@@ -60,8 +60,6 @@ static void coll_read_test(int chunk_factor);
  * Programmer:    Unknown
  *        Dec 2nd, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -87,8 +85,6 @@ coll_irregular_cont_write(void)
  * Programmer:    Unknown
  *        Dec 2nd, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -112,8 +108,6 @@ coll_irregular_cont_read(void)
  *
  * Programmer:    Unknown
  *        Dec 2nd, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -140,8 +134,6 @@ coll_irregular_simple_chunk_write(void)
  * Programmer:    Unknown
  *        Dec 2nd, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -164,8 +156,6 @@ coll_irregular_simple_chunk_read(void)
  *
  * Programmer:    Unknown
  *        Dec 2nd, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -192,8 +182,6 @@ coll_irregular_complex_chunk_write(void)
  * Programmer:    Unknown
  *        Dec 2nd, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -218,8 +206,6 @@ coll_irregular_complex_chunk_read(void)
  *
  * Programmer:    Unknown
  *        Dec 2nd, 2004
- *
- * Modifications: Oct 18th, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -694,9 +680,6 @@ void coll_write_test(int chunk_factor)
  * Programmer:    Unknown
  *        Dec 2nd, 2004
  *
- * Modifications: Oct 18th, 2005
- * Note:        This test must be used with the correpsonding
-                coll_write_test.
  *-------------------------------------------------------------------------
  */
 static void
@@ -948,18 +931,18 @@ coll_read_test(int chunk_factor)
 **
 **  lower_dim_size_comp_test__select_checker_board():
 **
-**    Given a data space of tgt_rank, and dimensions:
+**    Given a dataspace of tgt_rank, and dimensions:
 **
 **        (mpi_size + 1), edge_size, ... , edge_size
 **
 **    edge_size, and a checker_edge_size, select a checker
 **    board selection of a sel_rank (sel_rank < tgt_rank)
-**    dimensional slice through the data space parallel to the
+**    dimensional slice through the dataspace parallel to the
 **      sel_rank fastest changing indicies, with origin (in the
 **    higher indicies) as indicated by the start array.
 **
 **    Note that this function, is hard coded to presume a
-**    maximum data space rank of 5.
+**    maximum dataspace rank of 5.
 **
 **    While this maximum is declared as a constant, increasing
 **    it will require extensive coding in addition to changing
@@ -1304,7 +1287,7 @@ lower_dim_size_comp_test__select_checker_board(
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG */
 
-    /* Clip the selection back to the data space proper. */
+    /* Clip the selection back to the dataspace proper. */
 
     for ( i = 0; i < test_max_rank; i++ ) {
 
@@ -1564,14 +1547,12 @@ lower_dim_size_comp_test__verify_data(uint32_t * buf_ptr,
  * Function:    lower_dim_size_comp_test__run_test()
  *
  * Purpose:    Verify that a bug in the computation of the size of the
- *        lower dimensions of a data space in H5S_obtain_datatype()
+ *        lower dimensions of a dataspace in H5S_obtain_datatype()
  *        has been corrected.
  *
  * Return:    void
  *
  * Programmer:    JRM -- 11/11/09
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1763,7 +1744,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
     }
 #endif
 
-    /* create data spaces */
+    /* create dataspaces */
 
     full_mem_small_ds_sid = H5Screate_simple(5, small_dims, NULL);
     VRFY((full_mem_small_ds_sid != 0),
@@ -2177,7 +2158,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
     }
 
-    /* try clipping the selection back to the large data space proper */
+    /* try clipping the selection back to the large dataspace proper */
     start[0] = start[1] = start[2] = start[3] = start[4] = (hsize_t)0;
 
     stride[0] = (hsize_t)(2 * (mpi_size + 1));
@@ -2331,12 +2312,11 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
                                                    large_sel_start);
 
 
-    /* verify that H5S_select_shape_same() reports the two
+    /* verify that H5Sselect_shape_same() reports the two
      * selections as having the same shape.
      */
-    check = H5S__select_shape_same_test(mem_large_ds_sid,
-                                       file_small_ds_sid);
-    VRFY((check == TRUE), "H5S__select_shape_same_test passed (1)");
+    check = H5Sselect_shape_same(mem_large_ds_sid, file_small_ds_sid);
+    VRFY((check == TRUE), "H5Sselect_shape_same passed (1)");
 
 
     ret = H5Dread(small_dataset,
@@ -2452,12 +2432,11 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
                                                    large_sel_start);
 
 
-    /* verify that H5S_select_shape_same() reports the two
+    /* verify that H5Sselect_shape_same() reports the two
      * selections as having the same shape.
      */
-    check = H5S__select_shape_same_test(mem_small_ds_sid,
-                                       file_large_ds_sid);
-    VRFY((check == TRUE), "H5S__select_shape_same_test passed (2)");
+    check = H5Sselect_shape_same(mem_small_ds_sid, file_large_ds_sid);
+    VRFY((check == TRUE), "H5Sselect_shape_same passed (2)");
 
 
     ret = H5Dread(large_dataset,
@@ -2613,8 +2592,6 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
  *
  * Programmer:    JRM -- 11/11/09
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2671,8 +2648,6 @@ lower_dim_size_comp_test(void)
  * Return:    void
  *
  * Programmer:    JRM -- 12/16/09
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2737,7 +2712,7 @@ link_chunk_collective_io_test(void)
     /* setup dims */
     dims[0] = ((hsize_t)mpi_size) * ((hsize_t)(LINK_CHUNK_COLLECTIVE_IO_TEST_CHUNK_SIZE));
 
-    /* setup mem and file data spaces */
+    /* setup mem and file dataspaces */
     write_mem_ds_sid = H5Screate_simple(1, chunk_dims, NULL);
     VRFY((write_mem_ds_sid != 0),
          "H5Screate_simple() write_mem_ds_sid succeeded");

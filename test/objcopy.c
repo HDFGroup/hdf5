@@ -284,8 +284,6 @@ addr_reset(void)
  * Programmer:  Peter Cao
  *              Friday, August 4, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -344,8 +342,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Monday, March 5, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -421,8 +417,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, August 4, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -517,8 +511,6 @@ error:
  * Programmer:  Peter Cao
  *              Saturday, December 17, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -578,8 +570,6 @@ done:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -855,10 +845,6 @@ error:
  *
  * Note:    This isn't very general, the attributes are assumed to be
  *              those written in test_copy_attach_attributes().
- *
- * Modifier:    Peter Cao
- *              Wednesday, March 21, 2007
- *              Change to compare any attributes of two objects
  *
  *-------------------------------------------------------------------------
  */
@@ -1167,7 +1153,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if((obj2_sid = H5Rget_region(parent2, H5R_DATASET_REGION, ref_buf2)) < 0) TEST_ERROR
 
                 /* Check if dataspaces are the same shape */
-                if(H5S__select_shape_same_test(obj1_sid, obj2_sid) < 0) TEST_ERROR
+                if(H5Sselect_shape_same(obj1_sid, obj2_sid) < 0) TEST_ERROR
 
                 /* Close dataspaces */
                 if(H5Sclose(obj1_sid) < 0) TEST_ERROR
@@ -1213,8 +1199,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     hssize_t nelmts;                            /* # of elements in dataspace */
     void *rbuf = NULL;                          /* Buffer for reading raw data */
     void *rbuf2 = NULL;                         /* Buffer for reading raw data */
-    H5D_space_status_t space_status;            /* Dataset's raw data space status */
-    H5D_space_status_t space_status2;           /* Dataset's raw data space status */
+    H5D_space_status_t space_status;            /* Dataset's raw dataspace status */
+    H5D_space_status_t space_status2;           /* Dataset's raw dataspace status */
 
     /* Check the datatypes are equal */
 
@@ -1569,8 +1555,6 @@ error:
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1858,8 +1842,6 @@ error:
  * Programmer:  Neil
  *              Friday, March 11, 2011
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1998,8 +1980,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2294,8 +2274,6 @@ error:
  * Programmer:  Neil Fortner
  *              Thursday, January 15, 2009
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2519,8 +2497,6 @@ error:
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2650,8 +2626,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4395,8 +4369,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6281,8 +6253,6 @@ error:
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6375,8 +6345,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              August 8, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6508,8 +6476,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -7023,12 +6989,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
- *              Neil Fortner
- *              Tuesday, February 16, 2010
- *              Modified test to test flags for expanding soft and external
- *              links.
  *
  *-------------------------------------------------------------------------
  */
@@ -8017,7 +7977,7 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* make a copy of the datatype for later use */
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create and set compact plist */
@@ -8171,7 +8131,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* make a copy of the datatype for later use */
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -8326,7 +8286,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* make a copy of the datatype for later use */
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
@@ -8487,7 +8447,7 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
     /* make a copy of the datatype for later use */
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
@@ -10289,7 +10249,7 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src1, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -10313,7 +10273,7 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src2, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -10524,7 +10484,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid, NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset */
@@ -10551,7 +10511,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid, NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset */
@@ -10796,7 +10756,7 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -10823,7 +10783,7 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "a" */
+    /* committed datatype "a" */
     if((H5Tcommit2(fid_dst, "/a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -10832,7 +10792,7 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "b" */
+    /* committed datatype "b" */
     if((H5Tcommit2(fid_dst, "/b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -11027,7 +10987,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -11057,7 +11017,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* create anonymous committed data type */
+    /* create anonymous committed datatype */
     if((H5Tcommit_anon(fid_dst, tid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create attribute at SRC file */
@@ -12817,7 +12777,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -12847,7 +12807,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "a" */
+    /* committed datatype "a" */
     if((H5Tcommit2(fid_dst, "/a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -12856,7 +12816,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "b" */
+    /* committed datatype "b" */
     if((H5Tcommit2(fid_dst, "/b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -13176,7 +13136,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -13206,7 +13166,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "a" */
+    /* committed datatype "a" */
     if((H5Tcommit2(fid_dst, "/a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -13215,7 +13175,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "b" */
+    /* committed datatype "b" */
     if((H5Tcommit2(fid_dst, "/b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -13498,8 +13458,6 @@ error:
  *
  * Programmer:  Peter Cao
  *               March 11, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -13816,8 +13774,6 @@ error:
  *
  * Programmer:  Vailin Choi
  *              Feb 7, 2012
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -14137,8 +14093,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

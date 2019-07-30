@@ -91,6 +91,15 @@
  * H5S_UNLIMITED) */
 #define H5S_MAX_SIZE            ((hsize_t)(hssize_t)(-2))
 
+/* Macro for checking if two ranges overlap one another */
+/*
+ * Check for the inverse of whether the ranges are disjoint.  If they are
+ * disjoint, then the low bound of one of the ranges must be greater than the
+ * high bound of the other.
+ */
+/* (Assumes that low & high bounds are _inclusive_) */
+#define H5S_RANGE_OVERLAP(L1, H1, L2, H2)       (!((L1) > (H2) || (L2) > (H1)))
+
 
 /*
  * Dataspace extent information
@@ -240,6 +249,8 @@ typedef htri_t (*H5S_sel_is_single_func_t)(const H5S_t *space);
 typedef htri_t (*H5S_sel_is_regular_func_t)(const H5S_t *space);
 /* Method to determine if two dataspaces' selections are the same shape */
 typedef htri_t (*H5S_sel_shape_same_func_t)(const H5S_t *space1, const H5S_t *space2);
+/* Method to determine if selection intersects a block */
+typedef htri_t (*H5S_sel_intersect_block_func_t)(const H5S_t *space, const hsize_t *start, const hsize_t *end);
 /* Method to adjust a selection by an offset */
 typedef herr_t (*H5S_sel_adjust_u_func_t)(H5S_t *space, const hsize_t *offset);
 /* Method to construct single element projection onto scalar dataspace */
@@ -268,6 +279,7 @@ typedef struct {
     H5S_sel_is_single_func_t is_single;         /* Method to determine if current selection is a single block */
     H5S_sel_is_regular_func_t is_regular;       /* Method to determine if current selection is "regular" */
     H5S_sel_shape_same_func_t shape_same;       /* Method to determine if two dataspaces' selections are the same shape */
+    H5S_sel_intersect_block_func_t intersect_block; /* Method to determine if a dataspaces' selection intersects a block */
     H5S_sel_adjust_u_func_t adjust_u;           /* Method to adjust a selection by an offset */
     H5S_sel_project_scalar project_scalar;      /* Method to construct scalar dataspace projection */
     H5S_sel_project_simple project_simple;      /* Method to construct simple dataspace projection */
@@ -369,7 +381,6 @@ H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
 
 /* Testing functions */
 #ifdef H5S_TESTING
-H5_DLL htri_t H5S__select_shape_same_test(hid_t sid1, hid_t sid2);
 H5_DLL herr_t H5S__get_rebuild_status_test(hid_t space_id,
     H5S_diminfo_valid_t *status1, H5S_diminfo_valid_t *status2);
 H5_DLL herr_t H5S__get_diminfo_status_test(hid_t space_id,

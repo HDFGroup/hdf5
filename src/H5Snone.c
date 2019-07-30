@@ -28,11 +28,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		        */
-#include "H5Iprivate.h"		/* ID Functions		                */
-#include "H5Spkg.h"		/* Dataspace functions			*/
-#include "H5VMprivate.h"        /* Vector functions                     */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Eprivate.h"		/* Error handling			    */
+#include "H5Iprivate.h"         /* ID Functions                             */
+#include "H5Spkg.h"             /* Dataspace functions                      */
+#include "H5VMprivate.h"        /* Vector functions                         */
 
 
 /****************/
@@ -63,9 +63,12 @@ static htri_t H5S__none_is_contiguous(const H5S_t *space);
 static htri_t H5S__none_is_single(const H5S_t *space);
 static htri_t H5S__none_is_regular(const H5S_t *space);
 static htri_t H5S__none_shape_same(const H5S_t *space1, const H5S_t *space2);
+static htri_t H5S__none_intersect_block(const H5S_t *space, const hsize_t *start,
+    const hsize_t *end);
 static herr_t H5S__none_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S__none_project_scalar(const H5S_t *space, hsize_t *offset);
-static herr_t H5S__none_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
+static herr_t H5S__none_project_simple(const H5S_t *space, H5S_t *new_space,
+    hsize_t *offset);
 static herr_t H5S__none_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
 
 /* Selection iteration callbacks */
@@ -108,6 +111,7 @@ const H5S_select_class_t H5S_sel_none[1] = {{
     H5S__none_is_single,
     H5S__none_is_regular,
     H5S__none_shape_same,
+    H5S__none_intersect_block,
     H5S__none_adjust_u,
     H5S__none_project_scalar,
     H5S__none_project_simple,
@@ -882,6 +886,41 @@ H5S__none_shape_same(const H5S_t H5_ATTR_UNUSED *space1,
 
     FUNC_LEAVE_NOAPI(TRUE)
 } /* end H5S__none_shape_same() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__none_intersect_block
+ PURPOSE
+    Detect intersections of selection with block
+ USAGE
+    htri_t H5S__none_intersect_block(space, start, end)
+        const H5S_t *space;     IN: Dataspace with selection to use
+        const hsize_t *start;   IN: Starting coordinate for block
+        const hsize_t *end;     IN: Ending coordinate for block
+ RETURNS
+    Non-negative TRUE / FALSE on success, negative on failure
+ DESCRIPTION
+    Quickly detect intersections with a block
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S__none_intersect_block(const H5S_t H5_ATTR_UNUSED *space,
+    const hsize_t H5_ATTR_UNUSED *start, const hsize_t H5_ATTR_UNUSED *end)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(space);
+    HDassert(H5S_SEL_NONE == H5S_GET_SELECT_TYPE(space));
+    HDassert(start);
+    HDassert(end);
+
+    FUNC_LEAVE_NOAPI(FALSE)
+} /* end H5S__none_intersect_block() */
 
 
 /*--------------------------------------------------------------------------
