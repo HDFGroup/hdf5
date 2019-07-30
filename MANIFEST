@@ -1555,7 +1555,7 @@
 ./tools/lib/io_timer.h
 
 ./tools/libtest/Makefile.am
-./tools/libtest/h5tools_utils.c
+./tools/libtest/h5tools_test_utils.c
 
 ./tools/src/misc/Makefile.am
 ./tools/src/misc/h5clear.c
