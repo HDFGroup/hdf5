@@ -2084,6 +2084,7 @@ H5Sselect_intersect_block(hid_t space_id, const hsize_t *start, const hsize_t *e
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("t", "i*h*h", space_id, start, end);
 
     /* Check arguments */
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
