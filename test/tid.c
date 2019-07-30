@@ -251,7 +251,10 @@ static int id_predefined_test(void )
 
     testObj = HDmalloc(sizeof(int));
 
-    /* Try to perform illegal functions on various predefined types */
+    /*
+     * Attempt to perform public functions on various library types
+     */
+
     H5E_BEGIN_TRY
         testID = H5Iregister(H5I_FILE, testObj);
     H5E_END_TRY
@@ -317,7 +320,7 @@ static int id_predefined_test(void )
     H5Tclose(typeID);
 
     /* testObj was never registered as an atom, so it will not be
-         * automatically freed. */
+     * automatically freed. */
     HDfree(testObj);
     return 0;
 
@@ -476,7 +479,7 @@ static int test_id_type_list(void)
         goto out;
 
     /* Sanity check */
-    if(startType >= H5I_MAX_NUM_TYPES || startType < H5I_NTYPES)
+    if((int)startType >= H5I_MAX_NUM_TYPES || startType < H5I_NTYPES)
     {
         /* Error condition, throw an error */
         CHECK(1, 1, "H5Iregister_type");

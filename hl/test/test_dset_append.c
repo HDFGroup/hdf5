@@ -11,11 +11,12 @@
  * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "h5hltest.h"
 #include "H5DOpublic.h"
-#include <math.h>
 
 #if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER) 
 # define H5_ZLIB_HEADER "zlib.h"

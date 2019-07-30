@@ -97,7 +97,7 @@ parallel_print(const char* format, ...)
     HDva_end(ap);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: error_msg
  *
@@ -122,7 +122,7 @@ error_msg(const char *fmt, ...)
     HDva_end(ap);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: warn_msg
  *
@@ -161,7 +161,7 @@ help_ref_msg(FILE *output)
     HDfprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n",h5tools_getprogname());
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: get_option
  *
@@ -344,7 +344,7 @@ indentation(unsigned x)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_version
  *
@@ -362,7 +362,7 @@ print_version(const char *progname)
            ((const char *)H5_VERS_SUBRELEASE)[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    init_table
  *
@@ -384,7 +384,7 @@ init_table(table_t **tbl)
     *tbl = table;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    free_table
  *
@@ -408,7 +408,7 @@ free_table(table_t *table)
 }
 
 #ifdef H5DUMP_DEBUG
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_table
  *
@@ -429,7 +429,7 @@ dump_table(char* tablename, table_t *table)
            table->objs[u].displayed, table->objs[u].recorded);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_tables
  *
@@ -447,7 +447,7 @@ dump_tables(find_objs_t *info)
 }
 #endif  /* H5DUMP_DEBUG */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    search_obj
  *
@@ -470,7 +470,7 @@ search_obj(table_t *table, haddr_t objno)
     return NULL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    find_objs_cb
  *
@@ -546,7 +546,7 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
     return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    init_objs
  *
@@ -591,7 +591,7 @@ done:
     return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    add_obj
  *
@@ -622,7 +622,7 @@ add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
     table->objs[u].displayed = 0;
 }
 
-
+
 #ifndef H5_HAVE_TMPFILE
 /*-------------------------------------------------------------------------
  * Function:    tmpfile

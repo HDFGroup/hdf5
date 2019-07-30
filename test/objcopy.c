@@ -986,15 +986,15 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                  * for each */
                 for(elmt=0; elmt<nelmts; elmt++) {
                     /* Check vlen lengths */
-                    if(((const hvl_t *)memb1)->len
-                            != ((const hvl_t *)memb2)->len)
+                    if(((const hvl_t *)((const void *)memb1))->len
+                            != ((const hvl_t *)((const void *)memb2))->len)
                         TEST_ERROR
 
                     /* Check vlen data */
                     if(!compare_data(parent1, parent2, pid, base_id,
-                            ((const hvl_t *)memb1)->len,
-                            ((const hvl_t *)memb1)->p,
-                            ((const hvl_t *)memb2)->p, obj_owner))
+                            ((const hvl_t *)((const void *)memb1))->len,
+                            ((const hvl_t *)((const void *)memb1))->p,
+                            ((const hvl_t *)((const void *)memb2))->p, obj_owner))
                         TEST_ERROR
 
                     /* Update member pointers */
@@ -5875,7 +5875,7 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
     char *v;
     } s1;
     s1 rbuf;            /* Buffer for data read */
-    s1 rbuf2;            /* Buffer for data read */
+    s1 rbuf2;           /* Buffer for data read */
 
     /* Open the attributes attached to the objects */
     if((aid = H5Aopen_by_idx(loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -13390,7 +13390,7 @@ test_copy_iterate(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl
     hid_t fid1 = -1, fid2 = -1;                 /* File IDs */
     hid_t gid = -1;                             /* Group ID */
     int i;
-    char grp_name[8];
+    char grp_name[16];
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
 

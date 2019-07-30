@@ -66,7 +66,7 @@ const char *FILENAME[] = {
 #define COMPAT_BASENAME "family_v16_"
 #define MULTI_COMPAT_BASENAME "multi_file_v16"
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_sec2
  *
@@ -178,7 +178,7 @@ error:
     return -1;
 } /* end test_sec2() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_core
  *
@@ -412,8 +412,8 @@ test_core(void)
         for(j = 0; j < CORE_DSET_DIM2; j++)
             if(*pr++ != *pw++) {
                 H5_FAILED();
-                printf("    Read different values than written in data set.\n");
-                printf("    At index %d,%d\n", i, j);
+                HDprintf("    Read different values than written in data set.\n");
+                HDprintf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -480,8 +480,8 @@ test_core(void)
         for(j = 0; j < CORE_DSET_DIM2; j++)
             if(*pw++ != *pr++) {
                 H5_FAILED();
-                printf("    Read different values than written in data set.\n");
-                printf("    At index %d,%d\n", i, j);
+                HDprintf("    Read different values than written in data set.\n");
+                HDprintf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -534,7 +534,7 @@ error:
     return -1;
 } /* end test_core() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_direct
  *
@@ -597,7 +597,7 @@ test_direct(void)
     if(file<0) {
         H5Pclose (fapl);
         SKIPPED();
-        printf("  Probably the file system doesn't support Direct I/O\n");
+        HDprintf("  Probably the file system doesn't support Direct I/O\n");
         return 0;
     }
 
@@ -674,8 +674,8 @@ test_direct(void)
         for(j = 0; j < DSET1_DIM2; j++)
             if(*p1++ != *p2++) {
                 H5_FAILED();
-                printf("    Read different values than written in data set 1.\n");
-                printf("    At index %d,%d\n", i, j);
+                HDprintf("    Read different values than written in data set 1.\n");
+                HDprintf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
               } /* end if */
 
@@ -706,8 +706,8 @@ test_direct(void)
     for(i = 0; i < DSET2_DIM; i++)
         if(wdata2[i] != rdata2[i]) {
             H5_FAILED();
-            printf("    Read different values than written in data set 2.\n");
-            printf("    At index %d\n", i);
+            HDprintf("    Read different values than written in data set 2.\n");
+            HDprintf("    At index %d\n", i);
             TEST_ERROR;
         } /* end if */
 
@@ -754,7 +754,7 @@ error:
 #endif /*H5_HAVE_DIRECT*/
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family_opens
  *
@@ -769,6 +769,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'first_name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_family_opens(char *fname, hid_t fa_pl)
 {
@@ -825,8 +833,9 @@ test_family_opens(char *fname, hid_t fa_pl)
 error:
     return -1;
 } /* end test_family_opens() */
+#pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family
  *
@@ -1008,7 +1017,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family_compat
  *
@@ -1027,6 +1036,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'newname_individual', etc. in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_family_compat(void)
 {
@@ -1110,26 +1127,34 @@ error:
 
     return -1;
 } /* end test_family_compat() */
+#pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi_opens
  *
  * Purpose:     Private function for test_multi() to tests wrong ways of
  *              reopening multi file.
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Thursday, May 19, 2005
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'sf_name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_multi_opens(char *fname)
 {
-    hid_t file=-1;
+    hid_t fid = H5I_INVALID_HID;
     char  super_name[1024];     /*name string "%%s-s.h5"*/
     char  sf_name[1024];        /*name string "multi_file-s.h5"*/
 
@@ -1138,20 +1163,20 @@ test_multi_opens(char *fname)
     HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
 
     H5E_BEGIN_TRY {
-        file = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+        fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
 
-    return(file >= 0 ? -1 : 0);
-}
+    return(fid >= 0 ? FAIL : SUCCEED);
+} /* end test_multi_opens() */
+#pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi
  *
  * Purpose:     Tests the file handle interface for MUTLI driver
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
@@ -1201,19 +1226,19 @@ test_multi(void)
     memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
     memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
 
-    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    sprintf(sv[H5FD_MEM_BTREE],  "%%s-%c.h5", 'b');
+    HDsprintf(sv[H5FD_MEM_BTREE],  "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX/4;
 
-    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
 
-    sprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
+    HDsprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
     memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
     memb_addr[H5FD_MEM_GHEAP] = (HADDR_MAX/4)*3;
 
@@ -1365,7 +1390,7 @@ test_multi(void)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -1374,11 +1399,12 @@ error:
         H5Pclose(fapl);
         H5Pclose(fapl2);
         H5Fclose(file);
+        H5Aclose(attr);
     } H5E_END_TRY;
-    return -1;
-}
+    return FAIL;
+} /* end test_multi() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi_compat
  *
@@ -1432,12 +1458,12 @@ test_multi_compat(void)
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 
     memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
-    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
     memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
-    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
 
@@ -1447,17 +1473,19 @@ test_multi_compat(void)
     h5_fixname(FILENAME[9], fapl, newname, sizeof newname);
 
     /* Make copy for the data file in the build directory, to protect the
-     * original file in the source directory */
-    sprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
-    sprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
+     * original file in the source directory
+     */
+    HDsprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
+    HDsprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
     h5_make_local_copy(filename_s, newname_s);
 
-    sprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
-    sprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
+    HDsprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
+    HDsprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
     h5_make_local_copy(filename_r, newname_r);
 
     /* Reopen the file for read only.  Verify 1.8 library can open file
-     * created with 1.6 library. */
+     * created with 1.6 library.
+     */
     if((file=H5Fopen(newname, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
 
@@ -1550,7 +1578,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_log
  *
@@ -1661,7 +1689,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_stdio
  *
@@ -1766,7 +1794,7 @@ error:
 }
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_windows
  *
@@ -1888,7 +1916,6 @@ error:
 } /* end test_windows() */
 
 
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *

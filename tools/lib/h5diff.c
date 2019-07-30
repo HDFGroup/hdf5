@@ -1344,7 +1344,6 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
     }
 #endif /* H5_HAVE_PARALLEL */
 
-out:
     opts->err_stat = opts->err_stat | ret_value;
 
 /* free table */

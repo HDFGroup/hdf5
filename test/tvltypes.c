@@ -88,7 +88,7 @@ void test_vltypes_free_custom(void *_mem, void *mem_used)
                                                                  */
         unsigned char *mem = ((unsigned char *)_mem) - extra;   /* Pointer to actual block allocated */
 
-        *(size_t *)mem_used -= *(size_t *)mem;
+        *(size_t *)mem_used -= *(size_t *)((void *)mem);
         HDfree(mem);
     } /* end if */
 }
@@ -1348,7 +1348,7 @@ test_vltypes_compound_vlstr(void)
         } /* end if */
 
         for(t1=(s2 *)(wdata[i].v.p), t2=(s2 *)(rdata[i].v.p), j=0; j<rdata[i].v.len; j++, t1++, t2++) {
-                if( HDstrcmp(t1->string, t2->string) ) {
+                if(HDstrcmp(t1->string, t2->string)) {
                     TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n",t1->string, t2->string);
                     continue;
                 } /* end if */
@@ -1406,7 +1406,7 @@ test_vltypes_compound_vlstr(void)
         } /* end if */
 
         for(t1=(s2 *)(wdata2[i].v.p), t2=(s2 *)(rdata2[i].v.p), j=0; j<rdata2[i].v.len; j++, t1++, t2++) {
-                if( HDstrcmp(t1->string, t2->string) ) {
+                if(HDstrcmp(t1->string, t2->string)) {
                     TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n",t1->string, t2->string);
                     continue;
                 } /* end if */

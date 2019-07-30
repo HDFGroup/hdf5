@@ -378,7 +378,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
             TEST_ERROR
         if(config == TEST_API_REOPEN_FILE) {
             if(oinfo.meta_size.obj.heap_size != exp_meta_size) {
-                printf("VDS metadata size: %llu Expected: %llu\n", (long long unsigned)oinfo.meta_size.obj.heap_size, (long long unsigned)exp_meta_size);
+                HDprintf("VDS metadata size: %llu Expected: %llu\n", (long long unsigned)oinfo.meta_size.obj.heap_size, (long long unsigned)exp_meta_size);
                 TEST_ERROR
             }
         }
@@ -1215,11 +1215,14 @@ test_vds_prefix_first(unsigned config, hid_t fapl)
 
     /* Create source file if requested */
     if(config & TEST_IO_DIFFERENT_FILE) {
-        HDgetcwd(buffer, 1024);
-        HDchdir(TMPDIR);
+        if(NULL == HDgetcwd(buffer, 1024))
+            TEST_ERROR
+        if(HDchdir(TMPDIR) < 0)
+            TEST_ERROR
         if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
-        HDchdir(buffer);
+        if(HDchdir(buffer) < 0)
+            TEST_ERROR
     }
     else {
         srcfile[0] = vfile;
@@ -1296,11 +1299,14 @@ test_vds_prefix_first(unsigned config, hid_t fapl)
     /* Reopen srcdset and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE) {
-            HDgetcwd(buffer, 1024);
-            HDchdir(TMPDIR);
+            if(NULL == HDgetcwd(buffer, 1024))
+                TEST_ERROR
+            if(HDchdir(TMPDIR) < 0)
+                TEST_ERROR
             if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
-            HDchdir(buffer);
+            if(HDchdir(buffer) < 0)
+                TEST_ERROR
         }
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -11451,14 +11457,14 @@ main(void)
 
     if(nerrors)
         goto error;
-    printf("All virtual dataset tests passed.\n");
+    HDprintf("All virtual dataset tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
-    printf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n",
+    HDprintf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 } /* end main() */

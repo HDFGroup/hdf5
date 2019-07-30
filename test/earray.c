@@ -529,10 +529,10 @@ verify_cparam(const H5EA_t *ea, const H5EA_create_t *cparam)
         TEST_ERROR
 
     /* Success */
-    return(0);
+    return SUCCEED;
 
 error:
-    return(-1);
+    return FAIL;
 } /* verify_cparam() */
 
 
@@ -2398,7 +2398,7 @@ error:
     H5E_BEGIN_TRY {
         if(ea)
             H5EA_close(ea);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
 
     return 1;

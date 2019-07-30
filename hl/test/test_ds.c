@@ -4876,12 +4876,12 @@ static int read_data( const char* fname,
 
     for(i=0, nelms=1; i < ndims; i++) {
         if(fscanf( f, "%s %u", str, &j) && HDferror(f)) {
-            printf( "fscanf error in file %s\n", data_file );
+            HDprintf( "fscanf error in file %s\n", data_file );
             HDfclose(f);
             return -1;
         } /* end if */
         if(fscanf( f, "%d",&n ) < 0 && HDferror(f)) {
-            printf( "fscanf error in file %s\n", data_file );
+            HDprintf( "fscanf error in file %s\n", data_file );
             HDfclose(f);
             return -1;
         } /* end if */
@@ -4899,7 +4899,7 @@ static int read_data( const char* fname,
 
     for(j = 0; j < nelms; j++) {
         if(fscanf( f, "%f",&val ) < 0 && HDferror(f)) {
-            printf( "fscanf error in file %s\n", data_file );
+            HDprintf( "fscanf error in file %s\n", data_file );
             HDfclose(f);
             return -1;
         } /* end if */
