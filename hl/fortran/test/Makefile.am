@@ -62,4 +62,4 @@ clean-local:
 # from tests in conclude.am)
 FORTRAN_API=yes
 
-include $(top_srcdir)/config/conclude_fc.am
+include $(top_srcdir)/config/conclude.am
