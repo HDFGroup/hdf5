@@ -145,7 +145,7 @@ ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c
 cache_image_SOURCES=cache_image.c genall5.c
 
-VFD_LIST = hdfs sec2 stdio core core_paged split multi family
+VFD_LIST = sec2 stdio core core_paged split multi family
 if DIRECT_VFD_CONDITIONAL
   VFD_LIST += direct
 endif
