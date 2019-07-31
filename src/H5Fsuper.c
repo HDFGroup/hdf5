@@ -1855,7 +1855,7 @@ H5O__fsinfo_set_version(H5F_t *f, H5O_fsinfo_t *fsinfo)
     /* Version bounds check */
     if(H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)] == H5O_INVALID_VERSION ||
        version > H5O_fsinfo_ver_bounds[H5F_HIGH_BOUND(f)])
-        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
 
     /* Set the message version */
     fsinfo->version = version;
