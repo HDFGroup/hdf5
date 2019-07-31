@@ -1402,4 +1402,3 @@ error:
     printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */
-

@@ -1228,7 +1228,7 @@ setup_derived_types(void)
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: MPI_Get_Address() call failed.\n",
+            HDfprintf(stdout, "%d:%s: MPI_Get_address() call failed.\n",
                       world_mpi_rank, FUNC);
         }
 
@@ -1250,7 +1250,7 @@ setup_derived_types(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: MPI_Type_struct() call failed.\n",
+                HDfprintf(stdout, "%d:%s: MPI_Type_create_struct() call failed.\n",
                           world_mpi_rank, FUNC);
             }
         }

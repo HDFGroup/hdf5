@@ -184,7 +184,7 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
     if(udata->is_absolute) {
         size_t base_len = HDstrlen(udata->base_grp_name);
         size_t add_slash = base_len ? ((udata->base_grp_name)[base_len - 1] != '/') : 1;
-        size_t new_name_len = base_len + add_slash + HDstrlen(path) + 1;
+        size_t new_name_len = base_len + add_slash + HDstrlen(path) + 1 + 3; /* Extra "+3" to quiet GCC warning - 2019/07/05, QAK */
 
         if(NULL == (new_name = (char*)HDmalloc(new_name_len)))
             return(H5_ITER_ERROR);

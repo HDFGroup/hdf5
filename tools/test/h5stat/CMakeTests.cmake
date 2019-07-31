@@ -102,27 +102,15 @@
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat${tgt_ext}> ${ARGN})
+      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat${tgt_ext}> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (last_test)
-        set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5STAT-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      if (last_test)
-        set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_ext}>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -131,34 +119,21 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS H5STAT-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
   macro (ADD_H5_ERR_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat${tgt_ext}> ${ARGN})
+      add_test (NAME H5STAT-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat${tgt_ext}> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (last_test)
-        set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5STAT-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      if (last_test)
-        set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_ext}>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -168,7 +143,6 @@
               -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS H5STAT-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -185,13 +159,8 @@
     endforeach ()
     add_test (
       NAME H5STAT-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove ${CLEAR_LIST}
+      COMMAND ${CMAKE_COMMAND} -E remove ${CLEAR_LIST}
     )
-    if (last_test)
-      set_tests_properties (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5STAT-clearall-objects")
   endif ()
 
 # Test for help flag

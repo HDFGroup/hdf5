@@ -94,28 +94,12 @@ public class TestH5F {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Fget_create_plist_closed() throws Throwable {
-        long fid = -1;
-
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
-        }
-
-        try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Throwable err) {
-            fail("H5.H5Fopen: " + err);
-        }
-        try {
-            H5.H5Fclose(fid);
-        }
-        catch (Exception ex) {
         }
 
         // it should fail because the file was closed.
-        H5.H5Fget_create_plist(fid);
+        H5.H5Fget_create_plist(H5fid);
     }
 
     @Test
@@ -134,34 +118,17 @@ public class TestH5F {
 
     @Test(expected = HDF5LibraryException.class)
     public void testH5Fget_access_plist_closed() throws Throwable {
-        long fid = -1;
-
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
-            H5fid = -1;
-        }
-
-        try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
-                    HDF5Constants.H5P_DEFAULT);
-        }
-        catch (Throwable err) {
-            fail("H5.H5Fopen: " + err);
-        }
-        try {
-            H5.H5Fclose(fid);
-        }
-        catch (Exception ex) {
         }
 
         // it should fail because the file was closed.
-        H5.H5Fget_access_plist(fid);
+        H5.H5Fget_access_plist(H5fid);
     }
 
     @Test
     public void testH5Fget_intent_rdwr() {
         int intent = 0;
-        long fid = -1;
 
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
@@ -169,31 +136,24 @@ public class TestH5F {
         }
 
         try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
+            H5fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR,
                     HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
         }
         try {
-            intent = H5.H5Fget_intent(fid);
+            intent = H5.H5Fget_intent(H5fid);
         }
         catch (Throwable err) {
             fail("H5.H5Fget_intent: " + err);
         }
         assertEquals(HDF5Constants.H5F_ACC_RDWR, intent);
-
-        try {
-            H5.H5Fclose(fid);
-        }
-        catch (Exception ex) {
-        }
     }
 
     @Test
     public void testH5Fget_intent_rdonly() {
         int intent = 0;
-        long fid = -1;
 
         if (H5fid > 0) {
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
@@ -201,25 +161,19 @@ public class TestH5F {
         }
 
         try {
-            fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDONLY,
+            H5fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDONLY,
                     HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             fail("H5.H5Fopen: " + err);
         }
         try {
-            intent = H5.H5Fget_intent(fid);
+            intent = H5.H5Fget_intent(H5fid);
         }
         catch (Throwable err) {
             fail("H5.H5Fget_intent: " + err);
         }
         assertEquals(HDF5Constants.H5F_ACC_RDONLY, intent);
-
-        try {
-            H5.H5Fclose(fid);
-        }
-        catch (Exception ex) {
-        }
     }
 
     @Test

@@ -11,7 +11,7 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   target_link_libraries (h5diffgentest PRIVATE ${HDF5_LIB_TARGET})
   set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
 
-  #add_test (NAME h5diffgentest COMMAND $<TARGET_FILE:h5diffgentest>)
+  #add_test (NAME h5diffgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diffgentest>)
 endif ()
 
 #-----------------------------------------------------------------------------

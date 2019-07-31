@@ -14,7 +14,8 @@
 # This file provides functions for HDF5 specific Fortran support.
 #
 #-------------------------------------------------------------------------------
-ENABLE_LANGUAGE (Fortran)
+enable_language (Fortran)
+
 set (HDF_PREFIX "H5")
 include (CheckFortranFunctionExists)
 

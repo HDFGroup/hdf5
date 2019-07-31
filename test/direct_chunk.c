@@ -2008,11 +2008,11 @@ error:
 static int
 test_single_chunk(unsigned config)
 {
-    hid_t fid;              /* File ID */
-    hid_t fapl;             /* File access property list ID */
-    hid_t sid;              /* Dataspace ID */
-    hid_t did;              /* Dataset ID */
-    hid_t dcpl;             /* Dataset creation property list */
+    hid_t fid = H5I_INVALID_HID;            /* File ID */
+    hid_t fapl = H5I_INVALID_HID;           /* File access property list ID */
+    hid_t sid = H5I_INVALID_HID;            /* Dataspace ID */
+    hid_t did = H5I_INVALID_HID;            /* Dataset ID */
+    hid_t dcpl = H5I_INVALID_HID;           /* Dataset creation property list */
     hsize_t dims[2] = {DIM0, DIM1};         /* Dimension sizes */
     hsize_t chunk[2] = {CHUNK0, CHUNK1};    /* Chunk dimension sizes */
     hsize_t offset[2] = {0,0};              /* Offset for writing */

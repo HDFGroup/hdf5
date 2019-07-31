@@ -394,7 +394,7 @@ error:
  * Function:    get_sbe_tag()
  *
  * Purpose:     This function retrieves the tag associated with the superblock
- *		extension (the object header address stored in the superblock)
+ *              extension (the object header address stored in the superblock)
  *
  * Return:      0 on Success; 1 on Failure
  *

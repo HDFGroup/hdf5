@@ -39,6 +39,7 @@
     add_test (
       NAME H5REPACK-VFD-${vfdname}-h5repacktest
       COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
           -D "TEST_PROGRAM=$<TARGET_FILE:h5repacktest>"
           -D "TEST_ARGS:STRING="
           -D "TEST_VFD:STRING=${vfdname}"
@@ -47,10 +48,6 @@
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
           -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
     )
-    if (last_test)
-      set_tests_properties (H5REPACK-VFD-${vfdname}-h5repacktest PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5REPACK-VFD-${vfdname}-h5repacktest")
   endmacro ()
 
 ##############################################################################

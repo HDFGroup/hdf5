@@ -61,17 +61,17 @@ endmacro ()
 # ----------------------------------------------------------------------
 # WINDOWS Hard code Values
 # ----------------------------------------------------------------------
-
 set (WINDOWS)
-if (WIN32)
-  if (MINGW)
-    set (${HDF_PREFIX}_HAVE_MINGW 1)
-    set (WINDOWS 1) # MinGW tries to imitate Windows
-    set (CMAKE_REQUIRED_FLAGS "-DWIN32_LEAN_AND_MEAN=1 -DNOGDI=1")
-  endif ()
-  set (${HDF_PREFIX}_HAVE_WIN32_API 1)
-  set (HDF5_REQUIRED_LIBRARIES "ws2_32.lib;wsock32.lib")
-  if (NOT UNIX AND NOT MINGW)
+
+if (MINGW)
+  set (${HDF_PREFIX}_HAVE_MINGW 1)
+  set (WINDOWS 1) # MinGW tries to imitate Windows
+  set (CMAKE_REQUIRED_FLAGS "-DWIN32_LEAN_AND_MEAN=1 -DNOGDI=1")
+  set (${HDF_PREFIX}_HAVE_WINSOCK2_H 1)
+endif ()
+
+if (WIN32 AND NOT MINGW)
+  if (NOT UNIX)
     set (WINDOWS 1)
     set (CMAKE_REQUIRED_FLAGS "/DWIN32_LEAN_AND_MEAN=1 /DNOGDI=1")
     if (MSVC)
@@ -81,6 +81,8 @@ if (WIN32)
 endif ()
 
 if (WINDOWS)
+  set (HDF5_REQUIRED_LIBRARIES "ws2_32.lib;wsock32.lib")
+  set (${HDF_PREFIX}_HAVE_WIN32_API 1)
   set (${HDF_PREFIX}_HAVE_STDDEF_H 1)
   set (${HDF_PREFIX}_HAVE_SYS_STAT_H 1)
   set (${HDF_PREFIX}_HAVE_SYS_TYPES_H 1)
@@ -90,19 +92,16 @@ if (WINDOWS)
   set (${HDF_PREFIX}_HAVE_LONGJMP 1)
   if (NOT MINGW)
     set (${HDF_PREFIX}_HAVE_GETHOSTNAME 1)
+    set (${HDF_PREFIX}_HAVE_FUNCTION 1)
   endif ()
-  if (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
+  if (NOT UNIX AND NOT CYGWIN)
     set (${HDF_PREFIX}_HAVE_GETCONSOLESCREENBUFFERINFO 1)
+    set (${HDF_PREFIX}_GETTIMEOFDAY_GIVES_TZ 1)
+    set (${HDF_PREFIX}_HAVE_TIMEZONE 1)
+    set (${HDF_PREFIX}_HAVE_GETTIMEOFDAY 1)
+    set (${HDF_PREFIX}_HAVE_LIBWS2_32 1)
+    set (${HDF_PREFIX}_HAVE_LIBWSOCK32 1)
   endif ()
-  set (${HDF_PREFIX}_HAVE_FUNCTION 1)
-  set (${HDF_PREFIX}_GETTIMEOFDAY_GIVES_TZ 1)
-  set (${HDF_PREFIX}_HAVE_TIMEZONE 1)
-  set (${HDF_PREFIX}_HAVE_GETTIMEOFDAY 1)
-  if (MINGW)
-    set (${HDF_PREFIX}_HAVE_WINSOCK2_H 1)
-  endif ()
-  set (${HDF_PREFIX}_HAVE_LIBWS2_32 1)
-  set (${HDF_PREFIX}_HAVE_LIBWSOCK32 1)
 endif ()
 
 # ----------------------------------------------------------------------
@@ -188,7 +187,7 @@ endif ()
 #-----------------------------------------------------------------------------
 #  Check for the math library "m"
 #-----------------------------------------------------------------------------
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   CHECK_LIBRARY_EXISTS_CONCAT ("m" ceil     ${HDF_PREFIX}_HAVE_LIBM)
   CHECK_LIBRARY_EXISTS_CONCAT ("dl" dlopen     ${HDF_PREFIX}_HAVE_LIBDL)
   CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  ${HDF_PREFIX}_HAVE_LIBWS2_32)
@@ -264,7 +263,7 @@ set (LINUX_LFS 0)
 
 set (HDF_EXTRA_C_FLAGS)
 set (HDF_EXTRA_FLAGS)
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   # Might want to check explicitly for Linux and possibly Cygwin
   # instead of checking for not Solaris or Darwin.
   if (NOT ${HDF_PREFIX}_HAVE_SOLARIS AND NOT ${HDF_PREFIX}_HAVE_DARWIN)
@@ -324,7 +323,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Check for HAVE_OFF64_T functionality
 #-----------------------------------------------------------------------------
-if (NOT WINDOWS OR MINGW)
+if (MINGW OR NOT WINDOWS)
   HDF_FUNCTION_TEST (HAVE_OFF64_T)
   if (${HDF_PREFIX}_HAVE_OFF64_T)
     CHECK_FUNCTION_EXISTS (lseek64            ${HDF_PREFIX}_HAVE_LSEEK64)
@@ -403,7 +402,7 @@ if (NOT APPLE)
   if (NOT ${HDF_PREFIX}_SIZEOF_SSIZE_T)
     set (${HDF_PREFIX}_SIZEOF_SSIZE_T 0)
   endif ()
-  if (NOT WINDOWS)
+  if (MINGW OR NOT WINDOWS)
     HDF_CHECK_TYPE_SIZE (ptrdiff_t    ${HDF_PREFIX}_SIZEOF_PTRDIFF_T)
   endif ()
 endif ()
@@ -427,7 +426,7 @@ else ()
   HDF_CHECK_TYPE_SIZE (_Bool        ${HDF_PREFIX}_SIZEOF_BOOL)
 endif ()
 
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   #-----------------------------------------------------------------------------
   # Check if the dev_t type is a scalar type
   #-----------------------------------------------------------------------------
@@ -474,7 +473,7 @@ if (NOT WINDOWS)
   CHECK_FUNCTION_EXISTS (_getvideoconfig   ${HDF_PREFIX}_HAVE__GETVIDEOCONFIG)
   CHECK_FUNCTION_EXISTS (gettextinfo       ${HDF_PREFIX}_HAVE_GETTEXTINFO)
   CHECK_FUNCTION_EXISTS (_scrsize          ${HDF_PREFIX}_HAVE__SCRSIZE)
-  if (NOT CYGWIN AND NOT MINGW)
+  if (NOT CYGWIN)
     CHECK_FUNCTION_EXISTS (GetConsoleScreenBufferInfo    ${HDF_PREFIX}_HAVE_GETCONSOLESCREENBUFFERINFO)
   endif ()
   CHECK_SYMBOL_EXISTS (TIOCGWINSZ "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGWINSZ)
@@ -535,7 +534,7 @@ CHECK_FUNCTION_EXISTS (vasprintf         ${HDF_PREFIX}_HAVE_VASPRINTF)
 CHECK_FUNCTION_EXISTS (waitpid           ${HDF_PREFIX}_HAVE_WAITPID)
 
 CHECK_FUNCTION_EXISTS (vsnprintf         ${HDF_PREFIX}_HAVE_VSNPRINTF)
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   if (${HDF_PREFIX}_HAVE_VSNPRINTF)
     HDF_FUNCTION_TEST (VSNPRINTF_WORKS)
   endif ()
@@ -556,7 +555,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Check a bunch of other functions
 #-----------------------------------------------------------------------------
-if (NOT WINDOWS)
+if (MINGW OR NOT WINDOWS)
   foreach (other_test
       HAVE_ATTRIBUTE
       HAVE_C99_FUNC

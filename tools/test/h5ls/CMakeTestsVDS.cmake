@@ -89,26 +89,16 @@
   macro (ADD_H5_VDS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls${tgt_ext}> ${ARGN})
+      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_ext}> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (${resultcode} EQUAL 1)
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (last_test)
-        set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
     else ()
-      add_test (
-          NAME H5LS-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5LS-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_ext}>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds"
@@ -117,14 +107,13 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS H5LS-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
   macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5LS_PREFIX-${resultfile} COMMAND $<TARGET_FILE:h5ls${tgt_ext}> ${ARGN})
+      add_test (NAME H5LS_PREFIX-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_ext}> ${ARGN})
       set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES
           ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
@@ -132,21 +121,11 @@
       if (${resultcode} EQUAL 1)
         set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (last_test)
-        set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
     else ()
-      add_test (
-          NAME H5LS_PREFIX-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5LS_PREFIX-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix")
       add_test (
           NAME H5LS_PREFIX-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_ext}>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
@@ -157,7 +136,6 @@
               -D "TEST_ENV_VALUE=\${ORIGIN}"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES DEPENDS H5LS_PREFIX-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -166,44 +144,6 @@
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    # Remove any output file left over from previous test run
-    add_test (
-      NAME H5LS_VDS-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          tvds-1.out
-          tvds-1.out.err
-          tvds-2.out
-          tvds-2.out.err
-          tvds-3_1.out
-          tvds-3_1.out.err
-          tvds-3_2.out
-          tvds-3_2.out.err
-          tvds-4.out
-          tvds-4.out.err
-          tvds-5.out
-          tvds-5.out.err
-          tvds_layout-1.out
-          tvds_layout-1.out.err
-          tvds_layout-2.out
-          tvds_layout-2.out.err
-          tvds_layout-3_1.out
-          tvds_layout-3_1.out.err
-          tvds_layout-3_2.out
-          tvds_layout-3_2.out.err
-          tvds_layout-4.out
-          tvds_layout-4.out.err
-          tvds_layout-5.out
-          tvds_layout-5.out.err
-    )
-    set_tests_properties (H5LS_VDS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
-    if (last_test)
-      set_tests_properties (H5LS_VDS-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5LS_VDS-clearall-objects")
-  endif ()
 
   ADD_H5_VDS_TEST (tvds-1 0 -w80 -v -S 1_vds.h5)
   ADD_H5_VDS_TEST (tvds-2 0 -w80 -v -S 2_vds.h5)

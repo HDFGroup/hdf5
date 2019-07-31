@@ -16,11 +16,10 @@
 ##############################################################################
 ##############################################################################
 # Remove any output file left over from previous test run
-add_test (NAME MPI_TEST-clear-testphdf5-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove ParaTest.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_PAR_BINARY_DIR}
+add_test (
+    NAME MPI_TEST-clear-testphdf5-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ParaTest.h5
+    WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
 set_tests_properties (MPI_TEST-clear-testphdf5-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
 
@@ -93,12 +92,10 @@ set (test_par_CLEANFILES
 )
 
 # Remove any output file left over from previous test run
-add_test (NAME MPI_TEST-clear-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        ${test_par_CLEANFILES}
-    WORKING_DIRECTORY
-        ${HDF5_TEST_PAR_BINARY_DIR}
+add_test (
+    NAME MPI_TEST-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_par_CLEANFILES}
+    WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
 set_tests_properties (MPI_TEST-clear-objects PROPERTIES FIXTURES_SETUP par_clear_objects)
 
