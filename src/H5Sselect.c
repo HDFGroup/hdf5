@@ -2081,7 +2081,7 @@ H5Sselect_intersect_block(hid_t space_id, const hsize_t *start, const hsize_t *e
 {
     H5S_t *space;                       /* Dataspace to query */
     unsigned u;                         /* Local index value */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    htri_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*h*h", space_id, start, end);
