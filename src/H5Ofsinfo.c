@@ -65,10 +65,6 @@ const H5O_msg_class_t H5O_MSG_FSINFO[1] = {{
     H5O__fsinfo_debug          	/* debug the message            	*/
 }};
 
-/* Current version of free-space manager info information */
-#define H5O_FSINFO_VERSION_0 	0
-#define H5O_FSINFO_VERSION_1 	1
-
 /* Declare a free list to manage the H5O_fsinfo_t struct */
 H5FL_DEFINE_STATIC(H5O_fsinfo_t);
 
@@ -157,11 +153,13 @@ H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file space strategy")
         } /* end switch */
 
+        fsinfo->version = H5O_FSINFO_VERSION_1;
         fsinfo->mapped = TRUE;
        
     } else {
-        HDassert(vers == H5O_FSINFO_VERSION_1);
+        HDassert(vers >= H5O_FSINFO_VERSION_1);
 
+        fsinfo->version = vers;
         fsinfo->strategy = (H5F_fspace_strategy_t)*p++; /* File space strategy */
         fsinfo->persist = *p++;                         /* Free-space persist or not */
         H5F_DECODE_LENGTH(f, p, fsinfo->threshold);     /* Free-space section threshold */
@@ -214,7 +212,7 @@ H5O_fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     HDassert(p);
     HDassert(fsinfo);
 
-    *p++ = H5O_FSINFO_VERSION_1;	/* message version */
+    *p++ = (uint8_t)fsinfo->version;    /* message version */
     *p++ = fsinfo->strategy;	    /* File space strategy */
     *p++ = (unsigned char)fsinfo->persist;	/* Free-space persist or not */
     H5F_ENCODE_LENGTH(f, p, fsinfo->threshold); /* Free-space section size threshold */
