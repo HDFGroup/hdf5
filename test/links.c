@@ -520,7 +520,6 @@ cklinks(hid_t fapl, hbool_t new_format)
         HDputs("    expected file location.");
         TEST_ERROR
     } /* end if */
-    if(H5Lexists(file, "/", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
     if(H5Lexists(file, "d1", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
     if(H5Lexists(file, "grp1/hard", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
     if(H5Lexists(file, "/grp1", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
@@ -3597,6 +3596,7 @@ external_set_elink_fapl3(hbool_t new_format)
 {
     hid_t    core_fapl = -1, stdio_fapl = -1;
     hid_t    lapl_id = -1, new_lapl_id = -1, l_fapl = -1, out_fapl;
+    int      ret;
 
     if(new_format)
         TESTING("H5Pset/get_fapl() (w/new group format)")
@@ -3629,8 +3629,11 @@ external_set_elink_fapl3(hbool_t new_format)
     if(H5Pget(lapl_id, "external link fapl", &out_fapl) < 0) TEST_ERROR
     if(H5Pclose(lapl_id) < 0) TEST_ERROR
 
-    /* Try closing out_fapl, should succeed since H5Pget() should clone its fapl */
-    if(H5Pclose(out_fapl) < 0) TEST_ERROR
+    /* Try closing out_fapl should fail since H5Pclose(lapl_id) should also close its fapl */
+    H5E_BEGIN_TRY {
+        ret = H5Pclose(out_fapl);
+    } H5E_END_TRY;
+    if(ret != FAIL) TEST_ERROR
 
     /* Verify that the driver for the copied link's fapl is the "core" driver */
     if((l_fapl = H5Pget_elink_fapl(new_lapl_id)) < 0) TEST_ERROR
@@ -3640,8 +3643,11 @@ external_set_elink_fapl3(hbool_t new_format)
     if(H5Pget(new_lapl_id, "external link fapl", &out_fapl) < 0) TEST_ERROR
     if(H5Premove(new_lapl_id, "external link fapl") < 0) TEST_ERROR
 
-    /* Try closing out_fapl, should succeed since H5Pget() should clone its fapl */
-    if(H5Pclose(out_fapl) < 0) TEST_ERROR
+    /* Try closing out_fapl should fail since the property is removed from new_lapl_id */
+    H5E_BEGIN_TRY {
+        ret = H5Pclose(out_fapl);
+    } H5E_END_TRY;
+    if(ret != FAIL) TEST_ERROR
 
     if(H5Pclose(l_fapl) < 0) TEST_ERROR
     if(H5Pclose(new_lapl_id) < 0) TEST_ERROR
@@ -5802,16 +5808,29 @@ error:
 static int
 external_link_endian(hbool_t new_format)
 {
-    hid_t        fid = -1;                     /* File ID */
-    hid_t        gid = -1, gid2 = -1;          /* Group IDs */
-    hid_t        lapl_id = -1;                 /* Prop List ID */
-    const char  *pathbuf = H5_get_srcdir();    /* Path to the files */
-    const char  *namebuf;
+    hid_t       fid = -1;                       /* File ID */
+    hid_t       gid = -1, gid2 = -1;            /* Group IDs */
+    hid_t       lapl_id = -1;                   /* Prop List ID */
+    char       *srcdir = getenv("srcdir");      /* The source directory */
+    char        pathbuf[NAME_BUF_SIZE];         /* Path to the files */
+    char        namebuf[NAME_BUF_SIZE];
 
     if(new_format)
         TESTING("endianness of external links (w/new group format)")
     else
         TESTING("endianness of external links")
+
+    /*
+     * Create the name of the file to open (in case we are using the --srcdir
+     * option and the file is in a different directory from this test).
+     */
+    if (srcdir && ((HDstrlen(srcdir) + 2) < sizeof(pathbuf)) )
+    {
+        HDstrcpy(pathbuf, srcdir);
+        HDstrcat(pathbuf, "/");
+    }
+    else
+        HDstrcpy(pathbuf, "");
 
     /* Create a link access property list with the path to the srcdir */
     if((lapl_id = H5Pcreate(H5P_LINK_ACCESS)) < 0) TEST_ERROR
@@ -8547,6 +8566,14 @@ build_visit_file(hid_t fapl)
     if(H5Lcreate_hard(fid, "/", fid, "/Group1/Group2/hard_zero", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Create external link to existing file */
+    pathname[0] = '\0';
+    /* Generate correct name for test file by prepending the source path */
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(LINKED_FILE) + 1) < sizeof(pathname))) {
+        HDstrcpy(pathname, srcdir);
+        HDstrcat(pathname, "/");
+    }
+    HDstrcat(pathname, LINKED_FILE);
+
     if(H5Lcreate_external(pathname, "/group", fid, "/ext_one", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Create dangling external link to non-existent file */
