@@ -43,7 +43,7 @@ Languages:
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               H5 Fortran Flags: @H5_FCFLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               AM Fortran Flags: @AM_FCFLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Shared Fortran Library: @H5_ENABLE_SHARED_LIB@
-@BUILD_FORTRAN_CONDITIONAL_TRUE@         Static Fortran Library: YES
+@BUILD_FORTRAN_CONDITIONAL_TRUE@         Static Fortran Library: @H5_ENABLE_STATIC_LIB@
 
                             C++: @HDF5_BUILD_CPP_LIB@
 @BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CMAKE_CXX_COMPILER@ @CMAKE_CXX_COMPILER_VERSION@
@@ -51,23 +51,23 @@ Languages:
 @BUILD_CXX_CONDITIONAL_TRUE@                   H5 C++ Flags: @H5_CXXFLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@                   AM C++ Flags: @AM_CXXFLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@             Shared C++ Library: @H5_ENABLE_SHARED_LIB@
-@BUILD_CXX_CONDITIONAL_TRUE@             Static C++ Library: YES
+@BUILD_CXX_CONDITIONAL_TRUE@             Static C++ Library: @H5_ENABLE_STATIC_LIB@
 
 Features:
 ---------
-                  Parallel HDF5: @HDF5_ENABLE_PARALLEL@
-             High Level library: @HDF5_BUILD_HL_LIB@
-               Build HDF5 Tests: @BUILD_TESTING@
-               Build HDF5 Tools: @HDF5_BUILD_TOOLS@
-                   Threadsafety: @HDF5_ENABLE_THREADSAFE@
-            Default API Mapping: @DEFAULT_API_VERSION@
- With Deprecated Public Symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@
-         I/O filters (external): @EXTERNAL_FILTERS@
-                            MPE: @H5_HAVE_LIBLMPE@
-                     Direct VFD: @H5_HAVE_DIRECT@
-                        dmalloc: @H5_HAVE_LIBDMALLOC@
-Clear file buffers before write: @HDF5_Enable_Clear_File_Buffers@
-           Using memory checker: @HDF5_ENABLE_USING_MEMCHECKER@
-         Function Stack Tracing: @HDF5_ENABLE_CODESTACK@
-      Strict File Format Checks: @HDF5_STRICT_FORMAT_CHECKS@
-   Optimization Instrumentation: @HDF5_Enable_Instrument@
+                   Parallel HDF5: @HDF5_ENABLE_PARALLEL@
+              High Level library: @HDF5_BUILD_HL_LIB@
+                Build HDF5 Tests: @BUILD_TESTING@
+                Build HDF5 Tools: @HDF5_BUILD_TOOLS@
+                    Threadsafety: @HDF5_ENABLE_THREADSAFE@
+             Default API mapping: @DEFAULT_API_VERSION@
+  With deprecated public symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@
+          I/O filters (external): @EXTERNAL_FILTERS@
+                             MPE: @H5_HAVE_LIBLMPE@
+                      Direct VFD: @H5_HAVE_DIRECT@
+                         dmalloc: @H5_HAVE_LIBDMALLOC@
+ Clear file buffers before write: @HDF5_Enable_Clear_File_Buffers@
+            Using memory checker: @HDF5_ENABLE_USING_MEMCHECKER@
+          Function Stack Tracing: @HDF5_ENABLE_CODESTACK@
+       Strict File Format Checks: @HDF5_STRICT_FORMAT_CHECKS@
+    Optimization Instrumentation: @HDF5_Enable_Instrument@

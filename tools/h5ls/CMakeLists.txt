@@ -4,18 +4,20 @@ project (HDF5_TOOLS_H5LS C)
 #-----------------------------------------------------------------------------
 # Add the h5ls executable
 #-----------------------------------------------------------------------------
-add_executable (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
-target_include_directories(h5ls PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-TARGET_C_PROPERTIES (h5ls STATIC)
-target_link_libraries (h5ls PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
-set_target_properties (h5ls PROPERTIES FOLDER tools)
-set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5ls")
+if (NOT ONLY_SHARED_LIBS)
+  add_executable (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
+  target_include_directories (h5ls PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (h5ls STATIC)
+  target_link_libraries (h5ls PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (h5ls PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5ls")
 
-set (H5_DEP_EXECUTABLES h5ls)
+  set (H5_DEP_EXECUTABLES h5ls)
+endif ()
 
 if (BUILD_SHARED_LIBS)
   add_executable (h5ls-shared ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
-  target_include_directories(h5ls-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5ls-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5ls-shared SHARED)
   target_link_libraries (h5ls-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5ls-shared PROPERTIES FOLDER tools)
@@ -29,15 +31,15 @@ if (BUILD_TESTING)
   # If plugin library tests can be tested
   #-----------------------------------------------------------------------------
   if (BUILD_SHARED_LIBS)
-    set (HDF5_TOOL_PLUGIN_LIB_CORENAME         "dynlibls")
-    set (HDF5_TOOL_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TOOL_PLUGIN_LIB_CORENAME}")
-    set (HDF5_TOOL_PLUGIN_LIB_TARGET           ${HDF5_TOOL_PLUGIN_LIB_CORENAME})
+    set (H5LS_TOOL_PLUGIN_LIB_CORENAME         "dynlibls")
+    set (H5LS_TOOL_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${H5LS_TOOL_PLUGIN_LIB_CORENAME}")
+    set (H5LS_TOOL_PLUGIN_LIB_TARGET           ${H5LS_TOOL_PLUGIN_LIB_CORENAME})
 
-    add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_ls.c)
-    target_include_directories(${HDF5_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-    TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED)
-    target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_TEST_LIB_TARGET})
-    H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
+    add_library (${H5LS_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_ls.c)
+    target_include_directories (${H5LS_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    TARGET_C_PROPERTIES (${H5LS_TOOL_PLUGIN_LIB_TARGET} SHARED)
+    target_link_libraries (${H5LS_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
+    H5_SET_LIB_OPTIONS (${H5LS_TOOL_PLUGIN_LIB_TARGET} ${H5LS_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")
 
     # make plugins dir
     file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
@@ -45,12 +47,12 @@ if (BUILD_TESTING)
     # Copy plugin library to a plugins folder
     #-----------------------------------------------------------------------------
     add_custom_command (
-        TARGET     ${HDF5_TOOL_PLUGIN_LIB_TARGET}
+        TARGET     ${H5LS_TOOL_PLUGIN_LIB_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different
-            "$<TARGET_FILE:${HDF5_TOOL_PLUGIN_LIB_TARGET}>"
-            "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${HDF5_TOOL_PLUGIN_LIB_TARGET}>"
+            "$<TARGET_FILE:${H5LS_TOOL_PLUGIN_LIB_TARGET}>"
+            "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${H5LS_TOOL_PLUGIN_LIB_TARGET}>"
     )
   endif ()
 

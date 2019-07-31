@@ -127,8 +127,8 @@ randll(hsize_t limit, int current_index)
     /* does not overlap with any previous writes */
     while(overlap != 0 && tries < MAX_TRIES)
     {
-        acc = HDrandom();
-        acc *= HDrandom();
+        acc = (hsize_t)HDrandom();
+        acc *= (hsize_t)HDrandom();
         acc = acc % limit;
         overlap = 0;
 
@@ -524,7 +524,7 @@ reader(char *filename, hid_t fapl)
                     }
         if(zero) {
             H5_FAILED();
-            printf("    %d zero%s\n", zero, 1 == zero ? "" : "s");
+            HDprintf("    %d zero%s\n", zero, 1 == zero ? "" : "s");
         } else if(wrong) {
             SKIPPED();
             HDputs("    Possible overlap with another region.");
@@ -765,7 +765,7 @@ main (int ac, char **av)
                 family_size_def = (hsize_t)HDstrtoull(*av, NULL, 0);
             }
             else{
-                printf("***Missing fsize value***\n");
+                HDprintf("***Missing fsize value***\n");
                 usage();
                 return 1;
             }
@@ -799,7 +799,7 @@ main (int ac, char **av)
     /* seed = (unsigned long)1155438845; */
     HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif /* QAK */
-    HDsrandom(seed);
+    HDsrandom((unsigned)seed);
 
     /* run VFD-specific test */
     if(H5FD_SEC2 == driver) {

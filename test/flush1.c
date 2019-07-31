@@ -18,7 +18,7 @@
  * Purpose:	This is the first half of a two-part test that makes sure
  *		that a file can be read after an application crashes as long
  *		as the file was flushed first.  We simulate a crash by
- *		calling _exit(0) since this doesn't flush HDF5 caches but
+ *		calling _exit(EXIT_SUCCESS) since this doesn't flush HDF5 caches but
  *		still exits with success.
  */
 #include "h5test.h"
@@ -33,18 +33,15 @@ const char *FILENAME[] = {
 static double	the_data[100][100];
 
 /*-------------------------------------------------------------------------
- * Function:	create_file
+ * Function:    create_file
  *
- * Purpose:	Creates files used in part 1 of the test
+ * Purpose:     Creates files and datasets used in part 1 of the test
  *
- * Return:	Success:	0
- *
- *		Failure:	1
+ * Return:      Success:	a valid file ID
+ *              Failure:	-1
  *
  * Programmer:	Leon Arber
  *              Sept. 26, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

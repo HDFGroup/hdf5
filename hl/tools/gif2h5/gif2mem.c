@@ -218,7 +218,7 @@ Gif2Mem(BYTE *MemGif, GIFTOMEM *GifMemoryStruct)
                         PlainTextCount++;
 
                         if (PlainTextCount > PlainTextArray)
-			  PlainTextArray = (BYTE)((PlainTextArray << 1) + 1);
+                            PlainTextArray = (BYTE)((PlainTextArray << 1) + 1);
 
                         if (!(gifPlainText = (GIFPLAINTEXT **)realloc(gifPlainText , sizeof(GIFPLAINTEXT *) * PlainTextArray))) {
                             printf("Out of memory!");
@@ -240,7 +240,7 @@ Gif2Mem(BYTE *MemGif, GIFTOMEM *GifMemoryStruct)
                         CommentCount++;
 
                         if (CommentCount > CommentArray)
-			  CommentArray = (BYTE)((CommentArray << 1) + 1);
+                            CommentArray = (BYTE)((CommentArray << 1) + 1);
 
                         if (!(gifComment = (GIFCOMMENT **)realloc(gifComment , sizeof(GIFCOMMENT *) * CommentArray))) {
                             printf("Out of memory!");
@@ -295,7 +295,8 @@ Gif2Mem(BYTE *MemGif, GIFTOMEM *GifMemoryStruct)
                             fprintf(stderr,
                                     "Error reading Graphic Control Extension information\n");
 
-                        if (!*MemGif++ == 0)
+                        (*MemGif)++;
+                        if ((!*MemGif) == 0)
                             fprintf(stderr,
                                     "Error reading Graphic Control Extension\n");
 
@@ -305,7 +306,7 @@ Gif2Mem(BYTE *MemGif, GIFTOMEM *GifMemoryStruct)
                         ApplicationCount++;
 
                         if (ApplicationCount > ApplicationArray)
-			  ApplicationArray = (BYTE)((ApplicationArray << 1) + 1);
+                            ApplicationArray = (BYTE)((ApplicationArray << 1) + 1);
 
                         if (!(gifApplication = (GIFAPPLICATION **)realloc(gifApplication , sizeof(GIFAPPLICATION *) * ApplicationArray))) {
                             printf("Out of memory!");
@@ -325,7 +326,7 @@ Gif2Mem(BYTE *MemGif, GIFTOMEM *GifMemoryStruct)
                         break;
 
                     default:
-                        printf("Unknown Extension Label: 0x%02x\n", Label);
+                        printf("Unknown Extension Label: %#02x\n", Label);
                         break;
                     }
 
@@ -333,7 +334,7 @@ Gif2Mem(BYTE *MemGif, GIFTOMEM *GifMemoryStruct)
 
             default:
                 fprintf(stderr,
-                        "Unknown Block Separator Character: 0x%02x\n", Identifier);
+                        "Unknown Block Separator Character: %#02x\n", Identifier);
         }
     }
 }

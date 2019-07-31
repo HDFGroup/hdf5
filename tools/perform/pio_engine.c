@@ -82,6 +82,12 @@
 
 
 /* POSIX I/O macros */
+#ifdef H5_HAVE_WIN32_API
+/* Can't link against the library, so this test will use the older, non-Unicode
+ * _open() call on Windows.
+ */
+#define HDopen(S,F,...)           _open(S, F | _O_BINARY, __VA_ARGS__)
+#endif /* H5_HAVE_WIN32_API */
 #define POSIXCREATE(fn)           HDopen(fn, O_CREAT|O_TRUNC|O_RDWR, 0600)
 #define POSIXOPEN(fn, F)          HDopen(fn, F, 0600)
 #define POSIXCLOSE(F)             HDclose(F)
@@ -312,7 +318,6 @@ do_pio(parameters param)
 
     set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
     hrc = do_write(&res, &fd, &param, ndsets, nbytes, buf_size, buffer);
-    hrc == SUCCESS;
     set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
 
     VRFY((hrc == SUCCESS), "do_write failed");

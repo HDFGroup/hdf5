@@ -112,7 +112,7 @@ main(void)
         puts("    Modification times will be mantained in the file but");
         puts("    cannot be queried on this system.  See H5O_mtime_decode().");
         return 0;
-    } else if(HDfabs(HDdifftime(now, oi1.ctime)) > 60.0F) {
+    } else if(HDfabs(HDdifftime(now, oi1.ctime)) > (double)60.0F) {
         H5_FAILED();
         tm = HDlocaltime(&(oi1.ctime));
         HDstrftime((char*)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
@@ -145,7 +145,7 @@ main(void)
             if(oi1.ctime != MTIME1) {
                 H5_FAILED();
                    /* If this fails, examine H5Omtime.c.  Modification time is very
-                    * system dependant (e.g., on Windows DST must be hardcoded). */
+                    * system dependent (e.g., on Windows DST must be hardcoded). */
                 puts("    Old modification time incorrect");
                 goto error;
             }

@@ -64,9 +64,9 @@ const char *FILENAME[] = {
 };
 
 typedef enum {
-    TEST_NORMAL,          	/* size of aggregator is >= alignment size */
-    TEST_AGGR_SMALL,          	/* size of aggregator is smaller than alignment size */
-    TEST_NTESTS           	/* The number of test types, must be last */
+    TEST_NORMAL,            /* size of aggregator is >= alignment size */
+    TEST_AGGR_SMALL,            /* size of aggregator is smaller than alignment size */
+    TEST_NTESTS             /* The number of test types, must be last */
 } test_type_t;
 
 typedef struct frspace_state_t {
@@ -107,9 +107,6 @@ static unsigned test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t 
 /*
  * Verify statistics for the free-space manager
  *
- *  Modifications:
- *      Vailin Choi; July 2012
- *      To ensure "f" and "frsp" are valid pointers 
  */
 static int
 check_stats(const H5F_t *f, const H5FS_t *frsp, frspace_state_t *state)
@@ -125,22 +122,22 @@ check_stats(const H5F_t *f, const H5FS_t *frsp, frspace_state_t *state)
 
     if(frspace_stats.tot_space != state->tot_space) {
         HDfprintf(stdout, "frspace_stats.tot_space = %Hu, state->tot_space = %Zu\n",
-	    frspace_stats.tot_space, state->tot_space);
+                  frspace_stats.tot_space, state->tot_space);
         TEST_ERROR
     } /* end if */
     if(frspace_stats.tot_sect_count != state->tot_sect_count) {
         HDfprintf(stdout, "frspace_stats.tot_sect_count = %Hu, state->tot_sect_count = %Hu\n",
-	    frspace_stats.tot_sect_count, state->tot_sect_count);
+                  frspace_stats.tot_sect_count, state->tot_sect_count);
         TEST_ERROR
     } /* end if */
     if(frspace_stats.serial_sect_count != state->serial_sect_count) {
         HDfprintf(stdout, "frspace_stats.serial_sect_count = %Hu, state->serial_sect_count = %Hu\n",
-	    frspace_stats.serial_sect_count, state->serial_sect_count);
+                  frspace_stats.serial_sect_count, state->serial_sect_count);
         TEST_ERROR
     } /* end if */
     if(frspace_stats.ghost_sect_count != state->ghost_sect_count) {
         HDfprintf(stdout, "frspace_stats.ghost_sect_count = %Hu, state->ghost_sect_count = %Hu\n",
-	    frspace_stats.ghost_sect_count, state->ghost_sect_count);
+                  frspace_stats.ghost_sect_count, state->ghost_sect_count);
         TEST_ERROR
     } /* end if */
 
@@ -152,13 +149,15 @@ error:
 } /* check_stats() */
 
 /*
+ *-------------------------------------------------------------------------
  * To verify that blocks are allocated from file allocation
  *
  * Set up:
- * 	Turn off using meta/small data aggregator
- * 	There is nothing in free-space manager
+ *  Turn off using meta/small data aggregator
+ *  There is nothing in free-space manager
  *
  * Allocate two blocks which should be from file allocation
+ *-------------------------------------------------------------------------
  */
 static unsigned
 test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
@@ -287,6 +286,7 @@ error:
 } /* test_mf_eoa() */
 
 /*
+ *-------------------------------------------------------------------------
  * To verify that an allocated block from file allocation is shrunk.
  *
  * Set up:
@@ -302,6 +302,7 @@ error:
  *	Test 4: Allocate a block of 30 from file allocation
  * 		H5MF_try_shrink() the block by 20 from the end: succeed
  *
+ *-------------------------------------------------------------------------
  */
 static unsigned
 test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
@@ -310,9 +311,9 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
     hid_t		fapl_new = -1;		/* copy of fapl */
     char		filename[FILENAME_LEN]; /* Filename to use */
     H5F_t		*f = NULL;              /* Internal file object pointer */
-    h5_stat_size_t      file_size, new_file_size; /* file size */
+    h5_stat_size_t      file_size = 0, new_file_size; /* file size */
     H5FD_mem_t 		type;
-    haddr_t		addr;
+    haddr_t		addr = 0;
     haddr_t 		ma_addr=HADDR_UNDEF, new_ma_addr=HADDR_UNDEF;
     hsize_t 		ma_size=0, new_ma_size=0;
     hbool_t             contig_addr_vfd;        /* Whether VFD used has a contigous address space */
@@ -567,6 +568,7 @@ error:
 } /* test_mf_eoa_shrink() */
 
 /*
+ *-------------------------------------------------------------------------
  * To verify that an allocated block from file allocation is extended.
  *
  * Set up:
@@ -578,6 +580,7 @@ error:
  *
  * Test 2: Allocate a block of 30
  * 	H5MF_try_extend() the block of size 20 by 50: fail
+ *-------------------------------------------------------------------------
  */
 static unsigned
 test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
@@ -766,6 +769,7 @@ error:
 } /* test_mf_eoa_extend() */
 
 /*
+ *-------------------------------------------------------------------------
  * To verify that temporary blocks are allocated correctly
  *
  * Set up:
@@ -785,6 +789,7 @@ error:
  *              space fails
  *         - Check that allocating another 1/2 of the file as normal address
  *              space fails
+ *-------------------------------------------------------------------------
  */
 static unsigned
 test_mf_tmp(const char *env_h5_drvr, hid_t fapl)
@@ -942,10 +947,12 @@ error:
 } /* test_mf_tmp() */
 
 /*
+ *-------------------------------------------------------------------------
  * To verify that the free-space manager is created or opened
  *
  * Set up:
  * 	Turn off using meta/small data aggregator
+ *-------------------------------------------------------------------------
  */
 static unsigned
 test_mf_fs_start(hid_t fapl)
@@ -1034,6 +1041,7 @@ error:
 
 
 /*
+ *-------------------------------------------------------------------------
  * To verify that a block is allocated/freed from/to the free-space manager
  *
  * Set up:
@@ -1057,10 +1065,7 @@ error:
  *	The block is allocated from file allocation
  *	Deallocate the block which will be returned to free-space manager
  *	(the space is shrunk and freed since it is at end of file)
- *
- * Modifications:
- *	Vailin Choi; July 2012
- *	Initialize the new field "allow_eoa_shrink_only" for user data.
+ *-------------------------------------------------------------------------
  */
 static unsigned
 test_mf_fs_alloc_free(hid_t fapl)
@@ -1379,6 +1384,7 @@ error:
 
 
 /*
+ *-------------------------------------------------------------------------
  * To verify that a block allocated from the free-space manager can be extended
  *
  * Set up:
@@ -1414,10 +1420,7 @@ error:
  * 	Try to extend the allocated block by 50 from the free-space_manager:
  *	Fail: section A does not adjoin section B (70+20 != address of section B) even though
  *	      the requested-size (50) equal to size of section B (50)
- *
- * Modifications:
- *	Vailin Choi; July 2012
- *	Initialize the new field "allow_eoa_shrink_only" for user data.
+ *-------------------------------------------------------------------------
  */
 static unsigned
 test_mf_fs_extend(hid_t fapl)
@@ -1936,6 +1939,7 @@ error:
 } /* test_mf_fs_extend() */
 
 /*
+ *-------------------------------------------------------------------------
  * To verify that an aggregator is absorbed into a section.
  *
  *	Test 1: To aborb the aggregator onto the beginning of the section
@@ -1958,10 +1962,7 @@ error:
  *			which will absorb meta_aggr to the section:
  *			  section size + remaining size of aggregator is > aggr->alloc_size,
  *			  section is allowed to absorb an aggregator (allow_sect_absorb is true)
- *
- * Modifications:
- *	Vailin Choi; July 2012
- *	Initialize the new field "allow_eoa_shrink_only" for user data.
+ *-------------------------------------------------------------------------
  */
 static unsigned
 test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
@@ -2145,6 +2146,7 @@ error:
 } /* test_mf_fs_absorb() */
 
 /*
+ *-------------------------------------------------------------------------
  * To verify that blocks are allocated from the aggregator
  *
  *	Allocate first block (30) from meta_aggr: (nothing in the aggregator)
@@ -2159,6 +2161,7 @@ error:
  *	Result:
  *		The second block of 50 is allocated from meta_aggr
  *		There is space of 1968 left in meta_aggr
+ *-------------------------------------------------------------------------
  */
 static unsigned
 test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
@@ -2269,6 +2272,7 @@ error:
 } /* test_mf_aggr_alloc1() */
 
 /*
+ *-------------------------------------------------------------------------
  * To verify that blocks are allocated from the aggregator
  *
  *	Allocate first block (30) from meta_aggr: (nothing in the aggregator)
@@ -2290,6 +2294,7 @@ error:
  *		A block of request-size is extended via file allocation and is merged with meta_aggr
  *		The block of 2058 is allocated out of meta_aggr
  *		There is space of 1968 left in meta_aggr
+ *-------------------------------------------------------------------------
  */
 static unsigned
 test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)

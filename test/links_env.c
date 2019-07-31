@@ -136,8 +136,8 @@ external_link_env(hid_t fapl, hbool_t new_format)
  *
  * Purpose:	Test external link with environment variable HDF5_EXT_PREFIX
  *
- * Return:	Success:	exit(0)
- *		Failure:	exit(non-zero)
+ * Return:	Success:	exit(EXIT_SUCCESS)
+ *		Failure:	exit(EXIT_FAILURE)
  *
  * Programmer:	Vailin Choi; Nov 2010
  *
@@ -171,11 +171,11 @@ main(void)
 
     /* Results */
     if(nerrors) {
-        printf("***** %d External Link (HDF5_EXT_PREFIX) test%s FAILED! *****\n",
+        HDprintf("***** %d External Link (HDF5_EXT_PREFIX) test%s FAILED! *****\n",
                 nerrors, 1 == nerrors ? "" : "s");
-        exit(1);
+        HDexit(EXIT_FAILURE);
     }
-    printf("All external Link (HDF5_EXT_PREFIX) tests passed.\n");
+    HDprintf("All external Link (HDF5_EXT_PREFIX) tests passed.\n");
 
     /* clean up tmp directory created by external link tests */
     HDrmdir(TMPDIR);
@@ -183,6 +183,6 @@ main(void)
     return 0;
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     return 1;
 }

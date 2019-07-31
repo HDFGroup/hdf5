@@ -20,11 +20,6 @@
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST")
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/testfiles")
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/testfiles/plist_files")
-if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST-shared")
-  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST-shared/testfiles")
-  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST-shared/testfiles/plist_files")
-endif ()
 
 # --------------------------------------------------------------------
 # Copy all the HDF5 files from the source directory into the test directory
@@ -35,9 +30,6 @@ set (HDF5_TEST_FILES
 
 foreach (h5_tfile ${HDF5_TEST_FILES})
   HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/H5TEST/${h5_tfile}" "HDF5_TEST_LIB_files")
-  if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/H5TEST-shared/${h5_tfile}" "HDF5_TEST_LIBSH_files")
-  endif ()
 endforeach ()
 
 # --------------------------------------------------------------------
@@ -53,9 +45,6 @@ set (HDF5_REFERENCE_FILES
 
 foreach (ref_file ${HDF5_REFERENCE_FILES})
   HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/H5TEST/${ref_file}" "HDF5_TEST_LIB_files")
-  if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-    HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/H5TEST-shared/${ref_file}" "HDF5_TEST_LIBSH_files")
-  endif ()
 endforeach ()
 
 # --------------------------------------------------------------------
@@ -105,125 +94,63 @@ set (HDF5_REFERENCE_TEST_FILES
 
 foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
   HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/H5TEST/${h5_file}" "HDF5_TEST_LIB_files")
-  if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-    HDFTEST_COPY_FILE("${HDF5_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_TEST_BINARY_DIR}/H5TEST-shared/${h5_file}" "HDF5_TEST_LIBSH_files")
-  endif ()
 endforeach ()
 
 add_custom_target(HDF5_TEST_LIB_files ALL COMMENT "Copying files needed by HDF5_TEST_LIB tests" DEPENDS ${HDF5_TEST_LIB_files_list})
-if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-  add_custom_target(HDF5_TEST_LIBSH_files ALL COMMENT "Copying files needed by HDF5_TEST_LIBSH tests" DEPENDS ${HDF5_TEST_LIBSH_files_list})
-endif ()
+
+set (testhdf5_CLEANFILES
+          coord.h5
+          dtypes10.h5
+          sys_file1
+          tattr.h5
+          tfile1.h5
+          tfile2.h5
+          tfile3.h5
+          tfile4.h5
+          tfile5.h5
+          tfile6.h5
+          tfile7.h5
+          tfilespace.h5
+          th5o_file
+          th5s1.h5
+          tselect.h5
+          tsohm.h5
+          tsohm_dst.h5
+          tsohm_src.h5
+)
 
 # Remove any output file left over from previous test run
-add_test (NAME H5TEST-clear-testhdf5-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        coord.h5
-        dtypes10.h5
-        sys_file1
-        tattr.h5
-        tfile1.h5
-        tfile2.h5
-        tfile3.h5
-        tfile4.h5
-        tfile5.h5
-        tfile6.h5
-        tfile7.h5
-        th5o_file
-        th5s1.h5
-        tselect.h5
-        tsohm.h5
-        tsohm_dst.h5
-        tsohm_src.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
+add_test (
+    NAME H5TEST-testhdf5-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${testhdf5_CLEANFILES}
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
-set_tests_properties (H5TEST-clear-testhdf5-objects PROPERTIES FIXTURES_SETUP clear_testhdf5)
+set_tests_properties (H5TEST-testhdf5-clear-objects PROPERTIES FIXTURES_SETUP clear_testhdf5)
 
-if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME H5TEST-testhdf5-base COMMAND $<TARGET_FILE:testhdf5> -x heap -x file -x select)
-  set_tests_properties (H5TEST-testhdf5-base PROPERTIES
-      FIXTURES_REQUIRED clear_testhdf5
-      ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-  )
-  add_test (NAME H5TEST-testhdf5-heap COMMAND $<TARGET_FILE:testhdf5> -o heap)
-  set_tests_properties (H5TEST-testhdf5-heap PROPERTIES
-      FIXTURES_REQUIRED clear_testhdf5
-      ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-  )
-  add_test (NAME H5TEST-testhdf5-file COMMAND $<TARGET_FILE:testhdf5> -o file)
-  set_tests_properties (H5TEST-testhdf5-file PROPERTIES
-      FIXTURES_REQUIRED clear_testhdf5
-      ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-  )
-  add_test (NAME H5TEST-testhdf5-select COMMAND $<TARGET_FILE:testhdf5> -o select)
-  set_tests_properties (H5TEST-testhdf5-select PROPERTIES
-      FIXTURES_REQUIRED clear_testhdf5
-      ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-  )
-else ()
-  add_test (NAME H5TEST-testhdf5 COMMAND "${CMAKE_COMMAND}"
-      -D "TEST_PROGRAM=$<TARGET_FILE:testhdf5>"
-      -D "TEST_ARGS:STRING="
-      -D "TEST_EXPECT=0"
-      -D "TEST_SKIP_COMPARE=TRUE"
-      -D "TEST_OUTPUT=testhdf5.txt"
-      #-D "TEST_REFERENCE=testhdf5.out"
-      -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-  )
-  set_tests_properties (H5TEST-testhdf5 PROPERTIES
-      FIXTURES_REQUIRED clear_testhdf5
-      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-  )
-  if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-    add_test (NAME H5TEST-shared-clear-testhdf5-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-            coord.h5
-            dtypes10.h5
-            sys_file1
-            tattr.h5
-            tfile1.h5
-            tfile2.h5
-            tfile3.h5
-            tfile4.h5
-            tfile5.h5
-            tfile6.h5
-            tfile7.h5
-            th5o_file
-            th5s1.h5
-            tselect.h5
-            tsohm.h5
-            tsohm_dst.h5
-            tsohm_src.h5
-        WORKING_DIRECTORY
-            ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-    )
-    set_tests_properties (H5TEST-shared-clear-testhdf5-objects PROPERTIES FIXTURES_SETUP shared_clear_testhdf5)
-    add_test (NAME H5TEST-shared-testhdf5 COMMAND "${CMAKE_COMMAND}"
-        -D "TEST_PROGRAM=$<TARGET_FILE:testhdf5-shared>"
-        -D "TEST_ARGS:STRING="
-        -D "TEST_EXPECT=0"
-        -D "TEST_SKIP_COMPARE=TRUE"
-        -D "TEST_OUTPUT=testhdf5.txt"
-        #-D "TEST_REFERENCE=testhdf5.out"
-        -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-    )
-    set_tests_properties (H5TEST-shared-testhdf5 PROPERTIES
-        FIXTURES_REQUIRED shared_clear_testhdf5
-        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
-        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-    )
-  endif ()
-endif ()
+add_test (NAME H5TEST-testhdf5-base COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5> -x heap -x file -x select)
+set_tests_properties (H5TEST-testhdf5-base PROPERTIES
+    FIXTURES_REQUIRED clear_testhdf5
+    ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+add_test (NAME H5TEST-testhdf5-heap COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5> -o heap)
+set_tests_properties (H5TEST-testhdf5-heap PROPERTIES
+    FIXTURES_REQUIRED clear_testhdf5
+    ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+add_test (NAME H5TEST-testhdf5-file COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5> -o file)
+set_tests_properties (H5TEST-testhdf5-file PROPERTIES
+    FIXTURES_REQUIRED clear_testhdf5
+    ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+add_test (NAME H5TEST-testhdf5-select COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5> -o select)
+set_tests_properties (H5TEST-testhdf5-select PROPERTIES
+    FIXTURES_REQUIRED clear_testhdf5
+    ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
 
 ##############################################################################
 ##############################################################################
@@ -299,14 +226,12 @@ set (test_CLEANFILES
 )
 
 # Remove any output file left over from previous test run
-add_test (NAME H5TEST-clear-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        ${test_CLEANFILES}
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
+add_test (
+    NAME H5TEST-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_CLEANFILES}
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
-set_tests_properties (H5TEST-clear-objects PROPERTIES FIXTURES_SETUP clear_objects)
+set_tests_properties (H5TEST-clear-objects PROPERTIES FIXTURES_SETUP clear_H5TEST)
 
 set (H5TEST_SEPARATE_TESTS
     testhdf5
@@ -317,7 +242,7 @@ set (H5TEST_SEPARATE_TESTS
 foreach (h5_test ${H5_TESTS})
   if (NOT h5_test IN_LIST H5TEST_SEPARATE_TESTS)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5TEST-${h5_test} COMMAND $<TARGET_FILE:${h5_test}>)
+      add_test (NAME H5TEST-${h5_test} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${h5_test}>)
       set_tests_properties (H5TEST-${h5_test} PROPERTIES
           FIXTURES_REQUIRED clear_objects
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
@@ -330,18 +255,20 @@ foreach (h5_test ${H5_TESTS})
         )
       else ()
         add_test (NAME H5TEST-${h5_test} COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}>"
             -D "TEST_ARGS:STRING="
             -D "TEST_EXPECT=0"
             -D "TEST_SKIP_COMPARE=TRUE"
             -D "TEST_OUTPUT=${h5_test}.txt"
+            -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
             #-D "TEST_REFERENCE=${test}.out"
             -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
             -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
       endif ()
       set_tests_properties (H5TEST-${h5_test} PROPERTIES
-          FIXTURES_REQUIRED clear_objects
+          FIXTURES_REQUIRED clear_H5TEST
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
       )
@@ -350,73 +277,23 @@ foreach (h5_test ${H5_TESTS})
 endforeach ()
 
 set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-set_tests_properties (H5TEST-testmeta PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 set_tests_properties (H5TEST-big PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+set_tests_properties (H5TEST-btree2 PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 set_tests_properties (H5TEST-objcopy PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-
-if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-  # Remove any output file left over from previous test run
-  add_test (NAME H5TEST-shared-clear-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          ${test_CLEANFILES}
-      WORKING_DIRECTORY
-          ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-  )
-  set_tests_properties (H5TEST-shared-clear-objects PROPERTIES FIXTURES_SETUP shared_clear_objects)
-
-  foreach (h5_test ${H5_TESTS})
-    if (NOT h5_test IN_LIST H5TEST_SEPARATE_TESTS)
-      if ("${h5_test}" STREQUAL "big" AND CYGWIN)
-        add_test (NAME H5TEST-shared-${h5_test}
-            COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}-shared"
-        )
-      else ()
-        add_test (NAME H5TEST-shared-${h5_test} COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}-shared>"
-            -D "TEST_ARGS:STRING="
-            -D "TEST_EXPECT=0"
-            -D "TEST_SKIP_COMPARE=TRUE"
-            -D "TEST_OUTPUT=${h5_test}.txt"
-            #-D "TEST_REFERENCE=${test}.out"
-            -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
-            -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-        )
-      endif ()
-      set_tests_properties (H5TEST-shared-${h5_test} PROPERTIES
-          FIXTURES_REQUIRED shared_clear_objects
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
-          WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-      )
-    endif ()
-  endforeach ()
-
-  set_tests_properties (H5TEST-shared-fheap PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-  set_tests_properties (H5TEST-shared-testmeta PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-  set_tests_properties (H5TEST-shared-big PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-  set_tests_properties (H5TEST-shared-objcopy PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-endif ()
-
-##############################################################################
-##############################################################################
-###           A D D I T I O N A L   T E S T S                              ###
-##############################################################################
-##############################################################################
 
 #-- Adding test for cache
 if (NOT CYGWIN)
-  add_test (NAME H5TEST-clear-cache-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          cache_test.h5
-      WORKING_DIRECTORY
-          ${HDF5_TEST_BINARY_DIR}/H5TEST
+  add_test (
+      NAME H5TEST-cache-clear-objects
+      COMMAND ${CMAKE_COMMAND} -E remove cache_test.h5
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
-  set_tests_properties (H5TEST-clear-cache-objects PROPERTIES FIXTURES_SETUP cache_clear_objects)
+  set_tests_properties (H5TEST-cache-clear-objects PROPERTIES FIXTURES_SETUP clear_cache)
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5TEST-cache COMMAND $<TARGET_FILE:cache>)
+    add_test (NAME H5TEST-cache COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:cache>)
   else ()
     add_test (NAME H5TEST-cache COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -D "TEST_PROGRAM=$<TARGET_FILE:cache>"
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
@@ -428,7 +305,7 @@ if (NOT CYGWIN)
     )
   endif ()
   set_tests_properties (H5TEST-cache PROPERTIES
-      FIXTURES_REQUIRED cache_clear_objects
+      FIXTURES_REQUIRED clear_cache
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
@@ -436,9 +313,8 @@ if (NOT CYGWIN)
 endif ()
 
 #-- Adding test for flush1/2
-add_test (NAME H5TEST-clear-flush-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
+add_test (NAME H5TEST-flush-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove
         flush.h5
         flush-swmr.h5
         noflush.h5
@@ -450,10 +326,12 @@ add_test (NAME H5TEST-clear-flush-objects
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
+set_tests_properties (H5TEST-flush-clear-objects PROPERTIES FIXTURES_SETUP clear_flush)
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME H5TEST-flush1 COMMAND $<TARGET_FILE:flush1>)
+  add_test (NAME H5TEST-flush1 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:flush1>)
 else ()
   add_test (NAME H5TEST-flush1 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:flush1>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
@@ -464,14 +342,15 @@ else ()
   )
 endif ()
 set_tests_properties (H5TEST-flush1 PROPERTIES
-    DEPENDS H5TEST-clear-flush-objects
+    FIXTURES_REQUIRED clear_flush
     ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME H5TEST-flush2 COMMAND $<TARGET_FILE:flush2>)
+  add_test (NAME H5TEST-flush2 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:flush2>)
 else ()
   add_test (NAME H5TEST-flush2 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:flush2>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
@@ -481,20 +360,52 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
+set_tests_properties (H5TEST-flush2 PROPERTIES
+    FIXTURES_REQUIRED clear_flush
+    DEPENDS H5TEST-flush1
+)
+
+#-- Adding test for tcheck_version
+add_test (NAME H5TEST-tcheck_version-major COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:tcheck_version> "-tM")
+set_tests_properties (H5TEST-tcheck_version-major PROPERTIES
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    WILL_FAIL "true"
+)
+add_test (NAME H5TEST-tcheck_version-minor COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:tcheck_version> "-tm")
+set_tests_properties (H5TEST-tcheck_version-minor PROPERTIES
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    WILL_FAIL "true"
+)
+add_test (NAME H5TEST-tcheck_version-release COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:tcheck_version> "-tr")
+set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    WILL_FAIL "true"
+)
+
+##############################################################################
+##############################################################################
+###           A D D I T I O N A L   T E S T S                              ###
+##############################################################################
+##############################################################################
+# H5_CHECK_TESTS
+#---------------
+#    error_test
+#    err_compat
+#    testmeta
+#    links_env
+##############################################################################
+# autotools script tests
+# error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
+# links_env is used by testlinks_env.sh
+# NOT CONVERTED 'make check' doesn't run them directly, so they are not included in TEST_PROG.
+# NOT CONVERTED Also build testmeta, which is used for timings test.  It builds quickly,
+# NOT CONVERTED and this lets automake keep all its test programs in one place.
+##############################################################################
 
 #-- Adding test for err_compat
-if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
-  add_test (NAME H5TEST-clear-err_compat-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          err_compat.txt
-          err_compat.txt.err
-      WORKING_DIRECTORY
-          ${HDF5_TEST_BINARY_DIR}/H5TEST
-  )
-  set_tests_properties (H5TEST-clear-err_compat-objects PROPERTIES FIXTURES_SETUP err_compat_clear_objects)
+if (HDF5_ENABLE_DEPRECATED_SYMBOLS AND NOT MINGW)
   add_test (NAME H5TEST-err_compat COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:err_compat>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
@@ -506,23 +417,13 @@ if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
   set_tests_properties (H5TEST-err_compat PROPERTIES
-      FIXTURES_REQUIRED err_compat_clear_objects
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
 endif ()
 
 #-- Adding test for error_test
-add_test (NAME H5TEST-clear-error_test-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        error_test.txt
-        error_test.txt.err
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-set_tests_properties (H5TEST-clear-error_test-objects PROPERTIES FIXTURES_SETUP error_test_clear_objects)
-if (HDF5_USE_16_API_DEFAULT)
+if (HDF5_USE_16_API_DEFAULT OR MINGW)
   add_test (
       NAME H5TEST-error_test
       COMMAND ${CMAKE_COMMAND} -E echo "SKIP $<TARGET_FILE:error_test>"
@@ -530,6 +431,7 @@ if (HDF5_USE_16_API_DEFAULT)
   set_property(TEST H5TEST-error_test PROPERTY DISABLED)
 else ()
   add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
@@ -541,54 +443,62 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
   set_tests_properties (H5TEST-error_test PROPERTIES
-      FIXTURES_REQUIRED error_test_clear_objects
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
 endif ()
 
 #-- Adding test for links_env
-add_test (NAME H5TEST-clear-links_env-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        links_env.txt
-        links_env.txt.err
+add_test (NAME H5TEST-links_env-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove
         extlinks_env0.h5
         extlinks_env1.h5
         tmp/extlinks_env1.h5
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
-set_tests_properties (H5TEST-clear-links_env-objects PROPERTIES FIXTURES_SETUP links_env_clear_objects)
-add_test (NAME H5TEST-links_env COMMAND "${CMAKE_COMMAND}"
-    -D "TEST_PROGRAM=$<TARGET_FILE:links_env>"
-    -D "TEST_ARGS:STRING="
-    -D "TEST_ENV_VAR:STRING=HDF5_EXT_PREFIX"
-    -D "TEST_ENV_VALUE:STRING=.:tmp"
-    -D "TEST_EXPECT=0"
-    -D "TEST_OUTPUT=links_env.txt"
-    -D "TEST_REFERENCE=links_env.out"
-    -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-    -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-)
+set_tests_properties (H5TEST-links_env-clear-objects PROPERTIES FIXTURES_SETUP clear_links_env)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME H5TEST-links_env COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:links_env>)
+else ()
+  add_test (NAME H5TEST-links_env COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:links_env>"
+      -D "TEST_ARGS:STRING="
+      #-D "TEST_ENV_VAR:STRING=HDF5_EXT_PREFIX"
+      #-D "TEST_ENV_VALUE:STRING=.:tmp"
+      -D "TEST_EXPECT=0"
+      -D "TEST_OUTPUT=links_env.txt"
+      -D "TEST_REFERENCE=links_env.out"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
 set_tests_properties (H5TEST-links_env PROPERTIES
-    FIXTURES_REQUIRED links_env_clear_objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    FIXTURES_REQUIRED clear_links_env
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_EXT_PREFIX=.:tmp"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 
-#-- Adding test for libinfo
-add_test (NAME H5TEST-testlibinfo
-    COMMAND ${CMAKE_COMMAND} -D "TEST_PROGRAM=$<TARGET_FILE:${HDF5_LIB_TARGET}>" -P "${GREP_RUNNER}"
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
+if (NOT BUILD_SHARED_LIBS)
+  #-- Adding test for libinfo
+  add_test (NAME H5TEST-testlibinfo
+      COMMAND ${CMAKE_COMMAND} -D "TEST_PROGRAM=$<TARGET_FILE:${HDF5_LIB_TARGET}>" -P "${GREP_RUNNER}"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+else ()
+  #-- Adding test for libinfo
+  add_test (NAME H5TEST-testlibinfo
+      COMMAND ${CMAKE_COMMAND} -D "TEST_PROGRAM=$<TARGET_FILE:${HDF5_LIBSH_TARGET}>" -P "${GREP_RUNNER}"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+endif ()
 
 ##############################################################################
 ###    F I L T E R  P L U G I N  T E S T S
 ##############################################################################
-if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
-  if (WIN32)
+if (BUILD_SHARED_LIBS)
+  if (WIN32 OR MINGW)
     set (CMAKE_SEP "\;")
     set (BIN_REL_PATH "../../")
   else ()
@@ -596,7 +506,7 @@ if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS)
     set (BIN_REL_PATH "../")
   endif ()
 
-  add_test (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:filter_plugin>)
+  add_test (NAME H5PLUGIN-plugin COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:filter_plugin>)
   set_tests_properties (H5PLUGIN-plugin PROPERTIES
       ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
@@ -619,10 +529,10 @@ endif ()
 ##############################################################################
 ##############################################################################
 
-if (HDF5_BUILD_GENERATORS)
+if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   macro (ADD_H5_GENERATOR genfile)
     add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
-    target_include_directories(${genfile} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (${genfile} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     TARGET_C_PROPERTIES (${genfile} STATIC)
     target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (${genfile} PROPERTIES FOLDER generator/test)

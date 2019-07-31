@@ -147,10 +147,6 @@ error:
  * Programmer:  Robb Matzke
  *              Friday, October 23, 1998
  *
- * Modifications:
- *     Leon Arber
- *     Sept. 26, 2006, expand to check for case where the was file not flushed.
- *
  *-------------------------------------------------------------------------
  */
 int

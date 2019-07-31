@@ -122,14 +122,14 @@ H5O_mtime_new_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_
     size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     time_t	*mesg;
-    uint32_t    tmp_time;       /* Temporary copy of the time */
-    void        *ret_value;     /* Return value */
+    uint32_t    tmp_time;               /* Temporary copy of the time */
+    void        *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
-    assert(f);
-    assert(p);
+    HDassert(f);
+    HDassert(p);
 
     /* decode */
     if(*p++ != H5O_MTIME_VERSION)
@@ -143,7 +143,7 @@ H5O_mtime_new_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_
 
     /* The return value */
     if (NULL==(mesg = H5FL_MALLOC(time_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     *mesg = (time_t)tmp_time;
 
     /* Set return value */
@@ -179,13 +179,6 @@ H5O_mtime_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
     int	i;
     struct tm	tm;
     void        *ret_value = NULL;      /* Return value */
-#if _MSC_VER >= 1900 /* VS 2015 */
-    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
-     * variable declared in time.h. That variable was deprecated and in VS 2015
-     * is removed, with _get_timezone replacing it.
-     */
-    long timezone = 0;
-#endif
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -193,54 +186,22 @@ H5O_mtime_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
     HDassert(f);
     HDassert(p);
 
-    /* Initialize time zone information */
-    if(!ntzset) {
-        HDtzset();
-        ntzset = TRUE;
-    } /* end if */
-
     /* decode */
     for(i = 0; i < 14; i++)
         if(!HDisdigit(p[i]))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message")
 
-    /*
-     * Convert YYYYMMDDhhmmss UTC to a time_t.  This is a little problematic
-     * because mktime() operates on local times.  We convert to local time
-     * and then figure out the adjustment based on the local time zone and
-     * daylight savings setting.
-     */
+    /* Convert YYYYMMDDhhmmss UTC to a time_t. */
     HDmemset(&tm, 0, sizeof tm);
-    tm.tm_year = (p[0]-'0')*1000 + (p[1]-'0')*100 +
-		 (p[2]-'0')*10 + (p[3]-'0') - 1900;
+    tm.tm_year = (p[0]-'0')*1000 + (p[1]-'0')*100 + (p[2]-'0')*10 + (p[3]-'0') - 1900;
     tm.tm_mon = (p[4]-'0')*10 + (p[5]-'0') - 1;
     tm.tm_mday = (p[6]-'0')*10 + (p[7]-'0');
     tm.tm_hour = (p[8]-'0')*10 + (p[9]-'0');
     tm.tm_min = (p[10]-'0')*10 + (p[11]-'0');
     tm.tm_sec = (p[12]-'0')*10 + (p[13]-'0');
-    tm.tm_isdst = -1; /*figure it out*/
-    if((time_t)-1 == (the_time = HDmktime(&tm)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message")
-
-#if defined(H5_HAVE_TM_GMTOFF)
-    /* BSD-like systems */
-    the_time += tm.tm_gmtoff;
-#elif defined(H5_HAVE_TIMEZONE)
-    #if _MSC_VER >= 1900  /* VS 2015 */
-        HDget_timezone(&timezone);
-    #endif
-    /* GNU/Linux systems */
-    the_time -= timezone - (tm.tm_isdst ? 3600 : 0);
-#else
-    /*
-     * The catch-all.  If we can't convert a character string universal
-     * coordinated time to a time_t value reliably then we can't decode the
-     * modification time message. This really isn't as bad as it sounds -- the
-     * only way a user can get the modification time is from our internal
-     * query routines, which can gracefully recover.
-     */
-    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to obtain local timezone information")
-#endif
+    tm.tm_isdst = -1; /* (figure it out) */
+    if((time_t)-1 == (the_time = H5_make_time(&tm)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't construct time info")
 
     /* The return value */
     if(NULL == (mesg = H5FL_MALLOC(time_t)))
@@ -276,9 +237,9 @@ H5O_mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(f);
-    assert(p);
-    assert(mesg);
+    HDassert(f);
+    HDassert(p);
+    HDassert(mesg);
 
     /* Version */
     *p++ = H5O_MTIME_VERSION;
@@ -319,15 +280,15 @@ H5O_mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(f);
-    assert(p);
-    assert(mesg);
+    HDassert(f);
+    HDassert(p);
+    HDassert(mesg);
 
     /* encode */
     tm = HDgmtime(mesg);
-    sprintf((char*)p, "%04d%02d%02d%02d%02d%02d",
-	    1900+tm->tm_year, 1+tm->tm_mon, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min, tm->tm_sec);
+    HDsprintf((char*)p, "%04d%02d%02d%02d%02d%02d",
+      1900+tm->tm_year, 1+tm->tm_mon, tm->tm_mday,
+      tm->tm_hour, tm->tm_min, tm->tm_sec);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
@@ -356,12 +317,12 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
 {
     const time_t	*mesg = (const time_t *) _mesg;
     time_t		*dest = (time_t *) _dest;
-    void        *ret_value;     /* Return value */
+    void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
-    assert(mesg);
+    HDassert(mesg);
     if (!dest && NULL==(dest = H5FL_MALLOC(time_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
@@ -402,8 +363,8 @@ H5O_mtime_new_size(const H5F_t H5_ATTR_UNUSED * f, hbool_t H5_ATTR_UNUSED disabl
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(f);
-    assert(mesg);
+    HDassert(f);
+    HDassert(mesg);
 
     FUNC_LEAVE_NOAPI(8)
 } /* end H5O_mtime_new_size() */
@@ -435,8 +396,8 @@ H5O_mtime_size(const H5F_t H5_ATTR_UNUSED * f, hbool_t H5_ATTR_UNUSED disable_sh
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(f);
-    assert(mesg);
+    HDassert(f);
+    HDassert(mesg);
 
     FUNC_LEAVE_NOAPI(16)
 }
@@ -469,14 +430,12 @@ H5O_mtime_reset(void H5_ATTR_UNUSED *_mesg)
 /*-------------------------------------------------------------------------
  * Function:	H5O_mtime_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Thursday, March 30, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -504,8 +463,6 @@ H5O_mtime_free(void *mesg)
  *		matzke@llnl.gov
  *		Jul 24 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -519,18 +476,18 @@ H5O_mtime_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const voi
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
-    assert(f);
-    assert(mesg);
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(mesg);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
     /* debug */
     tm = HDlocaltime(mesg);
 
     HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	    "Time:", buf);
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+      "Time:", buf);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }

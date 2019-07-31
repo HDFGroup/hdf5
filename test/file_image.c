@@ -547,7 +547,7 @@ test_core(void)
     VERIFY(fapl >= 0, "fapl creation failed");
 
     /* Set up the core VFD */
-    ret = H5Pset_fapl_core(fapl, 0, 0);
+    ret = H5Pset_fapl_core(fapl, (size_t)0, 0);
     VERIFY(ret >= 0, "setting core driver in fapl failed");
 
     tmp = h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -629,7 +629,8 @@ test_core(void)
     VERIFY(ret == 0, "fstat failed");
     size = (size_t)sb.st_size;
     file_image = (unsigned char *)HDmalloc(size);
-    HDread(fd, file_image, size);
+    if(HDread(fd, file_image, size) < 0)
+        FAIL_PUTS_ERROR("unable to read from file descriptor");
     ret = HDclose(fd);
     VERIFY(ret == 0, "close failed");
 
@@ -928,7 +929,6 @@ test_get_file_image_error_rejection(void)
     void * image_ptr = NULL;
     int data[100];
     int i;
-    int result;
     hid_t fapl_id = -1;
     hid_t file_id = -1;
     hid_t dset_id = -1;
@@ -1281,7 +1281,7 @@ main(void)
 
     h5_reset();
 
-    printf("Testing File Image Functionality.\n");
+    HDprintf("Testing File Image Functionality.\n");
 
     errors += test_properties();
     errors += test_callbacks();
@@ -1337,12 +1337,12 @@ main(void)
     h5_restore_err();
 
     if(errors) { 
-        printf("***** %d File Image TEST%s FAILED! *****\n", 
+        HDprintf("***** %d File Image TEST%s FAILED! *****\n", 
             errors, errors > 1 ? "S" : ""); 
         return 1; 
     }
 
-    printf("All File Image tests passed.\n");
+    HDprintf("All File Image tests passed.\n");
     return 0;
 }
 

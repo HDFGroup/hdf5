@@ -36,13 +36,13 @@ endif ()
 #  set (ERROR_APPEND 1)
 #endif ()
 
-message (STATUS "USING ${TEST_VFD} ON COMMAND: ${TEST_PROGRAM} ${TEST_ARGS}")
+message (STATUS "USING ${TEST_VFD} ON COMMAND: ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}")
 
 set (ENV{HDF5_DRIVER} "${TEST_VFD}")
 
 # run the test program, capture the stdout/stderr and the result var
 execute_process (
-    COMMAND ${TEST_PROGRAM} ${TEST_ARGS}
+    COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}
     WORKING_DIRECTORY ${TEST_FOLDER}
     RESULT_VARIABLE TEST_RESULT
     OUTPUT_FILE ${TEST_OUTPUT}_${TEST_VFD}.out

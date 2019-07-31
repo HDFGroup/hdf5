@@ -162,10 +162,6 @@ print_version(const char *progname)
            H5_VERS_SUBRELEASE[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
-
-
-/** From h5test.c **/
-
 #ifdef H5_HAVE_PARALLEL
 MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
 #endif

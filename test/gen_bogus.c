@@ -19,8 +19,8 @@
  *              datasets that have "bogus" messages in their object header.
  */
 
-#include "H5private.h"
 #include "hdf5.h"
+#include "H5private.h"
 #include "H5Oprivate.h"
 
 #ifdef H5O_ENABLE_BOGUS
@@ -149,3 +149,4 @@ error:
 #endif /* H5O_ENABLE_BOGUS */
     return 1;
 }
+
