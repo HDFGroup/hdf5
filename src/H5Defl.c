@@ -477,7 +477,6 @@ H5D__efl_readvv(const H5D_io_info_t *io_info,
     HDassert(io_info->u.rbuf);
     HDassert(io_info->dset);
     HDassert(io_info->dset->shared);
-    HDassert(io_info->dset->shared->extfile_prefix);
     HDassert(dset_curr_seq);
     HDassert(dset_len_arr);
     HDassert(dset_off_arr);
@@ -561,7 +560,6 @@ H5D__efl_writevv(const H5D_io_info_t *io_info,
     HDassert(io_info->u.wbuf);
     HDassert(io_info->dset);
     HDassert(io_info->dset->shared);
-    HDassert(io_info->dset->shared->extfile_prefix);
     HDassert(dset_curr_seq);
     HDassert(dset_len_arr);
     HDassert(dset_off_arr);
