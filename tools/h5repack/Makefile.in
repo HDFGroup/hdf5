@@ -108,7 +108,6 @@ host_triplet = @host@
 @BUILD_TESTS_CONDITIONAL_TRUE@@HAVE_SHARED_CONDITIONAL_TRUE@@USE_PLUGINS_CONDITIONAL_TRUE@am__append_1 = h5repack_plugin.sh
 check_PROGRAMS = $(am__EXEEXT_1)
 bin_PROGRAMS = h5repack$(EXEEXT)
-@BUILD_TESTS_CONDITIONAL_TRUE@am__append_2 = $(LIBH5TEST)
 TESTS = $(am__EXEEXT_1) $(am__EXEEXT_2)
 subdir = tools/h5repack
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -154,7 +153,13 @@ am__objects_1 = h5repack.$(OBJEXT) h5repack_copy.$(OBJEXT) \
 am_h5repack_OBJECTS = $(am__objects_1) h5repack_main.$(OBJEXT)
 h5repack_OBJECTS = $(am_h5repack_OBJECTS)
 h5repack_LDADD = $(LDADD)
-h5repack_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5) $(am__append_2)
+@BUILD_TESTS_CONDITIONAL_FALSE@h5repack_DEPENDENCIES = $(LIBH5TOOLS) \
+@BUILD_TESTS_CONDITIONAL_FALSE@	$(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@h5repack_DEPENDENCIES = $(LIBH5TOOLS) \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBH5TEST) $(LIBHDF5)
+h5repack_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(h5repack_LDFLAGS) $(LDFLAGS) -o $@
 am__h5repacktst_SOURCES_DIST = h5repack.c h5repack_copy.c \
 	h5repack_filters.c h5repack_opttable.c h5repack_parse.c \
 	h5repack_refs.c h5repack_verify.c h5repacktst.c
@@ -163,15 +168,22 @@ am__h5repacktst_SOURCES_DIST = h5repack.c h5repack_copy.c \
 @BUILD_TESTS_CONDITIONAL_TRUE@	h5repacktst.$(OBJEXT)
 h5repacktst_OBJECTS = $(am_h5repacktst_OBJECTS)
 h5repacktst_LDADD = $(LDADD)
-h5repacktst_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5) $(am__append_2)
+@BUILD_TESTS_CONDITIONAL_FALSE@h5repacktst_DEPENDENCIES =  \
+@BUILD_TESTS_CONDITIONAL_FALSE@	$(LIBH5TOOLS) $(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@h5repacktst_DEPENDENCIES =  \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBH5TOOLS) $(LIBH5TEST) \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBHDF5)
 am__testh5repack_detect_szip_SOURCES_DIST =  \
 	testh5repack_detect_szip.c
 @BUILD_TESTS_CONDITIONAL_TRUE@am_testh5repack_detect_szip_OBJECTS = testh5repack_detect_szip.$(OBJEXT)
 testh5repack_detect_szip_OBJECTS =  \
 	$(am_testh5repack_detect_szip_OBJECTS)
 testh5repack_detect_szip_LDADD = $(LDADD)
-testh5repack_detect_szip_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5) \
-	$(am__append_2)
+@BUILD_TESTS_CONDITIONAL_FALSE@testh5repack_detect_szip_DEPENDENCIES =  \
+@BUILD_TESTS_CONDITIONAL_FALSE@	$(LIBH5TOOLS) $(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@testh5repack_detect_szip_DEPENDENCIES =  \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBH5TOOLS) $(LIBH5TEST) \
+@BUILD_TESTS_CONDITIONAL_TRUE@	$(LIBHDF5)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -734,8 +746,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 *.bin \
 SCRIPT_DEPEND = h5repack$(EXEEXT)
 check_SCRIPTS = $(TEST_SCRIPT)
 
-# Depend on the hdf5 library, the tools library, the test library
-LDADD = $(LIBH5TOOLS) $(LIBHDF5) $(am__append_2)
+# Add h5repack specific linker flags here
+h5repack_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # Source files
 COMMON_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \
@@ -743,6 +755,11 @@ COMMON_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \
                h5repack_verify.c
 
 h5repack_SOURCES = $(COMMON_SOURCES) h5repack_main.c
+# Depend on the hdf5 library and the tools library
+@BUILD_TESTS_CONDITIONAL_FALSE@LDADD = $(LIBH5TOOLS) $(LIBHDF5)
+
+# Depend on the hdf5 library, the tools library, the test library
+@BUILD_TESTS_CONDITIONAL_TRUE@LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 @BUILD_TESTS_CONDITIONAL_TRUE@h5repacktst_SOURCES = $(COMMON_SOURCES) h5repacktst.c
 #testh5repack_detect_szip_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 @BUILD_TESTS_CONDITIONAL_TRUE@testh5repack_detect_szip_SOURCES = testh5repack_detect_szip.c
@@ -910,7 +927,7 @@ clean-noinstPROGRAMS:
 
 h5repack$(EXEEXT): $(h5repack_OBJECTS) $(h5repack_DEPENDENCIES) $(EXTRA_h5repack_DEPENDENCIES) 
 	@rm -f h5repack$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(h5repack_OBJECTS) $(h5repack_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(h5repack_LINK) $(h5repack_OBJECTS) $(h5repack_LDADD) $(LIBS)
 
 h5repacktst$(EXEEXT): $(h5repacktst_OBJECTS) $(h5repacktst_DEPENDENCIES) $(EXTRA_h5repacktst_DEPENDENCIES) 
 	@rm -f h5repacktst$(EXEEXT)
