@@ -67,8 +67,10 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (PERFORM_h5perf_serial PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-set_tests_properties (PERFORM_h5perf_serial PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
+set_tests_properties (PERFORM_h5perf_serial PROPERTIES
+    TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
+    DEPENDS "PERFORM_h5perform-clearall-objects"
+)
 
 if (HDF5_BUILD_PERFORM_STANDALONE)
   add_test (NAME PERFORM_h5perf_serial_alone COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5perf_serial_alone>)
@@ -89,7 +91,9 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (PERFORM_chunk PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
+set_tests_properties (PERFORM_chunk PROPERTIES
+    DEPENDS "PERFORM_h5perform-clearall-objects"
+)
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME PERFORM_iopipe COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:iopipe>)
@@ -106,7 +110,9 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (PERFORM_iopipe PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
+set_tests_properties (PERFORM_iopipe PROPERTIES
+    DEPENDS "PERFORM_h5perform-clearall-objects"
+)
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME PERFORM_overhead COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:overhead>)
@@ -123,7 +129,9 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (PERFORM_overhead PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
+set_tests_properties (PERFORM_overhead PROPERTIES
+    DEPENDS "PERFORM_h5perform-clearall-objects"
+)
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME PERFORM_perf_meta COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:perf_meta>)
@@ -140,7 +148,9 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (PERFORM_perf_meta PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
+set_tests_properties (PERFORM_perf_meta PROPERTIES
+    DEPENDS "PERFORM_h5perform-clearall-objects"
+)
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME PERFORM_zip_perf_help COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:zip_perf> "-h")
@@ -157,7 +167,9 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (PERFORM_zip_perf_help PROPERTIES DEPENDS "PERFORM_h5perform-clearall-objects")
+set_tests_properties (PERFORM_zip_perf_help PROPERTIES
+    DEPENDS "PERFORM_h5perform-clearall-objects"
+)
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME PERFORM_zip_perf COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:zip_perf> tfilters.h5)
@@ -174,7 +186,9 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
-set_tests_properties (PERFORM_zip_perf PROPERTIES DEPENDS "PERFORM_zip_perf_help;PERFORM_h5perform-clearall-objects")
+set_tests_properties (PERFORM_zip_perf PROPERTIES
+    DEPENDS "PERFORM_zip_perf_help;PERFORM_h5perform-clearall-objects"
+)
 
 if (H5_HAVE_PARALLEL)
   if (UNIX)

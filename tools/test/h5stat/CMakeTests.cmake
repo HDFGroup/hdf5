@@ -106,20 +106,7 @@
       if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (last_test)
-        set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5STAT-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      if (last_test)
-        set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -132,7 +119,6 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS H5STAT-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -143,20 +129,7 @@
       if (${resultcode})
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-      if (last_test)
-        set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5STAT-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      if (last_test)
-        set_tests_properties (H5STAT-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
       add_test (
           NAME H5STAT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -170,7 +143,6 @@
               -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS H5STAT-${resultfile}-clear-objects)
     endif ()
   endmacro ()
 
@@ -187,13 +159,8 @@
     endforeach ()
     add_test (
       NAME H5STAT-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove ${CLEAR_LIST}
+      COMMAND ${CMAKE_COMMAND} -E remove ${CLEAR_LIST}
     )
-    if (last_test)
-      set_tests_properties (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5STAT-clearall-objects")
   endif ()
 
 # Test for help flag

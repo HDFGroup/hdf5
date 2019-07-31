@@ -21,10 +21,10 @@ add_test (
     NAME HL_FORTRAN_f90_ex-clear-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove
-        ex_ds1.h5
-        exlite.h5
+            ex_ds1.h5
+            exlite.h5
 )
-
+set_tests_properties (HL_FORTRAN_f90_ex-clear-objects PROPERTIES FIXTURES_SETUP clear_HL_FORTRAN_f90_ex)
 
 foreach (example ${examples})
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -42,5 +42,7 @@ foreach (example ${examples})
         -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
     )
   endif ()
-  set_tests_properties (HL_FORTRAN_f90_ex_${example} PROPERTIES DEPENDS HL_FORTRAN_f90_ex-clear-objects)
+  set_tests_properties (HL_FORTRAN_f90_ex_${example} PROPERTIES
+      FIXTURES_REQUIRED clear_HL_FORTRAN_f90_ex
+  )
 endforeach ()

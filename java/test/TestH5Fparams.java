@@ -244,7 +244,7 @@ public class TestH5Fparams {
             catch (Throwable err) {
                 fail("H5.H5Fcreate: " + err);
             }
-            H5.H5Fset_libver_bounds(fid, HDF5Constants.H5F_LIBVER_V110, HDF5Constants.H5F_LIBVER_V110+1);
+            H5.H5Fset_libver_bounds(fid, HDF5Constants.H5F_LIBVER_LATEST, HDF5Constants.H5F_LIBVER_LATEST+1);
         }
         finally {
             try {H5.H5Fclose(fid);} catch (Exception ex) {}
