@@ -549,7 +549,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
                 printf("*** Hint ***\n"
                        "You can use environment variable HDF5_PARAPREFIX to "
                        "run parallel test files in a\n"
-                       "different directory or to add file type prefix. E.g.,\n"
+                       "different directory or to add file type prefix. e.g.,\n"
                        "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
                        "   export HDF5_PARAPREFIX\n"
                        "*** End of Hint ***\n");

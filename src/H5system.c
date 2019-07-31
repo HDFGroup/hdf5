@@ -30,11 +30,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"    /* Generic Functions      */
-#include "H5Fprivate.h"    /* File access        */
-#include "H5MMprivate.h"  /* Memory management      */
-#include "H5Eprivate.h"
-
+#include "H5private.h"        /* Generic Functions            */
+#include "H5Eprivate.h"        /* Error handling              */
+#include "H5Fprivate.h"        /* File access                */
+#include "H5MMprivate.h"    /* Memory management            */
 
 
 /****************/
@@ -74,7 +73,7 @@
 /* Track whether tzset routine was called */
 static hbool_t H5_ntzset = FALSE;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  HDfprintf
  *
@@ -433,7 +432,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 } /* end HDfprintf() */
 #pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  HDstrtoll
  *
@@ -560,7 +559,7 @@ HDstrtoll(const char *s, const char **rest, int base)
     return acc;
 } /* end HDstrtoll() */
 #endif
-
+
 /*-------------------------------------------------------------------------
  * Function:  HDrand/HDsrand
  *
@@ -596,6 +595,7 @@ void HDsrand(unsigned int seed)
 #endif /* H5_HAVE_RAND_R */
 
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5_make_time
  *
@@ -680,7 +680,7 @@ done:
 /* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
 #define _W32_FT_OFFSET (116444736000000000ULL)
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
  *
@@ -732,7 +732,7 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
   return 0;
 } /* end Wgettimeofday() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    Wsetenv
  *
@@ -830,7 +830,7 @@ Wnanosleep(const struct timespec *req, struct timespec *rem)
 
 } /* end Wnanosleep() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
  *
@@ -1008,7 +1008,7 @@ done:
 
 #endif /* H5_HAVE_WIN32_API */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_build_extpath
  *
@@ -1128,7 +1128,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_build_extpath() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5_combine_path
  *
@@ -1191,11 +1191,11 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
          * Allocate a buffer to hold path1 + path2 + possibly the delimiter
          *      + terminating null byte
          */
-        if(NULL == (*full_name = (char *)H5MM_malloc(path1_len + path2_len + 2)))
+        if(NULL == (*full_name = (char *)H5MM_malloc(path1_len + path2_len + 2 + 2))) /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer")
 
         /* Compose the full file name */
-        HDsnprintf(*full_name, (path1_len + path2_len + 2), "%s%s%s", path1,
+        HDsnprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s", path1, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
                    (H5_CHECK_DELIMITER(path1[path1_len - 1]) ? "" : H5_DIR_SEPS), path2);
     } /* end else */
 
@@ -1203,7 +1203,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_combine_path() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5_nanosleep
  *
@@ -1231,7 +1231,7 @@ H5_nanosleep(uint64_t nanosec)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5_nanosleep() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5_get_time
  *
@@ -1267,7 +1267,7 @@ H5_get_time(void)
 
 #define H5_WIN32_ENV_VAR_BUFFER_SIZE    32767
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_expand_windows_env_vars()
  *

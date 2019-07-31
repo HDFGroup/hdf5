@@ -32,8 +32,23 @@ if (HDF5_ENABLE_F2003)
 endif ()
 
 #-- Adding test for fflush1
-add_test (NAME FORTRAN_fflush1 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:fflush1>)
+add_test (
+    NAME FORTRAN_flush1-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove flush.h5
+)
+add_test (
+    NAME FORTRAN_fflush1
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:fflush1>
+)
+set_tests_properties (FORTRAN_fflush1 PROPERTIES
+    DEPENDS FORTRAN_flush1-clear-objects
+)
 
 #-- Adding test for fflush2
-add_test (NAME FORTRAN_fflush2 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:fflush2>)
-set_tests_properties (FORTRAN_fflush2 PROPERTIES DEPENDS FORTRAN_fflush1)
+add_test (
+    NAME FORTRAN_fflush2
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:fflush2>
+)
+set_tests_properties (FORTRAN_fflush2 PROPERTIES
+    DEPENDS FORTRAN_fflush1
+)

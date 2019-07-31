@@ -290,7 +290,7 @@ main (void)
 
     if(nerrors) {
         printf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
-        exit(1);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     printf("All extend tests passed.\n");

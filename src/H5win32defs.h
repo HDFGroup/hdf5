@@ -56,7 +56,7 @@ typedef __int64             h5_stat_size_t;
 #define HDopen(S,F,...)     Wopen_utf8(S,F,__VA_ARGS__)
 #else
 #define HDopen(S,F,...)     Wopen_utf8(S,F,##__VA_ARGS__)
-#endif /* H5_HAVE_MINGW */
+#endif
 #define HDread(F,M,Z)       _read(F,M,Z)
 #define HDremove(S)         Wremove_utf8(S)
 #define HDrmdir(S)          _rmdir(S)

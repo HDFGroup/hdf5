@@ -465,7 +465,7 @@ test_poly(const hid_t dxpl_id_polynomial)
     for(row = 0; row < ROWS; row++)
         for(col = 0; col < COLS; col++) {
             windchillC = (int) ((5.0f / 9.0f) * (windchillFfloat[row][col] - 32));
-            polyflres[row][col] = (float) ((2.0f + windchillC) * ((windchillC - 8.0f) / 2.0f));
+            polyflres[row][col] = ((2.0f + (float)windchillC) * (((float)windchillC - 8.0f) / 2.0f));
         }
 
     TESTING("data transform, polynomial transform (int->float)")
@@ -744,7 +744,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
     HDfree(ptrgetTest);
     ptrgetTest = NULL;
 
-    TESTING("data transform, read after reseting of transform property")
+    TESTING("data transform, read after resetting of transform property")
 
     if(H5Pset_data_transform(dxpl_id_c_to_f, simple) < 0)
         TEST_ERROR

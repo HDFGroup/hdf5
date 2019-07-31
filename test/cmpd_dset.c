@@ -100,15 +100,18 @@ typedef struct {
     float f, g, h[16], i, j;
     double k, l, m, n;
 } stype1;
+
 typedef struct {
     int a, b, c[8], d, e;
     float f, g, h[16], i, j;
     double k, l, m, n;
     long o, p, q;
 } stype2;
+
 typedef struct {
     int a, b, c[8], d, e;
 } stype3;
+
 typedef struct {
     int a, b, c[8], d, e;
     float f, g, h[16], i, j;

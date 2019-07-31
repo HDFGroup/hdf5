@@ -348,8 +348,8 @@ error:
  * Purpose:     Tests the library's behavior when a mandate filter returns 
  *              failure.
  *
- * Return:      Success:        exit(0)
- *              Failure:        exit(1)
+ * Return:      Success:        exit(EXIT_SUCCESS)
+ *              Failure:        exit(EXIT_FAILURE)
  * 
  * Programmer:  Raymond Lu
  *              25 August 2010
@@ -405,6 +405,6 @@ error:
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 }
