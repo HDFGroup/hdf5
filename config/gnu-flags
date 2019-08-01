@@ -195,7 +195,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
 
     # -Wvolatile-register-var was later incorporated into -Wall and              
     # only needs to be specified explicitly for gcc 4.2-4.3                      
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $$cc_vers_minor -le 3; then
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 3; then
         H5_CFLAGS="$H5_CFLAGS -Wvolatile-register-var"                           
     fi 
 
