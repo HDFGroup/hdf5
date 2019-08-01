@@ -70,7 +70,7 @@ test_path_env(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Reset the raw data files */
-    if(reset_raw_data_files(1) < 0)
+    if(reset_raw_data_files(TRUE) < 0)
         TEST_ERROR
 
     /* Create the dataset */
