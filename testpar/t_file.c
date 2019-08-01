@@ -179,8 +179,6 @@ test_page_buffer_access(void)
     for(i=0 ; i<num_elements ; i++)
         data[i] = -1;
 
-    /* MSC - why this stopped working ? */
-#if 0
     if(MAINPROCESS) {
         hid_t fapl_self;
 
@@ -252,7 +250,7 @@ test_page_buffer_access(void)
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
 
-        ret = H5PB_flush(f, FALSE);
+        ret = H5PB_flush(f);
         VRFY((ret == 0), "");
 
         /* read elements 0 - 200 */
@@ -288,7 +286,6 @@ test_page_buffer_access(void)
         /* Pop API context */
         if(api_ctx_pushed) { ret = H5CX_pop(); VRFY((ret == 0), "H5CX_pop()"); api_ctx_pushed = FALSE; }
     }
-#endif
 
     MPI_Barrier(MPI_COMM_WORLD);
 
