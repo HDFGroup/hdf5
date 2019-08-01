@@ -838,6 +838,13 @@ void dataset_fillvalue(void)
     HDfree(wdata);
 }
 
+/* combined cngrpw and ingrpr tests because ingrpr reads file created by cngrpw. */
+void collective_group_write_independent_group_read(void)
+{
+    collective_group_write();
+    independent_group_read();
+}
+
 /* Write multiple groups with a chunked dataset in each group collectively.
  * These groups and datasets are for testing independent read later.
  *
