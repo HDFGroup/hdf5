@@ -2579,13 +2579,6 @@ test_obj_ref(hid_t fapl)
     if(!((HDstrcmp(buf, "/Dataset3") == 0) &&(namelen == 9))) TEST_ERROR
     *buf = '\0';
 
-    /* Check H5Rget_name returns the correct length of the name when name is NULL */
-    namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], NULL, 0);
-    if(namelen != 9) TEST_ERROR
-    /* Make sure size parameter is ignored */
-    namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], NULL, 200);
-    if(namelen != 9) TEST_ERROR
-    
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], (char*)buf, sizeof(buf));
     if(!((HDstrcmp(buf, "/Dataset3") == 0) &&(namelen == 9))) TEST_ERROR
     PASSED()
@@ -2823,12 +2816,7 @@ test_reg_ref(hid_t fapl)
     /* Get name of the dataset the first region reference points to using H5Rget_name */
     TESTING("H5Rget_name to get name from region reference(hyperslab)");
     *buf1 = '\0';
-
-    /* Check H5Rget_name returns the correct length of the name when name is NULL */
-    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], NULL, 0);
-    if(name_size1 != 7) TEST_ERROR
-
-    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], (char*)buf1, NAME_BUF_SIZE );
+    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], (char*)buf1, NAME_BUF_SIZE);
     if(!((HDstrcmp(buf1, "/MATRIX") == 0) &&(name_size1 == 7))) TEST_ERROR
     PASSED()
 
