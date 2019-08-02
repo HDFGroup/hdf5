@@ -130,7 +130,7 @@ int main(void)
     set = H5Dopen2(fil, setname, H5P_DEFAULT);
 
     H5Dread(set, fix, spc, H5S_ALL, H5P_DEFAULT, data);
-    fptr = (float *)(data + H5Tget_member_offset(fix, 1));
+    fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 1)));
     H5Dclose(set);
 
 out:
@@ -151,7 +151,7 @@ out:
         if(mname)
             H5free_memory(mname);
 
-        fptr = (float *)(data + H5Tget_member_offset(fix, 1));
+        fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 1)));
         mname = H5Tget_member_name(fix, 1);
         printf("Data comparison:\n"
             "%14s (%2d) %6f = %f\n"
@@ -162,7 +162,7 @@ out:
         if(mname)
             H5free_memory(mname);
 
-        fptr = (float *)(data + H5Tget_member_offset(fix, 2));
+        fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 2)));
         mname = H5Tget_member_name(fix, 2);
         printf("%14s (%2d) %6f = %f\n"
             "                    %6f = %6f\n",
@@ -172,7 +172,7 @@ out:
         if(mname)
             H5free_memory(mname);
 
-        fptr = (float *)(data + H5Tget_member_offset(fix, 1));
+        fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 1)));
         printf("\n"
             "Short circuit\n"
             "                    %6f = %f\n"

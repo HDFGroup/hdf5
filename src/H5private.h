@@ -1332,8 +1332,9 @@ typedef off_t               h5_stat_size_t;
         #define HDsrandom(S)    srand(S)
     #endif /* HDsrandom */
 #endif /* H5_HAVE_RAND_R */
-/* sscanf() variable arguments */
-
+#ifndef HDsscanf
+    #define HDsscanf(S,FMT,...)   sscanf(S,FMT,__VA_ARGS__)
+#endif /* HDsscanf */
 #ifndef HDstrcat
     #define HDstrcat(X,Y)    strcat(X,Y)
 #endif /* HDstrcat */
@@ -1390,6 +1391,9 @@ typedef off_t               h5_stat_size_t;
 #endif /* HDstrtod */
 #ifndef HDstrtok
     #define HDstrtok(X,Y)    strtok(X,Y)
+#endif /* HDstrtok */
+#ifndef HDstrtok_r
+    #define HDstrtok_r(X,Y,Z) strtok_r(X,Y,Z)
 #endif /* HDstrtok */
 #ifndef HDstrtol
     #define HDstrtol(S,R,N)    strtol(S,R,N)
@@ -1493,6 +1497,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDva_arg
     #define HDva_arg(A,T)    va_arg(A,T)
 #endif /* HDva_arg */
+#ifndef HDva_copy
+#define HDva_copy(D,S)    va_copy(D,S)
+#endif /* HDva_copy */
 #ifndef HDva_end
     #define HDva_end(A)    va_end(A)
 #endif /* HDva_end */
@@ -1998,7 +2005,6 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 H5_DLL herr_t H5CX_push(void);
 H5_DLL herr_t H5CX_pop(void);
 
-
 #ifndef NDEBUG
 #define FUNC_ENTER_CHECK_NAME(asrt)                                           \
     {                                                                         \
@@ -2037,7 +2043,7 @@ H5_DLL herr_t H5CX_pop(void);
 /* Local variables for API routines */
 #define FUNC_ENTER_API_VARS                                                   \
     MPE_LOG_VARS                                                              \
-    H5TRACE_DECL                                                              \
+    H5TRACE_DECL
 
 #define FUNC_ENTER_API_COMMON                                                 \
     FUNC_ENTER_API_VARS                                                       \

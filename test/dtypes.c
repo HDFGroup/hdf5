@@ -716,7 +716,7 @@ test_compound_2(void)
     bkg = (unsigned char*)HDmalloc(nelmts * sizeof(struct dt));
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
+	s_ptr = ((struct st*)((void *)orig)) + i;
 	s_ptr->a    = i*8+0;
 	s_ptr->b    = i*8+1;
 	s_ptr->c[0] = i*8+2;
@@ -754,8 +754,8 @@ test_compound_2(void)
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
-	d_ptr = ((struct dt*)buf)  + i;
+	s_ptr = ((struct st*)((void *)orig)) + i;
+	d_ptr = ((struct dt*)((void *)buf))  + i;
 	if (s_ptr->a    != d_ptr->a    ||
 	    s_ptr->b    != d_ptr->b    ||
 	    s_ptr->c[0] != d_ptr->c[0] ||
@@ -847,7 +847,7 @@ test_compound_3(void)
     bkg = (unsigned char*)HDmalloc(nelmts * sizeof(struct dt));
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
-        s_ptr = ((struct st*)orig) + i;
+        s_ptr = ((struct st*)((void *)orig)) + i;
         s_ptr->a    = i*8+0;
         s_ptr->b    = i*8+1;
         s_ptr->c[0] = i*8+2;
@@ -884,8 +884,8 @@ test_compound_3(void)
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
-	d_ptr = ((struct dt*)buf)  + i;
+	s_ptr = ((struct st*)((void *)orig)) + i;
+	d_ptr = ((struct dt*)((void *)buf))  + i;
 	if (s_ptr->a    != d_ptr->a    ||
 	    s_ptr->c[0] != d_ptr->c[0] ||
 	    s_ptr->c[1] != d_ptr->c[1] ||
@@ -978,7 +978,7 @@ test_compound_4(void)
     bkg = (unsigned char*)HDmalloc(nelmts * sizeof(struct dt));
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
-        s_ptr = ((struct st*)orig) + i;
+        s_ptr = ((struct st*)((void *)orig)) + i;
         s_ptr->a    = i*8+0;
         s_ptr->b    = (i*8+1) & 0x7fff;
         s_ptr->c[0] = i*8+2;
@@ -1017,8 +1017,8 @@ test_compound_4(void)
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
-	d_ptr = ((struct dt*)buf)  + i;
+	s_ptr = ((struct st*)((void *)orig)) + i;
+	d_ptr = ((struct dt*)((void *)buf))  + i;
 	if (s_ptr->a    != d_ptr->a    ||
 	    s_ptr->b    != d_ptr->b    ||
 	    s_ptr->c[0] != d_ptr->c[0] ||
@@ -1215,7 +1215,7 @@ test_compound_6(void)
     bkg = (unsigned char*)HDmalloc(nelmts * sizeof(struct dt));
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
-        s_ptr = ((struct st*)orig) + i;
+        s_ptr = ((struct st*)((void *)orig)) + i;
         s_ptr->b    = (i*8+1) & 0x7fff;
         s_ptr->d    = (i*8+6) & 0x7fff;
     }
@@ -1244,8 +1244,8 @@ test_compound_6(void)
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
-	s_ptr = ((struct st*)orig) + i;
-	d_ptr = ((struct dt*)buf)  + i;
+	s_ptr = ((struct st*)((void *)orig)) + i;
+	d_ptr = ((struct dt*)((void *)buf))  + i;
 	if (s_ptr->b    != d_ptr->b    ||
 	    s_ptr->d    != d_ptr->d) {
 	    H5_FAILED();

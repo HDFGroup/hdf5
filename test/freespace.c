@@ -24,7 +24,7 @@
 #define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #include "H5Fpkg.h"
 
-#include "H5CXprivate.h"        /* API Contexts                         */
+#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Iprivate.h"
 #include "H5VMprivate.h"
 
@@ -496,7 +496,7 @@ test_fs_create(hid_t fapl)
 
     if(!H5F_addr_defined(fs_addr))
         TEST_ERROR
-    if (frsp->nclasses != nclasses)
+    if(frsp->nclasses != nclasses)
         TEST_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -879,7 +879,7 @@ test_fs_sect_add(hid_t fapl)
         FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    /* Close the file and dxpl */
+    /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
@@ -1248,7 +1248,7 @@ test_fs_sect_find(hid_t fapl)
         FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    /* Close the file and dxpl */
+    /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
@@ -1857,14 +1857,14 @@ test_fs_sect_shrink(hid_t fapl)
      * Re-add section A that allow shrinking and its section class type defines "can_shrink"
      */
     if(NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
-	FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     can_shrink = FALSE;
     if(H5FS_sect_add(f, frsp, (H5FS_section_info_t *)sect_node1,
 	    H5FS_ADD_RETURNED_SPACE, &can_shrink) < 0)
-	FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* should have nothing in free-space */
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -1875,18 +1875,18 @@ test_fs_sect_shrink(hid_t fapl)
     /* section A should not be there in free-space */
     if((node_found = H5FS_sect_find(f, frsp,
             (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
-	FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     if (node_found) TEST_ERROR
 
     /* Close the free space manager */
     if(H5FS_close(f, frsp) < 0)
-	FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
     frsp = NULL;
 
     /* Delete free space manager */
     if(H5FS_delete(f, fs_addr) < 0)
-	FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
     /* Close the file */
@@ -2082,7 +2082,7 @@ test_fs_sect_shrink(hid_t fapl)
 	FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    /* Close the file and dxpl */
+    /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
@@ -2357,7 +2357,7 @@ test_fs_sect_change_class(hid_t fapl)
 	FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    /* Close the file and dxpl */
+    /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
@@ -2736,7 +2736,7 @@ test_fs_sect_extend(hid_t fapl)
 
     PASSED()
 
-    /* Close the file and dxpl */
+    /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
@@ -2838,7 +2838,7 @@ test_fs_sect_iterate(hid_t fapl)
 	FAIL_STACK_ERROR
     fs_addr = HADDR_UNDEF;
 
-    /* Close the file and dxpl */
+    /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 

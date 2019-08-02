@@ -43,10 +43,10 @@ if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
-message (STATUS "COMMAND: ${TEST_PROGRAM} ${TEST_ARGS}")
+message (STATUS "COMMAND: ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}")
 
 if (TEST_LIBRARY_DIRECTORY)
-  if (WIN32 AND NOT MINGW)
+  if (WIN32 OR MINGW)
     set (ENV{PATH} "$ENV{PATH};${TEST_LIBRARY_DIRECTORY}")
   else ()
     set (ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${TEST_LIBRARY_DIRECTORY}")
@@ -60,7 +60,7 @@ endif ()
 
 # run the test program, capture the stdout/stderr and the result var
 execute_process (
-    COMMAND ${TEST_PROGRAM} ${TEST_ARGS}
+    COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}
     WORKING_DIRECTORY ${TEST_FOLDER}
     RESULT_VARIABLE TEST_RESULT
     OUTPUT_FILE ${TEST_OUTPUT}
@@ -98,9 +98,11 @@ if (TEST_ERRREF)
   #always compare output file to reference unless this must be skipped
   if (NOT TEST_SKIP_COMPARE)
     if (EXISTS ${TEST_FOLDER}/${TEST_REFERENCE})
-      if (WIN32 AND NOT MINGW)
-        file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-        file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
+      if (WIN32 OR MINGW)
+        configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
+        file(RENAME ${TEST_FOLDER}/${TEST_REFERENCE}.tmp ${TEST_FOLDER}/${TEST_REFERENCE})
+        #file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+        #file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
       endif ()
       if (NOT TEST_SORT_COMPARE)
         # now compare the output with the reference

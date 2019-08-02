@@ -116,7 +116,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_
             return(count2 > 10 ? 1 : 0);
 
         default:
-            printf("invalid iteration command");
+            HDprintf("invalid iteration command");
             return(-1);
     } /* end switch */
 } /* end liter_cb() */
@@ -163,7 +163,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(filespace, FAIL, "H5Screate");
 
     for(i=0; i< NDATASETS; i++) {
-        sprintf(name,"Dataset %d",i);
+        HDsprintf(name,"Dataset %d",i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
@@ -737,7 +737,7 @@ static void test_grp_memb_funcs(hid_t fapl)
     CHECK(filespace, FAIL, "H5Screate");
 
     for(i = 0; i < NDATASETS; i++) {
-        sprintf(name, "Dataset %d", i);
+        HDsprintf(name, "Dataset %d", i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
@@ -953,6 +953,7 @@ find_err_msg_cb(unsigned n, const H5E_error2_t *err_desc, void *_client_data)
         searched_err->found = true;
         status = H5_ITER_STOP;
     }
+
     return status;
 } /* end find_err_msg_cb() */
 
@@ -1077,6 +1078,6 @@ test_iterate(void)
 void
 cleanup_iterate(void)
 {
-    remove(DATAFILE);
+    HDremove(DATAFILE);
 }
 

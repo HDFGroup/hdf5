@@ -240,6 +240,7 @@ void test_file_properties(void);
 void multiple_dset_write(void);
 void multiple_group_write(void);
 void multiple_group_read(void);
+void collective_group_write_independent_group_read(void);
 void collective_group_write(void);
 void independent_group_read(void);
 void test_fapl_mpio_dup(void);

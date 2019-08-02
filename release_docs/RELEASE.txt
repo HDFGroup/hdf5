@@ -47,6 +47,36 @@ New Features
 
     Configuration:
     -------------
+    - Update CMake tests to use FIXTURES
+
+      CMake test fixtures allow setup/cleanup tests and other dependency
+      requirements as properties for tests. This is more flexible for
+      modern CMake code.
+
+      (ADB - 2019/07/23, HDFFV-10529)
+
+    - Windows PDB files are always installed
+
+      There are build configuration or flag settings for Windows that may not
+      generate PDB files. If those files are not generated then the install
+      utility will fail because those PDB files are not found. An optional
+      variable, DISABLE_PDB_FILES, was added to not install PDB files.
+
+      (ADB - 2019/07/17, HDFFV-10424)
+
+    - Add mingw CMake support with a toolchain file
+
+      There has been a number of mingw issues that has been linked under
+      HDFFV-10845. It has been decided to implement the CMake cross-compiling
+      technique of toolchain files. We will use a linux platform with the mingw
+      compiler stack for testing. Only the C language is fully supported, and
+      the error tests are skipped. The C++ language works for static but shared
+      builds has a shared library issue with the mingw Standard Exception Handling
+      library, which is not available on Windows. Fortran has a common cross-compile
+      problem with the fortran configure tests.
+
+      (ADB - 2019/07/12, HDFFV-10845, HDFFV-10595)
+
     - Windows PDB files are installed incorrectly
 
       For static builds, the PDB files for windows should be installed next
@@ -376,6 +406,22 @@ Bug Fixes since HDF5-1.10.4 release
 
     Library
     -------
+    - Fixed an issue where creating a file with non-default file space info
+      together with library high bound setting to H5F_LIBVER_V18.
+
+      When setting non-default file space info in fcpl via
+      H5Pset_file_space_strategy() and then creating a file with 
+      both high and low library bounds set to
+      H5F_LIBVER_V18 in fapl, the library succeeds in creating the file.
+      File creation should fail because the feature of setting non-default
+      file space info does not exist in library release 1.8 or earlier.
+
+      This was fixed by setting and checking the proper version in the 
+      file space info message based on the library low and high bounds
+      when creating and opening the HDF5 file.
+
+      (VC - 2019/6/25, HDFFV-10808)
+
     - Fixed an issue where copying a version 1.8 dataset between files using
       H5Ocopy fails due to an incompatible fill version
 

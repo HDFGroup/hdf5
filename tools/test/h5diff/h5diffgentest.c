@@ -108,6 +108,10 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define SPACE1_DIM1 0
 #define SPACE1_DIM2 0
 
+/* Error macros */
+#define AT()            HDprintf("ERROR at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
+#define PROGRAM_ERROR   {AT(); goto error;}
+
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t
 UD_traverse(H5_ATTR_UNUSED const char * link_name, H5_ATTR_UNUSED hid_t cur_group,
@@ -176,7 +180,7 @@ static void write_dset_in(hid_t loc_id, const char* dset_name, hid_t fid, int ma
 static void gen_datareg(hid_t fid, int make_diffs);
 /* utilities */
 static int write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *name, hid_t tid, void *buf);
-static int write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *name, hid_t tid, void *buf);
+static herr_t write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *name, hid_t tid, void *buf);
 static int gen_dataset_idx(const char *file, int format);
 
 /*-------------------------------------------------------------------------
@@ -284,7 +288,7 @@ int main(void)
     /* string dataset and attribute. HDFFV-10028 */
     test_objs_strings(DIFF_STRINGS1, DIFF_STRINGS2);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 /*-------------------------------------------------------------------------
@@ -4906,9 +4910,9 @@ out:
  *   types.
  *   h5diff should show non-comparable output from these common objects.
  *-------------------------------------------------------------------------*/
-static void test_objs_nocomparables(const char *fname1, const char *fname2)
+static void
+test_objs_nocomparables(const char *fname1, const char *fname2)
 {
-    herr_t status = SUCCEED;
     hid_t fid1 = -1;
     hid_t fid2 = -1;
     hid_t topgid1 = -1;
@@ -4925,110 +4929,90 @@ static void test_objs_nocomparables(const char *fname1, const char *fname2)
     * Open file(s) to add objects
     *------------------------------------------------------------------------*/
     /* file1 */
-    fid1 = H5Fopen(fname1, H5F_ACC_RDWR, H5P_DEFAULT);
-    if (fid1 < 0) {
-        fprintf(stderr, "Error: %s> H5Fopen failed.\n", fname1);
-        status = FAIL;
-        goto out;
-    }
+    if((fid1 = H5Fopen(fname1, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        PROGRAM_ERROR
 
     /* file2 */
-    fid2 = H5Fopen(fname2, H5F_ACC_RDWR, H5P_DEFAULT);
-    if (fid2 < 0) {
-        fprintf(stderr, "Error: %s> H5Fopen failed.\n", fname2);
-        status = FAIL;
-        goto out;
-    }
+    if((fid2 = H5Fopen(fname2, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        PROGRAM_ERROR
 
     /*-----------------------------------------------------------------------
     * in file1 : add member objects
     *------------------------------------------------------------------------*/
     /* parent group */
-    topgid1 = H5Gcreate2(fid1, "diffobjtypes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (topgid1 < 0) {
-        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
-        status = FAIL;
-        goto out;
-    }
+    if((topgid1 = H5Gcreate2(fid1, "diffobjtypes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        PROGRAM_ERROR
 
     /* dataset */
-    status = write_dset(topgid1, 1, dims, "obj1", H5T_NATIVE_INT, data1);
-    if (status == FAIL) {
-        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
-        goto out;
-    }
+    if(write_dset(topgid1, 1, dims, "obj1", H5T_NATIVE_INT, data1) < 0)
+        PROGRAM_ERROR
 
     /* group */
-    gid1 = H5Gcreate2(topgid1, "obj2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (gid1 < 0) {
-        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
-        status = FAIL;
-        goto out;
-    }
+    if((gid1 = H5Gcreate2(topgid1, "obj2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        PROGRAM_ERROR
 
     /* committed type */
-    tid1 = H5Tcopy(H5T_NATIVE_INT);
-    status = H5Tcommit2(topgid1, "obj3", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (status < 0) {
-        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", fname1);
-        goto out;
-    }
+    if((tid1 = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        PROGRAM_ERROR
+    if(H5Tcommit2(topgid1, "obj3", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        PROGRAM_ERROR
 
     /*-----------------------------------------------------------------------
     * in file2 : add member objects
     *------------------------------------------------------------------------*/
     /* parent group */
-    topgid2 = H5Gcreate2(fid2, "diffobjtypes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (topgid2 < 0) {
-        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
-        status = FAIL;
-        goto out;
-    }
+    if((topgid2 = H5Gcreate2(fid2, "diffobjtypes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        PROGRAM_ERROR
 
     /* group */
-    gid2 = H5Gcreate2(topgid2, "obj1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (gid2 < 0) {
-        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
-        status = FAIL;
-        goto out;
-    }
+    if((gid2 = H5Gcreate2(topgid2, "obj1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        PROGRAM_ERROR
 
     /* committed type */
-    tid2 = H5Tcopy(H5T_NATIVE_INT);
-    status = H5Tcommit2(topgid2, "obj2", tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (status < 0) {
-        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", fname2);
-        goto out;
-    }
+    if((tid2 = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        PROGRAM_ERROR
+    if(H5Tcommit2(topgid2, "obj2", tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        PROGRAM_ERROR
 
     /* dataset */
-    status = write_dset(topgid2, 1, dims, "obj3", H5T_NATIVE_INT, data2);
-    if (status == FAIL) {
-        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
-        goto out;
-    }
+    if(write_dset(topgid2, 1, dims, "obj3", H5T_NATIVE_INT, data2) < 0)
+        PROGRAM_ERROR
 
-out:
     /*-----------------------------------------------------------------------
     * Close IDs
     *-----------------------------------------------------------------------*/
-    if (fid1)
-        H5Fclose(fid1);
-    if (fid2)
-        H5Fclose(fid2);
-    if (topgid1)
-        H5Gclose(topgid1);
-    if (topgid2)
-        H5Gclose(topgid2);
-    if (gid1)
-        H5Gclose(gid1);
-    if (gid2)
-        H5Gclose(gid2);
-    if (tid1)
-        H5Tclose(tid1);
-    if (tid2)
-        H5Tclose(tid2);
+    if(H5Fclose(fid1) < 0)
+        PROGRAM_ERROR
+    if(H5Fclose(fid2) < 0)
+        PROGRAM_ERROR
+    if(H5Gclose(topgid1) < 0)
+        PROGRAM_ERROR
+    if(H5Gclose(topgid2) < 0)
+        PROGRAM_ERROR
+    if(H5Gclose(gid1) < 0)
+        PROGRAM_ERROR
+    if(H5Gclose(gid2) < 0)
+        PROGRAM_ERROR
+    if(H5Tclose(tid1) < 0)
+        PROGRAM_ERROR
+    if(H5Tclose(tid2) < 0)
+        PROGRAM_ERROR
 
+    return;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+        H5Gclose(topgid1);
+        H5Gclose(topgid2);
+        H5Gclose(gid1);
+        H5Gclose(gid2);
+        H5Tclose(tid1);
+        H5Tclose(tid2);
+    } H5E_END_TRY;
+
+    return;
 }
 
 static hid_t mkstr(int size, H5T_str_t pad)
@@ -8083,36 +8067,40 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-static
-int write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *name, hid_t tid, void *buf)
+static herr_t
+write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *name, hid_t tid, void *buf)
 {
     hid_t did = -1;
     hid_t sid = -1;
 
     /* create a space  */
-    if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
-        goto out;
+    if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+        PROGRAM_ERROR
 
     /* create the dataset */
-    if ((did = H5Dcreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto out;
+    if((did = H5Dcreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        PROGRAM_ERROR
 
     /* write */
-    if (buf) {
-        if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-            goto out;
-    }
+    if(buf)
+        if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+            PROGRAM_ERROR
 
     /* close */
-    H5Dclose(did);
-    H5Sclose(sid);
+    if(H5Dclose(did) < 0)
+        PROGRAM_ERROR
+    if(H5Sclose(sid) < 0)
+        PROGRAM_ERROR
 
     return SUCCEED;
 
-out:
+error:
 
-    H5Dclose(did);
-    H5Sclose(sid);
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+        H5Sclose(sid);
+    } H5E_END_TRY;
+
     return FAIL;
-}
+} /* end write_dset() */
 

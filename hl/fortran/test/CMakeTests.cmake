@@ -16,7 +16,7 @@
 ##############################################################################
 ##############################################################################
 
-set (test_CLEANFILES
+set (test_hl_fortran_CLEANFILES
           dsetf1.h5
           dsetf2.h5
           dsetf3.h5
@@ -28,11 +28,20 @@ set (test_CLEANFILES
           tstds.h5
 )
 
+# Remove any output file left over from previous test run
+add_test (
+    NAME HL_FORTRAN_test-clear-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove ${test_hl_fortran_CLEANFILES}
+)
+set_tests_properties (HL_FORTRAN_test-clear-objects PROPERTIES FIXTURES_SETUP clear_HL_FORTRAN_test)
+
 macro (ADD_H5_FORTRAN_TEST file)
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME HL_FORTRAN_f90_${file} COMMAND $<TARGET_FILE:hl_f90_${file}>)
+    add_test (NAME HL_FORTRAN_f90_${file} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_f90_${file}>)
   else ()
     add_test (NAME HL_FORTRAN_f90_${file} COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -D "TEST_PROGRAM=$<TARGET_FILE:hl_f90_${file}>"
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
@@ -43,15 +52,10 @@ macro (ADD_H5_FORTRAN_TEST file)
         -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
     )
   endif ()
-  set_tests_properties (HL_FORTRAN_f90_${file} PROPERTIES DEPENDS HL_FORTRAN_test-clear-objects)
+  set_tests_properties (HL_FORTRAN_f90_${file} PROPERTIES
+      FIXTURES_REQUIRED clear_HL_FORTRAN_test
+  )
 endmacro ()
-
-# Remove any output file left over from previous test run
-add_test (
-    NAME HL_FORTRAN_test-clear-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove ${test_CLEANFILES}
-)
 
 foreach (h5_test ${H5_TESTS})
   ADD_H5_FORTRAN_TEST(${h5_test})

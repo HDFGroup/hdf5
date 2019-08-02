@@ -16,40 +16,37 @@
 ##############################################################################
 ##############################################################################
 
-  set (test_CLEANFILES
-            compound.h5
-            copy1.h5
-            copy2.h5
-            dsetf.h5
-            extend.h5
-            FORTRAN.h5
-            groupf.h5
-            groupsf.h5
-            h5_cmprss.h5
-            mount1.h5
-            mount2.h5
-            sdsf.h5
-            subset.h5
-            SDScompound.h5
-            test.h5
-  )
+set (test_ex_fortran_CLEANFILES
+    compound.h5
+    copy1.h5
+    copy2.h5
+    dsetf.h5
+    extend.h5
+    FORTRAN.h5
+    groupf.h5
+    groupsf.h5
+    h5_cmprss.h5
+    mount1.h5
+    mount2.h5
+    sdsf.h5
+    subset.h5
+    SDScompound.h5
+    test.h5
+)
 
-  # Remove any output file left over from previous test run
-  add_test (
-      NAME f90_ex-clear-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove ${test_CLEANFILES}
-  )
-  if (last_test)
-    set_tests_properties (f90_ex-clear-objects PROPERTIES DEPENDS ${last_test})
-  endif ()
-  set (last_test "f90_ex-clear-objects")
+# Remove any output file left over from previous test run
+add_test (
+    NAME f90_ex-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_ex_fortran_CLEANFILES}
+)
+set_tests_properties (f90_ex-clear-objects PROPERTIES FIXTURES_SETUP clear_f90_ex)
 
 foreach (example ${examples})
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME f90_ex_${example} COMMAND $<TARGET_FILE:f90_ex_${example}>)
+    add_test (NAME f90_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:f90_ex_${example}>)
   else ()
     add_test (NAME f90_ex_${example} COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -D "TEST_PROGRAM=$<TARGET_FILE:f90_ex_${example}>"
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
@@ -60,6 +57,7 @@ foreach (example ${examples})
         -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
     )
   endif ()
+  set_tests_properties (f90_ex_${example} PROPERTIES FIXTURES_REQUIRED clear_f90_ex)
   if (last_test)
     set_tests_properties (f90_ex_${example} PROPERTIES DEPENDS ${last_test})
   endif ()
@@ -68,9 +66,10 @@ endforeach ()
 
 foreach (example ${F2003_examples})
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME f03_ex_${example} COMMAND $<TARGET_FILE:f03_ex_${example}>)
+    add_test (NAME f03_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:f03_ex_${example}>)
   else ()
     add_test (NAME f03_ex_${example} COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -D "TEST_PROGRAM=$<TARGET_FILE:f03_ex_${example}>"
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
@@ -81,6 +80,7 @@ foreach (example ${F2003_examples})
         -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
     )
   endif ()
+  set_tests_properties (f03_ex_${example} PROPERTIES FIXTURES_REQUIRED clear_f90_ex)
   if (last_test)
     set_tests_properties (f03_ex_${example} PROPERTIES DEPENDS ${last_test})
   endif ()

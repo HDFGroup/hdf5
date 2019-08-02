@@ -16,10 +16,16 @@
 ##############################################################################
 ##############################################################################
 
+add_test (
+    NAME HL_CPP_ptableTest-clear-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove ${example}.txt
+)
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME HL_CPP_ptableTest COMMAND $<TARGET_FILE:hl_ptableTest>)
+  add_test (NAME HL_CPP_ptableTest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_ptableTest>)
 else ()
   add_test (NAME HL_CPP_ptableTest COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:hl_ptableTest>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
@@ -30,3 +36,4 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
+set_tests_properties (HL_CPP_ptableTest PROPERTIES DEPENDS HL_CPP_ptableTest-clear-objects)

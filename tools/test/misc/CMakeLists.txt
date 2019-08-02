@@ -15,7 +15,7 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
     target_link_libraries (h5repart_gentest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET})
   endif ()
   set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
-  #add_test (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
+  #add_test (NAME h5repart_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart_gentest>)
 
   add_executable (h5clear_gentest ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/h5clear_gentest.c)
   target_include_directories (h5clear_gentest PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -27,7 +27,7 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
     target_link_libraries (h5clear_gentest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET})
   endif ()
   set_target_properties (h5clear_gentest PROPERTIES FOLDER tools)
-  #add_test (NAME H5CLEAR-h5clear_gentest COMMAND $<TARGET_FILE:h5clear_gentest>)
+  #add_test (NAME H5CLEAR-h5clear_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5clear_gentest>)
 
   add_subdirectory (vds)
 

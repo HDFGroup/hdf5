@@ -360,12 +360,7 @@
   endforeach ()
 
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
-    if (WIN32)
-      file (READ ${HDF5_TOOLS_DIR}/testfiles/${tst_exp_file} TEST_STREAM)
-      file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file} "${TEST_STREAM}")
-    else ()
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
-    endif ()
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
   endforeach ()
 
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
@@ -386,9 +381,10 @@
   # --------------------------------------------------------------------
   HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
 
-  if (WIN32)
-    file (READ ${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp TEST_STREAM)
-    file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
+  if (WIN32 OR MINGW)
+    configure_file(${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
+    #file (READ ${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp TEST_STREAM)
+    #file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
   else ()
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
   endif ()
@@ -409,27 +405,17 @@
   macro (ADD_HELP_TEST testname resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${testname} COMMAND $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN})
+      add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN})
       set_tests_properties (H5DUMP-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (last_test)
         set_tests_properties (H5DUMP-${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "H5DUMP-${testname}")
     else ()
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DUMP-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              testfiles/std/h5dump-${testname}.out
-              testfiles/std/h5dump-${testname}.out.err
-      )
-      if (last_test)
-        set_tests_properties (H5DUMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
       add_test (
           NAME H5DUMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -438,7 +424,9 @@
               -D "TEST_REFERENCE=h5dump-${testname}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5DUMP-${testname} PROPERTIES DEPENDS H5DUMP-${testname}-clear-objects)
+      if (last_test)
+        set_tests_properties (H5DUMP-${testname} PROPERTIES DEPENDS ${last_test})
+      endif ()
     endif ()
   endmacro ()
 
@@ -459,7 +447,7 @@
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN})
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -470,16 +458,13 @@
     else ()
       add_test (
           NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.bin
-              ${resultfile}.out
-              ${resultfile}.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove ${resultfile}.bin
       )
       set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -495,7 +480,7 @@
   macro (ADD_H5_TEST_N resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-N-${resultfile} COMMAND $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN})
+      add_test (NAME H5DUMP-N-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN})
       set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (${resultcode})
         set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -506,16 +491,13 @@
     else ()
       add_test (
           NAME H5DUMP-N-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}-N.bin
-              ${resultfile}-N.out
-              ${resultfile}-N.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove ${resultfile}-N.bin
       )
       set_tests_properties (H5DUMP-N-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-N-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -531,7 +513,7 @@
   macro (ADD_H5_TEST_EXPORT resultfile targetfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN} ${resultfile}.txt ${targetfile})
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN} ${resultfile}.txt ${targetfile})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -542,16 +524,13 @@
     else ()
       add_test (
           NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.txt
-              ${resultfile}.out
-              ${resultfile}.out.err
+          COMMAND ${CMAKE_COMMAND} -E remove ${resultfile}.txt
       )
       set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN};${resultfile}.txt;${targetfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -561,20 +540,21 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-      add_test (
-          NAME H5DUMP-${resultfile}-output-cmp
-          COMMAND ${CMAKE_COMMAND}
-                -E compare_files ${resultfile}.txt ${resultfile}.exp
-      )
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
+      if(NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+        add_test (
+            NAME H5DUMP-${resultfile}-output-cmp
+            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
+        )
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
+      endif ()
     endif ()
   endmacro ()
 
   macro (ADD_H5_TEST_EXPORT_DDL resultfile targetfile resultcode ddlfile)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump${tgt_ext}> --ddl=${ddlfile}.txt ${ARGN} ${resultfile}.txt ${targetfile})
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> --ddl=${ddlfile}.txt ${ARGN} ${resultfile}.txt ${targetfile})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -585,17 +565,15 @@
     else ()
       add_test (
           NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
+          COMMAND ${CMAKE_COMMAND} -E remove
               ${ddlfile}.txt
               ${resultfile}.txt
-              ${resultfile}.out
-              ${resultfile}.out.err
       )
       set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=--ddl=${ddlfile}.txt;${ARGN};${resultfile}.txt;${targetfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -605,20 +583,20 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-      add_test (
-          NAME H5DUMP-${resultfile}-output-cmp
-          COMMAND ${CMAKE_COMMAND}
-                -E compare_files ${resultfile}.txt ${resultfile}.exp
-      )
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
-      add_test (
-          NAME H5DUMP-${resultfile}-output-cmp-ddl
-          COMMAND ${CMAKE_COMMAND}
-                -E compare_files ${ddlfile}.txt ${ddlfile}.exp
-      )
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES DEPENDS H5DUMP-${resultfile}-output-cmp)
+      if(NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+        add_test (
+            NAME H5DUMP-${resultfile}-output-cmp
+            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
+        )
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
+        add_test (
+            NAME H5DUMP-${resultfile}-output-cmp-ddl
+            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${ddlfile}.txt ${ddlfile}.exp
+        )
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES DEPENDS H5DUMP-${resultfile}-output-cmp)
+      endif ()
     endif ()
   endmacro ()
 
@@ -626,40 +604,32 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5DUMP-output-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ${resultfile}.txt
+          COMMAND ${CMAKE_COMMAND} -E remove ${resultfile}.txt
       )
       set_tests_properties (H5DUMP-output-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-output-${resultfile}
-          COMMAND $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN} ${resultfile}.txt ${targetfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN} ${resultfile}.txt ${targetfile}
       )
       set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile}-clear-objects)
-      add_test (
-          NAME H5DUMP-output-cmp-${resultfile}
-          COMMAND ${CMAKE_COMMAND}
-                -E compare_files ${resultfile}.txt ${resultfile}.exp
-      )
-      set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-      set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile})
+      if(NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+        add_test (
+            NAME H5DUMP-output-cmp-${resultfile}
+            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
+        )
+        set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+        set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile})
+      endif ()
     endif ()
   endmacro ()
 
   macro (ADD_H5_MASK_TEST resultfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -669,24 +639,15 @@
               -D "TEST_MASK_ERROR=true"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
   endmacro ()
 
   macro (ADD_H5_GREP_TEST resultfile resultcode result_check)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -695,24 +656,15 @@
               -D "TEST_REFERENCE=${result_check}"
               -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
       )
-    set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
   endmacro ()
 
   macro (ADD_H5ERR_MASK_TEST resultfile resultcode result_errcheck)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -722,24 +674,15 @@
               -D "TEST_ERRREF=${result_errcheck}"
               -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
       )
-    set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
   endmacro ()
 
   macro (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode result_errcheck envvar envval)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -751,7 +694,6 @@
               -D "TEST_ENV_VALUE:STRING=${envval}"
               -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
       )
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
   endmacro ()
 
@@ -760,16 +702,15 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5DUMP-IMPORT-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
+          COMMAND ${CMAKE_COMMAND} -E remove
               ${resultfile}.bin
               ${resultfile}.h5
-              ${conffile}.out
       )
       set_tests_properties (H5DUMP-IMPORT-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-IMPORT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN};-o;${resultfile}.bin;${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -779,10 +720,10 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES DEPENDS "H5DUMP-IMPORT-${resultfile}-clear-objects")
-      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND $<TARGET_FILE:h5import> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
+      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-${resultfile})
-      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
+      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-h5import-${resultfile})
     endif ()
@@ -790,18 +731,10 @@
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      # Remove any output file left over from previous test run
-      add_test (
-          NAME H5DUMP_UD-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5DUMP_UD-${testname}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP_UD-${testname}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -813,7 +746,6 @@
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5DUMP_UD-${testname} PROPERTIES DEPENDS H5DUMP_UD-${testname}-clear-objects)
     endif ()
   endmacro ()
 
@@ -822,368 +754,6 @@
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    # Remove any output file left over from previous test run
-    add_test (
-      NAME H5DUMP-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          h5dump-help.out
-          charsets.out
-          charsets.out.err
-          file_space.out
-          file_space.out.err
-          filter_fail.out
-          filter_fail.out.err
-          non_existing.out
-          non_existing.out.err
-          packedbits.out
-          packedbits.out.err
-          tall-1.out
-          tall-1.out.err
-          tall-2.out
-          tall-2.out.err
-          tall-2A.out
-          tall-2A.out.err
-          tall-2A0.out
-          tall-2A0.out.err
-          tall-2B.out
-          tall-2B.out.err
-          tall-3.out
-          tall-3.out.err
-          tall-4s.out
-          tall-4s.out.err
-          tall-5s.out
-          tall-5s.out.err
-          tall-6.txt
-          tall-6.out
-          tall-6.out.err
-          tall-7.out
-          tall-7.out.err
-          tall-7N.out
-          tall-7N.out.err
-          tallfilters.out
-          tallfilters.out.err
-          tarray1.out
-          tarray1.out.err
-          tarray1_big.out
-          tarray1_big.out.err
-          tarray2.out
-          tarray2.out.err
-          tarray3.out
-          tarray3.out.err
-          tarray4.out
-          tarray4.out.err
-          tarray5.out
-          tarray5.out.err
-          tarray6.out
-          tarray6.out.err
-          tarray7.out
-          tarray7.out.err
-          tarray8.out
-          tarray8.out.err
-          tattr-1.out
-          tattr-1.out.err
-          tattr-2.out
-          tattr-2.out.err
-          tattr-3.out
-          tattr-3.out.err
-          tattr-4_be.out
-          tattr-4_be.out.err
-          tattrcontents1.out
-          tattrcontents1.out.err
-          tattrcontents2.out
-          tattrcontents2.out.err
-          tattrintsize.out
-          tattrintsize.out.err
-          tattrreg.out
-          tattrreg.out.err
-          tattrregR.out
-          tattrregR.out.err
-          tbin1LE.bin
-          tbinregR.txt
-          tbinregR.out
-          tbinregR.out.err
-          tbigdims.out
-          tbigdims.out.err
-          tbitnopaque_be.out
-          tbitnopaque_be.out.err
-          tbitnopaque_le.out
-          tbitnopaque_le.out.err
-          tboot1.out
-          tboot1.out.err
-          tboot2.out
-          tboot2.out.err
-          tboot2A.out
-          tboot2A.out.err
-          tboot2B.out
-          tboot2B.out.err
-          tchar1.out
-          tchar1.out.err
-          tchunked.out
-          tchunked.out.err
-          tcmpdattrintsize.out
-          tcmpdattrintsize.out.err
-          tcmpdintarray.out
-          tcmpdintarray.out.err
-          tcmpdints.out
-          tcmpdints.out.err
-          tcmpdintsize.out
-          tcmpdintsize.out.err
-          tcomp-1.out
-          tcomp-1.out.err
-          tcomp-2.out
-          tcomp-2.out.err
-          tcomp-3.out
-          tcomp-3.out.err
-          tcomp-4.out
-          tcomp-4.out.err
-          tcompact.out
-          tcompact.out.err
-          tcompound_complex.out
-          tcompound_complex.out.err
-          tcontents.out
-          tcontents.out.err
-          tcontiguos.out
-          tcontiguos.out.err
-          tdatareg.out
-          tdatareg.out.err
-          tdataregR.out
-          tdataregR.out.err
-          tdeflate.out
-          tdeflate.out.err
-          tdset-1.out
-          tdset-1.out.err
-          tdset-2.out
-          tdset-2.out.err
-          tdset-3s.out
-          tdset-3s.out.err
-          tempty.out
-          tempty.out.err
-          texternal.out
-          texternal.out.err
-          textlinksrc.out
-          textlinksrc.out.err
-          textlinkfar.out
-          textlinkfar.out.err
-          textlink.out
-          textlink.out.err
-          tfamily.out
-          tfamily.out.err
-          tfill.out
-          tfill.out.err
-          tfletcher32.out
-          tfletcher32.out.err
-          tfpformat.out
-          tfpformat.out.err
-          tgroup-1.out
-          tgroup-1.out.err
-          tgroup-2.out
-          tgroup-2.out.err
-          tgrp_comments.out
-          tgrp_comments.out.err
-          tgrpnullspace.out
-          tgrpnullspace.out.err
-          thlink-1.out
-          thlink-1.out.err
-          thlink-2.out
-          thlink-2.out.err
-          thlink-3.out
-          thlink-3.out.err
-          thlink-4.out
-          thlink-4.out.err
-          thlink-5.out
-          thlink-5.out.err
-          thyperslab.out
-          thyperslab.out.err
-          tindicesno.out
-          tindicesno.out.err
-          tindicessub1.out
-          tindicessub1.out.err
-          tindicessub2.out
-          tindicessub2.out.err
-          tindicessub3.out
-          tindicessub3.out.err
-          tindicessub4.out
-          tindicessub4.out.err
-          texceedsubstart.out
-          texceedsubstart.out.err
-          texceedsubcount.out
-          texceedsubcount.out.err
-          texceedsubstride.out
-          texceedsubstride.out.err
-          texceedsubblock.out
-          texceedsubblock.out.err
-          tindicesyes.out
-          tindicesyes.out.err
-          tints4dims.out
-          tints4dims.out.err
-          tints4dimsBlock2.out
-          tints4dimsBlock2.out.err
-          tints4dimsBlockEq.out
-          tints4dimsBlockEq.out.err
-          tints4dimsCount2.out
-          tints4dimsCount2.out.err
-          tints4dimsCountEq.out
-          tints4dimsCountEq.out.err
-          tints4dimsStride2.out
-          tints4dimsStride2.out.err
-          tintsattrs.out
-          tintsattrs.out.err
-          tintsnodata.out
-          tintsnodata.out.err
-          tlarge_objname.out
-          tlarge_objname.out.err
-          tldouble.out
-          tldouble.out.err
-          tlonglinks.out
-          tlonglinks.out.err
-          tloop-1.out
-          tloop-1.out.err
-          tmulti.out
-          tmulti.out.err
-          tmultifile.out
-          tmultifile.out.err
-#          tqmarkfile.out
-#          tqmarkfile.out.err
-#          tstarfile.out
-#          tstarfile.out.err
-          tnamed_dtype_attr.out
-          tnamed_dtype_attr.out.err
-          tnbit.out
-          tnbit.out.err
-          tnestcomp-1.out
-          tnestcomp-1.out.err
-          tnestedcmpddt.out
-          tnestedcmpddt.out.err
-          tnoattrdata.out
-          tnoattrdata.out.err
-          tnoattrddl.out
-          tnoattrddl.out.err
-          tnodata.out
-          tnodata.out.err
-          tnoddl.out
-          tnoddl.out.err
-          tnoddlfile.out
-          tnoddlfile.out.err
-          tno-subset.out
-          tno-subset.out.err
-          tnullspace.out
-          tnullspace.out.err
-          tordergr1.out
-          tordergr1.out.err
-          tordergr2.out
-          tordergr2.out.err
-          tordergr3.out
-          tordergr3.out.err
-          tordergr4.out
-          tordergr4.out.err
-          tordergr5.out
-          tordergr5.out.err
-          torderattr1.out
-          torderattr1.out.err
-          torderattr2.out
-          torderattr2.out.err
-          torderattr3.out
-          torderattr3.out.err
-          torderattr4.out
-          torderattr4.out.err
-          tordercontents1.out
-          tordercontents1.out.err
-          tordercontents2.out
-          tordercontents2.out.err
-          torderlinks1.out
-          torderlinks1.out.err
-          torderlinks2.out
-          torderlinks2.out.err
-          tperror.out
-          tperror.out.err
-          trawdatafile.out
-          trawdatafile.out.err
-          trawdatafile.txt
-          trawssetfile.out
-          trawssetfile.out.err
-          trawssetfile.txt
-          treadfilter.out
-          treadfilter.out.err
-          treadintfilter.out
-          treadintfilter.out.err
-          treference.out
-          treference.out.err
-          tsaf.out
-          tsaf.out.err
-          tscalarattrintsize.out
-          tscalarattrintsize.out.err
-          tscalarintattrsize.out
-          tscalarintattrsize.out.err
-          tscalarintsize.out
-          tscalarintsize.out.err
-          tscalarstring.out
-          tscalarstring.out.err
-          tscaleoffset.out
-          tscaleoffset.out.err
-          tshuffle.out
-          tshuffle.out.err
-          tslink-1.out
-          tslink-1.out.err
-          tslink-2.out
-          tslink-2.out.err
-          tslink-D.out
-          tslink-D.out.err
-          tsplit_file.out
-          tsplit_file.out.err
-          tstr-1.out
-          tstr-1.out.err
-          tstr-2.out
-          tstr-2.out.err
-          tstr2bin2.txt
-          tstr2bin6.txt
-          tstring.out
-          tstring.out.err
-          tstring2.out
-          tstring2.out.err
-          tstringe.out
-          tstringe.out.err
-          tszip.out
-          tszip.out.err
-          tudlink-1.out
-          tudlink-1.out.err
-          tudlink-2.out
-          tudlink-2.out.err
-          tuserfilter.out
-          tuserfilter.out.err
-          tvldtypes1.out
-          tvldtypes1.out.err
-          tvldtypes2.out
-          tvldtypes2.out.err
-          tvldtypes3.out
-          tvldtypes3.out.err
-          tvldtypes4.out
-          tvldtypes4.out.err
-          tvldtypes5.out
-          tvldtypes5.out.err
-          tvlenstr_array.out
-          tvlenstr_array.out.err
-          tvlstr.out
-          tvlstr.out.err
-          tvms.out
-          tvms.out.err
-          twidedisplay.out
-          twidedisplay.out.err
-          twithddl.txt
-          twithddlfile.out
-          twithddlfile.out.err
-          twithddlfile.txt
-          zerodim.out
-          zerodim.out.err
-    )
-    set_tests_properties (H5DUMP-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-    if (last_test)
-      set_tests_properties (H5DUMP-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5DUMP-clearall-objects")
-  endif ()
 
   ADD_HELP_TEST(help 0 -h)
 

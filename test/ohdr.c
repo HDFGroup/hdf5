@@ -21,14 +21,14 @@
  * This file needs to access private datatypes from the H5O package.
  * This file also needs to access the object header testing code.
  */
-#define H5O_FRIEND        /*suppress error about including H5Opkg      */
+#define H5O_FRIEND              /* suppress error about including H5Opkg */
 #define H5O_TESTING
 #include "H5Opkg.h"
 
 /*
  * This file needs to access private datatypes from the H5G package.
  */
-#define H5G_FRIEND        /*suppress error about including H5Gpkg      */
+#define H5G_FRIEND              /* suppress error about including H5Gpkg */
 #include "H5Gpkg.h"
 
 #include "H5CXprivate.h"        /* API Contexts                         */
@@ -1189,17 +1189,17 @@ error:
 static herr_t
 test_ohdr_swmr(hbool_t new_format)
 {
-    hid_t fid = -1;                /* File ID */
-    hid_t fapl = -1;            /* File access property list */
-    hid_t did = -1;                /* Dataset ID */
-    hid_t sid = -1;             /* Dataspace ID */
-    hid_t plist = -1;            /* Dataset creation property list */
-    size_t compact_size = 1024;    /* The size of compact dataset */
-    int *wbuf = NULL;            /* Buffer for writing */
-    hsize_t dims[1];            /* Dimension sizes */
-    size_t u;                    /* Iterator */
-    int n;                      /* Data variable */
-    H5O_info_t obj_info;        /* Information for the object */
+    hid_t fid = -1;                 /* File ID */
+    hid_t fapl = -1;                /* File access property list */
+    hid_t did = -1;                 /* Dataset ID */
+    hid_t sid = -1;                 /* Dataspace ID */
+    hid_t plist = -1;               /* Dataset creation property list */
+    size_t compact_size = 1024;     /* The size of compact dataset */
+    int *wbuf = NULL;               /* Buffer for writing */
+    hsize_t dims[1];                /* Dimension sizes */
+    size_t u;                       /* Iterator */
+    int n;                          /* Data variable */
+    H5O_info_t obj_info;            /* Information for the object */
 
     if(new_format) {
         TESTING("exercise the coding for the re-read of the object header for SWMR access: latest-format");
@@ -1636,12 +1636,8 @@ error:
  * Return:      Success: 0
  *              Failure: 1
  *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
- *
- * Modification:
- *              - Added loop of combinations of low/high library format bounds
- *                (BMR, Feb 2018)
  *
  *-------------------------------------------------------------------------
  */

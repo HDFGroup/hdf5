@@ -81,6 +81,8 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
       tcheck_version
       testmeta
       links_env
+      external_env
+      vds_env
   )
   if (NOT CYGWIN)
     list (REMOVE_ITEM H5_VFD_SKIP_TESTS big cache)
@@ -91,15 +93,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
     if ("${vfdtest}" STREQUAL "flush1" OR "${vfdtest}" STREQUAL "flush2")
       if ("${vfdname}" STREQUAL "multi" OR "${vfdname}" STREQUAL "split")
         if (NOT BUILD_SHARED_LIBS AND NOT HDF_CFG_NAME MATCHES "Debug")
-          add_test (
-              NAME VFD-${vfdname}-${vfdtest}-clear-objects
-              COMMAND    ${CMAKE_COMMAND}
-                  -E remove
-                      ${vfdname}/${vfdname}-${vfdtest}.out
-                      ${vfdname}/${vfdname}-${vfdtest}.out.err
-          )
           add_test (NAME VFD-${vfdname}-${vfdtest}
               COMMAND "${CMAKE_COMMAND}"
+                  -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                   -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}>"
                   -D "TEST_ARGS:STRING="
                   -D "TEST_VFD:STRING=${vfdname}"
@@ -109,7 +105,6 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
                   -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
           )
           set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-              DEPENDS VFD-${vfdname}-${vfdtest}-clear-objects
               ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
               WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
           )
@@ -119,15 +114,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
           )
         endif ()
       else ()
-        add_test (
-            NAME VFD-${vfdname}-${vfdtest}-clear-objects
-            COMMAND    ${CMAKE_COMMAND}
-                -E remove
-                    ${vfdname}/${vfdname}-${vfdtest}.out
-                    ${vfdname}/${vfdname}-${vfdtest}.out.err
-        )
         add_test (NAME VFD-${vfdname}-${vfdtest}
             COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}>"
                 -D "TEST_ARGS:STRING="
                 -D "TEST_VFD:STRING=${vfdname}"
@@ -137,21 +126,14 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
                 -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
         set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-            DEPENDS VFD-${vfdname}-${vfdtest}-clear-objects
             ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
         )
       endif ()
     else ()
-      add_test (
-          NAME VFD-${vfdname}-${vfdtest}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  ${vfdname}/${vfdname}-${vfdtest}.out
-                  ${vfdname}/${vfdname}-${vfdtest}.out.err
-      )
       add_test (NAME VFD-${vfdname}-${vfdtest}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VFD:STRING=${vfdname}"
@@ -161,7 +143,6 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-          DEPENDS VFD-${vfdname}-${vfdtest}-clear-objects
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
@@ -169,15 +150,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
   endmacro ()
 
   macro (DO_VFD_TEST vfdtest vfdname resultcode)
-    add_test (
-        NAME VFD-${vfdname}-${vfdtest}-clear-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-                ${vfdname}/${vfdname}-${vfdtest}.out
-                ${vfdname}/${vfdname}-${vfdtest}.out.err
-    )
     add_test (NAME VFD-${vfdname}-${vfdtest}
         COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}>"
             -D "TEST_ARGS:STRING="
             -D "TEST_VFD:STRING=${vfdname}"
@@ -187,7 +162,6 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
             -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
     )
     set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-        DEPENDS VFD-${vfdname}-${vfdtest}-clear-objects
         ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
     )
@@ -211,15 +185,9 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
       set_tests_properties (VFD-${vfdname}-cache PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
     endif ()
     if (HDF5_TEST_FHEAP_VFD)
-      add_test (
-          NAME VFD-${vfdname}-fheap-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  ${vfdname}/${vfdname}-fheap.out
-                  ${vfdname}/${vfdname}-fheap.out.err
-      )
       add_test (NAME VFD-${vfdname}-fheap
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:fheap>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VFD:STRING=${vfdname}"
@@ -229,7 +197,6 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (VFD-${vfdname}-fheap PROPERTIES
-          DEPENDS VFD-${vfdname}-fheap-clear-objects
           TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}

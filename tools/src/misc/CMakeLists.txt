@@ -78,13 +78,6 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
-#-----------------------------------------------------------------------------
-# Generate the h5cc file containing settings needed to compile programs
-#-----------------------------------------------------------------------------
-#if (NOT WIN32)
-#  configure_file (${HDF5_TOOLS_SRC_MISC_SOURCE_DIR}/h5cc.in ${HDF5_BINARY_DIR}/h5cc @ONLY)
-#endif ()
-
 ##############################################################################
 ##############################################################################
 ###           I N S T A L L A T I O N                                      ###
