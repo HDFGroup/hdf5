@@ -30,7 +30,6 @@ static const char *EXT_FNAME[] = {
     "extern_4",
     "extern_dir/file_1",
     "extern_5",
-    "extern_env_dir/file_2",
     NULL
 };
 
