@@ -60,7 +60,7 @@ reset_raw_data_files(hbool_t is_env)
 
         /* Open file */
         if(is_env)
-            HDsprintf(filename, "extern_env_%lur.raw", (unsigned long)i + 1);
+            HDsprintf(filename, "extern_env_dir%sextern_env_%lur.raw", H5_DIR_SEPS, (unsigned long)i + 1);
         else
             HDsprintf(filename, "extern_%lur.raw", (unsigned long)i + 1);
         if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
@@ -97,7 +97,7 @@ reset_raw_data_files(hbool_t is_env)
 
         /* Open file */
         if(is_env)
-            HDsprintf(filename, "extern_env_%luw.raw", (unsigned long)i + 1);
+            HDsprintf(filename, "extern_env_dir%sextern_env_%luw.raw", H5_DIR_SEPS, (unsigned long)i + 1);
         else
             HDsprintf(filename, "extern_%luw.raw", (unsigned long)i + 1);
         if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0)
