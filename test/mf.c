@@ -6916,7 +6916,6 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     H5FD_mem_t  fs_type; 
     hbool_t contig_addr_vfd;
 
-
     if(new_format)
         TESTING("File's free-space is going away with new library format")
     else

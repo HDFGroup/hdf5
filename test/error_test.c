@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Raymond Lu
+ * Programmer:    Raymond Lu
  *              October 14, 2001
  *
- * Purpose:	Tests the error API routines.
+ * Purpose:    Tests the error API routines.
  */
 #include "h5test.h"
 #include "H5srcdir.h"
@@ -23,7 +23,7 @@
 #ifdef H5_USE_16_API
 int main(void)
 {
-    HDfprintf(stderr, "Test skipped because backward compatbility with v1.6 is configured in\n");
+    HDfprintf(stderr, "Test skipped because backward compatibility with v1.6 is configured in\n");
     return 0;
 }
 #else /* H5_USE_16_API */
@@ -38,7 +38,7 @@ const char *FILENAME[] = {
 #define DIM0    100
 #define DIM1    200
 
-int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
+int    ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 
 hid_t   ERR_CLS;
 hid_t   ERR_CLS2;
@@ -80,7 +80,7 @@ hid_t   ERR_MIN_GETNUM;
 static herr_t custom_print_cb(unsigned n, const H5E_error2_t *err_desc,
     void *client_data);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_error
  *
@@ -94,10 +94,10 @@ static herr_t custom_print_cb(unsigned n, const H5E_error2_t *err_desc,
 static herr_t
 test_error(hid_t file)
 {
-    hid_t		dataset = -1;
+    hid_t        dataset = -1;
     hid_t       space = -1;
     hid_t       estack_id = -1;
-    hsize_t		dims[2];
+    hsize_t        dims[2];
     const char          *FUNC_test_error = "test_error";
     H5E_auto2_t         old_func;
     void                *old_data = NULL;
@@ -169,7 +169,7 @@ test_error(hid_t file)
     return -1;
 } /* end test_error() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    init_error
  *
@@ -245,7 +245,7 @@ error:
     return -1;
 } /* end init_error() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    error_stack
  *
@@ -287,7 +287,7 @@ error:
     return -1;
 } /* end error_stack() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    long_desc_cb
  *
@@ -309,7 +309,7 @@ long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *clie
         return -1;
 } /* end long_desc_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_long_desc
  *
@@ -384,7 +384,7 @@ error:
 } /* end test_long_desc() */
 #pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_error
  *
@@ -414,7 +414,7 @@ error:
     return -1;
 } /* end dump_error() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    custom_print_cb
  *
@@ -445,8 +445,8 @@ custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void* client_data)
         TEST_ERROR;
 
     HDfprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
-	     indent, "", n, err_desc->file_name,
-	     err_desc->func_name, err_desc->line);
+        indent, "", n, err_desc->file_name,
+        err_desc->func_name, err_desc->line);
     HDfprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
     HDfprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
     HDfprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
@@ -457,7 +457,7 @@ error:
     return -1;
 } /* end custom_print_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_create
  *
@@ -540,11 +540,11 @@ test_copy(void)
     err_num = H5Eget_num(H5E_DEFAULT);
     if (err_num != 1)
         TEST_ERROR
-            
+
     /* Copy error stack, which clears the original */
     if ((estack_id = H5Eget_current_stack()) < 0)
         TEST_ERROR
-    
+
     /* Check the number of errors on stack copy */
     err_num = H5Eget_num(estack_id);
     if (err_num != 1)
@@ -564,7 +564,7 @@ test_copy(void)
     if (err_num != 1)
         TEST_ERROR
 
-    /* Try to close error stack copy.  Should fail because 
+    /* Try to close error stack copy.  Should fail because
      * the current H5Eset_current_stack closes the stack to be set.
      */
     H5E_BEGIN_TRY {
@@ -579,7 +579,7 @@ error:
     return -1;
 } /* end test_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    close_error
  *
@@ -615,17 +615,17 @@ error:
     return -1;
 } /* end close_error() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_filter_error
  *
  * Purpose:     Make sure the error message prints out the filter name
- *              when the existent file is opened but the filter isn't 
- *              registered. The existent file was created with 
- *              gen_filters.c. 
+ *              when the existent file is opened but the filter isn't
+ *              registered. The existent file was created with
+ *              gen_filters.c.
  *
  * Return:      Success:    0
- *		        Failure:    -1
+ *                Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
@@ -663,7 +663,7 @@ error:
     return -1;
 } /* end test_filter_error() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -745,7 +745,7 @@ main(void)
     if (close_error() < 0)
         TEST_ERROR;
 
-    /* Test error message during data reading when filter isn't registered 
+    /* Test error message during data reading when filter isn't registered
      * Use default FAPL to avoid some VFD drivers by the check-vfd test because
      * the test file was pre-generated.
      */

@@ -93,7 +93,6 @@ static unsigned evict_on_close_test(hbool_t single_file_vfd);
 #define DSET_SIZE               (40 * CHUNK_SIZE)
 #define MAX_NUM_DSETS           256
 
-
 static void 
 create_datasets(hid_t file_id, int min_dset, int max_dset)
 {
@@ -4486,7 +4485,6 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
         if ( show_progress ) 
             HDfprintf(stdout, "%s:L3 cp = %d, max_dset = %d, pass = %d.\n", 
                       fcn_name, cp + 2, max_dset, pass);
-
     } /* end while */
     cp += 3;
  
@@ -5111,8 +5109,8 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
      *    extension message has been deleted.
      */
     i = min_group;
-    while ( ( pass ) && ( i <= max_group ) ) { 
-	sprintf(process_group_name, "/process_%d", i);
+    while ( ( pass ) && ( i <= max_group ) ) {
+        sprintf(process_group_name, "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
  
