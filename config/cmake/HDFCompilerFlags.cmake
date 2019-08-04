@@ -210,7 +210,7 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
 
     # Append more extra warning flags that only gcc 9.x+ know about
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 9.0)
-      set (H5_CFLAGS4 "${H5_CFLAGS4} Wattribute-alias=2 -Wmissing-profile")
+      set (H5_CFLAGS4 "${H5_CFLAGS4} -Wattribute-alias=2 -Wmissing-profile")
     endif ()
 
 endif ()
