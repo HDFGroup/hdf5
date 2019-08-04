@@ -827,7 +827,7 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2,
                     if((equal = H5S_extent_equal(layout1->storage.u.virt.list[u].source_dset.virtual_select, layout2->storage.u.virt.list[u].source_dset.virtual_select)) < 0) HGOTO_DONE(-1)
                     if(!equal)
                         HGOTO_DONE(1)
-                    if((equal = H5S_select_shape_same(layout1->storage.u.virt.list[u].source_dset.virtual_select, layout2->storage.u.virt.list[u].source_dset.virtual_select)) < 0) HGOTO_DONE(-1)
+                    if((equal = H5S_SELECT_SHAPE_SAME(layout1->storage.u.virt.list[u].source_dset.virtual_select, layout2->storage.u.virt.list[u].source_dset.virtual_select)) < 0) HGOTO_DONE(-1)
                     if(!equal)
                         HGOTO_DONE(1)
 
@@ -847,7 +847,7 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2,
                     if((equal = H5S_extent_equal(layout1->storage.u.virt.list[u].source_select, layout2->storage.u.virt.list[u].source_select)) < 0) HGOTO_DONE(-1)
                     if(!equal)
                         HGOTO_DONE(1)
-                    if((equal = H5S_select_shape_same(layout1->storage.u.virt.list[u].source_select, layout2->storage.u.virt.list[u].source_select)) < 0) HGOTO_DONE(-1)
+                    if((equal = H5S_SELECT_SHAPE_SAME(layout1->storage.u.virt.list[u].source_select, layout2->storage.u.virt.list[u].source_select)) < 0) HGOTO_DONE(-1)
                     if(!equal)
                         HGOTO_DONE(1)
                 } /* end for */
