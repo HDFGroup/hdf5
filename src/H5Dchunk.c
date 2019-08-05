@@ -1245,7 +1245,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         } /* end else */
 
         /* Build the memory selection for each chunk */
-        if(sel_hyper_flag && H5S_select_shape_same(file_space, mem_space) == TRUE) {
+        if(sel_hyper_flag && H5S_SELECT_SHAPE_SAME(file_space, mem_space) == TRUE) {
             /* Reset chunk template information */
             fm->mchunk_tmpl = NULL;
 
@@ -1811,7 +1811,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     while(sel_points) {
         /* Check for intersection of current chunk and file selection */
         /* (Casting away const OK - QAK) */
-        if(TRUE == H5S_hyper_intersect_block((H5S_t *)fm->file_space, coords, end)) {
+        if(TRUE == H5S_SELECT_INTERSECT_BLOCK(fm->file_space, coords, end)) {
             H5D_chunk_info_t *new_chunk_info;   /* chunk information to insert into skip list */
             hssize_t    schunk_points;          /* Number of elements in chunk selection */
 
@@ -2030,12 +2030,8 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
                 /* Sanity check */
                 HDassert(H5S_SEL_HYPERSLABS == chunk_sel_type);
 
-                /* Release the current selection */
-                if(H5S_SELECT_RELEASE(chunk_info->mspace) < 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection")
-
                 /* Copy the file chunk's selection */
-                if(H5S_select_copy(chunk_info->mspace, chunk_info->fspace, FALSE) < 0)
+                if(H5S_SELECT_COPY(chunk_info->mspace, chunk_info->fspace, FALSE) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy selection")
 
                 /* Compute the adjustment for this chunk */

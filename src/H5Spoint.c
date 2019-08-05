@@ -28,14 +28,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"      /* Generic Functions        */
-#include "H5CXprivate.h"    /* API Contexts             */
-#include "H5Eprivate.h"		/* Error handling			*/
-#include "H5FLprivate.h"	/* Free Lists				*/
-#include "H5Iprivate.h"     /* ID Functions             */
-#include "H5MMprivate.h"    /* Memory management        */
-#include "H5Spkg.h"         /* Dataspace functions      */
-#include "H5VMprivate.h"        /* Vector functions     */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Eprivate.h"		/* Error handling			    */
+#include "H5FLprivate.h"	/* Free Lists				    */
+#include "H5Iprivate.h"         /* ID Functions                             */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Spkg.h"             /* Dataspace functions                      */
+#include "H5VMprivate.h"        /* Vector functions                         */
 
 
 /****************/
@@ -75,6 +75,8 @@ static htri_t H5S__point_is_contiguous(const H5S_t *space);
 static htri_t H5S__point_is_single(const H5S_t *space);
 static htri_t H5S__point_is_regular(const H5S_t *space);
 static htri_t H5S__point_shape_same(const H5S_t *space1, const H5S_t *space2);
+static htri_t H5S__point_intersect_block(const H5S_t *space, const hsize_t *start,
+    const hsize_t *end);
 static herr_t H5S__point_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S__point_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S__point_project_simple(const H5S_t *space, H5S_t *new_space,
@@ -124,6 +126,7 @@ const H5S_select_class_t H5S_sel_point[1] = {{
     H5S__point_is_single,
     H5S__point_is_regular,
     H5S__point_shape_same,
+    H5S__point_intersect_block,
     H5S__point_adjust_u,
     H5S__point_project_scalar,
     H5S__point_project_simple,
@@ -1994,6 +1997,63 @@ H5S__point_shape_same(const H5S_t *space1, const H5S_t *space2)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__point_shape_same() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__point_intersect_block
+ PURPOSE
+    Detect intersections of selection with block
+ USAGE
+    htri_t H5S__point_intersect_block(space, start, end)
+        const H5S_t *space;     IN: Dataspace with selection to use
+        const hsize_t *start;   IN: Starting coordinate for block
+        const hsize_t *end;     IN: Ending coordinate for block
+ RETURNS
+    Non-negative TRUE / FALSE on success, negative on failure
+ DESCRIPTION
+    Quickly detect intersections with a block
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S__point_intersect_block(const H5S_t *space, const hsize_t *start,
+    const hsize_t *end)
+{
+    H5S_pnt_node_t *pnt;        /* Point information node */
+    htri_t ret_value = FALSE;   /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(space);
+    HDassert(H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(space));
+    HDassert(start);
+    HDassert(end);
+
+    /* Loop over points */
+    pnt = space->select.sel_info.pnt_lst->head;
+    while(pnt) {
+        unsigned u;                 /* Local index variable */
+
+        /* Verify that the point is within the block */
+        for(u = 0; u < space->extent.rank; u++)
+            if(pnt->pnt[u] < start[u] || pnt->pnt[u] > end[u])
+                break;
+
+        /* Check if point was within block for all dimensions */
+        if(u == space->extent.rank)
+            HGOTO_DONE(TRUE)
+
+        /* Advance to next point */
+        pnt = pnt->next;
+    } /* end while */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S__point_intersect_block() */
 
 
 /*--------------------------------------------------------------------------

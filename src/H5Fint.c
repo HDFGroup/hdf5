@@ -868,7 +868,7 @@ H5F__is_hdf5(const char *name, hid_t fapl_id)
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
     if(H5FD_locate_signature(file, &sig_addr) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
+        HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "error while trying to locate file signature")
     ret_value = (HADDR_UNDEF != sig_addr);
 
 done:
