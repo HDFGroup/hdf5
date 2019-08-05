@@ -1774,7 +1774,7 @@ test_genprop_path(void)
     CHECK_I(ret, "H5Pregister2");
 
     /* Get full path for first class */
-    path=H5P_get_class_path_test(cid1);
+    path = H5P_get_class_path_test(cid1);
     CHECK_PTR(path, "H5P_get_class_path_test");
     if(HDstrcmp(path,CLASS1_PATH)!=0)
         TestErrPrintf("Class names don't match!, path=%s, CLASS1_PATH=%s\n",path,CLASS1_PATH);
@@ -1789,7 +1789,7 @@ test_genprop_path(void)
     CHECK_I(ret, "H5Pregister2");
 
     /* Get full path for second class */
-    path=H5P_get_class_path_test(cid2);
+    path = H5P_get_class_path_test(cid2);
     CHECK_PTR(path, "H5P_get_class_path_test");
     if(HDstrcmp(path,CLASS2_PATH)!=0)
         TestErrPrintf("Class names don't match!, path=%s, CLASS2_PATH=%s\n",path,CLASS2_PATH);

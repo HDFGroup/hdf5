@@ -1888,7 +1888,7 @@ static void gent_str2(void)
 
 
     int i;
-    char buf[LENSTR+10];
+    char buf[LENSTR+20];
     char buf2[3*LENSTR2];
     hsize_t sdim;
 
@@ -7531,16 +7531,6 @@ gent_nodata(void)
 {
     hid_t fid, dataset, space;
     hsize_t dims[2];
-    uint8_t  dsetu8[F66_XDIM][F66_YDIM8],   valu8bits;
-    uint16_t dsetu16[F66_XDIM][F66_YDIM16], valu16bits;
-    uint32_t dsetu32[F66_XDIM][F66_YDIM32], valu32bits;
-    uint64_t dsetu64[F66_XDIM][F66_YDIM64], valu64bits;
-    int8_t  dset8[F66_XDIM][F66_YDIM8],   val8bits;
-    int16_t dset16[F66_XDIM][F66_YDIM16], val16bits;
-    int32_t dset32[F66_XDIM][F66_YDIM32], val32bits;
-    int64_t dset64[F66_XDIM][F66_YDIM64], val64bits;
-    double  dsetdbl[F66_XDIM][F66_YDIM8];
-    unsigned int i, j;
 
     fid = H5Fcreate(FILE87, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 

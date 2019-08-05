@@ -158,7 +158,7 @@ static hbool_t print_int_type(h5tools_str_t *buffer, hid_t type, int ind);
 static hbool_t print_float_type(h5tools_str_t *buffer, hid_t type, int ind);
 static herr_t visit_obj(hid_t file, const char *oname, iter_t *iter);
 
-
+
 /*-------------------------------------------------------------------------
  * Function: usage
  *
@@ -237,7 +237,6 @@ usage (void)
     PRINTVALSTREAM(rawoutstream, "                      Replaced by --enable-error-stack.\n");
 }
 
-
 
 /*-------------------------------------------------------------------------
  * Function: print_string
@@ -315,7 +314,7 @@ print_string(h5tools_str_t *buffer, const char *s, hbool_t escape_spaces)
     return nprint;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_obj_name
  *
@@ -364,7 +363,7 @@ print_obj_name(h5tools_str_t *buffer, const iter_t *iter, const char *oname,
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_native_type
  *
@@ -489,7 +488,7 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_ieee_type
  *
@@ -527,7 +526,7 @@ print_ieee_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_precision
  *
@@ -619,7 +618,7 @@ print_precision(h5tools_str_t *buffer, hid_t type, int ind)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_int_type
  *
@@ -693,7 +692,7 @@ print_int_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_float_type
  *
@@ -807,7 +806,7 @@ print_float_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_cmpd_type
  *
@@ -860,7 +859,7 @@ print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_enum_type
  *
@@ -985,7 +984,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_string_type
  *
@@ -1086,7 +1085,7 @@ print_string_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_reference_type
  *
@@ -1124,7 +1123,7 @@ print_reference_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_opaque_type
  *
@@ -1160,7 +1159,7 @@ print_opaque_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    print_vlen_type
  *
@@ -1190,7 +1189,7 @@ print_vlen_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*---------------------------------------------------------------------------
  * Purpose:     Print information about an array type
  *
@@ -1237,7 +1236,7 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
     return TRUE;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_bitfield_type
  *
@@ -1345,7 +1344,7 @@ print_type(h5tools_str_t *buffer, hid_t type, int ind)
             (unsigned long)H5Tget_size(type), (unsigned)data_class);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: dump_dataset_values
  *
@@ -1475,7 +1474,7 @@ dump_dataset_values(hid_t dset)
     PRINTVALSTREAM(rawoutstream, "\n");
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: list_attr
  *
@@ -1662,7 +1661,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: dataset_list1
  *
@@ -1727,7 +1726,7 @@ dataset_list1(hid_t dset)
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: dataset_list2
  *
@@ -1962,7 +1961,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
     return 0;
 } /* end dataset_list2() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: datatype_list2
  *
@@ -2004,7 +2003,7 @@ datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: list_obj
  *
@@ -2160,7 +2159,7 @@ done:
 } /* end list_obj() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function: list_lnk
  *
@@ -2354,7 +2353,7 @@ done:
     return 0;
 } /* end list_lnk() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: visit_obj
  *
@@ -2434,7 +2433,7 @@ done:
     return retval;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: get_width
  *
@@ -2550,7 +2549,7 @@ out:
     return ret;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: leave
  *
@@ -2573,7 +2572,7 @@ leave(int ret)
     HDexit(ret);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -2772,6 +2771,7 @@ main(int argc, const char *argv[])
                 } /* end switch */
             } /* end for */
         } else {
+            HDfprintf(stderr, "Unknown argument: %s\n", argv[argno]);
             usage();
             leave(EXIT_FAILURE);
         }

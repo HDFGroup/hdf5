@@ -615,7 +615,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
-    /* Create the reference dataset */
+    /* Create a dataset */
     dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Dcreate2");
 
@@ -1849,10 +1849,10 @@ test_reference(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing References\n"));
 
-    test_reference_params();        /* Test for correct parameter checking */
-    test_reference_obj();           /* Test basic H5R object reference code */
+    test_reference_params();    /* Test for correct parameter checking */
+    test_reference_obj();       /* Test basic H5R object reference code */
 
-     /* Loop through all the combinations of low/high version bounds */
+    /* Loop through all the combinations of low/high version bounds */
     for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
         for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
@@ -1866,10 +1866,10 @@ test_reference(void)
         } /* end high bound */
     } /* end low bound */
 
-    test_reference_obj_deleted();       /* Test H5R object reference code for deleted objects */
-    test_reference_group();             /* Test operations on dereferenced groups */
+    test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
+    test_reference_group();     /* Test operations on dereferenced groups */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    test_reference_compat();            /* Test operations with old API routines */
+    test_reference_compat();    /* Test operations with old API routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 }   /* test_reference() */
