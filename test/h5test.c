@@ -42,7 +42,10 @@
  *      use for HDF5 file access.  The first word in the
  *      value is the name of the driver and subsequent data
  *      is interpreted according to the driver.  See
- *      h5_fileaccess() for details.
+ *      h5_get_vfd_fapl() for details.
+ *
+ * HDF5_LIBVER_BOUNDS:    This string describes what library version bounds to
+ *      use for HDF5 file access.  See h5_get_libver_fapl() for details.
  *
  * HDF5_PREFIX:    A string to add to the beginning of all serial test
  *      file names.  This can be used to run tests in a
@@ -95,8 +98,9 @@ static const char *multi_letters = "msbrglo";
 static H5E_auto2_t err_func = NULL;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
-static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
+static char *h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix,
                               char *fullname, size_t size);
+
 
 
 /*-------------------------------------------------------------------------
@@ -143,47 +147,8 @@ h5_clean_files(const char *base_name[], hid_t fapl)
     int i;
 
     for(i = 0; base_name[i]; i++) {
-        char filename[1024];
-        char temp[2048];
-        hid_t driver;
-
-        if(NULL == h5_fixname(base_name[i], fapl, filename, sizeof(filename)))
-            continue;
-
-        driver = H5Pget_driver(fapl);
-
-        if(driver == H5FD_FAMILY) {
-            int j;
-
-            for(j = 0; /*void*/; j++) {
-                HDsnprintf(temp, sizeof temp, filename, j);
-
-                if(HDaccess(temp, F_OK) < 0)
-                    break;
-
-                HDremove(temp);
-            } /* end for */
-        } else if(driver == H5FD_CORE) {
-            hbool_t backing;        /* Whether the core file has backing store */
-
-            H5Pget_fapl_core(fapl, NULL, &backing);
-
-            /* If the file was stored to disk with bacing store, remove it */
-            if(backing)
-                HDremove(filename);
-        } else if (driver == H5FD_MULTI) {
-            H5FD_mem_t mt;
-
-            HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
-                HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
-                HDremove(temp); /*don't care if it fails*/
-            } /* end for */
-        } else {
-            HDremove(filename);
-        }
-    } /* end for */
+        h5_delete_test_file(base_name[i], fapl);
+    }
 
     /* Close the FAPL used to access the file */
     H5Pclose(fapl);
@@ -209,6 +174,14 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      sub_filename in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 void
 h5_delete_test_file(const char *base_name, hid_t fapl)
 {
@@ -251,13 +224,14 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
             HDsnprintf(sub_filename, sizeof(sub_filename), "%s-%c.h5", filename, multi_letters[mt]);
             HDremove(sub_filename);
-        } /* end for */
+        }
     } else {
         HDremove(filename);
-    } /* end if */
+    } /* end driver selection tree */
 
     return;
 } /* end h5_delete_test_file() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------
@@ -324,6 +298,35 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 
     return retval;
 } /* end h5_cleanup() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_test_shutdown
+ *
+ * Purpose:     Performs any special test cleanup required before the test
+ *              ends.
+ *
+ *              NOTE: This function should normally only be called once
+ *              in a given test, usually just before leaving main(). It
+ *              is intended for use in the single-file unit tests, not
+ *              testhdf5.
+ *
+ * Return:      void
+ *
+ * Programmer:  Dana Robinson
+ *              February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5_test_shutdown(void)
+{
+
+    /* Restore the original error reporting routine */
+    h5_restore_err();
+
+    return;
+} /* end h5_test_shutdown() */
 
 
 /*-------------------------------------------------------------------------
@@ -404,6 +407,39 @@ h5_reset(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    h5_test_init
+ *
+ * Purpose:     Performs any special actions before the test begins.
+ *
+ *              NOTE: This function should normally only be called once
+ *              in a given test, usually at the beginning of main(). It
+ *              is intended for use in the single-file unit tests, not
+ *              testhdf5.
+ *
+ * Return:      void
+ *
+ * Programmer:  Dana Robinson
+ *              February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5_test_init(void)
+{
+    HDfflush(stdout);
+    HDfflush(stderr);
+    H5close();
+
+    /* Save current error stack reporting routine and redirect to our local one */
+    HDassert(err_func == NULL);
+    H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
+    H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
+
+    return;
+} /* end h5_test_init() */
+
+
+/*-------------------------------------------------------------------------
  * Function:  h5_fixname
  *
  * Purpose:  Create a file name from a file base name like `test' and
@@ -431,6 +467,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     return (h5_fixname_real(base_name, fapl, ".h5", fullname, size));
 }
 
+
 
 /*-------------------------------------------------------------------------
  * Function:  h5_fixname_no_suffix
@@ -450,6 +487,7 @@ h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t s
 {
     return (h5_fixname_real(base_name, fapl, NULL, fullname, size));
 }
+
 
 
 /*-------------------------------------------------------------------------
@@ -475,10 +513,11 @@ h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t s
  *-------------------------------------------------------------------------
  */
 static char *
-h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, 
+h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
                 char *fullname, size_t size)
 {
     const char     *prefix = NULL;
+    const char     *env = NULL;    /* HDF5_DRIVER environment variable     */
     char           *ptr, last = '\0';
     const char     *suffix = _suffix;
     size_t          i, j;
@@ -506,7 +545,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
     /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
      * could be of value -1 if it is not defined.
      */
-    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO==driver);
+    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO == driver);
 
     /* Check HDF5_NOCLEANUP environment setting.
      * (The #ifdef is needed to prevent compile failure in case MPI is not
@@ -701,8 +740,8 @@ h5_rmprefix(const char *filename)
  *              but with a file driver set according to the constant or
  *              environment variable HDF5_DRIVER
  *
- * Return:      Success:  A file access property list
- *              Failure:  -1
+ * Return:      Success:    A file access property list
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Robb Matzke
  *              Thursday, November 19, 1998
@@ -712,125 +751,270 @@ h5_rmprefix(const char *filename)
 hid_t
 h5_fileaccess(void)
 {
-    const char  *val = NULL;
-    const char  *name;
-    char        s[1024];
-    hid_t       fapl = -1;
+    hid_t       fapl_id = H5I_INVALID_HID;
 
-    /* First use the environment variable, then the constant */
-    val = HDgetenv("HDF5_DRIVER");
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+
+    /* Attempt to set up a file driver first */
+    if(h5_get_vfd_fapl(fapl_id) < 0)
+        goto error;
+
+    /* Finally, check for libver bounds */
+    if(h5_get_libver_fapl(fapl_id) < 0)
+        goto error;
+ 
+    return fapl_id;
+
+error:
+    if(fapl_id != H5I_INVALID_HID)
+        H5Pclose(fapl_id);
+    return H5I_INVALID_HID;
+} /* end h5_fileaccess() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_fileaccess_flags
+ *
+ * Purpose:     Returns a file access template which is the default template
+ *              but with a file driver, VOL connector, or libver bound set
+ *              according to a constant or environment variable
+ *
+ * Return:      Success:    A file access property list
+ *              Failure:    H5I_INVALID_HID
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, November 19, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+h5_fileaccess_flags(unsigned flags)
+{
+    hid_t       fapl_id = H5I_INVALID_HID;
+
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+
+    /* Attempt to set up a file driver first */
+    if((flags & H5_FILEACCESS_VFD) && h5_get_vfd_fapl(fapl_id) < 0)
+        goto error;
+
+    /* Finally, check for libver bounds */
+    if((flags & H5_FILEACCESS_LIBVER) && h5_get_libver_fapl(fapl_id) < 0)
+        goto error;
+
+    return fapl_id;
+
+error:
+    if(fapl_id != H5I_INVALID_HID)
+        H5Pclose(fapl_id);
+    return H5I_INVALID_HID;
+} /* end h5_fileaccess_flags() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_vfd_fapl
+ *
+ * Purpose:     Sets the file driver for a FAPL according to the value specified
+ *              in the constant or environment variable "HDF5_DRIVER".
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_get_vfd_fapl(hid_t fapl)
+{
+    const char  *env = NULL;    /* HDF5_DRIVER environment variable     */
+    const char  *tok = NULL;    /* strtok pointer                       */
+    char        *lasts = NULL;  /* Context pointer for strtok_r() call */
+    char        buf[1024];      /* buffer for tokenizing HDF5_DRIVER    */
+
+    /* Get the environment variable, if it exists */
+    env = HDgetenv("HDF5_DRIVER");
 #ifdef HDF5_DRIVER
-    if(!val)
-        val = HDF5_DRIVER;
+    /* Use the environment variable, then the compile-time constant */
+    if(!env)
+        env = HDF5_DRIVER;
 #endif
 
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        return -1;
-    if(!val || !*val)
-        return fapl; /* use default */
+    /* If the environment variable was not set, just return
+     * without modifying the FAPL.
+     */
+    if(!env || !*env)
+        goto done;
 
-    HDstrncpy(s, val, sizeof s);
-    s[sizeof(s)-1] = '\0';
-    if(NULL == (name = HDstrtok(s, " \t\n\r")))
-        return fapl;
+    /* Get the first 'word' of the environment variable.
+     * If it's nothing (environment variable was whitespace)
+     * just return the default fapl.
+     */
+    HDstrncpy(buf, env, sizeof(buf));
+    buf[sizeof(buf) - 1] = '\0';
+    if(NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
+        goto done;
 
-    if(!HDstrcmp(name, "sec2")) {
-        /* Unix read() and write() system calls */
-        if (H5Pset_fapl_sec2(fapl) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "stdio")) {
+    if(!HDstrcmp(tok, "sec2")) {
+        /* POSIX (section 2) read() and write() system calls */
+        if(H5Pset_fapl_sec2(fapl) < 0)
+            goto error;
+    } else if(!HDstrcmp(tok, "stdio")) {
         /* Standard C fread() and fwrite() system calls */
-        if (H5Pset_fapl_stdio(fapl) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "core")) {
+        if(H5Pset_fapl_stdio(fapl) < 0)
+            goto error;
+    } else if(!HDstrcmp(tok, "core")) {
         /* In-memory driver settings (backing store on, 1 MB increment) */
-        if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "core_paged")) {
+        if(H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
+            goto error;
+    } else if(!HDstrcmp(tok, "core_paged")) {
         /* In-memory driver with write tracking and paging on */
-        if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
-            return -1;
+        if(H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
+            goto error;
         if(H5Pset_core_write_tracking(fapl, TRUE, (size_t)4096) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "split")) {
+            goto error;
+     } else if(!HDstrcmp(tok, "split")) {
         /* Split meta data and raw data each using default driver */
-        if(H5Pset_fapl_split(fapl,
-            "-m.h5", H5P_DEFAULT,
-            "-r.h5", H5P_DEFAULT) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "multi")) {
+        if(H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
+            goto error;
+    } else if(!HDstrcmp(tok, "multi")) {
         /* Multi-file driver, general case of the split driver */
-        H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
-        hid_t memb_fapl[H5FD_MEM_NTYPES];
-        const char *memb_name[H5FD_MEM_NTYPES];
-        char *sv[H5FD_MEM_NTYPES];
-        haddr_t memb_addr[H5FD_MEM_NTYPES];
+        H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
+        hid_t       memb_fapl[H5FD_MEM_NTYPES];
+        const char  *memb_name[H5FD_MEM_NTYPES];
+        char        *sv[H5FD_MEM_NTYPES];
+        haddr_t     memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t  mt;
 
-        HDmemset(memb_map, 0, sizeof memb_map);
-        HDmemset(memb_fapl, 0, sizeof memb_fapl);
-        HDmemset(memb_name, 0, sizeof memb_name);
-        HDmemset(memb_addr, 0, sizeof memb_addr);
+        HDmemset(memb_map, 0, sizeof(memb_map));
+        HDmemset(memb_fapl, 0, sizeof(memb_fapl));
+        HDmemset(memb_name, 0, sizeof(memb_name));
+        HDmemset(memb_addr, 0, sizeof(memb_addr));
 
-        HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+        HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
-            if(NULL == (sv[mt] = (char *)HDmalloc(H5TEST_MULTI_FILENAME_LEN)))
-                return -1;
+            sv[mt] = (char *)HDmalloc(H5TEST_MULTI_FILENAME_LEN);
+            HDassert(sv[mt]);
             HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         } /* end for */
 
         if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
-            return -1;
+            goto error;
 
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
             HDfree(sv[mt]);
-    }
-    else if(!HDstrcmp(name, "family")) {
-        hsize_t fam_size = 100*1024*1024; /*100 MB*/
-
+    } else if(!HDstrcmp(tok, "family")) {
         /* Family of files, each 1MB and using the default driver */
-        if((val = HDstrtok(NULL, " \t\n\r")))
-            fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
-        if(H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "log")) {
+        hsize_t fam_size = 100 * 1024 * 1024;   /* 100 MB */
+
+        /* Was a family size specified in the environment variable? */
+        if((tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
+            fam_size = (hsize_t)(HDstrtod(tok, NULL) * 1024 * 1024);
+        if(H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT) < 0)
+            goto error;
+    } else if(!HDstrcmp(tok, "log")) {
+        /* Log file access */
         unsigned log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
 
-        /* Log file access */
-        if((val = HDstrtok(NULL, " \t\n\r")))
-            log_flags = (unsigned)HDstrtol(val, NULL, 0);
+        /* Were special log file flags specified in the environment variable? */
+        if((tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
+            log_flags = (unsigned)HDstrtol(tok, NULL, 0);
+
         if(H5Pset_fapl_log(fapl, NULL, log_flags, (size_t)0) < 0)
-            return -1;
-    }
-    else if(!HDstrcmp(name, "direct")) {
+            goto error;
 #ifdef H5_HAVE_DIRECT
-        /* Linux direct read() and write() system calls.  Set memory boundary, file block size,
-         * and copy buffer size to the default values. */
+    } else if(!HDstrcmp(tok, "direct")) {
+        /* Linux direct read() and write() system calls.  Set memory boundary,
+         * file block size, and copy buffer size to the default values.
+         */
         if(H5Pset_fapl_direct(fapl, 1024, 4096, 8 * 4096) < 0)
-            return -1;
+            goto error;
 #endif
-    }
-    else if(!HDstrcmp(name, "latest")) {
+    } else if(!HDstrcmp(tok, "latest")) {
         /* use the latest format */
         if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            return -1;
+            goto error;
     }
     else {
         /* Unknown driver */
-        return -1;
-    }
+        goto error;
+    } /* end if */
 
-    return fapl;
-}
+done:
+    return 0;
+
+error:
+    return -1;
+} /* end h5_get_vfd_fapl() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_libver_fapl
+ *
+ * Purpose:     Sets the library version bounds for a FAPL according to the
+ *              value in the constant or environment variable "HDF5_LIBVER_BOUNDS".
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ * Programmer:  Quincey Koziol
+ *              November 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_get_libver_fapl(hid_t fapl)
+{
+    const char  *env = NULL;    /* HDF5_DRIVER environment variable     */
+    const char  *tok = NULL;    /* strtok pointer                       */
+    char        *lasts = NULL;  /* Context pointer for strtok_r() call */
+    char        buf[1024];      /* buffer for tokenizing HDF5_DRIVER    */
+
+    /* Get the environment variable, if it exists */
+    env = HDgetenv("HDF5_LIBVER_BOUNDS");
+#ifdef HDF5_LIBVER_BOUNDS
+    /* Use the environment variable, then the compile-time constant */
+    if(!env)
+        env = HDF5_LIBVER_BOUNDS;
+#endif
+
+    /* If the environment variable was not set, just return
+     * without modifying the FAPL.
+     */
+    if(!env || !*env)
+        goto done;
+
+    /* Get the first 'word' of the environment variable.
+     * If it's nothing (environment variable was whitespace)
+     * just return the default fapl.
+     */
+    HDstrncpy(buf, env, sizeof(buf));
+    buf[sizeof(buf) - 1] = '\0';
+    if(NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
+        goto done;
+
+    if(!HDstrcmp(tok, "latest")) {
+        /* use the latest format */
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            goto error;
+    } /* end if */
+    else {
+        /* Unknown setting */
+        goto error;
+    } /* end else */
+
+done:
+    return 0;
+
+error:
+    return -1;
+} /* end h5_get_libver_fapl() */
 
 
 /*-------------------------------------------------------------------------
@@ -954,7 +1138,7 @@ h5_set_info_object(void)
     int    ret_value=0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
-    if ((envp = getenv("HDF5_MPI_INFO")) != NULL){
+    if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL){
         char *next, *valp;
 
         valp = envp = next = HDstrdup(envp);
@@ -1016,7 +1200,7 @@ h5_set_info_object(void)
 
                 /* actually set the darned thing */
                 if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
-                    printf("MPI_Info_set failed\n");
+                    HDprintf("MPI_Info_set failed\n");
                     ret_value = -1;
                 }
             }
@@ -1079,6 +1263,14 @@ h5_dump_info_object(MPI_Info info)
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      temp in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 h5_stat_size_t
 h5_get_file_size(const char *filename, hid_t fapl)
 {
@@ -1180,6 +1372,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
 
     return(-1);
 } /* end get_file_size() */
+#pragma GCC diagnostic pop
 
 /*
  * This routine is designed to provide equivalent functionality to 'printf'
@@ -1192,9 +1385,9 @@ print_func(const char *format, ...)
   va_list arglist;
   int ret_value;
 
-  va_start(arglist, format);
+  HDva_start(arglist, format);
   ret_value = vprintf(format, arglist);
-  va_end(arglist);
+  HDva_end(arglist);
   return ret_value;
 }
 
@@ -1279,7 +1472,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
     int len;
     static char* env = NULL;
 
-    assert(name);
+    HDassert(name);
 
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);
@@ -1287,7 +1480,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
     if(mpi_initialized && !mpi_finalized) {
         MPI_Comm_rank(comm, &mpi_rank);
         MPI_Comm_size(comm, &mpi_size);
-        assert(root < mpi_size);
+        HDassert(root < mpi_size);
 
         /* The root task does the getenv call
          * and sends the result to the other tasks */
@@ -1377,7 +1570,7 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
     while((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
         if(HDwrite(fd_new, buf, (size_t)nread) < 0)
             goto error;
- 
+
     /* Close files */
     if(HDclose(fd_old) < 0)
         goto error;
@@ -1405,14 +1598,10 @@ error:
  *
  * Purpose:     Callback function for h5_verify_cached_stabs.
  *
- * Return:      Success:        0
- *
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Neil Fortner
  *              Tuesday, April 12, 2011
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1421,9 +1610,9 @@ h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name,
     const H5O_info_t *oinfo, void H5_ATTR_UNUSED *udata)
 {
     if(oinfo->type == H5O_TYPE_GROUP)
-        return(H5G__verify_cached_stabs_test(oid));
+        return H5G__verify_cached_stabs_test(oid);
     else
-        return(0);
+        return SUCCEED;
 } /* end h5_verify_cached_stabs_cb() */
 
 

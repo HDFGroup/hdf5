@@ -102,7 +102,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
  * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
 #define TESTING(WHAT)  {printf("Testing %-62s",WHAT); fflush(stdout);}
-#define TESTING_2(WHAT)  {printf(" Testing %-62s",WHAT); fflush(stdout);}
+#define TESTING_2(WHAT)  {printf("  Testing %-60s",WHAT); fflush(stdout);}
 #define PASSED()  {puts(" PASSED");fflush(stdout);}
 #define H5_FAILED()  {puts("*FAILED*");fflush(stdout);}
 #define H5_WARNING()  {puts("*WARNING*");fflush(stdout);}
@@ -120,6 +120,10 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define H5_ALARM_SEC  1200  /* default is 20 minutes */
 #define ALARM_ON  TestAlarmOn()
 #define ALARM_OFF  HDalarm(0)
+
+/* Flags for h5_fileaccess_flags() */
+#define H5_FILEACCESS_VFD       0x01
+#define H5_FILEACCESS_LIBVER    0x02
 
 /*
  * The methods to compare the equality of floating-point values:
@@ -150,6 +154,7 @@ H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, s
 H5TEST_DLL char *h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL char *h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL hid_t h5_fileaccess(void);
+H5TEST_DLL hid_t h5_fileaccess_flags(unsigned flags);
 H5TEST_DLL void h5_no_hwconv(void);
 H5TEST_DLL const char *h5_rmprefix(const char *filename);
 H5TEST_DLL void h5_reset(void);
@@ -160,14 +165,19 @@ H5TEST_DLL int print_func(const char *format, ...);
 H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
 
-/* Functions that will replace VFD-dependent functions that violate
- * the single responsibility principle. Unlike their predecessors,
- * these new functions do not have hidden side effects.
- */
-/* h5_fileaccess() replacement */
+/* Functions that will replace components of a FAPL */
+H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);
+H5TEST_DLL herr_t h5_get_libver_fapl(hid_t fapl_id);
+
 /* h5_clean_files() replacements */
 H5TEST_DLL void h5_delete_test_file(const char *base_name, hid_t fapl);
 H5TEST_DLL void h5_delete_all_test_files(const char *base_name[], hid_t fapl);
+
+/* h5_reset() replacement */
+H5TEST_DLL void h5_test_init(void);
+
+/* h5_cleanup() replacement */
+H5TEST_DLL void h5_test_shutdown(void);
 
 /* Routines for operating on the list of tests (for the "all in one" tests) */
 H5TEST_DLL void TestUsage(void);

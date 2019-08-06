@@ -50,5 +50,5 @@ set (CTEST_TEST_TIMEOUT 1200 CACHE STRING
 set (DART_TESTING_TIMEOUT 1200 CACHE STRING
     "Maximum time allowed before CTest will kill the test." FORCE)
 
-SET(CTEST_SUBMIT_RETRY_DELAY 20 CACHE STRING
+set (CTEST_SUBMIT_RETRY_DELAY 20 CACHE STRING
     "How long to wait between timed-out CTest submissions.")

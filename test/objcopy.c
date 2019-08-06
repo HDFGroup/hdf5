@@ -57,61 +57,61 @@ const char *FILENAME[] = {
 #define CONFIG_DENSE 16
 #define MAX_CONFIGURATION 31
 
-#define FILE_EXT 		"objcopy_ext.dat"
+#define FILE_EXT         "objcopy_ext.dat"
 /* The fill_old.h5 is generated from gen_old_fill.c in HDF5 'test' directory
  * for version 1.4(after 1.4.3).  To get this data file, simply compile
  * gen_old_fill.c with HDF5 library (before v1.5) and run it. */
 #define FILE_OLD_LAYOUT         "fill_old.h5"
 
 
-#define NAME_DATATYPE_SIMPLE 	"H5T_NATIVE_INT"
-#define NAME_DATATYPE_SIMPLE2 	"H5T_NATIVE_INT-2"
-#define NAME_DATATYPE_VL 	"vlen of int"
-#define NAME_DATATYPE_VL_VL 	"vlen of vlen of int"
-#define NAME_DATASET_SIMPLE 	"dataset_simple"
+#define NAME_DATATYPE_SIMPLE     "H5T_NATIVE_INT"
+#define NAME_DATATYPE_SIMPLE2     "H5T_NATIVE_INT-2"
+#define NAME_DATATYPE_VL     "vlen of int"
+#define NAME_DATATYPE_VL_VL     "vlen of vlen of int"
+#define NAME_DATASET_SIMPLE     "dataset_simple"
 #define NAME_DATASET_SIMPLE2    "dataset_simple_copy"
 #define NAME_DATASET_SIMPLE3    "dataset_simple_another_copy"
-#define NAME_DATASET_COMPOUND 	"dataset_compound"
-#define NAME_DATASET_CHUNKED 	"dataset_chunked"
-#define NAME_DATASET_CHUNKED2 	"dataset_chunked2"
-#define NAME_DATASET_COMPACT 	"dataset_compact"
-#define NAME_DATASET_EXTERNAL 	"dataset_ext"
-#define NAME_DATASET_NAMED_DTYPE 	"dataset_named_dtype"
-#define NAME_DATASET_NAMED_DTYPE2 	"dataset_named_dtype2"
-#define NAME_DATASET_MULTI_OHDR 	"dataset_multi_ohdr"
-#define NAME_DATASET_MULTI_OHDR2 	"dataset_multi_ohdr2"
-#define NAME_DATASET_VL 	"dataset_vl"
-#define NAME_DATASET_VL_VL 	"dataset_vl_vl"
-#define NAME_DATASET_CMPD_VL 	"dataset_cmpd_vl"
-#define NAME_DATASET_SUB_SUB 	"/g0/g00/g000/dataset_simple"
-#define NAME_GROUP_UNCOPIED 	"/uncopied"
-#define NAME_GROUP_EMPTY 	"/empty"
-#define NAME_GROUP_TOP 		"/g0"
+#define NAME_DATASET_COMPOUND     "dataset_compound"
+#define NAME_DATASET_CHUNKED     "dataset_chunked"
+#define NAME_DATASET_CHUNKED2     "dataset_chunked2"
+#define NAME_DATASET_COMPACT     "dataset_compact"
+#define NAME_DATASET_EXTERNAL     "dataset_ext"
+#define NAME_DATASET_NAMED_DTYPE     "dataset_named_dtype"
+#define NAME_DATASET_NAMED_DTYPE2     "dataset_named_dtype2"
+#define NAME_DATASET_MULTI_OHDR     "dataset_multi_ohdr"
+#define NAME_DATASET_MULTI_OHDR2     "dataset_multi_ohdr2"
+#define NAME_DATASET_VL     "dataset_vl"
+#define NAME_DATASET_VL_VL     "dataset_vl_vl"
+#define NAME_DATASET_CMPD_VL     "dataset_cmpd_vl"
+#define NAME_DATASET_SUB_SUB     "/g0/g00/g000/dataset_simple"
+#define NAME_GROUP_UNCOPIED     "/uncopied"
+#define NAME_GROUP_EMPTY     "/empty"
+#define NAME_GROUP_TOP         "/g0"
 #define NAME_GROUP_TOP2         "/g1"
 #define NAME_GROUP_TOP3         "/g2"
 #define NAME_GROUP_TOP4         "/g3"
-#define NAME_GROUP_SUB 		"/g0/g00"
-#define NAME_GROUP_SUB_2	"/g0/g01"
-#define NAME_GROUP_SUB_SUB 	"/g0/g00/g000"
-#define NAME_GROUP_SUB_SUB2 	"g000"
-#define NAME_GROUP_DATASET 	"/g0/dataset_simple"
-#define NAME_GROUP_LINK		"/g_links"
-#define NAME_GROUP_LINK2	"/g_links2"
-#define NAME_GROUP_LOOP		"g_loop"
-#define NAME_GROUP_LOOP2	"g_loop2"
-#define NAME_GROUP_LOOP3	"g_loop3"
-#define NAME_GROUP_REF	        "ref_grp"
-#define NAME_LINK_DATASET	"/g_links/dataset_simple"
-#define NAME_LINK_HARD		"/g_links/hard_link_to_dataset_simple"
-#define NAME_LINK_SOFT		"/g_links/soft_link_to_dataset_simple"
-#define NAME_LINK_SOFT2		"/g_links2/soft_link_to_dataset_simple"
-#define NAME_LINK_EXTERN	"/g_links/external_link_to_dataset_simple"
+#define NAME_GROUP_SUB         "/g0/g00"
+#define NAME_GROUP_SUB_2    "/g0/g01"
+#define NAME_GROUP_SUB_SUB     "/g0/g00/g000"
+#define NAME_GROUP_SUB_SUB2     "g000"
+#define NAME_GROUP_DATASET     "/g0/dataset_simple"
+#define NAME_GROUP_LINK        "/g_links"
+#define NAME_GROUP_LINK2    "/g_links2"
+#define NAME_GROUP_LOOP        "g_loop"
+#define NAME_GROUP_LOOP2    "g_loop2"
+#define NAME_GROUP_LOOP3    "g_loop3"
+#define NAME_GROUP_REF            "ref_grp"
+#define NAME_LINK_DATASET    "/g_links/dataset_simple"
+#define NAME_LINK_HARD        "/g_links/hard_link_to_dataset_simple"
+#define NAME_LINK_SOFT        "/g_links/soft_link_to_dataset_simple"
+#define NAME_LINK_SOFT2        "/g_links2/soft_link_to_dataset_simple"
+#define NAME_LINK_EXTERN    "/g_links/external_link_to_dataset_simple"
 #define NAME_LINK_EXTERN2       "/g_links2/external_link_to_dataset_simple"
-#define NAME_LINK_SOFT_DANGLE	"/g_links/soft_link_to_nowhere"
-#define NAME_LINK_SOFT_DANGLE2	"/g_links2/soft_link_to_nowhere"
+#define NAME_LINK_SOFT_DANGLE    "/g_links/soft_link_to_nowhere"
+#define NAME_LINK_SOFT_DANGLE2    "/g_links2/soft_link_to_nowhere"
 #define NAME_LINK_EXTERN_DANGLE "/g_links/external_link_to_nowhere"
 #define NAME_LINK_EXTERN_DANGLE2        "/g_links2/external_link_to_nowhere"
-#define NAME_OLD_FORMAT		"/dset1"
+#define NAME_OLD_FORMAT        "/dset1"
 
 #define NAME_BUF_SIZE   1024
 #define ATTR_NAME_LEN 80
@@ -151,7 +151,7 @@ attach_attribute_compound_vlstr(hid_t loc_id);
 static int
 compare_attribute_compound_vlstr(hid_t loc, hid_t loc2);
 
-
+
 /*-------------------------------------------------------------------------
  * Function: addr_insert
  *
@@ -185,7 +185,7 @@ addr_insert(H5O_info_t *oi)
     idtab_g.obj[n] = oi->addr;
 } /* end addr_insert() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: addr_lookup
  *
@@ -214,7 +214,7 @@ addr_lookup(H5O_info_t *oi)
     return FALSE;
 } /* end addr_lookup() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: addr_reset
  *
@@ -236,7 +236,7 @@ addr_reset(void)
     idtab_g.nalloc = idtab_g.nobjs = 0;
 } /* end addr_reset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    attach_ref_attr
  *
@@ -246,8 +246,6 @@ addr_reset(void)
  *
  * Programmer:  Peter Cao
  *              Friday, August 4, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -297,7 +295,7 @@ error:
     return(-1);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    attach_reg_ref_attr
  *
@@ -307,8 +305,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Monday, March 5, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -374,7 +370,7 @@ error:
     return(-1);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    create_reg_ref_dataset
  *
@@ -384,8 +380,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, August 4, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -469,7 +463,7 @@ error:
     return(-1);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    attach_attribute_vl
  *
@@ -479,8 +473,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Saturday, December 17, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -527,18 +519,16 @@ done:
 } /* end of attach_attribute_vl */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_attach_attributes
  *
  * Purpose:     Attach NUM_ATTRIBUTES attributes to the object to be copied
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -601,13 +591,13 @@ done:
     return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_attach_paired_attributes
  *
  * Purpose:     Attach NUM_ATTRIBUTES attributes to a pair of objects to be copied
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Tuesday, November 1, 2005
@@ -670,7 +660,7 @@ done:
     return -1;
 } /* end test_copy_attach_paired_attributes() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    compare_attribute
  *
@@ -801,23 +791,19 @@ error:
     return FALSE;
 } /* end compare_attribute() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    compare_std_attributes
  *
  * Purpose:     Compare "standard" attributes on two objects to check that they are equal
  *
- * Return:	TRUE if objects have same attributes/FALSE if they are different
+ * Return:    TRUE if objects have same attributes/FALSE if they are different
  *
  * Programmer:  Quincey Koziol
  *              Monday, October 31, 2005
  *
- * Note:	This isn't very general, the attributes are assumed to be
+ * Note:    This isn't very general, the attributes are assumed to be
  *              those written in test_copy_attach_attributes().
- *
- * Modifier:    Peter Cao
- *              Wednesday, March 21, 2007
- *              Change to compare any attributes of two objects
  *
  *-------------------------------------------------------------------------
  */
@@ -873,19 +859,19 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
 
 error:
     H5E_BEGIN_TRY {
-    	H5Aclose(aid2);
-    	H5Aclose(aid);
+        H5Aclose(aid2);
+        H5Aclose(aid);
     } H5E_END_TRY;
     return FALSE;
 } /* end compare_std_attributes() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    compare_data
  *
  * Purpose:     Compare two buffers of data to check that they are equal
  *
- * Return:	TRUE if buffer are equal/FALSE if they are different
+ * Return:    TRUE if buffer are equal/FALSE if they are different
  *
  * Programmer:  Quincey Koziol
  *              Monday, November 21, 2005
@@ -945,15 +931,15 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                  * for each */
                 for(elmt=0; elmt<nelmts; elmt++) {
                     /* Check vlen lengths */
-                    if(((const hvl_t *)memb1)->len
-                            != ((const hvl_t *)memb2)->len)
+                    if(((const hvl_t *)((const void *)memb1))->len
+                            != ((const hvl_t *)((const void *)memb2))->len)
                         TEST_ERROR
 
                     /* Check vlen data */
                     if(!compare_data(parent1, parent2, pid, base_id,
-                            ((const hvl_t *)memb1)->len,
-                            ((const hvl_t *)memb1)->p,
-                            ((const hvl_t *)memb2)->p, obj_owner))
+                            ((const hvl_t *)((const void *)memb1))->len,
+                            ((const hvl_t *)((const void *)memb1))->p,
+                            ((const hvl_t *)((const void *)memb2))->p, obj_owner))
                         TEST_ERROR
 
                     /* Update member pointers */
@@ -1146,13 +1132,13 @@ error:
     return FALSE;
 } /* end compare_data() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    compare_datasets
  *
  * Purpose:     Compare two datasets to check that they are equal
  *
- * Return:	TRUE if datasets are equal/FALSE if they are different
+ * Return:    TRUE if datasets are equal/FALSE if they are different
  *
  * Programmer:  Quincey Koziol
  *              Tuesday, October 25, 2005
@@ -1173,8 +1159,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     hssize_t nelmts;                            /* # of elements in dataspace */
     void *rbuf = NULL;                          /* Buffer for reading raw data */
     void *rbuf2 = NULL;                         /* Buffer for reading raw data */
-    H5D_space_status_t space_status;            /* Dataset's raw data space status */
-    H5D_space_status_t space_status2;           /* Dataset's raw data space status */
+    H5D_space_status_t space_status;            /* Dataset's raw dataspace status */
+    H5D_space_status_t space_status2;           /* Dataset's raw dataspace status */
 
     /* Check the datatypes are equal */
 
@@ -1352,23 +1338,23 @@ error:
             HDfree(rbuf);
         if(rbuf2)
             HDfree(rbuf2);
-    	H5Pclose(dcpl2);
-    	H5Pclose(dcpl);
-    	H5Sclose(sid2);
-    	H5Sclose(sid);
-    	H5Tclose(tid2);
-    	H5Tclose(tid);
+        H5Pclose(dcpl2);
+        H5Pclose(dcpl);
+        H5Sclose(sid2);
+        H5Sclose(sid);
+        H5Tclose(tid2);
+        H5Tclose(tid);
     } H5E_END_TRY;
     return FALSE;
 } /* end compare_datasets() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    compare_groups
  *
  * Purpose:     Compare two groups to check that they are "equal"
  *
- * Return:	TRUE if group are equal/FALSE if they are different
+ * Return:    TRUE if group are equal/FALSE if they are different
  *
  * Programmer:  Quincey Koziol
  *              Monday, October 31, 2005
@@ -1518,7 +1504,7 @@ error:
     return FALSE;
 } /* end compare_groups() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_named_datatype
  *
@@ -1530,8 +1516,6 @@ error:
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1539,8 +1523,8 @@ test_copy_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
 {
     hid_t fid_src = -1, fid_dst = -1;   /* File IDs */
     hid_t tid = -1, tid2 = -1;          /* Datatype IDs */
-    char		src_filename[NAME_BUF_SIZE];
-    char		dst_filename[NAME_BUF_SIZE];
+    char        src_filename[NAME_BUF_SIZE];
+    char        dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): named datatype");
 
@@ -1605,15 +1589,15 @@ test_copy_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
 
 error:
     H5E_BEGIN_TRY {
-    	H5Tclose(tid2);
-    	H5Tclose(tid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid2);
+        H5Tclose(tid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_named_datatype */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_named_datatype_vl
  *
@@ -1632,8 +1616,8 @@ test_copy_named_datatype_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
 {
     hid_t fid_src = -1, fid_dst = -1;   /* File IDs */
     hid_t tid = -1, tid2 = -1;          /* Datatype IDs */
-    char		src_filename[NAME_BUF_SIZE];
-    char		dst_filename[NAME_BUF_SIZE];
+    char        src_filename[NAME_BUF_SIZE];
+    char        dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): named vlen datatype");
 
@@ -1698,15 +1682,15 @@ test_copy_named_datatype_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
 
 error:
     H5E_BEGIN_TRY {
-    	H5Tclose(tid2);
-    	H5Tclose(tid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid2);
+        H5Tclose(tid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_named_datatype_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_named_datatype_vl_vl
  *
@@ -1725,8 +1709,8 @@ test_copy_named_datatype_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
 {
     hid_t fid_src = -1, fid_dst = -1;   /* File IDs */
     hid_t tid = -1, tid2 = -1;          /* Datatype IDs */
-    char		src_filename[NAME_BUF_SIZE];
-    char		dst_filename[NAME_BUF_SIZE];
+    char        src_filename[NAME_BUF_SIZE];
+    char        dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): named nested vlen datatype");
 
@@ -1797,15 +1781,15 @@ test_copy_named_datatype_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
 
 error:
     H5E_BEGIN_TRY {
-    	H5Tclose(tid2);
-    	H5Tclose(tid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid2);
+        H5Tclose(tid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_named_datatype_vl_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_named_datatype_attr_self
  *
@@ -1818,8 +1802,6 @@ error:
  *
  * Programmer:  Neil
  *              Friday, March 11, 2011
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1948,7 +1930,7 @@ error:
     return 1;
 } /* end test_copy_named_datatype_attr_self */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_simple
  *
@@ -1959,8 +1941,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2057,16 +2037,16 @@ test_copy_dataset_simple(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_simple */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_simple_samefile
  *
@@ -2074,12 +2054,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Neil Fortner
- *              Thursday, January 15, 2009
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2437,8 +2411,6 @@ error:
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2594,17 +2566,17 @@ test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Pclose(pid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Pclose(pid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_chunked */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_chunked_empty
  *
@@ -2756,12 +2728,12 @@ test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Pclose(pid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Pclose(pid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_chunked_empty */
@@ -2952,17 +2924,17 @@ test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Pclose(pid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Pclose(pid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_chunked_sparse */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compressed
  *
@@ -3087,18 +3059,18 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
 #ifdef H5_HAVE_FILTER_DEFLATE
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Pclose(pid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Pclose(pid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 #endif /* H5_HAVE_FILTER_DEFLATE */
 } /* end test_copy_dataset_compressed */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compact
  *
@@ -3137,7 +3109,7 @@ test_copy_dataset_compact(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     /* set initial data values */
     for (i=0; i<DIM_SIZE_1; i++)
         for (j=0; j<DIM_SIZE_2; j++)
-            buf[i][j] = (float)(i+j/100.0F);
+            buf[i][j] = (float)i + (float)j / 100.0F;
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
@@ -3224,17 +3196,17 @@ test_copy_dataset_compact(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Pclose(pid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Pclose(pid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_compact */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_external
  *
@@ -3245,8 +3217,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3351,17 +3321,17 @@ test_copy_dataset_external(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Pclose(pid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Pclose(pid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_external */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_named_dtype
  *
@@ -3472,17 +3442,17 @@ test_copy_dataset_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hi
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_named_dtype */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_named_dtype_hier
  *
@@ -3609,18 +3579,18 @@ test_copy_dataset_named_dtype_hier(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_named_dtype_hier */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_named_dtype_hier_outside
  *
@@ -3748,18 +3718,18 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fcpl_src, hid_t fcpl_dst, hid_t
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_named_dtype_hier_outside */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_multi_ohdr_chunks
  *
@@ -3792,8 +3762,8 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fa
     char dst_filename[NAME_BUF_SIZE];
 
     if(test_open) {
-        TESTING("H5Ocopy(): openend datasets that have multiple ohdr chunks");
-    } else{
+        TESTING("H5Ocopy(): opened datasets that have multiple ohdr chunks");
+    } else {
         TESTING("H5Ocopy(): datasets that have multiple ohdr chunks");
     }
 
@@ -3867,7 +3837,6 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fa
     if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     if(test_open) {
-
         /* close the second dataset */
         if(H5Dclose(did2) < 0) TEST_ERROR
 
@@ -3898,18 +3867,18 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fa
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Sclose(sid);
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_multi_ohdr_chunks */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_attr_named_dtype
  *
@@ -4039,19 +4008,19 @@ test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_attr_named_dtype */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_contig_vl
  *
@@ -4169,18 +4138,18 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_contig_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_chunked_vl
  *
@@ -4255,6 +4224,7 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     /* close the dataset */
     if(H5Dclose(did) < 0) TEST_ERROR
 
+
     /* close the SRC file */
     if(H5Fclose(fid_src) < 0) TEST_ERROR
 
@@ -4307,18 +4277,19 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Pclose(pid);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_chunked_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compact_vl
  *
@@ -4444,18 +4415,18 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_compact_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_attribute_vl
  *
@@ -4561,11 +4532,11 @@ error:
     H5E_BEGIN_TRY {
         H5Aclose(aid2);
         H5Aclose(aid);
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_simple_empty */
@@ -4584,18 +4555,18 @@ error:
 static int
 attach_attribute_compound_vlstr(hid_t loc_id)
 {
-    hid_t aid = -1; 		/* Attribute ID */
-    hid_t sid = -1; 		/* Dataspace ID */
-    hid_t tid = -1;		/* Datatype ID */
-    hid_t vl_str_tid = -1;	/* Variable length string datatype ID */
-    hid_t cmpd_tid = -1;	/* Compound datatype ID */
-    hsize_t dim1 = 1;		/* Dimension size */
-    typedef struct { 		/* Compound structure for the attribute */
+    hid_t aid = -1;         /* Attribute ID */
+    hid_t sid = -1;         /* Dataspace ID */
+    hid_t tid = -1;        /* Datatype ID */
+    hid_t vl_str_tid = -1;    /* Variable length string datatype ID */
+    hid_t cmpd_tid = -1;    /* Compound datatype ID */
+    hsize_t dim1 = 1;        /* Dimension size */
+    typedef struct {         /* Compound structure for the attribute */
         int i;
         char *v;
     } s1;
     s1 buf;                     /* Buffer */
-    int ret_value = -1;		/* Return value */
+    int ret_value = -1;        /* Return value */
 
     /* Create dataspace */
     if((sid = H5Screate_simple(1, &dim1, NULL)) < 0 )
@@ -4649,7 +4620,7 @@ done:
  * Function:    compare_attribute_compound_vlstr
  *
  * Purpose:     Compare data of the attributes attached to the two objects.
- *		The attribute is a  compound datatype with a variable length string.
+ *        The attribute is a  compound datatype with a variable length string.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -4660,52 +4631,73 @@ done:
 static int
 compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
 {
-    hid_t aid = -1, aid2 = -1;	/* Attribute IDs */
-    hid_t tid = -1, tid2 = -1;	/* Datatype IDs */
-    typedef struct {		/* Compound structure for the attribute */
-	int i;
-	char *v;
+    hid_t aid = -1, aid2 = -1;    /* Attribute IDs */
+    hid_t tid = -1, tid2 = -1;    /* Datatype IDs */
+    hid_t sid = -1, sid2 = -1;    /* Dataspace IDs */
+    typedef struct {        /* Compound structure for the attribute */
+    int i;
+    char *v;
     } s1;
-    s1 rbuf;			/* Buffer for data read */
-    s1 rbuf2;			/* Buffer for data read */
-    
+    s1 rbuf;            /* Buffer for data read */
+    s1 rbuf2;           /* Buffer for data read */
+
     /* Open the attributes attached to the objects */
     if((aid = H5Aopen_by_idx(loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR	
+    FAIL_STACK_ERROR
     if((aid2 = H5Aopen_by_idx(loc2, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR	
+    FAIL_STACK_ERROR
 
     /* Get the attributes' datatypes */
-    if((tid = H5Aget_type(aid)) < 0) 
-        TEST_ERROR	
+    if((tid = H5Aget_type(aid)) < 0)
+    FAIL_STACK_ERROR
     if((tid2 = H5Aget_type(aid2)) < 0)
-        TEST_ERROR	
+    FAIL_STACK_ERROR
+
+    /* Get the attributes' dataspaces */
+    if((sid = H5Aget_space(aid)) < 0)
+    FAIL_STACK_ERROR
+    if((sid2 = H5Aget_space(aid2)) < 0)
+    FAIL_STACK_ERROR
 
     /* Read the attributes */
     if(H5Aread(aid, tid, &rbuf) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
     if(H5Aread(aid2, tid2, &rbuf2) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* Compare the attributes' data */
     if(rbuf.i != rbuf2.i)
-        TEST_ERROR
-    if(HDstrlen(rbuf.v) != HDstrlen(rbuf2.v)) 
-        TEST_ERROR
-    if(HDmemcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v))) 
-        TEST_ERROR
+    FAIL_STACK_ERROR
+    if(HDstrlen(rbuf.v) != HDstrlen(rbuf2.v))
+    FAIL_STACK_ERROR
+    if(HDmemcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v)))
+    FAIL_STACK_ERROR
+
+    /* Reclaim vlen buffer */
+    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf) < 0) TEST_ERROR
+    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf2) < 0) TEST_ERROR
+
+    /* Close the dataspaces */
+    if(H5Sclose(sid) < 0)
+    FAIL_STACK_ERROR
+    if(H5Sclose(sid2) < 0)
+    FAIL_STACK_ERROR
 
     /* Close the attributes */
     if(H5Aclose(aid) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
     if(H5Aclose(aid2) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
     return TRUE;
 
 error:
     H5E_BEGIN_TRY {
         H5Aclose(aid);
         H5Aclose(aid2);
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf);
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf2);
+        H5Sclose(sid);
+        H5Sclose(sid2);
         H5Tclose(tid);
         H5Tclose(tid2);
     } H5E_END_TRY;
@@ -4717,15 +4709,15 @@ error:
  * Function:    test_copy_attribute_compound_vlstr
  *
  * Purpose:     Create a simple dataset and a group in SRC file.
- *		Both has an attribute with a compound datatype consisting
+ *        Both has an attribute with a compound datatype consisting
  *              of a variable length string
  *              Copy the dataset and the group to DST file
- *		This is for HDFFV-7991
+ *        This is for HDFFV-7991
  *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  
+ * Programmer:
  *
  *-------------------------------------------------------------------------
  */
@@ -4736,10 +4728,10 @@ test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
     hid_t aid = -1, aid2 = -1;                  /* Attribute IDs */
-    hid_t gid = -1, gid2 = -1;			/* Group IDs */
+    hid_t gid = -1, gid2 = -1;            /* Group IDs */
     hsize_t dim2d[2];                           /* Dataset dimensions */
-    char src_filename[NAME_BUF_SIZE];		/* Source file name */
-    char dst_filename[NAME_BUF_SIZE];		/* Destination file name */
+    char src_filename[NAME_BUF_SIZE];        /* Source file name */
+    char dst_filename[NAME_BUF_SIZE];        /* Destination file name */
 
     TESTING("H5Ocopy(): attribute with compound datatype consisting of variable length string");
 
@@ -4752,7 +4744,7 @@ test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
@@ -4760,48 +4752,48 @@ test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
     /* create 2D dataspace */
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* create 2D int dataset at SRC file */
     if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* close dataspace */
     if(H5Sclose(sid) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* attach an attribute to the dataset */
     if(attach_attribute_compound_vlstr(did) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* close the dataset */
     if(H5Dclose(did) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* create a group */
     if((gid = H5Gcreate2(fid_src, NAME_GROUP_EMPTY, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* attach attribute to the group */
     if(attach_attribute_compound_vlstr(gid) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* close the group */
     if(H5Gclose(gid) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* close the SRC file */
     if(H5Fclose(fid_src) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
 
     /* open the source file with read-only */
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0)
-        TEST_ERROR
+    FAIL_STACK_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -4845,9 +4837,9 @@ test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
         TEST_ERROR
 
     /* close the groups */
-    if(H5Gclose(gid) < 0) 
+    if(H5Gclose(gid) < 0)
         TEST_ERROR
-    if(H5Gclose(gid2) < 0) 
+    if(H5Gclose(gid2) < 0)
         TEST_ERROR
 
     /* close the SRC file */
@@ -4865,18 +4857,18 @@ error:
     H5E_BEGIN_TRY {
         H5Aclose(aid2);
         H5Aclose(aid);
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Gclose(gid);
-    	H5Gclose(gid2);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Gclose(gid);
+        H5Gclose(gid2);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_attribute_compound_vlstr() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compressed_vl
  *
@@ -4999,7 +4991,9 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -5014,20 +5008,20 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 #ifdef H5_HAVE_FILTER_DEFLATE
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Pclose(pid);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Pclose(pid);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 #endif /* H5_HAVE_FILTER_DEFLATE */
 } /* end test_copy_dataset_compressed_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_group_empty
  *
@@ -5038,8 +5032,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5114,15 +5106,15 @@ test_copy_group_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_
 
 error:
     H5E_BEGIN_TRY {
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_group_empty */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_root_group
  *
@@ -5133,8 +5125,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              August 8, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5255,7 +5245,7 @@ error:
     return 1;
 } /* end test_copy_root_group */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_group
  *
@@ -5266,8 +5256,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5378,18 +5366,18 @@ test_copy_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 
 error:
     H5E_BEGIN_TRY {
-    	H5Sclose(sid);
-    	H5Dclose(did);
-    	H5Gclose(gid_sub);
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Gclose(gid_sub);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_group */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_group_deep
  *
@@ -5520,18 +5508,18 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
 
 error:
     H5E_BEGIN_TRY {
-    	H5Sclose(sid);
-    	H5Dclose(did);
-    	H5Gclose(gid_sub);
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Gclose(gid_sub);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_group_deep */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_group_loop
  *
@@ -5631,17 +5619,17 @@ test_copy_group_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
 
 error:
     H5E_BEGIN_TRY {
-    	H5Gclose(gid_sub2);
-    	H5Gclose(gid_sub);
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Gclose(gid_sub2);
+        H5Gclose(gid_sub);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_group_loop */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_group_wide_loop
  *
@@ -5760,17 +5748,17 @@ test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
 
 error:
     H5E_BEGIN_TRY {
-    	H5Gclose(gid_sub2);
-    	H5Gclose(gid_sub);
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Gclose(gid_sub2);
+        H5Gclose(gid_sub);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_group_wide_loop */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_group_links
  *
@@ -5781,12 +5769,6 @@ error:
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
- *
- * Modifications:
- *              Neil Fortner
- *              Tuesday, February 16, 2010
- *              Modified test to test flags for expanding soft and external
- *              links.
  *
  *-------------------------------------------------------------------------
  */
@@ -6018,20 +6000,20 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_
 
 error:
     H5E_BEGIN_TRY {
-    	H5Sclose(sid);
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_ext);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
-    	H5Pclose(plid);
+        H5Sclose(sid);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_ext);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
+        H5Pclose(plid);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_group_links */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_soft_link
  *
@@ -6157,17 +6139,17 @@ test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fa
 
 error:
     H5E_BEGIN_TRY {
-    	H5Sclose(sid);
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Sclose(sid);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_soft_link */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_ext_link
  *
@@ -6291,17 +6273,17 @@ test_copy_ext_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
 
 error:
     H5E_BEGIN_TRY {
-    	H5Sclose(sid);
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Sclose(sid);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_ext_link */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_exist
  *
@@ -6401,15 +6383,15 @@ test_copy_exist(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_exist */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_path
  *
@@ -6535,17 +6517,17 @@ test_copy_path(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Sclose(sid);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_path */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_same_file_named_datatype
  *
@@ -6607,25 +6589,22 @@ test_copy_same_file_named_datatype(hid_t fcpl_src, hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
-    	H5Tclose(tid2);
-    	H5Tclose(tid);
-    	H5Fclose(fid);
+        H5Tclose(tid2);
+        H5Tclose(tid);
+        H5Fclose(fid);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_same_file_named_datatype */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_old_layout
  *
  * Purpose:     Copy dataset that uses the "old" layout version (pre version 3)
  *              format.
  *
- *              Note: This test uses the "fill_old.h5" file for convenience, since it
+ * Note:    This test uses the "fill_old.h5" file for convenience, since it
  *              has a dataset with the old layout format.
- *
- *              Note: The parameter "test_open" is added to test for H5Ocopy when
- *                    the dataset is open in the file (HDFFV-7853).
  *
  * Return:      Success:        0
  *              Failure:        number of errors
@@ -6708,15 +6687,15 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl, hbool_t test_open)
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did2);
+        H5Dclose(did);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_old_layout */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compact_named_vl
  *
@@ -6777,7 +6756,7 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* make a copy of the datatype for later use */
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create and set compact plist */
@@ -6838,7 +6817,9 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid_copy) < 0) TEST_ERROR
@@ -6851,20 +6832,20 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 error:
     H5E_BEGIN_TRY {
-    	H5Pclose(pid);
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Pclose(pid);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Tclose(tid_copy);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Tclose(tid_copy);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_compact_named_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_contig_named_vl
  *
@@ -6924,7 +6905,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* make a copy of the datatype for later use */
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -6978,7 +6959,9 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid_copy) < 0) TEST_ERROR
@@ -6991,19 +6974,19 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Tclose(tid_copy);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Tclose(tid_copy);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_contig_named_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_chunked_named_vl
  *
@@ -7072,7 +7055,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* make a copy of the datatype for later use */
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
@@ -7138,7 +7121,9 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid_copy) < 0) TEST_ERROR
@@ -7151,20 +7136,20 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 error:
     H5E_BEGIN_TRY {
-    	H5Pclose(pid);
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Pclose(pid);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Tclose(tid_copy);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Tclose(tid_copy);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_chunked_named_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compressed_named_vl
  *
@@ -7226,7 +7211,7 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
     /* make a copy of the datatype for later use */
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
@@ -7288,7 +7273,9 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid_copy) < 0) TEST_ERROR
@@ -7301,20 +7288,20 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
 
 error:
     H5E_BEGIN_TRY {
-    	H5Pclose(pid);
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Pclose(pid);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Tclose(tid_copy);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Tclose(tid_copy);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_compressed_named_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compact_vl_vl
  *
@@ -7443,7 +7430,9 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -7457,19 +7446,20 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Tclose(tid2);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Pclose(pid);
+        H5Tclose(tid);
+        H5Tclose(tid2);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_compact_vl_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_contig_vl_vl
  *
@@ -7608,7 +7598,9 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -7622,19 +7614,20 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Tclose(tid2);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Pclose(pid);
+        H5Tclose(tid);
+        H5Tclose(tid2);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_contig_vl_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_chunked_vl_vl
  *
@@ -7653,7 +7646,7 @@ static int
 test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
-    hid_t tid = -1, tid2=-1;       /* Datatype ID */
+    hid_t tid = -1, tid2=-1;               /* Datatype ID */
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
@@ -7709,7 +7702,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     /* create nested VL datatype */
     if((tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
 
-     /* create and set chunk plist */
+    /* create and set chunk plist */
     if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
     if(H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
 
@@ -7724,6 +7717,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 
     /* close the dataset */
     if(H5Dclose(did) < 0) TEST_ERROR
+
 
     /* close the SRC file */
     if(H5Fclose(fid_src) < 0) TEST_ERROR
@@ -7763,7 +7757,9 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -7777,20 +7773,20 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 
 error:
     H5E_BEGIN_TRY {
-    	H5Pclose(pid);
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Pclose(pid);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Tclose(tid2);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Tclose(tid2);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_chunked_vl_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compressed_vl_vl
  *
@@ -7887,6 +7883,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     if(H5Pclose(pid) < 0) TEST_ERROR
 
     if(!test_open) {
+
         /* close the dataset */
         if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -7931,7 +7928,9 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -7945,15 +7944,15 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 error:
     H5E_BEGIN_TRY {
-    	H5Pclose(pid);
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Pclose(pid);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
-    	H5Tclose(tid);
-    	H5Tclose(tid2);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Tclose(tid2);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_compressed_vl_vl */
@@ -7967,7 +7966,7 @@ typedef struct cmpd_vl_t {
     double c;
 } cmpd_vl_t;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_contig_cmpd_vl
  *
@@ -8001,12 +8000,12 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* set initial data values */
     for(i = 0; i < DIM_SIZE_1; i++) {
-        buf[i].a = i * (i - 1);
+        buf[i].a = (int)(i * (i - 1));
         buf[i].b.len = i+1;
         buf[i].b.p = (int *)HDmalloc(buf[i].b.len * sizeof(int));
         for(j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
-        buf[i].c = 1.0F / (i + 1.0F);
+        buf[i].c = 1.0F / ((float)i + 1.0F);
     } /* end for */
 
     /* Initialize the filenames */
@@ -8080,7 +8079,9 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid2) < 0) TEST_ERROR
@@ -8094,19 +8095,19 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
         H5Tclose(tid2);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_contig_cmpd_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_chunked_cmpd_vl
  *
@@ -8140,12 +8141,12 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
     /* set initial data values */
     for(i = 0; i < DIM_SIZE_1; i++) {
-        buf[i].a = i * (i - 1);
+        buf[i].a = (int)(i * (i - 1));
         buf[i].b.len = i+1;
         buf[i].b.p = (int *)HDmalloc(buf[i].b.len * sizeof(int));
         for(j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
-        buf[i].c = 1.0F / (i + 1.0F);
+        buf[i].c = 1.0F / ((float)i + 1.0F);
     } /* end for */
 
     /* Initialize the filenames */
@@ -8226,7 +8227,9 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid2) < 0) TEST_ERROR
@@ -8240,19 +8243,20 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Pclose(pid);
         H5Tclose(tid2);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_chunked_cmpd_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_compact_cmpd_vl
  *
@@ -8285,12 +8289,12 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
     /* set initial data values */
     for(i = 0; i < DIM_SIZE_1; i++) {
-        buf[i].a = i * (i - 1);
+        buf[i].a = (int)(i * (i - 1));
         buf[i].b.len = i+1;
         buf[i].b.p = (int *)HDmalloc(buf[i].b.len * sizeof(int));
         for(j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
-        buf[i].c = 1.0F / (i + 1.0F);
+        buf[i].c = 1.0F / ((float)i + 1.0F);
     } /* end for */
 
     /* Initialize the filenames */
@@ -8371,7 +8375,9 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    }
 
     /* close datatype */
     if(H5Tclose(tid2) < 0) TEST_ERROR
@@ -8385,19 +8391,20 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did2);
-    	H5Dclose(did);
+        H5Dclose(did2);
+        H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Pclose(pid);
         H5Tclose(tid2);
-    	H5Tclose(tid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_compact_cmpd_vl */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_null_ref
  *
@@ -8559,7 +8566,7 @@ error:
     return 1;
 } /* end test_copy_null_ref */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_null_ref_open
  *
@@ -8741,7 +8748,7 @@ error:
     return 1;
 } /* end test_copy_null_ref_open */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_attr_crt_order
  *
@@ -8863,7 +8870,7 @@ error:
     return 1;
 } /* end test_copy_attr_crt_order */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_committed_datatype_merge
  *
@@ -8929,7 +8936,7 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src1, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -8953,7 +8960,7 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src2, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -9100,7 +9107,7 @@ error:
     return 1;
 } /* end test_copy_committed_datatype_merge */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_committed_datatype_merge_same_file
  *
@@ -9164,7 +9171,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid, NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset */
@@ -9191,7 +9198,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid, NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset */
@@ -9372,7 +9379,7 @@ error:
 } /* end test_copy_committed_datatype_merge_same_file */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_committed_dt_merge_sugg
  *
@@ -9436,7 +9443,7 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -9463,7 +9470,7 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "a" */
+    /* committed datatype "a" */
     if((H5Tcommit2(fid_dst, "/a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -9472,7 +9479,7 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "b" */
+    /* committed datatype "b" */
     if((H5Tcommit2(fid_dst, "/b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -9601,7 +9608,7 @@ error:
     return 1;
 } /* end test_copy_committed_dt_merge_sugg */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_committed_dt_merge_attr
  *
@@ -9667,7 +9674,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -9697,7 +9704,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* create anonymous committed data type */
+    /* create anonymous committed datatype */
     if((H5Tcommit_anon(fid_dst, tid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create attribute at SRC file */
@@ -9794,27 +9801,27 @@ error:
 #define ROOT_NDT_INT "root_ndt_int"
 #define GROUP_NDT_SHORT "group_ndt_short"
 
-#define SRC_GRP 	"src_grp"
-#define DST_GRP 	"dst_grp"
-#define DST_GRP2 	"dst_grp2"
+#define SRC_GRP     "src_grp"
+#define DST_GRP     "dst_grp"
+#define DST_GRP2     "dst_grp2"
 
-#define SRC_NDT_SHORT	"src_ndt_short"
-#define SRC_NDT_INT	"src_ndt_int"
-#define SRC_NDT_INT2	"src_ndt_int2"
-#define SRC_NDT_FLOAT	"src_ndt_float"
-#define SRC_NDT_DOUBLE	"src_ndt_double"
+#define SRC_NDT_SHORT    "src_ndt_short"
+#define SRC_NDT_INT    "src_ndt_int"
+#define SRC_NDT_INT2    "src_ndt_int2"
+#define SRC_NDT_FLOAT    "src_ndt_float"
+#define SRC_NDT_DOUBLE    "src_ndt_double"
 
-#define DST_NDT_SHORT	"dst_ndt_short"
-#define DST_NDT_INT	"dst_ndt_int"
-#define DST_NDT_FLOAT	"dst_ndt_float"
-#define DST_NDT_DOUBLE	"dst_ndt_double"
+#define DST_NDT_SHORT    "dst_ndt_short"
+#define DST_NDT_INT    "dst_ndt_int"
+#define DST_NDT_FLOAT    "dst_ndt_float"
+#define DST_NDT_DOUBLE    "dst_ndt_double"
 
-#define SRC_NDT_DSET	"src_ndt_dset"
-#define SRC_NDT_DSET2	"src_ndt_dset2"
-#define SRC_NDT_DSET3	"src_ndt_dset3"
+#define SRC_NDT_DSET    "src_ndt_dset"
+#define SRC_NDT_DSET2    "src_ndt_dset2"
+#define SRC_NDT_DSET3    "src_ndt_dset3"
 
-#define SRC_DSET	"src_dset"
-#define SRC_DSET1	"src_dset1"
+#define SRC_DSET    "src_dset"
+#define SRC_DSET1    "src_dset1"
 
 #define SRC_ATTR  "src_attr"
 
@@ -9823,21 +9830,21 @@ error:
 
 #define DST_ATTR  "dst_attr"
 #define DST_ATTR2  "dst_attr2"
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_cdt_hier_merge
  *
  * Purpose:     Tests the "merge committed datatypes" feature of H5Ocopy:
- *		SRC file:
- *		  Create committed datatypes at / and /g0
- *		  Create datasets with native type and committed datatypes at /g0
- *		DST file:
- *		  Create attributes with anonymous committed datatypes at /uncopied
+ *        SRC file:
+ *          Create committed datatypes at / and /g0
+ *          Create datasets with native type and committed datatypes at /g0
+ *        DST file:
+ *          Create attributes with anonymous committed datatypes at /uncopied
  *
- *		Copy / at SRC to DST
- *		Copy /g0 at SRC to DST
- *		Copy the datasets in /g0 at SRC to DST /uncopied
- *		Verify that committed datatypes are copied and merged correctly
+ *        Copy / at SRC to DST
+ *        Copy /g0 at SRC to DST
+ *        Copy the datasets in /g0 at SRC to DST /uncopied
+ *        Verify that committed datatypes are copied and merged correctly
  *
  * Return:      Success:        0
  *              Failure:        number of errors
@@ -9853,19 +9860,19 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     hid_t tid = -1;                             /* Datatype ID */
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t did = -1;                             /* Dataset ID */
-    hid_t gid = -1; 	                 	/* Group IDs */
-    hid_t f_tid = -1;				/* Datatype ID for root group */
-    hid_t g_tid = -1;				/* Datatype ID for group */
-    hid_t anon_tid = -1;			/* Anonymous datatype */
-    hid_t aid = -1;				/* Attribute ID */
+    hid_t gid = -1;                          /* Group IDs */
+    hid_t f_tid = -1;                /* Datatype ID for root group */
+    hid_t g_tid = -1;                /* Datatype ID for group */
+    hid_t anon_tid = -1;            /* Anonymous datatype */
+    hid_t aid = -1;                /* Attribute ID */
     hid_t ocpypl_id = -1;                       /* Object copy plist ID */
-    int i;					/* Local index variable */
-    hsize_t dim1d[1];				/* dimension sizes */
-    int buf[DIM_SIZE_1];			/* Buffer for data */
-    haddr_t exp_addr_int, exp_addr_short;     	/* Expected object addresses */
+    int i;                    /* Local index variable */
+    hsize_t dim1d[1];                /* dimension sizes */
+    int buf[DIM_SIZE_1];            /* Buffer for data */
+    haddr_t exp_addr_int, exp_addr_short;         /* Expected object addresses */
     H5O_info_t oinfo;                           /* Object info */
-    char src_filename[NAME_BUF_SIZE];		/* Source file name */
-    char dst_filename[NAME_BUF_SIZE];		/* Destination file name */
+    char src_filename[NAME_BUF_SIZE];        /* Source file name */
+    char dst_filename[NAME_BUF_SIZE];        /* Destination file name */
 
     if(reopen)
         TESTING("H5Ocopy(): hier. of committed datatypes and merging with reopen")
@@ -9883,8 +9890,8 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* Reset file address checking info */
     addr_reset();
 
-    /* 
-     * Populate source file 
+    /*
+     * Populate source file
      */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
 
@@ -9942,8 +9949,8 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* close the SRC file */
     if(H5Fclose(fid_src) < 0) TEST_ERROR
 
-    /* 
-     * Populate destination file 
+    /*
+     * Populate destination file
      */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
@@ -9956,7 +9963,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
 
     /* create attribute of anon ndt (short) in /uncopied */
     if((aid = H5Acreate2(gid, DST_ATTR_ANON_SHORT, anon_tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	TEST_ERROR
+    TEST_ERROR
 
     /* close the attribute */
     if(H5Aclose(aid) < 0) TEST_ERROR
@@ -9970,7 +9977,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
 
     /* create attribute of anon ndt (int) in /uncopied */
     if((aid = H5Acreate2(gid, DST_ATTR_ANON_INT, anon_tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	TEST_ERROR
+    TEST_ERROR
 
     /* close the attribute */
     if(H5Aclose(aid) < 0) TEST_ERROR
@@ -10131,17 +10138,17 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
 
 error:
     H5E_BEGIN_TRY {
-    	H5Tclose(tid);
-    	H5Tclose(f_tid);
-    	H5Tclose(g_tid);
-    	H5Tclose(anon_tid);
-	H5Pclose(ocpypl_id);
-	H5Aclose(aid);
-    	H5Dclose(did);
-    	H5Sclose(sid);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Tclose(tid);
+        H5Tclose(f_tid);
+        H5Tclose(g_tid);
+        H5Tclose(anon_tid);
+    H5Pclose(ocpypl_id);
+    H5Aclose(aid);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_cdt_hier_merge */
@@ -10151,22 +10158,22 @@ error:
  * Function:    test_copy_cdt_merge_cdt
  *
  * Purpose:     Tests the "merge committed datatypes" feature of H5Ocopy:
- *		SRC file:
- *			Create committed datatype (short)
- *			Create committed datatype (float)
- *			Create committed datatype (int), with attribute of ndt int
- *			Create committed datatype (double), with attribute of anon ndt short
- *		DST file:
- *			Create committed datatype (int)
- *			Create committed datatype (float), with attribute of native int
- *			Create committed datatype (double), with attribute of anon ndt short 
+ *        SRC file:
+ *            Create committed datatype (short)
+ *            Create committed datatype (float)
+ *            Create committed datatype (int), with attribute of ndt int
+ *            Create committed datatype (double), with attribute of anon ndt short
+ *        DST file:
+ *            Create committed datatype (int)
+ *            Create committed datatype (float), with attribute of native int
+ *            Create committed datatype (double), with attribute of anon ndt short
  *
- *		Copy / at SRC to DST
- *		Verify that committed datatypes are copied and merged correctly
+ *        Copy / at SRC to DST
+ *        Verify that committed datatypes are copied and merged correctly
  *
- *		NOTE: 
- *		  Comparison of attributes are not implemented yet.
- *		  Further tests will be added in the future.
+ *        NOTE:
+ *          Comparison of attributes are not implemented yet.
+ *          Further tests will be added in the future.
  *
  * Return:      Success:        0
  *              Failure:        number of errors
@@ -10181,15 +10188,15 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid1 = -1, tid2 = -1;                 /* Datatype IDs */
     hid_t tid3 = -1, tid4 = -1;                 /* Datatype IDs */
-    hid_t tid5 = -1, tid = -1;                 	/* Datatype IDs */
+    hid_t tid5 = -1, tid = -1;                     /* Datatype IDs */
     hid_t sid = -1;                             /* Dataspace ID */
-    hid_t aid = -1;				/* Attribute ID */
+    hid_t aid = -1;                /* Attribute ID */
     hid_t ocpypl_id = -1;                       /* Object copy plist ID */
-    hsize_t dim1d[1];				/* dimension sizes */
+    hsize_t dim1d[1];                /* dimension sizes */
     H5O_info_t oinfo;                           /* Object info */
-    haddr_t exp_addr;      			/* Expected object addresses */
-    char src_filename[NAME_BUF_SIZE];		/* Source file name */
-    char dst_filename[NAME_BUF_SIZE];		/* Destination file name */
+    haddr_t exp_addr;                  /* Expected object addresses */
+    char src_filename[NAME_BUF_SIZE];        /* Source file name */
+    char dst_filename[NAME_BUF_SIZE];        /* Destination file name */
 
     if(reopen)
         TESTING("H5Ocopy(): merging various committed datatypes with reopen")
@@ -10203,8 +10210,8 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     /* Reset file address checking info */
     addr_reset();
 
-    /* 
-     * Populate source file 
+    /*
+     * Populate source file
      */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
 
@@ -10254,8 +10261,8 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     /* close the SRC file */
     if(H5Fclose(fid_src) < 0) TEST_ERROR
 
-    /* 
-     * Populate destination file 
+    /*
+     * Populate destination file
      */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
@@ -10310,8 +10317,8 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     /* copy everything in SRC to DST */
     if(H5Ocopy(fid_src, "/", fid_dst, SRC_ROOT_GROUP, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* 
-     * Verification 
+    /*
+     * Verification
      */
     /* get address of committed datatype: /src_root/src_ndt_double */
     if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_DOUBLE, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -10375,29 +10382,29 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
 
 error:
     H5E_BEGIN_TRY {
-	H5Pclose(ocpypl_id);
-	H5Tclose(tid);
-	H5Tclose(tid1);
-	H5Tclose(tid2);
-	H5Tclose(tid3);
-	H5Tclose(tid4);
-	H5Tclose(tid5);
-	H5Aclose(aid);
-    	H5Sclose(sid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+    H5Pclose(ocpypl_id);
+    H5Tclose(tid);
+    H5Tclose(tid1);
+    H5Tclose(tid2);
+    H5Tclose(tid3);
+    H5Tclose(tid4);
+    H5Tclose(tid5);
+    H5Aclose(aid);
+        H5Sclose(sid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_cdt_merge_cdt */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_cdt_merge_suggs
  *
  * Purpose:     Tests the suggested searching paths feature (H5Padd_merge_committed_dtype_path)
- *		is correctly applied in merging the committed datatypes.
- *		
+ *        is correctly applied in merging the committed datatypes.
+ *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
@@ -10466,7 +10473,7 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     /*
-     * Test 1 
+     * Test 1
      */
     /* open the source file with read-only */
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
@@ -10502,8 +10509,8 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
-     * Test 2 
+    /*
+     * Test 2
      */
     /* open destination file */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -10535,8 +10542,8 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
-     * Test 3 
+    /*
+     * Test 3
      */
     /* open destination file */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -10551,7 +10558,7 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* copy "/src_ndt_int" from SRC file to "/src_ndt_int2" at DST file */
     /* copy with merging and search suggestion: "/uncopied/src_ndt_int" */
     if(H5Ocopy(fid_src, SRC_NDT_INT, fid_dst, SRC_NDT_INT2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
-    
+
     if(reopen) {
         /* Reopen file */
         if(H5Fclose(fid_dst) < 0) TEST_ERROR
@@ -10573,8 +10580,8 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
-     * Test 4 
+    /*
+     * Test 4
      */
     /* open destination file */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -10626,13 +10633,13 @@ error:
     return 1;
 } /* end test_copy_cdt_merge_suggs */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_cdt_merge_dset_suggs
  *
  * Purpose:     Tests the suggested searching paths feature (H5Padd_merge_committed_dtype_path)
- *		is correctly applied in merging the committed datatypes of datasets.
- *		
+ *        is correctly applied in merging the committed datatypes of datasets.
+ *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
@@ -10727,7 +10734,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     if(H5Sclose(sid) < 0) TEST_ERROR
 
     /*
-     * Test 1 
+     * Test 1
      */
     /* open the source file with read-only */
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0) TEST_ERROR
@@ -10765,8 +10772,8 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
-     * Test 2 
+    /*
+     * Test 2
      */
     /* open destination file */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -10802,8 +10809,8 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
-     * Test 3 
+    /*
+     * Test 3
      */
     /* open destination file */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -10818,7 +10825,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* copy "src_ndt_dset" from SRC file to "/src_ndt_dset2" at DST file */
     /* use merging and suggested searching path: "/uncopied/src_ndt_dset" */
     if(H5Ocopy(fid_src, SRC_NDT_DSET, fid_dst, SRC_NDT_DSET2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
-    
+
     if(reopen) {
         /* Reopen file */
         if(H5Fclose(fid_dst) < 0) TEST_ERROR
@@ -10844,8 +10851,8 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
-     * Test 4 
+    /*
+     * Test 4
      */
     /* open destination file */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -10903,12 +10910,12 @@ error:
     return 1;
 } /* end test_copy_cdt_merge_dset_suggs */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_cdt_merge_all_suggs
  *
  * Purpose:     Tests the merging committed datatype + search suggestion feature.
- *		
+ *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
@@ -10927,8 +10934,8 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     hid_t aid = -1;                             /* Attribute ID */
     hid_t did = -1;                             /* Dataset ID */
     hid_t exp_did = -1;                          /* Dataset ID */
-    hid_t tid_short = -1; 			/* Datatype ID */
-    hid_t exp_tid = -1;				/* Expected datatype ID */
+    hid_t tid_short = -1;             /* Datatype ID */
+    hid_t exp_tid = -1;                /* Expected datatype ID */
     hid_t ocpypl_id = -1;                       /* Object copy plist ID */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     char src_filename[NAME_BUF_SIZE];
@@ -10984,7 +10991,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* create third dataset in group */
     if((did = H5Dcreate2(gid, SRC_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    
+
     /* get datatype */
     if((tid_short = H5Topen2(fid_src, "/" SRC_GRP "/" SRC_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
 
@@ -11113,7 +11120,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Test 1
      */
     /* open the source file with read-only */
@@ -11154,7 +11161,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Test 2
      */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -11191,7 +11198,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Test 3
      */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -11226,7 +11233,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Test 4
      */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -11279,7 +11286,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Test 5
      */
     /* open destination file */
@@ -11317,7 +11324,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Test 6
      */
     /* open destination file */
@@ -11378,7 +11385,7 @@ error:
     return 1;
 } /* end test_copy_cdt_merge_all_suggs */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_set_mcdt_search_cb
  *
@@ -11457,7 +11464,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -11487,7 +11494,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "a" */
+    /* committed datatype "a" */
     if((H5Tcommit2(fid_dst, "/a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -11496,7 +11503,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "b" */
+    /* committed datatype "b" */
     if((H5Tcommit2(fid_dst, "/b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -11563,7 +11570,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* Continue the global search */
     if(H5Pset_mcdt_search_cb(ocpypl_id, mcdt_search_cb, &cb_udata) < 0)
-	TEST_ERROR
+    TEST_ERROR
 
     /* open destination file */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -11598,7 +11605,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
 
-    /* 
+    /*
      * Stop the search, default action is to create an anonymous committed datatype
      */
     cb_udata.search_action = H5O_MCDT_SEARCH_STOP;
@@ -11734,7 +11741,7 @@ error:
     return 1;
 } /* end test_copy_set_mcdt_search_cb */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_set_get_mcdt_cb
  *
@@ -11780,10 +11787,10 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     int buf[DIM_SIZE_1];                        /* Buffer for writing data */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
-    H5O_mcdt_search_cb_t mcdt_cb = NULL;	/* The callback function */
-    H5O_mcdt_search_ret_t mcdt_udataA;		/* User data for callback */
-    H5O_mcdt_search_ret_t mcdt_udataB;		/* User data for callback */
-    H5O_mcdt_search_ret_t *mcdt_udata_p = NULL;	/* Pointer to user data for callback */
+    H5O_mcdt_search_cb_t mcdt_cb = NULL;    /* The callback function */
+    H5O_mcdt_search_ret_t mcdt_udataA;        /* User data for callback */
+    H5O_mcdt_search_ret_t mcdt_udataB;        /* User data for callback */
+    H5O_mcdt_search_ret_t *mcdt_udata_p = NULL;    /* Pointer to user data for callback */
 
     if(reopen)
         TESTING("H5Ocopy(): H5Pset/get_mcdt_search_cb and reopen")
@@ -11816,7 +11823,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -11846,7 +11853,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "a" */
+    /* committed datatype "a" */
     if((H5Tcommit2(fid_dst, "/a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -11855,7 +11862,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "b" */
+    /* committed datatype "b" */
     if((H5Tcommit2(fid_dst, "/b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -11913,7 +11920,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* Continue the global search */
     if(H5Pset_mcdt_search_cb(ocpypl_id, mcdt_search_cbA, &mcdt_udataA) < 0)
-	TEST_ERROR
+    TEST_ERROR
 
     /* open the destination file */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -11946,7 +11953,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     mcdt_udataB = H5O_MCDT_SEARCH_STOP;
 
     if(H5Pset_mcdt_search_cb(ocpypl_id, mcdt_search_cbA, &mcdt_udataB) < 0)
-	TEST_ERROR
+    TEST_ERROR
 
     /* open destination file */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -11976,7 +11983,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     if(H5Pfree_merge_committed_dtype_paths(ocpypl_id) < 0) TEST_ERROR
 
     if(H5Pset_mcdt_search_cb(ocpypl_id, mcdt_search_cbB, &mcdt_udataB) < 0)
-	TEST_ERROR
+    TEST_ERROR
 
     /* open destination file */
     if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDWR, dst_fapl)) < 0) TEST_ERROR
@@ -12029,7 +12036,7 @@ error:
     return 1;
 } /* end test_copy_set_get_mcdt_search_cb */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_iterate
  *
@@ -12065,7 +12072,7 @@ test_copy_iterate(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl
     hid_t fid1 = -1, fid2 = -1;                 /* File IDs */
     hid_t gid = -1;                             /* Group ID */
     int i;
-    char grp_name[8];
+    char grp_name[16];
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
 
@@ -12127,7 +12134,7 @@ error:
     return 1;
 } /* end test_copy_iterate */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_option
  *
@@ -12138,8 +12145,6 @@ error:
  *
  * Programmer:  Peter Cao
  *               March 11, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -12152,7 +12157,7 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
     hid_t did = -1;                             /* Dataset ID */
     hid_t gid=-1, gid2=-1, gid_ref=-1;          /* Group IDs */
     hid_t gid_sub=-1, gid_sub_sub=-1;           /* Sub-group ID */
-    hid_t pid=-1, lcpl_id=-1;			/* Property IDs */
+    hid_t pid=-1, lcpl_id=-1;            /* Property IDs */
     unsigned cpy_flags;                         /* Object copy flags */
     int depth = -1;                             /* Copy depth */
     hsize_t dim2d[2];
@@ -12405,59 +12410,57 @@ error:
     H5E_BEGIN_TRY {
         H5Pclose(lcpl_id);
         H5Pclose(pid);
-    	H5Sclose(sid);
-    	H5Dclose(did);
-    	H5Gclose(gid_ref);
-    	H5Gclose(gid_sub);
-    	H5Gclose(gid2);
-    	H5Gclose(gid);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
-    	H5Fclose(fid_ext);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Gclose(gid_ref);
+        H5Gclose(gid_sub);
+        H5Gclose(gid2);
+        H5Gclose(gid);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
+        H5Fclose(fid_ext);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_option */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_copy_dataset_open
  *
  * Purpose:     To ensure that H5Ocopy() copies data of opened dataset correctly.
- *		This is for bug fix HDFFV-7853.
+ *        This is for bug fix HDFFV-7853.
  *
- *		Test Case 1:
- *		Create a dataset with attributes in SRC file
- *		Copy the opened dataset to another location in the same file
- *		Copy the opened dataset to DST file
- *		Close the dataset
+ *        Test Case 1:
+ *        Create a dataset with attributes in SRC file
+ *        Copy the opened dataset to another location in the same file
+ *        Copy the opened dataset to DST file
+ *        Close the dataset
  *
- *		Test Case 2:
- *		Reopen the dataset, write new data to the dataset
- *		Copy the opened dataset to another location in the same file
- *		Copy the opened dataset to to DST file
- *		Close the dataset
+ *        Test Case 2:
+ *        Reopen the dataset, write new data to the dataset
+ *        Copy the opened dataset to another location in the same file
+ *        Copy the opened dataset to to DST file
+ *        Close the dataset
  *
- *		Test Case 3:
- *		Create a committed datatype
- *		Create a dataset with the committed datatype in SRC file
- *		Open the committed datatype
- *		Copy the opened dataset (with the opened committed datatype) to another location in the same file
- *		Copy the opened dataset (with the opened committed datatype) to DST file
- *		Close the dataset and the committed datatype
+ *        Test Case 3:
+ *        Create a committed datatype
+ *        Create a dataset with the committed datatype in SRC file
+ *        Open the committed datatype
+ *        Copy the opened dataset (with the opened committed datatype) to another location in the same file
+ *        Copy the opened dataset (with the opened committed datatype) to DST file
+ *        Close the dataset and the committed datatype
  *
- *		Test Case 4:
- *		Create a group with attributes, create a dataset in the group
- *		Copy the opened group (together with the opened dataset) to another location in the same file
- *		Copy the opened group (together with the opened dataset) to DST file
- *		Close the group and the dataset
+ *        Test Case 4:
+ *        Create a group with attributes, create a dataset in the group
+ *        Copy the opened group (together with the opened dataset) to another location in the same file
+ *        Copy the opened group (together with the opened dataset) to DST file
+ *        Close the group and the dataset
  *
  * Return:      Success:        0
  *              Failure:        number of errors
  *
  * Programmer:  Vailin Choi
  *              Feb 7, 2012
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -12470,10 +12473,10 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
     hid_t did3 = -1, did4 = -1;                 /* Dataset IDs */
     hid_t gid = -1, gid2 = -1;                  /* Group IDs */
+    hid_t pid = -1;                             /* Dataset creation property list */
+    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2};   /* Chunk dimension sizes */
     int buf[DIM_SIZE_1][DIM_SIZE_2];            /* Buffer for writing data */
     int newbuf[DIM_SIZE_1][DIM_SIZE_2];         /* Buffer for writing data */
-    hid_t pid = -1;                             /* Dataset creation property list */
-    hsize_t chunk_dim2d[2] ={CHUNK_SIZE_1, CHUNK_SIZE_2};   /* Chunk dimension sizes */
     hsize_t dim2d[2];                           /* Dataset dimensions */
     int i, j;                                   /* local index variables */
     char src_filename[NAME_BUF_SIZE];
@@ -12532,18 +12535,18 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     if(test_copy_attach_attributes(did, H5T_NATIVE_INT) < 0) TEST_ERROR
     if(test_copy_attach_attributes(did2, H5T_NATIVE_INT) < 0) TEST_ERROR
 
-    /* 
-     * Test case 1 
+    /*
+     * Test case 1
      */
 
-    /* 
+    /*
      * Copy within the same file
      */
     /* copy the opened dataset to another location in SRC file */
     if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_src, NAME_DATASET_SIMPLE2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Ocopy(fid_src, NAME_DATASET_CHUNKED, fid_src, NAME_DATASET_CHUNKED2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* open the copied datasets */
+    /* open the copied dataset */
     if((did3 = H5Dopen2(fid_src, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((did4 = H5Dopen2(fid_src, NAME_DATASET_CHUNKED2, H5P_DEFAULT)) < 0) TEST_ERROR
 
@@ -12555,7 +12558,7 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     if(H5Dclose(did3) < 0) TEST_ERROR
     if(H5Dclose(did4) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Copy to another file
      */
     /* copy the opened dataset from SRC to DST */
@@ -12578,8 +12581,8 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     if(H5Dclose(did) < 0) TEST_ERROR
     if(H5Dclose(did2) < 0) TEST_ERROR
 
-    /* 
-     * Test case 2 
+    /*
+     * Test case 2
      */
     /* reopen the dataset in SRC file */
     if((did = H5Dopen2(fid_src, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -12589,7 +12592,7 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, newbuf) < 0) TEST_ERROR
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, newbuf) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Copy within the same file
      */
     /* copy the opened dataset to another location in SRC file */
@@ -12607,7 +12610,7 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     /* close the copied dataset in SRC file */
     if(H5Dclose(did3) < 0) TEST_ERROR
     if(H5Dclose(did4) < 0) TEST_ERROR
-    /* 
+    /*
      * Copy to another file
      */
     /* copy the opened dataset from SRC to DST */
@@ -12630,8 +12633,8 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     if(H5Dclose(did) < 0) TEST_ERROR
     if(H5Dclose(did2) < 0) TEST_ERROR
 
-    /* 
-     * Test case 3 
+    /*
+     * Test case 3
      */
 
     /* make a copy of the datatype */
@@ -12652,7 +12655,7 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     /* write data to the dataset */
     if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Copy within the same file
      */
     /* copy the opened dataset (with the opened committed datatype) to another location in SRC file */
@@ -12667,7 +12670,7 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     /* close the copied dataset in SRC file */
     if(H5Dclose(did2) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Copy to another file
      */
     /* copy the opened dataset (with the opened committed datatype) from SRC to DST */
@@ -12688,8 +12691,8 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     /* close the committed datatype at SRC file */
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* 
-     * Test case 4 
+    /*
+     * Test case 4
      */
     /* create a group in SRC file */
     if((gid = H5Gcreate2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -12702,7 +12705,7 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
 
     /* write data to the dataset */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
-    /* 
+    /*
      * Copy within the same file
      */
     /* copy the opened group (together with opened dataset) to another location in SRC file */
@@ -12717,7 +12720,7 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     /* close the DST dataset */
     if(H5Gclose(gid2) < 0) TEST_ERROR
 
-    /* 
+    /*
      * Copy to another file
      */
     /* copy the opened group (together with opened dataset) to DST file */
@@ -12752,20 +12755,20 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
 
 error:
     H5E_BEGIN_TRY {
-    	H5Dclose(did);
-    	H5Dclose(did2);
-    	H5Sclose(sid);
-    	H5Gclose(gid);
-    	H5Gclose(gid2);
-    	H5Fclose(fid_dst);
-    	H5Fclose(fid_src);
+        H5Dclose(did);
+        H5Dclose(did2);
+        H5Sclose(sid);
+        H5Gclose(gid);
+        H5Gclose(gid2);
+        H5Fclose(fid_dst);
+        H5Fclose(fid_src);
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_open */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:   	main
+ * Function:       main
  *
  * Purpose:     Test H5Ocopy()
  *
@@ -12778,19 +12781,17 @@ error:
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
     int     nerrors = 0;
-    hid_t	fapl, fapl2;
+    hid_t    fapl, fapl2;
     hid_t   fcpl_shared, ocpl;
     unsigned    max_compact, min_dense;
     int     configuration;  /* Configuration of tests. */
-    int	ExpressMode;
+    int    ExpressMode;
     hbool_t same_file;  /* Whether to run tests that only use one file */
 
     /* Setup */
@@ -12799,7 +12800,7 @@ main(void)
 
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        printf("***Express test mode on.  Some tests may be skipped\n");
+        HDprintf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Copy the file access property list */
     if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
@@ -12835,52 +12836,52 @@ main(void)
 
         /* Test with and without shared messages */
         if(configuration & CONFIG_SHARE_SRC) {
-            puts("\nTesting with shared src messages:");
+            HDputs("\nTesting with shared src messages:");
             fcpl_src = fcpl_shared;
         }
         else {
-            puts("\nTesting without shared src messages:");
+            HDputs("\nTesting without shared src messages:");
             fcpl_src = H5P_DEFAULT;
         }
         if(configuration & CONFIG_SHARE_DST) {
-            puts("Testing with shared dst messages:");
+            HDputs("Testing with shared dst messages:");
             fcpl_dst = fcpl_shared;
             same_file = FALSE;
         }
         else {
-            puts("Testing without shared dst messages:");
+            HDputs("Testing without shared dst messages:");
             fcpl_dst = H5P_DEFAULT;
         }
 
         /* Set the FAPL for the source file's type of format */
         if(configuration & CONFIG_SRC_NEW_FORMAT) {
-            puts("Testing with latest format for source file:");
+            HDputs("Testing with latest format for source file:");
             src_fapl = fapl2;
 
             /* Test with and without dense attributes */
             if(configuration & CONFIG_DENSE) {
-                puts("Testing with dense attributes:");
+                HDputs("Testing with dense attributes:");
                 num_attributes_g = max_compact + 1;
             }
             else {
-                puts("Testing without dense attributes:");
+                HDputs("Testing without dense attributes:");
                 num_attributes_g = MAX(min_dense, 2) - 2;
             }
         } /* end if */
         else {
-	    puts("Testing with oldest file format for source file:");
+            HDputs("Testing with oldest file format for source file:");
             src_fapl = fapl;
             num_attributes_g = 4;
         } /* end else */
 
         /* Set the FAPL for the destination file's type of format */
         if(configuration & CONFIG_DST_NEW_FORMAT) {
-            puts("Testing with latest format for destination file:");
+            HDputs("Testing with latest format for destination file:");
             dst_fapl = fapl2;
             same_file = FALSE;
         } /* end if */
         else {
-            puts("Testing with oldest file format for destination file:");
+            HDputs("Testing with oldest file format for destination file:");
             dst_fapl = fapl;
         } /* end else */
 
@@ -12939,10 +12940,10 @@ main(void)
                     FALSE, "H5Ocopy(): expand soft link");
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                     H5O_COPY_EXPAND_EXT_LINK_FLAG,
-                    FALSE, "H5Ocopy: expand external link");
+                    FALSE, "H5Ocopy(): expand external link");
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                     H5O_COPY_EXPAND_SOFT_LINK_FLAG | H5O_COPY_EXPAND_EXT_LINK_FLAG,
-                    FALSE, "H5Ocopy: expand soft and external links");
+                    FALSE, "H5Ocopy(): expand soft and external links");
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                     H5O_COPY_SHALLOW_HIERARCHY_FLAG,
                     FALSE, "H5Ocopy(): shallow group copy");
@@ -13007,7 +13008,6 @@ main(void)
             nerrors += test_copy_dataset_compressed_named_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_dataset_compact_vl_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
 
-
             /* Test with dataset opened in the file or not */
             nerrors += test_copy_dataset_contig_vl_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl, FALSE);
             nerrors += test_copy_dataset_contig_vl_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl, TRUE);
@@ -13023,7 +13023,7 @@ main(void)
             nerrors += test_copy_dataset_compact_cmpd_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
 
             nerrors += test_copy_same_file_named_datatype(fcpl_src, src_fapl);
-            
+
             /* Test with dataset opened in the file or not */
             nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, FALSE);
             nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, TRUE);
@@ -13033,7 +13033,7 @@ main(void)
             nerrors += test_copy_null_ref_open(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
 
             nerrors += test_copy_iterate(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
-        }
+        } /* end if */
 
 /* TODO: not implemented
         nerrors += test_copy_mount(src_fapl);
@@ -13048,12 +13048,12 @@ main(void)
 
     /* Results */
     if(nerrors) {
-        printf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
+        HDprintf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
                 nerrors, (1 == nerrors ? "" : "S"));
-        exit(1);
+        exit(EXIT_FAILURE);
     } /* end if */
 
-    puts ("All object copying tests passed.");
+    HDputs ("All object copying tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 

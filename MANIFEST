@@ -2393,6 +2393,7 @@
 ./c++/src/CMakeLists.txt
 ./c++/test/CMakeLists.txt
 ./c++/test/CMakeTests.cmake
+./c++/test/CMakeVFDTests.cmake
 ./examples/CMakeLists.txt
 ./examples/CMakeTests.cmake
 ./examples/run-all-ex.sh
@@ -2432,6 +2433,7 @@
 ./test/CMakeVFDTests.cmake
 ./testpar/CMakeLists.txt
 ./testpar/CMakeTests.cmake
+./testpar/CMakeVFDTests.cmake
 ./tools/CMakeLists.txt
 ./tools/h5copy/CMakeLists.txt
 ./tools/h5copy/CMakeTests.cmake
@@ -2441,6 +2443,7 @@
 ./tools/h5dump/CMakeTests.cmake
 ./tools/h5dump/CMakeTestsPBITS.cmake
 ./tools/h5dump/CMakeTestsXML.cmake
+./tools/h5dump/CMakeVFDTests.cmake
 ./tools/h5import/CMakeLists.txt
 ./tools/h5import/CMakeTests.cmake
 ./tools/h5jam/CMakeLists.txt
@@ -2449,11 +2452,11 @@
 ./tools/h5ls/CMakeTests.cmake
 ./tools/h5repack/CMakeLists.txt
 ./tools/h5repack/CMakeTests.cmake
+./tools/h5repack/CMakeVFDTests.cmake
 ./tools/h5stat/CMakeLists.txt
 ./tools/h5stat/CMakeTests.cmake
 ./tools/lib/CMakeLists.txt
 ./tools/misc/CMakeLists.txt
-./tools/misc/CMakeTests.cmake
 ./tools/misc/CMakeTestsMkgrp.cmake
 ./tools/misc/CMakeTestsRepart.cmake
 ./tools/perform/CMakeLists.txt
