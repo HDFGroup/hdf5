@@ -3658,8 +3658,7 @@ cache_image_smoke_check_2(void)
 
     if ( show_progress ) 
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
- 
- 
+
     /* 4) Open the file.  
      *
      *    Verify that the metadata cache is instructed to load the 
@@ -4565,7 +4564,6 @@ cache_image_smoke_check_4(void)
                   FUNC, failure_mssg);
 
     return !pass;
-
 } /* cache_image_smoke_check_4() */
 
 
@@ -5028,8 +5026,7 @@ cache_image_smoke_check_5(void)
      */
     i = min_group;
     while ( ( pass ) && ( i <= max_group ) ) {
-
-	sprintf(process_group_name, "/process_%d", i);
+        sprintf(process_group_name, "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
  

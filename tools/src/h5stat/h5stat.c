@@ -74,14 +74,14 @@ typedef struct iter_t {
     ohdr_info_t group_ohdr_info;        /* Object header information for groups */
 
     hsize_t  max_attrs;                 /* Maximum attributes from a group */
-    unsigned long *num_small_attrs;    	/* Size of small attributes tracked */
+    unsigned long *num_small_attrs;     /* Size of small attributes tracked */
     unsigned attr_nbins;                /* Number of bins for attribute counts */
     unsigned long *attr_bins;           /* Pointer to array of bins for attribute counts */
 
     unsigned max_dset_rank;             /* Maximum rank of dataset */
     unsigned long dset_rank_count[H5S_MAX_RANK];   /* Number of datasets of each rank */
     hsize_t max_dset_dims;              /* Maximum dimension size of dataset */
-    unsigned long *small_dset_dims;    /* Size of dimensions of small datasets tracked */
+    unsigned long *small_dset_dims;     /* Size of dimensions of small datasets tracked */
     unsigned long dset_layouts[H5D_NLAYOUTS];           /* Type of storage for each dataset */
     unsigned long dset_comptype[H5_NFILTERS_IMPL];     /* Number of currently implemented filters */
     unsigned long dset_ntypes;          /* Number of diff. dataset datatypes found */
@@ -257,7 +257,7 @@ leave(int ret)
 }
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function: usage
  *
@@ -297,7 +297,7 @@ static void usage(const char *prog)
      HDfprintf(stdout, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: ceil_log10
  *
@@ -324,7 +324,7 @@ ceil_log10(unsigned long x)
     return ret;
 } /* ceil_log10() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: attribute_stats
  *
@@ -374,7 +374,7 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
      return 0;
 } /* end attribute_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: group_stats
  *
@@ -456,7 +456,7 @@ done:
     return ret_value;
 } /* end group_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: dataset_stats
  *
@@ -648,7 +648,7 @@ done:
      return ret_value;
 }  /* end dataset_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: datatype_stats
  *
@@ -680,7 +680,7 @@ done:
      return ret_value;
 }  /* end datatype_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: obj_stats
  *
@@ -736,7 +736,7 @@ done:
     return ret_value;
 } /* end obj_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: lnk_stats
  *
@@ -834,7 +834,7 @@ freespace_stats(hid_t fid, iter_t *iter)
     return 0;
 } /* end freespace_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: hand_free
  *
@@ -863,7 +863,7 @@ hand_free(struct handler_t *hand)
     } /* end if */
 } /* end hand_free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
  *
@@ -1041,7 +1041,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: iter_free
  *
@@ -1106,7 +1106,7 @@ iter_free(iter_t *iter)
     } /* end if */
 } /* end iter_free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_file_info
  *
@@ -1138,7 +1138,7 @@ print_file_info(const iter_t *iter)
     return 0;
 } /* print_file_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_file_metadata
  *
@@ -1198,7 +1198,7 @@ print_file_metadata(const iter_t *iter)
     return 0;
 } /* print_file_metadata() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_group_info
  *
@@ -1255,7 +1255,7 @@ print_group_info(const iter_t *iter)
     return 0;
 } /* print_group_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_group_metadata
  *
@@ -1282,7 +1282,7 @@ print_group_metadata(const iter_t *iter)
     return 0;
 } /* print_group_metadata() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_dataset_info
  *
@@ -1369,7 +1369,7 @@ print_dataset_info(const iter_t *iter)
     return 0;
 } /* print_dataset_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_dataset_metadata
  *
@@ -1398,7 +1398,7 @@ print_dset_metadata(const iter_t *iter)
     return 0;
 } /* print_dset_metadata() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_dset_dtype_meta
  *
@@ -1439,7 +1439,7 @@ print_dset_dtype_meta(const iter_t *iter)
     return 0;
 } /* print_dset_dtype_meta() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_attr_info
  *
@@ -1488,7 +1488,7 @@ print_attr_info(const iter_t *iter)
     return 0;
 } /* print_attr_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_freespace_info
  *
@@ -1538,7 +1538,7 @@ print_freespace_info(const iter_t *iter)
     return 0;
 } /* print_freespace_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_storage_summary
  *
@@ -1602,7 +1602,7 @@ print_storage_summary(const iter_t *iter)
     return 0;
 } /* print_storage_summary() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_file_statistics
  *
@@ -1649,7 +1649,7 @@ print_file_statistics(const iter_t *iter)
     if(display_summary)         print_storage_summary(iter);
 } /* print_file_statistics() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_object_statistics
  *
@@ -1672,7 +1672,7 @@ print_object_statistics(const char *name)
     printf("Object name %s\n", name);
 } /* print_object_statistics() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_statistics
  *
@@ -1698,7 +1698,7 @@ print_statistics(const char *name, const iter_t *iter)
         print_file_statistics(iter);
 } /* print_statistics() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: main
  *

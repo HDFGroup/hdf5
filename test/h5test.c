@@ -225,6 +225,14 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      sub_filename in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 void
 h5_delete_test_file(const char *base_name, hid_t fapl)
 {
@@ -267,13 +275,14 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
             HDsnprintf(sub_filename, sizeof(sub_filename), "%s-%c.h5", filename, multi_letters[mt]);
             HDremove(sub_filename);
-        } /* end for */
+        }
     } else {
         HDremove(filename);
-    } /* end if */
+    } /* end driver selection tree */
 
     return;
 } /* end h5_delete_test_file() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------
@@ -610,7 +619,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
     /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
      * could be of value -1 if it is not defined.
      */
-    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO==driver);
+    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO == driver);
 
     /* Check HDF5_NOCLEANUP environment setting.
      * (The #ifdef is needed to prevent compile failure in case MPI is not
@@ -805,8 +814,8 @@ h5_rmprefix(const char *filename)
  *              but with a file driver set according to the constant or
  *              environment variable HDF5_DRIVER
  *
- * Return:      Success:  A file access property list
- *              Failure:  -1
+ * Return:      Success:    A file access property list
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Robb Matzke
  *              Thursday, November 19, 1998
@@ -819,7 +828,7 @@ h5_fileaccess(void)
     const char  *val = NULL;
     const char  *name;
     char        s[1024];
-    hid_t       fapl = -1;
+    hid_t       fapl = H5I_INVALID_HID;
 
     /* First use the environment variable, then the constant */
     val = HDgetenv("HDF5_DRIVER");
@@ -1192,7 +1201,7 @@ h5_set_info_object(void)
     int    ret_value=0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
-    if ((envp = getenv("HDF5_MPI_INFO")) != NULL){
+    if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL){
         char *next, *valp;
 
         valp = envp = next = HDstrdup(envp);
@@ -1254,7 +1263,7 @@ h5_set_info_object(void)
 
                 /* actually set the darned thing */
                 if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
-                    printf("MPI_Info_set failed\n");
+                    HDprintf("MPI_Info_set failed\n");
                     ret_value = -1;
                 }
             }
@@ -1317,6 +1326,14 @@ h5_dump_info_object(MPI_Info info)
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      temp in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 h5_stat_size_t
 h5_get_file_size(const char *filename, hid_t fapl)
 {
@@ -1418,6 +1435,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
 
     return(-1);
 } /* end get_file_size() */
+#pragma GCC diagnostic pop
 
 /*
  * This routine is designed to provide equivalent functionality to 'printf'
@@ -1430,9 +1448,9 @@ print_func(const char *format, ...)
   va_list arglist;
   int ret_value;
 
-  va_start(arglist, format);
+  HDva_start(arglist, format);
   ret_value = vprintf(format, arglist);
-  va_end(arglist);
+  HDva_end(arglist);
   return ret_value;
 }
 
@@ -1517,7 +1535,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
     int len;
     static char* env = NULL;
 
-    assert(name);
+    HDassert(name);
 
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);
@@ -1525,7 +1543,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
     if(mpi_initialized && !mpi_finalized) {
         MPI_Comm_rank(comm, &mpi_rank);
         MPI_Comm_size(comm, &mpi_size);
-        assert(root < mpi_size);
+        HDassert(root < mpi_size);
 
         /* The root task does the getenv call
          * and sends the result to the other tasks */
@@ -1643,14 +1661,10 @@ error:
  *
  * Purpose:     Callback function for h5_verify_cached_stabs.
  *
- * Return:      Success:        0
- *
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Neil Fortner
  *              Tuesday, April 12, 2011
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1659,9 +1673,9 @@ h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name,
     const H5O_info_t *oinfo, void H5_ATTR_UNUSED *udata)
 {
     if(oinfo->type == H5O_TYPE_GROUP)
-        return(H5G__verify_cached_stabs_test(oid));
+        return H5G__verify_cached_stabs_test(oid);
     else
-        return(0);
+        return SUCCEED;
 } /* end h5_verify_cached_stabs_cb() */
 
 

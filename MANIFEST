@@ -3332,6 +3332,7 @@
 ./tools/test/h5dump/CMakeTestsPBITS.cmake
 ./tools/test/h5dump/CMakeTestsXML.cmake
 ./tools/test/h5dump/CMakeTestsVDS.cmake
+./tools/test/h5dump/CMakeVFDTests.cmake
 ./tools/src/h5format_convert/CMakeLists.txt
 ./tools/test/h5format_convert/CMakeLists.txt
 ./tools/test/h5format_convert/CMakeTests.cmake
