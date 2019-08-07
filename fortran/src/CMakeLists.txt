@@ -28,41 +28,20 @@ set (Fortran_COMPILER_ID CMAKE_Fortran_COMPILER_ID)
 # H5fort_type_defines.h    used to generate H5f90i_gen.h + H5fortran_types.f90
 #-----------------------------------------------------------------------------
 if (H5_FORTRAN_HAVE_STORAGE_SIZE)
-  add_executable (H5test_FortranHavekind
-      ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_STORAGE_SIZE.f90
-  )
-  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-    add_executable (H5test_FortranHavekind-shared
-        ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_STORAGE_SIZE.f90
-    )
-  endif ()
+  add_executable (H5test_FortranHavekind ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_STORAGE_SIZE.f90)
   set (H5_TEST_KIND_NAME "h5test_kind_storage_size_mod")
 else ()
     if (H5_FORTRAN_HAVE_SIZEOF)
-      add_executable (H5test_FortranHavekind
-          ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_SIZEOF.f90
-      )
-      if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-        add_executable (H5test_FortranHavekind-shared
-            ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_SIZEOF.f90
-        )
-      endif ()
+      add_executable (H5test_FortranHavekind ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind_SIZEOF.f90)
       set (H5_TEST_KIND_NAME "h5test_kind_sizeof_mod")
     else ()
-      add_executable (H5test_FortranHavekind
-          ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind.f90
-      )
-      if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-        add_executable (H5test_FortranHavekind-shared
-            ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind.f90
-        )
-      endif ()
+      add_executable (H5test_FortranHavekind ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind.f90)
     endif ()
 endif ()
 
 set_target_properties (H5test_FortranHavekind PROPERTIES
     LINKER_LANGUAGE Fortran
-    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 #set_property(TARGET H5test_FortranHavekind APPEND PROPERTY
 #    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
@@ -190,16 +169,11 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   )
 endif ()
 
-set (f90CStub_C_HDRS
-    # generated files
-    ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
-)
-set (f90CStub_C_SHHDRS
-    # generated files
-    ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
-)
-
 if (NOT ONLY_SHARED_LIBS)
+  set (f90CStub_C_HDRS
+      # generated files
+      ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
+  )
   add_library (${HDF5_F90_C_LIB_TARGET} STATIC ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS})
   target_include_directories (${HDF5_F90_C_LIB_TARGET}
       PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
@@ -217,6 +191,10 @@ if (NOT ONLY_SHARED_LIBS)
 endif ()
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  set (f90CStub_C_SHHDRS
+      # generated files
+      ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
+  )
   add_library (${HDF5_F90_C_LIBSH_TARGET} SHARED ${f90CStub_C_SOURCES} ${f90CStub_C_SHHDRS})
   target_include_directories (${HDF5_F90_C_LIBSH_TARGET}
       PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
@@ -316,7 +294,7 @@ if (NOT ONLY_SHARED_LIBS)
   )
   set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 endif ()
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   set (f90_F_SRCS_SHARED
       # generated files
       ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.f90
@@ -437,7 +415,8 @@ if (NOT ONLY_SHARED_LIBS)
       COMPONENT
           fortheaders
   )
-else ()
+endif ()
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   install (
       FILES
           ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
@@ -586,7 +565,7 @@ set (_PKG_CONFIG_LIBS_PRIVATE)
 if (NOT ONLY_SHARED_LIBS)
   set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${HDF5_F90_LIB_CORENAME}")
 endif ()
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   set (_PKG_CONFIG_SH_LIBS "${_PKG_CONFIG_SH_LIBS} -l${HDF5_F90_LIB_CORENAME}")
 endif ()
 

@@ -26,21 +26,7 @@ macro (ADD_H5_FORTRAN_EXE file)
   if(MSVC)
     set_property(TARGET hl_f90_${file} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
-  if (NOT BUILD_SHARED_LIBS)
-    target_include_directories (hl_f90_${file}
-        PRIVATE
-            "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_SRC_DIR}/src"
-    )
-    target_link_libraries (hl_f90_${file}
-        PRIVATE
-            ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET}
-    )
-    set_target_properties (hl_f90_${file} PROPERTIES
-        LINKER_LANGUAGE Fortran
-        FOLDER test/hl/fortran
-        Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-    )
-  elseif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     target_include_directories (hl_f90_${file}
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_SRC_DIR}/src"
@@ -53,6 +39,20 @@ macro (ADD_H5_FORTRAN_EXE file)
         LINKER_LANGUAGE Fortran
         FOLDER test/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
+    )
+  else ()
+    target_include_directories (hl_f90_${file}
+        PRIVATE
+            "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_SRC_DIR}/src"
+    )
+    target_link_libraries (hl_f90_${file}
+        PRIVATE
+            ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET}
+    )
+    set_target_properties (hl_f90_${file} PROPERTIES
+        LINKER_LANGUAGE Fortran
+        FOLDER test/hl/fortran
+        Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
     )
   endif ()
 endmacro ()
