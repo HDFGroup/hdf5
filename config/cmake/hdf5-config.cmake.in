@@ -100,9 +100,9 @@ endif ()
 #-----------------------------------------------------------------------------
 # Version Strings
 #-----------------------------------------------------------------------------
-set (HDF5_VERSION_STRING @HDF5_VERSION_STRING@)
-set (HDF5_VERSION_MAJOR  @HDF5_VERSION_MAJOR@)
-set (HDF5_VERSION_MINOR  @HDF5_VERSION_MINOR@)
+set (${HDF5_PACKAGE_NAME}_VERSION_STRING @HDF5_VERSION_STRING@)
+set (${HDF5_PACKAGE_NAME}_VERSION_MAJOR  @HDF5_VERSION_MAJOR@)
+set (${HDF5_PACKAGE_NAME}_VERSION_MINOR  @HDF5_VERSION_MINOR@)
 
 #-----------------------------------------------------------------------------
 # Don't include targets if this file is being picked up by another
@@ -196,7 +196,7 @@ foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
       elseif (comp STREQUAL "Java")
         set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 1)
         string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_LIBRARY COMP_LIBRARY)
-        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} hdf5::${hdf5_comp})
+        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @HDF5_PACKAGE@::${hdf5_comp})
       else ()
         set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 1)
         string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_${libtype}_LIBRARY COMP_LIBRARY)
