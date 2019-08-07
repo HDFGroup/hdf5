@@ -14113,7 +14113,7 @@ main(void)
 
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        printf("***Express test mode on.  Some tests may be skipped\n");
+        HDprintf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Copy the file access property list */
     if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
@@ -14149,52 +14149,52 @@ main(void)
 
         /* Test with and without shared messages */
         if(configuration & CONFIG_SHARE_SRC) {
-            puts("\nTesting with shared src messages:");
+            HDputs("\nTesting with shared src messages:");
             fcpl_src = fcpl_shared;
         }
         else {
-            puts("\nTesting without shared src messages:");
+            HDputs("\nTesting without shared src messages:");
             fcpl_src = H5P_DEFAULT;
         }
         if(configuration & CONFIG_SHARE_DST) {
-            puts("Testing with shared dst messages:");
+            HDputs("Testing with shared dst messages:");
             fcpl_dst = fcpl_shared;
             same_file = FALSE;
         }
         else {
-            puts("Testing without shared dst messages:");
+            HDputs("Testing without shared dst messages:");
             fcpl_dst = H5P_DEFAULT;
         }
 
         /* Set the FAPL for the source file's type of format */
         if(configuration & CONFIG_SRC_NEW_FORMAT) {
-            puts("Testing with latest format for source file:");
+            HDputs("Testing with latest format for source file:");
             src_fapl = fapl2;
 
             /* Test with and without dense attributes */
             if(configuration & CONFIG_DENSE) {
-                puts("Testing with dense attributes:");
+                HDputs("Testing with dense attributes:");
                 num_attributes_g = max_compact + 1;
             }
             else {
-                puts("Testing without dense attributes:");
+                HDputs("Testing without dense attributes:");
                 num_attributes_g = MAX(min_dense, 2) - 2;
             }
         } /* end if */
         else {
-        puts("Testing with oldest file format for source file:");
+            HDputs("Testing with oldest file format for source file:");
             src_fapl = fapl;
             num_attributes_g = 4;
         } /* end else */
 
         /* Set the FAPL for the destination file's type of format */
         if(configuration & CONFIG_DST_NEW_FORMAT) {
-            puts("Testing with latest format for destination file:");
+            HDputs("Testing with latest format for destination file:");
             dst_fapl = fapl2;
             same_file = FALSE;
         } /* end if */
         else {
-            puts("Testing with oldest file format for destination file:");
+            HDputs("Testing with oldest file format for destination file:");
             dst_fapl = fapl;
         } /* end else */
 
@@ -14365,12 +14365,12 @@ main(void)
 
     /* Results */
     if(nerrors) {
-        printf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
+        HDprintf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
                 nerrors, (1 == nerrors ? "" : "S"));
         exit(EXIT_FAILURE);
     } /* end if */
 
-    puts ("All object copying tests passed.");
+    HDputs ("All object copying tests passed.");
 
     /* close property list.
      * NOTE: if this property list is not closed and the test is

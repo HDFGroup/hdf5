@@ -74,14 +74,14 @@ typedef struct iter_t {
     ohdr_info_t group_ohdr_info;        /* Object header information for groups */
 
     hsize_t  max_attrs;                 /* Maximum attributes from a group */
-    unsigned long *num_small_attrs;        /* Size of small attributes tracked */
+    unsigned long *num_small_attrs;     /* Size of small attributes tracked */
     unsigned attr_nbins;                /* Number of bins for attribute counts */
     unsigned long *attr_bins;           /* Pointer to array of bins for attribute counts */
 
     unsigned max_dset_rank;             /* Maximum rank of dataset */
     unsigned long dset_rank_count[H5S_MAX_RANK];   /* Number of datasets of each rank */
     hsize_t max_dset_dims;              /* Maximum dimension size of dataset */
-    unsigned long *small_dset_dims;    /* Size of dimensions of small datasets tracked */
+    unsigned long *small_dset_dims;     /* Size of dimensions of small datasets tracked */
     unsigned long dset_layouts[H5D_NLAYOUTS];           /* Type of storage for each dataset */
     unsigned long dset_comptype[H5_NFILTERS_IMPL];     /* Number of currently implemented filters */
     unsigned long dset_ntypes;          /* Number of diff. dataset datatypes found */
@@ -320,9 +320,9 @@ static void usage(const char *prog)
      HDfprintf(stdout, "     -s, --freespace       Print free space information\n");
      HDfprintf(stdout, "     -S, --summary         Print summary of file space information\n");
      HDfprintf(stdout, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
-    HDfprintf(stdout,  "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
-    HDfprintf(stdout,  "                           <cred> :: (region,id,key)\n");
-    HDfprintf(stdout,  "                           If <cred> == \"(,,)\", no authentication is used.\n");
+     HDfprintf(stdout, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
+     HDfprintf(stdout, "                           <cred> :: (region,id,key)\n");
+     HDfprintf(stdout, "                           If <cred> == \"(,,)\", no authentication is used.\n");
      HDfprintf(stdout, "     --hdfs-attrs=<attrs>  Access a file on HDFS with given configuration\n");
      HDfprintf(stdout, "                           attributes.\n");
      HDfprintf(stdout, "                           <attrs> :: (<namenode name>,<namenode port>,\n");
@@ -544,7 +544,8 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "attribute_stats() failed");
 
     /* Get storage info */
-    storage = H5Dget_storage_size(did);
+    if((storage = H5Dget_storage_size(did)) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_storage_size() failed");
 
     /* Gather layout statistics */
     if((dcpl = H5Dget_create_plist(did)) < 0)

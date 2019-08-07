@@ -1641,7 +1641,7 @@ main(void)
         /* Display info about testing */
         low_string = h5_get_version_string(low);
         high_string = h5_get_version_string(high);
-        sprintf(msg, "Using file format version: (%s, %s)", low_string,
+        HDsprintf(msg, "Using file format version: (%s, %s)", low_string,
                 high_string);
         HDputs(msg);
 
@@ -1887,7 +1887,7 @@ main(void)
     return 0;
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
         H5Fclose(file);
     } H5E_END_TRY;

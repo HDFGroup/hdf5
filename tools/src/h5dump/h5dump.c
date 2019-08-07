@@ -1898,4 +1898,3 @@ add_prefix(char **prfx, size_t *prfx_len, const char *name)
     HDstrcat(HDstrcat(*prfx, "/"), name);
 } /* end add_prefix */
 
-

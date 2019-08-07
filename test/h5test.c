@@ -110,7 +110,6 @@ const char *LIBVER_NAMES[] = {
     NULL
 };
 
-
 /* Previous error reporting function */
 static H5E_auto2_t err_func = NULL;
 
@@ -1983,7 +1982,6 @@ error:
     return NULL;
 } /* h5_get_dummy_vfd_class */
 
-
 /*-------------------------------------------------------------------------
  * Function:    h5_get_dummy_vol_class()
  *
