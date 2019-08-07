@@ -1445,11 +1445,11 @@ main(void)
 
         /* Set the fapl for different file formats */
         if(latest_format) {
-            puts("\nTesting with the latest file format:");
+            HDputs("\nTesting with the latest file format:");
             current_fapl_id = fapl_id_new;
         } /* end if */
         else {
-            puts("Testing with the default file format:");
+            HDputs("Testing with the default file format:");
             current_fapl_id = fapl_id_old;
         } /* end else */
 
@@ -1522,7 +1522,6 @@ error:
         H5Gclose(gid);
     } H5E_END_TRY;
     nerrors = MAX(1, nerrors);
-    printf ("%d TEST%s FAILED.\n", nerrors, 1==nerrors?"":"s");
+    HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */
-

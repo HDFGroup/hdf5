@@ -37,7 +37,7 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 # --------------------------------------------------------------------
-# Add h5Repack test executables
+# Add h5repack test executables
 # --------------------------------------------------------------------
 if (BUILD_TESTING)
   add_executable (testh5repack_detect_szip ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)

@@ -86,9 +86,9 @@ endif ()
 #-----------------------------------------------------------------------------
 # Version Strings
 #-----------------------------------------------------------------------------
-set (HDF5_VERSION_STRING @HDF5_VERSION_STRING@)
-set (HDF5_VERSION_MAJOR  @HDF5_VERSION_MAJOR@)
-set (HDF5_VERSION_MINOR  @HDF5_VERSION_MINOR@)
+set (${HDF5_PACKAGE_NAME}_VERSION_STRING @HDF5_VERSION_STRING@)
+set (${HDF5_PACKAGE_NAME}_VERSION_MAJOR  @HDF5_VERSION_MAJOR@)
+set (${HDF5_PACKAGE_NAME}_VERSION_MINOR  @HDF5_VERSION_MINOR@)
 
 #-----------------------------------------------------------------------------
 # Don't include targets if this file is being picked up by another

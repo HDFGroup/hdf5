@@ -35,7 +35,7 @@
 #include "H5Iprivate.h"
 #include "H5VMprivate.h"
 
-#define FILENAME_LEN		1024
+#define FILENAME_LEN        1024
 
 #define TEST_BLOCK_SIZE5	5
 #define TEST_BLOCK_SIZE20	20
@@ -52,8 +52,8 @@
 #define TEST_BLOCK_SIZE8000	8000
 #define TEST_BLOCK_SIZE2048	2048
 
-#define TEST_BLOCK_ADDR70	70
-#define TEST_BLOCK_ADDR100	100
+#define TEST_BLOCK_ADDR70   70
+#define TEST_BLOCK_ADDR100  100
 
 #define TEST_ALIGN1024		1024
 #define TEST_ALIGN4096		4096
