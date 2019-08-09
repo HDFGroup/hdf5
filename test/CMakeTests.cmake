@@ -879,10 +879,12 @@ if (BUILD_SHARED_LIBS)
 ##############################################################################
 endif ()
 
+option (TEST_SHELL_SCRIPTS "Enable shell script tests" OFF)
 if (TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()
 
+option (ENABLE_EXTENDED_TESTS "Enable extended tests" OFF)
 if (ENABLE_EXTENDED_TESTS)
 ##############################################################################
 ###    S W M R  T E S T S
