@@ -42,7 +42,6 @@ if (H5_HAVE_PARALLEL)
     target_link_libraries (ph5diff PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
     set_target_properties (ph5diff PROPERTIES FOLDER tools)
     set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};ph5diff")
-    set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} ph5diff)
   endif ()
 
 if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
