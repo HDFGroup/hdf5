@@ -317,7 +317,11 @@
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
+#if defined(__GNUC__) && __GNUC__ >= 7
 #   define H5_ATTR_FALLTHROUGH  __attribute__((fallthrough));
+#else
+#   define H5_ATTR_FALLTHROUGH  /*void*/
+#endif
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
 #   define H5_ATTR_UNUSED       /*void*/
