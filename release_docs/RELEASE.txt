@@ -57,17 +57,17 @@ New Features
     Configuration
     -------------
     - Add options to enable or disable building tools and tests
-    
-      Configure options --enable-tests and --enable-tools were added for 
+
+      Configure options --enable-tests and --enable-tools were added for
       autotools configure.  These options are enabled by default, and can be
-      disabled with either --disable-tests (or tools) or --enable-tests=no 
-      (or --enable-tools=no).  Build time is reduced ~20% when tools are 
+      disabled with either --disable-tests (or tools) or --enable-tests=no
+      (or --enable-tools=no).  Build time is reduced ~20% when tools are
       disabled, 35% when tests are disabled, 45% when both are disabled.
       Reenabling them after the initial build requires running configure
       again with the option(s) enabled.
 
       (DAP - 2019/07/24, HDFFV-9976)
-      
+
     - Update CMake tests to use FIXTURES
 
       CMake test fixtures allow setup/cleanup tests and other dependency
@@ -195,7 +195,13 @@ Bug Fixes since HDF5-1.8.21
 
     Configuration
     -------------
-    - None
+    - Correct option for default API version
+
+      CMake options for default API version are not mutually exclusive.
+      Change the multiple BOOL options to a single STRING option with the
+      strings; v16, v18.
+
+      (ADB - 2019/08/12, HDFFV-10879)
 
 
     Library
