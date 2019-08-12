@@ -492,7 +492,13 @@ Bug Fixes since HDF5-1.10.3 release
 
     Configuration
     -------------
-    -
+    - Correct option for default API version
+
+      CMake options for default API version are not mutually exclusive.
+      Change the multiple BOOL options to a single STRING option with the
+      strings; v16, v18, v110, v112.
+
+      (ADB - 2019/08/12, HDFFV-10879)
 
     Performance
     -------------
