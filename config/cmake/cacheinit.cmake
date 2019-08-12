@@ -35,6 +35,8 @@ set (MPIEXEC_MAX_NUMPROCS "4" CACHE STRING "Minimum number of processes for HDF 
 
 set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
 
+set (HDF5_USE_18_API_DEFAULT ON CACHE BOOL "Enable v1.8 API" FORCE)
+
 set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
 
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
