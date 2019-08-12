@@ -645,7 +645,10 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to use 1.10.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_110_API_DEFAULT "Use the HDF5 1.10.x API by default" ON)
+option (HDF5_USE_110_API_DEFAULT "Use the HDF5 1.10.x API by default" OFF)
+if (NOT HDF5_USE_16_API_DEFAULT AND NOT HDF5_USE_18_API_DEFAULT AND NOT HDF5_USE_110_API_DEFAULT)
+  set (HDF5_USE_110_API_DEFAULT ON)
+endif ()
 set (H5_USE_110_API_DEFAULT 0)
 if (HDF5_USE_110_API_DEFAULT)
   set (H5_USE_110_API_DEFAULT 1)
