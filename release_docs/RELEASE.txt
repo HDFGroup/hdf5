@@ -174,13 +174,13 @@ Bug Fixes since HDF5-1.10.5 release
       together with library high bound setting to H5F_LIBVER_V18.
 
       When setting non-default file space info in fcpl via
-      H5Pset_file_space_strategy() and then creating a file with 
+      H5Pset_file_space_strategy() and then creating a file with
       both high and low library bounds set to
       H5F_LIBVER_V18 in fapl, the library succeeds in creating the file.
       File creation should fail because the feature of setting non-default
       file space info does not exist in library release 1.8 or earlier.
 
-      This was fixed by setting and checking the proper version in the 
+      This was fixed by setting and checking the proper version in the
       file space info message based on the library low and high bounds
       when creating and opening the HDF5 file.
 
@@ -194,7 +194,7 @@ Bug Fixes since HDF5-1.10.5 release
       H5F_LIBVER_V18, the H5Ocopy() call will fail with the error stack indicating
       that the fill value version is out of bounds.
 
-      This was fixed by changing the fill value message version to H5O_FILL_VERSION_3 
+      This was fixed by changing the fill value message version to H5O_FILL_VERSION_3
       (from H5O_FILL_VERSION_2) for H5F_LIBVER_V18.
 
       (VC - 2019/6/14, HDFFV-10800)
@@ -225,6 +225,16 @@ Bug Fixes since HDF5-1.10.5 release
     Java Library:
     ----------------
     -
+
+    Configuration
+    -------------
+    - Correct option for default API version
+
+      CMake options for default API version are not mutually exclusive.
+      Change the multiple BOOL options to a single STRING option with the
+      strings; v16, v18, v110.
+
+      (ADB - 2019/08/12, HDFFV-10879)
 
     Fortran
     --------
