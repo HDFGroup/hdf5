@@ -642,45 +642,41 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
-set (DEFAULT_API_VERSION "v110")
+set (DEFAULT_API_VERSION "v112" CACHE STRING "Enable v1.12 API (v16, v18, v110, v112)" FORCE)
+set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_16_API_DEFAULT "Use the HDF5 1.6.x API by default" OFF)
 set (H5_USE_16_API_DEFAULT 0)
-if (HDF5_USE_16_API_DEFAULT)
+if (DEFAULT_API_VERSION MATCHES "v16")
   set (H5_USE_16_API_DEFAULT 1)
-  set (DEFAULT_API_VERSION "v16")
 endif ()
 
 #-----------------------------------------------------------------------------
 # Option to use 1.8.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_18_API_DEFAULT "Use the HDF5 1.8.x API by default" OFF)
 set (H5_USE_18_API_DEFAULT 0)
-if (HDF5_USE_18_API_DEFAULT)
+if (DEFAULT_API_VERSION MATCHES "v18")
   set (H5_USE_18_API_DEFAULT 1)
-  set (DEFAULT_API_VERSION "v18")
 endif ()
 
 #-----------------------------------------------------------------------------
 # Option to use 1.10.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_110_API_DEFAULT "Use the HDF5 1.10.x API by default" OFF)
 set (H5_USE_110_API_DEFAULT 0)
-if (HDF5_USE_110_API_DEFAULT)
+if (DEFAULT_API_VERSION MATCHES "v110")
   set (H5_USE_110_API_DEFAULT 1)
-  set (DEFAULT_API_VERSION "v110")
 endif ()
 
 #-----------------------------------------------------------------------------
 # Option to use 1.12.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_112_API_DEFAULT "Use the HDF5 1.12.x API by default" ON)
-set (H5_USE_112_API_DEFAULT 0)
-if (HDF5_USE_112_API_DEFAULT)
-  set (H5_USE_112_API_DEFAULT 1)
+if (NOT DEFAULT_API_VERSION)
   set (DEFAULT_API_VERSION "v112")
+endif ()
+set (H5_USE_112_API_DEFAULT 0)
+if (DEFAULT_API_VERSION MATCHES "v112")
+  set (H5_USE_112_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------
