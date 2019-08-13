@@ -313,7 +313,7 @@
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
-#if defined(__GNUC__) && __GNUC__ >= 7
+#if defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
 #   define H5_ATTR_FALLTHROUGH  __attribute__((fallthrough));
 #else
 #   define H5_ATTR_FALLTHROUGH  /*void*/
