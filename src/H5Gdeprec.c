@@ -131,6 +131,9 @@ H5G_map_obj_type(H5O_type_t obj_type)
             ret_value = H5G_TYPE;
             break;
 
+        case H5O_TYPE_MAP:
+            /* Maps not supported in native VOL connector */
+
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:

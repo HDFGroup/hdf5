@@ -191,6 +191,11 @@ New Features
 
     Library:
     --------
+    - Add new API H5M for map objects.  Currently not supported by native
+      library, can be supported by VOL connectors.
+
+      (NAF - 2019/03/01)
+
     - Improved the performance of virtual dataset I/O
 
       Refactored the internal dataspace routines used by the virtual dataset

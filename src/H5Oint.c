@@ -1836,6 +1836,9 @@ H5O_get_loc(hid_t object_id)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get object location from datatype ID")
             break;
 
+        case H5I_MAP:
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, NULL, "maps not supported in native VOL connector")
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_FILE:

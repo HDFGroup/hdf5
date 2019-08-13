@@ -29,6 +29,7 @@
 #include "H5Gpublic.h"          /* Groups                                   */
 #include "H5Ipublic.h"          /* ID management                            */
 #include "H5Lpublic.h"          /* Links                                    */
+#include "H5Mpublic.h"          /* Maps                                     */
 #include "H5MMpublic.h"         /* Memory management                        */
 #include "H5Opublic.h"          /* Object headers                           */
 #include "H5Ppublic.h"          /* Property lists                           */

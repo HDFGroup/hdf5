@@ -498,6 +498,9 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                     oloc = NULL;
                 break;
 
+            case H5I_MAP:
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "maps not supported in native VOL connector")
+
             case H5I_UNINIT:
             case H5I_BADID:
             case H5I_FILE:
@@ -3599,6 +3602,9 @@ H5F__get_file(void *obj, H5I_type_t type)
         case H5I_ATTR:
             oloc = H5A_oloc((H5A_t *)obj);
             break;
+
+        case H5I_MAP:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "maps not supported in native VOL connector")
 
         case H5I_UNINIT:
         case H5I_BADID:
