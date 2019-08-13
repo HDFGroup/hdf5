@@ -46,8 +46,8 @@ if (H5_HAVE_PARALLEL)
   endif ()
   if (BUILD_SHARED_LIBS)
     add_executable (ph5diff-shared
-        ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
-        ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/ph5diff_main.c
+        ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diff_common.c
+        ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/ph5diff_main.c
     )
     target_include_directories (ph5diff-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     TARGET_C_PROPERTIES (ph5diff-shared SHARED)

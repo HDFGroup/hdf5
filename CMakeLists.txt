@@ -496,25 +496,26 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
-set (DEFAULT_API_VERSION "v18")
+#option (DEFAULT_API_VERSION "Enable v1.8 API (v16, v18)" "v18")
+set (DEFAULT_API_VERSION "v18" CACHE STRING "Enable v1.8 API (v16, v18)")
+set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_16_API_DEFAULT "Use the HDF5 1.6.x API by default" OFF)
 set (H5_USE_16_API_DEFAULT 0)
-if (HDF5_USE_16_API_DEFAULT)
+if (DEFAULT_API_VERSION MATCHES "v16")
   set (H5_USE_16_API_DEFAULT 1)
-  set (DEFAULT_API_VERSION "v16")
 endif ()
 
 #-----------------------------------------------------------------------------
 # Option to use 1.8.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_18_API_DEFAULT "Use the HDF5 1.8.x API by default" ON)
-set (H5_USE_18_API_DEFAULT 0)
-if (HDF5_USE_18_API_DEFAULT)
-  set (H5_USE_18_API_DEFAULT 1)
+if (NOT DEFAULT_API_VERSION)
   set (DEFAULT_API_VERSION "v18")
+endif ()
+set (H5_USE_18_API_DEFAULT 0)
+if (DEFAULT_API_VERSION MATCHES "v18")
+  set (H5_USE_18_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------
