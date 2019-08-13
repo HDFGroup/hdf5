@@ -2371,6 +2371,11 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             break;
         }
 
+        /* TODO: Maps will have to be added when they are supported in the
+         *       native VOL connector.
+         */
+        case H5I_MAP:
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_FILE:

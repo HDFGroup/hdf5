@@ -1721,6 +1721,7 @@ typedef enum {
     H5_PKG_HG,      /* Global heaps             */
     H5_PKG_HL,      /* Local heaps              */
     H5_PKG_I,       /* IDs                      */
+    H5_PKG_M,       /* Maps                     */
     H5_PKG_MF,      /* File memory management   */
     H5_PKG_MM,      /* Core memory management   */
     H5_PKG_O,       /* Object headers           */
@@ -2637,6 +2638,8 @@ H5_DLL int H5G_term_package(void);
 H5_DLL int H5G_top_term_package(void);
 H5_DLL int H5I_term_package(void);
 H5_DLL int H5L_term_package(void);
+H5_DLL int H5M_term_package(void);
+H5_DLL int H5M_top_term_package(void);
 H5_DLL int H5P_term_package(void);
 H5_DLL int H5PL_term_package(void);
 H5_DLL int H5R_term_package(void);

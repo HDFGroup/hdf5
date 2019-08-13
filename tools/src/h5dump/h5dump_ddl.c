@@ -393,6 +393,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             }
             break;
 
+        case H5O_TYPE_MAP:
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:
@@ -1404,6 +1405,7 @@ obj_search(const char *path, const H5O_info_t *oi, const char H5_ATTR_UNUSED *al
                 handle_datatypes(handle_data->fid, path, NULL, 0, NULL);
                 break;
 
+            case H5O_TYPE_MAP:
             case H5O_TYPE_UNKNOWN:
             case H5O_TYPE_NTYPES:
             default:
@@ -2143,6 +2145,7 @@ dump_extlink(hid_t group, const char *linkname, const char *objname)
                 handle_datatypes(group, linkname, NULL, 0, objname);
                 break;
 
+            case H5O_TYPE_MAP:
             case H5O_TYPE_UNKNOWN:
             case H5O_TYPE_NTYPES:
             default:

@@ -151,6 +151,10 @@ hid_t H5P_CLS_DATATYPE_CREATE_ID_g              = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATATYPE_CREATE_g       = NULL;
 hid_t H5P_CLS_DATATYPE_ACCESS_ID_g              = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_DATATYPE_ACCESS_g       = NULL;
+hid_t H5P_CLS_MAP_CREATE_ID_g                   = H5I_INVALID_HID;
+H5P_genclass_t *H5P_CLS_MAP_CREATE_g            = NULL;
+hid_t H5P_CLS_MAP_ACCESS_ID_g                   = H5I_INVALID_HID;
+H5P_genclass_t *H5P_CLS_MAP_ACCESS_g            = NULL;
 hid_t H5P_CLS_ATTRIBUTE_CREATE_ID_g             = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_ATTRIBUTE_CREATE_g      = NULL;
 hid_t H5P_CLS_ATTRIBUTE_ACCESS_ID_g             = H5I_INVALID_HID;
@@ -180,6 +184,8 @@ hid_t H5P_LST_GROUP_CREATE_ID_g         = H5I_INVALID_HID;
 hid_t H5P_LST_GROUP_ACCESS_ID_g         = H5I_INVALID_HID;
 hid_t H5P_LST_DATATYPE_CREATE_ID_g      = H5I_INVALID_HID;
 hid_t H5P_LST_DATATYPE_ACCESS_ID_g      = H5I_INVALID_HID;
+hid_t H5P_LST_MAP_CREATE_ID_g           = H5I_INVALID_HID;
+hid_t H5P_LST_MAP_ACCESS_ID_g           = H5I_INVALID_HID;
 hid_t H5P_LST_ATTRIBUTE_CREATE_ID_g     = H5I_INVALID_HID;
 hid_t H5P_LST_ATTRIBUTE_ACCESS_ID_g     = H5I_INVALID_HID;
 hid_t H5P_LST_OBJECT_COPY_ID_g          = H5I_INVALID_HID;
@@ -314,6 +320,7 @@ H5_DLLVAR const H5P_libclass_t H5P_CLS_STRCRT[1];       /* String create */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_GCRT[1];         /* Group create */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FCRT[1];         /* File creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_DCRT[1];         /* Dataset creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_MCRT[1];         /* Map creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_DXFR[1];         /* Data transfer */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FMNT[1];         /* File mount */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */
@@ -352,6 +359,8 @@ static H5P_libclass_t const * const init_class[] = {
     H5P_CLS_FMNT,       /* File mount */
     H5P_CLS_TCRT,       /* Datatype creation */
     H5P_CLS_TACC,       /* Datatype access */
+    H5P_CLS_MCRT,       /* Map creation */
+    H5P_CLS_MACC,       /* Map access */
     H5P_CLS_ACRT,       /* Attribute creation */
     H5P_CLS_AACC,       /* Attribute access */
     H5P_CLS_LCRT,       /* Link creation */
@@ -431,7 +440,7 @@ H5P__init_package(void)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDcompile_assert(H5P_TYPE_VOL_INITIALIZE == (H5P_TYPE_MAX_TYPE - 1));
+    HDcompile_assert(H5P_TYPE_MAP_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
 
     /*
      * Initialize the Generic Property class & object groups.
@@ -442,8 +451,8 @@ H5P__init_package(void)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
     /* Repeatedly pass over the list of property list classes for the library,
-     *  initializing each class if it's parent class is initialized, until no
-     *  more progress is made.
+     * initializing each class if its parent class is initialized, until no
+     * more progress is made.
      */
     tot_init = 0;
     do {
@@ -547,6 +556,8 @@ H5P_term_package(void)
                         H5P_LST_GROUP_ACCESS_ID_g =
                         H5P_LST_DATATYPE_CREATE_ID_g =
                         H5P_LST_DATATYPE_ACCESS_ID_g =
+                        H5P_LST_MAP_CREATE_ID_g =
+                        H5P_LST_MAP_ACCESS_ID_g =
                         H5P_LST_ATTRIBUTE_CREATE_ID_g =
                         H5P_LST_ATTRIBUTE_ACCESS_ID_g =
                         H5P_LST_OBJECT_COPY_ID_g =
@@ -574,6 +585,8 @@ H5P_term_package(void)
                         H5P_CLS_GROUP_ACCESS_g =
                         H5P_CLS_DATATYPE_CREATE_g =
                         H5P_CLS_DATATYPE_ACCESS_g =
+                        H5P_CLS_MAP_CREATE_g =
+                        H5P_CLS_MAP_ACCESS_g =
                         H5P_CLS_STRING_CREATE_g =
                         H5P_CLS_ATTRIBUTE_CREATE_g =
                         H5P_CLS_ATTRIBUTE_ACCESS_g =
@@ -594,6 +607,8 @@ H5P_term_package(void)
                         H5P_CLS_GROUP_ACCESS_ID_g =
                         H5P_CLS_DATATYPE_CREATE_ID_g =
                         H5P_CLS_DATATYPE_ACCESS_ID_g =
+                        H5P_CLS_MAP_CREATE_ID_g =
+                        H5P_CLS_MAP_ACCESS_ID_g =
                         H5P_CLS_STRING_CREATE_ID_g =
                         H5P_CLS_ATTRIBUTE_CREATE_ID_g =
                         H5P_CLS_ATTRIBUTE_ACCESS_ID_g =
@@ -5437,8 +5452,9 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
-    HDassert(type >= H5P_TYPE_USER && type < H5P_TYPE_MAX_TYPE);
+    /* Sanity checks */
+    HDcompile_assert(H5P_TYPE_MAP_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
+    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_MAP_ACCESS);
 
     /* Check arguments */
     if(type == H5P_TYPE_USER)
@@ -5490,6 +5506,14 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
         case H5P_TYPE_DATATYPE_ACCESS:
             class_id = H5P_CLS_DATATYPE_ACCESS_ID_g;
+            break;
+
+        case H5P_TYPE_MAP_CREATE:
+            class_id = H5P_CLS_MAP_CREATE_ID_g;
+            break;
+
+        case H5P_TYPE_MAP_ACCESS:
+            class_id = H5P_CLS_MAP_ACCESS_ID_g;
             break;
 
         case H5P_TYPE_STRING_CREATE:

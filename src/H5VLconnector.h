@@ -314,7 +314,7 @@ typedef struct H5VL_group_class_t {
 /* H5L routines */
 typedef struct H5VL_link_class_t {
     herr_t (*create)(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
-            hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req, va_list argumenmts);
+            hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*copy)(void *src_obj, const H5VL_loc_params_t *loc_params1,
                    void *dst_obj, const H5VL_loc_params_t *loc_params2,
                    hid_t lcpl, hid_t lapl, hid_t dxpl_id, void **req);

@@ -758,6 +758,7 @@ obj_stats(const char *path, const H5O_info_t *oi, const char *already_visited,
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "datatype_stats failed");
                 break;
 
+            case H5O_TYPE_MAP:
             case H5O_TYPE_UNKNOWN:
             case H5O_TYPE_NTYPES:
             default:

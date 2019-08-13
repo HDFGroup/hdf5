@@ -7108,6 +7108,9 @@ done:
                     ret_value = -1;
                 break;
 
+            case H5I_MAP:
+                /* TODO: Not supported in native file format yet */
+
             case H5I_UNINIT:
             case H5I_BADID:
             case H5I_FILE:
@@ -7196,6 +7199,9 @@ done:
                 if(H5Tclose(target_obj) < 0)
                     ret_value = -1;
                 break;
+
+            case H5I_MAP:
+                /* TODO: Not supported in native file format yet */
 
             case H5I_UNINIT:
             case H5I_BADID:

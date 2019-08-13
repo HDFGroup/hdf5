@@ -1080,6 +1080,9 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                         if(H5Tequal(obj1_id, obj2_id) != TRUE) TEST_ERROR
                         break;
 
+                    case H5O_TYPE_MAP:
+                        /* Maps not supported in native VOL connector */
+
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
@@ -1137,6 +1140,9 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                     case H5O_TYPE_NAMED_DATATYPE:
                         if(H5Tequal(obj1_id, obj2_id) != TRUE) TEST_ERROR
                         break;
+
+                    case H5O_TYPE_MAP:
+                        /* Maps not supported in native VOL connector */
 
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
@@ -1454,10 +1460,13 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                         if(H5Tequal(oid, oid2) != TRUE) TEST_ERROR
                         break;
 
+                    case H5O_TYPE_MAP:
+                        HDassert(0 && "maps not supported in native VOL connector");
+
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
-HDassert(0 && "Unknown type of object");
+                        HDassert(0 && "Unknown type of object");
                         break;
                 } /* end switch */
 

@@ -2766,6 +2766,32 @@ if test -n "$PARALLEL"; then
 fi
 
 ## ----------------------------------------------------------------------
+## Check if the map API is enabled by --enable-map-api
+##
+AC_SUBST([MAP_API])
+
+## Default is no map API
+MAP_API=no
+
+AC_MSG_CHECKING([if the map API (H5M) is enabled])
+
+AC_ARG_ENABLE([map-api],
+              [AS_HELP_STRING([--enable-map-api],
+                              [Build the map API (H5M).
+                               This is not yet supported in the native file format
+                               and requires a VOL connector that supports it.
+                               [default=no]])],
+              [MAP_API=$enableval], [MAP_API=no])
+
+if test "X$MAP_API" = "Xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_MAP_API], [1],
+            [Define if the map API (H5M) should be compiled])
+else
+    AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 AC_SUBST([DIRECT_VFD])

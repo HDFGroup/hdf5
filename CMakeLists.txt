@@ -705,6 +705,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     endif ()
   endif ()
 endif ()
+
 #-----------------------------------------------------------------------------
 # Option to use threadsafe
 #-----------------------------------------------------------------------------
@@ -756,6 +757,14 @@ if (HDF5_ENABLE_THREADSAFE)
   if (Threads_FOUND)
     set (H5_HAVE_THREADSAFE 1)
   endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to build the map API
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_MAP_API "Build the map API" OFF)
+if (HDF5_ENABLE_MAP_API)
+  set (H5_HAVE_MAP_API 1)
 endif ()
 
 #-----------------------------------------------------------------------------

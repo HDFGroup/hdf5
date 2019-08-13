@@ -267,6 +267,9 @@
 /* Define to 1 if you have the <mach/mach_time.h> header file. */
 #cmakedefine H5_HAVE_MACH_MACH_TIME_H @H5_HAVE_MACH_MACH_TIME_H@
 
+/* Define if the map API (H5M) should be compiled */
+#cmakedefine H5_HAVE_MAP_API @H5_HAVE_MAP_API@
+
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine H5_HAVE_MEMORY_H @H5_HAVE_MEMORY_H@
 
