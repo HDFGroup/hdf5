@@ -642,7 +642,8 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
-#set (DEFAULT_API_VERSION "v112" CACHE STRING "Enable v1.12 API (v16, v18, v110, v112)" FORCE)
+#option (DEFAULT_API_VERSION "Enable v1.12 API (v16, v18, v110, v112)" "v112")
+set (DEFAULT_API_VERSION "v112" CACHE STRING "Enable v1.12 API (v16, v18, v110, v112)")
 set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
