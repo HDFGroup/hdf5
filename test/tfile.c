@@ -1434,6 +1434,9 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
                         VERIFY(oid_list[i], did, "H5Fget_obj_ids");
                         break;
 
+                    case H5I_MAP:
+                        /* TODO: Not supported in native VOL connector yet */
+
                     case H5I_UNINIT:
                     case H5I_BADID:
                     case H5I_DATATYPE:

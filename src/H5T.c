@@ -1740,6 +1740,7 @@ H5Tcopy(hid_t obj_id)
         case H5I_GROUP:
         case H5I_DATASPACE:
         case H5I_ATTR:
+        case H5I_MAP:
         case H5I_VFL:
         case H5I_VOL:
         case H5I_GENPROP_CLS:

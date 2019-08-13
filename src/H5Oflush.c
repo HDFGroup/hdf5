@@ -479,6 +479,9 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_connector
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to finish refresh for dataset")
             break;
 
+        case H5I_MAP:
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector")
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_FILE:

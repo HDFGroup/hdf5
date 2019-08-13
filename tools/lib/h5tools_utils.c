@@ -763,6 +763,7 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
             } /* end if */
             break;
 
+        case H5O_TYPE_MAP:
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:

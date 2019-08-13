@@ -193,5 +193,8 @@ H5_DLL herr_t H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_s
 H5_DLL herr_t H5VL_request_optional(const H5VL_object_t *vol_obj, ...);
 H5_DLL herr_t H5VL_request_free(const H5VL_object_t *vol_obj);
 
+/* Generic functions */
+H5_DLL herr_t H5VL_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id,void **req, ...);
+
 #endif /* _H5VLprivate_H */
 

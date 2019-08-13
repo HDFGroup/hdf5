@@ -914,6 +914,10 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
             printf(" %-10s %s", "datatype", path);
             break;
 
+        case H5O_TYPE_MAP:
+            printf(" %-10s %s", "map", path);
+            break;
+
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:

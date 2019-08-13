@@ -472,6 +472,9 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type, const void *_r
             break;
         }
 
+        case H5O_TYPE_MAP:
+            HGOTO_ERROR(H5E_REFERENCE, H5E_BADTYPE, H5I_INVALID_HID, "maps not supported in native VOL connector")
+
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:

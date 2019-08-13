@@ -816,6 +816,9 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             obj_path = H5T_nameof((H5T_t *)obj_ptr);
             break;
 
+        case H5I_MAP:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector")
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_FILE:
@@ -1111,6 +1114,9 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
                                 /* Search and replace names through datatype IDs */
                                 search_datatype = TRUE;
                                 break;
+
+                            case H5O_TYPE_MAP:
+                                HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector")
 
                             case H5O_TYPE_UNKNOWN:
                             case H5O_TYPE_NTYPES:

@@ -38,6 +38,7 @@ typedef enum H5I_type_t {
     H5I_DATATYPE,               /* type ID for Datatype objects                 */
     H5I_DATASPACE,              /* type ID for Dataspace objects                */
     H5I_DATASET,                /* type ID for Dataset objects                  */
+    H5I_MAP,                    /* type ID for Map objects                      */
     H5I_ATTR,                   /* type ID for Attribute objects                */
     H5I_VFL,                    /* type ID for virtual file layer               */
     H5I_VOL,                    /* type ID for virtual object layer             */

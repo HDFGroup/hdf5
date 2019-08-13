@@ -213,6 +213,9 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
         case H5I_DATASPACE:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of dataspace")
 
+        case H5I_MAP:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "maps not supported in native VOL connector")
+
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of property list")
