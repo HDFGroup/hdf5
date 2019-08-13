@@ -20,7 +20,7 @@ else ()
 endif ()
 set_target_properties (h5perf_serial PROPERTIES FOLDER perform)
 
-if (HDF5_BUILD_PERFORM_STANDALONE)
+if (HDF5_BUILD_PERFORM_STANDALONE AND BUILD_TESTING)
   #-- Adding test for h5perf_serial_alone
   set (h5perf_serial_alone_SOURCES
       ${HDF5_TOOLS_PERFORM_SOURCE_DIR}/sio_perf.c
@@ -179,4 +179,3 @@ endif ()
 if (BUILD_TESTING)
   include (CMakeTests.cmake)
 endif ()
-  
