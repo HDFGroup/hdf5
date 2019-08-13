@@ -763,6 +763,9 @@ endif ()
 # Option to build the map API
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_MAP_API "Build the map API" OFF)
+if (HDF5_ENABLE_MAP_API)
+  set (H5_HAVE_MAP_API 1)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
