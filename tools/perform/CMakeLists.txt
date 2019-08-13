@@ -87,20 +87,22 @@ else ()
 endif ()
 set_target_properties (overhead PROPERTIES FOLDER perform)
 
-#-- Adding test for perf_meta
-set (perf_meta_SOURCES
-    ${HDF5_TOOLS_PERFORM_SOURCE_DIR}/perf_meta.c
-)
-add_executable (perf_meta ${perf_meta_SOURCES})
-target_include_directories (perf_meta PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-if (NOT BUILD_SHARED_LIBS)
-  TARGET_C_PROPERTIES (perf_meta STATIC)
-  target_link_libraries (perf_meta PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
-else ()
-  TARGET_C_PROPERTIES (perf_meta SHARED)
-  target_link_libraries (perf_meta PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+if (BUILD_TESTING)
+  #-- Adding test for perf_meta
+  set (perf_meta_SOURCES
+      ${HDF5_TOOLS_PERFORM_SOURCE_DIR}/perf_meta.c
+  )
+  add_executable (perf_meta ${perf_meta_SOURCES})
+  target_include_directories (perf_meta PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  if (NOT BUILD_SHARED_LIBS)
+    TARGET_C_PROPERTIES (perf_meta STATIC)
+    target_link_libraries (perf_meta PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+  else ()
+    TARGET_C_PROPERTIES (perf_meta SHARED)
+    target_link_libraries (perf_meta PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  endif ()
+  set_target_properties (perf_meta PROPERTIES FOLDER perform)
 endif ()
-set_target_properties (perf_meta PROPERTIES FOLDER perform)
 
 #-- Adding test for zip_perf
 set (zip_perf_SOURCES
@@ -174,4 +176,7 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
   endif ()
 endif ()
 
-include (CMakeTests.cmake)
+if (BUILD_TESTING)
+  include (CMakeTests.cmake)
+endif ()
+  
