@@ -37,7 +37,7 @@
 #define H5VL_MAP_OPEN           2
 #define H5VL_MAP_GET_VAL        3
 #define H5VL_MAP_EXISTS         4
-#define H5VL_MAP_SET            5
+#define H5VL_MAP_PUT            5
 #define H5VL_MAP_GET            6
 #define H5VL_MAP_SPECIFIC       7
 #define H5VL_MAP_CLOSE          8
@@ -59,7 +59,7 @@ typedef enum H5VL_map_get_t {
 /* types for map SPECIFIC callback */
 typedef enum H5VL_map_specific_t {
     H5VL_MAP_ITER,                          /* H5Miterate               */
-    H5VL_MAP_DELETE_KEY                     /* H5Mdelete_key            */
+    H5VL_MAP_DELETE                         /* H5Mdelete                */
 } H5VL_map_specific_t;
 
 /* Callback for H5Miterate() */
@@ -95,7 +95,7 @@ H5_DLL hid_t H5Mget_val_type(hid_t map_id);
 H5_DLL hid_t H5Mget_create_plist(hid_t map_id);
 H5_DLL hid_t H5Mget_access_plist(hid_t map_id);
 H5_DLL herr_t H5Mget_count(hid_t map_id, hsize_t *count, hid_t dxpl_id);
-H5_DLL herr_t H5Mset(hid_t map_id, hid_t key_mem_type_id, const void *key,
+H5_DLL herr_t H5Mput(hid_t map_id, hid_t key_mem_type_id, const void *key,
     hid_t val_mem_type_id, const void *value, hid_t dxpl_id);
 H5_DLL herr_t H5Mget(hid_t map_id, hid_t key_mem_type_id, const void *key,
     hid_t val_mem_type_id, void *value, hid_t dxpl_id);
@@ -106,7 +106,7 @@ H5_DLL herr_t H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id,
 H5_DLL herr_t H5Miterate_by_name(hid_t loc_id, const char *map_name,
     hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, void *op_data,
     hid_t dxpl_id, hid_t lapl_id);
-H5_DLL herr_t H5Mdelete_key(hid_t map_id, hid_t key_mem_type_id,
+H5_DLL herr_t H5Mdelete(hid_t map_id, hid_t key_mem_type_id,
     const void *key, hid_t dxpl_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.

@@ -650,9 +650,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Mset
+ * Function:    H5Mput
  *
- * Purpose:     H5Mset adds a key-value pair to the Map specified by
+ * Purpose:     H5Mput adds a key-value pair to the Map specified by
  *              MAP_ID, or updates the value for the specified key if one
  *              was set previously. KEY_MEM_TYPE_ID and VAL_MEM_TYPE_ID
  *              specify the datatypes for the provided KEY and VALUE
@@ -666,7 +666,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Mset(hid_t map_id, hid_t key_mem_type_id, const void *key,
+H5Mput(hid_t map_id, hid_t key_mem_type_id, const void *key,
     hid_t val_mem_type_id, const void *value, hid_t dxpl_id)
 {
     H5VL_object_t          *vol_obj = NULL;
@@ -697,12 +697,12 @@ H5Mset(hid_t map_id, hid_t key_mem_type_id, const void *key,
     H5CX_set_dxpl(dxpl_id);
 
     /* Set the key/value pair */
-    if(H5VL_optional(vol_obj, dxpl_id, H5_REQUEST_NULL, H5VL_MAP_SET, key_mem_type_id, key, val_mem_type_id, value) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTSET, FAIL, "unable to set key/value pair")
+    if(H5VL_optional(vol_obj, dxpl_id, H5_REQUEST_NULL, H5VL_MAP_PUT, key_mem_type_id, key, val_mem_type_id, value) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTSET, FAIL, "unable to put key/value pair")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Mset() */
+} /* end H5Mput() */
 
 
 /*-------------------------------------------------------------------------
@@ -973,9 +973,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Mdelete_key
+ * Function:    H5Mdelete
  *
- * Purpose:     H5Mdelete_key deletes a key-value pair from the Map
+ * Purpose:     H5Mdelete deletes a key-value pair from the Map
  *              specified by MAP_ID. KEY_MEM_TYPE_ID specifies the
  *              datatype for the provided key buffers, and if different
  *              from that used to create the Map object, the key will be
@@ -988,7 +988,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Mdelete_key(hid_t map_id, hid_t key_mem_type_id, const void *key,
+H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key,
     hid_t dxpl_id)
 {
     H5VL_object_t          *vol_obj = NULL;
@@ -1020,13 +1020,13 @@ H5Mdelete_key(hid_t map_id, hid_t key_mem_type_id, const void *key,
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(map_id);
 
-    /* Set the key/value pair */
-    if(H5VL_optional(vol_obj, dxpl_id, H5_REQUEST_NULL, H5VL_MAP_SPECIFIC, &loc_params, H5VL_MAP_DELETE_KEY, key_mem_type_id, key) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTSET, FAIL, "unable to set key/value pair")
+    /* Delete the key/value pair */
+    if(H5VL_optional(vol_obj, dxpl_id, H5_REQUEST_NULL, H5VL_MAP_SPECIFIC, &loc_params, H5VL_MAP_DELETE, key_mem_type_id, key) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTSET, FAIL, "unable to delete key/value pair")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Mdelete_key() */
+} /* end H5Mdelete() */
 
 #endif /*  H5_HAVE_MAP_API */
 
