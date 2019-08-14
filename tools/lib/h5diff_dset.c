@@ -416,10 +416,10 @@ hsize_t diff_datasetid(hid_t did1,
             /* reclaim any VL memory, if necessary */
             h5diffdebug2("check vl_data1:%d\n", vl_data1);
             if(vl_data1)
-                H5Dvlen_reclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
+                H5Treclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
             h5diffdebug2("check vl_data2:%d\n", vl_data2);
             if(vl_data2)
-                H5Dvlen_reclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
+                H5Treclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
             if(buf1 != NULL) {
                 HDfree(buf1);
                 buf1 = NULL;
@@ -510,9 +510,9 @@ hsize_t diff_datasetid(hid_t did1,
 
                 /* reclaim any VL memory, if necessary */
                 if(vl_data1)
-                    H5Dvlen_reclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf1);
+                    H5Treclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf1);
                 if(vl_data2)
-                    H5Dvlen_reclaim(m_tid2, sm_space, H5P_DEFAULT, sm_buf2);
+                    H5Treclaim(m_tid2, sm_space, H5P_DEFAULT, sm_buf2);
 
                 /* calculate the next hyperslab offset */
                 for(i = rank1, carry = 1; i > 0 && carry; --i) {
@@ -550,28 +550,28 @@ done:
     if(buf1 != NULL) {
         /* reclaim any VL memory, if necessary */
         if(vl_data1)
-            H5Dvlen_reclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
+            H5Treclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
         HDfree(buf1);
         buf1 = NULL;
     }
     if(buf2 != NULL) {
         /* reclaim any VL memory, if necessary */
         if(vl_data2)
-            H5Dvlen_reclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
+            H5Treclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
         HDfree(buf2);
         buf2 = NULL;
     }
     if(sm_buf1 != NULL) {
         /* reclaim any VL memory, if necessary */
         if(vl_data1)
-            H5Dvlen_reclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf1);
+            H5Treclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf1);
         HDfree(sm_buf1);
         sm_buf1 = NULL;
     }
     if(sm_buf2 != NULL) {
         /* reclaim any VL memory, if necessary */
         if(vl_data2)
-            H5Dvlen_reclaim(m_tid2, sm_space, H5P_DEFAULT, sm_buf2);
+            H5Treclaim(m_tid2, sm_space, H5P_DEFAULT, sm_buf2);
         HDfree(sm_buf2);
         sm_buf2 = NULL;
     }

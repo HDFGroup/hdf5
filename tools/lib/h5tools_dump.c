@@ -1256,7 +1256,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
 
             /* Reclaim any VL memory, if necessary */
             if (vl_data)
-                H5Dvlen_reclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
+                H5Treclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
 
             if(H5Sclose(sm_space) < 0)
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
@@ -1645,7 +1645,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
 
         /* Reclaim any VL memory, if necessary */
         if (vl_data)
-            H5Dvlen_reclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
+            H5Treclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
 
         /* Calculate the next hyperslab offset */
         for (i = ctx->ndims, carry = 1; i > 0 && carry; --i) {
@@ -3979,7 +3979,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info,
 
                 /* Reclaim any VL memory, if necessary */
                 if (vl_data)
-                    H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
+                    H5Treclaim(p_type, space, H5P_DEFAULT, buf);
 
                 HDfree(buf);
             }

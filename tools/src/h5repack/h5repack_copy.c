@@ -918,8 +918,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                     /* Check if we have VL data in the dataset's
                                      * datatype that must be reclaimed */
                                     if (TRUE == H5Tdetect_class(wtype_id, H5T_VLEN))
-                                        if (H5Dvlen_reclaim(wtype_id, f_space_id, H5P_DEFAULT, buf) < 0)
-                                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dvlen_reclaim failed");
+                                        if (H5Treclaim(wtype_id, f_space_id, H5P_DEFAULT, buf) < 0)
+                                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Treclaim failed");
 
                                     if (buf != NULL) { /* TODO: is buf potentially released by H5Dvlen_reclaim()? */
                                         HDfree(buf);
@@ -1010,7 +1010,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
                                         /* reclaim any VL memory, if necessary */
                                         if (vl_data)
-                                            H5Dvlen_reclaim(wtype_id, hslab_space, H5P_DEFAULT, hslab_buf);
+                                            H5Treclaim(wtype_id, hslab_space, H5P_DEFAULT, hslab_buf);
 
                                         /* calculate the next hyperslab offset */
                                         for (k = rank, carry = 1; k > 0 && carry; --k) {
