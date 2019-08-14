@@ -78,6 +78,7 @@ Parallel Filtered Dataset Writes: @PARALLEL_FILTERED_WRITES@
   With deprecated public symbols: @DEPRECATED_SYMBOLS@
           I/O filters (external): @EXTERNAL_FILTERS@
                              MPE: @MPE@
+                   Map (H5M) API: @MAP_API@
                       Direct VFD: @DIRECT_VFD@
               (Read-Only) S3 VFD: @ROS3_VFD@
             (Read-Only) HDFS VFD: @HAVE_LIBHDFS@
