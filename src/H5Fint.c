@@ -3647,7 +3647,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5F__get_file_id(H5F_t *file)
+H5F__get_file_id(H5F_t *file, hbool_t app_ref)
 {
     hid_t file_id = H5I_INVALID_HID;    /* File ID */
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
@@ -3660,13 +3660,13 @@ H5F__get_file_id(H5F_t *file)
 
     /* If the ID does not exist, register it with the VOL connector */
     if(H5I_INVALID_HID == file_id) {
-        if((file_id = H5VL_wrap_register(H5I_FILE, file, TRUE)) < 0)
+        if((file_id = H5VL_wrap_register(H5I_FILE, file, app_ref)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
         file->id_exists = TRUE;
     } /* end if */
     else {
         /* Increment ref count on existing ID */
-        if(H5I_inc_ref(file_id, TRUE) < 0)
+        if(H5I_inc_ref(file_id, app_ref) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
     } /* end else */
 
@@ -3690,7 +3690,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5F_get_file_id(hid_t obj_id, H5I_type_t type)
+H5F_get_file_id(hid_t obj_id, H5I_type_t type, hbool_t app_ref)
 {
     H5VL_object_t  *vol_obj;                    /* File info */
     hid_t           file_id = H5I_INVALID_HID;  /* File ID for object */
@@ -3703,7 +3703,7 @@ H5F_get_file_id(hid_t obj_id, H5I_type_t type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
 
     /* Get the file through the VOL */
-    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_FILE_ID, (int)type, &file_id) < 0)
+    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_FILE_ID, (int)type, (int)app_ref, &file_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get file ID")
     if(H5I_INVALID_HID == file_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the file ID through the VOL")
