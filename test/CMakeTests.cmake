@@ -796,7 +796,7 @@ else ()
 endif ()
 
 #-- Adding test for error_test
-if (HDF5_USE_16_API_DEFAULT OR MINGW)
+if (DEFAULT_API_VERSION MATCHES "v16" OR MINGW)
   add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
       -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
