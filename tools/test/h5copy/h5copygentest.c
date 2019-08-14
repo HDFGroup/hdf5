@@ -261,7 +261,7 @@ static void gent_named_vl(hid_t loc_id)
     H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 
     /* close */
-    H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf);
+    H5Treclaim(tid,sid,H5P_DEFAULT,buf);
     H5Sclose(sid);
     H5Dclose(did);
     H5Tclose(tid);
@@ -314,7 +314,7 @@ static void gent_nested_vl(hid_t loc_id)
     H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 
     /* close */
-    H5Dvlen_reclaim(tid2,sid,H5P_DEFAULT,buf);
+    H5Treclaim(tid2,sid,H5P_DEFAULT,buf);
     H5Sclose(sid);
     H5Dclose(did);
     H5Tclose(tid1);

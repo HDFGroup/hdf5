@@ -1809,7 +1809,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if(H5Dvlen_reclaim(dup_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
+    if(H5Treclaim(dup_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
@@ -1875,7 +1875,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if(H5Dvlen_reclaim(dup_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
+    if(H5Treclaim(dup_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't read data\n");
         goto error;
@@ -2063,12 +2063,12 @@ test_compound_10(void)
             goto error;
         }
     } /* end for */
-    if(H5Dvlen_reclaim(arr_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
+    if(H5Treclaim(arr_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
     } /* end if */
-    if(H5Dvlen_reclaim(arr_tid, space_id, H5P_DEFAULT, &wdata) < 0) {
+    if(H5Treclaim(arr_tid, space_id, H5P_DEFAULT, &wdata) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
@@ -2226,7 +2226,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
     } /* end for */
-    if(H5Dvlen_reclaim(little_tid2, space_id, H5P_DEFAULT, buf) < 0) {
+    if(H5Treclaim(little_tid2, space_id, H5P_DEFAULT, buf) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim data\n");
         goto error;
@@ -2270,7 +2270,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
     } /* end for */
-    if(H5Dvlen_reclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
+    if(H5Treclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim data\n");
         goto error;
@@ -2308,7 +2308,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
     } /* end for */
-    if(H5Dvlen_reclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
+    if(H5Treclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim data\n");
         goto error;
@@ -2811,13 +2811,13 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if(H5Dvlen_reclaim(cmpd_m1_tid, space_id, H5P_DEFAULT, &rdata1) < 0) {
+    if(H5Treclaim(cmpd_m1_tid, space_id, H5P_DEFAULT, &rdata1) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
     } /* end if */
     rdata1.str = NULL;
-    if(H5Dvlen_reclaim(cmpd_m2_tid, space_id, H5P_DEFAULT, &rdata2) < 0) {
+    if(H5Treclaim(cmpd_m2_tid, space_id, H5P_DEFAULT, &rdata2) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
@@ -2898,13 +2898,13 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if(H5Dvlen_reclaim(cmpd_m1_tid, space_id, H5P_DEFAULT, &rdata1) < 0) {
+    if(H5Treclaim(cmpd_m1_tid, space_id, H5P_DEFAULT, &rdata1) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
     } /* end if */
     rdata1.str = NULL;
-    if(H5Dvlen_reclaim(cmpd_m2_tid, space_id, H5P_DEFAULT, &rdata2) < 0) {
+    if(H5Treclaim(cmpd_m2_tid, space_id, H5P_DEFAULT, &rdata2) < 0) {
         H5_FAILED(); AT();
         HDprintf("Can't reclaim read data\n");
         goto error;
