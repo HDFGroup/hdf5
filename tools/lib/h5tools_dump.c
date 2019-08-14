@@ -2345,9 +2345,13 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         if (H5Tequal(type, H5T_STD_REF_DSETREG) == TRUE) {
             h5tools_str_append(buffer, " { H5T_STD_REF_DSETREG }");
         }
-        else {
+        else if (H5Tequal(type, H5T_STD_REF_OBJ) == TRUE) {
             h5tools_str_append(buffer, " { H5T_STD_REF_OBJECT }");
         }
+        else if (H5Tequal(type, H5T_STD_REF) == TRUE) {
+            h5tools_str_append(buffer, " { H5T_STD_REF }");
+        } else
+            h5tools_str_append(buffer, " { UNDEFINED }");
         break;
 
     case H5T_ENUM:
