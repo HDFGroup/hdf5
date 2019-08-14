@@ -34,7 +34,7 @@ const char *FILENAME[] = {
 
 #define FILENAME_BUF_SIZE       1024
 
-#define TMPDIR          "tmp/"
+#define TMPDIR          "tmp_vds_env/"
 
 /*-------------------------------------------------------------------------
  * Function:    test_vds_prefix_second
