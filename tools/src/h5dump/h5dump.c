@@ -24,6 +24,7 @@ static int           doxml = 0;
 static int           useschema = 1;
 static const char   *xml_dtd_uri = NULL;
 
+#ifdef H5_HAVE_ROS3_VFD
 static H5FD_ros3_fapl_t ros3_fa = {
     1,     /* version           */
     false, /* authenticate      */
@@ -31,7 +32,9 @@ static H5FD_ros3_fapl_t ros3_fa = {
     "",    /* access key id     */
     "",    /* secret access key */
 };
+#endif /* H5_HAVE_ROS3_VFD */
 
+#ifdef H5_HAVE_LIBHDFS
 static H5FD_hdfs_fapl_t hdfs_fa = {
     1,           /* fapl version          */
     "localhost", /* namenode name         */
@@ -40,6 +43,7 @@ static H5FD_hdfs_fapl_t hdfs_fa = {
     "",          /* user name             */
     2048,        /* stream buffer size    */
 };
+#endif /* H5_HAVE_LIBHDFS */
 
 /* module-scoped variables for XML option */
 #define DEFAULT_XSD     "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd"
