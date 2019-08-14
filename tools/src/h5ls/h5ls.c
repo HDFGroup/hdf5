@@ -2612,6 +2612,7 @@ main(int argc, const char *argv[])
     int err_exit = 0;
     hid_t fapl_id = H5P_DEFAULT;
 
+#ifdef H5_HAVE_ROS3_VFD
     /* default "anonymous" s3 configuration */
     H5FD_ros3_fapl_t ros3_fa = {
         1,     /* fapl version      */
@@ -2620,7 +2621,9 @@ main(int argc, const char *argv[])
         "",    /* access key id     */
         "",    /* secret access key */
     };
+#endif /* H5_HVAE_ROS3_VFD */
 
+#ifdef H5_HAVE_LIBHDFS
     /* "default" HDFS configuration */
     H5FD_hdfs_fapl_t hdfs_fa = {
         1,           /* fapl version          */
@@ -2630,6 +2633,7 @@ main(int argc, const char *argv[])
         "",          /* user name             */
         2048,        /* stream buffer size    */
     };
+#endif /* H5_HAVE_LIBHDFS */
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
