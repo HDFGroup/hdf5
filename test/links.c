@@ -40,7 +40,7 @@
 #define LINKED_FILE  "be_extlink2.h5"
 
 #define TMPDIR          "tmp_links/"
-#define TMPDIR2         "tmp2/"
+#define TMPDIR2         "tmp2_links/"
 
 /* Symlinks for external link symlink test */
 #define SYMLINK1  TMPDIR "sym1.h5"
