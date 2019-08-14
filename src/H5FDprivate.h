@@ -160,9 +160,6 @@ H5_DLL herr_t H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 /* General routines */
 H5_DLL haddr_t H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off);
 H5_DLL herr_t H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/);
-H5_DLL herr_t H5FD_mpi_comm_info_dup(MPI_Comm comm, MPI_Info info,
-				MPI_Comm *comm_new, MPI_Info *info_new);
-H5_DLL herr_t H5FD_mpi_comm_info_free(MPI_Comm *comm, MPI_Info *info);
 #ifdef NOT_YET
 H5_DLL herr_t H5FD_mpio_wait_for_left_neighbor(H5FD_t *file);
 H5_DLL herr_t H5FD_mpio_signal_right_neighbor(H5FD_t *file);
