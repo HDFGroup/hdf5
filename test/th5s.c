@@ -91,11 +91,21 @@ struct space4_struct {
     unsigned u;
     float f;
     char c2;
- } space4_data={'v',987123,-3.14F,'g'}; /* Test data for 4th dataspace */
+} space4_data={'v',987123,-3.14F,'g'}; /* Test data for 4th dataspace */
 
-
-/* Used in test_h5s_encode_irregular_exceed32() and test_h5s_encode_points_exceed32() */
+/*
+ *  Testing configuration defines used by:
+ *      test_h5s_encode_regular_hyper()
+ *      test_h5s_encode_irregular_hyper()
+ *      test_h5s_encode_points()
+ */
+#define CONFIG_8    1
+#define CONFIG_16   2
+#define CONFIG_32   3
+#define POWER8      256             /* 2^8 */
+#define POWER16     65536           /* 2^16 */
 #define POWER32     4294967296      /* 2^32 */
+
 
 /****************************************************************
 **
@@ -1200,6 +1210,7 @@ test_h5s_encode(void)
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
+    /* Set the hyperslab selection */
     ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
@@ -1212,7 +1223,7 @@ test_h5s_encode(void)
 
     /* Try decoding bogus buffer */
     H5E_BEGIN_TRY {
-    ret_id = H5Sdecode(sbuf);
+        ret_id = H5Sdecode(sbuf);
     } H5E_END_TRY;
     VERIFY(ret_id, FAIL, "H5Sdecode");
 
@@ -1229,22 +1240,26 @@ test_h5s_encode(void)
     VERIFY(n, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3,
     "H5Sget_simple_extent_npoints");
 
+    /* Retrieve and verify the dataspace rank */
     rank = H5Sget_simple_extent_ndims(decoded_sid1);
     CHECK(rank, FAIL, "H5Sget_simple_extent_ndims");
     VERIFY(rank, SPACE1_RANK, "H5Sget_simple_extent_ndims");
 
+     /* Retrieve and verify the dataspace dimensions */
     rank = H5Sget_simple_extent_dims(decoded_sid1, tdims, NULL);
     CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
     VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0,
     "H5Sget_simple_extent_dims");
 
-    /* Verify hyperslabe selection */
+    /* Verify the type of dataspace selection */
     sel_type = H5Sget_select_type(decoded_sid1);
     VERIFY(sel_type, H5S_SEL_HYPERSLABS, "H5Sget_select_type");
 
+    /* Verify the number of hyperslab blocks */
     nblocks = H5Sget_select_hyper_nblocks(decoded_sid1);
     VERIFY(nblocks, 2*2*2, "H5Sget_select_hyper_nblocks");
 
+    /* Close the dataspaces */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
 
@@ -1272,10 +1287,11 @@ test_h5s_encode(void)
     decoded_sid2=H5Sdecode(null_sbuf);
     CHECK(decoded_sid2, FAIL, "H5Sdecode");
 
-    /* Verify decoded dataspace */
+    /* Verify the decoded dataspace type */
     space_type = H5Sget_simple_extent_type(decoded_sid2);
     VERIFY(space_type, H5S_NULL, "H5Sget_simple_extent_type");
 
+    /* Close the dataspaces */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
 
@@ -1313,20 +1329,26 @@ test_h5s_encode(void)
     CHECK(n, FAIL, "H5Sget_simple_extent_npoints");
     VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
+    /* Retrieve and verify the dataspace rank */
     rank = H5Sget_simple_extent_ndims(decoded_sid3);
     CHECK(rank, FAIL, "H5Sget_simple_extent_ndims");
     VERIFY(rank, 0, "H5Sget_simple_extent_ndims");
 
+    /* Close the dataspaces */
     ret = H5Sclose(sid3);
     CHECK(ret, FAIL, "H5Sclose");
 
     ret = H5Sclose(decoded_sid3);
     CHECK(ret, FAIL, "H5Sclose");
 
-    HDfree(sbuf);
-    HDfree(null_sbuf);
-    HDfree(scalar_buf);
-}                /* test_h5s_encode() */
+    /* Release resources */
+    if(sbuf)
+        HDfree(sbuf);
+    if(null_sbuf)
+        HDfree(null_sbuf);
+    if(scalar_buf)
+        HDfree(scalar_buf);
+} /* test_h5s_encode() */
 
 /****************************************************************
 **
@@ -1336,14 +1358,14 @@ test_h5s_encode(void)
 static void
 test_h5s_scalar_write(void)
 {
-    hid_t        fid1;        /* HDF5 File IDs        */
-    hid_t        dataset;    /* Dataset ID            */
-    hid_t        sid1;            /* Dataspace ID            */
-    int                rank;        /* Logical rank of dataspace    */
-    hsize_t        tdims[4];    /* Dimension array to test with */
-    hssize_t        n;         /* Number of dataspace elements */
-    H5S_class_t         ext_type;       /* Extent type */
-    herr_t        ret;        /* Generic return value        */
+    hid_t        fid1;      /* HDF5 File IDs        */
+    hid_t        dataset;   /* Dataset ID            */
+    hid_t        sid1;      /* Dataspace ID            */
+    int          rank;      /* Logical rank of dataspace    */
+    hsize_t      tdims[4];  /* Dimension array to test with */
+    hssize_t     n;         /* Number of dataspace elements */
+    H5S_class_t  ext_type;  /* Extent type */
+    herr_t        ret;      /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Scalar Dataspace Manipulation during Writing\n"));
@@ -1362,14 +1384,17 @@ test_h5s_scalar_write(void)
     sid1 = H5Screate_simple(SPACE3_RANK, NULL, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
+    /* Retrieve the number of elements in the dataspace selection */
     n = H5Sget_simple_extent_npoints(sid1);
     CHECK(n, FAIL, "H5Sget_simple_extent_npoints");
     VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
+    /* Get the dataspace rank */
     rank = H5Sget_simple_extent_ndims(sid1);
     CHECK(rank, FAIL, "H5Sget_simple_extent_ndims");
     VERIFY(rank, SPACE3_RANK, "H5Sget_simple_extent_ndims");
 
+    /* Get the dataspace dimension sizes */
     rank = H5Sget_simple_extent_dims(sid1, tdims, NULL);
     VERIFY(rank, 0, "H5Sget_simple_extent_dims");
 
@@ -1381,6 +1406,7 @@ test_h5s_scalar_write(void)
     dataset = H5Dcreate2(fid1, "Dataset1", H5T_NATIVE_UINT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate2");
 
+    /* Write to the dataset */
     ret = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &space3_data);
     CHECK(ret, FAIL, "H5Dwrite");
 
@@ -1395,7 +1421,7 @@ test_h5s_scalar_write(void)
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
-}                /* test_h5s_scalar_write() */
+}  /* test_h5s_scalar_write() */
 
 /****************************************************************
 **

@@ -775,15 +775,43 @@ if (HDF5_ENABLE_DEPRECATED_SYMBOLS AND NOT MINGW)
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
+else ()
+  add_test (NAME H5TEST-err_compat COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:err_compat>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_MASK_ERROR=true"
+      -D "ERROR_APPEND=1"
+      -D "TEST_OUTPUT=err_compat.txt"
+      -D "TEST_REFERENCE=err_compat_2"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+  set_tests_properties (H5TEST-err_compat PROPERTIES
+      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
 endif ()
 
 #-- Adding test for error_test
-if (HDF5_USE_16_API_DEFAULT OR MINGW)
-  add_test (
-      NAME H5TEST-error_test
-      COMMAND ${CMAKE_COMMAND} -E echo "SKIP $<TARGET_FILE:error_test>"
+if (DEFAULT_API_VERSION MATCHES "v16" OR MINGW)
+  add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:error_test>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_MASK_ERROR=true"
+      -D "ERROR_APPEND=1"
+      -D "TEST_OUTPUT=error_test.txt"
+      -D "TEST_REFERENCE=error_test_2"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
-  set_property(TEST H5TEST-error_test PROPERTY DISABLED)
+  set_tests_properties (H5TEST-error_test PROPERTIES
+      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
 else ()
   add_test (NAME H5TEST-error_test COMMAND "${CMAKE_COMMAND}"
       -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
@@ -878,10 +906,12 @@ if (BUILD_SHARED_LIBS)
 ##############################################################################
 endif ()
 
+option (TEST_SHELL_SCRIPTS "Enable shell script tests" OFF)
 if (TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()
 
+option (ENABLE_EXTENDED_TESTS "Enable extended tests" OFF)
 if (ENABLE_EXTENDED_TESTS)
 ##############################################################################
 ###    S W M R  T E S T S

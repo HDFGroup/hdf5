@@ -1399,6 +1399,6 @@ error:
         H5Gclose(gid);
     } H5E_END_TRY;
     nerrors = MAX(1, nerrors);
-    printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
+    HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */

@@ -15,6 +15,7 @@
 top_builddir=@top_builddir@
 top_srcdir=@top_srcdir@
 srcdir=@srcdir@
+prefix=@prefix@
 
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
@@ -40,7 +41,7 @@ myos=`uname -s`
 
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
-BLDLIBDIR="$top_builddir/hdf5/lib"
+BLDLIBDIR="$prefix/lib"
 BLDDIR="."
 HDFTEST_HOME="$top_srcdir/java/test"
 JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar

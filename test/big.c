@@ -275,6 +275,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static int
 enough_room(hid_t fapl)
 {
@@ -315,6 +323,7 @@ done:
 
     return ret_value;
 }
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------

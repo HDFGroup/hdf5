@@ -6114,7 +6114,7 @@ test_mf_fs_persist_split(void)
 
     TESTING("File's free-space managers are persistent for split-file");
 
-    /* for now, we don't support persistent free space managers 
+    /* for now, we don't support persistent free space managers
      * with the split file driver.
      */
     SKIPPED();
@@ -6124,7 +6124,7 @@ test_mf_fs_persist_split(void)
     /* File creation property list template */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
 
-    /* for now, we don't support persistent free space managers 
+    /* for now, we don't support persistent free space managers
      * with the split file driver.
      */
     SKIPPED();
@@ -6436,14 +6436,14 @@ test_mf_fs_persist_multi(void)
 
     TESTING("File's free-space managers are persistent for multi-file");
 
-    /* for now, we don't support persistent free space managers 
+    /* for now, we don't support persistent free space managers
      * with the multi file driver.
      */
     SKIPPED();
     HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0;  /* <========== note return */
 
-    /* for now, we don't support persistent free space managers 
+    /* for now, we don't support persistent free space managers
      * with the multi file driver.
      */
     SKIPPED();
@@ -7614,7 +7614,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
     hid_t fcpl = -1;            /* File creation property list */
     hid_t fapl_new = -1;        /* File access property list ID */
     H5F_t *f = NULL;            /* Internal file object pointer */
-    haddr_t addr2, addr3;       /* Addresses for small meta data blocks */
+    haddr_t addr2, addr3;       /* Addresses for small metadata blocks */
     haddr_t saddr1;             /* Addresses for small raw data blocks */
     haddr_t gaddr1;             /* Addresses for large data blocks */
     hbool_t split = FALSE, multi = FALSE;
@@ -7661,7 +7661,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
             if(NULL == (f = (H5F_t *)H5I_object(fid)))
                 TEST_ERROR
     
-            /* Allocate 3 small meta data blocks: addr1, addr2, addr3 */
+            /* Allocate 3 small metadata blocks: addr1, addr2, addr3 */
             H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE30);
             addr2 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE1034);
             addr3 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE50);
@@ -7673,7 +7673,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
 
                 H5MF__alloc_to_fs_type(f, H5FD_MEM_OHDR, TBLOCK_SIZE1034, (H5F_mem_page_t *)&fs_type);
 
-                /* Verify that the freed block with addr2 is found from the small meta data manager */
+                /* Verify that the freed block with addr2 is found from the small metadata manager */
                 if(H5MF__find_sect(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE1034, f->shared->fs_man[fs_type], &found_addr) < 0)
                     TEST_ERROR
                 if(found_addr != addr2)
@@ -7735,7 +7735,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                 if(!H5F_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR
 
-                /* Verify that the small meta data manager is there */
+                /* Verify that the small metadata manager is there */
                 H5MF__alloc_to_fs_type(f, H5FD_MEM_OHDR, f->shared->fs_page_size - 1, (H5F_mem_page_t *)&fs_type);
                 if(!H5F_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR
@@ -7755,7 +7755,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                     if(H5MF__open_fstype(f, fs_type) < 0)
                         TEST_ERROR
 
-                /* Verify that the freed block with addr2 is found from the small meta data manager */
+                /* Verify that the freed block with addr2 is found from the small metadata manager */
                 if(H5MF__find_sect(f, H5FD_MEM_OHDR, (hsize_t)(f->shared->fs_page_size-(addr3+TBLOCK_SIZE50)), f->shared->fs_man[fs_type], &found_addr) < 0)
                     TEST_ERROR
 
@@ -7838,7 +7838,7 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
     hid_t fid = -1;                 /* File ID */
     hid_t fcpl = -1;                /* File creation property list */
     H5F_t *f = NULL;                /* Internal file object pointer */
-    haddr_t addr1;                  /* Address for small meta data block */
+    haddr_t addr1;                  /* Address for small metadata block */
     haddr_t saddr1;                 /* Address for small raw data block */
     haddr_t gaddr1;                 /* Address for large data block */
     hbool_t contig_addr_vfd;        /* Whether VFD used has a contigous address space */
@@ -7872,14 +7872,14 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(fid)))
             FAIL_STACK_ERROR
 
-        /* Allocate a small meta data block with addr1 */
+        /* Allocate a small metadata block with addr1 */
         addr1 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE50);
 
         /* Try to shrink the block with addr1 */
         if((status = H5MF_try_shrink(f, H5FD_MEM_OHDR, addr1, (hsize_t)TBLOCK_SIZE50)) < 0)
             FAIL_STACK_ERROR
 
-        /* Couldn't shrink due to the section (remaining space in the page) is in the small meta data free-space manager */
+        /* Couldn't shrink due to the section (remaining space in the page) is in the small metadata free-space manager */
         if(status == TRUE) TEST_ERROR
 
         /* Allocate a small raw data block with saddr1 */
@@ -7961,7 +7961,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
     hid_t fid = -1;                 /* File ID */
     hid_t fcpl = -1;                /* File creation property list */
     H5F_t *f = NULL;                /* Internal file object pointer */
-    haddr_t addr1, addr2, addr3;    /* Addresses for small meta data blocks */
+    haddr_t addr1, addr2, addr3;    /* Addresses for small metadata blocks */
     haddr_t saddr1;                 /* Address for small raw data block */
     hbool_t contig_addr_vfd;        /* Whether VFD used has a contigous address space */
     htri_t was_extended;            /* Whether the block can be extended or not */
@@ -7993,7 +7993,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(fid)))
             FAIL_STACK_ERROR
 
-        /* Allocate a small meta data block with addr1 */
+        /* Allocate a small metadata block with addr1 */
         addr1 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE98);
 
         /* Try extending the block with addr1 at EOF not crossing page boundary */
@@ -8001,7 +8001,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
         /* Should succeed */
         if(was_extended != TRUE) TEST_ERROR
 
-        /* Allocate 2 small meta data blocks with addr2 and addr3--will be on another meta data page */
+        /* Allocate 2 small metadata blocks with addr2 and addr3--will be on another metadata page */
         addr2 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE100);
         addr3 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE150);
 
@@ -8028,7 +8028,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
         /* Free the block with addr1 */
         H5MF_xfree(f, H5FD_MEM_OHDR, addr1, (hsize_t)TBLOCK_SIZE3248);
 
-        /* Allocate a new meta data block with addr1 */
+        /* Allocate a new metadata block with addr1 */
         /* There is a page end threshold of size H5F_FILE_SPACE_PGEND_META_THRES at the end of the block */
         /* The block is right next to the threshold */ 
         addr1 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE3286);
@@ -8409,7 +8409,7 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
     hid_t fcpl = -1;                    /* File creation property list */
     H5F_t *f = NULL;                    /* Internal file object pointer */
     haddr_t addr2, addr3, addr4, addr5; /* Addresses for blocks */
-    haddr_t addr9, addr10, addr11;      /* Address for small meta data blocks */
+    haddr_t addr9, addr10, addr11;      /* Address for small metadata blocks */
     haddr_t saddr1, saddr2;             /* Addresses for small raw data blocks */
     H5FS_stat_t fs_stat;                /* Information for free-space manager */
     char filename[FILENAME_LEN];        /* Filename to use */
@@ -8445,7 +8445,7 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(fid)))
             FAIL_STACK_ERROR
 
-        /* Allocate 2 small meta data blocks: addr1, addr2 */
+        /* Allocate 2 small metadata blocks: addr1, addr2 */
         H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE30);
         addr2 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE50);
 
@@ -8464,13 +8464,13 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
         if(saddr2 != (saddr1 + TBLOCK_SIZE30))
             TEST_ERROR
 
-        /* Allocate a small meta data block with addr3--there is no free-space section big enough to fulfill the request */
+        /* Allocate a small metadata block with addr3--there is no free-space section big enough to fulfill the request */
         addr3 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE4020);
         /* Should be on the third page and page aligned */
         if(addr3 % TBLOCK_SIZE4096)
             TEST_ERROR
 
-        /* Allocate a small meta data block with addr4--there is a free-space section big enough to fulfill the request */
+        /* Allocate a small metadata block with addr4--there is a free-space section big enough to fulfill the request */
         addr4 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE80);
         /* Should not be page aligned */
         if(!(addr4 % TBLOCK_SIZE4096))
@@ -8479,7 +8479,7 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
         if(addr4 != (addr2 + TBLOCK_SIZE50))
             TEST_ERROR
 
-        /* Allocate a small meta data block with addr5--there is a free-space section big enough to fulfill the request */
+        /* Allocate a small metadata block with addr5--there is a free-space section big enough to fulfill the request */
         addr5 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE40);
         /* Should not be page aligned */
         if(!(addr5 % TBLOCK_SIZE4096))
@@ -8489,16 +8489,16 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
         if(addr5 != (addr3 + TBLOCK_SIZE4020))
             TEST_ERROR
 
-        /* Allocate a small meta data block with addr6--taking up the remaining space in the first page */
+        /* Allocate a small metadata block with addr6--taking up the remaining space in the first page */
         if(family)
             H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE3080);
         else
             H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE3088);
 
-        /* Allocate a small meta data block with addr7--taking up the remaining space in the third page */
+        /* Allocate a small metadata block with addr7--taking up the remaining space in the third page */
         H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE36);
 
-        /* Allocate 2 small meta data blocks: addr8, addr9--there is no free-space to fulfill the request */
+        /* Allocate 2 small metadata blocks: addr8, addr9--there is no free-space to fulfill the request */
         H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE50);
         addr9 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE80);
 
@@ -8514,13 +8514,13 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
         if(fs_stat.tot_space != TBLOCK_SIZE4096)
             TEST_ERROR
 
-        /* Allocate a small meta data block with addr10--there is a free-space section big enough to fulfill the request */
+        /* Allocate a small metadata block with addr10--there is a free-space section big enough to fulfill the request */
         addr10 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE3900);
         /* The block should be next to the block with addr9 */
         if(addr10 != (addr9 + TBLOCK_SIZE80))
             TEST_ERROR
 
-        /* Allocate a small meta data block with addr11 */
+        /* Allocate a small metadata block with addr11 */
         /* The current free-space section is unable to fulfill the request; obtain a page from the large manager */
         addr11 = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE80);
         /* The address of the block should be the same the freed block with saddr1 */
@@ -8575,7 +8575,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
     hid_t fcpl2 = -1;               /* File creation property list ID */
     hid_t fapl_new = -1;            /* File access property list ID */
     H5F_t *f = NULL;                /* Internal file object pointer */
-    haddr_t addr1, addr2;           /* Addresses for small meta data blocks */
+    haddr_t addr1, addr2;           /* Addresses for small metadata blocks */
     haddr_t saddr1, saddr2;         /* Addresses for small raw data blocks */
     haddr_t gaddr1, gaddr2;         /* Addresses for blocks */
     char filename[FILENAME_LEN];    /* Filename to use */
@@ -8729,7 +8729,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
         /* Disable small data block mechanism */
         if(H5Pset_small_data_block_size(fapl_new, (hsize_t)0) < 0)
             TEST_ERROR
-        /* Disable meta data block mechanism */
+        /* Disable metadata block mechanism */
         if(H5Pset_meta_block_size(fapl_new, (hsize_t)0) < 0)
             TEST_ERROR
 
@@ -8741,7 +8741,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(fid)))
             TEST_ERROR
 
-        /* Allocate 2 small meta data blocks */
+        /* Allocate 2 small metadata blocks */
         addr1 = H5MF_alloc(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE30);
         addr2 = H5MF_alloc(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE50);
 
