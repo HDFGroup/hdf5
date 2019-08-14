@@ -23,7 +23,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
 
-#define TMPDIR          "tmp/"
+#define TMPDIR          "tmp_links_env/"
 #define NAME_BUF_SIZE   1024
 
 const char *FILENAME[] = {
