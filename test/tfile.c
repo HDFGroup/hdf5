@@ -905,15 +905,15 @@ test_file_close(void)
     CHECK(ret, FAIL, "H5Pget_fclose_degree");
 
     switch(fc_degree) {
-    case H5F_CLOSE_STRONG:
+        case H5F_CLOSE_STRONG:
             /* Close first open */
             ret = H5Fclose(fid1);
             CHECK(ret, FAIL, "H5Fclose");
             /* Close second open */
             ret = H5Fclose(fid2);
             CHECK(ret, FAIL, "H5Fclose");
-        break;
-    case H5F_CLOSE_SEMI:
+            break;
+        case H5F_CLOSE_SEMI:
             /* Close first open */
             ret = H5Fclose(fid1);
             CHECK(ret, FAIL, "H5Fclose");
@@ -928,8 +928,8 @@ test_file_close(void)
             /* Close second open */
             ret = H5Fclose(fid2);
             CHECK(ret, FAIL, "H5Fclose");
-        break;
-    case H5F_CLOSE_WEAK:
+            break;
+        case H5F_CLOSE_WEAK:
             /* Close first open */
             ret = H5Fclose(fid1);
             CHECK(ret, FAIL, "H5Fclose");
@@ -944,7 +944,7 @@ test_file_close(void)
             CHECK(ret, FAIL, "H5Gclose");
             ret = H5Gclose(group_id3);
             CHECK(ret, FAIL, "H5Gclose");
-        break;
+            break;
         case H5F_CLOSE_DEFAULT:
         default:
             CHECK(fc_degree, H5F_CLOSE_DEFAULT, "H5Pget_fclose_degree");
@@ -1595,7 +1595,6 @@ test_file_perm2(void)
 } /* end test_file_perm2() */
 
 
-
 /****************************************************************
 **
 **  test_file_ishdf5(): low-level file test routine.
@@ -2164,10 +2163,8 @@ test_file_double_file_dataset_open(hbool_t new_format)
     MESSAGE(5, ("Testing double file and dataset open/close\n"));
 
     /* Setting up test file */
-
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
-
     if(new_format) {
         ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
         CHECK(ret, FAIL, "H5Pset_libver_bounds");

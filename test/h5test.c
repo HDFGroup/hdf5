@@ -111,7 +111,7 @@ const char *LIBVER_NAMES[] = {
 static H5E_auto2_t err_func = NULL;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
-static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
+static char *h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
                               char *fullname, size_t size, hbool_t nest_printf);
 
 

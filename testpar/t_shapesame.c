@@ -22,6 +22,9 @@
 #define H5S_TESTING
 
 
+#include "hdf5.h"
+#include "H5private.h"
+#include "testphdf5.h"
 #include "H5Spkg.h"             /* Dataspaces                           */
 #include "testphdf5.h"
 
@@ -109,10 +112,6 @@ struct hs_dr_pio_test_vars_t
  * Return:    void
  *
  * Programmer:    JRM -- 8/9/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -573,7 +572,7 @@ hs_dr_pio_test__setup(const int test_num,
                               tv_ptr->block);
     VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid_0, set) suceeded");
 
-    /* In passing, setup the process slice data spaces as well */
+    /* In passing, setup the process slice dataspaces as well */
 
     ret = H5Sselect_hyperslab(tv_ptr->mem_large_ds_process_slice_sid,
                               H5S_SELECT_SET,
@@ -684,10 +683,6 @@ hs_dr_pio_test__setup(const int test_num,
  * Return:    void
  *
  * Programmer:    JRM -- 9/18/09
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -803,10 +798,6 @@ hs_dr_pio_test__takedown( struct hs_dr_pio_test_vars_t * tv_ptr)
  *
  * Programmer:    JRM -- 9/10/11
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -831,7 +822,7 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
     mpi_rank = tv_ptr->mpi_rank;
 
 
-    /* We have already done a H5Sselect_all() on the data space
+    /* We have already done a H5Sselect_all() on the dataspace
      * small_ds_slice_sid in the initialization phase, so no need to
      * call H5Sselect_all() again.
      */
@@ -1043,10 +1034,6 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/10/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1328,10 +1315,6 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/10/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1658,10 +1641,6 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/10/11
- *
- * Modifications:
- *
- *        None
  *
  *-------------------------------------------------------------------------
  */
@@ -2395,18 +2374,18 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
 /****************************************************************
 **
 **  ckrbrd_hs_dr_pio_test__slct_ckrbrd():
-**    Given a data space of tgt_rank, and dimensions:
+**    Given a dataspace of tgt_rank, and dimensions:
 **
 **        (mpi_size + 1), edge_size, ... , edge_size
 **
 **    edge_size, and a checker_edge_size, select a checker
 **    board selection of a sel_rank (sel_rank < tgt_rank)
-**    dimensional slice through the data space parallel to the
+**    dimensional slice through the dataspace parallel to the
 **      sel_rank fastest changing indicies, with origin (in the
 **    higher indicies) as indicated by the start array.
 **
 **    Note that this function, like all its relatives, is
-**    hard coded to presume a maximum data space rank of 5.
+**    hard coded to presume a maximum dataspace rank of 5.
 **    While this maximum is declared as a constant, increasing
 **    it will require extensive coding in addition to changing
 **      the value of the constant.
@@ -2707,7 +2686,7 @@ ckrbrd_hs_dr_pio_test__slct_ckrbrd(const int mpi_rank,
               fcnName, mpi_rank, (int)H5Sget_select_npoints(tgt_sid));
 #endif /* CKRBRD_HS_DR_PIO_TEST__SELECT_CHECKER_BOARD__DEBUG */
 
-    /* Clip the selection back to the data space proper. */
+    /* Clip the selection back to the dataspace proper. */
 
     for ( i = 0; i < test_max_rank; i++ ) {
 
@@ -2958,7 +2937,7 @@ ckrbrd_hs_dr_pio_test__verify_data(uint32_t * buf_ptr,
  *        board selections of different rank that
  *              H5S_select_shape_same() views as being of the same shape.
  *
- *              In this function, we test this by reading small_rank - 1
+ *        In this function, we test this by reading small_rank - 1
  *        checker board slices from the on disk large cube, and
  *        verifying that the data read is correct.  Verify that
  *        H5S_select_shape_same() returns true on the memory and
@@ -2967,10 +2946,6 @@ ckrbrd_hs_dr_pio_test__verify_data(uint32_t * buf_ptr,
  * Return:    void
  *
  * Programmer:    JRM -- 9/15/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3242,10 +3217,6 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/15/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3574,10 +3545,6 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/15/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3937,10 +3904,6 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/15/11
- *
- * Modifications:
- *
- *        None
  *
  *-------------------------------------------------------------------------
  */

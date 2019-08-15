@@ -311,8 +311,8 @@ main(void)
     fapl = h5_fileaccess();
 
     for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
-	HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file", bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
-	nerrors += test_vds_prefix_second(bit_config, fapl);
+        HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file", bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
+        nerrors += test_vds_prefix_second(bit_config, fapl);
     }
 
     /* Verify symbol table messages are cached */

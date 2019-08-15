@@ -444,7 +444,7 @@ set (test_CLEANFILES
     cache_logging.out
     vds_swmr.h5
     vds_swmr_src_*.h5
-    tmp/vds_src_2.h5
+    tmp_vds_env/vds_src_2.h5
     direct_chunk.h5
 )
 
@@ -612,7 +612,7 @@ else ()
         -D "TEST_PROGRAM=$<TARGET_FILE:vds_env>"
         -D "TEST_ARGS:STRING="
         -D "TEST_ENV_VAR:STRING=HDF5_VDS_PREFIX"
-        -D "TEST_ENV_VALUE:STRING=\${ORIGIN}/tmp"
+        -D "TEST_ENV_VALUE:STRING=\${ORIGIN}/tmp_vds_env"
         -D "TEST_EXPECT=0"
         -D "TEST_SKIP_COMPARE=TRUE"
         -D "TEST_OUTPUT=vds_env.txt"
@@ -836,7 +836,7 @@ add_test (NAME H5TEST-links_env-clear-objects
     COMMAND ${CMAKE_COMMAND} -E remove
         extlinks_env0.h5
         extlinks_env1.h5
-        tmp/extlinks_env1.h5
+        tmp_links_env/extlinks_env1.h5
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
@@ -849,7 +849,7 @@ else ()
       -D "TEST_PROGRAM=$<TARGET_FILE:links_env>"
       -D "TEST_ARGS:STRING="
       #-D "TEST_ENV_VAR:STRING=HDF5_EXT_PREFIX"
-      #-D "TEST_ENV_VALUE:STRING=.:tmp"
+      #-D "TEST_ENV_VALUE:STRING=.:tmp_links_env"
       -D "TEST_EXPECT=0"
       -D "TEST_OUTPUT=links_env.txt"
       -D "TEST_REFERENCE=links_env.out"
@@ -859,7 +859,7 @@ else ()
 endif ()
 set_tests_properties (H5TEST-links_env PROPERTIES
     FIXTURES_REQUIRED clear_links_env
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_EXT_PREFIX=.:tmp"
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_EXT_PREFIX=.:tmp_links_env"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 
