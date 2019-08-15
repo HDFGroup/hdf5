@@ -55,6 +55,7 @@ typedef struct parameters_ {
     off_t       num_bytes;  /* Number of bytes in each dset         */
     int         num_iters;  /* Number of times to loop doing the IO */
     int         rank;       /* Rank of dataset */
+    off_t       dset_size[MAX_DIMS]; /* Dataset size             */
     size_t      buf_size[MAX_DIMS]; /* Buffer size               */
     size_t      chk_size[MAX_DIMS]; /* Chunk size               */
     int         order[MAX_DIMS]; /* Buffer size               */
