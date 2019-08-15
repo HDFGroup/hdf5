@@ -27,7 +27,7 @@ nerrors=0
 echo "Testing external link with HDF5_EXT_PREFIX"
 TEST_NAME=links_env         # The test name
 TEST_BIN=`pwd`/$TEST_NAME     # The path of the test binary
-ENVCMD="env HDF5_EXT_PREFIX=.:tmp_links"     # The environment variable & value
+ENVCMD="env HDF5_EXT_PREFIX=.:tmp_links_env"     # The environment variable & value
 #
 # Run the test
 echo "$ENVCMD $RUNSERIAL $TEST_BIN"
