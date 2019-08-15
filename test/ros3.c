@@ -1925,7 +1925,7 @@ main(void)
         s3_test_bucket_defined = TRUE;
     }
 
-    if (S3_TEST_MAX_URL_SIZE < snprintf(
+    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(
             url_text_restricted,
             (size_t)S3_TEST_MAX_URL_SIZE,
             "%s/%s",

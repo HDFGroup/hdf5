@@ -2192,40 +2192,40 @@ int main( void )
             continue;
 
         /* Print configuration */
-        printf("Configuration: ");
+        HDprintf("Configuration: ");
         if(config == 0)
-            printf("<empty>");
+            HDprintf("<empty>");
         if(config & CONFIG_LATEST) {
             if(need_comma)
-                printf(", ");
-            printf("latest format");
+                HDprintf(", ");
+            HDprintf("latest format");
             need_comma = TRUE;
         } /* end if */
         if(config & CONFIG_REOPEN_FILE) {
             if(need_comma)
-                printf(", ");
-            printf("reopen file");
+                HDprintf(", ");
+            HDprintf("reopen file");
             need_comma = TRUE;
         } /* end if */
         else if(config & CONFIG_REOPEN_DSET) {
             if(need_comma)
-                printf(", ");
-            printf("reopen dataset");
+                HDprintf(", ");
+            HDprintf("reopen dataset");
             need_comma = TRUE;
         } /* end if */
         if(config & CONFIG_DIRECT_WRITE) {
             if(need_comma)
-                printf(", ");
-            printf("direct write");
+                HDprintf(", ");
+            HDprintf("direct write");
             need_comma = TRUE;
         } /* end if */
         if(config & CONFIG_DIRECT_READ) {
             if(need_comma)
-                printf(", ");
-            printf("direct read");
+                HDprintf(", ");
+            HDprintf("direct read");
             need_comma = TRUE;
         } /* end if */
-        printf(":\n");
+        HDprintf(":\n");
         fflush(stdout);
 
         nerrors += test_single_chunk(config);

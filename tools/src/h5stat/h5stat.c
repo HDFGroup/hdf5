@@ -396,12 +396,12 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
     /* Add attribute count to proper bin */
     bin = ceil_log10((unsigned long)oi->num_attrs);
     if((bin + 1) > iter->attr_nbins) {
-  iter->attr_bins = (unsigned long *)HDrealloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
+        iter->attr_bins = (unsigned long *)HDrealloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
         HDassert(iter->attr_bins);
 
   /* Initialize counts for intermediate bins */
         while(iter->attr_nbins < bin)
-      iter->attr_bins[iter->attr_nbins++] = 0;
+            iter->attr_bins[iter->attr_nbins++] = 0;
         iter->attr_nbins++;
 
         /* Initialize count for new bin */
@@ -549,7 +549,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Get storage info */
     /* Failure 0 indistinguishable from no-data-stored 0 */
-    storage = H5Dget_storage_size(did); 
+    storage = H5Dget_storage_size(did);
 
     /* Gather layout statistics */
     if((dcpl = H5Dget_create_plist(did)) < 0)
@@ -574,7 +574,8 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     if(num_ext) {
         iter->nexternal += (unsigned long)num_ext;
         iter->dset_external_storage_size += (unsigned long)storage;
-    } else
+    }
+    else
         iter->dset_storage_size += storage;
 
     /* Gather dataspace statistics */
@@ -971,7 +972,8 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                         error_msg("Invalid threshold for small groups\n");
                         goto error;
                     }
-                } else
+                }
+                else
                     error_msg("Missing threshold for small groups\n");
 
                 break;
@@ -993,7 +995,8 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                         error_msg("Invalid threshold for small datasets\n");
                         goto error;
                     }
-                } else
+                }
+                else
                     error_msg("Missing threshold for small datasets\n");
 
                 break;
@@ -1015,7 +1018,8 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                         error_msg("Invalid threshold for small # of attributes\n");
                         goto error;
                     }
-                } else
+                }
+                else
                     error_msg("Missing threshold for small # of attributes\n");
 
                 break;
@@ -1066,8 +1070,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                     char       **cred     = NULL;
                     char const  *ccred[3];
 
-                    if (FAIL == parse_tuple((const char *)opt_arg, ',',
-                                            &cred_str, &nelems, &cred)) {
+                    if (FAIL == parse_tuple((const char *)opt_arg, ',', &cred_str, &nelems, &cred)) {
                         error_msg("Unable to parse s3 credential\n");
                         goto error;
                     }
@@ -1078,9 +1081,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                     ccred[0] = (const char *)cred[0];
                     ccred[1] = (const char *)cred[1];
                     ccred[2] = (const char *)cred[2];
-                    if (0 ==
-                        h5tools_populate_ros3_fapl(&ros3_fa, ccred))
-                    {
+                    if (0 == h5tools_populate_ros3_fapl(&ros3_fa, ccred)) {
                         error_msg("Unable to set ros3 fapl config\n");
                         goto error;
                     }
@@ -1101,13 +1102,8 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                     char            *props_src = NULL;
                     char           **props     = NULL;
                     unsigned long    k         = 0;
-                    if (FAIL == parse_tuple(
-                            (const char *)opt_arg,
-                            ',',
-                            &props_src,
-                            &nelems,
-                            &props))
-                    {
+                    if (FAIL == parse_tuple((const char *)opt_arg,
+                            ',', &props_src, &nelems, &props)) {
                         error_msg("unable to parse hdfs properties tuple\n");
                         goto error;
                     }
@@ -1115,7 +1111,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                      */
                     if (nelems != 5) {
                         char str[64] = "";
-                        sprintf(str,
+                        HDsprintf(str,
                                 "expected 5 elements in hdfs properties tuple "
                                 "but found %u\n",
                                 nelems);
@@ -1130,12 +1126,10 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                      *         input strings... Silent overflow is possible,
                      *         albeit unlikely.
                      */
-                    if (strncmp(props[0], "", 1)) {
-                        HDstrncpy(hdfs_fa.namenode_name,
-                                (const char *)props[0],
-                                HDstrlen(props[0]));
+                    if (HDstrncmp(props[0], "", 1)) {
+                        HDstrncpy(hdfs_fa.namenode_name,(const char *)props[0], HDstrlen(props[0]));
                     }
-                    if (strncmp(props[1], "", 1)) {
+                    if (HDstrncmp(props[1], "", 1)) {
                         k = strtoul((const char *)props[1], NULL, 0);
                         if (errno == ERANGE) {
                             error_msg("supposed port number wasn't.\n");
@@ -1143,18 +1137,14 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                         }
                         hdfs_fa.namenode_port = (int32_t)k;
                     }
-                    if (strncmp(props[2], "", 1)) {
-                        HDstrncpy(hdfs_fa.kerberos_ticket_cache,
-                                (const char *)props[2],
-                                HDstrlen(props[2]));
+                    if (HDstrncmp(props[2], "", 1)) {
+                        HDstrncpy(hdfs_fa.kerberos_ticket_cache, (const char *)props[2], HDstrlen(props[2]));
                     }
-                    if (strncmp(props[3], "", 1)) {
-                        HDstrncpy(hdfs_fa.user_name,
-                                (const char *)props[3],
-                                HDstrlen(props[3]));
+                    if (HDstrncmp(props[3], "", 1)) {
+                        HDstrncpy(hdfs_fa.user_name, (const char *)props[3], HDstrlen(props[3]));
                     }
                     if (strncmp(props[4], "", 1)) {
-                        k = strtoul((const char *)props[4], NULL, 0);
+                        k = HDstrtoul((const char *)props[4], NULL, 0);
                         if (errno == ERANGE) {
                             error_msg("supposed buffersize number wasn't.\n");
                             goto error;
@@ -1279,13 +1269,13 @@ iter_free(iter_t *iter)
 static herr_t
 print_file_info(const iter_t *iter)
 {
-    printf("File information\n");
-    printf("\t# of unique groups: %lu\n", iter->uniq_groups);
-    printf("\t# of unique datasets: %lu\n", iter->uniq_dsets);
-    printf("\t# of unique named datatypes: %lu\n", iter->uniq_dtypes);
-    printf("\t# of unique links: %lu\n", iter->uniq_links);
-    printf("\t# of unique other: %lu\n", iter->uniq_others);
-    printf("\tMax. # of links to object: %lu\n", iter->max_links);
+    HDprintf("File information\n");
+    HDprintf("\t# of unique groups: %lu\n", iter->uniq_groups);
+    HDprintf("\t# of unique datasets: %lu\n", iter->uniq_dsets);
+    HDprintf("\t# of unique named datatypes: %lu\n", iter->uniq_dtypes);
+    HDprintf("\t# of unique links: %lu\n", iter->uniq_links);
+    HDprintf("\t# of unique other: %lu\n", iter->uniq_others);
+    HDprintf("\tMax. # of links to object: %lu\n", iter->max_links);
     HDfprintf(stdout, "\tMax. # of objects in group: %Hu\n", iter->max_fanout);
 
     return 0;
@@ -1315,15 +1305,12 @@ print_file_metadata(const iter_t *iter)
     HDfprintf(stdout, "\tUser block: %Hu\n", iter->ublk_size);
 
     HDfprintf(stdout, "\tObject headers: (total/unused)\n");
-    HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n",
-                iter->group_ohdr_info.total_size,
-    iter->group_ohdr_info.free_size);
+    HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n", iter->group_ohdr_info.total_size,
+            iter->group_ohdr_info.free_size);
     HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n",
-    iter->dset_ohdr_info.total_size,
-    iter->dset_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n",
-                iter->dtype_ohdr_info.total_size,
-    iter->dtype_ohdr_info.free_size);
+            iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
+    HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n", iter->dtype_ohdr_info.total_size,
+            iter->dtype_ohdr_info.free_size);
 
     HDfprintf(stdout, "\tGroups:\n");
     HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->groups_btree_storage_size);
@@ -1378,32 +1365,32 @@ print_group_info(const iter_t *iter)
     unsigned long total;        /* Total count for various statistics */
     unsigned u;                 /* Local index variable */
 
-    printf("Small groups (with 0 to %u links):\n", sgroups_threshold-1);
+    HDprintf("Small groups (with 0 to %u links):\n", sgroups_threshold-1);
     total = 0;
     for(u = 0; u < (unsigned)sgroups_threshold; u++) {
         if(iter->num_small_groups[u] > 0) {
-            printf("\t# of groups with %u link(s): %lu\n", u, iter->num_small_groups[u]);
+            HDprintf("\t# of groups with %u link(s): %lu\n", u, iter->num_small_groups[u]);
             total += iter->num_small_groups[u];
         } /* end if */
     } /* end for */
-    printf("\tTotal # of small groups: %lu\n", total);
+    HDprintf("\tTotal # of small groups: %lu\n", total);
 
-    printf("Group bins:\n");
+    HDprintf("Group bins:\n");
     total = 0;
     if((iter->group_nbins > 0) && (iter->group_bins[0] > 0)) {
-       printf("\t# of groups with 0 link: %lu\n", iter->group_bins[0]);
+       HDprintf("\t# of groups with 0 link: %lu\n", iter->group_bins[0]);
        total = iter->group_bins[0];
     } /* end if */
     power = 1;
     for(u = 1; u < iter->group_nbins; u++) {
         if(iter->group_bins[u] > 0) {
-           printf("\t# of groups with %lu - %lu links: %lu\n", power, (power * 10) - 1,
+           HDprintf("\t# of groups with %lu - %lu links: %lu\n", power, (power * 10) - 1,
                     iter->group_bins[u]);
            total += iter->group_bins[u];
         } /* end if */
         power *= 10;
     } /* end for */
-    printf("\tTotal # of groups: %lu\n", total);
+    HDprintf("\tTotal # of groups: %lu\n", total);
 
     return 0;
 } /* print_group_info() */
@@ -1424,7 +1411,7 @@ print_group_info(const iter_t *iter)
 static herr_t
 print_group_metadata(const iter_t *iter)
 {
-    printf("File space information for groups' metadata (in bytes):\n");
+    HDprintf("File space information for groups' metadata (in bytes):\n");
 
     HDfprintf(stdout, "\tObject headers (total/unused): %Hu/%Hu\n",
             iter->group_ohdr_info.total_size, iter->group_ohdr_info.free_size);
@@ -1457,66 +1444,66 @@ print_dataset_info(const iter_t *iter)
     unsigned u;                 /* Local index variable */
 
     if(iter->uniq_dsets > 0) {
-        printf("Dataset dimension information:\n");
-        printf("\tMax. rank of datasets: %u\n", iter->max_dset_rank);
-        printf("\tDataset ranks:\n");
+        HDprintf("Dataset dimension information:\n");
+        HDprintf("\tMax. rank of datasets: %u\n", iter->max_dset_rank);
+        HDprintf("\tDataset ranks:\n");
         for(u = 0; u < H5S_MAX_RANK; u++)
             if(iter->dset_rank_count[u] > 0)
-                printf("\t\t# of dataset with rank %u: %lu\n", u, iter->dset_rank_count[u]);
+                HDprintf("\t\t# of dataset with rank %u: %lu\n", u, iter->dset_rank_count[u]);
 
-        printf("1-D Dataset information:\n");
+        HDprintf("1-D Dataset information:\n");
         HDfprintf(stdout, "\tMax. dimension size of 1-D datasets: %Hu\n", iter->max_dset_dims);
-        printf("\tSmall 1-D datasets (with dimension sizes 0 to %u):\n", sdsets_threshold - 1);
+        HDprintf("\tSmall 1-D datasets (with dimension sizes 0 to %u):\n", sdsets_threshold - 1);
         total = 0;
         for(u = 0; u < (unsigned)sdsets_threshold; u++) {
             if(iter->small_dset_dims[u] > 0) {
-                printf("\t\t# of datasets with dimension sizes %u: %lu\n", u,
+                HDprintf("\t\t# of datasets with dimension sizes %u: %lu\n", u,
                          iter->small_dset_dims[u]);
                 total += iter->small_dset_dims[u];
             } /* end if */
         } /* end for */
-        printf("\t\tTotal # of small datasets: %lu\n", total);
+        HDprintf("\t\tTotal # of small datasets: %lu\n", total);
 
         /* Protect against no datasets in file */
         if(iter->dset_dim_nbins > 0) {
-            printf("\t1-D Dataset dimension bins:\n");
+            HDprintf("\t1-D Dataset dimension bins:\n");
             total = 0;
             if(iter->dset_dim_bins[0] > 0) {
-                printf("\t\t# of datasets with dimension size 0: %lu\n", iter->dset_dim_bins[0]);
+                HDprintf("\t\t# of datasets with dimension size 0: %lu\n", iter->dset_dim_bins[0]);
                 total = iter->dset_dim_bins[0];
             } /* end if */
             power = 1;
             for(u = 1; u < iter->dset_dim_nbins; u++) {
                 if(iter->dset_dim_bins[u] > 0) {
-                    printf("\t\t# of datasets with dimension size %lu - %lu: %lu\n", power, (power * 10) - 1,
+                    HDprintf("\t\t# of datasets with dimension size %lu - %lu: %lu\n", power, (power * 10) - 1,
                              iter->dset_dim_bins[u]);
                     total += iter->dset_dim_bins[u];
                 } /* end if */
                 power *= 10;
             } /* end for */
-            printf("\t\tTotal # of datasets: %lu\n", total);
+            HDprintf("\t\tTotal # of datasets: %lu\n", total);
         } /* end if */
 
-        printf("Dataset storage information:\n");
+        HDprintf("Dataset storage information:\n");
         HDfprintf(stdout, "\tTotal raw data size: %Hu\n", iter->dset_storage_size);
         HDfprintf(stdout, "\tTotal external raw data size: %Hu\n", iter->dset_external_storage_size);
 
-        printf("Dataset layout information:\n");
+        HDprintf("Dataset layout information:\n");
         for(u = 0; u < H5D_NLAYOUTS; u++)
-            printf("\tDataset layout counts[%s]: %lu\n", (u == H5D_COMPACT ? "COMPACT" :
+            HDprintf("\tDataset layout counts[%s]: %lu\n", (u == H5D_COMPACT ? "COMPACT" :
                 (u == H5D_CONTIGUOUS ? "CONTIG" : (u == H5D_CHUNKED ? "CHUNKED" : "VIRTUAL"))), iter->dset_layouts[u]);
-        printf("\tNumber of external files : %lu\n", iter->nexternal);
+        HDprintf("\tNumber of external files : %lu\n", iter->nexternal);
 
-        printf("Dataset filters information:\n");
-        printf("\tNumber of datasets with:\n");
-        printf("\t\tNO filter: %lu\n", iter->dset_comptype[H5Z_FILTER_ERROR+1]);
-        printf("\t\tGZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_DEFLATE]);
-        printf("\t\tSHUFFLE filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SHUFFLE]);
-        printf("\t\tFLETCHER32 filter: %lu\n", iter->dset_comptype[H5Z_FILTER_FLETCHER32]);
-        printf("\t\tSZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SZIP]);
-        printf("\t\tNBIT filter: %lu\n", iter->dset_comptype[H5Z_FILTER_NBIT]);
-        printf("\t\tSCALEOFFSET filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SCALEOFFSET]);
-        printf("\t\tUSER-DEFINED filter: %lu\n", iter->dset_comptype[H5_NFILTERS_IMPL-1]);
+        HDprintf("Dataset filters information:\n");
+        HDprintf("\tNumber of datasets with:\n");
+        HDprintf("\t\tNO filter: %lu\n", iter->dset_comptype[H5Z_FILTER_ERROR+1]);
+        HDprintf("\t\tGZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_DEFLATE]);
+        HDprintf("\t\tSHUFFLE filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SHUFFLE]);
+        HDprintf("\t\tFLETCHER32 filter: %lu\n", iter->dset_comptype[H5Z_FILTER_FLETCHER32]);
+        HDprintf("\t\tSZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SZIP]);
+        HDprintf("\t\tNBIT filter: %lu\n", iter->dset_comptype[H5Z_FILTER_NBIT]);
+        HDprintf("\t\tSCALEOFFSET filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SCALEOFFSET]);
+        HDprintf("\t\tUSER-DEFINED filter: %lu\n", iter->dset_comptype[H5_NFILTERS_IMPL-1]);
     } /* end if */
 
     return 0;
@@ -1539,7 +1526,7 @@ print_dataset_info(const iter_t *iter)
 static herr_t
 print_dset_metadata(const iter_t *iter)
 {
-    printf("File space information for datasets' metadata (in bytes):\n");
+    HDprintf("File space information for datasets' metadata (in bytes):\n");
 
     HDfprintf(stdout, "\tObject headers (total/unused): %Hu/%Hu\n",
             iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
@@ -1573,20 +1560,20 @@ print_dset_dtype_meta(const iter_t *iter)
     unsigned u;                 /* Local index variable */
 
     if(iter->dset_ntypes) {
-        printf("Dataset datatype information:\n");
-        printf("\t# of unique datatypes used by datasets: %lu\n", iter->dset_ntypes);
+        HDprintf("Dataset datatype information:\n");
+        HDprintf("\t# of unique datatypes used by datasets: %lu\n", iter->dset_ntypes);
         total = 0;
         for(u = 0; u < iter->dset_ntypes; u++) {
             H5Tencode(iter->dset_type_info[u].tid, NULL, &dtype_size);
-            printf("\tDataset datatype #%u:\n", u);
-            printf("\t\tCount (total/named) = (%lu/%lu)\n",
+            HDprintf("\tDataset datatype #%u:\n", u);
+            HDprintf("\t\tCount (total/named) = (%lu/%lu)\n",
                     iter->dset_type_info[u].count, iter->dset_type_info[u].named);
-            printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
+            HDprintf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
                     (unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
             H5Tclose(iter->dset_type_info[u].tid);
             total += iter->dset_type_info[u].count;
         } /* end for */
-        printf("\tTotal dataset datatype count: %lu\n", total);
+        HDprintf("\tTotal dataset datatype count: %lu\n", total);
     } /* end if */
 
     return 0;
@@ -1614,29 +1601,29 @@ print_attr_info(const iter_t *iter)
     unsigned long total;        /* Total count for various statistics */
     unsigned u;                 /* Local index variable */
 
-    printf("Small # of attributes (objects with 1 to %u attributes):\n", sattrs_threshold);
+    HDprintf("Small # of attributes (objects with 1 to %u attributes):\n", sattrs_threshold);
     total = 0;
     for(u = 1; u <= (unsigned)sattrs_threshold; u++) {
         if(iter->num_small_attrs[u] > 0) {
-            printf("\t# of objects with %u attributes: %lu\n", u, iter->num_small_attrs[u]);
+            HDprintf("\t# of objects with %u attributes: %lu\n", u, iter->num_small_attrs[u]);
             total += iter->num_small_attrs[u];
         } /* end if */
     } /* end for */
-    printf("\tTotal # of objects with small # of attributes: %lu\n", total);
+    HDprintf("\tTotal # of objects with small # of attributes: %lu\n", total);
 
-    printf("Attribute bins:\n");
+    HDprintf("Attribute bins:\n");
     total = 0;
     power = 1;
     for(u = 1; u < iter->attr_nbins; u++) {
         if(iter->attr_bins[u] > 0) {
-           printf("\t# of objects with %lu - %lu attributes: %lu\n", power, (power * 10) - 1,
+           HDprintf("\t# of objects with %lu - %lu attributes: %lu\n", power, (power * 10) - 1,
                     iter->attr_bins[u]);
            total += iter->attr_bins[u];
         } /* end if */
         power *= 10;
     } /* end for */
-    printf("\tTotal # of objects with attributes: %lu\n", total);
-    printf("\tMax. # of attributes to objects: %lu\n", (unsigned long)iter->max_attrs);
+    HDprintf("\tTotal # of objects with attributes: %lu\n", total);
+    HDprintf("\tMax. # of attributes to objects: %lu\n", (unsigned long)iter->max_attrs);
 
     return 0;
 } /* print_attr_info() */
@@ -1664,29 +1651,29 @@ print_freespace_info(const iter_t *iter)
 
     HDfprintf(stdout, "Free-space persist: %s\n", iter->fs_persist ? "TRUE" : "FALSE");
     HDfprintf(stdout, "Free-space section threshold: %Hu bytes\n", iter->fs_threshold);
-    printf("Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
+    HDprintf("Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
     total = 0;
     for(u = 0; u < SIZE_SMALL_SECTS; u++) {
         if(iter->num_small_sects[u] > 0) {
-            printf("\t# of sections of size %u: %lu\n", u, iter->num_small_sects[u]);
+            HDprintf("\t# of sections of size %u: %lu\n", u, iter->num_small_sects[u]);
             total += iter->num_small_sects[u];
         } /* end if */
     } /* end for */
-    printf("\tTotal # of small size sections: %lu\n", total);
+    HDprintf("\tTotal # of small size sections: %lu\n", total);
 
-    printf("Free-space section bins:\n");
+    HDprintf("Free-space section bins:\n");
 
     total = 0;
     power = 1;
     for(u = 1; u < iter->sect_nbins; u++) {
         if(iter->sect_bins[u] > 0) {
-           printf("\t# of sections of size %lu - %lu: %lu\n", power, (power * 10) - 1,
+           HDprintf("\t# of sections of size %lu - %lu: %lu\n", power, (power * 10) - 1,
                     iter->sect_bins[u]);
            total += iter->sect_bins[u];
         } /* end if */
         power *= 10;
     } /* end for */
-    printf("\tTotal # of sections: %lu\n", total);
+    HDprintf("\tTotal # of sections: %lu\n", total);
 
     return 0;
 } /* print_freespace_info() */
@@ -1714,7 +1701,7 @@ print_storage_summary(const iter_t *iter)
 
     HDfprintf(stdout, "File space management strategy: %s\n", FS_STRATEGY_NAME[iter->fs_strategy]);
     HDfprintf(stdout, "File space page size: %Hu bytes\n", iter->fsp_size);
-    printf("Summary of file space information:\n");
+    HDprintf("Summary of file space information:\n");
     total_meta =
             iter->super_size + iter->super_ext_size + iter->ublk_size +
             iter->group_ohdr_info.total_size +
@@ -1822,7 +1809,7 @@ print_file_statistics(const iter_t *iter)
 static void
 print_object_statistics(const char *name)
 {
-    printf("Object name %s\n", name);
+    HDprintf("Object name %s\n", name);
 } /* print_object_statistics() */
 
 
@@ -1905,7 +1892,8 @@ main(int argc, const char *argv[])
             conf_fa = (void *)&ros3_fa;
 #endif /* H5_HAVE_ROS3_VFD */
 
-        } else if (!HDstrcmp(drivername, "hdfs")) {
+        }
+        else if (!HDstrcmp(drivername, "hdfs")) {
 #ifndef H5_HAVE_LIBHDFS
             error_msg("HDFS VFD not enabled.\n\n");
             goto done;
@@ -1921,11 +1909,7 @@ main(int argc, const char *argv[])
                 error_msg("Unable to create fapl entry\n");
                 goto done;
             }
-            if (1 > h5tools_set_configured_fapl(
-                    fapl_id,
-                    drivername,
-                    conf_fa))
-            {
+            if (1 > h5tools_set_configured_fapl(fapl_id, drivername, conf_fa)) {
                 error_msg("Unable to set fapl\n");
                 goto done;
             }
@@ -1944,7 +1928,7 @@ main(int argc, const char *argv[])
         hid_t               fcpl;
         H5F_info2_t         finfo;
 
-        printf("Filename: %s\n", fname);
+        HDprintf("Filename: %s\n", fname);
 
         fid = H5Fopen(fname, H5F_ACC_RDONLY, fapl_id);
         if(fid < 0) {
@@ -1979,7 +1963,7 @@ main(int argc, const char *argv[])
 
         if(iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {
             error_msg("Unable to allocate memory for tracking small groups/datasets/attributes\n");
-                h5tools_setstatus(EXIT_FAILURE);
+            h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
 
@@ -2008,7 +1992,8 @@ main(int argc, const char *argv[])
                 if(h5trav_visit(fid, hand->obj[u], TRUE, TRUE, obj_stats, lnk_stats, &iter, H5O_INFO_ALL) < 0) {
                     error_msg("unable to traverse object \"%s\"\n", hand->obj[u]);
                     h5tools_setstatus(EXIT_FAILURE);
-                } else
+                }
+                else
                     print_statistics(hand->obj[u], &iter);
             } /* end for */
         } /* end if */
@@ -2016,7 +2001,8 @@ main(int argc, const char *argv[])
             if(h5trav_visit(fid, "/", TRUE, TRUE, obj_stats, lnk_stats, &iter, H5O_INFO_ALL) < 0) {
                 error_msg("unable to traverse objects/links in file \"%s\"\n", fname);
                 h5tools_setstatus(EXIT_FAILURE);
-            } else
+            }
+            else
                 print_statistics("/", &iter);
         } /* end else */
     } /* end if */
