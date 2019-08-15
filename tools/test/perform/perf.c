@@ -64,13 +64,13 @@
 #define H5FATAL 1
 #define VRFY(val, mesg, fatal) do {                                            \
     if (!val) {                                                                \
-    printf("Proc %d: ", mynod);                 \
+        printf("Proc %d: ", mynod);                 \
         printf("*** Assertion failed (%s) at line %4d in %s\n",                \
-      mesg, (int)__LINE__, __FILE__);                  \
-    if (fatal){                     \
-      fflush(stdout);                   \
-      goto die_jar_jar_die;                 \
-    }                       \
+        mesg, (int)__LINE__, __FILE__);                  \
+        if (fatal){                     \
+            fflush(stdout);                   \
+            goto die_jar_jar_die;                 \
+        }                       \
     }                                                                          \
 } while(0)
 #define RANK 1
