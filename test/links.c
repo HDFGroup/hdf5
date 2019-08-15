@@ -39,8 +39,8 @@
 /* File for external link test.  Created with gen_udlinks.c */
 #define LINKED_FILE  "be_extlink2.h5"
 
-#define TMPDIR          "tmp/"
-#define TMPDIR2         "tmp2/"
+#define TMPDIR          "tmp_links/"
+#define TMPDIR2         "tmp2_links/"
 
 /* Symlinks for external link symlink test */
 #define SYMLINK1  TMPDIR "sym1.h5"
@@ -106,7 +106,7 @@ const char *FILENAME[] = {
 #define CORE_INCREMENT  1024
 #define NUM40           40
 
-/* do not do check_all_closed() for "ext*" files and "tmp/ext*" */
+/* do not do check_all_closed() for "ext*" files and "tmp_links/ext*" */
 #define EXTSTOP         12
 
 #define LINK_BUF_SIZE   1024
@@ -2562,9 +2562,9 @@ error:
  *
  * Purpose:     1. target link: "extlinks2"
  *              2. main file: "extlinks0"
- *              3. target file: "tmp/extlinks2"
- *              4. Set up external link prefix via H5Pset_elink_prefix() to be "tmp"
- *                 Should be able to access the target file in tmp directory via the prefix set
+ *              3. target file: "tmp_links/extlinks2"
+ *              4. Set up external link prefix via H5Pset_elink_prefix() to be "tmp_links"
+ *                 Should be able to access the target file in tmp_links directory via the prefix set
  *                 by H5Pset_elink_prefix()
  *
  *
@@ -2592,11 +2592,11 @@ external_link_prefix(hid_t fapl, hbool_t new_format)
     /* set up name for external linked target file: "extlinks2" */
     h5_fixname(FILENAME[16], fapl, filename2, sizeof filename2);
 
-    /* create tmp directory and get current working directory path */
+    /* create tmp_links directory and get current working directory path */
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
     TEST_ERROR
 
-    /* set up name for target file: "tmp/extlinks2" */
+    /* set up name for target file: "tmp_links/extlinks2" */
     h5_fixname(FILENAME[17], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
@@ -2626,7 +2626,7 @@ external_link_prefix(hid_t fapl, hbool_t new_format)
     /* should be able to find the target file from pathnames set via H5Pset_elink_prefix() */
     if (gid < 0) {
         H5_FAILED();
-        HDputs("    Should have found the file in tmp directory.");
+        HDputs("    Should have found the file in tmp_links directory.");
         goto error;
     }
 
@@ -2650,8 +2650,8 @@ error:
  * Function:    external_link_abs_mainpath: test 3
  *
  * Purpose:     1. target link: "extlinks3"
- *              2. main file: Linux:"/CWD/tmp/extlinks0"; Windows: "<cur drive>:/CWD/tmp/extlinks0"
- *              3. target file: "tmp/extlinks3"
+ *              2. main file: Linux:"/CWD/tmp_links/extlinks0"; Windows: "<cur drive>:/CWD/tmp_links/extlinks0"
+ *              3. target file: "tmp_links/extlinks3"
  *                 Should be able to access the target file via the main file's absolute path
  *
  * Return:      Success:        0
@@ -2676,17 +2676,17 @@ external_link_abs_mainpath(hid_t fapl, hbool_t new_format)
 
     /* set up name for external linked target file: "extlinks3" */
     h5_fixname(FILENAME[18], fapl, filename2, sizeof filename2);
-    /* set up name for target file: "tmp/extlinks3" */
+    /* set up name for target file: "tmp_links/extlinks3" */
     h5_fixname(FILENAME[19], fapl, filename3, sizeof filename3);
 
-    /* create tmp directory and get current working directory path */
+    /* create tmp_links directory and get current working directory path */
     if((HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) || (NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE)))
         TEST_ERROR
 
     /*
      * set up name for main file:
-     *    Linux: "/CWD/tmp/extlinks0"
-     *  Window: "<cur drive>:/CWD/tmp/extlinks0"
+     *    Linux: "/CWD/tmp_links/extlinks0"
+     *  Window: "<cur drive>:/CWD/tmp_links/extlinks0"
      */
     fix_ext_filename(tmpname, cwdpath, FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
@@ -2714,7 +2714,7 @@ external_link_abs_mainpath(hid_t fapl, hbool_t new_format)
     /* should be able to find the target file from absolute path set for main file */
     if(gid < 0) {
     H5_FAILED();
-    HDputs("    Should have found the file in tmp directory.");
+    HDputs("    Should have found the file in tmp_links directory.");
     goto error;
     }
 
@@ -2738,8 +2738,8 @@ error:
  * Function:    external_link_rel_mainpath: test 4
  *
  * Purpose:     1. target link: "extlinks4"
- *              2. main file: "tmp/extlinks0"
- *              3. target file: "tmp/extlinks4"
+ *              2. main file: "tmp_links/extlinks0"
+ *              3. target file: "tmp_links/extlinks4"
  *                 Should be able to access the target file via the main file's CWD+relative path
  *
  * Return:      Success:        0
@@ -2766,9 +2766,9 @@ external_link_rel_mainpath(hid_t fapl, hbool_t new_format)
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
         TEST_ERROR
 
-     /* set up name for main file: "tmp/extlinks0" */
+     /* set up name for main file: "tmp_links/extlinks0" */
     h5_fixname(FILENAME[13], fapl, filename1, sizeof filename1);
-    /* set up name for target file: "tmp/extlinks4" */
+    /* set up name for target file: "tmp_links/extlinks4" */
     h5_fixname(FILENAME[21], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
@@ -2817,7 +2817,7 @@ error:
  * Function:    external_link_cwd: test 5
  *
  * Purpose:     1. target link: "extlinks5"
- *              2. main file: Linux:"/CWD/tmp/extlinks0"; Window: "<cur drive>:/CWD/tmp/extlinks0"
+ *              2. main file: Linux:"/CWD/tmp_links/extlinks0"; Window: "<cur drive>:/CWD/tmp_links/extlinks0"
  *              3. target file: "extlinks5"
  *                 Should be able to access the target file in the current working directory
  *
@@ -2849,8 +2849,8 @@ external_link_cwd(hid_t fapl, hbool_t new_format)
 
     /*
      * set up name for main file:
-     *     Linux: "/CWD/tmp/extlinks0"
-     *   Windows: "<cur drive>:/CWD/tmp/extlinks0"
+     *     Linux: "/CWD/tmp_links/extlinks0"
+     *   Windows: "<cur drive>:/CWD/tmp_links/extlinks0"
      */
     fix_ext_filename(tmpname, cwdpath, FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
@@ -2901,9 +2901,9 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    external_link_abstar: test 6
  *
- * Purpose:     1. target link: Linux:"/CWD/tmp/extlinks6"; Windows:"<cur drive>:/CWD/tmp/extlinks6"
+ * Purpose:     1. target link: Linux:"/CWD/tmp_links/extlinks6"; Windows:"<cur drive>:/CWD/tmp_links/extlinks6"
  *              2. main file: "extlinks0"
- *              3. target file: "tmp/extlinks6"
+ *              3. target file: "tmp_links/extlinks6"
  *                 Should be able to access the target file's absolute path
  *
  * Return:      Success:        0
@@ -2929,19 +2929,19 @@ external_link_abstar(hid_t fapl, hbool_t new_format)
     /* set up name for main file: "extlinks0" */
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
 
-     /* create tmp directory and get current working directory path */
+     /* create tmp_links directory and get current working directory path */
     if((HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) || (NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE)))
         TEST_ERROR
 
     /*
      * set up name for external linked target file:
-     *   Linux: "/CWD/tmp/extlinks6"
-     *     Windows: "<cur drive>:/CWD/tmp/extlinks6"
+     *   Linux: "/CWD/tmp_links/extlinks6"
+     *     Windows: "<cur drive>:/CWD/tmp_links/extlinks6"
      */
     fix_ext_filename(tmpname, cwdpath, FILENAME[23]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
-    /* set up name for target file: "tmp/extlinks6" */
+    /* set up name for target file: "tmp_links/extlinks6" */
     h5_fixname(FILENAME[23], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
@@ -2966,7 +2966,7 @@ external_link_abstar(hid_t fapl, hbool_t new_format)
     /* should be able to find the target file with abolute path */
     if(gid < 0) {
         H5_FAILED();
-        HDputs("    Should have found the file in tmp directory.");
+        HDputs("    Should have found the file in tmp_links directory.");
         goto error;
     }
 
@@ -2988,7 +2988,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    external_link_abstar_cur: test 7
  *
- * Purpose:     1. target link: Linux: "/CWD/tmp/extlinks7"; Windows: "<cur drive>:/CWD/tmp/extlinks7"
+ * Purpose:     1. target link: Linux: "/CWD/tmp_links/extlinks7"; Windows: "<cur drive>:/CWD/tmp_links/extlinks7"
  *              2. main file: "extlinks0"
  *              3. target file: "extlinks7"
  *                 Should be able to access the target file via the main file's CWD.
@@ -3019,14 +3019,14 @@ external_link_abstar_cur(hid_t fapl, hbool_t new_format)
     /* set up name for target file name: "extlinks7" */
     h5_fixname(FILENAME[24], fapl, filename3, sizeof filename3);
 
-    /* create tmp directory and get current working directory path */
+    /* create tmp_links directory and get current working directory path */
     if((HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) || (NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE)))
         TEST_ERROR
 
      /*
       * set up name for external linked target file:
-      *   Linux: "/CWD/tmp/extlinks7"
-      *   Windows: "<cur drive>:/CWD/tmp/extlinks7"
+      *   Linux: "/CWD/tmp_links/extlinks7"
+      *   Windows: "<cur drive>:/CWD/tmp_links/extlinks7"
       */
     fix_ext_filename(tmpname, cwdpath, FILENAME[25]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
@@ -3076,9 +3076,9 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    external_link_reltar: test 8
  *
- * Purpose:     1. target link: Linux:"tmp/extlinks8"
+ * Purpose:     1. target link: Linux:"tmp_links/extlinks8"
  *              2. main file: "extlinks0"
- *              3. target file: "tmp/extlinks8"
+ *              3. target file: "tmp_links/extlinks8"
  *                 Should be able to access the target file via the main file's CWD+ target's relative path
  *
  * Return:      Success:        0
@@ -3101,11 +3101,11 @@ external_link_reltar(hid_t fapl, hbool_t new_format)
     /* set up name for main file: "extlinks0" */
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
 
-    /* create tmp directory */
+    /* create tmp_links directory */
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) TEST_ERROR
 
-    /* set up name for target file name: "tmp/extlinks8" */
-    /* set up name for external linked target file: "tmp/extlinks8" */
+    /* set up name for target file name: "tmp_links/extlinks8" */
+    /* set up name for external linked target file: "tmp_links/extlinks8" */
     h5_fixname(FILENAME[26], fapl, filename2, sizeof filename2);
 
     /* Create the target file */
@@ -3126,7 +3126,7 @@ external_link_reltar(hid_t fapl, hbool_t new_format)
     /* Open object through external link */
     if((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDputs("    Should have found the file in tmp directory.");
+        HDputs("    Should have found the file in tmp_links directory.");
         goto error;
     } /* end if */
 
@@ -3152,8 +3152,8 @@ error:
  * Purpose:
  *        1. target link: "extlinks9"
  *        2. main file: "extlinks0"
- *        3. target file" "tmp/extlinks9"
- *        3. chdir "tmp"
+ *        3. target file" "tmp_links/extlinks9"
+ *        3. chdir "tmp_links"
  *        Should be able to access the target file in current working directory
  *
  * Return:      Success:        0
@@ -3179,10 +3179,10 @@ external_link_chdir(hid_t fapl, hbool_t new_format)
     /* set up name for external linked target file ("extlinks9") */
     h5_fixname(FILENAME[27], fapl, filename2, sizeof filename2);
 
-    /* create tmp directory */
+    /* create tmp_links directory */
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) TEST_ERROR
 
-    /* set up name for target file name ("tmp/extlinks9") */
+    /* set up name for target file name ("tmp_links/extlinks9") */
     h5_fixname(FILENAME[28], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
@@ -3215,7 +3215,7 @@ external_link_chdir(hid_t fapl, hbool_t new_format)
      */
     if (gid < 0) {
         H5_FAILED();
-        HDputs("    Should have found the file in tmp directory.");
+        HDputs("    Should have found the file in tmp_links directory.");
         goto error;
     }
 
@@ -3243,7 +3243,7 @@ error:
  *
  *        1. target link: "extlinks16"
  *        2. target file: "extlinks16"
- *        3. main file: Linux:"/CWD/tmp/extlinks0"; Window: "<cur drive>:/CWD/tmp/extlinks0"
+ *        3. main file: Linux:"/CWD/tmp_links/extlinks0"; Window: "<cur drive>:/CWD/tmp_links/extlinks0"
  *        4. Create target file A to be a "family" file: extlinks16A
  *        4. Create target file B to be a "multi" file: extlinks16B
  *        5. Create external link from main file to target file A: ext_linkA->extlinks16A:/A
@@ -3285,8 +3285,8 @@ external_set_elink_fapl1(hid_t fapl, hbool_t new_format)
 
     /*
      * set up name for main file:
-     *     Linux: "/CWD/tmp/extlinks0"
-     *   Windows: "<cur drive>:/CWD/tmp/extlinks0"
+     *     Linux: "/CWD/tmp_links/extlinks0"
+     *   Windows: "<cur drive>:/CWD/tmp_links/extlinks0"
      */
     fix_ext_filename(tmpname, cwdpath, FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
@@ -3435,7 +3435,7 @@ error:
  *
  *         1. target link: "extlinks17"
  *         2. target file: "extlinks17"
- *         3. main file: Linux:"/CWD/tmp/extlinks0"; Window: "<cur drive>:/CWD/tmp/extlinks0"
+ *         3. main file: Linux:"/CWD/tmp_links/extlinks0"; Window: "<cur drive>:/CWD/tmp_links/extlinks0"
  *         4. Create target file to be a "core" file:/A/Dataset
  *         5. Create external link from main file to target file:ext_link->target file:/A/Dataset
  *         6. Set the file access property list of the link access to use "core" file without
@@ -3474,8 +3474,8 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
 
     /*
      * set up name for main file:
-     *   Linux: "/CWD/tmp/extlinks0"
-     *   Windows: "<cur drive>:/CWD/tmp/extlinks0"
+     *   Linux: "/CWD/tmp_links/extlinks0"
+     *   Windows: "<cur drive>:/CWD/tmp_links/extlinks0"
      */
     fix_ext_filename(tmpname, cwdpath, FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
@@ -4108,7 +4108,7 @@ error:
  * Function:    external_link_win1
  *
  * Purpose:
- *            1. target link: "/CWD/tmp/extlinks10"
+ *            1. target link: "/CWD/tmp_links/extlinks10"
  *            2. main file: "extlinks0"
  *            3. target file: "extlinks10"
  *            Should be able to find the target file via main file's current drive/rel path
@@ -4139,7 +4139,7 @@ external_link_win1(hid_t fapl, hbool_t new_format)
     if(NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE))
         TEST_ERROR
 
-    /* set up name for target link: "/CWD/tmp/extlinks10" */
+    /* set up name for target link: "/CWD/tmp_links/extlinks10" */
     HDstrcpy(tmpname, &cwdpath[2]); /* stripped the drive letter to make it rel drive but absolute path */
     HDstrcat(tmpname, "/");
     HDstrcat(tmpname, FILENAME[30]);
@@ -4194,9 +4194,9 @@ error:
  * Function:    external_link_win2
  *
  * Purpose:
- *           1. target link: "/CWD/tmp/extlinks11"
+ *           1. target link: "/CWD/tmp_links/extlinks11"
  *           2. main file: "extlinks0"
- *           3. target file: "tmp/extlinks11"
+ *           3. target file: "tmp_links/extlinks11"
  *              Should be able to access the target file directly (rel drive/abs path)
  *
  * Return:      Success:        0
@@ -4222,17 +4222,17 @@ external_link_win2(hid_t fapl, hbool_t new_format)
     /* set up name for main file: "extlinks0" */
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
 
-     /* create tmp directory and get current working directory path */
+     /* create tmp_links directory and get current working directory path */
     if((HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) || (NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE)))
         TEST_ERROR
 
-    /* set up name for target link: "/CWD/tmp/extlinks11" */
+    /* set up name for target link: "/CWD/tmp_links/extlinks11" */
     HDstrcpy(tmpname, &cwdpath[2]); /* stripped the drive letter to make it relative drive but absolute path */
     HDstrcat(tmpname, "/");
     HDstrcat(tmpname, FILENAME[31]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
-    /* set up name for target file: "tmp/extlinks11" */
+    /* set up name for target file: "tmp_links/extlinks11" */
     h5_fixname(FILENAME[31], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
@@ -4258,7 +4258,7 @@ external_link_win2(hid_t fapl, hbool_t new_format)
     /* should be able to find the target file directly */
     if(gid < 0) {
         H5_FAILED();
-        HDputs("    Should have found the file in tmp.");
+        HDputs("    Should have found the file in tmp_links.");
         goto error;
     }
 
@@ -4282,9 +4282,9 @@ error:
  * Function:    external_link_win3
  *
  * Purpose:
- *           1. target link: "<cur drive>:tmp/extlinks12"
+ *           1. target link: "<cur drive>:tmp_links/extlinks12"
  *           2. main file: "extlinks0"
- *           3. target file: "tmp/extlinks12"
+ *           3. target file: "tmp_links/extlinks12"
  *              Should be able to access the target file directly (abs drive/rel path)
  *
  * Return:      Success:        0
@@ -4310,16 +4310,16 @@ external_link_win3(hid_t fapl, hbool_t new_format)
     /* set up name for main file: "extlinks0" */
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
 
-    /* create tmp directory */
+    /* create tmp_links directory */
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
         TEST_ERROR
 
-    /* set up name for target link: "<drive-letter>:tmp/extlinks12" */
+    /* set up name for target link: "<drive-letter>:tmp_links/extlinks12" */
     drive = HDgetdrive();
     HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", (drive+'A'-1), FILENAME[32]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
-    /* set up name for target file: "tmp/extlinks12" */
+    /* set up name for target file: "tmp_links/extlinks12" */
     h5_fixname(FILENAME[32], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
@@ -4345,7 +4345,7 @@ external_link_win3(hid_t fapl, hbool_t new_format)
     /* should be able to find the target file directly */
     if (gid < 0) {
         H5_FAILED();
-        HDputs("    Should have found the file in tmp.");
+        HDputs("    Should have found the file in tmp_links.");
         goto error;
     }
 
@@ -4369,8 +4369,8 @@ external_link_win3(hid_t fapl, hbool_t new_format)
  *
  * Purpose:
  *        1. target link: "<cur drive>:extlinks13"
- *        2. main file: "<cur-drive>:tmp/extlinks0"
- *        3. target file: tmp/extlinks13
+ *        2. main file: "<cur-drive>:tmp_links/extlinks0"
+ *        3. target file: tmp_links/extlinks13
  *           Should be able to access the target file via main file's abs drive/rel path
  *
  * Return:      Success:        0
@@ -4393,7 +4393,7 @@ external_link_win4(hid_t fapl, hbool_t new_format)
     else
         TESTING("external links via main file's abs drive/rel path (windows)")
 
-    /* set up name for main file: "<drive-letter>:tmp/extlinks0" */
+    /* set up name for main file: "<drive-letter>:tmp_links/extlinks0" */
     drive = HDgetdrive();
     HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", (drive+'A'-1), FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
@@ -4402,7 +4402,7 @@ external_link_win4(hid_t fapl, hbool_t new_format)
     HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", (drive+'A'-1), FILENAME[33]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
-    /* set up name for target file: "tmp/extlinks13" */
+    /* set up name for target file: "tmp_links/extlinks13" */
     h5_fixname(FILENAME[34], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
@@ -4451,9 +4451,9 @@ error:
  * Function:    external_link_win5
  *
  * Purpose:
- *           1. target link: "<cur drive+1>:tmp/extlinks14"
+ *           1. target link: "<cur drive+1>:tmp_links/extlinks14"
  *           2. main file: "/CWD/extlinks0"
- *           3. target file: "tmp/extlinks14"
+ *           3. target file: "tmp_links/extlinks14"
  *              Should be able to access the target file via main file's relative drive/absolute path
  *
  * Return:      Success:        0
@@ -4491,11 +4491,11 @@ external_link_win5(hid_t fapl, hbool_t new_format)
     HDstrcat(tmpname, FILENAME[12]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
-    /* set up name for target link: "<drive-letter+1>:tmp/extlinks14" */
+    /* set up name for target link: "<drive-letter+1>:tmp_links/extlinks14" */
     HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", (drive+'A'-1), FILENAME[35]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
-    /* set up name for target file: "tmp/extlinks14" */
+    /* set up name for target file: "tmp_links/extlinks14" */
     h5_fixname(FILENAME[35], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
@@ -4544,9 +4544,9 @@ error:
  * Function:    external_link_win6
  *
  * Purpose:
- *           1. target link: "<cur drive+1>:tmp/extlinks15"
+ *           1. target link: "<cur drive+1>:tmp_links/extlinks15"
  *           2. main file: "extlinks0"
- *           3. target file: "tmp/extlinks15"
+ *           3. target file: "tmp_links/extlinks15"
  *              Should be able to access the target file via target's current drive/rel path
  *
  * Return:      Success:        0
@@ -4569,7 +4569,7 @@ external_link_win6(hid_t fapl, hbool_t new_format)
     else
         TESTING("external links via target's current drive/rel path (windows)")
 
-    /* create tmp directory */
+    /* create tmp_links directory */
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
         TEST_ERROR
     drive = HDgetdrive();
@@ -4581,7 +4581,7 @@ external_link_win6(hid_t fapl, hbool_t new_format)
     /* set up name for main file: "extlinks0" */
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
 
-    /* set up name for target link: "<drive-letter+1>:tmp/extlinks15" */
+    /* set up name for target link: "<drive-letter+1>:tmp_links/extlinks15" */
     HDsnprintf(tmpname, sizeof(tmpname), "%c:%s", (drive+'A'-1), FILENAME[36]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
@@ -4610,7 +4610,7 @@ external_link_win6(hid_t fapl, hbool_t new_format)
     /* should be able to find the target file via target file's rel path in current drive */
     if (gid < 0) {
         H5_FAILED();
-        HDputs("    Should have found the file in tmp.");
+        HDputs("    Should have found the file in tmp_links.");
         goto error;
     }
 
@@ -4634,7 +4634,7 @@ error:
  * Function:    external_link_win7
  *
  * Purpose:
- *      1. UNC target link: "\\127.0.01\c$/tmp/extlinks10"
+ *      1. UNC target link: "\\127.0.01\c$/tmp_links/extlinks10"
  *      2. main file: "extlinks0"
  *      3. target file: "extlinks15"
  *         Should be able to find the target file via main file's local host/main drive/rel path
@@ -4665,7 +4665,7 @@ external_link_win7(hid_t fapl, hbool_t new_format)
     if(NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE))
         TEST_ERROR
 
-    /* set up name for target link: "\\127.0.0.1\c$/tmp/extlinks10" */
+    /* set up name for target link: "\\127.0.0.1\c$/tmp_links/extlinks10" */
     HDstrcpy(tmpname, "\\\\127.0.0.1\\c$"); /* absolute path */
     HDstrcat(tmpname, "/");
     HDstrcat(tmpname, FILENAME[30]);
@@ -4752,7 +4752,7 @@ external_link_win8(hid_t fapl, hbool_t new_format)
 
     if(NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE))  TEST_ERROR
 
-    /* create tmp directory */
+    /* create tmp_links directory */
     if(HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) TEST_ERROR
 
     /* set up name for target link: "<drive-letter>:\CWD\extlinks10" */
@@ -4785,7 +4785,7 @@ external_link_win8(hid_t fapl, hbool_t new_format)
     /* should be able to find the target file directly */
     if(gid < 0) {
         H5_FAILED();
-        HDputs("    Should have found the file in tmp.");
+        HDputs("    Should have found the file in tmp_links.");
         goto error;
     }
 
@@ -4809,7 +4809,7 @@ error:
  * Function:    external_link_win9
  *
  * Purpose:
- *      1. Long UNC target link: "\\?\UNC\127.0.01\c$/tmp/extlinks10"
+ *      1. Long UNC target link: "\\?\UNC\127.0.01\c$/tmp_links/extlinks10"
  *      2. main file: "extlinks0"
  *      3. target file: "extlinks15"
  *         Should be able to find the target file via main file's local host/main drive/rel path
@@ -4839,7 +4839,7 @@ external_link_win9(hid_t fapl, hbool_t new_format)
 
     if(NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE)) TEST_ERROR
 
-    /* set up name for target link: "\\?\UNC\127.0.0.1\c$/tmp/extlinks10" */
+    /* set up name for target link: "\\?\UNC\127.0.0.1\c$/tmp_links/extlinks10" */
     HDstrcpy(tmpname, "\\\\?\\UNC\127.0.0.1\\c$"); /* absolute path */
     HDstrcat(tmpname, "/");
     HDstrcat(tmpname, FILENAME[30]);
@@ -6087,7 +6087,7 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         /* set up name for main file: "extlinks21A" */
         h5_fixname(FILENAME[45], fapl, filename1, sizeof(filename1));
 
-        /* create tmp directory and get current working directory path */
+        /* create tmp_links directory and get current working directory path */
         if(HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
             TEST_ERROR
         if(HDmkdir(TMPDIR2, (mode_t)0755) < 0 && errno != EEXIST)
@@ -6097,29 +6097,29 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
 
         /* Set up names for files in the subdirectories */
 
-        /* set up names for file #2 in temporary directory #2: "tmp2/extlinks21B" */
+        /* set up names for file #2 in temporary directory #2: "tmp2_links/extlinks21B" */
         h5_fixname(FILENAME[46], fapl, filename2a, sizeof(filename2a));
         fix_ext_filename(tmpname, cwdpath, FILENAME[46]);
         h5_fixname(tmpname, fapl, filename2b, sizeof(filename2b));
 
         /* Create symbolic link #1 in temporary directory #1 to file #2 in temporary directory #2 */
-        /* (i.e. tmp/sym1.h5 -> <full path to>/tmp2/extlinks21B.h5) */
+        /* (i.e. tmp_links/sym1.h5 -> <full path to>/tmp2_links/extlinks21B.h5) */
         if(HDsymlink(filename2b, SYMLINK1) < 0 && errno != EEXIST) TEST_ERROR
 
-        /* set up name for file #3 in temporary directory #2: "tmp2/extlinks21C" */
+        /* set up name for file #3 in temporary directory #2: "tmp2_links/extlinks21C" */
         h5_fixname(FILENAME[47], fapl, filename3a, sizeof(filename3a));
         h5_fixname(FILENAME[48], fapl, filename3b, sizeof(filename3b));
 
-        /* set up name for file #4 in temporary directory #1: "tmp/extlinks21D" */
+        /* set up name for file #4 in temporary directory #1: "tmp_links/extlinks21D" */
         h5_fixname(FILENAME[49], fapl, filename4a, sizeof(filename4a));
         fix_ext_filename(tmpname, cwdpath, FILENAME[49]);
         h5_fixname(tmpname, fapl, filename4b, sizeof(filename4b));
 
         /* Create symbolic link #2 in temporary directory #2 to file #4 in temporary directory #1 */
-        /* (i.e. tmp2/sym2.h5 -> <full path to>/tmp/extlinks21D.h5) */
+        /* (i.e. tmp2_links/sym2.h5 -> <full path to>/tmp_links/extlinks21D.h5) */
         if(HDsymlink(filename4b, SYMLINK2) < 0 && errno != EEXIST) TEST_ERROR
 
-        /* set up name for file #5 in temporary directory #1: "tmp/extlinks21E" */
+        /* set up name for file #5 in temporary directory #1: "tmp_links/extlinks21E" */
         h5_fixname(FILENAME[50], fapl, filename5a, sizeof(filename5a));
         h5_fixname(FILENAME[51], fapl, filename5b, sizeof(filename5b));
 
@@ -6132,11 +6132,11 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         /* Close file #1 */
         if(H5Fclose(file1) < 0) TEST_ERROR
 
-        /* Create file #2 in tmp directory #2 */
+        /* Create file #2 in tmp_links directory #2 */
         if((file2 = H5Fcreate(filename2a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
         if(H5Fclose(file2) < 0) TEST_ERROR
 
-        /* Re-open file #2 in tmp directory through symlink */
+        /* Re-open file #2 in tmp_links directory through symlink */
         if((file2 = H5Fopen(SYMLINK1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
 
         /* Create group in file #2 in temporary directory */
@@ -9154,7 +9154,7 @@ static size_t link_filter_filter(unsigned int flags, size_t cd_nelmts,
     if(flags & H5Z_FLAG_REVERSE) {
         if(link_filter_state != LFS_ENCODED) return 0;
         link_filter_state = LFS_DECODED;
-    } 
+    }
     else {
         if(link_filter_state < LFS_SET_LOCAL_CALLED) return 0;
         link_filter_state = LFS_ENCODED;
@@ -13937,7 +13937,7 @@ main(void)
             HDprintf("\n-Testing with minimzed dataset object headers-\n");
             dcpl_g = H5Pcreate(H5P_DATASET_CREATE);
             if (0 > dcpl_g) TEST_ERROR
-        } 
+        }
         else {
             HDprintf("\n-Testing with unminimzed dataset object headers-\n");
             dcpl_g = H5P_DEFAULT;
@@ -13950,7 +13950,7 @@ main(void)
             if(new_format) {
                 my_fapl = fapl2;
                 HDprintf("\n--Testing with 'new format'--\n");
-            } 
+            }
             else {
                 my_fapl = fapl;
                 HDprintf("\n--Testing with 'old format'--\n");
@@ -13977,7 +13977,7 @@ main(void)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
             /* tests for external link */
-            /* Test external file cache first, so it sees the default efc setting on the fapl 
+            /* Test external file cache first, so it sees the default efc setting on the fapl
              */
             nerrors += external_file_cache(my_fapl, new_format) < 0 ? 1 : 0;
 
@@ -13987,7 +13987,7 @@ main(void)
             nerrors += external_link_mult(my_fapl, new_format) < 0 ? 1 : 0;
 
             /* This test cannot run with the EFC because the EFC cannot currently
-             * reopen a cached file with a different intent 
+             * reopen a cached file with a different intent
              */
             nerrors += external_set_elink_acc_flags(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
 
@@ -14133,7 +14133,7 @@ main(void)
     HDremove(SYMLINK1);
     HDremove(SYMLINK2);
 
-    /* clean up tmp directory created by external link tests */
+    /* clean up tmp_links and tmp2_links directory created by external link tests */
     HDrmdir(TMPDIR);
     HDrmdir(TMPDIR2);
 

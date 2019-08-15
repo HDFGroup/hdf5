@@ -19,7 +19,7 @@ nerrors=0
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###              T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 
@@ -27,7 +27,7 @@ nerrors=0
 echo "Testing basic virtual dataset I/O via H5Pset_vds_prefix(): all selection with ENV prefix"
 TEST_NAME=vds_env                               # The test name
 TEST_BIN=`pwd`/$TEST_NAME                       # The path of the test binary
-ENVCMD="env HDF5_VDS_PREFIX=\${ORIGIN}/tmp"     # Set the environment variable & value
+ENVCMD="env HDF5_VDS_PREFIX=\${ORIGIN}/tmp_vds_env"     # Set the environment variable & value
 UNENVCMD="unset HDF5_VDS_PREFIX"                # Unset the environment variable & value
 #
 # Run the test
@@ -37,8 +37,8 @@ exitcode=$?
 if [ $exitcode -eq 0 ]; then
         echo "Test prefix for HDF5_VDS_PREFIX PASSED"
     else
- 	nerrors="`expr $nerrors + 1`"
-	echo "***Error encountered for HDF5_VDS_PREFIX test***"
+    nerrors="`expr $nerrors + 1`"
+    echo "***Error encountered for HDF5_VDS_PREFIX test***"
 fi
 $UNENVCMD
 exit $nerrors
