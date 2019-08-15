@@ -54,6 +54,12 @@
 } while(0)
 
 /* POSIX I/O macros */
+#ifdef H5_HAVE_WIN32_API
+/* Can't link against the library, so this test will use the older, non-Unicode
+ * _open() call on Windows.
+ */
+#define HDopen(S,F,...)           _open(S, F | _O_BINARY, __VA_ARGS__)
+#endif /* H5_HAVE_WIN32_API */
 #define POSIXCREATE(fn)           HDopen(fn, O_CREAT|O_TRUNC|O_RDWR, 0600)
 #define POSIXOPEN(fn, F)          HDopen(fn, F, 0600)
 #define POSIXCLOSE(F)             HDclose(F)
@@ -941,8 +947,9 @@ done:
  * Modifications:
  */
 
-static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms,
-    void *buffer, const char *buffer2)
+static herr_t
+dset_read(int local_dim, file_descr *fd, parameters *parms, void *buffer,
+    const char *buffer2)
 {
     int cur_dim = order[local_dim]-1;
     hsize_t i;
@@ -1248,7 +1255,15 @@ done:
  * Programmer:  Albert Cheng 2001/12/12
  * Modifications: Support for file drivers. Christian Chilan, April, 2008
  */
-    static void
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'temp' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+static void
 do_cleanupfile(iotype iot, char *filename)
 {
     char        temp[2048];
@@ -1261,12 +1276,12 @@ do_cleanupfile(iotype iot, char *filename)
     if (clean_file_g){
 
     switch (iot) {
-    case POSIXIO:
-          HDremove(filename);
-        break;
+        case POSIXIO:
+            HDremove(filename);
+            break;
 
-    case HDF5:
-           driver = H5Pget_driver(fapl);
+        case HDF5:
+            driver = H5Pget_driver(fapl);
 
             if (driver == H5FD_FAMILY) {
                 for (j = 0; /*void*/; j++) {
@@ -1299,14 +1314,15 @@ do_cleanupfile(iotype iot, char *filename)
                 HDremove(filename);
             }
             H5Pclose(fapl);
-        break;
-
-    default:
-        /* unknown request */
-        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
-        HDassert(0 && "Unknown IO type");
-        break;
-    }
+            break;
+                            
+        default:
+            /* unknown request */
+            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+            HDassert(0 && "Unknown IO type");
+            break;
+        }
     }
 }
+#pragma GCC diagnostic pop
 
