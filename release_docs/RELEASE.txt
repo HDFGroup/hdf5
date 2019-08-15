@@ -338,8 +338,8 @@ Bug Fixes since HDF5-1.10.3 release
       to unsigned later on, the decimal part is chopped off causing the test
       failure.
 
-      This was fixed by performing ((value of log10) + 1) first before casting
-      the result to unsigned.
+      This was fixed by obtaining the rounded integer value (HDceil) for the 
+      log10 value of read attempts first before casting the result to unsigned.
 
       (VC - 2019/8/14, HDFFV-10813)
 
