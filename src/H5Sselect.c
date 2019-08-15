@@ -971,6 +971,45 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_adjust_u() */
 
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_adjust_u
+ PURPOSE
+    Adjust a selection by subtracting an offset
+ USAGE
+    herr_t H5Sselect_adjust_u(space_id, offset)
+        hid_t space_id;        IN: ID of dataspace to adjust
+        const hsize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves a selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Sselect_adjust_u(hid_t space_id, const hsize_t *offset)
+{
+    H5S_t *space;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*h", space_id, offset);
+
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(NULL == offset)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "NULL offset pointer")
+
+    if(H5S_select_adjust_u(space, offset) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Sselect_adjust_u() */
+
 
 /*--------------------------------------------------------------------------
  NAME
