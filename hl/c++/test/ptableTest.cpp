@@ -81,7 +81,8 @@ int BasicTest()
     hsize_t count;
     int error;
 
-    TESTING2("basic functionality")
+    printf("Testing %-62s", "basic functionality");
+    HDfflush(stdout);
 
     FL_PacketTable wrapper(fileID, H5P_DEFAULT, BASICTEST_PT, H5T_NATIVE_INT, 1);
     if(! wrapper.IsValid())
@@ -137,7 +138,8 @@ int TestCompoundDatatype()
     hsize_t count;
     int error;
 
-    TESTING2("compound datatypes")
+    printf("Testing %-62s", "compound datatypes");
+    HDfflush(stdout);
 
     /* Create compound datatype */
     typedef struct compoundType
@@ -206,7 +208,8 @@ int TestGetNext()
     int records[2];
     int i;
 
-    TESTING2("GetNextPacket")
+    printf("Testing %-62s", "GetNextPacket");
+    HDfflush(stdout);
 
     /* Create a dataset */
     FL_PacketTable wrapper(fileID, H5P_DEFAULT, GETNEXT_PT, H5T_NATIVE_INT, 500);
@@ -268,7 +271,8 @@ int TestCompress()
     unsigned int config = 0;
     size_t cd_nelemts = 0;
 
-    TESTING2("compression")
+    printf("Testing %-62s", "compression");
+    HDfflush(stdout);
 #ifdef H5_HAVE_FILTER_DEFLATE
     try {
     /* Prepare property list to set compression, randomly use deflate */
@@ -315,7 +319,8 @@ int TestGetPacket()
     int record;
     int theRecs[3];
     int i;
-    TESTING2("GetPacket")
+    printf("Testing %-62s", "GetPacket");
+    HDfflush(stdout);
 
     /* Create a dataset.  Does not need to specify property list because
        there is no compression. */
@@ -353,7 +358,8 @@ const char* PT_TESTERROR = "/TestErrors";
 
 int TestErrors()
 {
-    TESTING2("error conditions")
+    printf("Testing %-62s", "error conditions");
+    HDfflush(stdout);
 
     /* Create a dataset */
     FL_PacketTable wrapper(fileID, PT_TESTERROR, H5T_NATIVE_INT, 1);
@@ -464,7 +470,8 @@ const char* PT_SYSTEMTST1 = "/SystemTest1";
 const char* PT_SYSTEMTST2 = "/SystemTest2";
 int SystemTest()
 {
-    TESTING2("multiple datatypes")
+    printf("Testing %-62s", "multiple datatypes");
+    HDfflush(stdout);
 
     hid_t dtypeID1, dtypeID2;
     hsize_t count;
@@ -602,7 +609,8 @@ int TestHDFFV_9758()
         s1[i].e = 100+i;
     }
 
-    TESTING2("data corruption in packed structs (HDFFV-9758)")
+    printf("Testing %-62s", "data corruption in packed structs (HDFFV-9758)");
+    HDfflush(stdout);
 
     // Build a compound datatype
     compound_type = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));

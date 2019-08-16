@@ -539,7 +539,7 @@ done:
 int
 main(void)
 {
-    HDHDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
     return EXIT_SUCCESS;
 } /* end main() */
 
