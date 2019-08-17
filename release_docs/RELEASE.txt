@@ -326,6 +326,23 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed the test failure from test_metadata_read_retry_info() in
+      test/swmr.c
+
+      The test failure is due to the incorrect number of bins returned for
+      retry info (info.nbins).  The # of bins expected for 101 read attempts
+      is 3 instead of 2.  The routine H5F_set_retries() in src/H5Fint.c
+      calculates the # of bins by first obtaining the log10 value for
+      (read attempts - 1).  For PGI/19, the log10 value for 100 read attempts
+      is 1.9999999999999998 instead of 2.00000.  When casting the log10 value
+      to unsigned later on, the decimal part is chopped off causing the test
+      failure.
+
+      This was fixed by obtaining the rounded integer value (HDceil) for the 
+      log10 value of read attempts first before casting the result to unsigned.
+
+      (VC - 2019/8/14, HDFFV-10813)
+
     - Fixed an issue where creating a file with non-default file space info
       together with library high bound setting to H5F_LIBVER_V18.
 
