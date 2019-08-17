@@ -31,7 +31,7 @@ int main(void)
     fileID = H5Fcreate(TEST_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if(fileID <0)
     {
-        HDfprintf(stderr, "Couldn't create file.\n");
+        fprintf(stderr, "Couldn't create file.\n");
         num_errors = 1;
     }
     else {
@@ -57,7 +57,7 @@ int main(void)
         err = H5Fclose(fileID);
         if( err < 0 )
         {
-            HDfprintf(stderr, "Failed to close file.\n");
+            fprintf(stderr, "Failed to close file.\n");
             num_errors++;
         }
 
