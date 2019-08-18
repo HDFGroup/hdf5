@@ -321,8 +321,8 @@ test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support continuous address space");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support continuous address space");
     } /* end else */
 
     return(0);
@@ -463,8 +463,8 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     TESTING("H5MF_try_shrink() of file allocation: test 2");
@@ -511,8 +511,8 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
 
@@ -555,8 +555,8 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     TESTING("H5MF_try_shrink() of file allocation: test 4");
@@ -603,8 +603,8 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
@@ -612,7 +612,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
 error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl_new);
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_eoa_shrink() */
@@ -741,8 +741,8 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     TESTING("H5MF_try_extend() of file allocation: test 2");
@@ -804,8 +804,8 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
@@ -813,7 +813,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
 error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl_new);
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_eoa_extend() */
@@ -1002,15 +1002,15 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support continuous address space");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support continuous address space");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_tmp() */
@@ -1088,7 +1088,7 @@ test_mf_fs_start(hid_t fapl)
 
     /* Verify the file is the correct size */
     if(new_file_size != file_size)
-    TEST_ERROR
+        TEST_ERROR
 
     if(H5Pclose(fapl_new) < 0)
         FAIL_STACK_ERROR
@@ -1100,7 +1100,7 @@ test_mf_fs_start(hid_t fapl)
 error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl_new);
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_fs_start() */
@@ -1206,7 +1206,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Verify that the allocated block is section A in free-space */
     if(addr != TBLOCK_ADDR70)
-    TEST_ERROR
+        TEST_ERROR
 
     state.tot_space -= TBLOCK_SIZE30;
     state.tot_sect_count -= 1;
@@ -1240,7 +1240,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Verify the file is the correct size */
     if (new_file_size != file_size)
-    TEST_ERROR
+        TEST_ERROR
 
     PASSED()
 
@@ -1283,7 +1283,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Verify that the allocated block is section A in free-space manager */
     if(addr != TBLOCK_ADDR70)
-    TEST_ERROR
+        TEST_ERROR
 
     /* should still have 1 section of size 10 left in free-space manager */
     state.tot_space -= (TBLOCK_SIZE20);
@@ -1315,7 +1315,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Verify the file is the correct size */
     if (new_file_size != file_size)
-    TEST_ERROR
+        TEST_ERROR
 
     PASSED()
 
@@ -1400,7 +1400,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Verify the file is the correct size */
     if(new_file_size != file_size)
-    TEST_ERROR
+        TEST_ERROR
 
     if(H5Pclose(fapl_new) < 0)
         FAIL_STACK_ERROR
@@ -1412,7 +1412,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl_new);
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_fs_alloc_free() */
@@ -1559,7 +1559,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* should succeed */
     if(was_extended <= 0)
-    TEST_ERROR
+        TEST_ERROR
 
     /* Section B is removed from free-space manager */
     state.tot_space -= TBLOCK_SIZE50;
@@ -1596,7 +1596,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Verify the file is the correct size */
     if (new_file_size != file_size)
-    TEST_ERROR
+        TEST_ERROR
 
     PASSED()
 
@@ -1667,7 +1667,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Should not be able to extend the allocated block */
     if(was_extended)
-    TEST_ERROR
+        TEST_ERROR
 
     /* free-space info should remain the same */
     if(check_stats(f, f->shared->fs_man[H5FD_MEM_SUPER], &state))
@@ -1698,7 +1698,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Verify the file is the correct size */
     if (new_file_size != file_size)
-    TEST_ERROR
+        TEST_ERROR
 
     PASSED()
 
@@ -1769,7 +1769,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Should succeed in extending the allocated block */
     if(was_extended <=0)
-    TEST_ERROR
+        TEST_ERROR
 
     /* Should have 1 section of size=10 left in free-space manager */
     state.tot_space -= (TBLOCK_SIZE40);
@@ -1800,7 +1800,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Verify the file is the correct size */
     if (new_file_size != file_size)
-    TEST_ERROR
+        TEST_ERROR
 
     PASSED()
 
@@ -1871,7 +1871,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Should not succeed in extending the allocated block */
     if(was_extended)
-    TEST_ERROR
+        TEST_ERROR
 
     /* Free-space info should be the same */
     if(check_stats(f, f->shared->fs_man[H5FD_MEM_SUPER], &state))
@@ -1906,7 +1906,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Verify the file is the correct size */
     if(new_file_size != file_size)
-    TEST_ERROR
+        TEST_ERROR
 
     if(H5Pclose(fapl_new) < 0)
         FAIL_STACK_ERROR
@@ -1918,7 +1918,7 @@ test_mf_fs_extend(hid_t fapl)
 error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl_new);
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_fs_extend() */
@@ -2026,8 +2026,8 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     TESTING("A free-space section absorbs an aggregator: test 2");
@@ -2087,15 +2087,15 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_fs_absorb() */
@@ -2229,15 +2229,15 @@ test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
         H5Pclose(fcpl);
     } H5E_END_TRY;
     return(1);
@@ -2371,15 +2371,15 @@ test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_aggr_alloc2() */
@@ -2531,15 +2531,15 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_aggr_alloc3() */
@@ -2698,15 +2698,15 @@ test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_aggr_alloc4() */
@@ -2821,15 +2821,15 @@ test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_aggr_alloc5() */
@@ -2977,15 +2977,15 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_aggr_alloc6() */
@@ -3161,15 +3161,15 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_aggr_alloc7() */
@@ -3315,8 +3315,8 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     TESTING("H5MF_try_extend() of meta/sdata aggregator: test 2");
@@ -3385,8 +3385,8 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     TESTING("H5MF_try_extend() of meta/sdata aggregator: test 3");
@@ -3453,15 +3453,15 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_aggr_extend() */
@@ -3562,8 +3562,8 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     TESTING("H5MF_try_shrink() of meta/sdata aggregator: test 2");
@@ -3621,8 +3621,8 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     TESTING("H5MF_try_shrink() of meta/sdata aggregator: test 3");
@@ -3683,8 +3683,8 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support metadata aggregator");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support metadata aggregator");
     } /* end else */
 
     return(0);
@@ -3850,8 +3850,8 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support mis-aligned fragments");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support mis-aligned fragments");
     } /* end else */
 
     TESTING("H5MF_try_shrink() of file allocation with alignment: test 2");
@@ -3905,8 +3905,8 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support mis-aligned fragments");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support mis-aligned fragments");
     } /* end else */
 
     TESTING("H5MF_try_extend() of file allocation with alignment: test 3");
@@ -3961,15 +3961,15 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support mis-aligned fragments");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support mis-aligned fragments");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_align_eoa() */
@@ -4248,15 +4248,15 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support mis-aligned fragments");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support mis-aligned fragments");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_align_fs() */
@@ -4518,15 +4518,15 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support mis-aligned fragments");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support mis-aligned fragments");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_align_alloc1() */
@@ -4804,15 +4804,15 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support mis-aligned fragments");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support mis-aligned fragments");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_align_alloc2() */
@@ -5180,15 +5180,15 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support mis-aligned fragments");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support mis-aligned fragments");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_align_alloc3() */
@@ -5389,15 +5389,15 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support mis-aligned fragments");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support mis-aligned fragments");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_align_alloc4() */
@@ -5612,15 +5612,15 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         PASSED()
     } /* end if */
     else {
-    SKIPPED();
-    puts("    Current VFD doesn't support mis-aligned fragments");
+        SKIPPED();
+        HDputs("    Current VFD doesn't support mis-aligned fragments");
     } /* end else */
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_align_alloc5() */
@@ -6136,18 +6136,18 @@ test_mf_fs_persist_split(void)
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
 
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* Set up split driver */
     if(H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT)<0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* File creation property list template */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -6312,7 +6312,7 @@ test_mf_fs_persist_split(void)
 
     /* Retrieve block #3 from H5FD_MEM_SUPER free-space manager */
     if(HADDR_UNDEF == (tmp_addr = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE3)))
-    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
     if(tmp_addr != addr3)
         TEST_ERROR
 
@@ -6882,14 +6882,14 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
 
     } else {
         SKIPPED();
-        puts("    Current VFD doesn't support persisting free-space or paged aggregation strategy");
+        HDputs("    Current VFD doesn't support persisting free-space or paged aggregation strategy");
     }
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
         H5Pclose(fcpl);
         H5Pclose(fapl2);
     } H5E_END_TRY;
@@ -7066,14 +7066,14 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
 
     } else {
         SKIPPED();
-        puts("    Current VFD doesn't support persistent free-space manager");
+        HDputs("    Current VFD doesn't support persistent free-space manager");
     }
 
     return(0);
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
         H5Pclose(fcpl);
         H5Pclose(fapl2);
     } H5E_END_TRY;
@@ -7243,7 +7243,7 @@ error:
     H5E_BEGIN_TRY {
         H5Pclose(fcpl);
         H5Pclose(fapl2);
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_strat_thres_persist() */
@@ -7429,7 +7429,7 @@ error:
     H5E_BEGIN_TRY {
         H5Pclose(fcpl);
         H5Pclose(fapl2);
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_mf_strat_thres_gone() */
@@ -7516,7 +7516,7 @@ test_dichotomy(hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
-    H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_dichotomy() */
@@ -7770,7 +7770,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
 
     } else {
         SKIPPED();
-        puts("    Current VFD doesn't support persisting free-space or paged aggregation strategy");
+        HDputs("    Current VFD doesn't support persisting free-space or paged aggregation strategy");
     }
 
     return(0);
@@ -7894,7 +7894,7 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
 
     } else {
         SKIPPED();
-        puts("    Current VFD doesn't support paged aggregation");
+        HDputs("    Current VFD doesn't support paged aggregation");
     }
 
     return(0);
@@ -8049,7 +8049,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
 
     } else {
         SKIPPED();
-        puts("    Current VFD doesn't support paged aggregation");
+        HDputs("    Current VFD doesn't support paged aggregation");
     }
 
     return(0);
@@ -8190,7 +8190,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
 
     } else {
         SKIPPED();
-        puts("    Current VFD doesn't support paged aggregation strategy");
+        HDputs("    Current VFD doesn't support paged aggregation strategy");
     }
 
     return(0);
@@ -8343,7 +8343,7 @@ test_page_large(const char *env_h5_drvr, hid_t fapl)
 
     } else {
         SKIPPED();
-        puts("    Current VFD doesn't support paged aggregation strategy");
+        HDputs("    Current VFD doesn't support paged aggregation strategy");
     }
 
     return(0);
@@ -8506,7 +8506,7 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
 
     } else {
         SKIPPED();
-        puts("    Current VFD doesn't support paged aggregation strategy");
+        HDputs("    Current VFD doesn't support paged aggregation strategy");
     }
 
     return(0);
@@ -8812,7 +8812,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
 
     } else {
         SKIPPED();
-        puts("    Current VFD doesn't support persisting free-space or paged aggregation strategy");
+        HDputs("    Current VFD doesn't support persisting free-space or paged aggregation strategy");
     }
 
     return(0);
@@ -8969,12 +8969,12 @@ main(void)
 
     if(nerrors)
         goto error;
-    puts("All free-space manager tests for file memory passed.");
+    HDputs("All free-space manager tests for file memory passed.");
 
     return(0);
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
         H5Pclose(fapl);
         H5Pclose(new_fapl);
