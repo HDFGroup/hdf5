@@ -1846,11 +1846,11 @@ test_swmr_write_big(hbool_t newest_format)
      * by the environment variable.
      */
     driver = HDgetenv("HDF5_DRIVER");
-    if (!H5FD_supports_swmr_test(driver)) {
+    if(!H5FD_supports_swmr_test(driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return 0;
-    } /* end if */
+    }
 
     /* File access property list */
     if((fapl = h5_fileaccess()) < 0)
@@ -1968,12 +1968,13 @@ test_swmr_write_big(hbool_t newest_format)
         /* Flush the accumulator */
         if(accum_reset(rf) < 0)
             FAIL_STACK_ERROR;
-        /* Close the property list */
-        if(H5Pclose(fapl) < 0) 
-            FAIL_STACK_ERROR;
 
         /* Close and remove the file */
         if(H5Fclose(fid) < 0) 
+            FAIL_STACK_ERROR;
+
+        /* Close the property list */
+        if(H5Pclose(fapl) < 0) 
             FAIL_STACK_ERROR;
 
         /* Pop API context */
@@ -1993,11 +1994,11 @@ test_swmr_write_big(hbool_t newest_format)
 
 error:
     /* Closing and remove the file */
-    H5Pclose(fapl);
     H5Fclose(fid);
 
     if(api_ctx_pushed) H5CX_pop();
 
+    H5Pclose(fapl);
     HDremove(SWMR_FILENAME);
 
     /* Release memory */

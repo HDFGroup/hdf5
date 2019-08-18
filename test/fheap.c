@@ -30,9 +30,9 @@
 
 /* Other private headers that this test requires */
 #include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5VMprivate.h"	/* Vectors and arrays 			*/
+#include "H5MMprivate.h"        /* Memory management			*/
+#include "H5Iprivate.h"         /* IDs			  		*/
+#include "H5VMprivate.h"        /* Vectors and arrays 			*/
 
 /* Max. testfile name length */
 #define FHEAP_FILENAME_LEN      1024
@@ -15594,7 +15594,7 @@ error:
         H5MM_xfree(keep_ids.offs);
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_random() */

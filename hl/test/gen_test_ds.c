@@ -281,7 +281,7 @@ static int test_long_attachscales(const char *filename)
     strcpy(dsname, DATASET_NAME);
     strcat(dsname, "al");
 
-    TESTING2("test_long_attachscales");
+    HL_TESTING2("test_long_attachscales");
 
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         goto out;
@@ -342,7 +342,7 @@ static int test_duplicatelong_attachscales(const char *filename)
     strcpy(dsname, DATASET_NAME);
     strcat(dsname, "al2");
 
-    TESTING2("test_duplicatelong_attachscales");
+    HL_TESTING2("test_duplicatelong_attachscales");
 
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         goto out;
@@ -406,7 +406,7 @@ static int test_long_scalenames(const char *filename) {
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         goto out;
 
-    TESTING2("set long scale/cmp scale name");
+    HL_TESTING2("set long scale/cmp scale name");
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
         strcpy(scalename, DS_1_NAME);
         strcat(scalename, "al");
@@ -483,7 +483,7 @@ static int test_samelong_scalenames(const char *filename) {
     if((fid = open_test_file(filename)) < 0)
         goto out;
 
-    TESTING2("set same long scale/cmp scale name");
+    HL_TESTING2("set same long scale/cmp scale name");
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
         strcpy(scalename, DS_1_NAME);
         strcat(scalename, "al");
@@ -554,7 +554,7 @@ static int test_foreign_scaleattached(const char *filename)
     hid_t   did = -1;
     hid_t   dsid = -1;
 
-    TESTING2("test_foreign_scaleattached");
+    HL_TESTING2("test_foreign_scaleattached");
 
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         goto out;

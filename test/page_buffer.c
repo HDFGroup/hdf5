@@ -21,6 +21,10 @@
 
 #include "h5test.h"
 
+#include "H5CXprivate.h"        /* API Contexts                         */
+#include "H5Iprivate.h"
+#include "H5PBprivate.h"
+
 /*
  * This file needs to access private information from the H5F package.
  */
@@ -30,10 +34,6 @@
 #define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"
-
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Iprivate.h"
-#include "H5PBprivate.h"
 
 
 #define FILENAME_LEN            1024

@@ -56,9 +56,8 @@ main(void)
      * by the environment variable.
      */
     driver = HDgetenv("HDF5_DRIVER");
-    if(!H5FD_supports_swmr_test(driver)) {
+    if(!H5FD_supports_swmr_test(driver))
         return EXIT_SUCCESS;
-    }
 
     /* Initialize buffers */
     for(u = 0; u < 1024; u++) {
@@ -71,7 +70,7 @@ main(void)
 
     /* Open the file with SWMR_READ */
     if((fid = H5Fopen(SWMR_FILENAME, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-	    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* Push API context */
     if(H5CX_push() < 0) FAIL_STACK_ERROR
@@ -79,21 +78,21 @@ main(void)
 
     /* Get H5F_t * to internal file structure */
     if(NULL == (f = (H5F_t *)H5I_object(fid))) 
-	    FAIL_STACK_ERROR
+        FAIL_STACK_ERROR
 
     /* Should read in [1024, 2024] with buf data */
     if(H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, rbuf) < 0)
-	    FAIL_STACK_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify the data read is correct */
     if(HDmemcmp(buf, rbuf, (size_t)1024) != 0) 
-	    TEST_ERROR;
+        TEST_ERROR;
 
     /* CLose the file */
     if(H5Pclose(fapl) < 0)
-	    FAIL_STACK_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-	    FAIL_STACK_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Pop API context */
     if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
@@ -101,8 +100,11 @@ main(void)
 
     return EXIT_SUCCESS;
 
-error: 
-    H5Fclose(fid);
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
 
     if(api_ctx_pushed) H5CX_pop();
 

@@ -169,7 +169,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
             /* create the dataset */
             if ( pass ) {
 
-                sprintf(dset_name, "/dset%03d", i);
+                HDsprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
                                             dataspace_id, H5P_DEFAULT,
                                             properties, H5P_DEFAULT);
@@ -363,7 +363,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
 
 			if ( verbose ) {
 
-                            fprintf(stdout, 
+                HDfprintf(stdout,
                                   "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                                   i, j, m);
 			}
@@ -470,7 +470,7 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
 
         while ( ( pass ) && ( i <= max_dset ) )
         {
-            sprintf(dset_name, "/dset%03d", i);
+            HDsprintf(dset_name, "/dset%03d", i);
 
 	    if ( H5Ldelete(file_id, dset_name, H5P_DEFAULT) < 0) {
 
@@ -712,6 +712,9 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected,
 
                 file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR, fapl_id);
         }
+
+        /* tidy up */
+        H5Pclose(fapl_id);
 
         if ( file_id < 0 ) {
 
@@ -1062,7 +1065,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
             /* open the dataset */
             if ( pass ) {
 
-                sprintf(dset_name, "/dset%03d", i);
+                HDsprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
 
                 if ( dataset_ids[i] < 0 ) {
@@ -1202,7 +1205,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
 
 			if ( verbose ) {
 
-                            fprintf(stdout, 
+                HDfprintf(stdout,
                                   "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                                   i, j, m);
 			}
@@ -4718,7 +4721,7 @@ cache_image_smoke_check_5(void)
     /* 2) Create a process specific group. */
     if ( pass ) {
 
-	sprintf(process_group_name, "/process_%d", min_group);
+        HDsprintf(process_group_name, "/process_%d", min_group);
 
         proc_gid = H5Gcreate2(file_id, process_group_name, H5P_DEFAULT, 
                               H5P_DEFAULT, H5P_DEFAULT);
@@ -4830,7 +4833,7 @@ cache_image_smoke_check_5(void)
         if ( pass ) {
 
 	    max_group++;
-	    sprintf(process_group_name, "/process_%d", max_group);
+        HDsprintf(process_group_name, "/process_%d", max_group);
 
             proc_gid = H5Gcreate2(file_id, process_group_name, H5P_DEFAULT, 
                                   H5P_DEFAULT, H5P_DEFAULT);
@@ -4909,7 +4912,7 @@ cache_image_smoke_check_5(void)
     /* 11) Validate all the zoos. */
     i = min_group;
     while(pass && i <= max_group) {
-	sprintf(process_group_name, "/process_%d", i);
+        HDsprintf(process_group_name, "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
  
@@ -4962,7 +4965,7 @@ cache_image_smoke_check_5(void)
     i = min_group;
     while ( ( pass ) && ( i <= max_group ) ) {
 
-	sprintf(process_group_name, "/process_%d", i);
+        HDsprintf(process_group_name, "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
  
@@ -5026,7 +5029,7 @@ cache_image_smoke_check_5(void)
      */
     i = min_group;
     while ( ( pass ) && ( i <= max_group ) ) {
-        sprintf(process_group_name, "/process_%d", i);
+        HDsprintf(process_group_name, "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
  
@@ -8045,10 +8048,10 @@ main(void)
 
     express_test = GetTestExpress();
 
-    printf("=========================================\n");
-    printf("Cache image tests\n");
-    printf("        express_test = %d\n", express_test);
-    printf("=========================================\n");
+    HDprintf("=========================================\n");
+    HDprintf("Cache image tests\n");
+    HDprintf("        express_test = %d\n", express_test);
+    HDprintf("=========================================\n");
 
     nerrs += check_cache_image_ctl_flow_1();
     nerrs += check_cache_image_ctl_flow_2();

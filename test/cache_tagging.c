@@ -723,7 +723,7 @@ check_multi_group_creation_tags(void)
     hid_t fid = -1;          /* File Identifier */
     hid_t gid = -1;          /* Group Identifier */
     int verbose = FALSE;     /* verbose file outout */
-    char gname[10];          /* group name buffer */
+    char gname[16];          /* group name buffer */
     int i = 0;               /* iterator */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t g_tag = 0;       /* Group tag value */
@@ -756,7 +756,7 @@ check_multi_group_creation_tags(void)
 
     for (i = 0; i < MULTIGROUPS; i++) {
 
-        sprintf(gname, "%d", i);
+        HDsprintf(gname, "%d", i);
         if ( (gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
         if ( H5Gclose(gid) < 0 ) TEST_ERROR;
 
@@ -775,7 +775,7 @@ check_multi_group_creation_tags(void)
     for (i = 0; i < MULTIGROUPS; i++) {
 
         /* Re-open the group */
-        sprintf(gname, "%d", i);
+        HDsprintf(gname, "%d", i);
         if ( (gid = H5Gopen2(fid, gname, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
         /* Verify object header for root group */
@@ -874,7 +874,7 @@ check_link_iteration_tags(void)
     /* Create many datasets in root group */
     for (i=0;i<500;i++) {
 
-        sprintf(dsetname, "Dset %d", i);
+        HDsprintf(dsetname, "Dset %d", i);
         if ( (did = H5Dcreate2(fid, dsetname, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
         if ( H5Dclose(did) < 0 ) TEST_ERROR;
     }
@@ -1008,7 +1008,7 @@ check_dense_attribute_tags(void)
 
     for (i=0;i<50;i++) {
 
-        sprintf(attrname, "attr %d", i);
+        HDsprintf(attrname, "attr %d", i);
         if ( (aid = H5Acreate2(did, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
         if ( H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0 ) TEST_ERROR;
         if ( H5Aclose(aid) < 0 ) TEST_ERROR;
@@ -3711,9 +3711,7 @@ error:
  *
  * Purpose:     Run tests on library's ability to tag metadata entries.
  *
- * Return:      Success:
- *
- *              Failure:
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Mike McGreevy
  *              January 15, 2009
@@ -3755,12 +3753,12 @@ main(void)
         /* Run tests on each fcpl set up above. */
         if (test_type == TEST_DEFAULT) {
 
-            if (!nerrs) printf("Testing standard tag application cases w/ default fcpl:\n");
+            if (!nerrs) HDprintf("Testing standard tag application cases w/ default fcpl:\n");
             fcpl = fcpl_default;
         
         } else if (test_type == TEST_SHMESG) {
 
-            if (!nerrs) printf("Testing standard tag application cases w/ shared messages:\n");
+            if (!nerrs) HDprintf("Testing standard tag application cases w/ shared messages:\n");
             fcpl = fcpl_shmesg_all;
 
         } else {
@@ -3780,7 +3778,7 @@ main(void)
         if (!nerrs) nerrs += check_link_removal_tags(fcpl, test_type);
     } /* end for */
 
-    if (!nerrs) printf("Testing other specific tag application cases:\n");
+    if (!nerrs) HDprintf("Testing other specific tag application cases:\n");
     if (!nerrs) nerrs += check_group_creation_tags();
     if (!nerrs) nerrs += check_multi_group_creation_tags();
     if (!nerrs) nerrs += check_group_open_tags();
@@ -3804,10 +3802,13 @@ main(void)
     HDremove(FILENAME2);
 
     /* Return Errors */
-    return nerrs > 0;
+    if (nerrs > 0)
+        return EXIT_FAILURE;
+    else
+        return EXIT_SUCCESS;
 
 error:
     /* Return with Error */
-    return 1;
+    return EXIT_FAILURE;
 
 } /* main */

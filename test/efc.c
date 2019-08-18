@@ -2885,8 +2885,7 @@ error:
  *
  * Purpose:     Test the external file cache code
  *
- * Return:      Success: SUCCEED
- *              Failure: FAIL
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Neil Fortner
  *              December 16, 2010
