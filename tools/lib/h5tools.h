@@ -324,6 +324,7 @@ typedef struct h5tool_format_t {
     const char  *cmpd_suf;
     const char  *cmpd_end;
 
+
     /*
      * Fields associated with vlen data types.
      *

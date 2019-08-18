@@ -119,7 +119,7 @@ print_incoming_data(void)
             HDmemset(data, 0, PRINT_DATA_MAX_SIZE+1);
             MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
 
-            printf("%s", data);
+            HDprintf("%s", data);
         }
     } while(incomingMessage);
 }
@@ -274,12 +274,15 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
     int      cmp;
     trav_table_t *table = NULL;
     size_t   idx;
+    int      ret_value = 0;
 
     h5difftrace("build_match_list start\n");
     /* init */
     trav_table_init(&table);
-    if (table == NULL)
-        H5TOOLS_INFO(H5E_tools_min_id_g, "Cannot create tarverse table");
+    if (table == NULL) {
+        H5TOOLS_INFO(H5E_tools_min_id_g, "Cannot create traverse table");
+        HGOTO_DONE(-1);
+    }
     /*
      * This is necessary for the case that given objects are group and
      * have different names (ex: obj1 is /grp1 and obj2 is /grp5).
@@ -367,6 +370,7 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
 
     free_exclude_path_list (opts);
 
+done:
     *table_out = table;
     h5difftrace("build_match_list finish\n");
 }
@@ -1115,7 +1119,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 /*Set up args to pass to worker task. */
                 if(HDstrlen(obj1_fullpath) > 255 ||
                    HDstrlen(obj2_fullpath) > 255) {
-                    printf("The parallel diff only supports object names up to 255 characters\n");
+                    HDprintf("The parallel diff only supports object names up to 255 characters\n");
                     MPI_Abort(MPI_COMM_WORLD, 0);
                 } /* end if */
 
@@ -1243,7 +1247,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                             MPI_Send(&args, sizeof(args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
                         } /* end else-if */
                         else {
-                            printf("ERROR: Invalid tag (%d) received \n", Status.MPI_TAG);
+                            HDprintf("ERROR: Invalid tag (%d) received \n", Status.MPI_TAG);
                             MPI_Abort(MPI_COMM_WORLD, 0);
                             MPI_Finalize();
                         } /* end else */
@@ -1320,10 +1324,10 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
                 MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
 
-                printf("%s", data);
+                HDprintf("%s", data);
             } /* end else-if */
             else {
-                printf("ph5diff-manager: ERROR!! Invalid tag (%d) received \n", Status.MPI_TAG);
+                HDprintf("ph5diff-manager: ERROR!! Invalid tag (%d) received \n", Status.MPI_TAG);
                 MPI_Abort(MPI_COMM_WORLD, 0);
             } /* end else */
         } /* end while */
@@ -1340,7 +1344,6 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
     }
 #endif /* H5_HAVE_PARALLEL */
 
-out:
     opts->err_stat = opts->err_stat | ret_value;
 
 /* free table */

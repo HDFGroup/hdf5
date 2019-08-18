@@ -11,11 +11,6 @@
  * help@hdfgroup.org.                                                        *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <stdio.h>
-
 /* High-level library internal header file */
 #include "H5HLprivate2.h"
 
@@ -25,14 +20,11 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5DOwrite_chunk
+ * Function:    H5DOwrite_chunk
  *
  * Purpose:     Writes an entire chunk to the file directly.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		30 July 2012
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -104,10 +96,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              14 February 2016
- *
- *------------  -------------------------------------------------------------
+ *---------------------------------------------------------------------------
  */
 herr_t
 H5DOread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,

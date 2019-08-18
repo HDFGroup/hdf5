@@ -153,7 +153,7 @@ test_direct_chunk_write (hid_t file)
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("basic functionality of H5DOwrite_chunk");
+    HL_TESTING2("basic functionality of H5DOwrite_chunk");
 
     /*
      * Create the data space with unlimited dimensions.
@@ -399,7 +399,7 @@ test_direct_chunk_overwrite_data(hid_t fid)
     int16_t     n;
     int16_t     read_buf[OVERWRITE_CHUNK_NY][OVERWRITE_CHUNK_2NX];
 
-    TESTING("overwriting existing data with H5DOwrite_chunk");
+    HL_TESTING2("overwriting existing data with H5DOwrite_chunk");
 
     /* Create the dataset's data space */
     if ((sid = H5Screate_simple(OVERWRITE_NDIMS, dset_dims, dset_max_dims)) < 0)
@@ -473,7 +473,7 @@ error:
 } /* end test_direct_chunk_overwrite_data() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_skip_compress_write1
+ * Function:    test_skip_compress_write1
  *
  * Purpose:    Test skipping compression filter when it is the only filter
  *              for the dataset
@@ -514,7 +514,7 @@ test_skip_compress_write1(hid_t file)
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("skipping compression filter for H5DOwrite_chunk/H5DOread_chunk");
+    HL_TESTING2("skipping compression filter for H5DOwrite_chunk/H5DOread_chunk");
 
     /*
      * Create the data space with unlimited dimensions.
@@ -767,7 +767,7 @@ test_skip_compress_write2(hid_t file)
     hsize_t count[2];   /* Block count */
     hsize_t block[2];   /* Block sizes */
 
-    TESTING("skipping compression filters but keep two other filters");
+    HL_TESTING2("skipping compression filters but keep two other filters");
 
     /*
      * Create the data space with unlimited dimensions.
@@ -968,7 +968,7 @@ test_data_conv(hid_t file)
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("data conversion for H5DOwrite_chunk/H5DOread_chunk");
+    HL_TESTING2("data conversion for H5DOwrite_chunk/H5DOread_chunk");
 
     /*
      * Create the data space with unlimited dimensions.
@@ -1181,7 +1181,7 @@ test_invalid_parameters(hid_t file)
 
     hsize_t     chunk_nbytes;       /* Chunk size */
 
-    TESTING("invalid parameters for H5DOwrite_chunk/H5DOread_chunk");
+    HL_TESTING2("invalid parameters for H5DOwrite_chunk/H5DOread_chunk");
 
     /*
      * Create the data space with unlimited dimensions.
@@ -1408,7 +1408,7 @@ test_direct_chunk_read_no_cache (hid_t file)
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("basic functionality of H5DOread_chunk (chunk cache disabled)");
+    HL_TESTING2("basic functionality of H5DOread_chunk (chunk cache disabled)");
 
     /* Create the data space with unlimited dimensions. */
     if((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
@@ -1578,9 +1578,9 @@ test_direct_chunk_read_cache (hid_t file, hbool_t flush)
     hsize_t block[2];  /* Block sizes */
 
     if(flush) {
-        TESTING("basic functionality of H5DOread_chunk (flush chunk cache)");
+        HL_TESTING2("basic functionality of H5DOread_chunk (flush chunk cache)");
     } else {
-        TESTING("basic functionality of H5DOread_chunk (does not flush chunk cache)");
+        HL_TESTING2("basic functionality of H5DOread_chunk (does not flush chunk cache)");
     }
 
     /* Create the data space with unlimited dimensions. */
@@ -1760,7 +1760,7 @@ test_read_unfiltered_dset(hid_t file)
     hsize_t count[2];  /* Block count */
     hsize_t block[2];  /* Block sizes */
 
-    TESTING("basic functionality of H5DOread_chunk on unfiltered datasets");
+    HL_TESTING2("basic functionality of H5DOread_chunk on unfiltered datasets");
 
     /* Create the data space with unlimited dimensions. */
     if((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
@@ -1902,7 +1902,7 @@ test_read_unallocated_chunk (hid_t file)
     int         direct_buf[CHUNK_NX][CHUNK_NY]; /* chunk read with H5DOread and manually decompressed */
     hsize_t     offset[2];  /* chunk offset used for H5DOread_chunk */
 
-    TESTING("H5DOread_chunk with unallocated chunks");
+    HL_TESTING2("H5DOread_chunk with unallocated chunks");
 
     /* Create the data space with unlimited dimensions. */
     if((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
@@ -2015,7 +2015,7 @@ test_single_chunk(unsigned config)
     int rdata[DIM0][DIM1];  /* Read buffer */
     int i, j;               /* Local index variable */
 
-    TESTING("Single chunk I/O");
+    HL_TESTING2("Single chunk I/O");
 
     /* Initialize data */
     for (i=0; i<DIM0; i++) {
@@ -2133,15 +2133,15 @@ error:
 } /* test_single_chunk_latest() */
 
 /*-------------------------------------------------------------------------
- * Function:	Main function
+ * Function:    Main function
  *
- * Purpose:	    Test direct chunk write function H5Dwrite_chunk and
+ * Purpose:        Test direct chunk write function H5Dwrite_chunk and
  *              chunk direct read function H5Dread_chunk
  *
- * Return:	    Success:	0
- *		        Failure:	1
+ * Return:        Success:    0
+ *                Failure:    1
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              30 November 2012
  *
  *-------------------------------------------------------------------------
