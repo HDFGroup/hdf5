@@ -294,6 +294,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_GET_READ_ATTEMPTS(F) ((F)->shared->read_attempts)
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
 #define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
+#define H5F_SHARED_HAS_FEATURE(F_SH,FL) ((F_SH)->lf->feature_flags & (FL))
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
 #define H5F_BASE_ADDR(F)        ((F)->shared->sblock->base_addr)
 #define H5F_SYM_LEAF_K(F)       ((F)->shared->sblock->sym_leaf_k)
@@ -337,6 +338,7 @@ typedef struct H5F_t H5F_t;
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
+#define H5F_SHARED_INTENT(F_SH) (H5F_shared_get_intent(F_SH))
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_OPEN_NAME(F)        (H5F_get_open_name(F))
 #define H5F_ACTUAL_NAME(F)      (H5F_get_actual_name(F))
@@ -352,6 +354,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_GET_READ_ATTEMPTS(F) (H5F_get_read_attempts(F))
 #define H5F_DRIVER_ID(F)        (H5F_get_driver_id(F))
 #define H5F_GET_FILENO(F,FILENUM) (H5F_get_fileno((F), &(FILENUM)))
+#define H5F_SHARED_HAS_FEATURE(F_SH,FL) (H5F_shared_has_feature(F_SH,FL))
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
 #define H5F_BASE_ADDR(F)        (H5F_get_base_addr(F))
 #define H5F_SYM_LEAF_K(F)       (H5F_sym_leaf_k(F))
@@ -724,6 +727,7 @@ H5_DLL hid_t H5F_get_file_id(hid_t obj_id, H5I_type_t id_type, hbool_t app_ref);
 /* Functions that retrieve values from the file struct */
 H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);
 H5_DLL H5F_libver_t H5F_get_high_bound(const H5F_t *f);
+H5_DLL unsigned H5F_shared_get_intent(const H5F_file_t *f);
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL char *H5F_get_open_name(const H5F_t *f);
 H5_DLL char *H5F_get_actual_name(const H5F_t *f);
@@ -787,7 +791,9 @@ H5_DLL char *H5F_mdc_log_location(const H5F_t *f);
 /* Functions that retrieve values from VFD layer */
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
+H5_DLL hbool_t H5F_shared_has_feature(const H5F_file_t *f, unsigned feature);
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
+H5_DLL haddr_t H5F_shared_get_eoa(const H5F_file_t *f_sh, H5FD_mem_t type);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
 H5_DLL herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle);
 
@@ -838,6 +844,7 @@ H5_DLL herr_t H5F_eoa_dirty(H5F_t *f);
 H5_DLL herr_t H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle);
 H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
+H5_DLL int H5F_shared_mpi_get_size(const H5F_file_t *f_sh);
 H5_DLL int H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
 H5_DLL herr_t H5F_get_mpi_info(const H5F_t *f, MPI_Info **f_info);

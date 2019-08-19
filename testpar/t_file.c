@@ -250,7 +250,7 @@ test_page_buffer_access(void)
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
 
-        ret = H5PB_flush(f);
+        ret = H5PB_flush(f->shared);
         VRFY((ret == 0), "");
 
         /* read elements 0 - 200 */

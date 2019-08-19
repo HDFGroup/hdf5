@@ -170,6 +170,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_shared_mpi_get_size
+ *
+ * Purpose:     Retrieves the size of an MPI process.
+ *
+ * Return:      Success:        The size (positive)
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              Friday, May 6, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5F_shared_mpi_get_size(const H5F_file_t *f_sh)
+{
+    int ret_value = -1;
+
+    FUNC_ENTER_NOAPI((-1))
+
+    HDassert(f_sh);
+
+    /* Dispatch to driver */
+    if((ret_value = H5FD_mpi_get_size(f_sh->lf)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "driver get_size request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_shared_mpi_get_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5F_mpi_get_size
  *
  * Purpose:     Retrieves the size of an MPI process.

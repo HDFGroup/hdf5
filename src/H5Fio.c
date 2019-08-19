@@ -159,7 +159,7 @@ H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
 
     /* Pass through page buffer layer */
-    if(H5PB_write(f, map_type, addr, size, buf) < 0)
+    if(H5PB_write(f->shared, map_type, addr, size, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through page buffer failed")
 
 done:

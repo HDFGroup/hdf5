@@ -1910,7 +1910,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
     /* Flush the page buffer */
-    if(H5PB_flush(f) < 0)
+    if(H5PB_flush(f->shared) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "page buffer flush failed")
 
