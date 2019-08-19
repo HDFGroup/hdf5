@@ -52,18 +52,15 @@
  *
  *****************************************************************************/
 
-#include <ctype.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include "H5private.h"      /* Generic Functions        */
 
 #ifdef H5_HAVE_ROS3_VFD
+
+/* Necessary S3 headers */
 #include <curl/curl.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
-#endif /* ifdef H5_HAVE_ROS3_VFD */
 
 /*****************
  * PUBLIC MACROS *
@@ -99,9 +96,6 @@
  *     It is left to the programmer to check return value of
  *     ISO8601NOW (should equal ISO8601_SIZE - 1).
  *
- * Programmer: Jacob Smith
- *             2017-07-??
- *
  *---------------------------------------------------------------------------
  */
 #define ISO8601NOW(dest, now_gm) \
@@ -120,9 +114,6 @@ strftime((dest), ISO8601_SIZE, "%Y%m%dT%H%M%SZ", (now_gm))
  *
  *     It is left to the programmer to check return value of
  *     RFC7231NOW (should equal RFC7231_SIZE - 1).
- *
- * Programmer: Jacob Smith
- *             2017-07-??
  *
  *---------------------------------------------------------------------------
  */
@@ -168,11 +159,6 @@ strftime((dest), RFC7231_SIZE, "%a, %d %b %Y %H:%M:%S GMT", (now_gm))
  *     `date` must be of format "YYYYmmdd".
  *     `region` should be relevant AWS region, i.e. "us-east-1".
  *     `service` should be "s3".
- *
- * Programmer: Jacob Smith
- *             2017-09-19
- *
- * Changes: None.
  *
  *---------------------------------------------------------------------------
  */
@@ -266,16 +252,6 @@ HDsnprintf((dest), S3COMMS_MAX_CREDENTIAL_SIZE,                                 
  *     Pointers to next node in the list, or NULL sentinel as end of list.
  *     Next node must have a greater `lowername` as determined by strcmp().
  *
- *
- *
- * Programmer: Jacob Smith
- *             2017-09-22
- *
- * Changes:
- *
- *     - Change from twin doubly-linked lists to singly-linked list.
- *     --- Jake Smith 2017-01-17
- *
  *----------------------------------------------------------------------------
  */
 typedef struct hrb_node_t {
@@ -353,10 +329,6 @@ typedef struct hrb_node_t {
  *
  *     Pointer to HTTP version string, e.g., "HTTP/1.1".
  *
- *
- *
- * Programmer: Jacob Smith
- *
  *----------------------------------------------------------------------------
  */
 typedef struct {
@@ -420,10 +392,6 @@ typedef struct {
  *
  *     Single string of all query parameters in url (if any).
  *     "arg1=value1&arg2=value2"
- *
- *
- *
- * Programmer: Jacob Smith
  *
  *----------------------------------------------------------------------------
  */
@@ -514,15 +482,10 @@ typedef struct {
  *
  *     Requred to authenticate.
  *
- *
- *
- * Programmer: Jacob Smith
- *
  *----------------------------------------------------------------------------
  */
 typedef struct {
     unsigned long  magic;
-#ifdef H5_HAVE_ROS3_VFD
     CURL          *curlhandle;
     size_t         filesize;
     char          *httpverb;
@@ -530,15 +493,19 @@ typedef struct {
     char          *region;
     char          *secret_id;
     unsigned char *signing_key;
-#endif /* ifdef H5_HAVE_ROS3_VFD */
 } s3r_t;
+
 #define S3COMMS_S3R_MAGIC 0x44d8d79
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*******************************************
  * DECLARATION OF HTTP FIELD LIST ROUTINES *
  *******************************************/
 
-herr_t H5FD_s3comms_hrb_node_set(hrb_node_t **L,
+H5_DLL herr_t H5FD_s3comms_hrb_node_set(hrb_node_t **L,
                                  const char  *name,
                                  const char  *value);
 
@@ -546,9 +513,9 @@ herr_t H5FD_s3comms_hrb_node_set(hrb_node_t **L,
  * DECLARATION OF HTTP REQUEST BUFFER ROUTINES *
  ***********************************************/
 
-herr_t H5FD_s3comms_hrb_destroy(hrb_t **buf);
+H5_DLL herr_t H5FD_s3comms_hrb_destroy(hrb_t **buf);
 
-hrb_t * H5FD_s3comms_hrb_init_request(const char *verb,
+H5_DLL hrb_t * H5FD_s3comms_hrb_init_request(const char *verb,
                                       const char *resource,
                                       const char *host);
 
@@ -576,7 +543,7 @@ H5_DLL herr_t H5FD_s3comms_s3r_read(s3r_t   *handle,
 
 H5_DLL struct tm * gmnow(void);
 
-herr_t H5FD_s3comms_aws_canonical_request(char  *canonical_request_dest,
+H5_DLL herr_t H5FD_s3comms_aws_canonical_request(char  *canonical_request_dest,
                                           int    cr_size,
                                           char  *signed_headers_dest,
                                           int    sh_size,
@@ -587,27 +554,27 @@ H5_DLL herr_t H5FD_s3comms_bytes_to_hex(char                *dest,
                                  size_t               msg_len,
                                  hbool_t              lowercase);
 
-herr_t H5FD_s3comms_free_purl(parsed_url_t *purl);
+H5_DLL herr_t H5FD_s3comms_free_purl(parsed_url_t *purl);
 
-herr_t H5FD_s3comms_HMAC_SHA256(const unsigned char *key,
+H5_DLL herr_t H5FD_s3comms_HMAC_SHA256(const unsigned char *key,
                                 size_t               key_len,
                                 const char          *msg,
                                 size_t               msg_len,
                                 char                *dest);
 
-herr_t H5FD_s3comms_load_aws_profile(const char *name,
+H5_DLL herr_t H5FD_s3comms_load_aws_profile(const char *name,
                                      char       *key_id_out,
                                      char       *secret_access_key_out,
                                      char       *aws_region_out);
 
-herr_t H5FD_s3comms_nlowercase(char       *dest,
+H5_DLL herr_t H5FD_s3comms_nlowercase(char       *dest,
                                const char *s,
                                size_t      len);
 
-herr_t H5FD_s3comms_parse_url(const char    *str,
+H5_DLL herr_t H5FD_s3comms_parse_url(const char    *str,
                               parsed_url_t **purl);
 
-herr_t H5FD_s3comms_percent_encode_char(char                *repr,
+H5_DLL herr_t H5FD_s3comms_percent_encode_char(char                *repr,
                                         const unsigned char  c,
                                         size_t              *repr_len);
 
@@ -616,7 +583,7 @@ H5_DLL herr_t H5FD_s3comms_signing_key(unsigned char *md,
                                        const char    *region,
                                        const char    *iso8601now);
 
-herr_t H5FD_s3comms_tostringtosign(char       *dest,
+H5_DLL herr_t H5FD_s3comms_tostringtosign(char       *dest,
                                    const char *req_str,
                                    const char *now,
                                    const char *region);
@@ -626,10 +593,12 @@ H5_DLL herr_t H5FD_s3comms_trim(char   *dest,
                          size_t  s_len,
                          size_t *n_written);
 
-H5_DLL herr_t H5FD_s3comms_uriencode(char       *dest,
-                              const char *s,
-                              size_t      s_len,
-                              hbool_t     encode_slash,
-                              size_t     *n_written);
+H5_DLL herr_t H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len,
+    hbool_t encode_slash, size_t *n_written);
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* H5_HAVE_ROS3_VFD */
 

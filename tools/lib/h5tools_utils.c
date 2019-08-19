@@ -1129,17 +1129,13 @@ done:
  * Programmer: Jacob Smith
  *             2017-11-13
  *
- * Changes: None.
- *
  *----------------------------------------------------------------------------
  */
+#ifdef H5_HAVE_ROS3_VFD
 int
 h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
                            const char       **values)
 {
-#ifndef H5_HAVE_ROS3_VFD
-    return 0;
-#else
     int show_progress = 0; /* set to 1 for debugging */
     int ret_value     = 1; /* 1 for success, 0 for failure           */
                            /* e.g.? if (!populate()) { then failed } */
@@ -1159,7 +1155,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
     if (show_progress) {
         HDprintf("  preset fapl with default values\n");
     }
-    fa->version       = H5FD__CURR_ROS3_FAPL_T_VERSION;
+    fa->version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
     fa->authenticate  = FALSE;
     *(fa->aws_region) = '\0';
     *(fa->secret_id)  = '\0';
@@ -1196,7 +1192,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
         if (*values[0] != '\0' &&
             *values[1] != '\0')
         {
-            if (HDstrlen(values[0]) > H5FD__ROS3_MAX_REGION_LEN) {
+            if (HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
                 if (show_progress) {
                     HDprintf("  ERROR: aws_region value too long\n");
                 }
@@ -1210,7 +1206,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
             }
 
 
-            if (HDstrlen(values[1]) > H5FD__ROS3_MAX_SECRET_ID_LEN) {
+            if (HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
                 if (show_progress) {
                     HDprintf("  ERROR: secret_id value too long\n");
                 }
@@ -1224,7 +1220,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
                 HDprintf("  secret_id set\n");
             }
 
-            if (HDstrlen(values[2]) > H5FD__ROS3_MAX_SECRET_KEY_LEN) {
+            if (HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
                 if (show_progress) {
                     HDprintf("  ERROR: secret_key value too long\n");
                 }
@@ -1259,9 +1255,9 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
 
 done:
     return ret_value;
-#endif /* H5_HAVE_ROS3_VFD */
 
 } /* h5tools_populate_ros3_fapl */
+#endif /* H5_HAVE_ROS3_VFD */
 
 
 /*-----------------------------------------------------------------------------
@@ -1328,6 +1324,4 @@ done:
     return ret_value;
 
 } /* h5tools_set_configured_fapl() */
-
-
 
