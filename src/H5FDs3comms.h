@@ -538,19 +538,19 @@ typedef struct {
  * DECLARATION OF HTTP FIELD LIST ROUTINES *
  *******************************************/
 
-herr_t H5FD_s3comms_hrb_node_set(hrb_node_t **L,
-                                 const char  *name,
-                                 const char  *value);
+H5_DLL herr_t H5FD_s3comms_hrb_node_set(hrb_node_t **L,
+                                        const char  *name,
+                                        const char  *value);
 
 /***********************************************
  * DECLARATION OF HTTP REQUEST BUFFER ROUTINES *
  ***********************************************/
 
-herr_t H5FD_s3comms_hrb_destroy(hrb_t **buf);
+H5_DLL herr_t H5FD_s3comms_hrb_destroy(hrb_t **buf);
 
-hrb_t * H5FD_s3comms_hrb_init_request(const char *verb,
-                                      const char *resource,
-                                      const char *host);
+H5_DLL hrb_t * H5FD_s3comms_hrb_init_request(const char *verb,
+                                             const char *resource,
+                                             const char *host);
 
 /*************************************
  * DECLARATION OF S3REQUEST ROUTINES *
@@ -576,60 +576,60 @@ H5_DLL herr_t H5FD_s3comms_s3r_read(s3r_t   *handle,
 
 H5_DLL struct tm * gmnow(void);
 
-herr_t H5FD_s3comms_aws_canonical_request(char  *canonical_request_dest,
-                                          int    cr_size,
-                                          char  *signed_headers_dest,
-                                          int    sh_size,
-                                          hrb_t *http_request);
+H5_DLL herr_t H5FD_s3comms_aws_canonical_request(char  *canonical_request_dest,
+                                                 int    cr_size,
+                                                 char  *signed_headers_dest,
+                                                 int    sh_size,
+                                                 hrb_t *http_request);
 
 H5_DLL herr_t H5FD_s3comms_bytes_to_hex(char                *dest,
-                                 const unsigned char *msg,
-                                 size_t               msg_len,
-                                 hbool_t              lowercase);
+                                        const unsigned char *msg,
+                                        size_t               msg_len,
+                                        hbool_t              lowercase);
 
-herr_t H5FD_s3comms_free_purl(parsed_url_t *purl);
+H5_DLL herr_t H5FD_s3comms_free_purl(parsed_url_t *purl);
 
-herr_t H5FD_s3comms_HMAC_SHA256(const unsigned char *key,
-                                size_t               key_len,
-                                const char          *msg,
-                                size_t               msg_len,
-                                char                *dest);
+H5_DLL herr_t H5FD_s3comms_HMAC_SHA256(const unsigned char *key,
+                                       size_t               key_len,
+                                       const char          *msg,
+                                       size_t               msg_len,
+                                       char                *dest);
 
-herr_t H5FD_s3comms_load_aws_profile(const char *name,
-                                     char       *key_id_out,
-                                     char       *secret_access_key_out,
-                                     char       *aws_region_out);
+H5_DLL herr_t H5FD_s3comms_load_aws_profile(const char *name,
+                                            char       *key_id_out,
+                                            char       *secret_access_key_out,
+                                            char       *aws_region_out);
 
-herr_t H5FD_s3comms_nlowercase(char       *dest,
-                               const char *s,
-                               size_t      len);
+H5_DLL herr_t H5FD_s3comms_nlowercase(char       *dest,
+                                      const char *s,
+                                      size_t      len);
 
-herr_t H5FD_s3comms_parse_url(const char    *str,
-                              parsed_url_t **purl);
+H5_DLL herr_t H5FD_s3comms_parse_url(const char    *str,
+                                     parsed_url_t **purl);
 
-herr_t H5FD_s3comms_percent_encode_char(char                *repr,
-                                        const unsigned char  c,
-                                        size_t              *repr_len);
+H5_DLL herr_t H5FD_s3comms_percent_encode_char(char                *repr,
+                                               const unsigned char  c,
+                                               size_t              *repr_len);
 
 H5_DLL herr_t H5FD_s3comms_signing_key(unsigned char *md,
                                        const char    *secret,
                                        const char    *region,
                                        const char    *iso8601now);
 
-herr_t H5FD_s3comms_tostringtosign(char       *dest,
-                                   const char *req_str,
-                                   const char *now,
-                                   const char *region);
+H5_DLL herr_t H5FD_s3comms_tostringtosign(char       *dest,
+                                          const char *req_str,
+                                          const char *now,
+                                          const char *region);
 
 H5_DLL herr_t H5FD_s3comms_trim(char   *dest,
-                         char   *s,
-                         size_t  s_len,
-                         size_t *n_written);
+                                char   *s,
+                                size_t  s_len,
+                                size_t *n_written);
 
 H5_DLL herr_t H5FD_s3comms_uriencode(char       *dest,
-                              const char *s,
-                              size_t      s_len,
-                              hbool_t     encode_slash,
-                              size_t     *n_written);
+                                     const char *s,
+                                     size_t      s_len,
+                                     hbool_t     encode_slash,
+                                     size_t     *n_written);
 
 
