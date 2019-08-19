@@ -1346,7 +1346,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
         } /* end if */
 
         /* Destroy other components of the file */
-        if(H5F__accum_reset(f, TRUE) < 0)
+        if(H5F__accum_reset(f->shared, TRUE) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         if(H5FO_dest(f) < 0)
@@ -1905,7 +1905,7 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
 #endif /* H5_HAVE_PARALLEL */
 
     /* Flush out the metadata accumulator */
-    if(H5F__accum_flush(f) < 0)
+    if(H5F__accum_flush(f->shared) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
@@ -3416,7 +3416,7 @@ H5F__start_swmr_write(H5F_t *f)
     } /* end if */
 
     /* Flush and reset the accumulator */
-    if(H5F__accum_reset(f, TRUE) < 0)
+    if(H5F__accum_reset(f->shared, TRUE) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator")
 
     /* Turn on SWMR write in shared file open flags */

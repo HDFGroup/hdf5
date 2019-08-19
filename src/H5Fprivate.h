@@ -278,6 +278,7 @@ typedef struct H5F_t H5F_t;
 #ifdef H5F_MODULE
 #define H5F_LOW_BOUND(F)        ((F)->shared->low_bound)
 #define H5F_HIGH_BOUND(F)       ((F)->shared->high_bound)
+#define H5F_SHARED_INTENT(F_SH) ((F_SH)->flags)
 #define H5F_INTENT(F)           ((F)->shared->flags)
 #define H5F_OPEN_NAME(F)        ((F)->open_name)
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)

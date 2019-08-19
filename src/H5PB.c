@@ -1025,7 +1025,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
      * buffering.
      */
     if(NULL == page_buf || size >= page_buf->page_size || bypass_pb) {
-        if(H5F__accum_write(f, type, addr, size, buf) < 0)
+        if(H5F__accum_write(f->shared, type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "write through metadata accumulator failed")
 
         /* Update statistics */
