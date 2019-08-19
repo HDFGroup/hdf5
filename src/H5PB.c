@@ -729,7 +729,7 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/
      */
     if(NULL == page_buf || size >= page_buf->page_size ||
            (bypass_pb && H5FD_MEM_DRAW == type)) {
-        if(H5F__accum_read(f, type, addr, size, buf) < 0)
+        if(H5F__accum_read(f->shared, type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "read through metadata accumulator failed")
 
         /* Update statistics */

@@ -111,7 +111,7 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_read(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
+H5F__accum_read(H5F_file_t *f_sh, H5FD_mem_t map_type, haddr_t addr,
     size_t size, void *buf/*out*/)
 {
     H5FD_t *file;                       /* File driver pointer */
@@ -120,18 +120,18 @@ H5F__accum_read(H5F_t *f, H5FD_mem_t map_type, haddr_t addr,
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(f);
+    HDassert(f_sh);
     HDassert(buf);
 
     /* Translate to file driver I/O info object */
-    file = f->shared->lf;
+    file = f_sh->lf;
 
     /* Check if this information is in the metadata accumulator */
-    if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && map_type != H5FD_MEM_DRAW) {
+    if((f_sh->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && map_type != H5FD_MEM_DRAW) {
         H5F_meta_accum_t *accum;     /* Alias for file's metadata accumulator */
 
         /* Set up alias for file's metadata accumulator info */
-        accum = &f->shared->accum;
+        accum = &f_sh->accum;
 
         if(size < H5F_ACCUM_MAX_SIZE) {
             /* Sanity check */
@@ -847,7 +847,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_free(H5F_t *f, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr,
+H5F__accum_free(H5F_file_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr,
     hsize_t size)
 {
     H5F_meta_accum_t *accum;            /* Alias for file's metadata accumulator */
@@ -857,16 +857,16 @@ H5F__accum_free(H5F_t *f, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr,
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f);
+    HDassert(f_sh);
 
     /* Set up alias for file's metadata accumulator info */
-    accum = &f->shared->accum;
+    accum = &f_sh->accum;
 
     /* Translate to file driver pointer */
-    file = f->shared->lf;
+    file = f_sh->lf;
 
     /* Adjust the metadata accumulator to remove the freed block, if it overlaps */
-    if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA)
+    if((f_sh->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA)
             && H5F_addr_overlap(addr, size, accum->loc, accum->size)) {
         size_t overlap_size;        /* Size of overlap with accumulator */
 
