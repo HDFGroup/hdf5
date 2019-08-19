@@ -25,27 +25,27 @@
 
 #ifndef _H5TEST_
 
-#define AT() fprintf(stdout, "   at %s:%d in %s()...\n",        \
+#define UTIL_AT() HDfprintf(stdout, "   at %s:%d in %s()...\n",        \
                      __FILE__, __LINE__, FUNC);
 
-#define FAILED(msg) {                 \
-    fprintf(stdout, "*FAILED*"); AT() \
+#define UTIL_FAILED(msg) {                 \
+    HDfprintf(stdout, "*FAILED*"); AT() \
     if (msg == NULL) {                \
-        fprintf(stdout,"(NULL)\n");   \
+        HDfprintf(stdout,"(NULL)\n");   \
     } else {                          \
-        fprintf(stdout, "%s\n", msg); \
+        HDfprintf(stdout, "%s\n", msg); \
     }                                 \
-    fflush(stdout);                   \
+    HDfflush(stdout);                   \
 }
 
-#define TESTING(msg) {                       \
-    fprintf(stdout, "TESTING %-62s", (msg)); \
-    fflush(stdout);                          \
+#define UTIL_TESTING(msg) {                       \
+    HDfprintf(stdout, "TESTING %-62s", (msg)); \
+    HDfflush(stdout);                          \
 }
 
-#define PASSED() {                \
-    fprintf(stdout, " PASSED\n"); \
-    fflush(stdout);               \
+#define UTIL_PASSED() {                \
+    HDfprintf(stdout, " PASSED\n"); \
+    HDfflush(stdout);               \
 }
 
 #endif /* ifndef _H5TEST_ */
@@ -60,7 +60,7 @@
  *
  * Purpose:
  *
- *     1. Upon test failure, goto-jump to single-location teardown in test 
+ *     1. Upon test failure, goto-jump to single-location teardown in test
  *        function. E.g., `error:` (consistency with HDF corpus) or
  *        `failed:` (reflects purpose).
  *            >>> using "error", in part because `H5E_BEGIN_TRY` expects it.
@@ -69,22 +69,22 @@
  *        requires reading of entire line to know whether this if/call is
  *        part of the test setup, test operation, or a test unto itself.
  *     3. Provide testing macros with optional user-supplied failure message;
- *        if not supplied (NULL), generate comparison output in the spirit of 
+ *        if not supplied (NULL), generate comparison output in the spirit of
  *        test-driven development. E.g., "expected 5 but was -3"
  *        User messages clarify test's purpose in code, encouraging description
  *        without relying on comments.
  *     4. Configurable expected-actual order in generated comparison strings.
- *        Some prefer `VERIFY(expected, actual)`, others 
+ *        Some prefer `VERIFY(expected, actual)`, others
  *        `VERIFY(actual, expected)`. Provide preprocessor ifdef switch
  *        to satifsy both parties, assuming one paradigm per test file.
  *        (One could #undef and redefine the flag through the file as desired,
  *         but _why_.)
  *
- *     Provided as courtesy, per consideration for inclusion in the library 
+ *     Provided as courtesy, per consideration for inclusion in the library
  *     proper.
  *
  *     Macros:
- * 
+ *
  *         JSVERIFY_EXP_ACT - ifdef flag, configures comparison order
  *         FAIL_IF()        - check condition
  *         FAIL_UNLESS()    - check _not_ condition
@@ -97,19 +97,19 @@
  *
  *****************************************************************************/
 
-
+
 /*----------------------------------------------------------------------------
  *
  * ifdef flag: JSVERIFY_EXP_ACT
- * 
- * JSVERIFY macros accept arguments as (EXPECTED, ACTUAL[, reason]) 
+ *
+ * JSVERIFY macros accept arguments as (EXPECTED, ACTUAL[, reason])
  * default, if this is undefined, is (ACTUAL, EXPECTED[, reason])
  *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_EXP_ACT 1L
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSFAILED_AT()
@@ -130,15 +130,15 @@
     HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC); \
 }
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: FAIL_IF()
  *
- * Purpose:  
+ * Purpose:
  *
  *     Make tests more accessible and less cluttered than
- *         `if (thing == otherthing()) TEST_ERROR` 
+ *         `if (thing == otherthing()) TEST_ERROR`
  *         paradigm.
  *
  *     The following lines are roughly equivalent:
@@ -160,7 +160,7 @@ if (condition) {           \
     goto error;           \
 }
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: FAIL_UNLESS()
@@ -169,7 +169,7 @@ if (condition) {           \
  *
  *     TEST_ERROR wrapper to reduce cognitive overhead from "negative tests",
  *     e.g., "a != b".
- *     
+ *
  *     Opposite of FAIL_IF; fails if the given condition is _not_ true.
  *
  *     `FAIL_IF( 5 != my_op() )`
@@ -189,7 +189,7 @@ if (!(condition)) {            \
     goto error;               \
 }
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSERR_LONG()
@@ -225,7 +225,7 @@ if (!(condition)) {            \
     }                                                    \
 }
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSERR_STR()
@@ -266,15 +266,15 @@ if (!(condition)) {            \
 
 #ifdef JSVERIFY_EXP_ACT
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSVERIFY()
  *
- * Purpose: 
+ * Purpose:
  *
  *     Verify that two long integers are equal.
- *     If unequal, print failure message 
+ *     If unequal, print failure message
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
@@ -289,15 +289,15 @@ if ((long)(actual) != (long)(expected)) {      \
     goto error;                                \
 } /* JSVERIFY */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSVERIFY_NOT()
  *
- * Purpose: 
+ * Purpose:
  *
  *     Verify that two long integers are _not_ equal.
- *     If equal, print failure message 
+ *     If equal, print failure message
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
@@ -312,15 +312,15 @@ if ((long)(actual) == (long)(expected)) {      \
     goto error;                                \
 } /* JSVERIFY_NOT */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSVERIFY_STR()
  *
- * Purpose: 
+ * Purpose:
  *
  *     Verify that two strings are equal.
- *     If unequal, print failure message 
+ *     If unequal, print failure message
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
@@ -335,11 +335,11 @@ if (HDstrcmp((actual), (expected)) != 0) {       \
     goto error;                                \
 } /* JSVERIFY_STR */
 
-
+
 #else /* JSVERIFY_EXP_ACT not defined                                        */
       /* Repeats macros above, but with actual/expected parameters reversed. */
 
-
+
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
  * See: JSVERIFY documentation above.
@@ -353,7 +353,7 @@ if ((long)(actual) != (long)(expected)) {       \
     goto error;                                 \
 } /* JSVERIFY */
 
-
+
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
  * See: JSVERIFY_NOT documentation above.
@@ -367,7 +367,7 @@ if ((long)(actual) == (long)(expected)) {      \
     goto error;                                \
 } /* JSVERIFY_NOT */
 
-
+
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
  * See: JSVERIFY_STR documentation above.
@@ -392,12 +392,12 @@ if (HDstrcmp((actual), (expected)) != 0) {       \
 /* TEST FUNCTIONS */
 /******************/
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: test_parse_tuple()
  *
- * Purpose: 
+ * Purpose:
  *
  *     Provide unit tests and specification for the `parse_tuple()` function.
  *
@@ -548,7 +548,7 @@ test_parse_tuple(void)
 
 
 
-    TESTING("arbitrary-count tuple parsing");
+    UTIL_TESTING("arbitrary-count tuple parsing");
 
 #if H5TOOLS_UTILS_TEST_DEBUG > 0
         show_progress = TRUE;
@@ -566,13 +566,12 @@ test_parse_tuple(void)
         HDassert(cpy == NULL);
         tc = cases[i];
         if (show_progress == TRUE) {
-            printf("testing %d: %s...\n", i, tc.test_msg);
+            HDprintf("testing %d: %s...\n", i, tc.test_msg);
         }
 
         /* VERIFY
          */
-        success = parse_tuple(tc.in_str, tc.sep,
-                              &cpy, &count, &parsed);
+        success = parse_tuple(tc.in_str, tc.sep,  &cpy, &count, &parsed);
 
         JSVERIFY( tc.exp_ret,    success, "function returned incorrect value" )
         JSVERIFY( tc.exp_nelems, count,   NULL )
@@ -584,9 +583,9 @@ test_parse_tuple(void)
             /* TEARDOWN */
             HDassert(parsed != NULL);
             HDassert(cpy    != NULL);
-            free(parsed);
+            HDfree(parsed);
             parsed = NULL;
-            free(cpy);
+            HDfree(cpy);
             cpy = NULL;
         } else {
             FAIL_IF( parsed != NULL )
@@ -602,14 +601,14 @@ error:
      * CLEANUP *
      ***********/
 
-    if (parsed != NULL) free(parsed);
-    if (cpy    != NULL) free(cpy);
+    if (parsed != NULL) HDfree(parsed);
+    if (cpy    != NULL) HDfree(cpy);
 
     return 1;
 
 } /* test_parse_tuple */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function:   test_populate_ros3_fa()
@@ -642,12 +641,12 @@ test_populate_ros3_fa(void)
     int     bad_version   = 0xf87a; /* arbitrarily wrong version number */
 #endif /* H5_HAVE_ROS3_VFD */
 
-    TESTING("programmatic ros3 fapl population");
+    UTIL_TESTING("programmatic ros3 fapl population");
 
 #ifndef H5_HAVE_ROS3_VFD
-    puts(" -SKIP-");
-    puts("    Read-Only S3 VFD not enabled");
-    fflush(stdout);
+    HDputs(" -SKIP-");
+    HDputs("    Read-Only S3 VFD not enabled");
+    HDfflush(stdout);
     return 0;
 #else
 #if H5TOOLS_UTILS_TEST_DEBUG > 0
@@ -687,7 +686,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR( "", fa.secret_key, NULL )
     }
 
-    /* all-empty values 
+    /* all-empty values
      * yields default fapl
      */
     {
@@ -705,7 +704,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR( "", fa.secret_key, NULL )
     }
 
-    /* successfully set fapl with values 
+    /* successfully set fapl with values
      * excess value is ignored
      */
     {
@@ -985,7 +984,7 @@ error :
 
 } /* test_populate_ros3_fa */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function:   test_set_configured_fapl()
@@ -1173,7 +1172,7 @@ test_set_configured_fapl(void)
     n_cases += 5;
 #endif /* H5_HAVE_LIBHDFS */
 
-    TESTING("programmatic fapl set");
+    UTIL_TESTING("programmatic fapl set");
 
     for (unsigned i = 0; i < n_cases; i++) {
         int      result;
@@ -1247,7 +1246,7 @@ error :
 #undef UTIL_TEST_CREATE
 } /* test_set_configured_fapl */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function:   main()

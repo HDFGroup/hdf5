@@ -381,10 +381,10 @@ main (int argc, const char *argv[])
     *-------------------------------------------------------------------------*/
 
     if (verbose) {
-        printf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n",
+        HDprintf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n",
         fname_src, oname_src, fname_dst, oname_dst);
         if (flag) {
-            printf("Using %s flag\n", str_flag);
+            HDprintf("Using %s flag\n", str_flag);
         }
     }
 
@@ -419,7 +419,7 @@ main (int argc, const char *argv[])
 
         /* Display some output if requested */
         if(verbose)
-            printf("%s: Creating parent groups\n", h5tools_getprogname());
+            HDprintf("%s: Creating parent groups\n", h5tools_getprogname());
     } /* end if */
     else {
         /* error, if parent groups doesn't already exist in destination file */
@@ -490,7 +490,7 @@ main (int argc, const char *argv[])
     leave(EXIT_SUCCESS);
 
 done:
-    printf("Error in copy...Exiting\n");
+    HDprintf("Error in copy...Exiting\n");
 
     /* free link info path */
     if (linkinfo.trg_path)

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	Tests datasets stored in external raw files.
+ * Purpose:    Tests datasets stored in external raw files.
  */
 #include "external_common.h"
 #include "external_fname.h"
@@ -22,7 +22,7 @@ static const char *EXT_ENV_FNAME[] = {
     NULL
 };
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_path_env
  *
@@ -47,18 +47,18 @@ static const char *EXT_ENV_FNAME[] = {
 static int
 test_path_env(hid_t fapl)
 {
-    hid_t	file = -1;          /* file to write to                     */
-    hid_t	dcpl = -1;          /* dataset creation properties          */
-    hid_t	space = -1;         /* data space                           */
-    hid_t	dapl = -1;          /* dataset access property list         */
-    hid_t	dset = -1;          /* dataset                              */
-    size_t	i;                  /* miscellaneous counters               */
-    char	cwdpath[1024];		/* working directory                    */
-    char	filename[1024];		/* file name                            */
-    int	    part[PART_SIZE];    /* raw data buffer (partial)            */
+    hid_t    file = -1;          /* file to write to                     */
+    hid_t    dcpl = -1;          /* dataset creation properties          */
+    hid_t    space = -1;         /* data space                           */
+    hid_t    dapl = -1;          /* dataset access property list         */
+    hid_t    dset = -1;          /* dataset                              */
+    size_t    i;                  /* miscellaneous counters               */
+    char    cwdpath[1024];        /* working directory                    */
+    char    filename[1024];        /* file name                            */
+    int        part[PART_SIZE];    /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE];  /* raw data buffer (total)              */
-    hsize_t	cur_size;           /* current data space size              */
-    char	buffer[1024];       /* buffer to read efile_prefix          */
+    hsize_t    cur_size;           /* current data space size              */
+    char    buffer[1024];       /* buffer to read efile_prefix          */
 
     TESTING("prefix in HDF5_EXTFILE_PREFIX");
 
@@ -130,7 +130,7 @@ error:
     return 1;
 } /* end test_path_env() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -138,7 +138,7 @@ error:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, March  3, 1998
  *
  *-------------------------------------------------------------------------
@@ -146,12 +146,12 @@ error:
 int
 main(void)
 {
-    hid_t	fapl_id_old = -1;   /* file access properties (old format)  */
-    hid_t	fapl_id_new = -1;   /* file access properties (new format)  */
-    hid_t	fid = -1;           /* file for test_1* functions           */
-    hid_t	gid = -1;           /* group to emit diagnostics            */
+    hid_t    fapl_id_old = -1;   /* file access properties (old format)  */
+    hid_t    fapl_id_new = -1;   /* file access properties (new format)  */
+    hid_t    fid = -1;           /* file for test_1* functions           */
+    hid_t    gid = -1;           /* group to emit diagnostics            */
     unsigned latest_format;     /* default or latest file format        */
-    int		nerrors = 0;        /* number of errors                     */
+    int        nerrors = 0;        /* number of errors                     */
 
     h5_reset();
 
@@ -213,7 +213,7 @@ error:
         H5Gclose(gid);
     } H5E_END_TRY;
     nerrors = MAX(1, nerrors);
-    printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
+    HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */
 

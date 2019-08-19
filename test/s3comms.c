@@ -386,7 +386,7 @@ static hbool_t s3_test_bucket_defined                   = FALSE;
 
 #endif /* H5_HAVE_ROS3_VFD */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_macro_format_credential()
@@ -431,7 +431,7 @@ error:
 
 } /* end test_macro_format_credential() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_aws_canonical_request()
@@ -616,7 +616,7 @@ error:
 
 } /* end test_aws_canonical_request() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_bytes_to_hex
@@ -712,7 +712,7 @@ error:
 
 } /* end test_bytes_to_hex() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_hrb_init_request()
@@ -834,7 +834,7 @@ error:
 
 } /* end test_hrb_init_request() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_hrb_node_set()
@@ -1141,7 +1141,7 @@ error:
 } /* end test_hrb_node_t() */
 
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_HMAC_SHA256()
@@ -1276,7 +1276,7 @@ error:
 
 } /* end test_HMAC_SHA256() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: test_nlowercase()
@@ -1359,7 +1359,7 @@ error:
 
 } /* end test_nlowercase() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_parse_url()
@@ -1609,7 +1609,7 @@ error:
 
 } /* end test_parse_url() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_percent_encode_char()
@@ -1693,7 +1693,7 @@ error:
     return -1;
 } /* end test_percent_encode_char() */
 
-
+
 /*---------------------------------------------------------------------------
  * Function: test_s3r_open()
  *
@@ -1763,7 +1763,7 @@ error:
 
 } /* end test_s3r_get_filesize() */
 
-
+
 /*---------------------------------------------------------------------------
  * Function: test_s3r_open()
  *
@@ -1902,7 +1902,7 @@ test_s3r_open(void)
      *************************/
 
 #if S3_TEST_RUN_TIMEOUT
-printf("Opening on inactive port may hang for a minute; waiting for timeout\n");
+    HDprintf("Opening on inactive port may hang for a minute; waiting for timeout\n");
     handle = H5FD_s3comms_s3r_open(url_raven_badport, NULL, NULL, NULL);
     FAIL_IF( handle != NULL );
 #endif
@@ -2004,7 +2004,7 @@ error:
 
 } /* end test_s3r_open() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_s3r_read()
@@ -2369,7 +2369,7 @@ error:
 
 } /* end test_signing_key() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_tostringtosign()
@@ -2441,7 +2441,7 @@ error :
 
 } /* end test_tostringtosign() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: test_trim()
@@ -2552,7 +2552,7 @@ error:
 
 } /* end test_trim() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: test_uriencode()
@@ -2681,7 +2681,7 @@ error:
 
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function: main()
  *

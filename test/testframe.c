@@ -74,12 +74,12 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
 {
     /* Sanity checking */
     if (HDstrlen(TheDescr) >= MAXTESTDESC) {
-        printf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n",
+        HDprintf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n",
         TheDescr, MAXTESTDESC);
         exit(EXIT_FAILURE);
     } /* end if */
     if (HDstrlen(TheName) >= MAXTESTNAME) {
-        printf("Test name too long, increase MAXTESTNAME(%d).\n",
+        HDprintf("Test name too long, increase MAXTESTNAME(%d).\n",
         MAXTESTNAME);
         exit(EXIT_FAILURE);
     } /* end if */
@@ -91,7 +91,7 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
 
         /* Reallocate array */
         if(NULL == (newTest = (TestStruct *)HDrealloc(Test, newAlloc * sizeof(TestStruct)))) {
-            printf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc, newAlloc);
+            HDprintf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc, newAlloc);
             exit(EXIT_FAILURE);
         } /* end if */
 
@@ -559,9 +559,9 @@ TestErrPrintf(const char *format, ...)
     num_errs++;
 
     /* Print the requested information */
-    va_start(arglist, format);
-    ret_value = vprintf(format, arglist);
-    va_end(arglist);
+    HDva_start(arglist, format);
+    ret_value = HDvprintf(format, arglist);
+    HDva_end(arglist);
 
     /* Return the length of the string produced (like printf() does) */
     return ret_value;
@@ -609,7 +609,7 @@ void SetTest(const char *testname, int action)
         break;
     default:
         /* error */
-        printf("*** ERROR: Unknown action (%d) for SetTest\n", action);
+        HDprintf("*** ERROR: Unknown action (%d) for SetTest\n", action);
         break;
     }
 }

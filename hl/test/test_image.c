@@ -169,7 +169,7 @@ static int test_simple(void)
     *-------------------------------------------------------------------------
     */
 
-    TESTING("indexed image");
+    HL_TESTING2("indexed image");
 
     /* Write image */
     if ( H5IMmake_image_8bit( fid, IMAGE1_NAME, width, height, buf1 ) < 0 )
@@ -205,7 +205,7 @@ static int test_simple(void)
     *-------------------------------------------------------------------------
     */
 
-    TESTING("true color image");
+    HL_TESTING2("true color image");
 
     /* Write image */
     if ( H5IMmake_image_24bit( fid, IMAGE2_NAME, width, height, "INTERLACE_PIXEL", buf2 ) )
@@ -232,7 +232,7 @@ static int test_simple(void)
     *-------------------------------------------------------------------------
     */
 
-    TESTING("pallete functions");
+    HL_TESTING2("pallete functions");
 
     if ( H5IMget_npalettes( fid, IMAGE1_NAME, &npals ) < 0 )
         goto out;
@@ -351,7 +351,7 @@ static int test_data(void)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("make indexed image");
+    HL_TESTING2("make indexed image");
 
     /* read first data file */
     if (read_data(DATA_FILE1,&width,&height)<0)
@@ -364,7 +364,7 @@ static int test_data(void)
     PASSED();
 
 
-    TESTING2("attaching palettes");
+    HL_TESTING2("attaching palettes");
 
     /*-------------------------------------------------------------------------
     * palette #1. rainbow palette. data is contained in "pal_rgb.h"
@@ -464,7 +464,7 @@ static int test_data(void)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("make true color image with pixel interlace");
+    HL_TESTING2("make true color image with pixel interlace");
 
     /* read second data file */
     if ((read_data(DATA_FILE2,&width,&height))<0)
@@ -481,7 +481,7 @@ static int test_data(void)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("make true color image with plane interlace");
+    HL_TESTING2("make true color image with plane interlace");
 
     /* read third data file */
     if ((read_data(DATA_FILE3,&width,&height))<0)
@@ -627,7 +627,7 @@ static int test_generate(void)
         goto out;
     if(n_elements > INT_MAX / (int)sizeof(float))
         goto out;
-    
+
     data = (float *)HDmalloc((size_t)n_elements * sizeof(float));
     if(NULL == data)
         goto out;
@@ -652,7 +652,7 @@ static int test_generate(void)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("make indexed image from all the data");
+    HL_TESTING2("make indexed image from all the data");
 
     for ( i = 0; i < n_elements; i++ )
         image_data[i] = (unsigned char)(( 255 * (data[i] - xmin ) ) / (xmax - xmin ));
@@ -669,7 +669,7 @@ static int test_generate(void)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("make indexed image from land data");
+    HL_TESTING2("make indexed image from land data");
 
     for ( i = 0; i < n_elements; i++ )
     {
@@ -691,7 +691,7 @@ static int test_generate(void)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("make indexed image from sea data");
+    HL_TESTING2("make indexed image from sea data");
 
     for ( i = 0; i < n_elements; i++ )
     {
@@ -712,7 +712,7 @@ static int test_generate(void)
     *-------------------------------------------------------------------------
     */
 
-    TESTING2("attaching palettes");
+    HL_TESTING2("attaching palettes");
 
     /* make a palette */
     if ((H5IMmake_palette(fid,PAL1_NAME,pal_dims,pal_rgb))<0)
@@ -815,7 +815,7 @@ static int read_data(const char* fname, /*IN*/
         printf( "fscanf error in file %s.\n", data_file );
         goto out;
     } /* end if */
- 
+
     if(fscanf(f, "%d", &h) < 0 && HDferror(f)) {
         printf( "fscanf error in file %s.\n", data_file );
         goto out;
@@ -870,7 +870,7 @@ static int read_data(const char* fname, /*IN*/
     /* Indicate success */
     ret_val = 1;
 
-out:    
+out:
     if(f)
         HDfclose(f);
 
