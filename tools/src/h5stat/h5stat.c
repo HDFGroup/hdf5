@@ -120,6 +120,7 @@ typedef struct iter_t {
 
 static const char *drivername = "";
 
+#ifdef H5_HAVE_ROS3_VFD
 /* default "anonymous" s3 configuration
  */
 static H5FD_ros3_fapl_t ros3_fa = {
@@ -129,7 +130,9 @@ static H5FD_ros3_fapl_t ros3_fa = {
     "",    /* access key id     */
     "",    /* secret access key */
 };
+#endif /* H5_HAVE_ROS3_VFD */
 
+#ifdef H5_HAVE_LIBHDFS
 /* default HDFS access configuration
  */
 static H5FD_hdfs_fapl_t hdfs_fa = {
@@ -140,6 +143,7 @@ static H5FD_hdfs_fapl_t hdfs_fa = {
     "",          /* user name             */
     2048,        /* stream buffer size    */
 };
+#endif /* H5_HAVE_LIBHDFS */
 
 static int        display_all = TRUE;
 
@@ -544,8 +548,8 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "attribute_stats() failed");
 
     /* Get storage info */
-    if((storage = H5Dget_storage_size(did)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_storage_size() failed");
+    /* Failure 0 indistinguishable from no-data-stored 0 */
+    storage = H5Dget_storage_size(did); 
 
     /* Gather layout statistics */
     if((dcpl = H5Dget_create_plist(did)) < 0)
@@ -758,6 +762,7 @@ obj_stats(const char *path, const H5O_info_t *oi, const char *already_visited,
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "datatype_stats failed");
                 break;
 
+            case H5O_TYPE_MAP:
             case H5O_TYPE_UNKNOWN:
             case H5O_TYPE_NTYPES:
             default:

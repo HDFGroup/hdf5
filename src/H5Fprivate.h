@@ -718,7 +718,7 @@ typedef enum H5F_prefix_open_t {
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
-H5_DLL hid_t H5F_get_file_id(hid_t obj_id, H5I_type_t id_type);
+H5_DLL hid_t H5F_get_file_id(hid_t obj_id, H5I_type_t id_type, hbool_t app_ref);
 
 /* Functions that retrieve values from the file struct */
 H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);

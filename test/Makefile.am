@@ -184,7 +184,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
     ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5\
-    dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
+    dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 \
+    tmp tmp_links tmp2_links tmp_links_env tmp_vds_env \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \

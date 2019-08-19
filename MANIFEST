@@ -481,6 +481,7 @@
 ./src/H5err.txt
 ./src/H5detect.c
 ./src/H5make_libsettings.c
+./src/H5mpi.c
 ./src/H5overflow.txt
 ./src/H5private.h
 ./src/H5public.h
@@ -749,6 +750,11 @@
 ./src/H5Lpkg.h
 ./src/H5Lprivate.h
 ./src/H5Lpublic.h
+./src/H5M.c
+./src/H5Mmodule.h
+./src/H5Mpkg.h
+./src/H5Mprivate.h
+./src/H5Mpublic.h
 ./src/H5MF.c
 ./src/H5MFaggr.c
 ./src/H5MFdbg.c
@@ -820,6 +826,8 @@
 ./src/H5Pint.c
 ./src/H5Plapl.c
 ./src/H5Plcpl.c
+./src/H5Pmapl.c
+./src/H5Pmcpl.c
 ./src/H5Pmodule.h
 ./src/H5Pocpl.c
 ./src/H5Pocpypl.c

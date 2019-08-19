@@ -90,14 +90,14 @@ herr_t
 H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle)
 {
     herr_t ret_value = SUCCEED;
-    hid_t fapl = -1;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(f && f->shared);
 
     /* Dispatch to driver */
-    if ((ret_value = H5FD_get_vfd_handle(f->shared->lf, fapl, (void **)f_handle)) < 0)
+    if ((ret_value = H5FD_get_vfd_handle(f->shared->lf, fapl_id, (void **)f_handle)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
 
 done:
@@ -106,33 +106,31 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_mpi_get_rank
+ * Function:    H5F_mpi_get_rank
  *
- * Purpose:	Retrieves the rank of an MPI process.
+ * Purpose:     Retrieves the rank of an MPI process.
  *
- * Return:	Success:	The rank (non-negative)
+ * Return:      Success:    The rank (non-negative)
  *
- *		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, January 30, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 int
 H5F_mpi_get_rank(const H5F_t *f)
 {
-    int	ret_value;
+    int ret_value = -1;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI((-1))
 
     HDassert(f && f->shared);
 
     /* Dispatch to driver */
-    if ((ret_value=H5FD_mpi_get_rank(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
+    if ((ret_value = H5FD_mpi_get_rank(f->shared->lf)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "driver get_rank request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -140,32 +138,30 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_mpi_get_comm
+ * Function:    H5F_mpi_get_comm
  *
- * Purpose:	Retrieves the file's communicator
+ * Purpose:     Retrieves the file's communicator
  *
- * Return:	Success:	The communicator (non-negative)
+ * Return:      Success:    The communicator (non-negative)
  *
- *		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, January 30, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 MPI_Comm
 H5F_mpi_get_comm(const H5F_t *f)
 {
-    MPI_Comm	ret_value;
+    MPI_Comm    ret_value = MPI_COMM_NULL;
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
     HDassert(f && f->shared);
 
     /* Dispatch to driver */
-    if ((ret_value=H5FD_mpi_get_comm(f->shared->lf))==MPI_COMM_NULL)
+    if ((ret_value = H5FD_mpi_get_comm(f->shared->lf)) == MPI_COMM_NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
 
 done:
@@ -185,22 +181,20 @@ done:
  * Programmer:  John Mainzer
  *              Friday, May 6, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
 H5F_mpi_get_size(const H5F_t *f)
 {
-    int ret_value;
+    int ret_value = -1;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI((-1))
 
     HDassert(f && f->shared);
 
     /* Dispatch to driver */
-    if ((ret_value=H5FD_mpi_get_size(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
+    if ((ret_value = H5FD_mpi_get_size(f->shared->lf)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "driver get_size request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -208,16 +202,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fset_mpi_atomicity
+ * Function:    H5Fset_mpi_atomicity
  *
- * Purpose:	Sets the atomicity mode
+ * Purpose:     Sets the atomicity mode
  *
- * Return:	Success:	Non-negative
+ * Return:      Success:    Non-negative
  *
- * 		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Mohamad Chaarawi
- *		Feb 14, 2012
+ * Programmer:  Mohamad Chaarawi
+ *              Feb 14, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -248,16 +242,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fget_mpi_atomicity
+ * Function:    H5Fget_mpi_atomicity
  *
- * Purpose:	Returns the atomicity mode
+ * Purpose:     Returns the atomicity mode
  *
- * Return:	Success:	Non-negative
+ * Return:      Success:    Non-negative
  *
- * 		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Mohamad Chaarawi
- *		Feb 14, 2012
+ * Programmer:  Mohamad Chaarawi
+ *              Feb 14, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -288,18 +282,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_mpi_retrieve_comm
+ * Function:    H5F_mpi_retrieve_comm
  *
- * Purpose:	Retrieves an MPI communicator from the file the location ID 
+ * Purpose:     Retrieves an MPI communicator from the file the location ID 
  *              is in. If the loc_id is invalid, the fapl_id is used to 
  *              retrieve the communicator.
  *
- * Return:	Success:	Non-negative
+ * Return:      Success:    Non-negative
  *
- * 		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Mohamad Chaarawi
- *		Feb 14, 2012
+ * Programmer:  Mohamad Chaarawi
+ *              Feb 14, 2012
  *
  *-------------------------------------------------------------------------
  */

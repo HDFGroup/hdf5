@@ -577,7 +577,9 @@ H5_DLL herr_t H5FD_s3comms_s3r_read(s3r_t   *handle,
 H5_DLL struct tm * gmnow(void);
 
 herr_t H5FD_s3comms_aws_canonical_request(char  *canonical_request_dest,
+                                          int    cr_size,
                                           char  *signed_headers_dest,
+                                          int    sh_size,
                                           hrb_t *http_request);
 
 H5_DLL herr_t H5FD_s3comms_bytes_to_hex(char                *dest,

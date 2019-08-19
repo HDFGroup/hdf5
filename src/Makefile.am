@@ -78,6 +78,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5HG.c H5HGcache.c H5HGdbg.c H5HGquery.c \
         H5HL.c H5HLcache.c H5HLdbg.c H5HLint.c H5HLprfx.c H5HLdblk.c\
         H5HP.c H5I.c H5Itest.c H5L.c H5Lexternal.c H5lib_settings.c \
+        H5M.c \
         H5MF.c H5MFaggr.c H5MFdbg.c H5MFsection.c \
         H5MM.c H5MP.c H5MPtest.c \
         H5O.c H5Odeprec.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
@@ -95,8 +96,9 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c \
         H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
-        H5Pgcpl.c H5Pint.c \
-        H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
+        H5Pgcpl.c H5Pint.c H5Plapl.c H5Plcpl.c \
+        H5Pmapl.c H5Pmcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c \
+        H5Ptest.c \
         H5PB.c \
         H5PL.c H5PLint.c H5PLpath.c H5PLplugin_cache.c \
         H5R.c H5Rint.c H5Rdeprec.c \
@@ -124,7 +126,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
 
 # Only compile parallel sources if necessary
 if BUILD_PARALLEL_CONDITIONAL
-    libhdf5_la_SOURCES += H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
+    libhdf5_la_SOURCES += H5mpi.c H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
 endif
 
 # Only compile the direct VFD if necessary
@@ -141,7 +143,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5FDfamily.h H5FDhdfs.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
         H5FDmulti.h H5FDros3.h H5FDsec2.h H5FDstdio.h H5FDwindows.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
-        H5MMpublic.h H5Opublic.h H5Ppublic.h \
+        H5Mpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
         H5Rpublic.h H5Spublic.h H5Tpublic.h \
         H5VLconnector.h H5VLconnector_passthru.h \

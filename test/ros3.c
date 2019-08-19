@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Read-Only S3 Virtual File Driver (VFD)                                   
+ * Read-Only S3 Virtual File Driver (VFD)
  *
  * Purpose:
  *
@@ -31,6 +31,9 @@
 #include "H5FDs3comms.h" /* for loading of credentials */
 
 
+
+/* only include the testing macros if needed */
+#ifdef H5_HAVE_ROS3_VFD
 
 /*****************************************************************************
  *
@@ -368,15 +371,16 @@ if (strcmp((actual), (expected)) != 0) {       \
 
 #endif /* ifdef/else JSVERIFY_EXP_ACT */
 
+#endif /* H5_HAVE_ROS3_VFD */
+
 /********************************
  * OTHER MACROS AND DEFINITIONS *
  ********************************/
 
-/* copied from src/ros3.c
- */
+#ifdef H5_HAVE_ROS3_VFD
+
 #define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
 
-#ifdef H5_HAVE_ROS3_VFD
 #define S3_TEST_PROFILE_NAME "ros3_vfd_test"
 
 #define S3_TEST_MAX_URL_SIZE 256
@@ -440,6 +444,15 @@ H5FD_ros3_fapl_t anonymous_fa = {
 static int
 test_fapl_config_validation(void)
 {
+#ifndef H5_HAVE_ROS3_VFD
+    TESTING("ROS3 fapl configuration validation");
+    SKIPPED();
+    puts("    ROS3 VFD not enabled");
+    fflush(stdout);
+    return 0;
+
+#else /* H5_HAVE_ROS3_VFD defined */
+
     /*********************
      * test-local macros *
      *********************/
@@ -458,7 +471,6 @@ test_fapl_config_validation(void)
      * test-local variables *
      ************************/
 
-#ifdef H5_HAVE_ROS3_VFD
     hid_t            fapl_id     = -1;   /* file access property list ID */
     H5FD_ros3_fapl_t config;
     H5FD_ros3_fapl_t fa_fetch;
@@ -544,20 +556,11 @@ test_fapl_config_validation(void)
         },
     };
 
-#endif /* H5_HAVE_ROS3_VFD */
-
     TESTING("ROS3 fapl configuration validation");
 
     /*********
      * TESTS *
      *********/
-
-#ifndef H5_HAVE_ROS3_VFD
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-#else
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
@@ -655,7 +658,7 @@ error:
  * Purpose:     Tests the file handle interface for the ROS3 driver
  *
  *              As the ROS3 driver is 1) read only, 2) requires access
- *              to an S3 server (minio for now), this test is quite
+ *              to an S3 server, this test is quite
  *              different from the other tests.
  *
  *              For now, test only fapl & flags.  Extend as the
@@ -675,11 +678,19 @@ error:
 static int
 test_ros3_fapl(void)
 {
+#ifndef H5_HAVE_ROS3_VFD
+    TESTING("ROS3 fapl ");
+    SKIPPED();
+    puts("    ROS3 VFD not enabled");
+    fflush(stdout);
+    return 0;
+
+#else /* H5_HAVE_ROS3 defined */
+
     /************************
      * test-local variables *
      ************************/
 
-#ifdef H5_HAVE_ROS3_VFD
     hid_t             fapl_id        = -1;  /* file access property list ID */
     hid_t             driver_id      = -1;  /* ID for this VFD              */
     unsigned long     driver_flags   =  0;  /* VFD feature flags            */
@@ -690,16 +701,9 @@ test_ros3_fapl(void)
         "",                             /* secret_id     */
         "plugh",                        /* secret_key    */
     };
-#endif /* H5_HAVE_ROS3_VFD */
 
     TESTING("ROS3 fapl ");
 
-#ifndef H5_HAVE_ROS3_VFD
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-#else
     /* Set property list and file name for ROS3 driver.
      */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -759,11 +763,19 @@ error:
 static int
 test_vfd_open(void)
 {
+#ifndef H5_HAVE_ROS3_VFD
+    TESTING("ROS3 VFD-level open");
+    SKIPPED();
+    puts("    ROS3 VFD not enabled");
+    fflush(stdout);
+    return 0;
+
+#else /* H5_HAVE_ROS3_VFD defined */
+
     /*********************
      * test-local macros *
      *********************/
 
-#ifdef H5_HAVE_ROS3_VFD
 
 #define FAPL_H5P_DEFAULT -2
 #define FAPL_FILE_ACCESS -3
@@ -853,16 +865,8 @@ test_vfd_open(void)
     hid_t     fapl_file_access = -1;
     unsigned  i                = 0;
     unsigned  tests_count      = 10;
-#endif /* H5_HAVE_ROS3_VFD */
 
     TESTING("ROS3 VFD-level open");
-
-#ifndef H5_HAVE_ROS3_VFD
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-#else
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
@@ -989,6 +993,15 @@ error:
 static int
 test_eof_eoa(void)
 {
+#ifndef H5_HAVE_ROS3_VFD
+    TESTING("ROS3 eof/eoa gets and sets");
+    SKIPPED();
+    puts("    ROS3 VFD not enabled");
+    fflush(stdout);
+    return 0;
+
+#else /* H5_HAVE_ROS3_VFD defined */
+
     /*********************
      * test-local macros *
      *********************/
@@ -1001,20 +1014,12 @@ test_eof_eoa(void)
      * test-local variables *
      ************************/
 
-#ifdef H5_HAVE_ROS3_VFD
     H5FD_t  *fd_shakespeare  = NULL;
     hbool_t  curl_ready      = FALSE;
     hid_t    fapl_id         = -1;
-#endif /* H5_HAVE_ROS3_VFD */
 
     TESTING("ROS3 eof/eoa gets and sets");
 
-#ifndef H5_HAVE_ROS3_VFD
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-#else
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         puts("    s3 credentials are not loaded");
@@ -1136,21 +1141,22 @@ error:
 static int
 test_H5FDread_without_eoa_set_fails(void)
 {
-#ifdef H5_HAVE_ROS3_VFD
-    char              buffer[256];
-    unsigned int      i                = 0;
-    H5FD_t           *file_shakespeare = NULL;
-    hid_t             fapl_id          = -1;
-#endif /* H5_HAVE_ROS3_VFD */
-
-    TESTING("ROS3 VFD read-eoa temporal coupling library limitation ");
-
 #ifndef H5_HAVE_ROS3_VFD
+    TESTING("ROS3 VFD read-eoa temporal coupling library limitation ");
     SKIPPED();
     puts("    ROS3 VFD not enabled");
     fflush(stdout);
     return 0;
-#else
+
+#else /* H5_HAVE_ROS3_VFD defined */
+
+    char              buffer[256];
+    unsigned int      i                = 0;
+    H5FD_t           *file_shakespeare = NULL;
+    hid_t             fapl_id          = -1;
+
+    TESTING("ROS3 VFD read-eoa temporal coupling library limitation ");
+
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         puts("    s3 credentials are not loaded");
@@ -1256,6 +1262,15 @@ error:
 static int
 test_read(void)
 {
+#ifndef H5_HAVE_ROS3_VFD
+    TESTING("ROS3 VFD read/range-gets");
+    SKIPPED();
+    puts("    ROS3 VFD not enabled");
+    fflush(stdout);
+    return 0;
+
+#else /* H5_HAVE_ROS3_VFD defined */
+
     /*********************
      * test-local macros *
      *********************/
@@ -1275,7 +1290,6 @@ test_read(void)
     /************************
      * test-local variables *
      ************************/
-#ifdef H5_HAVE_ROS3_VFD
     struct testcase cases[] = {
         {   "successful range-get",
             6464,
@@ -1328,16 +1342,9 @@ test_read(void)
     unsigned int      i                = 0;
     H5FD_t           *file_raven       = NULL;
     hid_t             fapl_id          = -1;
-#endif /* H5_HAVE_ROS3_VFD */
 
     TESTING("ROS3 VFD read/range-gets");
 
-#ifndef H5_HAVE_ROS3_VFD
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-#else
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         puts("    s3 credentials are not loaded");
@@ -1471,6 +1478,15 @@ error:
 static int
 test_noops_and_autofails(void)
 {
+#ifndef H5_HAVE_ROS3_VFD
+    TESTING("ROS3 VFD always-fail and no-op routines");
+    SKIPPED();
+    puts("    ROS3 VFD not enabled");
+    fflush(stdout);
+    return 0;
+
+#else
+
     /*********************
      * test-local macros *
      *********************/
@@ -1483,21 +1499,13 @@ test_noops_and_autofails(void)
      * test-local variables *
      ************************/
 
-#ifdef H5_HAVE_ROS3_VFD
     hbool_t           curl_ready = FALSE;
     hid_t             fapl_id    = -1;
     H5FD_t           *file       = NULL;
     const char        data[36]   = "The Force shall be with you, always";
-#endif /* H5_HAVE_ROS3_VFD */
 
     TESTING("ROS3 VFD always-fail and no-op routines");
 
-#ifndef H5_HAVE_ROS3_VFD
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-#else
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
@@ -1624,6 +1632,15 @@ error:
 static int
 test_cmp(void)
 {
+#ifndef H5_HAVE_ROS3_VFD
+    TESTING("ROS3 cmp (comparison)");
+    SKIPPED();
+    puts("    ROS3 VFD not enabled");
+    fflush(stdout);
+    return 0;
+
+#else
+
     /*********************
      * test-local macros *
      *********************/
@@ -1636,22 +1653,14 @@ test_cmp(void)
      * test-local variables *
      ************************/
 
-#ifdef H5_HAVE_ROS3_VFD
     H5FD_t           *fd_raven   = NULL;
     H5FD_t           *fd_shakes  = NULL;
     H5FD_t           *fd_raven_2 = NULL;
     hbool_t           curl_ready = FALSE;
     hid_t             fapl_id    = -1;
-#endif /* H5_HAVE_ROS3_VFD */
 
     TESTING("ROS3 cmp (comparison)");
 
-#ifndef H5_HAVE_ROS3_VFD
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-#else
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         puts("    s3 credentials are not loaded");
@@ -1767,6 +1776,15 @@ error:
 static int
 test_H5F_integration(void)
 {
+#ifndef H5_HAVE_ROS3_VFD
+    TESTING("S3 file access through HD5F library (H5F API)");
+    SKIPPED();
+    puts("    ROS3 VFD not enabled");
+    fflush(stdout);
+    return 0;
+
+#else
+
     /*********************
      * test-local macros *
      *********************/
@@ -1779,19 +1797,11 @@ test_H5F_integration(void)
      * test-local variables *
      ************************/
 
-#ifdef H5_HAVE_ROS3_VFD
     hid_t file    = -1;
     hid_t fapl_id = -1;
-#endif /* H5_HAVE_ROS3_VFD */
 
     TESTING("S3 file access through HD5F library (H5F API)");
 
-#ifndef H5_HAVE_ROS3_VFD
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-#else
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
         puts("    s3 credentials are not loaded");

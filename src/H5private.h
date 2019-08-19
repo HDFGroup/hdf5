@@ -317,7 +317,7 @@
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
-#if defined(__GNUC__) && __GNUC__ >= 7
+#if defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
 #   define H5_ATTR_FALLTHROUGH  __attribute__((fallthrough));
 #else
 #   define H5_ATTR_FALLTHROUGH  /*void*/
@@ -1721,6 +1721,7 @@ typedef enum {
     H5_PKG_HG,      /* Global heaps             */
     H5_PKG_HL,      /* Local heaps              */
     H5_PKG_I,       /* IDs                      */
+    H5_PKG_M,       /* Maps                     */
     H5_PKG_MF,      /* File memory management   */
     H5_PKG_MM,      /* Core memory management   */
     H5_PKG_O,       /* Object headers           */
@@ -2637,6 +2638,8 @@ H5_DLL int H5G_term_package(void);
 H5_DLL int H5G_top_term_package(void);
 H5_DLL int H5I_term_package(void);
 H5_DLL int H5L_term_package(void);
+H5_DLL int H5M_term_package(void);
+H5_DLL int H5M_top_term_package(void);
 H5_DLL int H5P_term_package(void);
 H5_DLL int H5PL_term_package(void);
 H5_DLL int H5R_term_package(void);
@@ -2664,6 +2667,14 @@ H5_DLL double H5_get_time(void);
 /* Functions for building paths, etc. */
 H5_DLL herr_t   H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
+
+#ifdef H5_HAVE_PARALLEL
+/* Generic MPI functions */
+H5_DLL herr_t   H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new);
+H5_DLL herr_t   H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new);
+H5_DLL herr_t   H5_mpi_comm_free(MPI_Comm *comm);
+H5_DLL herr_t   H5_mpi_info_free(MPI_Info *info);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Functions for debugging */
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,
