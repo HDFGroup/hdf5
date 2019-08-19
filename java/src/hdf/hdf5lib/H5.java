@@ -5048,10 +5048,9 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native void H5Orefresh(long object_id) throws HDF5LibraryException;
 
-    // /////// unimplemented ////////
-    //  herr_t H5Odisable_mdc_flushes(hid_t object_id);
-    //  herr_t H5Oenable_mdc_flushes(hid_t object_id);
-    //  herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled);
+    public synchronized static native void  H5Odisable_mdc_flushes(long object_id);
+    public synchronized static native void  H5Oenable_mdc_flushes(long object_id);
+    public synchronized static native boolean  H5Oare_mdc_flushes_disabled(long object_id);
 
     // ////////////////////////////////////////////////////////////
     // //

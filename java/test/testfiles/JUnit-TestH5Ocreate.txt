@@ -4,6 +4,7 @@ JUnit version 4.11
 .testH5Oget_info_softlink
 .testH5Oget_info_externallink
 .testH5Ocopy
+.testH5Ocork
 .testH5Olink
 .testH5Ocomment_by_name
 .testH5Oget_info_by_idx_n1_create
@@ -17,5 +18,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (15 tests)
+OK (16 tests)
 
