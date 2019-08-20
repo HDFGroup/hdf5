@@ -20,7 +20,7 @@
  */
 static void print_filter_warning(const char *dname, const char *fname)
 {
-    fprintf(stderr,
+    HDfprintf(stderr,
             "Warning: dataset <%s> cannot be read, %s filter is not available\n",
             dname, fname);
 }

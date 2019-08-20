@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "testphdf5.h"
+#include "H5Dprivate.h"
 
 #define DIM  2
 #define SIZE 32
@@ -311,7 +312,6 @@ void compact_dataset(void)
      VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
-
     dataset = H5Dopen2(iof, dname, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
@@ -603,7 +603,7 @@ void dataset_fillvalue(void)
     hsize_t     req_count[4] = {1, 6, 7, 8};
     hsize_t     dset_size;      /* Dataset size */
     int *rdata, *wdata;         /* Buffers for data to read and write */
-    int *twdata, *trdata;        /* Temporary pointer into buffer */
+    int *twdata, *trdata;       /* Temporary pointer into buffer */
     int acc, i, j, k, l;        /* Local index variables */
     herr_t ret;                 /* Generic return value */
     const char *filename;
@@ -645,27 +645,29 @@ void dataset_fillvalue(void)
     /*
      * Read dataset before any data is written.
      */
-    /* set entire read buffer with the constant 2 */
-    HDmemset(rdata,2,(size_t)(dset_size*sizeof(int)));
-    /* Independently read the entire dataset back */
-    ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
-    VRFY((ret >= 0), "H5Dread succeeded");
+      /* set entire read buffer with the constant 2 */
+      HDmemset(rdata,2,(size_t)(dset_size*sizeof(int)));
 
-    /* Verify all data read are the fill value 0 */
-    trdata = rdata;
-    err_num = 0;
-    for(i = 0; i < (int)dset_dims[0]; i++)
+      /* Independently read the entire dataset back */
+      ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+      VRFY((ret >= 0), "H5Dread succeeded");
+
+      /* Verify all data read are the fill value 0 */
+      trdata = rdata;
+      err_num = 0;
+      for(i = 0; i < (int)dset_dims[0]; i++)
         for(j = 0; j < (int)dset_dims[1]; j++)
-            for(k = 0; k < (int)dset_dims[2]; k++)
-                for(l = 0; l < (int)dset_dims[3]; l++, twdata++, trdata++)
-		    if(*trdata != 0)
-			if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
-			    printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i, j, k, l, *trdata);
-    if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
+          for(k = 0; k < (int)dset_dims[2]; k++)
+            for(l = 0; l < (int)dset_dims[3]; l++, twdata++, trdata++)
+              if(*trdata != 0)
+                if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
+                  printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i, j, k, l, *trdata);
+      if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
         printf("[more errors ...]\n");
-    if(err_num){
+      if(err_num) {
         printf("%d errors found in check_value\n", err_num);
-	nerrors++;
+        nerrors++;
+      }
     }
 
     /* Barrier to ensure all processes have completed the above test. */
@@ -711,36 +713,38 @@ void dataset_fillvalue(void)
     /*
      * Read dataset after partial write.
      */
-    /* set entire read buffer with the constant 2 */
-    HDmemset(rdata,2,(size_t)(dset_size*sizeof(int)));
-    /* Independently read the entire dataset back */
-    ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
-    VRFY((ret >= 0), "H5Dread succeeded");
 
-    /* Verify correct data read */
-    twdata=wdata;
-    trdata=rdata;
-    err_num=0;
-    for(i=0; i<(int)dset_dims[0]; i++)
+      /* set entire read buffer with the constant 2 */
+      HDmemset(rdata,2,(size_t)(dset_size*sizeof(int)));
+
+      /* Independently read the entire dataset back */
+      ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+      VRFY((ret >= 0), "H5Dread succeeded");
+
+      /* Verify correct data read */
+      twdata=wdata;
+      trdata=rdata;
+      err_num=0;
+      for(i=0; i<(int)dset_dims[0]; i++)
         for(j=0; j<(int)dset_dims[1]; j++)
-            for(k=0; k<(int)dset_dims[2]; k++)
-                for(l=0; l<(int)dset_dims[3]; l++, twdata++, trdata++)
-                    if(i<mpi_size) {
-                        if(*twdata != *trdata )
-                            if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
-                                printf("Dataset Verify failed at [%d][%d][%d][%d]: expect %d, got %d\n", i,j,k,l, *twdata, *trdata);
-                    } /* end if */
-                    else {
-                        if(*trdata != 0)
-                            if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
-                                printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i,j,k,l, *trdata);
-                    } /* end else */
-    if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
+          for(k=0; k<(int)dset_dims[2]; k++)
+            for(l=0; l<(int)dset_dims[3]; l++, twdata++, trdata++)
+              if(i<mpi_size) {
+                if(*twdata != *trdata )
+                  if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
+                    printf("Dataset Verify failed at [%d][%d][%d][%d]: expect %d, got %d\n", i,j,k,l, *twdata, *trdata);
+              } /* end if */
+              else {
+                if(*trdata != 0)
+                  if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
+                    printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i,j,k,l, *trdata);
+              } /* end else */
+      if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
         printf("[more errors ...]\n");
-    if(err_num){
+      if(err_num){
         printf("%d errors found in check_value\n", err_num);
-	nerrors++;
-    }
+        nerrors++;
+      }
 
     /* Close all file objects */
     ret = H5Dclose(dataset);
@@ -856,7 +860,7 @@ void collective_group_write(void)
         if(!((m+1) % 10)) {
             printf("created %d groups\n", m+1);
             MPI_Barrier(MPI_COMM_WORLD);
-	}
+        }
 #endif /* BARRIER_CHECKS */
     }
 

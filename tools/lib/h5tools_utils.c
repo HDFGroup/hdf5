@@ -97,7 +97,7 @@ parallel_print(const char* format, ...)
     HDva_end(ap);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: error_msg
  *
@@ -122,7 +122,7 @@ error_msg(const char *fmt, ...)
     HDva_end(ap);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: warn_msg
  *
@@ -161,7 +161,7 @@ help_ref_msg(FILE *output)
     HDfprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n",h5tools_getprogname());
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: get_option
  *
@@ -344,7 +344,7 @@ indentation(unsigned x)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: print_version
  *
@@ -362,7 +362,7 @@ print_version(const char *progname)
            ((const char *)H5_VERS_SUBRELEASE)[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    init_table
  *
@@ -384,7 +384,7 @@ init_table(table_t **tbl)
     *tbl = table;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    free_table
  *
@@ -408,7 +408,7 @@ free_table(table_t *table)
 }
 
 #ifdef H5DUMP_DEBUG
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_table
  *
@@ -429,7 +429,7 @@ dump_table(char* tablename, table_t *table)
            table->objs[u].displayed, table->objs[u].recorded);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_tables
  *
@@ -447,7 +447,7 @@ dump_tables(find_objs_t *info)
 }
 #endif  /* H5DUMP_DEBUG */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    search_obj
  *
@@ -470,7 +470,7 @@ search_obj(table_t *table, haddr_t objno)
     return NULL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    find_objs_cb
  *
@@ -482,8 +482,7 @@ search_obj(table_t *table, haddr_t objno)
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen,
-    void *op_data)
+find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen, void *op_data)
 {
     find_objs_t *info = (find_objs_t*)op_data;
     herr_t ret_value = 0;
@@ -547,7 +546,7 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
     return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    init_objs
  *
@@ -562,6 +561,8 @@ herr_t
 init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     table_t **dset_table, table_t **type_table)
 {
+    herr_t ret_value = SUCCEED;
+
     /* Initialize the tables */
     init_table(group_table);
     init_table(dset_table);
@@ -574,10 +575,23 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     info->dset_table = *dset_table;
 
     /* Find all shared objects */
-    return(h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info));
+    if((ret_value = h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info)) < 0)
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "finding shared objects failed")
+
+done:
+    /* Release resources */
+    if(ret_value < 0) {
+        free_table(*group_table);
+        info->group_table = NULL;
+        free_table(*type_table);
+        info->type_table = NULL;
+        free_table(*dset_table);
+        info->dset_table = NULL;
+    }
+    return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    add_obj
  *
@@ -608,7 +622,7 @@ add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
     table->objs[u].displayed = 0;
 }
 
-
+
 #ifndef H5_HAVE_TMPFILE
 /*-------------------------------------------------------------------------
  * Function:    tmpfile

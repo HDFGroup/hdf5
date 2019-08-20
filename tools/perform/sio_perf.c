@@ -280,11 +280,11 @@ struct options {
     off_t dset_size[MAX_DIMS];  /* Dataset size                           */
     size_t buf_size[MAX_DIMS];  /* Buffer size                           */
     size_t chk_size[MAX_DIMS];  /* Chunk size                           */
-    int order[MAX_DIMS];  /* Dimension access order                           */
-    int dset_rank;             /* Rank                   */
-    int buf_rank;             /* Rank                   */
+    int order[MAX_DIMS];        /* Dimension access order                           */
+    int dset_rank;              /* Rank                   */
+    int buf_rank;               /* Rank                   */
     int order_rank;             /* Rank                   */
-    int chk_rank;             /* Rank                   */
+    int chk_rank;               /* Rank                   */
     int print_times;       	/* print times as well as throughputs   */
     int print_raw;         	/* print raw data throughput info       */
     off_t h5_alignment;         /* alignment in HDF5 file               */
@@ -495,6 +495,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
     /* Do IO iteration times, collecting statistics each time */
     for (i = 0; i < parms.num_iters; ++i) {
         double t;
+
         res = do_sio(parms);
 
         /* gather all of the "sys write" times */
