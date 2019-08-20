@@ -2877,6 +2877,11 @@ else
     ROS3_VFD=no
 
 fi
+
+## Read-only S3 files are not built if not required.
+AM_CONDITIONAL([ROS3_VFD_CONDITIONAL], [test "X$ROS3_VFD" = "Xyes"])
+
+
 ## ----------------------------------------------------------------------
 ## Is libhdfs (Hadoop Distributed File System) present?
 ## It might be specified with the `--with-libhdfs' command-line switch.

@@ -653,7 +653,7 @@ test_populate_ros3_fa(void)
     show_progress = TRUE;
 #endif /* H5TOOLS_UTILS_TEST_DEBUG */
 
-    HDassert(bad_version != H5FD__CURR_ROS3_FAPL_T_VERSION);
+    HDassert(bad_version != H5FD_CURR_ROS3_FAPL_T_VERSION);
 
     /*********
      * TESTS *
@@ -679,7 +679,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 1, h5tools_populate_ros3_fapl(&fa, NULL),
                   "NULL values pointer yields \"default\" fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id,  NULL )
@@ -697,7 +697,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 1, h5tools_populate_ros3_fapl(&fa, values),
                   "empty values yields \"default\" fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id,  NULL )
@@ -715,7 +715,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 1, h5tools_populate_ros3_fapl(&fa, values),
                   "four values" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( TRUE, fa.authenticate, NULL )
         JSVERIFY_STR( "x", fa.aws_region, NULL )
         JSVERIFY_STR( "y", fa.secret_id, NULL )
@@ -733,7 +733,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id, NULL )
@@ -751,7 +751,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id, NULL )
@@ -771,11 +771,11 @@ test_populate_ros3_fa(void)
 
         if (show_progress) { HDprintf("region overflow\n"); }
 
-        HDassert(HDstrlen(values[0]) > H5FD__ROS3_MAX_REGION_LEN);
+        HDassert(HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id, NULL )
@@ -793,7 +793,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id, NULL )
@@ -811,7 +811,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id, NULL )
@@ -839,11 +839,11 @@ test_populate_ros3_fa(void)
 
         if (show_progress) { HDprintf("id overflow\n"); }
 
-        HDassert(HDstrlen(values[1]) > H5FD__ROS3_MAX_SECRET_ID_LEN);
+        HDassert(HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN);
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "x", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id, NULL )
@@ -861,7 +861,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id, NULL )
@@ -879,7 +879,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 1, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( TRUE, fa.authenticate, NULL )
         JSVERIFY_STR( "x", fa.aws_region, NULL )
         JSVERIFY_STR( "y", fa.secret_id, NULL )
@@ -897,7 +897,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id, NULL )
@@ -915,7 +915,7 @@ test_populate_ros3_fa(void)
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "", fa.aws_region, NULL )
         JSVERIFY_STR( "", fa.secret_id, NULL )
@@ -943,11 +943,11 @@ test_populate_ros3_fa(void)
 
         if (show_progress) { HDprintf("key overflow\n"); }
 
-        HDassert(HDstrlen(values[2]) > H5FD__ROS3_MAX_SECRET_KEY_LEN);
+        HDassert(HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN);
 
         JSVERIFY( 0, h5tools_populate_ros3_fapl(&fa, values),
                   "could not fill fapl" )
-        JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
+        JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL )
         JSVERIFY( FALSE, fa.authenticate, NULL )
         JSVERIFY_STR( "x", fa.aws_region, NULL )
         JSVERIFY_STR( "y", fa.secret_id, NULL )

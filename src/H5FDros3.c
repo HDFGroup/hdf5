@@ -34,6 +34,8 @@
 #include "H5MMprivate.h"    /* Memory management        */
 #include "H5FDs3comms.h"    /* S3 Communications        */
 
+#ifdef H5_HAVE_ROS3_VFD
+
 /* toggle function call prints: 1 turns on
  */
 #define ROS3_DEBUG 0
@@ -119,8 +121,6 @@ static unsigned long long ros3_stats_boundaries[ROS3_STATS_BIN_COUNT];
  *
  * Programmer: Jacob Smith
  *
- * Changes: None
- *
  ***************************************************************************/
 typedef struct {
     unsigned long long count;
@@ -190,8 +190,6 @@ typedef struct {
  *
  * Programmer: Jacob Smith
  *
- * Changes: None.
- *
  ***************************************************************************/
 typedef struct H5FD_ros3_t {
     H5FD_t            pub;
@@ -215,9 +213,7 @@ typedef struct H5FD_ros3_t {
  *
  */
 #define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
-#ifdef H5_HAVE_ROS3_VFD
 #define ADDR_OVERFLOW(A)    (HADDR_UNDEF==(A) || ((A) & ~(haddr_t)MAXADDR))
-#endif /* H5_HAVE_ROS3_VFD */
 
 /* Prototypes */
 static herr_t  H5FD_ros3_term(void);
@@ -279,10 +275,8 @@ static const H5FD_class_t H5FD_ros3_g = {
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 
-#ifdef H5_HAVE_ROS3_VFD
 /* Declare a free list to manage the H5FD_ros3_t struct */
 H5FL_DEFINE_STATIC(H5FD_ros3_t);
-#endif /* H5_HAVE_ROS3_VFD */
 
 
 /*-------------------------------------------------------------------------
@@ -292,8 +286,7 @@ H5FL_DEFINE_STATIC(H5FD_ros3_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Changes:     Rename as appropriate for ros3 vfd.
- *              Jacob Smith 2017
+ * Programmer:  Jacob Smith 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -324,11 +317,7 @@ done:
  * Return:      Success:    The driver ID for the ros3 driver.
  *              Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
- * Changes:     Rename as appropriate for ros3 vfd.
- *              Jacob Smith 2017
+ * Programmer:  Jacob Smith 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -372,11 +361,7 @@ done:
  *
  * Returns:     SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
- *
- * Changes:     Rename as appropriate for ros3 vfd.
- *              Jacob Smith 2017
+ * Programmer:  Jacob Smith 2017
  *
  *---------------------------------------------------------------------------
  */
@@ -464,10 +449,6 @@ done:
  * Programmer:  Jacob Smith
  *              9/10/17
  *
- * Changes:     Add checks for authenticate flag requring populated
- *              `aws_region` and `secret_id` strings.
- *                  -- Jacob Smith 2017-11-01
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -479,7 +460,7 @@ H5FD_ros3_validate_config(const H5FD_ros3_fapl_t * fa)
 
     HDassert(fa != NULL);
 
-    if ( fa->version != H5FD__CURR_ROS3_FAPL_T_VERSION ) {
+    if ( fa->version != H5FD_CURR_ROS3_FAPL_T_VERSION ) {
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                      "Unknown H5FD_ros3_fapl_t version");
     }
@@ -704,8 +685,6 @@ H5FD_ros3_fapl_free(void *_fa)
  * Programmer: Jacob Smith
  *             2017-12-08
  *
- * Changes: None.
- *
  *----------------------------------------------------------------------------
  */
 static herr_t
@@ -774,12 +753,8 @@ done:
  * Programmer: Jacob Smith
  *             2017-11-02
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_ROS3_VFD
-
 static H5FD_t *
 H5FD_ros3_open(
         const char *url,
@@ -904,22 +879,6 @@ done:
 
 } /* end H5FD_ros3_open() */
 
-#else /* H5_HAVE_ROS3_VFD not defined */
-
-static H5FD_t *
-H5FD_ros3_open(
-        const char H5_ATTR_UNUSED *url,
-        unsigned   H5_ATTR_UNUSED  flags,
-        hid_t      H5_ATTR_UNUSED  fapl_id,
-        haddr_t    H5_ATTR_UNUSED  maxaddr)
-{
-    H5FD_t *ret_value = NULL;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_ros3_open() */
-
-#endif /* H5_HAVE_ROS3_VFD */
-
 #if ROS3_STATS
 
 /*----------------------------------------------------------------------------
@@ -973,8 +932,6 @@ H5FD_ros3_open(
  *         - TODO: if stream is invalid? how can we check this?
  *
  * Programmer: Jacob Smith
- *
- * Changes: None.
  *
  *----------------------------------------------------------------------------
  */
@@ -1228,12 +1185,8 @@ done:
  * Programmer: Jacob Smith
  *             2017-11-02
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_ROS3_VFD
-
 static herr_t
 H5FD_ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
 {
@@ -1277,18 +1230,6 @@ done:
 
 } /* end H5FD_ros3_close() */
 
-#else /* H5_HAVE_ROS3_VFD not defined */
-
-static herr_t
-H5FD_ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
-{
-    herr_t ret_value = FAIL;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_ros3_close() */
-
-#endif /* H5_HAVE_ROS3_VFD */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1318,17 +1259,8 @@ H5FD_ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
  * Programmer: Jacob Smith
  *             2017-11-06
  *
- * Changes:
- *
- *     + Change from strcmp-like return values (-1, 0, 1) to instead return
- *       binary equivalence (0) or inequality (-1).
- *     + Replace "if still equal then check this" waterfall with GOTO jumps.
- *     Jacob Smith 2018-05-17
- *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_ROS3_VFD
-
 static int
 H5FD_ros3_cmp(
         const H5FD_t *_f1,
@@ -1463,20 +1395,6 @@ done:
 
 } /* H5FD_ros3_cmp() */
 
-#else /* H5_HAVE_ROS3_VFD not defined */
-
-static int
-H5FD_ros3_cmp(
-        const H5FD_t H5_ATTR_UNUSED *_f1,
-        const H5FD_t H5_ATTR_UNUSED *_f2)
-{
-    int                 ret_value = 0;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_ros3_cmp() */
-
-#endif /* H5_HAVE_ROS3_VFD */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_query
@@ -1536,8 +1454,6 @@ H5FD_ros3_query(const H5FD_t H5_ATTR_UNUSED *_file,
  * Programmer: Jacob Smith
  *             2017-11-02
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1571,8 +1487,6 @@ H5FD_ros3_get_eoa(const H5FD_t                *_file,
  *
  * Programmer: Jacob Smith
  *             2017-11-03
- *
- * Changes: None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1646,8 +1560,6 @@ H5FD_ros3_get_eof(const H5FD_t                *_file,
  * Programmer: Jacob Smith
  *             2017-11-02
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1695,8 +1607,6 @@ done:
  *
  * Programmer: Jacob Smith
  *             2017-11-??
- *
- * Changes: None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1792,8 +1702,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-10-23
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1839,8 +1747,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-10-23
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1884,8 +1790,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-11-03
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1914,8 +1818,6 @@ H5FD_ros3_lock(H5FD_t  H5_ATTR_UNUSED *_file,
  * Programmer: Jacob Smith
  *             2017-11-03
  *
- * Changes: None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1926,4 +1828,5 @@ H5FD_ros3_unlock(H5FD_t H5_ATTR_UNUSED *_file)
 
 } /* end H5FD_ros3_unlock() */
 
+#endif /* H5_HAVE_ROS3_VFD */
 
