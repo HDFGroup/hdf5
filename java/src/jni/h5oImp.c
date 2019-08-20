@@ -856,6 +856,66 @@ done:
     return;
 } /* end Java_hdf_hdf5lib_H5_H5Orefresh */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Odisable_mdc_flushes
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Odisable_1mdc_1flushes
+    (JNIEnv *env, jclass clss, jlong loc_id)
+{
+    UNUSED(clss);
+
+    if (H5Odisable_mdc_flushes((hid_t)loc_id) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
+} /* end Java_hdf_hdf5lib_H5_H5Odisable_1mdc_1flushes */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oenable_mdc_flushes
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Oenable_1mdc_1flushes
+    (JNIEnv *env, jclass clss, jlong loc_id)
+{
+    UNUSED(clss);
+
+    if (H5Oenable_mdc_flushes((hid_t)loc_id) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
+} /* end Java_hdf_hdf5lib_H5_H5Oenable_1mdc_1flushes */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oare_mdc_flushes_disabled
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Oare_1mdc_1flushes_1disabled
+    (JNIEnv *env, jclass clss, jlong loc_id)
+{
+    jboolean bval = JNI_FALSE;
+    hbool_t    is_disabled = FALSE;
+
+    UNUSED(clss);
+
+    if (H5Oare_mdc_flushes_disabled((hid_t)loc_id, &is_disabled) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (is_disabled == TRUE)
+        bval =  JNI_TRUE;
+
+done:
+    return bval;
+} /* end Java_hdf_hdf5lib_H5_H5Oare_1mdc_1flushes_1disabled */
+
 
 
 #ifdef __cplusplus
