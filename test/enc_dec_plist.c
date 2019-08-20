@@ -22,7 +22,7 @@
 static int
 test_encode_decode(hid_t orig_pl)
 {
-    hid_t pl = (-1);	       	/* Decoded property list */
+    hid_t pl = (-1);               /* Decoded property list */
     void *temp_buf = NULL;      /* Pointer to encoding buffer */
     size_t temp_size = 0;       /* Size of encoding buffer */
 
@@ -51,10 +51,12 @@ test_encode_decode(hid_t orig_pl)
     return(0);
 
 error:
-    if(pl > 0)
-        H5Pclose(pl);
     if(temp_buf)
         HDfree(temp_buf);
+
+     H5E_BEGIN_TRY {
+        H5Pclose(pl);
+    } H5E_END_TRY;
 
     return(-1);
 } /* end test_encode_decode() */
@@ -62,22 +64,22 @@ error:
 int
 main(void)
 {
-    hid_t dcpl;	       	/* dataset create prop. list */
-    hid_t dapl;	       	/* dataset access prop. list */
-    hid_t dxpl;	       	/* dataset xfer prop. list */
-    hid_t gcpl;	       	/* group create prop. list */
-    hid_t ocpypl;	/* object copy prop. list */
-    hid_t ocpl;	        /* object create prop. list */
-    hid_t lcpl;	       	/* link create prop. list */
-    hid_t lapl;	       	/* link access prop. list */
-    hid_t fapl;	       	/* file access prop. list */
-    hid_t fcpl;	       	/* file create prop. list */
-    hid_t strcpl;	/* string create prop. list */
-    hid_t acpl;	       	/* attribute create prop. list */
+    hid_t dcpl;      /* dataset create prop. list */
+    hid_t dapl;      /* dataset access prop. list */
+    hid_t dxpl;      /* dataset xfer prop. list */
+    hid_t gcpl;      /* group create prop. list */
+    hid_t ocpypl;    /* object copy prop. list */
+    hid_t ocpl;      /* object create prop. list */
+    hid_t lcpl;      /* link create prop. list */
+    hid_t lapl;      /* link access prop. list */
+    hid_t fapl;      /* file access prop. list */
+    hid_t fcpl;      /* file create prop. list */
+    hid_t strcpl;    /* string create prop. list */
+    hid_t acpl;      /* attribute create prop. list */
 
-    hsize_t chunk_size[2] = {16384, 4};	/* chunk size */ 
-    double fill = 2.7f;         /* Fill value */
-    hsize_t max_size[1];        /* data space maximum size */
+    hsize_t chunk_size[2] = {16384, 4};    /* chunk size */
+    double fill = 2.7f;     /* Fill value */
+    hsize_t max_size[1];    /* data space maximum size */
     size_t nslots = 521 * 2;
     size_t nbytes = 1048576 * 10;
     double w0 = 0.5f;
@@ -115,14 +117,15 @@ main(void)
         0.2f,
         (256 * 2048),
         H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
+
     H5AC_cache_image_config_t my_cache_image_config = {
-	H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION,
-	TRUE,
+        H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION,
+        TRUE,
         FALSE,
-	-1};
+        -1 };
 
     if(VERBOSE_MED)
-	printf("Encode/Decode DCPLs\n");
+        HDprintf("Encode/Decode DCPLs\n");
 
     /******* ENCODE/DECODE DCPLS *****/
     TESTING("Default DCPL Encoding/Decoding");
@@ -150,23 +153,23 @@ main(void)
         FAIL_STACK_ERROR
 
     max_size[0] = 100;
-    if((H5Pset_external(dcpl, "ext1.data", (off_t)0, 
+    if((H5Pset_external(dcpl, "ext1.data", (off_t)0,
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
         FAIL_STACK_ERROR
-    if((H5Pset_external(dcpl, "ext2.data", (off_t)0, 
+    if((H5Pset_external(dcpl, "ext2.data", (off_t)0,
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
         FAIL_STACK_ERROR
-    if((H5Pset_external(dcpl, "ext3.data", (off_t)0, 
+    if((H5Pset_external(dcpl, "ext3.data", (off_t)0,
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
         FAIL_STACK_ERROR
-    if((H5Pset_external(dcpl, "ext4.data", (off_t)0, 
+    if((H5Pset_external(dcpl, "ext4.data", (off_t)0,
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
         FAIL_STACK_ERROR
 
     /* Test encoding & decoding property list */
     if(test_encode_decode(dcpl) < 0)
         FAIL_PUTS_ERROR("DCPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(dcpl)) < 0)
          FAIL_STACK_ERROR
@@ -193,7 +196,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(dapl) < 0)
         FAIL_PUTS_ERROR("DAPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(dapl)) < 0)
          FAIL_STACK_ERROR
@@ -226,7 +229,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(ocpl) < 0)
         FAIL_PUTS_ERROR("OCPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(ocpl)) < 0)
         FAIL_STACK_ERROR
@@ -271,7 +274,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(dxpl) < 0)
         FAIL_PUTS_ERROR("DXPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(dxpl)) < 0)
          FAIL_STACK_ERROR
@@ -311,7 +314,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(gcpl) < 0)
         FAIL_PUTS_ERROR("GCPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(gcpl)) < 0)
          FAIL_STACK_ERROR
@@ -338,7 +341,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(lcpl) < 0)
         FAIL_PUTS_ERROR("LCPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(lcpl)) < 0)
         FAIL_STACK_ERROR
@@ -384,7 +387,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(lapl) < 0)
         FAIL_PUTS_ERROR("LAPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(lapl)) < 0)
         FAIL_STACK_ERROR
@@ -416,7 +419,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(ocpypl) < 0)
         FAIL_PUTS_ERROR("OCPYPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(ocpypl)) < 0)
          FAIL_STACK_ERROR
@@ -469,7 +472,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(fapl) < 0)
         FAIL_PUTS_ERROR("FAPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(fapl)) < 0)
         FAIL_STACK_ERROR
@@ -515,7 +518,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(fcpl) < 0)
         FAIL_PUTS_ERROR("FCPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(fcpl)) < 0)
         FAIL_STACK_ERROR
@@ -543,7 +546,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(strcpl) < 0)
         FAIL_PUTS_ERROR("STRCPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(strcpl)) < 0)
         FAIL_STACK_ERROR
@@ -571,7 +574,7 @@ main(void)
     /* Test encoding & decoding property list */
     if(test_encode_decode(acpl) < 0)
         FAIL_PUTS_ERROR("ACPL encoding/decoding failed\n")
-        
+
     /* release resource */
     if((H5Pclose(acpl)) < 0)
         FAIL_STACK_ERROR
@@ -582,7 +585,7 @@ main(void)
     return 0;
 
 error:
-    printf("***** Plist Encode/Decode tests FAILED! *****\n");
+    HDprintf("***** Plist Encode/Decode tests FAILED! *****\n");
     return 1;
 }
 

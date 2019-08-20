@@ -15,10 +15,10 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, July 30, 1998
  *
- * Purpose:	Determines if the modification time message is working
- *		properly.  Specifically, the code in H5O_mtime_decode() is
- *		very OS-dependent and this test tries to figure out if it's
- *		working properly.
+ * Purpose:    Determines if the modification time message is working
+ *        properly.  Specifically, the code in H5O_mtime_decode() is
+ *        very OS-dependent and this test tries to figure out if it's
+ *        working properly.
  */
 #include "h5test.h"
 #include "H5srcdir.h"
@@ -33,17 +33,17 @@ const char *FILENAME[] = {
 #define TESTFILE2       "tmtimen.h5"
 #define MTIME2          1041606478
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	H5O_mtime_decode() test.
+ * Purpose:    H5O_mtime_decode() test.
  *
- * Return:	Success:
+ * Return:    Success:
  *
- *		Failure:
+ *        Failure:
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, July 30, 1998
  *
  * Modifications:
@@ -58,13 +58,13 @@ const char *FILENAME[] = {
 int
 main(void)
 {
-    hid_t	fapl, file, space, dset;
-    hsize_t	size[1] = {2};
-    time_t	now;
-    struct tm	*tm;
-    H5O_info_t	oi1, oi2;
-    signed char	buf1[32], buf2[32];
-    char	filename[1024];
+    hid_t    fapl, file, space, dset;
+    hsize_t    size[1] = {2};
+    time_t    now;
+    struct tm    *tm;
+    H5O_info_t    oi1, oi2;
+    signed char    buf1[32], buf2[32];
+    char    filename[1024];
 
     h5_reset();
     fapl = h5_fileaccess();
@@ -99,18 +99,18 @@ main(void)
     /* Compare addresses & times from the two ways of calling H5Oget_info() */
     if(oi1.addr != oi2.addr || oi1.ctime != oi2.ctime) {
         H5_FAILED();
-        puts("    Calling H5Oget_info() with the dataset ID returned");
-        puts("    different values than calling it with a file and dataset");
-        puts("    name.");
+        HDputs("    Calling H5Oget_info() with the dataset ID returned");
+        HDputs("    different values than calling it with a file and dataset");
+        HDputs("    name.");
         goto error;
     }
 
     /* Compare times -- they must be within 60 seconds of one another */
     if(0 == oi1.ctime) {
         SKIPPED();
-        puts("    The modification time could not be decoded on this OS.");
-        puts("    Modification times will be mantained in the file but");
-        puts("    cannot be queried on this system.  See H5O_mtime_decode().");
+        HDputs("    The modification time could not be decoded on this OS.");
+        HDputs("    Modification times will be mantained in the file but");
+        HDputs("    cannot be queried on this system.  See H5O_mtime_decode().");
         return 0;
     } else if(HDfabs(HDdifftime(now, oi1.ctime)) > (double)60.0F) {
         H5_FAILED();
@@ -118,7 +118,7 @@ main(void)
         HDstrftime((char*)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
         tm = HDlocaltime(&now);
         HDstrftime((char*)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
-        printf("    got: %s\n    ans: %s\n", buf1, buf2);
+        HDprintf("    got: %s\n    ans: %s\n", buf1, buf2);
         goto error;
     }
     PASSED();
@@ -147,7 +147,7 @@ main(void)
         }
         else {
             H5_FAILED();
-            printf("***cannot open the pre-created old modification test file (%s)\n",
+            HDprintf("***cannot open the pre-created old modification test file (%s)\n",
                 testfile);
             goto error;
         } /* end else */
@@ -168,14 +168,14 @@ main(void)
                 TEST_ERROR;
             if(oi2.ctime != MTIME2) {
                H5_FAILED();
-               puts("    Modification time incorrect.");
+               HDputs("    Modification time incorrect.");
                goto error;
             }
             if(H5Fclose(file) < 0) TEST_ERROR;
         }
         else {
             H5_FAILED();
-            printf("***cannot open the pre-created old modification test file (%s)\n",
+            HDprintf("***cannot open the pre-created old modification test file (%s)\n",
                 testfile);
             goto error;
         } /* end else */
@@ -186,7 +186,7 @@ main(void)
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
 
     /* All looks good */
-    puts("All modification time tests passed.");
+    HDputs("All modification time tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
 

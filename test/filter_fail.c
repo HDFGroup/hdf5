@@ -270,15 +270,15 @@ test_filter_read(char *file_name, hid_t my_fapl)
     for(i = 0; i < DIM; i++) {
         if(i < DIM-2 && rbuf[i] != i) {
             H5_FAILED();
-            printf("    Read different values than written.\n");
-            printf("    At index %d\n", i);
-            printf("    rbuf[%d]=%d\n", i, rbuf[i]);
+            HDprintf("    Read different values than written.\n");
+            HDprintf("    At index %d\n", i);
+            HDprintf("    rbuf[%d]=%d\n", i, rbuf[i]);
             TEST_ERROR
         } else if(i >= DIM-2 && rbuf[i] != 0) {
             H5_FAILED();
-            printf("    No value should be read.\n");
-            printf("    At index %d\n", i);
-            printf("    rbuf[%d]=%d\n", i, rbuf[i]);
+            HDprintf("    No value should be read.\n");
+            HDprintf("    At index %d\n", i);
+            HDprintf("    rbuf[%d]=%d\n", i, rbuf[i]);
             TEST_ERROR
         }
     }
@@ -310,15 +310,15 @@ test_filter_read(char *file_name, hid_t my_fapl)
     for(i = 0; i < DIM; i+=2) {
         if(i < DIM-2 && rbuf[i] != i) {
             H5_FAILED();
-            printf("    Read different values than written.\n");
-            printf("    At index %d\n", i);
-            printf("    rbuf[%d]=%d\n", i, rbuf[i]);
+            HDprintf("    Read different values than written.\n");
+            HDprintf("    At index %d\n", i);
+            HDprintf("    rbuf[%d]=%d\n", i, rbuf[i]);
             TEST_ERROR
         } else if(i >= DIM-2 && rbuf[i] != 0) {
             H5_FAILED();
-            printf("    No value should be read.\n");
-            printf("    At index %d\n", i);
-            printf("    rbuf[%d]=%d\n", i, rbuf[i]);
+            HDprintf("    No value should be read.\n");
+            HDprintf("    At index %d\n", i);
+            HDprintf("    rbuf[%d]=%d\n", i, rbuf[i]);
             TEST_ERROR
         }
     }
@@ -402,7 +402,7 @@ int main(void)
 
 error:
     if (nerrors) {
-        printf("***** %u FAILURE%s! *****\n",
+        HDprintf("***** %u FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
         HDexit(EXIT_FAILURE);
     }

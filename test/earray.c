@@ -20,14 +20,14 @@
  * This file needs to access private datatypes from the H5EA package.
  * This file also needs to access the extensible array testing code.
  */
-#define H5EA_FRIEND		/*suppress error about including H5EApkg	  */
+#define H5EA_FRIEND        /*suppress error about including H5EApkg      */
 #define H5EA_TESTING
-#include "H5EApkg.h"		/* Extensible Arrays			*/
+#include "H5EApkg.h"        /* Extensible Arrays            */
 
 /* Other private headers that this test requires */
 #include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5Iprivate.h"        /* IDs                      */
+#include "H5VMprivate.h"        /* Vectors and arrays             */
 
 
 /* Local macros */
@@ -172,16 +172,16 @@ char filename_g[EARRAY_FILENAME_LEN];
 /* Empty file size */
 h5_stat_size_t empty_size_g;
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	init_cparam
+ * Function:    init_cparam
  *
- * Purpose:	Initialize array creation parameter structure
+ * Purpose:    Initialize array creation parameter structure
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 21, 2008
  *
  *-------------------------------------------------------------------------
@@ -204,18 +204,18 @@ init_cparam(H5EA_create_t *cparam)
     return(0);
 } /* init_cparam() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	init_tparam
+ * Function:    init_tparam
  *
- * Purpose:	Initialize array testing parameter structure
+ * Purpose:    Initialize array testing parameter structure
  *
- * Note:	This initialization is the same as that in H5EA_hdr_init()
+ * Note:    This initialization is the same as that in H5EA_hdr_init()
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, September 25, 2008
  *
  *-------------------------------------------------------------------------
@@ -254,16 +254,16 @@ init_tparam(earray_test_param_t *tparam, const H5EA_create_t *cparam)
     return(0);
 } /* init_tparam() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	finish_tparam
+ * Function:    finish_tparam
  *
- * Purpose:	Close down array testing parameter structure
+ * Purpose:    Close down array testing parameter structure
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, September 25, 2008
  *
  *-------------------------------------------------------------------------
@@ -278,16 +278,16 @@ finish_tparam(earray_test_param_t *tparam)
     return(0);
 } /* finish_tparam() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	create_file
+ * Function:    create_file
  *
- * Purpose:	Create file and retrieve pointer to internal file object
+ * Purpose:    Create file and retrieve pointer to internal file object
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
@@ -314,16 +314,16 @@ error:
     return(-1);
 } /* create_file() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_stats
+ * Function:    check_stats
  *
- * Purpose:	Verify stats for an extensible array
+ * Purpose:    Verify stats for an extensible array
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 21, 2008
  *
  *-------------------------------------------------------------------------
@@ -392,22 +392,22 @@ error:
     return(-1);
 } /* check_stats() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	reopen_file
+ * Function:    reopen_file
  *
- * Purpose:	Perform common "re-open" operations on file & array for testing
+ * Purpose:    Perform common "re-open" operations on file & array for testing
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
  */
 static int
-reopen_file(hid_t *file, H5F_t **f, hid_t fapl, 
+reopen_file(hid_t *file, H5F_t **f, hid_t fapl,
     H5EA_t **ea, haddr_t ea_addr, const earray_test_param_t *tparam)
 {
     /* Check for closing & re-opening the array */
@@ -453,16 +453,16 @@ error:
     return(-1);
 } /* reopen_file() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	create_array
+ * Function:    create_array
  *
- * Purpose:	Create an extensible array and perform initial checks
+ * Purpose:    Create an extensible array and perform initial checks
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
@@ -500,16 +500,16 @@ error:
     return(-1);
 } /* create_array() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	verify_cparam
+ * Function:    verify_cparam
  *
- * Purpose:	Verify creation parameters are correct
+ * Purpose:    Verify creation parameters are correct
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
@@ -535,17 +535,17 @@ error:
     return FAIL;
 } /* verify_cparam() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	finish
+ * Function:    finish
  *
- * Purpose:	Close array, delete array, close file and verify that file
+ * Purpose:    Close array, delete array, close file and verify that file
  *              is empty size
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
@@ -589,16 +589,16 @@ error:
     return(-1);
 } /* finish() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_create
+ * Function:    test_create
  *
- * Purpose:	Test creating extensible array
+ * Purpose:    Test creating extensible array
  *
- * Return:	Success: 0
- *		Failure: 1
+ * Return:    Success: 0
+ *        Failure: 1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August  7, 2008
  *
  *-------------------------------------------------------------------------
@@ -606,8 +606,8 @@ error:
 static unsigned
 test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSED *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5EA_t      *ea = NULL;             /* Extensible array wrapper */
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
 
@@ -805,22 +805,22 @@ error:
     H5E_BEGIN_TRY {
         if(ea)
             H5EA_close(ea);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
 
     return 1;
 } /* end test_create() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_reopen
+ * Function:    test_reopen
  *
- * Purpose:	Create & reopen an extensible array
+ * Purpose:    Create & reopen an extensible array
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
@@ -828,8 +828,8 @@ error:
 static unsigned
 test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5EA_t      *ea = NULL;             /* Extensible array wrapper */
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
 
@@ -875,22 +875,22 @@ error:
     H5E_BEGIN_TRY {
         if(ea)
             H5EA_close(ea);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
 
     return 1;
 } /* test_reopen() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_open_twice
+ * Function:    test_open_twice
  *
- * Purpose:	Open an extensible array twice
+ * Purpose:    Open an extensible array twice
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
@@ -898,10 +898,10 @@ error:
 static unsigned
 test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    hid_t	file2 = -1;             /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
-    H5F_t	*f2 = NULL;             /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    hid_t    file2 = -1;             /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
+    H5F_t    *f2 = NULL;             /* Internal file object pointer */
     H5EA_t      *ea = NULL;             /* Extensible array wrapper */
     H5EA_t      *ea2 = NULL;            /* Extensible array wrapper */
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
@@ -981,25 +981,25 @@ error:
             H5EA_close(ea);
         if(ea2)
             H5EA_close(ea2);
-	H5Fclose(file);
-	H5Fclose(file2);
+    H5Fclose(file);
+    H5Fclose(file2);
     } H5E_END_TRY;
 
     return 1;
 } /* test_open_twice() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_open_twice_diff
+ * Function:    test_open_twice_diff
  *
- * Purpose:	Open an extensible array twice, through different "top" file
+ * Purpose:    Open an extensible array twice, through different "top" file
  *              handles, with an intermediate file open that takes the "shared"
  *              file handle from the first extensible array's file pointer.
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, December 18, 2015
  *
  *-------------------------------------------------------------------------
@@ -1008,12 +1008,12 @@ static unsigned
 test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
     char        filename_tmp[EARRAY_FILENAME_LEN];      /* Temporary file name */
-    hid_t	file = -1;              /* File ID */
-    hid_t	file2 = -1;             /* File ID */
-    hid_t	file0 = -1;             /* File ID */
-    hid_t	file00 = -1;            /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
-    H5F_t	*f2 = NULL;             /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    hid_t    file2 = -1;             /* File ID */
+    hid_t    file0 = -1;             /* File ID */
+    hid_t    file00 = -1;            /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
+    H5F_t    *f2 = NULL;             /* Internal file object pointer */
     H5EA_t      *ea = NULL;             /* Extensible array wrapper */
     H5EA_t      *ea2 = NULL;            /* Extensible array wrapper */
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
@@ -1121,25 +1121,25 @@ error:
             H5EA_close(ea);
         if(ea2)
             H5EA_close(ea2);
-	H5Fclose(file);
-	H5Fclose(file2);
-	H5Fclose(file0);
-	H5Fclose(file00);
+    H5Fclose(file);
+    H5Fclose(file2);
+    H5Fclose(file0);
+    H5Fclose(file00);
     } H5E_END_TRY;
 
     return 1;
 } /* test_open_twice_diff() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_delete_open
+ * Function:    test_delete_open
  *
- * Purpose:	Delete opened extensible array (& open deleted array)
+ * Purpose:    Delete opened extensible array (& open deleted array)
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
@@ -1147,8 +1147,8 @@ error:
 static unsigned
 test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5EA_t      *ea = NULL;             /* Extensible array wrapper */
     H5EA_t      *ea2 = NULL;            /* Extensible array wrapper */
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
@@ -1242,7 +1242,7 @@ error:
             H5EA_close(ea);
         if(ea2)
             H5EA_close(ea2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
 
     return 1;
@@ -1254,16 +1254,16 @@ typedef struct eiter_fw_t {
     unsigned base_sblk_idx;       /* Starting index for actual superblocks */
 } eiter_fw_t;
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_fw_init
+ * Function:    eiter_fw_init
  *
- * Purpose:	Initialize element interator (forward iteration)
+ * Purpose:    Initialize element interator (forward iteration)
  *
- * Return:	Success:	Pointer to iteration status object
- *		Failure:	NULL
+ * Return:    Success:    Pointer to iteration status object
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, October  2, 2008
  *
  *-------------------------------------------------------------------------
@@ -1286,16 +1286,16 @@ eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_para
     return(eiter);
 } /* end eiter_fw_init() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_fw_next
+ * Function:    eiter_fw_next
  *
- * Purpose:	Get next element index (forward iteration)
+ * Purpose:    Get next element index (forward iteration)
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  4, 2008
  *
  *-------------------------------------------------------------------------
@@ -1315,16 +1315,16 @@ eiter_fw_next(void *_eiter)
     return(ret_val);
 } /* end eiter_fw_next() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_fw_max
+ * Function:    eiter_fw_max
  *
- * Purpose:	Get max. element index (forward iteration)
+ * Purpose:    Get max. element index (forward iteration)
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  4, 2008
  *
  *-------------------------------------------------------------------------
@@ -1343,14 +1343,14 @@ eiter_fw_max(const void *_eiter)
 
 
 /*-------------------------------------------------------------------------
- * Function:	eiter_fw_state
+ * Function:    eiter_fw_state
  *
- * Purpose:	Get extensible array state (forward iteration)
+ * Purpose:    Get extensible array state (forward iteration)
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  4, 2008
  *
  *-------------------------------------------------------------------------
@@ -1415,16 +1415,16 @@ HDfprintf(stderr, "state->nsuper_blks = %Hu\n", state->nsuper_blks);
     return(0);
 } /* end eiter_fw_state() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_fw_term
+ * Function:    eiter_fw_term
  *
- * Purpose:	Shut down element interator (forward iteration)
+ * Purpose:    Shut down element interator (forward iteration)
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, October  2, 2008
  *
  *-------------------------------------------------------------------------
@@ -1460,16 +1460,16 @@ typedef struct eiter_rv_t {
     hsize_t idx_blk_nsblks;             /* Number of superblocks directly pointed to in the index block */
 } eiter_rv_t;
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_rv_init
+ * Function:    eiter_rv_init
  *
- * Purpose:	Initialize element interator (reverse iteration)
+ * Purpose:    Initialize element interator (reverse iteration)
  *
- * Return:	Success:	Pointer to iteration status object
- *		Failure:	NULL
+ * Return:    Success:    Pointer to iteration status object
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  4, 2008
  *
  *-------------------------------------------------------------------------
@@ -1504,16 +1504,16 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam,
     return(eiter);
 } /* end eiter_rv_init() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_rv_next
+ * Function:    eiter_rv_next
  *
- * Purpose:	Get next element index (reverse iteration)
+ * Purpose:    Get next element index (reverse iteration)
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  4, 2008
  *
  *-------------------------------------------------------------------------
@@ -1533,16 +1533,16 @@ eiter_rv_next(void *_eiter)
     return(ret_val);
 } /* end eiter_rv_next() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_rv_max
+ * Function:    eiter_rv_max
  *
- * Purpose:	Get max. element index (reverse iteration)
+ * Purpose:    Get max. element index (reverse iteration)
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  4, 2008
  *
  *-------------------------------------------------------------------------
@@ -1559,16 +1559,16 @@ eiter_rv_max(const void *_eiter)
     return((hssize_t)eiter->max);
 } /* end eiter_rv_max() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_rv_state
+ * Function:    eiter_rv_state
  *
- * Purpose:	Get extensible array state (reverse iteration)
+ * Purpose:    Get extensible array state (reverse iteration)
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  4, 2008
  *
  *-------------------------------------------------------------------------
@@ -1657,16 +1657,16 @@ HDfprintf(stderr, "eiter->idx_blk_nsblks = %Hu, state->nsuper_blks = %Hu\n", eit
     return(0);
 } /* end eiter_rv_state() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_rv_term
+ * Function:    eiter_rv_term
  *
- * Purpose:	Shut down element interator (reverse iteration)
+ * Purpose:    Shut down element interator (reverse iteration)
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  4, 2008
  *
  *-------------------------------------------------------------------------
@@ -1699,16 +1699,16 @@ typedef struct eiter_rnd_t {
     hsize_t *idx;               /* Array of shuffled indices */
 } eiter_rnd_t;
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_rnd_init
+ * Function:    eiter_rnd_init
  *
- * Purpose:	Initialize element interator (random iteration)
+ * Purpose:    Initialize element interator (random iteration)
  *
- * Return:	Success:	Pointer to iteration status object
- *		Failure:	NULL
+ * Return:    Success:    Pointer to iteration status object
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, November  6, 2008
  *
  *-------------------------------------------------------------------------
@@ -1751,16 +1751,16 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
     return(eiter);
 } /* end eiter_rnd_init() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_rnd_next
+ * Function:    eiter_rnd_next
  *
- * Purpose:	Get next element index (random iteration)
+ * Purpose:    Get next element index (random iteration)
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, November  6, 2008
  *
  *-------------------------------------------------------------------------
@@ -1785,16 +1785,16 @@ eiter_rnd_next(void *_eiter)
     return(ret_val);
 } /* end eiter_rnd_next() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_rnd_max
+ * Function:    eiter_rnd_max
  *
- * Purpose:	Get max. element index (random iteration)
+ * Purpose:    Get max. element index (random iteration)
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  6, 2008
  *
  *-------------------------------------------------------------------------
@@ -1811,16 +1811,16 @@ eiter_rnd_max(const void *_eiter)
     return((hssize_t)eiter->max);
 } /* end eiter_rnd_max() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_rnd_term
+ * Function:    eiter_rnd_term
  *
- * Purpose:	Shut down element interator (random iteration)
+ * Purpose:    Shut down element interator (random iteration)
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  6, 2008
  *
  *-------------------------------------------------------------------------
@@ -1852,16 +1852,16 @@ static const earray_iter_t ea_iter_rnd = {
     eiter_rnd_term              /* Iterator term */
 };
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_rnd2_init
+ * Function:    eiter_rnd2_init
  *
- * Purpose:	Initialize element interator (random #2 iteration)
+ * Purpose:    Initialize element interator (random #2 iteration)
  *
- * Return:	Success:	Pointer to iteration status object
- *		Failure:	NULL
+ * Return:    Success:    Pointer to iteration status object
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, November 11, 2008
  *
  *-------------------------------------------------------------------------
@@ -1936,16 +1936,16 @@ typedef struct eiter_cyc_t {
     hsize_t cyc;                /* Cycle of elements to choose from */
 } eiter_cyc_t;
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_cyc_init
+ * Function:    eiter_cyc_init
  *
- * Purpose:	Initialize element interator (cyclic iteration)
+ * Purpose:    Initialize element interator (cyclic iteration)
  *
- * Return:	Success:	Pointer to iteration status object
- *		Failure:	NULL
+ * Return:    Success:    Pointer to iteration status object
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November 11, 2008
  *
  *-------------------------------------------------------------------------
@@ -1970,16 +1970,16 @@ eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
     return(eiter);
 } /* end eiter_cyc_init() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_cyc_next
+ * Function:    eiter_cyc_next
  *
- * Purpose:	Get next element index (cyclic iteration)
+ * Purpose:    Get next element index (cyclic iteration)
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November 11, 2008
  *
  *-------------------------------------------------------------------------
@@ -2006,16 +2006,16 @@ eiter_cyc_next(void *_eiter)
     return(ret_val);
 } /* end eiter_cyc_next() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_cyc_max
+ * Function:    eiter_cyc_max
  *
- * Purpose:	Get max. element index (cyclic iteration)
+ * Purpose:    Get max. element index (cyclic iteration)
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November 11, 2008
  *
  *-------------------------------------------------------------------------
@@ -2032,16 +2032,16 @@ eiter_cyc_max(const void *_eiter)
     return((hssize_t)eiter->max);
 } /* end eiter_cyc_max() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	eiter_cyc_term
+ * Function:    eiter_cyc_term
  *
- * Purpose:	Shut down element interator (cyclic iteration)
+ * Purpose:    Shut down element interator (cyclic iteration)
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November 11, 2008
  *
  *-------------------------------------------------------------------------
@@ -2069,16 +2069,16 @@ static const earray_iter_t ea_iter_cyc = {
     eiter_cyc_term              /* Iterator term */
 };
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_set_elmts
+ * Function:    test_set_elmts
  *
- * Purpose:	Set all elements from 0 through 'nelmts' in extensible array
+ * Purpose:    Set all elements from 0 through 'nelmts' in extensible array
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, September 22, 2008
  *
  *-------------------------------------------------------------------------
@@ -2087,8 +2087,8 @@ static unsigned
 test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
     hsize_t nelmts, const char *test_str)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5EA_t      *ea = NULL;             /* Extensible array wrapper */
     void        *eiter_info;            /* Extensible array iterator info */
     earray_state_t state;               /* State of extensible array */
@@ -2241,22 +2241,22 @@ error:
     H5E_BEGIN_TRY {
         if(ea)
             H5EA_close(ea);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
 
     return 1;
 } /* test_set_elmts() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_skip_elmts
+ * Function:    test_skip_elmts
  *
- * Purpose:	Skip some elements when writing element
+ * Purpose:    Skip some elements when writing element
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November 11, 2008
  *
  *-------------------------------------------------------------------------
@@ -2265,8 +2265,8 @@ static unsigned
 test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
     hsize_t skip_elmts, const char *test_str)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5EA_t      *ea = NULL;             /* Extensible array wrapper */
     earray_state_t state;               /* State of extensible array */
     uint64_t    welmt;                  /* Element to write */
@@ -2404,16 +2404,16 @@ error:
     return 1;
 } /* test_skip_elmts() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Test the extensible array code
+ * Purpose:    Test the extensible array code
  *
- * Return:	Success: 0
- *		Failure: 1
+ * Return:    Success: 0
+ *        Failure: 1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, June 17, 2008
  *
  *-------------------------------------------------------------------------
@@ -2425,10 +2425,10 @@ main(void)
     earray_test_param_t tparam;         /* Testing parameters */
     earray_test_type_t curr_test;       /* Current test being worked on */
     earray_iter_type_t curr_iter;       /* Current iteration type being worked on */
-    hid_t	fapl = -1;              /* File access property list for data files */
-    unsigned	nerrors = 0;            /* Cumulative error count */
+    hid_t    fapl = -1;              /* File access property list for data files */
+    unsigned    nerrors = 0;            /* Cumulative error count */
     time_t      curr_time;              /* Current time, for seeding random number generator */
-    int		ExpressMode;            /* Test express value */
+    int        ExpressMode;            /* Test express value */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     /* Reset library */
@@ -2436,7 +2436,7 @@ main(void)
     fapl = h5_fileaccess();
     ExpressMode = GetTestExpress();
     if(ExpressMode > 1)
-	printf("***Express test mode on.  Some tests may be skipped\n");
+        HDprintf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
@@ -2451,7 +2451,7 @@ main(void)
 
     /* Create an empty file to retrieve size */
     {
-        hid_t	file;              /* File ID */
+        hid_t    file;              /* File ID */
 
         if((file = H5Fcreate(filename_g, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             FAIL_STACK_ERROR
@@ -2559,14 +2559,14 @@ main(void)
                     nelmts = (hsize_t)((hsize_t)1 + cparam.idx_blk_elmts +
                         tparam.sblk_info[sblk].start_idx +
                         (tparam.sblk_info[sblk].dblk_nelmts * dblk));
-                    sprintf(test_str, "setting first element of array's data block #%llu", (unsigned long long)ndblks);
+                    HDsprintf(test_str, "setting first element of array's data block #%llu", (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Test all elements in data block */
                     nelmts = (hsize_t)(cparam.idx_blk_elmts +
                         tparam.sblk_info[sblk].start_idx +
                         (tparam.sblk_info[sblk].dblk_nelmts * (dblk + 1)));
-                    sprintf(test_str, "setting all elements of array's data block #%llu", (unsigned long long)ndblks);
+                    HDsprintf(test_str, "setting all elements of array's data block #%llu", (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Increment data block being tested */
