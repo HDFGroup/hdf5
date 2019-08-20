@@ -557,4 +557,57 @@ public class TestH5Ocreate {
         }
     }
 
+    @Test
+    public void testH5Ocork() {
+        boolean corked = false;
+
+        // Check cork status of the group: not corked
+        try {
+            corked = H5.H5Oare_mdc_flushes_disabled(H5gid);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Ocork: H5.H5Oare_mdc_flushes_disabled: " + err);
+        }
+        assertFalse("H5Oare_mdc_flushes_disabled: ", corked);
+
+        // Cork the group: an object
+        try {
+            H5.H5Odisable_mdc_flushes(H5gid);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Ocork: H5.H5Odisable_mdc_flushes: " + err);
+        }
+
+        // Check cork status of the group: corked
+        try {
+            corked = H5.H5Oare_mdc_flushes_disabled(H5gid);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Ocork: H5.H5Oare_mdc_flushes_disabled: " + err);
+        }
+        assertTrue("H5Oare_mdc_flushes_disabled: ", corked);
+
+        // Unork the group: an object
+        try {
+            H5.H5Oenable_mdc_flushes(H5gid);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Ocork: H5.H5Oenable_mdc_flushes: " + err);
+        }
+
+        // Check cork status of the group: corked
+        try {
+            corked = H5.H5Oare_mdc_flushes_disabled(H5gid);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Ocork: H5.H5Oare_mdc_flushes_disabled: " + err);
+        }
+        assertFalse("H5Oare_mdc_flushes_disabled: ", corked);
+    }
+
 }
