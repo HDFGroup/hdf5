@@ -349,14 +349,6 @@ int main(int argc, char **argv)
     AddTest("split", test_split_comm_access, NULL,
             "dataset using split communicators", PARATESTFILE);
 
-#ifdef PB_OUT /* temporary: disable page buffering when parallel */
-    AddTest("page_buffer", test_page_buffer_access, NULL,
-            "page buffer usage in parallel", PARATESTFILE);
-#endif
-
-    AddTest("props", test_file_properties, NULL,
-            "Coll Metadata file property settings", PARATESTFILE);
-
     AddTest("idsetw", dataset_writeInd, NULL,
             "dataset independent write", PARATESTFILE);
     AddTest("idsetr", dataset_readInd, NULL,
@@ -547,12 +539,6 @@ int main(int argc, char **argv)
     AddTest("denseattr", test_dense_attr, NULL,
             "Store Dense Attributes", PARATESTFILE);
 
-    AddTest("noselcollmdread", test_partial_no_selection_coll_md_read, NULL,
-            "Collective Metadata read with some ranks having no selection", PARATESTFILE);
-    AddTest("MC_coll_MD_read", test_multi_chunk_io_addrmap_issue, NULL,
-            "Collective MD read with multi chunk I/O (H5D__chunk_addrmap)", PARATESTFILE);
-    AddTest("LC_coll_MD_read", test_link_chunk_io_sort_chunk_issue, NULL,
-            "Collective MD read with link chunk I/O (H5D__sort_chunk)", PARATESTFILE);
 
     /* Display testing information */
     TestInfo(argv[0]);
