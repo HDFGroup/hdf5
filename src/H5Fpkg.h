@@ -29,9 +29,6 @@
 /* Get package's private header */
 #include "H5Fprivate.h"
 
-/* Other public headers needed by this file */
-#include "H5VLpublic.h"         /* Virtual Object Layer                     */
-
 /* Other private headers needed by this file */
 #include "H5private.h"		    /* Generic Functions                        */
 #include "H5ACprivate.h"        /* Metadata cache                           */
@@ -313,6 +310,7 @@ struct H5F_shared_t {
 
     /* Cached VOL connector ID & info */
     hid_t       vol_id;         /* ID of VOL connector for the container */
+    const H5VL_class_t *vol_cls; /* Pointer to VOL connector class for the container */
     void       *vol_info;       /* Copy of VOL connector info for container */
 
     /* File space allocation information */

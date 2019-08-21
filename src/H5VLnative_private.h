@@ -17,13 +17,34 @@
 #ifndef _H5VLnative_private_H
 #define _H5VLnative_private_H
 
+/* Private headers needed by this file */
 #include "H5VLnative.h"             /* Native VOL connector                 */
+
+
+/**************************/
+/* Library Private Macros */
+/**************************/
+
+
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/******************************/
+/* Library Private Prototypes */
+/******************************/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Atrribute callbacks */
+/* Attribute callbacks */
 H5_DLL void *H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
 void *H5VL__native_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name, hid_t aapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req);
@@ -79,6 +100,12 @@ H5_DLL void *H5VL__native_datatype_open(void *obj, const H5VL_loc_params_t *loc_
 H5_DLL herr_t H5VL__native_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VL__native_datatype_specific(void *dt, H5VL_datatype_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VL__native_datatype_close(void *dt, hid_t dxpl_id, void **req);
+
+/* Blob callbacks */
+H5_DLL herr_t H5VL__native_blob_put(void *blob, size_t size, void *ctx, void *id);
+H5_DLL herr_t H5VL__native_blob_get(const void *id, void *ctx, void *buf);
+H5_DLL herr_t H5VL__native_blob_specific(void *id, H5VL_blob_specific_t specific_type, va_list arguments);
+H5_DLL herr_t H5VL__native_blob_optional(void *id, va_list arguments);
 
 #ifdef __cplusplus
 }

@@ -649,6 +649,7 @@ set (H5VL_SOURCES
     ${HDF5_SRC_DIR}/H5VLint.c
     ${HDF5_SRC_DIR}/H5VLnative.c
     ${HDF5_SRC_DIR}/H5VLnative_attr.c
+    ${HDF5_SRC_DIR}/H5VLnative_blob.c
     ${HDF5_SRC_DIR}/H5VLnative_dataset.c
     ${HDF5_SRC_DIR}/H5VLnative_datatype.c
     ${HDF5_SRC_DIR}/H5VLnative_file.c

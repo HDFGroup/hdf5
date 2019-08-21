@@ -196,14 +196,14 @@ static const H5VL_class_t H5VL_pass_through_g = {
         H5VL_pass_through_info_cmp,                 /* compare */
         H5VL_pass_through_info_free,                /* free    */
         H5VL_pass_through_info_to_str,              /* to_str  */
-        H5VL_pass_through_str_to_info,              /* from_str */
+        H5VL_pass_through_str_to_info               /* from_str */
     },
     {                                           /* wrap_cls */
         H5VL_pass_through_get_object,               /* get_object   */
         H5VL_pass_through_get_wrap_ctx,             /* get_wrap_ctx */
         H5VL_pass_through_wrap_object,              /* wrap_object  */
         H5VL_pass_through_unwrap_object,            /* unwrap_object */
-        H5VL_pass_through_free_wrap_ctx,            /* free_wrap_ctx */
+        H5VL_pass_through_free_wrap_ctx             /* free_wrap_ctx */
     },
     {                                           /* attribute_cls */
         H5VL_pass_through_attr_create,              /* create */
@@ -255,14 +255,14 @@ static const H5VL_class_t H5VL_pass_through_g = {
         H5VL_pass_through_link_move,                /* move */
         H5VL_pass_through_link_get,                 /* get */
         H5VL_pass_through_link_specific,            /* specific */
-        H5VL_pass_through_link_optional,            /* optional */
+        H5VL_pass_through_link_optional             /* optional */
     },
     {                                           /* object_cls */
         H5VL_pass_through_object_open,              /* open */
         H5VL_pass_through_object_copy,              /* copy */
         H5VL_pass_through_object_get,               /* get */
         H5VL_pass_through_object_specific,          /* specific */
-        H5VL_pass_through_object_optional,          /* optional */
+        H5VL_pass_through_object_optional           /* optional */
     },
     {                                           /* request_cls */
         H5VL_pass_through_request_wait,             /* wait */
@@ -271,6 +271,12 @@ static const H5VL_class_t H5VL_pass_through_g = {
         H5VL_pass_through_request_specific,         /* specific */
         H5VL_pass_through_request_optional,         /* optional */
         H5VL_pass_through_request_free              /* free */
+    },
+    {                                           /* blob_cls */
+        NULL,                                       /* put */
+        NULL,                                       /* get */
+        NULL,                                       /* specific */
+        NULL                                        /* optional */
     },
     NULL                                        /* optional */
 };

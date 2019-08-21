@@ -30,7 +30,6 @@
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -3020,17 +3019,16 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t     noop_conv = FALSE;      /* Flag to indicate a noop conversion */
     hbool_t     write_to_file = FALSE;  /* Flag to indicate writing to file */
     htri_t      parent_is_vlen;         /* Flag to indicate parent is vlen datatyp */
+    size_t	bg_seq_len = 0;         /* The number of elements in the background sequence */
     hid_t   	tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
     H5T_t	*src = NULL;		/*source datatype		     */
     H5T_t	*dst = NULL;		/*destination datatype		     */
-    H5HG_t	bg_hobjid, parent_hobjid;
     uint8_t	*s = NULL;		/*source buffer			*/
     uint8_t	*d = NULL;		/*destination buffer		*/
     uint8_t	*b = NULL;		/*background buffer		*/
     ssize_t	s_stride, d_stride;	/*src and dst strides		*/
     ssize_t	b_stride;	        /*bkg stride			*/
     size_t      safe;                   /*how many elements are safe to process in each pass */
-    size_t	bg_seq_len = 0;
     size_t	src_base_size, dst_base_size;/*source & destination base size*/
     void	*conv_buf = NULL;     	/*temporary conversion buffer 	     */
     size_t	conv_buf_size = 0;  	/*size of conversion buffer in bytes */
@@ -3055,13 +3053,13 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_VLEN != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_VLEN datatype")
-            if(H5T_VLEN != dst->shared->type) 
+            if(H5T_VLEN != dst->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_VLEN datatype")
             if(H5T_VLEN_STRING == src->shared->u.vlen.type && H5T_VLEN_STRING == dst->shared->u.vlen.type) {
                 if((H5T_CSET_ASCII == src->shared->u.vlen.cset && H5T_CSET_UTF8 == dst->shared->u.vlen.cset) 
-                    || (H5T_CSET_ASCII == dst->shared->u.vlen.cset && H5T_CSET_UTF8 == src->shared->u.vlen.cset))
+                        || (H5T_CSET_ASCII == dst->shared->u.vlen.cset && H5T_CSET_UTF8 == src->shared->u.vlen.cset))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "The library doesn't convert between strings of ASCII and UTF")
-            }
+            } /* end if */
 
             /* Variable-length types don't need a background buffer */
             cdata->need_bkg = H5T_BKG_NO;
@@ -3179,25 +3177,27 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 } /* end else */
 
                 for(elmtno = 0; elmtno < safe; elmtno++) {
+                    hbool_t is_nil;      /* Whether sequence is "nil" */
+
                     /* Check for "nil" source sequence */
-                    if((*(src->shared->u.vlen.isnull))(src->shared->u.vlen.f, s)) {
+                    if((*(src->shared->u.vlen.cls->isnull))(src->shared->u.vlen.f, s, &is_nil) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check if VL data is 'nil'")
+                    else if(is_nil) {
                         /* Write "nil" sequence to destination location */
-                        if((*(dst->shared->u.vlen.setnull))(dst->shared->u.vlen.f, d, b) < 0)
+                        if((*(dst->shared->u.vlen.cls->setnull))(dst->shared->u.vlen.f, d, b) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't set VL data to 'nil'")
-                    } /* end if */
+                    } /* end else-if */
                     else {
-                        ssize_t sseq_len;   /* (signed) The number of elements in the current sequence*/
-                        size_t 	seq_len;    /* The number of elements in the current sequence*/
+                        size_t 	seq_len;    /* The number of elements in the current sequence */
 
                         /* Get length of element sequences */
-                        if((sseq_len = (*(src->shared->u.vlen.getlen))(s)) < 0)
-                            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect length")
-                        seq_len = (size_t)sseq_len;
+                        if((*(src->shared->u.vlen.cls->getlen))(src->shared->u.vlen.f, s, &seq_len) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "bad sequence length")
 
                         /* If we are reading from memory and there is no conversion, just get the pointer to sequence */
                         if(write_to_file && noop_conv) {
                             /* Get direct pointer to sequence */
-                            if(NULL == (conv_buf = (*(src->shared->u.vlen.getptr))(s)))
+                            if(NULL == (conv_buf = (*(src->shared->u.vlen.cls->getptr))(s)))
                                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid source pointer")
                         } /* end if */
                         else {
@@ -3213,17 +3213,17 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 conv_buf_size = ((1 / H5T_VLEN_MIN_CONF_BUF_SIZE) + 1) * H5T_VLEN_MIN_CONF_BUF_SIZE;
                                 if(NULL == (conv_buf = H5FL_BLK_CALLOC(vlen_seq, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
-			    }
+			    } /* end if */
                             else if(conv_buf_size < MAX(src_size, dst_size)) {
                                 /* Only allocate conversion buffer in H5T_VLEN_MIN_CONF_BUF_SIZE increments */
                                 conv_buf_size = ((MAX(src_size, dst_size) / H5T_VLEN_MIN_CONF_BUF_SIZE) + 1) * H5T_VLEN_MIN_CONF_BUF_SIZE;
                                 if(NULL == (conv_buf = H5FL_BLK_REALLOC(vlen_seq, conv_buf, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
                                 HDmemset(conv_buf, 0, conv_buf_size);
-                            } /* end if */
+                            } /* end else-if */
 
                             /* Read in VL sequence */
-                            if((*(src->shared->u.vlen.read))(src->shared->u.vlen.f, s, conv_buf, src_size) < 0)
+                            if((*(src->shared->u.vlen.cls->read))(src->shared->u.vlen.f, s, conv_buf, src_size) < 0)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL data")
                         } /* end else */
 
@@ -3241,9 +3241,14 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             /* If we are writing and there is a nested VL type, read
                              * the sequence into the background buffer */
                             if(nested) {
-                                const uint8_t *tmp = b;
+                                /* Sanity check */
+                                HDassert(write_to_file);
 
-                                UINT32DECODE(tmp, bg_seq_len);
+                                /* Get length of background element sequence */
+                                if((*(dst->shared->u.vlen.cls->getlen))(dst->shared->u.vlen.f, b, &bg_seq_len) < 0)
+                                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "bad sequence length")
+
+                                /* Read sequence if length > 0 */
                                 if(bg_seq_len > 0) {
                                     if(tmp_buf_size < (bg_seq_len * MAX(src_base_size, dst_base_size))) {
                                         tmp_buf_size = (bg_seq_len * MAX(src_base_size, dst_base_size));
@@ -3251,10 +3256,10 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
                                         HDmemset(tmp_buf, 0, tmp_buf_size);
                                     } /* end if */
-                                    H5F_addr_decode(dst->shared->u.vlen.f, &tmp, &(bg_hobjid.addr));
-                                    UINT32DECODE(tmp, bg_hobjid.idx);
-                                    if(NULL == H5HG_read(dst->shared->u.vlen.f, &bg_hobjid, tmp_buf, NULL))
-                                        HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL sequence into background buffer")
+
+                                    /* Read in background VL sequence */
+                                    if((*(dst->shared->u.vlen.cls->read))(dst->shared->u.vlen.f, b, tmp_buf, bg_seq_len) < 0)
+                                        HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL data")
                                 } /* end if */
 
                                 /* If the sequence gets shorter, pad out the original sequence with zeros */
@@ -3268,26 +3273,23 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         } /* end if */
 
                         /* Write sequence to destination location */
-                        if((*(dst->shared->u.vlen.write))(dst->shared->u.vlen.f, &vl_alloc_info, d, conv_buf, b, seq_len, dst_base_size) < 0)
+                        if((*(dst->shared->u.vlen.cls->write))(dst->shared->u.vlen.f, &vl_alloc_info, d, conv_buf, b, seq_len, dst_base_size) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data")
 
                         if(!noop_conv) {
                             /* For nested VL case, free leftover heap objects from the deeper level if the length of new data elements is shorter than the old data elements.*/
                             if(nested && seq_len < bg_seq_len) {
-                                size_t parent_seq_len;
                                 const uint8_t *tmp;
                                 size_t u;
 
-                                /* TMP_P is reset each time in the loop because DST_BASE_SIZE may include some data in addition to VL info. - SLU */
-                                for(u = seq_len; u < bg_seq_len; u++) {
-                                    tmp = (uint8_t *)tmp_buf + u * dst_base_size;
-                                    UINT32DECODE(tmp, parent_seq_len);
-                                    if(parent_seq_len > 0) {
-                                        H5F_addr_decode(dst->shared->u.vlen.f, &tmp, &(parent_hobjid.addr));
-                                        UINT32DECODE(tmp, parent_hobjid.idx);
-                                        if(H5HG_remove(dst->shared->u.vlen.f, &parent_hobjid) < 0)
-                                            HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object")
-                                    } /* end if */
+                                /* Sanity check */
+                                HDassert(write_to_file);
+
+                                tmp = (uint8_t *)tmp_buf + seq_len * dst_base_size;
+                                for(u = seq_len; u < bg_seq_len; u++, tmp += dst_base_size) {
+                                    /* Delete sequence in destination location */
+                                    if((*(dst->shared->u.vlen.cls->del))(dst->shared->u.vlen.f, tmp) < 0)
+                                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove heap object")
                                 } /* end for */
                             } /* end if */
                         } /* end if */

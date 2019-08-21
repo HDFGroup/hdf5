@@ -1279,3 +1279,28 @@ H5F_get_null_fsm_addr(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->null_fsm_addr)
 } /* end H5F_get_null_fsm_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_get_vol_cls
+ *
+ * Purpose:  Get the VOL class for the file
+ *
+ * Return:   VOL class pointer for file, can't fail
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, August 17, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5VL_class_t *
+H5F_get_vol_cls(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->vol_cls)
+} /* end H5F_get_vol_cls */
+

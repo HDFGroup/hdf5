@@ -243,14 +243,6 @@ typedef struct H5T_enum_t {
     char	**name;		/*array of symbol names		     */
 } H5T_enum_t;
 
-/* VL function pointers */
-typedef ssize_t (*H5T_vlen_getlenfunc_t)(const void *vl_addr);
-typedef void * (*H5T_vlen_getptrfunc_t)(void *vl_addr);
-typedef htri_t (*H5T_vlen_isnullfunc_t)(const H5F_t *f, void *vl_addr);
-typedef herr_t (*H5T_vlen_readfunc_t)(H5F_t *f, void *_vl, void *buf, size_t len);
-typedef herr_t (*H5T_vlen_writefunc_t)(H5F_t *f, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size);
-typedef herr_t (*H5T_vlen_setnullfunc_t)(H5F_t *f, void *_vl, void *_bg);
-
 /* VL types */
 typedef enum {
     H5T_VLEN_BADTYPE =  -1, /* invalid VL Type */
@@ -259,20 +251,35 @@ typedef enum {
     H5T_VLEN_MAXTYPE        /* highest type (Invalid as true type) */
 } H5T_vlen_type_t;
 
+/* VL function pointers */
+typedef herr_t (*H5T_vlen_getlen_func_t)(H5F_t *f, const void *vl_addr, size_t *len);
+typedef void * (*H5T_vlen_getptr_func_t)(void *vl_addr);
+typedef herr_t (*H5T_vlen_isnull_func_t)(const H5F_t *f, void *vl_addr, hbool_t *isnull);
+typedef herr_t (*H5T_vlen_setnull_func_t)(H5F_t *f, void *_vl, void *_bg);
+typedef herr_t (*H5T_vlen_read_func_t)(H5F_t *f, void *_vl, void *buf, size_t len);
+typedef herr_t (*H5T_vlen_write_func_t)(H5F_t *f, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size);
+typedef herr_t (*H5T_vlen_delete_func_t)(H5F_t *f, const void *_vl);
+
+/* VL datatype callbacks */
+typedef struct H5T_vlen_class_t {
+    H5T_vlen_getlen_func_t getlen;  /* Function to get VL sequence size (in element units, not bytes) */
+    H5T_vlen_getptr_func_t getptr;  /* Function to get VL sequence pointer */
+    H5T_vlen_isnull_func_t isnull;  /* Function to check if VL value is NIL */
+    H5T_vlen_setnull_func_t setnull;/* Function to set a VL value to NIL */
+    H5T_vlen_read_func_t read;      /* Function to read VL sequence into buffer */
+    H5T_vlen_write_func_t write;    /* Function to write VL sequence from buffer */
+    H5T_vlen_delete_func_t del;     /* Function to delete VL sequence */
+} H5T_vlen_class_t;
+
 /* A VL datatype */
 typedef struct H5T_vlen_t {
     H5T_vlen_type_t     type;   /* Type of VL data in buffer */
     H5T_loc_t		loc;    /* Location of VL data in buffer */
-    H5T_cset_t          cset;   /* For VL string. character set */
-    H5T_str_t           pad;    /* For VL string.  space or null padding of
+    H5T_cset_t          cset;   /* For VL string: character set */
+    H5T_str_t           pad;    /* For VL string: space or null padding of
                                  * extra bytes */
     H5F_t *f;                   /* File ID (if VL data is on disk) */
-    H5T_vlen_getptrfunc_t getptr;   /* Function to get VL sequence pointer */
-    H5T_vlen_getlenfunc_t getlen;   /* Function to get VL sequence size (in element units, not bytes) */
-    H5T_vlen_isnullfunc_t isnull;   /* Function to check if VL value is NIL */
-    H5T_vlen_readfunc_t read;   /* Function to read VL sequence into buffer */
-    H5T_vlen_writefunc_t write; /* Function to write VL sequence from buffer */
-    H5T_vlen_setnullfunc_t setnull; /* Function to set a VL value to NIL */
+    const H5T_vlen_class_t *cls;    /* Pointer to VL class callbacks */
 } H5T_vlen_t;
 
 /* An opaque datatype */
