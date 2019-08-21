@@ -337,26 +337,26 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file,
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: swmr_start_write [-f <# of records to write between flushing file contents>]\n");
-    printf("    [-i <index type>] [-c <deflate compression level>]\n");
-    printf("    [-r <random seed>] [-q] <# of records>\n");
-    printf("\n");
-    printf("<# of records to write between flushing file contents> should be 0\n");
-    printf("(for no flushing) or between 1 and (<# of records> - 1).\n");
-    printf("\n");
-    printf("<index type> should be b2 or ea\n");
-    printf("\n");
-    printf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
-    printf("\n");
-    printf("<# of records> must be specified.\n");
-    printf("\n");
-    printf("Defaults to flushing every 10000 records ('-f 10000'),\n");
-    printf("v1 b-tree indexing (-i b1), compression ('-c -1'),\n");
-    printf("will generate a random seed (no -r given), and verbose (no '-q' given)\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: swmr_start_write [-f <# of records to write between flushing file contents>]\n");
+    HDprintf("    [-i <index type>] [-c <deflate compression level>]\n");
+    HDprintf("    [-r <random seed>] [-q] <# of records>\n");
+    HDprintf("\n");
+    HDprintf("<# of records to write between flushing file contents> should be 0\n");
+    HDprintf("(for no flushing) or between 1 and (<# of records> - 1).\n");
+    HDprintf("\n");
+    HDprintf("<index type> should be b2 or ea\n");
+    HDprintf("\n");
+    HDprintf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
+    HDprintf("\n");
+    HDprintf("<# of records> must be specified.\n");
+    HDprintf("\n");
+    HDprintf("Defaults to flushing every 10000 records ('-f 10000'),\n");
+    HDprintf("v1 b-tree indexing (-i b1), compression ('-c -1'),\n");
+    HDprintf("will generate a random seed (no -r given), and verbose (no '-q' given)\n");
+    HDprintf("\n");
     HDexit(1);
 } /* usage() */
 

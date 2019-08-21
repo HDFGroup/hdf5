@@ -71,7 +71,7 @@ public class H5FD_ros3_fapl_t implements Serializable {
      * @param key "secret key" or "access key" for authenticating request
      */
     public H5FD_ros3_fapl_t (String region, String id, String key) {
-        this.version    = 1; /* must equal H5FD__CURR_ROS3_FAPL_T_VERSION */
+        this.version    = 1; /* must equal H5FD_CURR_ROS3_FAPL_T_VERSION */
                              /* as found in H5FDros3.h                    */
         this.aws_region = region;
         this.secret_id  = id;

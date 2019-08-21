@@ -326,18 +326,18 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>]\n");
-    printf("    [-n <# of reads between reopens>] <# of records>\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read\n");
-    printf("between reopens ('-r 1')\n");
-    printf("\n");
-    printf("Note that the # of records *must* be the same as that supplied to\n");
-    printf("swmr_sparse_writer\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>]\n");
+    HDprintf("    [-n <# of reads between reopens>] <# of records>\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read\n");
+    HDprintf("between reopens ('-r 1')\n");
+    HDprintf("\n");
+    HDprintf("Note that the # of records *must* be the same as that supplied to\n");
+    HDprintf("swmr_sparse_writer\n");
+    HDprintf("\n");
     HDexit(1);
 } /* end usage() */
 

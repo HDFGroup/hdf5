@@ -865,7 +865,7 @@ dump_group(hid_t gid, const char *name)
             if(!type_table->objs[u].recorded) {
                 dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                 type = H5Dget_type(dset);
-                sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[u].objno);
+                HDsprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[u].objno);
                 dump_function_table->dump_named_datatype_function(type, type_name);
                 H5Tclose(type);
                 H5Dclose(dset);
@@ -2024,7 +2024,7 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED * data, int pe
 
             if(!type_table->objs[idx].recorded) {
                 /* unamed datatype */
-                sprintf(name, "/#"H5_PRINTF_HADDR_FMT, type_table->objs[idx].objno);
+                HDsprintf(name, "/#"H5_PRINTF_HADDR_FMT, type_table->objs[idx].objno);
 
                 if(!HDstrcmp(name, real_name))
                     break;

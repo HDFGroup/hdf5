@@ -15,7 +15,7 @@
  *
  *              This file contains tests for metadata tagging.
  */
-#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND        /*suppress error about including H5Fpkg      */
 #define H5F_TESTING
 #include "H5Fpkg.h"
 
@@ -47,7 +47,7 @@
 #define TEST_DEFAULT 0
 #define TEST_SHMESG 1
 #define NUM_TEST_TYPES 2
-    
+
 /* ===================== */
 /* Function Declarations */
 /* ===================== */
@@ -98,7 +98,7 @@ static unsigned check_invalid_tag_application(void);
 
 
 #ifndef NDEBUG
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_cache()
  *
@@ -127,19 +127,19 @@ static int dump_cache(hid_t fid)
         TEST_ERROR;
 
     return 0;
-    
+
 error:
     return -1;
 } /* dump_cache */
 #endif /* NDEBUG */ /* end debugging functions */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_no_unknown_tags()
  *
  * Purpose:     Verifies that all tags in the provided cache have the
- *		'dirtied' flag set.  Other verification functions in this
- *		test file set this flag after checking them, so 
+ *        'dirtied' flag set.  Other verification functions in this
+ *        test file set this flag after checking them, so
  *              this is handy to verify that tests have checked all entries
  *              in the cache.
  *
@@ -181,7 +181,7 @@ error:
     return -1;
 } /* verify_no_unknown_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    mark_all_entries_investigated()
  *
@@ -229,7 +229,7 @@ error:
     return -1;
 } /* mark_all_entries_investigated */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    reset_all_entries_investigated()
  *
@@ -275,15 +275,15 @@ error:
     return -1;
 } /* reset_all_entries_investigated */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_tag()
  *
  * Purpose:     Asserts that there is an entry in the specified cache with
  *              the provided entry id and provided tag. The function will
- *              fail if this is not the case. If found, this function will 
- *              set the entry's flush_marker flag, so future verification 
- *              attempts can skip over this entry, knowing it has already been 
+ *              fail if this is not the case. If found, this function will
+ *              set the entry's flush_marker flag, so future verification
+ *              attempts can skip over this entry, knowing it has already been
  *              checked.
  *
  * Return:      0 on Success, -1 on Failure
@@ -327,7 +327,7 @@ verify_tag(hid_t fid, int id, haddr_t tag)
 
     /* Didn't find the tagged entry, throw an error */
     TEST_ERROR;
-    
+
 done:
     return 0;
 
@@ -358,7 +358,7 @@ error:
     return -1;
 } /* evict entries */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    get_object_header_tag()
  *
@@ -389,7 +389,7 @@ error:
     return -1;
 } /* get_object_header_tag */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    get_sbe_tag()
  *
@@ -420,7 +420,7 @@ error:
 /* Test Functions */
 /* ============== */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_file_creation_tags
  *
@@ -434,7 +434,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_file_creation_tags(hid_t fcpl_id, int type)
 {
     /* Variable Declarations */
@@ -507,7 +507,7 @@ error:
     return 1;
 } /* check_file_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_file_open_tags
  *
@@ -521,7 +521,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_file_open_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -551,12 +551,12 @@ check_file_open_tags(hid_t fcpl, int type)
 
     /* Retrieve various tags */
     if ( type == TEST_SHMESG ) {
-        
+
         /* determine tag value of superblock extension object header */
         if ( get_sbe_tag(fid, &sbe_tag) < 0 ) TEST_ERROR;
 
     } /* end if */
-    
+
     /* Close the file */
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
 
@@ -619,7 +619,7 @@ error:
     return 1;
 } /* check_file_open_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_group_creation_tags
  *
@@ -633,7 +633,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_group_creation_tags(void)
 {
     /* Variable Declarations */
@@ -646,7 +646,7 @@ check_group_creation_tags(void)
 
     /* Testing Macro */
     TESTING("tag application during group creation");
-    
+
     /* ===== */
     /* Setup */
     /* ===== */
@@ -683,7 +683,7 @@ check_group_creation_tags(void)
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
- 
+
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
     if ( verify_tag(fid, H5AC_SNODE_ID, root_tag) < 0 ) TEST_ERROR;
@@ -720,7 +720,7 @@ error:
     return 1;
 } /* check_group_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_multi_group_creation_tags
  *
@@ -734,7 +734,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_multi_group_creation_tags(void)
 {
     /* Variable Declarations */
@@ -774,7 +774,7 @@ check_multi_group_creation_tags(void)
 
     for (i = 0; i < MULTIGROUPS; i++) {
 
-        sprintf(gname, "%d", i);
+        HDsprintf(gname, "%d", i);
         if ( (gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
         if ( H5Gclose(gid) < 0 ) TEST_ERROR;
 
@@ -793,7 +793,7 @@ check_multi_group_creation_tags(void)
     for (i = 0; i < MULTIGROUPS; i++) {
 
         /* Re-open the group */
-        sprintf(gname, "%d", i);
+        HDsprintf(gname, "%d", i);
         if ( (gid = H5Gopen2(fid, gname, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
         /* Verify object header for root group */
@@ -848,7 +848,7 @@ error:
     return 1;
 } /* check_multi_group_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_link_iteration_tags
  *
@@ -862,7 +862,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_link_iteration_tags(void)
 {
     /* Variable Declarations */
@@ -899,7 +899,7 @@ check_link_iteration_tags(void)
     /* Create many datasets in root group */
     for (i=0;i<500;i++) {
 
-        sprintf(dsetname, "Dset %d", i);
+        HDsprintf(dsetname, "Dset %d", i);
         if ( (did = H5Dcreate2(fid, dsetname, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
         if ( H5Dclose(did) < 0 ) TEST_ERROR;
     }
@@ -966,7 +966,7 @@ error:
     return 1;
 } /* check_link_iteration_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dense_attribute_tags
  *
@@ -980,7 +980,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dense_attribute_tags(void)
 {
     /* Variable Declarations */
@@ -994,7 +994,7 @@ check_dense_attribute_tags(void)
     hid_t fapl = -1;         /* File access property list */
     haddr_t d_tag = 0;       /* Dataset tag value */
     haddr_t root_tag = 0;    /* Root group tag value */
-    char attrname[500];	     /* Name of attribute */
+    char attrname[500];         /* Name of attribute */
 
     /* Testing Macro */
     TESTING("tag application during dense attribute manipulation");
@@ -1022,10 +1022,10 @@ check_dense_attribute_tags(void)
     /* Create dataset */
     if ( (did = H5Dcreate2(fid, DATASETNAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
     if ( H5Pclose(dcpl) < 0 ) TEST_ERROR;
-    
+
     /* get dataset object header */
     if ( get_object_header_tag(did, &d_tag) < 0 ) TEST_ERROR;
-    
+
     /* Clear Metadata Tags (don't care about them for this test */
     mark_all_entries_investigated(fid);
 
@@ -1035,7 +1035,7 @@ check_dense_attribute_tags(void)
 
     for (i=0;i<50;i++) {
 
-        sprintf(attrname, "attr %d", i);
+        HDsprintf(attrname, "attr %d", i);
         if ( (aid = H5Acreate2(did, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
         if ( H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0 ) TEST_ERROR;
         if ( H5Aclose(aid) < 0 ) TEST_ERROR;
@@ -1151,7 +1151,7 @@ error:
     return 1;
 } /* check_dense_attribute_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_group_open_tags
  *
@@ -1165,7 +1165,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_group_open_tags(void)
 {
     /* Variable Declarations */
@@ -1178,7 +1178,7 @@ check_group_open_tags(void)
 
     /* Testing Macro */
     TESTING("tag application during group open");
- 
+
     /* ===== */
     /* Setup */
     /* ===== */
@@ -1258,7 +1258,7 @@ error:
     return 1;
 } /* check_group_open_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_attribute_creation_tags
  *
@@ -1272,7 +1272,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_attribute_creation_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -1349,7 +1349,7 @@ check_attribute_creation_tags(hid_t fcpl, int type)
         /* verify shared message index tagged with sohm */
         if ( verify_tag(fid, H5AC_SOHM_LIST_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
         if ( verify_tag(fid, H5AC_SOHM_TABLE_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
-        
+
         /* verify fractal heap header belonging to group */
         if ( verify_tag(fid, H5AC_FHEAP_HDR_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
@@ -1368,7 +1368,7 @@ check_attribute_creation_tags(hid_t fcpl, int type)
 
     /* verify no other entries present */
     if ( verify_no_unknown_tags(fid) < 0 ) TEST_ERROR;
-    
+
     /* Reset the changes we've made to the cache's data structures */
     if(reset_all_entries_investigated(fid) < 0) TEST_ERROR;
 
@@ -1392,7 +1392,7 @@ error:
     return 1;
 } /* check_attribute_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_attribute_open_tags
  *
@@ -1406,7 +1406,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_attribute_open_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -1483,7 +1483,7 @@ check_attribute_open_tags(hid_t fcpl, int type)
 
     /* verify object header chunk belonging to group */
     if ( verify_tag(fid, H5AC_OHDR_CHK_ID, g_tag) < 0 ) TEST_ERROR;
-   
+
     if ( type == TEST_SHMESG ) {
 
         /* verify (another) object header chunk belonging to group */
@@ -1529,7 +1529,7 @@ error:
     return 1;
 } /* check_attribute_open_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_attribute_rename_tags
  *
@@ -1543,7 +1543,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_attribute_rename_tags(hid_t fcpl, int type)
 {
     /* Variable declarations */
@@ -1597,7 +1597,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
 
     /* Create attribute */
     if ( (aid = H5Acreate2(gid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
- 
+
     /* fill out data buffer */
     for(i = 0; i < DIMS; i++)
         for(j = 0; j < DIMS; j++)
@@ -1663,9 +1663,9 @@ check_attribute_rename_tags(hid_t fcpl, int type)
         /* verify shared header message stored as a list */
         if ( verify_tag(fid, H5AC_SOHM_LIST_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
-        /* 
-         *   one freespace header tag for H5FD_MEM_DRAW manager, 
-         *   one freespace header tag for H5FD_MEM_SUPER manager 
+        /*
+         *   one freespace header tag for H5FD_MEM_DRAW manager,
+         *   one freespace header tag for H5FD_MEM_SUPER manager
          */
         if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
         if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
@@ -1704,7 +1704,7 @@ error:
     return 1;
 } /* check_attribute_rename_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_attribute_delete_tags
  *
@@ -1718,7 +1718,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_attribute_delete_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -1772,7 +1772,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
 
     /* Create attribute */
     if ( (aid = H5Acreate2(gid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
- 
+
     /* fill out data buffer */
     for(i = 0;i < DIMS; i++)
         for(j = 0;j < DIMS; j++)
@@ -1810,33 +1810,33 @@ check_attribute_delete_tags(hid_t fcpl, int type)
 
     /* verify object header belonging to group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
-   
+
     if ( type == TEST_SHMESG ) {
 
         /* verify shared header message master table */
         if ( verify_tag(fid, H5AC_SOHM_TABLE_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
-        /* 
-         * 2 calls to verify_tag() for verifying free space: 
+        /*
+         * 2 calls to verify_tag() for verifying free space:
          *   one freespace header tag for free-space header raw data
          *   one freespace header tag for free-space section info raw data
          *   one freespace header tag for free-space header metadata
          */
-        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) 
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 )
             TEST_ERROR;
-        if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0 ) 
+        if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0 )
             TEST_ERROR;
-        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) 
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 )
             TEST_ERROR;
 
 #if 0
-        /* If the free space managers are persistent, the 
+        /* If the free space managers are persistent, the
          * H5MF_tidy_self_referential_fsm_hack() must have been run.
-         * Since this function floats all self referential free space 
-         * managers, the H5FD_MEM_SUPER FSM will not be in the metadata 
+         * Since this function floats all self referential free space
+         * managers, the H5FD_MEM_SUPER FSM will not be in the metadata
          * cache.
          */
-        if ( ( ! persistent_fsms ) && 
+        if ( ( ! persistent_fsms ) &&
              ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) )
             TEST_ERROR;
 #endif
@@ -1871,7 +1871,7 @@ error:
     return 1;
 } /* check_attribute_delete_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_creation_tags
  *
@@ -1885,7 +1885,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_creation_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -1929,10 +1929,10 @@ check_dataset_creation_tags(hid_t fcpl, int type)
     /* ============================ */
     /* Create Dataset in Root Group */
     /* ============================ */
- 
+
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -1974,7 +1974,7 @@ check_dataset_creation_tags(hid_t fcpl, int type)
 
         /* Verify dataset's tagged metadata */
         if ( verify_tag(fid, H5AC_FHEAP_HDR_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
-        
+
         /* Verify shared object header message tags */
         if ( verify_tag(fid, H5AC_SOHM_LIST_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
@@ -2004,7 +2004,7 @@ error:
     return 1;
 } /* check_dataset_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_creation_earlyalloc_tags
  *
@@ -2018,7 +2018,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -2107,7 +2107,7 @@ check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
 
         /* Verify dataset's tagged metadata */
         if ( verify_tag(fid, H5AC_FHEAP_HDR_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
-        
+
         /* Verify shared object header message tags */
         if ( verify_tag(fid, H5AC_SOHM_LIST_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
@@ -2141,7 +2141,7 @@ error:
     return 1;
 } /* check_dataset_creation_earlyalloc_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_open_tags
  *
@@ -2155,7 +2155,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_open_tags(void)
 {
     /* Variable Declarations */
@@ -2192,7 +2192,7 @@ check_dataset_open_tags(void)
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -2222,7 +2222,7 @@ check_dataset_open_tags(void)
     /* ========================== */
     /* Open Dataset in Root Group */
     /* ========================== */
- 
+
     if (( did = H5Dopen2(fid, DATASETNAME, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* =================================== */
@@ -2267,7 +2267,7 @@ error:
     return 1;
 } /* check_dataset_open_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_write_tags
  *
@@ -2281,7 +2281,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_write_tags(void)
 {
     /* Variable Declarations */
@@ -2323,7 +2323,7 @@ check_dataset_write_tags(void)
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -2372,7 +2372,7 @@ check_dataset_write_tags(void)
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
- 
+
     /* Verify 10 b-tree nodes belonging to dataset  */
     for (i=0; i<10; i++)
         if ( verify_tag(fid, H5AC_BT_ID, d_tag) < 0 ) TEST_ERROR;
@@ -2408,7 +2408,7 @@ error:
     return 1;
 } /* check_dataset_write_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_attribute_write_tags
  *
@@ -2422,7 +2422,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_attribute_write_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -2503,7 +2503,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
- 
+
     /* Verify object header of group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
 
@@ -2562,7 +2562,7 @@ error:
     return 1;
 } /* check_attribute_write_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_read_tags
  *
@@ -2576,7 +2576,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_read_tags(void)
 {
     /* Variable Declarations */
@@ -2618,7 +2618,7 @@ check_dataset_read_tags(void)
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -2666,7 +2666,7 @@ check_dataset_read_tags(void)
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
- 
+
     /* Verify 19 b-tree nodes belonging to dataset  */
     for (i=0; i<19; i++)
         if ( verify_tag(fid, H5AC_BT_ID, d_tag) < 0 ) TEST_ERROR;
@@ -2699,7 +2699,7 @@ error:
     return 1;
 } /* check_dataset_read_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_size_retrieval
  *
@@ -2713,7 +2713,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_size_retrieval(void)
 {
     /* Variable Declarations */
@@ -2756,7 +2756,7 @@ check_dataset_size_retrieval(void)
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -2837,7 +2837,7 @@ error:
     return 1;
 } /* check_dataset_size_retrieval */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset_extend_tags
  *
@@ -2851,7 +2851,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_dataset_extend_tags(void)
 {
 
@@ -2895,7 +2895,7 @@ check_dataset_extend_tags(void)
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -2976,7 +2976,7 @@ error:
     return 1;
 } /* check_dataset_extend_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_object_info_tags
  *
@@ -2990,7 +2990,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_object_info_tags(void)
 {
     /* Variable Declarations */
@@ -3000,7 +3000,7 @@ check_object_info_tags(void)
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;
     haddr_t g_tag;
-    H5O_info_t oinfo;                       /* Object info struct */    
+    H5O_info_t oinfo;                       /* Object info struct */
 
     /* Testing Macro */
     TESTING("tag application during object info retrieval");
@@ -3085,7 +3085,7 @@ error:
     return 1;
 } /* check_object_info_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_object_copy_tags
  *
@@ -3099,7 +3099,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_object_copy_tags(void)
 {
     /* Variable Declarations */
@@ -3155,7 +3155,7 @@ check_object_copy_tags(void)
     if ( (gid = H5Gopen2(fid, GROUPNAMECOPY, H5P_DEFAULT)) < 0 ) TEST_ERROR;
     if ( get_object_header_tag(gid, &copy_tag) < 0 ) TEST_ERROR;
     if (H5Gclose(gid) < 0) TEST_ERROR;
-  
+
     /* =================================== */
     /* Verification of Metadata Tag Values */
     /* =================================== */
@@ -3204,7 +3204,7 @@ error:
     return 1;
 } /* check_object_copy_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_link_removal_tags
  *
@@ -3218,7 +3218,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_link_removal_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
@@ -3271,7 +3271,7 @@ check_link_removal_tags(hid_t fcpl, int type)
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -3334,7 +3334,7 @@ check_link_removal_tags(hid_t fcpl, int type)
         if ( verify_tag(fid, H5AC_SOHM_TABLE_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
     } /* end if */
-    
+
     /* verify no other entries present */
     if ( verify_no_unknown_tags(fid) < 0 ) TEST_ERROR;
 
@@ -3362,7 +3362,7 @@ error:
     return 1;
 } /* check_link_removal_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_link_getname_tags
  *
@@ -3376,7 +3376,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_link_getname_tags(void)
 {
     /* Variable Declarations */
@@ -3430,7 +3430,7 @@ check_link_getname_tags(void)
 
     /* Set up creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    
+
     /* Enable chunking */
     if ( H5Pset_chunk(dcpl, RANK, cdims) < 0 ) TEST_ERROR;
 
@@ -3513,7 +3513,7 @@ error:
     return 1;
 } /* check_link_getname_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_external_link_creation_tags
  *
@@ -3527,7 +3527,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_external_link_creation_tags(void)
 {
     /* Variable Declarations */
@@ -3576,7 +3576,7 @@ check_external_link_creation_tags(void)
     /* ==================== */
     /* Create External Link */
     /* ==================== */
-    
+
     if (H5Lcreate_external(FILENAME2, GROUPNAMEPATH, fid, LINKNAME, H5P_DEFAULT, H5P_DEFAULT) < 0 ) TEST_ERROR;
 
     /* =================================== */
@@ -3587,7 +3587,7 @@ check_external_link_creation_tags(void)
     /* if verbose, print cache index to screen for visual verification */
     if ( verbose ) dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
- 
+
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
     if ( verify_tag(fid, H5AC_OHDR_CHK_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3617,7 +3617,7 @@ error:
     return 1;
 } /* check_external_link_creation_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_external_link_open_tags
  *
@@ -3631,7 +3631,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static unsigned 
+static unsigned
 check_external_link_open_tags(void)
 {
     /* Variable Declarations */
@@ -3689,11 +3689,11 @@ check_external_link_open_tags(void)
     /* ================== */
     /* Open External Link */
     /* ================== */
-  
+
     if ( (xid = H5Gopen2(fid, LINKNAME, H5P_DEFAULT)) < 0 ) TEST_ERROR;
     if ( (fid2 = H5Iget_file_id(xid)) < 0) TEST_ERROR;
     if ( get_object_header_tag(xid, &link_tag) < 0 ) TEST_ERROR;
-  
+
     /* =================================== */
     /* Verification of Metadata Tag Values */
     /* =================================== */
@@ -3747,12 +3747,12 @@ error:
     return 1;
 } /* check_external_link_open_tags */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_invalid_tag_application
  *
  * Purpose:     This function verifies that an error occurs if a tag
- *              has not been set up during a protect or set of 
+ *              has not been set up during a protect or set of
  *              a new piece of metadata.
  *
  * Return:      0 on Success, 1 on Failure
@@ -3777,7 +3777,7 @@ check_invalid_tag_application(void)
 
     /* Testing Macro */
     TESTING("failure on invalid tag application");
-    
+
 #if H5C_DO_TAGGING_SANITY_CHECKS
     /* Create Fapl */
     if ( (fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0 ) TEST_ERROR;
@@ -3844,7 +3844,7 @@ error:
     return 1;
 } /* check_invalid_tag_application */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -3857,8 +3857,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-int 
-main(void) 
+int
+main(void)
 {
     /* Variable Declarations */
     hid_t fcpl_default = -1;        /* file creation prop list */
@@ -3866,13 +3866,13 @@ main(void)
     hid_t fcpl = -1;                /* file creation prop list */
     unsigned nerrs = 0;         /* Error Encountered */
     int test_type = 0;          /* test type iterator */
-    
+
     /* Open the HDF5 Library */
     H5open();
- 
-    /* ========== */   
+
+    /* ========== */
     /* Test Setup */
-    /* ========== */   
+    /* ========== */
 
     /* Create a standard file creation property list */
     fcpl_default = H5Pcreate(H5P_FILE_CREATE);
@@ -3888,13 +3888,13 @@ main(void)
     /* ========= */
 
     for (test_type=0; test_type<NUM_TEST_TYPES; test_type++) {
-    
+
         /* Run tests on each fcpl set up above. */
         if (test_type == TEST_DEFAULT) {
 
             if (!nerrs) HDprintf("Testing standard tag application cases w/ default fcpl:\n");
             fcpl = fcpl_default;
-        
+
         } else if (test_type == TEST_SHMESG) {
 
             if (!nerrs) HDprintf("Testing standard tag application cases w/ shared messages:\n");
@@ -3931,7 +3931,7 @@ main(void)
     if (!nerrs) nerrs += check_link_getname_tags();
     if (!nerrs) nerrs += check_external_link_creation_tags();
     if (!nerrs) nerrs += check_external_link_open_tags();
-    
+
     if (!nerrs) nerrs += check_dense_attribute_tags();
     if (!nerrs) nerrs += check_link_iteration_tags();
     if (!nerrs) nerrs += check_invalid_tag_application();

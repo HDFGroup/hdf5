@@ -50,10 +50,10 @@ int main(void)
 
 #ifdef H5_HAVE_FILTER_SZIP
     if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
-        printf("yes\n");
+        HDprintf("yes\n");
         return(1);
     }
 #endif /* H5_HAVE_FILTER_SZIP */
-    printf("no\n");
+    HDprintf("no\n");
     return(0);
 }

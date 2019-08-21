@@ -359,17 +359,17 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: swmr_remove_reader [-q] [-s <# of seconds to sleep between\n");
-    printf("    polling>] [-h <# of common symbols to poll>] [-l <# of random symbols\n");
-    printf("    to poll>] [-r <random seed>] <# of seconds to test>\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), 1 second between polling ('-s 1'),\n");
-    printf("5 common symbols to poll ('-h 5'), 10 random symbols to poll ('-l 10'),\n");
-    printf("and will generate a random seed (no -r given).\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: swmr_remove_reader [-q] [-s <# of seconds to sleep between\n");
+    HDprintf("    polling>] [-h <# of common symbols to poll>] [-l <# of random symbols\n");
+    HDprintf("    to poll>] [-r <random seed>] <# of seconds to test>\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), 1 second between polling ('-s 1'),\n");
+    HDprintf("5 common symbols to poll ('-h 5'), 10 random symbols to poll ('-l 10'),\n");
+    HDprintf("and will generate a random seed (no -r given).\n");
+    HDprintf("\n");
     HDexit(1);
 } 
 

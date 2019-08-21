@@ -105,9 +105,9 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
 	    for(k = 0; k < (NX / 2); k++)
 		for(m = 0; m < (NY / 2); m++)
 		    if(buf2[k][m] != buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]) {
-			printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
-			printf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
-			printf("    buf1[%d][%d]=%d\n", (i % 2) * (NX / 2) + k, (j % 2) * (NY / 2) + m, buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]);
+			HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
+			HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
+			HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * (NX / 2) + k, (j % 2) * (NY / 2) + m, buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]);
 			TEST_ERROR;
 		    } /* end if */
 	} /* end for */
@@ -195,9 +195,9 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
 	    for(k = 0; k < (NX / 2); k++)
 		for(m = 0; m < (NY / 2); m++)
 		    if(buf2[k][m] != buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]) {
-			printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
-			printf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
-			printf("    buf1[%d][%d]=%d\n", (i % 2) * (NX / 2) + k, (j % 2) * (NY / 2) + m, buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]);
+			HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
+			HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
+			HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * (NX / 2) + k, (j % 2) * (NY / 2) + m, buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]);
 			TEST_ERROR;
 		    } /* end if */
 	} /* end for */
@@ -289,17 +289,17 @@ main (void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     if(nerrors) {
-        printf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
+        HDprintf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
         exit(EXIT_FAILURE);
     } /* end if */
 
-    printf("All extend tests passed.\n");
+    HDprintf("All extend tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
-    printf("*** One or more extend tests failed ***\n");
+    HDprintf("*** One or more extend tests failed ***\n");
     return 1;
 }
 

@@ -47,11 +47,11 @@
 /* Local Macros */
 /****************/
 
+#ifdef H5_HAVE_ROS3_VFD
+
 /* toggle debugging (enable with 1)
  */
 #define S3COMMS_DEBUG 0
-
-#ifdef H5_HAVE_ROS3_VFD
 
 /* manipulate verbosity of CURL output
  * operates separately from S3COMMS_DEBUG
@@ -67,7 +67,6 @@
  */
 #define S3COMMS_MAX_RANGE_STRING_SIZE 128
 
-#endif /* H5_HAVE_ROS3_VFD */
 
 /******************/
 /* Local Typedefs */
@@ -136,8 +135,6 @@ herr_t H5FD_s3comms_s3r_getsize(s3r_t *handle);
  *
  * Programmer: Jacob Smith
  *             2017-08-17
- *
- * Changes: None.
  *
  *----------------------------------------------------------------------------
  */
@@ -216,14 +213,6 @@ curlwritecallback(char   *ptr,
  *
  * Programmer: Jacob Smith
  *             2017-09-22
- *
- * Changes:
- *
- *     - Change return value to herr_t
- *     - Change list pointer to pointer-to-pointer-to-node
- *     - Change to use singly-linked list (from twin doubly-linked lists)
- *       with modification to hrb_node_t
- *     --- Jake Smith 2017-01-17
  *
  *----------------------------------------------------------------------------
  */
@@ -635,19 +624,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-07-21
  *
- * Changes:
- *
- *     - Conditional free() of `hrb_node_t` pointer properties based on
- *       `which_free` property.
- *     --- Jacob Smith 2017-08-08
- *
- *     - Integrate with HDF5.
- *     - Returns herr_t instead of nothing.
- *     --- Jacob Smith 2017-09-21
- *
- *     - Change argument to from *buf to **buf, to null pointer within call
- *     --- Jacob Smith 2017-20-05
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -708,25 +684,6 @@ done:
  *
  * Programmer: Jacob Smith
  *             2017-07-21
- *
- * Changes:
- *
- *     - Update struct membership for newer 'generic' `hrb_t` format.
- *     --- Jacob Smith, 2017-07-24
- *
- *     - Rename from `hrb_new()` to `hrb_request()`
- *     --- Jacob Smith, 2017-07-25
- *
- *     - Integrate with HDF5.
- *     - Rename from 'hrb_request()` to `H5FD_s3comms_hrb_init_request()`.
- *     - Remove `host` from input parameters.
- *         - Host, as with all other fields, must now be added through the
- *           add-field functions.
- *     - Add `version` (HTTP version string, e.g. "HTTP/1.1") to parameters.
- *     --- Jacob Smith 2017-09-20
- *
- *     - Update to use linked-list `hrb_node_t` headers in structure.
- *     --- Jacob Smith 2017-10-05
  *
  *----------------------------------------------------------------------------
  */
@@ -842,63 +799,9 @@ done:
 } /* end H5FD_s3comms_hrb_init_request() */
 
 
-
 /****************************************************************************
  * S3R FUNCTIONS
  ****************************************************************************/
-
-#ifndef H5_HAVE_ROS3_VFD
-/* No-op, auto-fail, unused-variable implementations if ROS3 is not enabled */
-
-herr_t
-H5FD_s3comms_s3r_close(s3r_t H5_ATTR_UNUSED *handle)
-{
-    herr_t ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_s3comms_s3r_close() */
-
-size_t
-H5FD_s3comms_s3r_get_filesize(s3r_t H5_ATTR_UNUSED *handle)
-{
-    size_t ret_value = 0;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_s3comms_s3r_get_filesize() */
-
-herr_t
-H5FD_s3comms_s3r_getsize(s3r_t H5_ATTR_UNUSED *handle)
-{
-    herr_t ret_value = FAIL;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_s3comms_s3r_getsize() */
-
-s3r_t *
-H5FD_s3comms_s3r_open(
-        const char          H5_ATTR_UNUSED *url,
-        const char          H5_ATTR_UNUSED *region,
-        const char          H5_ATTR_UNUSED *id,
-        const unsigned char H5_ATTR_UNUSED *signing_key)
-{
-    s3r_t        *ret_value = NULL;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_s3comms_s3r_open() */
-
-herr_t
-H5FD_s3comms_s3r_read(
-        s3r_t   H5_ATTR_UNUSED *handle,
-        haddr_t H5_ATTR_UNUSED  offset,
-        size_t  H5_ATTR_UNUSED  len,
-        void    H5_ATTR_UNUSED *dest)
-{
-    herr_t ret_value = FAIL;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_s3comms_s3r_read() */
-
-#else
 
 
 /*----------------------------------------------------------------------------
@@ -919,20 +822,6 @@ H5FD_s3comms_s3r_read(
  *
  * Programmer: Jacob Smith
  *             2017-08-31
- *
- * Changes:
- *
- *    - Remove all messiness related to the now-gone "setopt" utility
- *      as it no longer exists in the handle.
- *    - Return type to `void`.
- *    --- Jacob Smith 2017-09-01
- *
- *    - Incorporate into HDF environment.
- *    - Rename from `s3r_close()` to `H5FD_s3comms_s3r_close()`.
- *    --- Jacob Smith 2017-10-06
- *
- *    - Change separate host, resource, port info to `parsed_url_t` struct ptr.
- *    --- Jacob Smith 2017-11-01
  *
  *----------------------------------------------------------------------------
  */
@@ -995,8 +884,6 @@ done:
  *
  * Programmer: Jacob Smith 2017-01-14
  *
- * Changes: None
- *
  *----------------------------------------------------------------------------
  */
 size_t
@@ -1044,43 +931,23 @@ H5FD_s3comms_s3r_get_filesize(s3r_t *handle)
  * Programmer: Jacob Smith
  *             2017-08-23
  *
- * Changes:
- *
- *     - Update to revised `s3r_t` format and life cycle.
- *     --- Jacob Smith 2017-09-01
- *
- *     - Conditional change to static header buffer and structure.
- *     --- Jacob Smith 2017-09-05
- *
- *     - Incorporate into HDF environment.
- *     - Rename from `s3r_getsize()` to `H5FD_s3comms_s3r_getsize()`.
- *     --- Jacob Smith 2017-10-06
- *
  *----------------------------------------------------------------------------
  */
 herr_t
 H5FD_s3comms_s3r_getsize(s3r_t *handle)
 {
-#ifdef H5_HAVE_ROS3_VFD
     uintmax_t             content_length = 0;
     CURL                  *curlh          = NULL;
     char                  *end            = NULL;
     char                  *headerresponse = NULL;
-    herr_t                 ret_value      = SUCCEED;
     struct s3r_datastruct  sds            = {
             S3COMMS_CALLBACK_DATASTRUCT_MAGIC,
             NULL,
             0 };
     char                  *start          = NULL;
-#else
-    herr_t                 ret_value      = FAIL;
-#endif /* H5_HAVE_ROS3_VFD */
-
-
+    herr_t                 ret_value      = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#ifdef H5_HAVE_ROS3_VFD
 
 #if S3COMMS_DEBUG
     HDfprintf(stdout, "called H5FD_s3comms_s3r_getsize.\n");
@@ -1238,8 +1105,6 @@ done:
     H5MM_xfree(headerresponse);
     sds.magic += 1; /* set to bad magic */
 
-#endif /* H5_HAVE_ROS3_VFD */
-
     FUNC_LEAVE_NOAPI(ret_value);
 
 } /* H5FD_s3comms_s3r_getsize */
@@ -1282,20 +1147,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-09-01
  *
- * Changes:
- *
- *     - Incorporate into HDF environment.
- *     - Rename from `s3r_open()` to `H5FD_s3comms_s3r_open()`.
- *     --- Jacob Smith 2017-10-06
- *
- *     - Remove port number from signature.
- *     - Name (`url`) must be complete url with http scheme and optional port
- *       number in string.
- *         - e.g., "http://bucket.aws.com:9000/myfile.dat?query=param"
- *     - Internal storage of host, resource, and port information moved into
- *       `parsed_url_t` struct pointer.
- *     --- Jacob Smith 2017-11-01
- *
  *----------------------------------------------------------------------------
  */
 s3r_t *
@@ -1304,19 +1155,13 @@ H5FD_s3comms_s3r_open(const char          *url,
                       const char          *id,
                       const unsigned char *signing_key)
 {
-#ifdef H5_HAVE_ROS3_VFD
     size_t        tmplen    = 0;
     CURL         *curlh     = NULL;
     s3r_t        *handle    = NULL;
     parsed_url_t *purl      = NULL;
-#endif
     s3r_t        *ret_value = NULL;
 
-
-
     FUNC_ENTER_NOAPI_NOINIT
-
-#ifdef H5_HAVE_ROS3_VFD
 
 #if S3COMMS_DEBUG
     HDfprintf(stdout, "called H5FD_s3comms_s3r_open.\n");
@@ -1492,11 +1337,9 @@ H5FD_s3comms_s3r_open(const char          *url,
     HDmemcpy(handle->httpverb, "GET", 4);
 
     ret_value = handle;
-#endif /* H5_HAVE_ROS3_VFD */
 
 done:
     if (ret_value == NULL) {
-#ifdef H5_HAVE_ROS3_VFD
         if (curlh != NULL) {
             curl_easy_cleanup(curlh);
         }
@@ -1513,7 +1356,6 @@ done:
             }
             H5MM_xfree(handle);
         }
-#endif /* H5_HAVE_ROS3_VFD */
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1560,29 +1402,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-08-22
  *
- * Changes:
- *
- *     - Revise structure to prevent unnecessary hrb_t element creation.
- *     - Rename tmprstr -> rangebytesstr to reflect purpose.
- *     - Insert needed `free()`s, particularly for `sds`.
- *     --- Jacob Smith 2017-08-23
- *
- *     - Revise heavily to accept buffer, range as parameters.
- *     - Utilize modified s3r_t format.
- *     --- Jacob Smith 2017-08-31
- *
- *     - Incorporate into HDF library.
- *     - Rename from `s3r_read()` to `H5FD_s3comms_s3r_read()`.
- *     - Return `herr_t` succeed/fail instead of S3code.
- *     - Update to use revised `hrb_t` and `hrb_node_t` structures.
- *     --- Jacob Smith 2017-10-06
- *
- *     - Update to use `parsed_url_t *purl` in handle.
- *     --- Jacob Smith 2017-11-01
- *
- *     - Better define behavior upon read past EOF
- *     --- Jacob Smith 2017-01-19
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -1591,7 +1410,6 @@ H5FD_s3comms_s3r_read(s3r_t   *handle,
                       size_t   len,
                       void    *dest)
 {
-#ifdef H5_HAVE_ROS3_VFD
     CURL                  *curlh         = NULL;
     CURLcode               p_status      = CURLE_OK;
     struct curl_slist     *curlheaders   = NULL;
@@ -1604,15 +1422,8 @@ H5FD_s3comms_s3r_read(s3r_t   *handle,
                                               /* return value of HDsnprintf  */
     struct s3r_datastruct *sds           = NULL;
     herr_t                 ret_value     = SUCCEED;
-#else
-    herr_t                 ret_value     = FAIL;
-#endif /* H5_HAVE_ROS3_VFD */
-
-
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#ifdef H5_HAVE_ROS3_VFD
 
 #if S3COMMS_DEBUG
     HDfprintf(stdout, "called H5FD_s3comms_s3r_read.\n");
@@ -2105,12 +1916,9 @@ done:
         }
     }
 
-#endif /* H5_HAVE_ROS3_VFD */
-
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5FD_s3comms_s3r_read */
 
-#endif /* H5_HAVE_ROS3_VFD */
 
 /****************************************************************************
  * MISCELLANEOUS FUNCTIONS
@@ -2132,8 +1940,6 @@ done:
  *
  * Programmer: Jacob Smith
  *             2017-07-12
- *
- * Changes: None.
  *
  *----------------------------------------------------------------------------
  */
@@ -2191,8 +1997,6 @@ gmnow(void)
  *
  * Programmer: Jacob Smith
  *             2017-10-04
- *
- * Changes: None.
  *
  *----------------------------------------------------------------------------
  */
@@ -2362,20 +2166,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-07-12
  *
- * Changes:
- *
- *     - Integrate into HDF.
- *     - Rename from hex() to H5FD_s3comms_bytes_to_hex.
- *     - Change return type from `void` to `herr_t`.
- *     --- Jacob Smtih 2017-09-14
- *
- *     - Add bool parameter `lowercase` to configure upper/lowercase output
- *       of a-f hex characters.
- *     --- Jacob Smith 2017-09-19
- *
- *     - Change bool type to `hbool_t`
- *     --- Jacob Smtih 2017-10-11
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -2438,8 +2228,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-11-01
  *
- * Changes: None.
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -2494,22 +2282,8 @@ H5FD_s3comms_free_purl(parsed_url_t *purl)
  * Programmer: Jacob Smith
  *             2017-07-??
  *
- * Changes:
- *
- *     - Integrate with HDF5.
- *     - Rename from `HMAC_SHA256` to `H5FD_s3comms_HMAC_SHA256`.
- *     - Rename output parameter from `md` to `dest`.
- *     - Return `herr_t` type instead of `void`.
- *     - Call `H5FD_s3comms_bytes_to_hex` to generate hex cleartext for output.
- *     --- Jacob Smith 2017-09-19
- *
- *     - Use static char array instead of malloc'ing `md`
- *     --- Jacob Smith 2017-10-10
- *
  *----------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_ROS3_VFD
-
 herr_t
 H5FD_s3comms_HMAC_SHA256(
         const unsigned char *key,
@@ -2555,23 +2329,6 @@ H5FD_s3comms_HMAC_SHA256(
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5FD_s3comms_HMAC_SHA256 */
-
-#else /* H5_HAVE_ROS3_VFD not defined */
-
-herr_t
-H5FD_s3comms_HMAC_SHA256(
-        const unsigned char H5_ATTR_UNUSED *key,
-        size_t              H5_ATTR_UNUSED  key_len,
-        const char          H5_ATTR_UNUSED *msg,
-        size_t              H5_ATTR_UNUSED  msg_len,
-        char                H5_ATTR_UNUSED *dest)
-{
-    herr_t ret_value = FAIL;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_s3comms_HMAC_SHA256() */
-
-#endif /* H5_HAVE_ROS3_VFD */
 
 
 /*-----------------------------------------------------------------------------
@@ -2620,8 +2377,6 @@ H5FD_s3comms_HMAC_SHA256(
  *
  * Programmer: Jacob Smith
  *             2018-02-27
- *
- * Changes: None
  *
  *-----------------------------------------------------------------------------
  */
@@ -2781,8 +2536,6 @@ done:
  * Programmer: Jacob Smith
  *             2018-02-27
  *
- * Changes: None
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -2903,8 +2656,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-09-18
  *
- * Changes: None.
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -2967,8 +2718,6 @@ done:
  *
  * Programmer: Jacob Smith
  *             2017-10-30
- *
- * Changes: None.
  *
  *----------------------------------------------------------------------------
  */
@@ -3242,12 +2991,6 @@ done:
  *
  * Programmer: Jacob Smith
  *
- * Changes:
- *
- *     - Integrate into HDF.
- *     - Rename from `hexutf8` to `H5FD_s3comms_percent_encode_char`.
- *     --- Jacob Smith 2017-09-15
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -3421,19 +3164,8 @@ done:
  * Programmer: Jacob Smith
  *             2017-07-13
  *
- * Changes:
- *
- *     - Integrate into HDF5.
- *     - Return herr_t type.
- *     --- Jacob Smith 2017-09-18
- *
- *     - NULL check and fail of input parameters.
- *     --- Jacob Smith 2017-10-10
- *
  *----------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_ROS3_VFD
-
 herr_t
 H5FD_s3comms_signing_key(
         unsigned char *md,
@@ -3526,22 +3258,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_s3comms_signing_key() */
 
-#else /* H5_HAVE_ROS3_VFD not defined */
-
-herr_t
-H5FD_s3comms_signing_key(
-        unsigned char H5_ATTR_UNUSED *md,
-        const char    H5_ATTR_UNUSED *secret,
-        const char    H5_ATTR_UNUSED *region,
-        const char    H5_ATTR_UNUSED *iso8601now)
-{
-    herr_t ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR;
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD_s3comms_signing_key() */
-
-#endif /* H5_HAVE_ROS3_VFD */
-
 
 /*----------------------------------------------------------------------------
  *
@@ -3577,20 +3293,8 @@ H5FD_s3comms_signing_key(
  * Programmer: Jacob Smith
  *             2017-07-??
  *
- * Changes:
- *
- *     - Integrate with HDF5.
- *     - Rename from `tostringtosign` to `H5FD_s3comms_tostringtosign`.
- *     - Return `herr_t` instead of characters written.
- *     - Use HDF-friendly bytes-to-hex function (`H5FD_s3comms_bytes_to_hex`)
- *       instead of general-purpose, deprecated `hex()`.
- *     - Adjust casts to openssl's `SHA256`.
- *     - Input strings are now `const`.
- *     --- Jacob Smith 2017-09-19
- *
  *----------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_ROS3_VFD
 herr_t
 H5FD_s3comms_tostringtosign(
         char       *dest,
@@ -3681,22 +3385,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ros3_tostringtosign() */
 
-#else /* H5_HAVE_ROS3_VFD not defined */
-
-herr_t
-H5FD_s3comms_tostringtosign(
-        char       H5_ATTR_UNUSED *dest,
-        const char H5_ATTR_UNUSED *req,
-        const char H5_ATTR_UNUSED *now,
-        const char H5_ATTR_UNUSED *region)
-{
-    herr_t        ret_value = FAIL;
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ros3_tostringtosign() */
-
-#endif /* H5_HAVE_ROS3_VFD */
-
 
 /*----------------------------------------------------------------------------
  *
@@ -3724,13 +3412,6 @@ H5FD_s3comms_tostringtosign(
  *
  * Programmer: Jacob Smith
  *             2017-09-18
- *
- * Changes:
- *
- *     - Rename from `trim()` to `H5FD_s3comms_trim()`.
- *     - Incorporate into HDF5.
- *     - Returns `herr_t` type.
- *     --- Jacob Smith 2017-??-??
  *
  *----------------------------------------------------------------------------
  */
@@ -3826,16 +3507,6 @@ done:
  * Programmer: Jacob Smith
  *             2017-07-??
  *
- * Changes:
- *
- *     - Integrate to HDF environment.
- *     - Rename from `uriencode` to `H5FD_s3comms_uriencode`.
- *     - Change return from characters written to herr_t;
- *       move to i/o parameter `n_written`.
- *     - No longer append null-terminator to string;
- *       programmer may append or not as appropriate upon return.
- *     --- Jacob Smith 2017-09-15
- *
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -3915,4 +3586,5 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_uriencode */
 
+#endif /* H5_HAVE_ROS3_VFD */
 

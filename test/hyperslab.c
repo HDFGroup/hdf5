@@ -85,19 +85,19 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
 
     for(i = 0; i < nx; i++) {
     if(nz > 1)
-        printf("i=%lu:\n", (unsigned long)i);
+        HDprintf("i=%lu:\n", (unsigned long)i);
     else
-        printf("%03lu:", (unsigned long)i);
+        HDprintf("%03lu:", (unsigned long)i);
 
     for(j = 0; j < ny; j++) {
         if(nz > 1)
-        printf("%03lu:", (unsigned long)j);
+        HDprintf("%03lu:", (unsigned long)j);
         for(k = 0; k < nz; k++)
-        printf(" %3d", *array++);
+        HDprintf(" %3d", *array++);
         if(nz > 1)
-        printf("\n");
+        HDprintf("\n");
     } /* end for */
-    printf("\n");
+    HDprintf("\n");
     } /* end for */
 } /* end print_array() */
 
@@ -122,7 +122,7 @@ print_ref(size_t nx, size_t ny, size_t nz)
     uint8_t *array;
 
     if(NULL != (array = (uint8_t *)HDmalloc(nx * ny * nz))) {
-        printf("Reference array:\n");
+        HDprintf("Reference array:\n");
         init_full(array, nx, ny, nz);
         print_array(array, nx, ny, nz);
         HDfree(array);
@@ -168,21 +168,21 @@ test_fill(size_t nx, size_t ny, size_t nz,
         if(0 == ny) {
             ndims = 1;
             ny = nz = 1;
-            sprintf(dim, "%lu", (unsigned long) nx);
+            HDsprintf(dim, "%lu", (unsigned long) nx);
         } /* end if */
         else {
             ndims = 2;
             nz = 1;
-            sprintf(dim, "%lux%lu", (unsigned long) nx, (unsigned long) ny);
+            HDsprintf(dim, "%lux%lu", (unsigned long) nx, (unsigned long) ny);
         } /* end else */
     } /* end if */
     else {
         ndims = 3;
-        sprintf(dim, "%lux%lux%lu", (unsigned long) nx, (unsigned long) ny,
+        HDsprintf(dim, "%lux%lux%lu", (unsigned long) nx, (unsigned long) ny,
                 (unsigned long) nz);
     } /* end else */
-    sprintf(s, "Testing hyperslab fill %-11s variable hyperslab", dim);
-    printf("%-70s", s);
+    HDsprintf(s, "Testing hyperslab fill %-11s variable hyperslab", dim);
+    HDprintf("%-70s", s);
     fflush(stdout);
 
     /* Allocate array */
@@ -242,8 +242,8 @@ test_fill(size_t nx, size_t ny, size_t nz,
                                          * is going directly to a terminal.
                                          */
                                         AT();
-                                        printf("   acc != ref_value\n");
-                                        printf("   i=%lu, j=%lu, k=%lu, "
+                                        HDprintf("   acc != ref_value\n");
+                                        HDprintf("   i=%lu, j=%lu, k=%lu, "
                                             "dx=%lu, dy=%lu, dz=%lu, "
                                             "fill=%d\n", (unsigned long)i,
                                                 (unsigned long)j,
@@ -252,7 +252,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
                                                 (unsigned long)dy,
                                                 (unsigned long)dz, fill_value);
                                         print_ref(nx, ny, nz);
-                                        printf("\n   Result is:\n");
+                                        HDprintf("\n   Result is:\n");
                                         print_array(dst, nx, ny, nz);
                                     } /* end if */
                                     goto error;
@@ -332,17 +332,17 @@ test_copy(int mode,
         if(0 == ny) {
             ndims = 1;
             ny = nz = 1;
-            sprintf(dim, "%lu", (unsigned long) nx);
+            HDsprintf(dim, "%lu", (unsigned long) nx);
         } /* end if */
         else {
             ndims = 2;
             nz = 1;
-            sprintf(dim, "%lux%lu", (unsigned long) nx, (unsigned long) ny);
+            HDsprintf(dim, "%lux%lu", (unsigned long) nx, (unsigned long) ny);
         } /* end else */
     } /* end if */
     else {
         ndims = 3;
-        sprintf(dim, "%lux%lux%lu", (unsigned long) nx, (unsigned long) ny,
+        HDsprintf(dim, "%lux%lux%lu", (unsigned long) nx, (unsigned long) ny,
                 (unsigned long) nz);
     } /* end else */
 
@@ -376,8 +376,8 @@ test_copy(int mode,
             HDabort();
     } /* end switch */
 
-    sprintf(s, "Testing hyperslab copy %-11s %s", dim, sub);
-    printf("%-70s", s);
+    HDsprintf(s, "Testing hyperslab copy %-11s %s", dim, sub);
+    HDprintf("%-70s", s);
     fflush(stdout);
 
     /*
@@ -481,8 +481,8 @@ test_copy(int mode,
                                      * going directly to a terminal.
                                      */
                                     AT();
-                                    printf("   acc != ref_value\n");
-                                    printf("   i=%lu, j=%lu, k=%lu, "
+                                    HDprintf("   acc != ref_value\n");
+                                    HDprintf("   i=%lu, j=%lu, k=%lu, "
                                         "dx=%lu, dy=%lu, dz=%lu\n",
                                             (unsigned long)i,
                                             (unsigned long)j,
@@ -491,7 +491,7 @@ test_copy(int mode,
                                             (unsigned long)dy,
                                             (unsigned long)dz);
                                     print_ref(nx, ny, nz);
-                                    printf("\n     Destination array is:\n");
+                                    HDprintf("\n     Destination array is:\n");
                                     print_array(dst, nx, ny, nz);
                                 } /* end if */
                                 goto error;
@@ -522,9 +522,9 @@ test_copy(int mode,
                                      * going directly to a terminal.
                                      */
                                     AT();
-                                    printf("   acc != ref_value + nx*ny*nz - "
+                                    HDprintf("   acc != ref_value + nx*ny*nz - "
                                         "dx*dy*dz\n");
-                                    printf("   i=%lu, j=%lu, k=%lu, "
+                                    HDprintf("   i=%lu, j=%lu, k=%lu, "
                                         "dx=%lu, dy=%lu, dz=%lu\n",
                                             (unsigned long)i,
                                             (unsigned long)j,
@@ -533,7 +533,7 @@ test_copy(int mode,
                                             (unsigned long)dy,
                                             (unsigned long)dz);
                                     print_ref(nx, ny, nz);
-                                    printf("\n     Destination array is:\n");
+                                    HDprintf("\n     Destination array is:\n");
                                     print_array(dst, nx, ny, nz);
                                 } /* end if */
                                 goto error;
@@ -594,7 +594,7 @@ test_multifill(size_t nx)
     } fill, *src = NULL, *dst = NULL;
     hsize_t            i, j;
 
-    printf("%-70s", "Testing multi-byte fill value");
+    HDprintf("%-70s", "Testing multi-byte fill value");
     fflush(stdout);
 
     /* Initialize the source and destination */
@@ -639,28 +639,28 @@ test_multifill(size_t nx)
     s[0] = '\0';
     for(i = 0; i < nx; i++) {
         if(dst[i].left != 3333333)
-            sprintf(s, "bad dst[%lu].left", (unsigned long)i);
+            HDsprintf(s, "bad dst[%lu].left", (unsigned long)i);
         else if(!H5_DBL_ABS_EQUAL(dst[i].mid, fill.mid))
             /* Check if two DOUBLE values are equal.  If their difference
              * is smaller than the EPSILON value for double, they are
              * considered equal. See the definition in h5test.h.
              */
-            sprintf(s, "bad dst[%lu].mid", (unsigned long)i);
+            HDsprintf(s, "bad dst[%lu].mid", (unsigned long)i);
         else if(dst[i].right != 4444444)
-            sprintf(s, "bad dst[%lu].right", (unsigned long)i);
+            HDsprintf(s, "bad dst[%lu].right", (unsigned long)i);
         if(s[0]) {
             H5_FAILED()
             if(!HDisatty(1)) {
                 AT();
-                printf("   fill={%d,%g,%d}\n   ", fill.left, fill.mid,
+                HDprintf("   fill={%d,%g,%d}\n   ", fill.left, fill.mid,
                         fill.right);
                 for(j = 0; j < sizeof(fill); j++)
-                    printf(" %02x", ((uint8_t *)&fill)[j]);
-                printf("\n   dst[%lu]={%d,%g,%d}\n   ", (unsigned long)i,
+                    HDprintf(" %02x", ((uint8_t *)&fill)[j]);
+                HDprintf("\n   dst[%lu]={%d,%g,%d}\n   ", (unsigned long)i,
                         dst[i].left, dst[i].mid, dst[i].right);
                 for(j = 0; j < sizeof(dst[i]); j++)
-                    printf(" %02x", ((uint8_t *)(dst + i))[j]);
-                printf("\n");
+                    HDprintf(" %02x", ((uint8_t *)(dst + i))[j]);
+                HDprintf("\n");
             } /* end if */
             goto error;
         } /* end if */
@@ -709,7 +709,7 @@ test_endian(size_t nx)
     hsize_t        size[2];        /*size vector            */
     hsize_t        i, j;
 
-    printf("%-70s", "Testing endian conversion by stride");
+    HDprintf("%-70s", "Testing endian conversion by stride");
     fflush(stdout);
 
     /* Initialize arrays */
@@ -742,10 +742,10 @@ test_endian(size_t nx)
                      * to a terminal.
                      */
                     AT();
-                    printf("   i=%lu, j=%lu\n", (unsigned long)i, (unsigned long)j);
-                    printf("   Source array is:\n");
+                    HDprintf("   i=%lu, j=%lu\n", (unsigned long)i, (unsigned long)j);
+                    HDprintf("   Source array is:\n");
                     print_array(src, nx, (size_t)4, (size_t)1);
-                    printf("\n     Result is:\n");
+                    HDprintf("\n     Result is:\n");
                     print_array(dst, nx, (size_t)4, (size_t)1);
                 } /* end if */
                 goto error;
@@ -795,9 +795,9 @@ test_transpose(size_t nx, size_t ny)
     char    s[256];
     hsize_t    i, j;
 
-    sprintf(s, "Testing 2d transpose by stride %4lux%-lud", (unsigned long)nx,
+    HDsprintf(s, "Testing 2d transpose by stride %4lux%-lud", (unsigned long)nx,
             (unsigned long)ny);
-    printf("%-70s", s);
+    HDprintf("%-70s", s);
     fflush(stdout);
 
     /* Initialize */
@@ -829,20 +829,20 @@ test_transpose(size_t nx, size_t ny)
                 H5_FAILED()
                 if(!HDisatty(1)) {
                     AT();
-                    printf("   diff at i=%lu, j=%lu\n", (unsigned long)i, (unsigned long)j);
-                    printf("   Source is:\n");
+                    HDprintf("   diff at i=%lu, j=%lu\n", (unsigned long)i, (unsigned long)j);
+                    HDprintf("   Source is:\n");
                     for(i = 0; i < nx; i++) {
-                        printf("%3lu:", (unsigned long)i);
+                        HDprintf("%3lu:", (unsigned long)i);
                         for(j = 0; j < ny; j++)
-                            printf(" %6d", src[i * ny + j]);
-                        printf("\n");
+                            HDprintf(" %6d", src[i * ny + j]);
+                        HDprintf("\n");
                     } /* end for */
-                    printf("\n     Destination is:\n");
+                    HDprintf("\n     Destination is:\n");
                     for (i = 0; i < ny; i++) {
-                        printf("%3lu:", (unsigned long)i);
+                        HDprintf("%3lu:", (unsigned long)i);
                         for(j = 0; j < nx; j++)
-                            printf(" %6d", dst[i * nx + j]);
-                        printf("\n");
+                            HDprintf(" %6d", dst[i * nx + j]);
+                        HDprintf("\n");
                     } /* end for */
                 } /* end if */
                 goto error;
@@ -896,10 +896,10 @@ test_sub_super(size_t nx, size_t ny)
     hsize_t        i, j;
     char        s[256];
 
-    sprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ",
+    HDsprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ",
             (unsigned long)(2 * nx), (unsigned long)(2 * ny),
             (unsigned long)nx, (unsigned long)ny);
-    printf("%-70s", s);
+    HDprintf("%-70s", s);
     fflush(stdout);
 
     /* Initialize */
@@ -931,12 +931,12 @@ test_sub_super(size_t nx, size_t ny)
                 H5_FAILED()
                 if(!HDisatty(1)) {
                     AT();
-                    printf("   full[%lu][%lu] != half[%lu][%lu]\n",
+                    HDprintf("   full[%lu][%lu] != half[%lu][%lu]\n",
                             (unsigned long)i * 2, (unsigned long)j * 2,
                             (unsigned long)i, (unsigned long)j);
-                    printf("   full is:\n");
+                    HDprintf("   full is:\n");
                     print_array(full, 2 * nx, 2 * ny, (size_t)1);
-                    printf("\n     half is:\n");
+                    HDprintf("\n     half is:\n");
                     print_array(half, nx, ny, (size_t)1);
                 } /* end if */
                 goto error;
@@ -949,10 +949,10 @@ test_sub_super(size_t nx, size_t ny)
      * Test replicating pixels to produce an image twice as large in each
      * dimension.
      */
-    sprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ",
+    HDsprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ",
             (unsigned long)nx, (unsigned long)ny, (unsigned long)(2 * nx),
             (unsigned long)(2 * ny));
-    printf("%-70s", s);
+    HDprintf("%-70s", s);
     fflush(stdout);
 
     /* Setup stride */
@@ -978,28 +978,28 @@ test_sub_super(size_t nx, size_t ny)
     for(i = 0; i < nx; i++) {
         for(j = 0; j < ny; j++) {
             if(half[i * ny + j] != twice[4 * i * ny + 2 * j])
-                sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
+                HDsprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
                         (unsigned long)i, (unsigned long)j,
                         (unsigned long)i * 2, (unsigned long)j * 2);
             else if(half[i * ny + j] != twice[4 * i * ny + 2 * j + 1])
-                sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
+                HDsprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
                         (unsigned long)i, (unsigned long)j,
                         (unsigned long)i * 2, (unsigned long)j * 2 + 1);
             else if(half[i * ny + j] != twice[(2 * i + 1) * 2 * ny + 2 * j])
-                sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
+                HDsprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
                         (unsigned long)i, (unsigned long)j,
                         (unsigned long)i * 2 + 1, (unsigned long)j * 2);
             else if(half[i * ny + j] != twice[(2 * i + 1) * 2 * ny + 2 * j + 1])
-                sprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
+                HDsprintf(s, "half[%lu][%lu] != twice[%lu][%lu]",
                         (unsigned long)i, (unsigned long)j,
                         (unsigned long)i * 2 + 1, (unsigned long)j * 2 + 1);
             if(s[0]) {
                 H5_FAILED()
                 if(!HDisatty(1)) {
                     AT();
-                    printf("   %s\n   Half is:\n", s);
+                    HDprintf("   %s\n   Half is:\n", s);
                     print_array(half, nx, ny, (size_t)1);
-                    printf("\n     Twice is:\n");
+                    HDprintf("\n     Twice is:\n");
                     print_array(twice, 2 * nx, 2 * ny, (size_t)1);
                 } /* end if */
                 goto error;
@@ -1051,7 +1051,7 @@ test_array_fill(size_t lo, size_t hi)
     size_t    u, v, w;        /* Local index variables        */
     char    s[256];
 
-    sprintf(s, "array filling %4lu-%-4lu elements", (unsigned long)lo,(unsigned long)hi);
+    HDsprintf(s, "array filling %4lu-%-4lu elements", (unsigned long)lo,(unsigned long)hi);
     TESTING(s);
 
     /* Initialize */
@@ -1116,7 +1116,7 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     hsize_t     new_coords[ARRAY_OFFSET_NDIMS];  /* X, Y & X coordinates of offset */
     char    s[256];
 
-    sprintf(s, "array offset %4lux%4lux%4lu elements", (unsigned long)z,(unsigned long)y,(unsigned long)x);
+    HDsprintf(s, "array offset %4lux%4lux%4lu elements", (unsigned long)z,(unsigned long)y,(unsigned long)x);
     TESTING(s);
 
     /* Initialize */
@@ -1208,18 +1208,18 @@ main(int argc, char *argv[])
             else if(!HDstrcmp(argv[i], "medium"))
                 size_of_test |= TEST_MEDIUM;
             else {
-                printf("unrecognized argument: %s\n", argv[i]);
+                HDprintf("unrecognized argument: %s\n", argv[i]);
                 HDexit(EXIT_FAILURE);
             } /* end else */
         } /* end for */
     } /* end else */
 
-    printf("Test sizes: ");
+    HDprintf("Test sizes: ");
     if(size_of_test & TEST_SMALL)
-        printf(" SMALL");
+        HDprintf(" SMALL");
     if(size_of_test & TEST_MEDIUM)
-        printf(" MEDIUM");
-    printf("\n");
+        HDprintf(" MEDIUM");
+    HDprintf("\n");
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -1425,14 +1425,14 @@ main(int argc, char *argv[])
     /*--- END OF TESTS ---*/
 
     if(nerrors) {
-        printf("***** %d HYPERSLAB TEST%s FAILED! *****\n", nerrors, 1
+        HDprintf("***** %d HYPERSLAB TEST%s FAILED! *****\n", nerrors, 1
                 == nerrors ? "" : "S");
         if(HDisatty(1))
-            printf("(Redirect output to a pager or a file to see debug output)\n");
+            HDprintf("(Redirect output to a pager or a file to see debug output)\n");
         HDexit(EXIT_FAILURE);
     } /* end if */
 
-    printf("All hyperslab tests passed.\n");
+    HDprintf("All hyperslab tests passed.\n");
 
 #ifdef H5_HAVE_THREADSAFE
     H5close();

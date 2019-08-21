@@ -62,9 +62,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Fsfile.c H5Fspace.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAint.c H5FAstat.c H5FAtest.c \
-        H5FD.c H5FDcore.c  \
-        H5FDfamily.c H5FDhdfs.c H5FDint.c H5FDlog.c H5FDs3comms.c \
-        H5FDmulti.c H5FDros3.c H5FDsec2.c H5FDspace.c H5FDstdio.c H5FDtest.c \
+        H5FD.c H5FDcore.c H5FDfamily.c H5FDhdfs.c H5FDint.c H5FDlog.c \
+        H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c H5FDtest.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSint.c H5FSsection.c \
         H5FSstat.c H5FStest.c \
         H5G.c H5Gbtree2.c H5Gcache.c \
@@ -132,6 +131,11 @@ endif
 # Only compile the direct VFD if necessary
 if DIRECT_VFD_CONDITIONAL
     libhdf5_la_SOURCES += H5FDdirect.c
+endif
+
+# Only compile the read-only S3 VFD if necessary
+if ROS3_VFD_CONDITIONAL
+    libhdf5_la_SOURCES += H5FDros3.c H5FDs3comms.c
 endif
 
 # Public headers

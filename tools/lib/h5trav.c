@@ -823,14 +823,14 @@ trav_attr(hid_t
     const char          *buf = op_data->path;
 
     if((strlen(buf)==1) && (*buf=='/'))
-        printf(" %-10s %s%s", "attribute", buf, attr_name);
+        HDprintf(" %-10s %s%s", "attribute", buf, attr_name);
     else
-        printf(" %-10s %s/%s", "attribute", buf, attr_name);
+        HDprintf(" %-10s %s/%s", "attribute", buf, attr_name);
 
 #ifdef H5TRAV_PRINT_SPACE
     if(trav_verbosity < 2) {
 #endif
-        printf("\n");
+        HDprintf("\n");
 #ifdef H5TRAV_PRINT_SPACE
     }
     else {
@@ -850,26 +850,26 @@ trav_attr(hid_t
             switch(space_type) {
                 case H5S_SCALAR:
                     /* scalar dataspace */
-                    printf(" scalar\n");
+                    HDprintf(" scalar\n");
                     break;
 
                 case H5S_SIMPLE:
                     /* simple dataspace */
-                    printf(" {");
+                    HDprintf(" {");
                     for (i = 0; i < ndims; i++) {
-                        printf("%s" HSIZE_T_FORMAT, i?", ":"", size[i]);
+                        HDprintf("%s" HSIZE_T_FORMAT, i?", ":"", size[i]);
                     }
-                    printf("}\n");
+                    HDprintf("}\n");
                     break;
 
                 case H5S_NULL:
                     /* null dataspace */
-                    printf(" null\n");
+                    HDprintf(" null\n");
                     break;
 
                 default:
                     /* Unknown dataspace type */
-                    printf(" unknown\n");
+                    HDprintf(" unknown\n");
                     break;
             } /* end switch */
 
@@ -903,22 +903,22 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
      */
     switch(oinfo->type) {
         case H5O_TYPE_GROUP:
-            printf(" %-10s %s", "group", path);
+            HDprintf(" %-10s %s", "group", path);
             break;
 
         case H5O_TYPE_DATASET:
-            printf(" %-10s %s", "dataset", path);
+            HDprintf(" %-10s %s", "dataset", path);
             break;
 
         case H5O_TYPE_NAMED_DATATYPE:
-            printf(" %-10s %s", "datatype", path);
+            HDprintf(" %-10s %s", "datatype", path);
             break;
 
         case H5O_TYPE_MAP:
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:
-            printf(" %-10s %s", "unknown object type", path);
+            HDprintf(" %-10s %s", "unknown object type", path);
             break;
     } /* end switch */
 
@@ -928,14 +928,14 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
 
         op_data.path = path;
         /* Finish printing line about object */
-        printf("\n");
+        HDprintf("\n");
         if(trav_verbosity > 0)
             H5Aiterate_by_name(print_udata->fid, path, trav_index_by, trav_index_order,
                                NULL, trav_attr, &op_data, H5P_DEFAULT);
     }
     else
         /* Print the link's original name */
-        printf(" -> %s\n", already_visited);
+        HDprintf(" -> %s\n", already_visited);
 
     return(0);
 } /* end trav_print_visit_obj() */
@@ -963,12 +963,12 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
                 if(targbuf) {
                     if(H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT) < 0)
                         targbuf[0] = 0;
-                    printf(" %-10s %s -> %s\n", "link", path, targbuf);
+                    HDprintf(" %-10s %s -> %s\n", "link", path, targbuf);
                     HDfree(targbuf);
                 }
             } /* end if */
             else
-                printf(" %-10s %s ->\n", "link", path);
+                HDprintf(" %-10s %s ->\n", "link", path);
             break;
 
         case H5L_TYPE_EXTERNAL:
@@ -982,12 +982,12 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
                     if(H5Lget_val(print_udata->fid, path, targbuf, linfo->u.val_size + 1, H5P_DEFAULT) < 0)
                         targbuf[0] = 0;
                     if(H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &objname) >= 0)
-                        printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
+                        HDprintf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
                     HDfree(targbuf);
                 }
             } /* end if */
             else
-                printf(" %-10s %s ->\n", "ext link", path);
+                HDprintf(" %-10s %s ->\n", "ext link", path);
             break;
 
         case H5L_TYPE_HARD:
@@ -997,7 +997,7 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
         case H5L_TYPE_ERROR:
         case H5L_TYPE_MAX:
         default:
-            printf(" %-10s %s -> ???\n", "unknown type of UD link", path);
+            HDprintf(" %-10s %s -> ???\n", "unknown type of UD link", path);
             break;
     } /* end switch() */
 

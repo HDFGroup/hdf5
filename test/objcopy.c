@@ -592,7 +592,7 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         goto done;
 
     for(u = 0; u < num_attributes_g; u++) {
-        sprintf(attr_name, "%u attr", u);
+        HDsprintf(attr_name, "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -661,7 +661,7 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
     if((acpl = H5Pcreate(H5P_ATTRIBUTE_CREATE)) < 0) goto done;
 
     for(u = 0; u < num_attributes_g; u++) {
-        sprintf(attr_name, "%u attr", u);
+        HDsprintf(attr_name, "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -6667,15 +6667,15 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
 
     /* create nested sub-groups & datasets */
     for(i = 0; i < NUM_SUB_GROUPS; i++) {
-        sprintf(objname, "Group #%d", i);
+        HDsprintf(objname, "Group #%d", i);
         if((gid_sub = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
         for(j = 0; j < NUM_SUB_GROUPS; j++) {
-            sprintf(objname, "Group #%d", j);
+            HDsprintf(objname, "Group #%d", j);
             if((gid_sub2 = H5Gcreate2(gid_sub, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
             for(k = 0; k < NUM_DATASETS; k++) {
-                sprintf(objname, "Dataset #%d", k);
+                HDsprintf(objname, "Dataset #%d", k);
 
                 /* add a dataset to the group */
                 if((did = H5Dcreate2(gid_sub2, objname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -6908,11 +6908,11 @@ test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
 
     /* create wide sub-group hierarchy, with multiple links to higher groups */
     for(u = 0; u < NUM_WIDE_LOOP_GROUPS; u++) {
-        sprintf(objname, "%s-%u", NAME_GROUP_SUB, u);
+        HDsprintf(objname, "%s-%u", NAME_GROUP_SUB, u);
         if((gid_sub = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
         for(v = 0; v < NUM_WIDE_LOOP_GROUPS; v++) {
-            sprintf(objname, "%s-%u", NAME_GROUP_SUB_SUB2, v);
+            HDsprintf(objname, "%s-%u", NAME_GROUP_SUB_SUB2, v);
             if((gid_sub2 = H5Gcreate2(gid_sub, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
             /* Create link to top group */
