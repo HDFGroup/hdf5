@@ -1041,7 +1041,7 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
 
         if(H5FD_get_fs_type_map(lf, f->shared->fs_type_map) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get free space type mapping from VFD")
-        if(H5MF_init_merge_flags(f) < 0)
+        if(H5MF_init_merge_flags(f->shared) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "problem initializing free space merge flags")
         f->shared->tmp_addr = f->shared->maxaddr;
         /* Disable temp. space allocation for parallel I/O (for now) */

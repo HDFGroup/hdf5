@@ -55,11 +55,6 @@
 #define H5MF_FSPACE_SECT_SMALL      1   /* For paged aggregation: "small" meta/raw data section which is < fsp_size) */
 #define H5MF_FSPACE_SECT_LARGE      2   /* For paged aggregation: "large" Section which is >= fsp_size) */
 
-/* For non-paged aggregation: map allocation request type to tracked free-space type */
-/* F -- pointer to H5F_t; T -- H5FD_mem_t */
-#define H5MF_ALLOC_TO_FS_AGGR_TYPE(F, T)                  \
-        ((H5FD_MEM_DEFAULT == (F)->shared->fs_type_map[T]) ? (T) : (F)->shared->fs_type_map[T])
-
 /* Get section class type based on size */
 #define H5MF_SECT_CLASS_TYPE(F, S)                          \
         ((H5F_PAGED_AGGR(F)) ?                              \
@@ -182,13 +177,10 @@ H5_DLLVAR H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1];
 /* Allocator routines */
 H5_DLL herr_t H5MF__open_fstype(H5F_t *f, H5F_mem_page_t type);
 H5_DLL herr_t H5MF__start_fstype(H5F_t *f, H5F_mem_page_t type);
-
 H5_DLL htri_t H5MF__find_sect(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5FS_t *fspace, haddr_t *addr);
 H5_DLL herr_t H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_section_t *node);
-
-H5_DLL herr_t H5MF__sects_dump(H5F_t *f, FILE *stream);
-
-H5_DLL void H5MF__alloc_to_fs_type(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5F_mem_page_t *fs_type);
+H5_DLL void H5MF__alloc_to_fs_type(H5F_file_t *f_sh, H5FD_mem_t alloc_type,
+    hsize_t size, H5F_mem_page_t *fs_type);
 
 /* 'simple/small/large' section routines */
 H5_DLL H5MF_free_section_t *H5MF__sect_new(unsigned ctype, haddr_t sect_off,
@@ -205,6 +197,11 @@ H5_DLL herr_t H5MF__aggr_absorb(const H5F_t *f, H5F_blk_aggr_t *aggr,
     H5MF_free_section_t *sect, hbool_t allow_sect_absorb);
 H5_DLL herr_t H5MF__aggr_query(const H5F_t *f, const H5F_blk_aggr_t *aggr,
     haddr_t *addr, hsize_t *size);
+
+/* Debugging routines */
+#ifdef H5MF_ALLOC_DEBUG_DUMP
+H5_DLL herr_t H5MF__sects_dump(H5F_t *f, FILE *stream);
+#endif /* H5MF_ALLOC_DEBUG_DUMP */
 
 /* Testing routines */
 #ifdef H5MF_TESTING

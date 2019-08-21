@@ -55,6 +55,11 @@
     if(!H5F_addr_defined(FSM->addr) || !H5F_addr_defined(FSM->sect_addr))   \
         *CF = TRUE;
 
+/* For non-paged aggregation: map allocation request type to tracked free-space type */
+/* F_SH -- pointer to H5F_file_t; T -- H5FD_mem_t */
+#define H5MF_ALLOC_TO_FS_AGGR_TYPE(F_SH, T)                  \
+        ((H5FD_MEM_DEFAULT == (F_SH)->fs_type_map[T]) ? (T) : (F_SH)->fs_type_map[T])
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -141,7 +146,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_init_merge_flags(H5F_t *f)
+H5MF_init_merge_flags(H5F_file_t *f_sh)
 {
     H5MF_aggr_merge_t mapping_type;     /* Type of free list mapping */
     H5FD_mem_t type;                    /* Memory type for iteration */
@@ -151,9 +156,8 @@ H5MF_init_merge_flags(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
+    HDassert(f_sh);
+    HDassert(f_sh->lf);
 
     /* Iterate over all the free space types to determine if sections of that type
      *  can merge with the metadata or small 'raw' data aggregator
@@ -161,21 +165,21 @@ H5MF_init_merge_flags(H5F_t *f)
     all_same = TRUE;
     for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
         /* Check for any different type mappings */
-        if(f->shared->fs_type_map[type] != f->shared->fs_type_map[H5FD_MEM_DEFAULT]) {
+        if(f_sh->fs_type_map[type] != f_sh->fs_type_map[H5FD_MEM_DEFAULT]) {
             all_same = FALSE;
             break;
         } /* end if */
 
     /* Check for all allocation types mapping to the same free list type */
     if(all_same) {
-        if(f->shared->fs_type_map[H5FD_MEM_DEFAULT] == H5FD_MEM_DEFAULT)
+        if(f_sh->fs_type_map[H5FD_MEM_DEFAULT] == H5FD_MEM_DEFAULT)
             mapping_type = H5MF_AGGR_MERGE_SEPARATE;
         else
             mapping_type = H5MF_AGGR_MERGE_TOGETHER;
     } /* end if */
     else {
         /* Check for raw data mapping into same list as metadata */
-        if(f->shared->fs_type_map[H5FD_MEM_DRAW] == f->shared->fs_type_map[H5FD_MEM_SUPER])
+        if(f_sh->fs_type_map[H5FD_MEM_DRAW] == f_sh->fs_type_map[H5FD_MEM_SUPER])
             mapping_type = H5MF_AGGR_MERGE_SEPARATE;
         else {
             hbool_t all_metadata_same;              /* Whether all metadata go in same free list */
@@ -188,7 +192,7 @@ H5MF_init_merge_flags(H5F_t *f)
                 /* (global heap is treated as raw data) */
                 if(type != H5FD_MEM_DRAW && type != H5FD_MEM_GHEAP) {
                     /* Check for any different type mappings */
-                    if(f->shared->fs_type_map[type] != f->shared->fs_type_map[H5FD_MEM_SUPER]) {
+                    if(f_sh->fs_type_map[type] != f_sh->fs_type_map[H5FD_MEM_SUPER]) {
                         all_metadata_same = FALSE;
                         break;
                     } /* end if */
@@ -206,30 +210,30 @@ H5MF_init_merge_flags(H5F_t *f)
     switch(mapping_type) {
         case H5MF_AGGR_MERGE_SEPARATE:
             /* Don't merge any metadata together */
-            HDmemset(f->shared->fs_aggr_merge, 0, sizeof(f->shared->fs_aggr_merge));
+            HDmemset(f_sh->fs_aggr_merge, 0, sizeof(f_sh->fs_aggr_merge));
 
             /* Check if merging raw data should be allowed */
             /* (treat global heaps as raw data) */
-            if(H5FD_MEM_DRAW == f->shared->fs_type_map[H5FD_MEM_DRAW] ||
-                    H5FD_MEM_DEFAULT == f->shared->fs_type_map[H5FD_MEM_DRAW]) {
-                f->shared->fs_aggr_merge[H5FD_MEM_DRAW] = H5F_FS_MERGE_RAWDATA;
-                f->shared->fs_aggr_merge[H5FD_MEM_GHEAP] = H5F_FS_MERGE_RAWDATA;
+            if(H5FD_MEM_DRAW == f_sh->fs_type_map[H5FD_MEM_DRAW] ||
+                    H5FD_MEM_DEFAULT == f_sh->fs_type_map[H5FD_MEM_DRAW]) {
+                f_sh->fs_aggr_merge[H5FD_MEM_DRAW] = H5F_FS_MERGE_RAWDATA;
+                f_sh->fs_aggr_merge[H5FD_MEM_GHEAP] = H5F_FS_MERGE_RAWDATA;
 	    } /* end if */
             break;
 
         case H5MF_AGGR_MERGE_DICHOTOMY:
             /* Merge all metadata together (but not raw data) */
-            HDmemset(f->shared->fs_aggr_merge, H5F_FS_MERGE_METADATA, sizeof(f->shared->fs_aggr_merge));
+            HDmemset(f_sh->fs_aggr_merge, H5F_FS_MERGE_METADATA, sizeof(f_sh->fs_aggr_merge));
 
             /* Allow merging raw data allocations together */
             /* (treat global heaps as raw data) */
-            f->shared->fs_aggr_merge[H5FD_MEM_DRAW] = H5F_FS_MERGE_RAWDATA;
-            f->shared->fs_aggr_merge[H5FD_MEM_GHEAP] = H5F_FS_MERGE_RAWDATA;
+            f_sh->fs_aggr_merge[H5FD_MEM_DRAW] = H5F_FS_MERGE_RAWDATA;
+            f_sh->fs_aggr_merge[H5FD_MEM_GHEAP] = H5F_FS_MERGE_RAWDATA;
             break;
 
         case H5MF_AGGR_MERGE_TOGETHER:
             /* Merge all allocation types together */
-            HDmemset(f->shared->fs_aggr_merge, (H5F_FS_MERGE_METADATA | H5F_FS_MERGE_RAWDATA), sizeof(f->shared->fs_aggr_merge));
+            HDmemset(f_sh->fs_aggr_merge, (H5F_FS_MERGE_METADATA | H5F_FS_MERGE_RAWDATA), sizeof(f_sh->fs_aggr_merge));
             break;
 
         default:
@@ -254,31 +258,32 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5MF__alloc_to_fs_type(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5F_mem_page_t *fs_type)
+H5MF__alloc_to_fs_type(H5F_file_t *f_sh, H5FD_mem_t alloc_type, hsize_t size, H5F_mem_page_t *fs_type)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(f);
+    /* Check arguments */
+    HDassert(f_sh);
     HDassert(fs_type);
 
-    if(H5F_PAGED_AGGR(f)) { /* paged aggregation */
-        if(size >= f->shared->fs_page_size) {
-            if(H5F_HAS_FEATURE(f, H5FD_FEAT_PAGED_AGGR)) { /* multi or split driver */
+    if(H5F_SHARED_PAGED_AGGR(f_sh)) { /* paged aggregation */
+        if(size >= f_sh->fs_page_size) {
+            if(H5F_SHARED_HAS_FEATURE(f_sh, H5FD_FEAT_PAGED_AGGR)) { /* multi or split driver */
                 /* For non-contiguous address space, map to large size free-space manager for each alloc_type */
-                if(H5FD_MEM_DEFAULT == f->shared->fs_type_map[alloc_type]) 
-                    *fs_type = (H5F_mem_page_t) (alloc_type + (H5FD_MEM_NTYPES - 1));
+                if(H5FD_MEM_DEFAULT == f_sh->fs_type_map[alloc_type])
+                    *fs_type = (H5F_mem_page_t)(alloc_type + (H5FD_MEM_NTYPES - 1));
                 else
-                    *fs_type = (H5F_mem_page_t) (f->shared->fs_type_map[alloc_type] + (H5FD_MEM_NTYPES - 1));
+                    *fs_type = (H5F_mem_page_t)(f_sh->fs_type_map[alloc_type] + (H5FD_MEM_NTYPES - 1));
             } /* end if */
             else
                 /* For contiguous address space, map to generic large size free-space manager */
                 *fs_type = H5F_MEM_PAGE_GENERIC; /* H5F_MEM_PAGE_SUPER */
         } /* end if */
         else
-            *fs_type = (H5F_mem_page_t)H5MF_ALLOC_TO_FS_AGGR_TYPE(f, alloc_type);
+            *fs_type = (H5F_mem_page_t)H5MF_ALLOC_TO_FS_AGGR_TYPE(f_sh, alloc_type);
     } /* end if */
     else /* non-paged aggregation */
-        *fs_type = (H5F_mem_page_t)H5MF_ALLOC_TO_FS_AGGR_TYPE(f, alloc_type);
+        *fs_type = (H5F_mem_page_t)H5MF_ALLOC_TO_FS_AGGR_TYPE(f_sh, alloc_type);
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5MF__alloc_to_fs_type() */
@@ -620,7 +625,6 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5MF__close_fstype() */
 
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5MF__add_sect
@@ -649,7 +653,7 @@ H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_sectio
     HDassert(fspace);
     HDassert(node);
 
-    H5MF__alloc_to_fs_type(f, alloc_type, node->sect_info.size, &fs_type);
+    H5MF__alloc_to_fs_type(f->shared, alloc_type, node->sect_info.size, &fs_type);
 
     /* Construct user data for callbacks */
     udata.f = f;
@@ -801,7 +805,7 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
     HDassert(f->shared->lf);
     HDassert(size > 0);
 
-    H5MF__alloc_to_fs_type(f, alloc_type, size, &fs_type);
+    H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: Check 1.0\n", FUNC);
@@ -907,10 +911,10 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_type, size);
 #endif /* H5MF_ALLOC_DEBUG */
 
-    H5MF__alloc_to_fs_type(f, alloc_type, size, &ptype);
+    H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &ptype);
 
     switch(ptype) {
-	    case H5F_MEM_PAGE_GENERIC:  
+	    case H5F_MEM_PAGE_GENERIC:
 	    case H5F_MEM_PAGE_LARGE_BTREE:
 	    case H5F_MEM_PAGE_LARGE_DRAW:
 	    case H5F_MEM_PAGE_LARGE_GHEAP:
@@ -1108,7 +1112,7 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
         HGOTO_DONE(SUCCEED)
     HDassert(addr != 0);        /* Can't deallocate the superblock :-) */
 
-    H5MF__alloc_to_fs_type(f, alloc_type, size, &fs_type);
+    H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
     /* Set the ring type in the API context */
     if(H5MF__fsm_type_is_self_referential(f, fs_type))
@@ -1325,7 +1329,7 @@ HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_r
     } /* end if */
 
     /* Get free space type from allocation type */
-    H5MF__alloc_to_fs_type(f, alloc_type, size, &fs_type);
+    H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
     /* Set the ring type in the API context */
     if(H5MF__fsm_type_is_self_referential(f, fs_type))
@@ -1476,7 +1480,7 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
     HDassert(sect_cls);
 
     /* Get free space type from allocation type */
-    H5MF__alloc_to_fs_type(f, alloc_type, size, &fs_type);
+    H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
     /* Set the ring type in the API context */
     if(H5MF__fsm_type_is_self_referential(f, fs_type))
@@ -2730,7 +2734,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                 break;
 
             for(mem_type = H5FD_MEM_SUPER; mem_type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5F_mem_t, mem_type)) {
-                H5MF__alloc_to_fs_type(f, mem_type, alloc_size, &fsm_type);
+                H5MF__alloc_to_fs_type(f->shared, mem_type, alloc_size, &fsm_type);
 
                 if(pass_count == 0) { /* this is the first pass */
                     HDassert(fsm_type > H5F_MEM_PAGE_DEFAULT);
@@ -2875,7 +2879,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                 break;
 
             for(mem_type = H5FD_MEM_SUPER; mem_type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5F_mem_t, mem_type)) {
-                H5MF__alloc_to_fs_type(f, mem_type, alloc_size, &fsm_type);
+                H5MF__alloc_to_fs_type(f->shared, mem_type, alloc_size, &fsm_type);
 
                 if(pass_count == 0) { /* this is the first pass */
                     HDassert(fsm_type > H5F_MEM_PAGE_DEFAULT);
@@ -3119,8 +3123,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
         /* should only be called if file is opened R/W */
         HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
 
-        H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fs_type);
-        H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fs_type);
+        H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fs_type);
+        H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fs_type);
 
         HDassert(sm_fshdr_fs_type > H5F_MEM_PAGE_DEFAULT);
         HDassert(sm_fshdr_fs_type < H5F_MEM_PAGE_LARGE_SUPER);
@@ -3136,8 +3140,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
         sm_sinfo_fspace = f->shared->fs_man[sm_fssinfo_fs_type];
 
         if(H5F_PAGED_AGGR(f)) {
-            H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_HDR, f->shared->fs_page_size + 1, &lg_fshdr_fs_type);
-            H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_SINFO, f->shared->fs_page_size + 1, &lg_fssinfo_fs_type);
+            H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_HDR, f->shared->fs_page_size + 1, &lg_fshdr_fs_type);
+            H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_SINFO, f->shared->fs_page_size + 1, &lg_fssinfo_fs_type);
 
             HDassert(lg_fshdr_fs_type >= H5F_MEM_PAGE_LARGE_SUPER);
             HDassert(lg_fshdr_fs_type < H5F_MEM_PAGE_NTYPES);
@@ -3398,18 +3402,18 @@ H5MF__fsm_type_is_self_referential(H5F_t *f, H5F_mem_page_t fsm_type)
     HDassert(fsm_type >= H5F_MEM_PAGE_DEFAULT);
     HDassert(fsm_type < H5F_MEM_PAGE_NTYPES);
 
-    H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fsm);
-    H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fsm);
+    H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fsm);
+    H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fsm);
 
     if(H5F_PAGED_AGGR(f)) {
-        H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_HDR, f->shared->fs_page_size + 1, &lg_fshdr_fsm);
-        H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_SINFO, f->shared->fs_page_size + 1, &lg_fssinfo_fsm);
+        H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_HDR, f->shared->fs_page_size + 1, &lg_fshdr_fsm);
+        H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_SINFO, f->shared->fs_page_size + 1, &lg_fssinfo_fsm);
 
         result = (fsm_type == sm_fshdr_fsm) || (fsm_type == sm_fssinfo_fsm)
                 || (fsm_type == lg_fshdr_fsm) || (fsm_type == lg_fssinfo_fsm);
     } /* end if */
     else {
-        /* In principle, fsm_type should always be less than 
+        /* In principle, fsm_type should always be less than
          * H5F_MEM_PAGE_LARGE_SUPER whenever paged aggregation
          * is not enabled.  However, since there is code that does
          * not observe this principle, force the result to FALSE if
@@ -3452,15 +3456,15 @@ H5MF__fsm_is_self_referential(H5F_t *f, H5FS_t *fspace)
     HDassert(f->shared);
     HDassert(fspace);
 
-    H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fsm);
-    H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fsm);
+    H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fsm);
+    H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fsm);
 
     if(H5F_PAGED_AGGR(f)) {
         H5F_mem_page_t lg_fshdr_fsm;
         H5F_mem_page_t lg_fssinfo_fsm;
 
-        H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_HDR, f->shared->fs_page_size + 1, &lg_fshdr_fsm);
-        H5MF__alloc_to_fs_type(f, H5FD_MEM_FSPACE_SINFO, f->shared->fs_page_size + 1, &lg_fssinfo_fsm);
+        H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_HDR, f->shared->fs_page_size + 1, &lg_fshdr_fsm);
+        H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_SINFO, f->shared->fs_page_size + 1, &lg_fssinfo_fsm);
 
         result = (fspace == f->shared->fs_man[sm_fshdr_fsm]) ||
                    (fspace == f->shared->fs_man[sm_fssinfo_fsm]) ||
