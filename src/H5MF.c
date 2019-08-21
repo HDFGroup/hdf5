@@ -98,7 +98,7 @@ static herr_t H5MF__close_shrink_eoa(H5F_t *f);
 
 /* General routines */
 static herr_t H5MF__get_free_sects(H5F_t *f, H5FS_t *fspace, H5MF_sect_iter_ud_t *sect_udata, size_t *nums);
-static hbool_t H5MF__fsm_type_is_self_referential(H5F_t *f, H5F_mem_page_t fsm_type);
+static hbool_t H5MF__fsm_type_is_self_referential(H5F_file_t *f_sh, H5F_mem_page_t fsm_type);
 static hbool_t H5MF__fsm_is_self_referential(H5F_t *f, H5FS_t *fspace);
 static herr_t H5MF__continue_alloc_fsm(H5F_t *f, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace, 
     H5FS_t  *lg_hdr_fspace, H5FS_t *lg_sinfo_fspace, hbool_t *continue_alloc_fsm);
@@ -345,7 +345,7 @@ H5MF__open_fstype(H5F_t *f, H5F_mem_page_t type)
     } /* end else */
 
     /* Set the ring type in the API context */
-    if(H5MF__fsm_type_is_self_referential(f, type))
+    if(H5MF__fsm_type_is_self_referential(f->shared, type))
         fsm_ring = H5AC_RING_MDFSM;
     else
         fsm_ring = H5AC_RING_RDFSM;
@@ -433,7 +433,7 @@ H5MF__create_fstype(H5F_t *f, H5F_mem_page_t type)
     } /* end else */
 
     /* Set the ring type in the API context */
-    if(H5MF__fsm_type_is_self_referential(f, type))
+    if(H5MF__fsm_type_is_self_referential(f->shared, type))
         fsm_ring = H5AC_RING_MDFSM;
     else
         fsm_ring = H5AC_RING_RDFSM;
@@ -549,7 +549,7 @@ H5MF__delete_fstype(H5F_t *f, H5F_mem_page_t type)
     f->shared->fs_state[type] = H5F_FS_STATE_DELETING;
 
     /* Set the ring type in the API context */
-    if(H5MF__fsm_type_is_self_referential(f, type))
+    if(H5MF__fsm_type_is_self_referential(f->shared, type))
         fsm_ring = H5AC_RING_MDFSM;
     else
         fsm_ring = H5AC_RING_RDFSM;
@@ -812,7 +812,7 @@ HDfprintf(stderr, "%s: Check 1.0\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     /* Set the ring type in the API context */
-    if(H5MF__fsm_type_is_self_referential(f, fs_type))
+    if(H5MF__fsm_type_is_self_referential(f->shared, fs_type))
         fsm_ring = H5AC_RING_MDFSM;
     else
         fsm_ring = H5AC_RING_RDFSM;
@@ -1115,7 +1115,7 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
     /* Set the ring type in the API context */
-    if(H5MF__fsm_type_is_self_referential(f, fs_type))
+    if(H5MF__fsm_type_is_self_referential(f->shared, fs_type))
         fsm_ring = H5AC_RING_MDFSM;
     else
         fsm_ring = H5AC_RING_RDFSM;
@@ -1332,7 +1332,7 @@ HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_r
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
     /* Set the ring type in the API context */
-    if(H5MF__fsm_type_is_self_referential(f, fs_type))
+    if(H5MF__fsm_type_is_self_referential(f->shared, fs_type))
         fsm_ring = H5AC_RING_MDFSM;
     else
         fsm_ring = H5AC_RING_RDFSM;
@@ -1483,7 +1483,7 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
     /* Set the ring type in the API context */
-    if(H5MF__fsm_type_is_self_referential(f, fs_type))
+    if(H5MF__fsm_type_is_self_referential(f->shared, fs_type))
         fsm_ring = H5AC_RING_MDFSM;
     else
         fsm_ring = H5AC_RING_RDFSM;
@@ -1666,10 +1666,10 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
      *
      * The situation is further complicated if a cache image exists
      * and had not yet been loaded into the metadata cache.  In this
-     * case, call H5AC_force_cache_image_load() instead of 
+     * case, call H5AC_force_cache_image_load() instead of
      * H5MF_tidy_self_referential_fsm_hack().  H5AC_force_cache_image_load()
-     * will load the cache image, and then call 
-     * H5MF_tidy_self_referential_fsm_hack() to discard the cache image 
+     * will load the cache image, and then call
+     * H5MF_tidy_self_referential_fsm_hack() to discard the cache image
      * block.
      */
 
@@ -1683,12 +1683,12 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     if(H5F_PAGED_AGGR(f)) {
         H5F_mem_page_t ptype; 	/* Memory type for iteration */
 
-        /* Iterate over all the free space types that have managers and 
-         * get each free list's space 
+        /* Iterate over all the free space types that have managers and
+         * get each free list's space
          */
         for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype)) {
             /* Test to see if we need to switch rings -- do so if required */
-            if(H5MF__fsm_type_is_self_referential(f, ptype))
+            if(H5MF__fsm_type_is_self_referential(f->shared, ptype))
                 needed_ring = H5AC_RING_MDFSM;
             else
                 needed_ring = H5AC_RING_RDFSM;
@@ -1705,12 +1705,12 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     else {
         H5FD_mem_t type;          	/* Memory type for iteration */
 
-        /* Iterate over all the free space types that have managers and 
-         * get each free list's space 
+        /* Iterate over all the free space types that have managers and
+         * get each free list's space
          */
         for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
             /* Test to see if we need to switch rings -- do so if required */
-            if(H5MF__fsm_type_is_self_referential(f, (H5F_mem_page_t)type))
+            if(H5MF__fsm_type_is_self_referential(f->shared, (H5F_mem_page_t)type))
                 needed_ring = H5AC_RING_MDFSM;
             else
                 needed_ring = H5AC_RING_RDFSM;
@@ -1827,9 +1827,9 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
         for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
             if(f->shared->fs_man[type]) {
                 /* Test to see if we need to switch rings -- do so if required */
-                if(H5MF__fsm_type_is_self_referential(f, (H5F_mem_page_t)type))
+                if(H5MF__fsm_type_is_self_referential(f->shared, (H5F_mem_page_t)type))
                     needed_ring = H5AC_RING_MDFSM;
-                else 
+                else
                     needed_ring = H5AC_RING_RDFSM;
 
                 if(needed_ring != curr_ring) {
@@ -1977,7 +1977,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
 
         /* gather data for the free space manager superblock extension message.
          * Only need addresses of FSMs and eoa prior to allocation of
-         * file space for the self referential free space managers.  Other 
+         * file space for the self referential free space managers.  Other
          * data was gathered above.
          */
         for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
@@ -1993,7 +1993,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
         for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype)) {
             if(f->shared->fs_man[ptype]) {
                 /* Test to see if we need to switch rings -- do so if required */
-                if(H5MF__fsm_type_is_self_referential(f, ptype))
+                if(H5MF__fsm_type_is_self_referential(f->shared, ptype))
                     needed_ring = H5AC_RING_MDFSM;
                 else
                     needed_ring = H5AC_RING_RDFSM;
@@ -2128,7 +2128,7 @@ H5MF__close_shrink_eoa(H5F_t *f)
             for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype)) {
                 if(f->shared->fs_man[ptype]) {
                     /* Test to see if we need to switch rings -- do so if required */
-                    if(H5MF__fsm_type_is_self_referential(f, ptype))
+                    if(H5MF__fsm_type_is_self_referential(f->shared, ptype))
                         needed_ring = H5AC_RING_MDFSM;
                     else
                         needed_ring = H5AC_RING_RDFSM;
@@ -2152,7 +2152,7 @@ H5MF__close_shrink_eoa(H5F_t *f)
             for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
                 if(f->shared->fs_man[type]) {
                     /* Test to see if we need to switch rings -- do so if required */
-                    if(H5MF__fsm_type_is_self_referential(f, (H5F_mem_page_t)type))
+                    if(H5MF__fsm_type_is_self_referential(f->shared, (H5F_mem_page_t)type))
                         needed_ring = H5AC_RING_MDFSM;
                     else
                         needed_ring = H5AC_RING_RDFSM;
@@ -2272,7 +2272,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
         } /* end if */
 
         /* Test to see if we need to switch rings -- do so if required */
-        if(H5MF__fsm_type_is_self_referential(f, (H5F_mem_page_t)type))
+        if(H5MF__fsm_type_is_self_referential(f->shared, (H5F_mem_page_t)type))
             needed_ring = H5AC_RING_MDFSM;
         else
             needed_ring = H5AC_RING_RDFSM;
@@ -2302,7 +2302,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
     /* Close the free-space managers if they were opened earlier in this routine */
     for(type = start_type; type < end_type; H5_INC_ENUM(H5F_mem_page_t, type)) {
         /* Test to see if we need to switch rings -- do so if required */
-        if(H5MF__fsm_type_is_self_referential(f, (H5F_mem_page_t)type))
+        if(H5MF__fsm_type_is_self_referential(f->shared, (H5F_mem_page_t)type))
             needed_ring = H5AC_RING_MDFSM;
         else
             needed_ring = H5AC_RING_RDFSM;
@@ -2408,7 +2408,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
         size_t nums = 0;		/* The number of free-space sections */
 
         /* Test to see if we need to switch rings -- do so if required */
-        if(H5MF__fsm_type_is_self_referential(f, ty))
+        if(H5MF__fsm_type_is_self_referential(f->shared, ty))
             needed_ring = H5AC_RING_MDFSM;
         else
             needed_ring = H5AC_RING_RDFSM;
@@ -2767,7 +2767,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
                     if(f->shared->fs_man[fsm_type]) {
                         /* Test to see if we need to switch rings -- do so if required */
-                        if(H5MF__fsm_type_is_self_referential(f, fsm_type))
+                        if(H5MF__fsm_type_is_self_referential(f->shared, fsm_type))
                              needed_ring = H5AC_RING_MDFSM;
                         else
                              needed_ring = H5AC_RING_RDFSM;
@@ -2893,7 +2893,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                     HDassert(FALSE);
 
                 /* Test to see if we need to switch rings -- do so if required */
-                if(H5MF__fsm_type_is_self_referential(f, fsm_type))
+                if(H5MF__fsm_type_is_self_referential(f->shared, fsm_type))
                     needed_ring = H5AC_RING_MDFSM;
                 else
                     needed_ring = H5AC_RING_RDFSM;
@@ -2916,7 +2916,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                          * that this is also the deciding factor as to whether a FSM 
                          * in in the raw data FSM ring.
                          */
-                        if(!H5MF__fsm_type_is_self_referential(f, fsm_type)) {
+                        if(!H5MF__fsm_type_is_self_referential(f->shared, fsm_type)) {
                             /* The current ring should be H5AC_RING_RDFSM */
                             HDassert(curr_ring == H5AC_RING_RDFSM);
 
@@ -3385,8 +3385,8 @@ H5MF__continue_alloc_fsm(H5F_t *f, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspac
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
-H5MF__fsm_type_is_self_referential(H5F_t *f, H5F_mem_page_t fsm_type)
+static hbool_t
+H5MF__fsm_type_is_self_referential(H5F_file_t *f_sh, H5F_mem_page_t fsm_type)
 {
     H5F_mem_page_t sm_fshdr_fsm;
     H5F_mem_page_t sm_fssinfo_fsm;
@@ -3394,20 +3394,19 @@ H5MF__fsm_type_is_self_referential(H5F_t *f, H5F_mem_page_t fsm_type)
     H5F_mem_page_t lg_fssinfo_fsm;
     hbool_t result = FALSE;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    HDassert(f_sh);
     HDassert(fsm_type >= H5F_MEM_PAGE_DEFAULT);
     HDassert(fsm_type < H5F_MEM_PAGE_NTYPES);
 
-    H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fsm);
-    H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fsm);
+    H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fsm);
+    H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fsm);
 
-    if(H5F_PAGED_AGGR(f)) {
-        H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_HDR, f->shared->fs_page_size + 1, &lg_fshdr_fsm);
-        H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_SINFO, f->shared->fs_page_size + 1, &lg_fssinfo_fsm);
+    if(H5F_SHARED_PAGED_AGGR(f_sh)) {
+        H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_HDR, f_sh->fs_page_size + 1, &lg_fshdr_fsm);
+        H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_SINFO, f_sh->fs_page_size + 1, &lg_fssinfo_fsm);
 
         result = (fsm_type == sm_fshdr_fsm) || (fsm_type == sm_fssinfo_fsm)
                 || (fsm_type == lg_fshdr_fsm) || (fsm_type == lg_fssinfo_fsm);
