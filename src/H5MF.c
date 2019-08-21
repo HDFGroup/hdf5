@@ -3342,29 +3342,27 @@ H5MF__continue_alloc_fsm(H5F_file_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sin
     /* Check sm_hdr_fspace */
     if(sm_hdr_fspace && sm_hdr_fspace->serial_sect_count > 0 && sm_hdr_fspace->sinfo) {
         H5MF_CHECK_FSM(sm_hdr_fspace, continue_alloc_fsm);
-    }
+    } /* end if */
 
-    if(!(*continue_alloc_fsm)) {
+    if(!(*continue_alloc_fsm))
         if(sm_sinfo_fspace && sm_sinfo_fspace != sm_hdr_fspace &&
            sm_sinfo_fspace->serial_sect_count > 0 && sm_sinfo_fspace->sinfo) {
             H5MF_CHECK_FSM(sm_hdr_fspace, continue_alloc_fsm);
-        }
-    }
+        } /* end if */
 
     if(H5F_SHARED_PAGED_AGGR(f_sh) && !(*continue_alloc_fsm)) {
         /* Check lg_hdr_fspace */
         if(lg_hdr_fspace && lg_hdr_fspace->serial_sect_count > 0 && lg_hdr_fspace->sinfo) {
             H5MF_CHECK_FSM(lg_hdr_fspace, continue_alloc_fsm);
-        }
+        } /* end if */
 
         /* Check lg_sinfo_fspace */
-        if(!(*continue_alloc_fsm)) {
+        if(!(*continue_alloc_fsm))
             if(lg_sinfo_fspace && lg_sinfo_fspace != lg_hdr_fspace &&
-               lg_sinfo_fspace->serial_sect_count > 0 && lg_sinfo_fspace->sinfo) {
+                    lg_sinfo_fspace->serial_sect_count > 0 && lg_sinfo_fspace->sinfo) {
                 H5MF_CHECK_FSM(lg_sinfo_fspace, continue_alloc_fsm);
-            }
-         }
-    }
+            } /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5MF__continue_alloc_fsm() */
