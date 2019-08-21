@@ -116,8 +116,9 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Torder.c \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c \
         H5VL.c H5VLcallback.c H5VLint.c H5VLnative.c \
-        H5VLnative_attr.c H5VLnative_dataset.c H5VLnative_datatype.c \
-        H5VLnative_file.c H5VLnative_group.c H5VLnative_link.c H5VLnative_object.c \
+        H5VLnative_attr.c H5VLnative_blob.c H5VLnative_dataset.c \
+        H5VLnative_datatype.c H5VLnative_file.c H5VLnative_group.c \
+        H5VLnative_link.c H5VLnative_object.c \
         H5VLpassthru.c \
         H5VM.c H5WB.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c \

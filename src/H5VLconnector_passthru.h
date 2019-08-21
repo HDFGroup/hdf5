@@ -13,7 +13,7 @@
 /*
  * This file contains public declarations for authoring VOL connectors
  * which act as "passthrough" connectors that forward their API calls to
- * an underlying connector. 
+ * an underlying connector.
  *
  * An example of this might be a logging connector, which creates log messages
  * and then passes the call on to an underlying VOL connector.
@@ -157,6 +157,10 @@ H5_DLL herr_t H5VLrequest_cancel(void *req, hid_t connector_id);
 H5_DLL herr_t H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_t specific_type, va_list arguments);
 H5_DLL herr_t H5VLrequest_optional(void *req, hid_t connector_id, va_list arguments);
 H5_DLL herr_t H5VLrequest_free(void *req, hid_t connector_id);
+
+/* Public wrappers for generic 'optional' callback */
+H5_DLL herr_t H5VLoptional(void *obj, hid_t connector_id, hid_t dxpl_id,
+    void **req, va_list arguments);
 
 #ifdef __cplusplus
 }

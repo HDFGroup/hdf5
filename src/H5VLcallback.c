@@ -6564,6 +6564,125 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_blob_put
+ *
+ * Purpose:     Put a blob through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, August 21, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_blob_put(const H5VL_class_t *cls, void *blob, size_t size, void *ctx, void *id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(cls);
+    HDassert(size == 0 || blob);
+    HDassert(id);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->blob_cls.put)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'blob put' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->blob_cls.put)(blob, size, ctx, id) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "blob put callback failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_blob_put() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_blob_get
+ *
+ * Purpose:     Get a blob through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, August 16, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_blob_get(const H5VL_class_t *cls, const void *id, void *ctx, void *buf)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(cls);
+    HDassert(id);
+    HDassert(buf);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->blob_cls.get)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'blob get' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->blob_cls.get)(id, ctx, buf) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "blob get callback failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_blob_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_blob_specific
+ *
+ * Purpose:	Specific operation on blobs through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, August 17, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_blob_specific(const H5VL_class_t *cls, void *id,
+    H5VL_blob_specific_t specific_type, ...)
+{
+    va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(cls);
+    HDassert(id);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->blob_cls.specific)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'blob specific' method")
+
+    /* Call the corresponding VOL callback */
+    HDva_start(arguments, specific_type);
+    arg_started = TRUE;
+    if((cls->blob_cls.specific)(id, specific_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback")
+
+done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        HDva_end(arguments);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_blob_get() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL__optional
  *
  * Purpose:     Optional operation specific to connectors.

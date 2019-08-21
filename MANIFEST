@@ -925,6 +925,7 @@
 ./src/H5VLnative.c
 ./src/H5VLnative.h
 ./src/H5VLnative_attr.c
+./src/H5VLnative_blob.c
 ./src/H5VLnative_dataset.c
 ./src/H5VLnative_datatype.c
 ./src/H5VLnative_file.c

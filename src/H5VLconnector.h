@@ -169,6 +169,14 @@ typedef enum H5VL_request_specific_t {
     H5VL_REQUEST_WAITALL                /* Wait until all requests complete */
 } H5VL_request_specific_t;
 
+/* types for 'blob' SPECIFIC callback */
+typedef enum H5VL_blob_specific_t {
+    H5VL_BLOB_DELETE,                   /* Delete a blob (by ID) */
+    H5VL_BLOB_GETSIZE,                  /* Get size of blob */
+    H5VL_BLOB_ISNULL,                   /* Check if a blob ID is "null" */
+    H5VL_BLOB_SETNULL                   /* Set a blob ID to the connector's "null" blob ID value */
+} H5VL_blob_specific_t;
+
 /* types for different ways that objects are located in an HDF5 container */
 typedef enum H5VL_loc_type_t {
     H5VL_OBJECT_BY_SELF,
@@ -201,7 +209,7 @@ struct H5VL_loc_by_ref {
     hid_t lapl_id;
 };
 
-/* Structure to hold parameters for object locations. 
+/* Structure to hold parameters for object locations.
  * either: BY_ADDR, BY_ID, BY_NAME, BY_IDX, BY_REF
  *
  * Note: Leave loc_by_addr as the first union member so we
@@ -355,6 +363,14 @@ typedef struct H5VL_request_class_t {
     herr_t (*free)(void *req);
 } H5VL_request_class_t;
 
+/* 'blob' routines */
+typedef struct H5VL_blob_class_t {
+    herr_t (*put)(void *blob, size_t size, void *ctx, void *id);
+    herr_t (*get)(const void *id, void *ctx, void *blob);
+    herr_t (*specific)(void *id, H5VL_blob_specific_t specific_type, va_list arguments);
+    herr_t (*optional)(void *id, va_list arguments);
+} H5VL_blob_class_t;
+
 /*
  * VOL connector identifiers.  Values 0 through 255 are for connectors defined
  * by the HDF5 library.  Values 256 through 511 are available for testing new
@@ -386,8 +402,9 @@ typedef struct H5VL_class_t {
     H5VL_link_class_t       link_cls;       /* Link (H5L*) class callbacks      */
     H5VL_object_class_t     object_cls;     /* Object (H5O*) class callbacks    */
 
-    /* Services */
+    /* Infrastructure / Services */
     H5VL_request_class_t    request_cls;    /* Asynchronous request class callbacks */
+    H5VL_blob_class_t       blob_cls;       /* 'blob' callbacks */
 
     /* Catch-all */
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments); /* Optional callback */
@@ -397,6 +414,7 @@ typedef struct H5VL_class_t {
 /********************/
 /* Public Variables */
 /********************/
+
 
 /*********************/
 /* Public Prototypes */
