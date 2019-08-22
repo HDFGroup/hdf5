@@ -31,9 +31,6 @@
        12/9/02 - Started coding
  */
 
-#include <time.h>
-#include <stdlib.h>
-
 #include "testhdf5.h"
 #include "H5STprivate.h"
 
@@ -93,13 +90,13 @@ test_tst_init(void)
     } /* end for */
 
     /* Allocate space for the array of unique words */
-    uniq_words=HDmalloc(sizeof(char *)*num_uniq_words);
+    uniq_words = (char **)HDmalloc(sizeof(char *)*num_uniq_words);
 
     /* Allocate space for the array of randomized order unique words also */
-    rand_uniq_words=HDmalloc(sizeof(char *)*num_uniq_words);
+    rand_uniq_words = (char **)HDmalloc(sizeof(char *)*num_uniq_words);
 
     /* Allocate space for the array of sorted order unique words also */
-    sort_uniq_words=HDmalloc(sizeof(char *)*num_uniq_words);
+    sort_uniq_words = (char **)HDmalloc(sizeof(char *)*num_uniq_words);
 
     /* Insert unique words from test set into unique word set */
     w=0;
@@ -124,7 +121,7 @@ test_tst_init(void)
     curr_time=HDtime(NULL);
     HDsrandom((unsigned)curr_time);
     for(u=0; u<num_uniq_words; u++) {
-        v=u+(HDrandom()%(num_uniq_words-u));
+        v = u + ((size_t)HDrandom() % (num_uniq_words - u));
         if(u!=v) {
             tmp_word=rand_uniq_words[u];
             rand_uniq_words[u]=rand_uniq_words[v];
@@ -160,7 +157,7 @@ test_tst_create(void)
 
     /* Try creating a TST */
     tree=H5ST_create();
-    CHECK(tree, NULL, "H5ST_create");
+    CHECK_PTR(tree, "H5ST_create");
 
     /* Try closing a real tree */
     ret=H5ST_close(tree);
@@ -189,7 +186,7 @@ test_tst_insert(void)
 
     /* Create the TST */
     tree=H5ST_create();
-    CHECK(tree, NULL, "H5ST_create");
+    CHECK_PTR(tree, "H5ST_create");
 
     /* Insert unique words into TST, in random order */
     for(u=0; u<num_uniq_words; u++) {
@@ -205,13 +202,13 @@ test_tst_insert(void)
 
         /* Check that the value "payloads" are correct */
         found=H5ST_find(tree,uniq_words[u]);
-        CHECK(found, NULL, "H5ST_find");
+        CHECK_PTR(found, "H5ST_find");
 
         if(HDstrcmp((const char *)found->eqkid,uniq_words[u]))
             TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, uniq_words[%u]=%s\n",__LINE__,(char *)found->eqkid,(unsigned)u,uniq_words[u]);
 
         obj=H5ST_locate(tree,uniq_words[u]);
-        CHECK(obj, NULL, "H5ST_locate");
+        CHECK_PTR(obj, "H5ST_locate");
 
         if(HDstrcmp((const char *)obj,uniq_words[u]))
             TestErrPrintf("%d: TST objects don't match!, obj=%s, uniq_words[%u]=%s\n",__LINE__,(char *)obj,(unsigned)u,uniq_words[u]);
@@ -249,7 +246,7 @@ test_tst_iterate(void)
 
     /* Create the TST */
     tree=H5ST_create();
-    CHECK(tree, NULL, "H5ST_create");
+    CHECK_PTR(tree, "H5ST_create");
 
     /* Insert unique words into TST, in random order */
     for(u=0; u<num_uniq_words; u++) {
@@ -259,7 +256,7 @@ test_tst_iterate(void)
 
     /* Use findfirst/findnext calls to iterate through TST */
     found=H5ST_findfirst(tree);
-    CHECK(found, NULL, "H5ST_findfirst");
+    CHECK_PTR(found, "H5ST_findfirst");
     u=0;
     do {
         /* Check that the strings in the TST are in the correct order */
@@ -297,7 +294,7 @@ test_tst_remove(void)
 
     /* Create the TST */
     tree=H5ST_create();
-    CHECK(tree, NULL, "H5ST_create");
+    CHECK_PTR(tree, "H5ST_create");
 
     /* Insert unique words into TST, in random order */
     for(u=0; u<num_uniq_words; u++) {
@@ -308,7 +305,7 @@ test_tst_remove(void)
     /* Remove strings from TST in random order */
     for(u=0; u<num_uniq_words; u++) {
         obj=H5ST_remove(tree,rand_uniq_words[u]);
-        CHECK(obj, NULL, "H5ST_remove");
+        CHECK_PTR(obj, "H5ST_remove");
 
         /* Check that the correct string was removed from TST */
         if(HDstrcmp((const char *)obj,rand_uniq_words[u]))
@@ -329,7 +326,7 @@ test_tst_remove(void)
     for(u=0; u<num_uniq_words; u++) {
         /* Get the pointer to the node to delete */
         found=H5ST_find(tree,rand_uniq_words[u]);
-        CHECK(found, NULL, "H5ST_find");
+        CHECK_PTR(found, "H5ST_find");
 
         /* Check that the correct object will be removed from TST */
         if(HDstrcmp((const char *)found->eqkid,rand_uniq_words[u]))

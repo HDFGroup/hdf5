@@ -822,40 +822,40 @@ H5O_fill_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Space Allocation Time:");
     switch(fill->alloc_time) {
         case H5D_ALLOC_TIME_EARLY:
-            fprintf(stream,"Early\n");
+            HDfprintf(stream,"Early\n");
             break;
 
         case H5D_ALLOC_TIME_LATE:
-            fprintf(stream,"Late\n");
+            HDfprintf(stream,"Late\n");
             break;
 
         case H5D_ALLOC_TIME_INCR:
-            fprintf(stream,"Incremental\n");
+            HDfprintf(stream,"Incremental\n");
             break;
 
         case H5D_ALLOC_TIME_DEFAULT:
         case H5D_ALLOC_TIME_ERROR:
         default:
-            fprintf(stream,"Unknown!\n");
+            HDfprintf(stream,"Unknown!\n");
             break;
     } /* end switch */
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Time:");
     switch(fill->fill_time) {
         case H5D_FILL_TIME_ALLOC:
-            fprintf(stream,"On Allocation\n");
+            HDfprintf(stream,"On Allocation\n");
             break;
 
         case H5D_FILL_TIME_NEVER:
-            fprintf(stream,"Never\n");
+            HDfprintf(stream,"Never\n");
             break;
 
         case H5D_FILL_TIME_IFSET:
-            fprintf(stream,"If Set\n");
+            HDfprintf(stream,"If Set\n");
             break;
 
         case H5D_FILL_TIME_ERROR:
         default:
-            fprintf(stream,"Unknown!\n");
+            HDfprintf(stream,"Unknown!\n");
             break;
 
     } /* end switch */
@@ -863,20 +863,20 @@ H5O_fill_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
     H5P_is_fill_value_defined((const H5O_fill_t *)fill, &fill_status);
     switch(fill_status) {
         case H5D_FILL_VALUE_UNDEFINED:
-            fprintf(stream,"Undefined\n");
+            HDfprintf(stream,"Undefined\n");
             break;
 
         case H5D_FILL_VALUE_DEFAULT:
-            fprintf(stream,"Default\n");
+            HDfprintf(stream,"Default\n");
             break;
 
         case H5D_FILL_VALUE_USER_DEFINED:
-            fprintf(stream,"User Defined\n");
+            HDfprintf(stream,"User Defined\n");
             break;
 
         case H5D_FILL_VALUE_ERROR:
         default:
-            fprintf(stream,"Unknown!\n");
+            HDfprintf(stream,"Unknown!\n");
             break;
 
     } /* end switch */
@@ -885,10 +885,10 @@ H5O_fill_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Data type:");
     if(fill->type) {
 	H5T_debug(fill->type, stream);
-	fprintf(stream, "\n");
+	HDfprintf(stream, "\n");
     } /* end if */
     else
-	fprintf(stream, "<dataset type>\n");
+	HDfprintf(stream, "<dataset type>\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5O_fill_debug() */

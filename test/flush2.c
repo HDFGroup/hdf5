@@ -73,9 +73,9 @@ check_dset(hid_t file, const char* name)
             error = fabs(the_data[i][j] - (double)(hssize_t)i / ((hssize_t)j + 1));
             if(error > 0.0001F) {
                 H5_FAILED();
-                printf("    dset[%lu][%lu] = %g\n",
+                HDprintf("    dset[%lu][%lu] = %g\n",
                     (unsigned long)i, (unsigned long)j, the_data[i][j]);
-                printf("    should be %g\n",
+                HDprintf("    should be %g\n",
                     (double)(hssize_t)i/(hssize_t)(j+1));
                 goto error;
             } /* end if */
@@ -88,7 +88,7 @@ error:
     return 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  check_file
  *
@@ -116,9 +116,9 @@ check_file(char* filename, hid_t fapl, int flag)
     /* Open some groups */
     if((groups = H5Gopen2(file, "some_groups", H5P_DEFAULT)) < 0) goto error;
     for(i = 0; i < 100; i++) {
-  sprintf(name, "grp%02u", (unsigned)i);
-  if((grp = H5Gopen2(groups, name, H5P_DEFAULT)) < 0) goto error;
-  if(H5Gclose(grp) < 0) goto error;
+        HDsprintf(name, "grp%02u", (unsigned)i);
+        if((grp = H5Gopen2(groups, name, H5P_DEFAULT)) < 0) goto error;
+        if(H5Gclose(grp) < 0) goto error;
     } /* end for */
 
     /* Check to see if that last added dataset in the third file is accessible
@@ -134,7 +134,7 @@ error:
     return 1;
 } /* end check_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  main
  *

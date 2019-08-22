@@ -162,15 +162,15 @@ error:
 static unsigned
 test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t		file = -1;              /* File ID */
-    hid_t		fapl_new = -1;		/* copy of fapl */
-    char		filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t		*f = NULL;              /* Internal file object pointer */
+    hid_t        file = -1;              /* File ID */
+    hid_t        fapl_new = -1;        /* copy of fapl */
+    char        filename[FILENAME_LEN]; /* Filename to use */
+    H5F_t        *f = NULL;              /* Internal file object pointer */
     h5_stat_size_t      file_size, new_file_size;      /* file size */
-    H5FD_mem_t 		type;
-    haddr_t		addr1, addr2;
-    haddr_t 		ma_addr=HADDR_UNDEF, new_ma_addr=HADDR_UNDEF;
-    hsize_t 		ma_size=0;
+    H5FD_mem_t         type;
+    haddr_t        addr1, addr2;
+    haddr_t         ma_addr=HADDR_UNDEF, new_ma_addr=HADDR_UNDEF;
+    hsize_t         ma_size=0;
     hbool_t             contig_addr_vfd;        /* Whether VFD used has a contigous address space */
 
     TESTING("H5MM_alloc() of file allocation");

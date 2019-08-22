@@ -35,12 +35,15 @@ static const char *FileHeader = "\n\
 #include <stdio.h>
 #include <time.h>
 #include "H5private.h"
+/* Do NOT use HDfprintf in this file as it is not linked with the library,
+ * which contains the H5system.c file in which the function is defined.
+ */
 
 #define LIBSETTINGSFNAME "libhdf5.settings"
 
 FILE       *rawoutstream = NULL;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  insert_libhdf5_settings
  *
@@ -105,7 +108,7 @@ insert_libhdf5_settings(FILE *flibinfo)
 #endif
 } /* insert_libhdf5_settings() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  make_libinfo
  *
@@ -123,7 +126,7 @@ make_libinfo(void)
     insert_libhdf5_settings(rawoutstream);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  print_header
  *
@@ -196,8 +199,7 @@ information about the library build configuration\n";
     fprintf(rawoutstream, "/* Generated automatically by H5make_libsettings -- do not edit */\n\n\n");
     HDfputs(FileHeader, rawoutstream);        /*the copyright notice--see top of this file */
 
-    fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n",
-    month_name[tm->tm_mon], tm->tm_mday, 1900 + tm->tm_year);
+    fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday, 1900 + tm->tm_year);
     if(pwd || real_name[0] || host_name[0]) {
         fprintf(rawoutstream, " *\t\t\t");
         if(real_name[0])
@@ -229,7 +231,7 @@ information about the library build configuration\n";
     fprintf(rawoutstream, "\n */\n\n");
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  print_footer
  *
@@ -244,7 +246,7 @@ print_footer(void)
     /* nothing */
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  main
  *

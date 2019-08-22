@@ -111,7 +111,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
     /* Check if all the filters are available */
     if(H5Pall_filters_avail(dcpl) != TRUE) {
         H5_FAILED();
-        printf("    Line %d: Incorrect filter availability\n", __LINE__);
+        HDprintf("    Line %d: Incorrect filter availability\n", __LINE__);
         TEST_ERROR
     } /* end if */
 
@@ -132,8 +132,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
         for(j=0; j<(size_t)size[1]; j++)
             if(0 != check[i][j]) {
                 H5_FAILED();
-                printf("    Read a non-zero value.\n");
-                printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                HDprintf("    Read a non-zero value.\n");
+                HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
                 TEST_ERROR
             } /* end if */
     PASSED();
@@ -200,8 +200,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
         for(j=0; j<size[1]; j++)
             if(points[i][j] != check[i][j]) {
                 H5_FAILED();
-                printf("    Read different values than written.\n");
-                printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                HDprintf("    Read different values than written.\n");
+                HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
                 TEST_ERROR
             } /* end if */
 
@@ -225,8 +225,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
         for(j = 0; j < size[1]; j++)
             if(points[i][j] != check[i][j]) {
                 H5_FAILED();
-                printf("    Read different values than written.\n");
-                printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                HDprintf("    Read different values than written.\n");
+                HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
                 TEST_ERROR
             } /* end if */
 
@@ -1068,14 +1068,14 @@ main(void)
 
     if(nerrors) TEST_ERROR
 
-    printf("All plugin tests passed.\n");
+    HDprintf("All plugin tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
     nerrors = MAX(1, nerrors);
-    printf("***** %d PLUGIN TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    HDprintf("***** %d PLUGIN TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
 

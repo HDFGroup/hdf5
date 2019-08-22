@@ -151,13 +151,13 @@ filter_read_internal(const char *filename, hid_t dcpl,
         for (j=0; j<hs_size[1]; j++) {
             if(points[i*size[1]+(size_t)hs_offset[1]+j] !=
                       check[i*hs_size[1]+j]) {
-		  fprintf(stderr,"    Read different values than written.\n");
-		  fprintf(stderr,"    At index %lu,%lu\n",
+		  HDfprintf(stderr,"    Read different values than written.\n");
+		  HDfprintf(stderr,"    At index %lu,%lu\n",
 		         (unsigned long)(i),
 		         (unsigned long)(hs_offset[1]+j));
-		  fprintf(stderr,"    At original: %d\n",
+		  HDfprintf(stderr,"    At original: %d\n",
 		         (int)points[i*size[1]+(size_t)hs_offset[1]+j]);
-		  fprintf(stderr,"    At returned: %d\n",
+		  HDfprintf(stderr,"    At returned: %d\n",
 		         (int)check[i*hs_size[1]+j]);
                   VRFY(FALSE, "");
 	    }

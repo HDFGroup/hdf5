@@ -72,7 +72,7 @@ const int transformData[ROWS][COLS] =
             if(!( (((VAR1)[i][j] >= (TYPE)((VAR2)[i][j])) && ( ((VAR1)[i][j] - TOL) < (TYPE)((VAR2)[i][j]))) || (  ((VAR1)[i][j] <= (TYPE)((VAR2)[i][j])) && ( ((VAR1)[i][j] + TOL) > (TYPE)((VAR2)[i][j])))))	\
             {						\
                 H5_FAILED();				\
-                fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");	\
+                HDfprintf(stderr, "    ERROR: Conversion failed to match computed data\n");	\
                 goto error;					\
             }						\
         }							\
@@ -89,7 +89,7 @@ const int transformData[ROWS][COLS] =
             if( !(((VAR1)[i][j] <= ((TYPE)(VAR2)[i][j] + TOL)) && ((VAR1)[i][j] >= ((TYPE)(VAR2)[i][j] - TOL))) )	\
             {						\
                 H5_FAILED();				\
-                fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");	\
+                HDfprintf(stderr, "    ERROR: Conversion failed to match computed data\n");	\
                 goto error;					\
             }						\
         }							\
@@ -106,7 +106,7 @@ const int transformData[ROWS][COLS] =
             if( (VAR1)[i][j] != (VAR2)[i][j] )	        \
             {						\
                 H5_FAILED();				\
-                fprintf(stderr, "    ERROR: data  failed to match computed data\n");	\
+                HDfprintf(stderr, "    ERROR: data  failed to match computed data\n");	\
                 goto error;				\
             }						\
         }						\
@@ -248,7 +248,7 @@ const int transformData[ROWS][COLS] =
     else						\
     {							\
 	H5_FAILED();					\
-	fprintf(stderr, "    ERROR: Data transform allowed invalid TRANSFORM transform to be set\n");	\
+	HDfprintf(stderr, "    ERROR: Data transform allowed invalid TRANSFORM transform to be set\n");	\
 	goto error;					\
     }							\
 }

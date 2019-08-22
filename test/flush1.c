@@ -75,7 +75,7 @@ create_file(char* name, hid_t fapl)
     /* Create some groups */
     if((groups = H5Gcreate2(file, "some_groups", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     for(i = 0; i < 100; i++) {
-	sprintf(name, "grp%02u", (unsigned)i);
+	HDsprintf(name, "grp%02u", (unsigned)i);
 	if((grp = H5Gcreate2(groups, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 	if(H5Gclose(grp) < 0) FAIL_STACK_ERROR
     } /* end for */

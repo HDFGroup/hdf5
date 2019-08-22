@@ -1728,26 +1728,26 @@ H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
     H5FD_mem_t		mmt;
 
     /* Debugging stuff... */
-    fprintf(stderr, "multifile access information:\n");
+    HDfprintf(stderr, "multifile access information:\n");
 
     /* print the map */
-    fprintf(stderr, "    map=");
+    HDfprintf(stderr, "    map=");
     for (mt=1; mt<H5FD_MEM_NTYPES; mt++) {
 	mmt = file->memb_map[mt];
 	if (H5FD_MEM_DEFAULT==mmt) mmt = mt;
-	fprintf(stderr, "%s%d", 1==mt?"":",", (int)mmt);
+	HDfprintf(stderr, "%s%d", 1==mt?"":",", (int)mmt);
     }
-    fprintf(stderr, "\n");
+    HDfprintf(stderr, "\n");
 
     /* print info about each file */
-    fprintf(stderr, "      File             Starting            Allocated                 Next Member\n");
-    fprintf(stderr, "    Number              Address                 Size              Address Name\n");
-    fprintf(stderr, "    ------ -------------------- -------------------- -------------------- ------------------------------\n");
+    HDfprintf(stderr, "      File             Starting            Allocated                 Next Member\n");
+    HDfprintf(stderr, "    Number              Address                 Size              Address Name\n");
+    HDfprintf(stderr, "    ------ -------------------- -------------------- -------------------- ------------------------------\n");
 
     for (mt=1; mt<H5FD_MEM_NTYPES; mt++) {
 	if (HADDR_UNDEF!=file->memb_addr[mt]) {
 	    haddr_t eoa = H5FDget_eoa(file->memb[mt], mt);
-	    fprintf(stderr, "    %6d %20llu %20llu %20llu %s\n",
+	    HDfprintf(stderr, "    %6d %20llu %20llu %20llu %s\n",
 		    (int)mt, (unsigned long long)(file->memb_addr[mt]),
 		    (unsigned long long)eoa,
 		    (unsigned long long)(file->memb_next[mt]),

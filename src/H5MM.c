@@ -13,21 +13,27 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5MM.c
- *			Jul 10 1997
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:     H5MM.c
+ *              Jul 10 1997
+ *              Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		Memory management functions.
- *
- * Modifications:
+ * Purpose:     Memory management functions
  *
  *-------------------------------------------------------------------------
  */
 
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5MMprivate.h"
+/****************/
+/* Module Setup */
+/****************/
+
+
+/***********/
+/* Headers */
+/***********/
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /*-------------------------------------------------------------------------
@@ -41,9 +47,8 @@
  *              considered an error condition since allocations of zero
  *              bytes usually indicate problems.
  *  
- * Return:  Success:    Pointer new memory
- *
- *          Failure:	NULL
+ * Return:      Success:    Pointer to new memory
+ *              Failure:    NULL
  *
  * Programmer:  Quincey Koziol
  *              Nov  8 2003
@@ -82,9 +87,8 @@ H5MM_malloc(size_t size)
  *              bytes usually indicate problems.
  *
  *
- * Return:  Success:    Pointer new memory
- *
- *          Failure:	NULL
+ * Return:      Success:    Pointer to new memory
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *              Nov  8 2003
@@ -123,10 +127,9 @@ H5MM_calloc(size_t size)
  *              Note that the (NULL, 0) combination is undefined behavior
  *              in the C standard.
  *
- * Return:  Success:    Ptr to new memory if size > 0
- *                      NULL if size is zero
- *
- *          Failure:    NULL (input buffer is unchanged on failure)
+ * Return:      Success:    Ptr to new memory if size > 0
+ *                          NULL if size is zero
+ *              Failure:    NULL (input buffer is unchanged on failure)
  *
  * Programmer:  Robb Matzke
  *              Jul 10 1997
@@ -136,7 +139,7 @@ H5MM_calloc(size_t size)
 void *
 H5MM_realloc(void *mem, size_t size)
 {
-    void *ret_value;
+    void *ret_value = NULL;
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -166,18 +169,16 @@ H5MM_realloc(void *mem, size_t size)
  *              NULL is an acceptable value for the input string.
  *
  * Return:      Success:    Pointer to a new string (NULL if s is NULL).
- *
- *              Failure:    abort()
+ *              Failure:    NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 10 1997
  *-------------------------------------------------------------------------
  */
 char *
 H5MM_xstrdup(const char *s)
 {
-    char	*ret_value = NULL;
+    char    *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -202,25 +203,23 @@ done:
  *              an error will be raised.
  *
  * Return:      Success:    Pointer to a new string
- *
- *              Failure:    abort()
+ *              Failure:    NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 10 1997
  *-------------------------------------------------------------------------
  */
 char *
 H5MM_strdup(const char *s)
 {
-    char	*ret_value;
+    char *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
     if(!s)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "null string")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "null string")
     if(NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDstrcpy(ret_value, s);
 
 done:
@@ -229,21 +228,19 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MM_xfree
+ * Function:    H5MM_xfree
  *
- * Purpose:	Just like free(3) except null pointers are allowed as
- *		arguments, and the return value (always NULL) can be
- *		assigned to the pointer whose memory was just freed:
+ * Purpose:     Just like free(3) except null pointers are allowed as
+ *              arguments, and the return value (always NULL) can be
+ *              assigned to the pointer whose memory was just freed:
  *
- *			thing = H5MM_xfree (thing);
+ *              thing = H5MM_xfree (thing);
  *
- * Return:	Success:	NULL
+ * Return:      Success:    NULL
+ *              Failure:    never fails
  *
- *		Failure:	never fails
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
+ * Programmer:  Robb Matzke
+ *              Jul 10 1997
  *
  *-------------------------------------------------------------------------
  */

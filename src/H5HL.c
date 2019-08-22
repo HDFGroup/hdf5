@@ -821,7 +821,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 	    if (last_fl->size < H5HL_SIZEOF_FREE(f)) {
 #ifdef H5HL_DEBUG
 		if (H5DEBUG(HL) && last_fl->size) {
-		    fprintf(H5DEBUG(HL), "H5HL: lost %lu bytes at line %d\n",
+		    HDfprintf(H5DEBUG(HL), "H5HL: lost %lu bytes at line %d\n",
 			    (unsigned long)(last_fl->size), __LINE__);
 		}
 #endif
@@ -848,7 +848,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 		heap->freelist = fl;
 #ifdef H5HL_DEBUG
 	    } else if (H5DEBUG(HL) && need_more > need_size) {
-		fprintf(H5DEBUG(HL),
+		HDfprintf(H5DEBUG(HL),
 			"H5HL_insert: lost %lu bytes at line %d\n",
 			(unsigned long)(need_more - need_size), __LINE__);
 #endif
@@ -857,7 +857,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 
 #ifdef H5HL_DEBUG
 	if (H5DEBUG(HL)) {
-	    fprintf(H5DEBUG(HL),
+	    HDfprintf(H5DEBUG(HL),
 		    "H5HL: resize mem buf from %lu to %lu bytes\n",
 		    (unsigned long)(old_dblk_size),
 		    (unsigned long)(old_dblk_size + need_more));
@@ -1007,7 +1007,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
     if(size < H5HL_SIZEOF_FREE(f)) {
 #ifdef H5HL_DEBUG
 	if(H5DEBUG(HL)) {
-	    fprintf(H5DEBUG(HL), "H5HL: lost %lu bytes\n",
+	    HDfprintf(H5DEBUG(HL), "H5HL: lost %lu bytes\n",
 		    (unsigned long) size);
 	}
 #endif

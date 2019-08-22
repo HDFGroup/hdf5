@@ -7576,7 +7576,7 @@ main(void)
     fapl = h5_fileaccess();
     ExpressMode = GetTestExpress();
     if(ExpressMode > 1)
-        printf("***Express test mode on.  Some tests may be skipped\n");
+        HDprintf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Initialize v2 B-tree creation parameters */
     init_cparam(&cparam);
@@ -7585,11 +7585,11 @@ main(void)
     /* Loop over re-opening B-tree during tests */
     for(reopen = FALSE; reopen <= TRUE; reopen++) {
         if(reopen) {
-            fprintf(stdout, "Testing with reopening B-tree:\n");
+            HDfprintf(stdout, "Testing with reopening B-tree:\n");
             tparam.reopen_btree = TRUE;
         } /* end if */
         else {
-            fprintf(stdout, "Testing without reopening B-tree:\n");
+            HDfprintf(stdout, "Testing without reopening B-tree:\n");
             tparam.reopen_btree = FALSE;
         } /* end else */
 
@@ -7609,7 +7609,7 @@ main(void)
         nerrors += test_insert_level2_3internal_redistrib(fapl, &cparam, &tparam);
         nerrors += test_insert_level2_3internal_split(fapl, &cparam, &tparam);
         if(ExpressMode > 1)
-            printf("***Express test mode on.  test_insert_lots skipped\n");
+            HDprintf("***Express test mode on.  test_insert_lots skipped\n");
         else
             nerrors += test_insert_lots(fapl, &cparam, &tparam);
 
@@ -7636,7 +7636,7 @@ main(void)
         nerrors += test_remove_level2_3internal_merge(fapl, &cparam, &tparam);
         nerrors += test_remove_level2_collapse_right(fapl, &cparam, &tparam);
         if(ExpressMode > 1)
-            printf("***Express test mode on.  test_remove_lots skipped\n");
+            HDprintf("***Express test mode on.  test_remove_lots skipped\n");
         else
             nerrors += test_remove_lots(envval, fapl, &cparam);
 

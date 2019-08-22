@@ -41,7 +41,7 @@
    buffers if appropriate.                                                   */
 
 /*-------------------------------------------------------------------------
-* test file image operations 
+* test file image operations
 *-------------------------------------------------------------------------
 */
 static int
@@ -106,7 +106,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
         filename[i] = (char *)HDmalloc(sizeof(char) * 32);
 
         /* create file name */
-        sprintf(filename[i], "image_file%d.h5", (int)i);
+        HDsprintf(filename[i], "image_file%d.h5", (int)i);
 
         /* create file */
         if ((file_id[i] = H5Fcreate(filename[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -506,11 +506,11 @@ int main( void )
     nerrors += test_file_image(open_images, nflags, flags) < 0? 1 : 0;
 
     if (nerrors) goto error;
-    printf("File image tests passed.\n");
+    HDprintf("File image tests passed.\n");
     return 0;
 
 error:
-    printf("***** %d IMAGE TEST%s FAILED! *****\n",nerrors, 1 == nerrors ? "" : "S");
+    HDprintf("***** %d IMAGE TEST%s FAILED! *****\n",nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
 

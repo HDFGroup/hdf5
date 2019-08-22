@@ -262,7 +262,7 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
         if(cls_ptr->lib_vers)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
+        HDfprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
             (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
             (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
             (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
@@ -277,17 +277,17 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 
             if(mpi_initialized && !mpi_finalized) {
 	        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-	        fprintf(stream, "MPI-process %d", mpi_rank);
+	        HDfprintf(stream, "MPI-process %d", mpi_rank);
 	    } /* end if */
             else
-	        fprintf(stream, "thread 0");
+	        HDfprintf(stream, "thread 0");
         } /* end block */
 #elif defined(H5_HAVE_THREADSAFE)
-        fprintf(stream, "thread %lu", (unsigned long)HDpthread_self_ulong());
+        HDfprintf(stream, "thread %lu", (unsigned long)HDpthread_self_ulong());
 #else
-        fprintf(stream, "thread 0");
+        HDfprintf(stream, "thread 0");
 #endif
-        fprintf(stream, ":\n");
+        HDfprintf(stream, ":\n");
     } /* end if */
 
     /* Check for "real" error description - used to format output more nicely */
@@ -295,12 +295,12 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
         have_desc=0;
 
     /* Print error message */
-    fprintf(stream, "%*s#%03d: %s line %u in %s()%s%s\n",
+    HDfprintf(stream, "%*s#%03d: %s line %u in %s()%s%s\n",
 	     H5E_INDENT, "", n, err_desc->file_name, err_desc->line,
 	     err_desc->func_name, (have_desc ? ": " : ""),
              (have_desc ? err_desc->desc : ""));
-    fprintf(stream, "%*smajor: %s\n", (H5E_INDENT * 2), "", maj_str);
-    fprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
+    HDfprintf(stream, "%*smajor: %s\n", (H5E_INDENT * 2), "", maj_str);
+    HDfprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -394,7 +394,7 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         if(cls_ptr->lib_vers)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
+        HDfprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
             (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
             (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
             (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
@@ -409,17 +409,17 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 
             if(mpi_initialized && !mpi_finalized) {
 	        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-	        fprintf(stream, "MPI-process %d", mpi_rank);
+	        HDfprintf(stream, "MPI-process %d", mpi_rank);
 	    } /* end if */
             else
-	        fprintf(stream, "thread 0");
+	        HDfprintf(stream, "thread 0");
         } /* end block */
 #elif defined(H5_HAVE_THREADSAFE)
-        fprintf(stream, "thread %lu", (unsigned long)HDpthread_self_ulong());
+        HDfprintf(stream, "thread %lu", (unsigned long)HDpthread_self_ulong());
 #else
-        fprintf(stream, "thread 0");
+        HDfprintf(stream, "thread 0");
 #endif
-        fprintf(stream, ":\n");
+        HDfprintf(stream, ":\n");
     } /* end if */
 
     /* Check for "real" error description - used to format output more nicely */
@@ -427,12 +427,12 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         have_desc = 0;
 
     /* Print error message */
-    fprintf(stream, "%*s#%03u: %s line %u in %s()%s%s\n",
+    HDfprintf(stream, "%*s#%03u: %s line %u in %s()%s%s\n",
 	     H5E_INDENT, "", n, err_desc->file_name, err_desc->line,
 	     err_desc->func_name, (have_desc ? ": " : ""),
              (have_desc ? err_desc->desc : ""));
-    fprintf(stream, "%*smajor: %s\n", (H5E_INDENT * 2), "", maj_str);
-    fprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
+    HDfprintf(stream, "%*smajor: %s\n", (H5E_INDENT * 2), "", maj_str);
+    HDfprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

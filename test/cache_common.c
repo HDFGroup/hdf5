@@ -1891,7 +1891,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	       ( expected[i].is_pinned ) ) ) {
 
 	    pass = FALSE;
-	    sprintf(msg, "%d: Contradictory data in expected[%d].\n", tag, i);
+	    HDsprintf(msg, "%d: Contradictory data in expected[%d].\n", tag, i);
 	    failure_mssg = msg;
 	}
 
@@ -1903,7 +1903,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( in_cache != expected[i].in_cache ) {
 
 	        pass = FALSE;
-	        sprintf(msg,
+	        HDsprintf(msg,
 		      "%d entry (%d, %d) in cache actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -1919,7 +1919,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->size != expected[i].size ) {
 
 	        pass = FALSE;
-	        sprintf(msg,
+	        HDsprintf(msg,
                         "%d entry (%d, %d) size actualexpected = %ld/%ld.\n",
 			tag,
 	                (int)expected[i].entry_type,
@@ -1935,7 +1935,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->header.size != expected[i].size ) {
 
 	        pass = FALSE;
-	        sprintf(msg,
+	        HDsprintf(msg,
                         "%d entry (%d, %d) header size actual/expected = %ld/%ld.\n",
 			tag,
 		        (int)expected[i].entry_type,
@@ -1951,7 +1951,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->at_main_addr != expected[i].at_main_addr ) {
 
 	        pass = FALSE;
-	        sprintf(msg,
+	        HDsprintf(msg,
                       "%d entry (%d, %d) at main addr actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -1967,7 +1967,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->is_dirty != expected[i].is_dirty ) {
 
 	        pass = FALSE;
-	        sprintf(msg,
+	        HDsprintf(msg,
                       "%d entry (%d, %d) is_dirty actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -1983,7 +1983,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->header.is_dirty != expected[i].is_dirty ) {
 
 	        pass = FALSE;
-	        sprintf(msg,
+	        HDsprintf(msg,
                       "%d entry (%d, %d) header is_dirty actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -1999,7 +1999,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->is_protected != expected[i].is_protected ) {
 
 	        pass = FALSE;
-	        sprintf(msg,
+	        HDsprintf(msg,
                       "%d entry (%d, %d) is_protected actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -2015,7 +2015,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->header.is_protected != expected[i].is_protected ) {
 
 	        pass = FALSE;
-	        sprintf(msg,
+	        HDsprintf(msg,
                       "%d entry (%d, %d) header is_protected actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -2031,7 +2031,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->is_pinned != expected[i].is_pinned ) {
 
 	        pass = FALSE;
-	        sprintf(msg,
+	        HDsprintf(msg,
                       "%d entry (%d, %d) is_pinned actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -2047,7 +2047,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->header.is_pinned != expected[i].is_pinned ) {
 
 	        pass = FALSE;
-	        sprintf(msg,
+	        HDsprintf(msg,
                   "%d entry (%d, %d) header is_pinned actual/expected = %d/%d.\n",
 		  tag,
 		  (int)expected[i].entry_type,
@@ -2066,7 +2066,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	         ( entry_ptr->destroyed != expected[i].destroyed ) ) {
 
 	        pass = FALSE;
-                sprintf(msg,
+                HDsprintf(msg,
                         "%d entry (%d,%d) loaded = %d(%d), clrd = %d(%d), flshd = %d(%d), dest = %d(%d)\n",
 			tag,
 		        (int)expected[i].entry_type,

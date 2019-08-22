@@ -299,7 +299,7 @@ H5O_name_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth,
             "Name:",
             mesg->s);
 

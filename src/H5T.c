@@ -1412,7 +1412,7 @@ H5T_term_interface(void)
                         (size_t)0, (size_t)0, NULL, NULL,H5AC_ind_dxpl_id) < 0) {
 #ifdef H5T_DEBUG
                         if (H5DEBUG(T)) {
-                            fprintf(H5DEBUG(T), "H5T: conversion function "
+                            HDfprintf(H5DEBUG(T), "H5T: conversion function "
                                     "0x%08lx failed to free private data for "
                                     "%s (ignored)\n",
                                     (unsigned long)(path->func), path->name);
@@ -2353,7 +2353,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
                     (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id)<0) {
 #ifdef H5T_DEBUG
         if (H5DEBUG(T)) {
-            fprintf (H5DEBUG(T), "H5T: conversion function 0x%08lx "
+            HDfprintf (H5DEBUG(T), "H5T: conversion function 0x%08lx "
                 "failed to free private data for %s (ignored)\n",
                 (unsigned long)(old_path->func), old_path->name);
         }
@@ -2525,7 +2525,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
                     (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
 #ifdef H5T_DEBUG
                 if(H5DEBUG(T)) {
-                    fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx failed "
+                    HDfprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx failed "
                             "to free private data for %s (ignored)\n",
                             (unsigned long)(path->func), path->name);
                 }
@@ -4390,7 +4390,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
         if(H5T__conv_noop((hid_t)FAIL, (hid_t)FAIL, &(H5T_g.path[0]->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
 #ifdef H5T_DEBUG
             if(H5DEBUG(T))
-            fprintf(H5DEBUG(T), "H5T: unable to initialize no-op conversion function (ignored)\n");
+            HDfprintf(H5DEBUG(T), "H5T: unable to initialize no-op conversion function (ignored)\n");
 #endif
             H5E_clear_stack(NULL); /*ignore the error*/
         } /* end if */
@@ -4549,7 +4549,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
         if((table->func)((hid_t)FAIL, (hid_t)FAIL, &(table->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
 #ifdef H5T_DEBUG
             if(H5DEBUG(T)) {
-                fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free "
+                HDfprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free "
                         "failed for %s (ignored)\n",
                         (unsigned long)(path->func), path->name);
             } /* end if */

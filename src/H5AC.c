@@ -27,24 +27,24 @@
 
 #define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
 #define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5F_PACKAGE        /*suppress error about including H5Fpkg      */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5AC_init_interface
+#define H5_INTERFACE_INIT_FUNC    H5AC_init_interface
 
 #ifdef H5_HAVE_PARALLEL
 #include <mpi.h>
 #endif /* H5_HAVE_PARALLEL */
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACpkg.h"		/* Metadata cache			*/
+#include "H5private.h"        /* Generic Functions            */
+#include "H5ACpkg.h"        /* Metadata cache            */
 #include "H5Cpkg.h"             /* Cache                                */
-#include "H5Dprivate.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* Files				*/
-#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5Dprivate.h"        /* Dataset functions            */
+#include "H5Eprivate.h"        /* Error handling              */
+#include "H5Fpkg.h"        /* Files                */
+#include "H5FDprivate.h"    /* File drivers                */
 #include "H5FLprivate.h"        /* Free Lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Iprivate.h"        /* IDs                      */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 
@@ -68,13 +68,13 @@ H5FL_DEFINE_STATIC(H5AC_aux_t);
  * that purpose.  Its fields are as follows:
  *
  * magic:       Unsigned 32 bit integer always set to
- *		H5AC__H5AC_SLIST_ENTRY_T_MAGIC.  This field is used to
- *		validate pointers to instances of H5AC_slist_entry_t.
+ *        H5AC__H5AC_SLIST_ENTRY_T_MAGIC.  This field is used to
+ *        validate pointers to instances of H5AC_slist_entry_t.
  *
- * addr:	file offset of a metadata entry.  Entries are added to this
- *		list (if they aren't there already) when they are marked
- *		dirty in an unprotect, inserted, or moved.  They are
- *		removed when they appear in a clean entries broadcast.
+ * addr:    file offset of a metadata entry.  Entries are added to this
+ *        list (if they aren't there already) when they are marked
+ *        dirty in an unprotect, inserted, or moved.  They are
+ *        removed when they appear in a clean entries broadcast.
  *
  ****************************************************************************/
 
@@ -136,7 +136,7 @@ static herr_t H5AC_construct_candidate_list(H5AC_t * cache_ptr,
 static herr_t H5AC_copy_candidate_list_to_buffer(H5AC_t * cache_ptr,
                                         int * num_entries_ptr,
                                         haddr_t ** haddr_buf_ptr_ptr,
-					size_t * MPI_Offset_buf_size_ptr,
+                    size_t * MPI_Offset_buf_size_ptr,
                                         MPI_Offset ** MPI_Offset_buf_ptr_ptr);
 
 static herr_t H5AC_flush_entries(H5F_t *f);
@@ -183,39 +183,39 @@ static herr_t H5AC_tidy_cache_0_lists(H5AC_t * cache_ptr,
                                       int num_candidates,
                                       haddr_t * candidates_list_ptr);
 
-herr_t H5AC_rsp__dist_md_write__flush(H5F_t *f, 
-                                      hid_t dxpl_id, 
+herr_t H5AC_rsp__dist_md_write__flush(H5F_t *f,
+                                      hid_t dxpl_id,
                                       H5AC_t * cache_ptr);
 
-herr_t H5AC_rsp__dist_md_write__flush_to_min_clean(H5F_t *f, 
-                                                   hid_t dxpl_id, 
+herr_t H5AC_rsp__dist_md_write__flush_to_min_clean(H5F_t *f,
+                                                   hid_t dxpl_id,
                                                    H5AC_t * cache_ptr);
 
-herr_t H5AC_rsp__p0_only__flush(H5F_t *f, 
-                                hid_t dxpl_id, 
+herr_t H5AC_rsp__p0_only__flush(H5F_t *f,
+                                hid_t dxpl_id,
                                 H5AC_t * cache_ptr);
 
-herr_t H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f, 
-                                             hid_t dxpl_id, 
+herr_t H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f,
+                                             hid_t dxpl_id,
                                              H5AC_t * cache_ptr);
 
-static herr_t H5AC_run_sync_point(H5F_t *f, 
-                                  hid_t dxpl_id, 
-		                  int sync_point_op);
+static herr_t H5AC_run_sync_point(H5F_t *f,
+                                  hid_t dxpl_id,
+                        int sync_point_op);
 
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5AC_init
+ * Function:    H5AC_init
  *
- * Purpose:	Initialize the interface from some other layer.
+ * Purpose:    Initialize the interface from some other layer.
  *
- * Return:	Success:	non-negative
+ * Return:    Success:    non-negative
  *
- *		Failure:	negative
+ *        Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, January 18, 2003
  *
  *-------------------------------------------------------------------------
@@ -232,15 +232,15 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5AC_init_interface
+ * Function:    H5AC_init_interface
  *
- * Purpose:	Initialize interface-specific information
+ * Purpose:    Initialize interface-specific information
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, July 18, 2002
  *
  *-------------------------------------------------------------------------
@@ -303,18 +303,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC_init_interface() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5AC_term_interface
+ * Function:    H5AC_term_interface
  *
- * Purpose:	Terminate this interface.
+ * Purpose:    Terminate this interface.
  *
- * Return:	Success:	Positive if anything was done that might
- *				affect other interfaces; zero otherwise.
+ * Return:    Success:    Positive if anything was done that might
+ *                affect other interfaces; zero otherwise.
  *
- * 		Failure:	Negative.
+ *         Failure:    Negative.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, July 18, 2002
  *
  *-------------------------------------------------------------------------
@@ -322,7 +322,7 @@ done:
 int
 H5AC_term_interface(void)
 {
-    int	n = 0;
+    int    n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -378,10 +378,10 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "shared OH message master table",
     "shared OH message index",
     "superblock",
-    "test entry"	/* for testing only -- not used for actual files */
+    "test entry"    /* for testing only -- not used for actual files */
 };
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_create
  *
@@ -405,7 +405,7 @@ H5AC_create(const H5F_t *f,
             H5AC_cache_config_t *config_ptr)
 {
 #ifdef H5_HAVE_PARALLEL
-    char 	 prefix[H5C__PREFIX_LEN] = "";
+    char      prefix[H5C__PREFIX_LEN] = "";
     H5AC_aux_t * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -423,9 +423,9 @@ H5AC_create(const H5F_t *f,
 
 #ifdef H5_HAVE_PARALLEL
     if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-        MPI_Comm	 mpi_comm;
-        int		 mpi_rank;
-        int	 	 mpi_size;
+        MPI_Comm     mpi_comm;
+        int         mpi_rank;
+        int          mpi_size;
 
         if(MPI_COMM_NULL == (mpi_comm = H5F_mpi_get_comm(f)))
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI communicator")
@@ -465,7 +465,7 @@ H5AC_create(const H5F_t *f,
         aux_ptr->write_done = NULL;
         aux_ptr->sync_point_done = NULL;
 
-        sprintf(prefix, "%d:", mpi_rank);
+        HDsprintf(prefix, "%d:", mpi_rank);
 
         if(mpi_rank == 0) {
             if(NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -531,7 +531,7 @@ H5AC_create(const H5F_t *f,
 #endif /* H5_HAVE_PARALLEL */
 
     if(NULL == f->shared->cache)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
 #ifdef H5_HAVE_PARALLEL
     if(aux_ptr != NULL) {
@@ -566,7 +566,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_create() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_dest
  *
@@ -639,13 +639,13 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_dest() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_expunge_entry
  *
- * Purpose:	Expunge the target entry from the cache without writing it
- * 		to disk even if it is dirty.  The entry must not be either
- * 		pinned or protected.
+ * Purpose:    Expunge the target entry from the cache without writing it
+ *         to disk even if it is dirty.  The entry must not be either
+ *         pinned or protected.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -656,9 +656,9 @@ done:
  */
 herr_t
 H5AC_expunge_entry(H5F_t *f,
-		   hid_t dxpl_id,
-		   const H5AC_class_t *type,
-		   haddr_t addr,
+        hid_t dxpl_id,
+        const H5AC_class_t *type,
+        haddr_t addr,
                    unsigned flags)
 {
     herr_t  result;
@@ -690,15 +690,15 @@ H5AC_expunge_entry(H5F_t *f,
          ( H5C_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC_expunge_entry 0x%lx %d",
-	        (unsigned long)addr,
-		(int)(type->id));
+        HDsprintf(trace, "H5AC_expunge_entry 0x%lx %d",
+            (unsigned long)addr,
+        (int)(type->id));
     }
 }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     result = H5C_expunge_entry(f,
-		               dxpl_id,
+                    dxpl_id,
                                H5AC_dxpl_id,
                                type,
                                addr,
@@ -715,7 +715,7 @@ done:
 #if H5AC__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+    HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
@@ -723,17 +723,17 @@ done:
 
 } /* H5AC_expunge_entry() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_flush
  *
- * Purpose:	Flush (and possibly destroy) the metadata cache associated
- *		with the specified file.
+ * Purpose:    Flush (and possibly destroy) the metadata cache associated
+ *        with the specified file.
  *
- *		If the cache contains protected entries, the function will
- *		fail, as protected entries cannot be flushed.  However
- *		all unprotected entries should be flushed before the
- *		function returns failure.
+ *        If the cache contains protected entries, the function will
+ *        fail, as protected entries cannot be flushed.  However
+ *        all unprotected entries should be flushed before the
+ *        function returns failure.
  *
  * Return:      Non-negative on success/Negative on failure if there was a
  *              request to flush all items and something was protected.
@@ -748,10 +748,10 @@ herr_t
 H5AC_flush(H5F_t *f, hid_t dxpl_id)
 {
 #if H5AC__TRACE_FILE_ENABLED
-    char 	  trace[128] = "";
-    FILE *	  trace_file_ptr = NULL;
+    char       trace[128] = "";
+    FILE *      trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
-    herr_t	  ret_value = SUCCEED;      /* Return value */
+    herr_t      ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -768,7 +768,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
             (f->shared->cache != NULL) &&
             (H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
             (trace_file_ptr != NULL))
-	sprintf(trace, "H5AC_flush");
+    HDsprintf(trace, "H5AC_flush");
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
@@ -790,20 +790,20 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_flush() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_get_entry_status
  *
  * Purpose:     Given a file address, determine whether the metadata
- * 		cache contains an entry at that location.  If it does,
- * 		also determine whether the entry is dirty, protected,
- * 		pinned, etc. and return that information to the caller
- * 		in *status_ptr.
+ *         cache contains an entry at that location.  If it does,
+ *         also determine whether the entry is dirty, protected,
+ *         pinned, etc. and return that information to the caller
+ *         in *status_ptr.
  *
- * 		If the specified entry doesn't exist, set *status_ptr
- * 		to zero.
+ *         If the specified entry doesn't exist, set *status_ptr
+ *         to zero.
  *
- * 		On error, the value of *status_ptr is undefined.
+ *         On error, the value of *status_ptr is undefined.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -815,14 +815,14 @@ done:
 herr_t
 H5AC_get_entry_status(const H5F_t *f,
                       haddr_t    addr,
-		      unsigned * status_ptr)
+            unsigned * status_ptr)
 {
-    hbool_t	in_cache;
-    hbool_t	is_dirty;
-    hbool_t	is_protected;
-    hbool_t	is_pinned;
-    size_t	entry_size;
-    unsigned	status = 0;
+    hbool_t    in_cache;
+    hbool_t    is_dirty;
+    hbool_t    is_protected;
+    hbool_t    is_pinned;
+    size_t    entry_size;
+    unsigned    status = 0;
     herr_t      ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -835,13 +835,13 @@ H5AC_get_entry_status(const H5F_t *f,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_status() failed.")
 
     if(in_cache) {
-	status |= H5AC_ES__IN_CACHE;
-	if(is_dirty)
-	    status |= H5AC_ES__IS_DIRTY;
-	if(is_protected)
-	    status |= H5AC_ES__IS_PROTECTED;
-	if(is_pinned)
-	    status |= H5AC_ES__IS_PINNED;
+    status |= H5AC_ES__IN_CACHE;
+    if(is_dirty)
+        status |= H5AC_ES__IS_DIRTY;
+    if(is_protected)
+        status |= H5AC_ES__IS_PROTECTED;
+    if(is_pinned)
+        status |= H5AC_ES__IS_PINNED;
     } /* end if */
 
     *status_ptr = status;
@@ -850,7 +850,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_get_entry_status() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_insert_entry
  *
@@ -870,9 +870,9 @@ herr_t
 H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, unsigned int flags)
 {
 #if H5AC__TRACE_FILE_ENABLED
-    char          	trace[128] = "";
+    char              trace[128] = "";
     size_t              trace_entry_size = 0;
-    FILE *        	trace_file_ptr = NULL;
+    FILE *            trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -889,7 +889,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 
     /* Check for invalid access request */
     if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no write intent on file")
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no write intent on file")
 
 #if H5AC__TRACE_FILE_ENABLED
     /* For the insert, only the addr, size, type id and flags are really
@@ -905,10 +905,10 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
          ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC_insert_entry 0x%lx %d 0x%x",
-	        (unsigned long)addr,
-		type->id,
-		flags);
+        HDsprintf(trace, "H5AC_insert_entry 0x%lx %d 0x%x",
+            (unsigned long)addr,
+        type->id,
+        flags);
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
@@ -943,21 +943,21 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr != NULL) {
-	HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
+    HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
                   (int)trace_entry_size,
-		  (int)ret_value);
+        (int)ret_value);
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_insert_entry() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_mark_entry_dirty
  *
- * Purpose:	Mark a pinned or protected entry as dirty.  The target
- * 		entry MUST be either pinned, protected, or both.
+ * Purpose:    Mark a pinned or protected entry as dirty.  The target
+ *         entry MUST be either pinned, protected, or both.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -970,8 +970,8 @@ herr_t
 H5AC_mark_entry_dirty(void *thing)
 {
 #if H5AC__TRACE_FILE_ENABLED
-    char          	trace[128] = "";
-    FILE *        	trace_file_ptr = NULL;
+    char              trace[128] = "";
+    FILE *            trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -987,8 +987,8 @@ H5AC_mark_entry_dirty(void *thing)
      */
     if((H5C_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
             (NULL != trace_file_ptr))
-        sprintf(trace, "%s 0x%lx", FUNC,
-	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
+        HDsprintf(trace, "%s 0x%lx", FUNC,
+            (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
@@ -1013,13 +1013,13 @@ H5AC_mark_entry_dirty(void *thing)
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+    HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_dirty() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_move_entry
  *
@@ -1038,8 +1038,8 @@ herr_t
 H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t new_addr)
 {
 #if H5AC__TRACE_FILE_ENABLED
-    char          	trace[128] = "";
-    FILE *        	trace_file_ptr = NULL;
+    char              trace[128] = "";
+    FILE *            trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t        * aux_ptr;
@@ -1066,10 +1066,10 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
          ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC_move_entry 0x%lx 0x%lx %d",
-	        (unsigned long)old_addr,
-		(unsigned long)new_addr,
-		(int)(type->id));
+        HDsprintf(trace, "H5AC_move_entry 0x%lx 0x%lx %d",
+            (unsigned long)old_addr,
+        (unsigned long)new_addr,
+        (int)(type->id));
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
@@ -1095,17 +1095,17 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr != NULL)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+    HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_move_entry() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_pin_protected_entry()
  *
- * Purpose:	Pin a protected cache entry.  The entry must be protected
+ * Purpose:    Pin a protected cache entry.  The entry must be protected
  *              at the time of call, and must be unpinned.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1135,8 +1135,8 @@ H5AC_pin_protected_entry(void *thing)
      */
     if((H5C_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
             (NULL != trace_file_ptr))
-        sprintf(trace, "%s 0x%lx", FUNC,
-	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
+        HDsprintf(trace, "%s 0x%lx", FUNC,
+            (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     if(H5C_pin_protected_entry(thing) < 0)
@@ -1145,27 +1145,27 @@ H5AC_pin_protected_entry(void *thing)
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+    HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_pin_protected_entry() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_protect
  *
  * Purpose:     If the target entry is not in the cache, load it.  If
- *		necessary, attempt to evict one or more entries to keep
- *		the cache within its maximum size.
+ *        necessary, attempt to evict one or more entries to keep
+ *        the cache within its maximum size.
  *
- *		Mark the target entry as protected, and return its address
- *		to the caller.  The caller must call H5AC_unprotect() when
- *		finished with the entry.
+ *        Mark the target entry as protected, and return its address
+ *        to the caller.  The caller must call H5AC_unprotect() when
+ *        finished with the entry.
  *
- *		While it is protected, the entry may not be either evicted
- *		or flushed -- nor may it be accessed by another call to
- *		H5AC_protect.  Any attempt to do so will result in a failure.
+ *        While it is protected, the entry may not be either evicted
+ *        or flushed -- nor may it be accessed by another call to
+ *        H5AC_protect.  Any attempt to do so will result in a failure.
  *
  * Return:      Success:        Ptr to the object.
  *              Failure:        NULL
@@ -1181,17 +1181,17 @@ H5AC_protect(H5F_t *f,
              hid_t dxpl_id,
              const H5AC_class_t *type,
              haddr_t addr,
-	     void *udata,
+        void *udata,
              H5AC_protect_t rw)
 {
-    unsigned		protect_flags = H5C__NO_FLAGS_SET;
-    void *		thing = (void *)NULL;
+    unsigned        protect_flags = H5C__NO_FLAGS_SET;
+    void *        thing = (void *)NULL;
 #if H5AC__TRACE_FILE_ENABLED
     char                trace[128] = "";
-    size_t		trace_entry_size = 0;
+    size_t        trace_entry_size = 0;
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
-    void *		ret_value;      /* Return value */
+    void *        ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1206,7 +1206,7 @@ H5AC_protect(H5F_t *f,
 
     /* Check for invalid access request */
     if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR) && rw == H5AC_WRITE)
-	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "no write intent on file")
+    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "no write intent on file")
 
 #if H5AC__TRACE_FILE_ENABLED
     /* For the protect call, only the addr and type id is really necessary
@@ -1220,40 +1220,40 @@ H5AC_protect(H5F_t *f,
          ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
          ( trace_file_ptr != NULL ) ) {
 
-	const char * rw_string;
+    const char * rw_string;
 
         if ( rw == H5AC_WRITE ) {
 
-	    rw_string = "H5AC_WRITE";
+        rw_string = "H5AC_WRITE";
 
-	} else if ( rw == H5AC_READ ) {
+    } else if ( rw == H5AC_READ ) {
 
-	    rw_string = "H5AC_READ";
+        rw_string = "H5AC_READ";
 
-	} else {
+    } else {
 
-	    rw_string = "???";
-	}
+        rw_string = "???";
+    }
 
-        sprintf(trace, "H5AC_protect 0x%lx %d %s",
-	        (unsigned long)addr,
-		(int)(type->id),
-		rw_string);
+        HDsprintf(trace, "H5AC_protect 0x%lx %d %s",
+            (unsigned long)addr,
+        (int)(type->id),
+        rw_string);
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     if ( rw == H5AC_READ ) {
 
-	protect_flags |= H5C__READ_ONLY_FLAG;
+    protect_flags |= H5C__READ_ONLY_FLAG;
     }
 
     thing = H5C_protect(f,
-		        dxpl_id,
+                dxpl_id,
                         H5AC_dxpl_id,
-			type,
-			addr,
-			udata,
-			protect_flags);
+            type,
+            addr,
+            udata,
+            protect_flags);
 
     if ( thing == NULL ) {
 
@@ -1276,7 +1276,7 @@ done:
 #if H5AC__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
-	HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
+    HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
                   (int)trace_entry_size,
                   (int)(ret_value != NULL));
     }
@@ -1286,11 +1286,11 @@ done:
 
 } /* H5AC_protect() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_resize_entry
  *
- * Purpose:	Resize a pinned or protected entry.
+ * Purpose:    Resize a pinned or protected entry.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1303,8 +1303,8 @@ herr_t
 H5AC_resize_entry(void *thing, size_t new_size)
 {
 #if H5AC__TRACE_FILE_ENABLED
-    char          	trace[128] = "";
-    FILE *        	trace_file_ptr = NULL;
+    char              trace[128] = "";
+    FILE *            trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -1320,9 +1320,9 @@ H5AC_resize_entry(void *thing, size_t new_size)
      */
     if((H5C_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
             (NULL != trace_file_ptr))
-        sprintf(trace, "%s 0x%lx %d", FUNC,
-	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr),
-		(int)new_size);
+        HDsprintf(trace, "%s 0x%lx %d", FUNC,
+            (unsigned long)(((H5C_cache_entry_t *)thing)->addr),
+        (int)new_size);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     if(H5C_resize_entry(thing, new_size) < 0)
@@ -1346,18 +1346,18 @@ H5AC_resize_entry(void *thing, size_t new_size)
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+    HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_resize_entry() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_unpin_entry()
  *
- * Purpose:	Unpin a cache entry.  The entry must be unprotected at
- * 		the time of call, and must be pinned.
+ * Purpose:    Unpin a cache entry.  The entry must be unprotected at
+ *         the time of call, and must be pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1386,8 +1386,8 @@ H5AC_unpin_entry(void *thing)
      */
     if((H5C_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
             (NULL != trace_file_ptr))
-        sprintf(trace, "%s 0x%lx", FUNC,
-	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
+        HDsprintf(trace, "%s 0x%lx", FUNC,
+            (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     if(H5C_unpin_entry(thing) < 0)
@@ -1396,37 +1396,37 @@ H5AC_unpin_entry(void *thing)
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+    HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_unpin_entry() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_unprotect
  *
- * Purpose:	Undo an H5AC_protect() call -- specifically, mark the
- *		entry as unprotected, remove it from the protected list,
- *		and give it back to the replacement policy.
+ * Purpose:    Undo an H5AC_protect() call -- specifically, mark the
+ *        entry as unprotected, remove it from the protected list,
+ *        and give it back to the replacement policy.
  *
- *		The TYPE and ADDR arguments must be the same as those in
- *		the corresponding call to H5AC_protect() and the THING
- *		argument must be the value returned by that call to
- *		H5AC_protect().
+ *        The TYPE and ADDR arguments must be the same as those in
+ *        the corresponding call to H5AC_protect() and the THING
+ *        argument must be the value returned by that call to
+ *        H5AC_protect().
  *
- *		If the deleted flag is TRUE, simply remove the target entry
- *		from the cache, clear it, and free it without writing it to
- *		disk.
+ *        If the deleted flag is TRUE, simply remove the target entry
+ *        from the cache, clear it, and free it without writing it to
+ *        disk.
  *
- *		This version of the function is a complete re-write to
- *		use the new metadata cache.  While there isn't all that
- *		much difference between the old and new Purpose sections,
- *		the original version is given below.
+ *        This version of the function is a complete re-write to
+ *        use the new metadata cache.  While there isn't all that
+ *        much difference between the old and new Purpose sections,
+ *        the original version is given below.
  *
- *		Original purpose section:
+ *        Original purpose section:
  *
- *		This function should be called to undo the effect of
+ *        This function should be called to undo the effect of
  *              H5AC_protect().  The TYPE and ADDR arguments should be the
  *              same as the corresponding call to H5AC_protect() and the
  *              THING argument should be the value returned by H5AC_protect().
@@ -1445,8 +1445,8 @@ herr_t
 H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     void *thing, unsigned flags)
 {
-    hbool_t		dirtied;
-    hbool_t		deleted;
+    hbool_t        dirtied;
+    hbool_t        deleted;
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t        * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
@@ -1480,21 +1480,21 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
          ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC_unprotect 0x%lx %d",
-	        (unsigned long)addr,
-		(int)(type->id));
+        HDsprintf(trace, "H5AC_unprotect 0x%lx %d",
+            (unsigned long)addr,
+        (int)(type->id));
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     dirtied = (hbool_t)( ( (flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG ) ||
-		( ((H5AC_info_t *)thing)->dirtied ) );
+        ( ((H5AC_info_t *)thing)->dirtied ) );
     deleted = (hbool_t)( (flags & H5C__DELETED_FLAG) == H5C__DELETED_FLAG );
 
     /* Check if the size changed out from underneath us, if we're not deleting
      *  the entry.
      */
     if(dirtied && !deleted) {
-        size_t		curr_size = 0;
+        size_t        curr_size = 0;
 
         if((type->size)(f, thing, &curr_size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, "Can't get size of thing")
@@ -1532,21 +1532,21 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr != NULL)
-	HDfprintf(trace_file_ptr, "%s %x %d\n",
-		  trace, (unsigned)flags, (int)ret_value);
+    HDfprintf(trace_file_ptr, "%s %x %d\n",
+        trace, (unsigned)flags, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_unprotect() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    HA5C_set_sync_point_done_callback
  *
- * Purpose:     Set the value of the sync_point_done callback.  This 
- *		callback is used by the parallel test code to verify
- *		that the expected writes and only the expected writes
- *		take place during a sync point.
+ * Purpose:     Set the value of the sync_point_done callback.  This
+ *        callback is used by the parallel test code to verify
+ *        that the expected writes and only the expected writes
+ *        take place during a sync point.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1577,7 +1577,7 @@ H5AC_set_sync_point_done_callback(H5C_t * cache_ptr,
 } /* H5AC_set_sync_point_done_callback() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    HA5C_set_write_done_callback
  *
@@ -1614,7 +1614,7 @@ H5AC_set_write_done_callback(H5C_t * cache_ptr,
 } /* H5AC_set_write_done_callback() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_stats
  *
@@ -1630,7 +1630,7 @@ H5AC_set_write_done_callback(H5C_t * cache_ptr,
 herr_t
 H5AC_stats(const H5F_t *f)
 {
-    herr_t		ret_value = SUCCEED;   /* Return value */
+    herr_t        ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1645,7 +1645,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_dump_cache
  *
@@ -1679,7 +1679,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_dump_cache() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_get_cache_auto_resize_config
  *
@@ -1726,7 +1726,7 @@ H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
     }
 
     result = H5C_get_cache_auto_resize_config((const H5C_t *)cache_ptr,
-					      &internal_config);
+                        &internal_config);
 
     if ( result < 0 ) {
 
@@ -1743,7 +1743,7 @@ H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
 
     } else {
 
-	config_ptr->rpt_fcn_enabled = TRUE;
+    config_ptr->rpt_fcn_enabled = TRUE;
     }
 
     config_ptr->open_trace_file        = FALSE;
@@ -1778,17 +1778,17 @@ H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
     if ( cache_ptr->aux_ptr != NULL ) {
 
         config_ptr->dirty_bytes_threshold =
-	    ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold;
-	config_ptr->metadata_write_strategy = 
-	    ((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy;
+        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold;
+    config_ptr->metadata_write_strategy =
+        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy;
 
     } else {
 #endif /* H5_HAVE_PARALLEL */
 
-        config_ptr->dirty_bytes_threshold = 
-		H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD;
-	config_ptr->metadata_write_strategy = 
-		H5AC__DEFAULT_METADATA_WRITE_STRATEGY;
+        config_ptr->dirty_bytes_threshold =
+        H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD;
+    config_ptr->metadata_write_strategy =
+        H5AC__DEFAULT_METADATA_WRITE_STRATEGY;
 
 #ifdef H5_HAVE_PARALLEL
     }
@@ -1800,7 +1800,7 @@ done:
 
 } /* H5AC_get_cache_auto_resize_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_get_cache_size
  *
@@ -1826,10 +1826,10 @@ H5AC_get_cache_size(H5AC_t * cache_ptr,
     FUNC_ENTER_NOAPI(FAIL)
 
     result = H5C_get_cache_size((H5C_t *)cache_ptr,
-				max_size_ptr,
-				min_clean_size_ptr,
-				cur_size_ptr,
-				cur_num_entries_ptr);
+                max_size_ptr,
+                min_clean_size_ptr,
+                cur_size_ptr,
+                cur_num_entries_ptr);
 
     if ( result < 0 ) {
 
@@ -1843,7 +1843,7 @@ done:
 
 } /* H5AC_get_cache_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_get_cache_hit_rate
  *
@@ -1870,7 +1870,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_get_cache_hit_rate() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_reset_cache_hit_rate_stats()
@@ -1905,7 +1905,7 @@ done:
 
 } /* H5AC_reset_cache_hit_rate_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_set_cache_auto_resize_config
  *
@@ -1971,16 +1971,16 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
 
     if ( config_ptr->open_trace_file ) {
 
-	FILE * file_ptr = NULL;
+    FILE * file_ptr = NULL;
 
-	if ( H5C_get_trace_file_ptr(cache_ptr, &file_ptr) < 0 ) {
+    if ( H5C_get_trace_file_ptr(cache_ptr, &file_ptr) < 0 ) {
 
-	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			"H5C_get_trace_file_ptr() failed.")
-	}
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+            "H5C_get_trace_file_ptr() failed.")
+    }
 
-	if ( ( ! ( config_ptr->close_trace_file ) ) &&
-	     ( file_ptr != NULL ) ) {
+    if ( ( ! ( config_ptr->close_trace_file ) ) &&
+        ( file_ptr != NULL ) ) {
 
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                         "Trace file already open.")
@@ -1989,21 +1989,21 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
 
     if ( config_ptr->close_trace_file ) {
 
-	if ( H5AC_close_trace_file(cache_ptr) < 0 ) {
+    if ( H5AC_close_trace_file(cache_ptr) < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                         "H5AC_close_trace_file() failed.")
-	}
+    }
     }
 
     if ( config_ptr->open_trace_file ) {
 
         if ( H5AC_open_trace_file(cache_ptr, config_ptr->trace_file_name) < 0 )
-	{
+    {
 
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                         "H5AC_open_trace_file() failed.")
-	}
+    }
     }
 
     if(H5AC_ext_config_2_int_config(config_ptr, &internal_config) < 0)
@@ -2037,40 +2037,40 @@ done:
          ( H5C_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-	HDfprintf(trace_file_ptr,
+    HDfprintf(trace_file_ptr,
                   "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %f %f %d %d %d %f %f %d %d %d %d %f %d %d %d\n",
-		  "H5AC_set_cache_auto_resize_config",
-		  trace_config.version,
-		  (int)(trace_config.rpt_fcn_enabled),
-		  (int)(trace_config.open_trace_file),
-		  (int)(trace_config.close_trace_file),
-		  trace_config.trace_file_name,
-		  (int)(trace_config.evictions_enabled),
-		  (int)(trace_config.set_initial_size),
-		  (int)(trace_config.initial_size),
-		  trace_config.min_clean_fraction,
-		  (int)(trace_config.max_size),
-		  (int)(trace_config.min_size),
-		  trace_config.epoch_length,
-		  (int)(trace_config.incr_mode),
-		  trace_config.lower_hr_threshold,
-		  trace_config.increment,
-		  (int)(trace_config.flash_incr_mode),
-		  trace_config.flash_multiple,
-		  trace_config.flash_threshold,
-		  (int)(trace_config.apply_max_increment),
-		  (int)(trace_config.max_increment),
-		  (int)(trace_config.decr_mode),
-		  trace_config.upper_hr_threshold,
-		  trace_config.decrement,
-		  (int)(trace_config.apply_max_decrement),
-		  (int)(trace_config.max_decrement),
-		  trace_config.epochs_before_eviction,
-		  (int)(trace_config.apply_empty_reserve),
-		  trace_config.empty_reserve,
-		  trace_config.dirty_bytes_threshold,
-		  trace_config.metadata_write_strategy,
-		  (int)ret_value);
+        "H5AC_set_cache_auto_resize_config",
+        trace_config.version,
+        (int)(trace_config.rpt_fcn_enabled),
+        (int)(trace_config.open_trace_file),
+        (int)(trace_config.close_trace_file),
+        trace_config.trace_file_name,
+        (int)(trace_config.evictions_enabled),
+        (int)(trace_config.set_initial_size),
+        (int)(trace_config.initial_size),
+        trace_config.min_clean_fraction,
+        (int)(trace_config.max_size),
+        (int)(trace_config.min_size),
+        trace_config.epoch_length,
+        (int)(trace_config.incr_mode),
+        trace_config.lower_hr_threshold,
+        trace_config.increment,
+        (int)(trace_config.flash_incr_mode),
+        trace_config.flash_multiple,
+        trace_config.flash_threshold,
+        (int)(trace_config.apply_max_increment),
+        (int)(trace_config.max_increment),
+        (int)(trace_config.decr_mode),
+        trace_config.upper_hr_threshold,
+        trace_config.decrement,
+        (int)(trace_config.apply_max_decrement),
+        (int)(trace_config.max_decrement),
+        trace_config.epochs_before_eviction,
+        (int)(trace_config.apply_empty_reserve),
+        trace_config.empty_reserve,
+        trace_config.dirty_bytes_threshold,
+        trace_config.metadata_write_strategy,
+        (int)ret_value);
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
@@ -2078,21 +2078,21 @@ done:
 
 } /* H5AC_set_cache_auto_resize_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_validate_config()
  *
  * Purpose:     Run a sanity check on the contents of the supplied
- *		instance of H5AC_cache_config_t.
+ *        instance of H5AC_cache_config_t.
  *
  *              Do nothing and return SUCCEED if no errors are detected,
  *              and flag an error and return FAIL otherwise.
  *
- *		At present, this function operates by packing the data
- *		from the instance of H5AC_cache_config_t into an instance
- *		of H5C_auto_size_ctl_t, and then calling
- *		H5C_validate_resize_config().  As H5AC_cache_config_t and
- *		H5C_auto_size_ctl_t diverge, we may have to change this.
+ *        At present, this function operates by packing the data
+ *        from the instance of H5AC_cache_config_t into an instance
+ *        of H5C_auto_size_ctl_t, and then calling
+ *        H5C_validate_resize_config().  As H5AC_cache_config_t and
+ *        H5C_auto_size_ctl_t diverge, we may have to change this.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2126,19 +2126,19 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
 
     /* don't bother to test trace_file_name unless open_trace_file is TRUE */
     if(config_ptr->open_trace_file) {
-        size_t	        name_len;
+        size_t            name_len;
 
-	/* Can't really test the trace_file_name field without trying to
-	 * open the file, so we will content ourselves with a couple of
-	 * sanity checks on the length of the file name.
-	 */
-	name_len = HDstrlen(config_ptr->trace_file_name);
+    /* Can't really test the trace_file_name field without trying to
+    * open the file, so we will content ourselves with a couple of
+    * sanity checks on the length of the file name.
+    */
+    name_len = HDstrlen(config_ptr->trace_file_name);
 
-	if(name_len == 0) {
+    if(name_len == 0) {
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name is empty.")
         } else if(name_len > H5AC__MAX_TRACE_FILE_NAME_LEN) {
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name too long.")
-	}
+    }
     }
 
     if ( ( config_ptr->evictions_enabled != TRUE ) &&
@@ -2149,9 +2149,9 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
     }
 
     if ( ( config_ptr->evictions_enabled == FALSE ) &&
-	 ( ( config_ptr->incr_mode != H5C_incr__off ) ||
-	   ( config_ptr->flash_incr_mode != H5C_flash_incr__off ) ||
-	   ( config_ptr->decr_mode != H5C_decr__off ) ) ) {
+    ( ( config_ptr->incr_mode != H5C_incr__off ) ||
+    ( config_ptr->flash_incr_mode != H5C_flash_incr__off ) ||
+    ( config_ptr->decr_mode != H5C_decr__off ) ) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                     "Can't disable evictions while auto-resize is enabled.")
@@ -2177,7 +2177,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_validate_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_close_trace_file()
  *
@@ -2211,7 +2211,7 @@ H5AC_close_trace_file(H5AC_t * cache_ptr)
     if ( H5C_get_trace_file_ptr(cache_ptr, &trace_file_ptr) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		    "H5C_get_trace_file_ptr() failed.")
+            "H5C_get_trace_file_ptr() failed.")
     }
 
     if ( trace_file_ptr != NULL ) {
@@ -2235,15 +2235,15 @@ done:
 
 } /* H5AC_close_trace_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_open_trace_file()
  *
  * Purpose:     Open a trace file, and start logging calls to the cache.
  *
- * 		This logging is done at the H5C level, and will only take
- * 		place if H5C_TRACE_FILE_ENABLED (defined in H5Cprivate.h)
- * 		is TRUE.
+ *         This logging is done at the H5C level, and will only take
+ *         place if H5C_TRACE_FILE_ENABLED (defined in H5Cprivate.h)
+ *         is TRUE.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2254,7 +2254,7 @@ done:
  */
 herr_t
 H5AC_open_trace_file(H5AC_t * cache_ptr,
-		     const char * trace_file_name)
+            const char * trace_file_name)
 {
     herr_t   ret_value = SUCCEED;    /* Return value */
     char     file_name[H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 2];
@@ -2275,7 +2275,7 @@ H5AC_open_trace_file(H5AC_t * cache_ptr,
     if ( trace_file_name == NULL ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-		    "NULL trace_file_name on entry.")
+            "NULL trace_file_name on entry.")
     }
 
     if ( HDstrlen(trace_file_name) > H5AC__MAX_TRACE_FILE_NAME_LEN ) {
@@ -2286,7 +2286,7 @@ H5AC_open_trace_file(H5AC_t * cache_ptr,
     if ( H5C_get_trace_file_ptr(cache_ptr, &file_ptr) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		    "H5C_get_trace_file_ptr() failed.")
+            "H5C_get_trace_file_ptr() failed.")
     }
 
     if ( file_ptr != NULL ) {
@@ -2300,16 +2300,16 @@ H5AC_open_trace_file(H5AC_t * cache_ptr,
 
     if ( cache_ptr->aux_ptr == NULL ) {
 
-        sprintf(file_name, "%s", trace_file_name);
+        HDsprintf(file_name, "%s", trace_file_name);
 
     } else {
 
-	if ( aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC ) {
+    if ( aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad aux_ptr->magic.")
-	}
+    }
 
-        sprintf(file_name, "%s.%d", trace_file_name, aux_ptr->mpi_rank);
+        HDsprintf(file_name, "%s.%d", trace_file_name, aux_ptr->mpi_rank);
 
     }
 
@@ -2317,20 +2317,20 @@ H5AC_open_trace_file(H5AC_t * cache_ptr,
          H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 1 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		    "cooked trace file name too long.")
+            "cooked trace file name too long.")
     }
 
 #else /* H5_HAVE_PARALLEL */
 
-    HDsnprintf(file_name, 
-               (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 1), 
+    HDsnprintf(file_name,
+               (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 1),
                "%s", trace_file_name);
 
 #endif /* H5_HAVE_PARALLEL */
 
     if ( (file_ptr = HDfopen(file_name, "w")) == NULL ) {
 
-	/* trace file open failed */
+    /* trace file open failed */
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "trace file open failed.")
     }
 
@@ -2339,7 +2339,7 @@ H5AC_open_trace_file(H5AC_t * cache_ptr,
     if ( H5C_set_trace_file_ptr(cache_ptr, file_ptr) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		    "H5C_set_trace_file_ptr() failed.")
+            "H5C_set_trace_file_ptr() failed.")
     }
 
 done:
@@ -2348,17 +2348,17 @@ done:
 
 } /* H5AC_open_trace_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_add_candidate()
  *
  * Purpose:     Add the supplied metadata entry address to the candidate
- *		list.  Verify that each entry added does not appear in 
- *		the list prior to its insertion.
+ *        list.  Verify that each entry added does not appear in
+ *        the list prior to its insertion.
  *
- *		This function is intended for used in constructing list
- *		of entried to be flushed during sync points.  It shouldn't
- *		be called anywhere else.
+ *        This function is intended for used in constructing list
+ *        of entried to be flushed during sync points.  It shouldn't
+ *        be called anywhere else.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2412,7 +2412,7 @@ done:
 } /* H5AC_add_candidate() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*************************************************************************/
 /**************************** Private Functions: *************************/
 /*************************************************************************/
@@ -2422,18 +2422,18 @@ done:
  * Function:    H5AC_broadcast_candidate_list()
  *
  * Purpose:     Broadcast the contents of the process 0 candidate entry
- *		slist.  In passing, also remove all entries from said
- *		list.  As the application of this will be handled by 
- *		the same functions on all processes, construct and 
- *		return a copy of the list in the same format as that
- *		received by the other processes.  Note that if this
- *		copy is returned in *haddr_buf_ptr_ptr, the caller 
- *		must free it.
+ *        slist.  In passing, also remove all entries from said
+ *        list.  As the application of this will be handled by
+ *        the same functions on all processes, construct and
+ *        return a copy of the list in the same format as that
+ *        received by the other processes.  Note that if this
+ *        copy is returned in *haddr_buf_ptr_ptr, the caller
+ *        must free it.
  *
- *		This function must only be called by the process with
- *		MPI_rank 0.
+ *        This function must only be called by the process with
+ *        MPI_rank 0.
  *
- *		Return SUCCEED on success, and FAIL on failure.
+ *        Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -2447,14 +2447,14 @@ H5AC_broadcast_candidate_list(H5AC_t * cache_ptr,
                               int * num_entries_ptr,
                               haddr_t ** haddr_buf_ptr_ptr)
 {
-    hbool_t		 success = FALSE;
+    hbool_t         success = FALSE;
     H5AC_aux_t         * aux_ptr = NULL;
     haddr_t            * haddr_buf_ptr = NULL;
     MPI_Offset         * MPI_Offset_buf_ptr = NULL;
-    size_t		 buf_size = 0;
+    size_t         buf_size = 0;
     int                  mpi_result;
-    int			 chk_num_entries = 0;
-    int			 num_entries = 0;
+    int             chk_num_entries = 0;
+    int             num_entries = 0;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2471,7 +2471,7 @@ H5AC_broadcast_candidate_list(H5AC_t * cache_ptr,
               H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
     HDassert( aux_ptr->candidate_slist_ptr != NULL );
     HDassert( H5SL_count(aux_ptr->candidate_slist_ptr) ==
-		    (size_t)(aux_ptr->candidate_slist_len) );
+            (size_t)(aux_ptr->candidate_slist_len) );
     HDassert( num_entries_ptr != NULL );
     HDassert( *num_entries_ptr == 0 );
     HDassert( haddr_buf_ptr_ptr != NULL );
@@ -2487,7 +2487,7 @@ H5AC_broadcast_candidate_list(H5AC_t * cache_ptr,
 
     if(num_entries > 0) {
         /* convert the candidate list into the format we
-         * are used to receiving from process 0, and also load it 
+         * are used to receiving from process 0, and also load it
          * into a buffer for transmission.
          */
         if(H5AC_copy_candidate_list_to_buffer(cache_ptr, &chk_num_entries,
@@ -2517,7 +2517,7 @@ done:
         MPI_Offset_buf_ptr = (MPI_Offset *)H5MM_xfree((void *)MPI_Offset_buf_ptr);
 
     if(success) {
-        /* Pass the number of entries and the buffer pointer 
+        /* Pass the number of entries and the buffer pointer
          * back to the caller.  Do this so that we can use the same code
          * to apply the candidate list to all the processes.
          */
@@ -2531,20 +2531,20 @@ done:
 } /* H5AC_broadcast_candidate_list() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_broadcast_clean_list()
  *
  * Purpose:     Broadcast the contents of the process 0 cleaned entry
- *		slist.  In passing, also remove all entries from said
- *		list, and also remove any matching entries from the dirtied
- *		slist.
+ *        slist.  In passing, also remove all entries from said
+ *        list, and also remove any matching entries from the dirtied
+ *        slist.
  *
- *		This function must only be called by the process with
- *		MPI_rank 0.
+ *        This function must only be called by the process with
+ *        MPI_rank 0.
  *
- *		Return SUCCEED on success, and FAIL on failure.
+ *        Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -2557,16 +2557,16 @@ static herr_t
 H5AC_broadcast_clean_list(H5AC_t * cache_ptr)
 {
     herr_t               ret_value = SUCCEED;    /* Return value */
-    haddr_t		 addr;
-    haddr_t	       * addr_buf_ptr = NULL;
+    haddr_t         addr;
+    haddr_t           * addr_buf_ptr = NULL;
     H5AC_aux_t         * aux_ptr = NULL;
     H5SL_node_t        * slist_node_ptr = NULL;
     H5AC_slist_entry_t * slist_entry_ptr = NULL;
     MPI_Offset         * buf_ptr = NULL;
-    size_t		 buf_size;
+    size_t         buf_size;
     int                  i = 0;
     int                  mpi_result;
-    int			 num_entries = 0;
+    int             num_entries = 0;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2580,7 +2580,7 @@ H5AC_broadcast_clean_list(H5AC_t * cache_ptr)
     HDassert( aux_ptr->mpi_rank == 0 );
     HDassert( aux_ptr->c_slist_ptr != NULL );
     HDassert( H5SL_count(aux_ptr->c_slist_ptr) ==
-		    (size_t)(aux_ptr->c_slist_len) );
+            (size_t)(aux_ptr->c_slist_len) );
 
 
     /* First broadcast the number of entries in the list so that the
@@ -2718,19 +2718,19 @@ done:
 } /* H5AC_broadcast_clean_list() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_check_if_write_permitted
  *
  * Purpose:     Determine if a write is permitted under the current
- *		circumstances, and set *write_permitted_ptr accordingly.
- *		As a general rule it is, but when we are running in parallel
- *		mode with collective I/O, we must ensure that a read cannot
- *		cause a write.
+ *        circumstances, and set *write_permitted_ptr accordingly.
+ *        As a general rule it is, but when we are running in parallel
+ *        mode with collective I/O, we must ensure that a read cannot
+ *        cause a write.
  *
- *		In the event of failure, the value of *write_permitted_ptr
- *		is undefined.
+ *        In the event of failure, the value of *write_permitted_ptr
+ *        is undefined.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -2750,10 +2750,10 @@ H5AC_check_if_write_permitted(const H5F_t H5_ATTR_UNUSED * f,
                               hbool_t * write_permitted_ptr)
 #endif /* H5_HAVE_PARALLEL */
 {
-    hbool_t		write_permitted = TRUE;
-    herr_t		ret_value = SUCCEED;      /* Return value */
+    hbool_t        write_permitted = TRUE;
+    herr_t        ret_value = SUCCEED;      /* Return value */
 #ifdef H5_HAVE_PARALLEL
-    H5AC_aux_t *	aux_ptr = NULL;
+    H5AC_aux_t *    aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -2774,12 +2774,12 @@ H5AC_check_if_write_permitted(const H5F_t H5_ATTR_UNUSED * f,
              ( aux_ptr->metadata_write_strategy ==
                H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED ) ) {
 
-	    write_permitted = aux_ptr->write_permitted;
+        write_permitted = aux_ptr->write_permitted;
 
         } else {
 
-	    write_permitted = FALSE;
-	}
+        write_permitted = FALSE;
+    }
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -2791,18 +2791,18 @@ done:
 
 } /* H5AC_check_if_write_permitted() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_construct_candidate_list()
  *
- * Purpose:     In the parallel case when the metadata_write_strategy is 
- *		H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED, process 0 uses
- *		this function to construct the list of cache entries to 
- *		be flushed.  This list is then propagated to the other 
- *		caches, and then flushed in a distributed fashion.
+ * Purpose:     In the parallel case when the metadata_write_strategy is
+ *        H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED, process 0 uses
+ *        this function to construct the list of cache entries to
+ *        be flushed.  This list is then propagated to the other
+ *        caches, and then flushed in a distributed fashion.
  *
- *		The sync_point_op parameter is used to determine the extent
- *		of the flush.
+ *        The sync_point_op parameter is used to determine the extent
+ *        of the flush.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2838,19 +2838,19 @@ H5AC_construct_candidate_list(H5AC_t * cache_ptr,
               ( sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_CACHE ) );
 
     switch(sync_point_op) {
-	case H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN:
+    case H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN:
             if(H5C_construct_candidate_list__min_clean((H5C_t *)cache_ptr) < 0)
-		HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_construct_candidate_list__min_clean() failed.")
-	    break;
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_construct_candidate_list__min_clean() failed.")
+        break;
 
-	case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
+    case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
             if(H5C_construct_candidate_list__clean_cache((H5C_t *)cache_ptr) < 0)
-		HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_construct_candidate_list__clean_cache() failed.")
-	    break;
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_construct_candidate_list__clean_cache() failed.")
+        break;
 
         default:
-	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unknown sync point operation.")
-	    break;
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unknown sync point operation.")
+        break;
     } /* end switch */
 
 done:
@@ -2858,33 +2858,33 @@ done:
 } /* H5AC_construct_candidate_list() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_copy_candidate_list_to_buffer
  *
  * Purpose:     Allocate buffer(s) and copy the contents of the candidate
- *		entry slist into it (them).  In passing, remove all 
- *		entries from the candidate slist.  Note that the 
- *		candidate slist must not be empty.
+ *        entry slist into it (them).  In passing, remove all
+ *        entries from the candidate slist.  Note that the
+ *        candidate slist must not be empty.
  *
- *		If MPI_Offset_buf_ptr_ptr is not NULL, allocate a buffer
- *		of MPI_Offset, copy the contents of the candidate
- *		entry list into it with the appropriate conversions, 
- *		and return the base address of the buffer in 
- *		*MPI_Offset_buf_ptr.  Note that this is the buffer
- *		used by process 0 to transmit the list of entries to 
- *		be flushed to all other processes (in this file group).
+ *        If MPI_Offset_buf_ptr_ptr is not NULL, allocate a buffer
+ *        of MPI_Offset, copy the contents of the candidate
+ *        entry list into it with the appropriate conversions,
+ *        and return the base address of the buffer in
+ *        *MPI_Offset_buf_ptr.  Note that this is the buffer
+ *        used by process 0 to transmit the list of entries to
+ *        be flushed to all other processes (in this file group).
  *
- *		Similarly, allocate a buffer of haddr_t, load the contents
- *		of the candidate list into this buffer, and return its 
- *		base address in *haddr_buf_ptr_ptr.  Note that this 
- *		latter buffer is constructed unconditionally.  
+ *        Similarly, allocate a buffer of haddr_t, load the contents
+ *        of the candidate list into this buffer, and return its
+ *        base address in *haddr_buf_ptr_ptr.  Note that this
+ *        latter buffer is constructed unconditionally.
  *
- *		In passing, also remove all entries from the candidate
- *		entry slist.
+ *        In passing, also remove all entries from the candidate
+ *        entry slist.
  *
- * Return:	Return SUCCEED on success, and FAIL on failure.
+ * Return:    Return SUCCEED on success, and FAIL on failure.
  *
  * Programmer:  John Mainzer, 4/19/10
  *
@@ -2899,16 +2899,16 @@ H5AC_copy_candidate_list_to_buffer(H5AC_t * cache_ptr,
                                    MPI_Offset ** MPI_Offset_buf_ptr_ptr)
 {
     herr_t               ret_value = SUCCEED;    /* Return value */
-    hbool_t		 success = FALSE;
-    haddr_t		 addr;
+    hbool_t         success = FALSE;
+    haddr_t         addr;
     H5AC_aux_t         * aux_ptr = NULL;
     H5SL_node_t        * slist_node_ptr = NULL;
     H5AC_slist_entry_t * slist_entry_ptr = NULL;
     MPI_Offset         * MPI_Offset_buf_ptr = NULL;
     haddr_t            * haddr_buf_ptr = NULL;
-    size_t		 buf_size;
+    size_t         buf_size;
     int                  i = 0;
-    int			 num_entries = 0;
+    int             num_entries = 0;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2923,7 +2923,7 @@ H5AC_copy_candidate_list_to_buffer(H5AC_t * cache_ptr,
               H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
     HDassert( aux_ptr->candidate_slist_ptr != NULL );
     HDassert( H5SL_count(aux_ptr->candidate_slist_ptr) ==
-		    (size_t)(aux_ptr->candidate_slist_len) );
+            (size_t)(aux_ptr->candidate_slist_len) );
     HDassert( aux_ptr->candidate_slist_len > 0 );
     HDassert( num_entries_ptr != NULL );
     HDassert( *num_entries_ptr == 0 );
@@ -2932,8 +2932,8 @@ H5AC_copy_candidate_list_to_buffer(H5AC_t * cache_ptr,
 
     num_entries = aux_ptr->candidate_slist_len;
 
-    /* allocate a buffer(s) to store the list of candidate entry 
-     * base addresses in 
+    /* allocate a buffer(s) to store the list of candidate entry
+     * base addresses in
      */
     if(MPI_Offset_buf_ptr_ptr != NULL) {
         HDassert( MPI_Offset_buf_size_ptr != NULL );
@@ -2983,7 +2983,7 @@ H5AC_copy_candidate_list_to_buffer(H5AC_t * cache_ptr,
 
 done:
     if(success) {
-        /* Pass the number of entries and the buffer pointer 
+        /* Pass the number of entries and the buffer pointer
          * back to the caller.
          */
         *num_entries_ptr = num_entries;
@@ -2991,8 +2991,8 @@ done:
 
         if(MPI_Offset_buf_ptr_ptr != NULL) {
             HDassert( MPI_Offset_buf_ptr != NULL);
-	    *MPI_Offset_buf_size_ptr = buf_size;
-	    *MPI_Offset_buf_ptr_ptr = MPI_Offset_buf_ptr;
+        *MPI_Offset_buf_size_ptr = buf_size;
+        *MPI_Offset_buf_ptr_ptr = MPI_Offset_buf_ptr;
         } /* end if */
     } /* end if */
     else {
@@ -3006,17 +3006,17 @@ done:
 } /* H5AC_copy_candidate_list_to_buffer() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_ext_config_2_int_config()
  *
  * Purpose:     Utility function to translate an instance of
- *		H5AC_cache_config_t to an instance of H5C_auto_size_ctl_t.
+ *        H5AC_cache_config_t to an instance of H5C_auto_size_ctl_t.
  *
- *		Places translation in *int_conf_ptr and returns SUCCEED
- *		if successful.  Returns FAIL on failure.
+ *        Places translation in *int_conf_ptr and returns SUCCEED
+ *        if successful.  Returns FAIL on failure.
  *
- *		Does only minimal sanity checking.
+ *        Does only minimal sanity checking.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -3080,18 +3080,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_ext_config_2_int_config() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_log_deleted_entry()
  *
  * Purpose:     Log an entry for which H5C__DELETED_FLAG has been set.
  *
- *		If mpi_rank is 0, we must make sure that the entry doesn't
- *		appear in the cleaned or dirty entry lists.  Otherwise,
- *		we have nothing to do.
+ *        If mpi_rank is 0, we must make sure that the entry doesn't
+ *        appear in the cleaned or dirty entry lists.  Otherwise,
+ *        we have nothing to do.
  *
- *		Return SUCCEED on success, and FAIL on failure.
+ *        Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -3167,23 +3167,23 @@ done:
 } /* H5AC_log_deleted_entry() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_log_dirtied_entry()
  *
  * Purpose:     Update the dirty_bytes count for a newly dirtied entry.
  *
- *		If mpi_rank isnt 0, this simply means adding the size
- *		of the entries to the dirty_bytes count.
+ *        If mpi_rank isnt 0, this simply means adding the size
+ *        of the entries to the dirty_bytes count.
  *
- *		If mpi_rank is 0, we must first check to see if the entry
- *		appears in the dirty entries slist.  If it is, do nothing.
- *		If it isn't, add the size to th dirty_bytes count, add the
- *		entry to the dirty entries slist, and remove it from the
- *		cleaned list (if it is present there).
+ *        If mpi_rank is 0, we must first check to see if the entry
+ *        appears in the dirty entries slist.  If it is, do nothing.
+ *        If it isn't, add the size to th dirty_bytes count, add the
+ *        entry to the dirty entries slist, and remove it from the
+ *        cleaned list (if it is present there).
  *
- *		Return SUCCEED on success, and FAIL on failure.
+ *        Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -3246,8 +3246,8 @@ H5AC_log_dirtied_entry(const H5AC_info_t * entry_ptr,
             aux_ptr->d_slist_len += 1;
             aux_ptr->dirty_bytes += entry_ptr->size;
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-	    aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
-	    aux_ptr->unprotect_dirty_bytes_updates += 1;
+        aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
+        aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
         }
 
@@ -3286,21 +3286,21 @@ done:
 } /* H5AC_log_dirtied_entry() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_log_flushed_entry()
  *
  * Purpose:     Update the clean entry slist for the flush of an entry --
- *		specifically, if the entry has been cleared, remove it
- * 		from both the cleaned and dirtied lists if it is present.
- *		Otherwise, if the entry was dirty, insert the indicated
- *		entry address in the clean slist if it isn't there already.
+ *        specifically, if the entry has been cleared, remove it
+ *         from both the cleaned and dirtied lists if it is present.
+ *        Otherwise, if the entry was dirty, insert the indicated
+ *        entry address in the clean slist if it isn't there already.
  *
- *		This function is only used in PHDF5, and should only
- *		be called for the process with mpi rank 0.
+ *        This function is only used in PHDF5, and should only
+ *        be called for the process with mpi rank 0.
  *
- *		Return SUCCEED on success, and FAIL on failure.
+ *        Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -3317,7 +3317,7 @@ H5AC_log_flushed_entry(H5C_t * cache_ptr,
                        int H5_ATTR_UNUSED type_id)
 {
     herr_t               ret_value = SUCCEED;    /* Return value */
-    hbool_t		 cleared;
+    hbool_t         cleared;
     H5AC_aux_t         * aux_ptr;
     H5AC_slist_entry_t * slist_entry_ptr = NULL;
 
@@ -3343,7 +3343,7 @@ H5AC_log_flushed_entry(H5C_t * cache_ptr,
          */
 
         if ( (slist_entry_ptr = (H5AC_slist_entry_t *)
-				H5SL_search(aux_ptr->c_slist_ptr,
+                H5SL_search(aux_ptr->c_slist_ptr,
                                             (void *)(&addr))) != NULL ) {
 
             HDassert( slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC);
@@ -3417,20 +3417,20 @@ done:
 } /* H5AC_log_flushed_entry() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_log_inserted_entry()
  *
  * Purpose:     Update the dirty_bytes count for a newly inserted entry.
  *
- *		If mpi_rank isnt 0, this simply means adding the size
- *		of the entry to the dirty_bytes count.
+ *        If mpi_rank isnt 0, this simply means adding the size
+ *        of the entry to the dirty_bytes count.
  *
- *		If mpi_rank is 0, we must also add the entry to the
- *		dirty entries slist.
+ *        If mpi_rank is 0, we must also add the entry to the
+ *        dirty entries slist.
  *
- *		Return SUCCEED on success, and FAIL on failure.
+ *        Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -3497,46 +3497,46 @@ done:
 } /* H5AC_log_inserted_entry() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_log_moved_entry()
  *
  * Purpose:     Update the dirty_bytes count for a moved entry.
  *
- *		WARNING
+ *        WARNING
  *
- *		At present, the way that the move call is used ensures
- *		that the moved entry is present in all caches by
- *		moving in a collective operation and immediately after
- *		unprotecting the target entry.
+ *        At present, the way that the move call is used ensures
+ *        that the moved entry is present in all caches by
+ *        moving in a collective operation and immediately after
+ *        unprotecting the target entry.
  *
- *		This function uses this invarient, and will cause arcane
- *		failures if it is not met.  If maintaining this invarient
- *		becomes impossible, we will have to rework this function
- *		extensively, and likely include a bit of IPC for
- *		synchronization.  A better option might be to subsume
- *		move in the unprotect operation.
+ *        This function uses this invarient, and will cause arcane
+ *        failures if it is not met.  If maintaining this invarient
+ *        becomes impossible, we will have to rework this function
+ *        extensively, and likely include a bit of IPC for
+ *        synchronization.  A better option might be to subsume
+ *        move in the unprotect operation.
  *
- *		Given that the target entry is in all caches, the function
- *		proceeds as follows:
+ *        Given that the target entry is in all caches, the function
+ *        proceeds as follows:
  *
- *		For processes with mpi rank other 0, it simply checks to
- *		see if the entry was dirty prior to the move, and adds
- *		the entries size to the dirty bytes count.
+ *        For processes with mpi rank other 0, it simply checks to
+ *        see if the entry was dirty prior to the move, and adds
+ *        the entries size to the dirty bytes count.
  *
- *		In the process with mpi rank 0, the function first checks
- *		to see if the entry was dirty prior to the move.  If it
- *		was, and if the entry doesn't appear in the dirtied list
- *		under its old address, it adds the entry's size to the
- *		dirty bytes count.
+ *        In the process with mpi rank 0, the function first checks
+ *        to see if the entry was dirty prior to the move.  If it
+ *        was, and if the entry doesn't appear in the dirtied list
+ *        under its old address, it adds the entry's size to the
+ *        dirty bytes count.
  *
- *		The rank 0 process then removes any references to the
- *		entry under its old address from the cleands and dirtied
- *		lists, and inserts an entry in the dirtied list under the
- *		new address.
+ *        The rank 0 process then removes any references to the
+ *        entry under its old address from the cleands and dirtied
+ *        lists, and inserts an entry in the dirtied list under the
+ *        new address.
  *
- *		Return SUCCEED on success, and FAIL on failure.
+ *        Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -3551,8 +3551,8 @@ H5AC_log_moved_entry(const H5F_t *f,
                        haddr_t new_addr)
 {
     H5AC_t *             cache_ptr;
-    hbool_t		 entry_in_cache;
-    hbool_t		 entry_dirty;
+    hbool_t         entry_in_cache;
+    hbool_t         entry_dirty;
     size_t               entry_size;
     H5AC_aux_t         * aux_ptr = NULL;
     H5AC_slist_entry_t * slist_entry_ptr = NULL;
@@ -3594,7 +3594,7 @@ H5AC_log_moved_entry(const H5F_t *f,
          * address, remove it.
          */
         if ( (slist_entry_ptr = (H5AC_slist_entry_t *)
-	      H5SL_search(aux_ptr->c_slist_ptr, (void *)(&old_addr))) != NULL ) {
+        H5SL_search(aux_ptr->c_slist_ptr, (void *)(&old_addr))) != NULL ) {
 
             HDassert( slist_entry_ptr->magic ==
                           H5AC__H5AC_SLIST_ENTRY_T_MAGIC );
@@ -3619,7 +3619,7 @@ H5AC_log_moved_entry(const H5F_t *f,
          * address, remove it, but don't free it. Set addr to new_addr.
          */
         if ( (slist_entry_ptr = (H5AC_slist_entry_t *)
-	      H5SL_search(aux_ptr->d_slist_ptr, (void *)(&old_addr))) != NULL ) {
+        H5SL_search(aux_ptr->d_slist_ptr, (void *)(&old_addr))) != NULL ) {
 
             HDassert( slist_entry_ptr->magic ==
                       H5AC__H5AC_SLIST_ENTRY_T_MAGIC );
@@ -3699,92 +3699,92 @@ done:
 } /* H5AC_log_moved_entry() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_propagate_and_apply_candidate_list
  *
- * Purpose:     Prior to the addition of support for multiple metadata 
- *		write strategies, in PHDF5, only the metadata cache with 
- *		mpi rank 0 was allowed to write to file.  All other 
- *		metadata caches on processes with rank greater than 0 
- *		were required to retain dirty entries until they were 
- *		notified that the entry was clean.
+ * Purpose:     Prior to the addition of support for multiple metadata
+ *        write strategies, in PHDF5, only the metadata cache with
+ *        mpi rank 0 was allowed to write to file.  All other
+ *        metadata caches on processes with rank greater than 0
+ *        were required to retain dirty entries until they were
+ *        notified that the entry was clean.
  *
- *		This constraint is relaxed with the distributed 
- *		metadata write strategy, in which a list of candidate
- *		metadata cache entries is constructed by the process 0
- *		cache and then distributed to the caches of all the other
- *		processes.  Once the listed is distributed, many (if not 
- *		all) processes writing writing a unique subset of the 
- *		entries, and marking the remainder clean.  The subsets 
- *		are chosen so that each entry in the list of candidates 
- *		is written by exactly one cache, and all entries are 
- *		marked as being clean in all caches.
+ *        This constraint is relaxed with the distributed
+ *        metadata write strategy, in which a list of candidate
+ *        metadata cache entries is constructed by the process 0
+ *        cache and then distributed to the caches of all the other
+ *        processes.  Once the listed is distributed, many (if not
+ *        all) processes writing writing a unique subset of the
+ *        entries, and marking the remainder clean.  The subsets
+ *        are chosen so that each entry in the list of candidates
+ *        is written by exactly one cache, and all entries are
+ *        marked as being clean in all caches.
  *
- *		While the list of candidate cache entries is prepared 
- *		elsewhere, this function is the main routine for distributing
- *		and applying the list.  It must be run simultaniously on 
- *		all processes that have the relevant file open.  To ensure
- *		proper synchronization, there is a barrier at the beginning 
- *		of this function.
+ *        While the list of candidate cache entries is prepared
+ *        elsewhere, this function is the main routine for distributing
+ *        and applying the list.  It must be run simultaniously on
+ *        all processes that have the relevant file open.  To ensure
+ *        proper synchronization, there is a barrier at the beginning
+ *        of this function.
  *
- *		At present, this function is called under one of two 
- *		circumstances:
+ *        At present, this function is called under one of two
+ *        circumstances:
  *
- *		1) Dirty byte creation exceeds some user specified value.
+ *        1) Dirty byte creation exceeds some user specified value.
  *
- *		   While metadata reads may occur independently, all
- *		   operations writing metadata must be collective.  Thus
- *		   all metadata caches see the same sequence of operations,
+ *           While metadata reads may occur independently, all
+ *           operations writing metadata must be collective.  Thus
+ *           all metadata caches see the same sequence of operations,
  *                 and therefore the same dirty data creation.
  *
- *		   This fact is used to synchronize the caches for purposes
- *                 of propagating the list of candidate entries, by simply 
- *		   calling this function from all caches whenever some user 
- *		   specified threshold on dirty data is exceeded.  (the 
- *		   process 0 cache creates the candidate list just before 
- *		   calling this function).
+ *           This fact is used to synchronize the caches for purposes
+ *                 of propagating the list of candidate entries, by simply
+ *           calling this function from all caches whenever some user
+ *           specified threshold on dirty data is exceeded.  (the
+ *           process 0 cache creates the candidate list just before
+ *           calling this function).
  *
- *		2) Under direct user control -- this operation must be
- *		   collective.
+ *        2) Under direct user control -- this operation must be
+ *           collective.
  *
  *              The operations to be managed by this function are as
- * 		follows:
+ *         follows:
  *
- *		All processes:
+ *        All processes:
  *
- *		1) Participate in an opening barrier.
+ *        1) Participate in an opening barrier.
  *
- *		For the process with mpi rank 0:
+ *        For the process with mpi rank 0:
  *
- *		1) Load the contents of the candidate list 
- *		   (candidate_slist_ptr) into a buffer, and broadcast that
- *		   buffer to all the other caches.  Clear the candidate
- *		   list in passing.
+ *        1) Load the contents of the candidate list
+ *           (candidate_slist_ptr) into a buffer, and broadcast that
+ *           buffer to all the other caches.  Clear the candidate
+ *           list in passing.
  *
- *		If there is a positive number of candidates, proceed with 
- *		the following:
+ *        If there is a positive number of candidates, proceed with
+ *        the following:
  *
- *		2) Apply the candidate entry list.
+ *        2) Apply the candidate entry list.
  *
- *		3) Particpate in a closing barrier.
+ *        3) Particpate in a closing barrier.
  *
- *		4) Remove from the dirty list (d_slist_ptr) and from the 
- *		   flushed and still clean entries list (c_slist_ptr),  
+ *        4) Remove from the dirty list (d_slist_ptr) and from the
+ *           flushed and still clean entries list (c_slist_ptr),
  *                 all addresses that appeared in the candidate list, as
- *		   these entries are now clean.
+ *           these entries are now clean.
  *
  *
- *		For all processes with mpi rank greater than 0:
+ *        For all processes with mpi rank greater than 0:
  *
- *		1) Receive the candidate entry list broadcast
+ *        1) Receive the candidate entry list broadcast
  *
- *		If there is a positive number of candidates, proceed with 
- *		the following:
+ *        If there is a positive number of candidates, proceed with
+ *        the following:
  *
- *		2) Apply the candidate entry list.
+ *        2) Apply the candidate entry list.
  *
- *		3) Particpate in a closing barrier.
+ *        3) Particpate in a closing barrier.
  *
  * Return:      Success:        non-negative
  *
@@ -3801,8 +3801,8 @@ H5AC_propagate_and_apply_candidate_list(H5F_t  * f,
                                         hid_t    dxpl_id,
                                         H5AC_t * cache_ptr)
 {
-    int		         mpi_code;
-    int	                 num_candidates = 0;
+    int                 mpi_code;
+    int                     num_candidates = 0;
     haddr_t            * candidates_list_ptr = NULL;
     H5AC_aux_t         * aux_ptr;
     herr_t               ret_value = SUCCEED;   /* Return value */
@@ -3816,7 +3816,7 @@ H5AC_propagate_and_apply_candidate_list(H5F_t  * f,
 
     HDassert( aux_ptr != NULL );
     HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
+    HDassert( aux_ptr->metadata_write_strategy ==
               H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
 
     /* to prevent "messages from the future" we must synchronize all
@@ -3837,10 +3837,10 @@ H5AC_propagate_and_apply_candidate_list(H5F_t  * f,
     } /* end else */
 
     if(num_candidates > 0) {
-        herr_t	         result;
+        herr_t             result;
 
-        /* all processes apply the candidate list.  
-         * H5C_apply_candidate_list() handles the details of 
+        /* all processes apply the candidate list.
+         * H5C_apply_candidate_list() handles the details of
          * distributing the writes across the processes.
          */
 
@@ -3860,8 +3860,8 @@ H5AC_propagate_and_apply_candidate_list(H5F_t  * f,
         if(result < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't apply candidate list.")
 
-	if(aux_ptr->write_done != NULL)
-	    (aux_ptr->write_done)();
+    if(aux_ptr->write_done != NULL)
+        (aux_ptr->write_done)();
 
         /* to prevent "messages from the past" we must synchronize all
          * processes again before we go on.
@@ -3890,68 +3890,68 @@ done:
 } /* H5AC_propagate_and_apply_candidate_list() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_propagate_flushed_and_still_clean_entries_list
  *
  * Purpose:     In PHDF5, if the process 0 only metadata write strategy
- *		is selected, only the metadata cache with mpi rank 0 is 
- *		allowed to write to file.  All other metadata caches on 
- *		processes with rank greater than 0 must retain dirty 
- *		entries until they are notified that the entry is now 
- *		clean.
+ *        is selected, only the metadata cache with mpi rank 0 is
+ *        allowed to write to file.  All other metadata caches on
+ *        processes with rank greater than 0 must retain dirty
+ *        entries until they are notified that the entry is now
+ *        clean.
  *
- *		This function is the main routine for handling this 
- *		notification proceedure.  It must be called 
- *		simultaniously on all processes that have the relevant 
- *		file open.  To this end, it is called only during a 
- *		sync point, with a barrier prior to the call.
+ *        This function is the main routine for handling this
+ *        notification proceedure.  It must be called
+ *        simultaniously on all processes that have the relevant
+ *        file open.  To this end, it is called only during a
+ *        sync point, with a barrier prior to the call.
  *
- *		Note that any metadata entry writes by process 0 will
- *		occur after the barrier and just before this call.
+ *        Note that any metadata entry writes by process 0 will
+ *        occur after the barrier and just before this call.
  *
- *		Typicaly, calls to this function will be triggered in
- *		one of two ways:
+ *        Typicaly, calls to this function will be triggered in
+ *        one of two ways:
  *
- *		1) Dirty byte creation exceeds some user specified value.
+ *        1) Dirty byte creation exceeds some user specified value.
  *
- *		   While metadata reads may occur independently, all
- *		   operations writing metadata must be collective.  Thus
- *		   all metadata caches see the same sequence of operations,
+ *           While metadata reads may occur independently, all
+ *           operations writing metadata must be collective.  Thus
+ *           all metadata caches see the same sequence of operations,
  *                 and therefore the same dirty data creation.
  *
- *		   This fact is used to synchronize the caches for purposes
+ *           This fact is used to synchronize the caches for purposes
  *                 of propagating the list of flushed and still clean
- *		   entries, by simply calling this function from all
- *		   caches whenever some user specified threshold on dirty
- *		   data is exceeded.
+ *           entries, by simply calling this function from all
+ *           caches whenever some user specified threshold on dirty
+ *           data is exceeded.
  *
- *		2) Under direct user control -- this operation must be
- *		   collective.
+ *        2) Under direct user control -- this operation must be
+ *           collective.
  *
  *              The operations to be managed by this function are as
- * 		follows:
+ *         follows:
  *
- *		For the process with mpi rank 0:
+ *        For the process with mpi rank 0:
  *
- *		1) Load the contents of the flushed and still clean entries
- *		   list (c_slist_ptr) into a buffer, and broadcast that
- *		   buffer to all the other caches.
+ *        1) Load the contents of the flushed and still clean entries
+ *           list (c_slist_ptr) into a buffer, and broadcast that
+ *           buffer to all the other caches.
  *
- *		2) Clear the flushed and still clean entries list
+ *        2) Clear the flushed and still clean entries list
  *                 (c_slist_ptr).
  *
  *
- *		For all processes with mpi rank greater than 0:
+ *        For all processes with mpi rank greater than 0:
  *
- *		1) Receive the flushed and still clean entries list broadcast
+ *        1) Receive the flushed and still clean entries list broadcast
  *
- *		2) Mark the specified entries as clean.
+ *        2) Mark the specified entries as clean.
  *
  *
- *		For all processes:
+ *        For all processes:
  *
- *		1) Reset the dirtied bytes count to 0.
+ *        1) Reset the dirtied bytes count to 0.
  *
  * Return:      Success:        non-negative
  *
@@ -3969,7 +3969,7 @@ H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
                                                     H5AC_t * cache_ptr)
 {
     H5AC_aux_t * aux_ptr;
-    herr_t	 ret_value = SUCCEED;   /* Return value */
+    herr_t     ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -3980,7 +3980,7 @@ H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
 
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
-    HDassert(aux_ptr->metadata_write_strategy == 
+    HDassert(aux_ptr->metadata_write_strategy ==
               H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
 
     if(aux_ptr->mpi_rank == 0) {
@@ -3998,18 +3998,18 @@ done:
 } /* H5AC_propagate_flushed_and_still_clean_entries_list() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_receive_and_apply_clean_list()
  *
  * Purpose:     Receive the list of cleaned entries from process 0,
- *		and mark the specified entries as clean.
+ *        and mark the specified entries as clean.
  *
- *		This function must only be called by the process with
- *		MPI_rank greater than 0.
+ *        This function must only be called by the process with
+ *        MPI_rank greater than 0.
  *
- *		Return SUCCEED on success, and FAIL on failure.
+ *        Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -4025,10 +4025,10 @@ H5AC_receive_and_apply_clean_list(H5F_t  * f,
                                   H5AC_t * cache_ptr)
 {
     H5AC_aux_t         * aux_ptr;
-    haddr_t	       * haddr_buf_ptr = NULL;
+    haddr_t           * haddr_buf_ptr = NULL;
     MPI_Offset         * MPI_Offset_buf_ptr = NULL;
     int                  mpi_result;
-    int			 num_entries = 0;
+    int             num_entries = 0;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -4107,20 +4107,20 @@ done:
 } /* H5AC_receive_and_apply_clean_list() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5AC_receive_candidate_list()
  *
  * Purpose:     Receive the list of candidate entries from process 0,
- *		and return it in a buffer pointed to by *haddr_buf_ptr_ptr.
- *		Note that the caller must free this buffer if it is 
- *		returned.
+ *        and return it in a buffer pointed to by *haddr_buf_ptr_ptr.
+ *        Note that the caller must free this buffer if it is
+ *        returned.
  *
- *		This function must only be called by the process with
- *		MPI_rank greater than 0.
+ *        This function must only be called by the process with
+ *        MPI_rank greater than 0.
  *
- *		Return SUCCEED on success, and FAIL on failure.
+ *        Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -4134,12 +4134,12 @@ H5AC_receive_candidate_list(H5AC_t * cache_ptr,
                             int * num_entries_ptr,
                             haddr_t ** haddr_buf_ptr_ptr)
 {
-    hbool_t		 success = FALSE;
+    hbool_t         success = FALSE;
     H5AC_aux_t         * aux_ptr;
-    haddr_t	       * haddr_buf_ptr = NULL;
+    haddr_t           * haddr_buf_ptr = NULL;
     MPI_Offset         * MPI_Offset_buf_ptr = NULL;
     int                  mpi_result;
-    int			 num_entries;
+    int             num_entries;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -4152,7 +4152,7 @@ H5AC_receive_candidate_list(H5AC_t * cache_ptr,
     HDassert( aux_ptr != NULL );
     HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
     HDassert( aux_ptr->mpi_rank != 0 );
-    HDassert( aux_ptr-> metadata_write_strategy == 
+    HDassert( aux_ptr-> metadata_write_strategy ==
               H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
 
     HDassert( num_entries_ptr != NULL );
@@ -4210,7 +4210,7 @@ done:
         MPI_Offset_buf_ptr = (MPI_Offset *)H5MM_xfree((void *)MPI_Offset_buf_ptr);
 
     if(success) {
-        /* finally, pass the number of entries and the buffer pointer 
+        /* finally, pass the number of entries and the buffer pointer
          * back to the caller.  Do this so that we can use the same code
          * to apply the candidate list to all the processes.
          */
@@ -4226,46 +4226,46 @@ done:
 } /* H5AC_receive_candidate_list() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_rsp__dist_md_write__flush
  *
  * Purpose:     Routine for handling the details of running a sync point
- *		that is triggered by a flush -- which in turn must have been
- *		triggered by either a flush API call or a file close --
- *		when the distributed metadata write strategy is selected.  
+ *        that is triggered by a flush -- which in turn must have been
+ *        triggered by either a flush API call or a file close --
+ *        when the distributed metadata write strategy is selected.
  *
- *		Upon entry, each process generates it own candidate list, 
- *              being a sorted list of all dirty metadata entries currently 
- *		in the metadata cache.  Note that this list must be idendical 
- *		across all processes, as all processes see the same stream 
- *		of dirty metadata coming in, and use the same lists of 
- *		candidate entries at each sync point.  (At first glance, this 
- *		argument sounds circular, but think of it in the sense of
- *		a recursive proof).
+ *        Upon entry, each process generates it own candidate list,
+ *              being a sorted list of all dirty metadata entries currently
+ *        in the metadata cache.  Note that this list must be idendical
+ *        across all processes, as all processes see the same stream
+ *        of dirty metadata coming in, and use the same lists of
+ *        candidate entries at each sync point.  (At first glance, this
+ *        argument sounds circular, but think of it in the sense of
+ *        a recursive proof).
  *
- *		If this this list is empty, we are done, and the function 
- *		returns
+ *        If this this list is empty, we are done, and the function
+ *        returns
  *
- *		Otherwise, after the sorted list dirty metadata entries is 
- *		constructed, each process uses the same algorithm to assign 
- *		each entry on the candidate list to exactly one process for 
- *		flushing.
+ *        Otherwise, after the sorted list dirty metadata entries is
+ *        constructed, each process uses the same algorithm to assign
+ *        each entry on the candidate list to exactly one process for
+ *        flushing.
  *
- *		At this point, all processes participate in a barrier to
- *		avoid messages from the past/future bugs.
+ *        At this point, all processes participate in a barrier to
+ *        avoid messages from the past/future bugs.
  *
- *		Each process then flushes the entries assigned to it, and 
- *		marks all other entries on the candidate list as clean.
+ *        Each process then flushes the entries assigned to it, and
+ *        marks all other entries on the candidate list as clean.
  *
- *		Finally, all processes participate in a second barrier to 
- *		avoid messages from the past/future bugs.
+ *        Finally, all processes participate in a second barrier to
+ *        avoid messages from the past/future bugs.
  *
- *		At the end of this process, process 0 and only process 0
- *		must tidy up its lists of dirtied and cleaned entries.   
- *		These lists are not used in the distributed metadata write
- *		strategy, but they must be maintained should we shift 
- *		to a strategy that uses them.
+ *        At the end of this process, process 0 and only process 0
+ *        must tidy up its lists of dirtied and cleaned entries.
+ *        These lists are not used in the distributed metadata write
+ *        strategy, but they must be maintained should we shift
+ *        to a strategy that uses them.
  *
  * Return:      Success:        non-negative
  *
@@ -4278,15 +4278,15 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 herr_t
-H5AC_rsp__dist_md_write__flush(H5F_t *f, 
-                               hid_t dxpl_id, 
+H5AC_rsp__dist_md_write__flush(H5F_t *f,
+                               hid_t dxpl_id,
                                H5AC_t * cache_ptr)
 {
-    int		 mpi_code;
+    int         mpi_code;
     int          num_entries = 0;
     haddr_t    * haddr_buf_ptr = NULL;
     H5AC_aux_t * aux_ptr;
-    herr_t	 ret_value = SUCCEED;   /* Return value */
+    herr_t     ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -4300,17 +4300,17 @@ H5AC_rsp__dist_md_write__flush(H5F_t *f,
 
     HDassert( aux_ptr != NULL );
     HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
+    HDassert( aux_ptr->metadata_write_strategy ==
               H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
 
-    /* first construct the candidate list -- initially, this will be in the 
+    /* first construct the candidate list -- initially, this will be in the
      * form of a skip list.  We will convert it later.
      */
     if(H5C_construct_candidate_list__clean_cache(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate list.")
 
     if(aux_ptr->candidate_slist_len > 0) {
-        herr_t	 result;
+        herr_t     result;
 
         /* convert the candidate list into the format we
          * are used to receiving from process 0.
@@ -4340,7 +4340,7 @@ H5AC_rsp__dist_md_write__flush(H5F_t *f,
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't apply candidate list.")
 
         /* this code exists primarily for the test bed -- it allows us to
-         * enforce posix semantics on the server that pretends to be a 
+         * enforce posix semantics on the server that pretends to be a
          * file system in our parallel tests.
          */
         if(aux_ptr->write_done != NULL)
@@ -4350,7 +4350,7 @@ H5AC_rsp__dist_md_write__flush(H5F_t *f,
         if(MPI_SUCCESS != (mpi_code = MPI_Barrier(aux_ptr->mpi_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed 1", mpi_code)
 
-	/* if this is process zero, tidy up the dirtied,
+    /* if this is process zero, tidy up the dirtied,
          * and flushed and still clean lists.
          */
         if(aux_ptr->mpi_rank == 0) {
@@ -4374,51 +4374,51 @@ done:
 } /* H5AC_rsp__dist_md_write__flush() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_rsp__dist_md_write__flush_to_min_clean
  *
  * Purpose:     Routine for handling the details of running a sync point
- *		triggered by the accumulation of dirty metadata (as 
- *		opposed to a flush call to the API) when the distributed
- *		metadata write strategy is selected.
+ *        triggered by the accumulation of dirty metadata (as
+ *        opposed to a flush call to the API) when the distributed
+ *        metadata write strategy is selected.
  *
- *		After invocation and initial sanity checking this function
- *		first checks to see if evictions are enabled -- if they 
- *		are not, the function does nothing and returns.
+ *        After invocation and initial sanity checking this function
+ *        first checks to see if evictions are enabled -- if they
+ *        are not, the function does nothing and returns.
  *
- *		Otherwise, process zero constructs a list of entries to 
- *		be flushed in order to bring the process zero cache back
- *		within its min clean requirement.  Note that this list 
- *		(the candidate list) may be empty.
+ *        Otherwise, process zero constructs a list of entries to
+ *        be flushed in order to bring the process zero cache back
+ *        within its min clean requirement.  Note that this list
+ *        (the candidate list) may be empty.
  *
  *              Then, all processes participate in a barrier.
  *
- *		After the barrier, process 0 broadcasts the number of 
- *		entries in the candidate list prepared above, and all 
- *		other processes receive this number.
+ *        After the barrier, process 0 broadcasts the number of
+ *        entries in the candidate list prepared above, and all
+ *        other processes receive this number.
  *
- *		If this number is zero, we are done, and the function
- *		returns without further action.
+ *        If this number is zero, we are done, and the function
+ *        returns without further action.
  *
- *		Otherwise, process 0 broadcasts the sorted list of 
- *		candidate entries, and all other processes receive it.
+ *        Otherwise, process 0 broadcasts the sorted list of
+ *        candidate entries, and all other processes receive it.
  *
- *		Then, each process uses the same algorithm to assign 
- *		each entry on the candidate list to exactly one process 
- *		for flushing.
+ *        Then, each process uses the same algorithm to assign
+ *        each entry on the candidate list to exactly one process
+ *        for flushing.
  *
- *		Each process then flushes the entries assigned to it, and 
- *		marks all other entries on the candidate list as clean.
+ *        Each process then flushes the entries assigned to it, and
+ *        marks all other entries on the candidate list as clean.
  *
- *		Finally, all processes participate in a second barrier to 
- *		avoid messages from the past/future bugs.
+ *        Finally, all processes participate in a second barrier to
+ *        avoid messages from the past/future bugs.
  *
- *		At the end of this process, process 0 and only process 0
- *		must tidy up its lists of dirtied and cleaned entries.   
- *		These lists are not used in the distributed metadata write
- *		strategy, but they must be maintained should we shift 
- *		to a strategy that uses them.
+ *        At the end of this process, process 0 and only process 0
+ *        must tidy up its lists of dirtied and cleaned entries.
+ *        These lists are not used in the distributed metadata write
+ *        strategy, but they must be maintained should we shift
+ *        to a strategy that uses them.
  *
  * Return:      Success:        non-negative
  *
@@ -4431,13 +4431,13 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 herr_t
-H5AC_rsp__dist_md_write__flush_to_min_clean(H5F_t *f, 
-                                            hid_t dxpl_id, 
+H5AC_rsp__dist_md_write__flush_to_min_clean(H5F_t *f,
+                                            hid_t dxpl_id,
                                             H5AC_t * cache_ptr)
 {
-    hbool_t 	 evictions_enabled;
+    hbool_t      evictions_enabled;
     H5AC_aux_t * aux_ptr;
-    herr_t	 ret_value = SUCCEED;   /* Return value */
+    herr_t     ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -4451,7 +4451,7 @@ H5AC_rsp__dist_md_write__flush_to_min_clean(H5F_t *f,
 
     HDassert( aux_ptr != NULL );
     HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
+    HDassert( aux_ptr->metadata_write_strategy ==
               H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
 
     /* Query if evictions are allowed */
@@ -4475,33 +4475,33 @@ done:
 } /* H5AC_rsp__dist_md_write__flush_to_min_clean() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_rsp__p0_only__flush
  *
  * Purpose:     Routine for handling the details of running a sync point
- *		that is triggered a flush -- which in turn must have been
- *		triggered by either a flush API call or a file close -- 
- *		when the process 0 only metadata write strategy is selected.  
+ *        that is triggered a flush -- which in turn must have been
+ *        triggered by either a flush API call or a file close --
+ *        when the process 0 only metadata write strategy is selected.
  *
  *              First, all processes participate in a barrier.
  *
- *		Then process zero flushes all dirty entries, and broadcasts
- *		they number of clean entries (if any) to all the other 
- *		caches.
+ *        Then process zero flushes all dirty entries, and broadcasts
+ *        they number of clean entries (if any) to all the other
+ *        caches.
  *
- *		If this number is zero, we are done.
+ *        If this number is zero, we are done.
  *
- *		Otherwise, process 0 broadcasts the list of cleaned 
- *		entries, and all other processes which are part of this
- *		file group receive it, and mark the listed entries as
- *		clean in their caches.
+ *        Otherwise, process 0 broadcasts the list of cleaned
+ *        entries, and all other processes which are part of this
+ *        file group receive it, and mark the listed entries as
+ *        clean in their caches.
  *
- *		Since all processes have the same set of dirty 
- *		entries at the beginning of the sync point, and all
- *		entries that will be written are written before 
- *		process zero broadcasts the number of cleaned entries,
- *		there is no need for a closing barrier.
+ *        Since all processes have the same set of dirty
+ *        entries at the beginning of the sync point, and all
+ *        entries that will be written are written before
+ *        process zero broadcasts the number of cleaned entries,
+ *        there is no need for a closing barrier.
  *
  * Return:      Success:        non-negative
  *
@@ -4514,13 +4514,13 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 herr_t
-H5AC_rsp__p0_only__flush(H5F_t *f, 
-                         hid_t dxpl_id, 
+H5AC_rsp__p0_only__flush(H5F_t *f,
+                         hid_t dxpl_id,
                          H5AC_t * cache_ptr)
 {
-    int		 mpi_code;
+    int         mpi_code;
     H5AC_aux_t * aux_ptr;
-    herr_t	 ret_value = SUCCEED;   /* Return value */
+    herr_t     ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -4534,12 +4534,12 @@ H5AC_rsp__p0_only__flush(H5F_t *f,
 
     HDassert( aux_ptr != NULL );
     HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
+    HDassert( aux_ptr->metadata_write_strategy ==
               H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY );
 
 
-    /* to prevent "messages from the future" we must 
-     * synchronize all processes before we start the flush.  
+    /* to prevent "messages from the future" we must
+     * synchronize all processes before we start the flush.
      * Hence the following barrier.
      */
     if(MPI_SUCCESS != (mpi_code = MPI_Barrier(aux_ptr->mpi_comm)))
@@ -4571,39 +4571,39 @@ done:
 } /* H5AC_rsp__p0_only__flush() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_rsp__p0_only__flush_to_min_clean
  *
  * Purpose:     Routine for handling the details of running a sync point
- *		triggered by the accumulation of dirty metadata (as 
- *		opposed to a flush call to the API) when the process 0
- *		only metadata write strategy is selected.
+ *        triggered by the accumulation of dirty metadata (as
+ *        opposed to a flush call to the API) when the process 0
+ *        only metadata write strategy is selected.
  *
- *		After invocation and initial sanity checking this function
- *		first checks to see if evictions are enabled -- if they 
- *		are not, the function does nothing and returns.
+ *        After invocation and initial sanity checking this function
+ *        first checks to see if evictions are enabled -- if they
+ *        are not, the function does nothing and returns.
  *
  *              Otherwise, all processes participate in a barrier.
  *
- *		After the barrier, if this is process 0, the function 
- *		causes the cache to flush sufficient entries to get the 
- *		cache back within its minimum clean fraction, and broadcast 
- *		the number of entries which have been flushed since 
- *		the last sync point, and are still clean.
+ *        After the barrier, if this is process 0, the function
+ *        causes the cache to flush sufficient entries to get the
+ *        cache back within its minimum clean fraction, and broadcast
+ *        the number of entries which have been flushed since
+ *        the last sync point, and are still clean.
  *
- *		If this number is zero, we are done.
+ *        If this number is zero, we are done.
  *
- *		Otherwise, process 0 broadcasts the list of cleaned 
- *		entries, and all other processes which are part of this
- *		file group receive it, and mark the listed entries as
- *		clean in their caches.
+ *        Otherwise, process 0 broadcasts the list of cleaned
+ *        entries, and all other processes which are part of this
+ *        file group receive it, and mark the listed entries as
+ *        clean in their caches.
  *
- *		Since all processes have the same set of dirty 
- *		entries at the beginning of the sync point, and all
- *		entries that will be written are written before 
- *		process zero broadcasts the number of cleaned entries,
- *		there is no need for a closing barrier.
+ *        Since all processes have the same set of dirty
+ *        entries at the beginning of the sync point, and all
+ *        entries that will be written are written before
+ *        process zero broadcasts the number of cleaned entries,
+ *        there is no need for a closing barrier.
  *
  * Return:      Success:        non-negative
  *
@@ -4616,13 +4616,13 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 herr_t
-H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f, 
-                                      hid_t dxpl_id, 
+H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f,
+                                      hid_t dxpl_id,
                                       H5AC_t * cache_ptr)
 {
-    hbool_t 	 evictions_enabled;
+    hbool_t      evictions_enabled;
     H5AC_aux_t * aux_ptr;
-    herr_t	 ret_value = SUCCEED;   /* Return value */
+    herr_t     ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -4636,7 +4636,7 @@ H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f,
 
     HDassert( aux_ptr != NULL );
     HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
+    HDassert( aux_ptr->metadata_write_strategy ==
               H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY );
 
     /* Query if evictions are allowed */
@@ -4661,11 +4661,11 @@ H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f,
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
         if(0 == aux_ptr->mpi_rank) {
-            herr_t	 result;
+            herr_t     result;
 
-            /* here, process 0 flushes as many entries as necessary to 
+            /* here, process 0 flushes as many entries as necessary to
              * comply with the currently specified min clean size.
-             * Note that it is quite possible that no entries will be 
+             * Note that it is quite possible that no entries will be
              * flushed.
              */
             aux_ptr->write_permitted = TRUE;
@@ -4678,8 +4678,8 @@ H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f,
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_flush_to_min_clean() failed.")
 
             /* this call exists primarily for the test code -- it is used
- 	     * to enforce POSIX semantics on the process used to simulate
- 	     * reads and writes in t_cache.c.
+        * to enforce POSIX semantics on the process used to simulate
+        * reads and writes in t_cache.c.
              */
             if(aux_ptr->write_done != NULL)
                 (aux_ptr->write_done)();
@@ -4694,28 +4694,28 @@ done:
 } /* H5AC_rsp__p0_only__flush_to_min_clean() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_run_sync_point
  *
  * Purpose:     Top level routine for managing a sync point between all
- *		meta data caches in the parallel case.  Since all caches 
- *		see the same sequence of dirty metadata, we simply count
- *		bytes of dirty metadata, and run a sync point whenever the
- *		number of dirty bytes of metadata seen since the last
- *		sync point exceeds a threshold that is common across all
- *		processes.  We also run sync points in response to 
- *		HDF5 API calls triggering either a flush or a file close.
+ *        meta data caches in the parallel case.  Since all caches
+ *        see the same sequence of dirty metadata, we simply count
+ *        bytes of dirty metadata, and run a sync point whenever the
+ *        number of dirty bytes of metadata seen since the last
+ *        sync point exceeds a threshold that is common across all
+ *        processes.  We also run sync points in response to
+ *        HDF5 API calls triggering either a flush or a file close.
  *
- *		In earlier versions of PHDF5, only the metadata cache with 
- *		mpi rank 0 was allowed to write to file.  All other 
- *		metadata caches on processes with rank greater than 0 were
- *		required to retain dirty entries until they were notified 
- *		that the entry is was clean.
+ *        In earlier versions of PHDF5, only the metadata cache with
+ *        mpi rank 0 was allowed to write to file.  All other
+ *        metadata caches on processes with rank greater than 0 were
+ *        required to retain dirty entries until they were notified
+ *        that the entry is was clean.
  *
- *		This function was created to make it easier for us to 
- *		experiment with other options, as it is a single point 
- *		for the execution of sync points.  
+ *        This function was created to make it easier for us to
+ *        experiment with other options, as it is a single point
+ *        for the execution of sync points.
  *
  * Return:      Success:        non-negative
  *
@@ -4728,13 +4728,13 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 herr_t
-H5AC_run_sync_point(H5F_t *f, 
-                    hid_t dxpl_id, 
-		    int sync_point_op)
+H5AC_run_sync_point(H5F_t *f,
+                    hid_t dxpl_id,
+            int sync_point_op)
 {
     H5AC_t * cache_ptr;
     H5AC_aux_t * aux_ptr;
-    herr_t	 ret_value = SUCCEED;   /* Return value */
+    herr_t     ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -4768,44 +4768,44 @@ H5AC_run_sync_point(H5F_t *f,
 
     switch(aux_ptr->metadata_write_strategy) {
         case H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY:
-	    switch(sync_point_op) {
+        switch(sync_point_op) {
                 case H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN:
-	            if(H5AC_rsp__p0_only__flush_to_min_clean(f, dxpl_id, cache_ptr) < 0)
+                if(H5AC_rsp__p0_only__flush_to_min_clean(f, dxpl_id, cache_ptr) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC_rsp__p0_only__flush_to_min_clean() failed.")
-		    break;
+            break;
 
-		case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
-	            if(H5AC_rsp__p0_only__flush(f, dxpl_id, cache_ptr) < 0)
+        case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
+                if(H5AC_rsp__p0_only__flush(f, dxpl_id, cache_ptr) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC_rsp__p0_only__flush() failed.")
-		    break;
+            break;
 
-		default:
+        default:
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unknown flush op");
-		    break;
-	    } /* end switch */
-	    break;
+            break;
+        } /* end switch */
+        break;
 
-	case H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED:
-	    switch(sync_point_op) {
+    case H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED:
+        switch(sync_point_op) {
                 case H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN:
-	            if(H5AC_rsp__dist_md_write__flush_to_min_clean(f, dxpl_id, cache_ptr) < 0)
+                if(H5AC_rsp__dist_md_write__flush_to_min_clean(f, dxpl_id, cache_ptr) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC_rsp__dist_md_write__flush() failed.")
-		    break;
+            break;
 
-		case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
-	            if(H5AC_rsp__dist_md_write__flush(f, dxpl_id, cache_ptr) < 0)
+        case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
+                if(H5AC_rsp__dist_md_write__flush(f, dxpl_id, cache_ptr) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC_rsp__dist_md_write__flush() failed.")
-		    break;
+            break;
 
-		default:
+        default:
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unknown flush op");
-		    break;
-	    } /* end switch */
-	    break;
+            break;
+        } /* end switch */
+        break;
 
-	default:
+    default:
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown metadata write strategy.")
-	    break;
+        break;
     } /* end switch */
 
     /* reset the dirty bytes count */
@@ -4826,32 +4826,32 @@ done:
 } /* H5AC_run_sync_point() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_tidy_cache_0_lists()
  *
  * Purpose:     In the distributed metadata write strategy, not all dirty
- *		entries are written by process 0 -- thus we must tidy
- *		up the dirtied, and flushed and still clean lists 
- *		maintained by process zero after each sync point.
+ *        entries are written by process 0 -- thus we must tidy
+ *        up the dirtied, and flushed and still clean lists
+ *        maintained by process zero after each sync point.
  *
- *		This procedure exists to tend to this issue.
+ *        This procedure exists to tend to this issue.
  *
- *		At this point, all entries that process 0 cleared should
- *		have been removed from both the dirty and flushed and 
- *		still clean lists, and entries that process 0 has flushed
- *		should have been removed from the dirtied list and added
- *		to the flushed and still clean list.
+ *        At this point, all entries that process 0 cleared should
+ *        have been removed from both the dirty and flushed and
+ *        still clean lists, and entries that process 0 has flushed
+ *        should have been removed from the dirtied list and added
+ *        to the flushed and still clean list.
  *
- *		However, since the distributed metadata write strategy
- *		doesn't make use of these lists, the objective is simply
- *		to maintain these lists in consistent state that allows
- *		them to be used should the metadata write strategy change
- *		to one that uses these lists.
+ *        However, since the distributed metadata write strategy
+ *        doesn't make use of these lists, the objective is simply
+ *        to maintain these lists in consistent state that allows
+ *        them to be used should the metadata write strategy change
+ *        to one that uses these lists.
  *
- *		Thus for our purposes, all we need to do is remove from 
- *		the dirtied and flushed and still clean lists all
- *		references to entries that appear in the candidate list.
+ *        Thus for our purposes, all we need to do is remove from
+ *        the dirtied and flushed and still clean lists all
+ *        references to entries that appear in the candidate list.
  *
  * Return:      Success:        non-negative
  *
@@ -4882,17 +4882,17 @@ H5AC_tidy_cache_0_lists(H5AC_t * cache_ptr,
 
     HDassert( aux_ptr != NULL );
     HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
+    HDassert( aux_ptr->metadata_write_strategy ==
               H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
     HDassert( aux_ptr->mpi_rank == 0 );
     HDassert( num_candidates > 0 );
     HDassert( candidates_list_ptr != NULL );
 
-    /* clean up dirtied and flushed and still clean lists by removing 
-     * all entries on the candidate list.  Cleared entries should 
-     * have been removed from both the dirty and cleaned lists at 
-     * this point, flushed entries should have been added to the 
-     * cleaned list.  However, for this metadata write strategy, 
+    /* clean up dirtied and flushed and still clean lists by removing
+     * all entries on the candidate list.  Cleared entries should
+     * have been removed from both the dirty and cleaned lists at
+     * this point, flushed entries should have been added to the
+     * cleaned list.  However, for this metadata write strategy,
      * we just want to remove all references to the candidate entries.
      */
     for(i = 0; i < num_candidates; i++) {
@@ -4902,7 +4902,7 @@ H5AC_tidy_cache_0_lists(H5AC_t * cache_ptr,
 
         addr = candidates_list_ptr[i];
 
-        /* addr must be either on the dirtied list, or on the flushed 
+        /* addr must be either on the dirtied list, or on the flushed
          * and still clean list.  Remove it.
          */
         d_slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_search(aux_ptr->d_slist_ptr, (void *)&addr);
@@ -4943,7 +4943,7 @@ done:
 } /* H5AC_tidy_cache_0_lists() */
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_flush_entries
  *

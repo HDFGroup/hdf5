@@ -214,13 +214,13 @@ test_compound (char *filename, hid_t fapl)
     /* Also verify H5Pset_preserve is initially 0 and then is set to 1. */
     if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
     if ((ret_code=H5Pget_preserve (PRESERVE)) != 0){
-	printf("Preserve status of dataset transfer property list should be"
+	HDprintf("Preserve status of dataset transfer property list should be"
 	   " 0 (FALSE), got %d\n", ret_code);
 	goto error;
     }
     if (H5Pset_preserve (PRESERVE, 1)<0) goto error;
     if ((ret_code=H5Pget_preserve (PRESERVE)) != 1){
-	printf("Preserve status of dataset transfer property list should be"
+	HDprintf("Preserve status of dataset transfer property list should be"
 	   " 1 (TRUE), got %d\n", ret_code);
 	goto error;
     }
@@ -550,11 +550,11 @@ test_compound (char *filename, hid_t fapl)
 	    s1[i].d != 8*i+6 ||
 	    s1[i].e != 8*i+7) {
 	    H5_FAILED();
-	    printf("    i==%u, row=%u, col=%u\n", i, i/NY, i%NY);
-	    printf("    got: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n",
+	    HDprintf("    i==%u, row=%u, col=%u\n", i, i/NY, i%NY);
+	    HDprintf("    got: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n",
 		   s1[i].a, s1[i].b, s1[i].c[0], s1[i].c[1], s1[i].c[2],
 		   s1[i].c[3], s1[i].d, s1[i].e);
-	    printf("    ans: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n",
+	    HDprintf("    ans: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n",
 		   8*i+0, 8*i+1, 8*i+2, 8*i+3, 8*i+4, 8*i+5, 8*i+6, 8*i+7);
 	    goto error;
 	}
@@ -1298,15 +1298,15 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
             !DBL_ABS_EQUAL(s_ptr->n, d_ptr->n) ) {
 
 	    H5_FAILED();
-	    printf("    i=%d\n", i);
-	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
+	    HDprintf("    i=%d\n", i);
+	    HDprintf("    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
 		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
 		   s_ptr->c[3], s_ptr->c[4], s_ptr->c[5], s_ptr->c[6], s_ptr->c[7],
                    s_ptr->d, s_ptr->e, s_ptr->f, s_ptr->g,s_ptr->h[0],s_ptr->h[1],s_ptr->h[2],
                    s_ptr->h[3],s_ptr->h[4],s_ptr->h[5],s_ptr->h[6],s_ptr->h[7],s_ptr->h[8],
                    s_ptr->h[9],s_ptr->h[10],s_ptr->h[11],s_ptr->h[12],s_ptr->h[13],s_ptr->h[14],
                    s_ptr->h[15], s_ptr->i,s_ptr->j,s_ptr->k,s_ptr->l,s_ptr->m,s_ptr->n);
-	    printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
+	    HDprintf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
 		   d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
 		   d_ptr->c[3], d_ptr->c[4], d_ptr->c[5], d_ptr->c[6], d_ptr->c[7],
                    d_ptr->d, d_ptr->e, d_ptr->f, d_ptr->g,d_ptr->h[0],d_ptr->h[1],d_ptr->h[2],
@@ -1738,10 +1738,10 @@ error:
 {                                                                              \
     int _i;                                                                    \
     H5_FAILED(); AT();                                                         \
-    printf("    Insertion order =");                                           \
+    HDprintf("    Insertion order =");                                           \
     for(_i=0; _i<PACK_NMEMBS; _i++)                                            \
-        printf(" %d", order[_i]);                                              \
-    printf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]); \
+        HDprintf(" %d", order[_i]);                                              \
+    HDprintf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]); \
     fflush(stdout);                                                            \
     goto error;                                                                \
 }
@@ -1819,7 +1819,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in the random order previously generated */
         for(i=0; i<PACK_NMEMBS; i++) {
-            sprintf(name, "%05d", i);
+            HDsprintf(name, "%05d", i);
             if(i == sub_cmpd_order) {
                 if(H5Tinsert(cmpd, name, (size_t)(4 * order[i]), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
@@ -1845,7 +1845,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in the random order previously generated */
         for(i=0; i<PACK_NMEMBS; i++) {
-            sprintf(name, "%05d", i);
+            HDsprintf(name, "%05d", i);
             if(i == sub_cmpd_order) {
                 if(H5Tinsert(cmpd, name, (size_t)(4 * order[i]), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
@@ -1872,7 +1872,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in reverse order, with compound last */
         for(i=0; i<PACK_NMEMBS; i++) {
-            sprintf(name, "%05d", i);
+            HDsprintf(name, "%05d", i);
             if(i == PACK_NMEMBS - 1) {
                 if(H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
@@ -1898,7 +1898,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in reverse order, with compound last */
         for(i=0; i<PACK_NMEMBS; i++) {
-            sprintf(name, "%05d", i);
+            HDsprintf(name, "%05d", i);
             if(i == PACK_NMEMBS - 1) {
                 if(H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
@@ -1925,7 +1925,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in forward order, with compound first */
         for(i=0; i<PACK_NMEMBS; i++) {
-            sprintf(name, "%05d", i);
+            HDsprintf(name, "%05d", i);
             if(i == 0) {
                 if(H5Tinsert(cmpd, name, (size_t)(4 * i), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
@@ -1951,7 +1951,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in forward order */
         for(i=0; i<PACK_NMEMBS; i++) {
-            sprintf(name, "%05d", i);
+            HDsprintf(name, "%05d", i);
             if(i == 0) {
                 if(H5Tinsert(cmpd, name, (size_t)(4 * i), sub_cmpd) < 0) PACK_OOO_ERROR
             } else
@@ -2181,7 +2181,7 @@ main (int argc, char *argv[])
     /* Turn off optimized compound converter? */
     if (argc>1) {
 	if (argc>2 || strcmp("--noopt", argv[1])) {
-	    fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
+	    HDfprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
 	    exit(1);
 	}
 	H5Tunregister(H5T_PERS_DONTCARE, NULL, (hid_t)-1, (hid_t)-1, H5T__conv_struct_opt);
@@ -2213,7 +2213,7 @@ main (int argc, char *argv[])
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);
 
     if (nerrors) {
-        printf("***** %u FAILURE%s! *****\n",
+        HDprintf("***** %u FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
         HDexit(1);
     }

@@ -89,7 +89,7 @@ main(void)
         goto error;
     }
     for(i = 0; i < NOBJS; i++) {
-        sprintf(buf, "%03d-", i);
+        HDsprintf(buf, "%03d-", i);
         for(j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if(j > 4)
@@ -124,7 +124,7 @@ main(void)
         goto error;
     }
     for(i = 0; i < NOBJS; i++) {
-        sprintf(buf, "%03d-", i);
+        HDsprintf(buf, "%03d-", i);
         for(j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if(j > 4)
