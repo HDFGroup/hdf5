@@ -7096,7 +7096,9 @@ H5C_load_entry(H5F_t *              f,
     void *      thing = NULL;           /* Pointer to thing loaded        */
     H5C_cache_entry_t *entry = NULL;    /* Alias for thing loaded, as     */
                                         /* cache entry                    */
+#if 0
     size_t      init_len;
+#endif
     size_t      len;                    /* Size of image in file          */
 #ifdef H5_HAVE_PARALLEL
     int         mpi_rank = 0;           /* MPI process rank               */
@@ -7147,7 +7149,9 @@ H5C_load_entry(H5F_t *              f,
 
     HDassert(len > 0);
 
+#if 0
     init_len = len;
+#endif
 
     /* Check for possible speculative read off the end of the file */
     if ( type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG ) {

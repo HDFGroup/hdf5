@@ -417,14 +417,14 @@ struct H5F_file_t {
                                              * This field should be NULL unless
                                              * the index is defined.
                                              */
-    int32_t mdf_idx_len;                    /* number of entries in the array 
+    uint32_t mdf_idx_len;                   /* number of entries in the array 
                                              * of instances of 
                                              * H5FD_vfd_swmr_idx_entry_t pointed
                                              * to by mdf_idx above.  Note that 
                                              * not all entries in the index 
                                              * need be used.
                                              */
-    int32_t mdf_idx_entries_used;           /* Number of entries in *mdf_idx
+    uint32_t mdf_idx_entries_used;          /* Number of entries in *mdf_idx
                                              * that are in use -- these will 
                                              * be contiguous at indicies 0 
                                              * through mdf_idx_entries_used - 1.
@@ -437,8 +437,8 @@ struct H5F_file_t {
      * must be evicted or refreshed to avoid message from the past bugs.
      */
     H5FD_vfd_swmr_idx_entry_t * old_mdf_idx;
-    int32_t old_mdf_idx_len;
-    int32_t old_mdf_idx_entries_used;
+    uint32_t old_mdf_idx_len;
+    uint32_t old_mdf_idx_entries_used;
 
     /* Metadata file for VFD SWMR writer */
     int vfd_swmr_md_fd;                     /* POSIX: file descriptor for the 

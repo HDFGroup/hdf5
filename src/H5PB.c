@@ -1662,16 +1662,16 @@ done:
  */
 herr_t 
 H5PB_vfd_swmr__update_index(H5F_t * f, 
-                            int * idx_ent_added_ptr, 
-                            int * idx_ent_modified_ptr,
-                            int * idx_ent_not_in_tl_ptr,
-                            int * idx_ent_not_in_tl_flushed_ptr)
+                            uint32_t * idx_ent_added_ptr, 
+                            uint32_t * idx_ent_modified_ptr,
+                            uint32_t * idx_ent_not_in_tl_ptr,
+                            uint32_t * idx_ent_not_in_tl_flushed_ptr)
 {
-    int32_t i;
-    int32_t idx_ent_added = 0;
-    int32_t idx_ent_modified = 0;
-    int32_t idx_ent_not_in_tl = 0;
-    int32_t idx_ent_not_in_tl_flushed = 0;
+    uint32_t i;
+    uint32_t idx_ent_added = 0;
+    uint32_t idx_ent_modified = 0;
+    uint32_t idx_ent_not_in_tl = 0;
+    uint32_t idx_ent_not_in_tl_flushed = 0;
     H5PB_t * pb_ptr = NULL;
     H5PB_entry_t *pbe_ptr = NULL;
     H5FD_vfd_swmr_idx_entry_t * ie_ptr = NULL;

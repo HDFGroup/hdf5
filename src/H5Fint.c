@@ -124,7 +124,9 @@ static herr_t H5F__vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing);
 static herr_t H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num);
 static herr_t H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries);
 static herr_t H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries, struct H5FD_vfd_swmr_idx_entry_t index[]);
+#if 0
 static herr_t H5F__vfd_swmr_writer__dump_index(H5F_t * f);
+#endif
 static herr_t H5F__idx_entry_cmp(const void *_entry1, const void *_entry2);
 static herr_t H5F__vfd_swmr_writer__create_index(H5F_t * f);
 static herr_t H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f);
@@ -4496,9 +4498,9 @@ herr_t
 H5F_vfd_swmr_writer__delay_write(H5F_t *f, uint64_t page, 
     uint64_t * delay_write_until_ptr)
 {
-    int32_t top = -1;
-    int32_t bottom = 0;
-    int32_t probe;
+    uint32_t top = 0;
+    uint32_t bottom = 1;
+    uint32_t probe;
     uint64_t delay_write_until = 0;
     H5FD_vfd_swmr_idx_entry_t * ie_ptr = NULL;
     H5FD_vfd_swmr_idx_entry_t * idx = NULL;
@@ -4768,10 +4770,10 @@ done:
 herr_t
 H5F_vfd_swmr_writer_end_of_tick(void)
 {
-    int32_t idx_entries_added = 0;
-    int32_t idx_entries_modified = 0;
-    int32_t idx_ent_not_in_tl = 0;
-    int32_t idx_ent_not_in_tl_flushed = 0;
+    uint32_t idx_entries_added = 0;
+    uint32_t idx_entries_modified = 0;
+    uint32_t idx_ent_not_in_tl = 0;
+    uint32_t idx_ent_not_in_tl_flushed = 0;
     H5F_t * f;
     herr_t ret_value = SUCCEED;              /* Return value */
 
@@ -4960,9 +4962,9 @@ done:
 herr_t
 H5F__vfd_swmr_writer__create_index(H5F_t * f)
 {
-    int i;
+    unsigned int i;
     size_t bytes_available;
-    int32_t entries_in_index;
+    size_t entries_in_index;
     size_t index_size;
     H5FD_vfd_swmr_idx_entry_t * index = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
@@ -4984,11 +4986,11 @@ H5F__vfd_swmr_writer__create_index(H5F_t * f)
 
     HDassert(bytes_available > 0);
 
-    entries_in_index = (int32_t)(bytes_available / H5FD_MD_INDEX_ENTRY_SIZE);
+    entries_in_index = bytes_available / H5FD_MD_INDEX_ENTRY_SIZE;
 
     HDassert(entries_in_index > 0);
 
-    index_size = sizeof(H5FD_vfd_swmr_idx_entry_t) * (size_t)entries_in_index;
+    index_size = sizeof(H5FD_vfd_swmr_idx_entry_t) * entries_in_index;
     index = (H5FD_vfd_swmr_idx_entry_t *)HDmalloc(index_size);
 
     if ( index == NULL ) 
@@ -5010,8 +5012,10 @@ H5F__vfd_swmr_writer__create_index(H5F_t * f)
         index[i].moved_to_hdf5_file  = FALSE;
     }
 
+    HDassert(entries_in_index <= UINT32_MAX);
+
     f->shared->mdf_idx              = index;
-    f->shared->mdf_idx_len          = entries_in_index;
+    f->shared->mdf_idx_len          = (uint32_t)entries_in_index;
     f->shared->mdf_idx_entries_used = 0;
 
 done:
@@ -5021,6 +5025,7 @@ done:
 } /* end H5F__vfd_swmr_writer__create_index() */
 
 
+#if 0
 /*-------------------------------------------------------------------------
  *
  * Function: H5F__vfd_swmr_writer__dump_index
@@ -5038,9 +5043,9 @@ done:
 herr_t
 H5F__vfd_swmr_writer__dump_index(H5F_t * f)
 {
-    int i;
-    int32_t mdf_idx_len;
-    int32_t mdf_idx_entries_used;
+    unsigned int i;
+    uint32_t mdf_idx_len;
+    uint32_t mdf_idx_entries_used;
     H5FD_vfd_swmr_idx_entry_t * index = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
 
@@ -5073,6 +5078,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5F__vfd_swmr_writer__create_index() */
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: H5F_vfd_swmr_reader_end_of_tick
@@ -5120,11 +5126,11 @@ H5F_vfd_swmr_reader_end_of_tick(void)
     uint64_t tmp_tick_num = 0;
     H5F_t * f;
     H5FD_vfd_swmr_idx_entry_t * tmp_mdf_idx;
-    int32_t entries_added = 0;
-    int32_t entries_removed = 0;
-    int32_t entries_changed = 0;
-    int32_t tmp_mdf_idx_len;
-    int32_t tmp_mdf_idx_entries_used;
+    uint32_t entries_added = 0;
+    uint32_t entries_removed = 0;
+    uint32_t entries_changed = 0;
+    uint32_t tmp_mdf_idx_len;
+    uint32_t tmp_mdf_idx_entries_used;
     uint32_t mdf_idx_entries_used;
 
     herr_t ret_value = SUCCEED;              /* Return value */
@@ -5201,7 +5207,7 @@ H5F_vfd_swmr_reader_end_of_tick(void)
 
         HDassert(mdf_idx_entries_used <= (uint32_t)(f->shared->mdf_idx_len));
 
-        f->shared->mdf_idx_entries_used = (int32_t)mdf_idx_entries_used;
+        f->shared->mdf_idx_entries_used = mdf_idx_entries_used;
 
 #if 0 /* JRM */
         HDfprintf(stderr, "--- reader EOT index used / len = %d/%d ---\n",
@@ -5222,12 +5228,12 @@ H5F_vfd_swmr_reader_end_of_tick(void)
         while ( pass <= 1 ) {
 
             haddr_t page_addr;
-            int32_t i = 0;
-            int32_t j = 0;
+            uint32_t i = 0;
+            uint32_t j = 0;
             H5FD_vfd_swmr_idx_entry_t * new_mdf_idx;
             H5FD_vfd_swmr_idx_entry_t * old_mdf_idx;
-            int32_t new_mdf_idx_entries_used;
-            int32_t old_mdf_idx_entries_used;
+            uint32_t new_mdf_idx_entries_used;
+            uint32_t old_mdf_idx_entries_used;
 
             new_mdf_idx              = f->shared->mdf_idx;
             new_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
