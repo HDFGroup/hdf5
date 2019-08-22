@@ -1761,7 +1761,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(H5F_VFD_SWMR_CONFIG(file)) {
         /* Page buffering and page allocation strategy have to be enabled */
         if(!page_buf_size || !H5F_PAGED_AGGR(file))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "file open fail with VFD SWMR writer")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "VFD SWMR file open fail: page buffering must be enabled")
 
         /* Initialization for VFD SWMR writer and reader */
         if(1 == shared->nrefs) {
