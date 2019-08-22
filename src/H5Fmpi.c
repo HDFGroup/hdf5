@@ -130,7 +130,7 @@ H5F_mpi_get_rank(const H5F_t *f)
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_rank(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "driver get_rank request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_rank request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -162,7 +162,7 @@ H5F_mpi_get_comm(const H5F_t *f)
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_comm(f->shared->lf)) == MPI_COMM_NULL)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -194,7 +194,7 @@ H5F_shared_mpi_get_size(const H5F_shared_t *f_sh)
 
     /* Dispatch to driver */
     if((ret_value = H5FD_mpi_get_size(f_sh->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "driver get_size request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -226,7 +226,7 @@ H5F_mpi_get_size(const H5F_t *f)
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_size(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "driver get_size request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
