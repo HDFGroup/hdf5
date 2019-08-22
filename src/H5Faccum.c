@@ -111,7 +111,7 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_read(H5F_file_t *f_sh, H5FD_mem_t map_type, haddr_t addr,
+H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr,
     size_t size, void *buf/*out*/)
 {
     H5FD_t *file;                       /* File driver pointer */
@@ -419,7 +419,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_write(H5F_file_t *f_sh, H5FD_mem_t map_type, haddr_t addr,
+H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr,
     size_t size, const void *buf)
 {
     H5FD_t *file;                       /* File driver pointer */
@@ -847,7 +847,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_free(H5F_file_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr,
+H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr,
     hsize_t size)
 {
     H5F_meta_accum_t *accum;            /* Alias for file's metadata accumulator */
@@ -1013,7 +1013,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_flush(H5F_file_t *f_sh)
+H5F__accum_flush(H5F_shared_t *f_sh)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1056,7 +1056,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_reset(H5F_file_t *f_sh, hbool_t flush)
+H5F__accum_reset(H5F_shared_t *f_sh, hbool_t flush)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 

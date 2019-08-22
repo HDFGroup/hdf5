@@ -124,8 +124,8 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 static herr_t H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry);
-static htri_t H5PB__make_space(H5F_file_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type);
-static herr_t H5PB__write_entry(H5F_file_t *f_sh, H5PB_entry_t *page_entry);
+static htri_t H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type);
+static herr_t H5PB__write_entry(H5F_shared_t *f_sh, H5PB_entry_t *page_entry);
 
 
 /*********************/
@@ -289,7 +289,7 @@ H5PB_print_stats(const H5PB_t *page_buf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_create(H5F_file_t *f_sh, size_t size, unsigned page_buf_min_meta_perc, unsigned page_buf_min_raw_perc)
+H5PB_create(H5F_shared_t *f_sh, size_t size, unsigned page_buf_min_meta_perc, unsigned page_buf_min_raw_perc)
 {
     H5PB_t *page_buf = NULL;
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -369,7 +369,7 @@ static herr_t
 H5PB__flush_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
 {
     H5PB_entry_t *page_entry = (H5PB_entry_t *)item;    /* Pointer to page entry node */
-    H5F_file_t *f_sh = (H5F_file_t *)_op_data;
+    H5F_shared_t *f_sh = (H5F_shared_t *)_op_data;
     herr_t  ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -400,7 +400,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_flush(H5F_file_t *f_sh)
+H5PB_flush(H5F_shared_t *f_sh)
 {
     herr_t  ret_value = SUCCEED;    /* Return value */
 
@@ -472,7 +472,7 @@ H5PB__dest_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_dest(H5F_file_t *f_sh)
+H5PB_dest(H5F_shared_t *f_sh)
 {
     herr_t  ret_value = SUCCEED;        /* Return value */
 
@@ -529,7 +529,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_add_new_page(H5F_file_t *f_sh, H5FD_mem_t type, haddr_t page_addr)
+H5PB_add_new_page(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t page_addr)
 {
     H5PB_t *page_buf;                   /* Page buffer to operate on */
     H5PB_entry_t *page_entry = NULL;    /* Pointer to the corresponding page entry */
@@ -637,7 +637,7 @@ H5PB_update_entry(H5PB_t *page_buf, haddr_t addr, size_t size, const void *buf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_remove_entry(const H5F_file_t *f_sh, haddr_t addr)
+H5PB_remove_entry(const H5F_shared_t *f_sh, haddr_t addr)
 {
     H5PB_t *page_buf;                   /* Page buffer to operate on */
     H5PB_entry_t *page_entry = NULL;    /* Pointer to the page entry being searched */
@@ -687,7 +687,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_read(H5F_file_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/)
+H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/)
 {
     H5PB_t *page_buf;                   /* Page buffering info for this file */
     H5PB_entry_t *page_entry;           /* Pointer to the corresponding page entry */
@@ -984,7 +984,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_write(H5F_file_t *f_sh, H5FD_mem_t type, haddr_t addr,
+H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr,
     size_t size, const void *buf)
 {
     H5PB_t *page_buf;                   /* Page buffering info for this file */
@@ -1375,7 +1375,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5PB__make_space(H5F_file_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
+H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
 {
     H5PB_entry_t *page_entry;   /* Pointer to page eviction candidate */
     htri_t ret_value = TRUE;    /* Return value */
@@ -1474,7 +1474,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__write_entry(H5F_file_t *f_sh, H5PB_entry_t *page_entry)
+H5PB__write_entry(H5F_shared_t *f_sh, H5PB_entry_t *page_entry)
 {
     haddr_t eoa;                    /* Current EOA for the file */
     herr_t ret_value = SUCCEED;    /* Return value */

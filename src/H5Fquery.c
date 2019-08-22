@@ -79,13 +79,13 @@
  *
  * Purpose:  Quick and dirty routine to retrieve the file's 'intent' flags
  *           (Mainly added to stop non-file routines from poking about in the
- *           H5F_file_t data structure)
+ *           H5F_shared_t data structure)
  *
  * Return:   'intent' on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
 unsigned
-H5F_shared_get_intent(const H5F_file_t *f_sh)
+H5F_shared_get_intent(const H5F_shared_t *f_sh)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -243,7 +243,7 @@ H5F_get_extpath(const H5F_t *f)
  * Return:   'shared' on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
-H5F_file_t *
+H5F_shared_t *
 H5F_get_shared(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -858,7 +858,7 @@ H5F_store_msg_crt_idx(const H5F_t *f)
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5F_shared_has_feature(const H5F_file_t *f_sh, unsigned feature)
+H5F_shared_has_feature(const H5F_shared_t *f_sh, unsigned feature)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -955,7 +955,7 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5F_shared_get_eoa(const H5F_file_t *f_sh, H5FD_mem_t type)
+H5F_shared_get_eoa(const H5F_shared_t *f_sh, H5FD_mem_t type)
 {
     haddr_t    ret_value = HADDR_UNDEF;        /* Return value */
 

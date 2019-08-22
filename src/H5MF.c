@@ -56,7 +56,7 @@
         *CF = TRUE;
 
 /* For non-paged aggregation: map allocation request type to tracked free-space type */
-/* F_SH -- pointer to H5F_file_t; T -- H5FD_mem_t */
+/* F_SH -- pointer to H5F_shared_t; T -- H5FD_mem_t */
 #define H5MF_ALLOC_TO_FS_AGGR_TYPE(F_SH, T)                  \
         ((H5FD_MEM_DEFAULT == (F_SH)->fs_type_map[T]) ? (T) : (F_SH)->fs_type_map[T])
 
@@ -98,9 +98,9 @@ static herr_t H5MF__close_shrink_eoa(H5F_t *f);
 
 /* General routines */
 static herr_t H5MF__get_free_sects(H5F_t *f, H5FS_t *fspace, H5MF_sect_iter_ud_t *sect_udata, size_t *nums);
-static hbool_t H5MF__fsm_type_is_self_referential(H5F_file_t *f_sh, H5F_mem_page_t fsm_type);
-static hbool_t H5MF__fsm_is_self_referential(H5F_file_t *f_sh, H5FS_t *fspace);
-static herr_t H5MF__continue_alloc_fsm(H5F_file_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace, 
+static hbool_t H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type);
+static hbool_t H5MF__fsm_is_self_referential(H5F_shared_t *f_sh, H5FS_t *fspace);
+static herr_t H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace, 
     H5FS_t  *lg_hdr_fspace, H5FS_t *lg_sinfo_fspace, hbool_t *continue_alloc_fsm);
 
 /* Free-space type manager routines */
@@ -146,7 +146,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_init_merge_flags(H5F_file_t *f_sh)
+H5MF_init_merge_flags(H5F_shared_t *f_sh)
 {
     H5MF_aggr_merge_t mapping_type;     /* Type of free list mapping */
     H5FD_mem_t type;                    /* Memory type for iteration */
@@ -258,7 +258,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5MF__alloc_to_fs_type(H5F_file_t *f_sh, H5FD_mem_t alloc_type, hsize_t size, H5F_mem_page_t *fs_type)
+H5MF__alloc_to_fs_type(H5F_shared_t *f_sh, H5FD_mem_t alloc_type, hsize_t size, H5F_mem_page_t *fs_type)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -3330,7 +3330,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF__continue_alloc_fsm(H5F_file_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace, 
+H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace, 
     H5FS_t  *lg_hdr_fspace, H5FS_t *lg_sinfo_fspace, hbool_t *continue_alloc_fsm)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -3382,7 +3382,7 @@ H5MF__continue_alloc_fsm(H5F_file_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sin
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5MF__fsm_type_is_self_referential(H5F_file_t *f_sh, H5F_mem_page_t fsm_type)
+H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type)
 {
     H5F_mem_page_t sm_fshdr_fsm;
     H5F_mem_page_t sm_fssinfo_fsm;
@@ -3438,7 +3438,7 @@ H5MF__fsm_type_is_self_referential(H5F_file_t *f_sh, H5F_mem_page_t fsm_type)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5MF__fsm_is_self_referential(H5F_file_t *f_sh, H5FS_t *fspace)
+H5MF__fsm_is_self_referential(H5F_shared_t *f_sh, H5FS_t *fspace)
 {
     H5F_mem_page_t sm_fshdr_fsm;
     H5F_mem_page_t sm_fssinfo_fsm;

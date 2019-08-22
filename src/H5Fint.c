@@ -58,7 +58,7 @@ typedef struct H5F_olist_t {
     struct {
         hbool_t local;          /* Set flag for "local" file searches */
         union {
-            H5F_file_t *shared; /* Pointer to shared file to look inside */
+            H5F_shared_t *shared; /* Pointer to shared file to look inside */
             const H5F_t *file;  /* Pointer to file to look inside */
         } ptr;
     } file_info;
@@ -81,7 +81,7 @@ static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index,
 static int H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name/*out*/);
 static char *H5F__getenv_prefix_name(char **env_prefix/*in,out*/);
-static H5F_t *H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
+static H5F_t *H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 static herr_t H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name, char ** /*out*/ actual_name);
 static herr_t H5F__flush_phase1(H5F_t *f);
 static herr_t H5F__flush_phase2(H5F_t *f, hbool_t closing);
@@ -104,8 +104,8 @@ static herr_t H5F__flush_phase2(H5F_t *f, hbool_t closing);
 /* Declare a free list to manage the H5F_t struct */
 H5FL_DEFINE(H5F_t);
 
-/* Declare a free list to manage the H5F_file_t struct */
-H5FL_DEFINE(H5F_file_t);
+/* Declare a free list to manage the H5F_shared_t struct */
+H5FL_DEFINE(H5F_shared_t);
 
 
 
@@ -901,7 +901,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5F_t *
-H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
+H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
     H5F_t       *f          = NULL;
     H5F_t       *ret_value  = NULL;
@@ -922,7 +922,7 @@ H5F__new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_
         size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
-        if(NULL == (f->shared = H5FL_CALLOC(H5F_file_t)))
+        if(NULL == (f->shared = H5FL_CALLOC(H5F_shared_t)))
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
 
         f->shared->flags = flags;
@@ -1141,7 +1141,7 @@ done:
                 if(H5I_dec_ref(f->shared->fcpl_id) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list")
 
-            f->shared = H5FL_FREE(H5F_file_t, f->shared);
+            f->shared = H5FL_FREE(H5F_shared_t, f->shared);
         }
         f = H5FL_FREE(H5F_t, f);
     }
@@ -1390,7 +1390,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
                 f->shared->retries[actype] = (uint32_t *)H5MM_xfree(f->shared->retries[actype]);
 
         /* Destroy shared file struct */
-        f->shared = (H5F_file_t *)H5FL_FREE(H5F_file_t, f->shared);
+        f->shared = (H5F_shared_t *)H5FL_FREE(H5F_shared_t, f->shared);
 
     }
     else if(f->shared->nrefs > 0) {
@@ -1491,7 +1491,7 @@ H5F_t *
 H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t              *file = NULL;        /*the success return value      */
-    H5F_file_t         *shared = NULL;      /*shared part of `file'         */
+    H5F_shared_t       *shared = NULL;      /*shared part of `file'         */
     H5FD_t             *lf = NULL;          /*file driver part of `shared'  */
     unsigned            tent_flags;         /*tentative flags               */
     H5FD_class_t       *drvr;               /*file driver class info        */
@@ -2181,7 +2181,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
      */
 
     /* Destroy the H5F_t struct and decrement the reference count for the
-     * shared H5F_file_t struct. If the reference count for the H5F_file_t
+     * shared H5F_shared_t struct. If the reference count for the H5F_shared_t
      * struct reaches zero then destroy it also.
      */
     if(H5F__dest(f, TRUE) < 0)

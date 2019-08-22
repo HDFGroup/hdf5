@@ -210,7 +210,7 @@ typedef enum H5D_io_op_type_t {
 typedef struct H5D_io_info_t {
     const H5D_t *dset;          /* Pointer to dataset being operated on */
 /* QAK: Delete the f_sh field when oloc has a shared file pointer? */
-    H5F_file_t *f_sh;           /* Pointer to shared file struct that dataset is within */
+    H5F_shared_t *f_sh;         /* Pointer to shared file struct that dataset is within */
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm comm;              /* MPI communicator for file */
     hbool_t using_mpi_vfd;      /* Whether the file is using an MPI-based VFD */

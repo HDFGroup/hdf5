@@ -58,7 +58,7 @@
 
 /* Callback info for sieve buffer readvv operation */
 typedef struct H5D_contig_readvv_sieve_ud_t {
-    H5F_file_t *f_sh;           /* Shared file for dataset */
+    H5F_shared_t *f_sh;         /* Shared file for dataset */
     H5D_rdcdc_t *dset_contig;   /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig;    /* Contiguous storage info for this I/O operation */
     unsigned char *rbuf;        /* Pointer to buffer to fill */
@@ -66,14 +66,14 @@ typedef struct H5D_contig_readvv_sieve_ud_t {
 
 /* Callback info for [plain] readvv operation */
 typedef struct H5D_contig_readvv_ud_t {
-    H5F_file_t *f_sh;           /* Shared file for dataset */
+    H5F_shared_t *f_sh;         /* Shared file for dataset */
     haddr_t dset_addr;          /* Address of dataset */
     unsigned char *rbuf;        /* Pointer to buffer to fill */
 } H5D_contig_readvv_ud_t;
 
 /* Callback info for sieve buffer writevv operation */
 typedef struct H5D_contig_writevv_sieve_ud_t {
-    H5F_file_t *f_sh;           /* Shared file for dataset */
+    H5F_shared_t *f_sh;         /* Shared file for dataset */
     H5D_rdcdc_t *dset_contig;   /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig;    /* Contiguous storage info for this I/O operation */
     const unsigned char *wbuf;  /* Pointer to buffer to write */
@@ -81,7 +81,7 @@ typedef struct H5D_contig_writevv_sieve_ud_t {
 
 /* Callback info for [plain] writevv operation */
 typedef struct H5D_contig_writevv_ud_t {
-    H5F_file_t *f_sh;           /* Shared file for dataset */
+    H5F_shared_t *f_sh;         /* Shared file for dataset */
     haddr_t dset_addr;          /* Address of dataset */
     const unsigned char *wbuf;  /* Pointer to buffer to write */
 } H5D_contig_writevv_ud_t;
@@ -718,7 +718,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
     void *_udata)
 {
     H5D_contig_readvv_sieve_ud_t *udata = (H5D_contig_readvv_sieve_ud_t *)_udata; /* User data for H5VM_opvv() operator */
-    H5F_file_t *f_sh = udata->f_sh;     /* Shared file for dataset */
+    H5F_shared_t *f_sh = udata->f_sh;   /* Shared file for dataset */
     H5D_rdcdc_t *dset_contig = udata->dset_contig; /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig = udata->store_contig;    /* Contiguous storage info for this I/O operation */
     unsigned char *buf;         /* Pointer to buffer to fill */
@@ -983,7 +983,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
     void *_udata)
 {
     H5D_contig_writevv_sieve_ud_t *udata = (H5D_contig_writevv_sieve_ud_t *)_udata; /* User data for H5VM_opvv() operator */
-    H5F_file_t *f_sh = udata->f_sh;     /* Shared file for dataset */
+    H5F_shared_t *f_sh = udata->f_sh;   /* Shared file for dataset */
     H5D_rdcdc_t *dset_contig = udata->dset_contig; /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig = udata->store_contig;    /* Contiguous storage info for this I/O operation */
     const unsigned char *buf;   /* Pointer to buffer to fill */

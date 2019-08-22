@@ -92,7 +92,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_shared_block_read(H5F_file_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/)
+H5F_shared_block_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/)
 {
     H5FD_mem_t  map_type;               /* Mapped memory type */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -181,7 +181,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_shared_block_write(H5F_file_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf)
+H5F_shared_block_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf)
 {
     H5FD_mem_t  map_type;               /* Mapped memory type */
     herr_t      ret_value = SUCCEED;    /* Return value */

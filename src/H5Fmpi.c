@@ -184,7 +184,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5F_shared_mpi_get_size(const H5F_file_t *f_sh)
+H5F_shared_mpi_get_size(const H5F_shared_t *f_sh)
 {
     int ret_value = -1;
 
