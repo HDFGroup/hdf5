@@ -113,12 +113,12 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
 
     for (j = 0; j < ny; j++) {
         if (nz > 1)
-        HDfprintf(stderr,"%03lu:", (unsigned long)j);
+            HDfprintf(stderr,"%03lu:", (unsigned long)j);
         for (k = 0; k < nz; k++) {
-        HDfprintf(stderr," %3d", *array++);
+            HDfprintf(stderr," %3d", *array++);
         }
         if (nz > 1)
-        HDfprintf(stderr,"\n");
+            HDfprintf(stderr,"\n");
     }
     HDfprintf(stderr,"\n");
     }
@@ -296,8 +296,8 @@ test_extend(hid_t f, const char *prefix,
     /* Build the new empty object */
     HDsprintf(name, "%s_%s", prefix, dims);
     if ((dataset=new_object(f, name, ndims, whole_size, whole_size)) < 0) {
-    HDfprintf(stderr,"    Cannot create %u-d object `%s'\n", ndims, name);
-    goto error;
+        HDfprintf(stderr,"    Cannot create %u-d object `%s'\n", ndims, name);
+        goto error;
     }
 
     /* Get dataset's dataspace */
@@ -407,10 +407,10 @@ test_extend(hid_t f, const char *prefix,
             H5_FAILED();
             HDfprintf(stderr,"    Check failed at i=%lu", (unsigned long)i);
             if (ndims > 1) {
-            HDfprintf(stderr,", j=%lu", (unsigned long)j);
+                HDfprintf(stderr,", j=%lu", (unsigned long)j);
             }
             if (ndims > 2) {
-            HDfprintf(stderr,", k=%lu", (unsigned long)k);
+                HDfprintf(stderr,", k=%lu", (unsigned long)k);
             }
             HDfprintf(stderr,"\n    Check array is:\n");
             print_array(whole, nx, ny, nz);
@@ -514,8 +514,8 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
     /* Build the new empty object */
     HDsprintf(name, "%s_%s", prefix, dims);
     if ((dataset=new_object(f, name, ndims, whole_size, chunk_dims)) < 0) {
-    HDprintf("    Cannot create %u-d object `%s'\n", ndims, name);
-    goto error;
+        HDprintf("    Cannot create %u-d object `%s'\n", ndims, name);
+        goto error;
     }
 
     /* Get dataset's dataspace */

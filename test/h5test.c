@@ -94,6 +94,21 @@ static const char *multi_letters = "msbrglo";
 /* Length of multi-file VFD filename buffers */
 #define H5TEST_MULTI_FILENAME_LEN       1024
 
+/* Temporary file for sending signal messages */
+#define TMP_SIGNAL_FILE "tmp_signal_file"
+
+/* The # of seconds to wait for the message file--used by h5_wait_message() */
+#define MESSAGE_TIMEOUT         300             /* Timeout in seconds */
+
+/*  The strings that correspond to library version bounds H5F_libver_t in H5Fpublic.h */
+/*  This is used by h5_get_version_string() */
+const char *LIBVER_NAMES[] = {
+    "earliest", /* H5F_LIBVER_EARLIEST = 0  */
+    "v18",      /* H5F_LIBVER_V18 = 1       */
+    "latest",   /* H5F_LIBVER_V112 = 3      */
+    NULL
+};
+
 /* Previous error reporting function */
 static H5E_auto2_t err_func = NULL;
 
@@ -963,7 +978,7 @@ error:
     return -1;
 } /* end h5_get_vfd_fapl() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  h5_no_hwconv
  *
@@ -1753,8 +1768,8 @@ static haddr_t dummy_vfd_get_eoa(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H
 static herr_t dummy_vfd_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static herr_t dummy_vfd_set_eoa(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t H5_ATTR_UNUSED addr) { return FAIL; }
 
-static haddr_t dummy_vfd_get_eof(const H5FD_t *file, H5FD_mem_t type);
-static haddr_t dummy_vfd_get_eof(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type) { return HADDR_UNDEF; }
+static haddr_t dummy_vfd_get_eof(const H5FD_t *file);
+static haddr_t dummy_vfd_get_eof(const H5FD_t H5_ATTR_UNUSED *file) { return HADDR_UNDEF; }
 
 static herr_t dummy_vfd_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size, void *buf);
 static herr_t dummy_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, void H5_ATTR_UNUSED *buf) { return FAIL; }
@@ -1767,7 +1782,6 @@ static const H5FD_class_t H5FD_dummy_g = {
     "dummy",                    /* name         */
     1,                          /* maxaddr      */
     H5F_CLOSE_WEAK,             /* fc_degree    */
-    NULL,                       /* terminate    */
     NULL,                       /* sb_size      */
     NULL,                       /* sb_encode    */
     NULL,                       /* sb_decode    */
@@ -1795,7 +1809,7 @@ static const H5FD_class_t H5FD_dummy_g = {
     NULL,                       /* truncate     */
     NULL,                       /* lock         */
     NULL,                       /* unlock       */
-    H5FD_FLMAP_DICHOTOMY    /* fl_map       */
+    H5FD_FLMAP_DICHOTOMY        /* fl_map       */
 };
 
 

@@ -215,7 +215,7 @@ test_2 (hid_t fapl)
         size = GHEAP_TEST_NOBJS - u;
         HDmemset(out, (int)('A' + u % 26), size);
         H5Eclear2(H5E_DEFAULT);
-        if (H5HG_insert (f, H5P_DATASET_XFER_DEFAULT, size, out, obj + u) < 0) {
+        if(H5HG_insert(f, H5P_DATASET_XFER_DEFAULT, size, out, obj + u) < 0) {
             H5_FAILED();
             HDputs("    Unable to insert object into global heap");
             nerrors++;

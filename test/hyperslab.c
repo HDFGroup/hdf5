@@ -1001,9 +1001,9 @@ test_sub_super(size_t nx, size_t ny)
                 H5_FAILED()
                 if(!HDisatty(1)) {
                     AT();
-                    printf("   %s\n   Half is:\n", s);
+                    HDprintf("   %s\n   Half is:\n", s);
                     print_array(half, nx, ny, (size_t)1);
-                    printf("\n     Twice is:\n");
+                    HDprintf("\n     Twice is:\n");
                     print_array(twice, 2 * nx, 2 * ny, (size_t)1);
                 } /* end if */
                 goto error;

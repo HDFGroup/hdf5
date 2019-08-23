@@ -503,7 +503,7 @@ main(void)
     HDprintf("All error API tests passed.\n");
     return 0;
 
- error:
+error:
     HDprintf("***** ERROR TEST FAILED! *****\n");
     return 1;
 }
