@@ -299,7 +299,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_cwfs_remove_heap(H5F_file_t *shared, H5HG_heap_t *heap)
+H5F_cwfs_remove_heap(H5F_shared_t *shared, H5HG_heap_t *heap)
 {
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */

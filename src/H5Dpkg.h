@@ -47,11 +47,13 @@
 /* [Simple] Macro to construct a H5D_io_info_t from it's components */
 #define H5D_BUILD_IO_INFO_WRT(io_info, ds, str, buf)                    \
     (io_info)->dset = ds;                                               \
+    (io_info)->f_sh = H5F_SHARED((ds)->oloc.file);                      \
     (io_info)->store = str;                                             \
     (io_info)->op_type = H5D_IO_OP_WRITE;                               \
     (io_info)->u.wbuf = buf
 #define H5D_BUILD_IO_INFO_RD(io_info, ds, str, buf)                     \
     (io_info)->dset = ds;                                               \
+    (io_info)->f_sh = H5F_SHARED((ds)->oloc.file);                      \
     (io_info)->store = str;                                             \
     (io_info)->op_type = H5D_IO_OP_READ;                                \
     (io_info)->u.rbuf = buf
@@ -207,6 +209,8 @@ typedef enum H5D_io_op_type_t {
 
 typedef struct H5D_io_info_t {
     const H5D_t *dset;          /* Pointer to dataset being operated on */
+/* QAK: Delete the f_sh field when oloc has a shared file pointer? */
+    H5F_shared_t *f_sh;         /* Pointer to shared file struct that dataset is within */
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm comm;              /* MPI communicator for file */
     hbool_t using_mpi_vfd;      /* Whether the file is using an MPI-based VFD */

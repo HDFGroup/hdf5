@@ -6816,7 +6816,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
+        H5MF__alloc_to_fs_type(f->shared, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
 
         /* Verify that H5FD_MEM_SUPER free-space manager is there */
         if(!H5F_addr_defined(f->shared->fs_addr[tt]))
@@ -6990,7 +6990,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
-        H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE4, (H5F_mem_page_t *)&fs_type);
+        H5MF__alloc_to_fs_type(f->shared, type, TBLOCK_SIZE4, (H5F_mem_page_t *)&fs_type);
 
         /* Verify that the H5FD_MEM_SUPER free-space manager is not there */
         if(H5F_addr_defined(f->shared->fs_addr[fs_type]))
@@ -7185,7 +7185,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
                 if(NULL == (f = (H5F_t *)H5VL_object(file)))
                     FAIL_STACK_ERROR
 
-                H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
+                H5MF__alloc_to_fs_type(f->shared, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
 
                 /* Get a pointer to the internal file object */
                 if(NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7336,13 +7336,12 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
             if(HADDR_UNDEF == (addr6 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE6)))
                 FAIL_STACK_ERROR
 
-            H5MF__alloc_to_fs_type(f, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
+            H5MF__alloc_to_fs_type(f->shared, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
 
             /* For paged aggregation, the section in the page at EOF for small meta fs is not shrunk away */
-            if(fs_type == H5F_FSPACE_STRATEGY_PAGE) {
+            if(fs_type == H5F_FSPACE_STRATEGY_PAGE)
                 if(H5FS_stat_info(f, f->shared->fs_man[tt], &fs_state) < 0)
                     FAIL_STACK_ERROR
-            }
 
             /* Put block #3, #5 to H5FD_MEM_SUPER free-space manager */
             if(H5MF_xfree(f, type, addr3, (hsize_t)TBLOCK_SIZE3) < 0)
@@ -7647,8 +7646,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
             H5MF_xfree(f, H5FD_MEM_OHDR, addr2, (hsize_t)TBLOCK_SIZE1034);
 
             if(!fs_persist) {
-
-                H5MF__alloc_to_fs_type(f, H5FD_MEM_OHDR, TBLOCK_SIZE1034, (H5F_mem_page_t *)&fs_type);
+                H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_OHDR, TBLOCK_SIZE1034, (H5F_mem_page_t *)&fs_type);
 
                 /* Verify that the freed block with addr2 is found from the small metadata manager */
                 if(H5MF__find_sect(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE1034, f->shared->fs_man[fs_type], &found_addr) < 0)
@@ -7680,8 +7678,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
             H5MF_xfree(f, H5FD_MEM_DRAW, gaddr1, (hsize_t)TBLOCK_SIZE5000);
 
             if(!fs_persist) {
-
-                H5MF__alloc_to_fs_type(f, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
+                H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
 
                 /* Verify that the freed block with gaddr1 is found from the large data manager */
                 if(H5MF__find_sect(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE8192, f->shared->fs_man[fs_type], &found_addr) < 0)
@@ -7708,12 +7705,12 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                     TEST_ERROR
 
                 /* Verify that the large generic manager is there */
-                H5MF__alloc_to_fs_type(f, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
+                H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
                 if(!H5F_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR
 
                 /* Verify that the small metadata manager is there */
-                H5MF__alloc_to_fs_type(f, H5FD_MEM_OHDR, f->shared->fs_page_size - 1, (H5F_mem_page_t *)&fs_type);
+                H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_OHDR, f->shared->fs_page_size - 1, (H5F_mem_page_t *)&fs_type);
                 if(!H5F_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR
 
@@ -7744,7 +7741,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                 if(found_addr != saddr1)
                     TEST_ERROR
 
-                H5MF__alloc_to_fs_type(f, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
+                H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
 
                 if(!(f->shared->fs_man[fs_type]))
                     /* Set up to use the large data manager */

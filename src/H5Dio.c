@@ -857,6 +857,7 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
 
     /* Set up "normal" I/O fields */
     io_info->dset = dset;
+    io_info->f_sh = H5F_SHARED(dset->oloc.file);
     io_info->store = store;
 
     /* Set I/O operations to initial values */
