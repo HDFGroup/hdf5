@@ -818,20 +818,17 @@ static herr_t
 H5T__vlen_disk_getlen(H5F_t H5_ATTR_UNUSED *f, const void *_vl, size_t *seq_len)
 {
     const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
-    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check parameters */
-    HDassert(f);
     HDassert(vl);
     HDassert(seq_len);
 
     /* Get length of sequence (different from blob size) */
     UINT32DECODE(vl, *seq_len);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_disk_getlen() */
 
 

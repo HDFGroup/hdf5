@@ -129,6 +129,18 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
     FUNC_ENTER_PACKAGE
 
     switch(get_type) {
+        /* "get container info" */
+        case H5VL_FILE_GET_CONT_INFO:
+            {
+                H5VL_file_cont_info_t *info = HDva_arg(arguments, H5VL_file_cont_info_t *);
+
+                /* Retrieve the file's container info */
+                if(H5F__get_cont_info((H5F_t *)obj, info) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file container info")
+
+                break;
+            }
+
         /* H5Fget_access_plist */
         case H5VL_FILE_GET_FAPL:
             {
@@ -139,7 +151,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
 
                 /* Retrieve the file's access property list */
                 if((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file access property list")
 
                 if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(*plist_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
@@ -160,42 +172,6 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                 if((*plist_id = H5P_copy_plist(plist, TRUE)) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
 
-                break;
-            }
-
-        /* H5Fget_obj_count */
-        case H5VL_FILE_GET_OBJ_COUNT:
-            {
-                unsigned    types = HDva_arg(arguments, unsigned);
-                ssize_t    *ret = HDva_arg(arguments, ssize_t *);
-                size_t      obj_count = 0;      /* Number of opened objects */
-
-                f = (H5F_t *)obj;
-                /* Perform the query */
-                if(H5F_get_obj_count(f, types, TRUE, &obj_count) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
-
-                /* Set the return value */
-                *ret = (ssize_t)obj_count;
-                break;
-            }
-
-        /* H5Fget_obj_ids */
-        case H5VL_FILE_GET_OBJ_IDS:
-            {
-                unsigned    types = HDva_arg(arguments, unsigned);
-                size_t      max_objs = HDva_arg(arguments, size_t);
-                hid_t      *oid_list = HDva_arg(arguments, hid_t *);
-                ssize_t    *ret = HDva_arg(arguments, ssize_t *);
-                size_t      obj_count = 0;      /* Number of opened objects */
-
-                f = (H5F_t *)obj;
-                /* Perform the query */
-                if(H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_count) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_obj_ids failed")
-
-                /* Set the return value */
-                *ret = (ssize_t)obj_count;
                 break;
             }
 
@@ -263,6 +239,42 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
 
                 /* Set the return value for the API call */
                 *ret = (ssize_t)len;
+                break;
+            }
+
+        /* H5Fget_obj_count */
+        case H5VL_FILE_GET_OBJ_COUNT:
+            {
+                unsigned    types = HDva_arg(arguments, unsigned);
+                ssize_t    *ret = HDva_arg(arguments, ssize_t *);
+                size_t      obj_count = 0;      /* Number of opened objects */
+
+                f = (H5F_t *)obj;
+                /* Perform the query */
+                if(H5F_get_obj_count(f, types, TRUE, &obj_count) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
+
+                /* Set the return value */
+                *ret = (ssize_t)obj_count;
+                break;
+            }
+
+        /* H5Fget_obj_ids */
+        case H5VL_FILE_GET_OBJ_IDS:
+            {
+                unsigned    types = HDva_arg(arguments, unsigned);
+                size_t      max_objs = HDva_arg(arguments, size_t);
+                hid_t      *oid_list = HDva_arg(arguments, hid_t *);
+                ssize_t    *ret = HDva_arg(arguments, ssize_t *);
+                size_t      obj_count = 0;      /* Number of opened objects */
+
+                f = (H5F_t *)obj;
+                /* Perform the query */
+                if(H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_count) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "H5F_get_obj_ids failed")
+
+                /* Set the return value */
+                *ret = (ssize_t)obj_count;
                 break;
             }
 
