@@ -1304,3 +1304,41 @@ H5F_get_vol_cls(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->vol_cls)
 } /* end H5F_get_vol_cls */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_cont_info
+ *
+ * Purpose:     Get the VOL container info for the file
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, August 17, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Verify structure version */
+    if(info->version != H5VL_CONTAINER_INFO_VERSION)
+        HGOTO_ERROR(H5E_FILE, H5E_VERSION, FAIL, "wrong container info version #")
+
+    /* Set the container info fields */
+    info->feature_flags = 0;            /* None currently defined */
+    info->token_size = H5F_SIZEOF_ADDR(f);
+    info->blob_id_size = H5HG_HEAP_ID_SIZE(f);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_cont_info */
+

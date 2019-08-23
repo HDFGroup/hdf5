@@ -71,10 +71,10 @@ H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_typ
                 break;
             }
 
-        case H5VL_OBJECT_BY_ADDR:
+        case H5VL_OBJECT_BY_TOKEN:
             {
                 /* Open the object */
-                if(NULL == (ret_value = H5O_open_by_addr(&loc, loc_params->loc_data.loc_by_addr.addr, opened_type)))
+                if(NULL == (ret_value = H5O_open_by_addr(&loc, *(haddr_t *)loc_params->loc_data.loc_by_token.token, opened_type)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object by address")
                 break;
             }
@@ -225,18 +225,6 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                     if((*ret = H5G_get_name(&loc, name, size, NULL)) < 0)
                         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve object name")
                 } /* end if */
-                else if(loc_params->type == H5VL_OBJECT_BY_ADDR) {
-                    H5O_loc_t obj_oloc; /* Object location */
-
-                    /* Initialize the object location */
-                    H5O_loc_reset(&obj_oloc);
-                    obj_oloc.file = loc.oloc->file;
-                    obj_oloc.addr = loc_params->loc_data.loc_by_addr.addr;
-
-                    /* Retrieve object's name */
-                    if((*ret = H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, name, size)) < 0)
-                        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't determine object name")
-                } /* end else-if */
                 else
                     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get_name parameters")
                 break;

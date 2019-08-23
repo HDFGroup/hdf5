@@ -37,6 +37,9 @@
 #define H5VL_CAP_FLAG_NONE              0       /* No special connector capabilities */
 #define H5VL_CAP_FLAG_THREADSAFE        0x01    /* Connector is threadsafe */
 
+/* Container info version */
+#define H5VL_CONTAINER_INFO_VERSION     0x01    /* Container info struct version */
+
 /* The maximum size allowed for blobs */
 #define H5VL_MAX_BLOB_ID_SIZE           (16)    /* Allow for 128-bits blob IDs */
 
@@ -94,10 +97,11 @@ typedef enum H5VL_datatype_specific_t {
 
 /* types for file GET callback */
 typedef enum H5VL_file_get_t {
+    H5VL_FILE_GET_CONT_INFO,                /* file get container info              */
     H5VL_FILE_GET_FAPL,                     /* file access property list            */
     H5VL_FILE_GET_FCPL,                     /* file creation property list          */
-    H5VL_FILE_GET_INTENT,                   /* file intent                          */
     H5VL_FILE_GET_FILENO,                   /* file number                          */
+    H5VL_FILE_GET_INTENT,                   /* file intent                          */
     H5VL_FILE_GET_NAME,                     /* file name                            */
     H5VL_FILE_GET_OBJ_COUNT,                /* object count in file                 */
     H5VL_FILE_GET_OBJ_IDS                   /* object ids in file                   */
@@ -179,55 +183,66 @@ typedef enum H5VL_blob_specific_t {
     H5VL_BLOB_SETNULL                   /* Set a blob ID to the connector's "null" blob ID value */
 } H5VL_blob_specific_t;
 
-/* types for different ways that objects are located in an HDF5 container */
+/* Types for different ways that objects are located in an HDF5 container */
 typedef enum H5VL_loc_type_t {
     H5VL_OBJECT_BY_SELF,
     H5VL_OBJECT_BY_NAME,
     H5VL_OBJECT_BY_IDX,
-    H5VL_OBJECT_BY_ADDR,
-    H5VL_OBJECT_BY_REF
+    H5VL_OBJECT_BY_REF,
+    H5VL_OBJECT_BY_TOKEN
 } H5VL_loc_type_t;
 
-struct H5VL_loc_by_name {
+typedef struct H5VL_loc_by_name {
     const char *name;
     hid_t lapl_id;
-};
+} H5VL_loc_by_name_t;
 
-struct H5VL_loc_by_idx {
+typedef struct H5VL_loc_by_idx {
     const char *name;
     H5_index_t idx_type;
     H5_iter_order_t order;
     hsize_t n;
     hid_t lapl_id;
-};
+} H5VL_loc_by_idx_t;
 
-struct H5VL_loc_by_addr {
-    haddr_t addr;
-};
-
-struct H5VL_loc_by_ref {
+typedef struct H5VL_loc_by_ref {
     H5R_type_t ref_type;
     const void *_ref;
     hid_t lapl_id;
-};
+} H5VL_loc_by_ref_t;
+
+typedef struct H5VL_loc_by_token {
+    void *token;
+} H5VL_loc_by_token_t;
 
 /* Structure to hold parameters for object locations.
- * either: BY_ADDR, BY_ID, BY_NAME, BY_IDX, BY_REF
+ * Either: BY_SELF, BY_NAME, BY_IDX, BY_REF, BY_TOKEN
  *
- * Note: Leave loc_by_addr as the first union member so we
+ * Note: Leave loc_by_token as the first union member so we
  *       can perform the simplest initialization of the struct
  *       without raising warnings.
+ *
+ * Note: BY_SELF requires no union members.
  */
 typedef struct H5VL_loc_params_t {
     H5I_type_t      obj_type;
     H5VL_loc_type_t type;
     union{
-        struct H5VL_loc_by_addr loc_by_addr;
-        struct H5VL_loc_by_name loc_by_name;
-        struct H5VL_loc_by_idx  loc_by_idx;
-        struct H5VL_loc_by_ref  loc_by_ref;
+        H5VL_loc_by_token_t     loc_by_token;
+        H5VL_loc_by_name_t      loc_by_name;
+        H5VL_loc_by_idx_t       loc_by_idx;
+        H5VL_loc_by_ref_t       loc_by_ref;
     } loc_data;
 } H5VL_loc_params_t;
+
+/* Info for H5VL_FILE_GET_CONT_INFO */
+typedef struct H5VL_file_cont_info_t {
+    unsigned version;                   /* version information (keep first) */
+    uint64_t feature_flags;             /* Container feature flags          */
+                                        /* (none currently defined)         */
+    size_t token_size;                  /* Size of tokens                   */
+    size_t blob_id_size;                /* Size of blob IDs                 */
+} H5VL_file_cont_info_t;
 
 /* VOL connector info fields & callbacks */
 typedef struct H5VL_info_class_t {

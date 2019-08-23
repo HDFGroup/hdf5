@@ -2758,17 +2758,20 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                             H5VL_file_get_t get = (H5VL_file_get_t)HDva_arg(ap, int);
 
                             switch(get) {
+                                case H5VL_FILE_GET_CONT_INFO:
+                                    HDfprintf(out, "H5VL_FILE_GET_CONT_INFO");
+                                    break;
                                 case H5VL_FILE_GET_FAPL:
                                     HDfprintf(out, "H5VL_FILE_GET_FAPL");
                                     break;
                                 case H5VL_FILE_GET_FCPL:
                                     HDfprintf(out, "H5VL_FILE_GET_FCPL");
                                     break;
-                                case H5VL_FILE_GET_INTENT:
-                                    HDfprintf(out, "H5VL_FILE_GET_INTENT");
-                                    break;
                                 case H5VL_FILE_GET_FILENO:
                                     HDfprintf(out, "H5VL_FILE_GET_FILENO");
+                                    break;
+                                case H5VL_FILE_GET_INTENT:
+                                    HDfprintf(out, "H5VL_FILE_GET_INTENT");
                                     break;
                                 case H5VL_FILE_GET_NAME:
                                     HDfprintf(out, "H5VL_FILE_GET_NAME");

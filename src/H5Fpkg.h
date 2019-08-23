@@ -411,6 +411,7 @@ H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL H5F_t *H5F__get_file(void *obj, H5I_type_t type);
 H5_DLL hid_t H5F__get_file_id(H5F_t *file, hbool_t app_ref);
+H5_DLL herr_t H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
