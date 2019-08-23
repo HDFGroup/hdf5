@@ -75,11 +75,11 @@ int main(void)
     nerrors += test_generate()<0  ?1:0;
 
     if (nerrors) goto error;
-    printf("All image tests passed.\n");
+    HDprintf("All image tests passed.\n");
     return 0;
 
 error:
-    printf("***** %d IMAGE TEST%s FAILED! *****\n",nerrors, 1 == nerrors ? "" : "S");
+    HDprintf("***** %d IMAGE TEST%s FAILED! *****\n",nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
 
@@ -344,7 +344,7 @@ static int test_data(void)
     if ((fid=H5Fcreate(FILE2,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
         goto out;
 
-    printf("Testing read ascii image data and generate images\n");
+    HDprintf("Testing read ascii image data and generate images\n");
 
     /*-------------------------------------------------------------------------
     * read 8bit image data
@@ -551,7 +551,7 @@ static int test_generate(void)
     if ((fid=H5Fcreate(FILE3,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
         goto out;
 
-    printf("Testing read and process data and make indexed images\n");
+    HDprintf("Testing read and process data and make indexed images\n");
 
     /*-------------------------------------------------------------------------
     * read data; the file data format is described below
@@ -561,7 +561,7 @@ static int test_generate(void)
     f  = HDfopen( data_file, "r" ) ;
     if ( f == NULL )
     {
-        printf( "Could not find file %s. Try set $srcdir \n", data_file );
+        HDprintf( "Could not find file %s. Try set $srcdir \n", data_file );
         goto out;
     }
 
@@ -602,11 +602,11 @@ static int test_generate(void)
 
 
     if(fscanf( f, "%d %d %d", &imax, &jmax, &kmax ) < 0 && HDferror(f)) {
-        printf( "fscanf error in file %s.\n", data_file );
+        HDprintf( "fscanf error in file %s.\n", data_file );
         goto out;
     } /* end if */
     if(fscanf( f, "%f %f %f", &valex, &xmin, &xmax ) < 0 && HDferror(f)) {
-        printf( "fscanf error in file %s.\n", data_file );
+        HDprintf( "fscanf error in file %s.\n", data_file );
         goto out;
     } /* end if */
 
@@ -638,7 +638,7 @@ static int test_generate(void)
     for ( i = 0; i < n_elements; i++ )
     {
         if(fscanf( f, "%f ", &value ) < 0 && HDferror(f)) {
-            printf( "fscanf error in file %s.\n", data_file );
+            HDprintf( "fscanf error in file %s.\n", data_file );
             goto out;
         } /* end if */
         data[i] = value;
@@ -797,37 +797,37 @@ static int read_data(const char* fname, /*IN*/
     */
 
     if(NULL == (f = HDfopen(data_file, "r"))) {
-        printf( "Could not open file %s. Try set $srcdir \n", data_file );
+        HDprintf( "Could not open file %s. Try set $srcdir \n", data_file );
         goto out;
     }
 
     if(fscanf(f, "%s", str) < 0 && HDferror(f)) {
-        printf( "fscanf error in file %s.\n", data_file );
+        HDprintf( "fscanf error in file %s.\n", data_file );
         goto out;
     } /* end if */
 
     if(fscanf(f, "%d", &color_planes) < 0 && HDferror(f)) {
-        printf( "fscanf error in file %s.\n", data_file );
+        HDprintf( "fscanf error in file %s.\n", data_file );
         goto out;
     } /* end if */
 
     if(fscanf(f, "%s", str) < 0 && HDferror(f)) {
-        printf( "fscanf error in file %s.\n", data_file );
+        HDprintf( "fscanf error in file %s.\n", data_file );
         goto out;
     } /* end if */
 
     if(fscanf(f, "%d", &h) < 0 && HDferror(f)) {
-        printf( "fscanf error in file %s.\n", data_file );
+        HDprintf( "fscanf error in file %s.\n", data_file );
         goto out;
     } /* end if */
 
     if(fscanf(f, "%s", str) < 0 && HDferror(f)) {
-        printf( "fscanf error in file %s.\n", data_file );
+        HDprintf( "fscanf error in file %s.\n", data_file );
         goto out;
     } /* end if */
 
     if(fscanf(f, "%d", &w) < 0 && HDferror(f)) {
-        printf( "fscanf error in file %s.\n", data_file );
+        HDprintf( "fscanf error in file %s.\n", data_file );
         goto out;
     } /* end if */
 
@@ -861,7 +861,7 @@ static int read_data(const char* fname, /*IN*/
     /* Read data elements */
     for(i = 0; i < n_elements; i++) {
         if(fscanf(f, "%d", &n) < 0 && HDferror(f)) {
-            printf( "fscanf error in file %s.\n", data_file );
+            HDprintf( "fscanf error in file %s.\n", data_file );
             goto out;
         } /* end if */
         image_data[i] = (unsigned char)n;
@@ -917,7 +917,7 @@ static int read_palette(const char* fname,
     /* open the input file */
     if (!(file = HDfopen(data_file, "r")))
     {
-        printf( "Could not open file %s. Try set $srcdir \n", data_file );
+        HDprintf( "Could not open file %s. Try set $srcdir \n", data_file );
         return -1;
     }
 

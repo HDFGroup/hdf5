@@ -13,50 +13,50 @@
 
 /***********************************************************
 *
-* Test program:	 tselect
+* Test program:     tselect
 *
 * Test the Dataspace selection functionality
 *
 *************************************************************/
 
-#define H5S_FRIEND		/*suppress error about including H5Spkg	  */
+#define H5S_FRIEND        /*suppress error about including H5Spkg      */
 
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5S_TESTING
 
 #include "testhdf5.h"
 #include "hdf5.h"
-#include "H5Spkg.h"		/* Dataspaces				*/
+#include "H5Spkg.h"        /* Dataspaces                */
 
 #define FILENAME   "tselect.h5"
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
-#define SPACE1_RANK	3
-#define SPACE1_DIM1	3
-#define SPACE1_DIM2	15
-#define SPACE1_DIM3	13
+#define SPACE1_RANK    3
+#define SPACE1_DIM1    3
+#define SPACE1_DIM2    15
+#define SPACE1_DIM3    13
 
 /* 2-D dataset with fixed dimensions */
 #define SPACE2_NAME  "Space2"
-#define SPACE2_RANK	2
-#define SPACE2_DIM1	30
-#define SPACE2_DIM2	26
-#define SPACE2A_RANK	1
-#define SPACE2A_DIM1	(SPACE2_DIM1*SPACE2_DIM2)
+#define SPACE2_RANK    2
+#define SPACE2_DIM1    30
+#define SPACE2_DIM2    26
+#define SPACE2A_RANK    1
+#define SPACE2A_DIM1    (SPACE2_DIM1*SPACE2_DIM2)
 
 /* 2-D dataset with fixed dimensions */
 #define SPACE3_NAME  "Space3"
-#define SPACE3_RANK	2
-#define SPACE3_DIM1	15
-#define SPACE3_DIM2	26
+#define SPACE3_RANK    2
+#define SPACE3_DIM1    15
+#define SPACE3_DIM2    26
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE4_NAME  "Space4"
-#define SPACE4_RANK	3
-#define SPACE4_DIM1	11
-#define SPACE4_DIM2	13
-#define SPACE4_DIM3	17
+#define SPACE4_RANK    3
+#define SPACE4_DIM1    11
+#define SPACE4_DIM2    13
+#define SPACE4_DIM3    17
 
 /* Number of random hyperslabs to test */
 #define NHYPERSLABS 10
@@ -66,22 +66,22 @@
 
 /* 5-D dataset with fixed dimensions */
 #define SPACE5_NAME  "Space5"
-#define SPACE5_RANK	5
-#define SPACE5_DIM1	10
-#define SPACE5_DIM2	10
-#define SPACE5_DIM3	10
-#define SPACE5_DIM4	10
-#define SPACE5_DIM5	10
+#define SPACE5_RANK    5
+#define SPACE5_DIM1    10
+#define SPACE5_DIM2    10
+#define SPACE5_DIM3    10
+#define SPACE5_DIM4    10
+#define SPACE5_DIM5    10
 
 /* 1-D dataset with same size as 5-D dataset */
-#define SPACE6_RANK	1
-#define SPACE6_DIM1	(SPACE5_DIM1*SPACE5_DIM2*SPACE5_DIM3*SPACE5_DIM4*SPACE5_DIM5)
+#define SPACE6_RANK    1
+#define SPACE6_DIM1    (SPACE5_DIM1*SPACE5_DIM2*SPACE5_DIM3*SPACE5_DIM4*SPACE5_DIM5)
 
 /* 2-D dataset with easy dimension sizes */
 #define SPACE7_NAME  "Space7"
-#define SPACE7_RANK	2
-#define SPACE7_DIM1	10
-#define SPACE7_DIM2	10
+#define SPACE7_RANK    2
+#define SPACE7_DIM1    10
+#define SPACE7_DIM2    10
 #define SPACE7_FILL     254
 #define SPACE7_CHUNK_DIM1 5
 #define SPACE7_CHUNK_DIM2 5
@@ -89,16 +89,16 @@
 
 /* 4-D dataset with fixed dimensions */
 #define SPACE8_NAME  "Space8"
-#define SPACE8_RANK	4
-#define SPACE8_DIM1	11
-#define SPACE8_DIM2	13
-#define SPACE8_DIM3	17
-#define SPACE8_DIM4	19
+#define SPACE8_RANK    4
+#define SPACE8_DIM1    11
+#define SPACE8_DIM2    13
+#define SPACE8_DIM3    17
+#define SPACE8_DIM4    19
 
 /* Another 2-D dataset with easy dimension sizes */
-#define SPACE9_RANK	2
-#define SPACE9_DIM1	12
-#define SPACE9_DIM2	12
+#define SPACE9_RANK    2
+#define SPACE9_DIM1    12
+#define SPACE9_DIM2    12
 
 /* Element selection information */
 #define POINT1_NPOINTS 10
@@ -125,13 +125,13 @@
 #define SPACE10_CHUNK_SIZE 12
 
 /* Information for bounds checking test */
-#define SPACE11_RANK	2
+#define SPACE11_RANK    2
 #define SPACE11_DIM1    100
 #define SPACE11_DIM2    100
 #define SPACE11_NPOINTS 4
 
 /* Information for offsets w/chunks test #2 */
-#define SPACE12_RANK	        1
+#define SPACE12_RANK            1
 #define SPACE12_DIM0            25
 #define SPACE12_CHUNK_DIM0      5
 
@@ -164,10 +164,10 @@
 #define SPACEUD3_DIM2            13
 
 /* #defines for shape same / different rank tests */
-#define SS_DR_MAX_RANK		5
+#define SS_DR_MAX_RANK        5
 
 /* Information for regular hyperslab query test */
-#define SPACE13_RANK	3
+#define SPACE13_RANK    3
 #define SPACE13_DIM1    50
 #define SPACE13_DIM2    50
 #define SPACE13_DIM3    50
@@ -215,21 +215,21 @@ test_select_hyper_iter1(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_A
 static void
 test_select_hyper(hid_t xfer_plist)
 {
-    hid_t	fid1;		/* HDF5 File IDs		*/
-    hid_t	dataset;	/* Dataset ID			*/
-    hid_t	sid1,sid2;	/* Dataspace ID			*/
-    hsize_t	dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t	dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t	dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
-    hsize_t	stride[SPACE1_RANK];    /* Stride of hyperslab */
-    hsize_t	count[SPACE1_RANK];     /* Element count of hyperslab */
-    hsize_t	block[SPACE1_RANK];     /* Block size of hyperslab */
+    hid_t    fid1;        /* HDF5 File IDs        */
+    hid_t    dataset;    /* Dataset ID            */
+    hid_t    sid1,sid2;    /* Dataspace ID            */
+    hsize_t    dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t    dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t    dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t    start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t    stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t    count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t    block[SPACE1_RANK];     /* Block size of hyperslab */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
     H5S_class_t ext_type;   /* Extent type */
 
     /* Output message about test being performed */
@@ -380,7 +380,7 @@ test_select_hyper(hid_t xfer_plist)
 }   /* test_select_hyper() */
 
 struct pnt_iter {
-    hsize_t	coord[POINT1_NPOINTS*2][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t    coord[POINT1_NPOINTS*2][SPACE2_RANK]; /* Coordinates for point selection */
     uint8_t *buf;           /* Buffer the points are in */
     int offset;            /* Which point we are looking at */
 };
@@ -417,24 +417,24 @@ test_select_point_iter1(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_A
 static void
 test_select_point(hid_t xfer_plist)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hsize_t	temp_coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hsize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hsize_t	temp_coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hsize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
-    hsize_t	temp_coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t        dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t    coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hsize_t    temp_coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hsize_t    coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t    temp_coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t    coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
+    hsize_t    temp_coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
     int        i,j;        /* Counters */
     struct pnt_iter pi;     /* Custom Pointer iterator struct */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Element Selection Functions\n"));
@@ -703,15 +703,15 @@ test_select_none_iter1(void H5_ATTR_UNUSED *_elem, hid_t H5_ATTR_UNUSED type_id,
 static void
 test_select_all(hid_t xfer_plist)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;	        /* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE4_DIM1, SPACE4_DIM2, SPACE4_DIM3};
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1;            /* Dataspace ID            */
+    hsize_t        dims1[] = {SPACE4_DIM1, SPACE4_DIM2, SPACE4_DIM3};
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
     int        i,j,k;      /* Counters */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
     H5S_class_t ext_type;   /* Extent type */
 
     /* Output message about test being performed */
@@ -784,21 +784,21 @@ test_select_all(hid_t xfer_plist)
 static void
 test_select_all_hyper(hid_t xfer_plist)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims1[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t        dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t        start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE1_RANK];     /* Block size of hyperslab */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
     H5S_class_t ext_type;   /* Extent type */
 
     /* Output message about test being performed */
@@ -925,23 +925,23 @@ test_select_all_hyper(hid_t xfer_plist)
 static void
 test_select_combo(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t		coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t        dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t        coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hsize_t        start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE1_RANK];     /* Block size of hyperslab */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Combination of Hyperslab & Element Selection Functions\n"));
@@ -1069,16 +1069,16 @@ compare_size_t(const void *s1, const void *s2)
 static void
 test_select_hyper_stride(hid_t xfer_plist)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t        dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t        start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE1_RANK];     /* Block size of hyperslab */
     uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
@@ -1108,7 +1108,7 @@ test_select_hyper_stride(hid_t xfer_plist)
       220,221,222,246,247,248,    /* Block #12 */
             };
     int        i,j;        /* Counters */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
@@ -1224,19 +1224,19 @@ test_select_hyper_stride(hid_t xfer_plist)
 static void
 test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims2[] = {SPACE2_DIM2, SPACE2_DIM1};
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims2[] = {SPACE2_DIM2, SPACE2_DIM1};
+    hsize_t        start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE1_RANK];     /* Block size of hyperslab */
     uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Contiguous Hyperslabs Functionality\n"));
@@ -1350,17 +1350,17 @@ test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
 static void
 test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims2[] = {SPACE8_DIM4, SPACE8_DIM3, SPACE8_DIM2, SPACE8_DIM1};
-    hsize_t	        start[SPACE8_RANK];     /* Starting location of hyperslab */
-    hsize_t		count[SPACE8_RANK];     /* Element count of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims2[] = {SPACE8_DIM4, SPACE8_DIM3, SPACE8_DIM2, SPACE8_DIM1};
+    hsize_t            start[SPACE8_RANK];     /* Starting location of hyperslab */
+    hsize_t        count[SPACE8_RANK];     /* Element count of hyperslab */
     uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
     int        i,j,k,l;     /* Counters */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing More Contiguous Hyperslabs Functionality\n"));
@@ -1471,17 +1471,17 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
 static void
 test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims2[] = {SPACE8_DIM4, SPACE8_DIM3, SPACE8_DIM2, SPACE8_DIM1};
-    hsize_t	        start[SPACE8_RANK];     /* Starting location of hyperslab */
-    hsize_t		count[SPACE8_RANK];     /* Element count of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims2[] = {SPACE8_DIM4, SPACE8_DIM3, SPACE8_DIM2, SPACE8_DIM1};
+    hsize_t            start[SPACE8_RANK];     /* Starting location of hyperslab */
+    hsize_t        count[SPACE8_RANK];     /* Element count of hyperslab */
     uint16_t   *wbuf,           /* Buffer to write to disk */
                *rbuf,           /* Buffer read from disk */
                *tbuf, *tbuf2;   /* Temporary buffer pointers */
     unsigned   i,j,k,l;     /* Counters */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Yet More Contiguous Hyperslabs Functionality\n"));
@@ -1597,7 +1597,7 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
     HDfree(rbuf);
 }   /* test_select_hyper_contig3() */
 
-
+
 /****************************************************************
 **
 **  verify_select_hyper_contig_dr__run_test(): Verify data from
@@ -1609,10 +1609,10 @@ verify_select_hyper_contig_dr__run_test(const uint16_t *cube_buf,
     size_t cube_size, unsigned edge_size, unsigned cube_rank)
 {
     const uint16_t     *cube_ptr;           /* Pointer into the cube buffer */
-    uint16_t		expected_value;     /* Expected value in dataset */
+    uint16_t        expected_value;     /* Expected value in dataset */
     unsigned            i, j, k, l, m;      /* Local index variables */
     size_t              s;                  /* Local index variable */
-    hbool_t		mis_match;          /* Flag to indicate mis-match in expected value */
+    hbool_t        mis_match;          /* Flag to indicate mis-match in expected value */
 
     HDassert(cube_buf);
     HDassert(cube_size > 0);
@@ -1656,7 +1656,7 @@ verify_select_hyper_contig_dr__run_test(const uint16_t *cube_buf,
         TestErrPrintf("Initial cube data don't match! Line = %d\n", __LINE__);
 }   /* verify_select_hyper_contig_dr__run_test() */
 
-
+
 /****************************************************************
 **
 **  test_select_hyper_contig_dr__run_test(): Test H5S (dataspace)
@@ -1671,37 +1671,37 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf,
     const uint16_t *zero_buf, unsigned edge_size, unsigned chunk_edge_size,
     unsigned small_rank, unsigned large_rank, hid_t dset_type, hid_t xfer_plist)
 {
-    hbool_t		mis_match;              /* Flag indicating a value read in wasn't what was expected */
+    hbool_t        mis_match;              /* Flag indicating a value read in wasn't what was expected */
     hid_t               fapl;                   /* File access property list */
-    hid_t		fid1;		        /* File ID */
-    hid_t		small_cube_sid;         /* Dataspace ID for small cube in memory & file */
-    hid_t		mem_large_cube_sid;     /* Dataspace ID for large cube in memory */
-    hid_t		file_large_cube_sid;    /* Dataspace ID for large cube in file */
-    hid_t		small_cube_dcpl_id = H5P_DEFAULT;   /* DCPL for small cube dataset */
-    hid_t		large_cube_dcpl_id = H5P_DEFAULT;   /* DCPL for large cube dataset */
-    hid_t		small_cube_dataset;	/* Dataset ID */
-    hid_t		large_cube_dataset;	/* Dataset ID */
+    hid_t        fid1;                /* File ID */
+    hid_t        small_cube_sid;         /* Dataspace ID for small cube in memory & file */
+    hid_t        mem_large_cube_sid;     /* Dataspace ID for large cube in memory */
+    hid_t        file_large_cube_sid;    /* Dataspace ID for large cube in file */
+    hid_t        small_cube_dcpl_id = H5P_DEFAULT;   /* DCPL for small cube dataset */
+    hid_t        large_cube_dcpl_id = H5P_DEFAULT;   /* DCPL for large cube dataset */
+    hid_t        small_cube_dataset;    /* Dataset ID */
+    hid_t        large_cube_dataset;    /* Dataset ID */
     size_t              start_index;            /* Offset within buffer to begin inspecting */
     size_t              stop_index;             /* Offset within buffer to end inspecting */
-    uint16_t		expected_value;         /* Expected value in dataset */
-    uint16_t	      * small_cube_buf_1;       /* Buffer for small cube data */
-    uint16_t	      * large_cube_buf_1;       /* Buffer for large cube data */
-    uint16_t	      * ptr_1;                  /* Temporary pointer into cube data */
-    hsize_t		dims[SS_DR_MAX_RANK];   /* Dataspace dimensions */
-    hsize_t     	start[SS_DR_MAX_RANK];  /* Shared hyperslab start offset */
-    hsize_t     	stride[SS_DR_MAX_RANK]; /* Shared hyperslab stride */
-    hsize_t     	count[SS_DR_MAX_RANK];  /* Shared hyperslab count */
-    hsize_t     	block[SS_DR_MAX_RANK];  /* Shared hyperslab block size */
-    hsize_t	      * start_ptr;          /* Actual hyperslab start offset */
-    hsize_t	      * stride_ptr;         /* Actual hyperslab stride */
-    hsize_t	      * count_ptr;          /* Actual hyperslab count */
-    hsize_t	      * block_ptr;          /* Actual hyperslab block size */
+    uint16_t        expected_value;         /* Expected value in dataset */
+    uint16_t          * small_cube_buf_1;       /* Buffer for small cube data */
+    uint16_t          * large_cube_buf_1;       /* Buffer for large cube data */
+    uint16_t          * ptr_1;                  /* Temporary pointer into cube data */
+    hsize_t        dims[SS_DR_MAX_RANK];   /* Dataspace dimensions */
+    hsize_t         start[SS_DR_MAX_RANK];  /* Shared hyperslab start offset */
+    hsize_t         stride[SS_DR_MAX_RANK]; /* Shared hyperslab stride */
+    hsize_t         count[SS_DR_MAX_RANK];  /* Shared hyperslab count */
+    hsize_t         block[SS_DR_MAX_RANK];  /* Shared hyperslab block size */
+    hsize_t          * start_ptr;          /* Actual hyperslab start offset */
+    hsize_t          * stride_ptr;         /* Actual hyperslab stride */
+    hsize_t          * count_ptr;          /* Actual hyperslab count */
+    hsize_t          * block_ptr;          /* Actual hyperslab block size */
     size_t              small_cube_size;    /* Number of elements in small cube */
     size_t              large_cube_size;    /* Number of elements in large cube */
     unsigned            u, v, w, x;     /* Local index variables */
     size_t              s;              /* Local index variable */
-    htri_t      	check;          /* Shape comparison return value */
-    herr_t      	ret;            /* Generic return value */
+    htri_t          check;          /* Shape comparison return value */
+    herr_t          ret;            /* Generic return value */
 
     MESSAGE(7, ("\tn-cube slice through m-cube I/O test %d.\n", test_num));
     MESSAGE(7, ("\tranks = %u/%u, edge_size = %u, chunk_edge_size = %u.\n", small_rank, large_rank, edge_size, chunk_edge_size));
@@ -1770,10 +1770,10 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf,
      * datasets.
      */
     if(chunk_edge_size > 0) {
-        hsize_t		chunk_dims[SS_DR_MAX_RANK];     /* Chunk dimensions */
+        hsize_t        chunk_dims[SS_DR_MAX_RANK];     /* Chunk dimensions */
 
         chunk_dims[0] = chunk_dims[1] =
-		chunk_dims[2] = chunk_dims[3] = chunk_dims[4] = (hsize_t)chunk_edge_size;
+        chunk_dims[2] = chunk_dims[3] = chunk_dims[4] = (hsize_t)chunk_edge_size;
 
         small_cube_dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
         CHECK(small_cube_dcpl_id, FAIL, "H5Pcreate");
@@ -2096,7 +2096,7 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf,
                     VERIFY(check, TRUE, "H5S_select_shape_same_test");
 
 
-	            /* write the slice from the in memory large cube to the on disk small cube */
+                /* write the slice from the in memory large cube to the on disk small cube */
                     ret = H5Dwrite(small_cube_dataset,
                                    H5T_NATIVE_UINT16,
                                    mem_large_cube_sid,
@@ -2207,7 +2207,7 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf,
                     VERIFY(check, TRUE, "H5S_select_shape_same_test");
 
 
-	            /* write the cube from memory to the target slice of the disk cube */
+                /* write the cube from memory to the target slice of the disk cube */
                     ret = H5Dwrite(large_cube_dataset,
                                    H5T_NATIVE_UINT16,
                                    small_cube_sid,
@@ -2303,7 +2303,7 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf,
 
 }   /* test_select_hyper_contig_dr__run_test() */
 
-
+
 /****************************************************************
 **
 **  test_select_hyper_contig_dr(): Test H5S (dataspace)
@@ -2371,25 +2371,25 @@ test_select_hyper_contig_dr(hid_t dset_type, hid_t xfer_plist)
 
 }   /* test_select_hyper_contig_dr() */
 
-
+
 /****************************************************************
 **
 **  test_select_hyper_checker_board_dr__select_checker_board():
-**	Given an n-cube data space with each edge of length
-**	edge_size, and a checker_edge_size either select a checker
-**	board selection of the entire cube(if sel_rank == n),
-**	or select a checker board selection of a
-**	sel_rank dimensional slice through n-cube parallel to the
+**    Given an n-cube dataspace with each edge of length
+**    edge_size, and a checker_edge_size either select a checker
+**    board selection of the entire cube(if sel_rank == n),
+**    or select a checker board selection of a
+**    sel_rank dimensional slice through n-cube parallel to the
 **      sel_rank fastest changing indices, with origin (in the
-**	higher indices) as indicated by the start array.
+**    higher indices) as indicated by the start array.
 **
-**	Note that this function, like all its relatives, is
-**	hard coded to presume a maximum n-cube rank of 5.
-**	While this maximum is declared as a constant, increasing
-**	it will require extensive coding in addition to changing
+**    Note that this function, like all its relatives, is
+**    hard coded to presume a maximum n-cube rank of 5.
+**    While this maximum is declared as a constant, increasing
+**    it will require extensive coding in addition to changing
 **      the value of the constant.
 **
-**					JRM -- 9/9/09
+**                    JRM -- 9/9/09
 **
 ****************************************************************/
 static void
@@ -2397,18 +2397,18 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid,
     unsigned tgt_n_cube_rank, unsigned edge_size, unsigned checker_edge_size,
     unsigned sel_rank, hsize_t sel_start[])
 {
-    hbool_t		first_selection = TRUE;
-    unsigned		n_cube_offset;
-    unsigned		sel_offset;
-    hsize_t		base_count;
+    hbool_t        first_selection = TRUE;
+    unsigned        n_cube_offset;
+    unsigned        sel_offset;
+    hsize_t        base_count;
     hsize_t             offset_count;
-    hsize_t     	start[SS_DR_MAX_RANK];  /* Offset of hyperslab selection */
-    hsize_t     	stride[SS_DR_MAX_RANK]; /* Stride of hyperslab selection */
-    hsize_t     	count[SS_DR_MAX_RANK];  /* Count of hyperslab selection */
-    hsize_t     	block[SS_DR_MAX_RANK];  /* Block size of hyperslab selection */
+    hsize_t         start[SS_DR_MAX_RANK];  /* Offset of hyperslab selection */
+    hsize_t         stride[SS_DR_MAX_RANK]; /* Stride of hyperslab selection */
+    hsize_t         count[SS_DR_MAX_RANK];  /* Count of hyperslab selection */
+    hsize_t         block[SS_DR_MAX_RANK];  /* Block size of hyperslab selection */
     unsigned            i, j, k, l, m;  /* Local index variable */
     unsigned            u;              /* Local index variables */
-    herr_t      	ret;            /* Generic return value */
+    herr_t          ret;            /* Generic return value */
 
     HDassert(edge_size >= 6);
     HDassert(0 < checker_edge_size);
@@ -2567,8 +2567,8 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid,
     /* Wierdness alert:
      *
      * Some how, it seems that selections can extend beyond the
-     * boundaries of the target data space -- hence the following
-     * code to manually clip the selection back to the data space
+     * boundaries of the target dataspace -- hence the following
+     * code to manually clip the selection back to the dataspace
      * proper.
      */
     for(u = 0; u < SS_DR_MAX_RANK; u++) {
@@ -2582,47 +2582,47 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid,
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 } /* test_select_hyper_checker_board_dr__select_checker_board() */
 
-
+
 /****************************************************************
 **
 **  test_select_hyper_checker_board_dr__verify_data():
 **
-**	Examine the supplied buffer to see if it contains the
-**	expected data.  Return TRUE if it does, and FALSE
+**    Examine the supplied buffer to see if it contains the
+**    expected data.  Return TRUE if it does, and FALSE
 **      otherwise.
 **
-**	The supplied buffer is presumed to contain the results
-**	of read or writing a checkerboard selection of an
-**	n-cube, or a checkerboard selection of an m (1 <= m < n)
-**	dimensional slice through an n-cube parallel to the
+**    The supplied buffer is presumed to contain the results
+**    of read or writing a checkerboard selection of an
+**    n-cube, or a checkerboard selection of an m (1 <= m < n)
+**    dimensional slice through an n-cube parallel to the
 **      fastest changing indices.
 **
-**	It is further presumed that the buffer was zeroed before
-**	the read, and that the n-cube was initialize with the
+**    It is further presumed that the buffer was zeroed before
+**    the read, and that the n-cube was initialize with the
 **      natural numbers listed in order from the origin along
 **      the fastest changing axis.
 **
 **      Thus for a 10x10x10 3-cube, the value stored in location
-**	(x, y, z) (assuming that z is the fastest changing index
-**	and x the slowest) is assumed to be:
+**    (x, y, z) (assuming that z is the fastest changing index
+**    and x the slowest) is assumed to be:
 **
-**		(10 * 10 * x) + (10 * y) + z
+**        (10 * 10 * x) + (10 * y) + z
 **
-**	Thus, if the buffer contains the result of reading a
-**	checker board selection of a 10x10x10 3-cube, location
-**	(x, y, z) will contain zero if it is not in a checker,
-**	and 100x + 10y + z if (x, y, z) is in a checker.
+**    Thus, if the buffer contains the result of reading a
+**    checker board selection of a 10x10x10 3-cube, location
+**    (x, y, z) will contain zero if it is not in a checker,
+**    and 100x + 10y + z if (x, y, z) is in a checker.
 **
-**	If the buffer contains the result of reading a 3
-**	dimensional slice (parallel to the three fastest changing
-**	indices) through an n cube (n > 3), then the expected
-**	values in the buffer will be the same, save that we will
-**	add a constant determined by the origin of the 3-cube
-**	in the n-cube.
+**    If the buffer contains the result of reading a 3
+**    dimensional slice (parallel to the three fastest changing
+**    indices) through an n cube (n > 3), then the expected
+**    values in the buffer will be the same, save that we will
+**    add a constant determined by the origin of the 3-cube
+**    in the n-cube.
 **
-**	Finally, the function presumes that the first element
-**	of the buffer resides either at the origin of either
-**	a selected or an unselected checker.
+**    Finally, the function presumes that the first element
+**    of the buffer resides either at the origin of either
+**    a selected or an unselected checker.
 **
 ****************************************************************/
 H5_ATTR_PURE static hbool_t
@@ -2726,7 +2726,7 @@ test_select_hyper_checker_board_dr__verify_data(uint16_t * buf_ptr,
     return(good_data);
 } /* test_select_hyper_checker_board_dr__verify_data() */
 
-
+
 /****************************************************************
 **
 **  test_select_hyper_checker_board_dr__run_test(): Test H5S
@@ -2742,36 +2742,36 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
     unsigned chunk_edge_size, unsigned small_rank, unsigned large_rank,
     hid_t dset_type, hid_t xfer_plist)
 {
-    hbool_t		data_ok;
+    hbool_t        data_ok;
     hid_t               fapl;                   /* File access property list */
-    hid_t		fid;			/* HDF5 File IDs		*/
-    hid_t		full_small_cube_sid;    /* Dataspace for small cube w/all selection */
-    hid_t		mem_small_cube_sid;
-    hid_t		file_small_cube_sid;
-    hid_t		full_large_cube_sid;    /* Dataspace for large cube w/all selection */
-    hid_t		mem_large_cube_sid;
-    hid_t		file_large_cube_sid;
-    hid_t		small_cube_dcpl_id = H5P_DEFAULT;   /* DCPL for small cube dataset */
-    hid_t		large_cube_dcpl_id = H5P_DEFAULT;   /* DCPL for large cube dataset */
-    hid_t		small_cube_dataset;	/* Dataset ID			*/
-    hid_t		large_cube_dataset;	/* Dataset ID			*/
-    unsigned		small_rank_offset;      /* Rank offset of slice */
-    const unsigned	test_max_rank = 5;  /* must update code if this changes */
+    hid_t        fid;            /* HDF5 File IDs        */
+    hid_t        full_small_cube_sid;    /* Dataspace for small cube w/all selection */
+    hid_t        mem_small_cube_sid;
+    hid_t        file_small_cube_sid;
+    hid_t        full_large_cube_sid;    /* Dataspace for large cube w/all selection */
+    hid_t        mem_large_cube_sid;
+    hid_t        file_large_cube_sid;
+    hid_t        small_cube_dcpl_id = H5P_DEFAULT;   /* DCPL for small cube dataset */
+    hid_t        large_cube_dcpl_id = H5P_DEFAULT;   /* DCPL for large cube dataset */
+    hid_t        small_cube_dataset;    /* Dataset ID            */
+    hid_t        large_cube_dataset;    /* Dataset ID            */
+    unsigned        small_rank_offset;      /* Rank offset of slice */
+    const unsigned    test_max_rank = 5;  /* must update code if this changes */
     size_t              start_index;            /* Offset within buffer to begin inspecting */
     size_t              stop_index;             /* Offset within buffer to end inspecting */
-    uint16_t		expected_value;
-    uint16_t	      * small_cube_buf_1;
-    uint16_t	      * large_cube_buf_1;
-    uint16_t	      * ptr_1;
+    uint16_t        expected_value;
+    uint16_t          * small_cube_buf_1;
+    uint16_t          * large_cube_buf_1;
+    uint16_t          * ptr_1;
     size_t              small_cube_size;    /* Number of elements in small cube */
     size_t              large_cube_size;    /* Number of elements in large cube */
-    hsize_t		dims[SS_DR_MAX_RANK];
-    hsize_t		chunk_dims[SS_DR_MAX_RANK];
-    hsize_t     	sel_start[SS_DR_MAX_RANK];
+    hsize_t        dims[SS_DR_MAX_RANK];
+    hsize_t        chunk_dims[SS_DR_MAX_RANK];
+    hsize_t         sel_start[SS_DR_MAX_RANK];
     unsigned            u, v, w, x;     /* Local index variables */
     size_t              s;              /* Local index variable */
-    htri_t      	check;          /* Shape comparison return value */
-    herr_t      	ret;            /* Generic return value */
+    htri_t          check;          /* Shape comparison return value */
+    herr_t          ret;            /* Generic return value */
 
     MESSAGE(7, ("\tn-cube slice through m-cube I/O test %d.\n", test_num));
     MESSAGE(7, ("\tranks = %d/%d, edge_size = %d, checker_edge_size = %d, chunk_edge_size = %d.\n", small_rank, large_rank, edge_size, checker_edge_size, chunk_edge_size));
@@ -2862,7 +2862,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
      */
     if(chunk_edge_size > 0) {
         chunk_dims[0] = chunk_dims[1] =
-		chunk_dims[2] = chunk_dims[3] = chunk_dims[4] = chunk_edge_size;
+        chunk_dims[2] = chunk_dims[3] = chunk_dims[4] = chunk_edge_size;
 
         small_cube_dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
         CHECK(small_cube_dcpl_id, FAIL, "H5Pcreate");
@@ -3272,7 +3272,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     VERIFY(check, TRUE, "H5S_select_shape_same_test");
 
 
-	            /* write the slice from the in memory large cube to the
+                /* write the slice from the in memory large cube to the
                      * on disk small cube
                      */
                     ret = H5Dwrite(small_cube_dataset,
@@ -3404,7 +3404,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     VERIFY(check, TRUE, "H5S_select_shape_same_test");
 
 
-	            /* write the checker board selection of the in memory
+                /* write the checker board selection of the in memory
                      * small cube to a slice through the on disk large
                      * cube.
                      */
@@ -3531,7 +3531,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
 
 }   /* test_select_hyper_checker_board_dr__run_test() */
 
-
+
 /****************************************************************
 **
 **  test_select_hyper_checker_board_dr(): Test H5S (dataspace)
@@ -3540,8 +3540,8 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
 **	tested H5S_shape_same in isolation, so now we try to do
 **	I/O.
 **
-**	This is just an initial smoke check, so we will work
-**	with a slice through a cube only.
+**    This is just an initial smoke check, so we will work
+**    with a slice through a cube only.
 **
 ****************************************************************/
 static void
@@ -3616,7 +3616,7 @@ test_select_hyper_checker_board_dr(hid_t dset_type, hid_t xfer_plist)
 
 }   /* test_select_hyper_checker_board_dr() */
 
-
+
 /****************************************************************
 **
 **  test_select_hyper_copy(): Test H5S (dataspace) selection code.
@@ -3626,22 +3626,22 @@ test_select_hyper_checker_board_dr(hid_t dset_type, hid_t xfer_plist)
 static void
 test_select_hyper_copy(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		data1,data2;	/* Dataset IDs			*/
-    hid_t		sid1,sid2,sid3; /* Dataspace IDs		*/
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        data1,data2;    /* Dataset IDs            */
+    hid_t        sid1,sid2,sid3; /* Dataspace IDs        */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t        dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t        start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE1_RANK];     /* Block size of hyperslab */
     uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* 1st buffer read from disk */
                *rbuf2,      /* 2nd buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
@@ -3782,21 +3782,21 @@ test_select_hyper_copy(void)
 static void
 test_select_point_copy(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		data1,data2;	/* Dataset IDs			*/
-    hid_t		sid1,sid2,sid3; /* Dataspace IDs		*/
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hsize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hsize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        data1,data2;    /* Dataset IDs            */
+    hid_t        sid1,sid2,sid3; /* Dataspace IDs        */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t        dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t    coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hsize_t    coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t    coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
     uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* 1st buffer read from disk */
                *rbuf2,      /* 2nd buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;		/* Generic return value		*/
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
@@ -3956,24 +3956,24 @@ test_select_point_copy(void)
 static void
 test_select_hyper_offset(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
-    hssize_t	offset[SPACE1_RANK];    /* Offset of selection */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t        dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t        start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE1_RANK];     /* Block size of hyperslab */
+    hssize_t    offset[SPACE1_RANK];    /* Offset of selection */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;		/* Generic return value		*/
-    htri_t	    valid;		/* Generic boolean return value		*/
+    herr_t        ret;        /* Generic return value        */
+    htri_t        valid;        /* Generic boolean return value        */
     H5S_class_t ext_type;   /* Extent type */
 
     /* Output message about test being performed */
@@ -4118,21 +4118,21 @@ test_select_hyper_offset(void)
 static void
 test_select_hyper_offset2(void)
 {
-    hid_t	fid1;		/* HDF5 File IDs		*/
-    hid_t	dataset;	/* Dataset ID			*/
-    hid_t	sid1,sid2;	/* Dataspace ID			*/
-    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
-    hsize_t	dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
-    hsize_t	start[SPACE7_RANK];     /* Starting location of hyperslab */
-    hsize_t	count[SPACE7_RANK];     /* Element count of hyperslab */
-    hssize_t	offset[SPACE7_RANK];    /* Offset of selection */
+    hid_t    fid1;        /* HDF5 File IDs        */
+    hid_t    dataset;    /* Dataset ID            */
+    hid_t    sid1,sid2;    /* Dataspace ID            */
+    hsize_t    dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hsize_t    dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hsize_t    start[SPACE7_RANK];     /* Starting location of hyperslab */
+    hsize_t    count[SPACE7_RANK];     /* Element count of hyperslab */
+    hssize_t    offset[SPACE7_RANK];    /* Offset of selection */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
     int         i,j;        /* Counters */
-    herr_t	ret;        /* Generic return value */
-    htri_t	valid;      /* Generic boolean return value */
+    herr_t    ret;        /* Generic return value */
+    htri_t    valid;      /* Generic boolean return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing More Hyperslab Selection Functions with Offsets\n"));
@@ -4239,23 +4239,23 @@ test_select_hyper_offset2(void)
 static void
 test_select_point_offset(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hsize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hsize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
-    hssize_t	offset[SPACE1_RANK];    /* Offset of selection */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t        dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t    coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hsize_t    coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t    coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
+    hssize_t    offset[SPACE1_RANK];    /* Offset of selection */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;		/* Generic return value		*/
-    htri_t	    valid;		/* Generic boolean return value		*/
+    herr_t        ret;        /* Generic return value        */
+    htri_t        valid;        /* Generic boolean return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Element Selection Functions\n"));
@@ -4411,17 +4411,17 @@ test_select_point_offset(void)
 static void
 test_select_hyper_union(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hid_t		xfer;	    /* Dataset Transfer Property List ID */
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hid_t        xfer;        /* Dataset Transfer Property List ID */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t        dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t        start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE1_RANK];     /* Block size of hyperslab */
     size_t      begin[SPACE2_DIM1]=     /* Offset within irregular block */
         {0,0,0,0,0,0,0,0,0,0,           /* First ten rows start at offset 0 */
         5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5}; /* Next eighteen rows start at offset 5 */
@@ -4434,8 +4434,8 @@ test_select_hyper_union(void)
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;		/* Generic return value		*/
-    hssize_t	    npoints;	/* Number of elements in selection */
+    herr_t        ret;        /* Generic return value        */
+    hssize_t        npoints;    /* Number of elements in selection */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Hyperslab Selection Functions with unions of hyperslabs\n"));
@@ -5079,18 +5079,18 @@ test_select_hyper_union_stagger(void)
 static void
 test_select_hyper_union_3d(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hid_t		tmp_space;	/* Temporary Dataspace ID	*/
-    hid_t		tmp2_space;	/* Another temporary Dataspace ID	*/
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE4_DIM1, SPACE4_DIM2, SPACE4_DIM3};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hid_t        tmp_space;    /* Temporary Dataspace ID    */
+    hid_t        tmp2_space;    /* Another temporary Dataspace ID    */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t        dims2[] = {SPACE4_DIM1, SPACE4_DIM2, SPACE4_DIM3};
+    hsize_t        dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t        start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE1_RANK];     /* Block size of hyperslab */
     struct row_list {
         size_t z;
         size_t y;
@@ -5416,22 +5416,22 @@ test_select_hyper_and_2d(void)
 static void
 test_select_hyper_xor_2d(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims2[] = {SPACE2A_DIM1};
-    hsize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims1[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims2[] = {SPACE2A_DIM1};
+    hsize_t            start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE2_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE2_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE2_RANK];     /* Block size of hyperslab */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;    /* Generic return value		*/
-    hssize_t	    npoints;	/* Number of elements in selection */
+    herr_t        ret;    /* Generic return value        */
+    hssize_t        npoints;    /* Number of elements in selection */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Hyperslab Selection Functions with XOR of 2-D hyperslabs\n"));
@@ -5547,22 +5547,22 @@ test_select_hyper_xor_2d(void)
 static void
 test_select_hyper_notb_2d(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims2[] = {SPACE2A_DIM1};
-    hsize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims1[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims2[] = {SPACE2A_DIM1};
+    hsize_t            start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE2_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE2_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE2_RANK];     /* Block size of hyperslab */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;    /* Generic return value		*/
-    hssize_t	    npoints;	/* Number of elements in selection */
+    herr_t        ret;    /* Generic return value        */
+    hssize_t        npoints;    /* Number of elements in selection */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Hyperslab Selection Functions with NOTB of 2-D hyperslabs\n"));
@@ -5677,22 +5677,22 @@ test_select_hyper_notb_2d(void)
 static void
 test_select_hyper_nota_2d(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims2[] = {SPACE2A_DIM1};
-    hsize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
+    hid_t        fid1;        /* HDF5 File IDs        */
+    hid_t        dataset;    /* Dataset ID            */
+    hid_t        sid1,sid2;    /* Dataspace ID            */
+    hsize_t        dims1[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t        dims2[] = {SPACE2A_DIM1};
+    hsize_t            start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t        stride[SPACE2_RANK];    /* Stride of hyperslab */
+    hsize_t        count[SPACE2_RANK];     /* Element count of hyperslab */
+    hsize_t        block[SPACE2_RANK];     /* Block size of hyperslab */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
     int        i,j;        /* Counters */
-    herr_t		ret;    /* Generic return value		*/
-    hssize_t	    npoints;	/* Number of elements in selection */
+    herr_t        ret;    /* Generic return value        */
+    hssize_t        npoints;    /* Number of elements in selection */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Hyperslab Selection Functions with NOTA of 2-D hyperslabs\n"));
@@ -6988,15 +6988,15 @@ test_select_hyper_iter3(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndim
 static void
 test_select_fill_all(void)
 {
-    hid_t	sid1;           /* Dataspace ID */
-    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hid_t    sid1;           /* Dataspace ID */
+    hsize_t    dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     unsigned    fill_value;     /* Fill value */
     fill_iter_info iter_info;   /* Iterator information structure */
     hsize_t     points[SPACE7_DIM1*SPACE7_DIM2][SPACE7_RANK];   /* Coordinates of selection */
     unsigned   *wbuf,           /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     unsigned    u, v;           /* Counters */
-    herr_t	ret;		/* Generic return value	*/
+    herr_t    ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Filling 'all' Selections\n"));
@@ -7062,8 +7062,8 @@ test_select_fill_all(void)
 static void
 test_select_fill_point(hssize_t *offset)
 {
-    hid_t	sid1;           /* Dataspace ID */
-    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hid_t    sid1;           /* Dataspace ID */
+    hsize_t    dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
     hsize_t     points[5][SPACE7_RANK] = {{2,4}, {3,8}, {8,4}, {7,5}, {7,7}};
     size_t      num_points = 5; /* Number of points selected */
@@ -7072,7 +7072,7 @@ test_select_fill_point(hssize_t *offset)
     unsigned   *wbuf,           /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     unsigned   u, v, w;        /* Counters */
-    herr_t	ret;		/* Generic return value	*/
+    herr_t    ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Filling 'point' Selections\n"));
@@ -7157,8 +7157,8 @@ test_select_fill_point(hssize_t *offset)
 static void
 test_select_fill_hyper_simple(hssize_t *offset)
 {
-    hid_t	sid1;           /* Dataspace ID */
-    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hid_t    sid1;           /* Dataspace ID */
+    hsize_t    dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
     hsize_t     start[SPACE7_RANK];     /* Hyperslab start */
     hsize_t     count[SPACE7_RANK];     /* Hyperslab block size */
@@ -7169,7 +7169,7 @@ test_select_fill_hyper_simple(hssize_t *offset)
     unsigned   *wbuf,           /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     unsigned    u, v;           /* Counters */
-    herr_t	ret;		/* Generic return value	*/
+    herr_t    ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Filling Simple 'hyperslab' Selections\n"));
@@ -7257,8 +7257,8 @@ test_select_fill_hyper_simple(hssize_t *offset)
 static void
 test_select_fill_hyper_regular(hssize_t *offset)
 {
-    hid_t	sid1;           /* Dataspace ID */
-    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hid_t    sid1;           /* Dataspace ID */
+    hsize_t    dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
     hsize_t     start[SPACE7_RANK];     /* Hyperslab start */
     hsize_t     stride[SPACE7_RANK];    /* Hyperslab stride size */
@@ -7276,7 +7276,7 @@ test_select_fill_hyper_regular(hssize_t *offset)
     unsigned   *wbuf,           /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     unsigned    u, v, w;        /* Counters */
-    herr_t	ret;		/* Generic return value	*/
+    herr_t    ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Filling Regular 'hyperslab' Selections\n"));
@@ -7365,8 +7365,8 @@ test_select_fill_hyper_regular(hssize_t *offset)
 static void
 test_select_fill_hyper_irregular(hssize_t *offset)
 {
-    hid_t	sid1;           /* Dataspace ID */
-    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hid_t    sid1;           /* Dataspace ID */
+    hsize_t    dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
     hsize_t     start[SPACE7_RANK];     /* Hyperslab start */
     hsize_t     count[SPACE7_RANK];     /* Hyperslab block count */
@@ -7395,7 +7395,7 @@ test_select_fill_hyper_irregular(hssize_t *offset)
     unsigned   *wbuf,           /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     unsigned    u, v, w;        /* Counters */
-    herr_t	ret;		/* Generic return value	*/
+    herr_t    ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Filling Irregular 'hyperslab' Selections\n"));
@@ -7488,16 +7488,16 @@ test_select_fill_hyper_irregular(hssize_t *offset)
 static void
 test_select_none(void)
 {
-    hid_t	fid1;		/* HDF5 File IDs		*/
-    hid_t	dataset;	/* Dataset ID			*/
-    hid_t	sid1,sid2;	/* Dataspace ID			*/
-    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
-    hsize_t	dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hid_t    fid1;        /* HDF5 File IDs        */
+    hid_t    dataset;    /* Dataset ID            */
+    hid_t    sid1,sid2;    /* Dataspace ID            */
+    hsize_t    dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hsize_t    dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
     uint8_t    *wbuf,           /* buffer to write to disk */
                *rbuf,           /* buffer to read from disk */
                *tbuf;           /* temporary buffer pointer */
     int         i,j;            /* Counters */
-    herr_t	ret;		/* Generic return value	*/
+    herr_t    ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing I/O on 0-sized Selections\n"));
@@ -7586,11 +7586,11 @@ test_select_none(void)
 static void
 test_scalar_select(void)
 {
-    hid_t	fid1;		/* HDF5 File IDs		*/
-    hid_t	dataset;	/* Dataset ID			*/
-    hid_t	sid1,sid2;	/* Dataspace ID			*/
-    hsize_t	dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
-    hsize_t	coord1[SPACE7_RANK]; /* Coordinates for point selection */
+    hid_t    fid1;        /* HDF5 File IDs        */
+    hid_t    dataset;    /* Dataset ID            */
+    hid_t    sid1,sid2;    /* Dataspace ID            */
+    hsize_t    dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hsize_t    coord1[SPACE7_RANK]; /* Coordinates for point selection */
     hsize_t     start[SPACE7_RANK]; /* Hyperslab start */
     hsize_t     count[SPACE7_RANK]; /* Hyperslab block count */
     uint8_t    *wbuf_uint8,     /* buffer to write to disk */
@@ -7600,7 +7600,7 @@ test_scalar_select(void)
                 rval_ushort,    /* value read back in */
                *tbuf_ushort;    /* temporary buffer pointer */
     int         i,j;            /* Counters */
-    herr_t	ret;		/* Generic return value	*/
+    herr_t    ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing I/O on Selections in Scalar Dataspaces\n"));
@@ -7732,18 +7732,18 @@ test_scalar_select(void)
 /****************************************************************
 **
 **  test_scalar_select2(): Tests selections on scalar dataspace,
-**	verify H5Sselect_hyperslab and H5Sselect_elements fails for
-**	scalar dataspace.
+**    verify H5Sselect_hyperslab and H5Sselect_elements fails for
+**    scalar dataspace.
 **
 ****************************************************************/
 static void
 test_scalar_select2(void)
 {
-    hid_t	sid;		/* Dataspace ID			*/
-    hsize_t	coord1[1]; /* Coordinates for point selection */
+    hid_t    sid;        /* Dataspace ID            */
+    hsize_t    coord1[1]; /* Coordinates for point selection */
     hsize_t     start[1]; /* Hyperslab start */
     hsize_t     count[1]; /* Hyperslab block count */
-    herr_t	ret;		/* Generic return value	*/
+    herr_t    ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(6, ("Testing Selections in Scalar Dataspaces\n"));
@@ -7755,7 +7755,7 @@ test_scalar_select2(void)
     /* Select one element in memory with a point selection */
     coord1[0]=0;
     H5E_BEGIN_TRY {
-    	ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, (const hsize_t *)&coord1);
+        ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, (const hsize_t *)&coord1);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_elements");
 
@@ -7763,7 +7763,7 @@ test_scalar_select2(void)
     start[0]=0;
     count[0]=0;
     H5E_BEGIN_TRY {
-    	ret = H5Sselect_hyperslab(sid,H5S_SELECT_SET,start,NULL,count,NULL);
+        ret = H5Sselect_hyperslab(sid,H5S_SELECT_SET,start,NULL,count,NULL);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_hyperslab");
 
@@ -7789,18 +7789,18 @@ test_scalar_select2(void)
 static void
 test_scalar_select3(void)
 {
-    hid_t	fid1;		/* HDF5 File IDs		*/
-    hid_t	dataset;	/* Dataset ID			*/
-    hid_t	sid1,sid2;	/* Dataspace ID			*/
-    hsize_t	dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
-    hsize_t	coord1[SPACE7_RANK]; /* Coordinates for point selection */
+    hid_t    fid1;        /* HDF5 File IDs        */
+    hid_t    dataset;    /* Dataset ID            */
+    hid_t    sid1,sid2;    /* Dataspace ID            */
+    hsize_t    dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hsize_t    coord1[SPACE7_RANK]; /* Coordinates for point selection */
     hsize_t     start[SPACE7_RANK]; /* Hyperslab start */
     hsize_t     count[SPACE7_RANK]; /* Hyperslab block count */
     uint8_t     wval_uint8,     /* Value written out */
                 rval_uint8;     /* Value read in */
     unsigned short wval_ushort, /* Another value written out */
                 rval_ushort;    /* Another value read in */
-    herr_t	ret;		/* Generic return value	*/
+    herr_t    ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing I/O on Selections in Scalar Dataspaces in Memory\n"));
@@ -7923,40 +7923,40 @@ test_scalar_select3(void)
 /****************************************************************
 **
 **  test_shape_same(): Tests selections on dataspace, verify that
-**	"shape same" routine is working correctly.
+**    "shape same" routine is working correctly.
 **
 ****************************************************************/
 static void
 test_shape_same(void)
 {
-    hid_t	all_sid;	/* Dataspace ID	with "all" selection */
-    hid_t	none_sid;	/* Dataspace ID	with "none" selection */
-    hid_t	single_pt_sid;	/* Dataspace ID	with single point selection */
-    hid_t	mult_pt_sid;	/* Dataspace ID	with multiple point selection */
-    hid_t	single_hyper_sid;	/* Dataspace ID	with single block hyperslab selection */
-    hid_t	single_hyper_all_sid;	/* Dataspace ID	with single block hyperslab
+    hid_t    all_sid;    /* Dataspace ID    with "all" selection */
+    hid_t    none_sid;    /* Dataspace ID    with "none" selection */
+    hid_t    single_pt_sid;    /* Dataspace ID    with single point selection */
+    hid_t    mult_pt_sid;    /* Dataspace ID    with multiple point selection */
+    hid_t    single_hyper_sid;    /* Dataspace ID    with single block hyperslab selection */
+    hid_t    single_hyper_all_sid;    /* Dataspace ID    with single block hyperslab
                                          * selection that is the entire dataspace
                                          */
-    hid_t	single_hyper_pt_sid;	/* Dataspace ID	with single block hyperslab
+    hid_t    single_hyper_pt_sid;    /* Dataspace ID    with single block hyperslab
                                          * selection that is the same as the single
                                          * point selection
                                          */
-    hid_t	regular_hyper_sid;	/* Dataspace ID	with regular hyperslab selection */
-    hid_t	irreg_hyper_sid;	/* Dataspace ID	with irregular hyperslab selection */
-    hid_t	none_hyper_sid;	/* Dataspace ID	with "no hyperslabs" selection */
-    hid_t	scalar_all_sid;	/* ID for scalar dataspace with "all" selection */
-    hid_t	scalar_none_sid;	/* ID for scalar dataspace with "none" selection */
-    hid_t	tmp_sid;	/* Temporary dataspace ID */
-    hsize_t	dims[] = {SPACE9_DIM1, SPACE9_DIM2};
-    hsize_t	coord1[1][SPACE2_RANK]; /* Coordinates for single point selection */
-    hsize_t	coord2[SPACE9_DIM2][SPACE9_RANK]; /* Coordinates for multiple point selection */
+    hid_t    regular_hyper_sid;    /* Dataspace ID    with regular hyperslab selection */
+    hid_t    irreg_hyper_sid;    /* Dataspace ID    with irregular hyperslab selection */
+    hid_t    none_hyper_sid;    /* Dataspace ID    with "no hyperslabs" selection */
+    hid_t    scalar_all_sid;    /* ID for scalar dataspace with "all" selection */
+    hid_t    scalar_none_sid;    /* ID for scalar dataspace with "none" selection */
+    hid_t    tmp_sid;    /* Temporary dataspace ID */
+    hsize_t    dims[] = {SPACE9_DIM1, SPACE9_DIM2};
+    hsize_t    coord1[1][SPACE2_RANK]; /* Coordinates for single point selection */
+    hsize_t    coord2[SPACE9_DIM2][SPACE9_RANK]; /* Coordinates for multiple point selection */
     hsize_t     start[SPACE9_RANK]; /* Hyperslab start */
     hsize_t     stride[SPACE9_RANK]; /* Hyperslab stride */
     hsize_t     count[SPACE9_RANK]; /* Hyperslab block count */
     hsize_t     block[SPACE9_RANK]; /* Hyperslab block size */
     unsigned    u,v;            /* Local index variables */
-    htri_t	check;		/* Shape comparison return value */
-    herr_t	ret;		/* Generic return value	*/
+    htri_t    check;        /* Shape comparison return value */
+    herr_t    ret;        /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(6, ("Testing Same Shape Comparisons\n"));
@@ -8399,12 +8399,13 @@ test_shape_same(void)
             CHECK(tmp_sid, FAIL, "H5Screate_simple");
 
             /* Select sequence of points for point selection */
-            for(u=1; u<(SPACE9_DIM1-1); u++) {
-                for(v=1; v<(SPACE9_DIM2-1); v++) {
+            for(u = 1; u < (SPACE9_DIM1 - 1); u++) {
+                for(v = 1; v < (SPACE9_DIM2 - 1); v++) {
                     coord2[v - 1][0] = u;
                     coord2[v - 1][1] = v;
                 } /* end for */
-                ret = H5Sselect_elements(tmp_sid,H5S_SELECT_APPEND,(SPACE9_DIM2-2),coord2);
+
+                ret = H5Sselect_elements(tmp_sid, H5S_SELECT_APPEND, (SPACE9_DIM2 - 2), coord2);
                 CHECK(ret, FAIL, "H5Sselect_elements");
             } /* end for */
 
@@ -8426,12 +8427,12 @@ test_shape_same(void)
             CHECK(ret, FAIL, "H5Sselect_none");
 
             /* Select sequence of rows for hyperslab selection */
-            for(u=1; u<(SPACE9_DIM1-1); u++) {
-                start[0]=u; start[1]=1;
-                stride[0]=1; stride[1]=1;
-                count[0]=1; count[1]=1;
-                block[0]=1; block[1]=(SPACE9_DIM2-2);
-                ret = H5Sselect_hyperslab(tmp_sid,H5S_SELECT_OR,start,stride,count,block);
+            for(u = 1; u < (SPACE9_DIM1 - 1); u++) {
+                start[0] = u;  start[1] = 1;
+                stride[0] = 1; stride[1] = 1;
+                count[0] = 1;  count[1] = 1;
+                block[0] = 1;  block[1] = (SPACE9_DIM2 - 2);
+                ret = H5Sselect_hyperslab(tmp_sid, H5S_SELECT_OR, start, stride, count, block);
                 CHECK(ret, FAIL, "H5Sselect_hyperslab");
             } /* end for */
 
@@ -8514,12 +8515,12 @@ test_shape_same(void)
             CHECK(tmp_sid, FAIL, "H5Screate_simple");
 
             /* Select sequence of points for point selection */
-            for(u=0; u<SPACE9_DIM1; u++) {
-                for(v=0; v<SPACE9_DIM2; v++) {
+            for(u = 0; u < SPACE9_DIM1; u++) {
+                for(v = 0; v < SPACE9_DIM2; v++) {
                     coord2[v][0] = u;
                     coord2[v][1] = v;
                 } /* end for */
-                ret = H5Sselect_elements(tmp_sid,H5S_SELECT_APPEND,SPACE9_DIM2,coord2);
+                ret = H5Sselect_elements(tmp_sid, H5S_SELECT_APPEND, SPACE9_DIM2, coord2);
                 CHECK(ret, FAIL, "H5Sselect_elements");
             } /* end for */
 
@@ -8541,12 +8542,12 @@ test_shape_same(void)
             CHECK(ret, FAIL, "H5Sselect_none");
 
             /* Select sequence of rows for hyperslab selection */
-            for(u=0; u<SPACE9_DIM2; u++) {
-                start[0]=u; start[1]=0;
-                stride[0]=1; stride[1]=1;
-                count[0]=1; count[1]=1;
-                block[0]=1; block[1]=SPACE9_DIM2;
-                ret = H5Sselect_hyperslab(tmp_sid,H5S_SELECT_OR,start,stride,count,block);
+            for(u = 0; u < SPACE9_DIM2; u++) {
+                start[0] = u;  start[1] = 0;
+                stride[0] = 1; stride[1] = 1;
+                count[0] = 1;  count[1] = 1;
+                block[0] = 1;  block[1] = SPACE9_DIM2;
+                ret = H5Sselect_hyperslab(tmp_sid, H5S_SELECT_OR, start, stride, count, block);
                 CHECK(ret, FAIL, "H5Sselect_hyperslab");
             } /* end for */
 
@@ -8708,11 +8709,11 @@ test_shape_same(void)
 
             /* Select sequence of rows for hyperslab selection */
             for(u = 2; u < 11; u += 2) {
-                start[0] = u; start[1] = 3;
+                start[0] = u;  start[1] = 3;
                 stride[0] = 1; stride[1] = 2;
-                count[0] = 1; count[1] = 2;
-                block[0] = 1; block[1] = 1;
-                ret = H5Sselect_hyperslab(tmp_sid,H5S_SELECT_OR,start,stride,count,block);
+                count[0] = 1;  count[1] = 2;
+                block[0] = 1;  block[1] = 1;
+                ret = H5Sselect_hyperslab(tmp_sid, H5S_SELECT_OR, start, stride, count, block);
                 CHECK(ret, FAIL, "H5Sselect_hyperslab");
             } /* end for */
 
@@ -8729,11 +8730,11 @@ test_shape_same(void)
             CHECK(tmp_sid, FAIL, "H5Screate_simple");
 
             /* Select regular, strided hyperslab selection at an offset */
-            start[0] = 1; start[1] = 1;
+            start[0] = 1;  start[1] = 1;
             stride[0] = 2; stride[1] = 2;
-            count[0] = 5; count[1] = 2;
-            block[0] = 1; block[1] = 1;
-            ret = H5Sselect_hyperslab(tmp_sid,H5S_SELECT_SET,start,stride,count,block);
+            count[0] = 5;  count[1] = 2;
+            block[0] = 1;  block[1] = 1;
+            ret = H5Sselect_hyperslab(tmp_sid, H5S_SELECT_SET, start, stride, count, block);
             CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
             /* Compare against hyperslab selection */
@@ -8807,20 +8808,20 @@ test_shape_same(void)
             tmp_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
             CHECK(tmp_sid, FAIL, "H5Screate_simple");
 
-            start[0]=2; start[1]=2;
-            stride[0]=1; stride[1]=1;
-            count[0]=1; count[1]=1;
-            block[0]=1; block[1]=1;
-            ret = H5Sselect_hyperslab(tmp_sid,H5S_SELECT_SET,start,stride,count,block);
+            start[0] = 2;  start[1] = 2;
+            stride[0] = 1; stride[1] = 1;
+            count[0] = 1;  count[1] = 1;
+            block[0] = 1;  block[1] = 1;
+            ret = H5Sselect_hyperslab(tmp_sid, H5S_SELECT_SET, start, stride, count, block);
             CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
             /* Select sequence of columns for hyperslab selection */
-            for(u=0; u<3; u++) {
-                start[0]=4; start[1]=u+4;
-                stride[0]=1; stride[1]=1;
-                count[0]=1; count[1]=1;
-                block[0]=3; block[1]=1;
-                ret = H5Sselect_hyperslab(tmp_sid,H5S_SELECT_OR,start,stride,count,block);
+            for(u = 0; u < 3; u++) {
+                start[0] = 4; start[1] = u + 4;
+                stride[0] = 1; stride[1] = 1;
+                count[0] = 1; count[1] = 1;
+                block[0] = 3; block[1] = 1;
+                ret = H5Sselect_hyperslab(tmp_sid, H5S_SELECT_OR, start, stride, count, block);
                 CHECK(ret, FAIL, "H5Sselect_hyperslab");
             } /* end for */
 
@@ -8994,23 +8995,23 @@ test_shape_same(void)
 **  test_shape_same_dr__smoke_check_1():
 **
 **    Create a square, 2-D dataspace (10 X 10), and select
-**	all of it.
+**    all of it.
 **
 **      Similarly, create nine, 3-D dataspaces (10 X 10 X 10),
-**	and select (10 X 10 X 1) hyper slabs in each, three with
-**	the slab parallel to the xy plane, three parallel to the
-**	xz plane, and three parallel to the yz plane.
+**    and select (10 X 10 X 1) hyperslabs in each, three with
+**    the slab parallel to the xy plane, three parallel to the
+**    xz plane, and three parallel to the yz plane.
 **
-**	Assuming that z is the fastest changing dimension,
+**    Assuming that z is the fastest changing dimension,
 **    H5Sselect_shape_same() should return TRUE when comparing
 **    the full 2-D space against any hyperslab parallel to the
 **    yz plane in the 3-D space, and FALSE when comparing the
 **    full 2-D space against the other two hyperslabs.
 **
 **    Also create two additional 3-D dataspaces (10 X 10 X 10),
-**	and select a (10 X 10 X 2) hyper slab parallel to the yz
-**	axis in one of them, and two parallel (10 X 10 X 1) hyper
-**	slabs parallel to the yz axis in the other.
+**    and select a (10 X 10 X 2) hyperslab parallel to the yz
+**    axis in one of them, and two parallel (10 X 10 X 1) hyper
+**    slabs parallel to the yz axis in the other.
 **    H5Sselect_shape_same() should return FALSE when comparing
 **    each to the 2-D selection.
 **
@@ -9018,27 +9019,27 @@ test_shape_same(void)
 static void
 test_shape_same_dr__smoke_check_1(void)
 {
-    hid_t	small_square_sid;
-    hid_t	small_cube_xy_slice_0_sid;
-    hid_t	small_cube_xy_slice_1_sid;
-    hid_t	small_cube_xy_slice_2_sid;
-    hid_t	small_cube_xz_slice_0_sid;
-    hid_t	small_cube_xz_slice_1_sid;
-    hid_t	small_cube_xz_slice_2_sid;
-    hid_t	small_cube_yz_slice_0_sid;
-    hid_t	small_cube_yz_slice_1_sid;
-    hid_t	small_cube_yz_slice_2_sid;
-    hid_t	small_cube_yz_slice_3_sid;
-    hid_t	small_cube_yz_slice_4_sid;
-    hsize_t	small_cube_dims[] = {10, 10, 10};
-    hsize_t	start[3];
-    hsize_t	stride[3];
-    hsize_t	count[3];
-    hsize_t	block[3];
-    htri_t	check;		/* Shape comparison return value */
-    herr_t	ret;		/* Generic return value	*/
+    hid_t    small_square_sid;
+    hid_t    small_cube_xy_slice_0_sid;
+    hid_t    small_cube_xy_slice_1_sid;
+    hid_t    small_cube_xy_slice_2_sid;
+    hid_t    small_cube_xz_slice_0_sid;
+    hid_t    small_cube_xz_slice_1_sid;
+    hid_t    small_cube_xz_slice_2_sid;
+    hid_t    small_cube_yz_slice_0_sid;
+    hid_t    small_cube_yz_slice_1_sid;
+    hid_t    small_cube_yz_slice_2_sid;
+    hid_t    small_cube_yz_slice_3_sid;
+    hid_t    small_cube_yz_slice_4_sid;
+    hsize_t    small_cube_dims[] = {10, 10, 10};
+    hsize_t    start[3];
+    hsize_t    stride[3];
+    hsize_t    count[3];
+    hsize_t    block[3];
+    htri_t    check;        /* Shape comparison return value */
+    herr_t    ret;        /* Generic return value    */
 
-    MESSAGE(7, ("	Smoke check 1: Slices through a cube.\n"));
+    MESSAGE(7, ("    Smoke check 1: Slices through a cube.\n"));
 
     /* Create the 10 x 10 dataspace  */
     small_square_sid = H5Screate_simple(2, small_cube_dims, NULL);
@@ -9054,24 +9055,24 @@ test_shape_same_dr__smoke_check_1(void)
     small_cube_xy_slice_2_sid = H5Screate_simple(3, small_cube_dims, NULL);
     CHECK(small_cube_xy_slice_2_sid, FAIL, "H5Screate_simple");
 
-    start[0] = 0;	/* x */
-    start[1] = 0;	/* y */
-    start[2] = 0;	/* z */
+    start[0] = 0;    /* x */
+    start[1] = 0;    /* y */
+    start[2] = 0;    /* z */
 
     /* stride is a bit silly here, since we are only selecting a single  */
     /* contiguous plane, but include it anyway, with values large enough */
     /* to ensure that we will only get the single block selected. */
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
-    stride[2] = 20;	/* z */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
+    stride[2] = 20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 10;	/* x */
-    block[1] = 10;	/* y */
-    block[2] =  1;	/* z */
+    block[0] = 10;    /* x */
+    block[1] = 10;    /* y */
+    block[2] =  1;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_0_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9097,24 +9098,24 @@ test_shape_same_dr__smoke_check_1(void)
     small_cube_xz_slice_2_sid = H5Screate_simple(3, small_cube_dims, NULL);
     CHECK(small_cube_xz_slice_2_sid, FAIL, "H5Screate_simple");
 
-    start[0] = 0;	/* x */
-    start[1] = 0;	/* y */
-    start[2] = 0;	/* z */
+    start[0] = 0;    /* x */
+    start[1] = 0;    /* y */
+    start[2] = 0;    /* z */
 
     /* stride is a bit silly here, since we are only selecting a single  */
     /* contiguous chunk, but include it anyway, with values large enough */
     /* to ensure that we will only get the single chunk. */
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
-    stride[2] = 20;	/* z */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
+    stride[2] = 20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 10;	/* x */
-    block[1] =  1;	/* y */
-    block[2] = 10;	/* z */
+    block[0] = 10;    /* x */
+    block[1] =  1;    /* y */
+    block[2] = 10;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_0_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9146,24 +9147,24 @@ test_shape_same_dr__smoke_check_1(void)
     small_cube_yz_slice_4_sid = H5Screate_simple(3, small_cube_dims, NULL);
     CHECK(small_cube_yz_slice_4_sid, FAIL, "H5Screate_simple");
 
-    start[0] = 0;	/* x */
-    start[1] = 0;	/* y */
-    start[2] = 0;	/* z */
+    start[0] = 0;    /* x */
+    start[1] = 0;    /* y */
+    start[2] = 0;    /* z */
 
     /* stride is a bit silly here, since we are only selecting a single  */
     /* contiguous chunk, but include it anyway, with values large enough */
     /* to ensure that we will only get the single chunk. */
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
-    stride[2] = 20;	/* z */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
+    stride[2] = 20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] =  1;	/* x */
-    block[1] = 10;	/* y */
-    block[2] = 10;	/* z */
+    block[0] =  1;    /* x */
+    block[1] = 10;    /* y */
+    block[2] = 10;    /* z */
 
     ret = H5Sselect_hyperslab(small_cube_yz_slice_0_sid, H5S_SELECT_SET,
                               start, stride, count, block);
@@ -9285,39 +9286,39 @@ test_shape_same_dr__smoke_check_1(void)
 **  test_shape_same_dr__smoke_check_2():
 **
 **    Create a square, 2-D dataspace (10 X 10), and select
-**	a "checker board" hyper slab as follows:
+**    a "checker board" hyperslab as follows:
 **
-**		* * - - * * - - * *
+**        * * - - * * - - * *
 **              * * - - * * - - * *
 **              - - * * - - * * - -
 **              - - * * - - * * - -
-**		* * - - * * - - * *
+**        * * - - * * - - * *
 **              * * - - * * - - * *
 **              - - * * - - * * - -
 **              - - * * - - * * - -
-**		* * - - * * - - * *
+**        * * - - * * - - * *
 **              * * - - * * - - * *
 **
-**	where asterisks indicate selected elements, and dashes
-**	indicate unselected elements.
+**    where asterisks indicate selected elements, and dashes
+**    indicate unselected elements.
 **
 **    Similarly, create nine, 3-D dataspaces (10 X 10 X 10),
-**	and select similar (10 X 10 X 1) checker board hyper
-**	slabs in each, three with the slab parallel to  the xy
-**	plane, three parallel to the xz plane, and three parallel
-**	to the yz plane.
+**    and select similar (10 X 10 X 1) checker board hyper
+**    slabs in each, three with the slab parallel to  the xy
+**    plane, three parallel to the xz plane, and three parallel
+**    to the yz plane.
 **
-**	Assuming that z is the fastest changing dimension,
+**    Assuming that z is the fastest changing dimension,
 **    H5Sselect_shape_same() should return TRUE when comparing
 **    the 2-D space checker board selection against a checker
 **    board hyperslab parallel to the yz plane in the 3-D
 **    space, and FALSE when comparing the 2-D checkerboard
-**	selection against two hyper slabs parallel to the xy
-**	or xz planes.
+**    selection against two hyperslabs parallel to the xy
+**    or xz planes.
 **
 **    Also create an additional 3-D dataspaces (10 X 10 X 10),
-**	and select a checker board parallel with the yz axis,
-**	save with some squares being on different planes.
+**    and select a checker board parallel with the yz axis,
+**    save with some squares being on different planes.
 **    H5Sselect_shape_same() should return FALSE when
 **    comparing this selection to the 2-D selection.
 **
@@ -9325,57 +9326,57 @@ test_shape_same_dr__smoke_check_1(void)
 static void
 test_shape_same_dr__smoke_check_2(void)
 {
-    hid_t	small_square_sid;
-    hid_t	small_cube_xy_slice_0_sid;
-    hid_t	small_cube_xy_slice_1_sid;
-    hid_t	small_cube_xy_slice_2_sid;
-    hid_t	small_cube_xz_slice_0_sid;
-    hid_t	small_cube_xz_slice_1_sid;
-    hid_t	small_cube_xz_slice_2_sid;
-    hid_t	small_cube_yz_slice_0_sid;
-    hid_t	small_cube_yz_slice_1_sid;
-    hid_t	small_cube_yz_slice_2_sid;
-    hid_t	small_cube_yz_slice_3_sid;
-    hsize_t	small_cube_dims[] = {10, 10, 10};
-    hsize_t	start[3];
-    hsize_t	stride[3];
-    hsize_t	count[3];
-    hsize_t	block[3];
-    htri_t	check;		/* Shape comparison return value */
-    herr_t	ret;		/* Generic return value	*/
+    hid_t    small_square_sid;
+    hid_t    small_cube_xy_slice_0_sid;
+    hid_t    small_cube_xy_slice_1_sid;
+    hid_t    small_cube_xy_slice_2_sid;
+    hid_t    small_cube_xz_slice_0_sid;
+    hid_t    small_cube_xz_slice_1_sid;
+    hid_t    small_cube_xz_slice_2_sid;
+    hid_t    small_cube_yz_slice_0_sid;
+    hid_t    small_cube_yz_slice_1_sid;
+    hid_t    small_cube_yz_slice_2_sid;
+    hid_t    small_cube_yz_slice_3_sid;
+    hsize_t    small_cube_dims[] = {10, 10, 10};
+    hsize_t    start[3];
+    hsize_t    stride[3];
+    hsize_t    count[3];
+    hsize_t    block[3];
+    htri_t    check;        /* Shape comparison return value */
+    herr_t    ret;        /* Generic return value    */
 
-    MESSAGE(7, ("	Smoke check 2: Checker board slices through a cube.\n"));
+    MESSAGE(7, ("    Smoke check 2: Checker board slices through a cube.\n"));
 
     /* Create the 10 x 10 dataspace  */
     small_square_sid = H5Screate_simple(2, small_cube_dims, NULL);
     CHECK(small_square_sid, FAIL, "H5Screate_simple");
 
-    start[0] = 0;	/* x */
-    start[1] = 0;	/* y */
+    start[0] = 0;    /* x */
+    start[1] = 0;    /* y */
 
-    stride[0] = 4;	/* x */
-    stride[1] = 4;	/* y */
+    stride[0] = 4;    /* x */
+    stride[1] = 4;    /* y */
 
-    count[0] = 3;	/* x */
-    count[1] = 3;	/* y */
+    count[0] = 3;    /* x */
+    count[1] = 3;    /* y */
 
-    block[0] = 2;	/* x */
-    block[1] = 2;	/* y */
+    block[0] = 2;    /* x */
+    block[1] = 2;    /* y */
     ret = H5Sselect_hyperslab(small_square_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    start[0] = 2;	/* x */
-    start[1] = 2;	/* y */
+    start[0] = 2;    /* x */
+    start[1] = 2;    /* y */
 
-    stride[0] = 4;	/* x */
-    stride[1] = 4;	/* y */
+    stride[0] = 4;    /* x */
+    stride[1] = 4;    /* y */
 
-    count[0] = 2;	/* x */
-    count[1] = 2;	/* y */
+    count[0] = 2;    /* x */
+    count[1] = 2;    /* y */
 
-    block[0] = 2;	/* x */
-    block[1] = 2;	/* y */
+    block[0] = 2;    /* x */
+    block[1] = 2;    /* y */
     ret = H5Sselect_hyperslab(small_square_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9392,21 +9393,21 @@ test_shape_same_dr__smoke_check_2(void)
     CHECK(small_cube_xy_slice_2_sid, FAIL, "H5Screate_simple");
 
 
-    start[0] = 0;	/* x */
-    start[1] = 0;	/* y */
-    start[2] = 0;	/* z */
+    start[0] = 0;    /* x */
+    start[1] = 0;    /* y */
+    start[2] = 0;    /* z */
 
-    stride[0] =  4;	/* x */
-    stride[1] =  4;	/* y  */
-    stride[2] =  20;	/* z -- large enough that there will only be one slice */
+    stride[0] =  4;    /* x */
+    stride[1] =  4;    /* y  */
+    stride[2] =  20;    /* z -- large enough that there will only be one slice */
 
-    count[0] = 3;	/* x */
-    count[1] = 3;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 3;    /* x */
+    count[1] = 3;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 2;	/* x */
-    block[1] = 2;	/* y */
-    block[2] = 1;	/* z */
+    block[0] = 2;    /* x */
+    block[1] = 2;    /* y */
+    block[2] = 1;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_0_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9422,21 +9423,21 @@ test_shape_same_dr__smoke_check_2(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
 
-    start[0] = 2;	/* x */
-    start[1] = 2;	/* y */
-    start[2] = 0;	/* z */
+    start[0] = 2;    /* x */
+    start[1] = 2;    /* y */
+    start[2] = 0;    /* z */
 
-    stride[0] =  4;	/* x */
-    stride[1] =  4;	/* y  */
-    stride[2] =  20;	/* z -- large enough that there will only be one slice */
+    stride[0] =  4;    /* x */
+    stride[1] =  4;    /* y  */
+    stride[2] =  20;    /* z -- large enough that there will only be one slice */
 
-    count[0] = 2;	/* x */
-    count[1] = 2;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 2;    /* x */
+    count[1] = 2;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 2;	/* x */
-    block[1] = 2;	/* y */
-    block[2] = 1;	/* z */
+    block[0] = 2;    /* x */
+    block[1] = 2;    /* y */
+    block[2] = 1;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_0_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9463,21 +9464,21 @@ test_shape_same_dr__smoke_check_2(void)
     CHECK(small_cube_xz_slice_2_sid, FAIL, "H5Screate_simple");
 
 
-    start[0] = 0;	/* x */
-    start[1] = 0;	/* y */
-    start[2] = 0;	/* z */
+    start[0] = 0;    /* x */
+    start[1] = 0;    /* y */
+    start[2] = 0;    /* z */
 
-    stride[0] =  4;	/* x */
-    stride[1] = 20;	/* y -- large enough that there will only be one slice */
-    stride[2] =  4;	/* z */
+    stride[0] =  4;    /* x */
+    stride[1] = 20;    /* y -- large enough that there will only be one slice */
+    stride[2] =  4;    /* z */
 
-    count[0] = 3;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 3;	/* z */
+    count[0] = 3;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 3;    /* z */
 
-    block[0] = 2;	/* x */
-    block[1] = 1;	/* y */
-    block[2] = 2;	/* z */
+    block[0] = 2;    /* x */
+    block[1] = 1;    /* y */
+    block[2] = 2;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_0_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9492,21 +9493,21 @@ test_shape_same_dr__smoke_check_2(void)
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    start[0] = 2;	/* x */
-    start[1] = 0;	/* y */
-    start[2] = 2;	/* z */
+    start[0] = 2;    /* x */
+    start[1] = 0;    /* y */
+    start[2] = 2;    /* z */
 
-    stride[0] =  4;	/* x */
-    stride[1] = 20;	/* y -- large enough that there will only be one slice */
-    stride[2] =  4;	/* z */
+    stride[0] =  4;    /* x */
+    stride[1] = 20;    /* y -- large enough that there will only be one slice */
+    stride[2] =  4;    /* z */
 
-    count[0] = 2;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 2;	/* z */
+    count[0] = 2;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 2;    /* z */
 
-    block[0] = 2;	/* x */
-    block[1] = 1;	/* y */
-    block[2] = 2;	/* z */
+    block[0] = 2;    /* x */
+    block[1] = 1;    /* y */
+    block[2] = 2;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_0_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9535,21 +9536,21 @@ test_shape_same_dr__smoke_check_2(void)
     small_cube_yz_slice_3_sid = H5Screate_simple(3, small_cube_dims, NULL);
     CHECK(small_cube_yz_slice_3_sid, FAIL, "H5Screate_simple");
 
-    start[0] = 0;	/* x */
-    start[1] = 0;	/* y */
-    start[2] = 0;	/* z */
+    start[0] = 0;    /* x */
+    start[1] = 0;    /* y */
+    start[2] = 0;    /* z */
 
     stride[0] = 20;	/* x -- large enough that there will only be one slice */
     stride[1] =  4;	/* y  */
     stride[2] =  4;	/* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 3;	/* y */
-    count[2] = 3;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 3;    /* y */
+    count[2] = 3;    /* z */
 
-    block[0] = 1;	/* x */
-    block[1] = 2;	/* y */
-    block[2] = 2;	/* z */
+    block[0] = 1;    /* x */
+    block[1] = 2;    /* y */
+    block[2] = 2;    /* z */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_0_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9570,21 +9571,21 @@ test_shape_same_dr__smoke_check_2(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
 
-    start[0] = 0;	/* x */
-    start[1] = 2;	/* y */
-    start[2] = 2;	/* z */
+    start[0] = 0;    /* x */
+    start[1] = 2;    /* y */
+    start[2] = 2;    /* z */
 
-    stride[0] = 20;	/* x -- large enough that there will only be one slice */
-    stride[1] =  4;	/* y */
-    stride[2] =  4;	/* z */
+    stride[0] = 20;    /* x -- large enough that there will only be one slice */
+    stride[1] =  4;    /* y */
+    stride[2] =  4;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 2;	/* y */
-    count[2] = 2;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 2;    /* y */
+    count[2] = 2;    /* z */
 
-    block[0] = 1;	/* x */
-    block[1] = 2;	/* y */
-    block[2] = 2;	/* z */
+    block[0] = 1;    /* x */
+    block[1] = 2;    /* y */
+    block[2] = 2;    /* z */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_0_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9693,108 +9694,108 @@ test_shape_same_dr__smoke_check_2(void)
 **  test_shape_same_dr__smoke_check_3():
 **
 **    Create a square, 2-D dataspace (10 X 10), and select an
-**	irregular hyper slab as follows:
+**    irregular hyperslab as follows:
 **
-**		y
-**		9 - - - - - - - - - -
-**		8 - - - - - - - - - -
-**		7 - - - * * * * - - -
-**		6 - - * * * * * - - -
-**		5 - - * * - - - - - -
-**		4 - - * * - * * - - -
-**		3 - - * * - * * - - -
-**		2 - - - - - - - - - -
-**		1 - - - - - - - - - -
-**	 	0 - - - - - - - - - -
+**        y
+**        9 - - - - - - - - - -
+**        8 - - - - - - - - - -
+**        7 - - - * * * * - - -
+**        6 - - * * * * * - - -
+**        5 - - * * - - - - - -
+**        4 - - * * - * * - - -
+**        3 - - * * - * * - - -
+**        2 - - - - - - - - - -
+**        1 - - - - - - - - - -
+**         0 - - - - - - - - - -
 **                0 1 2 3 4 5 6 7 8 9 x
 **
-**	where asterisks indicate selected elements, and dashes
-**	indicate unselected elements.
+**    where asterisks indicate selected elements, and dashes
+**    indicate unselected elements.
 **
 **    Similarly, create nine, 3-D dataspaces (10 X 10 X 10),
-**	and select similar irregular hyper slabs in each, three
-**	with the slab parallel to the xy plane, three parallel
-**	to the xz plane, and three parallel to the yz plane.
-**	Further, translate the irregular slab in 2/3rds of the
-**	cases.
+**    and select similar irregular hyperslabs in each, three
+**    with the slab parallel to the xy plane, three parallel
+**    to the xz plane, and three parallel to the yz plane.
+**    Further, translate the irregular slab in 2/3rds of the
+**    cases.
 **
-**	Assuming that z is the fastest changing dimension,
+**    Assuming that z is the fastest changing dimension,
 **    H5Sselect_shape_same() should return TRUE when
 **    comparing the 2-D irregular hyperslab selection
-**	against the irregular hyperslab selections parallel
+**    against the irregular hyperslab selections parallel
 **    to the yz plane in the 3-D space, and FALSE when
-**	comparing it against the irregular hyper slabs
-**	selections parallel to the xy or xz planes.
+**    comparing it against the irregular hyperslabs
+**    selections parallel to the xy or xz planes.
 **
 ****************************************************************/
 static void
 test_shape_same_dr__smoke_check_3(void)
 {
-    hid_t	small_square_sid;
-    hid_t	small_cube_xy_slice_0_sid;
-    hid_t	small_cube_xy_slice_1_sid;
-    hid_t	small_cube_xy_slice_2_sid;
-    hid_t	small_cube_xz_slice_0_sid;
-    hid_t	small_cube_xz_slice_1_sid;
-    hid_t	small_cube_xz_slice_2_sid;
-    hid_t	small_cube_yz_slice_0_sid;
-    hid_t	small_cube_yz_slice_1_sid;
-    hid_t	small_cube_yz_slice_2_sid;
-    hsize_t	small_cube_dims[] = {10, 10, 10};
-    hsize_t	start[3];
-    hsize_t	stride[3];
-    hsize_t	count[3];
-    hsize_t	block[3];
-    htri_t	check;		/* Shape comparison return value */
-    herr_t	ret;		/* Generic return value	*/
+    hid_t    small_square_sid;
+    hid_t    small_cube_xy_slice_0_sid;
+    hid_t    small_cube_xy_slice_1_sid;
+    hid_t    small_cube_xy_slice_2_sid;
+    hid_t    small_cube_xz_slice_0_sid;
+    hid_t    small_cube_xz_slice_1_sid;
+    hid_t    small_cube_xz_slice_2_sid;
+    hid_t    small_cube_yz_slice_0_sid;
+    hid_t    small_cube_yz_slice_1_sid;
+    hid_t    small_cube_yz_slice_2_sid;
+    hsize_t    small_cube_dims[] = {10, 10, 10};
+    hsize_t    start[3];
+    hsize_t    stride[3];
+    hsize_t    count[3];
+    hsize_t    block[3];
+    htri_t    check;        /* Shape comparison return value */
+    herr_t    ret;        /* Generic return value    */
 
-    MESSAGE(7, ("	Smoke check 3: Offset subsets of slices through a cube.\n"));
+    MESSAGE(7, ("    Smoke check 3: Offset subsets of slices through a cube.\n"));
 
     /* Create the 10 x 10 dataspace  */
     small_square_sid = H5Screate_simple(2, small_cube_dims, NULL);
     CHECK(small_square_sid, FAIL, "H5Screate_simple");
 
-    start[0] = 2;	/* x */
-    start[1] = 3;	/* y */
+    start[0] = 2;    /* x */
+    start[1] = 3;    /* y */
 
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
 
-    block[0] = 2;	/* x */
-    block[1] = 4;	/* y */
+    block[0] = 2;    /* x */
+    block[1] = 4;    /* y */
     ret = H5Sselect_hyperslab(small_square_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    start[0] = 3;	/* x */
-    start[1] = 6;	/* y */
+    start[0] = 3;    /* x */
+    start[1] = 6;    /* y */
 
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
 
-    block[0] = 4;	/* x */
-    block[1] = 2;	/* y */
+    block[0] = 4;    /* x */
+    block[1] = 2;    /* y */
     ret = H5Sselect_hyperslab(small_square_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    start[0] = 5;	/* x */
-    start[1] = 3;	/* y */
+    start[0] = 5;    /* x */
+    start[1] = 3;    /* y */
 
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
 
-    block[0] = 2;	/* x */
-    block[1] = 2;	/* y */
+    block[0] = 2;    /* x */
+    block[1] = 2;    /* y */
     ret = H5Sselect_hyperslab(small_square_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9811,101 +9812,101 @@ test_shape_same_dr__smoke_check_3(void)
     CHECK(small_cube_xy_slice_2_sid, FAIL, "H5Screate_simple");
 
 
-    start[0] = 2;	/* x */
-    start[1] = 3;	/* y */
-    start[2] = 5;	/* z */
+    start[0] = 2;    /* x */
+    start[1] = 3;    /* y */
+    start[2] = 5;    /* z */
 
-    stride[0] =  20;	/* x */
-    stride[1] =  20;	/* y */
-    stride[2] =  20;	/* z */
+    stride[0] =  20;    /* x */
+    stride[1] =  20;    /* y */
+    stride[2] =  20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 2;	/* x */
-    block[1] = 4;	/* y */
-    block[2] = 1;	/* z */
+    block[0] = 2;    /* x */
+    block[1] = 4;    /* y */
+    block[2] = 1;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_0_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the starting point to the origin */
-    start[0] -= 1;	/* x */
-    start[1] -= 2;	/* y */
+    start[0] -= 1;    /* x */
+    start[1] -= 2;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_1_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the irregular selection to the upper right hand corner */
-    start[0] += 5;	/* x */
-    start[1] += 5;	/* y */
+    start[0] += 5;    /* x */
+    start[1] += 5;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_2_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    start[0] = 3;	/* x */
-    start[1] = 6;	/* y */
-    start[2] = 5;	/* z */
+    start[0] = 3;    /* x */
+    start[1] = 6;    /* y */
+    start[2] = 5;    /* z */
 
-    stride[0] =  20;	/* x */
-    stride[1] =  20;	/* y  */
-    stride[2] =  20;	/* z */
+    stride[0] =  20;    /* x */
+    stride[1] =  20;    /* y  */
+    stride[2] =  20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 4;	/* x */
-    block[1] = 2;	/* y */
-    block[2] = 1;	/* z */
+    block[0] = 4;    /* x */
+    block[1] = 2;    /* y */
+    block[2] = 1;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_0_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the starting point to the origin */
-    start[0] -= 1;	/* x */
-    start[1] -= 2;	/* y */
+    start[0] -= 1;    /* x */
+    start[1] -= 2;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_1_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the irregular selection to the upper right hand corner */
-    start[0] += 5;	/* x */
-    start[1] += 5;	/* y */
+    start[0] += 5;    /* x */
+    start[1] += 5;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_2_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    start[0] = 5;	/* x */
-    start[1] = 3;	/* y */
-    start[2] = 5;	/* z */
+    start[0] = 5;    /* x */
+    start[1] = 3;    /* y */
+    start[2] = 5;    /* z */
 
-    stride[0] =  20;	/* x */
-    stride[1] =  20;	/* y */
-    stride[2] =  20;	/* z */
+    stride[0] =  20;    /* x */
+    stride[1] =  20;    /* y */
+    stride[2] =  20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 2;	/* x */
-    block[1] = 2;	/* y */
-    block[2] = 1;	/* z */
+    block[0] = 2;    /* x */
+    block[1] = 2;    /* y */
+    block[2] = 1;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_0_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the starting point to the origin */
-    start[0] -= 1;	/* x */
-    start[1] -= 2;	/* y */
+    start[0] -= 1;    /* x */
+    start[1] -= 2;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_1_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the irregular selection to the upper right hand corner */
-    start[0] += 5;	/* x */
-    start[1] += 5;	/* y */
+    start[0] += 5;    /* x */
+    start[1] += 5;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xy_slice_2_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -9921,101 +9922,101 @@ test_shape_same_dr__smoke_check_3(void)
     small_cube_xz_slice_2_sid = H5Screate_simple(3, small_cube_dims, NULL);
     CHECK(small_cube_xz_slice_2_sid, FAIL, "H5Screate_simple");
 
-    start[0] = 2;	/* x */
-    start[1] = 5;	/* y */
-    start[2] = 3;	/* z */
+    start[0] = 2;    /* x */
+    start[1] = 5;    /* y */
+    start[2] = 3;    /* z */
 
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
-    stride[2] = 20;	/* z */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
+    stride[2] = 20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 2;	/* x */
-    block[1] = 1;	/* y */
-    block[2] = 4;	/* z */
+    block[0] = 2;    /* x */
+    block[1] = 1;    /* y */
+    block[2] = 4;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_0_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the starting point to the origin */
-    start[0] -= 1;	/* x */
-    start[2] -= 2;	/* y */
+    start[0] -= 1;    /* x */
+    start[2] -= 2;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_1_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the irregular selection to the upper right hand corner */
-    start[0] += 5;	/* x */
-    start[2] += 5;	/* y */
+    start[0] += 5;    /* x */
+    start[2] += 5;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_2_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    start[0] = 3;	/* x */
-    start[1] = 5;	/* y */
-    start[2] = 6;	/* z */
+    start[0] = 3;    /* x */
+    start[1] = 5;    /* y */
+    start[2] = 6;    /* z */
 
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
-    stride[2] = 20;	/* z */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
+    stride[2] = 20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 4;	/* x */
-    block[1] = 1;	/* y */
-    block[2] = 2;	/* z */
+    block[0] = 4;    /* x */
+    block[1] = 1;    /* y */
+    block[2] = 2;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_0_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the starting point to the origin */
-    start[0] -= 1;	/* x */
-    start[2] -= 2;	/* y */
+    start[0] -= 1;    /* x */
+    start[2] -= 2;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_1_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the irregular selection to the upper right hand corner */
-    start[0] += 5;	/* x */
-    start[2] += 5;	/* y */
+    start[0] += 5;    /* x */
+    start[2] += 5;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_2_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    start[0] = 5;	/* x */
-    start[1] = 5;	/* y */
-    start[2] = 3;	/* z */
+    start[0] = 5;    /* x */
+    start[1] = 5;    /* y */
+    start[2] = 3;    /* z */
 
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
-    stride[2] = 20;	/* z */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
+    stride[2] = 20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 2;	/* x */
-    block[1] = 1;	/* y */
-    block[2] = 2;	/* z */
+    block[0] = 2;    /* x */
+    block[1] = 1;    /* y */
+    block[2] = 2;    /* z */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_0_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the starting point to the origin */
-    start[0] -= 1;	/* x */
-    start[2] -= 2;	/* y */
+    start[0] -= 1;    /* x */
+    start[2] -= 2;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_1_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the irregular selection to the upper right hand corner */
-    start[0] += 5;	/* x */
-    start[2] += 5;	/* y */
+    start[0] += 5;    /* x */
+    start[2] += 5;    /* y */
     ret = H5Sselect_hyperslab(small_cube_xz_slice_2_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -10033,101 +10034,101 @@ test_shape_same_dr__smoke_check_3(void)
     small_cube_yz_slice_2_sid = H5Screate_simple(3, small_cube_dims, NULL);
     CHECK(small_cube_yz_slice_2_sid, FAIL, "H5Screate_simple");
 
-    start[0] = 8;	/* x */
-    start[1] = 2;	/* y */
-    start[2] = 3;	/* z */
+    start[0] = 8;    /* x */
+    start[1] = 2;    /* y */
+    start[2] = 3;    /* z */
 
-    stride[0] = 20;	/* x -- large enough that there will only be one slice */
-    stride[1] = 20;	/* y */
-    stride[2] = 20;	/* z */
+    stride[0] = 20;    /* x -- large enough that there will only be one slice */
+    stride[1] = 20;    /* y */
+    stride[2] = 20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 1;	/* x */
-    block[1] = 2;	/* y */
-    block[2] = 4;	/* z */
+    block[0] = 1;    /* x */
+    block[1] = 2;    /* y */
+    block[2] = 4;    /* z */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_0_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the starting point to the origin */
-    start[1] -= 1;	/* x */
-    start[2] -= 2;	/* y */
+    start[1] -= 1;    /* x */
+    start[2] -= 2;    /* y */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_1_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the irregular selection to the upper right hand corner */
-    start[0] += 5;	/* x */
-    start[2] += 5;	/* y */
+    start[0] += 5;    /* x */
+    start[2] += 5;    /* y */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_2_sid, H5S_SELECT_SET,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    start[0] = 8;	/* x */
-    start[1] = 3;	/* y */
-    start[2] = 6;	/* z */
+    start[0] = 8;    /* x */
+    start[1] = 3;    /* y */
+    start[2] = 6;    /* z */
 
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
-    stride[2] = 20;	/* z */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
+    stride[2] = 20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 1;	/* x */
-    block[1] = 4;	/* y */
-    block[2] = 2;	/* z */
+    block[0] = 1;    /* x */
+    block[1] = 4;    /* y */
+    block[2] = 2;    /* z */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_0_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the starting point to the origin */
-    start[1] -= 1;	/* x */
-    start[2] -= 2;	/* y */
+    start[1] -= 1;    /* x */
+    start[2] -= 2;    /* y */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_1_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the irregular selection to the upper right hand corner */
-    start[0] += 5;	/* x */
-    start[2] += 5;	/* y */
+    start[0] += 5;    /* x */
+    start[2] += 5;    /* y */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_2_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    start[0] = 8;	/* x */
-    start[1] = 5;	/* y */
-    start[2] = 3;	/* z */
+    start[0] = 8;    /* x */
+    start[1] = 5;    /* y */
+    start[2] = 3;    /* z */
 
-    stride[0] = 20;	/* x */
-    stride[1] = 20;	/* y */
-    stride[2] = 20;	/* z */
+    stride[0] = 20;    /* x */
+    stride[1] = 20;    /* y */
+    stride[2] = 20;    /* z */
 
-    count[0] = 1;	/* x */
-    count[1] = 1;	/* y */
-    count[2] = 1;	/* z */
+    count[0] = 1;    /* x */
+    count[1] = 1;    /* y */
+    count[2] = 1;    /* z */
 
-    block[0] = 1;	/* x */
-    block[1] = 2;	/* y */
-    block[2] = 2;	/* z */
+    block[0] = 1;    /* x */
+    block[1] = 2;    /* y */
+    block[2] = 2;    /* z */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_0_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the starting point to the origin */
-    start[1] -= 1;	/* x */
-    start[2] -= 2;	/* y */
+    start[1] -= 1;    /* x */
+    start[2] -= 2;    /* y */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_1_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* move the irregular selection to the upper right hand corner */
-    start[0] += 5;	/* x */
-    start[2] += 5;	/* y */
+    start[0] += 5;    /* x */
+    start[2] += 5;    /* y */
     ret = H5Sselect_hyperslab(small_cube_yz_slice_2_sid, H5S_SELECT_OR,
                               start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -10201,7 +10202,6 @@ test_shape_same_dr__smoke_check_3(void)
 
     ret = H5Sclose(small_cube_yz_slice_2_sid);
     CHECK(ret, FAIL, "H5Sclose");
-
 } /* test_shape_same_dr__smoke_check_3() */
 
 
@@ -10210,78 +10210,78 @@ test_shape_same_dr__smoke_check_3(void)
 **  test_shape_same_dr__smoke_check_4():
 **
 **    Create a square, 2-D dataspace (10 X 10), and select
-**	the entire space.
+**    the entire space.
 **
 **    Similarly, create 3-D and 4-D dataspaces:
 **
-**		(1 X 10 X 10)
-**		(10 X 1 X 10)
-**		(10 X 10 X 1)
-**		(10 X 10 X 10)
+**        (1 X 10 X 10)
+**        (10 X 1 X 10)
+**        (10 X 10 X 1)
+**        (10 X 10 X 10)
 **
-**		(1 X 1 X 10 X 10)
-**		(1 X 10 X 1 X 10)
-**		(1 X 10 X 10 X 1)
-**		(10 X 1 X 1 X 10)
-**		(10 X 1 X 10 X 1)
-**		(10 X 10 X 1 X 1)
-**		(10 X 1 X 10 X 10)
+**        (1 X 1 X 10 X 10)
+**        (1 X 10 X 1 X 10)
+**        (1 X 10 X 10 X 1)
+**        (10 X 1 X 1 X 10)
+**        (10 X 1 X 10 X 1)
+**        (10 X 10 X 1 X 1)
+**        (10 X 1 X 10 X 10)
 **
-**	And select these entire spaces as well.
+**    And select these entire spaces as well.
 **
 **    Compare the 2-D space against all the other spaces
 **    with H5Sselect_shape_same().  The (1 X 10 X 10) &
-**	(1 X 1 X 10 X 10) should return TRUE.  All others
-**	should return FALSE.
+**    (1 X 1 X 10 X 10) should return TRUE.  All others
+**    should return FALSE.
 **
 ****************************************************************/
 static void
 test_shape_same_dr__smoke_check_4(void)
 {
-    hid_t	square_sid;
-    hid_t	three_d_space_0_sid;
-    hid_t	three_d_space_1_sid;
-    hid_t	three_d_space_2_sid;
-    hid_t	three_d_space_3_sid;
-    hid_t	four_d_space_0_sid;
-    hid_t	four_d_space_1_sid;
-    hid_t	four_d_space_2_sid;
-    hid_t	four_d_space_3_sid;
-    hid_t	four_d_space_4_sid;
-    hid_t	four_d_space_5_sid;
-    hid_t	four_d_space_6_sid;
-    hsize_t	dims[] = {10, 10, 10, 10};
-    htri_t	check;		/* Shape comparison return value */
-    herr_t	ret;		/* Generic return value	*/
+    hid_t    square_sid;
+    hid_t    three_d_space_0_sid;
+    hid_t    three_d_space_1_sid;
+    hid_t    three_d_space_2_sid;
+    hid_t    three_d_space_3_sid;
+    hid_t    four_d_space_0_sid;
+    hid_t    four_d_space_1_sid;
+    hid_t    four_d_space_2_sid;
+    hid_t    four_d_space_3_sid;
+    hid_t    four_d_space_4_sid;
+    hid_t    four_d_space_5_sid;
+    hid_t    four_d_space_6_sid;
+    hsize_t    dims[] = {10, 10, 10, 10};
+    htri_t    check;        /* Shape comparison return value */
+    herr_t    ret;        /* Generic return value    */
 
-    MESSAGE(7, ("	Smoke check 4: Spaces of different dimension but same size.\n"));
+    MESSAGE(7, ("    Smoke check 4: Spaces of different dimension but same size.\n"));
 
     /* Create the 10 x 10 dataspace  */
     square_sid = H5Screate_simple(2, dims, NULL);
     CHECK(square_sid, FAIL, "H5Screate_simple");
 
-    /* create (1 X 10 X 10) data space */
+    /* create (1 X 10 X 10) dataspace */
     dims[0] = 1;
     dims[1] = 10;
     dims[2] = 10;
     three_d_space_0_sid = H5Screate_simple(3, dims, NULL);
     CHECK(three_d_space_0_sid, FAIL, "H5Screate_simple");
 
-    /* create (10 X 1 X 10) data space */
+    /* create (10 X 1 X 10) dataspace */
     dims[0] = 10;
     dims[1] =  1;
     dims[2] = 10;
     three_d_space_1_sid = H5Screate_simple(3, dims, NULL);
     CHECK(three_d_space_1_sid, FAIL, "H5Screate_simple");
 
-    /* create (10 X 10 X 1) data space */
+    /* create (10 X 10 X 1) dataspace */
     dims[0] = 10;
     dims[1] = 10;
     dims[2] =  1;
     three_d_space_2_sid = H5Screate_simple(3, dims, NULL);
     CHECK(three_d_space_2_sid, FAIL, "H5Screate_simple");
 
-    /* create (10 X 10 X 10) data space */
+    /* create (10 X 10 X 10) dataspace */
     dims[0] = 10;
     dims[1] = 10;
     dims[2] = 10;
@@ -10289,7 +10289,7 @@ test_shape_same_dr__smoke_check_4(void)
     CHECK(three_d_space_3_sid, FAIL, "H5Screate_simple");
 
 
-    /* create (1 X 1 X 10 X 10) data space */
+    /* create (1 X 1 X 10 X 10) dataspace */
     dims[0] =  1;
     dims[1] =  1;
     dims[2] = 10;
@@ -10297,7 +10297,7 @@ test_shape_same_dr__smoke_check_4(void)
     four_d_space_0_sid = H5Screate_simple(4, dims, NULL);
     CHECK(four_d_space_0_sid, FAIL, "H5Screate_simple");
 
-    /* create (1 X 10 X 1 X 10) data space */
+    /* create (1 X 10 X 1 X 10) dataspace */
     dims[0] =  1;
     dims[1] = 10;
     dims[2] =  1;
@@ -10305,7 +10305,7 @@ test_shape_same_dr__smoke_check_4(void)
     four_d_space_1_sid = H5Screate_simple(4, dims, NULL);
     CHECK(four_d_space_1_sid, FAIL, "H5Screate_simple");
 
-    /* create (1 X 10 X 10 X 1) data space */
+    /* create (1 X 10 X 10 X 1) dataspace */
     dims[0] =  1;
     dims[1] = 10;
     dims[2] = 10;
@@ -10313,7 +10313,7 @@ test_shape_same_dr__smoke_check_4(void)
     four_d_space_2_sid = H5Screate_simple(4, dims, NULL);
     CHECK(four_d_space_2_sid, FAIL, "H5Screate_simple");
 
-    /* create (10 X 1 X 1 X 10) data space */
+    /* create (10 X 1 X 1 X 10) dataspace */
     dims[0] = 10;
     dims[1] =  1;
     dims[2] =  1;
@@ -10321,7 +10321,7 @@ test_shape_same_dr__smoke_check_4(void)
     four_d_space_3_sid = H5Screate_simple(4, dims, NULL);
     CHECK(four_d_space_3_sid, FAIL, "H5Screate_simple");
 
-    /* create (10 X 1 X 10 X 1) data space */
+    /* create (10 X 1 X 10 X 1) dataspace */
     dims[0] = 10;
     dims[1] =  1;
     dims[2] = 10;
@@ -10329,7 +10329,7 @@ test_shape_same_dr__smoke_check_4(void)
     four_d_space_4_sid = H5Screate_simple(4, dims, NULL);
     CHECK(four_d_space_4_sid, FAIL, "H5Screate_simple");
 
-    /* create (10 X 10 X 1 X 1) data space */
+    /* create (10 X 10 X 1 X 1) dataspace */
     dims[0] = 10;
     dims[1] = 10;
     dims[2] =  1;
@@ -10337,7 +10337,7 @@ test_shape_same_dr__smoke_check_4(void)
     four_d_space_5_sid = H5Screate_simple(4, dims, NULL);
     CHECK(four_d_space_5_sid, FAIL, "H5Screate_simple");
 
-    /* create (10 X 1 X 10 X 10) data space */
+    /* create (10 X 1 X 10 X 10) dataspace */
     dims[0] = 10;
     dims[1] =  1;
     dims[2] = 10;
@@ -10427,15 +10427,15 @@ test_shape_same_dr__smoke_check_4(void)
 /****************************************************************
 **
 **  test_shape_same_dr__full_space_vs_slice(): Tests selection
-**	of a full n-cube data space vs an n-dimensional slice of
+**    of a full n-cube dataspace vs an n-dimensional slice of
 **    of an m-cube (m > n) in a call to H5Sselect_shape_same().
-**	Note that this test does not require the n-cube and the
-**	n-dimensional slice to have the same rank (although
+**    Note that this test does not require the n-cube and the
+**    n-dimensional slice to have the same rank (although
 **    H5Sselect_shape_same() should always return FALSE if
-**	they don't).
+**    they don't).
 **
-**	Per Quincey's suggestion, only test up to 5 dimensional
-**	spaces.
+**    Per Quincey's suggestion, only test up to 5 dimensional
+**    spaces.
 **
 ****************************************************************/
 static void
@@ -10447,22 +10447,22 @@ test_shape_same_dr__full_space_vs_slice(int test_num,
                                         hbool_t dim_selected[],
                                         hbool_t expected_result)
 {
-    char	test_desc_0[128];
-    char	test_desc_1[256];
+    char    test_desc_0[128];
+    char    test_desc_1[256];
     int         i;
-    hid_t	n_cube_0_sid;  /* the fully selected hyper cube */
-    hid_t	n_cube_1_sid;  /* the hyper cube in which a slice is selected */
-    hsize_t	dims[SS_DR_MAX_RANK];
-    hsize_t	start[SS_DR_MAX_RANK];
-    hsize_t *	start_ptr;
-    hsize_t	stride[SS_DR_MAX_RANK];
-    hsize_t *	stride_ptr;
-    hsize_t	count[SS_DR_MAX_RANK];
-    hsize_t *	count_ptr;
-    hsize_t	block[SS_DR_MAX_RANK];
-    hsize_t *	block_ptr;
-    htri_t	check;		/* Shape comparison return value */
-    herr_t	ret;		/* Generic return value	*/
+    hid_t    n_cube_0_sid;  /* the fully selected hyper cube */
+    hid_t    n_cube_1_sid;  /* the hyper cube in which a slice is selected */
+    hsize_t    dims[SS_DR_MAX_RANK];
+    hsize_t    start[SS_DR_MAX_RANK];
+    hsize_t *    start_ptr;
+    hsize_t    stride[SS_DR_MAX_RANK];
+    hsize_t *    stride_ptr;
+    hsize_t    count[SS_DR_MAX_RANK];
+    hsize_t *    count_ptr;
+    hsize_t    block[SS_DR_MAX_RANK];
+    hsize_t *    block_ptr;
+    htri_t    check;        /* Shape comparison return value */
+    herr_t    ret;        /* Generic return value    */
 
     HDassert( 0 < small_rank );
     HDassert( small_rank <= large_rank );
@@ -10536,7 +10536,7 @@ test_shape_same_dr__full_space_vs_slice(int test_num,
     block_ptr  = &(block[i]);
 
 
-    /* select the hyper slab */
+    /* select the hyperslab */
     ret = H5Sselect_hyperslab(n_cube_1_sid, H5S_SELECT_SET,
                               start_ptr, stride_ptr, count_ptr, block_ptr);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -10553,7 +10553,6 @@ test_shape_same_dr__full_space_vs_slice(int test_num,
 
     ret = H5Sclose(n_cube_1_sid);
     CHECK(ret, FAIL, "H5Sclose");
-
 }   /* test_shape_same_dr__full_space_vs_slice() */
 
 
@@ -10562,25 +10561,25 @@ test_shape_same_dr__full_space_vs_slice(int test_num,
 **  test_shape_same_dr__run_full_space_vs_slice_tests():
 **
 **    Run the test_shape_same_dr__full_space_vs_slice() test
-**	over a variety of ranks and offsets.
+**    over a variety of ranks and offsets.
 **
 **    At present, we test H5Sselect_shape_same() with
-**	fully selected 1, 2, 3, and 4 cubes as one parameter, and
-**	1, 2, 3, and 4 dimensional slices through a n-cube of rank
-**	no more than 5 (and at least the rank of the slice).
-**	 We stop at rank 5, as Quincey suggested that it would be
-**	sufficient.
+**    fully selected 1, 2, 3, and 4 cubes as one parameter, and
+**    1, 2, 3, and 4 dimensional slices through a n-cube of rank
+**    no more than 5 (and at least the rank of the slice).
+**     We stop at rank 5, as Quincey suggested that it would be
+**    sufficient.
 **
-**	All the n-cubes will have lengths of the same size, so
+**    All the n-cubes will have lengths of the same size, so
 **    H5Sselect_shape_same() should return true iff:
 **
-**	1) the rank for the fully selected n cube equals the
+**    1) the rank for the fully selected n cube equals the
 **         number of dimensions selected in the slice through the
 **         m-cube (m >= n).
 **
-**	2) The dimensions selected in the slice through the m-cube
-**	   are the dimesnions with the most quickly changing
-**	   indices.
+**    2) The dimensions selected in the slice through the m-cube
+**       are the dimesnions with the most quickly changing
+**       indices.
 **
 ****************************************************************/
 static void
@@ -10702,7 +10701,6 @@ test_shape_same_dr__run_full_space_vs_slice_tests(void)
             } while((v < 2) && (large_rank >= 5));
         } /* end for */
     } /* end for */
-
 } /* test_shape_same_dr__run_full_space_vs_slice_tests() */
 
 
@@ -10718,8 +10716,8 @@ test_shape_same_dr__run_full_space_vs_slice_tests(void)
 **	H5S_select_shape_same() should always return FALSE if
 **	they don't).
 **
-**	Per Quincey's suggestion, only test up to 5 dimensional
-**	spaces.
+**    Per Quincey's suggestion, only test up to 5 dimensional
+**    spaces.
 **
 ****************************************************************/
 static void
@@ -10732,31 +10730,31 @@ test_shape_same_dr__checkerboard(int test_num,
                                  hbool_t dim_selected[],
                                  hbool_t expected_result)
 {
-    char	test_desc_0[128];
-    char	test_desc_1[256];
+    char    test_desc_0[128];
+    char    test_desc_1[256];
     int         i;
-    int		dims_selected = 0;
-    hid_t	n_cube_0_sid;  /* the checker board selected
+    int        dims_selected = 0;
+    hid_t    n_cube_0_sid;  /* the checker board selected
                                 * hyper cube
                                 */
-    hid_t	n_cube_1_sid;  /* the hyper cube in which a
+    hid_t    n_cube_1_sid;  /* the hyper cube in which a
                                 * checkerboard slice is selected
                                 */
-    hsize_t	dims[SS_DR_MAX_RANK];
-    hsize_t	base_start[2];
-    hsize_t	start[SS_DR_MAX_RANK];
-    hsize_t *	start_ptr;
-    hsize_t	base_stride[2];
-    hsize_t	stride[SS_DR_MAX_RANK];
-    hsize_t *	stride_ptr;
-    hsize_t	base_count[2];
-    hsize_t	count[SS_DR_MAX_RANK];
-    hsize_t *	count_ptr;
-    hsize_t	base_block[2];
-    hsize_t	block[SS_DR_MAX_RANK];
-    hsize_t *	block_ptr;
-    htri_t	check;		/* Shape comparison return value */
-    herr_t	ret;		/* Generic return value	*/
+    hsize_t    dims[SS_DR_MAX_RANK];
+    hsize_t    base_start[2];
+    hsize_t    start[SS_DR_MAX_RANK];
+    hsize_t *    start_ptr;
+    hsize_t    base_stride[2];
+    hsize_t    stride[SS_DR_MAX_RANK];
+    hsize_t *    stride_ptr;
+    hsize_t    base_count[2];
+    hsize_t    count[SS_DR_MAX_RANK];
+    hsize_t *    count_ptr;
+    hsize_t    base_block[2];
+    hsize_t    block[SS_DR_MAX_RANK];
+    hsize_t *    block_ptr;
+    htri_t    check;        /* Shape comparison return value */
+    herr_t    ret;        /* Generic return value    */
 
     HDassert( 0 < small_rank );
     HDassert( small_rank <= large_rank );
@@ -10805,19 +10803,19 @@ test_shape_same_dr__checkerboard(int test_num,
      *
      * In the 1-D case, the "checkerboard" would look like this:
      *
-     *		* * - - * * - - * *
+     *        * * - - * * - - * *
      *
      * and in the 2-D case, it would look like this:
      *
-     *		* * - - * * - - * *
+     *        * * - - * * - - * *
      *          * * - - * * - - * *
      *          - - * * - - * * - -
      *          - - * * - - * * - -
-     *		* * - - * * - - * *
+     *        * * - - * * - - * *
      *          * * - - * * - - * *
      *          - - * * - - * * - -
      *          - - * * - - * * - -
-     *		* * - - * * - - * *
+     *        * * - - * * - - * *
      *          * * - - * * - - * *
      *
      * In both cases, asterisks indicate selected elements,
@@ -10833,9 +10831,9 @@ test_shape_same_dr__checkerboard(int test_num,
      * are not even divisors of the edge size -- thus
      * something like the following is also possible:
      *
-     *		* * * - - - * * * -
-     *		* * * - - - * * * -
-     *		* * * - - - * * * -
+     *        * * * - - - * * * -
+     *        * * * - - - * * * -
+     *        * * * - - - * * * -
      *          - - - * * * - - - *
      *          - - - * * * - - - *
      *          - - - * * * - - - *
@@ -10871,7 +10869,7 @@ test_shape_same_dr__checkerboard(int test_num,
 
     base_count[0] = edge_size / (checker_size * 2);
     if((edge_size % (checker_size * 2)) > 0)
-	base_count[0]++;
+    base_count[0]++;
 
     base_count[1] = (edge_size - checker_size) / (checker_size * 2);
     if(((edge_size - checker_size) % (checker_size * 2)) > 0)
@@ -10918,8 +10916,8 @@ test_shape_same_dr__checkerboard(int test_num,
     /* Wierdness alert:
      *
      * Some how, it seems that selections can extend beyond the
-     * boundaries of the target data space -- hence the following
-     * code to manually clip the selection back to the data space
+     * boundaries of the target dataspace -- hence the following
+     * code to manually clip the selection back to the dataspace
      * proper.
      */
     for(i = 0; i < SS_DR_MAX_RANK; i++) {
@@ -10980,7 +10978,7 @@ test_shape_same_dr__checkerboard(int test_num,
     count_ptr  = &(count[i]);
     block_ptr  = &(block[i]);
 
-    /* select the hyper slab */
+    /* select the hyperslab */
     ret = H5Sselect_hyperslab(n_cube_1_sid, H5S_SELECT_SET,
                               start_ptr, stride_ptr, count_ptr, block_ptr);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -11019,8 +11017,8 @@ test_shape_same_dr__checkerboard(int test_num,
     /* Wierdness alert:
      *
      * Again, it seems that selections can extend beyond the
-     * boundaries of the target data space -- hence the following
-     * code to manually clip the selection back to the data space
+     * boundaries of the target dataspace -- hence the following
+     * code to manually clip the selection back to the dataspace
      * proper.
      */
     for(i = 0; i < SS_DR_MAX_RANK; i++) {
@@ -11316,7 +11314,6 @@ test_shape_same_dr__run_checkerboard_tests(void)
             } while((v < 2) && (large_rank >= 5));
         } /* end for */
     } /* end for */
-
 } /* test_shape_same_dr__run_checkerboard_tests() */
 
 
@@ -11344,71 +11341,71 @@ test_shape_same_dr__irregular(int test_num,
                               hbool_t dim_selected[],
                               hbool_t expected_result)
 {
-    char	test_desc_0[128];
-    char	test_desc_1[256];
-    int		edge_size = 10;
+    char    test_desc_0[128];
+    char    test_desc_1[256];
+    int        edge_size = 10;
     int         i;
     int         j;
     int         k;
-    int		dims_selected = 0;
-    hid_t	n_cube_0_sid;  /* the hyper cube containing
+    int        dims_selected = 0;
+    hid_t    n_cube_0_sid;  /* the hyper cube containing
                                 * an irregular selection
                                 */
-    hid_t	n_cube_1_sid;  /* the hyper cube in which a
+    hid_t    n_cube_1_sid;  /* the hyper cube in which a
                                 * slice contains an irregular
                                 * selection.
                                 */
-    hsize_t	dims[SS_DR_MAX_RANK];
-    hsize_t	start_0[SS_DR_MAX_RANK]  = { 2,  2,  2,  2,  5};
-    hsize_t	stride_0[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
-    hsize_t	count_0[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
+    hsize_t    dims[SS_DR_MAX_RANK];
+    hsize_t    start_0[SS_DR_MAX_RANK]  = { 2,  2,  2,  2,  5};
+    hsize_t    stride_0[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
+    hsize_t    count_0[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
     hsize_t     block_0[SS_DR_MAX_RANK]  = { 2,  2,  2,  2,  3};
 
-    hsize_t	start_1[SS_DR_MAX_RANK]  = { 2,  2,  2,  5,  2};
-    hsize_t	stride_1[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
-    hsize_t	count_1[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
+    hsize_t    start_1[SS_DR_MAX_RANK]  = { 2,  2,  2,  5,  2};
+    hsize_t    stride_1[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
+    hsize_t    count_1[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
     hsize_t     block_1[SS_DR_MAX_RANK]  = { 2,  2,  2,  3,  2};
 
-    hsize_t	start_2[SS_DR_MAX_RANK]  = { 2,  2,  5,  2,  2};
-    hsize_t	stride_2[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
-    hsize_t	count_2[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
+    hsize_t    start_2[SS_DR_MAX_RANK]  = { 2,  2,  5,  2,  2};
+    hsize_t    stride_2[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
+    hsize_t    count_2[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
     hsize_t     block_2[SS_DR_MAX_RANK]  = { 2,  2,  3,  2,  2};
 
-    hsize_t	start_3[SS_DR_MAX_RANK]  = { 2,  5,  2,  2,  2};
-    hsize_t	stride_3[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
-    hsize_t	count_3[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
+    hsize_t    start_3[SS_DR_MAX_RANK]  = { 2,  5,  2,  2,  2};
+    hsize_t    stride_3[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
+    hsize_t    count_3[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
     hsize_t     block_3[SS_DR_MAX_RANK]  = { 2,  3,  2,  2,  2};
 
-    hsize_t	start_4[SS_DR_MAX_RANK]  = { 5,  2,  2,  2,  2};
-    hsize_t	stride_4[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
-    hsize_t	count_4[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
+    hsize_t    start_4[SS_DR_MAX_RANK]  = { 5,  2,  2,  2,  2};
+    hsize_t    stride_4[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
+    hsize_t    count_4[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
     hsize_t     block_4[SS_DR_MAX_RANK]  = { 3,  2,  2,  2,  2};
 
-    hsize_t	clip_start[SS_DR_MAX_RANK]  = { 0,  0,  0,  0,  0};
-    hsize_t	clip_stride[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
-    hsize_t	clip_count[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
+    hsize_t    clip_start[SS_DR_MAX_RANK]  = { 0,  0,  0,  0,  0};
+    hsize_t    clip_stride[SS_DR_MAX_RANK] = {10, 10, 10, 10, 10};
+    hsize_t    clip_count[SS_DR_MAX_RANK]  = { 1,  1,  1,  1,  1};
     hsize_t     clip_block[SS_DR_MAX_RANK]  = {10, 10, 10, 10, 10};
 
 
-    hsize_t	*(starts[SS_DR_MAX_RANK]) =
-                	{start_0, start_1, start_2, start_3, start_4};
+    hsize_t    *(starts[SS_DR_MAX_RANK]) =
+                    {start_0, start_1, start_2, start_3, start_4};
     hsize_t     *(strides[SS_DR_MAX_RANK]) =
-                	{stride_0, stride_1, stride_2, stride_3, stride_4};
+                    {stride_0, stride_1, stride_2, stride_3, stride_4};
     hsize_t     *(counts[SS_DR_MAX_RANK]) =
-                	{count_0, count_1, count_2, count_3, count_4};
+                    {count_0, count_1, count_2, count_3, count_4};
     hsize_t     *(blocks[SS_DR_MAX_RANK]) =
-                	{block_0, block_1, block_2, block_3, block_4};
+                    {block_0, block_1, block_2, block_3, block_4};
 
-    hsize_t	start[SS_DR_MAX_RANK];
-    hsize_t *	start_ptr;
-    hsize_t	stride[SS_DR_MAX_RANK];
-    hsize_t *	stride_ptr;
-    hsize_t	count[SS_DR_MAX_RANK];
-    hsize_t *	count_ptr;
-    hsize_t	block[SS_DR_MAX_RANK];
-    hsize_t *	block_ptr;
-    htri_t	check;		/* Shape comparison return value */
-    herr_t	ret;		/* Generic return value	*/
+    hsize_t    start[SS_DR_MAX_RANK];
+    hsize_t *    start_ptr;
+    hsize_t    stride[SS_DR_MAX_RANK];
+    hsize_t *    stride_ptr;
+    hsize_t    count[SS_DR_MAX_RANK];
+    hsize_t *    count_ptr;
+    hsize_t    block[SS_DR_MAX_RANK];
+    hsize_t *    block_ptr;
+    htri_t    check;        /* Shape comparison return value */
+    herr_t    ret;        /* Generic return value    */
 
     HDassert( 0 < small_rank );
     HDassert( small_rank <= large_rank );
@@ -11465,23 +11462,23 @@ test_shape_same_dr__irregular(int test_num,
      * In the 1-D case, the projection of the pattern looks
      * like this:
      *
-     *		  - - * * - * * * - -
+     *          - - * * - * * * - -
      *            0 1 2 3 4 5 6 7 8 9 x
      *
      * and in the 2-D case, it would look like this:
      *
      *
-     *		y
-     *		9 - - - - - - - - - -
-     *		8 - - - - - - - - - -
-     *		7 - - * * - - - - - -
-     *		6 - - * * - - - - - -
-     *		5 - - * * - - - - - -
-     *		4 - - - - - - - - - -
-     *		3 - - * * - * * * - -
-     *		2 - - * * - * * * - -
-     *		1 - - - - - - - - - -
-     *	 	0 - - - - - - - - - -
+     *        y
+     *        9 - - - - - - - - - -
+     *        8 - - - - - - - - - -
+     *        7 - - * * - - - - - -
+     *        6 - - * * - - - - - -
+     *        5 - - * * - - - - - -
+     *        4 - - - - - - - - - -
+     *        3 - - * * - * * * - -
+     *        2 - - * * - * * * - -
+     *        1 - - - - - - - - - -
+     *         0 - - - - - - - - - -
      *            0 1 2 3 4 5 6 7 8 9 x
      *
      * In both cases, asterisks indicate selected elements,
@@ -11490,7 +11487,7 @@ test_shape_same_dr__irregular(int test_num,
      * Note that is this case, since the edge size is fixed,
      * the pattern does not change.  However, we do use the
      * displacement parameter to allow it to be moved around
-     * within the n-cube or hyper slab.
+     * within the n-cube or hyperslab.
      */
 
     /* first, ensure that the small n-cube has no selection */
@@ -11566,13 +11563,13 @@ test_shape_same_dr__irregular(int test_num,
             } /* end else */
         } /* end for */
 
-        /* select the hyper slab */
+        /* select the hyperslab */
         ret = H5Sselect_hyperslab(n_cube_1_sid, H5S_SELECT_OR,
                               start_ptr, stride_ptr, count_ptr, block_ptr);
         CHECK(ret, FAIL, "H5Sselect_hyperslab");
     } /* end for */
 
-    /* it is possible that the selection extends beyond the data space.
+    /* it is possible that the selection extends beyond the dataspace.
      * clip the selection to ensure that it doesn't.
      */
     ret = H5Sselect_hyperslab(n_cube_1_sid, H5S_SELECT_AND,
@@ -11591,7 +11588,6 @@ test_shape_same_dr__irregular(int test_num,
 
     ret = H5Sclose(n_cube_1_sid);
     CHECK(ret, FAIL, "H5Sclose");
-
 }   /* test_shape_same_dr__irregular() */
 
 
@@ -11599,13 +11595,13 @@ test_shape_same_dr__irregular(int test_num,
 **
 **  test_shape_same_dr__run_irregular_tests():
 **
-**	In this set of tests, we test H5S_select_shape_same()
+**    In this set of tests, we test H5Sselect_shape_same()
 **      with an "irregular" subselection of 1, 2, 3, and 4 cubes as
 **      one parameter, and irregular subselections of 1, 2, 3,
 **      and 4 dimensional slices through a n-cube of rank no more
 **      than 5 (and at least the rank of the slice) as the other.
 **      Note that the "irregular" selection may be offset between
-**	the n-cube and the slice.
+**    the n-cube and the slice.
 **
 **      All the irregular selections will be identical (modulo rank)
 **      so H5S_select_shape_same() should return true iff:
@@ -11806,7 +11802,6 @@ test_shape_same_dr__run_irregular_tests(void)
             } while((v < 2 ) && (large_rank >= 5));
         } /* end for */
     } /* end for */
-
 } /* test_shape_same_dr__run_irregular_tests() */
 
 
@@ -11814,7 +11809,7 @@ test_shape_same_dr__run_irregular_tests(void)
 **
 **  test_shape_same_dr(): Tests selections on dataspace with
 **      different ranks, to verify that "shape same" routine
-**	is now handling this case correctly.
+**    is now handling this case correctly.
 **
 ****************************************************************/
 static void
@@ -11823,19 +11818,16 @@ test_shape_same_dr(void)
     /* Output message about test being performed */
     MESSAGE(6, ("Testing Same Shape/Different Rank Comparisons\n"));
 
-
     /* first run some smoke checks */
     test_shape_same_dr__smoke_check_1();
     test_shape_same_dr__smoke_check_2();
     test_shape_same_dr__smoke_check_3();
     test_shape_same_dr__smoke_check_4();
 
-
     /* now run more intensive tests. */
     test_shape_same_dr__run_full_space_vs_slice_tests();
     test_shape_same_dr__run_checkerboard_tests();
     test_shape_same_dr__run_irregular_tests();
-
 }   /* test_shape_same_dr() */
 
 
@@ -12499,7 +12491,7 @@ test_space_rebuild(void)
     CHECK(ret, FAIL, "H5Sclose");
 }
 
-
+
 /****************************************************************
 **
 **  test_select_hyper_chunk_offset(): Tests selections on dataspace,
@@ -13625,7 +13617,7 @@ test_select(void)
     size_t rdcc_nbytes; /* Raw data number of bytes */
     double rdcc_w0;     /* Raw data write percentage */
     hssize_t offset[SPACE7_RANK] = {1, 1}; /* Offset for testing selection offsets */
-    herr_t	ret;	/* Generic return value		*/
+    herr_t    ret;    /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Selections\n"));
@@ -13779,15 +13771,15 @@ test_select(void)
 
 }   /* test_select() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	cleanup_select
+ * Function:    cleanup_select
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:    Cleanup temporary test files
  *
- * Return:	none
+ * Return:    none
  *
- * Programmer:	Albert Cheng
+ * Programmer:    Albert Cheng
  *              July 2, 1998
  *
  *-------------------------------------------------------------------------

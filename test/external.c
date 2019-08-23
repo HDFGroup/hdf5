@@ -17,7 +17,6 @@
  *
  * Purpose:	Tests datasets stored in external raw files.
  */
-#include "h5test.h"
 #include "external_common.h"
 
 

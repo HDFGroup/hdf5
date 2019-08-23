@@ -15,10 +15,10 @@
 
 /* The HDF5 test files */
 const char *FILENAME[] = {
-    "h5clear_sec2_v3.h5",		/* 0 -- sec2 file with superblock version 3 */
-    "h5clear_log_v3.h5",		/* 1 -- log file with superblock veresion 3 */
-    "h5clear_sec2_v0.h5",		/* 2 -- sec2 file with superblock version 0 */
-    "h5clear_sec2_v2.h5"		/* 3 -- sec2 file with superblock version 2 */
+    "h5clear_sec2_v3.h5",        /* 0 -- sec2 file with superblock version 3 */
+    "h5clear_log_v3.h5",        /* 1 -- log file with superblock veresion 3 */
+    "h5clear_sec2_v0.h5",        /* 2 -- sec2 file with superblock version 0 */
+    "h5clear_sec2_v2.h5"        /* 3 -- sec2 file with superblock version 2 */
 };
 
 const char *FILENAME_ENHANCE[] = {
@@ -28,12 +28,12 @@ const char *FILENAME_ENHANCE[] = {
     "h5clear_fsm_persist_user_equal.h5",    /* 3: user block, persisting free-space, stored EOA = actual EOF */
     "h5clear_fsm_persist_user_greater.h5",  /* 4: user block, persisting free-space, stored EOA > actual EOF */
     "h5clear_fsm_persist_user_less.h5",     /* 5: user block, persisting free-space, stored EOA < actual EOF */
-    "h5clear_status_noclose.h5",	        /* 6 -- v3 superblock, nonzero status_flags, no flush, exit, 
+    "h5clear_status_noclose.h5",            /* 6 -- v3 superblock, nonzero status_flags, no flush, exit,
                                                stored EOA < actual EOF */
     "h5clear_fsm_persist_noclose.h5"        /* 7 -- persisting free-space, no flush, exit, stored EOA < actual EOF */
 };
 
-#define KB 		1024U
+#define KB         1024U
 
 #define CACHE_IMAGE_FILE    "h5clear_mdc_image.h5"
 #define DSET                "DSET"
@@ -42,14 +42,14 @@ const char *FILENAME_ENHANCE[] = {
 #define USERBLOCK           512
 
 /*-------------------------------------------------------------------------
- * Function:	gen_cache_image_file
+ * Function:    gen_cache_image_file
  *
- * Purpose:	    To create a file with cache image feature enabled.
+ * Purpose:        To create a file with cache image feature enabled.
  *
- * Return:      Success:	0
- *              Failure:	1
+ * Return:      Success:    0
+ *              Failure:    1
  *
- * Programmer:	Vailin Choi; March 2017
+ * Programmer:    Vailin Choi; March 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -136,9 +136,9 @@ error:
 } /* gen_cache_image_file() */
 
 /*-------------------------------------------------------------------------
- * Function:	gen_enhance_files
+ * Function:    gen_enhance_files
  *
- * Purpose:	    To create the first 6 files in FILENAME_ENHANCE[]:
+ * Purpose:        To create the first 6 files in FILENAME_ENHANCE[]:
  *                  (0) FILENAME_ENHANCE[0]: "h5clear_fsm_persist_equal.h5"
  *                  (1) FILENAME_ENHANCE[1]: "h5clear_fsm_persist_greater.h5"
  *                  (2) FILENAME_ENHANCE[2]: "h5clear_fsm_persist_less.h5"
@@ -149,15 +149,15 @@ error:
  *              value to the location where the EOA is stored in the superblock.
  *              Also modify the chksum in the superblock due to this change.
  *
- *              The first call to this routine (without user block) will generate 
+ *              The first call to this routine (without user block) will generate
  *              the first 3 files.
  *              The second call to this routine (with user block) will generate
  *              the last 3 files.
  *
- * Return:      Success:	0
- *              Failure:	1
+ * Return:      Success:    0
+ *              Failure:    1
  *
- * Programmer:	Vailin Choi; March 2017
+ * Programmer:    Vailin Choi; March 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -190,7 +190,7 @@ gen_enhance_files(hbool_t user)
     if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
         goto error;
 
-    /* 
+    /*
      * Create the file, then write invalid EOA to the file.
      */
     for(i = 0+u; i < 3+u; i++) {
@@ -221,21 +221,21 @@ gen_enhance_files(hbool_t user)
         if(H5Fclose(fid) < 0)
             goto error;
 
-        /* 
+        /*
          * No further action for:
-         *      --FILENAME_ENHANCE[0]: "h5clear_fsm_persist_equal.h5" 
+         *      --FILENAME_ENHANCE[0]: "h5clear_fsm_persist_equal.h5"
          *      --FILENAME_ENHANCE[3]: "h5clear_fsm_persist_user_equal.h5",
          */
         if(!(i % 3))
             continue;
-        /* 
+        /*
          * For the following files:
          *      --FILENAME_ENHANCE[1]: "h5clear_fsm_persist_greater.h5"
          *      --FILENAME_ENHANCE[2]: "h5clear_fsm_persist_less.h5"
          *      --FILENAME_ENHANCE[4]: "h5clear_fsm_persist_greater.h5"
          *      --FILENAME_ENHANCE[5]: "h5clear_fsm_persist_less.h5"
          *
-         *  Write invalid value to the location for stored eoa and 
+         *  Write invalid value to the location for stored eoa and
          *  update the chksum value.
          */
         /* Open the file */
@@ -306,9 +306,9 @@ error:
 } /* gen_enhance_files() */
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	 Generate test files used by h5clear.
+ * Purpose:     Generate test files used by h5clear.
  *
  *      (A) gen_cache_image_file():
  *          --generate a file with cache image feature
@@ -317,10 +317,10 @@ error:
  *          --generate the first 6 files in FILENAME_ENHANCE[]:
  *              (0) "h5clear_fsm_persist_equal.h5"
  *              (1) "h5clear_fsm_persist_greater.h5"
- *              (2) "h5clear_fsm_persist_less.h5"       
- *              (3) "h5clear_fsm_persist_user_equal.h5"   
+ *              (2) "h5clear_fsm_persist_less.h5"
+ *              (3) "h5clear_fsm_persist_user_equal.h5"
  *              (4) "h5clear_fsm_persist_user_greater.h5"
- *              (5) "h5clear_fsm_persist_user_less.h5"  
+ *              (5) "h5clear_fsm_persist_user_less.h5"
  *
  *      (C) Generate the following FILENAME[] files in main():
  *              (0a) "h5clear_sec2_v3.h5"
@@ -328,43 +328,43 @@ error:
  *              (1a) "h5clear_log_v3.h5",
  *              (1b) "latest_h5clear_log_v3.h5"
  *              (2) "h5clear_sec2_v0.h5"
- *              (3) "h5clear_sec2_v2.h5"       
- *              
- *          These HDF5 files are created with non-zero status_flags in 
+ *              (3) "h5clear_sec2_v2.h5"
+ *
+ *          These HDF5 files are created with non-zero status_flags in
  *          the superblock via flushing and exiting without closing the
  *          library.
- *		    Due to file locking, status_flags in the superblock will be 
- *		    nonzero after H5Fcreate.  The library will clear status_flags
- *		    on file closing.  
+ *            Due to file locking, status_flags in the superblock will be
+ *            nonzero after H5Fcreate.  The library will clear status_flags
+ *            on file closing.
  *          This program, after "H5Fcreate" the files, exits without
- *		    going through library closing. Thus, status_flags for these
- *		    files are not cleared.
- *		    The library will check consistency of status_flags when
- *		    opening a file with superblock >= v3 and will return error 
+ *            going through library closing. Thus, status_flags for these
+ *            files are not cleared.
+ *            The library will check consistency of status_flags when
+ *            opening a file with superblock >= v3 and will return error
  *          accordingly.
- *		    The library will not check status_flags when opening a file 
- *		    with < v3 superblock.
- *		    These files are used by "h5clear" to see if the tool clears
- *		    status_flags properly so users can open the files afterwards.
- *      
+ *            The library will not check status_flags when opening a file
+ *            with < v3 superblock.
+ *            These files are used by "h5clear" to see if the tool clears
+ *            status_flags properly so users can open the files afterwards.
+ *
  *      (D) Generate the last two files in FILENAME_ENHANCE[] in main():
- *              (6) "h5clear_status_noclose.h5",	      
+ *              (6) "h5clear_status_noclose.h5",
  *              (7) "h5clear_fsm_persist_noclose.h5"
  *
- * Return:	Success:	0
- *		    Failure:	1
+ * Return:    Success:    0
+ *            Failure:    1
  *
- * Programmer:	Vailin Choi; July 2013
+ * Programmer:    Vailin Choi; July 2013
  *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    hid_t fid = -1;			/* File ID */
-    hid_t fcpl = -1;		/* File creation property list */
-    hid_t fapl = -1, new_fapl = -1;	/* File access property lists */
-    char fname[512];		/* File name */
+    hid_t fid = -1;            /* File ID */
+    hid_t fcpl = -1;        /* File creation property list */
+    hid_t fapl = -1, new_fapl = -1;    /* File access property lists */
+    char fname[512];        /* File name */
     unsigned new_format;    /* To use latest library format or not */
     hid_t sid = -1;         /* Dataspace ID */
     hid_t did = -1;         /* Dataset ID */
@@ -382,7 +382,7 @@ main(void)
     if(gen_enhance_files(TRUE) < 0)
         goto error;
 
-    /* 
+    /*
      * Generate files in FILENAME[]
      */
     /* Create a copy of the file access property list */
@@ -396,13 +396,13 @@ main(void)
     if(H5Pset_libver_bounds(new_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         goto error;
 
-    /* 
+    /*
      * Files created within this for loop will have v3 superblock and nonzero status_flags
      *      --FILENAME[0]: "h5clear_sec2_v3.h5", "latest_h5clear_sec2_v3.h5"
      *      --FILENAME[1]: "h5clear_log_v3.h5", "latest_h5clear_log_v3.h5"
      */
     for(new_format = FALSE; new_format <= TRUE; new_format++) {
-        hid_t fapl2, my_fapl;	/* File access property lists */
+        hid_t fapl2, my_fapl;    /* File access property lists */
 
         /* Set to use the appropriate file access property list */
         if(new_format)
@@ -415,14 +415,14 @@ main(void)
         if((my_fapl = H5Pcopy(fapl2)) < 0)
             goto error;
         /* Create the file */
-        sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[0]);
-        if((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, my_fapl)) < 0) 
+        HDsprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[0]);
+        if((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, my_fapl)) < 0)
             goto error;
 
         /* Flush the file */
         if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
             goto error;
-    
+
         /* Close the property list */
         if(H5Pclose(my_fapl) < 0)
             goto error;
@@ -439,8 +439,8 @@ main(void)
             goto error;
 
         /* Create the file */
-        sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[1]);
-        if((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, my_fapl)) < 0) 
+        HDsprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[1]);
+        if((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, my_fapl)) < 0)
             goto error;
 
         /* Flush the file */
@@ -453,11 +453,11 @@ main(void)
 
     } /* end for */
 
-    /* 
+    /*
      * Create a sec2 file with v0 superblock but nonzero status_flags:
      *      FILENAME[2]: "h5clear_sec2_v0.h5"
      */
-    if((fid = H5Fcreate(FILENAME[2], H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) 
+    if((fid = H5Fcreate(FILENAME[2], H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
 
     /* Flush the file */
@@ -465,9 +465,9 @@ main(void)
         goto error;
 
 
-    /* 
+    /*
      * Create a sec2 file with v2 superblock but nonzero status_flags:
-     *      FILENAME[3]: "h5clear_sec2_v2.h5"       
+     *      FILENAME[3]: "h5clear_sec2_v2.h5"
      */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         goto error;
@@ -476,14 +476,14 @@ main(void)
     if(H5Pset_shared_mesg_index(fcpl, 0, H5O_SHMESG_DTYPE_FLAG, 50) < 0)
         goto error;
 
-    if((fid = H5Fcreate(FILENAME[3], H5F_ACC_TRUNC, fcpl, fapl)) < 0) 
+    if((fid = H5Fcreate(FILENAME[3], H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         goto error;
 
     /* Flush the file */
     if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
         goto error;
 
-    
+
     /* Close the property lists */
     if(H5Pclose(fapl) < 0)
         goto error;
@@ -492,10 +492,10 @@ main(void)
     if(H5Pclose(fcpl) < 0)
         goto error;
 
-    /* 
+    /*
      * Create the last two files in FILENAME_ENHANCE[]:
      * --FILENAME_ENHANCE[6]: h5clear_status_noclose.h5
-     * --FILENAME_ENHANCE[7]: h5clear_fsm_persist_noclose.h5 
+     * --FILENAME_ENHANCE[7]: h5clear_fsm_persist_noclose.h5
      */
     /*
      * FILENAME_ENHANCE[6]: h5clear_status_noclose.h5
@@ -503,7 +503,7 @@ main(void)
      *  --version 3 superblock
      *  --nonzero status_flags
      *  --does not persist free-space
-     *  --does not flush the file, just exit without closing file: 
+     *  --does not flush the file, just exit without closing file:
      *  --this file is similar to the user-suppplied test file attached with HDFFV-10347
      */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -542,8 +542,8 @@ main(void)
     /* Does not flush and does not close the file */
 
 
-    /* 
-     * FILENAME_ENHANCE[7]: h5clear_fsm_persist_noclose.h5 
+    /*
+     * FILENAME_ENHANCE[7]: h5clear_fsm_persist_noclose.h5
      *  --stored EOA < actual EOF
      *  --persisting free-space
      *  --undefined fsinfo.eoa_pre_fsm_fsalloc

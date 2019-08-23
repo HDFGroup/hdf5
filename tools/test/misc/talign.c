@@ -51,7 +51,7 @@ int main(void)
     int result = 0;
     herr_t error = 1;
 
-    printf("%-70s", "Testing alignment in compound datatypes");
+    HDprintf("%-70s", "Testing alignment in compound datatypes");
 
     strcpy(string5, "Hi!");
     HDunlink(fname);
@@ -145,7 +145,7 @@ out:
 
         result = 1;
         mname = H5Tget_member_name(fix, 0);
-        printf("%14s (%2d) %6s = %s\n",
+        HDprintf("%14s (%2d) %6s = %s\n",
             mname ? mname : "(null)", (int)H5Tget_member_offset(fix,0),
             string5, (char *)(data + H5Tget_member_offset(fix, 0)));
         if(mname)
@@ -153,7 +153,7 @@ out:
 
         fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 1)));
         mname = H5Tget_member_name(fix, 1);
-        printf("Data comparison:\n"
+        HDprintf("Data comparison:\n"
             "%14s (%2d) %6f = %f\n"
             "                    %6f = %f\n",
             mname ? mname : "(null)", (int)H5Tget_member_offset(fix,1),
@@ -164,7 +164,7 @@ out:
 
         fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 2)));
         mname = H5Tget_member_name(fix, 2);
-        printf("%14s (%2d) %6f = %f\n"
+        HDprintf("%14s (%2d) %6f = %f\n"
             "                    %6f = %6f\n",
             mname ? mname : "(null)", (int)H5Tget_member_offset(fix,2),
             (double)fnok[0], (double)fptr[0],
@@ -173,7 +173,7 @@ out:
             H5free_memory(mname);
 
         fptr = (float *)((void *)(data + H5Tget_member_offset(fix, 1)));
-        printf("\n"
+        HDprintf("\n"
             "Short circuit\n"
             "                    %6f = %f\n"
             "                    %6f = %f\n"

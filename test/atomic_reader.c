@@ -55,7 +55,7 @@ int verify(int fd, unsigned int k);
 void print_info(int *info, unsigned int lastr, unsigned iteration);
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -63,7 +63,7 @@ void print_info(int *info, unsigned int lastr, unsigned iteration);
  *
  * Parameters:  None
  *
- * Return: 	void
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -78,13 +78,13 @@ usage(void)
     printf("\n");
 } /* usage() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify
  *
  * Purpose:     To verify that the data read is the pattern expected.
  *              Each integer read should be the same as the index.
- *              When a difference is encountered, the remaining integers 
+ *              When a difference is encountered, the remaining integers
  *              read should be the same as the previous index.
  *              For example, the pattern expected should be either:
  *              a) 01234567....n-1
@@ -93,11 +93,11 @@ usage(void)
  *                 the remaining integers should be all "3"s as:
  *                 012333333333333
  *
- * Parameters:  
+ * Parameters:
  *              fd -- the file descriptor
  *              k -- the number of integers to read
  *
- * Return:      
+ * Return:
  *              positive on success
  *              negative on failure
  *
@@ -106,9 +106,9 @@ usage(void)
 int
 verify(int fd, unsigned int k)
 {
-    unsigned int i;		/* local index variable */
-    ssize_t bytes_read;		/* the number of bytes read */
-    unsigned int *buf = NULL;	/* buffer to hold data read */
+    unsigned int i;        /* local index variable */
+    ssize_t bytes_read;        /* the number of bytes read */
+    unsigned int *buf = NULL;    /* buffer to hold data read */
 
     /* Allocate buffer for data read */
     if((buf = (unsigned int *)malloc(k * sizeof(unsigned int))) == NULL) {
@@ -165,13 +165,13 @@ error:
 } /* end verify() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    print_info
  *
  * Purpose:     To print the statistics gathered for re-reads
  *
- * Parameters: 
+ * Parameters:
  *              info -- the array storing the statistics for re-reads
  *              lastr -- the last read completed
  *              iteration -- the current iteration
@@ -183,7 +183,7 @@ error:
 void
 print_info(int *info, unsigned int lastr, unsigned iteration)
 {
-    unsigned j;	/* local index variable */
+    unsigned j;    /* local index variable */
 
     printf("--------statistics for %u reads (iteration %u)--------\n", lastr, iteration);
 
@@ -193,13 +193,13 @@ print_info(int *info, unsigned int lastr, unsigned iteration)
     printf("--------end statistics for %u reads (iteration %u)--------\n", lastr, iteration);
 } /* print_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     To verify that the data read is the pattern expected.
- *              (1) Make sure the file opens successfully and the # of bytes read is as expected	
- *              (2) Iterate the reader with i iterations 
+ *              (1) Make sure the file opens successfully and the # of bytes read is as expected
+ *              (2) Iterate the reader with i iterations
  *              (3) Read and verify n integers for each iteration
  *              (4) On verification error, re-read the data at most READ_TRIES
  *                  times to see if correct data can be obtained

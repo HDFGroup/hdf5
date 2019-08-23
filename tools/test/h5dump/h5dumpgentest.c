@@ -1987,7 +1987,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of string array", i);
+        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of string array", i);
         H5Tset_size(memtype, HDstrlen(buf)+1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);

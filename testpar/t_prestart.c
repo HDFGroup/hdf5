@@ -107,7 +107,7 @@ main (int argc, char **argv)
     for (i=0; i < block[0]; i++){
 	for (j=0; j < block[1]; j++){
 	    if(*dataptr != mpi_rank+1) {
-                printf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
+                HDprintf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
                        (unsigned long)i, (unsigned long)j,
                        (unsigned long)(i+start[0]), (unsigned long)(j+start[1]),
                        mpi_rank+1, *(dataptr));

@@ -15,7 +15,7 @@
  * Serial tests for encoding/decoding plists
  */
 
-#include "h5test.h"
+#include "testhdf5.h"
 #include "H5ACprivate.h"
 #include "H5Pprivate.h"
 

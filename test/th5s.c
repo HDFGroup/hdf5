@@ -1214,7 +1214,7 @@ test_h5s_encode(void)
     ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    /* Encode simple data space in a buffer */
+    /* Encode simple dataspace in a buffer */
     ret = H5Sencode(sid1, NULL, &sbuf_size);
     CHECK(ret, FAIL, "H5Sencode");
 
@@ -1275,7 +1275,7 @@ test_h5s_encode(void)
     sid2 = H5Screate(H5S_NULL);
     CHECK(sid2, FAIL, "H5Screate");
 
-    /* Encode null data space in a buffer */
+    /* Encode null dataspace in a buffer */
     ret = H5Sencode(sid2, NULL, &null_size);
     CHECK(ret, FAIL, "H5Sencode");
 
