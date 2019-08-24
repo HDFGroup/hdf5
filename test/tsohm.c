@@ -3730,8 +3730,7 @@ test_sohm_external_dtype(void)
     ret = H5Tinsert (s1_tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
     CHECK_I(ret, "H5Tinsert");
 
-    /* Set up dataset in first file
-     */
+    /* Set up dataset in first file */
     file1 = H5Fcreate(FILENAME_SRC, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
     CHECK_I(file1, "H5Fcreate");
 
@@ -3767,8 +3766,7 @@ test_sohm_external_dtype(void)
     ret = H5Dclose(dataset1);
     CHECK_I(ret, "H5Dclose");
 
-    /* Create dataset in second file using datatype from dataset in the first file
-     */
+    /* Create dataset in second file using datatype from dataset in the first file */
     file2 = H5Fcreate(FILENAME_DST, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
     CHECK_I(file2, "H5Fcreate");
 
@@ -3797,8 +3795,7 @@ test_sohm_external_dtype(void)
     ret = H5Fclose(file1);
     CHECK_I(ret, "H5Fclose");
 
-    /* Verify that datatype details are still accessible by second file
-     */
+    /* Verify that datatype details are still accessible by second file */
     dataset2 = H5Dopen2(file2, "dataset_2", H5P_DEFAULT);
     CHECK_I(dataset2, "H5Dopen2");
 
@@ -3808,8 +3805,7 @@ test_sohm_external_dtype(void)
     dtype_class = H5Tget_class(dset2_tid);
     VERIFY(dtype_class, H5T_COMPOUND, "H5Tget_class");
 
-    /* Cleanup
-     */
+    /* Cleanup */
     ret = H5Tclose(dset2_tid);
     CHECK_I(ret, "H5Tclose");
     ret = H5Dclose(dataset2);

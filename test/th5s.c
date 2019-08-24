@@ -1184,24 +1184,24 @@ test_h5s_zero_dim(void)
 static void
 test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
 {
-    hid_t sid1, sid2, sid3; /* Dataspace ID */
-    hid_t decoded_sid1, decoded_sid2, decoded_sid3;
-    int rank;               /* Logical rank of dataspace */
-    hid_t fapl = -1;        /* File access property list ID */
-    hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    size_t sbuf_size=0, null_size=0, scalar_size=0;
-    unsigned char *sbuf=NULL, *null_sbuf=NULL, *scalar_buf=NULL;
-    hsize_t tdims[4];       /* Dimension array to test with */
-    hssize_t n;             /* Number of dataspace elements */
-    hsize_t start[] = {0, 0, 0};
-    hsize_t stride[] = {2, 5, 3};
-    hsize_t count[] = {2, 2, 2};
-    hsize_t block[] = {1, 3, 1};
-    H5S_sel_type sel_type;
-    H5S_class_t space_type;
-    hssize_t nblocks;
-    hid_t ret_id;           /* Generic hid_t return value   */
-    herr_t ret;             /* Generic return value     */
+    hid_t        sid1, sid2, sid3;    /* Dataspace ID        */
+    hid_t               decoded_sid1, decoded_sid2, decoded_sid3;
+    int                rank;        /* Logical rank of dataspace    */
+    hid_t         fapl = -1;        /* File access property list ID */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    size_t              sbuf_size=0, null_size=0, scalar_size=0;
+    unsigned char       *sbuf=NULL, *null_sbuf=NULL, *scalar_buf=NULL;
+    hsize_t        tdims[4];    /* Dimension array to test with */
+    hssize_t        n;         /* Number of dataspace elements */
+    hsize_t             start[] = {0, 0, 0};
+    hsize_t             stride[] = {2, 5, 3};
+    hsize_t             count[] = {2, 2, 2};
+    hsize_t             block[] = {1, 3, 1};
+    H5S_sel_type        sel_type;
+    H5S_class_t         space_type;
+    hssize_t            nblocks;
+    hid_t        ret_id;        /* Generic hid_t return value    */
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace Encoding and Decoding\n"));

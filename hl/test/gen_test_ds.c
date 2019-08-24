@@ -79,12 +79,12 @@ int main(int argc , char **argv)
 
 
     if (argc < 2) {
-        printf("Usage: gen_test [le | be]\n");
+        HDprintf("Usage: gen_test [le | be]\n");
         return 1;
     }
 
     if ( argv[1] && (strcmp("le",argv[1])!=0) && (strcmp("be",argv[1])!=0) ) {
-        printf("Usage: gen_test [le | be]\n");
+        HDprintf("Usage: gen_test [le | be]\n");
         return 1;
     }
 
@@ -103,11 +103,11 @@ int main(int argc , char **argv)
     nerrors += test_long_scalenames(filename) < 0  ? 1 : 0;
 
     if(nerrors) goto error;
-    printf("Dimension scales file generation passed.\n");
+    HDprintf("Dimension scales file generation passed.\n");
     return 0;
 
 error:
-    printf("***** %d DIMENSION SCALES FILE GENERATION FAILED! *****\n",nerrors);
+    HDprintf("***** %d DIMENSION SCALES FILE GENERATION FAILED! *****\n",nerrors);
     return 1;
 }
 
@@ -188,11 +188,11 @@ herr_t test_attach_scale(hid_t fid, hid_t did, const char *name, unsigned int id
         if(H5DSis_attached(did, dsid, idx) == 0) {
             if(H5DSattach_scale(did, dsid, idx) >= 0) {
                 if(H5DSis_attached(did, dsid, idx) > 0) {
-                    /* printf(" scale attached "); */
+                    /* HDprintf(" scale attached "); */
                     ret_value = SUCCEED;
                 }
                 else if(H5DSis_attached(did, dsid, idx) == 0) {
-                    printf(" scale not attached ");
+                    HDprintf(" scale not attached ");
                 }
             }
         }
