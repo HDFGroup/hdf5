@@ -2674,6 +2674,8 @@ H5_DLL herr_t   H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new);
 H5_DLL herr_t   H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new);
 H5_DLL herr_t   H5_mpi_comm_free(MPI_Comm *comm);
 H5_DLL herr_t   H5_mpi_info_free(MPI_Info *info);
+H5_DLL herr_t   H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result);
+H5_DLL herr_t   H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Functions for debugging */

@@ -32,7 +32,7 @@
  */
 #define MESG(mesg)                                                     \
     if (VERBOSE_MED && *mesg != '\0')                                  \
-	printf("%s\n", mesg)
+        HDprintf("%s\n", mesg)
 
 /* 
  * VRFY: Verify if the condition val is true.
@@ -46,16 +46,17 @@
  */
 #define VRFY(val, mesg) do {                                            \
     if (val) {                                                          \
-	MESG(mesg);                                                     \
-    } else {                                                            \
-        printf("Proc %d: ", mpi_rank);                                  \
-        printf("*** Parallel ERROR ***\n");                             \
-        printf("    VRFY (%s) failed at line %4d in %s\n",              \
+        MESG(mesg);                                                     \
+    }                                                                   \
+    else {                                                              \
+        HDprintf("Proc %d: ", mpi_rank);                                \
+        HDprintf("*** Parallel ERROR ***\n");                           \
+        HDprintf("    VRFY (%s) failed at line %4d in %s\n",            \
                mesg, (int)__LINE__, __FILE__);                          \
         ++nerrors;                                                      \
         fflush(stdout);                                                 \
         if (!VERBOSE_MED) {                                             \
-            printf("aborting MPI processes\n");                         \
+            HDprintf("aborting MPI processes\n");                       \
             MPI_Abort(MPI_COMM_WORLD, 1);                               \
         }                                                               \
     }                                                                   \
