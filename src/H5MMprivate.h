@@ -19,8 +19,6 @@
  *
  * Purpose:             Private header for memory management.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifndef _H5MMprivate_H
@@ -43,4 +41,5 @@ H5_DLL char *H5MM_xstrdup(const char *s);
 H5_DLL char *H5MM_strdup(const char *s);
 H5_DLL void *H5MM_xfree(void *mem);
 
-#endif
+#endif /* _H5MMprivate_H */
+

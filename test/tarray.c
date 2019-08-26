@@ -65,7 +65,7 @@ typedef struct
 void *test_array_alloc_custom(size_t size, void *info);
 void test_array_free_custom(void *mem, void *info);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_atomic_1d
  *
@@ -189,7 +189,7 @@ test_array_atomic_1d(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_array_atomic_1d() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_funcs
  *
@@ -252,7 +252,7 @@ test_array_funcs(void)
     CHECK(ret, FAIL, "H5Tclose");
 } /* end test_array_funcs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_atomic_3d
  *
@@ -381,7 +381,7 @@ test_array_atomic_3d(void)
 
 } /* end test_array_atomic_3d() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_array_atomic
  *
@@ -540,7 +540,7 @@ test_array_array_atomic(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_array_array_atomic() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_compound_atomic
  *
@@ -747,7 +747,7 @@ test_array_compound_atomic(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_array_compound_atomic() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_compound_array
  *
@@ -1006,7 +1006,7 @@ test_array_compound_array(void)
 **      allocated.
 **
 ****************************************************************/
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_alloc_custom
  *
@@ -1045,7 +1045,7 @@ test_array_alloc_custom(size_t size, void *info)
     return ret_value;
 } /* end test_array_alloc_custom() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_free_custom
  *
@@ -1081,7 +1081,7 @@ test_array_free_custom(void *_mem, void *info)
     return;
 } /* end test_array_free_custom() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_vlen_atomic
  *
@@ -1296,7 +1296,7 @@ test_array_vlen_atomic(void)
 
 } /* end test_array_vlen_atomic() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_vlen_array
  *
@@ -1551,7 +1551,7 @@ test_array_vlen_array(void)
 
 } /* end test_array_vlen_array() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_bkg
  *
@@ -1855,7 +1855,7 @@ test_array_bkg(void)
     HDfree(dtsinfo);
 } /* end test_array_bkg() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_compat
  *
@@ -2146,11 +2146,11 @@ test_compat(void)
         CHECK_I(ret, "H5Fclose");
     } /* end if */
     else
-        printf("***cannot open the pre-created compound datatype test file (%s)\n",testfile);
+        HDprintf("***cannot open the pre-created compound datatype test file (%s)\n",testfile);
 
 } /* end test_compat() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array
  *
@@ -2183,7 +2183,7 @@ test_array(void)
 
 }   /* end test_array() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_array
  *

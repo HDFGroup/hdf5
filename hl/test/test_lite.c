@@ -2121,7 +2121,7 @@ static int test_valid_path(void)
 
   if( (group = H5Gopen2(file_id, "/", H5P_DEFAULT)) < 0)
     goto out;
-  
+
   if( (path_valid = H5LTpath_valid(group, "/", TRUE)) != FALSE) {
     goto out;
   }

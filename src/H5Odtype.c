@@ -1710,56 +1710,56 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             s = buf;
             break;
     } /* end switch */
-    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Type class:",
 	    s);
 
-    fprintf(stream, "%*s%-*s %lu byte%s\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %lu byte%s\n", indent, "", fwidth,
 	    "Size:",
 	    (unsigned long)(dt->shared->size), 1 == dt->shared->size ? "" : "s");
 
-    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 		"Version:", dt->shared->version);
 
     if (H5T_COMPOUND == dt->shared->type) {
-	fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 		"Number of members:",
 		dt->shared->u.compnd.nmembs);
 	for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
 	    sprintf(buf, "Member %u:", i);
-	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    buf,
 		    dt->shared->u.compnd.memb[i].name);
-	    fprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX(0, fwidth-3),
+	    HDfprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX(0, fwidth-3),
 		    "Byte offset:",
 		    (unsigned long)(dt->shared->u.compnd.memb[i].offset));
 	    H5O_dtype_debug(f, dxpl_id, dt->shared->u.compnd.memb[i].type, stream,
 			    indent + 3, MAX(0, fwidth - 3));
 	}
     } else if(H5T_ENUM == dt->shared->type) {
-	fprintf(stream, "%*s%s\n", indent, "", "Base type:");
+	HDfprintf(stream, "%*s%s\n", indent, "", "Base type:");
 	H5O_dtype_debug(f, dxpl_id, dt->shared->parent, stream, indent+3, MAX(0, fwidth-3));
-	fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 		"Number of members:",
 		dt->shared->u.enumer.nmembs);
 	for(i = 0; i < dt->shared->u.enumer.nmembs; i++) {
 	    sprintf(buf, "Member %u:", i);
-	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    buf,
 		    dt->shared->u.enumer.name[i]);
-	    fprintf(stream, "%*s%-*s 0x", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s 0x", indent, "", fwidth,
 		    "Raw bytes of value:");
 	    for(k = 0; k < dt->shared->parent->shared->size; k++)
-		fprintf(stream, "%02x",
+		HDfprintf(stream, "%02x",
 			dt->shared->u.enumer.value[i*dt->shared->parent->shared->size + k]);
-	    fprintf(stream, "\n");
+	    HDfprintf(stream, "\n");
 	} /* end for */
 
     } else if(H5T_OPAQUE == dt->shared->type) {
-	fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
+	HDfprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
 		"Tag:", dt->shared->u.opaque.tag);
     } else if(H5T_REFERENCE == dt->shared->type) {
-	fprintf(stream, "%*s%-*s\n", indent, "", fwidth,
+	HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth,
 		"Fix dumping reference types!");
     } else if(H5T_STRING == dt->shared->type) {
         switch(dt->shared->u.atomic.u.s.cset) {
@@ -1795,7 +1795,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 s = buf;
                 break;
         } /* end switch */
-        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                 "Character Set:",
                 s);
 
@@ -1835,7 +1835,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 s = buf;
                 break;
         } /* end switch */
-        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                 "String Padding:",
                 s);
     } else if(H5T_VLEN == dt->shared->type) {
@@ -1855,7 +1855,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 s = buf;
                 break;
         } /* end switch */
-        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                 "Vlen type:", s);
 
         switch(dt->shared->u.vlen.loc) {
@@ -1874,7 +1874,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 s = buf;
                 break;
         } /* end switch */
-        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                 "Location:", s);
 
         /* Extra information for VL-strings */
@@ -1912,7 +1912,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                     s = buf;
                     break;
             } /* end switch */
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                     "Character Set:",
                     s);
 
@@ -1952,19 +1952,19 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                     s = buf;
                     break;
             } /* end switch */
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                     "String Padding:",
                     s);
         } /* end if */
     } else if(H5T_ARRAY == dt->shared->type) {
-	fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 		"Rank:",
 		dt->shared->u.array.ndims);
-        fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
+        HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
         for(i = 0; i < dt->shared->u.array.ndims; i++)
-            fprintf(stream, "%s%u", (i ? ", " : ""), (unsigned)dt->shared->u.array.dim[i]);
-        fprintf(stream, "}\n");
-	fprintf(stream, "%*s%s\n", indent, "", "Base type:");
+            HDfprintf(stream, "%s%u", (i ? ", " : ""), (unsigned)dt->shared->u.array.dim[i]);
+        HDfprintf(stream, "}\n");
+	HDfprintf(stream, "%*s%s\n", indent, "", "Base type:");
 	H5O_dtype_debug(f, dxpl_id, dt->shared->parent, stream, indent + 3, MAX(0, fwidth - 3));
     } else {
 	switch (dt->shared->u.atomic.order) {
@@ -1994,16 +1994,16 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 s = buf;
                 break;
 	} /* end switch */
-	fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		"Byte order:",
 		s);
 
-	fprintf(stream, "%*s%-*s %lu bit%s\n", indent, "", fwidth,
+	HDfprintf(stream, "%*s%-*s %lu bit%s\n", indent, "", fwidth,
 		"Precision:",
 		(unsigned long)(dt->shared->u.atomic.prec),
 		1==dt->shared->u.atomic.prec?"":"s");
 
-	fprintf(stream, "%*s%-*s %lu bit%s\n", indent, "", fwidth,
+	HDfprintf(stream, "%*s%-*s %lu bit%s\n", indent, "", fwidth,
 		"Offset:",
 		(unsigned long)(dt->shared->u.atomic.offset),
 		1==dt->shared->u.atomic.offset?"":"s");
@@ -2027,7 +2027,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 s = "pad?";
                 break;
 	} /* end switch */
-	fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		"Low pad type:", s);
 
 	switch (dt->shared->u.atomic.msb_pad) {
@@ -2049,7 +2049,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 s = "pad?";
                 break;
 	} /* end switch */
-	fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		"High pad type:", s);
 
 	if (H5T_FLOAT == dt->shared->type) {
@@ -2076,7 +2076,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                     s = buf;
                     break;
 	    } /* end switch */
-	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    "Internal pad type:", s);
 
 	    switch (dt->shared->u.atomic.u.f.norm) {
@@ -2097,30 +2097,30 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                     sprintf(buf, "H5T_NORM_%d", (int) (dt->shared->u.atomic.u.f.norm));
                     s = buf;
 	    } /* end switch */
-	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    "Normalization:", s);
 
-	    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 		    "Sign bit location:",
 		    (unsigned long) (dt->shared->u.atomic.u.f.sign));
 
-	    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 		    "Exponent location:",
 		    (unsigned long) (dt->shared->u.atomic.u.f.epos));
 
-	    fprintf(stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
 		    "Exponent bias:",
 		    (unsigned long) (dt->shared->u.atomic.u.f.ebias));
 
-	    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 		    "Exponent size:",
 		    (unsigned long) (dt->shared->u.atomic.u.f.esize));
 
-	    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 		    "Mantissa location:",
 		    (unsigned long) (dt->shared->u.atomic.u.f.mpos));
 
-	    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 		    "Mantissa size:",
 		    (unsigned long) (dt->shared->u.atomic.u.f.msize));
 
@@ -2141,7 +2141,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                     s = buf;
                     break;
 	    } /* end switch */
-	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    "Sign scheme:", s);
 	}
     }

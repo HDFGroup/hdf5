@@ -239,7 +239,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
             HDassert(0 && "This Should never be executed!");
     } /* end switch */
 
-    fprintf(stream, "%s%s {nbytes=%lu", s1, s2, (unsigned long)(dt->shared->size));
+    HDfprintf(stream, "%s%s {nbytes=%lu", s1, s2, (unsigned long)(dt->shared->size));
 
     if(H5T_IS_ATOMIC(dt->shared)) {
         uint64_t	tmp;
@@ -266,13 +266,13 @@ H5T_debug(const H5T_t *dt, FILE *stream)
                 break;
 	} /* end switch */
 
-	fprintf(stream, ", %s", s1);
+	HDfprintf(stream, ", %s", s1);
 
 	if(dt->shared->u.atomic.offset)
-	    fprintf(stream, ", offset=%lu",
+	    HDfprintf(stream, ", offset=%lu",
 		    (unsigned long) (dt->shared->u.atomic.offset));
 	if(dt->shared->u.atomic.prec != 8 * dt->shared->size)
-	    fprintf(stream, ", prec=%lu",
+	    HDfprintf(stream, ", prec=%lu",
 		    (unsigned long) (dt->shared->u.atomic.prec));
 	switch(dt->shared->type) {
             case H5T_INTEGER:
@@ -291,7 +291,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 
                 } /* end switch */
                 if(s1)
-                    fprintf(stream, ", %s", s1);
+                    HDfprintf(stream, ", %s", s1);
                 break;
 
             case H5T_FLOAT:
@@ -313,23 +313,23 @@ H5T_debug(const H5T_t *dt, FILE *stream)
                         break;
                 } /* end switch */
 
-                fprintf(stream, ", sign=%lu+1",
+                HDfprintf(stream, ", sign=%lu+1",
                         (unsigned long)(dt->shared->u.atomic.u.f.sign));
-                fprintf(stream, ", mant=%lu+%lu (%s)",
+                HDfprintf(stream, ", mant=%lu+%lu (%s)",
                         (unsigned long)(dt->shared->u.atomic.u.f.mpos),
                         (unsigned long)(dt->shared->u.atomic.u.f.msize), s1);
-                fprintf(stream, ", exp=%lu+%lu",
+                HDfprintf(stream, ", exp=%lu+%lu",
                         (unsigned long)(dt->shared->u.atomic.u.f.epos),
                         (unsigned long)(dt->shared->u.atomic.u.f.esize));
                 tmp = dt->shared->u.atomic.u.f.ebias >> 32;
                 if(tmp) {
                     size_t hi = (size_t)tmp;
                     size_t lo = (size_t)(dt->shared->u.atomic.u.f.ebias & 0xffffffff);
-                    fprintf(stream, " bias=0x%08lx%08lx",
+                    HDfprintf(stream, " bias=0x%08lx%08lx",
                             (unsigned long)hi, (unsigned long)lo);
                 } else {
                     size_t lo = (size_t)(dt->shared->u.atomic.u.f.ebias & 0xffffffff);
-                    fprintf(stream, " bias=0x%08lx", (unsigned long)lo);
+                    HDfprintf(stream, " bias=0x%08lx", (unsigned long)lo);
                 }
                 break;
 
@@ -340,60 +340,60 @@ H5T_debug(const H5T_t *dt, FILE *stream)
     } else if(H5T_COMPOUND == dt->shared->type) {
 	/* Compound data type */
 	for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
-	    fprintf(stream, "\n\"%s\" @%lu",
+	    HDfprintf(stream, "\n\"%s\" @%lu",
 		    dt->shared->u.compnd.memb[i].name,
 		    (unsigned long)(dt->shared->u.compnd.memb[i].offset));
-	    fprintf(stream, " ");
+	    HDfprintf(stream, " ");
 	    H5T_debug(dt->shared->u.compnd.memb[i].type, stream);
 	} /* end for */
-	fprintf(stream, "\n");
+	HDfprintf(stream, "\n");
     } else if(H5T_VLEN == dt->shared->type) {
         switch(dt->shared->u.vlen.loc) {
             case H5T_LOC_MEMORY:
-                fprintf(stream, ", loc=memory");
+                HDfprintf(stream, ", loc=memory");
                 break;
 
             case H5T_LOC_DISK:
-                fprintf(stream, ", loc=disk");
+                HDfprintf(stream, ", loc=disk");
                 break;
 
             default:
-                fprintf(stream, ", loc=UNKNOWN");
+                HDfprintf(stream, ", loc=UNKNOWN");
                 break;
         } /* end switch */
 
         if(H5T_IS_VL_STRING(dt->shared))
             /* Variable length string datatype */
-            fprintf(stream, ", variable-length");
+            HDfprintf(stream, ", variable-length");
         else {
             /* Variable length sequence datatype */
-            fprintf(stream, " VLEN ");
+            HDfprintf(stream, " VLEN ");
             H5T_debug(dt->shared->parent, stream);
-            fprintf(stream, "\n");
+            HDfprintf(stream, "\n");
         } /* end else */
     } else if(H5T_ENUM == dt->shared->type) {
         size_t	base_size;
 
 	/* Enumeration data type */
-	fprintf(stream, " ");
+	HDfprintf(stream, " ");
 	H5T_debug(dt->shared->parent, stream);
 	base_size = dt->shared->parent->shared->size;
 	for(i = 0; i < dt->shared->u.enumer.nmembs; i++) {
             size_t	k;
 
-	    fprintf(stream, "\n\"%s\" = 0x", dt->shared->u.enumer.name[i]);
+	    HDfprintf(stream, "\n\"%s\" = 0x", dt->shared->u.enumer.name[i]);
 	    for(k = 0; k < base_size; k++)
-		fprintf(stream, "%02lx",
+		HDfprintf(stream, "%02lx",
 			(unsigned long)(dt->shared->u.enumer.value + (i * base_size) + k));
 	} /* end for */
-	fprintf(stream, "\n");
+	HDfprintf(stream, "\n");
     } else if(H5T_OPAQUE == dt->shared->type) {
-	fprintf(stream, ", tag=\"%s\"", dt->shared->u.opaque.tag);
+	HDfprintf(stream, ", tag=\"%s\"", dt->shared->u.opaque.tag);
     } else {
 	/* Unknown */
-	fprintf(stream, "unknown class %d\n", (int)(dt->shared->type));
+	HDfprintf(stream, "unknown class %d\n", (int)(dt->shared->type));
     }
-    fprintf(stream, "}");
+    HDfprintf(stream, "}");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T_debug() */

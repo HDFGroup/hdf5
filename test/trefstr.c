@@ -67,7 +67,7 @@ test_refstr_create(void)
 
     /* Try creating a ref-counted string */
     rs=H5RS_create("foo");
-    CHECK(rs, NULL, "H5RS_create");
+    CHECK_PTR(rs, "H5RS_create");
 
     /* Get the reference count on the string */
     count=H5RS_get_count(rs);
@@ -97,7 +97,7 @@ test_refstr_count(void)
 
     /* Try creating a ref-counted string */
     rs=H5RS_create("foo");
-    CHECK(rs, NULL, "H5RS_create");
+    CHECK_PTR(rs, "H5RS_create");
 
     /* Get the reference count on the string */
     count=H5RS_get_count(rs);
@@ -144,7 +144,7 @@ test_refstr_dup(void)
 
     /* Try creating a ref-counted string */
     rs1=H5RS_create("foo");
-    CHECK(rs1, NULL, "H5RS_create");
+    CHECK_PTR(rs1, "H5RS_create");
 
     /* Get the reference count on the string */
     count=H5RS_get_count(rs1);
@@ -152,7 +152,7 @@ test_refstr_dup(void)
 
     /* Duplicate r-string */
     rs2=H5RS_dup(rs1);
-    CHECK(rs2, NULL, "H5RS_dup");
+    CHECK_PTR(rs2, "H5RS_dup");
 
     /* Get the reference count on the strings */
     count=H5RS_get_count(rs1);
@@ -194,11 +194,11 @@ test_refstr_cmp(void)
 
     /* Create first reference counted string */
     rs1=H5RS_create("foo");
-    CHECK(rs1, NULL, "H5RS_create");
+    CHECK_PTR(rs1, "H5RS_create");
 
     /* Create second reference counted string */
     rs2=H5RS_create("foo2");
-    CHECK(rs2, NULL, "H5RS_create");
+    CHECK_PTR(rs2, "H5RS_create");
 
     /* Compare the strings in various ways */
     cmp=H5RS_cmp(rs1,rs1);
@@ -246,12 +246,12 @@ test_refstr_wrap(void)
 
     /* Wrap ref-counted string around existing buffer */
     rs=H5RS_wrap(buf);
-    CHECK(rs, NULL, "H5RS_wrap");
+    CHECK_PTR(rs, "H5RS_wrap");
 
     /* Get pointer to raw string in ref-counted string */
     s=H5RS_get_str(rs);
-    CHECK(s, NULL, "H5RS_get_str");
-    VERIFY(s, buf, "wrapping");
+    CHECK_PTR(s, "H5RS_get_str");
+    CHECK_PTR_EQ(s, buf, "wrapping");
     cmp=HDstrcmp(s,buf);
     VERIFY(cmp, 0, "HDstrcmp");
 
@@ -264,7 +264,7 @@ test_refstr_wrap(void)
 
     /* Get pointer to raw string in ref-counted string */
     s=H5RS_get_str(rs);
-    CHECK(s, NULL, "H5RS_get_str");
+    CHECK_PTR(s, "H5RS_get_str");
     CHECK(s, buf, "wrapping");
     cmp=HDstrcmp(s,buf);
     if(cmp<=0)
@@ -299,17 +299,17 @@ test_refstr_own(void)
 
     /* Initialize buffer */
     s = (char *)H5FL_BLK_MALLOC(str_buf,HDstrlen("foo") + 1);
-    CHECK(s, NULL, "H5FL_BLK_MALLOC");    
+    CHECK_PTR(s, "H5FL_BLK_MALLOC");    
     HDstrcpy(s, "foo");
 
     /* Transfer ownership of dynamically allocated string to ref-counted string */
     rs=H5RS_own(s);
-    CHECK(rs, NULL, "H5RS_own");
+    CHECK_PTR(rs, "H5RS_own");
 
     /* Get pointer to raw string in ref-counted string */
     t=H5RS_get_str(rs);
-    CHECK(t, NULL, "H5RS_get_str");
-    VERIFY(t, s, "transferring");
+    CHECK_PTR(t, "H5RS_get_str");
+    CHECK_PTR_EQ(t, s, "transferring");
     cmp=HDstrcmp(s,t);
     VERIFY(cmp, 0, "HDstrcmp");
 
@@ -322,8 +322,8 @@ test_refstr_own(void)
 
     /* Get pointer to raw string in ref-counted string */
     t=H5RS_get_str(rs);
-    CHECK(t, NULL, "H5RS_get_str");
-    VERIFY(t, s, "transferring");
+    CHECK_PTR(t, "H5RS_get_str");
+    CHECK_PTR_EQ(t, s, "transferring");
     cmp=HDstrcmp(t,s);
     VERIFY(cmp, 0, "HDstrcmp");
 

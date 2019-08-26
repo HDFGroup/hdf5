@@ -1246,7 +1246,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
                 {
                     unsigned level = cd_values[0];
 
-                    sprintf(temp,"(%d)", level);
+                    HDsprintf(temp,"(%d)", level);
                     HDstrcat(strfilter, temp);
                 }
 #endif
@@ -1260,7 +1260,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
                     unsigned options_mask = cd_values[0]; /* from dcpl, not filt*/
                     unsigned ppb = cd_values[1];
 
-                    sprintf(temp,"(%d,", ppb);
+                    HDsprintf(temp,"(%d,", ppb);
                     HDstrcat(strfilter, temp);
                     if (options_mask & H5_SZIP_EC_OPTION_MASK)
                         HDstrcpy(temp, "EC) ");
@@ -1300,7 +1300,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
 
         HDstrcpy(str, "dset     ");
         HDstrcat(str, strfilter);
-        sprintf(temp, "  (%.3f:1)", ratio);
+        HDsprintf(temp, "  (%.3f:1)", ratio);
         HDstrcat(str, temp);
         printf(FORMAT_OBJ, str, objname);
     }

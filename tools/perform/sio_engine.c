@@ -41,7 +41,7 @@
 
 #define GOTOERROR(errcode)  { ret_code = errcode; goto done; }
 #define ERRMSG(mesg) {                                                  \
-    fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
+    HDfprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
         mesg, (int)__LINE__, __FILE__);                             \
 }
 
@@ -199,7 +199,7 @@ do_sio(parameters param)
     if (sio_debug_level >= 4)
 
     /* output all of the times for all iterations */
-        fprintf(output, "Timer details:\n");
+        HDfprintf(output, "Timer details:\n");
 
     /*
      * Write performance measurement
@@ -492,7 +492,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
         /* Create the dataset transfer property list */
         h5dxpl = H5Pcreate(H5P_DATASET_XFER);
         if (h5dxpl < 0) {
-            fprintf(stderr, "HDF5 Property List Create failed\n");
+            HDfprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -514,7 +514,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
             h5dcpl = H5Pcreate(H5P_DATASET_CREATE);
 
         if (h5dcpl < 0) {
-            fprintf(stderr, "HDF5 Property List Create failed\n");
+            HDfprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -522,12 +522,12 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
         /* Set the chunk size to be the same as the buffer size */
             hrc = H5Pset_chunk(h5dcpl, rank, h5chunk);
             if (hrc < 0) {
-                fprintf(stderr, "HDF5 Property List Set failed\n");
+                HDfprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
             } /* end if */
         } /* end if */
 
-        sprintf(dname, "Dataset_%ld", (unsigned long)parms->num_bytes);
+        HDsprintf(dname, "Dataset_%ld", (unsigned long)parms->num_bytes);
         h5ds_id = H5Dcreate2(fd->h5fd, dname, ELMT_H5_TYPE,
             h5dset_space_id, H5P_DEFAULT, h5dcpl, H5P_DEFAULT);
 
@@ -558,7 +558,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
     hrc = dset_write(rank-1, fd, parms, buffer);
 
     if (hrc < 0) {
-        fprintf(stderr, "Error in dataset write\n");
+        HDfprintf(stderr, "Error in dataset write\n");
         GOTOERROR(FAIL);
     }
 
@@ -573,7 +573,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
         hrc = H5Dclose(h5ds_id);
 
         if (hrc < 0) {
-            fprintf(stderr, "HDF5 Dataset Close failed\n");
+            HDfprintf(stderr, "HDF5 Dataset Close failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -586,7 +586,7 @@ done:
     if (h5dset_space_id != -1) {
         hrc = H5Sclose(h5dset_space_id);
         if (hrc < 0){
-            fprintf(stderr, "HDF5 Dataset Space Close failed\n");
+            HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
             ret_code = FAIL;
         } else {
             h5dset_space_id = -1;
@@ -596,7 +596,7 @@ done:
     if (h5mem_space_id != -1) {
         hrc = H5Sclose(h5mem_space_id);
         if (hrc < 0) {
-            fprintf(stderr, "HDF5 Memory Space Close failed\n");
+            HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
             ret_code = FAIL;
         } else {
             h5mem_space_id = -1;
@@ -606,7 +606,7 @@ done:
     if (h5dxpl != -1) {
         hrc = H5Pclose(h5dxpl);
         if (hrc < 0) {
-            fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+            HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
             ret_code = FAIL;
         } else {
             h5dxpl = -1;
@@ -839,7 +839,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
         /* Create the dataset transfer property list */
         h5dxpl = H5Pcreate(H5P_DATASET_XFER);
         if (h5dxpl < 0) {
-            fprintf(stderr, "HDF5 Property List Create failed\n");
+            HDfprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
         break;
@@ -858,7 +858,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
         break;
 
         case HDF5:
-        sprintf(dname, "Dataset_%ld", (long)parms->num_bytes);
+        HDsprintf(dname, "Dataset_%ld", (long)parms->num_bytes);
         h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
         if (h5ds_id < 0) {
             HDfprintf(stderr, "HDF5 Dataset open failed\n");
@@ -878,7 +878,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
     hrc = dset_read(rank-1, fd, parms, buffer, buffer2);
 
     if (hrc < 0) {
-        fprintf(stderr, "Error in dataset read\n");
+        HDfprintf(stderr, "Error in dataset read\n");
         GOTOERROR(FAIL);
     }
 
@@ -892,7 +892,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
         hrc = H5Dclose(h5ds_id);
 
         if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Close failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -905,7 +905,7 @@ done:
     if (h5dset_space_id != -1) {
     hrc = H5Sclose(h5dset_space_id);
     if (hrc < 0){
-        fprintf(stderr, "HDF5 Dataset Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
         h5dset_space_id = -1;
@@ -915,7 +915,7 @@ done:
     if (h5mem_space_id != -1) {
     hrc = H5Sclose(h5mem_space_id);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Memory Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
         h5mem_space_id = -1;
@@ -925,7 +925,7 @@ done:
     if (h5dxpl != -1) {
     hrc = H5Pclose(h5dxpl);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
         h5dxpl = -1;
@@ -1090,7 +1090,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
         fapl = set_vfd(param);
 
         if (fapl < 0) {
-            fprintf(stderr, "HDF5 Property List Create failed\n");
+            HDfprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -1103,7 +1103,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 
 
         if (fd->h5fd < 0) {
-            fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
+            HDfprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
             GOTOERROR(FAIL);
         }
         break;
@@ -1169,7 +1169,7 @@ set_vfd(parameters *param)
         HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
         for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
-            sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+            HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1,0) * (HADDR_MAX / 10);
         }
@@ -1218,7 +1218,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
         rc = POSIXCLOSE(fd->posixfd);
 
         if (rc != 0){
-        fprintf(stderr, "POSIX File Close failed\n");
+        HDfprintf(stderr, "POSIX File Close failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -1229,7 +1229,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
         hrc = H5Fclose(fd->h5fd);
 
         if (hrc < 0) {
-        fprintf(stderr, "HDF5 File Close failed\n");
+        HDfprintf(stderr, "HDF5 File Close failed\n");
         GOTOERROR(FAIL);
         }
 

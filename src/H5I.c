@@ -657,7 +657,7 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
             if(udata->force) {
 #ifdef H5I_DEBUG
                 if(H5DEBUG(I)) {
-                    fprintf(H5DEBUG(I), "H5I: free type=%d obj=0x%08lx "
+                    HDfprintf(H5DEBUG(I), "H5I: free type=%d obj=0x%08lx "
                             "failure ignored\n",
                             (int)udata->type_ptr->cls->type_id,
                             (unsigned long)(id->obj_ptr));
@@ -2368,9 +2368,9 @@ H5I__debug_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
     FUNC_ENTER_STATIC_NOERR
 
-    fprintf(stderr, "		 id = %lu\n", (unsigned long)(item->id));
-    fprintf(stderr, "		 count = %u\n", item->count);
-    fprintf(stderr, "		 obj   = 0x%08lx\n", (unsigned long)(item->obj_ptr));
+    HDfprintf(stderr, "		 id = %lu\n", (unsigned long)(item->id));
+    HDfprintf(stderr, "		 count = %u\n", item->count);
+    HDfprintf(stderr, "		 obj   = 0x%08lx\n", (unsigned long)(item->obj_ptr));
 
     /* Get the group location, so we get get the name */
     switch(type) {
@@ -2392,9 +2392,9 @@ H5I__debug_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
     if(path) {
         if(path->user_path_r)
-            fprintf(stderr, "                user_path = %s\n", H5RS_get_str(path->user_path_r));
+            HDfprintf(stderr, "                user_path = %s\n", H5RS_get_str(path->user_path_r));
         if(path->full_path_r)
-            fprintf(stderr, "                full_path = %s\n", H5RS_get_str(path->full_path_r));
+            HDfprintf(stderr, "                full_path = %s\n", H5RS_get_str(path->full_path_r));
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -2421,18 +2421,18 @@ H5I__debug(H5I_type_t type)
 
     FUNC_ENTER_STATIC_NOERR
 
-    fprintf(stderr, "Dumping ID type %d\n", (int)type);
+    HDfprintf(stderr, "Dumping ID type %d\n", (int)type);
     type_ptr = H5I_id_type_list_g[type];
 
     /* Header */
-    fprintf(stderr, "	 init_count = %u\n", type_ptr->init_count);
-    fprintf(stderr, "	 reserved   = %u\n", type_ptr->cls->reserved);
-    fprintf(stderr, "	 wrapped    = %u\n", type_ptr->wrapped);
-    fprintf(stderr, "	 id_count   = %u\n", type_ptr->id_count);
-    fprintf(stderr, "	 nextid	    = %u\n", type_ptr->nextid);
+    HDfprintf(stderr, "	 init_count = %u\n", type_ptr->init_count);
+    HDfprintf(stderr, "	 reserved   = %u\n", type_ptr->cls->reserved);
+    HDfprintf(stderr, "	 wrapped    = %u\n", type_ptr->wrapped);
+    HDfprintf(stderr, "	 id_count   = %u\n", type_ptr->id_count);
+    HDfprintf(stderr, "	 nextid	    = %u\n", type_ptr->nextid);
 
     /* List */
-    fprintf(stderr, "	 List:\n");
+    HDfprintf(stderr, "	 List:\n");
     H5SL_iterate(type_ptr->ids, H5I__debug_cb, &type);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

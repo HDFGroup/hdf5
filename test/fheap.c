@@ -16147,7 +16147,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
              */
 #ifndef QAK
             if(ExpressMode > 1)
-                printf("***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
+                HDprintf("***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
             else
                 nerrors += test_man_start_5th_recursive_indirect(fapl, &small_cparam, &tparam);
 #else /* QAK */
@@ -16210,7 +16210,7 @@ tparam.drain_half = FHEAP_DEL_DRAIN_ALL;
                     nerrors += test_man_remove_first_two_rows(fapl, &small_cparam, &tparam);
                     nerrors += test_man_remove_first_four_rows(fapl, &small_cparam, &tparam);
                     if(ExpressMode > 1)
-                        printf("***Express test mode on.  Some tests skipped\n");
+                        HDprintf("***Express test mode on.  Some tests skipped\n");
                     else {
                         nerrors += test_man_remove_all_root_direct(fapl, &small_cparam, &tparam);
                         nerrors += test_man_remove_2nd_indirect(fapl, &small_cparam, &tparam);
@@ -16244,7 +16244,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
                     nerrors += test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
                     nerrors += test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
                     if(ExpressMode > 1)
-                        printf("***Express test mode on.  Some tests skipped\n");
+                        HDprintf("***Express test mode on.  Some tests skipped\n");
                     else {
                         nerrors += test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(fapl, &small_cparam, &tparam);
                         nerrors += test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
@@ -16394,7 +16394,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
 #ifndef QAK
         /* Random object insertion & deletion */
         if(ExpressMode > 1)
-            printf("***Express test mode on.  Some tests skipped\n");
+            HDprintf("***Express test mode on.  Some tests skipped\n");
         else {
 #ifndef QAK
             /* Random tests using "small" heap creation parameters */

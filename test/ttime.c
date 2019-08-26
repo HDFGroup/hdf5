@@ -13,15 +13,13 @@
 
 /***********************************************************
 *
-* Test program:	 ttime
+* Test program:     ttime
 *
 * Test the Time Datatype functionality
 *
 *************************************************************/
 
 #include "testhdf5.h"
-
-#include "hdf5.h"
 
 #define DATAFILE   "ttime.h5"
 #ifdef NOT_YET
@@ -180,13 +178,13 @@ test_time_io(void)
 tid = H5Dget_type(dsid);
 CHECK(tid, FAIL, "H5Dget_type");
 if( H5Tget_class (tid) == H5T_TIME)
-    fprintf(stderr,"datatype class is H5T_TIME\n");
+    HDfprintf(stderr,"datatype class is H5T_TIME\n");
 status = H5Tclose (tid);
 CHECK(status, FAIL, "H5Tclose");
 
     status = H5Dread (dsid, H5T_UNIX_D32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &timethen);
     CHECK(status, FAIL, "H5Dread");
-fprintf(stderr,"time written was: %s\n", HDctime(&timethen));
+HDfprintf(stderr,"time written was: %s\n", HDctime(&timethen));
 
     status = H5Dclose(dsid);
     CHECK(status, FAIL, "H5Dclose");
@@ -215,15 +213,15 @@ test_time(void)
 
 }   /* test_time() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	cleanup_time
+ * Function:    cleanup_time
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:    Cleanup temporary test files
  *
- * Return:	none
+ * Return:    none
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              October 19, 2000
  *
  * Modifications:
@@ -233,6 +231,6 @@ test_time(void)
 void
 cleanup_time(void)
 {
-    remove(DATAFILE);
+    HDremove(DATAFILE);
 }
 

@@ -127,7 +127,7 @@ static int check_data(const char *dsetname, hid_t fid, hbool_t floating_number)
 		if (!DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001F)) {
 		    if (!nerrors++) {
 			H5_FAILED();
-			printf("element [%d][%d] is %g but should have been %g\n",
+			HDprintf("element [%d][%d] is %g but should have been %g\n",
 			       j, i, data_out[j][i], data_in[j][i]);
 		    }
 		}
@@ -144,7 +144,7 @@ static int check_data(const char *dsetname, hid_t fid, hbool_t floating_number)
 		if (int_data_out[j][i] != int_data_in[j][i]) {
 		    if (!nerrors++) {
 			H5_FAILED();
-			printf("element [%d][%d] is %d but should have been %d\n",
+			HDprintf("element [%d][%d] is %d but should have been %d\n",
 			       j, i, (int)int_data_out[j][i],
 			       (int)int_data_in[j][i]);
 		    }
@@ -161,7 +161,7 @@ static int check_data(const char *dsetname, hid_t fid, hbool_t floating_number)
 
     /* Failure */
     if (nerrors) {
-        printf("total of %d errors out of %d elements\n", nerrors, NX*NY);
+        HDprintf("total of %d errors out of %d elements\n", nerrors, NX*NY);
         return 1;
     }
 
@@ -337,11 +337,11 @@ int main(void)
     nerrors += open_dataset(filename);
 
     if (nerrors) {
-        printf("***** %u FAILURE%s! *****\n",
+        HDprintf("***** %u FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
         HDexit(1);
     }
 
-    printf("All data type tests passed.\n");
+    HDprintf("All data type tests passed.\n");
     return 0;
 }

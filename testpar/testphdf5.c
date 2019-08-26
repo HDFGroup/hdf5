@@ -270,10 +270,6 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
         /* set Parallel access with communicator */
         ret = H5Pset_fapl_mpio(ret_pl, comm, info);
         VRFY((ret >= 0), "");
-        ret = H5Pset_all_coll_metadata_ops(ret_pl, TRUE);
-        VRFY((ret >= 0), "");
-        ret = H5Pset_coll_metadata_write(ret_pl, TRUE);
-        VRFY((ret >= 0), "");
         return(ret_pl);
     }
 
@@ -513,9 +509,6 @@ int main(int argc, char **argv)
     AddTest("nocolcause", no_collective_cause_tests, NULL,
             "test cause for broken collective io",
             PARATESTFILE);
-
-    AddTest("edpl", test_plist_ed, NULL,
-            "encode/decode Property Lists", NULL);
 
     if((mpi_size < 2) && MAINPROCESS) {
         HDprintf("File Image Ops daisy chain test needs at least 2 processes.\n");

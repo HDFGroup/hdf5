@@ -127,7 +127,7 @@ test_misc(hid_t fapl, hbool_t new_format)
     if(HDstrcmp(comment, "hello world")) {
 	H5_FAILED();
 	puts("    Read the wrong comment string from the group.");
-	printf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
+	HDprintf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
 	TEST_ERROR
     }
     if(H5Gclose(g1) < 0) TEST_ERROR
@@ -198,7 +198,7 @@ test_long(hid_t fapl, hbool_t new_format)
         name1[i] = (char)('A' + i%26);
     name1[LONG_NAME_LEN - 1] = '\0';
     name2 = (char *)HDmalloc((size_t)((2 * LONG_NAME_LEN) + 2));
-    sprintf(name2, "%s/%s", name1, name1);
+    HDsprintf(name2, "%s/%s", name1, name1);
 
     /* Create groups */
     if((g1 = H5Gcreate2(fid, name1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -275,7 +275,7 @@ test_large(hid_t fapl, hbool_t new_format)
     if(new_format)
         if(H5G__has_stab_test(cwg) != FALSE) TEST_ERROR
     for(i = 0; i < LARGE_NOBJS; i++) {
-        sprintf(name, "%05d%05d", (HDrandom() % 100000), i);
+        HDsprintf(name, "%05d%05d", (HDrandom() % 100000), i);
 	if((dir = H5Gcreate2(cwg, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(dir) < 0) TEST_ERROR
     }
@@ -385,7 +385,7 @@ lifecycle(hid_t fapl2)
     if(H5G__is_empty_test(gid) != TRUE) TEST_ERROR
 
     /* Create first "bottom" group */
-    sprintf(objname, LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
+    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
     if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on bottom group's status */
@@ -402,7 +402,7 @@ lifecycle(hid_t fapl2)
     /* Create several more bottom groups, to push the top group almost to a symbol table */
     /* (Start counting at '1', since we've already created one bottom group */
     for(u = 1; u < LIFECYCLE_MAX_COMPACT; u++) {
-        sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+        HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
         if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
         /* Check on bottom group's status */
@@ -426,7 +426,7 @@ lifecycle(hid_t fapl2)
     if(oinfo.hdr.nchunks != 1) TEST_ERROR
 
     /* Create one more "bottom" group, which should push top group into using a symbol table */
-    sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
     if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on bottom group's status */
@@ -449,7 +449,7 @@ lifecycle(hid_t fapl2)
 
     /* Unlink objects from top group */
     while(u >= LIFECYCLE_MIN_DENSE) {
-        sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+        HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
 
         if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
@@ -462,7 +462,7 @@ lifecycle(hid_t fapl2)
     if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Unlink one more object from the group, which should transform back to using links */
-    sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
     if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     u--;
 
@@ -472,10 +472,10 @@ lifecycle(hid_t fapl2)
     if(nmsgs != (LIFECYCLE_MIN_DENSE - 1)) TEST_ERROR
 
     /* Unlink last two objects from top group */
-    sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
     if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     u--;
-    sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
     if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Check on top group's status */
@@ -691,7 +691,7 @@ read_old(void)
 
     /* Create a bunch of objects in the group */
     for(u = 0; u < READ_OLD_NGROUPS; u++) {
-        sprintf(objname, "Group %u", u);
+        HDsprintf(objname, "Group %u", u);
         if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
         /* Check on bottom group's status */
@@ -709,7 +709,7 @@ read_old(void)
 
     /* Delete new objects from old group */
     for(u = 0; u < READ_OLD_NGROUPS; u++) {
-        sprintf(objname, "Group %u", u);
+        HDsprintf(objname, "Group %u", u);
         if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     } /* end for */
 
@@ -802,7 +802,7 @@ no_compact(hid_t fapl2)
     if(H5G__is_empty_test(gid) != TRUE) TEST_ERROR
 
     /* Create first "bottom" group */
-    sprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
+    HDsprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on bottom group's status */
@@ -817,7 +817,7 @@ no_compact(hid_t fapl2)
     if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Unlink object from top group */
-    sprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
+    HDsprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Check on top group's status */

@@ -209,7 +209,7 @@ H5FD_core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
     HDassert(start <= end);
 
 #ifdef DER
-fprintf(stderr, "Add region: (%llu, %llu)\n", start, end);
+HDfprintf(stderr, "Add region: (%llu, %llu)\n", start, end);
 #endif
 
     /* Adjust the dirty region to the nearest block boundaries */
@@ -223,7 +223,7 @@ fprintf(stderr, "Add region: (%llu, %llu)\n", start, end);
         end = (((end / file->bstore_page_size) + 1) * file->bstore_page_size) - 1;
         if(end > file->eof){
 #ifdef DER
-fprintf(stderr, "Adjusted to EOF\n");
+HDfprintf(stderr, "Adjusted to EOF\n");
 #endif
             end = file->eof - 1;
         }
@@ -234,7 +234,7 @@ fprintf(stderr, "Adjusted to EOF\n");
 
 #ifdef DER
 if(was_adjusted)
-    fprintf(stderr, "Adjusted region: (%llu, %llu)\n", start, end);
+    HDfprintf(stderr, "Adjusted region: (%llu, %llu)\n", start, end);
 #endif
 
     /* Get the regions before and after the intended insertion point */
@@ -335,7 +335,7 @@ H5FD_core_destroy_dirty_list(H5FD_core_t *file)
 {
 size_t count = H5SL_count(file->dirty_list);
 if(count != 0)
-    fprintf(stderr, "LIST NOT EMPTY AT DESTROY\n");
+    HDfprintf(stderr, "LIST NOT EMPTY AT DESTROY\n");
 }
 #endif
         while(NULL != (region = (H5FD_core_region_t *)H5SL_remove_first(file->dirty_list)))
@@ -389,12 +389,12 @@ static herr_t H5FD_core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t 
             bytes_in = (h5_posix_io_t)size;
 
 #ifdef DER
-fprintf(stderr, "\nNEW\n");
+HDfprintf(stderr, "\nNEW\n");
 #endif
         do {
             bytes_wrote = HDwrite(file->fd, ptr, bytes_in);
 #ifdef DER
-fprintf(stderr, "bytes wrote: %lu\n", bytes_wrote);
+HDfprintf(stderr, "bytes wrote: %lu\n", bytes_wrote);
 #endif
         } while(-1 == bytes_wrote && EINTR == errno);
 
@@ -837,7 +837,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             if(NULL == (file->dirty_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
                 HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, NULL, "can't create core vfd dirty region list");
 #ifdef DER
-fprintf(stderr, "\n");
+HDfprintf(stderr, "\n");
 #endif
         } /* end if */
     } /* end if */
@@ -1346,7 +1346,7 @@ H5FD_core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, unsigned H5_ATTR_UN
             size_t size;
 
 #ifdef DER
-    fprintf(stderr, "FLUSHING. DIRTY LIST:\n");
+    HDfprintf(stderr, "FLUSHING. DIRTY LIST:\n");
 #endif
             while(NULL != (item = (H5FD_core_region_t *)H5SL_remove_first(file->dirty_list))) {
 
@@ -1358,7 +1358,7 @@ H5FD_core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, unsigned H5_ATTR_UN
                         item->end = file->eof - 1;
                     size = (size_t)((item->end - item->start) + 1);
 #ifdef DER
-fprintf(stderr, "(%llu, %llu : %lu)\n", item->start, item->end, size);
+HDfprintf(stderr, "(%llu, %llu : %lu)\n", item->start, item->end, size);
 #endif
                     if(H5FD_core_write_to_bstore(file, item->start, size) != SUCCEED)
                         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
@@ -1369,11 +1369,11 @@ fprintf(stderr, "(%llu, %llu : %lu)\n", item->start, item->end, size);
 
  
 #ifdef DER
-fprintf(stderr, "EOF: %llu\n", file->eof);
-fprintf(stderr, "EOA: %llu\n", file->eoa);
+HDfprintf(stderr, "EOF: %llu\n", file->eof);
+HDfprintf(stderr, "EOA: %llu\n", file->eoa);
 if(file->eoa > file->eof)
-    fprintf(stderr, "*** EOA BADNESS ***\n");
-fprintf(stderr, "\n");
+    HDfprintf(stderr, "*** EOA BADNESS ***\n");
+HDfprintf(stderr, "\n");
 #endif
         }
         /* Otherwise, write the entire file out at once */
@@ -1502,7 +1502,7 @@ H5FD_core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 #endif /* H5_HAVE_WIN32_API */
 
 #ifdef DER
-fprintf(stderr, "OLD: Truncated to: %llu\n", file->eoa);
+HDfprintf(stderr, "OLD: Truncated to: %llu\n", file->eoa);
 #endif
             } /* end if */
 

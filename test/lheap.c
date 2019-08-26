@@ -15,7 +15,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, November 24, 1998
  *
- * Purpose:	Test local heaps used by symbol tables (groups).
+ * Purpose:    Test local heaps used by symbol tables (groups).
  */
 #include "h5test.h"
 #include "H5srcdir.h"
@@ -32,7 +32,7 @@ const char *FILENAME[] = {
 
 #define NOBJS   40
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -89,7 +89,7 @@ main(void)
         goto error;
     }
     for(i = 0; i < NOBJS; i++) {
-        sprintf(buf, "%03d-", i);
+        HDsprintf(buf, "%03d-", i);
         for(j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if(j > 4)
@@ -124,7 +124,7 @@ main(void)
         goto error;
     }
     for(i = 0; i < NOBJS; i++) {
-        sprintf(buf, "%03d-", i);
+        HDsprintf(buf, "%03d-", i);
         for(j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if(j > 4)

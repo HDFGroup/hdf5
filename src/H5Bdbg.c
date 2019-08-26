@@ -191,7 +191,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 
     if(0 == ncalls++) {
 	if(H5DEBUG(B))
-	    fprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
+	    HDfprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
     } /* end if */
 
     /* Get shared info for B-tree */

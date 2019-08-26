@@ -71,7 +71,7 @@ rsrv_heap(void)
             dataspace_id = H5Screate_simple(1, dims, dims);
         } H5E_END_TRY
 
-        sprintf(dset_name, "Dset %d", i);
+        HDsprintf(dset_name, "Dset %d", i);
 
         H5E_BEGIN_TRY {
             dataset_id = H5Dcreate2(file_id, dset_name, H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -103,7 +103,7 @@ rsrv_heap(void)
     /* Re-open the library and try to read a dataset from the file we created */
     if(H5open() < 0) TEST_ERROR;
 
-    sprintf(dset_name, "Dset %d", i - 2);
+    HDsprintf(dset_name, "Dset %d", i - 2);
 
     file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     if(file_id < 0) TEST_ERROR;
@@ -195,7 +195,7 @@ rsrv_ohdr(void)
     } /* end for */
 
     for(i = 0; i < 2000; i++) {
-        sprintf(attrname, "attr %d", i);
+        HDsprintf(attrname, "attr %d", i);
         H5E_BEGIN_TRY{
             aid =  H5Screate_simple(2, dims, NULL);
             attr_id = H5Acreate2(dataset_id, attrname, H5T_STD_I32BE, aid, H5P_DEFAULT, H5P_DEFAULT);
@@ -439,7 +439,7 @@ main(void)
 	num_errs+=rsrv_vlen();
 
 	if(num_errs > 0)
-	    printf("**** %d FAILURE%s! ****\n", num_errs, num_errs==1?"":"S");
+	    HDprintf("**** %d FAILURE%s! ****\n", num_errs, num_errs==1?"":"S");
 	else
 	    puts("All address space reservation tests passed.");
 

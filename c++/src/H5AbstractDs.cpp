@@ -62,7 +62,7 @@ H5T_class_t AbstractDs::getTypeClass() const
     // which object invokes getTypeClass
     hid_t datatype_id;
     try {
-      datatype_id = p_get_type();  // returned value is already validated
+        datatype_id = p_get_type();  // returned value is already validated
     }
     catch (DataSetIException& E) {
         throw DataTypeIException("DataSet::getTypeClass", E.getDetailMsg());
@@ -80,7 +80,7 @@ H5T_class_t AbstractDs::getTypeClass() const
     {
         if (fromClass() == "DataSet")
             throw DataTypeIException("DataSet::getTypeClass", "H5Tclose failed");
-    else if (fromClass() == "Attribute")
+        else if (fromClass() == "Attribute")
             throw DataTypeIException("Attribute::getTypeClass", "H5Tclose failed");
     }
 
@@ -88,9 +88,9 @@ H5T_class_t AbstractDs::getTypeClass() const
     if (type_class == H5T_NO_CLASS)
     {
         if (fromClass() == "DataSet")
-        throw DataTypeIException("DataSet::getTypeClass", "H5Tget_class returns H5T_NO_CLASS");
-    else if (fromClass() == "Attribute")
-        throw DataTypeIException("Attribute::getTypeClass", "H5Tget_class returns H5T_NO_CLASS");
+            throw DataTypeIException("DataSet::getTypeClass", "H5Tget_class returns H5T_NO_CLASS");
+        else if (fromClass() == "Attribute")
+            throw DataTypeIException("Attribute::getTypeClass", "H5Tget_class returns H5T_NO_CLASS");
     }
     return(type_class);
 }

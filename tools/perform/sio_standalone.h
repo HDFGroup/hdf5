@@ -325,6 +325,7 @@ typedef off_t               h5_stat_size_t;
 #define HDpipe(F)               pipe(F)
 #define HDpow(X,Y)              pow(X,Y)
 /* printf() variable arguments */
+#define HDprintf(...)           printf /*varargs*/
 #define HDputc(C,F)             putc(C,F)
 #define HDputchar(C)            putchar(C)
 #define HDputs(S)               puts(S)
@@ -379,6 +380,7 @@ H5_DLL int HDrand(void);
 #define HDsin(X)                sin(X)
 #define HDsinh(X)               sinh(X)
 #define HDsleep(N)              sleep(N)
+#define HDsprintf               sprintf /*varargs*/
 #ifdef H5_HAVE_WIN32_API
 H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
 #define HDsnprintf          c99_snprintf /*varargs*/

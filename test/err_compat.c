@@ -22,7 +22,7 @@
 #ifdef H5_NO_DEPRECATED_SYMBOLS
 int main(void)
 {
-    printf("Test skipped because backward compatibility with v1.6 is NOT configured in\n");
+    HDprintf("Test skipped because backward compatibility with v1.6 is NOT configured in\n");
     return 0;
 }
 #else /* H5_NO_DEPRECATED_SYMBOLS */
@@ -62,7 +62,7 @@ static herr_t
 user_print1(FILE *stream)
 {
     /* Customized way to print errors */
-    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    HDfprintf(stderr, "\n********* Print error stack in customized way *********\n");
     if(H5Ewalk1(H5E_WALK_UPWARD, (H5E_walk1_t)custom_print_cb1, stream) < 0)
         TEST_ERROR;
 
@@ -92,7 +92,7 @@ static herr_t
 user_print2(hid_t err_stack, FILE *stream)
 {
     /* Customized way to print errors */
-    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    HDfprintf(stderr, "\n********* Print error stack in customized way *********\n");
     if(H5Ewalk2(err_stack, H5E_WALK_UPWARD, (H5E_walk2_t)custom_print_cb2, stream) < 0)
         TEST_ERROR;
 
@@ -135,12 +135,12 @@ custom_print_cb1(int n, H5E_error1_t *err_desc, void* client_data)
     if(NULL == (maj = H5Eget_major(err_desc->maj_num)))
         TEST_ERROR;
 
-    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
+    HDfprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
         indent, "", n, err_desc->file_name,
         err_desc->func_name, err_desc->line);
 
-    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
-    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+    HDfprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    HDfprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
 
     H5free_memory(maj);
     H5free_memory(min);
@@ -188,12 +188,12 @@ custom_print_cb2(int n, H5E_error2_t *err_desc, void* client_data)
     if(NULL == (maj = H5Eget_major(err_desc->maj_num)))
         TEST_ERROR;
 
-    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
+    HDfprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
         indent, "", n, err_desc->file_name,
         err_desc->func_name, err_desc->line);
 
-    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
-    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+    HDfprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    HDfprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
 
     H5free_memory(maj);
     H5free_memory(min);
@@ -238,7 +238,7 @@ test_error1(void)
     herr_t              ret;
 
     TESTING("error API H5Eset/get_auto");
-    fprintf(stderr, "\n");
+    HDfprintf(stderr, "\n");
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -367,7 +367,7 @@ test_error2(hid_t file)
     const char          *FUNC_test_error="test_error2";
 
     TESTING("error API based on data I/O");
-    fprintf(stderr, "\n");
+    HDfprintf(stderr, "\n");
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -433,12 +433,12 @@ static herr_t
 dump_error(void)
 {
     /* Print errors in library default way */
-    fprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
+    HDfprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
     if(H5Eprint1(stderr) < 0)
         TEST_ERROR;
 
     /* Customized way to print errors */
-    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    HDfprintf(stderr, "\n********* Print error stack in customized way *********\n");
     if(H5Ewalk1(H5E_WALK_UPWARD, custom_print_cb1, stderr) < 0)
         TEST_ERROR;
 
@@ -469,7 +469,7 @@ main(void)
     char        filename[1024];
     const char          *FUNC_main="main";
 
-    fprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There are supposed to be some error messages\n");
+    HDfprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There are supposed to be some error messages\n");
     fapl = h5_fileaccess();
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -500,11 +500,11 @@ main(void)
     if(H5Fclose(file) < 0) TEST_ERROR ;
     h5_clean_files(FILENAME, fapl);
 
-    printf("All error API tests passed.\n");
+    HDprintf("All error API tests passed.\n");
     return 0;
 
- error:
-    printf("***** ERROR TEST FAILED! *****\n");
+error:
+    HDprintf("***** ERROR TEST FAILED! *****\n");
     return 1;
 }
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
