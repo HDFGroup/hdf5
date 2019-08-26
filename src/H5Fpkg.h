@@ -309,6 +309,7 @@ struct H5F_shared_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5UC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
+    hbool_t     closing;        /* File is in the process of being closed */
 
     /* Cached VOL connector ID & info */
     hid_t       vol_id;         /* ID of VOL connector for the container */
