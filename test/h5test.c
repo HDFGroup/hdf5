@@ -103,9 +103,8 @@ static const char *multi_letters = "msbrglo";
 /*  The strings that correspond to library version bounds H5F_libver_t in H5Fpublic.h */
 /*  This is used by h5_get_version_string() */
 const char *LIBVER_NAMES[] = {
-    "earliest", /* H5F_LIBVER_EARLIEST = 0  */
-    "v18",      /* H5F_LIBVER_V18 = 1       */
-    "latest",   /* H5F_LIBVER_V112 = 3      */
+    "earliest",    /* H5F_LIBVER_EARLIEST = 0  */
+    "latest",      /* H5F_LIBVER_V18 = 1       */
     NULL
 };
 
