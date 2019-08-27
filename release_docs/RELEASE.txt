@@ -170,6 +170,20 @@ Bug Fixes since HDF5-1.10.5 release
 
     Library
     -------
+    - Fixed a bug caused by bad tag value when condensing object header
+      messages
+
+      There was an assertion failure when moving meessages from running a
+      user test program with library release hdf5.1.10.4. It was because
+      the tag value (object header's address) was not set up when entering
+      the library routine H5O__chunk_update_idx(), which will eventually 
+      verifies the metadata tag value when protecting the object header.
+
+      The problem was fixed by replacing FUNC_ENTER_PACKAGE in H5O__chunk_update_idx() 
+      with FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr) to set up the metadata tag.
+
+      (VC - 2019/08/23, HDFFV-10873)
+
     - Fixed the test failure from test_metadata_read_retry_info() in
       test/swmr.c
 
