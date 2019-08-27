@@ -94,7 +94,7 @@ h5tool_format_t h5tools_dataformat = {
 
 const h5tools_dump_header_t h5tools_standardformat = {
 "standardformat", /*name */
-"HDF5", /*fileebgin */
+"HDF5", /*filebegin */
 "", /*fileend */
 SUPER_BLOCK, /*bootblockbegin */
 "", /*bootblockend */
@@ -2277,18 +2277,18 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
         ctx->indent_level++;
         {
-           char *ttag;
+            char *ttag;
 
-           if(NULL == (ttag = H5Tget_tag(type)))
-              H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_tag failed")
+            if(NULL == (ttag = H5Tget_tag(type)))
+                H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_tag failed")
 
-           ctx->need_prefix = TRUE;
+                ctx->need_prefix = TRUE;
 
-           h5tools_str_reset(buffer);
-           h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";", ttag);
-           h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+            h5tools_str_reset(buffer);
+            h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";", ttag);
+            h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
-           H5free_memory(ttag);
+            H5free_memory(ttag);
         }
         ctx->indent_level--;
 

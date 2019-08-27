@@ -4155,7 +4155,7 @@ main(int argc, char **argv)
 
         if ( serial_insert_cache_image(file_idx, mpi_size) ) {
 
-            HD exit(0);
+            HDexit(0);
 
         } else {
 
