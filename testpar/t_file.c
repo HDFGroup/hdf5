@@ -24,14 +24,14 @@
 /*
  * This file needs to access private information from the H5F package.
  */
-#define H5AC_FRIEND		/*suppress error about including H5ACpkg	  */
+#define H5AC_FRIEND        /*suppress error about including H5ACpkg      */
 #include "H5ACpkg.h"
-#define H5C_FRIEND		/*suppress error about including H5Cpkg	  */
+#define H5C_FRIEND        /*suppress error about including H5Cpkg      */
 #include "H5Cpkg.h"
-#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND        /*suppress error about including H5Fpkg      */
 #define H5F_TESTING
 #include "H5Fpkg.h"
-#define H5MF_FRIEND		/*suppress error about including H5MFpkg	  */
+#define H5MF_FRIEND        /*suppress error about including H5MFpkg      */
 #include "H5MFpkg.h"
 
 #define NUM_DSETS               5
@@ -39,7 +39,7 @@
 int mpi_size, mpi_rank;
 
 static int create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_strategy);
-static int open_file(const char *filename, hid_t fapl, int metadata_write_strategy, 
+static int open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
                      hsize_t page_size, size_t page_buffer_size);
 
 /*
@@ -60,15 +60,15 @@ test_split_comm_access(void)
     MPI_Info info = MPI_INFO_NULL;
     int is_old, mrc;
     int newrank, newprocs;
-    hid_t fid;			/* file IDs */
-    hid_t acc_tpl;		/* File access properties */
-    herr_t ret;			/* generic return value */
+    hid_t fid;            /* file IDs */
+    hid_t acc_tpl;        /* File access properties */
+    herr_t ret;            /* generic return value */
     const char *filename;
 
     filename = (const char *)GetTestParameters();
     if (VERBOSE_MED)
-	printf("Split Communicator access test on file %s\n",
-	    filename);
+    HDprintf("Split Communicator access test on file %s\n",
+        filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -80,35 +80,35 @@ test_split_comm_access(void)
     MPI_Comm_rank(comm,&newrank);
 
     if (is_old){
-	/* odd-rank processes */
-	mrc = MPI_Barrier(comm);
-	VRFY((mrc==MPI_SUCCESS), "");
+    /* odd-rank processes */
+    mrc = MPI_Barrier(comm);
+    VRFY((mrc==MPI_SUCCESS), "");
     }else{
-	/* even-rank processes */
-	int sub_mpi_rank;	/* rank in the sub-comm */
-	MPI_Comm_rank(comm,&sub_mpi_rank);
+    /* even-rank processes */
+    int sub_mpi_rank;    /* rank in the sub-comm */
+    MPI_Comm_rank(comm,&sub_mpi_rank);
 
-	/* setup file access template */
-	acc_tpl = create_faccess_plist(comm, info, facc_type);
-	VRFY((acc_tpl >= 0), "");
+    /* setup file access template */
+    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    VRFY((acc_tpl >= 0), "");
 
-	/* create the file collectively */
-	fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
-	VRFY((fid >= 0), "H5Fcreate succeeded");
+    /* create the file collectively */
+    fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
 
-	/* Release file-access template */
-	ret=H5Pclose(acc_tpl);
-	VRFY((ret >= 0), "");
+    /* Release file-access template */
+    ret=H5Pclose(acc_tpl);
+    VRFY((ret >= 0), "");
 
-	/* close the file */
-	ret=H5Fclose(fid);
-	VRFY((ret >= 0), "");
+    /* close the file */
+    ret=H5Fclose(fid);
+    VRFY((ret >= 0), "");
 
-	/* delete the test file */
-	if (sub_mpi_rank == 0){
-	    mrc = MPI_File_delete((char *)filename, info);
-	    /*VRFY((mrc==MPI_SUCCESS), ""); */
-	}
+    /* delete the test file */
+    if (sub_mpi_rank == 0){
+        mrc = MPI_File_delete((char *)filename, info);
+        /*VRFY((mrc==MPI_SUCCESS), ""); */
+    }
     }
     mrc = MPI_Comm_free(&comm);
     VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free succeeded");
@@ -126,7 +126,7 @@ test_page_buffer_access(void)
     haddr_t raw_addr, meta_addr;
     int *data;
     H5F_t *f = NULL;
-    herr_t ret;			/* generic return value */
+    herr_t ret;            /* generic return value */
     const char *filename;
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
@@ -136,7 +136,7 @@ test_page_buffer_access(void)
     filename = (const char *)GetTestParameters();
 
     if (VERBOSE_MED)
-	printf("Page Buffer Usage in Parallel %s\n", filename);
+    HDprintf("Page Buffer Usage in Parallel %s\n", filename);
 
     fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     VRFY((fapl >= 0), "create_faccess_plist succeeded");
@@ -178,7 +178,6 @@ test_page_buffer_access(void)
     /* intialize all the elements to have a value of -1 */
     for(i=0 ; i<num_elements ; i++)
         data[i] = -1;
-
     if(MAINPROCESS) {
         hid_t fapl_self = H5I_INVALID_HID;
 
@@ -400,7 +399,7 @@ test_page_buffer_access(void)
         ret = H5F_block_read(f, H5FD_MEM_SUPER, meta_addr, sizeof(int)*50, data);
         VRFY((ret == 0), "");
         VRFY((H5SL_count(f->shared->page_buf->slist_ptr) == page_count), "Wrong number of pages in PB");
-        for (i=0; i < 50; i++) 
+        for (i=0; i < 50; i++)
             VRFY((data[i] == -1), "Read different values than written");
 
         /* close the file */
@@ -504,28 +503,28 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     VRFY((mem_dataspace >= 0), "");
 
     for(k=0 ; k<NUM_DSETS; k++) {
-        sprintf(dset_name, "D1dset%d", k);
+        HDsprintf(dset_name, "D1dset%d", k);
         dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, sid,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
         ret = H5Dclose(dset_id);
         VRFY((ret == 0), "");
 
-        sprintf(dset_name, "D2dset%d", k);
+        HDsprintf(dset_name, "D2dset%d", k);
         dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, sid,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
         ret = H5Dclose(dset_id);
         VRFY((ret == 0), "");
 
-        sprintf(dset_name, "D3dset%d", k);
+        HDsprintf(dset_name, "D3dset%d", k);
         dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, sid,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
         ret = H5Dclose(dset_id);
         VRFY((ret == 0), "");
 
-        sprintf(dset_name, "dset%d", k);
+        HDsprintf(dset_name, "dset%d", k);
         dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, sid,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
@@ -549,13 +548,13 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
         for (i=0; i < num_elements; i++)
             VRFY((data_array[i] == mpi_rank+1), "Dataset Verify failed");
 
-        sprintf(dset_name, "D1dset%d", k);
+        HDsprintf(dset_name, "D1dset%d", k);
         ret = H5Ldelete(grp_id, dset_name, H5P_DEFAULT);
         VRFY((ret == 0), "");
-        sprintf(dset_name, "D2dset%d", k);
+        HDsprintf(dset_name, "D2dset%d", k);
         ret = H5Ldelete(grp_id, dset_name, H5P_DEFAULT);
         VRFY((ret == 0), "");
-        sprintf(dset_name, "D3dset%d", k);
+        HDsprintf(dset_name, "D3dset%d", k);
         ret = H5Ldelete(grp_id, dset_name, H5P_DEFAULT);
         VRFY((ret == 0), "");
     }
@@ -657,7 +656,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
     VRFY((mem_dataspace >= 0), "");
 
     for(k=0 ; k<NUM_DSETS; k++) {
-        sprintf(dset_name, "dset%d", k);
+        HDsprintf(dset_name, "dset%d", k);
         dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
 

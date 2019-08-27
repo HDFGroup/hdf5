@@ -11163,17 +11163,18 @@ test_attr(void)
 {
     hid_t    fapl = (-1), fapl2 = (-1);    /* File access property lists */
     hid_t    fcpl = (-1), fcpl2 = (-1);    /* File creation property lists */
-    hid_t    dcpl = -1;
-    unsigned new_format;       /* Whether to use the new format or not */
-    unsigned use_shared;       /* Whether to use shared attributes or not */
-    unsigned minimize_dset_oh; /* Whether to use minimized dataset object headers */
-    herr_t ret;                /* Generic return value */
+    hid_t    dcpl = -1;         /* Dataset creation property list */
+    unsigned new_format;        /* Whether to use the new format or not */
+    unsigned use_shared;        /* Whether to use shared attributes or not */
+    unsigned minimize_dset_oh;  /* Whether to use minimized dataset object headers */
+    herr_t ret;                 /* Generic return value */
 
     MESSAGE(5, ("Testing Attributes\n"));
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
+    /* fapl2 uses "latest version of the format" for creating objects in the file */
     fapl2 = H5Pcopy(fapl);
     CHECK(fapl2, FAIL, "H5Pcopy");
     ret = H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
@@ -11207,6 +11208,7 @@ test_attr(void)
         for(new_format = FALSE; new_format <= TRUE; new_format++) {
             hid_t my_fapl;
 
+            /* Set the FAPL for the type of format */
             if(new_format) {
                 MESSAGE(7, ("testing with new file format\n"));
                 my_fapl = fapl2;
@@ -11262,8 +11264,7 @@ test_attr(void)
                 test_attr_rename_invalid_name(my_fcpl, my_fapl); /* Test passing a NULL or empty attribute name to H5Arename(_by_name) */
                 test_attr_get_name_invalid_buf(my_fcpl, my_fapl); /* Test passing NULL buffer to H5Aget_name(_by_idx) */
 
-                /* New attribute API routine tests
-                 */
+                /* New attribute API routine tests */
                 test_attr_info_by_idx(new_format, my_fcpl, my_fapl);    /* Test querying attribute info by index */
                 test_attr_delete_by_idx(new_format, my_fcpl, my_fapl);  /* Test deleting attribute by index */
                 test_attr_iterate2(new_format, my_fcpl, my_fapl);       /* Test iterating over attributes by index */
@@ -11271,8 +11272,7 @@ test_attr(void)
                 test_attr_open_by_name(new_format, my_fcpl, my_fapl);   /* Test opening attributes by name */
                 test_attr_create_by_name(new_format, my_fcpl, my_fapl); /* Test creating attributes by name */
 
-                /* Tests that address specific bugs
-                 */
+                /* Tests that address specific bugs */
                 test_attr_bug1(my_fcpl, my_fapl);               /* Test odd allocation operations */
                 test_attr_bug2(my_fcpl, my_fapl);               /* Test many deleted attributes */
                 test_attr_bug3(my_fcpl, my_fapl);               /* Test "self referential" attributes */
@@ -11285,8 +11285,7 @@ test_attr(void)
                 test_attr_bug8(my_fcpl, my_fapl);               /* Test attribute expanding object header with undecoded messages */
                 test_attr_bug9(my_fcpl, my_fapl);               /* Test large attributes converting to dense storage */
 
-                /* tests specific to the "new format"
-                 */
+                /* tests specific to the "new format" */
                 if (new_format == TRUE) {
                     /* General attribute tests */
                     test_attr_dense_create(my_fcpl, my_fapl);       /* Test dense attribute storage creation */
@@ -11297,8 +11296,7 @@ test_attr(void)
                     test_attr_dense_limits(my_fcpl, my_fapl);       /* Test dense attribute storage limits */
                     test_attr_dense_dup_ids(my_fcpl, my_fapl);      /* Test duplicated IDs for dense attribute storage */
 
-                    /* Attribute creation order tests
-                     */
+                    /* Attribute creation order tests */
                     test_attr_corder_create_basic(my_fcpl, my_fapl);/* Test creating an object w/attribute creation order info */
                     test_attr_corder_create_compact(my_fcpl, my_fapl);  /* Test compact attribute storage on an object w/attribute creation order info */
                     test_attr_corder_create_dense(my_fcpl, my_fapl);/* Test dense attribute storage on an object w/attribute creation order info */
@@ -11306,8 +11304,7 @@ test_attr(void)
                     test_attr_corder_transition(my_fcpl, my_fapl);  /* Test attribute storage transitions on an object w/attribute creation order info */
                     test_attr_corder_delete(my_fcpl, my_fapl);      /* Test deleting object using dense storage w/attribute creation order info */
 
-                    /* More complex tests with exclusively both "new format" and "shared" attributes
-                     */
+                    /* More complex tests with exclusively both "new format" and "shared" attributes */
                     if(use_shared == TRUE) {
                         test_attr_shared_write(my_fcpl, my_fapl);   /* Test writing to shared attributes in compact & dense storage */
                         test_attr_shared_rename(my_fcpl, my_fapl);  /* Test renaming shared attributes in compact & dense storage */
@@ -11365,6 +11362,6 @@ test_attr(void)
 void
 cleanup_attr(void)
 {
-    remove(FILENAME);
+    HDremove(FILENAME);
 }
 

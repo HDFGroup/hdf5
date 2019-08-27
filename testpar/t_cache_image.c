@@ -519,7 +519,7 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
             /* create the dataset */
             if ( pass ) {
 
-                sprintf(dset_name, "/dset%03d", i);
+                HDsprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
                                             dataspace_id, H5P_DEFAULT,
                                             properties, H5P_DEFAULT);
@@ -713,7 +713,7 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
 
             if ( verbose ) {
 
-                            fprintf(stdout,
+                HDfprintf(stdout,
                                   "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                                   i, j, m);
             }
@@ -830,7 +830,7 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
 
         while ( ( pass ) && ( i <= max_dset ) )
         {
-            sprintf(dset_name, "/dset%03d", i);
+            HDsprintf(dset_name, "/dset%03d", i);
 
         if ( H5Ldelete(file_id, dset_name, H5P_DEFAULT) < 0) {
 
@@ -1187,7 +1187,7 @@ open_hdf5_file(const hbool_t create_file,
 
         } else {
 
-            file_ptr = (struct H5F_t *)H5VL_object_verify(file_id, H5I_FILE);
+            file_ptr = (struct H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
             if ( file_ptr == NULL ) {
 
@@ -1446,7 +1446,7 @@ par_create_dataset(int dset_num,
     show_progress = (show_progress && (mpi_rank == 0));
     verbose       = (verbose && (mpi_rank == 0));
 
-    sprintf(dset_name, "/dset%03d", dset_num);
+    HDsprintf(dset_name, "/dset%03d", dset_num);
 
     if ( show_progress ) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -1750,7 +1750,7 @@ par_create_dataset(int dset_num,
 
                     if ( verbose ) {
 
-                        fprintf(stdout,
+                        HDfprintf(stdout,
                                 "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                                 i, j, dset_num);
                     }
@@ -1848,7 +1848,7 @@ par_delete_dataset(int dset_num,
 
     show_progress = (show_progress && (mpi_rank == 0));
 
-    sprintf(dset_name, "/dset%03d", dset_num);
+    HDsprintf(dset_name, "/dset%03d", dset_num);
 
     if ( show_progress ) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -1932,8 +1932,8 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size )
             int child_status;
             pid_t child_pid;
 
-            sprintf(file_name_idx_str, "%d", file_name_idx);
-            sprintf(mpi_size_str, "%d", mpi_size);
+            HDsprintf(file_name_idx_str, "%d", file_name_idx);
+            HDsprintf(mpi_size_str, "%d", mpi_size);
 
             child_pid = fork();
 
@@ -1954,7 +1954,7 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size )
                     HDfprintf(stdout,
                              "execl() of ici process failed. errno = %d(%s)\n",
                              errno, strerror(errno));
-                    exit(1);
+                    HDexit(1);
                 }
 
             } else if ( child_pid != -1 ) {
@@ -2056,7 +2056,7 @@ par_verify_dataset(int dset_num,
     show_progress = (show_progress && (mpi_rank == 0));
     verbose       = (verbose && (mpi_rank == 0));
 
-    sprintf(dset_name, "/dset%03d", dset_num);
+    HDsprintf(dset_name, "/dset%03d", dset_num);
 
     if ( show_progress ) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -2233,7 +2233,7 @@ par_verify_dataset(int dset_num,
 
                     if ( verbose ) {
 
-                        fprintf(stdout,
+                        HDfprintf(stdout,
                                 "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                                 i, j, dset_num);
                     }
@@ -2448,7 +2448,7 @@ serial_verify_dataset(int dset_num,
     hid_t dset_id = -1;
     hid_t filespace_id = -1;
 
-    sprintf(dset_name, "/dset%03d", dset_num);
+    HDsprintf(dset_name, "/dset%03d", dset_num);
 
     if ( show_progress ) {
         HDfprintf(stdout, "%s: dset name = \"%s\".\n", fcn_name, dset_name);
@@ -2603,7 +2603,7 @@ serial_verify_dataset(int dset_num,
 
                         if ( verbose ) {
 
-                            fprintf(stdout,
+                            HDfprintf(stdout,
                                   "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                                    j, k, dset_num);
                         }
@@ -2801,7 +2801,7 @@ usage(void)
     int i = 0;
 
     while(s[i] != NULL) {
-        fprintf(stdout, "%s", s[i]);
+        HDfprintf(stdout, "%s", s[i]);
         i++;
     }
 
@@ -2876,7 +2876,7 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
             /* open the dataset */
             if ( pass ) {
 
-                sprintf(dset_name, "/dset%03d", i);
+                HDsprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
 
                 if ( dataset_ids[i] < 0 ) {
@@ -3016,7 +3016,7 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
 
             if ( verbose ) {
 
-                            fprintf(stdout,
+                HDfprintf(stdout,
                                   "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                                   i, j, m);
             }
@@ -4137,31 +4137,31 @@ main(int argc, char **argv)
 
             if ( pass ) {
 
-                printf("done.\n");
+                HDprintf("done.\n");
                 HDfflush(stdout);
 
             } else {
 
-                printf("failed.\n");
-                exit(1);
+                HDprintf("failed.\n");
+                HDexit(1);
             }
             i++;
         }
 
         HDfprintf(stdout, "Test file construction complete.\n");
-        exit(0);
+        HDexit(0);
 
     } else if ( ici ) {
 
         if ( serial_insert_cache_image(file_idx, mpi_size) ) {
 
-            exit(0);
+            HDexit(0);
 
         } else {
 
             HDfprintf(stderr, "\n\nCache image insertion failed.\n");
             HDfprintf(stderr, "  failure mssg = \"%s\"\n", failure_mssg);
-            exit(1);
+            HDexit(1);
         }
     }
 
@@ -4178,24 +4178,24 @@ main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-        printf("%d:Failed to turn off atexit processing. Continue.\n",
+        HDprintf("%d:Failed to turn off atexit processing. Continue.\n",
                mpi_rank);
     };
 
     H5open();
 
     if ( mpi_rank == 0 ) {
-        printf("===================================\n");
-        printf("Parallel metadata cache image tests\n");
-        printf("        mpi_size     = %d\n", mpi_size);
-        printf("===================================\n");
+        HDprintf("===================================\n");
+        HDprintf("Parallel metadata cache image tests\n");
+        HDprintf("        mpi_size     = %d\n", mpi_size);
+        HDprintf("===================================\n");
     }
 
     if ( mpi_size < 2 ) {
 
         if ( mpi_rank == 0 ) {
 
-            printf("    Need at least 2 processes.  Exiting.\n");
+            HDprintf("    Need at least 2 processes.  Exiting.\n");
         }
         goto finish;
     }
@@ -4220,7 +4220,7 @@ main(int argc, char **argv)
                 HDfprintf(stdout,
                           "execl() of setup process failed. errno = %d(%s)\n",
                           errno, strerror(errno));
-                exit(1);
+                HDexit(1);
             }
 
         } else if ( child_pid != -1 ) {
@@ -4271,16 +4271,16 @@ finish:
     MPI_Barrier(MPI_COMM_WORLD);
 
     if ( mpi_rank == 0 ) {           /* only process 0 reports */
-        sleep(10);
-        printf("===================================\n");
+        HDsleep(10);
+        HDprintf("===================================\n");
         if ( nerrs > 0 ) {
-            printf("***metadata cache image tests detected %d failures***\n",
+            HDprintf("***metadata cache image tests detected %d failures***\n",
                    nerrs);
         }
         else {
-            printf("metadata cache image tests finished with no failures\n");
+            HDprintf("metadata cache image tests finished with no failures\n");
         }
-        printf("===================================\n");
+        HDprintf("===================================\n");
     }
 
     /* takedown_derived_types(); */

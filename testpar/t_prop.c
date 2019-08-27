@@ -141,7 +141,7 @@ test_plist_ed(void)
     herr_t ret;         	/* Generic return value */
 
     if(VERBOSE_MED)
-	printf("Encode/Decode DCPLs\n");
+	HDprintf("Encode/Decode DCPLs\n");
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);

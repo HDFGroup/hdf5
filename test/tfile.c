@@ -966,7 +966,7 @@ test_file_close(void)
 ****************************************************************/
 static void
 create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
-    hid_t *ret_gid2, hid_t *ret_gid3)
+        hid_t *ret_gid2, hid_t *ret_gid3)
 {
     ssize_t    oid_count;
     herr_t    ret;
@@ -1120,8 +1120,7 @@ test_get_obj_ids(void)
 
     /* Call the public function H5F_get_obj_ids to use H5F__get_objects.  User reported having problem here.
      * that the returned size (ret_count) from H5Fget_obj_ids is one greater than the size passed in
-     * (oid_list_size).
-     */
+     * (oid_list_size) */
     ret_count = H5Fget_obj_ids(fid, H5F_OBJ_ALL, (size_t)oid_list_size, oid_list);
     CHECK(ret_count, FAIL, "H5Fget_obj_ids");
     VERIFY(ret_count, oid_list_size, "H5Fget_obj_count");

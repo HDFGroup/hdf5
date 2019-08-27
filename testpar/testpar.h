@@ -71,9 +71,9 @@
     if (val) {                                                          \
 	MESG(mesg);                                                 \
     } else {                                                            \
-        printf("Proc %d: ", mpi_rank);                                  \
-        printf("*** PHDF5 REMARK (not an error) ***\n");                \
-        printf("        Condition (%s) failed at line %4d in %s\n",     \
+        HDprintf("Proc %d: ", mpi_rank);                                  \
+        HDprintf("*** PHDF5 REMARK (not an error) ***\n");                \
+        HDprintf("        Condition (%s) failed at line %4d in %s\n",     \
                mesg, (int)__LINE__, __FILE__);                          \
         fflush(stdout);                                                 \
     }                                                                   \
@@ -81,10 +81,10 @@
 
 #define MPI_BANNER(mesg) do {                                           \
     if (VERBOSE_MED || MAINPROCESS){                                    \
-	printf("--------------------------------\n");                   \
-	printf("Proc %d: ", mpi_rank);                                  \
-	printf("*** %s\n", mesg);                                       \
-	printf("--------------------------------\n");                   \
+	HDprintf("--------------------------------\n");                   \
+	HDprintf("Proc %d: ", mpi_rank);                                  \
+	HDprintf("*** %s\n", mesg);                                       \
+	HDprintf("--------------------------------\n");                   \
     }                                                                   \
 } while(0)
 
