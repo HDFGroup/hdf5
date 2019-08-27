@@ -239,6 +239,9 @@ H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result)
 
     /* Can't pass MPI_COMM_NULL to MPI_Comm_compare() so we have to handle
      * it in special cases.
+     *
+     * MPI_Comm can either be an integer type or a pointer. We cast them
+     * to intptr_t so we can compare them with < and > when needed.
      */
     if (MPI_COMM_NULL == comm1 && MPI_COMM_NULL == comm2) {
         /* Special case of both communicators being MPI_COMM_NULL */
@@ -247,7 +250,7 @@ H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result)
     else if (MPI_COMM_NULL == comm1 || MPI_COMM_NULL == comm2) {
 
         /* Special case of one communicator being MPI_COMM_NULL */
-        *result = (MPI_Datatype)comm1 < (MPI_Datatype)comm2 ? -1 : 1;
+        *result = (intptr_t)comm1 < (intptr_t)comm2 ? -1 : 1;
     }
     else {
 
@@ -257,15 +260,11 @@ H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result)
         if (MPI_SUCCESS != (mpi_code = MPI_Comm_compare(comm1, comm2, &mpi_result)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Comm_compare failed", mpi_code)
 
-        /* Set the result
-         *
-         * The else clause should work regardless of whether MPI_Datatype is
-         * fundamentally an integer or a pointer.
-         */
+        /* Set the result */
         if (MPI_IDENT == mpi_result || MPI_CONGRUENT == mpi_result)
             *result = 0;
         else
-            *result = (MPI_Datatype)comm1 < (MPI_Datatype)comm2 ? -1 : 1;
+            *result = (intptr_t)comm1 < (intptr_t)comm2 ? -1 : 1;
     }
 
 done:
@@ -372,11 +371,15 @@ H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
         } /* end else */
     } /* end else */
 
-    /* Set the output value */
+    /* Set the output value
+     *
+     * MPI_Info can either be an integer type or a pointer. We cast them
+     * to intptr_t so we can compare them with < and > when needed.
+     */
     if (same)
         *result = 0;
     else
-        *result = (MPI_Datatype)info1 < (MPI_Datatype)info2 ? -1 : 1;
+        *result = (intptr_t)info1 < (intptr_t)info2 ? -1 : 1;
 
 done:
     if (key)

@@ -792,20 +792,11 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
-    /* Set MPI communicator and info object */
-    if(H5P_FILE_ACCESS_DEFAULT == fapl_id || H5FD_MPIO != H5P_peek_driver(plist)) {
-        /* Non-parallel defaults */
-        if(FAIL == H5_mpi_comm_dup(MPI_COMM_SELF, &comm))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "communicator duplicate failed")
-        info = MPI_INFO_NULL;
-    }
-    else {
-        /* Get the MPI communicator and info object from the property list */
-        if(H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI communicator")
-        if(H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI info object")
-    }
+    /* Get the MPI communicator and info object from the property list */
+    if(H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI communicator")
+    if(H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI info object")
 
     /* Convert HDF5 flags to MPI-IO flags */
     /* Some combinations are illegal; let MPI-IO figure it out */
