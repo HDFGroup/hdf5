@@ -1175,6 +1175,9 @@ H5F__dest(H5F_t *f, hbool_t flush)
     if(1 == f->shared->nrefs) {
         int actype;                         /* metadata cache type (enum value) */
 
+        /* Mark this file as closing */
+        f->shared->closing = TRUE;
+
         /* Flush at this point since the file will be closed (phase 1).
          * Only try to flush the file if it was opened with write access, and if
          * the caller requested a flush.
