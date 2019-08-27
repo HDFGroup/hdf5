@@ -51,7 +51,7 @@ static void coll_read_test(int chunk_factor);
  * Function:    coll_irregular_cont_write
  *
  * Purpose:    Wrapper to test the collectively irregular hyperslab write in
-                contiguous storage
+ *             contiguous storage
  *
  * Return:    Success:    0
  *
@@ -76,7 +76,7 @@ coll_irregular_cont_write(void)
  * Function:    coll_irregular_cont_read
  *
  * Purpose:    Wrapper to test the collectively irregular hyperslab read in
-                contiguous storage
+ *             contiguous storage
  *
  * Return:    Success:    0
  *
@@ -100,7 +100,7 @@ coll_irregular_cont_read(void)
  * Function:    coll_irregular_simple_chunk_write
  *
  * Purpose:    Wrapper to test the collectively irregular hyperslab write in
-                chunk storage(1 chunk)
+ *             chunk storage(1 chunk)
  *
  * Return:    Success:    0
  *
@@ -125,7 +125,7 @@ coll_irregular_simple_chunk_write(void)
  * Function:    coll_irregular_simple_chunk_read
  *
  * Purpose:    Wrapper to test the collectively irregular hyperslab read in chunk
-                storage(1 chunk)
+ *             storage(1 chunk)
  *
  * Return:    Success:    0
  *
@@ -148,7 +148,7 @@ coll_irregular_simple_chunk_read(void)
  * Function:    coll_irregular_complex_chunk_write
  *
  * Purpose:    Wrapper to test the collectively irregular hyperslab write in chunk
-                storage(4 chunks)
+ *             storage(4 chunks)
  *
  * Return:    Success:    0
  *
@@ -173,7 +173,7 @@ coll_irregular_complex_chunk_write(void)
  * Function:    coll_irregular_complex_chunk_read
  *
  * Purpose:    Wrapper to test the collectively irregular hyperslab read in chunk
-                storage(1 chunk)
+ *             storage(1 chunk)
  *
  * Return:    Success:    0
  *
@@ -197,9 +197,9 @@ coll_irregular_complex_chunk_read(void)
  * Function:    coll_write_test
  *
  * Purpose:    To test the collectively irregular hyperslab write in chunk
-                storage
+ *              storage
  *  Input:      number of chunks on each dimension
-                if number is equal to 0, contiguous storage
+ *              if number is equal to 0, contiguous storage
  * Return:    Success:    0
  *
  *        Failure:    -1
@@ -670,9 +670,9 @@ void coll_write_test(int chunk_factor)
  * Function:    coll_read_test
  *
  * Purpose:    To test the collectively irregular hyperslab read in chunk
-                storage
+ *              storage
  * Input:       number of chunks on each dimension
-                if number is equal to 0, contiguous storage
+ *              if number is equal to 0, contiguous storage
  * Return:    Success:    0
  *
  *        Failure:    -1
@@ -923,7 +923,7 @@ coll_read_test(int chunk_factor)
   ret = H5Fclose(file);
   VRFY((ret >= 0),"");
 
-  return ;
+  return;
 }
 
 

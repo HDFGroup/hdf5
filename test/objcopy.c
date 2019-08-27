@@ -1199,8 +1199,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     hssize_t nelmts;                            /* # of elements in dataspace */
     void *rbuf = NULL;                          /* Buffer for reading raw data */
     void *rbuf2 = NULL;                         /* Buffer for reading raw data */
-    H5D_space_status_t space_status;            /* Dataset's raw data space status */
-    H5D_space_status_t space_status2;           /* Dataset's raw data space status */
+    H5D_space_status_t space_status;            /* Dataset's raw dataspace status */
+    H5D_space_status_t space_status2;           /* Dataset's raw dataspace status */
 
     /* Check the datatypes are equal */
 
@@ -8279,7 +8279,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* make a copy of the datatype for later use */
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
@@ -10980,7 +10980,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type */
+    /* committed datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -12770,7 +12770,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* named data type */
+    /* named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
@@ -13159,7 +13159,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "a" */
+    /* committed datatype "a" */
     if((H5Tcommit2(fid_dst, "/a", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -13168,7 +13168,7 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
 
-    /* committed data type "b" */
+    /* committed datatype "b" */
     if((H5Tcommit2(fid_dst, "/b", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
@@ -13768,8 +13768,6 @@ error:
  * Programmer:  Vailin Choi
  *              Feb 7, 2012
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -14184,7 +14182,7 @@ main(void)
 
         /* Set the FAPL for the destination file's type of format */
         if(configuration & CONFIG_DST_NEW_FORMAT) {
-            puts("Testing with latest format for destination file:");
+            HDputs("Testing with latest format for destination file:");
             dst_fapl = fapl2;
             same_file = FALSE;
         } /* end if */
@@ -14360,7 +14358,7 @@ main(void)
 
     /* Results */
     if(nerrors) {
-        printf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
+        HDprintf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
                 nerrors, (1 == nerrors ? "" : "S"));
         exit(EXIT_FAILURE);
     } /* end if */

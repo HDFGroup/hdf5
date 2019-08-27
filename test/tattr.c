@@ -11147,6 +11147,6 @@ test_attr(void)
 void
 cleanup_attr(void)
 {
-    remove(FILENAME);
+    HDremove(FILENAME);
 }
 

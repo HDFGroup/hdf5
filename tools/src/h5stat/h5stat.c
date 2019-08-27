@@ -1226,7 +1226,7 @@ print_group_info(const iter_t *iter)
     unsigned long total;        /* Total count for various statistics */
     unsigned u;                 /* Local index variable */
 
-    printf("Small groups (with 0 to %u links):\n", sgroups_threshold-1);
+    HDprintf("Small groups (with 0 to %u links):\n", sgroups_threshold-1);
     total = 0;
     for(u = 0; u < (unsigned)sgroups_threshold; u++) {
         if(iter->num_small_groups[u] > 0) {
@@ -1512,7 +1512,7 @@ print_freespace_info(const iter_t *iter)
 
     HDfprintf(stdout, "Free-space persist: %s\n", iter->fs_persist ? "TRUE" : "FALSE");
     HDfprintf(stdout, "Free-space section threshold: %Hu bytes\n", iter->fs_threshold);
-    printf("Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
+    HDprintf("Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
     total = 0;
     for(u = 0; u < SIZE_SMALL_SECTS; u++) {
         if(iter->num_small_sects[u] > 0) {
@@ -1520,7 +1520,7 @@ print_freespace_info(const iter_t *iter)
             total += iter->num_small_sects[u];
         } /* end if */
     } /* end for */
-    printf("\tTotal # of small size sections: %lu\n", total);
+    HDprintf("\tTotal # of small size sections: %lu\n", total);
 
     HDprintf("Free-space section bins:\n");
 

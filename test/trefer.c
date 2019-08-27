@@ -21,7 +21,7 @@
 
 #include "testhdf5.h"
 
-#define FILE1   "trefer1.h5"
+#define FILE1    "trefer1.h5"
 #define FILE2    "trefer2.h5"
 #define FILE3    "trefer3.h5"
 
@@ -510,9 +510,9 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hid_t dset1,        /* Dataset ID */
           dset2,        /* Dereferenced dataset ID */
           dset3;        /* Dereferenced dataset ID */
-    hid_t sid1,         /* Dataspace ID	#1 */
-          sid2,         /* Dataspace ID	#2 */
-          sid3;         /* Dataspace ID	#3 */
+    hid_t sid1,         /* Dataspace ID    #1 */
+          sid2,         /* Dataspace ID    #2 */
+          sid3;         /* Dataspace ID    #3 */
     hid_t dapl_id;      /* Dataset access property list */
     hsize_t dims1[] = {SPACE1_DIM1},
             dims2[] = {SPACE2_DIM1, SPACE2_DIM2};

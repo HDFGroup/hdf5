@@ -1373,7 +1373,7 @@ test_vds_prefix_first(unsigned config, hid_t fapl)
         TEST_ERROR
 
     return 1;
-} /* end test_vds_prefix() */
+} /* end test_vds_prefix */
 
 
 /*-------------------------------------------------------------------------

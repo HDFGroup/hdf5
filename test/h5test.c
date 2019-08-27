@@ -102,8 +102,7 @@ static const char *multi_letters = "msbrglo";
 const char *LIBVER_NAMES[] = {
     "earliest", /* H5F_LIBVER_EARLIEST = 0  */
     "v18",      /* H5F_LIBVER_V18 = 1       */
-    "v110",     /* H5F_LIBVER_V110 = 2      */
-    "latest",   /* H5F_LIBVER_V112 = 3      */
+    "latest",   /* H5F_LIBVER_V110 = 2      */
     NULL
 };
 
@@ -111,7 +110,7 @@ const char *LIBVER_NAMES[] = {
 static H5E_auto2_t err_func = NULL;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
-static char *h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
+static char *h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix,
                               char *fullname, size_t size, hbool_t nest_printf);
 
 /*-------------------------------------------------------------------------
@@ -548,7 +547,7 @@ h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size
  *-------------------------------------------------------------------------
  */
 static char *
-h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, 
+h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
                 char *fullname, size_t size, hbool_t nest_printf)
 {
     const char     *prefix = NULL;
@@ -995,7 +994,7 @@ error:
     return -1;
 } /* end h5_get_vfd_fapl() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  h5_no_hwconv
  *
