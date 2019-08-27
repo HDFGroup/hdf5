@@ -368,14 +368,9 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
         if(NULL == (plist = H5P_object_verify(acspl_id, H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file access list")
 
-        if(H5FD_MPIO == H5P_peek_driver(plist)) {
-            const H5FD_mpio_fapl_t *fa; /* MPIO fapl info */
-
-            if(NULL == (fa = (const H5FD_mpio_fapl_t *)H5P_peek_driver_info(plist)))
-                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad VFL driver info")
-
-            *mpi_comm = fa->comm;
-        }
+        if(H5FD_MPIO == H5P_peek_driver(plist))
+            if(H5P_peek(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, mpi_comm) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
     }
 
 done:
