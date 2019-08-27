@@ -338,7 +338,7 @@ test_extend(hid_t f, const char *prefix,
         HDfprintf(stderr,",%lu", (unsigned long)size[1]);
     if (ndims > 2)
         HDfprintf(stderr,",%lu", (unsigned long)size[2]);
-    HD fprintf(stderr,"), %lu element%s", (unsigned long)nelmts, 1 == nelmts ? "" : "s");
+    HDfprintf(stderr,"), %lu element%s", (unsigned long)nelmts, 1 == nelmts ? "" : "s");
     if (0 == nelmts)
         HDfprintf(stderr," *SKIPPED*");
     HDfprintf(stderr,"\n");

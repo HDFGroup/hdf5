@@ -4656,10 +4656,10 @@ void pause_proc(void)
     if (MAINPROCESS)
     while ((HDstat(greenlight, &statbuf) == -1) && loops < maxloop){
         if (!loops++){
-        printf("Proc %d (%*s, %d): to debug, attach %d\n",
+        HDprintf("Proc %d (%*s, %d): to debug, attach %d\n",
             mpi_rank, mpi_namelen, mpi_name, pid, pid);
         }
-        printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
+        HDprintf("waiting(%ds) for file %s ...\n", time_int, greenlight);
         fflush(stdout);
             HDsleep(time_int);
     }
@@ -4683,18 +4683,18 @@ int MPI_Init(int *argc, char ***argv)
 static void
 usage(void)
 {
-    printf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
+    HDprintf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
     "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
-    printf("\t-m<n_datasets>"
+    HDprintf("\t-m<n_datasets>"
     "\tset number of datasets for the multiple dataset test\n");
-    printf("\t-n<n_groups>"
+    HDprintf("\t-n<n_groups>"
         "\tset number of groups for the multiple group test\n");
-    printf("\t-f <prefix>\tfilename prefix\n");
-    printf("\t-2\t\tuse Split-file together with MPIO\n");
-    printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n",
+    HDprintf("\t-f <prefix>\tfilename prefix\n");
+    HDprintf("\t-2\t\tuse Split-file together with MPIO\n");
+    HDprintf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n",
     ROW_FACTOR, COL_FACTOR);
-    printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
-    printf("\n");
+    HDprintf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
+    HDprintf("\n");
 }
 
 
@@ -4772,7 +4772,7 @@ parse_options(int argc, char **argv)
                 break;
         case 'h':   /* print help message--return with nerrors set */
                 return(1);
-        default:    printf("Illegal option(%s)\n", *argv);
+        default:    HDprintf("Illegal option(%s)\n", *argv);
                 nerrors++;
                 return(1);
         }
@@ -4781,12 +4781,12 @@ parse_options(int argc, char **argv)
 
     /* check validity of dimension and chunk sizes */
     if (dim0 <= 0 || dim1 <= 0){
-    printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
+    HDprintf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
     nerrors++;
     return(1);
     }
     if (chunkdim0 <= 0 || chunkdim1 <= 0){
-    printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
+    HDprintf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
     nerrors++;
     return(1);
     }
@@ -4794,7 +4794,7 @@ parse_options(int argc, char **argv)
     /* Make sure datasets can be divided into equal portions by the processes */
     if ((dim0 % mpi_size) || (dim1 % mpi_size)){
     if (MAINPROCESS)
-        printf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n",
+        HDprintf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n",
             dim0, dim1, mpi_size);
     nerrors++;
     return(1);
@@ -4809,13 +4809,13 @@ parse_options(int argc, char **argv)
     for (i=0; i < n; i++)
         if (h5_fixname(FILENAME[i],fapl,filenames[i],sizeof(filenames[i]))
         == NULL){
-        printf("h5_fixname failed\n");
+        HDprintf("h5_fixname failed\n");
         nerrors++;
         return(1);
         }
-    printf("Test filenames are:\n");
+    HDprintf("Test filenames are:\n");
     for (i=0; i < n; i++)
-        printf("    %s\n", filenames[i]);
+        HDprintf("    %s\n", filenames[i]);
     }
 
     return(0);
@@ -4952,10 +4952,10 @@ int main(int argc, char **argv)
     dim1 = COL_FACTOR*mpi_size;
 
     if (MAINPROCESS){
-    printf("===================================\n");
-    printf("Shape Same Tests Start\n");
-        printf("    express_test = %d.\n", GetTestExpress());
-    printf("===================================\n");
+    HDprintf("===================================\n");
+    HDprintf("Shape Same Tests Start\n");
+        HDprintf("    express_test = %d.\n", GetTestExpress());
+    HDprintf("===================================\n");
     }
 
     /* Attempt to turn off atexit post processing so that in case errors
@@ -4964,7 +4964,7 @@ int main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-    printf("%d: Failed to turn off atexit processing. Continue.\n", mpi_rank);
+    HDprintf("%d: Failed to turn off atexit processing. Continue.\n", mpi_rank);
     };
     H5open();
     h5_show_hostname();
@@ -5003,7 +5003,7 @@ int main(int argc, char **argv)
     TestParseCmdLine(argc, argv);
 
     if (dxfer_coll_type == DXFER_INDEPENDENT_IO && MAINPROCESS){
-    printf("===================================\n"
+    HDprintf("===================================\n"
         "   Using Independent I/O with file set view to replace collective I/O \n"
         "===================================\n");
     }
@@ -5034,12 +5034,12 @@ int main(int argc, char **argv)
     }
 
     if (MAINPROCESS){        /* only process 0 reports */
-    printf("===================================\n");
+    HDprintf("===================================\n");
     if (nerrors)
-        printf("***Shape Same tests detected %d errors***\n", nerrors);
+        HDprintf("***Shape Same tests detected %d errors***\n", nerrors);
     else
-        printf("Shape Same tests finished with no errors\n");
-    printf("===================================\n");
+        HDprintf("Shape Same tests finished with no errors\n");
+    HDprintf("===================================\n");
     }
 
     /* close HDF5 library */

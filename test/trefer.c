@@ -21,7 +21,7 @@
 
 #include "testhdf5.h"
 
-#define FILE1   "trefer1.h5"
+#define FILE1    "trefer1.h5"
 #define FILE2    "trefer2.h5"
 #define FILE3    "trefer3.h5"
 
@@ -941,7 +941,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     uint8_t *tu8;    /* Temporary pointer to uint8 data */
     H5O_type_t obj_type;            /* Object type */
     int i;          /* counting variables */
-    herr_t ret;     /* Generic return value        */
+    herr_t ret;     /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Dataset Region Reference Functions\n"));
