@@ -61,7 +61,7 @@ set (H5P_TESTS
     t_mpi
     t_bigio
     t_cache
-    #t_cache_image
+    t_cache_image
     t_pflush1
     t_pflush2
     t_pread
