@@ -388,8 +388,8 @@ static void
 run_test_loop(struct options *opts)
 {
     parameters parms;
-    int i;
-    size_t      buf_bytes;
+    int        i;
+    size_t     buf_bytes;
 
     /* load options into parameter structure */
     parms.num_files = opts->num_files;

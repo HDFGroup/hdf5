@@ -385,7 +385,7 @@ done:
 
     /* release generic resources */
     if(buffer)
-    free(buffer);
+        HDfree(buffer);
     res.ret_code = ret_code;
     return res;
 }
@@ -620,7 +620,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 
         /* Prepare buffer for verifying data */
         if (parms->verify)
-            memset(buffer,pio_mpi_rank_g+1,buf_size*blk_size);
+            HDmemset(buffer,pio_mpi_rank_g+1,buf_size*blk_size);
     } /* end else */
 
 
@@ -1852,7 +1852,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         break;
 
         case PHDF5:
-        HDsprintf(dname, "Dataset_%ld", ndset);
+            HDsprintf(dname, "Dataset_%ld", ndset);
         h5ds_id = H5DOPEN(fd->h5fd, dname);
         if (h5ds_id < 0) {
             HDfprintf(stderr, "HDF5 Dataset open failed\n");
@@ -2621,7 +2621,7 @@ do_cleanupfile(iotype iot, char *fname)
     if (clean_file_g){
     switch (iot){
         case POSIXIO:
-        remove(fname);
+            HDremove(fname);
         break;
         case MPIO:
         case PHDF5:
