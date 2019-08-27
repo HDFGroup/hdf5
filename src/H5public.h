@@ -89,10 +89,10 @@ extern "C" {
     #define H5_GCC_DIAG_ON(x)
 #endif
 
-/* Version numbers */
-#define H5_VERS_MAJOR    1    /* For major interface/format changes           */
-#define H5_VERS_MINOR    8    /* For minor interface/format changes           */
-#define H5_VERS_RELEASE    22    /* For tweaks, bug-fixes, or development     */
+/* Version numbers TAB char must surround the H5_VERS_xxx number */
+#define H5_VERS_MAJOR	1	/* For major interface/format changes           */
+#define H5_VERS_MINOR	8	/* For minor interface/format changes           */
+#define H5_VERS_RELEASE	22	/* For tweaks, bug-fixes, or development     */
 #define H5_VERS_SUBRELEASE "snap1"    /* For pre-releases like snap0       */
                 /* Empty string for real releases.           */
 #define H5_VERS_INFO    "HDF5 library version: 1.8.22-snap1"      /* Full version string */
