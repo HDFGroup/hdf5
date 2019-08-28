@@ -224,7 +224,7 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "fill raw");
+    HDfprintf (stderr, HEADING, "fill raw");
     for(u = 0; u < nwrite; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
@@ -262,7 +262,7 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "fill hdf5");
+    HDfprintf (stderr, HEADING, "fill hdf5");
     for(u = 0; u < nread; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
@@ -301,7 +301,7 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "out raw");
+    HDfprintf (stderr, HEADING, "out raw");
     for(u = 0; u < nwrite; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
@@ -341,7 +341,7 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "out hdf5");
+    HDfprintf (stderr, HEADING, "out hdf5");
     for(u = 0; u < nwrite; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
@@ -380,7 +380,7 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "in raw");
+    HDfprintf (stderr, HEADING, "in raw");
     for(u = 0; u < nread; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
@@ -421,7 +421,7 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "in hdf5");
+    HDfprintf (stderr, HEADING, "in hdf5");
     for(u = 0; u < nread; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);
@@ -465,7 +465,7 @@ main (void)
   _ftime(tbstart);
 #endif
 #endif
-    fprintf (stderr, HEADING, "in hdf5 partial");
+    HDfprintf (stderr, HEADING, "in hdf5 partial");
     for(u = 0; u < nread; u++) {
   putc (PROGRESS, stderr);
   HDfflush(stderr);

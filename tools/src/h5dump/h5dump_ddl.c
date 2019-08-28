@@ -1943,9 +1943,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
             break;
 
         case H5L_TYPE_EXTERNAL:
-            begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            PRINTVALSTREAM(rawoutstream, "\n");
-            indentation(COL);
             begin_obj(h5tools_dump_header_format->extlinkbegin, links, h5tools_dump_header_format->extlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
             if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0) {
@@ -1953,8 +1950,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
                 const char *elink_path;
 
                 if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &elink_file, &elink_path)>=0) {
-                    indentation(COL);
-                    PRINTSTREAM(rawoutstream, "LINKCLASS %d\n", linfo.type);
                     indentation(COL);
                     PRINTSTREAM(rawoutstream, "TARGETFILE \"%s\"\n", elink_file);
                     indentation(COL);
@@ -1976,9 +1971,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
         case H5L_TYPE_MAX:
         case H5L_TYPE_HARD:
         default:
-            begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            PRINTVALSTREAM(rawoutstream, "\n");
-            indentation(COL);
             begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);

@@ -17,7 +17,7 @@ package hdf.hdf5lib.structs;
 import java.io.Serializable;
 
 /*
- * Java representation of the HDFS VFD file access property list (fapl) 
+ * Java representation of the HDFS VFD file access property list (fapl)
  * structure.
  *
  * Used for the access of files hosted on the Hadoop Distributed File System.
@@ -33,7 +33,7 @@ public class H5FD_hdfs_fapl_t implements Serializable {
     private int    namenode_port;
     private int    stream_buffer_size;
 
-    /**
+    /*
      * Create a fapl_t structure with the specified components.
      */
     public H5FD_hdfs_fapl_t(
@@ -91,7 +91,7 @@ public class H5FD_hdfs_fapl_t implements Serializable {
     public String toString() {
     return "H5FD_hdfs_fapl_t (Version: " + this.version + ") {" +
            "\n    namenode_name: '" + this.namenode_name +
-           "'\n    namenode_port: " + this.namenode_port + 
+           "'\n    namenode_port: " + this.namenode_port +
            "\n    user_name: '" + this.user_name +
            "'\n    kerberos_ticket_cache: '" + this.kerberos_ticket_cache +
            "'\n    stream_buffer_size: " + this.stream_buffer_size +
