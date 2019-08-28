@@ -1953,15 +1953,7 @@ extern hbool_t H5_libterm_g;    /* Is the library being shutdown? */
 #define H5_INIT_GLOBAL (H5_libinit_g)
 #define H5_TERM_GLOBAL (H5_libterm_g)
 
-/* Temporary globals for VFD SWMR */
-extern hbool_t vfd_swmr_g;
-extern hbool_t vfd_swmr_writer_g;
-extern uint64_t tick_num_g;
-#if 1 /* use clock_gettime() */ /* JRM */
-extern struct timespec end_of_tick_g;
-#else /* use gettimeofday() */ /* JRM */
-extern struct timeval end_of_tick_g;
-#endif /* use gettimeofday() */ /* JRM */
+#include "H5FDvfd_swmr_private.h"
 
 #endif /* H5_HAVE_THREADSAFE */
 
@@ -2078,59 +2070,50 @@ H5_DLL herr_t H5CX_pop(void);
                                                                               \
     BEGIN_MPE_LOG
 
-#if 1 /* clock_gettime() version */ /* JRM */
-#define VFD_SWMR_TEST_FOR_END_OF_TICK(swmr_reader_exit, err)                  \
+/* NetBSD provides these comparison macros as part of a nifty set that
+ * performs addition and subtraction, too.  We probably should bring in
+ * the whole set. -DCY
+ */
+#if !defined(timespeccmp)
+#define timespeccmp(__l, __r, __op)                                           \
+    (((__l)->tv_sec == (__r)->tv_sec)                                         \
+        ? ((__l)->tv_nsec __op (__r)->tv_nsec)                                \
+        : ((__l)->tv_sec __op (__r)->tv_sec))
+#endif /* !defined(timespeccmp) */
+
+#define VFD_SWMR_TEST_FOR_END_OF_TICK(entering, swmr_reader_exit, err)        \
     /* Initialize the library */                                              \
-    if(vfd_swmr_g) {                                                          \
+    /* TBD assert that the API lock is held.  The API lock */                 \
+    /* synchronizes access to `vfd_swmr_api_entries_g`     */                 \
+    if (!entering && --vfd_swmr_api_entries_g > 0) {                          \
+        ;   /* Do nothing: we are still in an API call. */                    \
+    } else if (entering && vfd_swmr_api_entries_g++ > 0) {                    \
+        ;   /* Do nothing: we are *re-*entering the API. */                   \
+    } else if(err_occurred) {                                                 \
+        ;   /* Do nothing: an error occurred. */                              \
+    } else if(vfd_swmr_g) {                                                   \
         struct timespec curr_time;                                            \
-        long curr_nsecs, end_nsecs;                                           \
-        if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0)                  \
+        if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0) {                \
             HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err,                           \
                         "can't get time via clock_gettime")                   \
-        curr_nsecs = curr_time.tv_sec * 1000000000 + curr_time.tv_nsec;       \
-        end_nsecs = end_of_tick_g.tv_sec * 1000000000 + end_of_tick_g.tv_nsec;\
-        if(curr_nsecs > end_nsecs) {                                          \
-            if(vfd_swmr_writer_g) {                                           \
-                if(H5F_vfd_swmr_writer_end_of_tick() < 0)                     \
-                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                   \
-                                "end of tick error for VFD SWMR writer")      \
-            }                                                                 \
-            else if(!swmr_reader_exit) {                                      \
-                if(H5F_vfd_swmr_reader_end_of_tick() < 0)                     \
-                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                   \
-                                "end of tick error for VFD SWMR reader")      \
-            }                                                                 \
+        } else if(timespeccmp(&curr_time, &end_of_tick_g, <)) {               \
+            ; /* Do nothing: it's not time, yet. */                           \
+        } else if (vfd_swmr_writer_g) {                                       \
+            if(H5F_vfd_swmr_writer_end_of_tick() < 0)                         \
+                HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                       \
+                            "end of tick error for VFD SWMR writer")          \
+        } else if(!swmr_reader_exit) {                                        \
+            if(H5F_vfd_swmr_reader_end_of_tick() < 0)                         \
+                HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                       \
+                            "end of tick error for VFD SWMR reader")          \
         }                                                                     \
     }
-#else /* gettimeofday() version */ /* JRM */
-#define VFD_SWMR_TEST_FOR_END_OF_TICK(swmr_reader_exit, err)                   \
-    /* Initialize the library */                                               \
-    if(vfd_swmr_g) {                                                           \
-        struct timeval curr_time;                                              \
-        if(HDgettimeofday(&curr_time, NULL) < 0)                               \
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err,                            \
-                        "can't get time via gettimeofday()")                   \
-        if((curr_time.tv_sec >= end_of_tick_g.tv_sec) &&                       \
-           (curr_time.tv_usec >= end_of_tick_g.tv_usec)) {                     \
-            if(vfd_swmr_writer_g) {                                            \
-                if(H5F_vfd_swmr_writer_end_of_tick() < 0)                      \
-                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                    \
-                                "end of tick error for VFD SWMR writer")       \
-            }                                                                  \
-            else if(!swmr_reader_exit) {                                       \
-                if(H5F_vfd_swmr_reader_end_of_tick() < 0)                      \
-                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                    \
-                           "end of tick error for VFD SWMR reader")            \
-            }                                                                  \
-        }                                                                      \
-    }
-#endif /* gettimeofday() version */ /* JRM */
 
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(err) {{                                                \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
-    VFD_SWMR_TEST_FOR_END_OF_TICK(FALSE, err);                                \
+    VFD_SWMR_TEST_FOR_END_OF_TICK(true, false, err);                          \
     /* Clear thread error stack entering public functions */                  \
     H5E_clear_stack(NULL);                                                    \
     {
@@ -2142,6 +2125,7 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API_NOCLEAR(err) {{                                        \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
+    VFD_SWMR_TEST_FOR_END_OF_TICK(true, false, err);                          \
     {
 
 /*
@@ -2332,16 +2316,15 @@ H5_DLL herr_t H5CX_pop(void);
     FINISH_MPE_LOG                                                            \
     H5TRACE_RETURN(ret_value);
 
-#define FUNC_LEAVE_API(ret_value)                                               \
-    if(!err_occurred)                                                           \
-        VFD_SWMR_TEST_FOR_END_OF_TICK(!vfd_swmr_writer_g, ret_value);           \
-    FUNC_LEAVE_API_COMMON(ret_value);                                           \
-    (void)H5CX_pop();                                                           \
-    H5_POP_FUNC                                                                 \
-    if(err_occurred)                                                            \
-       (void)H5E_dump_api_stack(TRUE);                                          \
-    FUNC_LEAVE_API_THREADSAFE                                                   \
-    return(ret_value);                                                          \
+#define FUNC_LEAVE_API(ret_value)                                             \
+    VFD_SWMR_TEST_FOR_END_OF_TICK(false, !vfd_swmr_writer_g, ret_value);      \
+    FUNC_LEAVE_API_COMMON(ret_value);                                         \
+    (void)H5CX_pop();                                                         \
+    H5_POP_FUNC                                                               \
+    if(err_occurred)                                                          \
+       (void)H5E_dump_api_stack(TRUE);                                        \
+    FUNC_LEAVE_API_THREADSAFE                                                 \
+    return(ret_value);                                                        \
 }} /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT macro */

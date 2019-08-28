@@ -141,6 +141,13 @@ static herr_t H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f);
 /* VFD SWMR globals */
 H5F_t *vfd_swmr_file_g = NULL;          /* Points to the file struct */
 hbool_t vfd_swmr_g = FALSE;             /* Is this a VFD SWMR configured file */
+unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
+                                         * and re-entered minus the times
+                                         * it was exited.  We only perform
+                                         * the end-of-tick processing
+                                         * on the 0->1 and 1->0
+                                         * transitions.
+                                         */
 hbool_t vfd_swmr_writer_g = FALSE;      /* Is this the VFD SWMR writer */
 uint64_t tick_num_g = 0;                /* The current tick_num */
 #if 1 /* clock_gettime() version */ /* JRM */

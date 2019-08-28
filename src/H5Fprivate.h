@@ -881,8 +881,6 @@ H5_DLL herr_t H5F_debug(H5F_t *f, FILE * stream, int indent, int fwidth);
 /* VFD SWMR */
 H5_DLL herr_t H5F_vfd_swmr_writer__delay_write(H5F_t *f, uint64_t page,
     uint64_t * delay_write_until_ptr);
-H5_DLL herr_t H5F_vfd_swmr_writer_end_of_tick(void);
-H5_DLL herr_t H5F_vfd_swmr_reader_end_of_tick(void);
 H5_DLL herr_t H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t index_len, struct H5FD_vfd_swmr_idx_entry_t *index);
 H5_DLL hbool_t H5F_use_vfd_swmr(const H5F_t *f);
 H5_DLL haddr_t H5F_get_vfd_swmr_md_eoa(const H5F_t *f);
