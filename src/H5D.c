@@ -457,8 +457,8 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	Robb Matzke
- *		Tuesday, February  3, 1998
+ * Programmer:  Robb Matzke
+ *              Tuesday, February  3, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -512,8 +512,8 @@ done:
  *
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	Neil Fortner
- *		Wednesday, October 29, 2008
+ * Programmer:  Neil Fortner
+ *              Wednesday, October 29, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -610,9 +610,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Diterate
+ * Function:    H5Diterate
  *
- * Purpose:	This routine iterates over all the elements selected in a memory
+ * Purpose: This routine iterates over all the elements selected in a memory
  *      buffer.  The callback function is called once for each element selected
  *      in the dataspace.  The selection in the dataspace is modified so
  *      that any elements already iterated over are removed from the selection
@@ -659,11 +659,11 @@ done:
  *              indicating failure. The iterator can be restarted at the next
  *              element.
  *
- * Return:	Returns the return value of the last operator if it was non-zero,
+ * Return:  Returns the return value of the last operator if it was non-zero,
  *          or zero if all elements were processed. Otherwise returns a
  *          negative value.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, June 11, 1999
  *
  *-------------------------------------------------------------------------
@@ -706,16 +706,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dvlen_reclaim
+ * Function:    H5Dvlen_reclaim
  *
- * Purpose:	Frees the buffers allocated for storing variable-length data
+ * Purpose: Frees the buffers allocated for storing variable-length data
  *      in memory.  Only frees the VL data in the selection defined in the
  *      dataspace.  The dataset transfer property list is required to find the
  *      correct allocation/free methods for the VL data in the buffer.
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:  Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, June 10, 1999
  *
  *-------------------------------------------------------------------------
@@ -756,9 +756,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dvlen_get_buf_size
+ * Function:    H5Dvlen_get_buf_size
  *
- * Purpose:	This routine checks the number of bytes required to store the VL
+ * Purpose: This routine checks the number of bytes required to store the VL
  *      data from the dataset, using the space_id for the selection in the
  *      dataset on disk and the type_id for the memory representation of the
  *      VL data, in memory.  The *size value is modified according to how many
@@ -772,9 +772,9 @@ done:
  *      Kinda kludgy, but easier than the other method of trying to figure out
  *      the sizes without actually reading the data in... - QAK
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:  Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Wednesday, August 11, 1999
  *
  *-------------------------------------------------------------------------
@@ -1095,3 +1095,150 @@ done:
     FUNC_LEAVE_API(ret_value);
 } /* H5Dget_chunk_storage_size() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_num_chunks
+ *
+ * Purpose:     Retrieves the number of chunks that have non-empty intersection
+ *              with a specified selection.
+ *
+ * Note:        Currently, this function only gets the number of all written
+ *              chunks, regardless the dataspace.
+ *
+ * Parameters:
+ *              hid_t dset_id;      IN: Chunked dataset ID
+ *              hid_t fspace_id;    IN: File dataspace ID
+ *              hsize_t *nchunks;   OUT: Number of non-empty chunks
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              May 2019 (HDFFV-10677)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks)
+{
+    H5VL_object_t  *vol_obj = NULL;     /* Dataset for this operation */
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ii*h", dset_id, fspace_id, nchunks);
+
+    /* Check arguments */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    if(NULL == nchunks)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)")
+
+    /* Get the number of written chunks */
+    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_NUM_CHUNKS, fspace_id, nchunks) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get number of chunks")
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* H5Dget_num_chunks() */
+ 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_chunk_info
+ *
+ * Purpose:     Retrieves information about a chunk specified by its index.
+ *
+ * Parameters:
+ *              hid_t dset_id;          IN: Chunked dataset ID
+ *              hid_t fspace_id;        IN: File dataspace ID
+ *              hsize_t index;          IN: Index of written chunk
+ *              hsize_t *offset         OUT: Logical position of the chunk’s
+ *                                           first element in the dataspace
+ *              unsigned *filter_mask   OUT: Mask for identifying the filters in use
+ *              haddr_t *addr           OUT: Address of the chunk
+ *              hsize_t *size           OUT: Size of the chunk
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              May 2019 (HDFFV-10677)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *offset, unsigned *filter_mask, haddr_t *addr, hsize_t *size)
+{
+    H5VL_object_t *vol_obj = NULL;     /* Dataset for this operation */
+    hsize_t        nchunks= 0;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "iih*h*Iu*a*h", dset_id, fspace_id, chk_index, offset,
+             filter_mask, addr, size);
+
+    /* Check arguments */
+    if(NULL == offset && NULL == filter_mask && NULL == addr && NULL == size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid arguments, must have at least one non-null output argument")
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
+    /* Get the number of written chunks to check range */
+    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_NUM_CHUNKS, fspace_id, &nchunks) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get number of chunks")
+
+    /* Check range for chunk index */
+    if(chk_index >= nchunks)
+        HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "chunk index is out of range")
+
+    /* Call private function to get the chunk info given the chunk's index */
+    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX, fspace_id, chk_index, offset, filter_mask, addr, size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get chunk info by index")
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* H5Dget_chunk_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_chunk_info_by_coord
+ *
+ * Purpose:     Retrieves information about a chunk specified by its logical
+ *              coordinates.
+ *
+ * Parameters:
+ *              hid_t dset_id;          IN: Chunked dataset ID
+ *              hsize_t *offset         IN: Logical position of the chunk’s
+ *                                           first element in the dataspace
+ *              unsigned *filter_mask   OUT: Mask for identifying the filters in use
+ *              haddr_t *addr           OUT: Address of the chunk
+ *              hsize_t *size           OUT: Size of the chunk
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              May 2019 (HDFFV-10677)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filter_mask, haddr_t *addr, hsize_t *size)
+{
+    H5VL_object_t  *vol_obj = NULL;     /* Dataset for this operation */
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "i*h*Iu*a*h", dset_id, offset, filter_mask, addr, size);
+
+    /* Check arguments */
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    if(NULL == filter_mask && NULL == addr && NULL == size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid arguments, must have at least one non-null output argument")
+    if(NULL == offset)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)")
+
+    /* Call private function to get the chunk info given the chunk's index */
+    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COOR, offset, filter_mask, addr, size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get chunk info by its logical coordinates")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dget_chunk_info_by_coord() */

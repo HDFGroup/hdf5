@@ -242,6 +242,7 @@ set (H5_TESTS
     page_buffer
     dtypes
     dsets
+    chunk_info
     cmpd_dset
     filter_fail
     extend
