@@ -1157,11 +1157,11 @@ testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 # Temporary files.
 DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
 
-# Automake needs to be taught how to build lib, dyn, progs, and tests targets.
+# Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
 # EXTRA_TEST variables are supplied to allow the user to force targets to
-# be built at certain times. 
+# be built at certain times.
 LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
       $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
 
@@ -2418,6 +2418,7 @@ timings _timings: testmeta
 
 # The flush1 test must run before the flush2 test
 flush2.chkexe_: flush1.chkexe_
+
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)
@@ -2453,7 +2454,7 @@ all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
 # make install-doc doesn't do anything outside of doc directory, but
 # Makefiles should recognize it.
 # UPDATE: docs no longer reside in this build tree, so this target
-# is depreciated.
+# is deprecated.
 install-doc uninstall-doc:
 	@echo "Nothing to be done."
 
@@ -2614,7 +2615,7 @@ build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
 	    echo "**** Hint ****";                                            \
 	    echo "Parallel test files reside in the current directory"        \
 	         "by default.";                                               \
-	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "Set HDF5_PARAPREFIX to use another directory. e.g.,";       \
 	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
 	    echo "    export HDF5_PARAPREFIX";                                \
 	    echo "    make check";                                            \

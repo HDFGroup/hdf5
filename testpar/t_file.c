@@ -36,15 +36,15 @@ test_split_comm_access(void)
     MPI_Info info = MPI_INFO_NULL;
     int is_old, mrc;
     int newrank, newprocs;
-    hid_t fid;			/* file IDs */
-    hid_t acc_tpl;		/* File access properties */
-    herr_t ret;			/* generic return value */
+    hid_t fid;            /* file IDs */
+    hid_t acc_tpl;        /* File access properties */
+    herr_t ret;            /* generic return value */
     const char *filename;
 
     filename = (const char *)GetTestParameters();
     if (VERBOSE_MED)
-	printf("Split Communicator access test on file %s\n",
-	    filename);
+    HDprintf("Split Communicator access test on file %s\n",
+        filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -56,35 +56,35 @@ test_split_comm_access(void)
     MPI_Comm_rank(comm,&newrank);
 
     if (is_old){
-	/* odd-rank processes */
-	mrc = MPI_Barrier(comm);
-	VRFY((mrc==MPI_SUCCESS), "");
+    /* odd-rank processes */
+    mrc = MPI_Barrier(comm);
+    VRFY((mrc==MPI_SUCCESS), "");
     }else{
-	/* even-rank processes */
-	int sub_mpi_rank;	/* rank in the sub-comm */
-	MPI_Comm_rank(comm,&sub_mpi_rank);
+    /* even-rank processes */
+    int sub_mpi_rank;    /* rank in the sub-comm */
+    MPI_Comm_rank(comm,&sub_mpi_rank);
 
-	/* setup file access template */
-	acc_tpl = create_faccess_plist(comm, info, facc_type);
-	VRFY((acc_tpl >= 0), "");
+    /* setup file access template */
+    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    VRFY((acc_tpl >= 0), "");
 
-	/* create the file collectively */
-	fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
-	VRFY((fid >= 0), "H5Fcreate succeeded");
+    /* create the file collectively */
+    fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
 
-	/* Release file-access template */
-	ret=H5Pclose(acc_tpl);
-	VRFY((ret >= 0), "");
+    /* Release file-access template */
+    ret=H5Pclose(acc_tpl);
+    VRFY((ret >= 0), "");
 
-	/* close the file */
-	ret=H5Fclose(fid);
-	VRFY((ret >= 0), "");
+    /* close the file */
+    ret=H5Fclose(fid);
+    VRFY((ret >= 0), "");
 
-	/* delete the test file */
-	if (sub_mpi_rank == 0){
-	    mrc = MPI_File_delete((char *)filename, info);
-	    /*VRFY((mrc==MPI_SUCCESS), ""); */
-	}
+    /* delete the test file */
+    if (sub_mpi_rank == 0){
+        mrc = MPI_File_delete((char *)filename, info);
+        /*VRFY((mrc==MPI_SUCCESS), ""); */
+    }
     }
     mrc = MPI_Comm_free(&comm);
     VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free succeeded");
