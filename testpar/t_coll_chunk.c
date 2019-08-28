@@ -1134,7 +1134,7 @@ ccslab_set(int mpi_rank,
 	break;
     }
     if (VERBOSE_MED){
-      printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
+      HDprintf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
 	(unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	(unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1],
 	(unsigned long)(block[0]*block[1]*count[0]*count[1]));
@@ -1197,20 +1197,20 @@ ccdataset_print(hsize_t start[],
     hsize_t i, j;
 
     /* print the column heading */
-    printf("Print only the first block of the dataset\n");
-    printf("%-8s", "Cols:");
+    HDprintf("Print only the first block of the dataset\n");
+    HDprintf("%-8s", "Cols:");
     for (j=0; j < block[1]; j++){
-	printf("%3lu ", (unsigned long)(start[1]+j));
+	HDprintf("%3lu ", (unsigned long)(start[1]+j));
     }
-    printf("\n");
+    HDprintf("\n");
 
     /* print the slab data */
     for (i=0; i < block[0]; i++){
-	printf("Row %2lu: ", (unsigned long)(i+start[0]));
+	HDprintf("Row %2lu: ", (unsigned long)(i+start[0]));
 	for (j=0; j < block[1]; j++){
-	    printf("%03d ", *dataptr++);
+	    HDprintf("%03d ", *dataptr++);
 	}
-	printf("\n");
+	HDprintf("\n");
     }
 }
 
@@ -1233,13 +1233,13 @@ ccdataset_vrfy(hsize_t start[],
 
     /* print it if VERBOSE_MED */
     if (VERBOSE_MED) {
-	printf("dataset_vrfy dumping:::\n");
-	printf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
+	HDprintf("dataset_vrfy dumping:::\n");
+	HDprintf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
 	    (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	    (unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1]);
-	printf("original values:\n");
+	HDprintf("original values:\n");
 	ccdataset_print(start, block, original);
-	printf("compared values:\n");
+	HDprintf("compared values:\n");
 	ccdataset_print(start, block, dataset);
     }
 
@@ -1262,7 +1262,7 @@ ccdataset_vrfy(hsize_t start[],
                     }
                     if (*dataptr != *oriptr){
                         if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED){
-                            printf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
+                            HDprintf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
                                    (unsigned long)i, (unsigned long)j,
                                    *(oriptr), *(dataptr));
                         }
@@ -1272,8 +1272,8 @@ ccdataset_vrfy(hsize_t start[],
         }
     }
     if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
-	printf("[more errors ...]\n");
+	HDprintf("[more errors ...]\n");
     if (vrfyerrs)
-	printf("%d errors found in ccdataset_vrfy\n", vrfyerrs);
+	HDprintf("%d errors found in ccdataset_vrfy\n", vrfyerrs);
     return(vrfyerrs);
 }

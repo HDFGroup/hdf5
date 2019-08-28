@@ -1139,7 +1139,7 @@ create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid, int counter)
 
 #ifdef BARRIER_CHECKS
    if(!((counter+1) % 10)) {
-    HDprintf("created %dth child groups\n", counter+1);
+        HDprintf("created %dth child groups\n", counter+1);
         MPI_Barrier(MPI_COMM_WORLD);
    }
 #endif /* BARRIER_CHECKS */
