@@ -191,10 +191,15 @@ New Features
 
     Library:
     --------
-    - Add new API H5M for map objects.  Currently not supported by native
-      library, can be supported by VOL connectors.
+    - Added new chunk query functions
 
-      (NAF - 2019/03/01)
+      The following public functions were added to discover information about
+      the chunks in an HDF5 file.
+        herr_t H5Dget_num_chunks(dset_id, fspace_id, *nchunks)
+        herr_t H5Dget_chunk_info_by_coord(dset_id, *coord, *filter_mask, *addr, *size)
+        herr_t H5Dget_chunk_info(dset_id, fspace_id, index, *coord, *filter_mask, *addr, *size)
+
+      (BMR - 2019/06/11, HDFFV-10677)
 
     - Improved the performance of virtual dataset I/O
 
@@ -203,19 +208,6 @@ New Features
       involved is very long and non-contiguous.
 
       (NAF - 2019/05/31, HDFFV-10693)
-
-    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
-
-      Rather than always running H5detect and generating H5Tinit.c and
-      H5make_libsettings.c, supply a location for those files.
-
-      (ADB - 2018/09/18, HDFFV-10332)
-
-    - Remove H5I_REFERENCE from the library
-
-      This ID class was never used by the library and has been removed.
-
-      (DER - 2018/12/08, HDFFV-10252)
 
     - Added the ability to open files with UTF-8 file names on Windows.
 
@@ -226,15 +218,23 @@ New Features
 
      (DER - 2019/03/15, HDFFV-2714, HDFFV-3914, HDFFV-3895, HDFFV-8237, HDFFV-10413, HDFFV-10691)
 
-    - Added new chunk query functions
+    - Add new API H5M for map objects.  Currently not supported by native
+      library, can be supported by VOL connectors.
 
-      The following public functions were added to discover information about
-      the chunks in an HDF5 file.
-        herr_t H5Dget_num_chunks(dset_id, fspace_id, *nchunks)
-        herr_t H5Dget_chunk_info_by_coord(dset_id, *coord, *filter_mask, *addr, *size)
-        herr_t H5Dget_chunk_info(dset_id, fspace_id, index, *coord, *filter_mask, *addr, *size)
+      (NAF - 2019/03/01)
 
-      (BMR - 2019/08/28, HDFFV-10677)
+    - Remove H5I_REFERENCE from the library
+
+      This ID class was never used by the library and has been removed.
+
+      (DER - 2018/12/08, HDFFV-10252)
+
+    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
+
+      Rather than always running H5detect and generating H5Tinit.c and
+      H5make_libsettings.c, supply a location for those files.
+
+      (ADB - 2018/09/18, HDFFV-10332)
 
 
     Parallel Library:
@@ -268,16 +268,16 @@ New Features
 
     C++ Library:
     ------------
-    - Added new wrapper for H5Ovisit2()
-          H5Object::visit()
-
-      (BMR - 2019/02/14, HDFFV-10532)
-
     - Added new wrappers for H5Pset/get_create_intermediate_group()
         LinkCreatPropList::setCreateIntermediateGroup()
         LinkCreatPropList::getCreateIntermediateGroup()
 
       (BMR - 2019/04/22, HDFFV-10622)
+
+    - Added new wrapper for H5Ovisit2()
+          H5Object::visit()
+
+      (BMR - 2019/02/14, HDFFV-10532)
 
 
     Java Library:
@@ -384,6 +384,18 @@ Bug Fixes since HDF5-1.10.3 release
 
       (VC - 2019/6/25, HDFFV-10808)
 
+    - When iterating over an old-style group (i.e., when not using the latest
+      file format) of size 0, a NULL pointer representing the empty links
+      table would be sent to qsort(3) for sorting, which is undefined behavior.
+
+      Iterating over an empty group is explicitly tested in the links test.
+      This has not caused any failures to date and was flagged by gcc's
+      -fsanitize=undefined.
+
+      The library no longer attempts to sort an empty array.
+
+      (DER - 2019/06/18, HDFFV-10829)
+
     - Fixed an issue where copying a version 1.8 dataset between files using
       H5Ocopy fails due to an incompatible fill version
 
@@ -396,6 +408,16 @@ Bug Fixes since HDF5-1.10.3 release
       (from H5O_FILL_VERSION_2) for H5F_LIBVER_V18.
 
       (VC - 2019/6/14, HDFFV-10800)
+
+    - Some oversights in the index iterating area of the library caused
+      a callback function to continue iterating even though it's supposed
+      to stop.
+
+      Added the returned value check to the for loop's conditions in
+      H5EA_iterate(), H5FA_iterate(), and H5D__none_idx_iterate().  The
+      iteration now stops when it should.
+
+      (BMR - 2019/06/11, HDFFV-10661)
 
     - Fixed a bug that would cause an error or cause fill values to be
       incorrectly read from a chunked dataset using the "single chunk" index if
@@ -491,27 +513,6 @@ Bug Fixes since HDF5-1.10.3 release
 
       (JTH - 2018/08/25, HDFFV-10501)
 
-    - When iterating over an old-style group (i.e., when not using the latest
-      file format) of size 0, a NULL pointer representing the empty links
-      table would be sent to qsort(3) for sorting, which is undefined behavior.
-
-      Iterating over an empty group is explicitly tested in the links test.
-      This has not caused any failures to date and was flagged by gcc's
-      -fsanitize=undefined.
-
-      The library no longer attempts to sort an empty array.
-
-      (DER - 2019/06/18, HDFFV-10829)
-
-    - Some oversights in the index iterating area of the library caused
-      a callback function to continue iterating even though it's supposed
-      to stop.
-
-      Added the returned value check to the for loop's conditions in
-      H5EA_iterate(), H5FA_iterate(), and H5D__none_idx_iterate().  The
-      iteration now stops when it should.
-
-      (BMR - 2019/08/28, HDFFV-10661)
 
     Java Library:
     ----------------
