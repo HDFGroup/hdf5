@@ -217,19 +217,11 @@ void coll_write_test(int chunk_factor)
   hid_t    file, datasetc,dataseti;      /* File and dataset identifiers */
   hid_t    mspaceid1, mspaceid, fspaceid,fspaceid1; /* Dataspace identifiers */
 
-  hsize_t mdim1[1],fsdim[2],mdim[2];
-
-#if 0
-  hsize_t  mdim1[] = {MSPACE1_DIM};  /* Dimension size of the first dataset
-                    (in memory) */
-  hsize_t  fsdim[] = {FSPACE_DIM1, FSPACE_DIM2}; /* Dimension sizes of the dataset
-                                                    (on disk) */
-
-  hsize_t  mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; /* Dimension sizes of the
-                        dataset in memory when we
-                        read selection from the
-                        dataset on the disk */
-#endif
+  hsize_t  mdim1[1];    /* Dimension size of the first dataset (in memory) */
+  hsize_t  fsdim[2];    /* Dimension sizes of the dataset (on disk) */
+  hsize_t  mdim[2];     /* Dimension sizes of the dataset in memory when we
+                         * read selection from the dataset on the disk
+                         */
 
   hsize_t  start[2];  /* Start of hyperslab */
   hsize_t  stride[2]; /* Stride of hyperslab */
@@ -241,15 +233,9 @@ void coll_write_test(int chunk_factor)
   unsigned i;
   int      fillvalue = 0;   /* Fill value for the dataset */
 
-#if 0
-  int      matrix_out[MSPACE_DIM1][MSPACE_DIM2];
-  int      matrix_out1[MSPACE_DIM1][MSPACE_DIM2];   /* Buffer to read from the
-                            dataset */
-  int      vector[MSPACE1_DIM];
-#endif
-
-
-  int      *matrix_out = NULL, *matrix_out1 = NULL, *vector = NULL;
+  int      *matrix_out = NULL;
+  int      *matrix_out1 = NULL;     /* Buffer to read from the dataset */
+  int      *vector = NULL;
 
   int      mpi_size,mpi_rank;
 
@@ -693,14 +679,10 @@ coll_read_test(int chunk_factor)
 
 
   /* Dimension sizes of the dataset (on disk) */
-#if 0
-  hsize_t mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; /* Dimension sizes of the
-                        dataset in memory when we
-                        read selection from the
-                        dataset on the disk */
+  hsize_t mdim[2];      /* Dimension sizes of the dataset in memory when we
+                         * read selection from the dataset on the disk
+                         */
 
-#endif
-  hsize_t mdim[2];
   hsize_t  start[2];  /* Start of hyperslab */
   hsize_t  stride[2]; /* Stride of hyperslab */
   hsize_t  count[2];  /* Block count */
@@ -710,13 +692,8 @@ coll_read_test(int chunk_factor)
   unsigned i;
 
   int     *matrix_out;
-  int     *matrix_out1;
-#if 0
-  int      matrix_out[MSPACE_DIM1][MSPACE_DIM2];
-  int      matrix_out1[MSPACE_DIM1][MSPACE_DIM2];   /* Buffer to read from the
-                            dataset */
+  int     *matrix_out1;     /* Buffer to read from the dataset */
 
-#endif
   int      mpi_size,mpi_rank;
 
   MPI_Comm comm = MPI_COMM_WORLD;
@@ -2601,10 +2578,6 @@ lower_dim_size_comp_test(void)
     /* const char *fcnName = "lower_dim_size_comp_test()"; */
     int      chunk_edge_size = 0;
     int      use_collective_io;
-
-#if 0
-   HDsleep(60);
-#endif
 
     HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
     for(use_collective_io = 0; use_collective_io <= 1; use_collective_io++) {
