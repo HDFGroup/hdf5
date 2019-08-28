@@ -852,18 +852,18 @@ void collective_group_write_independent_group_read(void)
  */
 void collective_group_write(void)
 {
-    int mpi_rank, mpi_size, size;
-    int i, j, m;
-    char gname[64], dname[32];
+    int   mpi_rank, mpi_size, size;
+    int   i, j, m;
+    char  gname[64], dname[32];
     hid_t fid, gid, did, plist, dcpl, memspace, filespace;
-    DATATYPE * outme = NULL;
-    hsize_t chunk_origin[DIM];
-    hsize_t chunk_dims[DIM], file_dims[DIM], count[DIM];
-    hsize_t chunk_size[2];  /* Chunk dimensions - computed shortly */
-    herr_t ret1, ret2;
+    DATATYPE *outme = NULL;
+    hsize_t   chunk_origin[DIM];
+    hsize_t   chunk_dims[DIM], file_dims[DIM], count[DIM];
+    hsize_t   chunk_size[2];  /* Chunk dimensions - computed shortly */
+    herr_t    ret1, ret2;
     const H5Ptest_param_t *pt;
-    char    *filename;
-    int        ngroups;
+    char     *filename;
+    int       ngroups;
 
     pt = GetTestParameters();
     filename = pt->name;
@@ -920,8 +920,7 @@ void collective_group_write(void)
             for(j = 0; j < size; j++)
                 outme[(i * size) + j] =(i + j) * 1000 + mpi_rank;
 
-        H5Dwrite(did, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT,
-                 outme);
+        H5Dwrite(did, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT, outme);
 
         H5Dclose(did);
         H5Gclose(gid);
@@ -951,7 +950,7 @@ void independent_group_read(void)
     hid_t    plist, fid;
     const H5Ptest_param_t *pt;
     char    *filename;
-    int        ngroups;
+    int      ngroups;
 
     pt = GetTestParameters();
     filename = pt->name;
@@ -1071,16 +1070,16 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
  */
 void multiple_group_write(void)
 {
-    int mpi_rank, mpi_size, size;
-    int m;
-    char gname[64];
-    hid_t fid, gid, plist, memspace, filespace;
+    int     mpi_rank, mpi_size, size;
+    int     m;
+    char    gname[64];
+    hid_t   fid, gid, plist, memspace, filespace;
     hsize_t chunk_origin[DIM];
     hsize_t chunk_dims[DIM], file_dims[DIM], count[DIM];
-    herr_t ret;
+    herr_t  ret;
     const H5Ptest_param_t *pt;
-    char    *filename;
-    int        ngroups;
+    char   *filename;
+    int     ngroups;
 
     pt = GetTestParameters();
     filename = pt->name;
@@ -1162,11 +1161,11 @@ void multiple_group_write(void)
 static void
 write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 {
-    int i, j, n, size;
-    int mpi_rank, mpi_size;
-    char dname[32];
-    DATATYPE * outme = NULL;
-    hid_t did;
+    int       i, j, n, size;
+    int       mpi_rank, mpi_size;
+    char      dname[32];
+    DATATYPE *outme = NULL;
+    hid_t     did;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -1248,7 +1247,7 @@ void multiple_group_read(void)
     hsize_t  chunk_dims[DIM], file_dims[DIM], count[DIM];
     const H5Ptest_param_t *pt;
     char    *filename;
-    int        ngroups;
+    int      ngroups;
 
     pt = GetTestParameters();
     filename = pt->name;
@@ -1323,10 +1322,10 @@ void multiple_group_read(void)
 static int
 read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 {
-    int i, j, n, mpi_rank, mpi_size, size, attr_errors=0, vrfy_errors=0;
-    char dname[32];
+    int       i, j, n, mpi_rank, mpi_size, size, attr_errors=0, vrfy_errors=0;
+    char      dname[32];
     DATATYPE *outdata = NULL, *indata = NULL;
-    hid_t did;
+    hid_t     did;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -1344,8 +1343,7 @@ read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
         did = H5Dopen2(gid, dname, H5P_DEFAULT);
         VRFY((did>0), dname);
 
-        H5Dread(did, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT,
-                indata);
+        H5Dread(did, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT, indata);
 
         /* this is the original value */
         for(i=0; i<size; i++)
@@ -1451,7 +1449,7 @@ read_attribute(hid_t obj_id, int this_type, int num)
         if(MAINPROCESS) {
             H5Aread(aid, H5T_NATIVE_INT, &in_num);
             vrfy_errors =  dataset_vrfy(NULL, NULL, NULL, group_block, &in_num, &num);
-    }
+        }
         H5Aclose(aid);
     }
     else if(this_type == is_dset) {
@@ -1462,7 +1460,7 @@ read_attribute(hid_t obj_id, int this_type, int num)
         if(MAINPROCESS) {
             H5Aread(aid, H5T_NATIVE_INT, in_data);
             vrfy_errors = dataset_vrfy(NULL, NULL, NULL, dset_block, in_data, out_data);
-    }
+        }
         H5Aclose(aid);
     }
 
@@ -1481,9 +1479,9 @@ read_attribute(hid_t obj_id, int this_type, int num)
 static int
 check_value(DATATYPE *indata, DATATYPE *outdata, int size)
 {
-    int mpi_rank, mpi_size, err_num=0;
-    hsize_t i, j;
-    hsize_t chunk_origin[DIM];
+    int      mpi_rank, mpi_size, err_num=0;
+    hsize_t  i, j;
+    hsize_t  chunk_origin[DIM];
     hsize_t  chunk_dims[DIM], count[DIM];
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -1494,11 +1492,11 @@ check_value(DATATYPE *indata, DATATYPE *outdata, int size)
     indata += chunk_origin[0]*size;
     outdata += chunk_origin[0]*size;
     for(i=chunk_origin[0]; i<(chunk_origin[0]+chunk_dims[0]); i++)
-         for(j=chunk_origin[1]; j<(chunk_origin[1]+chunk_dims[1]); j++) {
-              if(*indata != *outdata )
-            if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
-            HDprintf("Dataset Verify failed at [%lu][%lu](row %lu, col%lu): expect %d, got %d\n",(unsigned long)i,(unsigned long)j,(unsigned long)i,(unsigned long)j, *outdata, *indata);
-    }
+        for(j=chunk_origin[1]; j<(chunk_origin[1]+chunk_dims[1]); j++) {
+            if(*indata != *outdata )
+                if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
+                    HDprintf("Dataset Verify failed at [%lu][%lu](row %lu, col%lu): expect %d, got %d\n",(unsigned long)i,(unsigned long)j,(unsigned long)i,(unsigned long)j, *outdata, *indata);
+        }
     if(err_num > MAX_ERR_REPORT && !VERBOSE_MED)
         HDprintf("[more errors ...]\n");
     if(err_num)
@@ -1740,8 +1738,8 @@ void io_mode_confusion(void)
     status = H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
     VRFY((status >= 0 ), "H5Pset_dxpl_mpio() failed");
     if(dxfer_coll_type == DXFER_INDEPENDENT_IO) {
-     status = H5Pset_dxpl_mpio_collective_opt(plist_id, H5FD_MPIO_INDIVIDUAL_IO);
-     VRFY((status>= 0),"set independent IO collectively succeeded");
+        status = H5Pset_dxpl_mpio_collective_opt(plist_id, H5FD_MPIO_INDIVIDUAL_IO);
+        VRFY((status>= 0),"set independent IO collectively succeeded");
     }
 
 
@@ -1967,10 +1965,10 @@ void rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     int steps_done = 0;
 
     /* test bed related variables */
-    const char *        fcn_name = "rr_obj_hdr_flush_confusion_writer";
-    const hbool_t        verbose = FALSE;
-    const H5Ptest_param_t *    pt;
-    char *            filename;
+    const char   *fcn_name = "rr_obj_hdr_flush_confusion_writer";
+    const hbool_t verbose = FALSE;
+    const H5Ptest_param_t *pt;
+    char         *filename;
 
     /*
      * setup test bed related variables:
@@ -2067,19 +2065,19 @@ void rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     }
 
     for ( i = 0; i < NUM_DATA_SETS; i++ ) {
-    err = H5Sselect_hyperslab(disk_space[i], H5S_SELECT_SET, disk_start,
-                            NULL, disk_count, NULL);
+        err = H5Sselect_hyperslab(disk_space[i], H5S_SELECT_SET, disk_start,
+                NULL, disk_count, NULL);
         VRFY((err >= 0), "H5Sselect_hyperslab(1) failed.\n");
         mem_space[i] = H5Screate_simple(1, mem_size, NULL);
-    VRFY((mem_space[i] >= 0), "H5Screate_simple(2) failed.\n");
-    err = H5Sselect_hyperslab(mem_space[i], H5S_SELECT_SET,
-                            mem_start, NULL, mem_count, NULL);
+        VRFY((mem_space[i] >= 0), "H5Screate_simple(2) failed.\n");
+        err = H5Sselect_hyperslab(mem_space[i], H5S_SELECT_SET,
+                mem_start, NULL, mem_count, NULL);
         VRFY((err >= 0), "H5Sselect_hyperslab(2) failed.\n");
-    err = H5Dwrite(dataset[i], H5T_NATIVE_DOUBLE, mem_space[i],
-                       disk_space[i], dxpl_id, data);
+        err = H5Dwrite(dataset[i], H5T_NATIVE_DOUBLE, mem_space[i],
+                disk_space[i], dxpl_id, data);
         VRFY((err >= 0), "H5Dwrite(1) failed.\n");
         for ( j = 0; j < LOCAL_DATA_SIZE; j++ )
-        data[j] *= 10.0;
+            data[j] *= 10.0;
     }
 
     /*
@@ -2127,7 +2125,7 @@ void rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     for ( i = 0; i < NUM_DATA_SETS; i++ ) {
         att_space[i] = H5Screate_simple(1, att_size, NULL);
         VRFY((att_space[i] >= 0), "H5Screate_simple(3) failed.\n");
-    att_id[i] = H5Acreate2(dataset[i], att_name[i], H5T_NATIVE_DOUBLE,
+        att_id[i] = H5Acreate2(dataset[i], att_name[i], H5T_NATIVE_DOUBLE,
                                att_space[i], H5P_DEFAULT, H5P_DEFAULT);
         VRFY((att_id[i] >= 0), "H5Acreate(1) failed.\n");
         err = H5Awrite(att_id[i], H5T_NATIVE_DOUBLE, att);
@@ -2146,7 +2144,6 @@ void rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
                   mpi_rank, fcn_name);
 
     for ( i = 0; i < NUM_DATA_SETS; i++ ) {
-
         err = H5Sclose(att_space[i]);
         VRFY((err >= 0), "H5Sclose(att_space[i]) failed.\n");
         err = H5Aclose(att_id[i]);
@@ -2350,20 +2347,20 @@ void rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
 
     /* MPI variables */
     /* world communication size and rank */
-    int mpi_world_size;
-    int mpi_world_rank;
+    int    mpi_world_size;
+    int    mpi_world_rank;
     /* private communicator size and rank */
-    int mpi_size;
-    int mpi_rank;
-    int mrc;        /* mpi error code */
+    int    mpi_size;
+    int    mpi_rank;
+    int    mrc;        /* mpi error code */
     int    steps = -1;        /* How far (steps) to verify the file */
     int    steps_done = -1;    /* How far (steps) have been verified */
 
     /* test bed related variables */
-    const char *        fcn_name = "rr_obj_hdr_flush_confusion_reader";
-    const hbool_t        verbose = FALSE;
-    const H5Ptest_param_t *    pt;
-    char *            filename;
+    const char   *fcn_name = "rr_obj_hdr_flush_confusion_reader";
+    const hbool_t verbose = FALSE;
+    const H5Ptest_param_t *pt;
+    char         *filename;
 
     /*
      * setup test bed related variables:
@@ -2380,291 +2377,290 @@ void rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
     /* Repeatedly re-open the file and verify its contents until it is */
     /* told to end (when steps=0). */
     while (steps_done != 0){
-    Reader_wait(mrc, steps);
-    VRFY((mrc >= 0), "Reader_wait failed");
-    steps_done = 0;
+        Reader_wait(mrc, steps);
+        VRFY((mrc >= 0), "Reader_wait failed");
+        steps_done = 0;
 
-    if (steps > 0 ){
-        /*
-        * Set up file access property list with parallel I/O access
-        */
+        if (steps > 0 ){
+            /*
+            * Set up file access property list with parallel I/O access
+            */
 
-        if(verbose )
-        HDfprintf(stdout, "%0d:%s: Setting up property list.\n",
-            mpi_rank, fcn_name);
+            if(verbose )
+                HDfprintf(stdout, "%0d:%s: Setting up property list.\n",
+                        mpi_rank, fcn_name);
 
-        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-        VRFY((fapl_id != -1), "H5Pcreate(H5P_FILE_ACCESS) failed");
-        err = H5Pset_fapl_mpio(fapl_id, comm, MPI_INFO_NULL);
-        VRFY((err >= 0 ), "H5Pset_fapl_mpio() failed");
+            fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+            VRFY((fapl_id != -1), "H5Pcreate(H5P_FILE_ACCESS) failed");
+            err = H5Pset_fapl_mpio(fapl_id, comm, MPI_INFO_NULL);
+            VRFY((err >= 0 ), "H5Pset_fapl_mpio() failed");
 
-        /*
-        * Create a new file collectively and release property list identifier.
-        */
+            /*
+            * Create a new file collectively and release property list identifier.
+            */
 
-        if(verbose )
-        HDfprintf(stdout, "%0d:%s: Re-open file \"%s\".\n",
-            mpi_rank, fcn_name, filename);
+            if(verbose )
+                HDfprintf(stdout, "%0d:%s: Re-open file \"%s\".\n",
+                        mpi_rank, fcn_name, filename);
 
-        file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
-        VRFY((file_id >= 0 ), "H5Fopen() failed");
-        err = H5Pclose(fapl_id);
-        VRFY((err >= 0 ), "H5Pclose(fapl_id) failed");
+            file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
+            VRFY((file_id >= 0 ), "H5Fopen() failed");
+            err = H5Pclose(fapl_id);
+            VRFY((err >= 0 ), "H5Pclose(fapl_id) failed");
 
 #if 1
-        if (steps >= 1){
+            if (steps >= 1){
+                /*=====================================================*
+                * Step 1: open the data sets and read data.
+                *=====================================================*/
+
+                if(verbose )
+                    HDfprintf(stdout, "%0d:%s: opening the datasets.\n",
+                            mpi_rank, fcn_name);
+
+                for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+                    dataset[i] = -1;
+                }
+
+                for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+                    dataset[i] = H5Dopen2(file_id, dataset_name[i], H5P_DEFAULT);
+                    VRFY((dataset[i] >= 0), "H5Dopen(1) failed.\n");
+                    disk_space[i] = H5Dget_space(dataset[i]);
+                    VRFY((disk_space[i] >= 0), "H5Dget_space failed.\n");
+                }
+
+                /*
+                * setup data transfer property list
+                */
+
+                if(verbose )
+                    HDfprintf(stdout, "%0d:%s: Setting up dxpl.\n", mpi_rank, fcn_name);
+
+                dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+                VRFY((dxpl_id != -1), "H5Pcreate(H5P_DATASET_XFER) failed.\n");
+                err = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
+                VRFY((err >= 0),
+                        "H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) failed.\n");
+
+                /*
+                * read data from the data sets
+                */
+
+                if(verbose )
+                    HDfprintf(stdout, "%0d:%s: Reading datasets.\n", mpi_rank, fcn_name);
+
+                disk_count[0] = (hsize_t)(LOCAL_DATA_SIZE);
+                disk_start[0] = (hsize_t)(LOCAL_DATA_SIZE * mpi_rank);
+
+                mem_size[0] = (hsize_t)(LOCAL_DATA_SIZE);
+
+                mem_count[0] = (hsize_t)(LOCAL_DATA_SIZE);
+                mem_start[0] = (hsize_t)(0);
+
+                /* set up expected data for verification */
+                for ( j = 0; j < LOCAL_DATA_SIZE; j++ ) {
+                    data[j] = (double)(mpi_rank + 1);
+                }
+
+                for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+                    err = H5Sselect_hyperslab(disk_space[i], H5S_SELECT_SET, disk_start,
+                            NULL, disk_count, NULL);
+                    VRFY((err >= 0), "H5Sselect_hyperslab(1) failed.\n");
+                    mem_space[i] = H5Screate_simple(1, mem_size, NULL);
+                    VRFY((mem_space[i] >= 0), "H5Screate_simple(2) failed.\n");
+                    err = H5Sselect_hyperslab(mem_space[i], H5S_SELECT_SET,
+                            mem_start, NULL, mem_count, NULL);
+                    VRFY((err >= 0), "H5Sselect_hyperslab(2) failed.\n");
+                    err = H5Dread(dataset[i], H5T_NATIVE_DOUBLE, mem_space[i],
+                            disk_space[i], dxpl_id, data_read);
+                    VRFY((err >= 0), "H5Dread(1) failed.\n");
+
+                    /* compare read data with expected data */
+                    for ( j = 0; j < LOCAL_DATA_SIZE; j++ )
+                        if (data_read[j] != data[j]){
+                            HDfprintf(stdout,
+                                    "%0d:%s: Reading datasets value failed in "
+                                    "Dataset %d, at position %d: expect %f, got %f.\n",
+                                    mpi_rank, fcn_name, i, j, data[j], data_read[j]);
+                            nerrors++;
+                        }
+                    for ( j = 0; j < LOCAL_DATA_SIZE; j++ )
+                        data[j] *= 10.0;
+                }
+
+                /*
+                * close the data spaces
+                */
+
+                if(verbose )
+                    HDfprintf(stdout, "%0d:%s: closing dataspaces.\n", mpi_rank, fcn_name);
+
+                for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+                    err = H5Sclose(disk_space[i]);
+                    VRFY((err >= 0), "H5Sclose(disk_space[i]) failed.\n");
+                    err = H5Sclose(mem_space[i]);
+                    VRFY((err >= 0), "H5Sclose(mem_space[i]) failed.\n");
+                }
+                steps_done++;
+            }
+            /* End of Step 1: open the data sets and read data. */
+#endif
+
+#if 1
             /*=====================================================*
-        * Step 1: open the data sets and read data.
-        *=====================================================*/
+            * Step 2: reading attributes from each dataset
+            *=====================================================*/
 
-        if(verbose )
-            HDfprintf(stdout, "%0d:%s: opening the datasets.\n",
-                mpi_rank, fcn_name);
+            if (steps >= 2){
+                if(verbose )
+                    HDfprintf(stdout, "%0d:%s: reading attributes.\n", mpi_rank, fcn_name);
 
-        for ( i = 0; i < NUM_DATA_SETS; i++ ) {
-            dataset[i] = -1;
-        }
-
-        for ( i = 0; i < NUM_DATA_SETS; i++ ) {
-            dataset[i] = H5Dopen2(file_id, dataset_name[i], H5P_DEFAULT);
-            VRFY((dataset[i] >= 0), "H5Dopen(1) failed.\n");
-            disk_space[i] = H5Dget_space(dataset[i]);
-            VRFY((disk_space[i] >= 0), "H5Dget_space failed.\n");
-        }
-
-        /*
-        * setup data transfer property list
-        */
-
-        if(verbose )
-            HDfprintf(stdout, "%0d:%s: Setting up dxpl.\n", mpi_rank, fcn_name);
-
-        dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-        VRFY((dxpl_id != -1), "H5Pcreate(H5P_DATASET_XFER) failed.\n");
-        err = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
-        VRFY((err >= 0),
-            "H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) failed.\n");
-
-        /*
-        * read data from the data sets
-        */
-
-        if(verbose )
-            HDfprintf(stdout, "%0d:%s: Reading datasets.\n", mpi_rank, fcn_name);
-
-        disk_count[0] = (hsize_t)(LOCAL_DATA_SIZE);
-        disk_start[0] = (hsize_t)(LOCAL_DATA_SIZE * mpi_rank);
-
-            mem_size[0] = (hsize_t)(LOCAL_DATA_SIZE);
-
-        mem_count[0] = (hsize_t)(LOCAL_DATA_SIZE);
-        mem_start[0] = (hsize_t)(0);
-
-        /* set up expected data for verification */
-        for ( j = 0; j < LOCAL_DATA_SIZE; j++ ) {
-            data[j] = (double)(mpi_rank + 1);
-        }
-
-        for ( i = 0; i < NUM_DATA_SETS; i++ ) {
-            err = H5Sselect_hyperslab(disk_space[i], H5S_SELECT_SET, disk_start,
-                    NULL, disk_count, NULL);
-            VRFY((err >= 0), "H5Sselect_hyperslab(1) failed.\n");
-            mem_space[i] = H5Screate_simple(1, mem_size, NULL);
-            VRFY((mem_space[i] >= 0), "H5Screate_simple(2) failed.\n");
-            err = H5Sselect_hyperslab(mem_space[i], H5S_SELECT_SET,
-                    mem_start, NULL, mem_count, NULL);
-            VRFY((err >= 0), "H5Sselect_hyperslab(2) failed.\n");
-            err = H5Dread(dataset[i], H5T_NATIVE_DOUBLE, mem_space[i],
-                disk_space[i], dxpl_id, data_read);
-            VRFY((err >= 0), "H5Dread(1) failed.\n");
-
-            /* compare read data with expected data */
-            for ( j = 0; j < LOCAL_DATA_SIZE; j++ )
-            if (data_read[j] != data[j]){
-                HDfprintf(stdout,
-                "%0d:%s: Reading datasets value failed in "
-                "Dataset %d, at position %d: expect %f, got %f.\n",
-                mpi_rank, fcn_name, i, j, data[j], data_read[j]);
-                nerrors++;
-            }
-            for ( j = 0; j < LOCAL_DATA_SIZE; j++ )
-            data[j] *= 10.0;
-        }
-
-        /*
-        * close the data spaces
-        */
-
-        if(verbose )
-            HDfprintf(stdout, "%0d:%s: closing dataspaces.\n", mpi_rank, fcn_name);
-
-        for ( i = 0; i < NUM_DATA_SETS; i++ ) {
-            err = H5Sclose(disk_space[i]);
-            VRFY((err >= 0), "H5Sclose(disk_space[i]) failed.\n");
-            err = H5Sclose(mem_space[i]);
-            VRFY((err >= 0), "H5Sclose(mem_space[i]) failed.\n");
-        }
-        steps_done++;
-        }
-        /* End of Step 1: open the data sets and read data. */
-#endif
-
-#if 1
-        /*=====================================================*
-        * Step 2: reading attributes from each dataset
-        *=====================================================*/
-
-        if (steps >= 2){
-        if(verbose )
-            HDfprintf(stdout, "%0d:%s: reading attributes.\n", mpi_rank, fcn_name);
-
-        for ( j = 0; j < LOCAL_DATA_SIZE; j++ ) {
-
-            att[j] = (double)(j + 1);
-        }
-
-        for ( i = 0; i < NUM_DATA_SETS; i++ ) {
-            hid_t att_id, att_type;
-
-            att_id = H5Aopen(dataset[i], att_name[i], H5P_DEFAULT);
-            VRFY((att_id >= 0), "H5Aopen failed.\n");
-            att_type = H5Aget_type(att_id);
-            VRFY((att_type >= 0), "H5Aget_type failed.\n");
-            tri_err = H5Tequal(att_type, H5T_NATIVE_DOUBLE);
-            VRFY((tri_err >= 0), "H5Tequal failed.\n");
-            if (tri_err==0){
-            HDfprintf(stdout,
-                "%0d:%s: Mismatched Attribute type of Dataset %d.\n",
-                mpi_rank, fcn_name, i);
-                nerrors++;
-            }else{
-            /* should verify attribute size before H5Aread */
-            err = H5Aread(att_id, H5T_NATIVE_DOUBLE, att_read);
-            VRFY((err >= 0), "H5Aread failed.\n");
-            /* compare read attribute data with expected data */
-            for ( j = 0; j < LOCAL_DATA_SIZE; j++ )
-                if (att_read[j] != att[j]){
-                HDfprintf(stdout,
-                    "%0d:%s: Mismatched attribute data read in Dataset %d, at position %d: expect %f, got %f.\n",
-                    mpi_rank, fcn_name, i, j, att[j], att_read[j]);
-                    nerrors++;
+                for ( j = 0; j < LOCAL_DATA_SIZE; j++ ) {
+                    att[j] = (double)(j + 1);
                 }
-            for ( j = 0; j < LOCAL_DATA_SIZE; j++ ) {
 
-                att[j] /= 10.0;
+                for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+                    hid_t att_id, att_type;
+
+                    att_id = H5Aopen(dataset[i], att_name[i], H5P_DEFAULT);
+                    VRFY((att_id >= 0), "H5Aopen failed.\n");
+                    att_type = H5Aget_type(att_id);
+                    VRFY((att_type >= 0), "H5Aget_type failed.\n");
+                    tri_err = H5Tequal(att_type, H5T_NATIVE_DOUBLE);
+                    VRFY((tri_err >= 0), "H5Tequal failed.\n");
+                    if (tri_err==0){
+                        HDfprintf(stdout,
+                                "%0d:%s: Mismatched Attribute type of Dataset %d.\n",
+                                mpi_rank, fcn_name, i);
+                        nerrors++;
+                    }
+                    else {
+                        /* should verify attribute size before H5Aread */
+                        err = H5Aread(att_id, H5T_NATIVE_DOUBLE, att_read);
+                        VRFY((err >= 0), "H5Aread failed.\n");
+                        /* compare read attribute data with expected data */
+                        for ( j = 0; j < LOCAL_DATA_SIZE; j++ )
+                            if (att_read[j] != att[j]){
+                                HDfprintf(stdout,
+                                        "%0d:%s: Mismatched attribute data read in Dataset %d, at position %d: expect %f, got %f.\n",
+                                        mpi_rank, fcn_name, i, j, att[j], att_read[j]);
+                                nerrors++;
+                            }
+                        for ( j = 0; j < LOCAL_DATA_SIZE; j++ ) {
+                            att[j] /= 10.0;
+                        }
+                    }
+                    err = H5Aclose(att_id);
+                    VRFY((err >= 0), "H5Aclose failed.\n");
+                }
+                steps_done++;
             }
-            }
-            err = H5Aclose(att_id);
-            VRFY((err >= 0), "H5Aclose failed.\n");
-        }
-        steps_done++;
-        }
-        /* End of Step 2: reading attributes from each dataset */
+            /* End of Step 2: reading attributes from each dataset */
 #endif
 
 
 #if 1
-        /*=====================================================*
-        * Step 3 or 4: read large attributes from each dataset.
-        * Step 4 has different attribute value from step 3.
-        *=====================================================*/
+            /*=====================================================*
+            * Step 3 or 4: read large attributes from each dataset.
+            * Step 4 has different attribute value from step 3.
+            *=====================================================*/
 
-        if (steps >= 3){
-        if(verbose )
-            HDfprintf(stdout, "%0d:%s: reading large attributes.\n", mpi_rank, fcn_name);
+            if (steps >= 3){
+                if(verbose )
+                    HDfprintf(stdout, "%0d:%s: reading large attributes.\n", mpi_rank, fcn_name);
 
-        for ( j = 0; j < LARGE_ATTR_SIZE; j++ ) {
-
-            lg_att[j] = (steps==3) ? (double)(j + 1) : (double)(j+2);
-        }
-
-        for ( i = 0; i < NUM_DATA_SETS; i++ ) {
-            lg_att_id[i] = H5Aopen(dataset[i], lg_att_name[i], H5P_DEFAULT);
-            VRFY((lg_att_id[i] >= 0), "H5Aopen(2) failed.\n");
-            lg_att_type[i] = H5Aget_type(lg_att_id[i]);
-            VRFY((err >= 0), "H5Aget_type failed.\n");
-            tri_err = H5Tequal(lg_att_type[i], H5T_NATIVE_DOUBLE);
-            VRFY((tri_err >= 0), "H5Tequal failed.\n");
-            if (tri_err==0){
-            HDfprintf(stdout,
-                "%0d:%s: Mismatched Large attribute type of Dataset %d.\n",
-                mpi_rank, fcn_name, i);
-                nerrors++;
-            }else{
-            /* should verify large attribute size before H5Aread */
-            err = H5Aread(lg_att_id[i], H5T_NATIVE_DOUBLE, lg_att_read);
-            VRFY((err >= 0), "H5Aread failed.\n");
-            /* compare read attribute data with expected data */
-            for ( j = 0; j < LARGE_ATTR_SIZE; j++ )
-                if (lg_att_read[j] != lg_att[j]){
-                HDfprintf(stdout,
-                    "%0d:%s: Mismatched large attribute data read in Dataset %d, at position %d: expect %f, got %f.\n",
-                    mpi_rank, fcn_name, i, j, lg_att[j], lg_att_read[j]);
-                    nerrors++;
+                for ( j = 0; j < LARGE_ATTR_SIZE; j++ ) {
+                    lg_att[j] = (steps==3) ? (double)(j + 1) : (double)(j+2);
                 }
-            for ( j = 0; j < LARGE_ATTR_SIZE; j++ ) {
 
-                lg_att[j] /= 10.0;
-            }
-            }
-            err = H5Tclose(lg_att_type[i]);
-            VRFY((err >= 0), "H5Tclose failed.\n");
-            err = H5Aclose(lg_att_id[i]);
-            VRFY((err >= 0), "H5Aclose failed.\n");
-        }
-        /* Both step 3 and 4 use this same read checking code. */
-        steps_done = (steps==3) ? 3 : 4;
-        }
+                for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+                    lg_att_id[i] = H5Aopen(dataset[i], lg_att_name[i], H5P_DEFAULT);
+                    VRFY((lg_att_id[i] >= 0), "H5Aopen(2) failed.\n");
+                    lg_att_type[i] = H5Aget_type(lg_att_id[i]);
+                    VRFY((err >= 0), "H5Aget_type failed.\n");
+                    tri_err = H5Tequal(lg_att_type[i], H5T_NATIVE_DOUBLE);
+                    VRFY((tri_err >= 0), "H5Tequal failed.\n");
+                    if (tri_err==0){
+                        HDfprintf(stdout,
+                                "%0d:%s: Mismatched Large attribute type of Dataset %d.\n",
+                                mpi_rank, fcn_name, i);
+                        nerrors++;
+                    }
+                    else{
+                        /* should verify large attribute size before H5Aread */
+                        err = H5Aread(lg_att_id[i], H5T_NATIVE_DOUBLE, lg_att_read);
+                        VRFY((err >= 0), "H5Aread failed.\n");
+                        /* compare read attribute data with expected data */
+                        for ( j = 0; j < LARGE_ATTR_SIZE; j++ )
+                            if (lg_att_read[j] != lg_att[j]){
+                                HDfprintf(stdout,
+                                        "%0d:%s: Mismatched large attribute data read in Dataset %d, at position %d: expect %f, got %f.\n",
+                                        mpi_rank, fcn_name, i, j, lg_att[j], lg_att_read[j]);
+                                nerrors++;
+                            }
+                        for ( j = 0; j < LARGE_ATTR_SIZE; j++ ) {
 
-        /* End of Step 3 or 4: read large attributes from each dataset */
+                            lg_att[j] /= 10.0;
+                        }
+                    }
+                    err = H5Tclose(lg_att_type[i]);
+                    VRFY((err >= 0), "H5Tclose failed.\n");
+                    err = H5Aclose(lg_att_id[i]);
+                    VRFY((err >= 0), "H5Aclose failed.\n");
+                }
+                /* Both step 3 and 4 use this same read checking code. */
+                steps_done = (steps==3) ? 3 : 4;
+            }
+
+            /* End of Step 3 or 4: read large attributes from each dataset */
 #endif
 
 
-        /*=====================================================*
-        * Step 5: read all objects from the file
-        *=====================================================*/
-        if (steps>=5){
-        /* nothing extra to verify. The file is closed normally. */
-        /* Just increment steps_done */
-        steps_done++;
-        }
+            /*=====================================================*
+            * Step 5: read all objects from the file
+            *=====================================================*/
+            if (steps>=5){
+                /* nothing extra to verify. The file is closed normally. */
+                /* Just increment steps_done */
+                steps_done++;
+            }
 
-        /*
-        * Close the data sets
-        */
+            /*
+            * Close the data sets
+            */
 
-        if(verbose )
-        HDfprintf(stdout, "%0d:%s: closing datasets again.\n",
-            mpi_rank, fcn_name);
+            if(verbose )
+                HDfprintf(stdout, "%0d:%s: closing datasets again.\n",
+                        mpi_rank, fcn_name);
 
-        for ( i = 0; i < NUM_DATA_SETS; i++ ) {
-        if ( dataset[i] >= 0 ) {
-            err = H5Dclose(dataset[i]);
-            VRFY((err >= 0), "H5Dclose(dataset[i])1 failed.\n");
-        }
-        }
+            for ( i = 0; i < NUM_DATA_SETS; i++ ) {
+                if ( dataset[i] >= 0 ) {
+                    err = H5Dclose(dataset[i]);
+                    VRFY((err >= 0), "H5Dclose(dataset[i])1 failed.\n");
+                }
+            }
 
-        /*
-        * close the data transfer property list.
-        */
+            /*
+            * close the data transfer property list.
+            */
 
-        if(verbose )
-        HDfprintf(stdout, "%0d:%s: closing dxpl .\n", mpi_rank, fcn_name);
+            if(verbose )
+                HDfprintf(stdout, "%0d:%s: closing dxpl .\n", mpi_rank, fcn_name);
 
-        err = H5Pclose(dxpl_id);
-        VRFY((err >= 0), "H5Pclose(dxpl_id) failed.\n");
+            err = H5Pclose(dxpl_id);
+            VRFY((err >= 0), "H5Pclose(dxpl_id) failed.\n");
 
-        /*
-        * Close the file
-        */
-        if(verbose)
-        HDfprintf(stdout, "%0d:%s: closing file again.\n",
-            mpi_rank, fcn_name);
-        err = H5Fclose(file_id);
-        VRFY((err >= 0 ), "H5Fclose(1) failed");
+            /*
+            * Close the file
+            */
+            if(verbose)
+                HDfprintf(stdout, "%0d:%s: closing file again.\n",
+                        mpi_rank, fcn_name);
+            err = H5Fclose(file_id);
+            VRFY((err >= 0 ), "H5Fclose(1) failed");
 
-    } /* else if (steps_done==0) */
-    Reader_result(mrc, steps_done);
+        } /* else if (steps_done==0) */
+        Reader_result(mrc, steps_done);
     } /* end while(1) */
 
     if(verbose )
