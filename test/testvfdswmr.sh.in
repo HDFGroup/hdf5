@@ -21,6 +21,8 @@
 
 srcdir=@srcdir@
 
+. ${srcdir}/supervise.subr
+
 ###############################################################################
 ## test parameters
 ###############################################################################
@@ -211,7 +213,8 @@ do
         # Launch the Writer
         echo launch the vfd_swmr_writer
         seed="" # Put -r <random seed> command here
-        ./vfd_swmr_writer -o $Nrecords $seed 2>&1 |tee vfd_swmr_writer.out &
+        catch_out_err_and_rc vfd_swmr_writer \
+            ./vfd_swmr_writer -o $Nrecords $seed &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -226,30 +229,32 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            ./vfd_swmr_reader $Nsecs_add $seed 2>&1 |tee vfd_swmr_reader.out.$n &
+            catch_out_err_and_rc vfd_swmr_reader.$n \
+                ./vfd_swmr_reader $Nsecs_add $seed &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
         $DPRINT pid_readers=$pid_readers
         $IFDEBUG ps
 
-        # Collect exit code of the readers first because they usually finish
-        # before the writer.
-        for xpid in $pid_readers; do
-            $DPRINT checked reader $xpid
-            wait $xpid
-            if test $? -ne 0; then
+        # Wait for the readers and the writer to finish.
+        wait
+
+        # Collect exit codes of the readers
+        n=0
+        while [ $n -lt $Nreaders ]; do
+            if [ $(cat vfd_swmr_reader.$n.rc) -ne 0 ]; then
                 echo reader had error
-                nerrors=`expr $nerrors + 1`
+                nerrors=$((nerrors + 1))
             fi
+            n=$((n + 1))
         done
 
         # Collect exit code of the writer
         $DPRINT checked writer $pid_writer
-        wait $pid_writer
-        if test $? -ne 0; then
+        if [ $(cat vfd_swmr_writer.rc) -ne 0 ]; then
             echo writer had error
-            nerrors=`expr $nerrors + 1`
+            nerrors=$((nerrors + 1))
         fi
 
         # Check for error and exit if one occured
@@ -261,8 +266,8 @@ do
         fi
 
         # Clean up output files
-        rm -f vfd_swmr_writer.out
-        rm -f vfd_swmr_reader.out.*
+        rm -f vfd_swmr_writer.{out,rc}
+        rm -f vfd_swmr_reader.*.{out,rc}
 
         echo
         echo "###############################################################################"
@@ -274,7 +279,8 @@ do
         # Launch the Remove Writer
         echo launch the vfd_swmr_remove_writer
         seed="" # Put -r <random seed> command here
-        ./vfd_swmr_remove_writer -o $Nrecs_rem $seed 2>&1 |tee vfd_swmr_writer.out &
+        catch_out_err_and_rc vfd_swmr_writer \
+            ./vfd_swmr_remove_writer -o $Nrecs_rem $seed &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -289,30 +295,32 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            ./vfd_swmr_remove_reader $Nsecs_rem $seed 2>&1 |tee vfd_swmr_reader.out.$n &
+            catch_out_err_and_rc vfd_swmr_reader.$n \
+                ./vfd_swmr_remove_reader $Nsecs_rem $seed &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
         $DPRINT pid_readers=$pid_readers
         $IFDEBUG ps
 
-        # Collect exit code of the readers first because they usually finish
-        # before the writer.
-        for xpid in $pid_readers; do
-            $DPRINT checked reader $xpid
-            wait $xpid
-            if test $? -ne 0; then
+        # Wait for the readers and the writer to finish.
+        wait
+
+        # Collect exit codes of the readers
+        n=0
+        while [ $n -lt $Nreaders ]; do
+            if [ $(cat vfd_swmr_reader.$n.rc) -ne 0 ]; then
                 echo reader had error
-                nerrors=`expr $nerrors + 1`
+                nerrors=$((nerrors + 1))
             fi
+            n=$((n + 1))
         done
 
         # Collect exit code of the writer
         $DPRINT checked writer $pid_writer
-        wait $pid_writer
-        if test $? -ne 0; then
+        if [ $(cat vfd_swmr_writer.rc) -ne 0 ]; then
             echo writer had error
-            nerrors=`expr $nerrors + 1`
+            nerrors=$((nerrors + 1))
         fi
 
         # Check for error and exit if one occured
@@ -324,9 +332,10 @@ do
         fi
 
         # Clean up output files
-        rm -f vfd_swmr_writer.out
-        rm -f vfd_swmr_reader.out.*
+        rm -f vfd_swmr_writer.{out,rc}
+        rm -f vfd_swmr_reader.*.{out,rc}
 
+if false; then
         echo
         echo "###############################################################################"
         echo "## Add/remove test - randomly grow or shrink the dataset"
@@ -355,7 +364,8 @@ do
         # Launch the Add/Remove Writer
         echo launch the vfd_swmr_addrem_writer
         seed="" # Put -r <random seed> command here
-        ./vfd_swmr_addrem_writer $Nrecords $seed 2>&1 |tee vfd_swmr_writer.out &
+        catch_out_err_and_rc vfd_swmr_writer \
+            ./vfd_swmr_addrem_writer $Nrecords $seed &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -370,30 +380,32 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            ./vfd_swmr_remove_reader $Nsecs_addrem $seed 2>&1 |tee vfd_swmr_reader.out.$n &
+            catch_out_err_and_rc vfd_swmr_reader.$n \
+                ./vfd_swmr_remove_reader $Nsecs_addrem $seed &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
         $DPRINT pid_readers=$pid_readers
         $IFDEBUG ps
 
-        # Collect exit code of the readers first because they usually finish
-        # before the writer.
-        for xpid in $pid_readers; do
-            $DPRINT checked reader $xpid
-            wait $xpid
-            if test $? -ne 0; then
+        # Wait for the readers and the writer to finish.
+        wait
+
+        # Collect exit codes of the readers
+        n=0
+        while [ $n -lt $Nreaders ]; do
+            if [ $(cat vfd_swmr_reader.$n.rc) -ne 0 ]; then
                 echo reader had error
-                nerrors=`expr $nerrors + 1`
+                nerrors=$((nerrors + 1))
             fi
+            n=$((n + 1))
         done
 
         # Collect exit code of the writer
         $DPRINT checked writer $pid_writer
-        wait $pid_writer
-        if test $? -ne 0; then
+        if [ $(cat vfd_swmr_writer.rc) -ne 0 ]; then
             echo writer had error
-            nerrors=`expr $nerrors + 1`
+            nerrors=$((nerrors + 1))
         fi
 
         # Check for error and exit if one occured
@@ -405,9 +417,10 @@ do
         fi
 
         # Clean up output files
-        rm -f vfd_swmr_writer.out
-        rm -f vfd_swmr_reader.out.*
+        rm -f vfd_swmr_writer.{out,rc}
+        rm -f vfd_swmr_reader.*.{out,rc}
 
+fi
         echo
         echo "###############################################################################"
         echo "## Sparse writer test - test writing to random locations in the dataset"
@@ -428,7 +441,8 @@ do
         rm -f $WRITER_MESSAGE
         # Launch the Sparse writer
         echo launch the vfd_swmr_sparse_writer
-        nice -n 20 ./vfd_swmr_sparse_writer $Nrecs_spa 2>&1 |tee vfd_swmr_writer.out &
+        catch_out_err_and_rc vfd_swmr_writer nice -n 20 \
+            ./vfd_swmr_sparse_writer $Nrecs_spa &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -441,30 +455,33 @@ do
         echo launch $Nrdrs_spa vfd_swmr_sparse_readers
         while [ $n -lt $Nrdrs_spa ]; do
             # The sparse reader spits out a LOT of data so it's set to 'quiet'
-            ./vfd_swmr_sparse_reader -q $Nrecs_spa 2>&1 |tee vfd_swmr_reader.out.$n &
+            catch_out_err_and_rc vfd_swmr_reader.$n \
+                ./vfd_swmr_sparse_reader -q $Nrecs_spa &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
         $DPRINT pid_readers=$pid_readers
         $IFDEBUG ps
 
+        # Wait for the readers and the writer to finish.
+        wait
+
+        # Collect exit codes of the readers
+        n=0
+        while [ $n -lt $Nrdrs_spa ]; do
+            if [ $(cat vfd_swmr_reader.$n.rc) -ne 0 ]; then
+                echo reader had error
+                nerrors=$((nerrors + 1))
+            fi
+            n=$((n + 1))
+        done
+
         # Collect exit code of the writer
         $DPRINT checked writer $pid_writer
-        wait $pid_writer
-        if test $? -ne 0; then
+        if [ $(cat vfd_swmr_writer.rc) -ne 0 ]; then
             echo writer had error
-            nerrors=`expr $nerrors + 1`
+            nerrors=$((nerrors + 1))
         fi
-
-        # Collect exit code of the readers
-        for xpid in $pid_readers; do
-            $DPRINT checked reader $xpid
-            wait $xpid
-            if test $? -ne 0; then
-                echo reader had error
-                nerrors=`expr $nerrors + 1`
-            fi
-        done
 
         # Check for error and exit if one occured
         $DPRINT nerrors=$nerrors
@@ -475,8 +492,8 @@ do
         fi
 
         # Clean up output files
-        rm -f vfd_swmr_writer.out
-        rm -f vfd_swmr_reader.out.*
+        rm -f vfd_swmr_writer.{out,rc}
+        rm -f vfd_swmr_reader.*.{out,rc}
     done
 done
 

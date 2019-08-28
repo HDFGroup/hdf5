@@ -1,0 +1,30 @@
+#!/bin/sh
+
+#
+# catch_out_err_and_rc outbase command [arguments]
+#
+# Run `command` with any `arguments` provided.  Redirect `command`'s
+# stderr and stdout to the file `outbase.out`.  Record the result code
+# of `command` in `outbase.rc`.
+#
+catch_out_err_and_rc()
+{
+	if [ $# -lt 2 ]; then
+		echo "usage: catch_output_and_rc outbase command [arguments]" \
+		    1>&2
+		exit 1
+	fi
+	outbase=$1
+	shift
+	{
+		eval "$@" 2>&1
+		echo $? > ${outbase}.rc
+	} | tee ${outbase}.out
+}
+
+#catch_out_err_and_rc xxlsxx ls smiles &
+
+#wait
+#echo result=$(cat xxlsxx.rc)
+
+#exit 0
