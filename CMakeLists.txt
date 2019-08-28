@@ -544,14 +544,17 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     endif ()
   endif ()
 endif ()
+
 #-----------------------------------------------------------------------------
 # Option to use threadsafe
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
 if (HDF5_ENABLE_THREADSAFE)
   # check for unsupported options
-  message (STATUS " **** thread-safety option not supported with static library **** ")
-  message (STATUS " **** thread-safety option will not be used building static library **** ")
+  if (WIN32 OR MINGW)
+    message (STATUS " **** thread-safety option not supported with static library **** ")
+    message (STATUS " **** thread-safety option will not be used building static library **** ")
+  endif ()
   if (HDF5_ENABLE_PARALLEL)
     if (NOT ALLOW_UNSUPPORTED)
       message (FATAL_ERROR " **** parallel and thread-safety options are not supported **** ")
@@ -589,9 +592,9 @@ if (HDF5_ENABLE_THREADSAFE)
     endif ()
   endif ()
   set(THREADS_PREFER_PTHREAD_FLAG ON)
-  find_package(Threads)
-  if (NOT Threads_FOUND)
-    message (STATUS " **** thread-safe package not found - threads still might work **** ")
+  find_package(Threads REQUIRED)
+  if (Threads_FOUND)
+    set (H5_HAVE_THREADSAFE 1)
   endif ()
 endif ()
 
