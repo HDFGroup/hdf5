@@ -226,6 +226,17 @@ New Features
 
      (DER - 2019/03/15, HDFFV-2714, HDFFV-3914, HDFFV-3895, HDFFV-8237, HDFFV-10413, HDFFV-10691)
 
+    - Added new chunk query functions
+
+      The following public functions were added to discover information about
+      the chunks in an HDF5 file.
+        herr_t H5Dget_num_chunks(dset_id, fspace_id, *nchunks)
+        herr_t H5Dget_chunk_info_by_coord(dset_id, *coord, *filter_mask, *addr, *size)
+        herr_t H5Dget_chunk_info(dset_id, fspace_id, index, *coord, *filter_mask, *addr, *size)
+
+      (BMR - 2019/08/28, HDFFV-10677)
+
+
     Parallel Library:
     -----------------
     - Changed the default behavior in parallel when reading the same dataset in its entirely
@@ -491,6 +502,16 @@ Bug Fixes since HDF5-1.10.3 release
       The library no longer attempts to sort an empty array.
 
       (DER - 2019/06/18, HDFFV-10829)
+
+    - Some oversights in the index iterating area of the library caused
+      a callback function to continue iterating even though it's supposed
+      to stop.
+
+      Added the returned value check to the for loop's conditions in
+      H5EA_iterate(), H5FA_iterate(), and H5D__none_idx_iterate().  The
+      iteration now stops when it should.
+
+      (BMR - 2019/08/28, HDFFV-10661 and HDFFV-10677)
 
     Java Library:
     ----------------
