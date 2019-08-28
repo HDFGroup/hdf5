@@ -511,7 +511,7 @@ Bug Fixes since HDF5-1.10.3 release
       H5EA_iterate(), H5FA_iterate(), and H5D__none_idx_iterate().  The
       iteration now stops when it should.
 
-      (BMR - 2019/08/28, HDFFV-10661 and HDFFV-10677)
+      (BMR - 2019/08/28, HDFFV-10661)
 
     Java Library:
     ----------------
