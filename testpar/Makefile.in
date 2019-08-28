@@ -102,7 +102,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = $(am__EXEEXT_1)
+check_PROGRAMS = $(am__EXEEXT_1) t_pflush1$(EXEEXT) t_pflush2$(EXEEXT)
 TESTS =
 subdir = testpar
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -113,11 +113,11 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = testpflush.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = t_mpi$(EXEEXT) testphdf5$(EXEEXT) t_cache$(EXEEXT) \
-	t_pflush1$(EXEEXT) t_pflush2$(EXEEXT) t_pshutdown$(EXEEXT) \
-	t_prestart$(EXEEXT) t_init_term$(EXEEXT) t_shapesame$(EXEEXT)
+	t_pshutdown$(EXEEXT) t_prestart$(EXEEXT) t_init_term$(EXEEXT) \
+	t_shapesame$(EXEEXT)
 t_cache_SOURCES = t_cache.c
 t_cache_OBJECTS = t_cache.$(OBJEXT)
 t_cache_LDADD = $(LDADD)
@@ -424,9 +424,9 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
-am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/bin/depcomp \
-	$(top_srcdir)/bin/mkinstalldirs $(top_srcdir)/bin/test-driver \
-	$(top_srcdir)/config/commence.am \
+am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/testpflush.sh.in \
+	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/mkinstalldirs \
+	$(top_srcdir)/bin/test-driver $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -709,9 +709,15 @@ TRACE = perl $(top_srcdir)/bin/trace
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 MPItest.h5 \
 	Para*.h5 CacheTestDummy.h5 shutdown.h5 after_mpi_fin.h5 go
 
+# Test scripts--
+#       testpflush.sh:
+TEST_SCRIPT_PARA = testpflush.sh
+SCRIPT_DEPEND = t_pflush1$(EXEEXT) t_pflush2$(EXEEXT)
+check_SCRIPTS = $(TEST_SCRIPT_PARA)
+
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi testphdf5 t_cache t_pflush1 t_pflush2 t_pshutdown t_prestart t_init_term t_shapesame
+TEST_PROG_PARA = t_mpi testphdf5 t_cache t_pshutdown t_prestart t_init_term t_shapesame
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c
 
@@ -773,6 +779,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+testpflush.sh: $(top_builddir)/config.status $(srcdir)/testpflush.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -1042,7 +1050,7 @@ $(TEST_SUITE_LOG): $(TEST_LOGS)
 	  echo "$$col$$br$$std";					\
 	fi;								\
 	$$success || exit 1
-recheck: all $(check_PROGRAMS)
+recheck: all $(check_PROGRAMS) $(check_SCRIPTS)
 	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 	@set +e; $(am__set_TESTS_bases); \
 	bases=`for i in $$bases; do echo $$i; done \
@@ -1099,7 +1107,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile all-local

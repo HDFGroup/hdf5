@@ -2998,6 +2998,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlinks_env.sh
                  test/test_plugin.sh
                  testpar/Makefile
+                 testpar/testpflush.sh
                  tools/Makefile
                  tools/h5dump/Makefile
                  tools/h5dump/h5dump_plugin.sh
