@@ -1,11 +1,13 @@
 if (WIN32)
   set (CMAKE_SYSTEM_NAME Windows)
   set (CMAKE_GENERATOR_PLATFORM "x86")
+elseif(APPLE)
+  set (CMAKE_OSX_ARCHITECTURES "i386")
 else ()
   set (CMAKE_SYSTEM_NAME Linux)
 
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 -msse2" CACHE STRING "c++ flags")
-  set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -m32 -msse2" CACHE STRING "c flags")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32" CACHE STRING "c++ flags")
+  set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -m32" CACHE STRING "c flags")
 
   set (LIB32 /usr/lib) # Fedora
 
