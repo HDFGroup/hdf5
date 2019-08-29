@@ -40,21 +40,6 @@
 #include "testhdf5.h"
 #include "zlib.h"
 
-/* Used to make certain an offset is as expected */
-#define VERIFY_VAR(_x, _val, where, var) do {                                         \
-    long __x = (long)_x, __val = (long)_val;                                        \
-    if(VERBOSE_HI) {                                                                \
-        print_func("   Call to routine: %15s at line %4d in %s had value "          \
-            "%ld \n", (where), (int)__LINE__, __FILE__, __x);                       \
-    }                                                                               \
-    if((__x) != (__val)) {                                                          \
-        TestErrPrintf("*** UNEXPECTED VALUE from %s, %s should be %ld,"         \
-                      " but is %ld at line %4d in %s\n",                             \
-                     (where), (var),  __val, __x, (int)__LINE__, __FILE__);                 \
-        H5Eprint2(H5E_DEFAULT, stdout);                                             \
-    }                                                                               \
-} while(0)
-
 /* Test file names, using H5F_libver_t as indices */
 const char *FILENAME[] = {
         "tchunk_info_earliest",
@@ -63,10 +48,9 @@ const char *FILENAME[] = {
         "tchunk_info_112",
         NULL
 };
-#define FILTERMASK_FILE         "tfilter_mask.h5"
 
-/* From original test */
-#define DATASETNAME "2d"
+/* File to be used in test_failed_attempts */
+#define FILTERMASK_FILE         "tfilter_mask.h5"
 
 /* Parameters for testing chunk querying */
 #define RANK                    2
@@ -193,7 +177,6 @@ test_get_chunk_info_highest18(hid_t fapl)
     hsize_t  maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};      /* Chunk dimensions */
     int      direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];/* Data in chunks */
-    int      out_buf[NX][NY];    /* Buffer to read data in */
     size_t   buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);  /* Buffer size of a chk */
     unsigned filter_mask = 0;    /* Filter mask */
     unsigned read_flt_msk = 0;   /* Filter mask after direct read */
@@ -499,6 +482,38 @@ error:
     return FAIL;
 } /* test_get_chunk_info_highest18() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_idx_type
+ *
+ * Purpose:     Helper function to ensure that the correct chunk indexing
+ *              scheme is being used.
+ *
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    FAIL
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+verify_idx_type(hid_t dset, H5D_chunk_index_t expected_idx_type)
+{
+    H5D_chunk_index_t idx_type;
+
+    /* Get the chunk indexing type of the dataset */
+    if(H5Dget_chunk_index_type(dset, &idx_type) < 0)
+        TEST_ERROR
+
+    /* Simply return FALSE, not FAIL, if the dataset's indexing type is
+       not as expected */
+    if(idx_type != expected_idx_type)
+        return FALSE;
+
+    /* Indicating that the correct chunk indexing type is used */
+    return TRUE;
+
+error:
+    return FAIL;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    test_chunk_info_single_chunk
  *
@@ -519,16 +534,15 @@ error:
 static herr_t
 test_chunk_info_single_chunk(char *filename, hid_t fapl)
 {
-    hid_t    chunkfile = H5I_INVALID_HID;     /* File ID */
-    hid_t    dspace = H5I_INVALID_HID;        /* Dataspace ID */
-    hid_t    dset = H5I_INVALID_HID;          /* Dataset ID */
-    hid_t    cparms = H5I_INVALID_HID;        /* Creation plist */
-    hsize_t  dims[2]  = {NX, NY};/* Dataset dimensions */
+    hid_t    chunkfile = H5I_INVALID_HID;   /* File ID */
+    hid_t    dspace = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t    dset = H5I_INVALID_HID;        /* Dataset ID */
+    hid_t    cparms = H5I_INVALID_HID;      /* Creation plist */
+    hsize_t  dims[2]  = {NX, NY};           /* Dataset dimensions */
     hsize_t  chunk_dims[2] = {NX, NY};      /* Chunk dimensions */
     int      in_buf[NX][NY];     /* Input buffer */
     unsigned filter_mask = 0;    /* Filter mask */
     unsigned read_flt_msk = 0;   /* Filter mask after direct read */
-    H5D_chunk_index_t idx_type;  /* Dataset chunk index type */
     hsize_t  offset[2];          /* Offset coordinates of a chunk */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
     hsize_t  size = 0;           /* Size of an allocated/written chunk */
@@ -536,7 +550,7 @@ test_chunk_info_single_chunk(char *filename, hid_t fapl)
     haddr_t  addr = 0;           /* Address of an allocated/written chunk */
     hsize_t  chk_index = 0;      /* Index of a chunk */
     int      ii, jj;
-herr_t ret = 0;
+    herr_t   ret = 0;
 
     TESTING("   Single Chunk index");
 
@@ -560,9 +574,7 @@ herr_t ret = 0;
     if(dset < 0) TEST_ERROR
 
     /* Ensure we're using the correct chunk indexing scheme */
-    if(H5D__layout_idx_type_test(dset, &idx_type) < 0)
-        TEST_ERROR
-    if(idx_type != H5D_CHUNK_IDX_SINGLE)
+    if(verify_idx_type(dset, H5D_CHUNK_IDX_SINGLE) == FALSE)
         FAIL_PUTS_ERROR("Should be using Single Chunk index type");
 
     /* Close the dataset then... */
@@ -620,14 +632,6 @@ herr_t ret = 0;
     if(ret != FAIL)
         TEST_ERROR
 
-    /* Get info of the chunk at logical coordinates (0,0) */
-    offset[0] = 0;
-    offset[1] = 0;
-    if(H5Dget_chunk_info_by_coord(dset, offset, &read_flt_msk, &addr, &size) < 0)
-    CHECK(addr, HADDR_UNDEF, "H5Dget_chunk_info_by_coord");
-    VERIFY(size, SINGLE_CHUNK_SIZE, "H5Dget_chunk_info_by_coord, chunk size");
-    VERIFY(read_flt_msk, filter_mask, "H5Dget_chunk_info_by_coord, filter mask");
-
     /* Release resourse */
     if(H5Dclose(dset) < 0) TEST_ERROR
     if(H5Sclose(dspace) < 0) TEST_ERROR
@@ -677,19 +681,15 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
     hsize_t  dims[2]  = {NX, NY};/* Dataset dimensions */
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};      /* Chunk dimensions */
     int      direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];/* Data in chunks */
-    int      read_direct_chunk[CHUNK_NX][CHUNK_NY];/* Data in chunks */
-    int      out_buf[NX][NY];    /* Buffer to read data in */
     size_t   buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);  /* Buffer size of a chk */
     unsigned filter_mask = 0;    /* Filter mask */
     unsigned read_flt_msk = 0;   /* Filter mask after direct read */
-    H5D_chunk_index_t idx_type;  /* Dataset chunk index type */
     hsize_t  offset[2];          /* Offset coordinates of a chunk */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
     hsize_t  size = 0;           /* Size of an allocated/written chunk */
     hsize_t  nchunks = 0;        /* Number of chunks */
     haddr_t  addr = 0;           /* Address of an allocated/written chunk */
     hsize_t  chk_index = 0;      /* Index of a chunk */
-    int      aggression = 9;     /* Compression aggression setting */
     int      n;                  /* Used on buffer, to avoid conversion warning*/
     hsize_t  ii, jj;
     herr_t   ret;
@@ -719,10 +719,7 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
     if(dset < 0) TEST_ERROR
 
     /* Ensure we're using the correct chunk indexing scheme */
-    if(H5D__layout_idx_type_test(dset, &idx_type) < 0)
-        TEST_ERROR
-
-    if(idx_type != H5D_CHUNK_IDX_NONE) /* Implicit: No Index */
+    if(verify_idx_type(dset, H5D_CHUNK_IDX_NONE) == FALSE)
         FAIL_PUTS_ERROR("Should be using Implicit index type");
 
     /* Close the dataset then... */
@@ -853,7 +850,6 @@ test_chunk_info_fixed_array(char *filename, hid_t fapl)
     size_t   buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);  /* Buffer size of a chk */
     unsigned filter_mask = 0;    /* Filter mask */
     unsigned read_flt_msk = 0;   /* Filter mask after direct read */
-    H5D_chunk_index_t idx_type;  /* Dataset chunk index type */
     hsize_t  offset[2];          /* Offset coordinates of a chunk */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
     hsize_t  size = 0;           /* Size of an allocated/written chunk */
@@ -886,9 +882,7 @@ test_chunk_info_fixed_array(char *filename, hid_t fapl)
     if(dset < 0) TEST_ERROR
 
     /* Ensure we're using the correct chunk indexing scheme */
-    if(H5D__layout_idx_type_test(dset, &idx_type) < 0)
-        TEST_ERROR
-    if(idx_type != H5D_CHUNK_IDX_FARRAY)
+    if(verify_idx_type(dset, H5D_CHUNK_IDX_FARRAY) == FALSE)
         FAIL_PUTS_ERROR("Should be using Fixed Array index type");
 
     /* Close the dataset then... */
@@ -1066,11 +1060,9 @@ test_chunk_info_extensible_array(char *filename, hid_t fapl)
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};      /* Chunk dimensions */
     hsize_t  maxdims[2] = {H5S_UNLIMITED, NY}; /* One unlimited dimension */
     int      direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];/* Data in chunks */
-    int      out_buf[NX][NY];    /* Buffer to read data in */
     size_t   buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);  /* Buffer size of a chk */
     unsigned filter_mask = 0;    /* Filter mask */
     unsigned read_flt_msk = 0;   /* Filter mask after direct read */
-    H5D_chunk_index_t idx_type;  /* Dataset chunk index type */
     hsize_t  offset[2];          /* Offset coordinates of a chunk */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
     hsize_t  size = 0;           /* Size of an allocated/written chunk */
@@ -1103,9 +1095,7 @@ test_chunk_info_extensible_array(char *filename, hid_t fapl)
     if(dset < 0) TEST_ERROR
 
     /* Ensure we're using the correct chunk indexing scheme */
-    if(H5D__layout_idx_type_test(dset, &idx_type) < 0)
-        TEST_ERROR
-    if(idx_type != H5D_CHUNK_IDX_EARRAY)
+    if(verify_idx_type(dset, H5D_CHUNK_IDX_EARRAY) == FALSE)
         FAIL_PUTS_ERROR("Should be using Extensible Array index type");
 
     /* Close the dataset then... */
@@ -1287,11 +1277,9 @@ test_chunk_info_version2_btrees(char *filename, hid_t fapl)
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};      /* Chunk dimensions */
     hsize_t  maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Two unlimited dims */
     int      direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];/* Data in chunks */
-    int      out_buf[NX][NY];    /* Buffer to read data in */
     size_t   buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);  /* Buffer size of a chk */
     unsigned filter_mask = 0;    /* Filter mask */
     unsigned read_flt_msk = 0;   /* Filter mask after direct read */
-    H5D_chunk_index_t idx_type;  /* Dataset chunk index type */
     hsize_t  offset[2];          /* Offset coordinates of a chunk */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
     hsize_t  size = 0;           /* Size of an allocated/written chunk */
@@ -1324,9 +1312,7 @@ test_chunk_info_version2_btrees(char *filename, hid_t fapl)
     if(dset < 0) TEST_ERROR
 
     /* Ensure we're using the correct chunk indexing scheme */
-    if(H5D__layout_idx_type_test(dset, &idx_type) < 0)
-        TEST_ERROR
-    if(idx_type != H5D_CHUNK_IDX_BT2)
+    if(verify_idx_type(dset, H5D_CHUNK_IDX_BT2) == FALSE)
         FAIL_PUTS_ERROR("Should be using Version 2 B-tree index type");
 
     /* Close the dataset then... */
@@ -1502,13 +1488,9 @@ test_failed_attempts(char *filename, hid_t fapl)
     hid_t    chunkfile = H5I_INVALID_HID;     /* File ID */
     hid_t    dspace = H5I_INVALID_HID;        /* Dataspace ID */
     hid_t    dset = H5I_INVALID_HID;          /* Dataset ID */
-    hid_t    cparms = H5I_INVALID_HID;        /* Creation plist */
     hsize_t  dims[2]  = {NX, NY};/* Dataset dimensions */
-    hsize_t  chunk_dims[2] = {NX, NY};      /* Chunk dimensions */
     int      in_buf[NX][NY];     /* Input buffer */
-    unsigned filter_mask = 0;    /* Filter mask */
     unsigned read_flt_msk = 0;   /* Filter mask after direct read */
-    H5D_chunk_index_t idx_type;  /* Dataset chunk index type */
     hsize_t  offset[2];          /* Offset coordinates of a chunk */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
     hsize_t  size = 0;           /* Size of an allocated/written chunk */
@@ -1765,11 +1747,10 @@ test_filter_mask_with_skip_compress(hid_t fapl)
     /* Indicate the compression filter is to be skipped.     */
     filter_mask = 0x00000001;
 
-    /* Write the uncompressed data chunk repeatedly to fill the dataset,
-       using the direct writing function. */
+    /* Write a chunk of uncompressed data */
     offset[0] = CHUNK_NX;
     offset[1] = CHUNK_NY;
-    if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) < 0)
+    if((status = H5Dwrite_chunk(dataset, H5P_DEFAULT, filter_mask, offset, buf_size, direct_buf)) < 0)
         TEST_ERROR;
 
     if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
@@ -1931,7 +1912,5 @@ error:
 - create/write to a dataset, do the query before closing the dataset
 - do the query when extending the dataset (shrink or expand)
 - verify that invalid input parameters are handled properly
-- do the query on a non-chunked dataset...
-- test for filter or non-filter
 
 ****************************************************************************/

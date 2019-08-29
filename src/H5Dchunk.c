@@ -7143,8 +7143,6 @@ H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
     const H5D_rdcc_t   *rdcc = NULL;       /* Raw data chunk cache */
     H5D_rdcc_ent_t     *ent;               /* Cache entry index */
     hsize_t            ii = 0;             /* Dimension index */
-    hsize_t            nchunks = 0;        /* Number of chunks in this dset */
-    hsize_t scaled[H5S_MAX_RANK];
     herr_t             ret_value = SUCCEED;/* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
@@ -7279,8 +7277,6 @@ H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned*
     H5D_rdcc_ent_t     *ent;            /* Cache entry index */
     H5D_chk_idx_info_t  idx_info;       /* Chunked index info */
     H5D_chunk_info_iter_ud_t udata;     /* User data for callback */
-    H5D_chunk_ud_t udata2;
-    hsize_t scaled[H5S_MAX_RANK];
     herr_t              ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
