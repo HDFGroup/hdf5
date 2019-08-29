@@ -33,11 +33,11 @@ if (NOT TEST_CLASSPATH)
   message (STATUS "Require TEST_CLASSPATH to be defined")
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
@@ -73,7 +73,7 @@ execute_process (
 message (STATUS "COMMAND Result: ${TEST_RESULT}")
 
 # if the .err file exists and ERRROR_APPEND is enabled
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   if (TEST_MASK_FILE)
     STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
@@ -123,7 +123,7 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # compare output files to references unless this must be skipped
 if (NOT TEST_SKIP_COMPARE)
-  if (EXISTS ${TEST_FOLDER}/${TEST_REFERENCE})
+  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
     if (WIN32 OR MINGW)
       configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
       file(RENAME ${TEST_FOLDER}/${TEST_REFERENCE}.tmp ${TEST_FOLDER}/${TEST_REFERENCE})
@@ -254,7 +254,7 @@ if (TEST_GREP_COMPARE)
 
   string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
   if (TEST_EXPECT)
-    # TEST_EXPECT (1) interperts TEST_FILTER as NOT to match
+    # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
     string (LENGTH "${TEST_MATCH}" TEST_RESULT)
     if (TEST_RESULT)
       message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")

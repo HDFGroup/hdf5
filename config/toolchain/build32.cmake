@@ -11,7 +11,7 @@ else ()
 
   set (LIB32 /usr/lib) # Fedora
 
-  if (EXISTS /usr/lib32)
+  if (EXISTS "/usr/lib32")
     set (LIB32 /usr/lib32) # Arch, Solus
   endif ()
 
@@ -26,7 +26,7 @@ else ()
   # on Fedora and Arch and similar, point pkgconfig at 32 bit .pc files. We have
   # to include the regular system .pc files as well (at the end), because some
   # are not always present in the 32 bit directory
-  if (EXISTS ${LIB32}/pkgconfig)
+  if (EXISTS "${LIB32}/pkgconfig")
     set (ENV{PKG_CONFIG_LIBDIR} ${LIB32}/pkgconfig:/usr/share/pkgconfig:/usr/lib/pkgconfig:/usr/lib64/pkgconfig)
   endif ()
 # where is the target environment
