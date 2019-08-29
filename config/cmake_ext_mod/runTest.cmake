@@ -204,7 +204,7 @@ endif ()
 
 # compare output files to references unless this must be skipped
 if (NOT TEST_SKIP_COMPARE)
-  if (EXISTS ${TEST_FOLDER}/${TEST_REFERENCE})
+  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
     if (WIN32 OR MINGW)
       configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
       file(RENAME ${TEST_FOLDER}/${TEST_REFERENCE}.tmp ${TEST_FOLDER}/${TEST_REFERENCE})
