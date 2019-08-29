@@ -27,11 +27,11 @@ if (NOT TEST_EXPECT)
   message (STATUS "Require TEST_EXPECT to be defined")
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
@@ -88,7 +88,7 @@ endif ()
 message (STATUS "COMMAND Result: ${TEST_RESULT}")
 
 # if the .err file exists and ERRROR_APPEND is enabled
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   if (TEST_MASK_FILE)
     STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
@@ -113,7 +113,7 @@ endif ()
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
       file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
       message (STATUS "Output :\n${TEST_STREAM}")
     endif ()
