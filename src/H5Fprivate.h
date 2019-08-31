@@ -323,7 +323,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_USE_TMP_SPACE(F)    ((F)->shared->fs.use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->fs.tmp_addr, (ADDR)))
 #ifdef H5_HAVE_PARALLEL
-#define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
+#define H5F_COLL_MD_READ(F)     ((F)->shared->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
 #define H5F_USE_MDC_LOGGING(F)  ((F)->shared->use_mdc_logging)
 #define H5F_START_MDC_LOG_ON_ACCESS(F)  ((F)->shared->start_mdc_log_on_access)

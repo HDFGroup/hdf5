@@ -246,9 +246,9 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't set minimum raw data fraction of page buffer")
     } /* end if */
 #ifdef H5_HAVE_PARALLEL
-    if(H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
+    if(H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->shared->coll_md_read)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't set collective metadata read flag")
-    if(H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->shared->coll_md_write)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't set collective metadata read flag")
 #endif /* H5_HAVE_PARALLEL */
     if(H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
@@ -1020,9 +1020,9 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
             if(NULL == (f->shared->efc = H5F__efc_create(efc_size)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create external file cache")
 #ifdef H5_HAVE_PARALLEL
-        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
+        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &(f->shared->coll_md_read)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata read flag")
-        if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
+        if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->shared->coll_md_write)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata write flag")
 #endif /* H5_HAVE_PARALLEL */
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
@@ -1653,7 +1653,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(page_buf_size) {
 #ifdef H5_HAVE_PARALLEL
         /* Collective metadata writes are not supported with page buffering */
-        if(file->coll_md_write)
+        if(file->shared->coll_md_write)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "collective metadata writes are not supported with page buffering")
 
         /* Temporary: fail file create when page buffering feature is enabled for parallel */
@@ -3174,7 +3174,7 @@ H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
     /* Sanity check */
     HDassert(f);
 
-    f->coll_md_read = cmr;
+    f->shared->coll_md_read = cmr;
 
     FUNC_LEAVE_NOAPI_VOID
 } /* H5F_set_coll_md_read() */

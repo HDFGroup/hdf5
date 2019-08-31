@@ -1095,7 +1095,7 @@ H5F_coll_md_read(const H5F_t *f)
 
     HDassert(f);
 
-    FUNC_LEAVE_NOAPI(f->coll_md_read)
+    FUNC_LEAVE_NOAPI(f->shared->coll_md_read)
 } /* end H5F_coll_md_read() */
 #endif /* H5_HAVE_PARALLEL */
 

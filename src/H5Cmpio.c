@@ -222,7 +222,7 @@ H5C_apply_candidate_list(H5F_t * f,
     HDfprintf(stdout, "%s", tbl_buf);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
-    if(f->coll_md_write) {
+    if(f->shared->coll_md_write) {
         /* Sanity check */
         HDassert(NULL == cache_ptr->coll_write_list);
 
@@ -386,7 +386,7 @@ H5C_apply_candidate_list(H5F_t * f,
          HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush candidates failed")
 
     /* If we've deferred writing to do it collectively, take care of that now */
-    if(f->coll_md_write) {
+    if(f->shared->coll_md_write) {
         /* Sanity check */
         HDassert(cache_ptr->coll_write_list);
 

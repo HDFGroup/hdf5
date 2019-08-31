@@ -358,6 +358,12 @@ struct H5F_shared_t {
     /* Object flush info */
     H5F_object_flush_t 	object_flush;	    /* Information for object flush callback */
     hbool_t crt_dset_min_ohdr_flag; /* flag to minimize created dataset object header */
+
+#ifdef H5_HAVE_PARALLEL
+    H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
+    hbool_t             coll_md_write;  /* Do all metadata writes collectively */
+#endif /* H5_HAVE_PARALLEL */
+
 };
 
 /*
@@ -376,10 +382,6 @@ struct H5F_t {
     hbool_t             closing;        /* File is in the process of being closed                       */
     struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
     unsigned            nmounts;        /* Number of children mounted to this file                      */
-#ifdef H5_HAVE_PARALLEL
-    H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
-    hbool_t             coll_md_write;  /* Do all metadata writes collectively */
-#endif /* H5_HAVE_PARALLEL */
 };
 
 /*****************************/
