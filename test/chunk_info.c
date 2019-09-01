@@ -10,7 +10,6 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 /*
  *
  * Purpose:     Tests chunk query API functions
@@ -20,6 +19,7 @@
  *
  * Test structure:
  *          main()
+ *              test_basic_query()
  *              test_get_chunk_info_highest_v18()
  *              test_get_chunk_info_v110()
  *                  test_chunk_info_single_chunk()
@@ -31,6 +31,12 @@
  *              test_flt_msk_with_skip_compress()
  *
  * Helper functions:
+ *          read_each_chunk()
+ *          verify_and_write()
+ *          verify_get_chunk_info()
+ *          verify_get_chunk_info_by_coord()
+ *          verify_empty_chunk_info()
+ *          index_type_str()
  *
  */
 #define H5D_FRIEND
@@ -125,6 +131,8 @@ void reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size);
 static int verify_and_write(hid_t chunkfile, const char* dset_name, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsize_t exp_num_chunks, unsigned flt_msk);
 static int verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size, hsize_t *exp_offset, unsigned exp_flt_msk);
 static int verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size, unsigned exp_flt_msk);
+static int verify_empty_chunk_info(hid_t dset, hsize_t *offset);
+static const char* index_type_str(H5D_chunk_index_t idx_type);
 
 /*-------------------------------------------------------------------------
  * Function:    read_each_chunk (helper function)
