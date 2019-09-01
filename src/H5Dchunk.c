@@ -7124,8 +7124,8 @@ H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
  * Purpose:     Iterate over the chunks in the dataset to get the info
  *              of the desired chunk.
  *
- * Note:        Currently, this function only gets the number of all written
- *              chunks, regardless the dataspace.
+ * Note:        Currently, the domain of the index in this function is of all
+ *              the written chunks, regardless the dataspace.
  *
  * Return:      Success: SUCCEED
  *              Failure: FAIL
@@ -7293,7 +7293,6 @@ H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned*
     HDassert(rdcc);
     HDassert(H5D_CHUNKED == layout->type);
 
-/* Is this expensive? */
     /* Search for cached chunks that haven't been written out */
     for(ent = rdcc->head; ent; ent = ent->next)
         /* Flush the chunk out to disk, to make certain the size is correct later */

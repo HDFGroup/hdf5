@@ -509,15 +509,12 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 dset = (H5D_t *)obj;
                 HDassert(dset);
                 HDassert(dset->shared);
+                HDassert(dset->shared->space);
 
                 /* When default dataspace is given, use the dataset's dataspace */
                 if(space_id == H5S_ALL)
-                {
                     space = dset->shared->space;
-                    if(NULL == space)
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to obtain a dataspace")
-                }  /*  otherwise, use the given space ID */
-                else
+                else /*  otherwise, use the given space ID */
                     if(NULL == (space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
 

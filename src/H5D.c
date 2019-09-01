@@ -1167,7 +1167,7 @@ herr_t
 H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *offset, unsigned *filter_mask, haddr_t *addr, hsize_t *size)
 {
     H5VL_object_t *vol_obj = NULL;     /* Dataset for this operation */
-    hsize_t        nchunks= 0;
+    hsize_t        nchunks = 0;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -1186,7 +1186,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *of
 
     /* Check range for chunk index */
     if(chk_index >= nchunks)
-        HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "chunk index is out of range")
+        HGOTO_ERROR(H5E_IO, H5E_DATASET, FAIL, "chunk index is out of range")
 
     /* Call private function to get the chunk info given the chunk's index */
     if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX, fspace_id, chk_index, offset, filter_mask, addr, size) < 0)
