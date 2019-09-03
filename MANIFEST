@@ -990,6 +990,7 @@
 ./test/cache_image.c
 ./test/cache_logging.c
 ./test/cache_tagging.c
+./test/chunk_info.c
 ./test/cmpd_dset.c
 ./test/cork.c
 ./test/corrupt_stab_msg.h5
