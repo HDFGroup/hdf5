@@ -229,9 +229,9 @@ H5F_get_extpath(const H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
-    HDassert(f->extpath);
+    HDassert(f->shared->extpath);
 
-    FUNC_LEAVE_NOAPI(f->extpath)
+    FUNC_LEAVE_NOAPI(f->shared->extpath)
 } /* end H5F_get_extpath() */
 
 
@@ -1095,7 +1095,7 @@ H5F_coll_md_read(const H5F_t *f)
 
     HDassert(f);
 
-    FUNC_LEAVE_NOAPI(f->coll_md_read)
+    FUNC_LEAVE_NOAPI(f->shared->coll_md_read)
 } /* end H5F_coll_md_read() */
 #endif /* H5_HAVE_PARALLEL */
 
