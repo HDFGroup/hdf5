@@ -551,7 +551,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     offset[0] = 6;
     offset[1] = 12;
     if(verify_get_chunk_info(dset, H5S_ALL, NUM_CHUNKS_WRITTEN-1, CHK_SIZE, offset, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification verify_get_chunk_info failed\n");
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
     /* Attempt to get info of a non-existing chunk, should fail */
     chk_index = OUTOFRANGE_CHK_INDEX;
@@ -565,12 +565,12 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     offset[0] = 0;
     offset[1] = 0;
     if(verify_empty_chunk_info(dset, offset) == FAIL)
-        TEST_ERROR
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
     offset[0] = 3 * CHUNK_NX;
     offset[1] = 3 * CHUNK_NY;
     if(verify_empty_chunk_info(dset, offset) == FAIL)
-        TEST_ERROR
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
     /* Go through all written chunks, get their info and verify the values */
     chk_index = 0;
@@ -580,11 +580,11 @@ test_get_chunk_info_highest_v18(hid_t fapl)
             offset[1] = jj * CHUNK_NY;
 
             if(verify_get_chunk_info(dset, dspace, chk_index, CHK_SIZE, offset, flt_msk) == FAIL)
-                FAIL_PUTS_ERROR("Verification verify_get_chunk_info failed\n");
+                FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
             /* Use the same offset to pass into the next ...by_coord function */
             if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
-                FAIL_PUTS_ERROR("Verification verify_get_chunk_info_by_coord failed\n");
+                FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
         }
 
     /* Close the first dataset */
@@ -616,7 +616,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     offset[0] = EMPTY_CHK_X;
     offset[1] = EMPTY_CHK_Y;
     if(verify_empty_chunk_info(dset, offset) == FAIL)
-        TEST_ERROR
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
     if(H5Dclose(dset) < 0) TEST_ERROR
 
@@ -799,7 +799,7 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
  
     /* Get and verify info of the chunk at logical coordinates (0,0) */
     if(verify_get_chunk_info_by_coord(dset, offset, SINGLE_CHK_SIZE, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification verify_get_chunk_info_by_coord failed\n");
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
 
     /* Attempt to get chunk info given an invalid chunk index and verify
      * that failure occurs */
@@ -905,13 +905,13 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
             hsize_t offset[2] = {ii * CHUNK_NX, jj * CHUNK_NY};
 
             if(verify_get_chunk_info(dset, H5S_ALL, chk_index, CHK_SIZE, offset, flt_msk) == FAIL)
-                FAIL_PUTS_ERROR("Verification verify_get_chunk_info failed\n");
+                FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
             /* Get info of a chunk and verify its information.  Note that
                all chunks in this dataset are allocated because of the property
                H5D_ALLOC_TIME_EARLY */
             if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
-                FAIL_PUTS_ERROR("Verification verify_get_chunk_info_by_coord failed\n");
+                FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
         }
 
     /* Release resourse */
@@ -1018,7 +1018,7 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
             offset[0] = ii * CHUNK_NX;
             offset[1] = jj * CHUNK_NY;
             if(verify_get_chunk_info(dset, dspace, chk_index, CHK_SIZE, offset, flt_msk) == FAIL)
-                FAIL_PUTS_ERROR("Verification verify_get_chunk_info failed\n");
+                FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
         }
 
     /* Attempt to get info using an out-of-range index, chk_index is now > NUM_CHUNKS_WRITTEN.  should fail */
@@ -1032,12 +1032,12 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
     offset[0] = 0;
     offset[1] = 0;
     if(verify_empty_chunk_info(dset, offset) == FAIL)
-        TEST_ERROR
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
     offset[0] = 3 * CHUNK_NX;
     offset[1] = 3 * CHUNK_NY;
     if(verify_empty_chunk_info(dset, offset) == FAIL)
-        TEST_ERROR
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
     /* Initialize the array of chunk data for all NUM_CHUNKS chunks */
     for(n = 0; n < NUM_CHUNKS; n++)
@@ -1161,10 +1161,10 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
             offset[1] = jj * CHUNK_NY;
 
             if(verify_get_chunk_info(dset, dspace, chk_index, CHK_SIZE, offset, flt_msk) == FAIL)
-                FAIL_PUTS_ERROR("Verification verify_get_chunk_info failed\n");
+                FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
             if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
-                FAIL_PUTS_ERROR("Verification verify_get_chunk_info_by_coord failed\n");
+                FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
         }
 
     /* Attempt to get info using an out-of-range index, should fail */
@@ -1179,12 +1179,12 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
     offset[0] = 0;
     offset[1] = 0;
     if(verify_empty_chunk_info(dset, offset) == FAIL)
-        TEST_ERROR
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
     offset[0] = 3 * CHUNK_NX;
     offset[1] = 3 * CHUNK_NY;
     if(verify_empty_chunk_info(dset, offset) == FAIL)
-        TEST_ERROR
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
     /* Initialize the array of chunk data for all NUM_CHUNKS chunks */
     for(n = 0; n < NUM_CHUNKS; n++)
@@ -1307,10 +1307,10 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
             offset[1] = jj * CHUNK_NY;
 
             if(verify_get_chunk_info(dset, dspace, chk_index, CHK_SIZE, offset, flt_msk) == FAIL)
-                FAIL_PUTS_ERROR("Verification verify_get_chunk_info failed\n");
+                FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
             if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
-                FAIL_PUTS_ERROR("Verification verify_get_chunk_info_by_coord failed\n");
+                FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
         }
 
     /* Attempt to provide out-of-range offsets, should fail */
@@ -1325,12 +1325,12 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
     offset[0] = 0;
     offset[1] = 0;
     if(verify_empty_chunk_info(dset, offset) == FAIL)
-        TEST_ERROR
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
     offset[0] = 3 * CHUNK_NX;
     offset[1] = 3 * CHUNK_NY;
     if(verify_empty_chunk_info(dset, offset) == FAIL)
-        TEST_ERROR
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
     /* Read each chunk and verify the values */
     chk_index = 0;
@@ -1451,7 +1451,7 @@ test_basic_query(hid_t fapl)
  
     /* Get and verify info of the chunk at the offset (CHUNK_NX,CHUNK_NY) */
     if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification verify_get_chunk_info_by_coord failed\n");
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
 
     /* Attempt to get chunk info given an invalid chunk index and verify
      * that failure occurs */
@@ -1480,7 +1480,7 @@ test_basic_query(hid_t fapl)
  
     /* Get and verify info of the chunk at the offset (0,0) */
     if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification verify_get_chunk_info_by_coord failed\n");
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
 
     /* Get and verify info of the second written chunk in the dataset, its
        offset should be (CHUNK_NX, CHUNK_NY) */
@@ -1491,7 +1491,7 @@ test_basic_query(hid_t fapl)
  
     /* Get and verify info of the chunk at the offset (CHUNK_NX, CHUNK_NY) */
     if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification verify_get_chunk_info_by_coord failed\n");
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
 
     /* Get and verify info of an empty chunk, at offset 
        (2*CHUNK_NX, 2*CHUNK_NY) */
@@ -1499,7 +1499,7 @@ test_basic_query(hid_t fapl)
     offset[1] = 2*CHUNK_NY;
     /* Get and verify info of the chunk at the offset (CHUNK_NX, CHUNK_NY) */
     if(verify_empty_chunk_info(dset, offset) == FAIL)
-        FAIL_PUTS_ERROR("Verification verify_get_chunk_info_by_coord failed\n");
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
     /* Release resourse */
     if(H5Dclose(dset) < 0) TEST_ERROR
@@ -1870,11 +1870,11 @@ test_flt_msk_with_skip_compress(hid_t fapl)
     offset[0] = CHUNK_NX;
     offset[1] = CHUNK_NY;
     if(verify_get_chunk_info(dset, H5S_ALL, chk_index, CHK_SIZE, offset, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification verify_get_chunk_info failed\n");
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
     /* Get info of the chunk at the specified offsets and verify its info */
     if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification verify_get_chunk_info_by_coord failed\n");
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
 
     /* Release resourse */
     if(H5Dclose(dset) < 0) TEST_ERROR
