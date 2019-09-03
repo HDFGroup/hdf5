@@ -528,7 +528,7 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
-        case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COOR:
+        case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD:
             {   /* H5Dget_chunk_info_by_coord */
                 hsize_t  *offset      = HDva_arg(arguments, hsize_t *);
                 unsigned *filter_mask = HDva_arg(arguments, unsigned *);
