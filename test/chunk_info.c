@@ -55,6 +55,11 @@ const char *FILENAME[] = {
         NULL
 };
 
+ /* #ifdef H5_HAVE_FILTER_DEFLATE
+#undef H5_HAVE_FILTER_DEFLATE
+#endif
+ */ 
+
 /* File to be used in test_failed_attempts */
 #define FILTERMASK_FILE         "tflt_msk"
 #define BASIC_FILE              "basic_query"
@@ -449,6 +454,9 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(CHK_SIZE);
     uLong        z_src_nbytes = (uLong)CHK_SIZE;
     void         *outbuf = NULL; /* Pointer to new buffer */
+    hsize_t  chunk_size = CHK_SIZE; /* Size of a chunk, can be compressed or not */
+    void    *chunk_ptr = z_src;  /* Point to original chunk, and later, to the
+                                    compressed data chunk if compression occurs */
     hsize_t  ii, jj;             /* Array indices */
     int      n;   /* Used as chunk index, but int to avoid conversion warning */
     herr_t   ret; /* Temporary returned value for verifying failure */
@@ -492,6 +500,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
             for(jj = 0; jj < CHUNK_NY; jj++)
                 direct_buf[n][ii][jj] = n + 1;
 
+#ifdef H5_HAVE_FILTER_DEFLATE
     /* Allocate output (compressed) buffer */
     outbuf = malloc(z_dst_nbytes);
     z_dst = (Bytef *)outbuf;
@@ -510,23 +519,25 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         fprintf(stderr, "other deflate error");
         TEST_ERROR
     }
+#endif /* end H5_HAVE_FILTER_DEFLATE */
 
     /* Write only NUM_CHUNKS_WRITTEN chunks at the following logical coords:
        (0,2) (0,3) (1,2) (1,3) */
     n = 0;
     for(ii = START_CHK_X; ii < END_CHK_X; ii++)
         for(jj = START_CHK_Y; jj < END_CHK_Y; jj++, n++) {
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+            /* Set chunk size to the compressed chunk size and the chunk point
+               to the compressed data chunk */
+            chunk_size = (hsize_t)z_dst_nbytes;
+            chunk_ptr = (void *)z_dst;
+#endif /* end H5_HAVE_FILTER_DEFLATE */
             offset[0] = ii * CHUNK_NX;
             offset[1] = jj * CHUNK_NY;
-            ret = H5Dwrite_chunk(dset, H5P_DEFAULT, flt_msk, offset, CHK_SIZE, (void*)direct_buf[n]);
+            ret = H5Dwrite_chunk(dset, H5P_DEFAULT, flt_msk, offset, chunk_size, (void*)chunk_ptr);
             if(ret < 0) TEST_ERROR
         }
-
-    /* Read each chunk in the subset of chunks and verify the values */
-     /* if(read_each_chunk(dset, offset, (void*)direct_buf[chk_index]) < 0)
-    if(read_each_chunk(dset) == FAIL)
-        TEST_ERROR
- */ 
 
     /* Free the read buffer */
     if(outbuf)
@@ -550,7 +561,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
        this time */
     offset[0] = 6;
     offset[1] = 12;
-    if(verify_get_chunk_info(dset, H5S_ALL, NUM_CHUNKS_WRITTEN-1, CHK_SIZE, offset, flt_msk) == FAIL)
+    if(verify_get_chunk_info(dset, H5S_ALL, NUM_CHUNKS_WRITTEN-1, chunk_size, offset, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
     /* Attempt to get info of a non-existing chunk, should fail */
@@ -579,11 +590,11 @@ test_get_chunk_info_highest_v18(hid_t fapl)
             offset[0] = ii * CHUNK_NX;
             offset[1] = jj * CHUNK_NY;
 
-            if(verify_get_chunk_info(dset, dspace, chk_index, CHK_SIZE, offset, flt_msk) == FAIL)
+            if(verify_get_chunk_info(dset, dspace, chk_index, chunk_size, offset, flt_msk) == FAIL)
                 FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
             /* Use the same offset to pass into the next ...by_coord function */
-            if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
+            if(verify_get_chunk_info_by_coord(dset, offset, chunk_size, flt_msk) == FAIL)
                 FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
         }
 
