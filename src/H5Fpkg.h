@@ -358,6 +358,14 @@ struct H5F_shared_t {
     /* Object flush info */
     H5F_object_flush_t 	object_flush;	    /* Information for object flush callback */
     hbool_t crt_dset_min_ohdr_flag; /* flag to minimize created dataset object header */
+
+    char               *extpath;        /* Path for searching target external link file                 */
+
+#ifdef H5_HAVE_PARALLEL
+    H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
+    hbool_t             coll_md_write;  /* Do all metadata writes collectively */
+#endif /* H5_HAVE_PARALLEL */
+
 };
 
 /*
@@ -368,7 +376,6 @@ struct H5F_shared_t {
 struct H5F_t {
     char	       *open_name;      /* Name used to open file                                       */
     char	       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
-    char               *extpath;        /* Path for searching target external link file                 */
     H5F_shared_t       *shared;         /* The shared file info                                         */
     unsigned	        nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
@@ -376,10 +383,6 @@ struct H5F_t {
     hbool_t             closing;        /* File is in the process of being closed                       */
     struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
     unsigned            nmounts;        /* Number of children mounted to this file                      */
-#ifdef H5_HAVE_PARALLEL
-    H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
-    hbool_t             coll_md_write;  /* Do all metadata writes collectively */
-#endif /* H5_HAVE_PARALLEL */
 };
 
 /*****************************/

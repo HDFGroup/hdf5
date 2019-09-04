@@ -246,9 +246,9 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't set minimum raw data fraction of page buffer")
     } /* end if */
 #ifdef H5_HAVE_PARALLEL
-    if(H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
+    if(H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->shared->coll_md_read)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't set collective metadata read flag")
-    if(H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->shared->coll_md_write)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't set collective metadata read flag")
 #endif /* H5_HAVE_PARALLEL */
     if(H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
@@ -1020,9 +1020,9 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
             if(NULL == (f->shared->efc = H5F__efc_create(efc_size)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create external file cache")
 #ifdef H5_HAVE_PARALLEL
-        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
+        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &(f->shared->coll_md_read)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata read flag")
-        if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
+        if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->shared->coll_md_write)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata write flag")
 #endif /* H5_HAVE_PARALLEL */
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
@@ -1387,6 +1387,9 @@ H5F__dest(H5F_t *f, hbool_t flush)
         f->shared->mtab.child = (H5F_mount_t *)H5MM_xfree(f->shared->mtab.child);
         f->shared->mtab.nalloc = 0;
 
+        /* Free the external link file */
+        f->shared->extpath = (char *)H5MM_xfree(f->shared->extpath);
+
         /* Clean up the metadata retries array */
         for(actype = 0; actype < (int)H5AC_NTYPES; actype++)
             if(f->shared->retries[actype])
@@ -1407,7 +1410,6 @@ H5F__dest(H5F_t *f, hbool_t flush)
     /* Free the non-shared part of the file */
     f->open_name = (char *)H5MM_xfree(f->open_name);
     f->actual_name = (char *)H5MM_xfree(f->actual_name);
-    f->extpath = (char *)H5MM_xfree(f->extpath);
     if(H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     f->shared = NULL;
@@ -1653,7 +1655,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(page_buf_size) {
 #ifdef H5_HAVE_PARALLEL
         /* Collective metadata writes are not supported with page buffering */
-        if(file->coll_md_write)
+        if(file->shared->coll_md_write)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "collective metadata writes are not supported with page buffering")
 
         /* Temporary: fail file create when page buffering feature is enabled for parallel */
@@ -1753,8 +1755,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     } /* end if */
 
     /* Formulate the absolute path for later search of target file for external links */
-    if(H5_build_extpath(name, &file->extpath) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build extpath")
+    if(shared->nrefs == 1) {
+        if(H5_build_extpath(name, &file->shared->extpath) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build extpath")
+    }
 
     /* Formulate the actual file name, after following symlinks, etc. */
     if(H5F__build_actual_name(file, a_plist, name, &file->actual_name) < 0)
@@ -2227,7 +2231,6 @@ H5F__reopen(H5F_t *f)
     /* Duplicate old file's names */
     ret_value->open_name    = H5MM_xstrdup(f->open_name);
     ret_value->actual_name  = H5MM_xstrdup(f->actual_name);
-    ret_value->extpath      = H5MM_xstrdup(f->extpath);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3154,31 +3157,6 @@ H5F__get_max_eof_eoa(const H5F_t *f, haddr_t *max_eof_eoa)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__get_max_eof_eoa() */
-
-#ifdef H5_HAVE_PARALLEL
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_set_coll_md_read
- *
- * Purpose:     Set the coll_md_read field with a new value.
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-void
-H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Sanity check */
-    HDassert(f);
-
-    f->coll_md_read = cmr;
-
-    FUNC_LEAVE_NOAPI_VOID
-} /* H5F_set_coll_md_read() */
-#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------

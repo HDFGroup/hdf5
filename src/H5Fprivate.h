@@ -282,7 +282,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_INTENT(F)           ((F)->shared->flags)
 #define H5F_OPEN_NAME(F)        ((F)->open_name)
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)
-#define H5F_EXTPATH(F)          ((F)->extpath)
+#define H5F_EXTPATH(F)          ((F)->shared->extpath)
 #define H5F_SHARED(F)           ((F)->shared)
 #define H5F_SAME_SHARED(F1, F2) ((F1)->shared == (F2)->shared)
 #define H5F_NOPEN_OBJS(F)       ((F)->nopen_objs)
@@ -323,7 +323,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_USE_TMP_SPACE(F)    ((F)->shared->fs.use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->fs.tmp_addr, (ADDR)))
 #ifdef H5_HAVE_PARALLEL
-#define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
+#define H5F_COLL_MD_READ(F)     ((F)->shared->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
 #define H5F_USE_MDC_LOGGING(F)  ((F)->shared->use_mdc_logging)
 #define H5F_START_MDC_LOG_ON_ACCESS(F)  ((F)->shared->start_mdc_log_on_access)

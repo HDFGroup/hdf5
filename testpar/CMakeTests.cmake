@@ -72,6 +72,9 @@ endforeach ()
 #  list (REMOVE_ITEM H5P_TESTS t_shapesame)
 #endif ()
 
+# do not test until new version is added
+list (REMOVE_ITEM H5P_TESTS t_cache_image)
+
 set (test_par_CLEANFILES
     t_cache_image_00.h5
     t_cache_image_01.h5

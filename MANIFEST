@@ -3264,6 +3264,7 @@
 ./java/lib/ext/slf4j-simple-1.7.25.jar
 
 # CMake-specific Files
+./config/toolchain/build32.cmake
 ./config/toolchain/crayle.cmake
 ./config/toolchain/GCC.cmake
 ./config/toolchain/intel.cmake
