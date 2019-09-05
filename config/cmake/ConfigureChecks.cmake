@@ -159,8 +159,9 @@ endif ()
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
   if (HDF5_ENABLE_ROS3_VFD)
-    if (WIN32)
-      set(CURL_LIBRARY "-lcurl")
+    # CMake version 3.13 fixed FindCURL module
+    if(CMAKE_VERSION VERSION_LESS "3.13.0" AND WIN32)
+        MESSAGE(FATAL_ERROR "Windows builds for this option requires a minimum of CMake 3.13")
     endif ()
     find_package(CURL REQUIRED)
     find_package(OpenSSL REQUIRED)
