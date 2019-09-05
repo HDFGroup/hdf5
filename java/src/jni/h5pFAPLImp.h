@@ -137,6 +137,24 @@ Java_hdf_hdf5lib_H5_H5Pget_1family_1offset
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_fapl_hdfs
+ * Signature: (J)Lhdf/hdf5lib/structs/H5FD_hdfs_fapl_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1fapl_1hdfs
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_fapl_hdfs
+ * Signature: (JLhdf/hdf5lib/structs/H5FD_hdfs_fapl_t;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
+(JNIEnv *, jclass, jlong, jobject);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_fapl_log
  * Signature: (JLjava/lang/String;JJ)V
  */
@@ -185,6 +203,24 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1multi
 /*
  * TODO: H5Pget_multi_type
  */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_fapl_ros3
+ * Signature: (J)Lhdf/hdf5lib/structs/H5FD_ros3_fapl_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3
+(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_fapl_ros3
+ * Signature: (JLhdf/hdf5lib/structs/H5FD_ros3_fapl_t;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
+(JNIEnv *, jclass, jlong, jobject);
 
 /*
  * Class:     hdf_hdf5lib_H5

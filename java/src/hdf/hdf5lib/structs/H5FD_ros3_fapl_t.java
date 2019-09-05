@@ -17,13 +17,14 @@ package hdf.hdf5lib.structs;
 import java.io.Serializable;
 
 /*
- * Java representation of the ROS3 VFD file access property list (fapl) 
+ * Java representation of the ROS3 VFD file access property list (fapl)
  * structure.
  *
  * Used for the access of files hosted remotely on S3 by Amazon.
- * 
+ *
  * For simplicity, implemented assuming that all ROS3 fapls have components:
  * - version
+ * - authenticate
  * - aws_region
  * - secret_id
  * - secret_key
@@ -38,14 +39,15 @@ import java.io.Serializable;
  *     H5FD_ros3_fapl_v2_t (extends super with Version 2 components)
  *     and so on, for each version
  *
- *     "super" is passed around, and is version-checked and re-cast as 
+ *     "super" is passed around, and is version-checked and re-cast as
  *     appropriate
  */
 
-@SuppressWarnings("serial") // mute default serialUID warnings until someone knowledgeable comes along or something breaks horribly
 public class H5FD_ros3_fapl_t implements Serializable {
+    private static final long serialVersionUID = 8985533001471224030L;
 
-    private long   version;
+    private int   version;
+    private boolean authenticate;
     private String aws_region;
     private String secret_id;
     private String secret_key;
@@ -111,10 +113,10 @@ public class H5FD_ros3_fapl_t implements Serializable {
     @Override
     public String toString() {
     return "H5FD_ros3_fapl_t (Version:" + this.version + ") {" +
-           "\n    aws_region : " + this.aws_region +
-           "\n    secret_id  : " + this.secret_id + 
-           "\n    secret_key : " + this.secret_key +
-           "\n}\n";
+            "\n    aws_region : " + this.aws_region +
+            "\n    secret_id  : " + this.secret_id +
+            "\n    secret_key : " + this.secret_key +
+            "\n}\n";
     }
 }
 
