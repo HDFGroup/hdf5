@@ -424,11 +424,11 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1hdfs
     args[4].i = (jint)fa.stream_buffer_size;
 
     CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5FD_hdfs_fapl_t", "(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;I)V", args, ret_obj);
-
-done:
 #else
     H5_UNIMPLEMENTED(ENVONLY, "H5Pget_fapl_hdfs: not implemented");
 #endif /* H5_HAVE_LIBHDFS */
+
+done:
     return ret_obj;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1fapl_1hdfs */
 
@@ -441,9 +441,9 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
     (JNIEnv *env, jclass clss, jlong fapl_id, jobject fapl_config)
 {
+    const char       *str = NULL;
 #ifdef H5_HAVE_LIBHDFS
     H5FD_hdfs_fapl_t  instance;
-    const char       *str = NULL;
     jfieldID          fid;
     jstring           j_str;
     jclass            cls;
@@ -529,15 +529,15 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
     instance.stream_buffer_size = ENVPTR->GetIntField(ENVONLY, fapl_config, fid);
     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-    if (H5Pset_fapl_hdfs((hid_t) fapl_id, &instance) < 0)
+    if (H5Pset_fapl_hdfs((hid_t)fapl_id, &instance) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
+#else
+    H5_UNIMPLEMENTED(ENVONLY, "H5Pset_fapl_hdfs: not implemented");
+#endif /* H5_HAVE_LIBHDFS */
 
 done:
     if (str)
         UNPIN_JAVA_STRING(ENVONLY, j_str, str);
-#else
-    H5_UNIMPLEMENTED(ENVONLY, "H5Pset_fapl_hdfs: not implemented");
-#endif /* H5_HAVE_LIBHDFS */
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs */
 
 /*
@@ -809,7 +809,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3
 #ifdef H5_HAVE_ROS3_VFD
     /* pass fapl and fapl_t instance into library get_fapl */
     /* store fapl details in ros3_fapl_t instance `fa`          */
-    if (H5Pget_fapl_ros3((hid_t)loc_id, &fa) < 0)
+    if (H5Pget_fapl_ros3((hid_t)fapl_id, &fa) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL != fa.aws_region) {
@@ -837,11 +837,11 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3
     args[2].l = j_key;
 
     CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5FD_ros3_fapl_t", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", args, ret_obj);
-
-done:
 #else
     H5_UNIMPLEMENTED(ENVONLY, "H5Pget_fapl_ros3: not implemented");
 #endif /* H5_HAVE_ROS3_VFD */
+
+done:
     return ret_obj;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3 */
 
@@ -854,9 +854,9 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
     (JNIEnv *env, jclass clss, jlong fapl_id, jobject fapl_config)
 {
+    const char       *str = NULL;
 #ifdef H5_HAVE_ROS3_VFD
     H5FD_ros3_fapl_t  instance;
-    const char       *str = NULL;
     jfieldID          fid;
     jstring           j_str;
     jclass            cls;
@@ -935,13 +935,13 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
 
     if (H5Pset_fapl_ros3((hid_t)fapl_id, &instance) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+#else
+    H5_UNIMPLEMENTED(ENVONLY, "H5Pset_fapl_ros3: not implemented");
+#endif /* H5_HAVE_ROS3_VFD */
 
 done:
     if (str)
         UNPIN_JAVA_STRING(ENVONLY, j_str, str);
-#else
-    H5_UNIMPLEMENTED(ENVONLY, "H5Pset_fapl_ros3: not implemented");
-#endif /* H5_HAVE_ROS3_VFD */
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3 */
 
 /*
