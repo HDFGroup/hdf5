@@ -3304,6 +3304,7 @@
 
 ./config/cmake_ext_mod/ConfigureChecks.cmake
 ./config/cmake_ext_mod/CTestCustom.cmake
+./config/cmake_ext_mod/FindCURL.cmake
 ./config/cmake_ext_mod/FindSZIP.cmake
 ./config/cmake_ext_mod/GetTimeOfDayTest.cpp
 ./config/cmake_ext_mod/grepTest.cmake
