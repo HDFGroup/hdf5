@@ -13,6 +13,6 @@ else ()
   TARGET_C_PROPERTIES (h5tools_test_utils SHARED)
   target_link_libraries (h5tools_test_utils PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
-set_target_properties (h5tools_utils PROPERTIES FOLDER tools)
+set_target_properties (h5tools_test_utils PROPERTIES FOLDER tools)
 
 include (CMakeTests.cmake)
