@@ -441,9 +441,9 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
     (JNIEnv *env, jclass clss, jlong fapl_id, jobject fapl_config)
 {
-    const char       *str = NULL;
 #ifdef H5_HAVE_LIBHDFS
     H5FD_hdfs_fapl_t  instance;
+    const char       *str = NULL;
     jfieldID          fid;
     jstring           j_str;
     jclass            cls;
@@ -536,8 +536,10 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
 #endif /* H5_HAVE_LIBHDFS */
 
 done:
+#ifdef H5_HAVE_LIBHDFS
     if (str)
         UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+#endif /* H5_HAVE_LIBHDFS */
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs */
 
 /*
@@ -854,9 +856,9 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
     (JNIEnv *env, jclass clss, jlong fapl_id, jobject fapl_config)
 {
-    const char       *str = NULL;
 #ifdef H5_HAVE_ROS3_VFD
     H5FD_ros3_fapl_t  instance;
+    const char       *str = NULL;
     jfieldID          fid;
     jstring           j_str;
     jclass            cls;
@@ -940,8 +942,10 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
 #endif /* H5_HAVE_ROS3_VFD */
 
 done:
+#ifdef H5_HAVE_ROS3_VFD
     if (str)
         UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+#endif /* H5_HAVE_LIBHDFS */
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3 */
 
 /*
