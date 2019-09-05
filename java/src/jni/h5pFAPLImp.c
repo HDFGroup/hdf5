@@ -536,6 +536,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
 #endif /* H5_HAVE_LIBHDFS */
 
 done:
+    /* NOP */;
 #ifdef H5_HAVE_LIBHDFS
     if (str)
         UNPIN_JAVA_STRING(ENVONLY, j_str, str);
@@ -942,6 +943,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
 #endif /* H5_HAVE_ROS3_VFD */
 
 done:
+    /* NOP */;
 #ifdef H5_HAVE_ROS3_VFD
     if (str)
         UNPIN_JAVA_STRING(ENVONLY, j_str, str);
