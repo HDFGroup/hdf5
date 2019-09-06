@@ -31,8 +31,7 @@
  *              test_flt_msk_with_skip_compress()
  *
  * Helper functions:
- *          read_each_chunk()
- *          verify_and_write()
+ *          verify_idx_nchunks()
  *          verify_get_chunk_info()
  *          verify_get_chunk_info_by_coord()
  *          verify_empty_chunk_info()
@@ -128,46 +127,11 @@ void reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size);
 
 /* Helper function containing common code that verifies indexing type
    and number of chunks */
-static int verify_and_write(hid_t chunkfile, const char* dset_name, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsize_t exp_num_chunks, unsigned flt_msk);
+static int verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsize_t exp_num_chunks);
 static int verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size, hsize_t *exp_offset, unsigned exp_flt_msk);
 static int verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size, unsigned exp_flt_msk);
 static int verify_empty_chunk_info(hid_t dset, hsize_t *offset);
 static const char* index_type_str(H5D_chunk_index_t idx_type);
-
-/*-------------------------------------------------------------------------
- * Function:    read_each_chunk (helper function)
- *
- * Purpose:     Reads the chunk specified by its offset and verifies that
- *              it contains the same data as what was written.  This function
- *              is used in various test_get_chunk_info... functions.
- *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- * Date:        September 2018
- *
- *-------------------------------------------------------------------------
- */
-static herr_t read_each_chunk(hid_t dset_id, hsize_t *offset, void *direct_buf)
-{
-    int      read_buf[CHUNK_NX][CHUNK_NY];
-    unsigned read_flt_msk = 0;
-
-    HDmemset(&read_buf, 0, sizeof(read_buf));
-
-    /* Read the chunk specified by its offset */
-    if(H5Dread_chunk(dset_id, H5P_DEFAULT, offset, &read_flt_msk, read_buf) < 0)
-        return FAIL;
-
-    /* Verify that read chunk is the same as the corresponding written one */
-    if(HDmemcmp(direct_buf, read_buf, CHUNK_NX*CHUNK_NY) != 0)
-    {
-        HDfprintf(stderr, "Read chunk differs from written chunk at offset (%d,%d)\n", offset[0], offset[1]);
-        return FAIL;
-    }
-
-    return SUCCEED;
-}
 
 /*-------------------------------------------------------------------------
  * Function:    reinit_vars (helper function)
@@ -323,7 +287,66 @@ index_type_str(H5D_chunk_index_t idx_type)
 } /* index_type_str */
 
 /*-------------------------------------------------------------------------
- * Function:    verify_and_write (helper function)
+ * Function:    verify_selected_chunks (helper function)
+ *
+ * Purpose:     Reads the chunks within the boundery {start,end} and verify
+ *              the values against the populated data.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Date:        August 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+verify_selected_chunks(hid_t dset, hid_t plist, hsize_t *start, hsize_t *end)
+{
+    int      read_buf[CHUNK_NX][CHUNK_NY];
+    int      expected_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];/* Expected data */
+    unsigned read_flt_msk = 0;          /* Filter mask read back */
+    hsize_t  offset[2] = {0, 0};        /* Offset coordinates of a chunk */
+    hsize_t  chk_index;                 /* Chunk index */
+    hsize_t  ii, jj;                    /* Array indices */
+    int      n;
+
+    HDmemset(&read_buf, 0, sizeof(read_buf));
+
+    /* Initialize the array of chunk data for all NUM_CHUNKS chunks, this is
+       the same as the written data and will be used to verify the read data */
+    for(n = 0; n < NUM_CHUNKS; n++)
+        for(ii = 0; ii < CHUNK_NX; ii++)
+            for(jj = 0; jj < CHUNK_NY; jj++)
+                expected_buf[n][ii][jj] = (int)(ii*jj) + 1;
+
+    /* Read each chunk within the boundery of {start,end} and verify the
+       values against the expected data */
+    chk_index = 0;
+    for(ii = start[0]; ii < end[0]; ii++)
+        for(jj = start[1]; jj < end[1]; jj++, chk_index++) {
+            offset[0] = ii * CHUNK_NX;
+            offset[1] = jj * CHUNK_NY;
+
+            /* Read the current chunk */
+            if(H5Dread_chunk(dset, plist, offset, &read_flt_msk, read_buf) < 0)
+                TEST_ERROR
+
+            /* Verify that read chunk is the same as the corresponding written one */
+            if(HDmemcmp(expected_buf[chk_index], read_buf, CHUNK_NX*CHUNK_NY) != 0)
+            {
+                HDfprintf(stderr, "Read chunk differs from written chunk at offset (%d,%d)\n", offset[0], offset[1]);
+                return FAIL;
+            }
+        }
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+} /* verify_selected_chunks */
+
+/*-------------------------------------------------------------------------
+ * Function:    write_selected_chunks (helper function)
  *
  * Purpose:     Verifies that chunk indexing scheme and number of chunks of
  *              the dataset matches the expected values, then write data to
@@ -338,19 +361,55 @@ index_type_str(H5D_chunk_index_t idx_type)
  *-------------------------------------------------------------------------
  */
 static int
-verify_and_write(hid_t chunkfile, const char* dset_name, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsize_t exp_num_chunks, unsigned flt_msk)
+write_selected_chunks(hid_t dset, hid_t plist, hsize_t *start, hsize_t *end, unsigned flt_msk)
 {
-    hid_t    dset = H5I_INVALID_HID;    /* Dataset ID */
-    H5D_chunk_index_t idx_type;         /* Dataset chunk index type */
-    hsize_t  offset[2] = {0, 0};        /* Offset coordinates of a chunk */
-    hsize_t  nchunks = 0;               /* Number of chunks */
-    hsize_t  ii, jj;                    /* Array indices */
-    int      n;   /* Used as chunk index, but int to avoid conversion warning */
     int      direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];/* Data in chunks */
+    hsize_t  offset[2];                 /* Offset coordinates of a chunk */
+    hsize_t  chk_index;                 /* Chunk index */
+    hsize_t  ii, jj;                    /* Array indices */
+    int      n;
 
-    /* Open the dataset */
-    if((dset = H5Dopen2(chunkfile, dset_name, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+    /* Initialize the array of chunk data for all NUM_CHUNKS chunks */
+    for(n = 0; n < NUM_CHUNKS; n++)
+        for(ii = 0; ii < CHUNK_NX; ii++)
+            for(jj = 0; jj < CHUNK_NY; jj++)
+                direct_buf[n][ii][jj] = (int)(ii*jj) + 1;
+
+    /* Write NUM_CHUNKS_WRITTEN chunks at the following logical coords:
+       (0,2) (0,3) (1,2) (1,3) */
+    chk_index = 0;
+    for(ii = start[0]; ii < end[0]; ii++)
+        for(jj = start[1]; jj < end[1]; jj++, chk_index++) {
+            offset[0] = ii * CHUNK_NX;
+            offset[1] = jj * CHUNK_NY;
+            if(H5Dwrite_chunk(dset, plist, flt_msk, offset, CHK_SIZE, (void*)direct_buf[chk_index]) < 0)
+                TEST_ERROR
+        }
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+} /* write_selected_chunks */
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_idx_nchunks (helper function)
+ *
+ * Purpose:     Verifies that chunk indexing scheme and number of chunks of
+ *              the dataset match the expected values.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Date:        August 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsize_t exp_num_chunks)
+{
+    H5D_chunk_index_t idx_type;         /* Dataset chunk index type */
+    hsize_t  nchunks = 0;               /* Number of chunks */
 
     /* Get the chunk indexing type of the dataset */
     if(H5Dget_chunk_index_type(dset, &idx_type) < 0)
@@ -372,34 +431,11 @@ verify_and_write(hid_t chunkfile, const char* dset_name, hid_t dspace, H5D_chunk
     if(H5Dget_num_chunks(dset, H5S_ALL, &nchunks) < 0) TEST_ERROR
     VERIFY(nchunks, exp_num_chunks, "H5Dget_num_chunks, number of chunks");
 
-    /* Initialize the array of chunk data for all NUM_CHUNKS chunks */
-    for(n = 0; n < NUM_CHUNKS; n++)
-        for(ii = 0; ii < CHUNK_NX; ii++)
-            for(jj = 0; jj < CHUNK_NY; jj++)
-                direct_buf[n][ii][jj] = n + 1;
-
-    /* Write only NUM_CHUNKS_WRITTEN chunks at the following logical coords:
-       (0,2) (0,3) (1,2) (1,3) */
-    n = 0;
-    for(ii = START_CHK_X; ii < END_CHK_X; ii++)
-        for(jj = START_CHK_Y; jj < END_CHK_Y; jj++, n++) {
-            offset[0] = ii * CHUNK_NX;
-            offset[1] = jj * CHUNK_NY;
-            if(H5Dwrite_chunk(dset, H5P_DEFAULT, flt_msk, offset, CHK_SIZE, (void*)direct_buf[n]) < 0)
-                TEST_ERROR
-        }
-
-    /* Close the dataset */
-    if(H5Dclose(dset) < 0) TEST_ERROR
-
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
-        H5Dclose(dset);
-    } H5E_END_TRY;
     return FAIL;
-} /* verify_and_write */
+} /* verify_idx_nchunks */
 
 /*-------------------------------------------------------------------------
  * Function:    test_get_chunk_info_highest_v18
@@ -449,6 +485,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(CHK_SIZE);
     uLong        z_src_nbytes = (uLong)CHK_SIZE;
     void         *outbuf = NULL; /* Pointer to new buffer */
+    hsize_t  chunk_size = CHK_SIZE; /* Size of a chunk, can be compressed or not */
     hsize_t  ii, jj;             /* Array indices */
     int      n;   /* Used as chunk index, but int to avoid conversion warning */
     herr_t   ret; /* Temporary returned value for verifying failure */
@@ -490,8 +527,9 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     for(n = 0; n < NUM_CHUNKS; n++)
         for(ii = 0; ii < CHUNK_NX; ii++)
             for(jj = 0; jj < CHUNK_NY; jj++)
-                direct_buf[n][ii][jj] = n + 1;
+                direct_buf[n][ii][jj] = (int)(ii*jj) + 1;
 
+#ifdef H5_HAVE_FILTER_DEFLATE
     /* Allocate output (compressed) buffer */
     outbuf = malloc(z_dst_nbytes);
     z_dst = (Bytef *)outbuf;
@@ -510,23 +548,24 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         fprintf(stderr, "other deflate error");
         TEST_ERROR
     }
+#endif /* end H5_HAVE_FILTER_DEFLATE */
 
     /* Write only NUM_CHUNKS_WRITTEN chunks at the following logical coords:
        (0,2) (0,3) (1,2) (1,3) */
     n = 0;
     for(ii = START_CHK_X; ii < END_CHK_X; ii++)
         for(jj = START_CHK_Y; jj < END_CHK_Y; jj++, n++) {
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+            /* Set chunk size to the compressed chunk size and the chunk point
+               to the compressed data chunk */
+            chunk_size = (hsize_t)z_dst_nbytes;
+#endif /* end H5_HAVE_FILTER_DEFLATE */
             offset[0] = ii * CHUNK_NX;
             offset[1] = jj * CHUNK_NY;
-            ret = H5Dwrite_chunk(dset, H5P_DEFAULT, flt_msk, offset, CHK_SIZE, (void*)direct_buf[n]);
+            ret = H5Dwrite_chunk(dset, H5P_DEFAULT, flt_msk, offset, chunk_size, (void*)outbuf);
             if(ret < 0) TEST_ERROR
         }
-
-    /* Read each chunk in the subset of chunks and verify the values */
-     /* if(read_each_chunk(dset, offset, (void*)direct_buf[chk_index]) < 0)
-    if(read_each_chunk(dset) == FAIL)
-        TEST_ERROR
- */ 
 
     /* Free the read buffer */
     if(outbuf)
@@ -550,7 +589,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
        this time */
     offset[0] = 6;
     offset[1] = 12;
-    if(verify_get_chunk_info(dset, H5S_ALL, NUM_CHUNKS_WRITTEN-1, CHK_SIZE, offset, flt_msk) == FAIL)
+    if(verify_get_chunk_info(dset, H5S_ALL, NUM_CHUNKS_WRITTEN-1, chunk_size, offset, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
     /* Attempt to get info of a non-existing chunk, should fail */
@@ -579,11 +618,11 @@ test_get_chunk_info_highest_v18(hid_t fapl)
             offset[0] = ii * CHUNK_NX;
             offset[1] = jj * CHUNK_NY;
 
-            if(verify_get_chunk_info(dset, dspace, chk_index, CHK_SIZE, offset, flt_msk) == FAIL)
+            if(verify_get_chunk_info(dset, dspace, chk_index, chunk_size, offset, flt_msk) == FAIL)
                 FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info failed\n");
 
             /* Use the same offset to pass into the next ...by_coord function */
-            if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
+            if(verify_get_chunk_info_by_coord(dset, offset, chunk_size, flt_msk) == FAIL)
                 FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
         }
 
@@ -860,6 +899,8 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
     unsigned flt_msk = 0;                   /* Filter mask */
     hsize_t  chk_index = 0;                 /* Index of a chunk */
     hsize_t  ii, jj;                        /* Array indices */
+    hsize_t  start[2] = {START_CHK_X, START_CHK_Y}; /* Start position */
+    hsize_t  end[2] = {END_CHK_X, END_CHK_Y};       /* End position */
 
     TESTING("   Implicit index");
 
@@ -889,14 +930,18 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
     /* Close the dataset */
     if(H5Dclose(dset) < 0) TEST_ERROR
 
-    /* Verify chunk indexing scheme and number of chunks, and write data to a
-       subset of chunks. */
-    if(verify_and_write(chunkfile, IMPLICIT_INDEX_DSET_NAME, dspace, H5D_CHUNK_IDX_NONE, NUM_CHUNKS, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification and write failed\n");
-
     /* Open the dataset again to test getting chunk info */
     if((dset = H5Dopen2(chunkfile, IMPLICIT_INDEX_DSET_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR
+
+    /* Verify chunk indexing scheme and number of chunks */
+    if(verify_idx_nchunks(dset, dspace, H5D_CHUNK_IDX_NONE, NUM_CHUNKS) == FAIL)
+        FAIL_PUTS_ERROR("Verification and write failed\n");
+
+    /* Write NUM_CHUNKS_WRITTEN chunks at the following logical coords:
+       (0,2) (0,3) (1,2) (1,3) */
+    if(write_selected_chunks(dset, H5P_DEFAULT, start, end, flt_msk) == FAIL)
+        FAIL_PUTS_ERROR("Writing to selected chunks failed\n");
 
     /* Go through all chunks, and get their info and verify the values */
     chk_index = 0;
@@ -961,17 +1006,17 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
     hid_t    cparms = H5I_INVALID_HID;      /* Creation plist */
     hsize_t  dims[2] = {NX, NY};            /* Dataset dimensions */
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};      /* Chunk dimensions */
-    int      direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];/* Data in chunks */
     unsigned flt_msk = 0;        /* Filter mask */
     unsigned read_flt_msk = 0;   /* Filter mask after direct read */
     hsize_t  offset[2];          /* Offset coordinates of a chunk */
+    hsize_t  start[2] = {START_CHK_X, START_CHK_Y}; /* Start position */
+    hsize_t  end[2] = {END_CHK_X, END_CHK_Y};       /* End position */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
     hsize_t  size = 0;           /* Size of an allocated/written chunk */
     hsize_t  nchunks = 0;        /* Number of chunks */
     haddr_t  addr = 0;           /* Address of an allocated/written chunk */
     hsize_t  chk_index = 0;      /* Index of a chunk */
     hsize_t  ii, jj;             /* Array indices */
-    int      n;   /* Used as chunk index, but int to avoid conversion warning */
     herr_t   ret; /* Temporary returned value for verifying failure */
 
     TESTING("   Fixed Array index");
@@ -998,14 +1043,18 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
     /* Close the dataset */
     if(H5Dclose(dset) < 0) TEST_ERROR
 
-    /* Verify chunk indexing scheme and number of chunks, and write data
-       to a subset of chunks */
-    if(verify_and_write(chunkfile, FIXED_ARR_INDEX_DSET_NAME, dspace, H5D_CHUNK_IDX_FARRAY, NO_CHUNK_WRITTEN, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification and write failed\n");
-
     /* Open the dataset again to test getting chunk info */
     if((dset = H5Dopen2(chunkfile, FIXED_ARR_INDEX_DSET_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR
+
+    /* Verify chunk indexing scheme and number of chunks */
+    if(verify_idx_nchunks(dset, dspace, H5D_CHUNK_IDX_FARRAY, NO_CHUNK_WRITTEN) == FAIL)
+        FAIL_PUTS_ERROR("Verification and write failed\n");
+
+    /* Write NUM_CHUNKS_WRITTEN chunks at the following logical coords:
+       (0,2) (0,3) (1,2) (1,3) */
+    if(write_selected_chunks(dset, H5P_DEFAULT, start, end, flt_msk) == FAIL)
+        FAIL_PUTS_ERROR("Writing to selected chunks failed\n");
 
     /* Get and verify the number of chunks written */
     if(H5Dget_num_chunks(dset, dspace, &nchunks) < 0) TEST_ERROR
@@ -1039,22 +1088,8 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
     if(verify_empty_chunk_info(dset, offset) == FAIL)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
-    /* Initialize the array of chunk data for all NUM_CHUNKS chunks */
-    for(n = 0; n < NUM_CHUNKS; n++)
-        for(ii = 0; ii < CHUNK_NX; ii++)
-            for(jj = 0; jj < CHUNK_NY; jj++)
-                direct_buf[n][ii][jj] = n + 1;
-
-    /* Read each chunk and verify the values */
-    chk_index = 0;
-    for(ii = START_CHK_X; ii < END_CHK_X; ii++)
-        for(jj = START_CHK_Y; jj < END_CHK_Y; jj++, chk_index++) {
-            offset[0] = ii * CHUNK_NX;
-            offset[1] = jj * CHUNK_NY;
-
-            if(read_each_chunk(dset, offset, (void*)direct_buf[chk_index]) < 0)
-                TEST_ERROR
-        }
+    /* Read and verify values of selected chunks */
+    if(verify_selected_chunks(dset, H5P_DEFAULT, start, end) < 0)
 
     /* Release resourse */
     if(H5Dclose(dset) < 0) TEST_ERROR
@@ -1103,17 +1138,17 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
     hsize_t  dims[2] = {NX, NY};            /* Dataset dimensions */
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
     hsize_t  maxdims[2] = {H5S_UNLIMITED, NY};     /* One unlimited dimension */
-    int      direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];/* Data in chunks */
     unsigned flt_msk = 0;        /* Filter mask */
     unsigned read_flt_msk = 0;   /* Filter mask after direct read */
     hsize_t  offset[2];          /* Offset coordinates of a chunk */
+    hsize_t  start[2] = {START_CHK_X, START_CHK_Y}; /* Start position */
+    hsize_t  end[2] = {END_CHK_X, END_CHK_Y};       /* End position */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
     hsize_t  size = 0;           /* Size of an allocated/written chunk */
     hsize_t  nchunks = 0;        /* Number of chunks */
     haddr_t  addr = 0;           /* Address of an allocated/written chunk */
     hsize_t  chk_index = 0;      /* Index of a chunk */
     hsize_t  ii, jj;             /* Array indices */
-    int      n;   /* Used as chunk index, but int to avoid conversion warning */
     herr_t   ret; /* Temporary returned value for verifying failure */
 
     TESTING("   Extensible Array index");
@@ -1140,14 +1175,18 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
     /* Close the dataset */
     if(H5Dclose(dset) < 0) TEST_ERROR
 
-    /* Verify chunk indexing scheme and number of chunks, and write data
-       to a subset of chunks */
-    if(verify_and_write(chunkfile, EXT_ARR_INDEX_DSET_NAME, dspace, H5D_CHUNK_IDX_EARRAY, NO_CHUNK_WRITTEN, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification and write failed\n");
-
     /* Open the dataset again to test getting chunk info */
     if((dset = H5Dopen2(chunkfile, EXT_ARR_INDEX_DSET_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR
+
+    /* Verify chunk indexing scheme and number of chunks */
+    if(verify_idx_nchunks(dset, dspace, H5D_CHUNK_IDX_EARRAY, NO_CHUNK_WRITTEN) == FAIL)
+        FAIL_PUTS_ERROR("Verification and write failed\n");
+
+    /* Write NUM_CHUNKS_WRITTEN chunks at the following logical coords:
+       (0,2) (0,3) (1,2) (1,3) */
+    if(write_selected_chunks(dset, H5P_DEFAULT, start, end, flt_msk) == FAIL)
+        FAIL_PUTS_ERROR("Writing to selected chunks failed\n");
 
     /* Get and verify the number of chunks written */
     if(H5Dget_num_chunks(dset, dspace, &nchunks) < 0) TEST_ERROR
@@ -1186,22 +1225,8 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
     if(verify_empty_chunk_info(dset, offset) == FAIL)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
-    /* Initialize the array of chunk data for all NUM_CHUNKS chunks */
-    for(n = 0; n < NUM_CHUNKS; n++)
-        for(ii = 0; ii < CHUNK_NX; ii++)
-            for(jj = 0; jj < CHUNK_NY; jj++)
-                direct_buf[n][ii][jj] = n + 1;
-
-    /* Read each chunk and verify the values */
-    chk_index = 0;
-    for(ii = START_CHK_X; ii < END_CHK_X; ii++)
-        for(jj = START_CHK_Y; jj < END_CHK_Y; jj++, chk_index++) {
-            offset[0] = ii * CHUNK_NX;
-            offset[1] = jj * CHUNK_NY;
-
-            if(read_each_chunk(dset, offset, (void*)direct_buf[chk_index]) < 0)
-                TEST_ERROR
-        }
+    /* Read and verify values of selected chunks */
+    if(verify_selected_chunks(dset, H5P_DEFAULT, start, end) < 0)
 
     /* Release resourse */
     if(H5Dclose(dset) < 0) TEST_ERROR
@@ -1250,10 +1275,11 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
     hsize_t  dims[2]  = {NX, NY};/* Dataset dimensions */
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};      /* Chunk dimensions */
     hsize_t  maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Two unlimited dims */
-    int      direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];/* Data in chunks */
     unsigned flt_msk = 0;        /* Filter mask */
     unsigned read_flt_msk = 0;   /* Filter mask after direct read */
     hsize_t  offset[2];          /* Offset coordinates of a chunk */
+    hsize_t  start[2] = {START_CHK_X, START_CHK_Y}; /* Start position */
+    hsize_t  end[2] = {END_CHK_X, END_CHK_Y};       /* End position */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
     hsize_t  size = 0;           /* Size of an allocated/written chunk */
     hsize_t  nchunks = 0;        /* Number of chunks */
@@ -1286,14 +1312,18 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
     /* Close the dataset */
     if(H5Dclose(dset) < 0) TEST_ERROR
 
-    /* Verify chunk indexing scheme and number of chunks, and write data
-       to a subset of chunks */
-    if(verify_and_write(chunkfile, V2_BTREE_INDEX_DSET_NAME, dspace, H5D_CHUNK_IDX_BT2, NO_CHUNK_WRITTEN, flt_msk) == FAIL)
-        FAIL_PUTS_ERROR("Verification and write failed\n");
-
     /* Open the dataset again to test getting chunk info */
     if((dset = H5Dopen2(chunkfile, V2_BTREE_INDEX_DSET_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR
+
+    /* Verify chunk indexing scheme and number of chunks */
+    if(verify_idx_nchunks(dset, dspace, H5D_CHUNK_IDX_BT2, NO_CHUNK_WRITTEN) == FAIL)
+        FAIL_PUTS_ERROR("Verification and write failed\n");
+
+    /* Write NUM_CHUNKS_WRITTEN chunks at the following logical coords:
+       (0,2) (0,3) (1,2) (1,3) */
+    if(write_selected_chunks(dset, H5P_DEFAULT, start, end, flt_msk) == FAIL)
+        FAIL_PUTS_ERROR("Writing to selected chunks failed\n");
 
     /* Get and verify the number of chunks written */
     if(H5Dget_num_chunks(dset, dspace, &nchunks) < 0) TEST_ERROR
@@ -1332,16 +1362,8 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
     if(verify_empty_chunk_info(dset, offset) == FAIL)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
 
-    /* Read each chunk and verify the values */
-    chk_index = 0;
-    for(ii = START_CHK_X; ii < END_CHK_X; ii++)
-        for(jj = START_CHK_Y; jj < END_CHK_Y; jj++, chk_index++) {
-            offset[0] = ii * CHUNK_NX;
-            offset[1] = jj * CHUNK_NY;
-
-            if(read_each_chunk(dset, offset, (void*)direct_buf[chk_index]) < 0)
-                TEST_ERROR
-        }
+    /* Read and verify values of selected chunks */
+    if(verify_selected_chunks(dset, H5P_DEFAULT, start, end) < 0)
 
     /* Release resourse */
     if(H5Dclose(dset) < 0) TEST_ERROR
