@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
- * Read-Only S3 Virtual File Driver (VFD)                                   
+ * Read-Only S3 Virtual File Driver (VFD)
  *
  * This is the header for the S3 Communications module
  *
@@ -57,10 +57,10 @@
 #ifdef H5_HAVE_ROS3_VFD
 
 /* Necessary S3 headers */
-#include <curl/curl.h>
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+#include "curl/curl.h"
+#include "openssl/evp.h"
+#include "openssl/hmac.h"
+#include "openssl/sha.h"
 
 /*****************
  * PUBLIC MACROS *
