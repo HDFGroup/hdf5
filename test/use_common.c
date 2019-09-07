@@ -63,7 +63,7 @@ parse_option(int argc, char * const argv[])
     switch (c) {
     case 'h':
         usage(progname_g);
-        exit(0);
+        HDexit(EXIT_SUCCESS);
         break;
     case 'f':    /* usecase data file name */
         UC_opts.filename = optarg;

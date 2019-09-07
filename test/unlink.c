@@ -2421,16 +2421,12 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:    Test unlinking operations
+ * Purpose:     Test unlinking operations
  *
- * Return:    Success:    zero
- *
- *        Failure:    non-zero
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:    Robb Matzke
  *              Friday, September 25, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2551,16 +2547,16 @@ main(void)
 
     if (nerrors) {
         HDprintf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
     }
 
     HDputs("All unlink tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
-    return 1;
-}
+    HDexit(EXIT_FAILURE);
+} /* end main() */
 

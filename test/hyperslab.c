@@ -1176,13 +1176,11 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:    Test various hyperslab operations.  Give the words
- *        `small' and/or `medium' on the command line or only `small'
- *        is assumed.
+ * Purpose:     Test various hyperslab operations.  Give the words
+ *              'small' and/or 'medium' on the command line or only 'small'
+ *              is assumed.
  *
- * Return:    Success:    exit(EXIT_SUCCESS)
- *
- *        Failure:    exit(EXIT_FAILURE)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:    Robb Matzke
  *        Friday, October 10, 1997
@@ -1438,6 +1436,6 @@ main(int argc, char *argv[])
     H5close();
 #endif  /* H5_HAVE_THREADSAFE */
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 }
 
