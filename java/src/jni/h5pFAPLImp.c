@@ -467,7 +467,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
 
     if (j_str) {
         PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5FDset_fapl_hdfs: fapl_config namenode_name not pinned");
@@ -491,7 +491,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
 
     if (j_str) {
         PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5FDset_fapl_hdfs: fapl_config user_name not pinned");
@@ -509,7 +509,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
 
     if (j_str) {
         PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5FDset_fapl_hdfs: fapl_config kerberos_ticket_cache not pinned");
@@ -883,7 +883,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
 
     if (j_str) {
         PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5Pset_fapl_ros3: fapl_config aws_region not pinned");
@@ -901,7 +901,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
 
     if (j_str) {
         PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5Pset_fapl_ros3: fapl_config secret_id not pinned");
@@ -919,7 +919,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
 
     if (j_str) {
         PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5Pset_fapl_ros3: fapl_config secret_key not pinned");
