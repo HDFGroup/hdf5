@@ -43,9 +43,16 @@
 /* The maximum size allowed for blobs */
 #define H5VL_MAX_BLOB_ID_SIZE           (16)    /* Allow for 128-bits blob IDs */
 
+/* The maximum size allowed for tokens */
+#define H5VL_MAX_TOKEN_SIZE             (16)    /* Allow for 128-bits tokens */
+
 /*******************/
 /* Public Typedefs */
 /*******************/
+
+/* type for tokens. Token are unique and permanent identifiers that are
+ * used to reference HDF5 objects. */
+typedef unsigned char H5VL_token_t[H5VL_MAX_TOKEN_SIZE];
 
 /* types for attribute GET callback */
 typedef enum H5VL_attr_get_t {
