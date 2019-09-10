@@ -13167,8 +13167,7 @@ error:
  *
  * Purpose:     Tests the dataset interface (H5D)
  *
- * Return:      Success:    exit(EXIT_SUCCESS)
- *              Failure:    exit(EXIT_FAILURE)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
@@ -13388,12 +13387,12 @@ main(void)
 #endif /* H5_HAVE_FILTER_SZIP */
     h5_cleanup(FILENAME, fapl);
 
-    return EXIT_SUCCESS;
+    HDexit(EXIT_SUCCESS);
 
 error:
     nerrors = MAX(1, nerrors);
     HDprintf("***** %d DATASET TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
-    return EXIT_FAILURE;
+    HDexit(EXIT_FAILURE);
 } /* end main() */
 

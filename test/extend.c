@@ -219,22 +219,14 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Tests extendible datasets
+ * Purpose:     Tests extendible datasets
  *
- * Return:	Success:	exit(0)
- *
- *		Failure:	exit(non-zero)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:	Robb Matzke
  *              Friday, January 30, 1998
- *
- * Modifications:
- *              Took main data code out into write_data() routine, to allow
- *              different dataset creation property list settings to be tested.
- *              Quincey Koziol
- *              Tuesday, June 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -290,16 +282,16 @@ main (void)
 
     if(nerrors) {
         HDprintf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     HDprintf("All extend tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
     HDprintf("*** One or more extend tests failed ***\n");
-    return 1;
-}
+    HDexit(EXIT_FAILURE);
+} /* end main() */
 

@@ -370,7 +370,7 @@ usage(void)
     HDprintf("5 common symbols to poll ('-h 5'), 10 random symbols to poll ('-l 10'),\n");
     HDprintf("and will generate a random seed (no -r given).\n");
     HDprintf("\n");
-    HDexit(1);
+    HDexit(EXIT_FAILURE);
 } 
 
 int main(int argc, const char *argv[])
@@ -480,7 +480,7 @@ int main(int argc, const char *argv[])
     /* Generate dataset names */
     if(generate_symbols() < 0) {
         HDfprintf(stderr, "Error generating symbol names!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Create datatype for creating datasets */
@@ -490,7 +490,7 @@ int main(int argc, const char *argv[])
     /* Reading records from datasets */
     if(read_records(FILENAME, verbose, (unsigned long)nseconds, (unsigned)poll_time, (unsigned)ncommon, (unsigned)nrandom) < 0) {
         HDfprintf(stderr, "Error reading records from datasets!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -500,7 +500,7 @@ int main(int argc, const char *argv[])
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
         HDfprintf(stderr, "Error releasing symbols!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -510,7 +510,7 @@ int main(int argc, const char *argv[])
     /* Close objects created */
     if(H5Tclose(symbol_tid) < 0) {
         HDfprintf(stderr, "Error closing symbol datatype!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

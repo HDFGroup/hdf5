@@ -302,7 +302,7 @@ usage(void)
     HDprintf("Defaults to verbose (no '-q' given), flushing every 1000 operations\n");
     HDprintf("('-f 1000'), and will generate a random seed (no -r given).\n");
     HDprintf("\n");
-    HDexit(1);
+    HDexit(EXIT_FAILURE);
 }
 
 int main(int argc, const char *argv[])
@@ -401,7 +401,7 @@ int main(int argc, const char *argv[])
     /* Open file skeleton */
     if((fid = open_skeleton(FILENAME, verbose)) < 0) {
         HDfprintf(stderr, "Error opening skeleton file!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -414,7 +414,7 @@ int main(int argc, const char *argv[])
     /* Grow and shrink datasets */
     if(addrem_records(fid, verbose, (unsigned long)nops, (unsigned long)flush_count) < 0) {
         HDfprintf(stderr, "Error adding and removing records from datasets!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -424,7 +424,7 @@ int main(int argc, const char *argv[])
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
         HDfprintf(stderr, "Error releasing symbols!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -434,7 +434,7 @@ int main(int argc, const char *argv[])
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
         HDfprintf(stderr, "Error closing file!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

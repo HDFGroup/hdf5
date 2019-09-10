@@ -14090,7 +14090,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:       main
+ * Function:    main
  *
  * Purpose:     Test H5Ocopy()
  *
@@ -14098,7 +14098,7 @@ error:
  *              new or old format, messages can be shared in either,
  *              both, or neither of the source and destination files.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Peter Cao
  *              Friday, September 30, 2005
@@ -14376,7 +14376,7 @@ main(void)
     if(nerrors) {
         HDprintf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
                 nerrors, (1 == nerrors ? "" : "S"));
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     HDputs ("All object copying tests passed.");
@@ -14406,9 +14406,9 @@ main(void)
 
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
-    return 1;
+    HDexit(EXIT_FAILURE);
 } /* main */
 

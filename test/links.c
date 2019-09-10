@@ -13907,8 +13907,7 @@ error:
  *
  * Purpose:     Test links
  *
- * Return:      Success:    exit(EXIT_SUCCESS)
- *              Failure:    exit(EXIT_FAILURE)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *-------------------------------------------------------------------------
  */
 int
@@ -14137,10 +14136,10 @@ main(void)
     HDrmdir(TMPDIR);
     HDrmdir(TMPDIR2);
 
-    return SUCCEED;
+    HDexit(EXIT_SUCCESS);
 
 error:
     HDputs("*** TESTS FAILED ***");
-    return 1;
+    HDexit(EXIT_FAILURE);
 }
 
