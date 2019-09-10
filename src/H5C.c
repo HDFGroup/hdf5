@@ -7189,19 +7189,15 @@ H5C_load_entry(H5F_t *              f,
     /* Get the on-disk entry image */
     if ( 0 == (type->flags & H5C__CLASS_SKIP_READS) ) {
 
-        unsigned tries, max_tries;    /* The # of read attempts               */
         unsigned retries;             /* The # of retries                     */
         htri_t chk_ret;               /* return from verify_chksum callback   */
         size_t actual_len = len;      /* The actual length, after speculative */
                                       /* reads have been resolved             */
-        uint64_t nanosec = 1;         /* # of nanoseconds to sleep between    */
-                                      /* retries                              */
         void *new_image;              /* Pointer to image                     */
         hbool_t len_changed = TRUE;   /* Whether to re-check speculative      */
                                       /* entries                              */
-
-        /* Get the # of read attempts */
-        max_tries = tries = H5F_GET_READ_ATTEMPTS(f);
+        bool do_try;
+        h5_retry_t retry;
 
         /* 
          * This do/while loop performs the following till the metadata checksum
@@ -7210,7 +7206,10 @@ H5C_load_entry(H5F_t *              f,
          *   --determine the actual size of the metadata
          *   --perform checksum verification
          */
-        do {
+        for (do_try = h5_retry_init(&retry, H5F_GET_READ_ATTEMPTS(f),
+                          1, H5_RETRY_ONE_HOUR);
+             do_try;
+             do_try = h5_retry_next(&retry)) {
             if ( actual_len != len ) {
 
                 if ( NULL == (new_image = H5MM_realloc(image, 
@@ -7354,15 +7353,10 @@ H5C_load_entry(H5F_t *              f,
 
             if(chk_ret == TRUE)
                 break;
-
-            /* Sleep for some time */
-            H5_nanosleep(nanosec);
-            nanosec *= 2;               /* Double the sleep time next time */
-
-        } while(--tries);
+        }
 
         /* Check for too many tries */
-        if ( tries == 0 ) {
+        if (!do_try) {
 #if 0 /* JRM */
             haddr_t eoa;
             int64_t page = (int64_t)(addr / f->shared->cache->page_size);
@@ -7382,8 +7376,7 @@ H5C_load_entry(H5F_t *              f,
         }
 
         /* Calculate and track the # of retries */
-        retries = max_tries - tries;
-        if ( retries ) {    /* Does not track 0 retry */
+        if ((retries = h5_retry_retries(&retry)) != 0)     /* Does not track 0 retry */
 
             if ( H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, 
                                                  retries) < 0)

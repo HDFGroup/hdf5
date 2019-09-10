@@ -1192,15 +1192,32 @@ done:
 void
 H5_nanosleep(uint64_t nanosec)
 {
+    const uint64_t nanosec_per_sec = 1000 * 1000 * 1000;
     struct timespec sleeptime;  /* Struct to hold time to sleep */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Set up time to sleep */
-    sleeptime.tv_sec = 0;
-    sleeptime.tv_nsec = (long)nanosec;
+    /* Set up time to sleep
+     *
+     * Assuming ILP32 or LP64 or wider architecture, (long)operand
+     * satisfies 0 <= operand < nanosec_per_sec < LONG_MAX.
+     *
+     * It's harder to be sure that we don't overflow time_t.
+     */
+    sleeptime.tv_sec = (time_t)(nanosec / nanosec_per_sec);
+    sleeptime.tv_nsec = (long)(nanosec % nanosec_per_sec);
 
-    HDnanosleep(&sleeptime, NULL);
+    /* Sleep for up to `sleeptime` and, in the event of an interruption,
+     * save the unslept time back to `sleeptime`.
+     */
+    while (HDnanosleep(&sleeptime, &sleeptime) == -1) {
+        /* If we were just interrupted, sleep for the remaining time.
+         * Otherwise, the error was essentially impossible, so just stop
+         * sleeping.
+         */
+        if (errno != EINTR)
+            break;
+    }
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5_nanosleep() */

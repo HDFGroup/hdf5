@@ -2697,5 +2697,7 @@ H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **ful
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,
     const uint8_t *marker, size_t buf_offset, size_t buf_size);
 
+#include "H5retry_private.h"
+
 #endif /* _H5private_H */
 
