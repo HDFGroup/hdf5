@@ -24,9 +24,9 @@
  * This file needs to access private information from the H5C package.
  * This file also needs to access the metadata cache testing code.
  */
-#define H5C_FRIEND		/*suppress error about including H5Cpkg	  */
-#define H5C_TESTING		/*suppress warning about H5C testing funcs*/
-#include "H5Cpkg.h"		/* Cache				*/
+#define H5C_FRIEND        /*suppress error about including H5Cpkg      */
+#define H5C_TESTING        /*suppress warning about H5C testing funcs*/
+#include "H5Cpkg.h"        /* Cache                */
 
 
 /* ============ */
@@ -74,7 +74,7 @@ static unsigned verify_group_cork(hbool_t swmr);
 static unsigned verify_named_cork(hbool_t swmr);
 static unsigned verify_multiple_cork(hbool_t swmr);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_old_dset_cork
  *
@@ -120,15 +120,15 @@ verify_old_dset_cork(void)
         FAIL_STACK_ERROR
 
     /* Create chunked dataset with v1-btree indexing: DSET_BT1 */
-    if((sid = H5Screate_simple(2, dims, max_dims)) < 0) 
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0)
         TEST_ERROR
     if((did = H5Dcreate2(fid, DSET_BT1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    
+
     /* Get dataset object header address: DSET_BT1 */
     if(H5Oget_info2(did, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR
-    
+
     /* Cork the dataset: DSET_BT1 */
     if(H5Odisable_mdc_flushes(did) < 0)
         TEST_ERROR
@@ -159,13 +159,13 @@ verify_old_dset_cork(void)
         FAIL_STACK_ERROR
     if(H5Pset_alloc_time(dcpl2, H5D_ALLOC_TIME_EARLY) < 0)
         FAIL_STACK_ERROR
-    if((did2 = H5Dcreate2(fid, DSET_COMPACT, H5T_NATIVE_INT, sid2, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0) 
+    if((did2 = H5Dcreate2(fid, DSET_COMPACT, H5T_NATIVE_INT, sid2, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Get dataset object address */
     if(H5Oget_info2(did2, &oinfo2, H5O_INFO_BASIC) < 0)
         TEST_ERROR
-    
+
     /* Cork the dataset: DSET_COMPACT */
     if(H5Odisable_mdc_flushes(did2) < 0)
         TEST_ERROR
@@ -212,7 +212,7 @@ verify_old_dset_cork(void)
         FAIL_STACK_ERROR
     if(H5Pset_layout(dcpl3, H5D_CONTIGUOUS) < 0)
         FAIL_STACK_ERROR
-    if((did3 = H5Dcreate2(fid, DSET_CONTIG, H5T_NATIVE_INT, sid3, H5P_DEFAULT, dcpl3, H5P_DEFAULT)) < 0) 
+    if((did3 = H5Dcreate2(fid, DSET_CONTIG, H5T_NATIVE_INT, sid3, H5P_DEFAULT, dcpl3, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Get dataset object address: DSET_CONTIG */
@@ -224,11 +224,11 @@ verify_old_dset_cork(void)
         TEST_ERROR
 
     /* Verify the cork status for DSET_CONTIG */
-    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Verify the cork status for DSET_BT1 */
-    if(H5C__verify_cork_tag_test(fid, oinfo.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo.addr, FALSE) < 0)
         TEST_ERROR
 
     /* Un-cork the dataset: DSET_CONTIG */
@@ -236,7 +236,7 @@ verify_old_dset_cork(void)
         TEST_ERROR
 
     /* Verify the cork status for DSET_CONTIG */
-    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, FALSE) < 0)
         TEST_ERROR
 
     /* Closing */
@@ -268,7 +268,7 @@ error:
     return 1;
 } /* verify_old_dset_cork */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_obj_dset_cork
  *
@@ -325,23 +325,23 @@ verify_obj_dset_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Create dataset: DSET */
-    if((did = H5Dcreate2(fid, DSET, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((did = H5Dcreate2(fid, DSET, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     /* Get dataset object header address */
     if(H5Oget_info2(did, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR
-    
+
     /* Verify cork status of the dataset: DSET */
     if(H5C__verify_cork_tag_test(fid, oinfo.addr, FALSE) < 0)
         TEST_ERROR
-    
+
     /* Cork the dataset: DSET */
     if(H5Odisable_mdc_flushes(did) < 0)
         TEST_ERROR
 
     /* Attach and write to an attribute to the dataset: DSET */
-    if((aid = H5Acreate2(did, ATTR, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((aid = H5Acreate2(did, ATTR, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     /* Verify cork status of the dataset: DSET */
@@ -349,24 +349,24 @@ verify_obj_dset_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Close the attribute */
-    if(H5Aclose(aid) < 0) 
+    if(H5Aclose(aid) < 0)
         TEST_ERROR
 
     /* Verify cork status of the dataset: DSET */
     if(H5C__verify_cork_tag_test(fid, oinfo.addr, TRUE) < 0)
         TEST_ERROR
-    
+
     /* Create dcpl */
     if((dcpl2 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR
     /* Set to early allocation for dataset space */
-    if(H5Pset_alloc_time(dcpl2, H5D_ALLOC_TIME_EARLY) < 0) 
+    if(H5Pset_alloc_time(dcpl2, H5D_ALLOC_TIME_EARLY) < 0)
         TEST_ERROR
 
     /* Create chunked dataset with implicit indexing: DSET_NONE */
     if(H5Pset_chunk(dcpl2, 1, chunk_dim) < 0)
         FAIL_STACK_ERROR
-    if((sid2 = H5Screate_simple(1, dim, NULL)) < 0) 
+    if((sid2 = H5Screate_simple(1, dim, NULL)) < 0)
         TEST_ERROR
     if((did2 = H5Dcreate2(fid, DSET_NONE, H5T_NATIVE_INT, sid2, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -391,7 +391,7 @@ verify_obj_dset_cork(hbool_t swmr)
     } /* end for */
 
     /* Verify cork status of the dataset: DSET_NONE */
-    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Closing */
@@ -412,11 +412,11 @@ verify_obj_dset_cork(hbool_t swmr)
     flags = H5F_ACC_RDWR;
     if(swmr)
         flags |= H5F_ACC_SWMR_WRITE;
-    if((fid = H5Fopen(FILENAME, flags, fapl)) < 0) 
+    if((fid = H5Fopen(FILENAME, flags, fapl)) < 0)
         TEST_ERROR
 
     /* Open the dataset object: DSET_NONE */
-    if((oid = H5Oopen(fid, DSET_NONE, H5P_DEFAULT)) < 0) 
+    if((oid = H5Oopen(fid, DSET_NONE, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     /* Verify cork status of the dataset: DSET */
@@ -469,7 +469,7 @@ error:
     return 1;
 } /* verify_obj_dset_cork */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_dset_cork
  *
@@ -540,15 +540,15 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Create chunked dataset with extensive array indexing: DSET_EA */
-    if((sid = H5Screate_simple(2, dims, max_dims)) < 0) 
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0)
         TEST_ERROR
     if((did = H5Dcreate2(fid, DSET_EA, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    
+
     /* Get dataset object header address: DSET_EA */
     if(H5Oget_info2(did, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR
-    
+
     /* Cork the dataset: DSET_EA */
     if(H5Odisable_mdc_flushes(did) < 0)
         TEST_ERROR
@@ -558,7 +558,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Create chunked dataset with fixed array indexing: DSET_FA */
-    if((sid2 = H5Screate_simple(2, dims, NULL)) < 0) 
+    if((sid2 = H5Screate_simple(2, dims, NULL)) < 0)
         TEST_ERROR
     if((did2 = H5Dcreate2(fid, DSET_FA, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -566,7 +566,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     /* Get dataset object header address: DSET_FA */
     if(H5Oget_info2(did2, &oinfo2, H5O_INFO_BASIC) < 0)
         TEST_ERROR
-    
+
     /* Cork the dataset: DSET_FA */
     if(H5Odisable_mdc_flushes(did2) < 0)
         TEST_ERROR
@@ -585,7 +585,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
 
     /* Create chunked dataset with v2-Btree indexing */
     max_dims[0] = H5S_UNLIMITED;
-    if((sid3 = H5Screate_simple(2, dims, max_dims)) < 0) 
+    if((sid3 = H5Screate_simple(2, dims, max_dims)) < 0)
         TEST_ERROR
     if((did3 = H5Dcreate2(fid, DSET_BT2, H5T_NATIVE_INT, sid3, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -708,7 +708,7 @@ error:
 } /* verify_dset_cork */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_group_cork
  *
@@ -758,11 +758,11 @@ verify_group_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Create 3 groups */
-    if((gid = H5Gcreate2(fid, GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if((gid2 = H5Gcreate2(gid, GRP2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((gid2 = H5Gcreate2(gid, GRP2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if((gid3 = H5Gcreate2(gid2, GRP3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((gid3 = H5Gcreate2(gid2, GRP3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     /* Cork the second group: GRP2 */
@@ -778,23 +778,23 @@ verify_group_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Verify cork status of the groups */
-    if(H5C__verify_cork_tag_test(fid, oinfo.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo.addr, FALSE) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, TRUE) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, FALSE) < 0)
         TEST_ERROR
-    
+
     /* Close the second group: GRP2 */
     if(H5Gclose(gid2) < 0)
         TEST_ERROR
 
     /* Re-open the second group: GRP2 */
-    if((gid2 = H5Gopen2(gid, GRP2, H5P_DEFAULT)) < 0) 
+    if((gid2 = H5Gopen2(gid, GRP2, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Verify cork status of the second group: GRP2 */
-    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, FALSE) < 0)
         TEST_ERROR
 
     /* Closing */
@@ -813,11 +813,11 @@ verify_group_cork(hbool_t swmr)
         flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fopen(FILENAME, flags, fapl)) < 0)
         FAIL_STACK_ERROR
-    if((gid = H5Gopen2(fid, GRP, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gopen2(fid, GRP, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    if((gid2 = H5Gopen2(gid, GRP2, H5P_DEFAULT)) < 0) 
+    if((gid2 = H5Gopen2(gid, GRP2, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    if((gid3 = H5Gopen2(gid2, GRP3, H5P_DEFAULT)) < 0) 
+    if((gid3 = H5Gopen2(gid2, GRP3, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Create dataspace */
@@ -826,7 +826,7 @@ verify_group_cork(hbool_t swmr)
 
     /* Attach 8 attributes to the third group: GRP3 */
     for(i = 0;i < 8; i++) {
-        sprintf(attrname, "attr %d", i);
+        HDsprintf(attrname, "attr %d", i);
         if((aid = H5Acreate2(gid3, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR
         if(H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0)
@@ -835,7 +835,7 @@ verify_group_cork(hbool_t swmr)
         if(i == 3) {
             if(H5Odisable_mdc_flushes(gid3) < 0)
                 TEST_ERROR
-            if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0) 
+            if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0)
                 TEST_ERROR
         }
         if(H5Aclose(aid) < 0)
@@ -843,7 +843,7 @@ verify_group_cork(hbool_t swmr)
     } /* end for */
 
     /* Verify cork status of the third group: GRP3 */
-    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Closing */
@@ -875,7 +875,7 @@ error:
     return 1;
 } /* verify_group_cork */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_named_cork
  *
@@ -935,21 +935,21 @@ verify_named_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Commit datatype /DT */
-    if(H5Tcommit2(fid, DT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) 
+    if(H5Tcommit2(fid, DT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR
 
     /* Create /GRP */
-    if((gid = H5Gcreate2(fid, GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     /* Commit datatype /GRP/DT2 */
-    if(H5Tcommit2(gid, DT2, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) 
+    if(H5Tcommit2(gid, DT2, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR
 
     /* Create /GRP/GRP2 */
-    if((gid2 = H5Gcreate2(gid, GRP2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((gid2 = H5Gcreate2(gid, GRP2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     /* Commit datatype /GRP/GRP2/DT3 */
-    if(H5Tcommit2(gid2, DT3, tid3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) 
+    if(H5Tcommit2(gid2, DT3, tid3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR
 
     /* Cork 2 named datatypes: /DT and /GRP/GRP2/DT3 */
@@ -967,11 +967,11 @@ verify_named_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Verify cork status of the named datatypes */
-    if(H5C__verify_cork_tag_test(fid, oinfo.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo.addr, TRUE) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, FALSE) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Close the datatypes */
@@ -983,19 +983,19 @@ verify_named_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Re-open the named datatypes */
-    if((tid = H5Topen2(fid, DT, H5P_DEFAULT)) < 0) 
+    if((tid = H5Topen2(fid, DT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    if((tid2 = H5Topen2(gid, DT2, H5P_DEFAULT)) < 0) 
+    if((tid2 = H5Topen2(gid, DT2, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    if((tid3 = H5Topen2(gid2, DT3, H5P_DEFAULT)) < 0) 
+    if((tid3 = H5Topen2(gid2, DT3, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Verify cork status of the named datatypes */
-    if(H5C__verify_cork_tag_test(fid, oinfo.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo.addr, FALSE) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, FALSE) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, FALSE) < 0)
         TEST_ERROR
 
     /* Closing */
@@ -1019,17 +1019,17 @@ verify_named_cork(hbool_t swmr)
         flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fopen(FILENAME, flags, fapl)) < 0)
         FAIL_STACK_ERROR
-    if((gid = H5Gopen2(fid, GRP, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gopen2(fid, GRP, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    if((gid2 = H5Gopen2(gid, GRP2, H5P_DEFAULT)) < 0) 
+    if((gid2 = H5Gopen2(gid, GRP2, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Re-open the named datatypes */
-    if((tid = H5Topen2(fid, DT, H5P_DEFAULT)) < 0) 
+    if((tid = H5Topen2(fid, DT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    if((tid2 = H5Topen2(gid, DT2, H5P_DEFAULT)) < 0) 
+    if((tid2 = H5Topen2(gid, DT2, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    if((tid3 = H5Topen2(gid2, DT3, H5P_DEFAULT)) < 0) 
+    if((tid3 = H5Topen2(gid2, DT3, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Cork the datatype: DT2 */
@@ -1042,7 +1042,7 @@ verify_named_cork(hbool_t swmr)
 
     /* Attach 8 attributes to datatype: DT3 */
     for(i = 0;i < 8; i++) {
-        sprintf(attrname, "attr %d", i);
+        HDsprintf(attrname, "attr %d", i);
         if((aid = H5Acreate2(tid3, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR
         if(H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0)
@@ -1051,7 +1051,7 @@ verify_named_cork(hbool_t swmr)
         if(i == 3) {
             if(H5Odisable_mdc_flushes(tid3) < 0)
                 TEST_ERROR
-            if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0) 
+            if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0)
                 TEST_ERROR
         }
         if(H5Aclose(aid) < 0)
@@ -1059,7 +1059,7 @@ verify_named_cork(hbool_t swmr)
     } /* end for */
 
     /* Create a dataset with named datatype: DT */
-    if((did = H5Dcreate2(fid, DSET, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((did = H5Dcreate2(fid, DSET, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Get dataset object header address */
@@ -1071,20 +1071,20 @@ verify_named_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Verify cork status of the datatype: DT */
-    if(H5C__verify_cork_tag_test(fid, oinfo.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo.addr, FALSE) < 0)
         TEST_ERROR
     /* Verify cork status of the datatype: DT2 */
-    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, TRUE) < 0)
         TEST_ERROR
     /* Verify cork status of the datatype: DT3 */
-    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Un-cork the datatype: DT3 */
     if(H5Oenable_mdc_flushes(tid3) < 0)
         TEST_ERROR
     /* Verify cork status of the datatype: DT3 */
-    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo3.addr, FALSE) < 0)
         TEST_ERROR
 
     /* Cork the datatype: DT */
@@ -1092,14 +1092,14 @@ verify_named_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Verify cork status of the datatype: DT */
-    if(H5C__verify_cork_tag_test(fid, oinfo.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo.addr, TRUE) < 0)
         TEST_ERROR
     /* Verify cork status of the datatype: DT2 */
-    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo2.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Verify cork status of the dataset: DSET */
-    if(H5C__verify_cork_tag_test(fid, oinfo4.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo4.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Close the dataset */
@@ -1107,11 +1107,11 @@ verify_named_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Verify cork status of the datatype: DT */
-    if(H5C__verify_cork_tag_test(fid, oinfo.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Verify cork status of the dataset: DSET */
-    if(H5C__verify_cork_tag_test(fid, oinfo4.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid, oinfo4.addr, FALSE) < 0)
         TEST_ERROR
 
     /* Closing */
@@ -1149,7 +1149,7 @@ error:
     return 1;
 } /* verify_named_cork */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    verify_multiple_cork
  *
@@ -1279,7 +1279,7 @@ verify_multiple_cork(hbool_t swmr)
     /* Verify cork status of the group: gid2 */
     if(H5Oget_info2(gid2, &oinfo1, H5O_INFO_BASIC) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid2, oinfo1.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid2, oinfo1.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Check cork status of the group: gid1 */
@@ -1307,7 +1307,7 @@ verify_multiple_cork(hbool_t swmr)
     /* Verify cork status of the dataset: did1 */
     if(H5Oget_info2(did1, &oinfo2, H5O_INFO_BASIC) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid1, oinfo2.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid1, oinfo2.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Check cork status of the dataset: did2 */
@@ -1335,7 +1335,7 @@ verify_multiple_cork(hbool_t swmr)
     /* Verify cork status of the datatype: tid2 */
     if(H5Oget_info2(tid2, &oinfo3, H5O_INFO_BASIC) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid2, oinfo3.addr, TRUE) < 0) 
+    if(H5C__verify_cork_tag_test(fid2, oinfo3.addr, TRUE) < 0)
         TEST_ERROR
 
     /* Check cork status of the datatype: tid1 */
@@ -1351,7 +1351,7 @@ verify_multiple_cork(hbool_t swmr)
     /* Verify cork status of the group: gid1 */
     if(H5Oget_info2(gid1, &oinfo1, H5O_INFO_BASIC) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid1, oinfo1.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid1, oinfo1.addr, FALSE) < 0)
         TEST_ERROR
 
     /* Check cork status of the group: gid2 */
@@ -1371,7 +1371,7 @@ verify_multiple_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Verify cork status of the group: gid1 */
-    if(H5C__verify_cork_tag_test(fid1, oinfo1.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid1, oinfo1.addr, FALSE) < 0)
         TEST_ERROR
 
     /* Close the group: gid1 */
@@ -1385,7 +1385,7 @@ verify_multiple_cork(hbool_t swmr)
     /* Verify cork status of the dataset: did2 */
     if(H5Oget_info2(did2, &oinfo2, H5O_INFO_BASIC) < 0)
         TEST_ERROR
-    if(H5C__verify_cork_tag_test(fid2, oinfo2.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid2, oinfo2.addr, FALSE) < 0)
         TEST_ERROR
 
     /* Check cork status of the dataset: did1 */
@@ -1405,7 +1405,7 @@ verify_multiple_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Verify cork status of the dataset: did1 */
-    if(H5C__verify_cork_tag_test(fid1, oinfo2.addr, FALSE) < 0) 
+    if(H5C__verify_cork_tag_test(fid1, oinfo2.addr, FALSE) < 0)
         TEST_ERROR
 
     /* Close the dataset: did1 */
@@ -1517,7 +1517,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_objs_cork
  *
- * Purpose:     This function verifies H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled public 
+ * Purpose:     This function verifies H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled public
  *      routines are working as specified.
  *
  * Return:      0 on Success, 1 on Failure
@@ -1723,7 +1723,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
-    
+
     /* Cork the named datatype */
     if(H5Odisable_mdc_flushes(tid) < 0)
         TEST_ERROR
@@ -1796,7 +1796,7 @@ error:
     return 1;
 } /* test_objs_cork() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_dset_cork
  *
@@ -1847,7 +1847,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     } /* end if */
 
     /* Create fapl */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) 
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR
 
     /* Set to use latest format */
@@ -1880,7 +1880,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     /* Set up dataset creation property list */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR
-    
+
     /* Enable chunking */
     if(H5Pset_chunk(dcpl, RANK, cdims) < 0)
         TEST_ERROR
@@ -2003,7 +2003,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
     if(!corked)
         TEST_ERROR
-    
+
     /* Close the dataset */
     if(H5Dclose(did1) < 0)
         TEST_ERROR
@@ -2053,7 +2053,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Second open of the named datatype */
-    if((tid2 = H5Topen2(gid, "datatype", H5P_DEFAULT)) < 0) 
+    if((tid2 = H5Topen2(gid, "datatype", H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     /* Check cork status of the second opened named datatype */
@@ -2124,7 +2124,7 @@ error:
 } /* test_dset_cork() */
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -2138,12 +2138,12 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-int 
-main(void) 
+int
+main(void)
 {
     unsigned swmr;              /* Loop over SWMR/non-SWMR */
     unsigned nerrs = 0;         /* Error Encountered */
-    
+
     /* Test for dataset created with old library format */
     nerrs += verify_old_dset_cork();
 
@@ -2158,10 +2158,10 @@ main(void)
 
         /* Tests with/without SWMR access */
         nerrs += verify_obj_dset_cork(swmr);
-        nerrs += verify_dset_cork(swmr, TRUE); 
-        nerrs += verify_dset_cork(swmr, FALSE); 
-        nerrs += verify_group_cork(swmr); 
-        nerrs += verify_named_cork(swmr); 
+        nerrs += verify_dset_cork(swmr, TRUE);
+        nerrs += verify_dset_cork(swmr, FALSE);
+        nerrs += verify_group_cork(swmr);
+        nerrs += verify_named_cork(swmr);
         nerrs += verify_multiple_cork(swmr);
     } /* end for */
 

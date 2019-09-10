@@ -130,7 +130,7 @@ H5F_mpi_get_rank(const H5F_t *f)
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_rank(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "driver get_rank request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_rank request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -162,11 +162,43 @@ H5F_mpi_get_comm(const H5F_t *f)
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_comm(f->shared->lf)) == MPI_COMM_NULL)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_get_comm() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_shared_mpi_get_size
+ *
+ * Purpose:     Retrieves the size of an MPI process.
+ *
+ * Return:      Success:        The size (positive)
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              Friday, May 6, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5F_shared_mpi_get_size(const H5F_shared_t *f_sh)
+{
+    int ret_value = -1;
+
+    FUNC_ENTER_NOAPI((-1))
+
+    HDassert(f_sh);
+
+    /* Dispatch to driver */
+    if((ret_value = H5FD_mpi_get_size(f_sh->lf)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_shared_mpi_get_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -194,7 +226,7 @@ H5F_mpi_get_size(const H5F_t *f)
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_size(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, (-1), "driver get_size request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -336,14 +368,9 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
         if(NULL == (plist = H5P_object_verify(acspl_id, H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file access list")
 
-        if(H5FD_MPIO == H5P_peek_driver(plist)) {
-            const H5FD_mpio_fapl_t *fa; /* MPIO fapl info */
-
-            if(NULL == (fa = (const H5FD_mpio_fapl_t *)H5P_peek_driver_info(plist)))
-                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad VFL driver info")
-
-            *mpi_comm = fa->comm;
-        }
+        if(H5FD_MPIO == H5P_peek_driver(plist))
+            if(H5P_peek(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, mpi_comm) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
     }
 
 done:

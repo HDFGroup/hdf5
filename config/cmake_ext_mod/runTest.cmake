@@ -27,11 +27,11 @@ if (NOT TEST_EXPECT)
   message (STATUS "Require TEST_EXPECT to be defined")
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
@@ -88,7 +88,7 @@ endif ()
 message (STATUS "COMMAND Result: ${TEST_RESULT}")
 
 # if the .err file exists and ERRROR_APPEND is enabled
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   if (TEST_MASK_FILE)
     STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
@@ -113,7 +113,7 @@ endif ()
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
       file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
       message (STATUS "Output :\n${TEST_STREAM}")
     endif ()
@@ -125,10 +125,29 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # remove special output
 file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-string (FIND TEST_STREAM "_pmi_alps" "${TEST_FIND_RESULT}")
-if (TEST_FIND_RESULT GREATER 0)
+string (FIND "${TEST_STREAM}" "_pmi_alps" TEST_FIND_RESULT)
+if (TEST_FIND_RESULT GREATER -1)
   string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
+endif ()
+
+# remove special error output
+if (NOT TEST_ERRREF)
+  # the error stack has been appended to the output file
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+else ()
+  # the error stack remains in the .err file
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
+endif ()
+string (FIND "${TEST_STREAM}" "no version information available" TEST_FIND_RESULT)
+if (TEST_FIND_RESULT GREATER -1)
+  string (REGEX REPLACE "^.*no version information available[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
+  # write back the changes to the original files
+  if (NOT TEST_ERRREF)
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  else ()
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err "${TEST_STREAM}")
+  endif ()
 endif ()
 
 # if the output file needs Storage text removed
@@ -185,7 +204,7 @@ endif ()
 
 # compare output files to references unless this must be skipped
 if (NOT TEST_SKIP_COMPARE)
-  if (EXISTS ${TEST_FOLDER}/${TEST_REFERENCE})
+  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
     if (WIN32 OR MINGW)
       configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
       file(RENAME ${TEST_FOLDER}/${TEST_REFERENCE}.tmp ${TEST_FOLDER}/${TEST_REFERENCE})

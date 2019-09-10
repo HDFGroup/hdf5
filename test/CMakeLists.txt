@@ -242,6 +242,7 @@ set (H5_TESTS
     page_buffer
     dtypes
     dsets
+    chunk_info # compression lib link
     cmpd_dset
     filter_fail
     extend
@@ -301,6 +302,7 @@ macro (ADD_H5_EXE file)
 endmacro ()
 
 set (H5_TESTS_MULTIPLE
+    chunk_info
     direct_chunk
     testhdf5
     cache_image
@@ -317,6 +319,18 @@ endforeach ()
 ###           M U L T I P L E  S O U R C E   T E S T S                     ###
 ##############################################################################
 ######### Also special handling of link libs #############
+#-- Adding test for chunk_info
+add_executable (chunk_info ${HDF5_TEST_SOURCE_DIR}/chunk_info.c)
+target_include_directories (chunk_info PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+if (NOT BUILD_SHARED_LIBS)
+  TARGET_C_PROPERTIES (chunk_info STATIC)
+  target_link_libraries (chunk_info PRIVATE ${HDF5_TEST_LIB_TARGET} ${LINK_COMP_LIBS})
+else ()
+  TARGET_C_PROPERTIES (chunk_info SHARED)
+  target_link_libraries (chunk_info PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${LINK_COMP_LIBS})
+endif ()
+set_target_properties (chunk_info PROPERTIES FOLDER test)
+
 #-- Adding test for direct_chunk
 add_executable (direct_chunk ${HDF5_TEST_SOURCE_DIR}/direct_chunk.c)
 target_include_directories (direct_chunk PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")

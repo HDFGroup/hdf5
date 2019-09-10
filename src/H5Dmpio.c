@@ -457,7 +457,7 @@ H5D__mpio_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATT
     FUNC_ENTER_PACKAGE
 
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
-    if(H5F_block_read(io_info->dset->oloc.file, H5FD_MEM_DRAW, store_contig->dset_addr, (size_t)mpi_buf_count, io_info->u.rbuf) < 0)
+    if(H5F_shared_block_read(io_info->f_sh, H5FD_MEM_DRAW, store_contig->dset_addr, (size_t)mpi_buf_count, io_info->u.rbuf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't finish collective parallel read")
 
 done:
@@ -487,7 +487,7 @@ H5D__mpio_select_write(const H5D_io_info_t *io_info, const H5D_type_info_t H5_AT
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
-    if(H5F_block_write(io_info->dset->oloc.file, H5FD_MEM_DRAW, store_contig->dset_addr, (size_t)mpi_buf_count, io_info->u.wbuf) < 0)
+    if(H5F_shared_block_write(io_info->f_sh, H5FD_MEM_DRAW, store_contig->dset_addr, (size_t)mpi_buf_count, io_info->u.wbuf) < 0)
        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't finish collective parallel write")
 
 done:
@@ -3153,7 +3153,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
         if(H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
 
-        if(H5F_block_read(io_info->dset->oloc.file, H5FD_MEM_DRAW, chunk_entry->chunk_states.chunk_current.offset,
+        if(H5F_shared_block_read(io_info->f_sh, H5FD_MEM_DRAW, chunk_entry->chunk_states.chunk_current.offset,
                 chunk_entry->chunk_states.new_chunk.length, chunk_entry->buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read raw data chunk")
 

@@ -23,11 +23,11 @@ if (NOT TEST_VFD)
   message (FATAL_ERROR "Require TEST_VFD to be defined")
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
@@ -54,7 +54,7 @@ execute_process (
 message (STATUS "COMMAND Result: ${TEST_RESULT}")
 
 # if the .err file exists and ERRROR_APPEND is enabled
-if (ERROR_APPEND AND EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.err)
+if (ERROR_APPEND AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.err")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.err TEST_STREAM)
   file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.out "${TEST_STREAM}")
 endif ()
@@ -62,7 +62,7 @@ endif ()
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.out)
+    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.out")
       file (READ ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.out TEST_STREAM)
     message (STATUS "Output USING ${TEST_VFD}:\n${TEST_STREAM}")
     endif ()

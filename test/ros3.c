@@ -30,10 +30,9 @@
 #include "H5FDros3.h"    /* this file driver's utilities */
 #include "H5FDs3comms.h" /* for loading of credentials */
 
-
+#ifdef H5_HAVE_ROS3_VFD
 
 /* only include the testing macros if needed */
-#ifdef H5_HAVE_ROS3_VFD
 
 /*****************************************************************************
  *
@@ -371,13 +370,9 @@ if (strcmp((actual), (expected)) != 0) {       \
 
 #endif /* ifdef/else JSVERIFY_EXP_ACT */
 
-#endif /* H5_HAVE_ROS3_VFD */
-
 /********************************
  * OTHER MACROS AND DEFINITIONS *
  ********************************/
-
-#ifdef H5_HAVE_ROS3_VFD
 
 #define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
 
@@ -408,16 +403,15 @@ static char s3_test_aws_access_key_id[64];
 static char s3_test_aws_secret_access_key[128];
 
 H5FD_ros3_fapl_t restricted_access_fa = {
-            H5FD__CURR_ROS3_FAPL_T_VERSION, /* fapl version      */
+            H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl version      */
             TRUE,                           /* authenticate      */
             "",             /* aws region        */
             "",      /* access key id     */
             ""}; /* secret access key */
 
 H5FD_ros3_fapl_t anonymous_fa = {
-            H5FD__CURR_ROS3_FAPL_T_VERSION,
+            H5FD_CURR_ROS3_FAPL_T_VERSION,
             FALSE, "", "", "" };
-#endif /* H5_HAVE_ROS3_VFD */
 
 
 /*---------------------------------------------------------------------------
@@ -437,21 +431,11 @@ H5FD_ros3_fapl_t anonymous_fa = {
  * Programmer: Jacob Smith
  *             2017-10-23
  *
- * Changes: None.
- *
  *---------------------------------------------------------------------------
  */
 static int
 test_fapl_config_validation(void)
 {
-#ifndef H5_HAVE_ROS3_VFD
-    TESTING("ROS3 fapl configuration validation");
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-
-#else /* H5_HAVE_ROS3_VFD defined */
 
     /*********************
      * test-local macros *
@@ -483,7 +467,7 @@ test_fapl_config_validation(void)
     struct testcase  cases_arr[] = {
         {   "non-authenticating config allows empties.\n",
             SUCCEED,
-            {   H5FD__CURR_ROS3_FAPL_T_VERSION, /* version      */
+            {   H5FD_CURR_ROS3_FAPL_T_VERSION, /* version      */
                 FALSE,                          /* authenticate */
                 "",                             /* aws_region   */
                 "",                             /* secret_id    */
@@ -492,7 +476,7 @@ test_fapl_config_validation(void)
         },
         {   "authenticating config asks for populated strings.\n",
             FAIL,
-            {   H5FD__CURR_ROS3_FAPL_T_VERSION,
+            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "",
                 "",
@@ -501,7 +485,7 @@ test_fapl_config_validation(void)
         },
         {   "populated strings; key is the empty string?\n",
             SUCCEED,
-            {   H5FD__CURR_ROS3_FAPL_T_VERSION,
+            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "region",
                 "me",
@@ -510,7 +494,7 @@ test_fapl_config_validation(void)
         },
         {   "id cannot be empty.\n",
             FAIL,
-            {   H5FD__CURR_ROS3_FAPL_T_VERSION,
+            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "",
                 "me",
@@ -519,7 +503,7 @@ test_fapl_config_validation(void)
         },
         {   "region cannot be empty.\n",
             FAIL,
-            {   H5FD__CURR_ROS3_FAPL_T_VERSION,
+            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "where",
                 "",
@@ -528,7 +512,7 @@ test_fapl_config_validation(void)
         },
         {   "all strings populated.\n",
             SUCCEED,
-            {   H5FD__CURR_ROS3_FAPL_T_VERSION,
+            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "where",
                 "who",
@@ -547,7 +531,7 @@ test_fapl_config_validation(void)
         {   "non-authenticating config cares not for (de)population"
             "of strings.\n",
             SUCCEED,
-            {   H5FD__CURR_ROS3_FAPL_T_VERSION,
+            {   H5FD_CURR_ROS3_FAPL_T_VERSION,
                 FALSE,
                 "someregion",
                 "someid",
@@ -603,7 +587,7 @@ test_fapl_config_validation(void)
                       H5Pget_fapl_ros3(fapl_id, &fa_fetch),
                       "unable to get fapl" )
 
-            JSVERIFY( H5FD__CURR_ROS3_FAPL_T_VERSION,
+            JSVERIFY( H5FD_CURR_ROS3_FAPL_T_VERSION,
                       fa_fetch.version,
                       "invalid version number" )
             JSVERIFY( config.version,
@@ -646,8 +630,6 @@ error:
         } H5E_END_TRY;
     }
     return 1;
-#endif /* H5_HAVE_ROS3_VFD */
-
 } /* test_fapl_config_validation */
 
 
@@ -670,23 +652,11 @@ error:
  * Programmer:  John Mainzer
  *              7/12/17
  *
- * Changes:     Test only fapl and flags.
- *              Jacob Smith 2017
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_ros3_fapl(void)
 {
-#ifndef H5_HAVE_ROS3_VFD
-    TESTING("ROS3 fapl ");
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-
-#else /* H5_HAVE_ROS3 defined */
-
     /************************
      * test-local variables *
      ************************/
@@ -695,7 +665,7 @@ test_ros3_fapl(void)
     hid_t             driver_id      = -1;  /* ID for this VFD              */
     unsigned long     driver_flags   =  0;  /* VFD feature flags            */
     H5FD_ros3_fapl_t  ros3_fa_0      = {
-        H5FD__CURR_ROS3_FAPL_T_VERSION, /* version       */
+        H5FD_CURR_ROS3_FAPL_T_VERSION, /* version       */
         FALSE,                          /* authenticate  */
         "",                             /* aws_region    */
         "",                             /* secret_id     */
@@ -737,7 +707,6 @@ error:
     } H5E_END_TRY;
 
     return 1;
-#endif /* H5_HAVE_ROS3_VFD */
 
 } /* test_ros3_fapl() */
 
@@ -763,14 +732,6 @@ error:
 static int
 test_vfd_open(void)
 {
-#ifndef H5_HAVE_ROS3_VFD
-    TESTING("ROS3 VFD-level open");
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-
-#else /* H5_HAVE_ROS3_VFD defined */
 
     /*********************
      * test-local macros *
@@ -967,8 +928,6 @@ error:
 #undef FAPL_H5P_DEFAULT
 #undef FAPL_ROS3_ANON
 
-#endif /* H5_HAVE_ROS3_VFD */
-
 } /* test_vfd_open */
 
 
@@ -993,14 +952,6 @@ error:
 static int
 test_eof_eoa(void)
 {
-#ifndef H5_HAVE_ROS3_VFD
-    TESTING("ROS3 eof/eoa gets and sets");
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-
-#else /* H5_HAVE_ROS3_VFD defined */
 
     /*********************
      * test-local macros *
@@ -1119,7 +1070,6 @@ error:
     }
 
     return 1;
-#endif /* H5_HAVE_ROS3_VFD */
 
 } /* test_eof_eoa */
 
@@ -1141,15 +1091,6 @@ error:
 static int
 test_H5FDread_without_eoa_set_fails(void)
 {
-#ifndef H5_HAVE_ROS3_VFD
-    TESTING("ROS3 VFD read-eoa temporal coupling library limitation ");
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-
-#else /* H5_HAVE_ROS3_VFD defined */
-
     char              buffer[256];
     unsigned int      i                = 0;
     H5FD_t           *file_shakespeare = NULL;
@@ -1237,8 +1178,6 @@ error:
 
     return 1;
 
-#endif /* H5_HAVE_ROS3_VFD */
-
 } /* test_H5FDread_without_eoa_set_fails */
 
 
@@ -1262,14 +1201,6 @@ error:
 static int
 test_read(void)
 {
-#ifndef H5_HAVE_ROS3_VFD
-    TESTING("ROS3 VFD read/range-gets");
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-
-#else /* H5_HAVE_ROS3_VFD defined */
 
     /*********************
      * test-local macros *
@@ -1451,8 +1382,6 @@ error:
 
     return 1;
 
-#endif /* H5_HAVE_ROS3_VFD */
-
 } /* test_read */
 
 
@@ -1478,15 +1407,6 @@ error:
 static int
 test_noops_and_autofails(void)
 {
-#ifndef H5_HAVE_ROS3_VFD
-    TESTING("ROS3 VFD always-fail and no-op routines");
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
-
     /*********************
      * test-local macros *
      *********************/
@@ -1606,8 +1526,6 @@ error:
 
     return 1;
 
-#endif /* H5_HAVE_ROS3_VFD */
-
 } /* test_noops_and_autofails*/
 
 
@@ -1632,14 +1550,6 @@ error:
 static int
 test_cmp(void)
 {
-#ifndef H5_HAVE_ROS3_VFD
-    TESTING("ROS3 cmp (comparison)");
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
 
     /*********************
      * test-local macros *
@@ -1750,7 +1660,6 @@ error:
     }
 
     return 1;
-#endif /* H5_HAVE_ROS3_VFD */
 
 } /* test_cmp */
 
@@ -1776,15 +1685,6 @@ error:
 static int
 test_H5F_integration(void)
 {
-#ifndef H5_HAVE_ROS3_VFD
-    TESTING("S3 file access through HD5F library (H5F API)");
-    SKIPPED();
-    puts("    ROS3 VFD not enabled");
-    fflush(stdout);
-    return 0;
-
-#else
-
     /*********************
      * test-local macros *
      *********************/
@@ -1883,11 +1783,10 @@ HDprintf("\nerror!"); fflush(stdout);
         (void)H5Fclose(file);
 
     return 1;
-#endif /* H5_HAVE_ROS3_VFD */
 
 } /* test_H5F_integration */
 
-
+#endif /* H5_HAVE_ROS3_VFD */
 
 
 /*-------------------------------------------------------------------------
@@ -1907,10 +1806,15 @@ HDprintf("\nerror!"); fflush(stdout);
 int
 main(void)
 {
+#ifdef H5_HAVE_ROS3_VFD
     int nerrors = 0;
+    const char *bucket_url_env = NULL;
+
+#endif /* H5_HAVE_ROS3_VFD */
+
+    HDprintf("Testing ros3 VFD functionality.\n");
 
 #ifdef H5_HAVE_ROS3_VFD
-    const char *bucket_url_env = NULL;
 
     /************************
      * initialize test urls *
@@ -1925,7 +1829,7 @@ main(void)
         s3_test_bucket_defined = TRUE;
     }
 
-    if (S3_TEST_MAX_URL_SIZE < snprintf(
+    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(
             url_text_restricted,
             (size_t)S3_TEST_MAX_URL_SIZE,
             "%s/%s",
@@ -1987,23 +1891,20 @@ main(void)
         s3_test_credentials_loaded = 1;
         HDstrncpy(restricted_access_fa.aws_region,
                 (const char *)s3_test_aws_region,
-                H5FD__ROS3_MAX_REGION_LEN);
+                H5FD_ROS3_MAX_REGION_LEN);
         HDstrncpy(restricted_access_fa.secret_id,
                 (const char *)s3_test_aws_access_key_id,
-                H5FD__ROS3_MAX_SECRET_ID_LEN);
+                H5FD_ROS3_MAX_SECRET_ID_LEN);
         HDstrncpy(restricted_access_fa.secret_key,
                 (const char *)s3_test_aws_secret_access_key,
-                H5FD__ROS3_MAX_SECRET_KEY_LEN);
+                H5FD_ROS3_MAX_SECRET_KEY_LEN);
     }
-#endif /* H5_HAVE_ROS3_VFD */
 
     /******************
      * commence tests *
      ******************/
 
     h5_reset();
-
-    HDprintf("Testing ros3 VFD functionality.\n");
 
     nerrors += test_fapl_config_validation();
     nerrors += test_ros3_fapl();
@@ -2025,6 +1926,12 @@ main(void)
     }
     return nerrors; /* 0 if no errors, 1 if any errors */
 
-} /* main() */
+#else
 
+    HDprintf("SKIPPED - read-only S3 VFD not built\n");
+    return EXIT_SUCCESS;
+
+#endif /* H5_HAVE_ROS3_VFD */
+
+} /* main() */
 

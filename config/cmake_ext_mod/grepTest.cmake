@@ -35,11 +35,11 @@ if (NOT TEST_REFERENCE)
   message (FATAL_ERROR "Require TEST_REFERENCE to be defined")
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
@@ -84,7 +84,7 @@ endif ()
 # if the TEST_ERRREF exists grep the error output with the error reference
 if (TEST_ERRREF)
   # if the .err file exists grep the error output with the error reference before comparing stdout
-  if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
     file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_ERR_STREAM)
 
     # TEST_ERRREF should always be matched
@@ -97,7 +97,7 @@ if (TEST_ERRREF)
 
   #always compare output file to reference unless this must be skipped
   if (NOT TEST_SKIP_COMPARE)
-    if (EXISTS ${TEST_FOLDER}/${TEST_REFERENCE})
+    if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
       if (WIN32 OR MINGW)
         configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
         file(RENAME ${TEST_FOLDER}/${TEST_REFERENCE}.tmp ${TEST_FOLDER}/${TEST_REFERENCE})

@@ -58,7 +58,7 @@ const char *FILENAME[] = {
     "stdio_file",        /*7*/
     "windows_file",      /*8*/
     "new_multi_file_v16",/*9*/
-    "ro_s3_file6",       /*10*/
+    "ro_s3_file",        /*10*/
     NULL
 };
 
@@ -1940,6 +1940,7 @@ error:
 static herr_t
 test_ros3(void)
 {
+#ifdef H5_HAVE_ROS3_VFD
     hid_t       fid = -1;                   /* file ID                      */
     hid_t       fapl_id = -1;               /* file access property list ID */
     hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
@@ -1951,14 +1952,20 @@ test_ros3(void)
     H5FD_ros3_fapl_t test_ros3_fa;
     H5FD_ros3_fapl_t ros3_fa_0 =
     {
-        /* version      = */ H5FD__CURR_ROS3_FAPL_T_VERSION,
+        /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,
         /* authenticate = */ FALSE,
         /* aws_region   = */ "",
         /* secret_id    = */ "",
         /* secret_key   = */ "plugh",
     };
+#endif /*H5_HAVE_ROS3_VFD */
 
-    TESTING("ROS3 file driver");
+    TESTING("Read-only S3 file driver");
+
+#ifndef H5_HAVE_ROS3_VFD
+    SKIPPED();
+    return 0;
+#else /* H5_HAVE_ROS3_VFD */
 
     /* Set property list and file name for ROS3 driver. */
     if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -1988,60 +1995,12 @@ test_ros3(void)
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
         TEST_ERROR;
 
-    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))
+        TEST_ERROR
 
     /* Check for extra flags not accounted for above */
     if(driver_flags != (H5FD_FEAT_DATA_SIEVE))
         TEST_ERROR
-
-    /* can't create analogs of the following tests until the
-     * ROS3 driver is up and running in a minimal fashion.
-     * Comment them out until we get to them.
-     */
-#if 0
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-        TEST_ERROR;
-
-    /* Retrieve the access property list... */
-    if((fapl_id_out = H5Fget_access_plist(fid)) < 0)
-        TEST_ERROR;
-
-    /* Check that the driver is correct */
-    if(H5FD_ROS3 != H5Pget_driver(fapl_id_out))
-        TEST_ERROR;
-
-    /* ...and close the property list */
-    if(H5Pclose(fapl_id_out) < 0)
-        TEST_ERROR;
-
-    /* Check that we can get an operating-system-specific handle from
-     * the library.
-     */
-    if(H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
-        TEST_ERROR;
-    if(os_file_handle == NULL)
-        FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
-
-
-    /* There is no garantee the size of metadata in file is constant.
-     * Just try to check if it's reasonable.
-     *
-     * Currently it should be around 2 KB.
-     */
-    if(H5Fget_filesize(fid, &file_size) < 0)
-        TEST_ERROR;
-    if(file_size < 1 * KB || file_size > 4 * KB)
-        FAIL_PUTS_ERROR("suspicious file size obtained from H5Fget_filesize");
-
-    /* Close and delete the file */
-    if(H5Fclose(fid) < 0)
-        TEST_ERROR;
-    h5_delete_test_file(FILENAME[0], fapl_id);
-
-    /* Close the fapl */
-    if(H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
-#endif
 
     PASSED();
     return 0;
@@ -2053,9 +2012,8 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
     return -1;
+#endif /* H5_HAVE_ROS3_VFD */
 } /* end test_ros3() */
-
-
 
 /*-------------------------------------------------------------------------
  * Function:    main

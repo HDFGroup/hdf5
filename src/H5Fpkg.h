@@ -217,7 +217,7 @@ typedef struct H5F_mtab_t {
 } H5F_mtab_t;
 
 /* Structure specifically to store superblock. This was originally
- * maintained entirely within H5F_file_t, but is now extracted
+ * maintained entirely within H5F_shared_t, but is now extracted
  * here because the superblock is now handled by the cache */
 typedef struct H5F_super_t {
     H5AC_info_t cache_info;     /* Cache entry information structure          */
@@ -238,11 +238,11 @@ typedef struct H5F_super_t {
 /*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen(). That is, set of
- * H5F_t structs can all point to the same H5F_file_t struct. The `nrefs'
+ * H5F_t structs can all point to the same H5F_shared_t struct. The `nrefs'
  * count in this struct indicates the number of H5F_t structs which are
  * pointing to this struct.
  */
-struct H5F_file_t {
+struct H5F_shared_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     H5F_super_t *sblock;        /* Pointer to (pinned) superblock for file */
     H5O_drvinfo_t *drvinfo;	/* Pointer to the (pinned) driver info 
@@ -309,6 +309,7 @@ struct H5F_file_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5UC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
+    hbool_t     closing;        /* File is in the process of being closed */
 
     /* Cached VOL connector ID & info */
     hid_t       vol_id;         /* ID of VOL connector for the container */
@@ -357,28 +358,31 @@ struct H5F_file_t {
     /* Object flush info */
     H5F_object_flush_t 	object_flush;	    /* Information for object flush callback */
     hbool_t crt_dset_min_ohdr_flag; /* flag to minimize created dataset object header */
+
+    char               *extpath;        /* Path for searching target external link file                 */
+
+#ifdef H5_HAVE_PARALLEL
+    H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
+    hbool_t             coll_md_write;  /* Do all metadata writes collectively */
+#endif /* H5_HAVE_PARALLEL */
+
 };
 
 /*
  * This is the top-level file descriptor.  One of these structures is
  * allocated every time H5Fopen() is called although they may contain pointers
- * to shared H5F_file_t structs.
+ * to shared H5F_shared_t structs.
  */
 struct H5F_t {
-    char		       *open_name;      /* Name used to open file                                       */
-    char		       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
-    char               *extpath;        /* Path for searching target external link file                 */
-    H5F_file_t		   *shared;         /* The shared file info                                         */
-    unsigned		    nopen_objs;     /* Number of open object headers                                */
+    char	       *open_name;      /* Name used to open file                                       */
+    char	       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
+    H5F_shared_t       *shared;         /* The shared file info                                         */
+    unsigned	        nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
     hbool_t             id_exists;      /* Whether an ID for this struct exists                         */
     hbool_t             closing;        /* File is in the process of being closed                       */
     struct H5F_t       *parent;         /* Parent file that this file is mounted to                     */
     unsigned            nmounts;        /* Number of children mounted to this file                      */
-#ifdef H5_HAVE_PARALLEL
-    H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
-    hbool_t             coll_md_write;  /* Do all metadata writes collectively */
-#endif /* H5_HAVE_PARALLEL */
 };
 
 /*****************************/
@@ -388,8 +392,8 @@ struct H5F_t {
 /* Declare a free list to manage the H5F_t struct */
 H5FL_EXTERN(H5F_t);
 
-/* Declare a free list to manage the H5F_file_t struct */
-H5FL_EXTERN(H5F_file_t);
+/* Declare a free list to manage the H5F_shared_t struct */
+H5FL_EXTERN(H5F_shared_t);
 
 
 /******************************/
@@ -429,16 +433,16 @@ H5_DLL herr_t H5F__super_ext_remove_msg(H5F_t *f, unsigned id);
 H5_DLL herr_t H5F__super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hbool_t was_created);
 
 /* Metadata accumulator routines */
-H5_DLL herr_t H5F__accum_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf);
-H5_DLL herr_t H5F__accum_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5F__accum_free(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size);
-H5_DLL herr_t H5F__accum_flush(H5F_t *f);
-H5_DLL herr_t H5F__accum_reset(H5F_t *f, hbool_t flush);
+H5_DLL herr_t H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf);
+H5_DLL herr_t H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
+H5_DLL herr_t H5F__accum_free(H5F_shared_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size);
+H5_DLL herr_t H5F__accum_flush(H5F_shared_t *f_sh);
+H5_DLL herr_t H5F__accum_reset(H5F_shared_t *f_sh, hbool_t flush);
 
 /* Shared file list related routines */
-H5_DLL herr_t H5F__sfile_add(H5F_file_t *shared);
-H5_DLL H5F_file_t *H5F__sfile_search(H5FD_t *lf);
-H5_DLL herr_t H5F__sfile_remove(H5F_file_t *shared);
+H5_DLL herr_t H5F__sfile_add(H5F_shared_t *shared);
+H5_DLL H5F_shared_t *H5F__sfile_search(H5FD_t *lf);
+H5_DLL herr_t H5F__sfile_remove(H5F_shared_t *shared);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F__efc_create(unsigned max_nfiles);

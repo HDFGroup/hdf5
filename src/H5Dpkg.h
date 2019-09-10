@@ -47,11 +47,13 @@
 /* [Simple] Macro to construct a H5D_io_info_t from it's components */
 #define H5D_BUILD_IO_INFO_WRT(io_info, ds, str, buf)                    \
     (io_info)->dset = ds;                                               \
+    (io_info)->f_sh = H5F_SHARED((ds)->oloc.file);                      \
     (io_info)->store = str;                                             \
     (io_info)->op_type = H5D_IO_OP_WRITE;                               \
     (io_info)->u.wbuf = buf
 #define H5D_BUILD_IO_INFO_RD(io_info, ds, str, buf)                     \
     (io_info)->dset = ds;                                               \
+    (io_info)->f_sh = H5F_SHARED((ds)->oloc.file);                      \
     (io_info)->store = str;                                             \
     (io_info)->op_type = H5D_IO_OP_READ;                                \
     (io_info)->u.rbuf = buf
@@ -207,6 +209,8 @@ typedef enum H5D_io_op_type_t {
 
 typedef struct H5D_io_info_t {
     const H5D_t *dset;          /* Pointer to dataset being operated on */
+/* QAK: Delete the f_sh field when oloc has a shared file pointer? */
+    H5F_shared_t *f_sh;         /* Pointer to shared file struct that dataset is within */
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm comm;              /* MPI communicator for file */
     hbool_t using_mpi_vfd;      /* Whether the file is using an MPI-based VFD */
@@ -565,6 +569,9 @@ H5_DLL herr_t H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *alloc
 H5_DLL herr_t H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc, hbool_t full_overwrite, hsize_t old_dim[]);
 H5_DLL herr_t H5D__get_storage_size(const H5D_t *dset, hsize_t *storage_size);
 H5_DLL herr_t H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset, hsize_t *storage_size);
+H5_DLL herr_t H5D__get_num_chunks(const H5D_t *dset, const H5S_t *space, hsize_t *nchunks);
+H5_DLL herr_t H5D__get_chunk_info(const H5D_t *dset, const H5S_t *space, hsize_t chk_idx, hsize_t *coord, unsigned *filter_mask, haddr_t *offset, hsize_t *size);
+H5_DLL herr_t H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *coord, unsigned *filter_mask, haddr_t *addr, hsize_t *size);
 H5_DLL haddr_t H5D__get_offset(const H5D_t *dset);
 H5_DLL void *H5D__vlen_get_buf_size_alloc(size_t size, void *info);
 H5_DLL herr_t H5D__vlen_get_buf_size(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point, void *op_data);

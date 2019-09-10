@@ -105,9 +105,9 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
 	    for(k = 0; k < (NX / 2); k++)
 		for(m = 0; m < (NY / 2); m++)
 		    if(buf2[k][m] != buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]) {
-			printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
-			printf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
-			printf("    buf1[%d][%d]=%d\n", (i % 2) * (NX / 2) + k, (j % 2) * (NY / 2) + m, buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]);
+			HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
+			HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
+			HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * (NX / 2) + k, (j % 2) * (NY / 2) + m, buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]);
 			TEST_ERROR;
 		    } /* end if */
 	} /* end for */
@@ -195,9 +195,9 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
 	    for(k = 0; k < (NX / 2); k++)
 		for(m = 0; m < (NY / 2); m++)
 		    if(buf2[k][m] != buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]) {
-			printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
-			printf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
-			printf("    buf1[%d][%d]=%d\n", (i % 2) * (NX / 2) + k, (j % 2) * (NY / 2) + m, buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]);
+			HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
+			HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
+			HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * (NX / 2) + k, (j % 2) * (NY / 2) + m, buf1[(i % 2) * (NX / 2) + k][(j % 2) * (NY / 2) + m]);
 			TEST_ERROR;
 		    } /* end if */
 	} /* end for */
@@ -219,22 +219,14 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Tests extendible datasets
+ * Purpose:     Tests extendible datasets
  *
- * Return:	Success:	exit(0)
- *
- *		Failure:	exit(non-zero)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:	Robb Matzke
  *              Friday, January 30, 1998
- *
- * Modifications:
- *              Took main data code out into write_data() routine, to allow
- *              different dataset creation property list settings to be tested.
- *              Quincey Koziol
- *              Tuesday, June 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -289,17 +281,17 @@ main (void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     if(nerrors) {
-        printf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
-        exit(EXIT_FAILURE);
+        HDprintf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
-    printf("All extend tests passed.\n");
+    HDprintf("All extend tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
-    printf("*** One or more extend tests failed ***\n");
-    return 1;
-}
+    HDprintf("*** One or more extend tests failed ***\n");
+    HDexit(EXIT_FAILURE);
+} /* end main() */
 

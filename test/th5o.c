@@ -13,7 +13,7 @@
 
 /***********************************************************
 *
-* Test program:	 th5o
+* Test program:     th5o
 *
 * Test public H5O functions for accessing
 *
@@ -30,7 +30,7 @@
 #define TEST6_DIM1 100
 #define TEST6_DIM2 100
 
-
+
 /****************************************************************
 **
 **  test_h5o_open(): Test H5Oopen function.
@@ -140,7 +140,7 @@ test_h5o_open(void)
 } /* test_h5o_open() */
 
 
-
+
 /****************************************************************
 **
 **  test_h5o_close(): Test H5Oclose function.
@@ -230,7 +230,7 @@ test_h5o_close(void)
     CHECK(ret, FAIL, "H5Fclose");
 }
 
-
+
 /****************************************************************
 **
 **  test_h5o_open_by_addr(): Test H5Oopen_by_addr function.
@@ -367,7 +367,7 @@ test_h5o_open_by_addr(void)
     VERIFY(dtype, FAIL, "H5Oopen_by_addr");
 } /* test_h5o_open_by_addr() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_refcount(): Test H5O refcounting functions.
@@ -562,7 +562,7 @@ test_h5o_refcount(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* test_h5o_refcount() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_plist(): Test object creation properties
@@ -756,7 +756,7 @@ test_h5o_plist(void)
     CHECK(ret, FAIL, "H5Pclose");
 } /* test_h5o_plist() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_link(): Test creating link to object
@@ -910,7 +910,7 @@ test_h5o_link(void)
     HDfree(rdata);
 } /* end test_h5o_link() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_comment(): Test H5Oset(get)_comment functions.
@@ -1083,7 +1083,7 @@ test_h5o_comment(void)
 
 } /* test_h5o_comment() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_comment_by_name(): Test H5Oset(get)_comment_by_name functions.
@@ -1242,7 +1242,7 @@ test_h5o_comment_by_name(void)
 
 } /* test_h5o_comment_by_name() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_getinfo_same_file():  Test that querying the object info for
@@ -1353,7 +1353,7 @@ test_h5o_getinfo_same_file(void)
 /****************************************************************
 **
 **  visit_obj_cb():
-**      This is the callback function invoked by H5Ovisit1() in 
+**      This is the callback function invoked by H5Ovisit1() in
 **      test_h5o_getinfo_visit():
 **      --Verify that the object info returned to the callback
 **        function is the same as H5Oget_info2().
@@ -1382,10 +1382,10 @@ visit_obj_cb(hid_t group_id, const char *name, const H5O_info_t *oinfo1,
     return(H5_ITER_CONT);
 } /* end visit_obj_cb() */
 
-
+
 /****************************************************************
 **
-**  test_h5o_getinfo_visit():  
+**  test_h5o_getinfo_visit():
 **    Verify that the object info returned via H5Oget_info1()
 **    and H5Oget_info2() are the same.
 **    Verify that the object info retrieved via H5Ovisit1() is
@@ -1419,7 +1419,7 @@ test_h5o_getinfo_visit(void)
     /* Attach 10 attributes to "group1" */
     for(j = 0; j <10; j++) {
         /* Create the attribute name */
-        sprintf(attrname, "attr%u", j);
+        HDsprintf(attrname, "attr%u", j);
         /* Create the attribute */
         aid = H5Acreate2(gid1, attrname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Acreate2");
@@ -1479,7 +1479,7 @@ test_h5o_getinfo_visit(void)
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-
+
 /****************************************************************
 **
 **  test_h5o(): Main H5O (generic object) testing routine.
@@ -1505,7 +1505,7 @@ test_h5o(void)
 #endif
 } /* test_h5o() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_h5o
  *

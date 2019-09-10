@@ -2932,7 +2932,7 @@ H5D__flush_sieve_buf(H5D_t *dataset)
         HDassert(dataset->shared->layout.type != H5D_COMPACT);      /* We should never have a sieve buffer for compact storage */
 
         /* Write dirty data sieve buffer to file */
-        if(H5F_block_write(dataset->oloc.file, H5FD_MEM_DRAW, dataset->shared->cache.contig.sieve_loc,
+        if(H5F_shared_block_write(H5F_SHARED(dataset->oloc.file), H5FD_MEM_DRAW, dataset->shared->cache.contig.sieve_loc,
                 dataset->shared->cache.contig.sieve_size, dataset->shared->cache.contig.sieve_buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
 

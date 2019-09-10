@@ -390,7 +390,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
                 cache_flags |= H5AC__DIRTIED_FLAG;
 
                 /* On file close or flushing, does not allow section info to shrink in size */
-                if(f->closing || flush_in_progress) {
+                if(f->shared->closing || flush_in_progress) {
                     if(fspace->sect_size > fspace->alloc_sect_size)
                         cache_flags |= H5AC__DELETED_FLAG | H5AC__TAKE_OWNERSHIP_FLAG;
                     else
@@ -441,7 +441,7 @@ HDfprintf(stderr, "%s: Relinquishing section info ownership\n", FUNC);
                     /* Set flag to release section info space in file */
                     /* On file close or flushing, only need to release section info with size 
                        bigger than previous section */
-                    if(f->closing || flush_in_progress) {
+                    if(f->shared->closing || flush_in_progress) {
                         if(fspace->sect_size > fspace->alloc_sect_size)
                             release_sinfo_space = TRUE;
                         else
