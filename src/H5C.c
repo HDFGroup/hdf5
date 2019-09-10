@@ -7376,7 +7376,7 @@ H5C_load_entry(H5F_t *              f,
         }
 
         /* Calculate and track the # of retries */
-        if ((retries = h5_retry_retries(&retry)) != 0)     /* Does not track 0 retry */
+        if ((retries = h5_retry_retries(&retry)) != 0) {    /* Does not track 0 retry */
 
             if ( H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, 
                                                  retries) < 0)
