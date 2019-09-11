@@ -345,8 +345,9 @@ endif ()
 
 # dump the output unless nodisplay option is set
 if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY)
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
   execute_process (
-      COMMAND ${CMAKE_COMMAND} -E echo ${TEST_FOLDER}/${TEST_OUTPUT}
+      COMMAND ${CMAKE_COMMAND} -E echo ${TEST_STREAM}
       RESULT_VARIABLE TEST_RESULT
   )
 endif ()
