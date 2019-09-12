@@ -1751,7 +1751,7 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
              *
              * Obviously, this must be fixed for the production version.
              */
-            int32_t new_index_entry_index;
+            uint32_t new_index_entry_index;
 
             new_index_entry_index = f->shared->mdf_idx_entries_used + 
                                     idx_ent_added++;
