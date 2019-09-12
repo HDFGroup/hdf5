@@ -258,10 +258,8 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     H5P_genplist_t *plist;                   /* Property list pointer       */
     H5F_vfd_swmr_config_t *vfd_swmr_config = /* Points to VFD SWMR          */
         NULL;                                /* configuration               */
-    unsigned file_retries =                  /* Maximum retries for opening */
-        H5FD_VFD_SWMR_MD_FILE_RETRY_MAX;     /* md file                     */
-    uint64_t nanosec = 1;                    /* # of nanoseconds to sleep   */
-                                             /* between retries             */
+    h5_retry_t retry;                        /* retry state */
+    bool do_try;                             /* more tries remain */
     H5FD_t *ret_value  = NULL;               /* Return value     */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -306,16 +304,17 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     file->md_file_path[sizeof(file->md_file_path) - 1] = '\0';
 
     /* Retry on opening the metadata file */
-    do {
+    for (do_try = h5_retry_init(&retry, vfd_swmr_config->md_open_tries,
+                                 H5_RETRY_DEFAULT_MINIVAL,
+                                 H5_RETRY_DEFAULT_MAXIVAL);
+         do_try != 0;
+         do_try = h5_retry_next(&retry)) {
         if((file->md_fd = HDopen(file->md_file_path, O_RDONLY)) >= 0)
             break;
-        /* Sleep and double the sleep time on next retry */
-        H5_nanosleep(nanosec);
-        nanosec *= 2;               
-    } while (--file_retries);
+    }
 
     /* Exhaust all retries for opening the md file */
-    if(file_retries == 0)
+    if(!do_try)
         HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, NULL, \
                    "unable to open the metadata file after all retry attempts")
 
