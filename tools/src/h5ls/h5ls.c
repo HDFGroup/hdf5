@@ -16,7 +16,6 @@
  *              Monday, March 23, 1998
  */
 
-
 /*
  * We include the private header file so we can get to the uniform
  * programming environment it declares.  Other than that, h5ls only calls
@@ -121,6 +120,7 @@ typedef struct {
 /* Command-line switches */
 static int      verbose_g = 0;            /* lots of extra output */
 static int      width_g = 80;             /* output width in characters */
+static hbool_t  vfd_swmr_poll_g = FALSE;  /* poll for changes using VFD SWMR */
 static hbool_t  address_g = FALSE;        /* print raw data addresses */
 static hbool_t  data_g = FALSE;           /* display dataset values? */
 static hbool_t  label_g = FALSE;          /* label compound values? */
@@ -178,6 +178,7 @@ usage (void)
 {
     FLUSHSTREAM(rawoutstream);
     PRINTVALSTREAM(rawoutstream, "usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]\n");
+    PRINTVALSTREAM(rawoutstream, "       h5ls [OPTIONS] --poll file\n");
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "   -h, -?, --help  Print a usage message and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -a, --address   Print raw data address.  If dataset is contiguous, address\n");
@@ -208,6 +209,7 @@ usage (void)
     PRINTVALSTREAM(rawoutstream, "   -f, --full      Print full path names instead of base names\n");
     PRINTVALSTREAM(rawoutstream, "   -g, --group     Show information about a group, not its contents\n");
     PRINTVALSTREAM(rawoutstream, "   -l, --label     Label members of compound datasets\n");
+    PRINTVALSTREAM(rawoutstream, "   -p, --poll      Continuously re-read and re-display the input file using VFD SWMR\n");
     PRINTVALSTREAM(rawoutstream, "   -r, --recursive List all groups recursively, avoiding cycles\n");
     PRINTVALSTREAM(rawoutstream, "   -s, --string    Print 1-byte integer datasets as ASCII\n");
     PRINTVALSTREAM(rawoutstream, "   -S, --simple    Use a machine-readable output format\n");
@@ -1462,6 +1464,8 @@ dump_dataset_values(hid_t dset)
     h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
     ctx.need_prefix = TRUE;
     ctx.cur_column = (size_t)curr_pos;
+    if (vfd_swmr_poll_g)
+        H5Drefresh(dset);
     if (h5tools_dump_dset(rawoutstream, info, &ctx, dset, NULL) < 0) {
         h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, "        Unable to print data.");
@@ -2597,11 +2601,12 @@ main(int argc, const char *argv[])
     char *fname = NULL, *oname = NULL, *x;
     const char *s = NULL;
     char *rest;
-    int  argno;
+    int  argno, times;
     static char root_name[] = "/";
     char        drivername[50];
     const char *preferred_driver = NULL;
     int err_exit = 0;
+    uint64_t poll_nanosecs = 1000;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -2643,6 +2648,19 @@ main(int argc, const char *argv[])
             follow_elink_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--full")) {
             fullname_g = TRUE;
+        } else if(!HDstrncmp(argv[argno], "--poll=", strlen("--poll="))) {
+            int nscanned = 0, rc;
+            uint64_t poll_millisecs;
+            rc = sscanf(argv[argno], "--poll=%" SCNu64 "%n", &poll_millisecs,
+                &nscanned);
+            if (rc != 1 || argv[argno][nscanned] != '\0') {
+                usage();
+                leave(EXIT_FAILURE);
+            }
+            poll_nanosecs = poll_millisecs * 1000000;
+            vfd_swmr_poll_g = TRUE;
+        } else if(!HDstrcmp(argv[argno], "--poll")) {
+            vfd_swmr_poll_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--group")) {
             grp_literal_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--label")) {
@@ -2740,6 +2758,10 @@ main(int argc, const char *argv[])
                         label_g = TRUE;
                         break;
 
+                    case 'p': /* --poll */
+                        vfd_swmr_poll_g = TRUE;
+                        break;
+
                     case 'r': /* --recursive */
                         recursive_g = TRUE;
                         fullname_g = TRUE;
@@ -2784,6 +2806,10 @@ main(int argc, const char *argv[])
         leave(EXIT_FAILURE);
     } /* end if */
 
+    if (vfd_swmr_poll_g && argc > 1 + argno) {
+            HDfprintf(rawerrorstream, "Error: -p / --poll is limited to only one file[/OBJECT]\n\n");
+            leave(EXIT_FAILURE);
+    }
     /* Check for conflicting arguments */
     if (!is_valid_args())
     {
@@ -2815,6 +2841,10 @@ main(int argc, const char *argv[])
         symlink_trav_t symlink_list;
         size_t u;
 
+        if (vfd_swmr_poll_g) {
+            preferred_driver = "swmr";
+        }
+
         fname = HDstrdup(argv[argno++]);
         oname = NULL;
         file = -1;
@@ -2826,8 +2856,8 @@ main(int argc, const char *argv[])
                 if(verbose_g)
                     PRINTSTREAM(rawoutstream, "Opened \"%s\" with %s driver.\n", fname, drivername);
                 break; /*success*/
-            } /* end if */
-
+            } else if (vfd_swmr_poll_g)
+                break;
             /* Shorten the file name; lengthen the object name */
             x = oname;
             oname = HDstrrchr(fname, '/');
@@ -2903,16 +2933,26 @@ main(int argc, const char *argv[])
         else
             li.type = H5L_TYPE_HARD;
 
-        /* Open the object and display it's information */
-        if(li.type == H5L_TYPE_HARD) {
-            if(visit_obj(file, oname, &iter) < 0)
-                leave(EXIT_FAILURE);
-        } /* end if(li.type == H5L_TYPE_HARD) */
-        else {
-            /* Specified name is not for object -- list that link */
-            /* Use file ID for root group ID */
-            iter.gid = file;
-            list_lnk(oname, &li, &iter);
+        for (times = 0; vfd_swmr_poll_g || times < 1; times++) {
+            if (vfd_swmr_poll_g) {
+                int i;
+                for (i = 0; i < 3; i++) 
+                    printf("\n");
+            }
+            /* Open the object and display it's information */
+            if(li.type == H5L_TYPE_HARD) {
+                if(visit_obj(file, oname, &iter) < 0)
+                    leave(EXIT_FAILURE);
+            } /* end if(li.type == H5L_TYPE_HARD) */
+            else {
+                /* Specified name is not for object -- list that link */
+                /* Use file ID for root group ID */
+                iter.gid = file;
+                list_lnk(oname, &li, &iter);
+            }
+#if 1
+            H5_nanosleep(poll_nanosecs);
+#endif
         }
         H5Fclose(file);
         HDfree(fname);

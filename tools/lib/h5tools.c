@@ -16,6 +16,8 @@
  *  readable format.
  */
 
+#include <libgen.h>
+
 #include "h5tools.h"
 #include "h5tools_dump.h"
 #include "h5tools_ref.h"
@@ -52,21 +54,11 @@ H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descendi
 /* module-scoped variables */
 static int  h5tools_init_g;     /* if h5tools lib has been initialized */
 
-/* Names of VFDs */
-static const char *drivernames[]={
-    "sec2",
-    "family",
-    "split",
-    "multi",
-#ifdef H5_HAVE_PARALLEL
-    "mpio",
-#endif /* H5_HAVE_PARALLEL */
-};
-
-/* This enum should match the entries in the above drivers_list since they
+/* This enum should match the entries in the below drivers_list since they
  * are indexes into the drivers_list array. */
 typedef enum {
-    SEC2_IDX = 0
+    SWMR_IDX = 0
+   ,SEC2_IDX
    ,FAMILY_IDX
    ,SPLIT_IDX
    ,MULTI_IDX
@@ -74,6 +66,19 @@ typedef enum {
    ,MPIO_IDX
 #endif /* H5_HAVE_PARALLEL */
 } driver_idx;
+
+/* Names of VFDs */
+static const char *drivernames[]={
+    [SWMR_IDX] = "swmr",
+    [SEC2_IDX] = "sec2",
+    [FAMILY_IDX] = "family",
+    [SPLIT_IDX] = "split",
+    [MULTI_IDX] = "multi",
+#ifdef H5_HAVE_PARALLEL
+    [MPIO_IDX] = "mpio",
+#endif /* H5_HAVE_PARALLEL */
+};
+
 #define NUM_DRIVERS     (sizeof(drivernames) / sizeof(drivernames[0]))
 
 /*-------------------------------------------------------------------------
@@ -422,6 +427,55 @@ h5tools_set_error_file(const char *fname, int is_bin)
     return retvalue;
 }
 
+static hid_t
+swmr_fapl_augment(hid_t fapl, const char *fname)
+{
+    H5F_vfd_swmr_config_t *config = NULL;   /* Configuration for VFD SWMR */
+    const char *dname;
+    char *tname;
+
+    /*
+     * Set up to open the file with VFD SWMR configured.
+     */
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl, 4096, 100, 0) < 0) {
+        HDfprintf(rawerrorstream, "H5Pset_page_buffer_size failed\n");
+        return H5I_INVALID_HID;
+    }
+
+    /* Allocate memory for the configuration structure */
+    config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t));
+    if(config == NULL) {
+        HDfprintf(rawerrorstream, "VFD SWMR config allocation failed\n");
+        return H5I_INVALID_HID;
+    }
+
+    config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config->tick_len = 4;
+    config->max_lag = 5;
+    config->vfd_swmr_writer = FALSE;
+    config->md_pages_reserved = 128;
+#if 0
+    config->md_open_tries = 1;
+#endif
+
+    if ((tname = strdup(fname)) == NULL) {
+        HDfprintf(rawerrorstream, "temporary string allocation failed\n");
+        return H5I_INVALID_HID;
+    }
+    dname = dirname(tname);
+    snprintf(config->md_file_path, sizeof(config->md_file_path),
+        "%s/my_md_file", dname);
+    free(tname);
+
+    /* Enable VFD SWMR configuration */
+    if(H5Pset_vfd_swmr_config(fapl, config) < 0) {
+        HDfprintf(rawerrorstream, "H5Pset_vrd_swmr_config failed\n");
+        return H5I_INVALID_HID;
+    }
+    return fapl;
+}
+
 /*-------------------------------------------------------------------------
  * Function: h5tools_get_fapl
  *
@@ -432,7 +486,8 @@ h5tools_set_error_file(const char *fname, int is_bin)
  *-------------------------------------------------------------------------
  */
 static hid_t
-h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
+h5tools_get_fapl(hid_t fapl, const char *fname, const char *driver,
+    unsigned *drivernum)
 {
     hid_t       new_fapl = -1; /* Copy of file access property list passed in, or new property list */
     int         ret_value = SUCCEED;
@@ -449,7 +504,13 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 
     /* Determine which driver the user wants to open the file with. Try
      * that driver. If it can't open it, then fail. */
-    if (!HDstrcmp(driver, drivernames[SEC2_IDX])) {
+    if (!HDstrcmp(driver, drivernames[SWMR_IDX])) {
+        /* SWMR driver */
+        if (swmr_fapl_augment(new_fapl, fname) < 0)
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "swmr_fapl_augment failed");
+        if (drivernum)
+            *drivernum = SWMR_IDX;
+    } else if (!HDstrcmp(driver, drivernames[SEC2_IDX])) {
         /* SEC2 driver */
         if (H5Pset_fapl_sec2(new_fapl) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_sec2 failed");
@@ -545,7 +606,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
 
     if (driver && *driver) {
         /* Get the correct FAPL for the given driver */
-        if ((my_fapl = h5tools_get_fapl(fapl, driver, &drivernum)) < 0)
+        if ((my_fapl = h5tools_get_fapl(fapl, fname, driver, &drivernum)) < 0)
             goto done;
 
         /* allow error stack display if enable-error-stack has optional arg number */
@@ -566,7 +627,8 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
         /* Try to open the file using each of the drivers */
         for (drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
             /* Get the correct FAPL for the given driver */
-            if((my_fapl = h5tools_get_fapl(fapl, drivernames[drivernum], NULL)) < 0)
+            if((my_fapl = h5tools_get_fapl(fapl, fname, drivernames[drivernum],
+                    NULL)) < 0)
                 goto done;
 
             /* allow error stack display if enable-error-stack has optional arg number */
