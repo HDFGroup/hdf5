@@ -161,6 +161,10 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
 
     UNUSED(clss);
 
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    H5_UNIMPLEMENTED(ENVONLY, "H5Fis_hdf5: not implemented");
+#endif
+
     if (NULL == name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Fis_hdf5: file name is NULL");
 

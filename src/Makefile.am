@@ -62,8 +62,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Fsfile.c H5Fspace.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAint.c H5FAstat.c H5FAtest.c \
-        H5FD.c H5FDcore.c  \
-        H5FDfamily.c H5FDint.c H5FDlog.c \
+        H5FD.c H5FDcore.c H5FDfamily.c H5FDhdfs.c H5FDint.c H5FDlog.c \
         H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c H5FDtest.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSint.c H5FSsection.c \
         H5FSstat.c H5FStest.c \
@@ -95,8 +94,9 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c \
         H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
-        H5Pgcpl.c H5Pint.c \
-        H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
+        H5Pgcpl.c H5Pint.c H5Plapl.c H5Plcpl.c \
+        H5Pmapl.c H5Pmcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c \
+        H5Ptest.c \
         H5PB.c \
         H5PL.c H5PLint.c H5PLpath.c H5PLplugin_cache.c \
         H5R.c H5Rint.c H5Rdeprec.c \
@@ -127,14 +127,19 @@ if DIRECT_VFD_CONDITIONAL
     libhdf5_la_SOURCES += H5FDdirect.c
 endif
 
+# Only compile the read-only S3 VFD if necessary
+if ROS3_VFD_CONDITIONAL
+    libhdf5_la_SOURCES += H5FDros3.c H5FDs3comms.c
+endif
+
 # Public headers
 include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5version.h \
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5Fpublic.h \
         H5FDpublic.h H5FDcore.h H5FDdirect.h \
-        H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
-        H5FDmulti.h H5FDsec2.h  H5FDstdio.h H5FDwindows.h \
+        H5FDfamily.h H5FDhdfs.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
+        H5FDmulti.h H5FDros3.h H5FDsec2.h H5FDstdio.h H5FDwindows.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
