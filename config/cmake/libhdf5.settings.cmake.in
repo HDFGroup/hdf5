@@ -14,10 +14,10 @@ General Information:
 Compiling Options:
 ------------------
                      Build Mode: @CMAKE_BUILD_TYPE@
-              Debugging Symbols: @SYMBOLS@
-                        Asserts: @ASSERTS@
-                      Profiling: @PROFILING@
-             Optimization Level: @OPTIMIZATION@
+              Debugging Symbols: @HDF5_ENABLE_SYMBOLS@
+                        Asserts: @HDF5_ENABLE_ASSERTS@
+                      Profiling: @HDF5_ENABLE_PROFILING@
+             Optimization Level: @HDF5_ENABLE_OPTIMIZATION@
 
 Linking Options:
 ----------------
