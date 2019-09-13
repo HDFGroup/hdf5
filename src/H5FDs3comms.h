@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*****************************************************************************
- * Read-Only S3 Virtual File Driver (VFD)                                   
+ * Read-Only S3 Virtual File Driver (VFD)
  *
  * This is the header for the S3 Communications module
  *

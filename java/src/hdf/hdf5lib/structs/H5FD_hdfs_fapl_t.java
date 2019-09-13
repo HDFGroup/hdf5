@@ -23,14 +23,14 @@ import java.io.Serializable;
  * Used for the access of files hosted on the Hadoop Distributed File System.
  */
 
-@SuppressWarnings("serial") // mute default serialUID warnings until someone knowledgeable comes along or something breaks horribly
 public class H5FD_hdfs_fapl_t implements Serializable {
+    private static final long serialVersionUID = 2072473407027648309L;
 
-    private long   version;
+    private int    version;
     private String namenode_name;
+    private int    namenode_port;
     private String user_name;
     private String kerberos_ticket_cache;
-    private int    namenode_port;
     private int    stream_buffer_size;
 
     /*

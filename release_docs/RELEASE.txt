@@ -191,6 +191,31 @@ New Features
 
     Library:
     --------
+    - Add S3 and HDFS VFDs to HDF5 maintenance
+
+      Fix windows requirements and java tests. Windows requires CMake 3.13.
+            Install openssl library (with dev files);
+            from "Shining Light Productions". msi package preferred.
+
+            PATH should have been updated with the installation dir.
+            set ENV variable OPENSSL_ROOT_DIR to the installation dir.
+            set ENV variable OPENSSL_CONF to the cfg file, likely %OPENSSL_ROOT_DIR%\bin\openssl.cfg
+            Install libcurl library (with dev files);
+            download the latest released version using git: https://github.com/curl/curl.git
+
+            Open a Visual Studio Command prompt
+            change to the libcurl root folder
+            run the "buildconf.bat" batch file
+            change to the winbuild directory
+            nmake /f Makefile.vc mode=dll MACHINE=x64
+            copy libcurl-vc-x64-release-dll-ipv6-sspi-winssl dir to C:\curl (installation dir)
+            set ENV variable CURL_ROOT to C:\curl (installation dir)
+            update PATH ENV variable to %CURL_ROOT%\bin (installation bin dir).
+            the aws credentials file should be in %USERPROFILE%\.aws folder
+            set the ENV variable "HDF5_ROS3_TEST_BUCKET_URL=https://s3.us-east-2.amazonaws.com/hdf5ros3"
+
+      (ADB - 2019/09/12, HDFFV-10854)
+
     - Added new chunk query functions
 
       The following public functions were added to discover information about
@@ -343,10 +368,10 @@ Bug Fixes since HDF5-1.10.3 release
       There was an assertion failure when moving meessages from running a
       user test program with library release hdf5.1.10.4. It was because
       the tag value (object header's address) was not set up when entering
-      the library routine H5O__chunk_update_idx(), which will eventually 
+      the library routine H5O__chunk_update_idx(), which will eventually
       verifies the metadata tag value when protecting the object header.
 
-      The problem was fixed by replacing FUNC_ENTER_PACKAGE in H5O__chunk_update_idx() 
+      The problem was fixed by replacing FUNC_ENTER_PACKAGE in H5O__chunk_update_idx()
       with FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr) to set up the metadata tag.
 
       (VC - 2019/08/23, HDFFV-10873)
@@ -363,7 +388,7 @@ Bug Fixes since HDF5-1.10.3 release
       to unsigned later on, the decimal part is chopped off causing the test
       failure.
 
-      This was fixed by obtaining the rounded integer value (HDceil) for the 
+      This was fixed by obtaining the rounded integer value (HDceil) for the
       log10 value of read attempts first before casting the result to unsigned.
 
       (VC - 2019/8/14, HDFFV-10813)

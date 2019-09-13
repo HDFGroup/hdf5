@@ -370,6 +370,179 @@ done:
     return (jlong)offset;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1family_1offset */
 
+/* Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_fapl_hdfs
+ * Signature: (J)Lhdf/hdf5lib/structs/H5FD_hdfs_fapl_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1fapl_1hdfs
+    (JNIEnv *env, jclass clss, jlong fapl_id)
+{
+#ifdef H5_HAVE_LIBHDFS
+    H5FD_hdfs_fapl_t fa;
+    jvalue           args[5];
+    jint             j_namenode_port      = 0;
+    jstring          j_namenode_name      = NULL;
+    jstring          j_user_name          = NULL;
+    jstring          j_kerb_cache_path    = NULL;
+    jint             j_stream_buffer_size = 0;
+#endif /* H5_HAVE_LIBHDFS */
+    jobject          ret_obj              = NULL;
+
+    UNUSED(clss);
+
+#ifdef H5_HAVE_LIBHDFS
+    if (H5Pget_fapl_hdfs((hid_t)fapl_id, &fa) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (NULL != fa.namenode_name) {
+        if (NULL == (j_namenode_name = ENVPTR->NewStringUTF(ENVONLY, fa.namenode_name))) {
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create namenode_name string");
+        }
+    }
+    args[0].l = j_namenode_name;
+
+    args[1].i = (jint)fa.namenode_port;
+
+    if (NULL != fa.user_name) {
+        if (NULL == (j_user_name = ENVPTR->NewStringUTF(ENVONLY, fa.user_name))) {
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create user_name string");
+        }
+    }
+    args[2].l = j_user_name;
+
+    if (NULL != fa.kerberos_ticket_cache) {
+        if (NULL == (j_kerb_cache_path = ENVPTR->NewStringUTF(ENVONLY, fa.kerberos_ticket_cache))) {
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create kerberos_ticket_cache string");
+        }
+    }
+    args[3].l = j_kerb_cache_path;
+
+    args[4].i = (jint)fa.stream_buffer_size;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5FD_hdfs_fapl_t", "(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;I)V", args, ret_obj);
+#else
+    H5_UNIMPLEMENTED(ENVONLY, "H5Pget_fapl_hdfs: not implemented");
+#endif /* H5_HAVE_LIBHDFS */
+
+done:
+    return ret_obj;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1fapl_1hdfs */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_fapl_hdfs
+ * Signature: (JLhdf/hdf5lib/structs/H5FD_hdfs_fapl_t;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
+    (JNIEnv *env, jclass clss, jlong fapl_id, jobject fapl_config)
+{
+#ifdef H5_HAVE_LIBHDFS
+    H5FD_hdfs_fapl_t  instance;
+    const char       *str = NULL;
+    jfieldID          fid;
+    jstring           j_str;
+    jclass            cls;
+#endif /* H5_HAVE_LIBHDFS */
+
+    UNUSED(clss);
+
+#ifdef H5_HAVE_LIBHDFS
+    HDmemset(&instance, 0, sizeof(H5FD_hdfs_fapl_t));
+
+    if (NULL == (cls = ENVPTR->GetObjectClass(ENVONLY, fapl_config)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "version", "I")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    instance.version = ENVPTR->GetIntField(ENVONLY, fapl_config, fid);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "namenode_name", "Ljava/lang/String;")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (j_str) {
+        PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5FDset_fapl_hdfs: fapl_config namenode_name not pinned");
+
+        HDstrncpy(instance.namenode_name, str, H5FD__HDFS_NODE_NAME_SPACE + 1);
+        instance.namenode_name[H5FD__HDFS_NODE_NAME_SPACE] = '\0';
+
+        UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+        str = NULL;
+    }
+    else
+        HDmemset(instance.namenode_name, 0, H5FD__HDFS_NODE_NAME_SPACE + 1);
+
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "namenode_port", "I")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    instance.namenode_port = ENVPTR->GetIntField(ENVONLY, fapl_config, fid);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "user_name", "Ljava/lang/String;")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (j_str) {
+        PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5FDset_fapl_hdfs: fapl_config user_name not pinned");
+
+        HDstrncpy(instance.user_name, str, H5FD__HDFS_USER_NAME_SPACE + 1);
+        instance.user_name[H5FD__HDFS_USER_NAME_SPACE] = '\0';
+
+        UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+        str = NULL;
+    }
+    else
+        HDmemset(instance.user_name, 0, H5FD__HDFS_USER_NAME_SPACE + 1);
+
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "kerberos_ticket_cache", "Ljava/lang/String;")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (j_str) {
+        PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5FDset_fapl_hdfs: fapl_config kerberos_ticket_cache not pinned");
+
+        HDstrncpy(instance.kerberos_ticket_cache, str, H5FD__HDFS_KERB_CACHE_PATH_SPACE + 1);
+        instance.kerberos_ticket_cache[H5FD__HDFS_KERB_CACHE_PATH_SPACE] = '\0';
+
+        UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+        str = NULL;
+    }
+    else
+        HDmemset(instance.kerberos_ticket_cache, 0, H5FD__HDFS_KERB_CACHE_PATH_SPACE + 1);
+
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "stream_buffer_size", "I")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    instance.stream_buffer_size = ENVPTR->GetIntField(ENVONLY, fapl_config, fid);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (H5Pset_fapl_hdfs((hid_t)fapl_id, &instance) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+#else
+    H5_UNIMPLEMENTED(ENVONLY, "H5Pset_fapl_hdfs: not implemented");
+#endif /* H5_HAVE_LIBHDFS */
+
+done:
+    /* NOP */;
+#ifdef H5_HAVE_LIBHDFS
+    if (str)
+        UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+#endif /* H5_HAVE_LIBHDFS */
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs */
+
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_fapl_log
@@ -615,6 +788,167 @@ done:
 /*
  * TODO: H5Pget_multi_type
  */
+
+/*
+ * Class:     hdf5_hdf5lib_H5
+ * Method:    H5Pget_fapl_ros3
+ * Signature: (J)Lhdf/hdf5lib/structs/H5FD_ros3_fapl_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3
+    (JNIEnv *env, jclass clss, jlong fapl_id)
+{
+#ifdef H5_HAVE_ROS3_VFD
+    H5FD_ros3_fapl_t fa;
+    jvalue           args[3];
+    jstring          j_aws   = NULL;
+    jstring          j_id    = NULL;
+    jstring          j_key   = NULL;
+#endif /* H5_HAVE_ROS3_VFD */
+    jobject          ret_obj = NULL;
+
+    UNUSED(clss);
+
+#ifdef H5_HAVE_ROS3_VFD
+    /* pass fapl and fapl_t instance into library get_fapl */
+    /* store fapl details in ros3_fapl_t instance `fa`          */
+    if (H5Pget_fapl_ros3((hid_t)fapl_id, &fa) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (NULL != fa.aws_region) {
+        if (NULL == (j_aws = ENVPTR->NewStringUTF(ENVONLY, fa.aws_region))) {
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create aws_region string");
+        }
+    }
+    args[0].l = j_aws;
+
+    if (NULL != fa.secret_id) {
+        if (NULL == (j_id = ENVPTR->NewStringUTF(ENVONLY, fa.secret_id))) {
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_id string");
+        }
+    }
+    args[1].l = j_id;
+
+    if (NULL != fa.secret_key) {
+        if (NULL == (j_key = ENVPTR->NewStringUTF(ENVONLY, fa.secret_key))) {
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_key string");
+        }
+    }
+    args[2].l = j_key;
+
+    CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5FD_ros3_fapl_t", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", args, ret_obj);
+#else
+    H5_UNIMPLEMENTED(ENVONLY, "H5Pget_fapl_ros3: not implemented");
+#endif /* H5_HAVE_ROS3_VFD */
+
+done:
+    return ret_obj;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3 */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_fapl_ros3
+ * Signature: (JLhdf/hdf5lib/structs/H5FD_ros3_fapl_t;)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
+    (JNIEnv *env, jclass clss, jlong fapl_id, jobject fapl_config)
+{
+#ifdef H5_HAVE_ROS3_VFD
+    H5FD_ros3_fapl_t  instance;
+    const char       *str = NULL;
+    jfieldID          fid;
+    jstring           j_str;
+    jclass            cls;
+#endif /* H5_HAVE_ROS3_VFD */
+
+    UNUSED(clss);
+
+#ifdef H5_HAVE_ROS3_VFD
+    HDmemset(&instance, 0, sizeof(H5FD_ros3_fapl_t));
+
+    if (NULL == (cls = ENVPTR->GetObjectClass(ENVONLY, fapl_config)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "version", "I")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    instance.version = ENVPTR->GetIntField(ENVONLY, fapl_config, fid);
+    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "aws_region", "Ljava/lang/String;")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (j_str) {
+        PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5Pset_fapl_ros3: fapl_config aws_region not pinned");
+
+        HDstrncpy(instance.aws_region, str, H5FD_ROS3_MAX_REGION_LEN + 1);
+        instance.aws_region[H5FD_ROS3_MAX_REGION_LEN] = '\0';
+
+        UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+        str = NULL;
+    }
+    else
+        HDmemset(instance.aws_region, 0, H5FD_ROS3_MAX_REGION_LEN + 1);
+
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "secret_id", "Ljava/lang/String;")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (j_str) {
+        PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5Pset_fapl_ros3: fapl_config secret_id not pinned");
+
+        HDstrncpy(instance.secret_id, str, H5FD_ROS3_MAX_SECRET_ID_LEN + 1);
+        instance.secret_id[H5FD_ROS3_MAX_SECRET_ID_LEN] = '\0';
+
+        UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+        str = NULL;
+    }
+    else
+        HDmemset(instance.secret_id, 0, H5FD_ROS3_MAX_SECRET_ID_LEN + 1);
+
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "secret_key", "Ljava/lang/String;")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (j_str) {
+        PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5Pset_fapl_ros3: fapl_config secret_key not pinned");
+
+        HDstrncpy(instance.secret_key, str, H5FD_ROS3_MAX_SECRET_KEY_LEN + 1);
+        instance.secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN] = '\0';
+
+        UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+        str = NULL;
+    }
+    else
+        HDmemset(instance.secret_key, 0, H5FD_ROS3_MAX_SECRET_KEY_LEN + 1);
+
+    if (instance.aws_region[0] != '\0' && instance.secret_id[0] !='\0' && instance.secret_key[0] !='\0')
+        instance.authenticate = TRUE;
+
+    if (H5Pset_fapl_ros3((hid_t)fapl_id, &instance) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+#else
+    H5_UNIMPLEMENTED(ENVONLY, "H5Pset_fapl_ros3: not implemented");
+#endif /* H5_HAVE_ROS3_VFD */
+
+done:
+    /* NOP */;
+#ifdef H5_HAVE_ROS3_VFD
+    if (str)
+        UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+#endif /* H5_HAVE_LIBHDFS */
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3 */
 
 /*
  * Class:     hdf_hdf5lib_H5
