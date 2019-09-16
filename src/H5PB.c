@@ -3960,13 +3960,13 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:	H5PB__write_raw
+ * Function:    H5PB__write_raw
  *
- * Purpose:	Satisfy a raw data read in cases 3 and 4 from H5PB_write().
+ * Purpose:     Satisfy a raw data write in cases 3 and 4 from H5PB_write().
  *              Specifically:
  *
  *              3) If the write is raw data, and it of page size or 
- *                 larger, write directly from the HDF5 file.  
+ *                 larger, write directly to the HDF5 file.  
  *
  *                 It is possible that the write intersects one or more 
  *                 pages in the page buffer -- test for this and update
