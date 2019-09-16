@@ -58,15 +58,15 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj,
                 H5G_loc_t    cur_loc;
                 H5G_loc_t    link_loc;
                 void         *cur_obj = HDva_arg(arguments, void *);
-                H5VL_loc_params_t cur_params = HDva_arg(arguments, H5VL_loc_params_t);
+                H5VL_loc_params_t *cur_params = HDva_arg(arguments, H5VL_loc_params_t *);
 
-                if(NULL != cur_obj && H5G_loc_real(cur_obj, cur_params.obj_type, &cur_loc) < 0)
+                if(NULL != cur_obj && H5G_loc_real(cur_obj, cur_params->obj_type, &cur_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
                 if(NULL != obj && H5G_loc_real(obj, loc_params->obj_type, &link_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* H5Lcreate_hard */
-                if(H5VL_OBJECT_BY_NAME == cur_params.type) {
+                if(H5VL_OBJECT_BY_NAME == cur_params->type) {
                     H5G_loc_t *cur_loc_p, *link_loc_p;
 
                     /* Set up current & new location pointers */
@@ -80,7 +80,7 @@ H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj,
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should be in the same file.")
 
                     /* Create the link */
-                    if((ret_value = H5L_create_hard(cur_loc_p, cur_params.loc_data.loc_by_name.name, 
+                    if((ret_value = H5L_create_hard(cur_loc_p, cur_params->loc_data.loc_by_name.name, 
                                                     link_loc_p, loc_params->loc_data.loc_by_name.name, lcpl_id)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
                 } /* end if */

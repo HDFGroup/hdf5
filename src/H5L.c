@@ -578,7 +578,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     tmp_vol_obj.connector = (vol_obj1 != NULL ? vol_obj1->connector : vol_obj2->connector);
 
     /* Create the link */
-    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (vol_obj1 ? vol_obj1->data : NULL), loc_params1) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (vol_obj1 ? vol_obj1->data : NULL), &loc_params1) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to create hard link")
 
 done:
