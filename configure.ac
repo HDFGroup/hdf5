@@ -1082,6 +1082,7 @@ AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
 AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
+AC_CHECK_HEADERS([endian.h])
 AC_CHECK_HEADERS([stdbool.h])
 
 ## Darwin

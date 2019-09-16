@@ -517,7 +517,7 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
         /* Number of messages */
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
         if(oh->store_bad_mesg_count)
-           UINT16ENCODE(chunk_image, (oh->nmesgs - 1))
+           UINT16ENCODE(chunk_image, (oh->nmesgs - 1));
         else
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */
             UINT16ENCODE(chunk_image, oh->nmesgs);
@@ -1385,7 +1385,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
         /* Version # */
         if(oh->version == H5O_VERSION_1)
-            UINT16DECODE(chunk_image, id)
+            UINT16DECODE(chunk_image, id);
         else
             id = *chunk_image++;
 

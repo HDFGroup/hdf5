@@ -137,7 +137,7 @@ H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     /* Max. creation order value for the object */
     if(ainfo->track_corder)
-        UINT16DECODE(p, ainfo->max_crt_idx)
+        UINT16DECODE(p, ainfo->max_crt_idx);
     else
         ainfo->max_crt_idx = H5O_MAX_CRT_ORDER_IDX;
 

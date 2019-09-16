@@ -300,7 +300,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                     if(version >= H5O_DTYPE_VERSION_3)
                         UINT32DECODE_VAR(*pp, dt->shared->u.compnd.memb[i].offset, offset_nbytes)
                     else
-                        UINT32DECODE(*pp, dt->shared->u.compnd.memb[i].offset)
+                        UINT32DECODE(*pp, dt->shared->u.compnd.memb[i].offset);
 
                     /* Older versions of the library allowed a field to have
                      * intrinsic 'arrayness'.  Newer versions of the library
@@ -927,7 +927,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                     if(dt->shared->version >= H5O_DTYPE_VERSION_3)
                         UINT32ENCODE_VAR(*pp, (uint32_t)dt->shared->u.compnd.memb[i].offset, offset_nbytes)
                     else
-                        UINT32ENCODE(*pp, dt->shared->u.compnd.memb[i].offset)
+                        UINT32ENCODE(*pp, dt->shared->u.compnd.memb[i].offset);
 
                     /* If we don't have any array fields, write out the old style
                      * member information, for better backward compatibility

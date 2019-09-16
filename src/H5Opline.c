@@ -220,7 +220,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
              */
             for (j = 0; j < filter->cd_nelmts; j++) {
                 if (p + 4 - 1 <= p_end)
-                    UINT32DECODE(p, filter->cd_values[j])
+                    UINT32DECODE(p, filter->cd_values[j]);
                 else
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "ran off the end of the buffer: current p = %p, p_size = %zu, p_end = %p", p, p_size, p_end)
             }

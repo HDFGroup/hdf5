@@ -491,7 +491,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                     } /* end for */
 
                     /* Read stored checksum */
-                    UINT32DECODE(heap_block_p, stored_chksum)
+                    UINT32DECODE(heap_block_p, stored_chksum);
 
                     /* Compute checksum */
                     computed_chksum = H5_checksum_metadata(heap_block, block_size - (size_t)4, 0);

@@ -111,7 +111,7 @@ H5O__refcount_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Get ref. count for object */
-    UINT32DECODE(p, *refcount)
+    UINT32DECODE(p, *refcount);
 
     /* Set return value */
     ret_value = refcount;

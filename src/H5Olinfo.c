@@ -145,7 +145,7 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     /* Max. link creation order value for the group, if tracked */
     if(linfo->track_corder)
-        INT64DECODE(p, linfo->max_corder)
+        INT64DECODE(p, linfo->max_corder);
     else
         linfo->max_corder = 0;
 
@@ -209,7 +209,7 @@ H5O_linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
 
     /* Max. link creation order value for the group, if tracked */
     if(linfo->track_corder)
-        INT64ENCODE(p, linfo->max_corder)
+        INT64ENCODE(p, linfo->max_corder);
 
     /* Address of fractal heap to store "dense" links */
     H5F_addr_encode(f, &p, linfo->fheap_addr);
