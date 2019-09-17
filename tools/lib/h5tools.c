@@ -444,7 +444,7 @@ swmr_fapl_augment(hid_t fapl, const char *fname)
     }
 
     /* Allocate memory for the configuration structure */
-    config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t));
+    config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(*config));
     if(config == NULL) {
         HDfprintf(rawerrorstream, "VFD SWMR config allocation failed\n");
         return H5I_INVALID_HID;
