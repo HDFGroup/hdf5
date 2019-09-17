@@ -275,6 +275,28 @@ Bug Fixes since HDF5-1.10.5 release
 
       (RL - 2019/3/4, HDFFV-10705)
 
+    - fcntl(2)-based file locking incorrectly passed the lock argument struct
+      instead of a pointer to the struct, causing errors on systems where
+      flock(2) is not available.
+
+      File locking is used when files are opened to enforce SWMR semantics. A
+      lock operation takes place on all file opens unless the
+      HDF5_USE_FILE_LOCKING environment variable is set to the string "FALSE".
+      flock(2) is preferentially used, with fcntl(2) locks as a backup if
+      flock(2) is unavailable on a system (if neither is available, the lock
+      operation fails). On these systems, the file lock will often fail, which
+      causes HDF5 to not open the file and report an error.
+
+      This bug only affects POSIX systems. Win32 builds on Windows use a no-op
+      locking call which always succeeds. Systems which exhibit this bug will
+      have H5_HAVE_FCNTL defined but not H5_HAVE_FLOCK in the configure output.
+
+      This bug affects HDF5 1.10.0 through 1.10.5.
+
+      fcntl(2)-based file locking now correctly passes the struct pointer.
+
+      (DER - 2019/08/27, HDFFV-10892)
+
 
     Java Library:
     ----------------
