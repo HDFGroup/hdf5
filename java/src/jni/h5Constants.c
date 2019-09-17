@@ -438,7 +438,13 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1DIRECT(JNIEnv *env, jclass cls) {
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5FD_1FAMILY(JNIEnv *env, jclass cls) { return H5FD_FAMILY; }
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_HDF5Constants_H5FD_1HDFS(JNIEnv *env, jclass cls) { return H5FD_HDFS; }
+Java_hdf_hdf5lib_HDF5Constants_H5FD_1HDFS(JNIEnv *env, jclass cls) {
+#ifdef H5_HAVE_LIBHDFS
+    return H5FD_HDFS;
+#else
+    return -1;
+#endif
+}
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5FD_1LOG(JNIEnv *env, jclass cls) { return H5FD_LOG; }
 JNIEXPORT jlong JNICALL
@@ -448,7 +454,13 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1MULTI(JNIEnv *env, jclass cls) { return H5F
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5FD_1SEC2(JNIEnv *env, jclass cls) { return H5FD_SEC2; }
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_HDF5Constants_H5FD_1ROS3(JNIEnv *env, jclass cls) { return H5FD_ROS3; }
+Java_hdf_hdf5lib_HDF5Constants_H5FD_1ROS3(JNIEnv *env, jclass cls) {
+#ifdef H5_HAVE_ROS3_VFD
+    return H5FD_ROS3;
+#else
+    return -1;
+#endif
+}
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5FD_1STDIO(JNIEnv *env, jclass cls) { return H5FD_STDIO; }
 JNIEXPORT jlong JNICALL

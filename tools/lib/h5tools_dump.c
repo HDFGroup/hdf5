@@ -2289,6 +2289,14 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
             h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
             H5free_memory(ttag);
+
+            if((size = H5Tget_size(type)) <= 0) {
+                ctx->need_prefix = TRUE;
+
+                h5tools_str_reset(buffer);
+                h5tools_str_append(buffer, "OPAQUE_SIZE \"%s\";", size);
+                h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+            }
         }
         ctx->indent_level--;
 
