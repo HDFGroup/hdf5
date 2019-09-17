@@ -808,6 +808,19 @@ Bug Fixes since HDF5-1.10.2 release
 
       (DER - 2018/02/26, HDFFV-10356)
 
+    - Inappropriate linking with deprecated MPI C++ libraries
+
+      HDF5 does not define *_SKIP_MPICXX in the public headers, so applications
+      can inadvertently wind up linking to the deprecated MPI C++ wrappers.
+
+      MPICH_SKIP_MPICXX and OMPI_SKIP_MPICXX have both been defined in H5public.h
+      so this should no longer be an issue. HDF5 makes no use of the deprecated
+      MPI C++ wrappers.
+
+      (DER - 2019/09/17, HDFFV-10893)
+
+
+
     Configuration
     -------------
     - Applied patches to address Cywin build issues
