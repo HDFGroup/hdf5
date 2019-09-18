@@ -1423,6 +1423,6 @@ usage(const char *prog)
         HDprintf("      HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
         HDprintf("      HDF5_PREFIX      Data file prefix\n");
         HDprintf("\n");
-        fflush(stdout);
+        HDfflush(stdout);
 } /* end usage() */
 
