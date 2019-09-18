@@ -292,7 +292,9 @@ H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx))
     HDassert(raw);
     HDassert(elmt);
     HDassert(nelmts);
+#ifdef H5EA_DEBUG
     HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
+#endif /* H5EA_DEBUG */
 
     /* Decode raw elements into native elements */
     while(nelmts) {
