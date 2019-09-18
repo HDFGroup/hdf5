@@ -134,10 +134,9 @@ external_link_env(hid_t fapl, hbool_t new_format)
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:    Test external link with environment variable HDF5_EXT_PREFIX
+ * Purpose:     Test external link with environment variable HDF5_EXT_PREFIX
  *
- * Return:    Success:    exit(EXIT_SUCCESS)
- *        Failure:    exit(EXIT_FAILURE)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:    Vailin Choi; Nov 2010
  *
@@ -175,9 +174,10 @@ main(void)
     /* clean up tmp_links_env directory created by external link tests */
     HDrmdir(TMPDIR);
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
     HDputs("*** TESTS FAILED ***");
-    return 1;
-}
+    HDexit(EXIT_FAILURE);
+} /* end main() */
+

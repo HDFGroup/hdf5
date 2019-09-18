@@ -1255,13 +1255,11 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:     Create a file for cross_read.c test.
+ * Purpose:     Create a file for cross_read.c test
  *
- * Return:      Success:        exit(EXIT_SUCCESS)
- *              Failure:        exit(EXIT_FAILURE)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Raymond Lu
- *              Some time ago
  *
  *-------------------------------------------------------------------------
  */
@@ -1279,9 +1277,8 @@ main (void)
      * default file creation properties, and default file
      * access properties.
      */
-    if((file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))
-            < 0)
-        {H5_FAILED(); AT(); return 1;}
+    if((file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
     /*
      * Describe the size of the array and create the data space for fixed
@@ -1291,82 +1288,84 @@ main (void)
     dimsf[0] = NX + 1;
     dimsf[1] = NY;
     if((filespace = H5Screate_simple(RANK, dimsf, NULL)) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
     dimsf[0] = NX;
-    if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, NULL, dimsf, NULL)
-            < 0)
-        {H5_FAILED(); AT(); return 1;}
+    if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, NULL, dimsf, NULL) < 0)
+        TEST_ERROR;
 
     /* Create memory space.  This does not include the extra row for fill
      * values. */
     HDassert(dimsf[0] == NX);
     HDassert(dimsf[1] == NY);
     if((memspace = H5Screate_simple(RANK, dimsf, NULL)) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a regular dataset */
     if(create_normal_dset(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of FLOAT with scale-offset filter */
     if(create_scale_offset_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of DOUBLE with scale-offset filter */
     if(create_scale_offset_dsets_double(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of CHAR with scale-offset filter */
     if(create_scale_offset_dsets_char(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of SHORT with scale-offset filter */
     if(create_scale_offset_dsets_short(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of INT with scale-offset filter */
     if(create_scale_offset_dsets_int(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of LONG LONG with scale-offset filter */
     if(create_scale_offset_dsets_long_long(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of FLOAT with fletcher filter */
     if(create_fletcher_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of FLOAT with deflate filter */
     if(create_deflate_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
 #ifdef H5_HAVE_FILTER_SZIP
     /* Create a dataset of FLOAT with szip filter */
     if(create_szip_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 #else /* H5_HAVE_FILTER_SZIP */
-    puts("Szip filter is not enabled. Can't create the dataset.");
+    HDputs("Szip filter is not enabled. Can't create the dataset.");
 #endif /* H5_HAVE_FILTER_SZIP */
 
     /* Create a dataset of FLOAT with shuffle filter */
     if(create_shuffle_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
     /* Create a dataset of FLOAT with nbit filter */
     if(create_nbit_dsets_float(file, filespace, memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
 
     /*
      * Close/release resources.
      */
     if(H5Sclose(memspace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
     if(H5Sclose(filespace) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
     if(H5Fclose(file) < 0)
-        {H5_FAILED(); AT(); return 1;}
+        TEST_ERROR;
 
-    return 0;
-}
+    HDexit(EXIT_SUCCESS);
+
+error:
+    HDexit(EXIT_FAILURE);
+} /* end main() */
 
