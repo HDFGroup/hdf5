@@ -56,6 +56,9 @@
 #   include <stddef.h>
 #endif
 #ifdef H5_HAVE_PARALLEL
+/* Don't link against MPI C++ bindings */
+#   define MPICH_SKIP_MPICXX 1
+#   define OMPI_SKIP_MPICXX 1
 #   include <mpi.h>
 #ifndef MPI_FILE_NULL        /*MPIO may be defined in mpi.h already       */
 #   include <mpio.h>
