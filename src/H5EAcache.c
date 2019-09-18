@@ -581,11 +581,7 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
 		break;
 
             default:
-#ifdef NDEBUG
                 H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-                HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
         } /* end switch */
     } /* end if */
     else
@@ -978,11 +974,7 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing))
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -1390,11 +1382,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing))
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -1803,11 +1791,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing))
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -2184,11 +2168,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing))
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
