@@ -1031,6 +1031,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* TBD Add optional raw-data bypass here and at H5PB_write when we
+ * are operating in parallel mode.
+ */
 herr_t
 H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
           void *buf/*out*/)
@@ -2963,6 +2966,7 @@ H5PB__mark_entry_dirty(H5F_t * f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
 
         if ( ( pb_ptr->vfd_swmr_writer ) &&
              ( entry_ptr->loaded ) &&
+             ( entry_ptr->mem_type != H5FD_MEM_DRAW ) &&
              ( H5F_vfd_swmr_writer__delay_write(f, entry_ptr->page, 
                                         &(entry_ptr->delay_write_until)) < 0 ) )
 
