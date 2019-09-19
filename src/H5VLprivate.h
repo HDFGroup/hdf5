@@ -194,12 +194,9 @@ H5_DLL herr_t H5VL_request_optional(const H5VL_object_t *vol_obj, ...);
 H5_DLL herr_t H5VL_request_free(const H5VL_object_t *vol_obj);
 
 /* Blob functions */
-H5_DLL herr_t H5VL_blob_put(const H5VL_class_t *cls, void *blob, size_t size,
-    void *ctx, void *id);
-H5_DLL herr_t H5VL_blob_get(const H5VL_class_t *cls, const void *id, void *ctx,
-    void *blob);
-H5_DLL herr_t H5VL_blob_specific(const H5VL_class_t *cls, void *id,
-    H5VL_blob_specific_t specific_type, ...);
+H5_DLL herr_t H5VL_blob_put(const H5VL_object_t *vol_obj, const void *buf, size_t size, void *blob_id, void *ctx);
+H5_DLL herr_t H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf, size_t *size, void *ctx);
+H5_DLL herr_t H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specific_t specific_type, ...);
 
 /* Generic functions */
 H5_DLL herr_t H5VL_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id,void **req, ...);

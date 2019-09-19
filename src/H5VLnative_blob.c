@@ -68,22 +68,23 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_blob_put(void *blob, size_t size, void *_ctx, void *_id)
+H5VL__native_blob_put(void *obj, const void *buf, size_t size, void *blob_id,
+    void H5_ATTR_UNUSED *ctx)
 {
-    uint8_t *id = (uint8_t *)_id;       /* Pointer to blob ID */
-    H5F_t *f = (H5F_t *)_ctx;           /* Retrieve file pointer from context */
+    H5F_t *f = (H5F_t *)obj;            /* Retrieve file pointer */
+    uint8_t *id = (uint8_t *)blob_id;   /* Pointer to blob ID */
     H5HG_t hobjid;                      /* New VL sequence's heap ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check parameters */
-    HDassert(id);
-    HDassert(size == 0 || blob);
     HDassert(f);
+    HDassert(size == 0 || buf);
+    HDassert(id);
 
     /* Write the VL information to disk (allocates space also) */
-    if(H5HG_insert(f, size, blob, &hobjid) < 0)
+    if(H5HG_insert(f, size, (void *)buf, &hobjid) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "unable to write blob information")
 
     /* Encode the heap information */
@@ -108,18 +109,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_blob_get(const void *_id, void *_ctx, void *buf)
+H5VL__native_blob_get(void *obj, const void *blob_id, void *buf, size_t *size,
+    void H5_ATTR_UNUSED *ctx)
 {
-    const uint8_t *id = (const uint8_t *)_id; /* Pointer to the disk blob ID */
-    H5F_t *f = (H5F_t *)_ctx;           /* Retrieve file pointer from context */
+    H5F_t *f = (H5F_t *)obj;            /* Retrieve file pointer */
+    const uint8_t *id = (const uint8_t *)blob_id; /* Pointer to the disk blob ID */
     H5HG_t hobjid;                      /* Global heap ID for sequence */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(id);
     HDassert(f);
+    HDassert(id);
     HDassert(buf);
 
     /* Get the heap information */
@@ -129,7 +131,7 @@ H5VL__native_blob_get(const void *_id, void *_ctx, void *buf)
     /* Check if this sequence actually has any data */
     if(hobjid.addr > 0)
         /* Read the VL information from disk */
-        if(NULL == H5HG_read(f, &hobjid, buf, NULL))
+        if(NULL == H5HG_read(f, &hobjid, buf, size))
             HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "unable to read VL information")
 
 done:
@@ -150,18 +152,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_blob_specific(void *_id, H5VL_blob_specific_t specific_type,
-    va_list arguments)
+H5VL__native_blob_specific(void *obj, void *blob_id,
+    H5VL_blob_specific_t specific_type, va_list arguments)
 {
+    H5F_t *f = (H5F_t *)obj;        /* Retrieve file pointer */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity check */
+    HDassert(f);
+    HDassert(blob_id);
+
     switch(specific_type) {
         case H5VL_BLOB_GETSIZE:
             {
-                const uint8_t *id = (const uint8_t *)_id; /* Pointer to the blob ID */
-                H5F_t *f = HDva_arg(arguments, H5F_t *);
+                const uint8_t *id = (const uint8_t *)blob_id; /* Pointer to the blob ID */
                 size_t *size = HDva_arg(arguments, size_t *);
                 H5HG_t hobjid;              /* blob's heap ID */
 
@@ -182,8 +188,7 @@ H5VL__native_blob_specific(void *_id, H5VL_blob_specific_t specific_type,
 
         case H5VL_BLOB_ISNULL:
             {
-                const uint8_t *id = (const uint8_t *)_id; /* Pointer to the blob ID */
-                H5F_t *f = HDva_arg(arguments, H5F_t *);
+                const uint8_t *id = (const uint8_t *)blob_id; /* Pointer to the blob ID */
                 hbool_t *isnull = HDva_arg(arguments, hbool_t *);
                 haddr_t addr;               /* Sequence's heap address */
 
@@ -198,9 +203,7 @@ H5VL__native_blob_specific(void *_id, H5VL_blob_specific_t specific_type,
 
         case H5VL_BLOB_SETNULL:
             {
-                uint8_t *id = (uint8_t *)_id; /* Pointer to the blob ID */
-                H5F_t *f = HDva_arg(arguments, H5F_t *);
-
+                uint8_t *id = (uint8_t *)blob_id; /* Pointer to the blob ID */
                 /* Encode the "nil" heap pointer information */
                 H5F_addr_encode(f, &id, (haddr_t)0);
                 UINT32ENCODE(id, 0);
@@ -210,8 +213,7 @@ H5VL__native_blob_specific(void *_id, H5VL_blob_specific_t specific_type,
 
         case H5VL_BLOB_DELETE:
             {
-                const uint8_t *id = (const uint8_t *)_id; /* Pointer to the blob ID */
-                H5F_t *f = HDva_arg(arguments, H5F_t *);
+                const uint8_t *id = (const uint8_t *)blob_id; /* Pointer to the blob ID */
                 H5HG_t hobjid;              /* VL sequence's heap ID */
 
                 /* Get heap information */
@@ -233,28 +235,3 @@ H5VL__native_blob_specific(void *_id, H5VL_blob_specific_t specific_type,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_blob_specific() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5VL__native_blob_optional
- *
- * Purpose:     Handles the blob 'optional' callback
- *
- * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *		Friday, August 15, 2019
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL__native_blob_optional(void *id, va_list arguments)
-{
-    herr_t ret_value = SUCCEED;     /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__native_blob_optional() */
-

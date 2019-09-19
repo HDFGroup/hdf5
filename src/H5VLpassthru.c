@@ -178,6 +178,12 @@ static herr_t H5VL_pass_through_request_specific(void *req, H5VL_request_specifi
 static herr_t H5VL_pass_through_request_optional(void *req, va_list arguments);
 static herr_t H5VL_pass_through_request_free(void *req);
 
+/* Blob callbacks */
+static herr_t H5VL_pass_through_blob_put(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
+static herr_t H5VL_pass_through_blob_get(void *obj, const void *blob_id, void *buf, size_t *size, void *ctx);
+static herr_t H5VL_pass_through_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
+
+
 /*******************/
 /* Local variables */
 /*******************/
@@ -273,9 +279,9 @@ static const H5VL_class_t H5VL_pass_through_g = {
         H5VL_pass_through_request_free              /* free */
     },
     {                                           /* blob_cls */
-        NULL,                                       /* put */
-        NULL,                                       /* get */
-        NULL,                                       /* specific */
+        H5VL_pass_through_blob_put,                 /* put */
+        H5VL_pass_through_blob_get,                 /* get */
+        H5VL_pass_through_blob_specific,            /* specific */
         NULL                                        /* optional */
     },
     NULL                                        /* optional */
@@ -2840,3 +2846,83 @@ H5VL_pass_through_request_free(void *obj)
     return ret_value;
 } /* end H5VL_pass_through_request_free() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_pass_through_blob_put
+ *
+ * Purpose:     Handles the blob 'put' callback
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_pass_through_blob_put(void *obj, const void *buf, size_t size,
+    void *blob_id, void *ctx)
+{
+    H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
+    herr_t ret_value;
+
+#ifdef ENABLE_PASSTHRU_LOGGING
+    printf("------- PASS THROUGH VOL BLOB Put\n");
+#endif
+
+    ret_value = H5VLblob_put(o->under_object, o->under_vol_id, buf, size,
+        blob_id, ctx);
+
+    return ret_value;
+} /* end H5VL_pass_through_blob_put() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_pass_through_blob_get
+ *
+ * Purpose:     Handles the blob 'get' callback
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_pass_through_blob_get(void *obj, const void *blob_id, void *buf,
+    size_t *size, void *ctx)
+{
+    H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
+    herr_t ret_value;
+
+#ifdef ENABLE_PASSTHRU_LOGGING
+    printf("------- PASS THROUGH VOL BLOB Get\n");
+#endif
+
+    ret_value = H5VLblob_get(o->under_object, o->under_vol_id, blob_id, buf,
+        size, ctx);
+
+    return ret_value;
+} /* end H5VL_pass_through_blob_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_pass_through_blob_specific
+ *
+ * Purpose:     Handles the blob 'specific' callback
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_pass_through_blob_specific(void *obj, void *blob_id,
+    H5VL_blob_specific_t specific_type, va_list arguments)
+{
+    H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
+    herr_t ret_value;
+
+#ifdef ENABLE_PASSTHRU_LOGGING
+    printf("------- PASS THROUGH VOL BLOB Specific\n");
+#endif
+
+    ret_value = H5VLblob_specific(o->under_object, o->under_vol_id, blob_id,
+        specific_type, arguments);
+
+    return ret_value;
+} /* end H5VL_pass_through_blob_specific() */

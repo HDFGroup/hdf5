@@ -158,6 +158,11 @@ H5_DLL herr_t H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_s
 H5_DLL herr_t H5VLrequest_optional(void *req, hid_t connector_id, va_list arguments);
 H5_DLL herr_t H5VLrequest_free(void *req, hid_t connector_id);
 
+/* Public wrappers for blob callbacks */
+H5_DLL herr_t H5VLblob_put(void *obj, hid_t connector_id, const void *buf, size_t size, void *blob_id, void *ctx);
+H5_DLL herr_t H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf, size_t *size, void *ctx);
+H5_DLL herr_t H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
+
 /* Public wrappers for generic 'optional' callback */
 H5_DLL herr_t H5VLoptional(void *obj, hid_t connector_id, hid_t dxpl_id,
     void **req, va_list arguments);

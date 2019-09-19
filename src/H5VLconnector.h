@@ -37,6 +37,8 @@
 #define H5VL_CAP_FLAG_NONE              0       /* No special connector capabilities */
 #define H5VL_CAP_FLAG_THREADSAFE        0x01    /* Connector is threadsafe */
 
+/* The maximum size allowed for blobs */
+#define H5VL_MAX_BLOB_ID_SIZE           (16)    /* Allow for 128-bits blob IDs */
 
 /*******************/
 /* Public Typedefs */
@@ -365,10 +367,10 @@ typedef struct H5VL_request_class_t {
 
 /* 'blob' routines */
 typedef struct H5VL_blob_class_t {
-    herr_t (*put)(void *blob, size_t size, void *ctx, void *id);
-    herr_t (*get)(const void *id, void *ctx, void *blob);
-    herr_t (*specific)(void *id, H5VL_blob_specific_t specific_type, va_list arguments);
-    herr_t (*optional)(void *id, va_list arguments);
+    herr_t (*put)(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
+    herr_t (*get)(void *obj, const void *blob_id, void *buf, size_t *size, void *ctx);
+    herr_t (*specific)(void *obj, void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
+    herr_t (*optional)(void *obj, void *blob_id, va_list arguments);
 } H5VL_blob_class_t;
 
 /*
