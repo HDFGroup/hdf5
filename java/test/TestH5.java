@@ -81,7 +81,7 @@ public class TestH5 {
 
         int j2cValues[] = { HDF5Constants.H5F_ACC_RDONLY,
                 HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5F_ACC_TRUNC,
-                HDF5Constants.H5F_ACC_EXCL, H5F_ACC_DEBUG,
+                HDF5Constants.H5F_ACC_EXCL, HDF5Constants.H5F_ACC_DEBUG,
                 HDF5Constants.H5F_ACC_CREAT, HDF5Constants.H5F_OBJ_FILE,
                 HDF5Constants.H5F_OBJ_DATASET, HDF5Constants.H5F_OBJ_GROUP,
                 HDF5Constants.H5F_OBJ_DATATYPE, HDF5Constants.H5F_OBJ_ATTR,
