@@ -1639,14 +1639,10 @@ main(int argc, const char *argv[])
 
         if (fapl_id != H5P_DEFAULT) {
             fid = H5Fopen(fname, H5F_ACC_RDONLY, fapl_id);
-        } else {
-            fid = h5tools_fopen(
-                    fname,
-                    H5F_ACC_RDONLY,
-                    H5P_DEFAULT,
-                    driver,
-                    NULL,
-                    0);
+        } 
+        else {
+            fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT,
+                    driver, NULL, 0);
         }
 
         if (fid < 0) {

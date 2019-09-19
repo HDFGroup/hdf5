@@ -114,7 +114,7 @@ herr_t H5FD_s3comms_s3r_getsize(s3r_t *handle);
 /* Functions */
 /*************/
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: curlwritecallback()
@@ -162,7 +162,7 @@ curlwritecallback(char   *ptr,
 
 } /* end curlwritecallback() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_hrb_node_set()
@@ -589,7 +589,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_s3comms_hrb_node_set() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_hrb_destroy()
@@ -803,7 +803,7 @@ done:
  * S3R FUNCTIONS
  ****************************************************************************/
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_s3r_close()
@@ -865,7 +865,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_s3r_close */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_s3r_get_filesize()
@@ -900,7 +900,7 @@ H5FD_s3comms_s3r_get_filesize(s3r_t *handle)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_s3r_get_filesize */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_s3r_getsize()
@@ -1109,7 +1109,7 @@ done:
 
 } /* H5FD_s3comms_s3r_getsize */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_s3r_open()
@@ -1362,7 +1362,7 @@ done:
 
 } /* H5FD_s3comms_s3r_open */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_s3r_read()
@@ -1924,7 +1924,7 @@ done:
  * MISCELLANEOUS FUNCTIONS
  ****************************************************************************/
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: gmnow()
@@ -2136,7 +2136,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_s3comms_aws_canonical_request() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_bytes_to_hex()
@@ -2210,7 +2210,7 @@ done:
 
 } /* end H5FD_s3comms_bytes_to_hex() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_free_purl()
@@ -2253,7 +2253,7 @@ H5FD_s3comms_free_purl(parsed_url_t *purl)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_s3comms_free_purl() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_HMAC_SHA256()
@@ -2330,7 +2330,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5FD_s3comms_HMAC_SHA256 */
 
-
+
 /*-----------------------------------------------------------------------------
  *
  * Function: H5FD__s3comms_load_aws_creds_from_file()
@@ -2505,7 +2505,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__s3comms_load_aws_creds_from_file() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_load_aws_profile()
@@ -2556,9 +2556,12 @@ H5FD_s3comms_load_aws_profile(const char *profile_name,
     HDfprintf(stdout, "called H5FD_s3comms_load_aws_profile.\n");
 #endif
 
-    /* TODO: Windows and other path gotchas */
+#ifdef H5_HAVE_WIN32_API
+    ret = HDsnprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE")) ;
+#else
     ret = HDsnprintf(awspath, 117, "%s/.aws/", getenv("HOME")) ;
-    if (ret < 0 || (size_t)ret >= 117) {
+#endif
+     if (ret < 0 || (size_t)ret >= 117) {
         HGOTO_ERROR(H5E_ARGS, H5E_CANTCOPY, FAIL,
                     "unable to format home-aws path")
     }
@@ -2631,7 +2634,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_s3comms_load_aws_profile() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_nlowercase()
@@ -2689,7 +2692,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_s3comms_nlowercase() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_parse_url()
@@ -2953,7 +2956,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_s3comms_parse_url() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_percent_encode_char()
@@ -3127,7 +3130,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5FD_s3comms_percent_encode_char */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_signing_key()
@@ -3258,7 +3261,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_s3comms_signing_key() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_tostringtosign()
@@ -3385,7 +3388,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ros3_tostringtosign() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_trim()
@@ -3470,7 +3473,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_trim() */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_uriencode()

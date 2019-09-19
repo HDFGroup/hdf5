@@ -11,12 +11,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Read-Only S3 Virtual File Driver (VFD)                                   
+ * Read-Only S3 Virtual File Driver (VFD)
  *
  * Programmer:  John Mainzer
  *              2017-10-10
  *
- * Purpose:	The public header file for the ros3 driver.
+ * Purpose:    The public header file for the ros3 driver.
  */
 #ifndef H5FDros3_H
 #define H5FDros3_H
@@ -35,16 +35,16 @@
  *
  * Purpose:
  *
- *     H5FD_ros3_fapl_t is a public structure that is used to pass S3 
- *     authentication data to the appropriate S3 VFD via the FAPL.  A pointer 
- *     to an instance of this structure is a parameter to H5Pset_fapl_ros3() 
+ *     H5FD_ros3_fapl_t is a public structure that is used to pass S3
+ *     authentication data to the appropriate S3 VFD via the FAPL.  A pointer
+ *     to an instance of this structure is a parameter to H5Pset_fapl_ros3()
  *     and H5Pget_fapl_ros3().
  *
  *
  *
  * `version` (int32_t)
  *
- *     Version number of the H5FD_ros3_fapl_t structure.  Any instance passed 
+ *     Version number of the H5FD_ros3_fapl_t structure.  Any instance passed
  *     to the above calls must have a recognized version number, or an error
  *     will be flagged.
  *
@@ -53,8 +53,8 @@
  * `authenticate` (hbool_t)
  *
  *     Flag TRUE or FALSE whether or not requests are to be authenticated
- *     with the AWS4 algorithm. 
- *     If TRUE, `aws_region`, `secret_id`, and `secret_key` must be populated. 
+ *     with the AWS4 algorithm.
+ *     If TRUE, `aws_region`, `secret_id`, and `secret_key` must be populated.
  *     If FALSE, those three components are unused.
  *
  * `aws_region` (char[])
@@ -91,8 +91,8 @@ extern "C" {
 #endif
 
 H5_DLL hid_t H5FD_ros3_init(void);
-H5_DLL herr_t H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t * fa_out);
-H5_DLL herr_t H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t * fa);
+H5_DLL herr_t H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_out);
+H5_DLL herr_t H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa);
 
 #ifdef __cplusplus
 }

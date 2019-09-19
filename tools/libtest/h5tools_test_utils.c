@@ -16,39 +16,10 @@
  * Jacob Smith 2017-11-10
  */
 
-#include "hdf5.h"
-#include "H5private.h"
 #include "h5tools_utils.h"
-/* #include "h5test.h" */ /* linking failure */
+#include "h5test.h"
 
 #define UTIL_TEST_DEBUG 0
-
-#ifndef _H5TEST_
-
-#define UTIL_AT() HDfprintf(stdout, "   at %s:%d in %s()...\n",        \
-                     __FILE__, __LINE__, FUNC);
-
-#define UTIL_FAILED(msg) {                 \
-    HDfprintf(stdout, "*FAILED*"); AT() \
-    if (msg == NULL) {                \
-        HDfprintf(stdout,"(NULL)\n");   \
-    } else {                          \
-        HDfprintf(stdout, "%s\n", msg); \
-    }                                 \
-    HDfflush(stdout);                   \
-}
-
-#define UTIL_TESTING(msg) {                       \
-    HDfprintf(stdout, "TESTING %-62s", (msg)); \
-    HDfflush(stdout);                          \
-}
-
-#define UTIL_PASSED() {                \
-    HDfprintf(stdout, " PASSED\n"); \
-    HDfflush(stdout);               \
-}
-
-#endif /* ifndef _H5TEST_ */
 
 #ifndef __js_test__
 
@@ -548,7 +519,7 @@ test_parse_tuple(void)
 
 
 
-    UTIL_TESTING("arbitrary-count tuple parsing");
+    TESTING("arbitrary-count tuple parsing");
 
 #if H5TOOLS_UTILS_TEST_DEBUG > 0
         show_progress = TRUE;
@@ -641,7 +612,7 @@ test_populate_ros3_fa(void)
     int     bad_version   = 0xf87a; /* arbitrarily wrong version number */
 #endif /* H5_HAVE_ROS3_VFD */
 
-    UTIL_TESTING("programmatic ros3 fapl population");
+    TESTING("programmatic ros3 fapl population");
 
 #ifndef H5_HAVE_ROS3_VFD
     HDputs(" -SKIP-");
@@ -1172,7 +1143,7 @@ test_set_configured_fapl(void)
     n_cases += 5;
 #endif /* H5_HAVE_LIBHDFS */
 
-    UTIL_TESTING("programmatic fapl set");
+    TESTING("programmatic fapl set");
 
     for (unsigned i = 0; i < n_cases; i++) {
         int      result;
