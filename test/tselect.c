@@ -177,6 +177,13 @@
 #define SEL_ITER_MAX_SEQ        256
 
 
+/* Defines for test_hyper_io_1d() */
+#define DNAME           "DSET_1D"
+#define RANK            1
+#define NUMCHUNKS       3
+#define CHUNKSZ         20
+#define NUM_ELEMENTS    NUMCHUNKS * CHUNKSZ
+
 /* Location comparison function */
 static int compare_size_t(const void *s1, const void *s2);
 
@@ -15316,7 +15323,158 @@ test_select_intersect_block(void)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_select_intersect_block() */
 
+
+/****************************************************************
+**
+**  test_hyper_io_1d(): 
+**  Test to verify all the selected 10th element in the 1-d file
+**  dataspace is read correctly into the 1-d contiguous memory space.
+**  This is modeled after the test scenario described in HDFFV-20585
+**  that demonstrated the hyperslab slowness.  A fix to speed up
+**  performance is in place to handle the special case for 1-d disjoint
+**  file dataspace into 1-d single block contiguous memory space.
+**
+****************************************************************/
+static void
+test_hyper_io_1d(void)
+{
+    hid_t fid;              /* File ID */
+    hid_t did;              /* Dataset ID */
+    hid_t sid, mid;         /* Dataspace IDs */
+    hid_t dcpl;             /* Dataset creation property list ID */
+    hsize_t dims[1], maxdims[1], dimsm[1];  /* Dataset dimension sizes */
+    hsize_t chunk_dims[1];  /* Chunk dimension size */
+    hsize_t offset[1];      /* Starting offset for hyperslab */
+    hsize_t stride[1];      /* Distance between blocks in the hyperslab selection */
+    hsize_t count[1];       /* # of blocks in the the hyperslab selection */
+    hsize_t block[1];       /* Size of block in the hyperslab selection */
+    unsigned int wdata[CHUNKSZ]; /* Data to be written */
+    unsigned int rdata[NUM_ELEMENTS/10]; /* Data to be read */
+    herr_t	ret;		    /* Generic return value	*/
+    unsigned i;             /* Local index variable */
 
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing Hyperslab I/O for 1-d single block memory space\n"));
+
+    for (i = 0; i < CHUNKSZ; i++)
+        wdata[i] = i;
+
+    /* Create the file file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create file dataspace */
+    dims[0] = CHUNKSZ;
+    maxdims[0] = H5S_UNLIMITED;
+    sid = H5Screate_simple(RANK, dims, maxdims);
+    CHECK(sid, FAIL, "H5Pcreate");
+
+    /* Create memory dataspace */
+    dimsm[0] = CHUNKSZ;
+    mid = H5Screate_simple(RANK, dimsm, NULL);
+    CHECK(mid, FAIL, "H5Pcreate");
+
+    /* Set up to create a chunked dataset */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    chunk_dims[0] = CHUNKSZ;
+    ret = H5Pset_chunk(dcpl, RANK, chunk_dims);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    /* Create a chunked dataset */
+    did = H5Dcreate2(fid, DNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
+
+    /* Set up hyperslab selection for file dataspace */
+    offset[0] = 0;
+    stride[0] = 1;
+    count[0] = 1;
+    block[0] = CHUNKSZ;
+
+    /* Write to each chunk in the dataset */
+    for (i = 0; i < NUMCHUNKS; i++) {
+        /* Set the hyperslab selection */
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, offset, stride, count, block);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        /* Write to the dataset */
+        ret = H5Dwrite(did, H5T_NATIVE_INT, mid, sid, H5P_DEFAULT, wdata);
+        CHECK(ret, FAIL, "H5Dwrite");
+
+        /* Extend the dataset's dataspace */
+        if(i < (NUMCHUNKS - 1)) {
+            offset[0] = offset[0] + CHUNKSZ;
+            dims[0] = dims[0] + CHUNKSZ;
+            ret = H5Dset_extent(did, dims);
+            CHECK(ret, FAIL, "H5Dset_extent");
+
+            /* Get the dataset's current dataspace */
+            sid = H5Dget_space(did);
+            CHECK(sid, FAIL, "H5Dget_space");
+        }
+    }
+
+    /* Closing */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(mid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Open the file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    did = H5Dopen(fid, DNAME, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dopen");
+
+    /* Set up to read every 10th element in file dataspace */
+    offset[0] = 1;
+    stride[0] = 10;
+    count[0] = NUM_ELEMENTS/10;
+    block[0] = 1;
+
+    /* Get the dataset's dataspace */
+    sid = H5Dget_space(did);
+    CHECK(sid, FAIL, "H5Pcreate");
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, offset, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Set up contiguous memory dataspace for the selected elements */
+    dimsm[0] = count[0];
+    mid = H5Screate_simple(RANK, dimsm, NULL);
+    CHECK(mid, FAIL, "H5Screate");
+
+    /* Read all the selected 10th elements in the dataset into "rdata" */
+    ret = H5Dread(did, H5T_NATIVE_INT, mid, sid, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Verify data read is correct */
+    for(i = 0; i < 6; i += 2) {
+        VERIFY(rdata[i], 1, "H5Dread\n");
+        VERIFY(rdata[i+1], 11, "H5Dread\n");
+    }
+
+    /* Closing */
+    ret = H5Sclose(mid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+}   /* test_hyper_io_1d() */
+
+
 /****************************************************************
 **
 **  test_select(): Main H5S selection testing routine.
@@ -15499,6 +15657,10 @@ test_select(void)
 
     /* Test selection intersection with block  */
     test_select_intersect_block();
+
+    /* Test reading of 1-d disjoint file space to 1-d single block memory space */
+    test_hyper_io_1d();
+
 }   /* test_select() */
 
 
