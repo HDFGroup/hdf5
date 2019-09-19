@@ -16,7 +16,7 @@ message (STATUS "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
 
 
 if (WIN32)
-  set (HDF_JRE_DIRECTORY "C:/Program Files/Java/jre8")
+  set (HDF_JRE_DIRECTORY "C:/Program Files/Java/jre")
 else ()
   set (HDF_JRE_DIRECTORY "/usr/lib/jvm/jre")
 endif ()
