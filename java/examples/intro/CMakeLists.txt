@@ -77,7 +77,9 @@ if (BUILD_TESTING)
             -D "TEST_REFERENCE=intro/${example}.txt"
             -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
     )
-    set_tests_properties (JAVA_intro-${example} PROPERTIES DEPENDS JAVA_intro-${example}-copy-objects)
+    set_tests_properties (JAVA_intro-${example} PROPERTIES
+        DEPENDS JAVA_intro-${example}-copy-objects
+    )
   endforeach ()
 
 endif ()
