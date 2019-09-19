@@ -99,6 +99,7 @@ $Source = "";
                "unsigned long long"         => "UL",
                "H5VL_attr_get_t"            => "Va",
                "H5VL_attr_specific_t"       => "Vb",
+               "H5VL_blob_specific_t"       => "VB",
                "H5VL_class_value_t"         => "VC",
                "H5VL_dataset_get_t"         => "Vc",
                "H5VL_dataset_specific_t"    => "Vd",

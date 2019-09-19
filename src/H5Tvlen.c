@@ -21,7 +21,7 @@
 /****************/
 
 #include "H5Tmodule.h"          /* This source code file is part of the H5T module */
-
+#define H5F_FRIEND              /*suppress error about including H5Fpkg   */
 
 /***********/
 /* Headers */
@@ -30,6 +30,7 @@
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"         /* File access				*/
+#include "H5Fpkg.h"             /* File                 */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Tpkg.h"		/* Datatypes				*/
@@ -849,7 +850,9 @@ done:
 static herr_t
 H5T__vlen_disk_isnull(const H5F_t *f, void *_vl, hbool_t *isnull)
 {
-    const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
+    H5VL_object_t *vol_obj = NULL;/* Object info */
+    hid_t file_id = H5I_INVALID_HID;
+    uint8_t *vl = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -862,11 +865,19 @@ H5T__vlen_disk_isnull(const H5F_t *f, void *_vl, hbool_t *isnull)
     /* Skip the sequence's length */
     vl += 4;
 
+    /* TODO temporary hack to retrieve file object */
+    if((file_id = H5F__get_file_id((H5F_t *)f, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+    if(NULL == (vol_obj = H5VL_vol_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
     /* Check if blob ID is "nil" */
-    if(H5VL_blob_specific(H5F_VOL_CLS(f), vl, H5VL_BLOB_ISNULL, f, isnull) < 0)
+    if(H5VL_blob_specific(vol_obj, vl, H5VL_BLOB_ISNULL, isnull) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to check if a blob ID is 'nil'")
 
 done:
+    if((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file id")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__vlen_disk_isnull() */
 
@@ -886,6 +897,8 @@ done:
 static herr_t
 H5T__vlen_disk_setnull(H5F_t *f, void *_vl, void *bg)
 {
+    H5VL_object_t *vol_obj = NULL;/* Object info */
+    hid_t file_id = H5I_INVALID_HID;
     uint8_t *vl = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -904,11 +917,19 @@ H5T__vlen_disk_setnull(H5F_t *f, void *_vl, void *bg)
     /* Set the length of the sequence */
     UINT32ENCODE(vl, 0);
 
+    /* TODO temporary hack to retrieve file object */
+    if((file_id = H5F__get_file_id(f, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+    if(NULL == (vol_obj = H5VL_vol_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
     /* Set blob ID to "nil" */
-    if(H5VL_blob_specific(H5F_VOL_CLS(f), vl, H5VL_BLOB_SETNULL, f) < 0)
+    if(H5VL_blob_specific(vol_obj, vl, H5VL_BLOB_SETNULL) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set a blob ID to 'nil'")
 
 done:
+    if((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file id")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__vlen_disk_setnull() */
 
@@ -928,6 +949,8 @@ done:
 static herr_t
 H5T__vlen_disk_read(H5F_t *f, void *_vl, void *buf, size_t H5_ATTR_UNUSED len)
 {
+    H5VL_object_t *vol_obj = NULL;/* Object info */
+    hid_t file_id = H5I_INVALID_HID;
     const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
     herr_t ret_value = SUCCEED;     /* Return value */
 
@@ -941,11 +964,19 @@ H5T__vlen_disk_read(H5F_t *f, void *_vl, void *buf, size_t H5_ATTR_UNUSED len)
     /* Skip the length of the sequence */
     vl += 4;
 
+    /* TODO temporary hack to retrieve file object */
+    if((file_id = H5F__get_file_id(f, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+    if(NULL == (vol_obj = H5VL_vol_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
     /* Retrieve blob */
-    if(H5VL_blob_get(H5F_VOL_CLS(f), vl, f, buf) < 0)
+    if(H5VL_blob_get(vol_obj, vl, buf, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get blob")
 
 done:
+    if((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file id")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__vlen_disk_read() */
 
@@ -966,6 +997,8 @@ static herr_t
 H5T__vlen_disk_write(H5F_t *f, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_alloc_info,
     void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size)
 {
+    H5VL_object_t *vol_obj = NULL;      /* Object info */
+    hid_t file_id = H5I_INVALID_HID;
     uint8_t *vl = (uint8_t *)_vl;       /* Pointer to the user's hvl_t information */
     const uint8_t *bg = (const uint8_t *)_bg; /* Pointer to the old data hvl_t */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -985,11 +1018,19 @@ H5T__vlen_disk_write(H5F_t *f, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_al
     /* Set the length of the sequence */
     UINT32ENCODE(vl, seq_len);
 
+    /* TODO temporary hack to retrieve file object */
+    if((file_id = H5F__get_file_id(f, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+    if(NULL == (vol_obj = H5VL_vol_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
     /* Store blob */
-    if(H5VL_blob_put(H5F_VOL_CLS(f), buf, (seq_len * base_size), f, vl) < 0)
+    if(H5VL_blob_put(vol_obj, buf, (seq_len * base_size), vl, NULL) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to put blob")
 
 done:
+    if((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file id")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__vlen_disk_write() */
 
@@ -1010,6 +1051,7 @@ static herr_t
 H5T__vlen_disk_delete(H5F_t *f, const void *_vl)
 {
     const uint8_t *vl = (const uint8_t *)_vl; /* Pointer to the user's hvl_t information */
+    hid_t file_id = H5I_INVALID_HID;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1025,12 +1067,23 @@ H5T__vlen_disk_delete(H5F_t *f, const void *_vl)
         UINT32DECODE(vl, seq_len);
 
         /* Delete object, if length > 0 */
-        if(seq_len > 0)
-            if(H5VL_blob_specific(H5F_VOL_CLS(f), (void *)vl, H5VL_BLOB_DELETE, f) < 0)   /* Casting away 'const' OK -QAK */
+        if(seq_len > 0) {
+            H5VL_object_t *vol_obj = NULL; /* Object info */
+
+            /* TODO temporary hack to retrieve file object */
+            if((file_id = H5F__get_file_id(f, FALSE)) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+            if(NULL == (vol_obj = H5VL_vol_object(file_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+            if(H5VL_blob_specific(vol_obj, (void *)vl, H5VL_BLOB_DELETE) < 0)   /* Casting away 'const' OK -QAK */
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to delete blob")
+        }
     } /* end if */
 
 done:
+    if((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file id")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__vlen_disk_delete() */
 

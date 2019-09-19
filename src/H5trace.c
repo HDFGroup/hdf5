@@ -2592,6 +2592,35 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                             } /* end switch */
                         } /* end else */
                         break;
+                    case 'B':
+                        if(ptr) {
+                            if(vp)
+                                HDfprintf (out, "0x%lx", (unsigned long)vp);
+                            else
+                                HDfprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5VL_blob_specific_t specific = (H5VL_blob_specific_t)HDva_arg(ap, int);
+
+                            switch(specific) {
+                                case H5VL_BLOB_DELETE:
+                                    HDfprintf(out, "H5VL_BLOB_DELETE");
+                                    break;
+                                case H5VL_BLOB_GETSIZE:
+                                    HDfprintf(out, "H5VL_BLOB_GETSIZE");
+                                    break;
+                                case H5VL_BLOB_ISNULL:
+                                    HDfprintf(out, "H5VL_BLOB_ISNULL");
+                                    break;
+                                case H5VL_BLOB_SETNULL:
+                                    HDfprintf(out, "H5VL_BLOB_SETNULL");
+                                    break;
+                                default:
+                                    HDfprintf(out, "%ld", (long)specific);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
                     case 'C':
                         if(ptr) {
                             if(vp)
