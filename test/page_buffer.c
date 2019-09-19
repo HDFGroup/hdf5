@@ -554,7 +554,7 @@ error:
  */
 
 static unsigned
-test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
+test_vfd_swmr_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
 {
     char filename[FILENAME_LEN]; /* Filename to use */
     hid_t file_id = -1;          /* File ID */
@@ -570,7 +570,7 @@ test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
     const char *dname;
     char *tname;
 
-    TESTING("Basic Metadata Handling");
+    TESTING("VFD SWMR Raw Data Handling");
 
     h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
 
@@ -596,7 +596,7 @@ test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
     config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(*config));
     if(config == NULL) {
         HDfprintf(stderr, "VFD SWMR config allocation failed\n");
-        return H5I_INVALID_HID;
+        TEST_ERROR;
     }
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
@@ -610,7 +610,7 @@ test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
 
     if ((tname = strdup(filename)) == NULL) {
         HDfprintf(stderr, "temporary string allocation failed\n");
-        return H5I_INVALID_HID;
+        TEST_ERROR;
     }
     dname = dirname(tname);
     snprintf(config->md_file_path, sizeof(config->md_file_path),
@@ -620,7 +620,7 @@ test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
     /* Enable VFD SWMR configuration */
     if(H5Pset_vfd_swmr_config(fapl, config) < 0) {
         HDfprintf(stderr, "H5Pset_vrd_swmr_config failed\n");
-        return H5I_INVALID_HID;
+        TEST_ERROR;
     }
 
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
@@ -2682,6 +2682,7 @@ main(void)
 
         SKIPPED()
         HDputs("Skip page buffering test because paged aggregation is disabled for multi/split drivers");
+        HDputs("Furthermore, VFD SWMR is not expected to work with multi/split drivers");
         HDexit(EXIT_SUCCESS);
     } /* end if */
 
@@ -2703,7 +2704,7 @@ main(void)
 
     nerrors += test_args(fapl, env_h5_drvr);
     nerrors += test_raw_data_handling(fapl, env_h5_drvr);
-    nerrors += test_basic_metadata_handling(fapl, env_h5_drvr);
+    nerrors += test_vfd_swmr_raw_data_handling(fapl, env_h5_drvr);
     nerrors += test_lru_processing(fapl, env_h5_drvr);
     nerrors += test_min_threshold(fapl, env_h5_drvr);
     nerrors += test_stats_collection(fapl, env_h5_drvr);
