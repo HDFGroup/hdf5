@@ -2682,7 +2682,7 @@ main(void)
 
         SKIPPED()
         HDputs("Skip page buffering test because paged aggregation is disabled for multi/split drivers");
-        HDputs("Furthermore, VFD SWMR is not expected to work with multi/split drivers");
+        HDputs("Furthermore, VFD SWMR is not (yet) expected to work with multi/split drivers");
         HDexit(EXIT_SUCCESS);
     } /* end if */
 
