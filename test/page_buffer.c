@@ -202,7 +202,7 @@ error:
             HDfree(data);
     } H5E_END_TRY;
     return(1);
-} /* create_file */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -339,7 +339,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
             /* Set memb_addr aligned */
             for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
                 memb_addr[mt] = ((memb_addr[mt] + pagesize - 1) / pagesize) * pagesize;
-        } /* end else */
+        }
 
         /* Set multi driver with new FAPLs */
         if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl_arr, (const char * const *)memb_name, memb_addr, relax) < 0)
@@ -349,14 +349,14 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
             free(memb_name[mt]);
 
-    } /* end if */
+    }
 
     return 0;
 
 error:
     return 1;
 
-} /* set_multi_split() */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -537,7 +537,7 @@ error:
         H5Pclose(fcpl);
     } H5E_END_TRY;
     return 1;
-} /* test_args */
+}
 
 
 /*
@@ -1141,7 +1141,7 @@ error:
             HDfree(data);
     } H5E_END_TRY;
     return 1;
-} /* test_raw_data_handling */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1316,8 +1316,8 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
             HDfprintf(stderr, "Read different values than written\n");
             HDfprintf(stderr, "data[%d] = %d, %d expected.\n", i, data[i], -1);
             TEST_ERROR;
-        } /* end if */
-    } /* end for */
+        }
+    }
 
     /* verify that addr + 200 and addr + 1200 are the only raw data pages in
      * the page buffer.
@@ -1345,8 +1345,8 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
             HDfprintf(stderr, "data[%d] = %d, %d expected.\n", i, data[i], 
                       i + 350);
             TEST_ERROR;
-        } /* end if */
-    } /* end for */
+        }
+    }
 
     /* verify that addr + 200 and addr + 400 are the only raw data pages in
      * the page buffer.
@@ -1402,7 +1402,7 @@ error:
             HDfree(data);
     } H5E_END_TRY;
     return 1;
-} /* test_lru_processing */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -2135,7 +2135,7 @@ error:
 
     return 1;
 
-} /* test_min_threshold */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -2503,7 +2503,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
             TEST_ERROR;
         if(evictions[1] != 0)
             TEST_ERROR;
-    } /* end block */
+    }
 
     if(H5Fclose(file_id) < 0)
         FAIL_STACK_ERROR;
@@ -2527,7 +2527,7 @@ error:
     } H5E_END_TRY;
 
     return 1;
-} /* test_stats_collection */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -2641,7 +2641,7 @@ error:
 
     return 1;
 
-} /* verify_page_buffering_disabled() */
+}
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -2684,12 +2684,12 @@ main(void)
         HDputs("Skip page buffering test because paged aggregation is disabled for multi/split drivers");
         HDputs("Furthermore, VFD SWMR is not (yet) expected to work with multi/split drivers");
         HDexit(EXIT_SUCCESS);
-    } /* end if */
+    }
 
     if((fapl = h5_fileaccess()) < 0) {
         nerrors++;
         PUTS_ERROR("Can't get VFD-dependent fapl")
-    } /* end if */
+    }
 
     /* Push API context */
     if(H5CX_push() < 0) FAIL_STACK_ERROR
@@ -2735,5 +2735,5 @@ error:
     if(api_ctx_pushed) H5CX_pop();
 
     HDexit(EXIT_FAILURE);
-} /* main() */
+}
 
