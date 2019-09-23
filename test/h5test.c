@@ -129,6 +129,17 @@ h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
     return 0;
 }
 
+void
+h5_testing(const char *fmt, ...)
+{
+    va_list ap;
+    char buf[62 + 1];   /* room for 62-char field + NUL */
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    printf("Testing %s", buf);
+    fflush(stdout);
+}
 
 /*-------------------------------------------------------------------------
  * Function:  h5_clean_files
