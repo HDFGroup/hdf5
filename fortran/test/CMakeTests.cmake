@@ -16,7 +16,7 @@
 ##############################################################################
 ##############################################################################
 
-set (test_CLEANFILES
+set (testhdf5_fortran_CLEANFILES
           a.h5
           b.h5
           c.h5
@@ -55,19 +55,15 @@ set (test_CLEANFILES
 # Remove any output file left over from previous test run
 add_test (
     NAME FORTRAN_testhdf5-clear-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        ${test_CLEANFILES}
+    COMMAND ${CMAKE_COMMAND} -E remove ${testhdf5_fortran_CLEANFILES}
 )
-if (last_test)
-  set_tests_properties (FORTRAN_testhdf5-clear-objects PROPERTIES DEPENDS ${last_test})
-endif ()
-set (last_test "FORTRAN_testhdf5-clear-objects")
+set_tests_properties (FORTRAN_testhdf5-clear-objects PROPERTIES FIXTURES_SETUP clear_testhdf5_fortran)
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME FORTRAN_testhdf5_fortran COMMAND $<TARGET_FILE:testhdf5_fortran>)
+  add_test (NAME FORTRAN_testhdf5_fortran COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5_fortran>)
 else ()
   add_test (NAME FORTRAN_testhdf5_fortran COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:testhdf5_fortran>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
@@ -81,13 +77,16 @@ else ()
   )
 endif ()
 #set_tests_properties (FORTRAN_testhdf5_fortran PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
-set_tests_properties (FORTRAN_testhdf5_fortran PROPERTIES DEPENDS FORTRAN_testhdf5-clear-objects)
+set_tests_properties (FORTRAN_testhdf5_fortran PROPERTIES
+    FIXTURES_REQUIRED clear_testhdf5_fortran
+)
 
 #-- Adding test for testhdf5_fortran_1_8
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME FORTRAN_testhdf5_fortran_1_8 COMMAND $<TARGET_FILE:testhdf5_fortran_1_8>)
+  add_test (NAME FORTRAN_testhdf5_fortran_1_8 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5_fortran_1_8>)
 else ()
   add_test (NAME FORTRAN_testhdf5_fortran_1_8 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:testhdf5_fortran_1_8>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
@@ -101,13 +100,17 @@ else ()
   )
 endif ()
 #set_tests_properties (FORTRAN_testhdf5_fortran_1_8 PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
-set_tests_properties (FORTRAN_testhdf5_fortran_1_8 PROPERTIES DEPENDS FORTRAN_testhdf5_fortran)
+set_tests_properties (FORTRAN_testhdf5_fortran_1_8 PROPERTIES
+    DEPENDS FORTRAN_testhdf5_fortran
+    FIXTURES_REQUIRED clear_testhdf5_fortran
+)
 
 #-- Adding test for fortranlib_test_F03
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME FORTRAN_fortranlib_test_F03 COMMAND $<TARGET_FILE:fortranlib_test_F03>)
+  add_test (NAME FORTRAN_fortranlib_test_F03 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:fortranlib_test_F03>)
 else ()
   add_test (NAME FORTRAN_fortranlib_test_F03 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:fortranlib_test_F03>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
@@ -121,13 +124,17 @@ else ()
   )
 endif ()
 #  set_tests_properties (FORTRAN_fortranlib_test_F03 PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
-  set_tests_properties (FORTRAN_fortranlib_test_F03 PROPERTIES DEPENDS FORTRAN_testhdf5_fortran_1_8)
+set_tests_properties (FORTRAN_fortranlib_test_F03 PROPERTIES
+    DEPENDS FORTRAN_testhdf5_fortran_1_8
+    FIXTURES_REQUIRED clear_testhdf5_fortran
+)
 
 #-- Adding test for vol_connector
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME FORTRAN_vol_connector COMMAND $<TARGET_FILE:vol_connector>)
+  add_test (NAME FORTRAN_vol_connector COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:vol_connector>)
 else ()
   add_test (NAME FORTRAN_vol_connector COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:vol_connector>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
@@ -142,9 +149,23 @@ else ()
 endif ()
 
 #-- Adding test for fflush1
-add_test (NAME FORTRAN_fflush1 COMMAND $<TARGET_FILE:fflush1>)
-set_tests_properties (FORTRAN_fflush1 PROPERTIES DEPENDS FORTRAN_testhdf5-clear-objects)
+add_test (
+    NAME FORTRAN_flush1-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove flush.h5
+)
+add_test (
+    NAME FORTRAN_fflush1
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:fflush1>
+)
+set_tests_properties (FORTRAN_fflush1 PROPERTIES
+    DEPENDS FORTRAN_flush1-clear-objects
+)
 
 #-- Adding test for fflush2
-add_test (NAME FORTRAN_fflush2 COMMAND $<TARGET_FILE:fflush2>)
-set_tests_properties (FORTRAN_fflush2 PROPERTIES DEPENDS FORTRAN_fflush1)
+add_test (
+    NAME FORTRAN_fflush2
+    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:fflush2>
+)
+set_tests_properties (FORTRAN_fflush2 PROPERTIES
+    DEPENDS FORTRAN_fflush1
+)

@@ -191,7 +191,7 @@ CHECK_FORTRAN_FEATURE(iso_c_binding
 # Add debug information (intel Fortran : JB)
 #-----------------------------------------------------------------------------
 if (CMAKE_Fortran_COMPILER MATCHES ifort)
-    if (WIN32)
+    if (WIN32 AND NOT MINGW)
         set (CMAKE_Fortran_FLAGS_DEBUG "/debug:full /dbglibs " CACHE "flags" STRING FORCE)
         set (CMAKE_EXE_LINKER_FLAGS_DEBUG "/DEBUG" CACHE "flags" STRING FORCE)
     endif ()

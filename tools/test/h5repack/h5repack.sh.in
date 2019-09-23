@@ -1496,7 +1496,12 @@ TOOLTEST add_alignment $arg
 TOOLTEST upgrade_layout h5repack_layouto.h5
 
 # test for datum size > H5TOOLS_MALLOCSIZE
-TOOLTEST gt_mallocsize h5repack_objs.h5 -f GZIP=1
+arg="h5repack_objs.h5 -f GZIP=1"
+if test $USE_FILTER_DEFLATE != "yes" ; then
+ SKIP $arg
+else
+ TOOLTEST gt_mallocsize $arg
+fi
 
 # Check repacking file with committed datatypes in odd configurations
 TOOLTEST committed_dt h5repack_named_dtypes.h5
@@ -1567,7 +1572,7 @@ VERIFY_SUPERBLOCK 1 2 2 h5repack_layout.h5 -j 1 -k 2 h5repack_layout.h5
 # -j 2 -k 2, superblock will be 3
 VERIFY_SUPERBLOCK 2 2 3 h5repack_layout.h5 -j 2 -k 2 h5repack_layout.h5
 # -j 0 -k 1, file cannot be opened
-VERIFY_INVALIDBOUNDS 0 1 bounds_latest_latest.h5 
+VERIFY_INVALIDBOUNDS 0 1 bounds_latest_latest.h5
 
 ########################################
 # Testing external storage

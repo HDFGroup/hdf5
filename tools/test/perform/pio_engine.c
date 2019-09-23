@@ -61,14 +61,14 @@
 #define GOTOERROR(errcode)  { ret_code = errcode; goto done; }
 #define GOTODONE        { goto done; }
 #define ERRMSG(mesg) {                                                  \
-    fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                       \
-    fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
+    HDfprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                       \
+    HDfprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
         mesg, (int)__LINE__, __FILE__);                             \
 }
 
 #define MSG(mesg) {                                     \
-    fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);       \
-    fprintf(stderr, "(%s) at line %4d in %s\n",         \
+    HDfprintf(stderr, "Proc %d: ", pio_mpi_rank_g);       \
+    HDfprintf(stderr, "(%s) at line %4d in %s\n",         \
         mesg, (int)__LINE__, __FILE__);             \
 }
 
@@ -194,7 +194,7 @@ do_pio(parameters param)
             break;
         default:
             /* unknown request */
-            fprintf(stderr, "Unknown IO type request (%d)\n", iot);
+            HDfprintf(stderr, "Unknown IO type request (%d)\n", iot);
             GOTOERROR(FAIL);
     }
 
@@ -213,21 +213,21 @@ do_pio(parameters param)
     }
 
     if (param.num_files < 0 ) {
-    fprintf(stderr,
+    HDfprintf(stderr,
         "number of files must be >= 0 (%ld)\n",
         param.num_files);
     GOTOERROR(FAIL);
     }
 
     if (ndsets < 0 ) {
-    fprintf(stderr,
+    HDfprintf(stderr,
         "number of datasets per file must be >= 0 (%ld)\n",
         ndsets);
     GOTOERROR(FAIL);
     }
 
     if (param.num_procs <= 0 ) {
-    fprintf(stderr,
+    HDfprintf(stderr,
         "maximum number of process to use must be > 0 (%d)\n",
         param.num_procs);
     GOTOERROR(FAIL);
@@ -292,7 +292,7 @@ do_pio(parameters param)
 
     /* output all of the times for all iterations */
     if (myrank == 0)
-        fprintf(output, "Timer details:\n");
+        HDfprintf(output, "Timer details:\n");
     }
 
     for (nf = 1; nf <= param.num_files; nf++) {
@@ -302,7 +302,7 @@ do_pio(parameters param)
     /* Open file for write */
     char base_name[256];
 
-    sprintf(base_name, "#pio_tmp_%lu", nf);
+    HDsprintf(base_name, "#pio_tmp_%lu", nf);
     pio_create_filename(iot, base_name, fname, sizeof(fname));
     if (pio_debug_level > 0)
         HDfprintf(output, "rank %d: data filename=%s\n",
@@ -311,21 +311,21 @@ do_pio(parameters param)
     /* Need barrier to make sure everyone starts at the same time */
     MPI_Barrier(pio_comm_g);
 
-    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
     hrc = do_fopen(&param, fname, &fd, PIO_CREATE | PIO_WRITE);
 
     VRFY((hrc == SUCCESS), "do_fopen failed");
 
-    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
     hrc = do_write(&res, &fd, &param, ndsets, nbytes, buf_size, buffer);
-    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
 
     VRFY((hrc == SUCCESS), "do_write failed");
 
     /* Close file for write */
     hrc = do_fclose(iot, &fd);
 
-    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_fclose failed");
 
     if (!param.h5_write_only) {
@@ -339,20 +339,20 @@ do_pio(parameters param)
         MPI_Barrier(pio_comm_g);
 
         /* Open file for read */
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
+        io_time_set(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
         hrc = do_fopen(&param, fname, &fd, PIO_READ);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
+        io_time_set(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
         hrc = do_read(&res, &fd, &param, ndsets, nbytes, buf_size, buffer);
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
+        io_time_set(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
         hrc = do_fclose(iot, &fd);
 
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
+        io_time_set(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_fclose failed");
     }
 
@@ -385,7 +385,7 @@ done:
 
     /* release generic resources */
     if(buffer)
-    free(buffer);
+        HDfree(buffer);
     res.ret_code = ret_code;
     return res;
 }
@@ -620,7 +620,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 
         /* Prepare buffer for verifying data */
         if (parms->verify)
-            memset(buffer,pio_mpi_rank_g+1,buf_size*blk_size);
+            HDmemset(buffer,pio_mpi_rank_g+1,buf_size*blk_size);
     } /* end else */
 
 
@@ -853,7 +853,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* Create the dataset transfer property list */
         h5dxpl = H5Pcreate(H5P_DATASET_XFER);
         if (h5dxpl < 0) {
-        fprintf(stderr, "HDF5 Property List Create failed\n");
+        HDfprintf(stderr, "HDF5 Property List Create failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -861,7 +861,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         if(parms->collective) {
             hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
             if (hrc < 0) {
-                fprintf(stderr, "HDF5 Property List Set failed\n");
+                HDfprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
             } /* end if */
         } /* end if */
@@ -883,7 +883,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         case PHDF5:
             h5dcpl = H5Pcreate(H5P_DATASET_CREATE);
             if (h5dcpl < 0) {
-                fprintf(stderr, "HDF5 Property List Create failed\n");
+                HDfprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
             /* 1D dataspace */
@@ -894,7 +894,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 h5dims[0] = blk_size;
                 hrc = H5Pset_chunk(h5dcpl, 1, h5dims);
                 if (hrc < 0) {
-                    fprintf(stderr, "HDF5 Property List Set failed\n");
+                    HDfprintf(stderr, "HDF5 Property List Set failed\n");
                     GOTOERROR(FAIL);
                 } /* end if */
                 } /* end if */
@@ -907,25 +907,25 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 h5dims[1] = blk_size;
                 hrc = H5Pset_chunk(h5dcpl, 2, h5dims);
                 if (hrc < 0) {
-                    fprintf(stderr, "HDF5 Property List Set failed\n");
+                    HDfprintf(stderr, "HDF5 Property List Set failed\n");
                     GOTOERROR(FAIL);
                 } /* end if */
                 } /* end if */
             }/* end else */
 
-            sprintf(dname, "Dataset_%ld", ndset);
+            HDsprintf(dname, "Dataset_%ld", ndset);
             h5ds_id = H5DCREATE(fd->h5fd, dname, ELMT_H5_TYPE,
                 h5dset_space_id, h5dcpl);
 
             if (h5ds_id < 0) {
-                fprintf(stderr, "HDF5 Dataset Create failed\n");
+                HDfprintf(stderr, "HDF5 Dataset Create failed\n");
                 GOTOERROR(FAIL);
             }
 
             hrc = H5Pclose(h5dcpl);
             /* verifying the close of the dcpl */
             if (hrc < 0) {
-                fprintf(stderr, "HDF5 Property List Close failed\n");
+                HDfprintf(stderr, "HDF5 Property List Close failed\n");
                 GOTOERROR(FAIL);
             }
             break;
@@ -958,7 +958,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end else */
 
     /* Start "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTART);
 
     while (nbytes_xfer < bytes_count){
         /* Write */
@@ -1389,7 +1389,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end while */
 
     /* Stop "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTOP);
 
     /* Calculate write time */
 
@@ -1398,7 +1398,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         hrc = H5Dclose(h5ds_id);
 
         if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Close failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -1455,7 +1455,7 @@ done:
     if (h5dset_space_id != -1) {
     hrc = H5Sclose(h5dset_space_id);
     if (hrc < 0){
-        fprintf(stderr, "HDF5 Dataset Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
         h5dset_space_id = -1;
@@ -1465,7 +1465,7 @@ done:
     if (h5mem_space_id != -1) {
     hrc = H5Sclose(h5mem_space_id);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Memory Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
         h5mem_space_id = -1;
@@ -1475,7 +1475,7 @@ done:
     if (h5dxpl != -1) {
     hrc = H5Pclose(h5dxpl);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
         h5dxpl = -1;
@@ -1824,7 +1824,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* Create the dataset transfer property list */
         h5dxpl = H5Pcreate(H5P_DATASET_XFER);
         if (h5dxpl < 0) {
-        fprintf(stderr, "HDF5 Property List Create failed\n");
+        HDfprintf(stderr, "HDF5 Property List Create failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -1832,7 +1832,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         if(parms->collective) {
         hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
         if (hrc < 0) {
-            fprintf(stderr, "HDF5 Property List Set failed\n");
+            HDfprintf(stderr, "HDF5 Property List Set failed\n");
             GOTOERROR(FAIL);
         } /* end if */
         } /* end if */
@@ -1852,10 +1852,10 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         break;
 
         case PHDF5:
-        sprintf(dname, "Dataset_%ld", ndset);
+            HDsprintf(dname, "Dataset_%ld", ndset);
         h5ds_id = H5DOPEN(fd->h5fd, dname);
         if (h5ds_id < 0) {
-            fprintf(stderr, "HDF5 Dataset open failed\n");
+            HDfprintf(stderr, "HDF5 Dataset open failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -1889,7 +1889,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end else */
 
     /* Start "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTART);
 
     while (nbytes_xfer < bytes_count){
         /* Read */
@@ -2344,7 +2344,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     } /* end while */
 
     /* Stop "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTOP);
 
     /* Calculate read time */
 
@@ -2353,7 +2353,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         hrc = H5Dclose(h5ds_id);
 
         if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Close failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -2410,7 +2410,7 @@ done:
     if (h5dset_space_id != -1) {
     hrc = H5Sclose(h5dset_space_id);
     if (hrc < 0){
-        fprintf(stderr, "HDF5 Dataset Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
         h5dset_space_id = -1;
@@ -2420,7 +2420,7 @@ done:
     if (h5mem_space_id != -1) {
     hrc = H5Sclose(h5mem_space_id);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Memory Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
         h5mem_space_id = -1;
@@ -2430,7 +2430,7 @@ done:
     if (h5dxpl != -1) {
     hrc = H5Pclose(h5dxpl);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
         h5dxpl = -1;
@@ -2461,7 +2461,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
                 fd->posixfd = POSIXOPEN(fname, O_RDONLY);
 
             if (fd->posixfd < 0 ) {
-                fprintf(stderr, "POSIX File Open failed(%s)\n", fname);
+                HDfprintf(stderr, "POSIX File Open failed(%s)\n", fname);
                 GOTOERROR(FAIL);
             }
 
@@ -2485,7 +2485,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
                     h5_io_info_g, &fd->mpifd);
 
                 if (mrc != MPI_SUCCESS) {
-                    fprintf(stderr, "MPI File Open failed(%s)\n", fname);
+                    HDfprintf(stderr, "MPI File Open failed(%s)\n", fname);
                     GOTOERROR(FAIL);
                 }
 
@@ -2493,13 +2493,13 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
                 /*filesize , set size to 0 explicitedly.    */
                 mrc = MPI_File_set_size(fd->mpifd, (MPI_Offset)0);
                 if (mrc != MPI_SUCCESS) {
-                    fprintf(stderr, "MPI_File_set_size failed\n");
+                    HDfprintf(stderr, "MPI_File_set_size failed\n");
                     GOTOERROR(FAIL);
                 }
             } else {
                 mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_RDONLY, h5_io_info_g, &fd->mpifd);
                 if (mrc != MPI_SUCCESS) {
-                    fprintf(stderr, "MPI File Open failed(%s)\n", fname);
+                    HDfprintf(stderr, "MPI File Open failed(%s)\n", fname);
                     GOTOERROR(FAIL);
                 }
             }
@@ -2508,19 +2508,19 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 
         case PHDF5:
             if ((acc_tpl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-                fprintf(stderr, "HDF5 Property List Create failed\n");
+                HDfprintf(stderr, "HDF5 Property List Create failed\n");
                 GOTOERROR(FAIL);
             }
 
             /* Set the file driver to the MPI-IO driver */
             if (H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g) < 0) {
-                fprintf(stderr, "HDF5 Property List Set failed\n");
+                HDfprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
             }
 
             /* Set the alignment of objects in HDF5 file */
             if (H5Pset_alignment(acc_tpl, param->h5_thresh, param->h5_align) < 0) {
-                fprintf(stderr, "HDF5 Property List Set failed\n");
+                HDfprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -2530,13 +2530,13 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             else
                 fd->h5fd = H5Fopen(fname, H5F_ACC_RDONLY, acc_tpl);
             if (fd->h5fd < 0) {
-                fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
+                HDfprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
                 GOTOERROR(FAIL);
             }
 
             /* verifying the close of the acc_tpl */
             if (H5Pclose(acc_tpl) < 0) {
-                fprintf(stderr, "HDF5 Property List Close failed\n");
+                HDfprintf(stderr, "HDF5 Property List Close failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -2565,7 +2565,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
         rc = POSIXCLOSE(fd->posixfd);
 
         if (rc != 0){
-        fprintf(stderr, "POSIX File Close failed\n");
+        HDfprintf(stderr, "POSIX File Close failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -2576,7 +2576,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
         mrc = MPI_File_close(&fd->mpifd);
 
         if (mrc != MPI_SUCCESS){
-        fprintf(stderr, "MPI File close failed\n");
+        HDfprintf(stderr, "MPI File close failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -2587,7 +2587,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
         hrc = H5Fclose(fd->h5fd);
 
         if (hrc < 0) {
-        fprintf(stderr, "HDF5 File Close failed\n");
+        HDfprintf(stderr, "HDF5 File Close failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -2621,7 +2621,7 @@ do_cleanupfile(iotype iot, char *fname)
     if (clean_file_g){
     switch (iot){
         case POSIXIO:
-        remove(fname);
+            HDremove(fname);
         break;
         case MPIO:
         case PHDF5:
@@ -2639,9 +2639,9 @@ int MPI_File_read_at(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_READ, TSTART);
+    io_time_set(timer_g, HDF5_MPI_READ, TSTART);
     err=PMPI_File_read_at(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_READ, TSTOP);
+    io_time_set(timer_g, HDF5_MPI_READ, TSTOP);
     return err;
 }
 
@@ -2650,9 +2650,9 @@ int MPI_File_read_at_all(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_READ, TSTART);
+    io_time_set(timer_g, HDF5_MPI_READ, TSTART);
     err=PMPI_File_read_at_all(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_READ, TSTOP);
+    io_time_set(timer_g, HDF5_MPI_READ, TSTOP);
     return err;
 }
 
@@ -2660,9 +2660,9 @@ int MPI_File_write_at(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_WRITE, TSTART);
+    io_time_set(timer_g, HDF5_MPI_WRITE, TSTART);
     err=PMPI_File_write_at(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_WRITE, TSTOP);
+    io_time_set(timer_g, HDF5_MPI_WRITE, TSTOP);
     return err;
 }
 
@@ -2670,9 +2670,9 @@ int MPI_File_write_at_all(MPI_File fh, MPI_Offset offset, void *buf,
     int count, MPI_Datatype datatype, MPI_Status *status)
 {
     int err;
-    set_time(timer_g, HDF5_MPI_WRITE, TSTART);
+    io_time_set(timer_g, HDF5_MPI_WRITE, TSTART);
     err=PMPI_File_write_at_all(fh, offset, buf, count, datatype, status);
-    set_time(timer_g, HDF5_MPI_WRITE, TSTOP);
+    io_time_set(timer_g, HDF5_MPI_WRITE, TSTOP);
     return err;
 }
 

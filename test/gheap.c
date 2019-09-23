@@ -57,7 +57,7 @@ const char *FILENAME[] = {
     NULL
 };
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_1
  *
@@ -68,7 +68,7 @@ const char *FILENAME[] = {
  *
  *              Failure:    number of errors
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, March 31, 1998
  *
  *-------------------------------------------------------------------------
@@ -165,7 +165,7 @@ error:
     return MAX(1, nerrors);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_2
  *
@@ -176,7 +176,7 @@ error:
  *
  *              Failure:     number of errors
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Tuesday, March 31, 1998
  *
  *-------------------------------------------------------------------------
@@ -264,7 +264,7 @@ test_2 (hid_t fapl)
     return MAX(1, nerrors);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_3
  *
@@ -275,7 +275,7 @@ test_2 (hid_t fapl)
  *
  *              Failure:    number of errors
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, March 31, 1998
  *
  *-------------------------------------------------------------------------
@@ -353,7 +353,7 @@ test_3 (hid_t fapl)
     return MAX(1, nerrors);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_4
  *
@@ -365,7 +365,7 @@ test_3 (hid_t fapl)
  *
  *              Failure:    number of errors
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, March 31, 1998
  *
  *-------------------------------------------------------------------------
@@ -448,7 +448,7 @@ test_4 (hid_t fapl)
     return MAX(1, nerrors);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_ooo_indices
  *
@@ -461,7 +461,7 @@ test_4 (hid_t fapl)
  *
  *              Failure:    number of errors
  *
- * Programmer:	Neil Fortner
+ * Programmer:    Neil Fortner
  *              Monday, October 26, 2009
  *
  *-------------------------------------------------------------------------
@@ -566,7 +566,7 @@ test_ooo_indices(hid_t fapl)
     return MAX(1, nerrors);
 } /* end test_ooo_indices */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	main
  *
@@ -579,8 +579,8 @@ test_ooo_indices(hid_t fapl)
 int
 main (void)
 {
-    int		nerrors = 0;
-    hid_t	fapl_id = H5I_INVALID_HID;
+    int         nerrors = 0;
+    hid_t       fapl_id = H5I_INVALID_HID;
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
     h5_reset();

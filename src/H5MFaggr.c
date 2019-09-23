@@ -194,9 +194,9 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
      * the cache eventually adjusts/evicts ageout entries and ends up flushing out the
      * same entry that is being serialized (flush_in_progress).
      */ 
-    if((f->shared->feature_flags & aggr->feature_flag) && f->shared->fs_strategy != H5F_FSPACE_STRATEGY_NONE && (!f->closing || !f->shared->fs_persist)) {
+    if((f->shared->feature_flags & aggr->feature_flag) && f->shared->fs_strategy != H5F_FSPACE_STRATEGY_NONE && (!f->shared->closing || !f->shared->fs_persist)) {
 #ifdef REPLACE
-    if((f->shared->feature_flags & aggr->feature_flag) && f->shared->fs_strategy != H5F_FSPACE_STRATEGY_NONE && !f->closing) {
+    if((f->shared->feature_flags & aggr->feature_flag) && f->shared->fs_strategy != H5F_FSPACE_STRATEGY_NONE && !f->shared->closing) {
 #endif
         haddr_t	aggr_frag_addr = HADDR_UNDEF;   /* Address of aggregrator fragment */
         hsize_t	aggr_frag_size = 0;             /* Size of aggregator fragment */

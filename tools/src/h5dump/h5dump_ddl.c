@@ -393,6 +393,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             }
             break;
 
+        case H5O_TYPE_MAP:
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:
@@ -864,7 +865,7 @@ dump_group(hid_t gid, const char *name)
             if(!type_table->objs[u].recorded) {
                 dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                 type = H5Dget_type(dset);
-                sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[u].objno);
+                HDsprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[u].objno);
                 dump_function_table->dump_named_datatype_function(type, type_name);
                 H5Tclose(type);
                 H5Dclose(dset);
@@ -1404,6 +1405,7 @@ obj_search(const char *path, const H5O_info_t *oi, const char H5_ATTR_UNUSED *al
                 handle_datatypes(handle_data->fid, path, NULL, 0, NULL);
                 break;
 
+            case H5O_TYPE_MAP:
             case H5O_TYPE_UNKNOWN:
             case H5O_TYPE_NTYPES:
             default:
@@ -1941,9 +1943,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
             break;
 
         case H5L_TYPE_EXTERNAL:
-            begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            PRINTVALSTREAM(rawoutstream, "\n");
-            indentation(COL);
             begin_obj(h5tools_dump_header_format->extlinkbegin, links, h5tools_dump_header_format->extlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
             if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0) {
@@ -1951,8 +1950,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
                 const char *elink_path;
 
                 if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &elink_file, &elink_path)>=0) {
-                    indentation(COL);
-                    PRINTSTREAM(rawoutstream, "LINKCLASS %d\n", linfo.type);
                     indentation(COL);
                     PRINTSTREAM(rawoutstream, "TARGETFILE \"%s\"\n", elink_file);
                     indentation(COL);
@@ -1974,9 +1971,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
         case H5L_TYPE_MAX:
         case H5L_TYPE_HARD:
         default:
-            begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            PRINTVALSTREAM(rawoutstream, "\n");
-            indentation(COL);
             begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);
@@ -2022,7 +2016,7 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED * data, int pe
 
             if(!type_table->objs[idx].recorded) {
                 /* unamed datatype */
-                sprintf(name, "/#"H5_PRINTF_HADDR_FMT, type_table->objs[idx].objno);
+                HDsprintf(name, "/#"H5_PRINTF_HADDR_FMT, type_table->objs[idx].objno);
 
                 if(!HDstrcmp(name, real_name))
                     break;
@@ -2143,6 +2137,7 @@ dump_extlink(hid_t group, const char *linkname, const char *objname)
                 handle_datatypes(group, linkname, NULL, 0, objname);
                 break;
 
+            case H5O_TYPE_MAP:
             case H5O_TYPE_UNKNOWN:
             case H5O_TYPE_NTYPES:
             default:

@@ -877,7 +877,7 @@ H5EA_close(H5EA_t *ea))
         if(pending_delete) {
             H5EA_hdr_t *hdr;            /* Another pointer to extensible array header */
 
-#ifndef NDEBUG
+#ifdef H5EA_DEBUG
 {
     unsigned hdr_status = 0;         /* Header's status in the metadata cache */
 
@@ -890,7 +890,7 @@ H5EA_close(H5EA_t *ea))
     HDassert(hdr_status & H5AC_ES__IS_PINNED);
     HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
 }
-#endif /* NDEBUG */
+#endif /* H5EA_DEBUG */
 
             /* Lock the array header into memory */
             /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
@@ -987,19 +987,25 @@ END_FUNC(PRIV)  /* end H5EA_delete() */
  * Purpose:	Iterate over the elements of an extensible array
  *		(copied and modified from FA_iterate() in H5FA.c)
  *
- * Return:      SUCCEED/FAIL
+ * Return:      H5_ITER_CONT/H5_ITER_ERROR
  *
  * Programmer:  Vailin Choi; Feb 2015
  *
+ * Modification:
+ *              Prototype changed (HDFFV-10661)
+ *              - herr_t to int
+ *              - SUCCEED/FAIL to H5_ITER_CONT/H5_ITER_ERROR
+ *              June 6, 2019 -BMR
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
+int, H5_ITER_CONT, H5_ITER_ERROR,
 H5EA_iterate(H5EA_t *ea, H5EA_operator_t op, void *udata))
 
     /* Local variables */
     uint8_t     *elmt = NULL;
     hsize_t     u;
+    int         cb_ret = H5_ITER_CONT;     /* Return value from callback */
 
     /*
      * Check arguments.
@@ -1013,9 +1019,7 @@ H5EA_iterate(H5EA_t *ea, H5EA_operator_t op, void *udata))
         H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array element")
 
     /* Iterate over all elements in array */
-    for(u = 0; u < ea->hdr->stats.stored.max_idx_set; u++) {
-        int cb_ret;     /* Return value from callback */
-
+    for(u = 0; u < ea->hdr->stats.stored.max_idx_set && cb_ret == H5_ITER_CONT; u++) {
         /* Get array element */
         if(H5EA_get(ea, u, elmt) < 0)
             H5E_THROW(H5E_CANTGET, "unable to delete fixed array")

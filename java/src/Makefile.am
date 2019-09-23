@@ -98,6 +98,8 @@ hdf5_java_JAVA =  \
 	${pkgpath}/structs/H5A_info_t.java \
 	${pkgpath}/structs/H5E_error2_t.java \
 	${pkgpath}/structs/H5F_info2_t.java \
+	${pkgpath}/structs/H5FD_hdfs_fapl_t.java \
+	${pkgpath}/structs/H5FD_ros3_fapl_t.java \
 	${pkgpath}/structs/H5G_info_t.java \
 	${pkgpath}/structs/H5L_info_t.java \
 	${pkgpath}/structs/H5O_info_t.java \

@@ -131,6 +131,9 @@ H5G_map_obj_type(H5O_type_t obj_type)
             ret_value = H5G_TYPE;
             break;
 
+        case H5O_TYPE_MAP:
+            /* Maps not supported in native VOL connector */
+
         case H5O_TYPE_UNKNOWN:
         case H5O_TYPE_NTYPES:
         default:
@@ -354,7 +357,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
         tmp_vol_obj.connector = vol_obj->connector;
 
         /* Create the link through the VOL */
-        if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, vol_obj->data, loc_params1) < 0)
+        if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, vol_obj->data, &loc_params1) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {
@@ -434,7 +437,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
         /* Create the link through the VOL */
-        if(H5VL_link_create(H5VL_LINK_CREATE_HARD, vol_obj2, &loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, vol_obj1->data, loc_params1) < 0)
+        if(H5VL_link_create(H5VL_LINK_CREATE_HARD, vol_obj2, &loc_params2, lcpl_id, H5P_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, vol_obj1->data, &loc_params1) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {

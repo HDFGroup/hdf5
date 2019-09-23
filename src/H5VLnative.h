@@ -36,8 +36,11 @@ typedef int H5VL_native_dataset_optional_t;
 #define H5VL_NATIVE_DATASET_FORMAT_CONVERT          0   /* H5Dformat_convert (internal) */
 #define H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE    1   /* H5Dget_chunk_index_type      */
 #define H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE  2   /* H5Dget_chunk_storage_size    */
-#define H5VL_NATIVE_DATASET_CHUNK_READ              3   /* H5Dchunk_read                */
-#define H5VL_NATIVE_DATASET_CHUNK_WRITE             4   /* H5Dchunk_write               */
+#define H5VL_NATIVE_DATASET_GET_NUM_CHUNKS          3   /* H5Dget_num_chunks            */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX   4   /* H5Dget_chunk_info            */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD 5   /* H5Dget_chunk_info_by_coord   */
+#define H5VL_NATIVE_DATASET_CHUNK_READ              6   /* H5Dchunk_read                */
+#define H5VL_NATIVE_DATASET_CHUNK_WRITE             7   /* H5Dchunk_write               */
 
 /* Typedef and values for native VOL connector file optional VOL operations */
 typedef int H5VL_native_file_optional_t;

@@ -58,6 +58,7 @@ const char *FILENAME[] = {
     "stdio_file",        /*7*/
     "windows_file",      /*8*/
     "new_multi_file_v16",/*9*/
+    "ro_s3_file",        /*10*/
     NULL
 };
 
@@ -66,7 +67,7 @@ const char *FILENAME[] = {
 #define COMPAT_BASENAME "family_v16_"
 #define MULTI_COMPAT_BASENAME "multi_file_v16"
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_sec2
  *
@@ -178,7 +179,7 @@ error:
     return -1;
 } /* end test_sec2() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_core
  *
@@ -534,7 +535,7 @@ error:
     return -1;
 } /* end test_core() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_direct
  *
@@ -754,7 +755,7 @@ error:
 #endif /*H5_HAVE_DIRECT*/
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family_opens
  *
@@ -835,7 +836,7 @@ error:
 } /* end test_family_opens() */
 #pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family
  *
@@ -1017,7 +1018,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family_compat
  *
@@ -1129,7 +1130,7 @@ error:
 } /* end test_family_compat() */
 #pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family_member_fapl
  *
@@ -1302,7 +1303,7 @@ test_multi_opens(char *fname)
 } /* end test_multi_opens() */
 #pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi
  *
@@ -1536,7 +1537,7 @@ error:
     return FAIL;
 } /* end test_multi() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi_compat
  *
@@ -1710,7 +1711,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_log
  *
@@ -1821,7 +1822,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_stdio
  *
@@ -1926,7 +1927,7 @@ error:
 }
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_windows
  *
@@ -2048,7 +2049,104 @@ error:
 } /* end test_windows() */
 
 
-
+/*-------------------------------------------------------------------------
+ * Function:    test_ros3
+ *
+ * Purpose:     Tests the file handle interface for the ROS3 driver
+ *
+ *              As the ROS3 driver is 1) read only, 2) requires access
+ *              to an S3 server (minio for now), this test is quite
+ *              different from the other tests.
+ *
+ *              For now, test only fapl & flags.  Extend as the
+ *              work on the VFD continues.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  John Mainzer
+ *              7/12/17
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_ros3(void)
+{
+#ifdef H5_HAVE_ROS3_VFD
+    hid_t       fid = -1;                   /* file ID                      */
+    hid_t       fapl_id = -1;               /* file access property list ID */
+    hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
+    char        filename[1024];             /* filename                     */
+    void        *os_file_handle = NULL;     /* OS file handle               */
+    hsize_t     file_size;                  /* file size                    */
+    H5FD_ros3_fapl_t test_ros3_fa;
+    H5FD_ros3_fapl_t ros3_fa_0 =
+    {
+        /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,
+        /* authenticate = */ FALSE,
+        /* aws_region   = */ "",
+        /* secret_id    = */ "",
+        /* secret_key   = */ "plugh",
+    };
+#endif /*H5_HAVE_ROS3_VFD */
+
+    TESTING("Read-only S3 file driver");
+
+#ifndef H5_HAVE_ROS3_VFD
+    SKIPPED();
+    return 0;
+#else /* H5_HAVE_ROS3_VFD */
+
+    /* Set property list and file name for ROS3 driver. */
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    if(H5Pset_fapl_ros3(fapl_id, &ros3_fa_0) < 0)
+        TEST_ERROR;
+
+    /* verify that the ROS3 FAPL entry is set as expected */
+    if(H5Pget_fapl_ros3(fapl_id, &test_ros3_fa) < 0)
+        TEST_ERROR;
+
+    /* need a macro to compare instances of H5FD_ros3_fapl_t */
+    if((test_ros3_fa.version != ros3_fa_0.version) ||
+       (test_ros3_fa.authenticate != ros3_fa_0.authenticate) ||
+       (strcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
+       (strcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
+       (strcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[10], fapl_id, filename, sizeof(filename));
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR;
+
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR;
+
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))
+        TEST_ERROR
+
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_DATA_SIEVE))
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_id);
+        H5Pclose(fapl_id_out);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+#endif /* H5_HAVE_ROS3_VFD */
+} /* end test_ros3() */
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -2082,6 +2180,7 @@ main(void)
     nerrors += test_log() < 0            ? 1 : 0;
     nerrors += test_stdio() < 0          ? 1 : 0;
     nerrors += test_windows() < 0        ? 1 : 0;
+    nerrors += test_ros3() < 0           ? 1 : 0;
 
     if(nerrors) {
         HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n",

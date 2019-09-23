@@ -490,7 +490,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * Note that in general, this requires us to touch up the memory buffer as 
      * well.
      */
-    if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
+    if(TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
             H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
         void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
                                 /* to the beginning of the projected mem space.  */
@@ -725,7 +725,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * Note that in general, this requires us to touch up the memory buffer 
      * as well.
      */
-    if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
+    if(TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
             H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
         void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
                                 /* to the beginning of the projected mem space.  */
@@ -857,6 +857,7 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
 
     /* Set up "normal" I/O fields */
     io_info->dset = dset;
+    io_info->f_sh = H5F_SHARED(dset->oloc.file);
     io_info->store = store;
 
     /* Set I/O operations to initial values */

@@ -481,6 +481,7 @@
 ./src/H5err.txt
 ./src/H5detect.c
 ./src/H5make_libsettings.c
+./src/H5mpi.c
 ./src/H5overflow.txt
 ./src/H5private.h
 ./src/H5public.h
@@ -636,6 +637,8 @@
 ./src/H5FDdrvr_module.h
 ./src/H5FDfamily.c
 ./src/H5FDfamily.h
+./src/H5FDhdfs.c
+./src/H5FDhdfs.h
 ./src/H5FDint.c
 ./src/H5FDlog.c
 ./src/H5FDlog.h
@@ -646,9 +649,13 @@
 ./src/H5FDmpio.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
+./src/H5FDros3.c
+./src/H5FDros3.h
 ./src/H5FDpkg.h
 ./src/H5FDprivate.h
 ./src/H5FDpublic.h
+./src/H5FDs3comms.h
+./src/H5FDs3comms.c
 ./src/H5FDsec2.c
 ./src/H5FDsec2.h
 ./src/H5FDspace.c
@@ -743,6 +750,11 @@
 ./src/H5Lpkg.h
 ./src/H5Lprivate.h
 ./src/H5Lpublic.h
+./src/H5M.c
+./src/H5Mmodule.h
+./src/H5Mpkg.h
+./src/H5Mprivate.h
+./src/H5Mpublic.h
 ./src/H5MF.c
 ./src/H5MFaggr.c
 ./src/H5MFdbg.c
@@ -814,6 +826,8 @@
 ./src/H5Pint.c
 ./src/H5Plapl.c
 ./src/H5Plcpl.c
+./src/H5Pmapl.c
+./src/H5Pmcpl.c
 ./src/H5Pmodule.h
 ./src/H5Pocpl.c
 ./src/H5Pocpypl.c
@@ -976,6 +990,7 @@
 ./test/cache_image.c
 ./test/cache_logging.c
 ./test/cache_tagging.c
+./test/chunk_info.c
 ./test/cmpd_dset.c
 ./test/cork.c
 ./test/corrupt_stab_msg.h5
@@ -1069,6 +1084,7 @@
 ./test/h5fc_ext_none.h5
 ./test/h5test.c
 ./test/h5test.h
+./test/hdfs.c
 ./test/hyperslab.c
 ./test/istore.c
 ./test/le_data.h5
@@ -1094,7 +1110,9 @@
 ./test/paged_nopersist.h5
 ./test/paged_persist.h5
 ./test/reserved.c
+./test/ros3.c
 ./test/pool.c
+./test/s3comms.c
 ./test/set_extent.c
 # ====distribute this for now. See HDFFV-8236====
 ./test/space_overflow.c
@@ -1546,6 +1564,9 @@
 ./tools/lib/h5tools_error.h
 ./tools/lib/io_timer.c
 ./tools/lib/io_timer.h
+
+./tools/libtest/Makefile.am
+./tools/libtest/h5tools_test_utils.c
 
 ./tools/src/misc/Makefile.am
 ./tools/src/misc/h5clear.c
@@ -3035,6 +3056,8 @@
 ./java/src/hdf/hdf5lib/structs/H5AC_cache_config_t.java
 ./java/src/hdf/hdf5lib/structs/H5E_error2_t.java
 ./java/src/hdf/hdf5lib/structs/H5F_info2_t.java
+./java/src/hdf/hdf5lib/structs/H5FD_hdfs_fapl_t.java
+./java/src/hdf/hdf5lib/structs/H5FD_ros3_fapl_t.java
 ./java/src/hdf/hdf5lib/structs/H5G_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5L_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_hdr_info_t.java
@@ -3198,6 +3221,8 @@
 ./java/test/testfiles/JUnit-TestH5P.txt
 ./java/test/testfiles/JUnit-TestH5PData.txt
 ./java/test/testfiles/JUnit-TestH5Pfapl.txt
+./java/test/testfiles/JUnit-TestH5Pfaplhdfs.txt
+./java/test/testfiles/JUnit-TestH5Pfapls3.txt
 ./java/test/testfiles/JUnit-TestH5Plist.txt
 ./java/test/testfiles/JUnit-TestH5Pvirtual.txt
 ./java/test/testfiles/JUnit-TestH5PL.txt
@@ -3236,6 +3261,8 @@
 ./java/test/TestH5P.java
 ./java/test/TestH5PData.java
 ./java/test/TestH5Pfapl.java
+./java/test/TestH5Pfaplhdfs.java
+./java/test/TestH5Pfapls3.java
 ./java/test/TestH5Plist.java
 ./java/test/TestH5Pvirtual.java
 ./java/test/TestH5PL.java
@@ -3257,9 +3284,11 @@
 ./java/lib/ext/slf4j-simple-1.7.25.jar
 
 # CMake-specific Files
+./config/toolchain/build32.cmake
 ./config/toolchain/crayle.cmake
 ./config/toolchain/GCC.cmake
 ./config/toolchain/intel.cmake
+./config/toolchain/mingw64.cmake
 ./config/toolchain/PGI.cmake
 
 ./config/cmake/cacheinit.cmake
@@ -3268,6 +3297,7 @@
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
+./config/cmake/FindHDFS.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
 ./config/cmake/hdf5-config.cmake.in
@@ -3377,6 +3407,8 @@
 ./testpar/CMakeVFDTests.cmake
 ./tools/CMakeLists.txt
 ./tools/lib/CMakeLists.txt
+./tools/libtest/CMakeLists.txt
+./tools/libtest/CMakeTests.cmake
 ./tools/src/CMakeLists.txt
 ./tools/test/CMakeLists.txt
 ./tools/src/h5copy/CMakeLists.txt
@@ -3391,6 +3423,7 @@
 ./tools/test/h5dump/CMakeTestsPBITS.cmake
 ./tools/test/h5dump/CMakeTestsXML.cmake
 ./tools/test/h5dump/CMakeTestsVDS.cmake
+./tools/test/h5dump/CMakeVFDTests.cmake
 ./tools/src/h5format_convert/CMakeLists.txt
 ./tools/test/h5format_convert/CMakeLists.txt
 ./tools/test/h5format_convert/CMakeTests.cmake
@@ -3497,6 +3530,7 @@
 ./testpar/Makefile.in
 ./tools/Makefile.in
 ./tools/lib/Makefile.in
+./tools/libtest/Makefile.in
 ./tools/src/Makefile.in
 ./tools/src/h5copy/Makefile.in
 ./tools/src/h5diff/Makefile.in

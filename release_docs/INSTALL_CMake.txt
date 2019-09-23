@@ -652,10 +652,7 @@ HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"   
 HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "0"
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_TEST_PASSTHROUGH_VOL      "Execute tests with different passthrough VOL connectors"      OFF
-HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
-HDF5_USE_18_API_DEFAULT        "Use the HDF5 1.8.x API by default"                            OFF
-HDF5_USE_110_API_DEFAULT       "Use the HDF5 1.10.x API by default"                           OFF
-HDF5_USE_112_API_DEFAULT       "Use the HDF5 1.12.x API by default"                           ON
+DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112)"                    "v112"
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  ON
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
@@ -668,13 +665,13 @@ if (HDF5_TEST_VFD)
     HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"      ON
 
 ---------------- External Library Options ---------------------
-HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building"        "NO"
-HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                        OFF
-HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                    OFF
-ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB" 0
-SZIP_USE_EXTERNAL           "Use External Library Building for SZIP" 0
+HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"
+HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     OFF
+HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 OFF
+ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"              0
+SZIP_USE_EXTERNAL           "Use External Library Building for SZIP"              0
 if (HDF5_ENABLE_SZIP_SUPPORT)
-    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"      OFF
+    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                                 OFF
 if (WINDOWS)
     H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 else ()

@@ -68,7 +68,7 @@
 -T H5E_minor_t
 -T H5E_t
 -T H5F_create_t
--T H5F_file_t
+-T H5F_shared_t
 -T H5F_isop_t
 -T H5F_istore_key_t
 -T H5F_istore_ud1_t

@@ -187,7 +187,7 @@ test_h5s_basic(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     /*
-     * Check to be sure we can't create a simple data space that has too many
+     * Check to be sure we can't create a simple dataspace that has too many
      * dimensions.
      */
     H5E_BEGIN_TRY {
@@ -214,7 +214,7 @@ test_h5s_basic(void)
         CHECK_I(ret, "H5Fclose");
     }
     else
-        printf("***cannot open the pre-created H5S_MAX_RANK test file (%s)\n", testfile);
+        HDprintf("***cannot open the pre-created H5S_MAX_RANK test file (%s)\n", testfile);
     }
 
     /* Verify that incorrect dimensions don't work */
@@ -318,7 +318,7 @@ test_h5s_basic(void)
 
 /****************************************************************
 **
-**  test_h5s_null(): Test NULL data space
+**  test_h5s_null(): Test NULL dataspace
 **
 ****************************************************************/
 static void
@@ -460,7 +460,7 @@ test_h5s_null(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /*============================================
-     *  Reopen the file to check the data space
+     *  Reopen the file to check the dataspace
      *============================================
      */
     fid = H5Fopen(NULLFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -683,7 +683,7 @@ test_h5s_zero_dim(void)
             for(j=0; j<SPACE1_DIM3; j++) {
                 if(rdata[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %d but should have been 7\n",
+                    HDprintf("element [%d][%d] is %d but should have been 7\n",
                            i, j, rdata[i][j]);
                 }
             }
@@ -705,7 +705,7 @@ test_h5s_zero_dim(void)
             for(j=0; j<SPACE1_DIM3; j++) {
                 if(rdata_short[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %d but should have been 7\n",
+                    HDprintf("element [%d][%d] is %d but should have been 7\n",
                            i, j, rdata_short[i][j]);
                 }
             }
@@ -772,7 +772,7 @@ test_h5s_zero_dim(void)
             for(j=0; j<SPACE1_DIM3; j++) {
                 if(rdata[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %d but should have been 7\n",
+                    HDprintf("element [%d][%d] is %d but should have been 7\n",
                            i, j, rdata[i][j]);
                 }
         }
@@ -798,7 +798,7 @@ test_h5s_zero_dim(void)
                 for(k=0; k<SPACE1_DIM3; k++) {
                     if(rdata_real[i][j][k] != wdata_real[i][j][k]) {
                         H5_FAILED();
-                        printf("element [%d][%d][%d] is %d but should have been %d\n",
+                        HDprintf("element [%d][%d][%d] is %d but should have been %d\n",
                            i, j, k, rdata_real[i][j][k], wdata_real[i][j][k]);
                     }
                 }
@@ -822,7 +822,7 @@ test_h5s_zero_dim(void)
             for(j=0; j<SPACE1_DIM3; j++) {
                 if(rdata[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %d but should have been 7\n",
+                    HDprintf("element [%d][%d] is %d but should have been 7\n",
                            i, j, rdata[i][j]);
                 }
         }
@@ -869,7 +869,7 @@ test_h5s_zero_dim(void)
             for(j=0; j<SPACE1_DIM3; j++) {
                 if(rdata[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %d but should have been 7\n",
+                    HDprintf("element [%d][%d] is %d but should have been 7\n",
                            i, j, rdata[i][j]);
                 }
         }
@@ -913,7 +913,7 @@ test_h5s_zero_dim(void)
             for(j=0; j<SPACE1_DIM3; j++) {
                 if(rdata[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %d but should have been 7\n",
+                    HDprintf("element [%d][%d] is %d but should have been 7\n",
                            i, j, rdata[i][j]);
                 }
             }
@@ -945,7 +945,7 @@ test_h5s_zero_dim(void)
             for(j=0; j<SPACE1_DIM3; j++) {
                 if(rdata[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %d but should have been 7\n",
+                    HDprintf("element [%d][%d] is %d but should have been 7\n",
                            i, j, rdata[i][j]);
                 }
             }
@@ -967,7 +967,7 @@ test_h5s_zero_dim(void)
             for(j=0; j<SPACE1_DIM3; j++) {
                 if(rdata_short[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %d but should have been 7\n",
+                    HDprintf("element [%d][%d] is %d but should have been 7\n",
                            i, j, rdata_short[i][j]);
                 }
             }
@@ -1029,7 +1029,7 @@ test_h5s_zero_dim(void)
                 for(k=0; k<SPACE1_DIM3; k++) {
                     if(rdata_real[i][j][k] != wdata_real[i][j][k]) {
                         H5_FAILED();
-                        printf("element [%d][%d][%d] is %d but should have been %d\n",
+                        HDprintf("element [%d][%d][%d] is %d but should have been %d\n",
                            i, j, k, rdata_real[i][j][k], wdata_real[i][j][k]);
                     }
                 }
@@ -1078,7 +1078,7 @@ test_h5s_zero_dim(void)
         CHECK(ret, FAIL, "H5Fclose");
 
         /*============================================
-         *  Reopen the file to check the data space
+         *  Reopen the file to check the dataspace
          *============================================
          */
         fid1 = H5Fopen(ZEROFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -1116,7 +1116,7 @@ test_h5s_zero_dim(void)
             for(j=0; j<SPACE1_DIM3; j++) {
                 if(rdata[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %d but should have been 7\n",
+                    HDprintf("element [%d][%d] is %d but should have been 7\n",
                            i, j, rdata[i][j]);
                 }
             }
@@ -1154,7 +1154,7 @@ test_h5s_zero_dim(void)
             for(j=0; j<SPACE1_DIM3; j++) {
                 if(rdata_short[i][j] != 7) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %d but should have been 7\n",
+                    HDprintf("element [%d][%d] is %d but should have been 7\n",
                            i, j, rdata_short[i][j]);
                 }
             }
@@ -1184,24 +1184,24 @@ test_h5s_zero_dim(void)
 static void
 test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
 {
-    hid_t sid1, sid2, sid3; /* Dataspace ID */
-    hid_t decoded_sid1, decoded_sid2, decoded_sid3;
-    int rank;               /* Logical rank of dataspace */
-    hid_t fapl = -1;        /* File access property list ID */
-    hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    size_t sbuf_size=0, null_size=0, scalar_size=0;
-    unsigned char *sbuf=NULL, *null_sbuf=NULL, *scalar_buf=NULL;
-    hsize_t tdims[4];       /* Dimension array to test with */
-    hssize_t n;             /* Number of dataspace elements */
-    hsize_t start[] = {0, 0, 0};
-    hsize_t stride[] = {2, 5, 3};
-    hsize_t count[] = {2, 2, 2};
-    hsize_t block[] = {1, 3, 1};
-    H5S_sel_type sel_type;
-    H5S_class_t space_type;
-    hssize_t nblocks;
-    hid_t ret_id;           /* Generic hid_t return value   */
-    herr_t ret;             /* Generic return value     */
+    hid_t        sid1, sid2, sid3;    /* Dataspace ID        */
+    hid_t               decoded_sid1, decoded_sid2, decoded_sid3;
+    int                rank;        /* Logical rank of dataspace    */
+    hid_t         fapl = -1;        /* File access property list ID */
+    hsize_t        dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    size_t              sbuf_size=0, null_size=0, scalar_size=0;
+    unsigned char       *sbuf=NULL, *null_sbuf=NULL, *scalar_buf=NULL;
+    hsize_t        tdims[4];    /* Dimension array to test with */
+    hssize_t        n;         /* Number of dataspace elements */
+    hsize_t             start[] = {0, 0, 0};
+    hsize_t             stride[] = {2, 5, 3};
+    hsize_t             count[] = {2, 2, 2};
+    hsize_t             block[] = {1, 3, 1};
+    H5S_sel_type        sel_type;
+    H5S_class_t         space_type;
+    hssize_t            nblocks;
+    hid_t        ret_id;        /* Generic hid_t return value    */
+    herr_t        ret;        /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace Encoding and Decoding\n"));
@@ -1227,7 +1227,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
     ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    /* Encode simple data space in a buffer with the fapl setting */
+    /* Encode simple dataspace in a buffer with the fapl setting */
     ret = H5Sencode2(sid1, NULL, &sbuf_size, fapl);
     CHECK(ret, FAIL, "H5Sencode2");
 
@@ -1242,7 +1242,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
     } H5E_END_TRY;
     VERIFY(ret_id, FAIL, "H5Sdecode");
 
-    /* Encode the simple data space in a buffer with the fapl setting */
+    /* Encode the simple dataspace in a buffer with the fapl setting */
     ret = H5Sencode2(sid1, sbuf, &sbuf_size, fapl);
     CHECK(ret, FAIL, "H5Sencode");
 
@@ -1289,7 +1289,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
     sid2 = H5Screate(H5S_NULL);
     CHECK(sid2, FAIL, "H5Screate");
 
-    /* Encode null data space in a buffer */
+    /* Encode null dataspace in a buffer */
     ret = H5Sencode2(sid2, NULL, &null_size, fapl);
     CHECK(ret, FAIL, "H5Sencode");
 
@@ -1298,7 +1298,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
         CHECK(null_sbuf, NULL, "HDcalloc");
     }
 
-    /* Encode the null data space in the buffer */
+    /* Encode the null dataspace in the buffer */
     ret = H5Sencode2(sid2, null_sbuf, &null_size, fapl);
     CHECK(ret, FAIL, "H5Sencode2");
 
@@ -1325,7 +1325,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
     sid3 = H5Screate(H5S_SCALAR);
     CHECK(sid3, FAIL, "H5Screate_simple");
 
-    /* Encode scalar data space in a buffer */
+    /* Encode scalar dataspace in a buffer */
     ret = H5Sencode2(sid3, NULL, &scalar_size, fapl);
     CHECK(ret, FAIL, "H5Sencode");
 
@@ -1334,7 +1334,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
         CHECK(scalar_buf, NULL, "HDcalloc");
     }
 
-    /* Encode the scalar data space in the buffer */
+    /* Encode the scalar dataspace in the buffer */
     ret = H5Sencode2(sid3, scalar_buf, &scalar_size, fapl);
     CHECK(ret, FAIL, "H5Sencode2");
 
@@ -1419,7 +1419,7 @@ test_h5s_encode1(void)
     ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    /* Encode simple data space in a buffer with the fapl setting */
+    /* Encode simple dataspace in a buffer with the fapl setting */
     ret = H5Sencode1(sid1, NULL, &sbuf_size);
     CHECK(ret, FAIL, "H5Sencode2");
 
@@ -1434,7 +1434,7 @@ test_h5s_encode1(void)
     } H5E_END_TRY;
     VERIFY(ret_id, FAIL, "H5Sdecode");
 
-    /* Encode the simple data space in a buffer */
+    /* Encode the simple dataspace in a buffer */
     ret = H5Sencode1(sid1, sbuf, &sbuf_size);
     CHECK(ret, FAIL, "H5Sencode");
 
@@ -1481,7 +1481,7 @@ test_h5s_encode1(void)
     sid2 = H5Screate(H5S_NULL);
     CHECK(sid2, FAIL, "H5Screate");
 
-    /* Encode null data space in a buffer */
+    /* Encode null dataspace in a buffer */
     ret = H5Sencode1(sid2, NULL, &null_size);
     CHECK(ret, FAIL, "H5Sencode");
 
@@ -1490,7 +1490,7 @@ test_h5s_encode1(void)
         CHECK(null_sbuf, NULL, "HDcalloc");
     }
 
-    /* Encode the null data space in the buffer */
+    /* Encode the null dataspace in the buffer */
     ret = H5Sencode1(sid2, null_sbuf, &null_size);
     CHECK(ret, FAIL, "H5Sencode2");
 
@@ -1515,9 +1515,9 @@ test_h5s_encode1(void)
      */
     /* Create scalar dataspace */
     sid3 = H5Screate(H5S_SCALAR);
-    CHECK(sid3, FAIL, "H5Screate_simple");
+    CHECK(sid3, FAIL, "H5Screate");
 
-    /* Encode scalar data space in a buffer */
+    /* Encode scalar dataspace in a buffer */
     ret = H5Sencode1(sid3, NULL, &scalar_size);
     CHECK(ret, FAIL, "H5Sencode");
 
@@ -1526,7 +1526,7 @@ test_h5s_encode1(void)
         CHECK(scalar_buf, NULL, "HDcalloc");
     }
 
-    /* Encode the scalar data space in the buffer */
+    /* Encode the scalar dataspace in the buffer */
     ret = H5Sencode1(sid3, scalar_buf, &scalar_size);
     CHECK(ret, FAIL, "H5Sencode2");
 
@@ -1622,8 +1622,8 @@ test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid,
         VERIFY(H5Sget_select_npoints(in_sid), H5Sget_select_npoints(d_sid), "Compare npoints");
 
         /* Verify if the two dataspace selections (in_sid, d_sid) are the same shape */
-        check = H5S__select_shape_same_test(in_sid, d_sid);
-        VERIFY(check, TRUE, "H5S__select_shape_same_test");
+        check = H5Sselect_shape_same(in_sid, d_sid);
+        VERIFY(check, TRUE, "H5Sselect_shape_same");
 
         /* Compare the starting/ending coordinates of the bounding box for in_sid and d_sid */
         ret = H5Sget_select_bounds(in_sid, in_low_bounds, in_high_bounds);
@@ -2127,7 +2127,7 @@ test_h5s_encode_length(void)
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &start, &stride, &count, &block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    /* Encode simple data space in a buffer */
+    /* Encode simple dataspace in a buffer */
     ret = H5Sencode2(sid, NULL, &sbuf_size, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Sencode");
 
@@ -2437,9 +2437,9 @@ test_h5s_compound_scalar_read(void)
     ret = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
     if(HDmemcmp(&space4_data,&rdata,sizeof(struct space4_struct))) {
-        printf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c1);
-        printf("scalar data different: space4_data.u=%u, read_data4.u=%u\n",space4_data.u,rdata.u);
-        printf("scalar data different: space4_data.f=%f, read_data4.f=%f\n",(double)space4_data.f,(double)rdata.f);
+        HDprintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c1);
+        HDprintf("scalar data different: space4_data.u=%u, read_data4.u=%u\n",space4_data.u,rdata.u);
+        HDprintf("scalar data different: space4_data.f=%f, read_data4.f=%f\n",(double)space4_data.f,(double)rdata.f);
         TestErrPrintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c2);
      } /* end if */
 
@@ -2493,7 +2493,7 @@ test_h5s_chunk(void)
     status = H5Pset_chunk(plist_id, 2, csize);
     CHECK(status, FAIL, "H5Pset_chunk");
 
-    /* Create the data space */
+    /* Create the dataspace */
     dims[0] = 50000;
     dims[1] = 3;
     space_id = H5Screate_simple(2, dims, NULL);

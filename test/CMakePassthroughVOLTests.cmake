@@ -90,15 +90,9 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
     if ("${voltest}" STREQUAL "flush1" OR "${voltest}" STREQUAL "flush2")
       if ("${volname}" STREQUAL "multi" OR "${volname}" STREQUAL "split")
         if (NOT BUILD_SHARED_LIBS AND NOT ${HDF_CFG_NAME} MATCHES "Debug")
-          add_test (
-              NAME VOL-${volname}-${voltest}-clear-objects
-              COMMAND    ${CMAKE_COMMAND}
-                  -E remove
-                      ${volname}/${volname}-${voltest}.out
-                      ${volname}/${volname}-${voltest}.out.err
-          )
           add_test (NAME VOL-${volname}-${voltest}
               COMMAND "${CMAKE_COMMAND}"
+                  -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                   -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}>"
                   -D "TEST_ARGS:STRING="
                   -D "TEST_VOL:STRING=${volinfo}"
@@ -108,7 +102,6 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
                   -P "${HDF_RESOURCES_DIR}/volTest.cmake"
           )
           set_tests_properties (VOL-${volname}-${voltest} PROPERTIES
-              DEPENDS VOL-${volname}-${voltest}-clear-objects
               ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
               WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
           )
@@ -118,15 +111,9 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
           )
         endif ()
       else ()
-        add_test (
-            NAME VOL-${volname}-${voltest}-clear-objects
-            COMMAND    ${CMAKE_COMMAND}
-                -E remove
-                    ${volname}/${volname}-${voltest}.out
-                    ${volname}/${volname}-${voltest}.out.err
-        )
         add_test (NAME VOL-${volname}-${voltest}
             COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}>"
                 -D "TEST_ARGS:STRING="
                 -D "TEST_VOL:STRING=${volinfo}"
@@ -136,21 +123,14 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
                 -P "${HDF_RESOURCES_DIR}/volTest.cmake"
         )
         set_tests_properties (VOL-${volname}-${voltest} PROPERTIES
-            DEPENDS VOL-${volname}-${voltest}-clear-objects
             ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
         )
       endif ()
     else ()
-      add_test (
-          NAME VOL-${volname}-${voltest}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  ${volname}/${volname}-${voltest}.out
-                  ${volname}/${volname}-${voltest}.out.err
-      )
       add_test (NAME VOL-${volname}-${voltest}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VOL:STRING=${volinfo}"
@@ -160,7 +140,6 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
               -P "${HDF_RESOURCES_DIR}/volTest.cmake"
       )
       set_tests_properties (VOL-${volname}-${voltest} PROPERTIES
-          DEPENDS VOL-${volname}-${voltest}-clear-objects
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
@@ -169,15 +148,9 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
 
   macro (DO_VOL_TEST voltest volname volinfo resultcode)
       #message(STATUS "${voltest}-${volname} with ${volinfo}")
-      add_test (
-          NAME VOL-${volname}-${voltest}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  ${volname}/${volname}-${voltest}.out
-                  ${volname}/${volname}-${voltest}.out.err
-      )
       add_test (NAME VOL-${volname}-${voltest}
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${voltest}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VOL:STRING=${volinfo}"
@@ -187,7 +160,6 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
               -P "${HDF_RESOURCES_DIR}/volTest.cmake"
       )
       set_tests_properties (VOL-${volname}-${voltest} PROPERTIES
-          DEPENDS VOL-${volname}-${voltest}-clear-objects
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
@@ -212,15 +184,9 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
       set_tests_properties (VOL-${volname}-cache PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
     endif ()
     if (HDF5_TEST_FHEAP_PASSTHROUGH_VOL)
-      add_test (
-          NAME VOL-${volname}-fheap-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  ${volname}/${volname}-fheap.out
-                  ${volname}/${volname}-fheap.out.err
-      )
       add_test (NAME VOL-${volname}-fheap
           COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:fheap>"
               -D "TEST_ARGS:STRING="
               -D "TEST_VOL:STRING=${volinfo}"
@@ -230,7 +196,6 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
               -P "${HDF_RESOURCES_DIR}/volTest.cmake"
       )
       set_tests_properties (VOL-${volname}-fheap PROPERTIES
-          DEPENDS VOL-${volname}-fheap-clear-objects
           TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}

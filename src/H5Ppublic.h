@@ -62,6 +62,8 @@
 #define H5P_GROUP_ACCESS        (H5OPEN H5P_CLS_GROUP_ACCESS_ID_g)
 #define H5P_DATATYPE_CREATE     (H5OPEN H5P_CLS_DATATYPE_CREATE_ID_g)
 #define H5P_DATATYPE_ACCESS     (H5OPEN H5P_CLS_DATATYPE_ACCESS_ID_g)
+#define H5P_MAP_CREATE          (H5OPEN H5P_CLS_MAP_CREATE_ID_g)
+#define H5P_MAP_ACCESS          (H5OPEN H5P_CLS_MAP_ACCESS_ID_g)
 #define H5P_STRING_CREATE       (H5OPEN H5P_CLS_STRING_CREATE_ID_g)
 #define H5P_ATTRIBUTE_CREATE    (H5OPEN H5P_CLS_ATTRIBUTE_CREATE_ID_g)
 #define H5P_ATTRIBUTE_ACCESS    (H5OPEN H5P_CLS_ATTRIBUTE_ACCESS_ID_g)
@@ -83,6 +85,8 @@
 #define H5P_GROUP_ACCESS_DEFAULT       (H5OPEN H5P_LST_GROUP_ACCESS_ID_g)
 #define H5P_DATATYPE_CREATE_DEFAULT    (H5OPEN H5P_LST_DATATYPE_CREATE_ID_g)
 #define H5P_DATATYPE_ACCESS_DEFAULT    (H5OPEN H5P_LST_DATATYPE_ACCESS_ID_g)
+#define H5P_MAP_CREATE_DEFAULT         (H5OPEN H5P_LST_MAP_CREATE_ID_g)
+#define H5P_MAP_ACCESS_DEFAULT         (H5OPEN H5P_LST_MAP_ACCESS_ID_g)
 #define H5P_ATTRIBUTE_CREATE_DEFAULT   (H5OPEN H5P_LST_ATTRIBUTE_CREATE_ID_g)
 #define H5P_ATTRIBUTE_ACCESS_DEFAULT   (H5OPEN H5P_LST_ATTRIBUTE_ACCESS_ID_g)
 #define H5P_OBJECT_COPY_DEFAULT        (H5OPEN H5P_LST_OBJECT_COPY_ID_g)
@@ -191,6 +195,8 @@ H5_DLLVAR hid_t H5P_CLS_GROUP_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_CLS_GROUP_ACCESS_ID_g;
 H5_DLLVAR hid_t H5P_CLS_DATATYPE_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_CLS_DATATYPE_ACCESS_ID_g;
+H5_DLLVAR hid_t H5P_CLS_MAP_CREATE_ID_g;
+H5_DLLVAR hid_t H5P_CLS_MAP_ACCESS_ID_g;
 H5_DLLVAR hid_t H5P_CLS_STRING_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_CLS_ATTRIBUTE_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_CLS_ATTRIBUTE_ACCESS_ID_g;
@@ -211,6 +217,8 @@ H5_DLLVAR hid_t H5P_LST_GROUP_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_LST_GROUP_ACCESS_ID_g;
 H5_DLLVAR hid_t H5P_LST_DATATYPE_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_LST_DATATYPE_ACCESS_ID_g;
+H5_DLLVAR hid_t H5P_LST_MAP_CREATE_ID_g;
+H5_DLLVAR hid_t H5P_LST_MAP_ACCESS_ID_g;
 H5_DLLVAR hid_t H5P_LST_ATTRIBUTE_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_LST_ATTRIBUTE_ACCESS_ID_g;
 H5_DLLVAR hid_t H5P_LST_OBJECT_COPY_ID_g;
@@ -373,6 +381,8 @@ H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective
 H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
 H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
 H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
+H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
+H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr);
 H5_DLL herr_t H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr /*out*/);
@@ -490,6 +500,12 @@ H5_DLL herr_t H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, uns
 H5_DLL herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */, unsigned *est_name_len /* out */);
 H5_DLL herr_t H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags);
 H5_DLL herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /* out */);
+
+/* Map access property list (MAPL) routines */
+#ifdef H5_HAVE_MAP_API
+H5_DLL herr_t H5Pset_map_iterate_hints(hid_t mapl_id, size_t key_prefetch_size, size_t key_alloc_size);
+H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size /*out*/, size_t *key_alloc_size /*out*/);
+#endif /*  H5_HAVE_MAP_API */
 
 /* String creation property list (STRCPL) routines */
 H5_DLL herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding);

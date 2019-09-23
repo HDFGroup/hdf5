@@ -325,7 +325,7 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 
 
 
-        if(f->closing) {
+        if(f->shared->closing) {
 
             /* Get the eoa, and verify that it has the expected value */
             if(HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)) )

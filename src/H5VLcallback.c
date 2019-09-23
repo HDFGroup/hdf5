@@ -6562,3 +6562,114 @@ done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLrequest_free() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__optional
+ *
+ * Purpose:     Optional operation specific to connectors.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
+    void **req, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->optional)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'optional' method")
+
+    /* Call the corresponding VOL callback */
+    if((ret_value = (cls->optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, ret_value, "unable to execute optional callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_optional
+ *
+ * Purpose:     Optional operation specific to connectors.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_optional(const H5VL_object_t *vol_obj, hid_t dxpl_id,
+    void **req, ...)
+{
+    va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    HDva_start(arguments, req);
+    arg_started = TRUE;
+    if((ret_value = H5VL__optional(vol_obj->data, vol_obj->connector->cls, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute optional callback")
+
+done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        HDva_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, ret_value, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLoptional
+ *
+ * Purpose:     Performs an optional connector-specific operation
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLoptional(void *obj, hid_t connector_id, hid_t dxpl_id, void **req,
+    va_list arguments)
+{
+    H5VL_class_t *cls;                  /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xii**xx", obj, connector_id, dxpl_id, req, arguments);
+
+    /* Check args and get class pointer */
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* Call the corresponding internal VOL routine */
+    if((ret_value = H5VL__optional(obj, cls, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, ret_value, "unable to execute optional callback")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLoptional() */
+

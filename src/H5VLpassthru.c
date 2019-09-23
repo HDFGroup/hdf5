@@ -2131,11 +2131,11 @@ H5VL_pass_through_link_create(H5VL_link_create_type_t create_type, void *obj,
     /* Fix up the link target object for hard link creation */
     if(H5VL_LINK_CREATE_HARD == create_type) {
         void         *cur_obj;
-        H5VL_loc_params_t cur_params;
+        H5VL_loc_params_t *cur_params;
 
         /* Retrieve the object & loc params for the link target */
         cur_obj = va_arg(arguments, void *);
-        cur_params = va_arg(arguments, H5VL_loc_params_t);
+        cur_params = va_arg(arguments, H5VL_loc_params_t *);
 
         /* If it's a non-NULL pointer, find the 'under object' and re-set the property */
         if(cur_obj) {

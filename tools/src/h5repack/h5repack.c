@@ -609,7 +609,7 @@ check_options(pack_opt_t *options)
             if (options->verbose) {
                 HDprintf(" <%s> with chunk size ", name);
                 for (k = 0; k < options->op_tbl->objs[i].chunk.rank; k++)
-                    HDprintf("%d ", (int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
+                    HDprintf("%d ", (int) options->op_tbl->objs[i].chunk.chunk_lengths[k]);
                 HDprintf("\n");
             }
             has_ck = 1;
@@ -649,9 +649,7 @@ check_options(pack_opt_t *options)
                     break;
                 case H5Z_FILTER_SZIP:
                 case H5Z_FILTER_DEFLATE:
-                    HDprintf(" All with %s, parameter %d\n",
-                            get_sfilter(filtn),
-                            options->filter_g[k].cd_values[0]);
+                    HDprintf(" All with %s, parameter %d\n", get_sfilter(filtn), options->filter_g[k].cd_values[0]);
                     break;
                 default:
                     HDprintf(" User Defined %d\n", filtn);

@@ -19,15 +19,15 @@ nerrors=0
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###              T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 
 # test for external links with HDF5_EXT_PREFIX
 echo "Testing external link with HDF5_EXT_PREFIX"
-TEST_NAME=links_env 		# The test name
-TEST_BIN=`pwd`/$TEST_NAME 	# The path of the test binary
-ENVCMD="env HDF5_EXT_PREFIX=.:tmp" 	# The environment variable & value
+TEST_NAME=links_env         # The test name
+TEST_BIN=`pwd`/$TEST_NAME     # The path of the test binary
+ENVCMD="env HDF5_EXT_PREFIX=.:tmp_links_env"     # The environment variable & value
 #
 # Run the test
 echo "$ENVCMD $RUNSERIAL $TEST_BIN"
@@ -36,7 +36,7 @@ exitcode=$?
 if [ $exitcode -eq 0 ]; then
         echo "Test for HDF5_EXT_PREFIX PASSED"
     else
- 	nerrors="`expr $nerrors + 1`"
-	echo "***Error encountered for HDF5_EXT_PREFIX test***"
+    nerrors="`expr $nerrors + 1`"
+    echo "***Error encountered for HDF5_EXT_PREFIX test***"
 fi
 exit $nerrors

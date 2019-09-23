@@ -52,7 +52,11 @@ typedef __int64             h5_stat_size_t;
 /* Note that the variadic HDopen macro is using a VC++ extension
  * where the comma is dropped if nothing is passed to the ellipsis.
  */
+#ifndef H5_HAVE_MINGW
 #define HDopen(S,F,...)     Wopen_utf8(S,F,__VA_ARGS__)
+#else
+#define HDopen(S,F,...)     Wopen_utf8(S,F,##__VA_ARGS__)
+#endif
 #define HDread(F,M,Z)       _read(F,M,Z)
 #define HDremove(S)         Wremove_utf8(S)
 #define HDrmdir(S)          _rmdir(S)
@@ -65,13 +69,6 @@ typedef __int64             h5_stat_size_t;
 #define HDtzset()           _tzset()
 #define HDunlink(S)         _unlink(S)
 #define HDwrite(F,M,Z)      _write(F,M,Z)
-#if (_MSC_VER < 1800)
-/* va_copy() does not exist on pre-2013 Visual Studio. Since va_lists are
- * just pointers into the stack in those CRTs, the usual work-around
- * is to just define the operation as a pointer copy.
- */
-#define HDva_copy(D,S)      ((D) = (S))
-#endif /* MSC_VER < 1800 */
 
 #ifdef H5_HAVE_VISUAL_STUDIO
 
@@ -82,6 +79,11 @@ typedef __int64             h5_stat_size_t;
   #ifndef H5_HAVE_STRTOULL
     #define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
   #endif /* H5_HAVE_STRTOULL */
+  /* va_copy() does not exist on pre-2013 Visual Studio. Since va_lists are
+   * just pointers into the stack in those CRTs, the usual work-around
+   * is to just define the operation as a pointer copy.
+   */
+  #define HDva_copy(D,S)      ((D) = (S))
 #endif /* MSC_VER < 1800 */
 
 /*
@@ -128,7 +130,7 @@ extern "C" {
     H5_DLL int Wnanosleep(const struct timespec *req, struct timespec *rem);
     H5_DLL herr_t H5_expand_windows_env_vars(char **env_var);
     H5_DLL const wchar_t *H5_get_utf16_str(const char *s);
-	H5_DLL int Wopen_utf8(const char *path, int oflag, ...);
+    H5_DLL int Wopen_utf8(const char *path, int oflag, ...);
     H5_DLL int Wremove_utf8(const char *path);
 
     /* Round functions only needed for VS2012 and earlier.

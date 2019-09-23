@@ -2280,8 +2280,8 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## too specialized or have huge performance hits. These
 ## are not listed in the "all" packages list.
 ##
-## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
-all_packages="AC,B2,CX,D,F,HL,I,O,S,ST,T,Z"
+## all_packages="AC,B,B2,D,EA,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
+all_packages="AC,B2,CX,D,EA,F,HL,I,O,S,ST,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
@@ -2766,6 +2766,32 @@ if test -n "$PARALLEL"; then
 fi
 
 ## ----------------------------------------------------------------------
+## Check if the map API is enabled by --enable-map-api
+##
+AC_SUBST([MAP_API])
+
+## Default is no map API
+MAP_API=no
+
+AC_MSG_CHECKING([if the map API (H5M) is enabled])
+
+AC_ARG_ENABLE([map-api],
+              [AS_HELP_STRING([--enable-map-api],
+                              [Build the map API (H5M).
+                               This is not yet supported in the native file format
+                               and requires a VOL connector that supports it.
+                               [default=no]])],
+              [MAP_API=$enableval], [MAP_API=no])
+
+if test "X$MAP_API" = "Xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_MAP_API], [1],
+            [Define if the map API (H5M) should be compiled])
+else
+    AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 AC_SUBST([DIRECT_VFD])
@@ -2807,6 +2833,135 @@ fi
 
 ## Direct VFD files are not built if not required.
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Check if Read-Only S3 virtual file driver is enabled by --enable-ros3-vfd
+##
+AC_SUBST([ROS3_VFD])
+
+## Default is no Read-Only S3 VFD
+ROS3_VFD=no
+
+AC_ARG_ENABLE([ros3-vfd],
+              [AS_HELP_STRING([--enable-ros3-vfd],
+                              [Build the Read-Only S3 virtual file driver (VFD).
+                               [default=no]])],
+              [ROS3_VFD=$enableval], [ROS3_VFD=no])
+
+if test "X$ROS3_VFD" = "Xyes"; then
+    AC_CHECK_HEADERS([curl/curl.h],, [unset ROS3_VFD])
+    AC_CHECK_HEADERS([openssl/evp.h],, [unset ROS3_VFD])
+    AC_CHECK_HEADERS([openssl/hmac.h],, [unset ROS3_VFD])
+    AC_CHECK_HEADERS([openssl/sha.h],, [unset ROS3_VFD])
+    if test "X$ROS3_VFD" = "Xyes"; then
+        AC_CHECK_LIB([curl], [curl_global_init],, [unset ROS3_VFD])
+        AC_CHECK_LIB([crypto], [EVP_sha256],, [unset ROS3_VFD])
+    fi
+
+    AC_MSG_CHECKING([if the Read-Only S3 virtual file driver (VFD) is enabled])
+    if test "X$ROS3_VFD" = "Xyes"; then
+        AC_DEFINE([HAVE_ROS3_VFD], [1],
+                [Define whether the Read-Only S3 virtual file driver (VFD) should be compiled])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+        ROS3_VFD=no
+        AC_MSG_ERROR([The Read-Only S3 VFD was requested but cannot be built.
+                      Please check that openssl and cURL are available on your
+                      system, and/or re-configure without option
+                      --enable-ros3-vfd.])
+    fi
+else
+    AC_MSG_CHECKING([if the Read-Only S3 virtual file driver (VFD) is enabled])
+    AC_MSG_RESULT([no])
+    ROS3_VFD=no
+
+fi
+
+## Read-only S3 files are not built if not required.
+AM_CONDITIONAL([ROS3_VFD_CONDITIONAL], [test "X$ROS3_VFD" = "Xyes"])
+
+
+## ----------------------------------------------------------------------
+## Is libhdfs (Hadoop Distributed File System) present?
+## It might be specified with the `--with-libhdfs' command-line switch.
+## If found, enables the HDFS VFD.
+##
+AC_SUBST([HAVE_LIBHDFS])
+AC_ARG_WITH([libhdfs],
+            [AS_HELP_STRING([--with-libhdfs=DIR],
+                            [Provide libhdfs library to enable HDFS virtual file driver (VFD) [default=no]])],,
+            [withval=no])
+
+case $withval in
+  no)
+    HAVE_LIBHDFS="no"
+    AC_MSG_CHECKING([for libhdfs])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_LIBHDFS="yes"
+    case "$withval" in
+      *,*)
+        libhdfs_inc="`echo $withval |cut -f1 -d,`"
+        libhdfs_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      yes)
+        libhdfs_inc="$HADOOP_HOME/include"
+        libhdfs_lib="$HADOOP_HOME/lib"
+        ;;
+      *)
+        if test -n "$withval"; then
+          libhdfs_inc="$withval/include"
+          libhdfs_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    if test -n "$libhdfs_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$libhdfs_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$libhdfs_inc"
+    fi
+    AC_CHECK_HEADERS([hdfs.h],,
+                     [unset HAVE_LIBHDFS])
+
+    if test "x$HAVE_LIBHDFS" = "xyes"; then
+      dnl Check for '-ljvm' needed by libhdfs
+      JNI_LDFLAGS=""
+      if test $JAVA_HOME != ""
+      then
+        JNI_LDFLAGS="-L$JAVA_HOME/jre/lib/$OS_ARCH -L$JAVA_HOME/jre/lib/$OS_ARCH/server"
+      fi
+      ldflags_bak=$LDFLAGS
+      LDFLAGS="$LDFLAGS $JNI_LDFLAGS"
+      AC_CHECK_LIB([jvm], [JNI_GetCreatedJavaVMs])
+      LDFLAGS=$ldflags_bak
+      AC_SUBST([JNI_LDFLAGS])
+      if test -n "$libhdfs_lib"; then
+        ## Hadoop distribution hides libraries down one level in 'lib/native'
+        libhdfs_lib="$libhdfs_lib/native"
+        LDFLAGS="$LDFLAGS -L$libhdfs_lib $JNI_LDFLAGS"
+        AM_LDFLAGS="$AM_LDFLAGS -L$libhdfs_lib $JNI_LDFLAGS"
+      fi
+      AC_CHECK_LIB([hdfs], [hdfsConnect],,
+                   [unset HAVE_LIBHDFS])
+    fi
+
+    if test -z "$HAVE_LIBHDFS"; then
+      AC_MSG_ERROR([Set to use libhdfs library, but could not find or use
+                    libhdfs. Please verify that the path to HADOOP_HOME is
+                    valid, and/or reconfigure without --with-libhdfs.])
+    fi
+    ;;
+esac
+
+if test "x$HAVE_LIBHDFS" = "xyes"; then
+  AC_DEFINE([HAVE_LIBHDFS], [1],
+            [Proceed to build with libhdfs])
+fi
+
+## Checkpoint the cache
+AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
 ## Enable custom plugin default path for library.  It requires SHARED support.
@@ -3537,6 +3692,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  testpar/testpflush.sh
                  tools/Makefile
                  tools/lib/Makefile
+                 tools/libtest/Makefile
                  tools/src/Makefile
                  tools/src/h5dump/Makefile
                  tools/src/h5import/Makefile

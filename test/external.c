@@ -147,7 +147,7 @@ test_non_extendible(hid_t file)
     if(1 != n) {
         H5_FAILED();
         HDputs("    Returned external count is wrong.");
-        printf("   got: %d\n    ans: 1\n", n);
+        HDprintf("   got: %d\n    ans: 1\n", n);
         goto error;
     }
 
@@ -157,13 +157,13 @@ test_non_extendible(hid_t file)
     if(file_offset != 0) {
         H5_FAILED();
         HDputs("    Wrong file offset.");
-        printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if(file_size != (max_size[0] * sizeof(int))) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        printf("    got: %lu\n    ans: %lu\n", (unsigned long)file_size, (unsigned long)max_size[0]*sizeof(int));
+        HDprintf("    got: %lu\n    ans: %lu\n", (unsigned long)file_size, (unsigned long)max_size[0]*sizeof(int));
         goto error;
     }
 
@@ -396,7 +396,7 @@ test_unlimited(hid_t file)
     if(1 != n) {
         H5_FAILED();
         HDputs("    Returned external count is wrong.");
-        printf("    got: %d\n    ans: 1\n", n);
+        HDprintf("    got: %d\n    ans: 1\n", n);
         goto error;
     } /* end if */
 
@@ -405,13 +405,13 @@ test_unlimited(hid_t file)
     if(file_offset != 0) {
         H5_FAILED();
         HDputs("    Wrong file offset.");
-        printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if(H5F_UNLIMITED != file_size) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        printf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
+        HDprintf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
         goto error;
     }
 
@@ -655,7 +655,7 @@ test_read_file_set(hid_t fapl)
         TEST_ERROR
 
     /* Reset the raw data files */
-    if(reset_raw_data_files(0) < 0)
+    if(reset_raw_data_files(FALSE) < 0)
         TEST_ERROR
 
     /* Create the file and an initial group.  This causes messages about
@@ -795,7 +795,7 @@ test_write_file_set(hid_t fapl)
     } /* end for */
 
     /* Reset the raw data files */
-    if(reset_raw_data_files(0) < 0)
+    if(reset_raw_data_files(FALSE) < 0)
         TEST_ERROR
 
     /* Create the dataset */
@@ -896,7 +896,7 @@ test_path_absolute(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Reset the raw data files */
-    if(reset_raw_data_files(0) < 0)
+    if(reset_raw_data_files(FALSE) < 0)
         TEST_ERROR
 
     /* Create the dcpl */
@@ -992,7 +992,7 @@ test_path_relative(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if(reset_raw_data_files(0) < 0)
+    if(reset_raw_data_files(FALSE) < 0)
         TEST_ERROR
 
     /* Create the dataset */
@@ -1087,7 +1087,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if(reset_raw_data_files(0) < 0)
+    if(reset_raw_data_files(FALSE) < 0)
         TEST_ERROR
 
     /* Create the dataset */
@@ -1229,7 +1229,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         TEST_ERROR
 
     /* Reset the raw data files */
-    if(reset_raw_data_files(0) < 0)
+    if(reset_raw_data_files(FALSE) < 0)
         TEST_ERROR
 
     /* Create the file */
@@ -1418,7 +1418,7 @@ error:
         H5Gclose(gid);
     } H5E_END_TRY;
     nerrors = MAX(1, nerrors);
-    printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
+    HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */
 

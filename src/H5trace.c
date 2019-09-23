@@ -1359,6 +1359,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 HDfprintf(out, "%ld (attr)", (long)obj);
                                 break;
 
+                            case H5I_MAP:
+                                HDfprintf(out, "%ld (map)", (long)obj);
+                                break;
+
                             case H5I_VFL:
                                 HDfprintf(out, "%ld (file driver)", (long)obj);
                                 break;
@@ -1542,6 +1546,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                 case H5I_ATTR:
                                     HDfprintf(out, "H5I_ATTR");
+                                    break;
+
+                                case H5I_MAP:
+                                    HDfprintf(out, "H5I_MAP");
                                     break;
 
                                 case H5I_VFL:
@@ -1799,8 +1807,12 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     HDfprintf(out, "H5O_TYPE_NAMED_DATATYPE");
                                     break;
 
+                                case H5O_TYPE_MAP:
+                                    HDfprintf(out, "H5O_TYPE_MAP");
+                                    break;
+
                                 case H5O_TYPE_NTYPES:
-                                    HDfprintf(out, "H5O_TYPE_TYPES");
+                                    HDfprintf(out, "H5O_TYPE_NTYPES");
                                     break;
 
                                 default:

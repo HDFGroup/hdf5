@@ -29,6 +29,7 @@
 #include "H5Gpublic.h"          /* Groups                                   */
 #include "H5Ipublic.h"          /* ID management                            */
 #include "H5Lpublic.h"          /* Links                                    */
+#include "H5Mpublic.h"          /* Maps                                     */
 #include "H5MMpublic.h"         /* Memory management                        */
 #include "H5Opublic.h"          /* Object headers                           */
 #include "H5Ppublic.h"          /* Property lists                           */
@@ -40,16 +41,18 @@
 #include "H5Zpublic.h"          /* Data filters                             */
 
 /* Predefined file drivers */
-#include "H5FDcore.h"           /* Files stored entirely in memory              */
-#include "H5FDdirect.h"         /* Linux direct I/O                             */
-#include "H5FDfamily.h"         /* File families                                */
+#include "H5FDcore.h"           /* Files stored entirely in memory          */
+#include "H5FDdirect.h"         /* Linux direct I/O                         */
+#include "H5FDfamily.h"         /* File families                            */
+#include "H5FDhdfs.h"           /* Hadoop HDFS                              */
 #include "H5FDlog.h"            /* sec2 driver with I/O logging (for debugging) */
-#include "H5FDmpi.h"            /* MPI-based file drivers                       */
-#include "H5FDmulti.h"          /* Usage-partitioned file family                */
-#include "H5FDsec2.h"           /* POSIX unbuffered file I/O                    */
-#include "H5FDstdio.h"          /* Standard C buffered I/O                      */
+#include "H5FDmpi.h"            /* MPI-based file drivers                   */
+#include "H5FDmulti.h"          /* Usage-partitioned file family            */
+#include "H5FDros3.h"           /* R/O S3 "file" I/O                        */
+#include "H5FDsec2.h"           /* POSIX unbuffered file I/O                */
+#include "H5FDstdio.h"          /* Standard C buffered I/O                  */
 #ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Win32 I/O                                    */
+#include "H5FDwindows.h"        /* Win32 I/O                                */
 #endif
 
 /* Virtual object layer (VOL) connectors */

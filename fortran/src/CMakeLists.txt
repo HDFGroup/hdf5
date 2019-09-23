@@ -84,7 +84,7 @@ if (NOT ONLY_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
              ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
-      COMMAND $<TARGET_FILE:H5match_types>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5match_types>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
       DEPENDS H5match_types
   )
@@ -95,7 +95,7 @@ if (BUILD_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
              ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
-      COMMAND $<TARGET_FILE:H5match_types>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5match_types>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
       DEPENDS H5match_types
   )
@@ -183,7 +183,7 @@ set (f90_F_GEN_SOURCES
 if (NOT ONLY_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
-      COMMAND $<TARGET_FILE:H5_buildiface>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_buildiface>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
       DEPENDS ${f90_F_GEN_SOURCES}
       COMMENT "Generating the H5_gen.F90 file"
@@ -197,7 +197,7 @@ endif ()
 if (BUILD_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
-      COMMAND $<TARGET_FILE:H5_buildiface>
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_buildiface>
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
       DEPENDS ${f90_F_GEN_SOURCES}
       COMMENT "Generating the H5_gen.F90 shared file"
@@ -356,18 +356,32 @@ install (
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
-        if (NOT ONLY_SHARED_LIBS)
-            ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
-            ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
-        else ()
-            ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
-            ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
-        endif ()
     DESTINATION
         ${HDF5_INSTALL_INCLUDE_DIR}
     COMPONENT
         fortheaders
 )
+if (NOT ONLY_SHARED_LIBS)
+  install (
+      FILES
+          ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
+          ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}
+      COMPONENT
+          fortheaders
+  )
+else ()
+  install (
+      FILES
+          ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
+          ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}
+      COMPONENT
+          fortheaders
+  )
+endif ()
 
 if (NOT ONLY_SHARED_LIBS)
   set (mod_files
@@ -494,7 +508,7 @@ install (
     COMPONENT fortlibraries
 )
 
-if (NOT WIN32)
+if (NOT WIN32 AND NOT MINGW)
   set (_PKG_CONFIG_COMPILER ${CMAKE_Fortran_COMPILER})
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in

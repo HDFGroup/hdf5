@@ -20,7 +20,7 @@
  * This file needs to access private datatypes from the H5B2 package.
  * This file also needs to access the v2 B-tree testing code.
  */
-#define H5B2_FRIEND		/*suppress error about including H5B2pkg	  */
+#define H5B2_FRIEND        /*suppress error about including H5B2pkg      */
 #define H5B2_TESTING
 #include "H5B2pkg.h"
 
@@ -50,16 +50,16 @@ typedef struct bt2_test_param_t {
     hbool_t reopen_btree;               /* Whether to re-open the B-tree during the test */
 } bt2_test_param_t;
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	init_cparam
+ * Function:    init_cparam
  *
- * Purpose:	Initialize v2 B-tree creation parameter structure
+ * Purpose:    Initialize v2 B-tree creation parameter structure
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, October 29, 2009
  *
  *-------------------------------------------------------------------------
@@ -90,16 +90,16 @@ init_cparam(H5B2_create_t *cparam, H5B2_create_t *cparam2)
     return(0);
 } /* init_cparam() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	create_file
+ * Function:    create_file
  *
- * Purpose:	Perform common "creation" operations on file
+ * Purpose:    Perform common "creation" operations on file
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, November  5, 2009
  *
  *-------------------------------------------------------------------------
@@ -107,7 +107,7 @@ init_cparam(H5B2_create_t *cparam, H5B2_create_t *cparam2)
 static int
 create_file(hid_t *file, H5F_t **f, hid_t fapl)
 {
-    char	filename[1024];         /* Filename to use */
+    char    filename[1024];         /* Filename to use */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -131,16 +131,16 @@ error:
     return(-1);
 } /* end create_file() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	create_btree
+ * Function:    create_btree
  *
- * Purpose:	Perform common "create" operations on B-tree for testing
+ * Purpose:    Perform common "create" operations on B-tree for testing
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, November  5, 2009
  *
  *-------------------------------------------------------------------------
@@ -164,16 +164,16 @@ error:
     return(-1);
 } /* end create_btree() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	reopen_file
+ * Function:    reopen_file
  *
- * Purpose:	Re-open the file
+ * Purpose:    Re-open the file
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, December 28, 2015
  *
  *-------------------------------------------------------------------------
@@ -181,7 +181,7 @@ error:
 static int
 reopen_file(hid_t *file, H5F_t **f, hid_t fapl)
 {
-    char	filename[1024];         /* Filename to use */
+    char    filename[1024];         /* Filename to use */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -205,16 +205,16 @@ error:
     return(-1);
 } /* end create_file() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	reopen_btree
+ * Function:    reopen_btree
  *
- * Purpose:	Perform common "re-open" operations on B-tree for testing
+ * Purpose:    Perform common "re-open" operations on B-tree for testing
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, November  5, 2009
  *
  *-------------------------------------------------------------------------
@@ -241,16 +241,16 @@ error:
     return(-1);
 } /* end reopen_btree() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_stats
+ * Function:    check_stats
  *
- * Purpose:	Check statistics about v1 B-tree
+ * Purpose:    Check statistics about v1 B-tree
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, November  5, 2009
  *
  *-------------------------------------------------------------------------
@@ -275,16 +275,16 @@ error:
     return(-1);
 } /* end check_stats() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_node_depth
+ * Function:    check_node_depth
  *
- * Purpose:	Check the depth of the node containing a record
+ * Purpose:    Check the depth of the node containing a record
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, November  5, 2009
  *
  *-------------------------------------------------------------------------
@@ -306,16 +306,16 @@ error:
     return(-1);
 } /* end check_node_depth() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_node_info
+ * Function:    check_node_info
  *
- * Purpose:	Check the info of the node containing a record
+ * Purpose:    Check the info of the node containing a record
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:    Success:    0
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, November  6, 2009
  *
  *-------------------------------------------------------------------------
@@ -340,16 +340,16 @@ error:
     return(-1);
 } /* end check_node_info() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	iter_cb
+ * Function:    iter_cb
  *
- * Purpose:	v2 B-tree iterator callback
+ * Purpose:    v2 B-tree iterator callback
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, February 16, 2005
  *
  *-------------------------------------------------------------------------
@@ -367,16 +367,16 @@ iter_cb(const void *_record, void *_op_data)
     return(H5_ITER_CONT);
 } /* end iter_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	iter_rec_cb
+ * Function:    iter_rec_cb
  *
- * Purpose:	v2 B-tree iterator callback for H5B2_test_rec_t records
+ * Purpose:    v2 B-tree iterator callback for H5B2_test_rec_t records
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, December 25, 2015
  *
  *-------------------------------------------------------------------------
@@ -397,16 +397,16 @@ iter_rec_cb(const void *_record, void *_op_data)
     return(H5_ITER_CONT);
 } /* end iter_rec_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	find_cb
+ * Function:    find_cb
  *
- * Purpose:	v2 B-tree find callback
+ * Purpose:    v2 B-tree find callback
  *
- * Return:	Success:	TRUE/FALSE
- *		Failure:	FAIL
+ * Return:    Success:    TRUE/FALSE
+ *        Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, February 24, 2005
  *
  *-------------------------------------------------------------------------
@@ -423,16 +423,16 @@ find_cb(const void *_record, void *_op_data)
     return(TRUE);
 } /* end find_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	find_rec_cb
+ * Function:    find_rec_cb
  *
- * Purpose:	v2 B-tree find callback for H5B2_test_rec_t records
+ * Purpose:    v2 B-tree find callback for H5B2_test_rec_t records
  *
- * Return:	Success:	TRUE/FALSE
- *		Failure:	FAIL
+ * Return:    Success:    TRUE/FALSE
+ *        Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, December 25, 2015
  *
  *-------------------------------------------------------------------------
@@ -450,18 +450,18 @@ find_rec_cb(const void *_record, void *_op_data)
     return(TRUE);
 } /* end find_rec_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	find_dec_cb
+ * Function:    find_dec_cb
  *
- * Purpose:	v2 B-tree find callback for indexing in decreasing order
+ * Purpose:    v2 B-tree find callback for indexing in decreasing order
  *
- * Note:	Currently hard-wired to "insert_lots" test
+ * Note:    Currently hard-wired to "insert_lots" test
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, November  7, 2006
  *
  *-------------------------------------------------------------------------
@@ -478,16 +478,16 @@ find_dec_cb(const void *_record, void *_op_data)
     return(0);
 } /* end find_dec_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	index_rec_cb
+ * Function:    index_rec_cb
  *
- * Purpose:	v2 B-tree index callback for H5B2_test_rec_t records
+ * Purpose:    v2 B-tree index callback for H5B2_test_rec_t records
  *
- * Return:	Success:	TRUE/FALSE
- *		Failure:	FAIL
+ * Return:    Success:    TRUE/FALSE
+ *        Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, December 25, 2015
  *
  *-------------------------------------------------------------------------
@@ -506,17 +506,17 @@ index_rec_cb(const void *_record, void *_op_data)
     return(TRUE);
 } /* end index_rec_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	neighbor_cb
+ * Function:    neighbor_cb
  *
- * Purpose:	v2 B-tree neighbor callback
+ * Purpose:    v2 B-tree neighbor callback
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, March  8, 2005
  *
  *-------------------------------------------------------------------------
@@ -532,17 +532,17 @@ neighbor_cb(const void *_record, void *_op_data)
     return(0);
 } /* end neighbor_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	modify_cb
+ * Function:    modify_cb
  *
- * Purpose:	v2 B-tree modify callback
+ * Purpose:    v2 B-tree modify callback
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March 10, 2005
  *
  *-------------------------------------------------------------------------
@@ -559,16 +559,16 @@ modify_cb(void *_record, void *_op_data, hbool_t *changed)
     return(0);
 } /* end modify_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	modify_rec_cb
+ * Function:    modify_rec_cb
  *
- * Purpose:	v2 B-tree modify callback for H5B2_test_rec_t records
+ * Purpose:    v2 B-tree modify callback for H5B2_test_rec_t records
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, December 25, 2015
  *
  *-------------------------------------------------------------------------
@@ -586,17 +586,17 @@ modify_rec_cb(void *_record, void *_op_data, hbool_t *changed)
     return(0);
 } /* end modify_rec_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	no_modify_cb
+ * Function:    no_modify_cb
  *
- * Purpose:	v2 B-tree modify callback for updates which shouldn't change
- *		the record (ie. inserting not modifying)
+ * Purpose:    v2 B-tree modify callback for updates which shouldn't change
+ *        the record (ie. inserting not modifying)
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, December 23, 2015
  *
  *-------------------------------------------------------------------------
@@ -610,17 +610,17 @@ no_modify_cb(void H5_ATTR_UNUSED *_record, void H5_ATTR_UNUSED *_op_data,
     return(1);
 } /* end no_modify_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	remove_cb
+ * Function:    remove_cb
  *
- * Purpose:	v2 B-tree remove callback
+ * Purpose:    v2 B-tree remove callback
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, August 8, 2006
  *
  *-------------------------------------------------------------------------
@@ -636,16 +636,16 @@ remove_cb(const void *_record, void *_op_data)
     return(0);
 } /* end remove_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_basic
+ * Function:    test_insert_basic
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, February  3, 2005
  *
  *-------------------------------------------------------------------------
@@ -654,8 +654,8 @@ static unsigned
 test_insert_basic(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -702,7 +702,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam,
     /* Attempt to index record in B-tree with no records */
     idx = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)0, find_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)0, find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -746,7 +746,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam,
     /* Attempt to index non-existant record in B-tree with 1 record */
     idx = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, find_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -803,7 +803,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam,
     /* Attempt to index non-existant record in B-tree with several records */
     idx = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, find_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -841,24 +841,24 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_insert_basic() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_split_root
+ * Function:    test_insert_split_root
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
  *              It also continues to add a few more records to each of the
  *              left and right leaf nodes after the split
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, February  3, 2005
  *
  *-------------------------------------------------------------------------
@@ -867,8 +867,8 @@ static unsigned
 test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -979,7 +979,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam,
     /* Attempt to index non-existant record in level-1 B-tree */
     idx = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC+2), find_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC+2), find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -1016,25 +1016,25 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_split_root() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level1_2leaf_redistrib
+ * Function:    test_insert_level1_2leaf_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
  *              It continues to add a more records to the each of the
  *              left and right leaf nodes after the split to force a 2 node
  *              redistribution
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, February  8, 2005
  *
  *-------------------------------------------------------------------------
@@ -1043,8 +1043,8 @@ static unsigned
 test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1170,25 +1170,25 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level1_2leaf_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level1_side_split
+ * Function:    test_insert_level1_side_split
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
  *              It continues to add a more records to the each of the
  *              left and right leaf nodes after the split to force a 2 node
  *              split, adding another node to the B-tree
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, February  9, 2005
  *
  *-------------------------------------------------------------------------
@@ -1197,8 +1197,8 @@ static unsigned
 test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1329,27 +1329,27 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level1_side_split() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level1_3leaf_redistrib
+ * Function:    test_insert_level1_3leaf_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
  *              It continues to add a more records to the each of the
  *              left and right leaf nodes after the split to force a 2 node
  *              split, adding another node to the B-tree, then continues to
  *              add records until a 3 node redistribution occurs
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, February 10, 2005
  *
  *-------------------------------------------------------------------------
@@ -1358,8 +1358,8 @@ static unsigned
 test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1472,26 +1472,26 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level1_3leaf_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level1_middle_split
+ * Function:    test_insert_level1_middle_split
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
  *              It continues to add a more records to the each of the
  *              left and right leaf nodes after the split to force a 2 node
  *              split, adding another node to the B-tree, then continues to
  *              add records until a 3 node split occurs
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, February 10, 2005
  *
  *-------------------------------------------------------------------------
@@ -1500,8 +1500,8 @@ static unsigned
 test_insert_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1594,22 +1594,22 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level1_middle_split() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_make_level2
+ * Function:    test_insert_make_level2
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to make a level 2 B-tree
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, February 11, 2005
  *
  *-------------------------------------------------------------------------
@@ -1618,8 +1618,8 @@ static unsigned
 test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1735,7 +1735,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam,
     /* Attempt to index non-existant record in level-2 B-tree */
     idx = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC * 30), find_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC * 30), find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -1773,24 +1773,24 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_make_level2() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level2_leaf_redistrib
+ * Function:    test_insert_level2_leaf_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to make a level 2 B-tree and then adds enough more
  *              records to force the leaves to redistribute
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, February 17, 2005
  *
  *-------------------------------------------------------------------------
@@ -1799,8 +1799,8 @@ static unsigned
 test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2001,24 +2001,24 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level2_leaf_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level2_leaf_split
+ * Function:    test_insert_level2_leaf_split
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to make a level 2 B-tree and then adds enough more
  *              records to force leaves to split.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, February 17, 2005
  *
  *-------------------------------------------------------------------------
@@ -2027,8 +2027,8 @@ static unsigned
 test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2233,25 +2233,25 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level2_leaf_split() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level2_2internal_redistrib
+ * Function:    test_insert_level2_2internal_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to make a level 2 B-tree and then adds enough more
  *              records to force the left-most and right-most internal nodes to
  *              redistribute.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, February 18, 2005
  *
  *-------------------------------------------------------------------------
@@ -2260,8 +2260,8 @@ static unsigned
 test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2404,25 +2404,25 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level2_2internal_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level2_2internal_split
+ * Function:    test_insert_level2_2internal_split
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to make a level 2 B-tree and then adds enough more
  *              records to force the left-most and right-most internal nodes to
  *              split.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, February 18, 2005
  *
  *-------------------------------------------------------------------------
@@ -2431,8 +2431,8 @@ static unsigned
 test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2581,26 +2581,26 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level2_2internal_split() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level2_3internal_redistrib
+ * Function:    test_insert_level2_3internal_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to make a level 2 B-tree and then adds enough more
  *              records to force the left-most and right-most internal nodes to
  *              split and more records to force a 3 node redistribution of the
  *              internal nodes.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, February 19, 2005
  *
  *-------------------------------------------------------------------------
@@ -2609,8 +2609,8 @@ static unsigned
 test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2758,26 +2758,26 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level2_3internal_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_level2_3internal_split
+ * Function:    test_insert_level2_3internal_split
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to make a level 2 B-tree and then adds enough more
  *              records to force the left-most and right-most internal nodes to
  *              split and more records to force a 3->4 node split of the
  *              internal nodes.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, February 19, 2005
  *
  *-------------------------------------------------------------------------
@@ -2786,8 +2786,8 @@ static unsigned
 test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2939,23 +2939,23 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level2_3internal_split() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_insert_lots
+ * Function:    test_insert_lots
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts many
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts many
  *              records in random order, enough to make at a level 4 B-tree.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, February 19, 2005
  *
  *-------------------------------------------------------------------------
@@ -2964,9 +2964,9 @@ static unsigned
 test_insert_lots(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    char	filename[1024];         /* Filename to use */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    char    filename[1024];         /* Filename to use */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -3099,13 +3099,13 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Attempt to index non-existant record in level-4 B-tree, in increasing & decreasing order */
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_MANY*3), find_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_MANY*3), find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
         TEST_ERROR
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_DEC, (hsize_t)(INSERT_MANY*3), find_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_DEC, (hsize_t)(INSERT_MANY*3), find_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -3170,22 +3170,22 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     HDfree(records);
     return 1;
 } /* test_insert_lots() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_update_basic
+ * Function:    test_update_basic
  *
- * Purpose:	Basic tests for the v2 B-tree update operation
+ * Purpose:    Basic tests for the v2 B-tree update operation
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, December 23, 2015
  *
  *-------------------------------------------------------------------------
@@ -3194,8 +3194,8 @@ static unsigned
 test_update_basic(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -3257,7 +3257,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Attempt to index non-existant record in B-tree with 1 record */
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -3321,7 +3321,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Attempt to index non-existant record in B-tree with 1 record */
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -3391,7 +3391,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Attempt to index non-existant record in B-tree with several records */
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -3478,7 +3478,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Attempt to index non-existant record in B-tree with several records */
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -3537,24 +3537,24 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_update_basic() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_update_split_root
+ * Function:    test_update_split_root
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
  *              It also continues to add a few more records to each of the
  *              left and right leaf nodes after the split
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, December 23, 2015
  *
  *-------------------------------------------------------------------------
@@ -3563,8 +3563,8 @@ static unsigned
 test_update_split_root(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -3736,7 +3736,7 @@ test_update_split_root(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Attempt to index non-existant record in level-1 B-tree */
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC + 2), index_rec_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC + 2), index_rec_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -3788,25 +3788,25 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_update_split_root() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_update_level1_2leaf_redistrib
+ * Function:    test_update_level1_2leaf_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
  *              It continues to add a more records to the each of the
  *              left and right leaf nodes after the split to force a 2 node
  *              redistribution
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, December 26, 2015
  *
  *-------------------------------------------------------------------------
@@ -3815,8 +3815,8 @@ static unsigned
 test_update_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -3946,25 +3946,25 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_update_level1_2leaf_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_update_level1_side_split
+ * Function:    test_update_level1_side_split
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
  *              It continues to add a more records to the each of the
  *              left and right leaf nodes after the split to force a 2 node
  *              split, adding another node to the B-tree
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, December 26, 2015
  *
  *-------------------------------------------------------------------------
@@ -3973,8 +3973,8 @@ static unsigned
 test_update_level1_side_split(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -4109,27 +4109,27 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_update_level1_side_split() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_update_level1_3leaf_redistrib
+ * Function:    test_update_level1_3leaf_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
  *              It continues to add a more records to the each of the
  *              left and right leaf nodes after the split to force a 2 node
  *              split, adding another node to the B-tree, then continues to
  *              add records until a 3 node redistribution occurs
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	1
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, December 26, 2015
  *
  *-------------------------------------------------------------------------
@@ -4138,8 +4138,8 @@ static unsigned
 test_update_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -4256,26 +4256,26 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_update_level1_3leaf_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_update_level1_middle_split
+ * Function:    test_update_level1_middle_split
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to split the root node and force the tree to depth 1.
  *              It continues to add a more records to the each of the
  *              left and right leaf nodes after the split to force a 2 node
  *              split, adding another node to the B-tree, then continues to
  *              add records until a 3 node split occurs
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, December 26, 2015
  *
  *-------------------------------------------------------------------------
@@ -4284,8 +4284,8 @@ static unsigned
 test_update_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -4381,22 +4381,22 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_update_level1_middle_split() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_update_make_level2
+ * Function:    test_update_make_level2
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts enough
  *              records to make a level 2 B-tree
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, December 26, 2015
  *
  *-------------------------------------------------------------------------
@@ -4405,8 +4405,8 @@ static unsigned
 test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -4541,7 +4541,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Attempt to index non-existant record in level-2 B-tree */
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -4706,7 +4706,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Attempt to index non-existant record in level-2 B-tree */
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -4881,7 +4881,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Attempt to index non-existant record in level-2 B-tree */
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -4934,22 +4934,22 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_update_make_level2() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_update_lots
+ * Function:    test_update_lots
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts many
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts many
  *              records in random order, enough to make at a level 4 B-tree.
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Sunday, December 27, 2015
  *
  *-------------------------------------------------------------------------
@@ -4958,8 +4958,8 @@ static unsigned
 test_update_lots(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     time_t      curr_time;              /* Current time, for seeding random number generator */
@@ -5086,13 +5086,13 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     /* Attempt to index non-existant record in level-4 B-tree, in increasing & decreasing order */
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
         TEST_ERROR
     H5E_BEGIN_TRY {
-	ret = H5B2_index(bt2, H5_ITER_DEC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL);
+    ret = H5B2_index(bt2, H5_ITER_DEC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -5174,23 +5174,23 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     HDfree(records);
 
     return 1;
 } /* test_update_lots() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_basic
+ * Function:    test_remove_basic
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, February 25, 2005
  *
  *-------------------------------------------------------------------------
@@ -5199,8 +5199,8 @@ static unsigned
 test_remove_basic(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5231,7 +5231,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam,
     /* Attempt to remove a record from a B-tree with no records */
     record = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_remove(bt2, &record, NULL, NULL);
+    ret = H5B2_remove(bt2, &record, NULL, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -5351,7 +5351,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam,
 
     record = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_remove(bt2, &record, NULL, NULL);
+    ret = H5B2_remove(bt2, &record, NULL, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -5483,21 +5483,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_basic() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level1_noredistrib
+ * Function:    test_remove_level1_noredistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, February 25, 2005
  *
  *-------------------------------------------------------------------------
@@ -5506,8 +5506,8 @@ static unsigned
 test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5554,7 +5554,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam,
     /* Attempt to remove a non-existant record from a B-tree with 1 record */
     record = (INSERT_SPLIT_ROOT_NREC * 2) + 1;
     H5E_BEGIN_TRY {
-	ret = H5B2_remove(bt2, &record, NULL, NULL);
+    ret = H5B2_remove(bt2, &record, NULL, NULL);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -5705,21 +5705,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level1_noredistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level1_redistrib
+ * Function:    test_remove_level1_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March  4, 2005
  *
  *-------------------------------------------------------------------------
@@ -5728,8 +5728,8 @@ static unsigned
 test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5901,21 +5901,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level1_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level1_2leaf_merge
+ * Function:    test_remove_level1_2leaf_merge
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March  4, 2005
  *
  *-------------------------------------------------------------------------
@@ -5924,8 +5924,8 @@ static unsigned
 test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6079,21 +6079,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level1_2leaf_merge() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level1_3leaf_merge
+ * Function:    test_remove_level1_3leaf_merge
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March  4, 2005
  *
  *-------------------------------------------------------------------------
@@ -6102,8 +6102,8 @@ static unsigned
 test_remove_level1_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6204,21 +6204,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level1_3leaf_merge() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level1_promote
+ * Function:    test_remove_level1_promote
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March  4, 2005
  *
  *-------------------------------------------------------------------------
@@ -6227,8 +6227,8 @@ static unsigned
 test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6430,21 +6430,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level1_promote() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level1_promote_2leaf_redistrib
+ * Function:    test_remove_level1_promote_2leaf_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March  4, 2005
  *
  *-------------------------------------------------------------------------
@@ -6453,8 +6453,8 @@ static unsigned
 test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6577,21 +6577,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level1_promote_2leaf_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level1_promote_3leaf_redistrib
+ * Function:    test_remove_level1_promote_3leaf_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March  4, 2005
  *
  *-------------------------------------------------------------------------
@@ -6600,8 +6600,8 @@ static unsigned
 test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6724,21 +6724,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level1_promote_3leaf_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level1_promote_2leaf_merge
+ * Function:    test_remove_level1_promote_2leaf_merge
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March  4, 2005
  *
  *-------------------------------------------------------------------------
@@ -6747,8 +6747,8 @@ static unsigned
 test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6868,21 +6868,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level1_promote_2leaf_merge() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level1_promote_3leaf_merge
+ * Function:    test_remove_level1_promote_3leaf_merge
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March  4, 2005
  *
  *-------------------------------------------------------------------------
@@ -6891,8 +6891,8 @@ static unsigned
 test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7012,21 +7012,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level1_promote_3leaf_merge() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level1_collapse
+ * Function:    test_remove_level1_collapse
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March  4, 2005
  *
  *-------------------------------------------------------------------------
@@ -7035,8 +7035,8 @@ static unsigned
 test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7150,21 +7150,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level1_collapse() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level2_promote
+ * Function:    test_remove_level2_promote
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March  4, 2005
  *
  *-------------------------------------------------------------------------
@@ -7173,8 +7173,8 @@ static unsigned
 test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7435,21 +7435,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level2_promote() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level2_promote_2internal_redistrib
+ * Function:    test_remove_level2_promote_2internal_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, March  7, 2005
  *
  *-------------------------------------------------------------------------
@@ -7458,8 +7458,8 @@ static unsigned
 test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7584,21 +7584,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level2_promote_2internal_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level2_3promote_internal_redistrib
+ * Function:    test_remove_level2_3promote_internal_redistrib
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, March  7, 2005
  *
  *-------------------------------------------------------------------------
@@ -7607,8 +7607,8 @@ static unsigned
 test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7733,21 +7733,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level2_promote_3internal_redistrib() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level2_promote_2internal_merge
+ * Function:    test_remove_level2_promote_2internal_merge
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, March  7, 2005
  *
  *-------------------------------------------------------------------------
@@ -7756,8 +7756,8 @@ static unsigned
 test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7883,21 +7883,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level2_promote_2internal_merge() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level2_3promote_internal_merge
+ * Function:    test_remove_level2_3promote_internal_merge
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, March  7, 2005
  *
  *-------------------------------------------------------------------------
@@ -7906,8 +7906,8 @@ static unsigned
 test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -8033,21 +8033,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level2_promote_3internal_merge() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level2_2internal_merge_left
+ * Function:    test_remove_level2_2internal_merge_left
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, March  8, 2005
  *
  *-------------------------------------------------------------------------
@@ -8056,8 +8056,8 @@ static unsigned
 test_remove_level2_2internal_merge_left(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -8158,21 +8158,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level2_2internal_merge_left() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level2_2internal_merge_right
+ * Function:    test_remove_level2_2internal_merge_right
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, March  8, 2005
  *
  *-------------------------------------------------------------------------
@@ -8181,8 +8181,8 @@ static unsigned
 test_remove_level2_2internal_merge_right(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -8283,21 +8283,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level2_2internal_merge_right() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level2_3internal_merge
+ * Function:    test_remove_level2_3internal_merge
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, March  8, 2005
  *
  *-------------------------------------------------------------------------
@@ -8306,8 +8306,8 @@ static unsigned
 test_remove_level2_3internal_merge(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -8408,21 +8408,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level2_3internal_merge() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_level2_collapse_right
+ * Function:    test_remove_level2_collapse_right
  *
- * Purpose:	Basic tests for the B-tree v2 code
+ * Purpose:    Basic tests for the B-tree v2 code
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, March  8, 2005
  *
  *-------------------------------------------------------------------------
@@ -8431,8 +8431,8 @@ static unsigned
 test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -8533,21 +8533,21 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_remove_level2_collapse_right() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	gen_l4_btree2
+ * Function:    gen_l4_btree2
  *
- * Purpose:	Generate a level-4 v2 B-tree for testing.
+ * Purpose:    Generate a level-4 v2 B-tree for testing.
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, October 14, 2008
  *
  *-------------------------------------------------------------------------
@@ -8556,8 +8556,8 @@ static unsigned
 gen_l4_btree2(const char *filename, hid_t fapl, const H5B2_create_t *cparam,
     haddr_t *bt2_addr, const hsize_t *records)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     hsize_t     record;                 /* Record to insert into tree */
     unsigned    u;                      /* Local index variable */
@@ -8607,24 +8607,24 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
 
     return 1;
 } /* gen_l4_btree2() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_remove_lots
+ * Function:    test_remove_lots
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test inserts many
+ * Purpose:    Basic tests for the B-tree v2 code.  This test inserts many
  *              records in random order, enough to make at a level 4 B-tree
  *              and then removes them all, by record and by index.
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, March  8, 2005
  *
  *-------------------------------------------------------------------------
@@ -8632,11 +8632,11 @@ error:
 static unsigned
 test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cparam)
 {
-    hid_t	file = -1;              /* File ID */
-    char	filename[1024];         /* Filename to use */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    char    filename[1024];         /* Filename to use */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     int         fd = -1;                /* File descriptor */
-    h5_stat_t	sb;                     /* Stat buffer for file */
+    h5_stat_t    sb;                     /* Stat buffer for file */
     void        *file_data = NULL;      /* Copy of file data */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
@@ -9051,7 +9051,7 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
 
     if(fd > 0)
@@ -9064,17 +9064,17 @@ error:
     return 1;
 } /* test_remove_lots() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_find_neighbor
+ * Function:    test_find_neighbor
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test exercises
+ * Purpose:    Basic tests for the B-tree v2 code.  This test exercises
  *              code to find nearest neighbors to a given value in a B-tree.
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, March  8, 2005
  *
  *-------------------------------------------------------------------------
@@ -9083,8 +9083,8 @@ static unsigned
 test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -9125,7 +9125,7 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam,
     /* Attempt to find record B-tree less than a value */
     search = 0;
     H5E_BEGIN_TRY {
-	ret = H5B2_neighbor(bt2, H5B2_COMPARE_LESS, &search, neighbor_cb, &record);
+    ret = H5B2_neighbor(bt2, H5B2_COMPARE_LESS, &search, neighbor_cb, &record);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -9203,7 +9203,7 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam,
     /* Attempt to find record B-tree less than a value */
     search = (FIND_NEIGHBOR * 2) + 1;
     H5E_BEGIN_TRY {
-	ret = H5B2_neighbor(bt2, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record);
+    ret = H5B2_neighbor(bt2, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -9279,23 +9279,23 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     HDfree(records);
     return 1;
 } /* test_find_neighbor() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_delete
+ * Function:    test_delete
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test exercises
+ * Purpose:    Basic tests for the B-tree v2 code.  This test exercises
  *              code to delete a B-tree from a file
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, March  9, 2005
  *
  *-------------------------------------------------------------------------
@@ -9303,9 +9303,9 @@ error:
 static unsigned
 test_delete(hid_t fapl, const H5B2_create_t *cparam)
 {
-    hid_t	file = -1;              /* File ID */
-    char	filename[1024];         /* Filename to use */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    char    filename[1024];         /* Filename to use */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     h5_stat_size_t       empty_size;             /* Size of an empty file */
     h5_stat_size_t       file_size;              /* Size of each file created */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
@@ -9551,22 +9551,22 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_delete() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_modify
+ * Function:    test_modify
  *
- * Purpose:	Basic tests for the B-tree v2 code.  This test exercises
+ * Purpose:    Basic tests for the B-tree v2 code.  This test exercises
  *              code to modify an existing record in the B-tree
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, March 10, 2005
  *
  *-------------------------------------------------------------------------
@@ -9575,8 +9575,8 @@ static unsigned
 test_modify(hid_t fapl, const H5B2_create_t *cparam,
     const bt2_test_param_t *tparam)
 {
-    hid_t	file = -1;              /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -9617,7 +9617,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam,
     record = 3;
     modify = 4;
     H5E_BEGIN_TRY {
-	ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+    ret = H5B2_modify(bt2, &record, modify_cb, &modify);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -9663,7 +9663,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam,
     record = 4330;
     found = HSIZET_MAX;
     H5E_BEGIN_TRY {
-	ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+    ret = H5B2_modify(bt2, &record, modify_cb, &modify);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -9709,7 +9709,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam,
     record = 5350;
     found = 5350;
     H5E_BEGIN_TRY {
-	ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+    ret = H5B2_modify(bt2, &record, modify_cb, &modify);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -9755,7 +9755,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam,
     record = 9445;
     found = 9445;
     H5E_BEGIN_TRY {
-	ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+    ret = H5B2_modify(bt2, &record, modify_cb, &modify);
     } H5E_END_TRY;
     /* Should fail */
     if(ret != FAIL)
@@ -9778,23 +9778,23 @@ error:
     H5E_BEGIN_TRY {
         if(bt2)
             H5B2_close(bt2);
-	H5Fclose(file);
+    H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 } /* test_modify() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_open_twice_diff
+ * Function:    test_open_twice_diff
  *
- * Purpose:	Open a v2 B-tree twice, through different "top" file
+ * Purpose:    Open a v2 B-tree twice, through different "top" file
  *              handles, with an intermediate file open that takes the "shared"
  *              file handle from the first B-tree's file pointer.
  *
- * Return:	Success:	0
- *		Failure:	1
+ * Return:    Success:    0
+ *        Failure:    1
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, December 18, 2015
  *
  *-------------------------------------------------------------------------
@@ -9802,14 +9802,14 @@ error:
 static unsigned
 test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
 {
-    char	filename[1024];         /* Filename to use */
+    char    filename[1024];         /* Filename to use */
     char        filename_tmp[1024];     /* Temporary file name */
-    hid_t	file = -1;              /* File ID */
-    hid_t	file2 = -1;             /* File ID */
-    hid_t	file0 = -1;             /* File ID */
-    hid_t	file00 = -1;            /* File ID */
-    H5F_t	*f = NULL;              /* Internal file object pointer */
-    H5F_t	*f2 = NULL;             /* Internal file object pointer */
+    hid_t    file = -1;              /* File ID */
+    hid_t    file2 = -1;             /* File ID */
+    hid_t    file0 = -1;             /* File ID */
+    hid_t    file00 = -1;            /* File ID */
+    H5F_t    *f = NULL;              /* Internal file object pointer */
+    H5F_t    *f2 = NULL;             /* Internal file object pointer */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     H5B2_t      *bt2_2 = NULL;          /* Second v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
@@ -9914,25 +9914,25 @@ error:
             H5B2_close(bt2);
         if(bt2)
             H5B2_close(bt2_2);
-	H5Fclose(file);
-	H5Fclose(file2);
-	H5Fclose(file0);
-	H5Fclose(file00);
+    H5Fclose(file);
+    H5Fclose(file2);
+    H5Fclose(file0);
+    H5Fclose(file00);
     } H5E_END_TRY;
     return(1);
 } /* test_open_twice_diff() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Test the B-tree v2 code
+ * Purpose:    Test the B-tree v2 code
  *
- * Return:	Success:
+ * Return:    Success:
  *
- *		Failure:
+ *        Failure:
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, February  1, 2005
  *
  *-------------------------------------------------------------------------
@@ -9942,10 +9942,10 @@ main(void)
 {
     H5B2_create_t cparam, cparam2;      /* Creation parameters for v2 B-tree */
     bt2_test_param_t tparam;            /* Test parameters for v2 B-tree */
-    hid_t	fapl = -1;              /* File access property list for data files */
-    unsigned	nerrors = 0;            /* Cumulative error count */
+    hid_t    fapl = -1;              /* File access property list for data files */
+    unsigned    nerrors = 0;            /* Cumulative error count */
     unsigned    reopen;                 /* Whether to reopen B-tree during tests */
-    int		ExpressMode;
+    int        ExpressMode;
     const char  *envval = NULL;
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
@@ -9958,7 +9958,7 @@ main(void)
     fapl = h5_fileaccess();
     ExpressMode = GetTestExpress();
     if(ExpressMode > 1)
-        printf("***Express test mode on.  Some tests may be skipped\n");
+        HDprintf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Initialize v2 B-tree creation parameters */
     init_cparam(&cparam, &cparam2);
@@ -9970,11 +9970,11 @@ main(void)
     /* Loop over re-opening B-tree during tests */
     for(reopen = FALSE; reopen <= TRUE; reopen++) {
         if(reopen) {
-            fprintf(stdout, "Testing with reopening B-tree:\n");
+            HDfprintf(stdout, "Testing with reopening B-tree:\n");
             tparam.reopen_btree = TRUE;
         } /* end if */
         else {
-            fprintf(stdout, "Testing without reopening B-tree:\n");
+            HDfprintf(stdout, "Testing without reopening B-tree:\n");
             tparam.reopen_btree = FALSE;
         } /* end else */
 
@@ -9994,7 +9994,7 @@ main(void)
         nerrors += test_insert_level2_3internal_redistrib(fapl, &cparam, &tparam);
         nerrors += test_insert_level2_3internal_split(fapl, &cparam, &tparam);
         if(ExpressMode > 1)
-            printf("***Express test mode on.  test_insert_lots skipped\n");
+            HDprintf("***Express test mode on.  test_insert_lots skipped\n");
         else
             nerrors += test_insert_lots(fapl, &cparam, &tparam);
 
@@ -10008,7 +10008,7 @@ main(void)
         nerrors += test_update_level1_middle_split(fapl, &cparam2, &tparam);
         nerrors += test_update_make_level2(fapl, &cparam2, &tparam);
         if(ExpressMode > 1)
-            printf("***Express test mode on.  test_update_lots skipped\n");
+            HDprintf("***Express test mode on.  test_update_lots skipped\n");
         else
             nerrors += test_update_lots(fapl, &cparam2, &tparam);
 
@@ -10035,7 +10035,7 @@ main(void)
         nerrors += test_remove_level2_3internal_merge(fapl, &cparam, &tparam);
         nerrors += test_remove_level2_collapse_right(fapl, &cparam, &tparam);
         if(ExpressMode > 1)
-            printf("***Express test mode on.  test_remove_lots skipped\n");
+            HDprintf("***Express test mode on.  test_remove_lots skipped\n");
         else
             nerrors += test_remove_lots(envval, fapl, &cparam);
 

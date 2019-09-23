@@ -216,6 +216,18 @@ typedef struct H5D_chunk_readvv_ud_t {
     const H5D_t *dset;          /* Dataset to operate on */
 } H5D_chunk_readvv_ud_t;
 
+typedef struct H5D_chunk_info_iter_ud_t {
+    hsize_t  scaled[H5O_LAYOUT_NDIMS];    /* Logical offset of the chunk */
+    hsize_t  ndims;             /* Number of dimensions in the dataset */
+    uint32_t nbytes;            /* Size of stored data in the chunk */
+    unsigned filter_mask;       /* Excluded filters */
+    haddr_t  chunk_addr;        /* Address of the chunk in file */
+    hsize_t  chunk_idx;         /* Chunk index, where the iteration needs to stop */
+    hsize_t  curr_idx;          /* Current index, where the iteration is */
+    unsigned idx_hint;          /* Index of chunk in cache, if present */
+    hbool_t  found;             /* Whether the chunk was found */
+} H5D_chunk_info_iter_ud_t;
+
 /* Callback info for file selection iteration */
 typedef struct H5D_chunk_file_iter_ud_t {
     H5D_chunk_map_t *fm;                /* File->memory chunk mapping info */
@@ -251,6 +263,11 @@ static herr_t H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *ty
 static herr_t H5D__chunk_flush(H5D_t *dset);
 static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_dest(H5D_t *dset);
+
+/* Chunk query operation callbacks */
+static int H5D__get_num_chunks_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
+static int H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
+static int H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* "Nonexistent" layout operation callback */
 static ssize_t
@@ -393,7 +410,6 @@ H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset,
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     hsize_t scaled[H5S_MAX_RANK];       /* Scaled coordinates for this chunk */
     hbool_t need_insert = FALSE;        /* Whether the chunk needs to be inserted into the index */
-    H5D_io_info_t io_info;              /* to hold the dset info */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
@@ -401,13 +417,17 @@ H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset,
     /* Sanity checks */
     HDassert(layout->type == H5D_CHUNKED);
 
-    io_info.dset = dset;
-
     /* Allocate dataspace and initialize it if it hasn't been. */
-    if(!H5D__chunk_is_space_alloc(&layout->storage))
+    if(!H5D__chunk_is_space_alloc(&layout->storage)) {
+        H5D_io_info_t io_info;              /* to hold the dset info */
+
+        io_info.dset = dset;
+        io_info.f_sh = H5F_SHARED(dset->oloc.file);
+
         /* Allocate storage */
         if(H5D__alloc_storage(&io_info, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
+    } /* end if */
 
     /* Calculate the index of this chunk */
     H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, scaled);
@@ -467,7 +487,7 @@ H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset,
     } /* end if */
 
     /* Write the data to the file */
-    if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, data_size, buf) < 0)
+    if(H5F_shared_block_write(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset, data_size, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
     /* Insert the chunk record into the index */
@@ -570,9 +590,9 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t* filters,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk address isn't defined")
 
     /* Read the chunk data into the supplied buffer */
-    if(H5F_block_read(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, udata.chunk_block.length, buf) < 0)
+    if(H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset, udata.chunk_block.length, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
-    
+
     /* Return the filter mask */
     *filters = udata.filter_mask;
 
@@ -1245,7 +1265,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         } /* end else */
 
         /* Build the memory selection for each chunk */
-        if(sel_hyper_flag && H5S_select_shape_same(file_space, mem_space) == TRUE) {
+        if(sel_hyper_flag && H5S_SELECT_SHAPE_SAME(file_space, mem_space) == TRUE) {
             /* Reset chunk template information */
             fm->mchunk_tmpl = NULL;
 
@@ -1811,7 +1831,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     while(sel_points) {
         /* Check for intersection of current chunk and file selection */
         /* (Casting away const OK - QAK) */
-        if(TRUE == H5S_hyper_intersect_block((H5S_t *)fm->file_space, coords, end)) {
+        if(TRUE == H5S_SELECT_INTERSECT_BLOCK(fm->file_space, coords, end)) {
             H5D_chunk_info_t *new_chunk_info;   /* chunk information to insert into skip list */
             hssize_t    schunk_points;          /* Number of elements in chunk selection */
 
@@ -2030,12 +2050,8 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
                 /* Sanity check */
                 HDassert(H5S_SEL_HYPERSLABS == chunk_sel_type);
 
-                /* Release the current selection */
-                if(H5S_SELECT_RELEASE(chunk_info->mspace) < 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection")
-
                 /* Copy the file chunk's selection */
-                if(H5S_select_copy(chunk_info->mspace, chunk_info->fspace, FALSE) < 0)
+                if(H5S_SELECT_COPY(chunk_info->mspace, chunk_info->fspace, FALSE) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy selection")
 
                 /* Compute the adjustment for this chunk */
@@ -3336,7 +3352,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
         /* Write the data to the file */
         HDassert(H5F_addr_defined(udata.chunk_block.offset));
         H5_CHECK_OVERFLOW(udata.chunk_block.length, hsize_t, size_t);
-        if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, (size_t)udata.chunk_block.length, buf) < 0)
+        if(H5F_shared_block_write(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset, (size_t)udata.chunk_block.length, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
         /* Insert the chunk record into the index */
@@ -3807,7 +3823,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                  * size in memory, so allocate memory big enough. */
                 if(NULL == (chunk = H5D__chunk_mem_alloc(my_chunk_alloc, (udata->new_unfilt_chunk ? old_pline : pline))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
-                if(H5F_block_read(dset->oloc.file, H5FD_MEM_DRAW, chunk_addr, my_chunk_alloc, chunk) < 0)
+                if(H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, chunk_addr, my_chunk_alloc, chunk) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
 
                 if(old_pline && old_pline->nused) {
@@ -4537,7 +4553,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
                 } /* end if */
                 else {
 #endif /* H5_HAVE_PARALLEL */
-                    if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, chunk_size, *fill_buf) < 0)
+                    if(H5F_shared_block_write(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset, chunk_size, *fill_buf) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 #ifdef H5_HAVE_PARALLEL
                 } /* end else */
@@ -4922,7 +4938,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set transfer mode")
 
     /* Low-level write (collective) */
-    if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, (haddr_t)0, (blocks) ? (size_t)1 : (size_t)0, fill_buf) < 0)
+    if(H5F_shared_block_write(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, (haddr_t)0, (blocks) ? (size_t)1 : (size_t)0, fill_buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
     /* Barrier so processes don't race ahead */
@@ -6956,4 +6972,374 @@ H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_format_convert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_num_chunks_cb
+ *
+ * Purpose:     Callback function that increments the number of written
+ *              chunks in the dataset.
+ *
+ * Note:        Currently, this function only gets the number of all written
+ *              chunks, regardless the dataspace.
+ *
+ * Return:      H5_ITER_CONT
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              June 2019 (HDFFV-10677)
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__get_num_chunks_cb(const H5D_chunk_rec_t H5_ATTR_UNUSED *chunk_rec, void *_udata)
+{
+    hsize_t *num_chunks = (hsize_t *)_udata;
+    int ret_value = H5_ITER_CONT;         /* Callback return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(num_chunks);
+
+    (*num_chunks)++;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__get_num_chunks_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_num_chunks
+ *
+ * Purpose:     Gets the number of written chunks in a dataset.
+ *
+ * Note:        Currently, this function only gets the number of all written
+ *              chunks, regardless the dataspace.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              June 2019 (HDFFV-10677)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__get_num_chunks(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_t *nchunks)
+{
+    H5D_chk_idx_info_t idx_info;                /* Chunked index info */
+    hsize_t            num_chunks = 0;          /* Number of written chunks */
+    H5D_rdcc_ent_t     *ent;                    /* Cache entry  */
+    const H5D_rdcc_t   *rdcc = NULL;            /* Raw data chunk cache */
+    const H5O_layout_t *layout;                 /* Dataset layout */
+    herr_t             ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+
+    HDassert(dset);
+    HDassert(dset->shared);
+    HDassert(space);
+    HDassert(nchunks);
+
+    layout = &(dset->shared->layout);    /* Dataset layout */
+    rdcc = &(dset->shared->cache.chunk); /* raw data chunk cache */
+    HDassert(rdcc);
+
+    /* Search for cached chunks that haven't been written out */
+    for(ent = rdcc->head; ent; ent = ent->next)
+        /* Flush the chunk out to disk, to make certain the size is correct later */
+        if(H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
+
+    /* Compose chunked index info struct */
+    idx_info.f = dset->oloc.file;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    /* If the dataset is not written, number of chunks will be 0 */
+    if(!H5F_addr_defined(idx_info.storage->idx_addr)) {
+        *nchunks = 0;
+    }
+    else {
+        /* Iterate over the allocated chunks */
+        if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_num_chunks_cb, &num_chunks) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve allocated chunk information from index")
+        *nchunks = num_chunks;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__get_num_chunks() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_chunk_info_cb
+ *
+ * Purpose:     Get the chunk info of the queried chunk, given by its index.
+ *
+ * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
+ *                          H5_ITER_STOP indicates the queried chunk is found
+ *              Failure:    Negative (H5_ITER_ERROR)
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              June 2019 (HDFFV-10677)
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
+{
+    H5D_chunk_info_iter_ud_t *chunk_info = (H5D_chunk_info_iter_ud_t *)_udata;
+    hsize_t ii = 0;                     /* Dimension index */
+    int     ret_value = H5_ITER_CONT;   /* Callback return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(chunk_rec);
+    HDassert(chunk_info);
+
+    /* If this is the queried chunk, retrieve its info and stop iterating */
+    if (chunk_info->curr_idx == chunk_info->chunk_idx) {
+        chunk_info->filter_mask = chunk_rec->filter_mask;
+        chunk_info->chunk_addr = chunk_rec->chunk_addr;
+        chunk_info->nbytes = chunk_rec->nbytes;
+        for (ii = 0; ii < chunk_info->ndims; ii++)
+            chunk_info->scaled[ii] = chunk_rec->scaled[ii];
+        chunk_info->found = TRUE;
+
+        /* Stop iterating */
+        ret_value = H5_ITER_STOP;
+    }
+    /* Go to the next chunk */
+    else
+        chunk_info->curr_idx++;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__get_chunk_info_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_chunk_info
+ *
+ * Purpose:     Iterate over the chunks in the dataset to get the info
+ *              of the desired chunk.
+ *
+ * Note:        Currently, the domain of the index in this function is of all
+ *              the written chunks, regardless the dataspace.
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAIL
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              June 2019 (HDFFV-10677)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_t chk_index, hsize_t *offset, unsigned *filter_mask, haddr_t *addr, hsize_t *size)
+{
+    H5D_chk_idx_info_t idx_info;           /* Chunked index info */
+    H5D_chunk_info_iter_ud_t udata;        /* User data for callback */
+    const H5D_rdcc_t   *rdcc = NULL;       /* Raw data chunk cache */
+    H5D_rdcc_ent_t     *ent;               /* Cache entry index */
+    hsize_t            ii = 0;             /* Dimension index */
+    herr_t             ret_value = SUCCEED;/* Return value */
+
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+
+    HDassert(dset);
+    HDassert(dset->shared);
+    HDassert(space);
+
+    /* Get the raw data chunk cache */
+    rdcc = &(dset->shared->cache.chunk);
+    HDassert(rdcc);
+
+    /* Search for cached chunks that haven't been written out */
+    for(ent = rdcc->head; ent; ent = ent->next)
+        /* Flush the chunk out to disk, to make certain the size is correct later */
+        if(H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
+
+    /* Compose chunked index info struct */
+    idx_info.f = dset->oloc.file;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    /* Set addr & size for when dset is not written or queried chunk is not found */
+    if (addr)
+        *addr = HADDR_UNDEF;
+    if (size)
+        *size = 0;
+
+    /* If the chunk is written, get its info, otherwise, return without error */
+    if(H5F_addr_defined(idx_info.storage->idx_addr)) {
+        /* Initialize before iteration */
+        udata.chunk_idx = chk_index;
+        udata.curr_idx = 0;
+        udata.ndims = dset->shared->ndims;
+        udata.nbytes = 0;
+        udata.filter_mask = 0;
+        udata.chunk_addr = HADDR_UNDEF;
+        udata.found = FALSE;
+
+        /* Iterate over the allocated chunks */
+        if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_chunk_info_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve allocated chunk information from index")
+
+        /* Obtain requested info if the chunk is found */
+        if(udata.found) {
+            if(filter_mask)
+                *filter_mask = udata.filter_mask;
+            if(addr)
+                *addr = udata.chunk_addr;
+            if(size)
+                *size = udata.nbytes;
+            if(offset)
+                for(ii = 0; ii < udata.ndims; ii++)
+                    offset[ii] = udata.scaled[ii] * dset->shared->layout.u.chunk.dim[ii];
+        }
+    } /* end if H5F_addr_defined */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__get_chunk_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_chunk_info_by_coord_cb
+ *
+ * Purpose:     Get the chunk info of the desired chunk, given its offset
+ *              coordinates.
+ *
+ * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
+ *              Failure:    Negative (H5_ITER_ERROR)
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              June 2019 (HDFFV-10677)
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
+{
+    hsize_t ii;
+    H5D_chunk_info_iter_ud_t *chunk_info = (H5D_chunk_info_iter_ud_t *)_udata;
+    hbool_t different = FALSE;      /* TRUE when a scaled value pair mismatch */
+    int ret_value = H5_ITER_CONT;   /* Callback return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(chunk_rec);
+    HDassert(chunk_info);
+
+    /* Going through the scaled, stop when a mismatch is found */
+    for (ii = 0; ii < chunk_info->ndims && !different; ii++)
+        if (chunk_info->scaled[ii] != chunk_rec->scaled[ii])
+            different = TRUE;
+
+    /* Same scaled coords means the chunk is found, copy the chunk info */
+    if (!different) {
+        chunk_info->nbytes = chunk_rec->nbytes;
+        chunk_info->filter_mask = chunk_rec->filter_mask;
+        chunk_info->chunk_addr = chunk_rec->chunk_addr;
+        chunk_info->found = TRUE;
+
+        /* Stop iterating */
+        ret_value = H5_ITER_STOP;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__get_chunk_info_by_coord_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__get_chunk_info_by_coord
+ *
+ * Purpose:     Iterate over the chunks in the dataset to get the info
+ *              of the desired chunk, given by its offset coordinates.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              June 2019 (HDFFV-10677)
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned* filter_mask, haddr_t *addr, hsize_t *size)
+{
+    const H5O_layout_t *layout = NULL;  /* Dataset layout */
+    const H5D_rdcc_t   *rdcc = NULL;    /* Raw data chunk cache */
+    H5D_rdcc_ent_t     *ent;            /* Cache entry index */
+    H5D_chk_idx_info_t  idx_info;       /* Chunked index info */
+    H5D_chunk_info_iter_ud_t udata;     /* User data for callback */
+    herr_t              ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+
+    /* Check args */
+    HDassert(dset);
+    HDassert(dset->shared);
+    HDassert(offset);
+
+    /* Get dataset layout and raw data chunk cache */
+    layout = &(dset->shared->layout);
+    rdcc = &(dset->shared->cache.chunk);
+    HDassert(layout);
+    HDassert(rdcc);
+    HDassert(H5D_CHUNKED == layout->type);
+
+    /* Search for cached chunks that haven't been written out */
+    for(ent = rdcc->head; ent; ent = ent->next)
+        /* Flush the chunk out to disk, to make certain the size is correct later */
+        if(H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
+
+    /* Set addr & size for when dset is not written or queried chunk is not found */
+    if (addr)
+        *addr = HADDR_UNDEF;
+    if (size)
+        *size = 0;
+
+    /* Compose chunked index info struct */
+    idx_info.f = dset->oloc.file;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    /* If the dataset is not written, return without errors */
+    if(H5F_addr_defined(idx_info.storage->idx_addr)) {
+        /* Calculate the scaled of this chunk */
+        H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, udata.scaled);
+        udata.scaled[dset->shared->ndims] = 0;
+
+        /* Initialize before iteration */
+        udata.ndims = dset->shared->ndims;
+        udata.nbytes = 0;
+        udata.filter_mask = 0;
+        udata.chunk_addr = HADDR_UNDEF;
+        udata.found = FALSE;
+
+        /* Iterate over the allocated chunks to find the requested chunk */
+        if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_chunk_info_by_coord_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve information of the chunk by its scaled coordinates")
+
+        /* Obtain requested info if the chunk is found */
+        if (udata.found) {
+            if(filter_mask)
+                *filter_mask = udata.filter_mask;
+            if(addr)
+                *addr = udata.chunk_addr;
+            if(size)
+                *size = udata.nbytes;
+        }
+    } /* end if H5F_addr_defined */
+
+done:
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
+} /* end H5D__get_chunk_info_by_coord() */
 

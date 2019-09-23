@@ -37,6 +37,15 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
    -V, --version   Print version number and exit
    --vfd=DRIVER    Use the specified virtual file driver
    -x, --hexdump   Show raw data in hexadecimal format
+   --s3-cred=C     Supply S3 authentication information to "ros3" vfd.
+                   Accepts tuple of "(<aws-region>,<access-id>,<access-key>)".
+                   If absent or C->"(,,)", defaults to no-authentication.
+                   Has no effect if vfd flag not set to "ros3".
+   --hdfs-attrs=A  Supply configuration information to Hadoop VFD.
+                   Accepts tuple of (<namenode name>,<namenode port>,
+                   ...<kerberos cache path>,<username>,<buffer size>)
+                   If absent or A == '(,,,,)', all default values are used.
+                   Has no effect if vfd flag is not 'hdfs'.
 
   file/OBJECT
     Each object consists of an HDF5 file name optionally followed by a

@@ -634,7 +634,7 @@ function(add_jar _TARGET_NAME)
         )
     else ()
         # create an empty java_class_filelist
-        if (NOT EXISTS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist)
+        if (NOT EXISTS "${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist")
             file(WRITE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist "")
         endif()
     endif ()

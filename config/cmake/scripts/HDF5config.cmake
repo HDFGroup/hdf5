@@ -45,7 +45,7 @@ set (CTEST_SOURCE_VERSEXT "")
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
 #MODEL - CDash group name
 #HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
-#MPI - enable MPI;
+#MPI - enable MPI
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
@@ -90,7 +90,7 @@ endif ()
 
 set (CTEST_BINARY_NAME "build")
 set (CTEST_DASHBOARD_ROOT "${CTEST_SCRIPT_DIRECTORY}")
-if (WIN32)
+if (WIN32 AND NOT MINGW)
   set (CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_SOURCE_NAME}")
   set (CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_BINARY_NAME}")
 else ()
@@ -104,7 +104,7 @@ if (NOT DEFINED HPC)
   if (NOT DEFINED BUILD_GENERATOR)
     message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
   endif ()
-  if (WIN32)
+  if (WIN32 AND NOT MINGW)
     set (SITE_OS_NAME "Windows")
     set (SITE_OS_VERSION "WIN7")
     if (BUILD_GENERATOR STREQUAL "VS201764")
@@ -212,7 +212,7 @@ set (REPOSITORY_BRANCH "develop")
 
 ###################################################################
 
-if (WIN32)
+if (WIN32 AND NOT MINGW)
   set (BINFILEBASE "HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}")
   include (${CTEST_SCRIPT_DIRECTORY}\\HDF5options.cmake)
   include (${CTEST_SCRIPT_DIRECTORY}\\CTestScript.cmake)

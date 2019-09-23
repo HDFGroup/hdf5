@@ -921,10 +921,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                         H5E_tools_g,
                                         H5E_tools_min_id_g,
                                         "H5Dcreate2 failed");
-                                if (options->verbose)
+                                if (options->verbose) {
                                     HDprintf(" warning: could not create dataset <%s>. Applying original settings\n",
                                             travt->objs[i].name);
-                                dset_out = H5Dcreate2(fidout,
+                                }
+                                dset_out = H5Dcreate2(
+                                        fidout,
                                         travt->objs[i].name,
                                         wtype_id,
                                         f_space_id,
@@ -1127,10 +1129,11 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                 /* print a message that the filter was not applied
                                  * (in case there was a filter)
                                  */
-                                if (has_filter && apply_s == 0)
+                                if (has_filter && apply_s == 0) {
                                     HDprintf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
                                             travt->objs[i].name,
                                             (int) options->min_comp);
+                                }
 
                                 if (has_filter && apply_f == 0)
                                     HDprintf(" <warning: could not apply the filter to %s>\n", travt->objs[i].name);
@@ -1358,7 +1361,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
                 {
                     unsigned level = cd_values[0];
 
-                    sprintf(temp,"(%d)", level);
+                    HDsprintf(temp,"(%d)", level);
                     HDstrcat(strfilter, temp);
                 }
 #endif
@@ -1372,7 +1375,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
                     unsigned options_mask = cd_values[0]; /* from dcpl, not filt*/
                     unsigned ppb = cd_values[1];
 
-                    sprintf(temp,"(%d,", ppb);
+                    HDsprintf(temp,"(%d,", ppb);
                     HDstrcat(strfilter, temp);
                     if (options_mask & H5_SZIP_EC_OPTION_MASK)
                         HDstrcpy(temp, "EC) ");
@@ -1412,7 +1415,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
 
         HDstrcpy(str, "dset     ");
         HDstrcat(str, strfilter);
-        sprintf(temp, "  (%.3f:1)", ratio);
+        HDsprintf(temp, "  (%.3f:1)", ratio);
         HDstrcat(str, temp);
         HDprintf(FORMAT_OBJ, str, objname);
     }

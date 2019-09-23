@@ -48,14 +48,35 @@ New Features
 
     Configuration:
     -------------
+    - Update CMake tests to use FIXTURES
+
+      CMake test fixtures allow setup/cleanup tests and other dependency
+      requirements as properties for tests. This is more flexible for
+      modern CMake code.
+
+      (ADB - 2019/07/23, HDFFV-10529)
+
     - Windows PDB files are always installed
 
-      There are configuration settings for Windows, that may not generate
-      PDB files. As such the install utility will break because those files
-      are not found. Add an optional variable that can be set to not install
-      PDB files.
+      There are build configuration or flag settings for Windows that may not
+      generate PDB files. If those files are not generated then the install
+      utility will fail because those PDB files are not found. An optional
+      variable, DISABLE_PDB_FILES, was added to not install PDB files.
 
-      (ADB - 2019/07/17, HDFFV-100424)
+      (ADB - 2019/07/17, HDFFV-10424)
+
+    - Add mingw CMake support with a toolchain file
+
+      There has been a number of mingw issues that has been linked under
+      HDFFV-10845. It has been decided to implement the CMake cross-compiling
+      technique of toolchain files. We will use a linux platform with the mingw
+      compiler stack for testing. Only the C language is fully supported, and
+      the error tests are skipped. The C++ language works for static but shared
+      builds has a shared library issue with the mingw Standard Exception Handling
+      library, which is not available on Windows. Fortran has a common cross-compile
+      problem with the fortran configure tests.
+
+      (ADB - 2019/07/12, HDFFV-10845, HDFFV-10595)
 
     - Windows PDB files are installed incorrectly
 
@@ -170,6 +191,41 @@ New Features
 
     Library:
     --------
+    - Add S3 and HDFS VFDs to HDF5 maintenance
+
+      Fix windows requirements and java tests. Windows requires CMake 3.13.
+            Install openssl library (with dev files);
+            from "Shining Light Productions". msi package preferred.
+
+            PATH should have been updated with the installation dir.
+            set ENV variable OPENSSL_ROOT_DIR to the installation dir.
+            set ENV variable OPENSSL_CONF to the cfg file, likely %OPENSSL_ROOT_DIR%\bin\openssl.cfg
+            Install libcurl library (with dev files);
+            download the latest released version using git: https://github.com/curl/curl.git
+
+            Open a Visual Studio Command prompt
+            change to the libcurl root folder
+            run the "buildconf.bat" batch file
+            change to the winbuild directory
+            nmake /f Makefile.vc mode=dll MACHINE=x64
+            copy libcurl-vc-x64-release-dll-ipv6-sspi-winssl dir to C:\curl (installation dir)
+            set ENV variable CURL_ROOT to C:\curl (installation dir)
+            update PATH ENV variable to %CURL_ROOT%\bin (installation bin dir).
+            the aws credentials file should be in %USERPROFILE%\.aws folder
+            set the ENV variable "HDF5_ROS3_TEST_BUCKET_URL=https://s3.us-east-2.amazonaws.com/hdf5ros3"
+
+      (ADB - 2019/09/12, HDFFV-10854)
+
+    - Added new chunk query functions
+
+      The following public functions were added to discover information about
+      the chunks in an HDF5 file.
+        herr_t H5Dget_num_chunks(dset_id, fspace_id, *nchunks)
+        herr_t H5Dget_chunk_info_by_coord(dset_id, *coord, *filter_mask, *addr, *size)
+        herr_t H5Dget_chunk_info(dset_id, fspace_id, index, *coord, *filter_mask, *addr, *size)
+
+      (BMR - 2019/06/11, HDFFV-10677)
+
     - Improved the performance of virtual dataset I/O
 
       Refactored the internal dataspace routines used by the virtual dataset
@@ -177,19 +233,6 @@ New Features
       involved is very long and non-contiguous.
 
       (NAF - 2019/05/31, HDFFV-10693)
-
-    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
-
-      Rather than always running H5detect and generating H5Tinit.c and
-      H5make_libsettings.c, supply a location for those files.
-
-      (ADB - 2018/09/18, HDFFV-10332)
-
-    - Remove H5I_REFERENCE from the library
-
-      This ID class was never used by the library and has been removed.
-
-      (DER - 2018/12/08, HDFFV-10252)
 
     - Added the ability to open files with UTF-8 file names on Windows.
 
@@ -199,6 +242,25 @@ New Features
       _wopen() instead.
 
      (DER - 2019/03/15, HDFFV-2714, HDFFV-3914, HDFFV-3895, HDFFV-8237, HDFFV-10413, HDFFV-10691)
+
+    - Add new API H5M for map objects.  Currently not supported by native
+      library, can be supported by VOL connectors.
+
+      (NAF - 2019/03/01)
+
+    - Remove H5I_REFERENCE from the library
+
+      This ID class was never used by the library and has been removed.
+
+      (DER - 2018/12/08, HDFFV-10252)
+
+    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
+
+      Rather than always running H5detect and generating H5Tinit.c and
+      H5make_libsettings.c, supply a location for those files.
+
+      (ADB - 2018/09/18, HDFFV-10332)
+
 
     Parallel Library:
     -----------------
@@ -231,16 +293,16 @@ New Features
 
     C++ Library:
     ------------
-    - Added new wrapper for H5Ovisit2()
-          H5Object::visit()
-
-      (BMR - 2019/02/14, HDFFV-10532)
-
     - Added new wrappers for H5Pset/get_create_intermediate_group()
         LinkCreatPropList::setCreateIntermediateGroup()
         LinkCreatPropList::getCreateIntermediateGroup()
 
       (BMR - 2019/04/22, HDFFV-10622)
+
+    - Added new wrapper for H5Ovisit2()
+          H5Object::visit()
+
+      (BMR - 2019/02/14, HDFFV-10532)
 
 
     Java Library:
@@ -300,6 +362,37 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed a bug caused by bad tag value when condensing object header
+      messages
+
+      There was an assertion failure when moving meessages from running a
+      user test program with library release hdf5.1.10.4. It was because
+      the tag value (object header's address) was not set up when entering
+      the library routine H5O__chunk_update_idx(), which will eventually
+      verifies the metadata tag value when protecting the object header.
+
+      The problem was fixed by replacing FUNC_ENTER_PACKAGE in H5O__chunk_update_idx()
+      with FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr) to set up the metadata tag.
+
+      (VC - 2019/08/23, HDFFV-10873)
+
+    - Fixed the test failure from test_metadata_read_retry_info() in
+      test/swmr.c
+
+      The test failure is due to the incorrect number of bins returned for
+      retry info (info.nbins).  The # of bins expected for 101 read attempts
+      is 3 instead of 2.  The routine H5F_set_retries() in src/H5Fint.c
+      calculates the # of bins by first obtaining the log10 value for
+      (read attempts - 1).  For PGI/19, the log10 value for 100 read attempts
+      is 1.9999999999999998 instead of 2.00000.  When casting the log10 value
+      to unsigned later on, the decimal part is chopped off causing the test
+      failure.
+
+      This was fixed by obtaining the rounded integer value (HDceil) for the
+      log10 value of read attempts first before casting the result to unsigned.
+
+      (VC - 2019/8/14, HDFFV-10813)
+
     - Fixed an issue where creating a file with non-default file space info
       together with library high bound setting to H5F_LIBVER_V18.
 
@@ -316,6 +409,18 @@ Bug Fixes since HDF5-1.10.3 release
 
       (VC - 2019/6/25, HDFFV-10808)
 
+    - When iterating over an old-style group (i.e., when not using the latest
+      file format) of size 0, a NULL pointer representing the empty links
+      table would be sent to qsort(3) for sorting, which is undefined behavior.
+
+      Iterating over an empty group is explicitly tested in the links test.
+      This has not caused any failures to date and was flagged by gcc's
+      -fsanitize=undefined.
+
+      The library no longer attempts to sort an empty array.
+
+      (DER - 2019/06/18, HDFFV-10829)
+
     - Fixed an issue where copying a version 1.8 dataset between files using
       H5Ocopy fails due to an incompatible fill version
 
@@ -328,6 +433,16 @@ Bug Fixes since HDF5-1.10.3 release
       (from H5O_FILL_VERSION_2) for H5F_LIBVER_V18.
 
       (VC - 2019/6/14, HDFFV-10800)
+
+    - Some oversights in the index iterating area of the library caused
+      a callback function to continue iterating even though it's supposed
+      to stop.
+
+      Added the returned value check to the for loop's conditions in
+      H5EA_iterate(), H5FA_iterate(), and H5D__none_idx_iterate().  The
+      iteration now stops when it should.
+
+      (BMR - 2019/06/11, HDFFV-10661)
 
     - Fixed a bug that would cause an error or cause fill values to be
       incorrectly read from a chunked dataset using the "single chunk" index if
@@ -423,17 +538,28 @@ Bug Fixes since HDF5-1.10.3 release
 
       (JTH - 2018/08/25, HDFFV-10501)
 
-    - When iterating over an old-style group (i.e., when not using the latest
-      file format) of size 0, a NULL pointer representing the empty links
-      table would be sent to qsort(3) for sorting, which is undefined behavior.
+    - fcntl(2)-based file locking incorrectly passed the lock argument struct
+      instead of a pointer to the struct, causing errors on systems where
+      flock(2) is not available.
 
-      Iterating over an empty group is explicitly tested in the links test.
-      This has not caused any failures to date and was flagged by gcc's
-      -fsanitize=undefined.
+      File locking is used when files are opened to enforce SWMR semantics. A
+      lock operation takes place on all file opens unless the
+      HDF5_USE_FILE_LOCKING environment variable is set to the string "FALSE".
+      flock(2) is preferentially used, with fcntl(2) locks as a backup if
+      flock(2) is unavailable on a system (if neither is available, the lock
+      operation fails). On these systems, the file lock will often fail, which
+      causes HDF5 to not open the file and report an error.
 
-      The library no longer attempts to sort an empty array.
+      This bug only affects POSIX systems. Win32 builds on Windows use a no-op
+      locking call which always succeeds. Systems which exhibit this bug will
+      have H5_HAVE_FCNTL defined but not H5_HAVE_FLOCK in the configure output.
 
-      (DER - 2019/06/18, HDFFV-10829)
+      This bug affects HDF5 1.10.0 through 1.10.5.
+
+      fcntl(2)-based file locking now correctly passes the struct pointer.
+
+      (DER - 2019/08/27, HDFFV-10892)
+
 
     Java Library:
     ----------------
@@ -471,7 +597,13 @@ Bug Fixes since HDF5-1.10.3 release
 
     Configuration
     -------------
-    -
+    - Correct option for default API version
+
+      CMake options for default API version are not mutually exclusive.
+      Change the multiple BOOL options to a single STRING option with the
+      strings; v16, v18, v110, v112.
+
+      (ADB - 2019/08/12, HDFFV-10879)
 
     Performance
     -------------
@@ -675,6 +807,19 @@ Bug Fixes since HDF5-1.10.2 release
       major releases, so this bug will not be fixed at this time.
 
       (DER - 2018/02/26, HDFFV-10356)
+
+    - Inappropriate linking with deprecated MPI C++ libraries
+
+      HDF5 does not define *_SKIP_MPICXX in the public headers, so applications
+      can inadvertently wind up linking to the deprecated MPI C++ wrappers.
+
+      MPICH_SKIP_MPICXX and OMPI_SKIP_MPICXX have both been defined in H5public.h
+      so this should no longer be an issue. HDF5 makes no use of the deprecated
+      MPI C++ wrappers.
+
+      (DER - 2019/09/17, HDFFV-10893)
+
+
 
     Configuration
     -------------

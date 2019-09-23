@@ -1,6 +1,10 @@
 cmake_minimum_required (VERSION 3.10)
 project (HDF5 C)
 
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
 #
@@ -27,6 +31,12 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
       "        $ cmake [OPTIONS] ..\n"
       )
 endif ()
+
+# CMake version 3.14 added option --ignore-eol to compare files
+#     cmake -E compare_files --ignore-eol file1 file2
+#if(CMAKE_VERSION VERSION_LESS "3.14.0" AND WIN32)
+#    MESSAGE(FATAL_ERROR "Windows builds requires a minimum of CMake 3.14")
+#endif()
 
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
@@ -512,7 +522,7 @@ endif ()
 # and we need to call the executable from inside the CMake configuration
 #-----------------------------------------------------------------------------
 set (EXE_EXT "")
-if (WIN32)
+if (WIN32 OR MINGW)
   set (EXE_EXT ".exe")
   add_definitions (-D_BIND_TO_CURRENT_VCLIBS_VERSION=1)
   add_definitions (-D_CRT_SECURE_NO_WARNINGS)
@@ -568,6 +578,27 @@ include (${HDF_RESOURCES_DIR}/HDFCompilerFlags.cmake)
 set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_EXT_DIR} ${CMAKE_MODULE_PATH})
 
 #-----------------------------------------------------------------------------
+# Option to Enable HDFS
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_HDFS "Enable HDFS" OFF)
+if (HDF5_ENABLE_HDFS)
+  find_package(JNI REQUIRED)
+  if (JNI_FOUND)
+    set (H5_HAVE_LIBJVM 1)
+  endif ()
+  find_package(HDFS REQUIRED)
+  if (HDFS_FOUND)
+    set (H5_HAVE_LIBHDFS 1)
+    set (H5_HAVE_HDFS_H 1)
+    if (NOT MSVC)
+      list (APPEND LINK_LIBS -pthread)
+    endif ()
+  else ()
+    message (FATAL_ERROR "Set to use libhdfs library, but could not find or use libhdfs. Please verify that the path to HADOOP_HOME is valid, and/or reconfigure without HDF5_ENABLE_HDFS")
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
@@ -615,45 +646,42 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
-set (DEFAULT_API_VERSION "v110")
+#option (DEFAULT_API_VERSION "Enable v1.12 API (v16, v18, v110, v112)" "v112")
+set (DEFAULT_API_VERSION "v112" CACHE STRING "Enable v1.12 API (v16, v18, v110, v112)")
+set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_16_API_DEFAULT "Use the HDF5 1.6.x API by default" OFF)
 set (H5_USE_16_API_DEFAULT 0)
-if (HDF5_USE_16_API_DEFAULT)
+if (DEFAULT_API_VERSION MATCHES "v16")
   set (H5_USE_16_API_DEFAULT 1)
-  set (DEFAULT_API_VERSION "v16")
 endif ()
 
 #-----------------------------------------------------------------------------
 # Option to use 1.8.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_18_API_DEFAULT "Use the HDF5 1.8.x API by default" OFF)
 set (H5_USE_18_API_DEFAULT 0)
-if (HDF5_USE_18_API_DEFAULT)
+if (DEFAULT_API_VERSION MATCHES "v18")
   set (H5_USE_18_API_DEFAULT 1)
-  set (DEFAULT_API_VERSION "v18")
 endif ()
 
 #-----------------------------------------------------------------------------
 # Option to use 1.10.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_110_API_DEFAULT "Use the HDF5 1.10.x API by default" OFF)
 set (H5_USE_110_API_DEFAULT 0)
-if (HDF5_USE_110_API_DEFAULT)
+if (DEFAULT_API_VERSION MATCHES "v110")
   set (H5_USE_110_API_DEFAULT 1)
-  set (DEFAULT_API_VERSION "v110")
 endif ()
 
 #-----------------------------------------------------------------------------
 # Option to use 1.12.x API
 #-----------------------------------------------------------------------------
-option (HDF5_USE_112_API_DEFAULT "Use the HDF5 1.12.x API by default" ON)
-set (H5_USE_112_API_DEFAULT 0)
-if (HDF5_USE_112_API_DEFAULT)
-  set (H5_USE_112_API_DEFAULT 1)
+if (NOT DEFAULT_API_VERSION)
   set (DEFAULT_API_VERSION "v112")
+endif ()
+set (H5_USE_112_API_DEFAULT 0)
+if (DEFAULT_API_VERSION MATCHES "v112")
+  set (H5_USE_112_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -682,13 +710,14 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     endif ()
   endif ()
 endif ()
+
 #-----------------------------------------------------------------------------
 # Option to use threadsafe
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
 if (HDF5_ENABLE_THREADSAFE)
   # check for unsupported options
-  if (WIN32)
+  if (WIN32 OR MINGW)
     message (STATUS " **** thread-safety option not supported with static library **** ")
     message (STATUS " **** thread-safety option will not be used building static library **** ")
   endif ()
@@ -733,6 +762,14 @@ if (HDF5_ENABLE_THREADSAFE)
   if (Threads_FOUND)
     set (H5_HAVE_THREADSAFE 1)
   endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to build the map API
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_MAP_API "Build the map API" OFF)
+if (HDF5_ENABLE_MAP_API)
+  set (H5_HAVE_MAP_API 1)
 endif ()
 
 #-----------------------------------------------------------------------------

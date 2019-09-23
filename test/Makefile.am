@@ -58,12 +58,12 @@ TEST_PROG= testhdf5 \
            cache cache_api cache_image cache_tagging lheap ohdr \
            stab gheap evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
-           dtypes dsets cmpd_dset filter_fail extend direct_chunk external efc \
-           objcopy links unlink twriteorder big mtime fillval mount \
+           dtypes dsets chunk_info cmpd_dset filter_fail extend direct_chunk \
+           external efc objcopy links unlink twriteorder big mtime fillval mount \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
-           enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
-           reserved cross_read freespace mf vds file_image unregister \
-           cache_logging cork swmr vol
+           enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
+           dangle dtransform reserved cross_read freespace mf vds file_image \
+           unregister cache_logging cork swmr vol
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -184,7 +184,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
     ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5\
-    dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
+    dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 \
+    tmp tmp_links tmp2_links tmp_links_env tmp_vds_env \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
@@ -201,8 +202,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 btree2_tmp.h5 objcopy_src.h5 objcopy_dst.h5 \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 farray_tmp.h5 \
-    earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log              \
-    new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
+    earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log log_ros3_out.log    \
+    log_s3comms_out.log new_multi_file_v16-r.h5 new_multi_file_v16-s.h5     \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
     vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5 \

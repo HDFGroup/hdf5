@@ -33,11 +33,11 @@ if (NOT TEST_CLASSPATH)
   message (STATUS "Require TEST_CLASSPATH to be defined")
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
@@ -49,7 +49,7 @@ endif ()
 
 message (STATUS "COMMAND: ${TEST_TESTER} -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=${LOG_LEVEL} -Djava.library.path=\"${TEST_LIBRARY_DIRECTORY}\" -cp \"${TEST_CLASSPATH}\" ${TEST_ARGS} ${TEST_PROGRAM} ${ARGN}")
 
-if (WIN32 AND NOT MINGW)
+if (WIN32 OR MINGW)
   set (ENV{PATH} "$ENV{PATH}\\;${TEST_LIBRARY_DIRECTORY}")
 else ()
   set (ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${TEST_LIBRARY_DIRECTORY}")
@@ -73,7 +73,7 @@ execute_process (
 message (STATUS "COMMAND Result: ${TEST_RESULT}")
 
 # if the .err file exists and ERRROR_APPEND is enabled
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   if (TEST_MASK_FILE)
     STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
@@ -123,10 +123,12 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # compare output files to references unless this must be skipped
 if (NOT TEST_SKIP_COMPARE)
-  if (EXISTS ${TEST_FOLDER}/${TEST_REFERENCE})
-    if (WIN32 AND NOT MINGW)
-      file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-      file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
+  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
+    if (WIN32 OR MINGW)
+      configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
+      file(RENAME ${TEST_FOLDER}/${TEST_REFERENCE}.tmp ${TEST_FOLDER}/${TEST_REFERENCE})
+      #file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+      #file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
     endif ()
 
     if (NOT TEST_SORT_COMPARE)
@@ -186,9 +188,11 @@ if (NOT TEST_SKIP_COMPARE)
 
   # now compare the .err file with the error reference, if supplied
   if (TEST_ERRREF)
-    if (WIN32 AND NOT MINGW)
-      file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
-      file (WRITE ${TEST_FOLDER}/${TEST_ERRREF} "${TEST_STREAM}")
+    if (WIN32 OR MINGW)
+      configure_file(${TEST_FOLDER}/${TEST_ERRREF} ${TEST_FOLDER}/${TEST_ERRREF}.tmp NEWLINE_STYLE CRLF)
+      file(RENAME ${TEST_FOLDER}/${TEST_ERRREF}.tmp ${TEST_FOLDER}/${TEST_ERRREF})
+      #file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
+      #file (WRITE ${TEST_FOLDER}/${TEST_ERRREF} "${TEST_STREAM}")
     endif ()
 
     # now compare the error output with the error reference
@@ -250,7 +254,7 @@ if (TEST_GREP_COMPARE)
 
   string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
   if (TEST_EXPECT)
-    # TEST_EXPECT (1) interperts TEST_FILTER as NOT to match
+    # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
     string (LENGTH "${TEST_MATCH}" TEST_RESULT)
     if (TEST_RESULT)
       message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")
