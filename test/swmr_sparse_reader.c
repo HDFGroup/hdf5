@@ -29,6 +29,7 @@
 /* Headers */
 /***********/
 
+#include <inttypes.h>   /* for PRIu64 */
 #include "h5test.h"
 #include "swmr_common.h"
 
@@ -115,10 +116,10 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(stderr, "Symbol = '%s', location = %lld\n", symbol->name, (long long)start);
+        HDfprintf(stderr, "Symbol = '%s', location = %Hu, %Hu\n", symbol->name, start[0], start[1]);
 
     /* Read record from dataset */
-    record->rec_id = (uint64_t)ULLONG_MAX;
+    record->rec_id = UINT64_MAX;
     if(H5Dread(dsid, symbol_tid, rec_sid, file_sid, H5P_DEFAULT, record) < 0)
         return -1;
 
@@ -126,7 +127,7 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
     if(record->rec_id != start[1]) {
         HDfprintf(stderr, "*** ERROR ***\n");
         HDfprintf(stderr, "Incorrect record value!\n");
-        HDfprintf(stderr, "Symbol = '%s', location = %lld, record->rec_id = %llu\n", symbol->name, (long long)start, (unsigned long long)record->rec_id);
+        HDfprintf(stderr, "Symbol = '%s', location = %Hu, %Hu, record->rec_id = %" PRIu64 "\n", symbol->name, start[0], start[1], record->rec_id);
         return -1;
     } /* end if */
 
