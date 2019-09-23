@@ -8029,6 +8029,13 @@ H5S_combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     HDassert(space2);
     HDassert(op >= H5S_SELECT_OR && op <= H5S_SELECT_NOTA);
 
+    if (space1->select.type->type == H5S_SEL_NONE) {
+        if (op == H5S_SELECT_AND)
+            ret_value = new_space = H5S_copy(space1, FALSE, TRUE);
+	else if (op == H5S_SELECT_OR)
+            ret_value = new_space = H5S_copy(space2, FALSE, TRUE);
+	goto done;
+    }
     /* Check that if space1 selections has span trees */
     if(NULL == space1->select.sel_info.hslab->span_lst)
         if(H5S_hyper_generate_spans(space1) < 0)
@@ -8041,7 +8048,6 @@ H5S_combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
             ret_value = new_space = H5S_copy(space1, FALSE, TRUE);
 	goto done;
     }
-
     
     if(NULL == space2->select.sel_info.hslab->span_lst) {
         hsize_t tmp_start[H5S_MAX_RANK];

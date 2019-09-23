@@ -1057,7 +1057,7 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_s
 
     /* Call initialization routine for selection type */
     ret_value = (*space->select.type->iter_init)(sel_iter, space);
-    HDassert(sel_iter->type);
+    HDassert(sel_iter->type != NULL);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_iter_init() */

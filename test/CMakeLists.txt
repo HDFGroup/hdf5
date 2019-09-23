@@ -253,8 +253,12 @@ set (H5_TESTS
     enc_dec_plist_cross_platform
     unregister
     query
+    query_perf
+    no_query
     halfquery
     index
+    parallel_query
+    hyperslab_perf
 )
 
 foreach (test ${H5_TESTS})

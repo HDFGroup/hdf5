@@ -700,6 +700,12 @@ H5D__chunk_is_space_alloc(const H5O_storage_t *storage)
 } /* end H5D__chunk_is_space_alloc() */
 
 
+static int io_init_count = 0;
+void H5D_reset_io_init_count(void)
+{
+   io_init_count = 0;
+}
+
 /*-------------------------------------------------------------------------
  * Function:	H5D__chunk_io_init
  *
@@ -957,8 +963,10 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                     chunk_info = (H5D_chunk_info_t *)H5SL_item(curr_node);
                     HDassert(chunk_info);
 
+		    io_init_count++; /* Debuginfo */
+
                     /* Clean hyperslab span's "scratch" information */
-                    if(H5S_hyper_reset_scratch(chunk_info->mspace) < 0)
+                    if(chunk_info->mspace && (H5S_hyper_reset_scratch(chunk_info->mspace) < 0))
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
 
                     /* Get the next chunk node in the skip list */

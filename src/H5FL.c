@@ -528,6 +528,8 @@ H5FL__reg_gc_list(H5FL_reg_head_t *head)
 {
     H5FL_reg_node_t *free_list; /* Pointer to nodes in free list being garbage collected */
     size_t total_mem;   /* Total memory used on list */
+    void *freed[8192];
+    int k, total = 0;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -536,6 +538,7 @@ H5FL__reg_gc_list(H5FL_reg_head_t *head)
 
     /* For each free list being garbage collected, walk through the nodes and free them */
     free_list = head->list;
+
     while(free_list != NULL) {
         void *tmp;          /* Temporary node pointer */
 
@@ -543,9 +546,11 @@ H5FL__reg_gc_list(H5FL_reg_head_t *head)
 
         /* Decrement the count of nodes allocated and free the node */
         head->allocated--;
-
+	for(k=0; k<total; k++)
+	  if (freed[k] == free_list) break;
+	if (k == total) 
         H5MM_free(free_list);
-
+	freed[total++] = free_list;
         free_list = (H5FL_reg_node_t *)tmp;
     } /* end while */
 

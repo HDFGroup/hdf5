@@ -36,13 +36,30 @@
 #define H5R_FRIEND
 #include "H5Rpkg.h" /* (Tmp) To re-use H5R__get_obj_name */
 
+#if defined(__linux__)
+#include <linux/limits.h>
+#define H5X_DB_MAX_NAME_LEN PATH_MAX
+#endif
+
 #ifdef H5_HAVE_DB
 #include <db.h>
 
 /****************/
 /* Local Macros */
 /****************/
-//#define H5X_DB_DEBUG
+// #define H5X_DB_DEBUG
+#define H5X_DB_SHOW_TIMING_AND_STATS
+#ifdef H5X_DB_SHOW_TIMING_AND_STATS
+#define H5X_DB_LOG_INFO(...) do {                              \
+      fprintf(stdout, " # %s(): ", __func__);                   \
+      fprintf(stdout, __VA_ARGS__);                             \
+      fprintf(stdout, "\n");                                    \
+      fflush(stdout);                                           \
+  } while (0)
+#else
+#define H5X_DB_LOG_INFO(...) do { \
+  } while (0)
+#endif
 
 #ifdef H5X_DB_DEBUG
 #define H5X_DB_LOG_DEBUG(...) do {                              \
@@ -142,7 +159,10 @@ struct {                                                                    \
 //#define H5X_DB_METADATA_TYPES 3
 #define H5X_DB_NPRIMARIES 2
 #define H5X_DB_NSECONDARIES 4
+
+#ifndef H5X_DB_MAX_NAME_LEN
 #define H5X_DB_MAX_NAME_LEN (64 * 1024)
+#endif
 
 #define H5X_DB_OBJ_REFS_SUFFIX      "__obj_refs.db"
 #define H5X_DB_LINK_NAMES_SUFFIX    "__link_names.db"
@@ -312,6 +332,7 @@ const H5X_class_t H5X_META_DB[1] = {{
     H5X_PLUGIN_META_DB,     /* (Or whatever number is assigned) */
     "DB",                   /* Whatever name desired */
     H5X_TYPE_METADATA,      /* This plugin operates on metadata */
+    H5X_SIMPLE_QUERY,       /* Query types */
     &idx_class              /* Index class */
 }};
 
@@ -402,7 +423,7 @@ H5X__db_insert_obj(H5X_db_t *db, href_t ref, H5X_db_obj_t *obj)
 {
     DBT key;  /* The key to dbcp->put() */
     DBT data; /* The data to dbcp->put() */
-    size_t ref_buf_size;
+    size_t ref_buf_size = 0;
     void *ref_buf = NULL;
     herr_t ret_value = SUCCEED; /* Return value */
     int db_ret;
@@ -433,7 +454,8 @@ H5X__db_insert_obj(H5X_db_t *db, href_t ref, H5X_db_obj_t *obj)
     }
 
 done:
-    H5MM_free(ref_buf);
+    if (ref_buf)
+        H5MM_free(ref_buf);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X__db_insert_obj */
 
@@ -542,12 +564,12 @@ H5X__db_index_attr(hid_t loc_id, const char *attr_name,
     if (FAIL == H5X__db_insert_attr(args->db, ref, &db_attr))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append object reference to view");
 
-//    H5X_db_index_attr_elem_arg_t iter_args;
+    //    H5X_db_index_attr_elem_arg_t iter_args;
     //    iter_args.attr_args = args;
     //    iter_args.attr_name = attr_name;
     /* Iterate over attribute elements to compare values */
-//    if (FAIL == H5Diterate(buf, type_id, space_id, H5X__db_index_attr_value_iterate, &iter_args))
-//        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, FAIL, "unable to compare attribute elements");
+    //    if (FAIL == H5Diterate(buf, type_id, space_id, H5X__db_index_attr_value_iterate, &iter_args))
+    //        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, FAIL, "unable to compare attribute elements");
 
 done:
     if (ref && FAIL == H5Rdestroy(ref))
@@ -1165,10 +1187,8 @@ H5X__db_stat(H5X_db_t *db)
         db->attr_names_file, db->attr_link_names_file, db->attr_values_file };
     DB *sdbs[H5X_DB_NSECONDARIES] = { db->link_names_db, db->attr_names_db,
         db->attr_link_names_db, db->attr_values_db };
-#ifdef H5X_DB_DEBUG
     const char *sdb_names[H5X_DB_NSECONDARIES] = { "link names", "attr names",
         "attr link names", "attr values" };
-#endif
     int i;
 
     /* Stat secondaries */
@@ -1194,6 +1214,11 @@ H5X__db_stat(H5X_db_t *db)
         H5X_DB_LOG_DEBUG("Database contains %lu records for %s",
             (u_long)statp->bt_ndata, sdb_names[i]);
         H5X_DB_LOG_DEBUG("Current database size on disk: %lf MB",
+            (float)st.st_size / (float)(1024 * 1024));
+
+        H5X_DB_LOG_INFO("Database contains %lu records for %s",
+            (u_long)statp->bt_ndata, sdb_names[i]);
+        H5X_DB_LOG_INFO("Current database size on disk: %lf MB",
             (float)st.st_size / (float)(1024 * 1024));
 
         HDfree(statp);
@@ -1306,7 +1331,7 @@ H5X__db_create(hid_t loc_id, hid_t H5_ATTR_UNUSED xcpl_id,
     hid_t H5_ATTR_UNUSED xapl_id, size_t *metadata_size, void **metadata)
 {
     H5X_db_t *db = NULL;
-#ifdef H5X_DB_DEBUG
+#ifdef H5X_DB_SHOW_TIMING_AND_STATS
     struct timeval t1, t2;
 #endif
     void *ret_value = NULL; /* Return value */
@@ -1336,21 +1361,22 @@ H5X__db_create(hid_t loc_id, hid_t H5_ATTR_UNUSED xcpl_id,
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, NULL, "can't create tables");
 
     /* Visit file */
-#ifdef H5X_DB_DEBUG
+#ifdef H5X_DB_SHOW_TIMING_AND_STATS
     HDgettimeofday(&t1, NULL);
 #endif
     if (FAIL == H5Ovisit(loc_id, H5_INDEX_NAME, H5_ITER_NATIVE, H5X__db_index, db))
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "object visitation failed");
-#ifdef H5X_DB_DEBUG
+
+#ifdef H5X_DB_SHOW_TIMING_AND_STATS
     HDgettimeofday(&t2, NULL);
 #endif
 
-    H5X_DB_LOG_DEBUG("######################################################");
-    H5X_DB_LOG_DEBUG("Index build time: %lf ms",
+    H5X_DB_LOG_INFO("######################################################");
+    H5X_DB_LOG_INFO("Index build time: %lf ms",
         ((float)(t2.tv_sec - t1.tv_sec)) * 1000.0f
         + ((float)(t2.tv_usec - t1.tv_usec)) / (1000.0f));
     H5X__db_stat(db);
-    H5X_DB_LOG_DEBUG("######################################################");
+    H5X_DB_LOG_INFO("######################################################");
 
     /* Write index metadata */
     if (FAIL == H5X__db_metadata_write(db, metadata_size, metadata))

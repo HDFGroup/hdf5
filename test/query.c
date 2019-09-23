@@ -785,6 +785,11 @@ main(int argc, char *argv[])
             goto error;
         }
     }
+#else
+    if (MPI_SUCCESS != MPI_Init(&argc, &argv)) {
+        fprintf(stderr, "MPI cannot be initialized\n");
+        goto error;
+    }
 #endif
 
     /* Reset library */
@@ -847,6 +852,9 @@ main(int argc, char *argv[])
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
 
     puts("All query tests passed.");
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+    
 //    h5_cleanup(FILENAME, fapl);
 //    for (i = 0; i < MULTI_NFILES; i++)
 //        HDfree(filename_multi[i]);

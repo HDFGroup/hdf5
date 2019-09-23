@@ -138,6 +138,15 @@ H5X__init_package(void)
 #ifdef H5_HAVE_FASTBIT
     if (H5X_register(H5X_FASTBIT) < 0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register FastBit index plugin");
+#ifdef H5_HAVE_PARALLEL
+    {  /* Enable parallel queries if MPI already initialized and we are using the fastbit plugin */
+       int mpi_available;
+       if (MPI_SUCCESS == MPI_Initialized(&mpi_available))
+	 if (mpi_available) {
+             H5Xinitialize_parallel_query();
+	 }
+    }
+#endif
 #endif
     if (H5X_register(H5X_META_DUMMY) < 0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register meta dummy index plugin");
@@ -457,10 +466,15 @@ herr_t
 H5Xcreate(hid_t loc_id, unsigned plugin_id, hid_t xcpl_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
-
+#ifdef H5_HAVE_PARALLEL
+    double start_t, end_t;
+#endif
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iIui", loc_id, plugin_id, xcpl_id);
 
+#ifdef H5_HAVE_PARALLEL
+    start_t = MPI_Wtime();
+#endif
     /* Check args */
     if (plugin_id > H5X_PLUGIN_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
@@ -469,6 +483,11 @@ H5Xcreate(hid_t loc_id, unsigned plugin_id, hid_t xcpl_id)
 
     if (FAIL == H5X_create(loc_id, plugin_id, xcpl_id))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot create index");
+
+#ifdef H5_HAVE_PARALLEL
+    end_t = MPI_Wtime();
+    printf("Time to create index = %lf Seconds\n", (end_t - start_t));
+#endif
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1091,12 +1110,16 @@ H5Xinitialize_parallel_query()
 {
     static int initialized = 0;
     herr_t ret = SUCCEED;
+#ifdef H5_HAVE_PARALLEL
     MPI_Comm comm = MPI_COMM_WORLD;
     if (!initialized) {
-       gather_topology_info(comm);
-       ret = create_group_comms(comm);
-       if (ret == SUCCEED) initialized++;
+        initialized = 1;
+        if (MPI_Comm_size(comm, &g_mpi_size) != MPI_SUCCESS) 
+            return FAIL;
+        if (g_mpi_size > 1) 
+            ret = create_group_comms(comm);
     }
+#endif
     return ret;
 }
 

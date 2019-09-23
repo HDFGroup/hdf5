@@ -218,5 +218,7 @@ H5_DLL herr_t H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stre
 H5_DLL herr_t H5D_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
     const H5S_t *mem_space, const H5S_t *file_space, hid_t dxpl_id, const void *buf);
 
+H5_DLL void H5D_reset_io_init_count(void);
+
 #endif /* _H5Dprivate_H */
 

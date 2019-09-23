@@ -205,10 +205,12 @@ static herr_t
 test_query(hid_t file_id, const char *dataset_name)
 {
     hsize_t start_coord[H5S_MAX_RANK + 1], end_coord[H5S_MAX_RANK + 1];
+    hsize_t nelmts;
     hid_t dataset = H5I_BADID;
     hid_t space = H5I_BADID;
     float query_lb = 39.1f, query_ub = 42.6f;
     hid_t query = H5I_BADID, query1 = H5I_BADID, query2 = H5I_BADID;
+
     struct timeval t1, t2;
     struct timeval t_total = {0, 0};
     int i;
@@ -216,7 +218,7 @@ test_query(hid_t file_id, const char *dataset_name)
     TESTING("index query");
 
     /* Create a simple query */
-    /* query = 39.1 < x < 42.1 */
+    /* query = 39.1 < x < 42.6 */
     query1 = H5Qcreate(H5Q_TYPE_DATA_ELEM, H5Q_MATCH_GREATER_THAN,
             H5T_NATIVE_FLOAT, &query_lb);
     if (query1 < 0) FAIL_STACK_ERROR;
@@ -241,19 +243,17 @@ test_query(hid_t file_id, const char *dataset_name)
 
         /*
         {
-            hsize_t nelmts;
             nelmts = (hsize_t) H5Sget_select_npoints(space);
             printf("\n Created dataspace with %llu elements,"
                     " bounds = [(%llu, %llu):(%llu, %llu)]\n",
                     nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
         }
         */
-
-        if (start_coord[0] != 40) FAIL_STACK_ERROR;
-    //    if (start_coord[1] != 0) FAIL_STACK_ERROR;
-        if (end_coord[0] != 42) FAIL_STACK_ERROR;
-    //    if (end_coord[1] != 2) FAIL_STACK_ERROR;
-
+	nelmts = (hsize_t) H5Sget_select_npoints(space);
+	if (nelmts > 0) {
+	  if (start_coord[0] != 40) FAIL_STACK_ERROR;
+	  if (end_coord[0] != 42) FAIL_STACK_ERROR;
+	}
         t_total.tv_sec += (t2.tv_sec - t1.tv_sec);
         t_total.tv_usec += (t2.tv_usec - t1.tv_usec);
 

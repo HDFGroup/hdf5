@@ -377,11 +377,6 @@ H5Q__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-#ifdef H5_HAVE_PARALLEL
-    if (FAIL == H5Xinitialize_parallel_query())
-        printf("Unable to initialize parallel queries\n");
-#endif    
-
     /* Initialize the atom group for the QUERY IDs */
     if (FAIL == H5I_register_type(H5I_QUERY_CLS))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to initialize interface");
