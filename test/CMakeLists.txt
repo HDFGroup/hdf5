@@ -207,6 +207,9 @@ set (H5_TESTS
     ttsafe # multiple source
     getname
     vfd
+    ros3
+    s3comms
+    hdfs
     ntypes
     dangle
     dtransform
@@ -249,6 +252,7 @@ endforeach ()
 ##############################################################################
 ###           M U L T I P L E  S O U R C E   T E S T S                     ###
 ##############################################################################
+
 
 ######### Special handling for multiple sources #############
 #-- Adding test for testhdf5

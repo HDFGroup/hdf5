@@ -1,6 +1,10 @@
 cmake_minimum_required (VERSION 3.10)
 project (HDF5 C)
 
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
 #
@@ -467,6 +471,27 @@ endif ()
 
 include (${HDF_RESOURCES_DIR}/HDFCompilerFlags.cmake)
 set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_EXT_DIR} ${CMAKE_MODULE_PATH})
+
+#-----------------------------------------------------------------------------
+# Option to Enable HDFS
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_HDFS "Enable HDFS" OFF)
+if (HDF5_ENABLE_HDFS)
+  find_package(JNI REQUIRED)
+  if (JNI_FOUND)
+    set (H5_HAVE_LIBJVM 1)
+  endif ()
+  find_package(HDFS REQUIRED)
+  if (HDFS_FOUND)
+    set (H5_HAVE_LIBHDFS 1)
+    set (H5_HAVE_HDFS_H 1)
+    if (NOT MSVC)
+      list (APPEND LINK_LIBS -pthread)
+    endif ()
+  else ()
+    message (FATAL_ERROR "Set to use libhdfs library, but could not find or use libhdfs. Please verify that the path to HADOOP_HOME is valid, and/or reconfigure without HDF5_ENABLE_HDFS")
+  endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel

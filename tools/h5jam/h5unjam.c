@@ -19,8 +19,6 @@
 /* Name of tool */
 #define PROGRAMNAME "h5unjam"
 
-#define TRUE 1
-#define FALSE 0
 #define COPY_BUF_SIZE 1024
 
 hsize_t write_pad( int , hsize_t );
@@ -334,17 +332,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-copy_to_file( FILE *infid, FILE *ofid, ssize_t _where, ssize_t how_much )
+copy_to_file( FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much )
 {
     static char buf[COPY_BUF_SIZE];
+    size_t how_much;
     off_t where = (off_t)_where;
     off_t to;
     off_t from;
     herr_t ret_value = 0;
 
     /* nothing to copy */
-    if(how_much <= 0)
+    if(show_much <= 0)
         goto done;
+    how_much = (size_t)show_much;
 
     /* rewind */
     HDfseek(infid, 0L, 0);
@@ -379,8 +379,8 @@ copy_to_file( FILE *infid, FILE *ofid, ssize_t _where, ssize_t how_much )
 
         /* Update positions/size */
         how_much -= bytes_read;
-        from += bytes_read;
-        to += bytes_read;
+        from += (off_t)bytes_read;
+        to += (off_t)bytes_read;
 
        /* Write nchars bytes to output file */
         bytes_wrote = HDfwrite(buf, (size_t)1, bytes_read, ofid);

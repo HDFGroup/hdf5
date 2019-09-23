@@ -782,12 +782,11 @@ static hsize_t diff_datum(
                 }
 
                 /* check object type */
-                if (ret_value >= 0)
-                    if (obj1_type != obj2_type) {
-                        parallel_print("Different object types referenced: <%s> and <%s>", obj1, obj2);
-                        opts->not_cmp = 1;
-                        HGOTO_DONE (opts->err_stat);
-                    }
+                if (obj1_type != obj2_type) {
+                    parallel_print("Different object types referenced: <%s> and <%s>", obj1, obj2);
+                    opts->not_cmp = 1;
+                    HGOTO_DONE (opts->err_stat);
+                }
 
                 if ((obj1_id = H5Rdereference(container1_id, H5R_OBJECT, _mem1)) < 0) {
                     opts->err_stat = 1;

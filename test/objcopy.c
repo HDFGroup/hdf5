@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: 	Peter X. Cao
- *             	May 01, 2005
+ * Programmer:     Peter X. Cao
+ *                 May 01, 2005
  *
- * Purpose:	Test H5Ocopy().
+ * Purpose:    Test H5Ocopy().
  */
 
 #include "h5test.h"

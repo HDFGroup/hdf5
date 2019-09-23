@@ -51,7 +51,7 @@
 #define INDENT  3
 #define VCOL    50
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    get_H5B2_class
  *
@@ -74,45 +74,45 @@ get_H5B2_class(const uint8_t *sig)
     const H5B2_class_t *cls;
 
     switch(subtype) {
-        case H5B2_TEST_ID:
-            cls = H5B2_TEST;
-            break;
+    case H5B2_TEST_ID:
+        cls = H5B2_TEST;
+        break;
 
-        case H5B2_FHEAP_HUGE_INDIR_ID:
-            cls = H5HF_HUGE_BT2_INDIR;
-            break;
+    case H5B2_FHEAP_HUGE_INDIR_ID:
+        cls = H5HF_HUGE_BT2_INDIR;
+        break;
 
-        case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
-            cls = H5HF_HUGE_BT2_FILT_INDIR;
-            break;
+    case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
+        cls = H5HF_HUGE_BT2_FILT_INDIR;
+        break;
 
-        case H5B2_FHEAP_HUGE_DIR_ID:
-            cls = H5HF_HUGE_BT2_DIR;
-            break;
+    case H5B2_FHEAP_HUGE_DIR_ID:
+        cls = H5HF_HUGE_BT2_DIR;
+        break;
 
-        case H5B2_FHEAP_HUGE_FILT_DIR_ID:
-            cls = H5HF_HUGE_BT2_FILT_DIR;
-            break;
+    case H5B2_FHEAP_HUGE_FILT_DIR_ID:
+        cls = H5HF_HUGE_BT2_FILT_DIR;
+        break;
 
-        case H5B2_GRP_DENSE_NAME_ID:
-            cls = H5G_BT2_NAME;
-            break;
+    case H5B2_GRP_DENSE_NAME_ID:
+        cls = H5G_BT2_NAME;
+        break;
 
-        case H5B2_GRP_DENSE_CORDER_ID:
-            cls = H5G_BT2_CORDER;
-            break;
+    case H5B2_GRP_DENSE_CORDER_ID:
+        cls = H5G_BT2_CORDER;
+        break;
 
-        case H5B2_SOHM_INDEX_ID:
-            cls = H5SM_INDEX;
-            break;
+    case H5B2_SOHM_INDEX_ID:
+        cls = H5SM_INDEX;
+        break;
 
-        case H5B2_ATTR_DENSE_NAME_ID:
-            cls = H5A_BT2_NAME;
-            break;
+    case H5B2_ATTR_DENSE_NAME_ID:
+        cls = H5A_BT2_NAME;
+        break;
 
-        case H5B2_ATTR_DENSE_CORDER_ID:
-            cls = H5A_BT2_CORDER;
-            break;
+    case H5B2_ATTR_DENSE_CORDER_ID:
+        cls = H5A_BT2_CORDER;
+        break;
 
         default:
             HDfprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
@@ -122,7 +122,7 @@ get_H5B2_class(const uint8_t *sig)
     return(cls);
 } /* end get_H5B2_class() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -147,12 +147,12 @@ main(int argc, char *argv[])
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
     H5E_auto2_t func;
-    void 	*edata;
+    void       *edata;
     herr_t      status = SUCCEED;
 
     if(argc == 1) {
-  	HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
-  	HDexit(1);
+        HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
+        HDexit(1);
     } /* end if */
 
     /* Initialize the library */
@@ -224,13 +224,15 @@ main(int argc, char *argv[])
          */
         status = H5HL_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
-    } else if(!HDmemcmp (sig, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
-	/*
-	 * Debug a global heap collection.
-	 */
-	status = H5HG_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+    }
+    else if(!HDmemcmp (sig, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+        /*
+         * Debug a global heap collection.
+         */
+        status = H5HG_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
-    } else if(!HDmemcmp(sig, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a symbol table node.
          */
@@ -244,7 +246,8 @@ main(int argc, char *argv[])
 
         status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
 
-    } else if(!HDmemcmp(sig, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a B-tree.  B-trees are debugged through the B-tree
          * subclass.  The subclass identifier is the byte immediately
@@ -254,27 +257,29 @@ main(int argc, char *argv[])
         unsigned    ndims;
 
         switch(subtype) {
-            case H5B_SNODE_ID:
-                /* Check for extra parameters */
-                if(extra == 0) {
-                    HDfprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
-                    HDfprintf(stderr, "B-tree symbol table node usage:\n");
-                    HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
-                } /* end if */
+        case H5B_SNODE_ID:
+            /* Check for extra parameters */
+            if(extra == 0) {
+                HDfprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
+                HDfprintf(stderr, "B-tree symbol table node usage:\n");
+                HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
+                HDexit(4);
+            } /* end if */
 
-                status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
-                break;
+            status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
+            break;
 
-            case H5B_CHUNK_ID:
-                /* Check for extra parameters */
-                if(extra == 0) {
-                    HDfprintf(stderr, "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
-                    HDfprintf(stderr, "B-tree chunked storage node usage:\n");
-                    HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions>\n");
-                    HDexit(4);
-                } /* end if */
+        case H5B_CHUNK_ID:
+            /* Check for extra parameters */
+            if(extra == 0) {
+                HDfprintf(stderr, "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
+                HDfprintf(stderr, "B-tree chunked storage node usage:\n");
+                HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> <slowest chunk dim>...<fastest chunk dim>\n");
+                HDexit(4);
+            } /* end if */
 
-                ndims = (unsigned)extra;
+            /* Build array of chunk dimensions */
+            ndims = (unsigned)extra;
                 status = H5D_btree_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
                 break;
 
@@ -283,7 +288,8 @@ main(int argc, char *argv[])
                 HDexit(4);
         }
 
-    } else if(!HDmemcmp(sig, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree header.
          */
@@ -292,7 +298,8 @@ main(int argc, char *argv[])
 
         status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
 
-    } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree internal node.
          */
@@ -310,7 +317,8 @@ main(int argc, char *argv[])
 
         status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
 
-    } else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a v2 B-tree leaf node.
          */
@@ -327,13 +335,15 @@ main(int argc, char *argv[])
 
         status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (haddr_t)extra3);
 
-    } else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a fractal heap header.
          */
         status = H5HF_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
-    } else if(!HDmemcmp(sig, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a fractal heap direct block.
          */
@@ -348,7 +358,8 @@ main(int argc, char *argv[])
 
         status = H5HF_dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (size_t)extra2);
 
-    } else if(!HDmemcmp(sig, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a fractal heap indirect block.
          */
@@ -363,14 +374,16 @@ main(int argc, char *argv[])
 
         status = H5HF_iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (unsigned)extra2);
 
-    } else if(!HDmemcmp(sig, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a free space header.
          */
 
         status = H5FS_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
-    } else if(!HDmemcmp(sig, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug free space serialized sections.
          */
@@ -385,14 +398,16 @@ main(int argc, char *argv[])
 
         status = H5FS_sects_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, extra2);
 
-    } else if(!HDmemcmp(sig, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug shared message master table.
          */
 
         status = H5SM_table_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned) UFAIL, (unsigned) UFAIL);
 
-    } else if(!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug shared message list index.
          */
@@ -407,33 +422,37 @@ main(int argc, char *argv[])
 
         status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned) extra, (size_t) extra2);
 
-    } else if(!HDmemcmp(sig, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    }
+    else if(!HDmemcmp(sig, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug v2 object header (which have signatures).
          */
 
         status = H5O_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
-    } else if(sig[0] == H5O_VERSION_1) {
+    }
+    else if(sig[0] == H5O_VERSION_1) {
         /*
          * This could be a v1 object header.  Since they don't have a signature
          * it's a somewhat "ify" detection.
          */
         status = H5O_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
-    } else {
+    }
+    else {
         /*
          * Got some other unrecognized signature.
          */
-        printf("%-*s ", VCOL, "Signature:");
+        HDprintf("%-*s ", VCOL, "Signature:");
         for (u = 0; u < sizeof(sig); u++) {
             if (sig[u] > ' ' && sig[u] <= '~' && '\\' != sig[u])
                 HDputchar(sig[u]);
             else if ('\\' == sig[u]) {
                 HDputchar('\\');
                 HDputchar('\\');
-            } else
-                printf("\\%03o", sig[u]);
+            }
+            else
+                HDprintf("\\%03o", sig[u]);
         }
         HDputchar('\n');
 

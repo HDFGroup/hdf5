@@ -58,8 +58,9 @@ Default installation process:
            with the CTEST_CONFIGURATION_TYPE script option. Note that this must
            be the same as the value used with the -C command line option.
        The default build configuration is defined to build and use static libraries.
-           Shared libraries can be used with the STATIC_ONLY script option set to "NO".
-       Other options can be changed by editing the HDF518_Examples.cmake file.
+
+       Shared libraries and other options can be changed by editing the
+           HDF5_Examples_options.cmake file.
 
        If the defaults are okay, execute from this directory:
            ctest -S HDF518_Examples.cmake -C Release -V -O test.log
