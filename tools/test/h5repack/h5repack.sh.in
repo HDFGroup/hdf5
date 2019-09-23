@@ -115,8 +115,14 @@ $SRC_H5REPACK_TESTFILES/h5repack_fsm_aggr_persist.h5
 $SRC_H5REPACK_TESTFILES/h5repack_none.h5
 $SRC_H5REPACK_TESTFILES/h5repack_paged_nopersist.h5
 $SRC_H5REPACK_TESTFILES/h5repack_paged_persist.h5
-$SRC_H5REPACK_TESTFILES/h5repack_int32le.h5
-$SRC_H5REPACK_TESTFILES/h5repack_int32le_ex.h5
+$SRC_H5REPACK_TESTFILES/h5repack_f32le.h5
+$SRC_H5REPACK_TESTFILES/h5repack_f32le_ex.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_1d.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_1d_ex.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_2d.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_2d_ex.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_3d.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_3d_ex.h5
 $SRC_H5REPACK_TESTFILES/h5repack_uint8be.h5
 $SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex.h5
 $SRC_H5DIFF_TESTFILES/h5diff_attr1.h5
@@ -164,7 +170,11 @@ $SRC_H5REPACK_TESTFILES/ublock.bin
 $SRC_H5REPACK_TESTFILES/h5repack.info
 $SRC_H5REPACK_TESTFILES/crtorder.tordergr.h5.ddl
 $SRC_H5REPACK_TESTFILES/deflate_limit.h5repack_layout.h5.ddl
-$SRC_H5REPACK_TESTFILES/h5repack_int32le_ex-0.dat
+$SRC_H5REPACK_TESTFILES/h5repack_f32le_ex-0.dat
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_1d_ex-0.dat
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_1d_ex-1.dat
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_2d_ex-0.dat
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_3d_ex-0.dat
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_filters.h5-gzip_verbose_filters.tst
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5-dset2_chunk_20x10-errstk.tst
@@ -173,10 +183,6 @@ $SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-0.dat
 $SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-1.dat
 $SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-2.dat
 $SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-3.dat
-$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-4.dat
-$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-5.dat
-$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-6.dat
-$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-7.dat
 $SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
 $SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
 $SRC_H5REPACK_TESTFILES/2_vds.h5-vds_chunk3x6x9-v.ddl
@@ -647,7 +653,7 @@ DIFFFAIL()
 # -----------------------------------------------------------------------------
 VERIFY_EXTERNAL_CONSOLIDATION()
 {
-    for name in int32le uint8be
+    for name in f32le int32le_1d int32le_2d int32le_3d uint8be
     do
         basename="h5repack_${name}"
         base_ext="${basename}_ex"
@@ -672,7 +678,7 @@ VERIFY_EXTERNAL_CONSOLIDATION()
         DIFFTEST $repacked $canonical
         DIFFTEST $repacked $external
 
-        # invalidate external file by moving its data file; verify
+        # invalidate external file by moving its first data file; verify
         (   cd $TESTDIR
             mv $ex_dat $ex_dat_mv
         )
