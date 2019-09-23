@@ -296,7 +296,7 @@ print_user_block(fnamein, fidin);
      *-------------------------------------------------------------------------
      */
     if (options->verbose)
-        printf("Making new file ...\n");
+        HDprintf("Making new file ...\n");
 
     if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fcreate could not create file <%s>:", fnameout);
@@ -625,9 +625,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
      */
 
     if (options->verbose) {
-        printf("-----------------------------------------\n");
-        printf(" Type     Filter (Compression)     Name\n");
-        printf("-----------------------------------------\n");
+        HDprintf("-----------------------------------------\n");
+        HDprintf(" Type     Filter (Compression)     Name\n");
+        HDprintf("-----------------------------------------\n");
     }
 
     if (travt->objs) {
@@ -646,7 +646,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                  */
             case H5TRAV_TYPE_GROUP:
                 if (options->verbose)
-                    printf(FORMAT_OBJ, "group", travt->objs[i].name);
+                    HDprintf(FORMAT_OBJ, "group", travt->objs[i].name);
 
                 /* open input group */
                 if ((grp_in = H5Gopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
@@ -782,17 +782,6 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_type failed");
                     if ((dcpl_in = H5Dget_create_plist(dset_in)) < 0)
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist failed");
-                    /* If the input dataset has external storage, it must be contiguous.
-                     * Accordingly, there would be no filter or chunk properties to preserve.
-                     */
-                    if (H5Pget_external_count(dcpl_in)) {
-                        if ((dcpl_out = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
-                    }
-                    else {
-                        if ((dcpl_out = H5Pcopy(dcpl_in)) < 0)
-                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcopy failed");
-                    }
                     if ((rank = H5Sget_simple_extent_ndims(f_space_id)) < 0)
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
                     HDmemset(dims, 0, sizeof dims);
@@ -800,6 +789,20 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
                     if (H5Dget_space_status(dset_in, &space_status) < 0)
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space_status failed");
+
+                    /* If the input dataset has external storage, it must be contiguous.
+                     * Accordingly, there would be no filter or chunk properties to preserve,
+                     * so create a new DCPL.
+                     * Otherwise, copy dcpl_in.
+                     */
+                    if (H5Pget_external_count(dcpl_in)) {
+                        if ((dcpl_out = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
+                    }
+                    else
+                    if ((dcpl_out = H5Pcopy(dcpl_in)) < 0) {
+                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcopy failed");
+                    }
 
                     nelmts = 1;
                     for (j = 0; j < rank; j++)
@@ -844,12 +847,14 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                              * changing to COMPACT. For the reference, COMPACT is limited
                              * by size 64K by library.
                              */
-                            if (options->layout_g != H5D_COMPACT)
-                                if (size_dset < options->min_comp)
+                            if (options->layout_g != H5D_COMPACT) {
+                                if (size_dset < options->min_comp) {
                                     apply_s = 0;
+                                }
+                            }
 
                             /* apply the filter */
-                            if (apply_s)
+                            if (apply_s) {
                                 if (apply_filters(
                                         travt->objs[i].name, 
                                         rank, 
@@ -860,6 +865,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                         &has_filter)
                                     < 0)
                                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "apply_filters failed");
+                            }
 
                             /* only if layout change requested for entire file or
                              * individual obj */
@@ -916,7 +922,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                         H5E_tools_min_id_g,
                                         "H5Dcreate2 failed");
                                 if (options->verbose)
-                                    printf(" warning: could not create dataset <%s>. Applying original settings\n",
+                                    HDprintf(" warning: could not create dataset <%s>. Applying original settings\n",
                                             travt->objs[i].name);
                                 dset_out = H5Dcreate2(fidout,
                                         travt->objs[i].name,
@@ -1122,12 +1128,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                  * (in case there was a filter)
                                  */
                                 if (has_filter && apply_s == 0)
-                                    printf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
+                                    HDprintf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
                                             travt->objs[i].name,
                                             (int) options->min_comp);
 
                                 if (has_filter && apply_f == 0)
-                                    printf(" <warning: could not apply the filter to %s>\n", travt->objs[i].name);
+                                    HDprintf(" <warning: could not apply the filter to %s>\n", travt->objs[i].name);
                             } /* end if verbose (print compression) */
 
                             /*-------------------------------------------------------------------------
@@ -1201,7 +1207,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
 
                     if (options->verbose)
-                        printf(FORMAT_OBJ, "dset", travt->objs[i].name);
+                        HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
 
                 } /* end whether we have request for filter/chunking */
                 break;
@@ -1212,7 +1218,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
              */
             case H5TRAV_TYPE_NAMED_DATATYPE:
                 if (options->verbose)
-                    printf(FORMAT_OBJ, "type", travt->objs[i].name);
+                    HDprintf(FORMAT_OBJ, "type", travt->objs[i].name);
 
                 if ((type_in = H5Topen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Topen2 failed");
@@ -1251,13 +1257,13 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
             case H5TRAV_TYPE_LINK:
             case H5TRAV_TYPE_UDLINK:
                 if (options->verbose)
-                    printf(FORMAT_OBJ, "link", travt->objs[i].name);
+                    HDprintf(FORMAT_OBJ, "link", travt->objs[i].name);
 
                 if (H5Lcopy(fidin, travt->objs[i].name, fidout, travt->objs[i].name, H5P_DEFAULT, H5P_DEFAULT) < 0)
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lcopy failed");
 
                 if (options->verbose)
-                    printf(FORMAT_OBJ, "link", travt->objs[i].name);
+                    HDprintf(FORMAT_OBJ, "link", travt->objs[i].name);
                 break;
 
             default:
@@ -1400,7 +1406,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
     } /* end for each filter */
 
     if (!pr)
-        printf(FORMAT_OBJ, "dset", objname);
+        HDprintf(FORMAT_OBJ, "dset", objname);
     else {
         char str[512], temp[512];
 
@@ -1408,7 +1414,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
         HDstrcat(str, strfilter);
         sprintf(temp, "  (%.3f:1)", ratio);
         HDstrcat(str, temp);
-        printf(FORMAT_OBJ, str, objname);
+        HDprintf(FORMAT_OBJ, str, objname);
     }
 } /* end print_dataset_info() */
 
@@ -1535,10 +1541,10 @@ print_user_block(const char *filename, hid_t fid)
 
         for (i = 0; i < nread; i++) {
 
-            printf("%c ", rbuf[i]);
+            HDprintf("%c ", rbuf[i]);
 
         }
-        printf("\n");
+        HDprintf("\n");
 
         if (nread < 0) {
             HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "nread < 0");

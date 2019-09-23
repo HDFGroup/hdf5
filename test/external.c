@@ -457,8 +457,7 @@ test_multiple_files(hid_t file)
 
     TESTING("multiple external files");
 
-    dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    if(dcpl < 0)
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
 
     max_ext_size = (hsize_t)(sizeof(int) * max_size[0] / n_external_files);
@@ -596,7 +595,7 @@ test_overflow(void)
 
     TESTING("address overflow in external files");
 
-    if((dcpl = H5Pcreate (H5P_DATASET_CREATE)) < 0)
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
     if(H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED-1) < 0)
         FAIL_STACK_ERROR
