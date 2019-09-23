@@ -542,7 +542,7 @@ error:
 
 
 /*
- * Function:    test_basic_meta_data_handling()
+ * Function:    test_basic_metadata_handling()
  *
  * Purpose:     Perform a basic check that metadata is not written
  *              immediately to the HDF5 file in VFD SWMR mode, but
@@ -555,6 +555,311 @@ error:
  * Programmer:  David Young
  *              16 Sep 2019
  */
+static unsigned
+test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
+{
+    char filename[FILENAME_LEN]; /* Filename to use */
+    hid_t file_id = -1;          /* File ID */
+    hid_t fcpl = -1;
+    hid_t fapl = -1;
+    int64_t base_page_cnt;
+    int64_t page_count = 0;
+    size_t i, num_elements = 2000;
+    haddr_t addr = HADDR_UNDEF;
+    int *data = NULL;
+    H5F_t *f = NULL;
+    H5F_vfd_swmr_config_t config;   /* Configuration for VFD SWMR */
+    const char *dname;
+    char *tname;
+    hsize_t pgsz = sizeof(int) * 200;
+
+    TESTING("Metadata Handling");
+
+    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
+
+    if ((fapl = H5Pcopy(orig_fapl)) < 0)
+        TEST_ERROR
+
+    if (set_multi_split(env_h5_drvr, fapl, pgsz) != 0)
+        TEST_ERROR;
+
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+        TEST_ERROR;
+    if (H5Pset_file_space_page_size(fcpl, pgsz) < 0)
+        TEST_ERROR;
+    if (H5Pset_page_buffer_size(fapl, 10 * pgsz, 0, 0) < 0)
+        TEST_ERROR;
+
+    memset(&config, '\0', sizeof(config));
+
+    config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config.tick_len = 4;
+    config.max_lag = 5;
+    config.vfd_swmr_writer = true;
+    config.md_pages_reserved = 128;
+#if 0
+    config.md_open_tries = 1;
+#endif
+
+    if ((tname = strdup(filename)) == NULL) {
+        HDfprintf(stderr, "temporary string allocation failed\n");
+        TEST_ERROR;
+    }
+    dname = dirname(tname);
+    snprintf(config.md_file_path, sizeof(config.md_file_path),
+        "%s/my_md_file", dname);
+    free(tname);
+
+    /* Enable VFD SWMR configuration */
+    if(H5Pset_vfd_swmr_config(fapl, &config) < 0) {
+        HDfprintf(stderr, "H5Pset_vrd_swmr_config failed\n");
+        TEST_ERROR;
+    }
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
+        FAIL_STACK_ERROR;
+
+    /* opening the file inserts one or more pages into the page buffer.
+     * Get the number of pages inserted, and verify that it is the 
+     * expected value.
+     */
+    base_page_cnt = f->shared->pb_ptr->curr_pages;
+    if (base_page_cnt != 2)
+        TEST_ERROR;
+
+    /* allocate space for 2000 elements */
+    if (HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_BTREE,
+            sizeof(int) * num_elements)))
+        FAIL_STACK_ERROR;
+
+    if ((data = (int *)HDcalloc(num_elements, sizeof(int))) == NULL)
+        TEST_ERROR;
+
+    /* initialize all the elements to have a value of -1 */
+    for(i = 0; i < num_elements; i++)
+        data[i] = -1;
+    if (H5F_block_write(f, H5FD_MEM_BTREE, addr, sizeof(int) * num_elements,
+           data) < 0)
+        FAIL_STACK_ERROR;
+
+#if 0
+    for (i = 0; i < config.max_lag + 1; i++)
+        H5Fvfd_swmr_end_tick(file_id);
+#endif
+
+    H5PB_flush(f);
+
+    /* read all elements using the VFD.. this should result in -1s. */
+    if (H5FD_read(f->shared->lf, H5FD_MEM_BTREE, addr,
+            sizeof(int) * num_elements, data) < 0)
+        FAIL_STACK_ERROR;
+
+    for (i = 0; i < num_elements; i++) {
+        if (data[i] != -1) {
+            fprintf(stderr, "Read %d at data[%d], expected -1\n", data[i], i);
+            TEST_ERROR;
+        }
+    }
+#if 0
+    /* update the first 100 elements to have values 0-99 - this will be
+       a page buffer update with 1 page resulting in the page
+       buffer. */
+    for(i = 0; i < 100; i++)
+        data[i] = i;
+
+    if (H5F_block_write(f, H5FD_MEM_DRAW, addr, sizeof(int) * 100, data) < 0)
+        FAIL_STACK_ERROR;
+
+    page_count ++;
+
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        FAIL_STACK_ERROR;
+
+    /* update elements 300 - 450, with values 300 -  - this will
+       bring two more pages into the page buffer. */
+    for(i = 0; i < 150; i++)
+        data[i] = i + 300;
+    if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 300), sizeof(int) * 150, data) < 0)
+        FAIL_STACK_ERROR;
+    page_count += 2;
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        FAIL_STACK_ERROR;
+
+    /* update elements 100 - 300, this will go to disk but also update
+       existing pages in the page buffer. */
+    for(i=0 ; i<200 ; i++)
+        data[i] = i+100;
+    if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 100), sizeof(int) * 200, data) < 0)
+        FAIL_STACK_ERROR;
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        FAIL_STACK_ERROR;
+
+    /* Update elements 225-300 - this will update an existing page in the PB */
+    /* Changes: 450 - 600; 150 */
+    for(i=0 ; i<150 ; i++)
+        data[i] = i+450;
+    if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 450), sizeof(int) * 150, data) < 0)
+        FAIL_STACK_ERROR;
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        FAIL_STACK_ERROR;
+
+    /* Do a full page write to block 600-800 - should bypass the PB */
+    for(i=0 ; i<200 ; i++)
+        data[i] = i+600;
+    if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 600), sizeof(int) * 200, data) < 0)
+        FAIL_STACK_ERROR;
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        FAIL_STACK_ERROR;
+
+    /* read elements 800 - 1200, this should not affect the PB, and should read -1s */
+    if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 800), sizeof(int) * 400, data) < 0)
+        FAIL_STACK_ERROR;
+    for (i=0; i < 400; i++) {
+        if (data[i] != -1) {
+            HDfprintf(stderr, "Read different values than written\n");
+            HDfprintf(stderr, "data[%d] = %d, %d expected.\n", i, data[i], -1);
+            FAIL_STACK_ERROR;
+        }
+    }
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        FAIL_STACK_ERROR;
+
+    /* read elements 1200 - 1201, this should read -1 and bring in an 
+     * entire page of addr 1200 
+     */
+    if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 1200), sizeof(int) * 1, data) < 0)
+        FAIL_STACK_ERROR;
+    for (i=0; i < 1; i++) {
+        if (data[i] != -1) {
+            HDfprintf(stderr, "Read different values than written\n");
+            HDfprintf(stderr, "data[%d] = %d, %d expected.\n", i, data[i], -1);
+            TEST_ERROR;
+        }
+    }
+    page_count ++;
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        TEST_ERROR;
+
+    /* read elements 175 - 225, this should use the PB existing pages */
+    /* Changes: 350 - 450 */
+    /* read elements 175 - 225, this should use the PB existing pages */
+    if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 350), sizeof(int) * 100, data) < 0)
+        FAIL_STACK_ERROR;
+    for (i=0; i < 100; i++) {
+        if (data[i] != i + 350) {
+            HDfprintf(stderr, "Read different values than written\n");
+            HDfprintf(stderr, "data[%d] = %d, %d expected.\n", i, data[i], 
+                      i + 350);
+            TEST_ERROR;
+        }
+    }
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        TEST_ERROR;
+
+    /* read elements 0 - 800 using the VFD.. this should result in -1s
+       except for the writes that went through the PB (100-300 & 600-800) */
+    if (H5FD_read(f->shared->lf, H5FD_MEM_DRAW, addr, sizeof(int) * 800, data) < 0)
+        FAIL_STACK_ERROR;
+    i = 0;
+    while (i < 800) {
+        if((i>=100 && i<300) || i >= 600) {
+            if (data[i] != i) {
+                HDfprintf(stderr, "Read different values than written\n");
+                HDfprintf(stderr, "data[%d] = %d, %d expected.\n", 
+                          i, data[i], i);
+                TEST_ERROR;
+            }
+        } else {
+            if (data[i] != -1) {
+                HDfprintf(stderr, "Read different values than written\n");
+                HDfprintf(stderr, "data[%d] = %d, %d expected.\n", 
+                          i, data[i], -1);
+                TEST_ERROR;
+            }
+        }
+        i++;
+    }
+
+    /* read elements 0 - 800 using the PB.. this should result in all
+     * what we have written so far and should get the updates from the PB 
+     */
+    if (H5F_block_read(f, H5FD_MEM_DRAW, addr, sizeof(int) * 800, data) < 0)
+        FAIL_STACK_ERROR;
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        TEST_ERROR;
+    for (i=0; i < 800; i++) {
+        if (data[i] != i) {
+            HDfprintf(stderr, "Read different values than written\n");
+            HDfprintf(stderr, "data[%d] = %d, %d expected.\n", i, data[i], i);
+            TEST_ERROR;
+        }
+    }
+
+    /* update elements 400 - 1400 to value 0, this will go to disk but
+     * also evict existing pages from the PB (page 400 & 1200 that are
+     * existing). 
+     */
+    for(i=0 ; i<1000 ; i++)
+        data[i] = 0;
+    if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 400), sizeof(int) * 1000, data) < 0)
+        FAIL_STACK_ERROR;
+    page_count -= 2;
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        TEST_ERROR;
+
+    /* read elements 0 - 1000.. this should go to disk then update the
+     * buffer result 200-400 with existing pages
+     */
+    if (H5F_block_read(f, H5FD_MEM_DRAW, addr, sizeof(int) * 1000, data) < 0)
+        FAIL_STACK_ERROR;
+    for (i = 0; i < 1000; i++) {
+        if(i < 400) {
+            if (data[i] != i) {
+                HDfprintf(stderr, "Read different values than written\n");
+                HDfprintf(stderr, "data[%d] = %d, %d expected.\n", 
+                          i, data[i], i);
+                TEST_ERROR;
+            }
+        } else {
+            if (data[i] != 0) {
+                HDfprintf(stderr, "Read different values than written\n");
+                HDfprintf(stderr, "data[%d] = %d, %d expected.\n", 
+                          i, data[i], 0);
+                TEST_ERROR;
+            }
+        }
+    }
+    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
+        TEST_ERROR;
+#endif
+
+    if (H5Fclose(file_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(fcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR;
+    HDfree(data);
+
+    PASSED()
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+        H5Fclose(file_id);
+        if (data)
+            HDfree(data);
+    } H5E_END_TRY;
+    return 1;
+}
 
 
 /*
@@ -669,7 +974,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
     if (base_page_cnt != 2)
         TEST_ERROR;
 
-    /* allocate space for a 2000 elements */
+    /* allocate space for 2000 elements */
     if (HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_DRAW, sizeof(int) * (size_t)num_elements)))
         FAIL_STACK_ERROR;
 
@@ -682,10 +987,9 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr, sizeof(int) * (size_t)num_elements, data) < 0)
         FAIL_STACK_ERROR;
 
-    /* update the first 50 elements to have values 0-49 - this will be
+    /* update the first 100 elements to have values 0-99 - this will be
        a page buffer update with 1 page resulting in the page
        buffer. */
-    /* Changes: 100 */
     for(i=0 ; i<100 ; i++)
         data[i] = i;
 
@@ -956,7 +1260,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     if(NULL == (f = (H5F_t *)H5I_object(file_id)))
         FAIL_STACK_ERROR;
 
-    /* allocate space for a 2000 elements */
+    /* allocate space for 2000 elements */
     if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_DRAW, 
                                          sizeof(int)*(size_t)num_elements)))
         FAIL_STACK_ERROR;
@@ -2443,6 +2747,7 @@ main(void)
     nerrors += test_args(fapl, env_h5_drvr);
     nerrors += test_raw_data_handling(fapl, env_h5_drvr, false);
     nerrors += test_raw_data_handling(fapl, env_h5_drvr, true);
+    nerrors += test_basic_metadata_handling(fapl, env_h5_drvr);
     nerrors += test_lru_processing(fapl, env_h5_drvr);
     nerrors += test_min_threshold(fapl, env_h5_drvr);
     nerrors += test_stats_collection(fapl, env_h5_drvr);
