@@ -254,7 +254,7 @@ main(int argc, char *argv[])
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
     H5E_auto2_t func;
-    void     *edata;
+    void       *edata;
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t      status = SUCCEED;
 
@@ -274,8 +274,8 @@ main(int argc, char *argv[])
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /*
-    * Open the file and get the file descriptor.
-    */
+     * Open the file and get the file descriptor.
+     */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         HDfprintf(stderr, "cannot create file access property list\n");
         HDexit(1);
@@ -309,8 +309,8 @@ main(int argc, char *argv[])
     }
 
     /*
-    * Parse command arguments.
-    */
+     * Parse command arguments.
+     */
     if(argc > 2)
         addr = (haddr_t)HDstrtoll(argv[2], NULL, 0);
     if(argc > 3)
@@ -323,8 +323,8 @@ main(int argc, char *argv[])
         extra4 = (haddr_t)HDstrtoll(argv[6], NULL, 0);
 
     /*
-    * Read the signature at the specified file position.
-    */
+     * Read the signature at the specified file position.
+     */
     HDfprintf(stdout, "Reading signature at address %a (rel)\n", addr);
     if(H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), sig) < 0) {
         HDfprintf(stderr, "cannot read signature\n");
@@ -332,28 +332,28 @@ main(int argc, char *argv[])
     }
     if(!HDmemcmp(sig, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN)) {
         /*
-        * Debug the file's super block.
-        */
+         * Debug the file's super block.
+         */
         status = H5F_debug(f, stdout, 0, VCOL);
 
     } else if(!HDmemcmp(sig, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a local heap.
-        */
+         * Debug a local heap.
+         */
         status = H5HL_debug(f, addr, stdout, 0, VCOL);
 
     }
     else if(!HDmemcmp (sig, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a global heap collection.
-        */
+         * Debug a global heap collection.
+         */
         status = H5HG_debug(f, addr, stdout, 0, VCOL);
 
     }
     else if(!HDmemcmp(sig, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a symbol table node.
-        */
+         * Debug a symbol table node.
+         */
 
         /* Check for extra parameters */
         if(extra == 0) {
@@ -367,10 +367,10 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a B-tree.  B-trees are debugged through the B-tree
-        * subclass.  The subclass identifier is the byte immediately
-        * after the B-tree signature.
-        */
+         * Debug a B-tree.  B-trees are debugged through the B-tree
+         * subclass.  The subclass identifier is the byte immediately
+         * after the B-tree signature.
+         */
         H5B_subid_t subtype = (H5B_subid_t)sig[H5_SIZEOF_MAGIC];
         unsigned    ndims;
         uint32_t    dim[H5O_LAYOUT_NDIMS];
@@ -435,8 +435,8 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a v2 B-tree header.
-        */
+         * Debug a v2 B-tree header.
+          */
         const H5B2_class_t *cls = get_H5B2_class(sig);
         HDassert(cls);
 
@@ -452,8 +452,8 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a v2 B-tree internal node.
-        */
+         * Debug a v2 B-tree internal node.
+         */
         const H5B2_class_t *cls = get_H5B2_class(sig);
         HDassert(cls);
 
@@ -479,8 +479,8 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a v2 B-tree leaf node.
-        */
+         * Debug a v2 B-tree leaf node.
+         */
         const H5B2_class_t *cls = get_H5B2_class(sig);
         HDassert(cls);
 
@@ -505,15 +505,15 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a fractal heap header.
-        */
+         * Debug a fractal heap header.
+         */
         status = H5HF_hdr_debug(f, addr, stdout, 0, VCOL);
 
     }
     else if(!HDmemcmp(sig, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a fractal heap direct block.
-        */
+         * Debug a fractal heap direct block.
+         */
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {
@@ -528,8 +528,8 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a fractal heap indirect block.
-        */
+         * Debug a fractal heap indirect block.
+         */
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {
@@ -544,16 +544,16 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a free space header.
-        */
+         * Debug a free space header.
+         */
 
         status = H5FS_debug(f, addr, stdout, 0, VCOL);
 
     }
     else if(!HDmemcmp(sig, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug free space serialized sections.
-        */
+         * Debug free space serialized sections.
+         */
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {
@@ -568,16 +568,16 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug shared message master table.
-        */
+         * Debug shared message master table.
+         */
 
         status = H5SM_table_debug(f, addr, stdout, 0, VCOL, (unsigned) UFAIL, (unsigned) UFAIL);
 
     }
     else if(!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug shared message list index.
-        */
+         * Debug shared message list index.
+         */
 
         /* Check for enough valid parameters */
         if(extra == 0) {
@@ -592,8 +592,8 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug an extensible aray header.
-        */
+         * Debug an extensible aray header.
+         */
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);
 
@@ -610,8 +610,8 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug an extensible aray index block.
-        */
+         * Debug an extensible aray index block.
+         */
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);
 
@@ -628,8 +628,8 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug an extensible aray super block.
-        */
+         * Debug an extensible aray super block.
+         */
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);
 
@@ -646,8 +646,8 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug an extensible aray data block.
-        */
+         * Debug an extensible aray data block.
+         */
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);
 
@@ -664,8 +664,8 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a fixed array header.
-        */
+         * Debug a fixed array header.
+         */
         const H5FA_class_t *cls = get_H5FA_class(sig);
         HDassert(cls);
 
@@ -682,8 +682,8 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug a fixed array data block.
-        */
+         * Debug a fixed array data block.
+         */
         const H5FA_class_t *cls = get_H5FA_class(sig);
         HDassert(cls);
 
@@ -700,24 +700,24 @@ main(int argc, char *argv[])
     }
     else if(!HDmemcmp(sig, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
-        * Debug v2 object header (which have signatures).
-        */
+         * Debug v2 object header (which have signatures).
+         */
 
         status = H5O_debug(f, addr, stdout, 0, VCOL);
 
     }
     else if(sig[0] == H5O_VERSION_1) {
         /*
-        * This could be a v1 object header.  Since they don't have a signature
-        * it's a somewhat "ify" detection.
-        */
+         * This could be a v1 object header.  Since they don't have a signature
+         * it's a somewhat "ify" detection.
+         */
         status = H5O_debug(f, addr, stdout, 0, VCOL);
 
     }
     else {
         /*
-        * Got some other unrecognized signature.
-        */
+         * Got some other unrecognized signature.
+         */
         HDprintf("%-*s ", VCOL, "Signature:");
         for (u = 0; u < sizeof(sig); u++) {
             if (sig[u] > ' ' && sig[u] <= '~' && '\\' != sig[u])
