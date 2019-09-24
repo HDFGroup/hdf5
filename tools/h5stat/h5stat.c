@@ -151,7 +151,7 @@ struct handler_t {
     char **obj;
 };
 
-static const char *s_opts ="Aa:Ddm:EFfhGgl:STO:Vw:";
+static const char *s_opts ="Aa:Ddm:EFfhGgl:STO:Vw:H:";
 /* e.g. "filemetadata" has to precede "file"; "groupmetadata" has to precede "group" etc. */
 static struct long_options l_opts[] = {
     {"help", no_arg, 'h'},
@@ -1810,7 +1810,8 @@ main(int argc, const char *argv[])
                 if(h5trav_visit(fid, hand->obj[u], TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0) {
                     error_msg("unable to traverse object \"%s\"\n", hand->obj[u]);
                     h5tools_setstatus(EXIT_FAILURE);
-                } else
+                }
+                else
                     print_statistics(hand->obj[u], &iter);
             } /* end for */
         } /* end if */
@@ -1831,7 +1832,7 @@ done:
     iter_free(&iter);
 
     if (fapl_id != H5P_DEFAULT) {
-        if (0 < H5Pclose(fapl_id)) {
+        if (H5Pclose(fapl_id) < 0) {
             error_msg("unable to close fapl entry\n");
             h5tools_setstatus(EXIT_FAILURE);
         }
