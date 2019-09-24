@@ -26,13 +26,23 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_deflate.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_early.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_ext.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_f32le.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_f32le_ex-0.dat
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_f32le_ex.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_fill.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_filters.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_fletcher.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_hlink.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_ex.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_ex-0.dat
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_1d.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_1d_ex-0.dat
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_1d_ex-1.dat
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_1d_ex.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_2d.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_2d_ex-0.dat
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_2d_ex.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_3d.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_3d_ex-0.dat
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_3d_ex.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layouto.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout2.h5
@@ -47,6 +57,12 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_shuffle.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_soffset.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_szip.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-0.dat
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-1.dat
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-2.dat
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-3.dat
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex.h5
       # fsm
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_aggr.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_fsm_aggr_nopersist.h5
@@ -54,16 +70,6 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_none.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_paged_nopersist.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_paged_persist.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-0.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-1.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-2.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-3.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-4.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-5.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-6.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-7.dat
       # h5diff/testfile
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr1.h5
       # tools/testfiles
