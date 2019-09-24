@@ -2465,7 +2465,7 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
     HDassert(entry_ptr->image_ptr);
     HDassert(entry_ptr->is_dirty);
     HDassert((pb_ptr->vfd_swmr_writer) || (!(entry_ptr->is_mpmde)));
-    HDassert((uint64_t)0 == (entry_ptr->delay_write_until));
+    HDassert(0 == entry_ptr->delay_write_until);
 
     /* Retrieve the 'eoa' for the file */
     if ( HADDR_UNDEF == (eoa = H5F_get_eoa(f, entry_ptr->mem_type)) )
