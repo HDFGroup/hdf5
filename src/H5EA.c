@@ -877,7 +877,7 @@ H5EA_close(H5EA_t *ea))
         if(pending_delete) {
             H5EA_hdr_t *hdr;            /* Another pointer to extensible array header */
 
-#ifdef H5EA_DEBUG
+#ifndef NDEBUG
 {
     unsigned hdr_status = 0;         /* Header's status in the metadata cache */
 
@@ -890,7 +890,7 @@ H5EA_close(H5EA_t *ea))
     HDassert(hdr_status & H5AC_ES__IS_PINNED);
     HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
 }
-#endif /* H5EA_DEBUG */
+#endif /* NDEBUG */
 
             /* Lock the array header into memory */
             /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
