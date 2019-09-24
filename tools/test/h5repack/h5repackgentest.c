@@ -26,6 +26,10 @@
  *
  * There is no restriction on the name, number, or structure of datasets and
  * groups in HDF5 file.
+ *
+ * The inluded datatypes should be more than adequate to verify the correctness
+ * of the behavior -- if one type can be consolidated from external storage,
+ * then thay all can.
  */
 
 #include "hdf5.h"

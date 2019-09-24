@@ -49,10 +49,10 @@
 /* Local Macros */
 /****************/
 
-#ifdef H5EA_DEBUG
+#ifndef NDEBUG
 /* Max. # of bits for max. nelmts index */
 #define H5EA_MAX_NELMTS_IDX_MAX 64
-#endif /* H5EA_DEBUG */
+#endif /* NDEBUG */
 
 /* # of elements in a data block for a particular super block */
 #define H5EA_SBLK_DBLK_NELMTS(s, m)                                           \
@@ -366,7 +366,7 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata))
     HDassert(f);
     HDassert(cparam);
 
-#ifdef H5EA_DEBUG
+#ifndef NDEBUG
 {
     unsigned sblk_idx;          /* Super block index for first "actual" super block */
     size_t dblk_nelmts;         /* Number of data block elements */
@@ -398,7 +398,7 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata))
     if(cparam->max_dblk_page_nelmts_bits > cparam->max_nelmts_bits)
         H5E_THROW(H5E_BADVALUE, "max. # of elements per data block page bits must be <= max. # of elements bits")
 }
-#endif /* H5EA_DEBUG */
+#endif /* NDEBUG */
 
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5EA__hdr_alloc(f)))
@@ -724,7 +724,7 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr))
     HDassert(hdr);
     HDassert(!hdr->file_rc);
 
-#ifdef H5EA_DEBUG
+#ifndef NDEBUG
 {
     unsigned hdr_status = 0;         /* Array header's status in the metadata cache */
 
@@ -736,7 +736,7 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr))
     HDassert(hdr_status & H5AC_ES__IN_CACHE);
     HDassert(hdr_status & H5AC_ES__IS_PROTECTED);
 } /* end block */
-#endif /* H5EA_DEBUG */
+#endif /* NDEBUG */
 
     /* Check for index block */
     if(H5F_addr_defined(hdr->idx_blk_addr)) {
