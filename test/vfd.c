@@ -1132,6 +1132,138 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_family_member_fapl
+ *
+ * Purpose:     Actually use the member fapl input to the member vfd.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Jacob Smith
+ *              21 May 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_family_member_fapl(void)
+{
+    hid_t    file         = H5I_INVALID_HID;
+    hid_t    fapl_id      = H5I_INVALID_HID;
+    hid_t    memb_fapl_id = H5I_INVALID_HID;
+    hid_t    space        = H5I_INVALID_HID;
+    hid_t    dset         = H5I_INVALID_HID;
+    char     filename[1024];
+    char     dname[]      = "dataset";
+    unsigned i            = 0;
+    unsigned j            = 0;
+    int      buf[FAMILY_NUMBER][FAMILY_SIZE];
+    hsize_t  dims[2]      = {FAMILY_NUMBER, FAMILY_SIZE};
+
+    TESTING("Family member FAPL");
+
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5I_INVALID_HID == fapl_id) {
+        TEST_ERROR;
+    }
+    memb_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5I_INVALID_HID == memb_fapl_id) {
+        TEST_ERROR;
+    }
+    if (H5Pset_fapl_sec2(memb_fapl_id) == FAIL) {
+        TEST_ERROR;
+    }
+    if (H5Pset_fapl_family(fapl_id, (hsize_t)FAMILY_SIZE, memb_fapl_id) == FAIL) {
+        TEST_ERROR;
+    }
+    h5_fixname(FILENAME[2], fapl_id, filename, sizeof(filename));
+
+    file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    space = H5Screate_simple(2, dims, NULL);
+    if (H5I_INVALID_HID == space) {
+        TEST_ERROR;
+    }
+
+    /* Create and write to dataset, then close file.
+     */
+    dset = H5Dcreate2(
+            file,
+            dname,
+            H5T_NATIVE_INT,
+            space,
+            H5P_DEFAULT,
+            H5P_DEFAULT,
+            H5P_DEFAULT);
+    if (H5I_INVALID_HID == dset) {
+        TEST_ERROR;
+    }
+    for (i = 0; i < FAMILY_NUMBER; i++) {
+        for (j = 0; j < FAMILY_SIZE; j++) {
+            buf[i][j] = (int)((i * 10000) + j);
+        }
+    }
+    if (H5Dwrite(dset,
+                 H5T_NATIVE_INT,
+                 H5S_ALL,
+                 H5S_ALL,
+                 H5P_DEFAULT,
+                 buf)
+            == FAIL)
+    {
+        TEST_ERROR;
+    }
+    if (H5Dclose(dset)         == FAIL) {
+        TEST_ERROR;
+    }
+    if (H5Sclose(space)        == FAIL) {
+        TEST_ERROR;
+    }
+    if (H5Fclose(file)         == FAIL) {
+        TEST_ERROR;
+    }
+
+    /* "Close" member FAPL at top level and re-open file.
+     * Should succeed, with library managing reference count properly
+     */
+    if (H5Pclose(memb_fapl_id) == FAIL) {
+        TEST_ERROR;
+    }
+
+    file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+    if (H5I_INVALID_HID == file) {
+        TEST_ERROR;
+    }
+
+    if (H5Fclose(file) == FAIL) {
+        TEST_ERROR;
+    }
+
+    h5_delete_test_file(FILENAME[2], fapl_id);
+
+    if (H5Pclose(fapl_id) == FAIL) {
+        TEST_ERROR;
+    }
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(space);
+        H5Dclose(dset);
+        H5Pclose(memb_fapl_id);
+        H5Pclose(fapl_id);
+        H5Fclose(file);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_family_member_fapl() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_multi_opens
  *
  * Purpose:     Private function for test_multi() to tests wrong ways of
@@ -2042,6 +2174,7 @@ main(void)
     nerrors += test_direct() < 0         ? 1 : 0;
     nerrors += test_family() < 0         ? 1 : 0;
     nerrors += test_family_compat() < 0  ? 1 : 0;
+    nerrors += test_family_member_fapl() < 0  ? 1 : 0;
     nerrors += test_multi() < 0          ? 1 : 0;
     nerrors += test_multi_compat() < 0   ? 1 : 0;
     nerrors += test_log() < 0            ? 1 : 0;
