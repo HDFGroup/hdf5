@@ -373,8 +373,7 @@ set_sort_by(const char *form)
 
     if (!HDstrcmp(form, "name"))
         idx_type = H5_INDEX_NAME;
-    else
-    if (!HDstrcmp(form, "creation_order"))
+    else if (!HDstrcmp(form, "creation_order"))
         idx_type = H5_INDEX_CRT_ORDER;
 
     return idx_type;
@@ -397,8 +396,7 @@ set_sort_order(const char *form)
 
     if (!HDstrcmp(form, "ascending"))
         iter_order = H5_ITER_INC;
-    else
-    if (!HDstrcmp(form, "descending"))
+    else if (!HDstrcmp(form, "descending"))
         iter_order = H5_ITER_DEC;
 
     return iter_order;
@@ -539,17 +537,13 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                         ssize = HDatoi( opt_arg );
                         if (!HDstrncmp(msgType, "dspace", 6))
                             options->msg_size[0] = ssize;
-                        else
-                        if (!HDstrncmp(msgType, "dtype", 5))
+                        else if (!HDstrncmp(msgType, "dtype", 5))
                             options->msg_size[1] = ssize;
-                        else
-                        if (!HDstrncmp(msgType, "fill", 4))
+                        else if (!HDstrncmp(msgType, "fill", 4))
                             options->msg_size[2] = ssize;
-                        else
-                        if (!HDstrncmp(msgType, "pline", 5))
+                        else if (!HDstrncmp(msgType, "pline", 5))
                             options->msg_size[3] = ssize;
-                        else
-                        if (!HDstrncmp(msgType, "attr", 4))
+                        else if (!HDstrncmp(msgType, "attr", 4))
                             options->msg_size[4] = ssize;
                     }
                 }
@@ -588,14 +582,11 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                     HDstrcpy(strategy, opt_arg);
                     if (!HDstrcmp(strategy, "FSM_AGGR"))
                         options->fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
-                    else
-                    if (!HDstrcmp(strategy, "PAGE"))
+                    else if (!HDstrcmp(strategy, "PAGE"))
                         options->fs_strategy = H5F_FSPACE_STRATEGY_PAGE;
-                    else
-                    if (!HDstrcmp(strategy, "AGGR"))
+                    else if (!HDstrcmp(strategy, "AGGR"))
                         options->fs_strategy = H5F_FSPACE_STRATEGY_AGGR;
-                    else
-                    if (!HDstrcmp(strategy, "NONE"))
+                    else if (!HDstrcmp(strategy, "NONE"))
                         options->fs_strategy = H5F_FSPACE_STRATEGY_NONE;
                     else {
                         error_msg("invalid file space management strategy\n", opt_arg);
@@ -640,7 +631,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'z':
-                if (H5_ITER_UNKNOWN == set_sort_order(opt_arg)) {
+                if (set_sort_order(opt_arg) == H5_ITER_UNKNOWN) {
                     error_msg(" failed to set sort order form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
@@ -662,7 +653,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
          if (argv[opt_ind] != NULL && argv[opt_ind + 1] != NULL) {
              infile = argv[opt_ind];
              outfile = argv[opt_ind + 1];
- 
+
              if (!HDstrcmp(infile, outfile)) {
                  error_msg("file names cannot be the same\n");
                  usage(h5tools_getprogname());
@@ -677,8 +668,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
              ret_value = -1;
          }
      }
-     else
-     if (has_i != 1 || has_o != 1) {
+     else if (has_i != 1 || has_o != 1) {
          error_msg("filenames must be either both -i -o or both positional\n");
          usage(h5tools_getprogname());
          h5tools_setstatus(EXIT_FAILURE);
