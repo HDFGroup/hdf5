@@ -173,7 +173,7 @@ struct handler_t {
     char **obj;
 };
 
-static const char *s_opts ="Aa:Ddm:EFfhGgl:sSTO:Vw:";
+static const char *s_opts ="Aa:Ddm:EFfhGgl:sSTO:Vw:H:";
 /* e.g. "filemetadata" has to precede "file"; "groupmetadata" has to precede "group" etc. */
 static struct long_options l_opts[] = {
     {"help", no_arg, 'h'},
@@ -2013,7 +2013,7 @@ done:
     iter_free(&iter);
 
     if (fapl_id != H5P_DEFAULT) {
-        if (0 < H5Pclose(fapl_id)) {
+        if (H5Pclose(fapl_id) < 0) {
             error_msg("unable to close fapl entry\n");
             h5tools_setstatus(EXIT_FAILURE);
         }
