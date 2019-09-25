@@ -15,7 +15,7 @@
  * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
  *              Thursday, June 18, 1998
  *
- * Purpose:	Hyperslab selection dataspace I/O functions.
+ * Purpose:    Hyperslab selection dataspace I/O functions.
  */
 
 /****************/
@@ -30,8 +30,8 @@
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
 #include "H5CXprivate.h"        /* API Contexts                             */
-#include "H5Eprivate.h"		/* Error handling			    */
-#include "H5FLprivate.h"	/* Free Lists				    */
+#include "H5Eprivate.h"        /* Error handling                */
+#include "H5FLprivate.h"    /* Free Lists                    */
 #include "H5Iprivate.h"         /* ID Functions                             */
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Spkg.h"             /* Dataspace functions                      */
@@ -246,6 +246,7 @@ const unsigned H5O_sds_hyper_ver_bounds[] = {
     H5S_HYPER_VERSION_1,    /* H5F_LIBVER_EARLIEST */
     H5S_HYPER_VERSION_1,    /* H5F_LIBVER_V18 */
     H5S_HYPER_VERSION_2,    /* H5F_LIBVER_V110 */
+    H5S_HYPER_VERSION_2,    /* H5F_LIBVER_V112 */
     H5S_HYPER_VERSION_3     /* H5F_LIBVER_LATEST */
 };
 
@@ -378,7 +379,7 @@ H5S__hyper_print_diminfo(FILE *f, const H5S_t *space)
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_print_spans_dfs
@@ -451,7 +452,7 @@ H5S__hyper_print_spans_dfs(FILE *f, const H5S_hyper_span_info_t *span_lst,
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_print_spans_dfs() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_print_space_dfs
@@ -524,15 +525,15 @@ H5S__hyper_print_space_dfs(FILE *f, const H5S_t *space)
 } /* end H5S__hyper_print_space_dfs() */
 #endif /* H5S_HYPER_DEBUG */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_get_op_gen
+ * Function:    H5S__hyper_get_op_gen
  *
- * Purpose:	Acquire a unique operation generation value
+ * Purpose:    Acquire a unique operation generation value
  *
- * Return:	Operation generation value (can't fail)
+ * Return:    Operation generation value (can't fail)
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, January 19, 2019
  *
  * Notes:       Assumes that a 64-bit value will not wrap around during
@@ -548,15 +549,15 @@ H5S__hyper_get_op_gen(void)
     FUNC_LEAVE_NOAPI(H5S_hyper_op_gen_g++);
 } /* end H5S__hyper_op_gen() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_iter_init
+ * Function:    H5S__hyper_iter_init
  *
- * Purpose:	Initializes iteration information for hyperslab selection.
+ * Purpose:    Initializes iteration information for hyperslab selection.
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:    Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, February 24, 2001
  *
  * Notes:       If the 'iter->elmt_size' field is set to zero, the regular
@@ -721,14 +722,14 @@ H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
 
         /* If this iterator is created from an API call, by default we clone the
          *  selection now, as the dataspace could be modified or go out of scope.
-         *  
+         *
          *  However, if the H5S_SEL_ITER_SHARE_WITH_DATASPACE flag is given,
          *  the selection is shared between the selection iterator and the
          *  dataspace.  In this case, the application _must_not_ modify or
          *  close the dataspace that the iterator is operating on, or undefined
          *  behavior will occur.
          */
-        if((iter->flags & H5S_SEL_ITER_API_CALL) && 
+        if((iter->flags & H5S_SEL_ITER_API_CALL) &&
                 !(iter->flags & H5S_SEL_ITER_SHARE_WITH_DATASPACE)) {
             /* Copy the span tree */
             if(NULL == (iter->u.hyp.spans = H5S__hyper_copy_span(space->select.sel_info.hslab->span_lst, space->extent.rank)))
@@ -787,16 +788,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_iter_init() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_iter_coords
+ * Function:    H5S__hyper_iter_coords
  *
- * Purpose:	Retrieve the current coordinates of iterator for current
+ * Purpose:    Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:    Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, April 22, 2003
  *
  *-------------------------------------------------------------------------
@@ -872,16 +873,16 @@ H5S__hyper_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_coords() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_iter_block
+ * Function:    H5S__hyper_iter_block
  *
- * Purpose:	Retrieve the current block of iterator for current
+ * Purpose:    Retrieve the current block of iterator for current
  *              selection
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:    Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, June 2, 2003
  *
  * Notes:       This routine assumes that the iterator is always located at
@@ -922,15 +923,15 @@ H5S__hyper_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_block() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_iter_nelmts
+ * Function:    H5S__hyper_iter_nelmts
  *
- * Purpose:	Return number of elements left to process in iterator
+ * Purpose:    Return number of elements left to process in iterator
  *
- * Return:	Non-negative number of elements on success, zero on failure
+ * Return:    Non-negative number of elements on success, zero on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
@@ -946,7 +947,7 @@ H5S__hyper_iter_nelmts(const H5S_sel_iter_t *iter)
     FUNC_LEAVE_NOAPI(iter->elmt_left)
 } /* end H5S__hyper_iter_nelmts() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_iter_has_next_block
@@ -1002,17 +1003,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_iter_has_next_block() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_iter_next
+ * Function:    H5S__hyper_iter_next
  *
- * Purpose:	Moves a hyperslab iterator to the beginning of the next sequence
+ * Purpose:    Moves a hyperslab iterator to the beginning of the next sequence
  *      of elements to read.  Handles walking off the end in all dimensions.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:    Success:    non-negative
+ *        Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Friday, September 8, 2000
  *
  *-------------------------------------------------------------------------
@@ -1209,17 +1210,17 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_next() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_iter_next_block
+ * Function:    H5S__hyper_iter_next_block
  *
- * Purpose:	Moves a hyperslab iterator to the beginning of the next sequence
+ * Purpose:    Moves a hyperslab iterator to the beginning of the next sequence
  *      of elements to read.  Handles walking off the end in all dimensions.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:    Success:    non-negative
+ *        Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, June 3, 2003
  *
  *-------------------------------------------------------------------------
@@ -1384,7 +1385,7 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_next_block() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_iter_get_seq_list_gen
@@ -1701,9 +1702,9 @@ H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t max
             /* Set the location of the last span's end */
             last_span_end = loc_off + span_size;
 
-	    /* Move to next span in fastest changing dimension */
+        /* Move to next span in fastest changing dimension */
             prev_span = curr_span;
-	    curr_span = curr_span->next;
+        curr_span = curr_span->next;
         } /* end while */
 
         /* Check if we are done */
@@ -1749,7 +1750,7 @@ H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t max
         /* Work back up through the dimensions */
         while(curr_dim >= 0) {
             /* Reset the current span */
-	    curr_span = ispan[curr_dim];
+        curr_span = ispan[curr_dim];
 
             /* Increment absolute position */
             abs_arr[curr_dim]++;
@@ -1836,7 +1837,7 @@ H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t max
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_get_seq_list_gen() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_iter_get_seq_list_opt
@@ -2103,15 +2104,15 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
     /* Read in data until an entire sequence can't be written out any longer */
     while(curr_rows > 0) {
 
-#define DUFF_GUTS						      \
-/* Store the sequence information */				      \
-off[curr_seq] = loc;						      \
-len[curr_seq] = actual_bytes;					      \
+#define DUFF_GUTS                              \
+/* Store the sequence information */                      \
+off[curr_seq] = loc;                              \
+len[curr_seq] = actual_bytes;                          \
                                                                       \
-/* Increment sequence count */					      \
-curr_seq++;							      \
+/* Increment sequence count */                          \
+curr_seq++;                                  \
                                                                       \
-/* Increment information to reflect block just processed */	      \
+/* Increment information to reflect block just processed */          \
 loc += fast_dim_buf_off;
 
 #ifdef NO_DUFFS_DEVICE
@@ -2280,7 +2281,7 @@ loc += fast_dim_buf_off;
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_get_seq_list_opt() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_iter_get_seq_list_single
@@ -2558,7 +2559,7 @@ H5S__hyper_iter_get_seq_list_single(H5S_sel_iter_t *iter, size_t maxseq, size_t 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_get_seq_list_single() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_iter_get_seq_list
@@ -2720,7 +2721,7 @@ H5S__hyper_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_iter_get_seq_list() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_iter_release
@@ -2753,7 +2754,7 @@ H5S__hyper_iter_release(H5S_sel_iter_t *iter)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_release() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_new_span
@@ -2801,7 +2802,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_new_span() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_new_span_info
@@ -2844,7 +2845,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_new_span_info() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_copy_span_helper
@@ -2939,7 +2940,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_copy_span_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_copy_span
@@ -2982,7 +2983,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_copy_span() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_cmp_spans
@@ -3078,7 +3079,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_cmp_spans() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_free_span_info
@@ -3135,7 +3136,7 @@ H5S__hyper_free_span_info(H5S_hyper_span_info_t *span_info)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5S__hyper_free_span_info() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_free_span
@@ -3173,7 +3174,7 @@ H5S__hyper_free_span(H5S_hyper_span_t *span)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5S__hyper_free_span() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_copy
@@ -3248,7 +3249,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_copy() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_is_valid
@@ -3307,7 +3308,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_is_valid() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_span_nblocks_helper
@@ -3373,7 +3374,7 @@ H5S__hyper_span_nblocks_helper(H5S_hyper_span_info_t *spans, uint64_t op_gen)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_span_nblocks_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_span_nblocks
@@ -3411,7 +3412,7 @@ H5S__hyper_span_nblocks(H5S_hyper_span_info_t *spans)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_span_nblocks() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__get_select_hyper_nblocks
@@ -3456,7 +3457,7 @@ H5S__get_select_hyper_nblocks(const H5S_t *space, hbool_t app_ref)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__get_select_hyper_nblocks() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5Sget_select_hyper_nblocks
@@ -3497,7 +3498,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sget_select_hyper_nblocks() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_get_enc_size_real
@@ -3533,7 +3534,7 @@ H5S__hyper_get_enc_size_real(hsize_t max_size)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5S__hyper_get_enc_size_real() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_get_version_enc_size
@@ -3544,7 +3545,7 @@ H5S__hyper_get_enc_size_real(hsize_t max_size)
         const H5S_t *space:             IN: The dataspace
         hsize_t block_count:            IN: The number of blocks in the selection
         uint32_t *version:              OUT: The version to use for encoding
-        uint8_t *enc_size:              OUT: The encoded size to use 
+        uint8_t *enc_size:              OUT: The encoded size to use
 
  RETURNS
     The version and the size to encode hyperslab selection info
@@ -3557,7 +3558,7 @@ H5S__hyper_get_enc_size_real(hsize_t max_size)
     Determine the encoded size based on version:
     For version 3, the encoded size is determined according to:
     (a) regular hyperslab
-        (1) The maximum needed to store start/stride/count/block 
+        (1) The maximum needed to store start/stride/count/block
         (2) Special handling for count/block: need to provide room for H5S_UNLIMITED
     (b) irregular hyperslab
         The maximum size needed to store:
@@ -3698,7 +3699,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5S__hyper_get_version_enc_size() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_serial_size
@@ -3746,14 +3747,14 @@ H5S__hyper_serial_size(const H5S_t *space)
          * 14 + (4 * enc_size * rank) bytes
          */
         if(H5S__hyper_is_regular(space))
-            ret_value = (hssize_t)14 + 
+            ret_value = (hssize_t)14 +
                          ((hssize_t)4 * (hssize_t)enc_size * (hssize_t)space->extent.rank);
         else {
             /* Version 3: irregular */
             /* Size required is always:
              * <type (4 bytes)> + <version (4 bytes)> + <flags (1 byte)> +
              * <size of offset info (1 byte)> + <rank (4 bytes)> +
-             * < # of blocks (depend on enc_size) > + 
+             * < # of blocks (depend on enc_size) > +
              * (2 (starting/ending offset) * <rank> * <enc_size> * <# of blocks) =
              * = 14 bytes + enc_size (block_count) + (2 * enc_size * rank * block_count) bytes
              */
@@ -3792,7 +3793,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_serial_size() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_serialize_helper
@@ -3876,7 +3877,7 @@ H5S__hyper_serialize_helper(const H5S_hyper_span_info_t *spans,
                      /* Encode previous ending points */
                     for(u=0; u<rank; u++)
                         UINT32ENCODE(pp, (uint32_t)end[u]);
-                    
+
                     /* Encode starting point for this span */
                     UINT32ENCODE(pp, (uint32_t)curr->high);
                     break;
@@ -3913,7 +3914,7 @@ H5S__hyper_serialize_helper(const H5S_hyper_span_info_t *spans,
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5S__hyper_serialize_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_serialize
@@ -4066,7 +4067,7 @@ H5S__hyper_serialize(const H5S_t *space, uint8_t **p)
         } /* end if */
         else {
             HDassert(version == H5S_HYPER_VERSION_1);
-    
+
             /* Set some convienence values */
             fast_dim = ndims - 1;
 
@@ -4100,7 +4101,7 @@ H5S__hyper_serialize(const H5S_t *space, uint8_t **p)
 
                     /* Move the offset to the next sequence to start */
                     offset[fast_dim]+=diminfo[fast_dim].stride;
-                    
+
                     /* Decrement the block count */
                     tmp_count[fast_dim]--;
                 } /* end while */
@@ -4189,7 +4190,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_serialize() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_deserialize
@@ -4350,7 +4351,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown offset info size for hyperslab")
                 break;
         } /* end switch */
-        
+
         /* Select the hyperslab to the current selection */
         if((ret_value = H5S_select_hyperslab(tmp_space, H5S_SELECT_SET, start, stride, count, block)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't change selection")
@@ -4370,7 +4371,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
             case H5S_SELECT_INFO_ENC_SIZE_2:
                 UINT16DECODE(pp, num_elem);
                 break;
-            
+
             case H5S_SELECT_INFO_ENC_SIZE_4:
                 UINT32DECODE(pp, num_elem);
                 break;
@@ -4443,7 +4444,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_deserialize() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_span_blocklist
@@ -4548,7 +4549,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_span_blocklist() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__get_select_hyper_blocklist
@@ -4730,7 +4731,7 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__get_select_hyper_blocklist() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5Sget_select_hyper_blocklist
@@ -4791,7 +4792,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sget_select_hyper_blocklist() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_bounds
@@ -4872,7 +4873,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_bounds() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_offset
@@ -4981,7 +4982,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_offset() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_unlim_dim
@@ -5008,7 +5009,7 @@ H5S__hyper_unlim_dim(const H5S_t *space)
     FUNC_LEAVE_NOAPI(space->select.sel_info.hslab->unlim_dim);
 } /* end H5S__hyper_unlim_dim() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_num_elem_non_unlim
@@ -5050,7 +5051,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_num_elem_non_unlim() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_is_contiguous
@@ -5100,8 +5101,8 @@ H5S__hyper_is_contiguous(const H5S_t *space)
          */
 
         /* Initialize flags */
-        large_contiguous = TRUE;	/* assume true and reset if the dimensions don't match */
-        small_contiguous = FALSE;	/* assume false initially */
+        large_contiguous = TRUE;    /* assume true and reset if the dimensions don't match */
+        small_contiguous = FALSE;    /* assume false initially */
 
         /* Check for a "large contigous" block */
         for(u = 0; u < space->extent.rank; u++) {
@@ -5146,8 +5147,8 @@ H5S__hyper_is_contiguous(const H5S_t *space)
          *      block size must be 1 in all but the fastest changing dimension.
          */
         /* Initialize flags */
-        large_contiguous = TRUE;	/* assume true and reset if the dimensions don't match */
-        small_contiguous = FALSE;	/* assume false initially */
+        large_contiguous = TRUE;    /* assume true and reset if the dimensions don't match */
+        small_contiguous = FALSE;    /* assume false initially */
 
         /* Get information for slowest changing information */
         spans = space->select.sel_info.hslab->span_lst;
@@ -5236,7 +5237,7 @@ H5S__hyper_is_contiguous(const H5S_t *space)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_is_contiguous() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_is_single
@@ -5309,7 +5310,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_is_single() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_is_regular
@@ -5354,7 +5355,7 @@ H5S__hyper_is_regular(const H5S_t *space)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_is_regular() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_spans_shape_same_helper
@@ -5463,7 +5464,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_spans_shape_same_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_spans_shape_same
@@ -5560,7 +5561,7 @@ H5S__hyper_spans_shape_same(const H5S_hyper_span_info_t *span_info1,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_spans_shape_same() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_shape_same
@@ -5706,7 +5707,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_shape_same() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_release
@@ -5747,7 +5748,7 @@ H5S__hyper_release(H5S_t *space)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_release() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_coord_to_span
@@ -5810,7 +5811,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_coord_to_span() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_add_span_element_helper
@@ -6041,7 +6042,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_add_span_element_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_hyper_add_span_element
@@ -6151,7 +6152,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_add_span_element() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_intersect_block_helper
@@ -6239,7 +6240,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_intersect_block_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_intersect_block
@@ -6369,7 +6370,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_intersect_block() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_adjust_u_helper
@@ -6435,7 +6436,7 @@ H5S__hyper_adjust_u_helper(H5S_hyper_span_info_t *spans, unsigned rank,
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5S__hyper_adjust_u_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_adjust_u
@@ -6492,16 +6493,16 @@ H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_adjust_u() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_project_scalar
+ * Function:    H5S__hyper_project_scalar
  *
- * Purpose:	Projects a single element hyperslab selection into a scalar
+ * Purpose:    Projects a single element hyperslab selection into a scalar
  *              dataspace
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:    Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -6568,16 +6569,16 @@ H5S__hyper_project_scalar(const H5S_t *space, hsize_t *offset)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_project_scalar() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_project_simple_lower
+ * Function:    H5S__hyper_project_simple_lower
  *
- * Purpose:	Projects a hyperslab selection onto/into a simple dataspace
+ * Purpose:    Projects a hyperslab selection onto/into a simple dataspace
  *              of a lower rank
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:    Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -6615,16 +6616,16 @@ H5S__hyper_project_simple_lower(const H5S_t *base_space, H5S_t *new_space)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_project_simple_lower() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_project_simple_higher
+ * Function:    H5S__hyper_project_simple_higher
  *
- * Purpose:	Projects a hyperslab selection onto/into a simple dataspace
+ * Purpose:    Projects a hyperslab selection onto/into a simple dataspace
  *              of a higher rank
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:    Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -6715,16 +6716,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_project_simple_higher() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_project_simple
+ * Function:    H5S__hyper_project_simple
  *
- * Purpose:	Projects a hyperslab selection onto/into a simple dataspace
+ * Purpose:    Projects a hyperslab selection onto/into a simple dataspace
  *              of a different rank
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:    Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------
@@ -6889,7 +6890,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_project_simple() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_adjust_s_helper
@@ -6955,7 +6956,7 @@ H5S__hyper_adjust_s_helper(H5S_hyper_span_info_t *spans, unsigned rank,
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5S__hyper_adjust_s_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_hyper_adjust_s
@@ -7066,7 +7067,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Shyper_adjust_s() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_hyper_normalize_offset
@@ -7124,7 +7125,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_normalize_offset() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_hyper_denormalize_offset
@@ -7168,7 +7169,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_denormalize_offset() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_append_span
@@ -7306,7 +7307,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_append_span() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_clip_spans
@@ -7902,7 +7903,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_clip_spans() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_merge_spans_helper
@@ -8218,7 +8219,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_merge_spans_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_merge_spans
@@ -8273,7 +8274,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_merge_spans() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_spans_nelem_helper
@@ -8344,7 +8345,7 @@ H5S__hyper_spans_nelem_helper(H5S_hyper_span_info_t *spans, uint64_t op_gen)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_spans_nelem_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_spans_nelem
@@ -8382,7 +8383,7 @@ H5S__hyper_spans_nelem(H5S_hyper_span_info_t *spans)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_spans_nelem() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_add_disjoint_spans
@@ -8431,7 +8432,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_add_disjoint_spans */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_make_spans
@@ -8580,7 +8581,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_make_spans() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_update_diminfo
@@ -8798,7 +8799,7 @@ H5S__hyper_update_diminfo(H5S_t *space, H5S_seloper_t op,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_update_diminfo() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_rebuild_helper
@@ -8909,7 +8910,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_rebuild_helper() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_rebuild
@@ -8959,7 +8960,7 @@ H5S__hyper_rebuild(H5S_t *space)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5S__hyper_rebuild() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_generate_spans
@@ -9018,7 +9019,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_generate_spans() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__check_spans_overlap
@@ -9099,7 +9100,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__check_spans_overlap() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__fill_in_new_space
@@ -9398,15 +9399,15 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__fill_in_new_space() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__generate_hyperlab
+ * Function:    H5S__generate_hyperlab
  *
- * Purpose:	Generate hyperslab information from H5S_select_hyperslab()
+ * Purpose:    Generate hyperslab information from H5S_select_hyperslab()
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, September 12, 2000
  *
  *-------------------------------------------------------------------------
@@ -9488,15 +9489,15 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__generate_hyperslab() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__set_regular_hyperslab
+ * Function:    H5S__set_regular_hyperslab
  *
- * Purpose:	Set a regular hyperslab
+ * Purpose:    Set a regular hyperslab
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, October 2, 2014
  *
  *-------------------------------------------------------------------------
@@ -9584,19 +9585,19 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__set_regular_hyperslab() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__hyper_regular_and_single_block
+ * Function:    H5S__hyper_regular_and_single_block
  *
- * Purpose:	Optimized routine to perform "AND" operation of a single
- *		block against a regular hyperslab selection.
+ * Purpose:    Optimized routine to perform "AND" operation of a single
+ *        block against a regular hyperslab selection.
  *
- * Note:	This algorithm is invoked when constructing the chunk map
+ * Note:    This algorithm is invoked when constructing the chunk map
  *              and a regular hyperslab is selected in the file's dataspace.
  *
- * Return:	Non-negative on success / Negative on failure
+ * Return:    Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, February 9, 2019
  *
  *-------------------------------------------------------------------------
@@ -9818,15 +9819,15 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_regular_and_single_block() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S_select_hyperslab
+ * Function:    H5S_select_hyperslab
  *
- * Purpose:	Internal version of H5Sselect_hyperslab().
+ * Purpose:    Internal version of H5Sselect_hyperslab().
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Wednesday, January 10, 2001
  *
  *-------------------------------------------------------------------------
@@ -10136,7 +10137,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_hyperslab() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5Sselect_hyperslab
@@ -10200,7 +10201,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sselect_hyperslab() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_combine_hyperslab
@@ -10406,16 +10407,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_combine_hyperslab() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__fill_in_select
+ * Function:    H5S__fill_in_select
  *
- * Purpose:	Combines two hyperslabs with an operation, putting the
+ * Purpose:    Combines two hyperslabs with an operation, putting the
  *              result into a third hyperslab selection
  *
- * Return:	Non-negative on success/negative on failure
+ * Return:    Non-negative on success/negative on failure
  *
- * Programmer:	Chao Mei
+ * Programmer:    Chao Mei
  *              Tuesday, July 5, 2011
  *
  *-------------------------------------------------------------------------
@@ -10459,7 +10460,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__fill_in_select() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5Scombine_hyperslab
@@ -10493,9 +10494,9 @@ hid_t
 H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
     const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
-    H5S_t	*space;                 /* Dataspace to modify selection of */
-    H5S_t	*new_space = NULL;      /* New dataspace created */
-    hid_t	ret_value;              /* Return value */
+    H5S_t    *space;                 /* Dataspace to modify selection of */
+    H5S_t    *new_space = NULL;      /* New dataspace created */
+    hid_t    ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE6("i", "iSs*h*h*h*h", space_id, op, start, stride, count, block);
@@ -10523,15 +10524,15 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Scombine_hyperslab() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__combine_select
+ * Function:    H5S__combine_select
  *
- * Purpose:	Internal version of H5Scombine_select().
+ * Purpose:    Internal version of H5Scombine_select().
  *
- * Return:	New dataspace on success/NULL on failure
+ * Return:    New dataspace on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, October 30, 2001
  *
  *-------------------------------------------------------------------------
@@ -10591,7 +10592,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__combine_select() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5Scombine_select
@@ -10617,10 +10618,10 @@ done:
 hid_t
 H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
 {
-    H5S_t	*space1;                /* First Dataspace */
-    H5S_t	*space2;                /* Second Dataspace */
-    H5S_t	*new_space = NULL;      /* New Dataspace */
-    hid_t	ret_value;              /* Return value */
+    H5S_t    *space1;                /* First Dataspace */
+    H5S_t    *space2;                /* Second Dataspace */
+    H5S_t    *new_space = NULL;      /* New Dataspace */
+    hid_t    ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "iSsi", space1_id, op, space2_id);
@@ -10666,15 +10667,15 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Scombine_select() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5S__modify_select
+ * Function:    H5S__modify_select
  *
- * Purpose:	Internal version of H5Smodify_select().
+ * Purpose:    Internal version of H5Smodify_select().
  *
- * Return:	New dataspace on success/NULL on failure
+ * Return:    New dataspace on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, October 30, 2001
  *
  *-------------------------------------------------------------------------
@@ -10726,7 +10727,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__modify_select() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5Smodify_select
@@ -10752,8 +10753,8 @@ done:
 herr_t
 H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
 {
-    H5S_t	*space1;                /* First Dataspace */
-    H5S_t	*space2;                /* Second Dataspace */
+    H5S_t    *space1;                /* First Dataspace */
+    H5S_t    *space2;                /* Second Dataspace */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -10808,7 +10809,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Smodify_select() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_proj_int_build_proj
@@ -11130,7 +11131,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_proj_int_build_proj() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_proj_int_iterate
@@ -11381,7 +11382,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_proj_int_iterate() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_project_intersection
@@ -11567,7 +11568,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_project_intersection() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_get_clip_diminfo
@@ -11622,7 +11623,7 @@ H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count,
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5S__hyper_get_clip_diminfo() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_hyper_clip_unlim
@@ -11748,7 +11749,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_clip_unlim() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S__hyper_get_clip_extent_real
@@ -11830,7 +11831,7 @@ H5S__hyper_get_clip_extent_real(const H5S_t *clip_space, hsize_t num_slices,
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_get_clip_extent_real() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_hyper_get_clip_extent
@@ -11893,7 +11894,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_clip_extent() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_hyper_get_clip_extent_match
@@ -11983,7 +11984,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_clip_extent_match() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_hyper_get_unlim_block
@@ -12066,7 +12067,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_unlim_block */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_hyper_get_first_inc_block
@@ -12134,7 +12135,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_first_inc_block */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5Sis_regular_hyperslab
@@ -12176,7 +12177,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sis_regular_hyperslab() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5Sget_regular_hyperslab
