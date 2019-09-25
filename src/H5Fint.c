@@ -150,12 +150,7 @@ unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          */
 hbool_t vfd_swmr_writer_g = FALSE;      /* Is this the VFD SWMR writer */
 uint64_t tick_num_g = 0;                /* The current tick_num */
-#if 1 /* clock_gettime() version */ /* JRM */
 struct timespec end_of_tick_g;          /* The current end_of_tick */
-#else /* gettimeofday() version */ /* JRM */
-struct timeval end_of_tick_g;          /* The current end_of_tick */
-#endif /* gettimeofday() version */ /* JRM */
-
 
 /*****************************/
 /* Library Private Variables */
@@ -3978,18 +3973,17 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if 1 /* clock_gettime() version */ /* JRM */
 static herr_t
 H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
 {
     struct timespec curr;               /* Current time in struct timespec */
     struct timespec new_end_of_tick;    /* new end_of_tick in struct timespec */
-    long curr_nsecs;                    /* current time in nanoseconds */
-    long tlen_nsecs;                    /* tick_len in nanoseconds */
+    uint64_t curr_nsecs;                    /* current time in nanoseconds */
+    uint64_t tlen_nsecs;                    /* tick_len in nanoseconds */
 #if 0 /* JRM */
-    long end_nsecs;                     /* end_of_tick in nanoseconds */
+    uint64_t end_nsecs;                     /* end_of_tick in nanoseconds */
 #endif /* JRM */
-    long new_end_nsecs;                 /* new end_of_tick in nanoseconds */
+    uint64_t new_end_nsecs;                 /* new end_of_tick in nanoseconds */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -4058,72 +4052,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5F__vfd_swmr_update_end_of_tick_and_tick_num() */
-
-#else /* gettimeofday() version */ /* JRM */
-
-static herr_t
-H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
-{
-    struct timeval curr;                /* Current time in struct timeval */
-    struct timeval new_end_of_tick;     /* new end_of_tick in struct timeval */
-    uint64_t tlen_usecs;
-    uint64_t new_usecs;
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Get current time in struct timespec */
-    if ( HDgettimeofday(&curr, NULL) < 0 )
-
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, \
-                    "can't get time via gettimeofday()")
-
-    /* Convert tick_len to u_secs */
-    tlen_usecs = f->shared->vfd_swmr_config.tick_len * TENTH_SEC_TO_MICROSECS;
-
-    /* compute new end of tick */
-    new_end_of_tick.tv_sec = curr.tv_sec;
-    new_usecs = curr.tv_usec + tlen_usecs;
-
-    while ( new_usecs > SECOND_TO_MICROSECS ) {
-
-        (new_end_of_tick.tv_sec)++;
-        new_usecs -= SECOND_TO_MICROSECS;
-    }
-
-    new_end_of_tick.tv_usec = (suseconds_t)new_usecs;
-
-    /* Update end_of_tick_g, f->shared->end_of_tick */
-
-    HDmemcpy(&end_of_tick_g, &new_end_of_tick, sizeof(struct timeval));
-    HDmemcpy(&f->shared->end_of_tick, &new_end_of_tick, sizeof(struct timeval));
-
-    /* 
-     *  Update tick_num_g, f->shared->tick_num 
-     */
-    if ( incr_tick_num ) {
-
-        /* Regardless of elapsed time, only increment the tick num by 1
-         * so as to avoid the possibility of using up all of max_lag in
-         * one or two ticks.
-         */
-        tick_num_g++;
-
-        f->shared->tick_num = tick_num_g;
-
-        if ( H5PB_vfd_swmr__set_tick(f) < 0 )
-
-            HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
-                        "Can't update page buffer current tick")
-    }
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5F__vfd_swmr_update_end_of_tick_and_tick_num() */
-
-#endif /* gettimeofday() version */ /* JRM */
 
 
 /*-------------------------------------------------------------------------
