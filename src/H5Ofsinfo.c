@@ -74,7 +74,7 @@ static const unsigned H5O_fsinfo_ver_bounds[] = {
     H5O_FSINFO_VERSION_1,           /* H5F_LIBVER_V112 */
     H5O_FSINFO_VERSION_LATEST       /* H5F_LIBVER_LATEST */
 };
-#define N_FSINFO_VERSION_BOUNDS     4
+#define N_FSINFO_VERSION_BOUNDS     H5F_LIBVER_NBOUNDS
 
 /* Declare a free list to manage the H5O_fsinfo_t struct */
 H5FL_DEFINE_STATIC(H5O_fsinfo_t);
