@@ -3695,7 +3695,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/test_vol_plugin.sh
                  testpar/Makefile
                  testpar/testpflush.sh
-                 testpar/test_cache_image.sh
                  tools/Makefile
                  tools/lib/Makefile
                  tools/libtest/Makefile
