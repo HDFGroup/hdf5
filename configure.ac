@@ -943,7 +943,7 @@ fi
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
 
 ## ----------------------------------------------------------------------
-## Check if they would like to disable building tests 
+## Check if they would like to disable building tests
 ##
 
 ## This needs to be exposed for the library info file.
@@ -3390,10 +3390,10 @@ esac
 AC_SUBST([DEFAULT_API_VERSION])
 AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
-            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110|v112)],
+            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110|v112|v114)],
                             [Specify default release version of public symbols
-                             [default=v112]])],,
-            [withval=v112])
+                             [default=v114]])],,
+            [withval=v114])
 
 if test "X$withval" = "Xv16"; then
     AC_MSG_RESULT([v16])
@@ -3415,6 +3415,11 @@ elif test "X$withval" = "Xv112"; then
     DEFAULT_API_VERSION=v112
     AC_DEFINE([USE_112_API_DEFAULT], [1],
               [Define using v1.12 public API symbols by default])
+elif test "X$withval" = "Xv114"; then
+    AC_MSG_RESULT([v114])
+    DEFAULT_API_VERSION=v114
+    AC_DEFINE([USE_114_API_DEFAULT], [1],
+              [Define using v1.14 public API symbols by default])
 else
     AC_MSG_ERROR([invalid version of public symbols given])
 fi
@@ -3424,7 +3429,7 @@ fi
 ## if the user insists on doing this via the --enable-unsupported configure
 ## flag, we'll let them.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${DEFAULT_API_VERSION}" != "Xv112" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
+  if test "X${DEFAULT_API_VERSION}" != "Xv114" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
     AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols. Use --enable-unsupported to override this error.])
   fi
 fi
@@ -3690,6 +3695,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/test_vol_plugin.sh
                  testpar/Makefile
                  testpar/testpflush.sh
+                 testpar/test_cache_image.sh
                  tools/Makefile
                  tools/lib/Makefile
                  tools/libtest/Makefile
