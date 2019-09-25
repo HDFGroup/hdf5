@@ -112,6 +112,7 @@ static herr_t H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr,
 static herr_t H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, 
     size_t size, const void *buf/*out*/);
 
+static void ldbgf(const char *, ...) H5_ATTR_FORMAT(printf, 1, 2);
 
 /*********************/
 /* Package Variables */
@@ -137,6 +138,22 @@ H5FL_DEFINE_STATIC(H5PB_t);
 /* Declare a free list to manage the H5PB_entry_t struct */
 H5FL_DEFINE_STATIC(H5PB_entry_t);
 
+static const bool ldbg_enabled = false;
+
+static void
+ldbgf(const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+
+    if (!ldbg_enabled)
+        return;
+
+    (void)vprintf(fmt, ap);
+
+    va_end(ap);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -813,6 +830,8 @@ H5PB_flush(H5F_t *f)
 
                 flush_ptr = entry_ptr;
                 entry_ptr = entry_ptr->ht_next;
+                ldbgf("%s: visiting %zu-byte page %" PRIu64 "\n",
+                    __func__, flush_ptr->size, flush_ptr->page);
 
                 if ( flush_ptr->is_dirty ) {
 
@@ -2466,6 +2485,9 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
     HDassert(entry_ptr->is_dirty);
     HDassert((pb_ptr->vfd_swmr_writer) || (!(entry_ptr->is_mpmde)));
     HDassert(0 == entry_ptr->delay_write_until);
+
+    ldbgf("%s: flushing %zu-byte page %" PRIu64 " @ %ju\n",
+        __func__, entry_ptr->size, entry_ptr->page, (uintmax_t)entry_ptr->addr);
 
     /* Retrieve the 'eoa' for the file */
     if ( HADDR_UNDEF == (eoa = H5F_get_eoa(f, entry_ptr->mem_type)) )
