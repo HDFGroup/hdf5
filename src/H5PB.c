@@ -835,6 +835,15 @@ H5PB_flush(H5F_t *f)
 
                 if ( flush_ptr->is_dirty ) {
 
+                    if (flush_ptr->delay_write_until != 0) {
+                        ldbgf("%s: delaying %zu-byte page %" PRIu64
+                              " until %" PRIu64 " (now %" PRIu64 ")\n",
+                              __func__, flush_ptr->size, flush_ptr->page,
+                              flush_ptr->delay_write_until,
+                              f->shared->tick_num);
+                        continue;
+                    }
+
                     if ( H5PB__flush_entry(f, pb_ptr, flush_ptr) < 0 )
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
