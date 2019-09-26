@@ -83,9 +83,12 @@ typedef int H5VL_native_group_optional_t;
 
 /* Typedef and values for native VOL connector object optional VOL operations */
 typedef int H5VL_native_object_optional_t;
-#define H5VL_NATIVE_OBJECT_GET_COMMENT      0   /* H5G|H5Oget_comment, H5Oget_comment_by_name   */
-#define H5VL_NATIVE_OBJECT_GET_INFO         1   /* H5Oget_info(_by_idx, _by_name)(2)            */
-#define H5VL_NATIVE_OBJECT_SET_COMMENT      2   /* H5G|H5Oset_comment, H5Oset_comment_by_name   */
+#define H5VL_NATIVE_OBJECT_GET_COMMENT                  0   /* H5G|H5Oget_comment, H5Oget_comment_by_name   */
+#define H5VL_NATIVE_OBJECT_GET_INFO                     1   /* H5Oget_info(_by_idx, _by_name)(2)            */
+#define H5VL_NATIVE_OBJECT_SET_COMMENT                  2   /* H5G|H5Oset_comment, H5Oset_comment_by_name   */
+#define H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES          3   /* H5Odisable_mdc_flushes                       */
+#define H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES           4   /* H5Oenable_mdc_flushes                        */
+#define H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED     5   /* H5Oare_mdc_flushes_disabled                  */
 
 #ifdef __cplusplus
 extern "C" {
