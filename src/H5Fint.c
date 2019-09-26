@@ -4453,7 +4453,7 @@ H5F_vfd_swmr_writer__delay_write(H5F_t *f, uint64_t page,
     HDassert((idx) ||( f->shared->tick_num <= 1));
 
     /* do a binary search on the metadata file index to see if
-     * it already contains an entry for *pbe_ptr.
+     * it already contains an entry for `page`.
      */
 
     ie_ptr = NULL;
