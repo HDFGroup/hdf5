@@ -646,9 +646,9 @@ if (H5_HAVE_PARALLEL)
   endif ()
 endif ()
 
-#option (DEFAULT_API_VERSION "Enable v1.12 API (v16, v18, v110, v112)" "v112")
-set (DEFAULT_API_VERSION "v112" CACHE STRING "Enable v1.12 API (v16, v18, v110, v112)")
-set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112)
+#option (DEFAULT_API_VERSION "Enable v1.14 API (v16, v18, v110, v112, v114)" "v114")
+set (DEFAULT_API_VERSION "v114" CACHE STRING "Enable v1.14 API (v16, v18, v110, v112, v114)")
+set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
@@ -682,6 +682,17 @@ endif ()
 set (H5_USE_112_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v112")
   set (H5_USE_112_API_DEFAULT 1)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use 1.14.x API
+#-----------------------------------------------------------------------------
+if (NOT DEFAULT_API_VERSION)
+  set (DEFAULT_API_VERSION "v114")
+endif ()
+set (H5_USE_114_API_DEFAULT 0)
+if (DEFAULT_API_VERSION MATCHES "v114")
+  set (H5_USE_114_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------

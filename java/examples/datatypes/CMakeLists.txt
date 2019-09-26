@@ -87,6 +87,8 @@ if (BUILD_TESTING)
             -D "TEST_REFERENCE=datatypes/${example}.txt"
             -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
     )
-    set_tests_properties (JAVA_datatypes-${example} PROPERTIES DEPENDS JAVA_datatypes-${example}-copy-objects)
+    set_tests_properties (JAVA_datatypes-${example} PROPERTIES
+        DEPENDS JAVA_datatypes-${example}-copy-objects
+    )
   endforeach ()
 endif ()
