@@ -375,12 +375,8 @@
 #  define H5_EXP2(n)    (1 << (n))
 
 /* VFD SWMR */
-#define SECOND_TO_NANOSECS          1000000000 /* Second to nanoseconds */
-#define TENTH_SEC_TO_NANOSECS       100000000  /* 0.1 second to nanoseconds */
-#if 0 /* use gettimeofday() */ /* JRM */
-#define SECOND_TO_MICROSECS         1000000    /* Second to microseconds */
-#define TENTH_SEC_TO_MICROSECS      100000     /* 0.1 second to microseconds */
-#endif /* use gettimeofday() */ /* JRM */
+#define nanosecs_per_second          1000000000 /* nanoseconds per second */
+#define nanosecs_per_tenth_sec       100000000  /* nanoseconds per 0.1 second */
 
 /*
  * HDF Boolean type.
