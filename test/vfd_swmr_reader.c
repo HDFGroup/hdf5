@@ -306,6 +306,8 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
         goto error;
 
+    memset(config, '\0', sizeof(*config));
+
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->tick_len = 4;
     config->max_lag = 5;
