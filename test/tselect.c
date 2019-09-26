@@ -15329,7 +15329,7 @@ test_select_intersect_block(void)
 **  test_hyper_io_1d(): 
 **  Test to verify all the selected 10th element in the 1-d file
 **  dataspace is read correctly into the 1-d contiguous memory space.
-**  This is modeled after the test scenario described in HDFFV-20585
+**  This is modeled after the test scenario described in HDFFV-10585
 **  that demonstrated the hyperslab slowness.  A fix to speed up
 **  performance is in place to handle the special case for 1-d disjoint
 **  file dataspace into 1-d single block contiguous memory space.
@@ -15361,22 +15361,22 @@ test_hyper_io_1d(void)
 
     /* Create the file file */
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(fid, FAIL, "H5Fcreate");
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Create file dataspace */
     dims[0] = CHUNKSZ;
     maxdims[0] = H5S_UNLIMITED;
     sid = H5Screate_simple(RANK, dims, maxdims);
-    CHECK(sid, FAIL, "H5Pcreate");
+    CHECK(sid, H5I_INVALID_HID, "H5Pcreate");
 
     /* Create memory dataspace */
     dimsm[0] = CHUNKSZ;
     mid = H5Screate_simple(RANK, dimsm, NULL);
-    CHECK(mid, FAIL, "H5Pcreate");
+    CHECK(mid, H5I_INVALID_HID, "H5Pcreate");
 
     /* Set up to create a chunked dataset */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl, FAIL, "H5Pcreate");
+    CHECK(dcpl, H5I_INVALID_HID, "H5Pcreate");
 
     chunk_dims[0] = CHUNKSZ;
     ret = H5Pset_chunk(dcpl, RANK, chunk_dims);
@@ -15384,7 +15384,7 @@ test_hyper_io_1d(void)
 
     /* Create a chunked dataset */
     did = H5Dcreate2(fid, DNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    CHECK(did, FAIL, "H5Dcreate2");
+    CHECK(did, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Set up hyperslab selection for file dataspace */
     offset[0] = 0;
@@ -15411,7 +15411,7 @@ test_hyper_io_1d(void)
 
             /* Get the dataset's current dataspace */
             sid = H5Dget_space(did);
-            CHECK(sid, FAIL, "H5Dget_space");
+            CHECK(sid, H5I_INVALID_HID, "H5Dget_space");
         }
     }
 
@@ -15429,11 +15429,11 @@ test_hyper_io_1d(void)
 
     /* Open the file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
-    CHECK(fid, FAIL, "H5Fopen");
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
 
     /* Open the dataset */
     did = H5Dopen(fid, DNAME, H5P_DEFAULT);
-    CHECK(did, FAIL, "H5Dopen");
+    CHECK(did, H5I_INVALID_HID, "H5Dopen");
 
     /* Set up to read every 10th element in file dataspace */
     offset[0] = 1;
@@ -15443,14 +15443,14 @@ test_hyper_io_1d(void)
 
     /* Get the dataset's dataspace */
     sid = H5Dget_space(did);
-    CHECK(sid, FAIL, "H5Pcreate");
+    CHECK(sid, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, offset, stride, count, block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Set up contiguous memory dataspace for the selected elements */
     dimsm[0] = count[0];
     mid = H5Screate_simple(RANK, dimsm, NULL);
-    CHECK(mid, FAIL, "H5Screate");
+    CHECK(mid, H5I_INVALID_HID, "H5Screate");
 
     /* Read all the selected 10th elements in the dataset into "rdata" */
     ret = H5Dread(did, H5T_NATIVE_INT, mid, sid, H5P_DEFAULT, rdata);

@@ -255,7 +255,7 @@ static herr_t H5D__chunk_io_init(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_io_init_selections(const H5D_io_info_t *io_info, 
-    const H5D_type_info_t *type_info, hsize_t nelmts, H5D_chunk_map_t *fm);
+    const H5D_type_info_t *type_info, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *fm);
@@ -1160,7 +1160,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     fm->file_space = file_space;
     fm->mem_space = mem_space;
 
-    if(H5D__chunk_io_init_selections(io_info, type_info, nelmts, fm) < 0)
+    if(H5D__chunk_io_init_selections(io_info, type_info, fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file and memory chunk selections")
 
 done:
@@ -1189,8 +1189,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_io_init_selections(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t nelmts, H5D_chunk_map_t *fm)
+H5D__chunk_io_init_selections(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, H5D_chunk_map_t *fm)
 {
     const H5D_t *dataset = io_info->dset;     /* Local pointer to dataset info */
     const H5T_t *mem_type = type_info->mem_type;        /* Local pointer to memory datatype */
