@@ -1429,9 +1429,8 @@ H5PB_vfd_swmr__release_delayed_writes(H5F_t * f)
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert(pb_ptr->vfd_swmr_writer);
 
-    while ( ( pb_ptr->dwl_tail_ptr ) &&
-            ( pb_ptr->dwl_tail_ptr->delay_write_until < 
-              f->shared->tick_num ) ) {
+    while (pb_ptr->dwl_tail_ptr &&
+           pb_ptr->dwl_tail_ptr->delay_write_until <= f->shared->tick_num) {
 
         entry_ptr = pb_ptr->dwl_tail_ptr;
 
