@@ -3995,10 +3995,10 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
                     "can't get time via clock_gettime")
 
     /* Convert curr to nsecs */
-    curr_nsecs = curr.tv_sec * SECOND_TO_NANOSECS + curr.tv_nsec;
+    curr_nsecs = curr.tv_sec * nanosecs_per_second + curr.tv_nsec;
 
     /* Convert tick_len to nanosecs */
-    tlen_nsecs = f->shared->vfd_swmr_config.tick_len * TENTH_SEC_TO_NANOSECS;
+    tlen_nsecs = f->shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
 
     /* 
      *  Update tick_num_g, f->shared->tick_num 
@@ -4007,7 +4007,7 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
 
 #if 0 /* JRM */
         /* Convert end_of_tick_g to nanoseconds */
-        end_nsecs = end_of_tick_g.tv_sec * SECOND_TO_NANOSECS + 
+        end_nsecs = end_of_tick_g.tv_sec * nanosecs_per_second +
                                            end_of_tick_g.tv_nsec;
 
         /* Increment tick_num by # of elapsed ticks */
@@ -4039,8 +4039,8 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
      */
 
     new_end_nsecs = curr_nsecs + tlen_nsecs;
-    new_end_of_tick.tv_nsec = new_end_nsecs % SECOND_TO_NANOSECS;
-    new_end_of_tick.tv_sec = new_end_nsecs / SECOND_TO_NANOSECS;
+    new_end_of_tick.tv_nsec = new_end_nsecs % nanosecs_per_second;
+    new_end_of_tick.tv_sec = new_end_nsecs / nanosecs_per_second;
 
     /* Update end_of_tick */
     HDmemcpy(&end_of_tick_g, &new_end_of_tick, sizeof(struct timespec));
@@ -4615,9 +4615,9 @@ H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
     HDassert((f == vfd_swmr_file_g) ||
              ((vfd_swmr_file_g) && (f->shared == vfd_swmr_file_g->shared)));
 
-    tick_in_nsec = f->shared->vfd_swmr_config.tick_len * TENTH_SEC_TO_NANOSECS;
-    req.tv_nsec = (long)(tick_in_nsec % SECOND_TO_NANOSECS);
-    req.tv_sec = (time_t)(tick_in_nsec / SECOND_TO_NANOSECS);
+    tick_in_nsec = f->shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
+    req.tv_nsec = (long)(tick_in_nsec % nanosecs_per_second);
+    req.tv_sec = (time_t)(tick_in_nsec / nanosecs_per_second);
 
     result = HDnanosleep(&req, &rem);
 
