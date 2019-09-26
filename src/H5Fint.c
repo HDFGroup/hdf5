@@ -4436,7 +4436,7 @@ H5F_vfd_swmr_writer__delay_write(H5F_t *f, uint64_t page,
     uint32_t top = 0;
     uint32_t bottom = 1;
     uint32_t probe;
-    uint64_t delay_write_until = 0;
+    uint64_t until = 0;
     H5FD_vfd_swmr_idx_entry_t * ie_ptr = NULL;
     H5FD_vfd_swmr_idx_entry_t * idx = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
@@ -4489,25 +4489,21 @@ H5F_vfd_swmr_writer__delay_write(H5F_t *f, uint64_t page,
 
         if ( ie_ptr->delayed_flush >= f->shared->tick_num ) {
 
-            delay_write_until = ie_ptr->delayed_flush;
+            until = ie_ptr->delayed_flush;
         }
     } else {
 
-        delay_write_until = f->shared->tick_num + 
+        until = f->shared->tick_num + 
                             f->shared->vfd_swmr_config.max_lag;
     }
 
-    if ( ( delay_write_until != 0 ) && 
-         ( ! ( ( delay_write_until >= f->shared->tick_num ) &&
-               ( delay_write_until <= 
-                 (f->shared->tick_num + f->shared->vfd_swmr_config.max_lag) ) 
-             )
-         )
-       )
+    if (until != 0 && 
+        (until < f->shared->tick_num ||
+         until > (f->shared->tick_num + f->shared->vfd_swmr_config.max_lag)))
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                     "VFD SWMR write delay out of range")
 
-    *delay_write_until_ptr = delay_write_until;
+    *delay_write_until_ptr = until;
   
 done:
 
