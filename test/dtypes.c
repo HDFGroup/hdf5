@@ -7650,8 +7650,8 @@ test_versionbounds(void)
     hsize_t arr_dim[] = {ARRAY_LEN}; /* Length of the array */
     int i, j;                   /* Indices for iterating over versions */
     H5F_libver_t low, high;    /* File format bounds */
-    H5F_libver_t versions[] = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18, H5F_LIBVER_V110};
-    int versions_count = 3;     /* Number of version bounds in the array */
+    H5F_libver_t versions[] = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18, H5F_LIBVER_V110, H5F_LIBVER_V112};
+    int versions_count = 4;     /* Number of version bounds in the array */
     unsigned highest_version;  /* Highest version in nested datatypes */
     color_t enum_val;          /* Enum type index */
     herr_t ret = 0;            /* Generic return value */
