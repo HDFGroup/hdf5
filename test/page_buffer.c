@@ -565,9 +565,8 @@ test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
     int64_t base_page_cnt;
     int64_t page_count = 0;
     size_t i, num_elements = 2000;
-    haddr_t addr = HADDR_UNDEF;
-    int *data = NULL;
-    H5F_t *f = NULL;
+    int *data, *odata;
+    H5F_t *f;
     H5F_vfd_swmr_config_t config;   /* Configuration for VFD SWMR */
     const char *dname;
     char *tname;
@@ -633,27 +632,31 @@ test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
     if (base_page_cnt != 2)
         TEST_ERROR;
 
+    const haddr_t addr = H5MF_alloc(f, H5FD_MEM_BTREE,
+        sizeof(int) * num_elements);
     /* allocate space for 2000 elements */
-    if (HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_BTREE,
-            sizeof(int) * num_elements)))
+    if (HADDR_UNDEF == addr)
         FAIL_STACK_ERROR;
+
+    if ((odata = (int *)HDcalloc(num_elements, sizeof(int))) == NULL)
+        TEST_ERROR;
 
     if ((data = (int *)HDcalloc(num_elements, sizeof(int))) == NULL)
         TEST_ERROR;
 
     /* initialize all the elements to have a value of -1 */
     for(i = 0; i < num_elements; i++)
-        data[i] = -1;
+        odata[i] = -1;
+
     if (H5F_block_write(f, H5FD_MEM_BTREE, addr, sizeof(int) * num_elements,
-           data) < 0)
+           odata) < 0)
         FAIL_STACK_ERROR;
 
-#if 0
-    for (i = 0; i < config.max_lag + 1; i++)
+    for (i = 0; i < config.max_lag + 1; i++) {
         H5Fvfd_swmr_end_tick(file_id);
-#endif
-
-    H5PB_flush(f);
+        if (H5PB_flush(f) < 0)
+            FAIL_STACK_ERROR;
+    }
 
     /* read all elements using the VFD.. this should result in -1s. */
     if (H5FD_read(f->shared->lf, H5FD_MEM_BTREE, addr,
@@ -662,7 +665,7 @@ test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
 
     for (i = 0; i < num_elements; i++) {
         if (data[i] != -1) {
-            fprintf(stderr, "Read %d at data[%d], expected -1\n", data[i], i);
+            printf("Read %d at data[%d], expected -1\n", data[i], i);
             TEST_ERROR;
         }
     }
