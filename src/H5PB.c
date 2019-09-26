@@ -57,7 +57,7 @@
  * The following #define controls this.  Set VFD_IO to FALSE to reproduce
  * the bug.
  */
-#define VFD_IO FALSE
+#define VFD_IO 1
 
 
 /******************/
@@ -1118,11 +1118,7 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
     if ( bypass_pb ) { /* cases 1, 2. and 5 */
 
-#if VFD_IO
         if ( H5FD_read(f->shared->lf, type, addr, size, buf) < 0 ) 
-#else /* VFD_IO */
-        if ( H5F__accum_read(f, type, addr, size, buf) < 0 )
-#endif /* VFD_IO */
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                         "read through metadata accumulator failed")
@@ -2021,11 +2017,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
     if ( bypass_pb ) { /* cases 1, 2. 5, and 6 */
 
-#if VFD_IO
         if ( H5FD_write(f->shared->lf, type, addr, size, buf) < 0 )
-#else /* VFD_IO */
-        if ( H5F__accum_write(f, type, addr, size, buf) < 0 )
-#endif /* VFD_IO */
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                         "write through metadata accumulator failed")
@@ -2468,12 +2460,7 @@ done:
 static herr_t
 H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
 {
-    hbool_t skip_write = FALSE;
-    size_t write_size;
     haddr_t eoa;                   /* Current EOA for the file */
-#if VFD_IO  /* JRM */
-    H5FD_t *file;                  /* file driver */
-#endif /* VFD_IO */ /* JRM */
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2520,23 +2507,12 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
      * an assertion is adequate here.
      */
     HDassert( eoa >= entry_ptr->addr + entry_ptr->size );
-    
-    write_size = entry_ptr->size;
 
     /* flush the entry */
-    if ( ! skip_write ) {
-#if VFD_IO  /* JRM */
-        file = f->shared->lf;
+    if ( H5FD_write(f->shared->lf, entry_ptr->mem_type, entry_ptr->addr, 
+                    entry_ptr->size, entry_ptr->image_ptr) < 0 )
 
-        if ( H5FD_write(file, entry_ptr->mem_type, entry_ptr->addr, 
-                        write_size, entry_ptr->image_ptr) < 0 )
-#else /* VFD_IO */ /* JRM */
-        if ( H5F__accum_write(f, entry_ptr->mem_type, entry_ptr->addr, 
-                              write_size, entry_ptr->image_ptr) < 0 )
-#endif /* VFD_IO */ /* JRM */
-
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed")
-    }
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed")
 
     /* mark the entry clean */
     if ( H5PB__mark_entry_clean(pb_ptr, entry_ptr) < 0 )
@@ -2600,9 +2576,6 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
     haddr_t eof = HADDR_UNDEF;
     H5PB_entry_t *entry_ptr = NULL;
     void *image_ptr = NULL;
-#if VFD_IO /* JRM */
-    H5FD_t *file;                       /* File driver pointer */
-#endif /* VFD_IO */ /* JRM */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2637,9 +2610,7 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
      *
      * Don't set "skip_read = (addr >= eof);" when accumulator is used.
      */
-#if VFD_IO /* JRM */
     skip_read = (addr >= eof);
-#endif /* VFD_IO */ /* JRM */
 
     /* make space in the page buffer if necessary */
     if ( ( pb_ptr->curr_pages >= pb_ptr->max_pages ) &&
@@ -2667,14 +2638,8 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
     /* Read the contents of the page from file, and store it in the 
      * image buffer associated with the new entry.
      */
-#if VFD_IO /* JRM */
-    file = f->shared->lf;
     if ( ( ! skip_read ) &&
-         ( H5FD_read(file, type, addr, entry_ptr->size, image_ptr) < 0 ) )
-#else /* VFD_IO */ /* JRM */
-    if ( ( ! skip_read ) &&
-         ( H5F__accum_read(f, type, addr, entry_ptr->size, image_ptr) < 0 ) )
-#endif /* VFD_IO */ /* JRM */
+         ( H5FD_read(f->shared->lf, type, addr, entry_ptr->size, image_ptr) < 0 ) )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                     "driver read request failed")
@@ -3176,9 +3141,7 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 {
     H5PB_t *pb_ptr;                         /* Page buffer for this file */
     H5PB_entry_t *entry_ptr;                /* Pointer to page buffer entry */
-#if VFD_IO /* JRM */
     H5FD_t *file;                           /* File driver pointer */
-#endif /* VFD_IO */ /* JRM */
     uint64_t page;		            /* page offset of addr */
     haddr_t page_addr;                      /* page containg addr */
     static haddr_t prev_addr = HADDR_UNDEF; /* addr of last call */
@@ -3199,9 +3162,7 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     HDassert(pb_ptr->min_rd_pages < pb_ptr->max_pages);
     HDassert(f->shared->lf);
 
-#if VFD_IO /* JRM */
     file = f->shared->lf;
-#endif /* VFD_IO */ /* JRM */
 
     HDassert(H5FD_MEM_DRAW != type);
     HDassert(buf);
@@ -3283,11 +3244,7 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                  * than one page, and there is no entry in the page buffer,
                  * satisfy the read from the file
                  */
-#if VFD_IO /* JRM */
                 if ( H5FD_read(file, type, addr, size, buf) < 0)
-#else /* VFD_IO */ /* JRM */
-                if ( H5F__accum_read(f, type, addr, size, buf) < 0 )
-#endif /* VFD_IO */ /* JRM */
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                                 "driver read request failed (1)")
@@ -3328,11 +3285,7 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                         "forced eviction failed (1)")
-#if VFD_IO  /* JRM */
                         if ( H5FD_read(file, type, addr, size, buf) < 0)
-#else /* VFD_IO */ /* JRM */
-                        if ( H5F__accum_read(f, type, addr, size, buf) < 0 )
-#endif /* VFD_IO */ /* JRM */
 
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                                         "driver read request failed (2)")
@@ -3552,11 +3505,7 @@ H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     /* case 3) raw data read of page size or greater. */
     if ( size >= pb_ptr->page_size ) {
 
-#if VFD_IO
         if ( H5FD_read(f->shared->lf, type, addr, size, buf) < 0)
-#else /* VFD_IO */
-        if ( H5F__accum_read(f, type, addr, size, buf) < 0 )
-#endif /* VFD_IO */
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                         "read through metadata accumulator failed")
@@ -4085,11 +4034,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
     /* case 3) raw data write of page size or greater. */
     if ( size >= pb_ptr->page_size ) {
-#if VFD_IO
         if ( H5FD_write(f->shared->lf, type, addr, size, buf) < 0 )
-#else /* VFD_IO */
-        if ( H5F__accum_write(f, type, addr, size, buf) < 0 )
-#endif /* VFD_IO */
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                         "write through metadata accumulator failed")
