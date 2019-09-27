@@ -597,12 +597,14 @@ error:
 
 
 /*
- * Function:    test_metadata_delay_basic()
+ * Function:    test_mpmde_delay_basic()
  *
- * Purpose:     Perform a basic check that metadata is not written
- *              immediately to the HDF5 file in VFD SWMR mode, but
- *              it is buffered in the shadow file until max_lag ticks
- *              have elapsed.
+ * Purpose:     Perform a basic check that a multi-page metadata entry
+ *              (MPMDE) is not written immediately to the HDF5 file in
+ *              VFD SWMR mode, but it is buffered in the shadow file
+ *              until max_lag + 1 ticks have elapsed.  Furthermore,
+ *              check that it appears *immediately* after max_lag + 1
+ *              ticks, since the LRU list does not hold onto MPMDEs.
  *
  * Return:      0 if test is sucessful
  *              1 if test fails
@@ -611,7 +613,7 @@ error:
  *              16 Sep 2019
  */
 static unsigned
-test_metadata_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
+test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
 {
     char filename[FILENAME_LEN]; /* Filename to use */
     hid_t file_id = -1;          /* File ID */
@@ -625,7 +627,7 @@ test_metadata_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     H5F_vfd_swmr_config_t config;   /* Configuration for VFD SWMR */
     hsize_t pgsz = sizeof(int) * 200;
 
-    TESTING("Metadata Handling");
+    TESTING("Multipage Metadata Delay Handling");
 
     h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
@@ -682,17 +684,30 @@ test_metadata_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
            odata) < 0)
         FAIL_STACK_ERROR;
 
+    /* H5Fvfd_swmr_end_tick() processes delayed writes before it increases
+     * the tick number, so it takes `max_lag + 1` times through this loop
+     * for a multi-page metadata write to make it to the HDF5 file.
+     */
     for (i = 0; i < config.max_lag + 1; i++) {
-
         /* All elements read using the VFD should be 0. */
-        if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data, 0))
+        if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements,
+                data, 0))
             TEST_ERROR;
         H5Fvfd_swmr_end_tick(file_id);
-#if 0
-        if (H5PB_flush(f) < 0)
-            FAIL_STACK_ERROR;
-#endif
     }
+
+    /* It is not necessary to flush the page buffer because delayed
+     * multi-page metadata buffers are flushed *immediately*
+     * when their delay elapses.
+     *
+     * If we were waiting for a single-page metadata buffer to
+     * appear at the VFD layer, then it may reside in the LRU buffer
+     * for a while.
+     */
+#if 0
+    if (H5PB_flush(f) < 0)
+        FAIL_STACK_ERROR;
+#endif
 
     /* All elements read using the VFD should be -1. */
     if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data, -1))
@@ -2750,7 +2765,7 @@ main(void)
     nerrors += test_args(fapl, env_h5_drvr);
     nerrors += test_raw_data_handling(fapl, env_h5_drvr, false);
     nerrors += test_raw_data_handling(fapl, env_h5_drvr, true);
-    nerrors += test_metadata_delay_basic(fapl, env_h5_drvr);
+    nerrors += test_mpmde_delay_basic(fapl, env_h5_drvr);
     nerrors += test_lru_processing(fapl, env_h5_drvr);
     nerrors += test_min_threshold(fapl, env_h5_drvr);
     nerrors += test_stats_collection(fapl, env_h5_drvr);
