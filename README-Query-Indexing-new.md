@@ -11,7 +11,8 @@ On Cori:
     module load autoconf/2.69
 ```
 
-1 Fastbit
+Fastbit
+----
     Download the fast bit library (Version 2.0.3)
     Visit the LBNL fastbit sourceforge site: https://codeforge.lbl.gov/frs/?group_id=44
     Follow the instructions found in the README file to build and install.
@@ -21,7 +22,8 @@ On Cori:
     make && make install
 ```
 
-2 Berkeley DB
+Berkeley DB
+----
     libdb.so is often included with modern Linux distributions so a download may not be necessary.
 
    libdb.so is often included with modern Linux distributions so a download may not be necessary.
