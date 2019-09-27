@@ -4676,7 +4676,7 @@ done:
  *               to the HDF5 file more than max_lag ticks ago, and haven't
  *               been modified since. 
  *
- *               (This is an optimization -- adress it later)
+ *               (This is an optimization -- address it later)
  *
  *            6) Update the metadata file.  Must do this before we 
  *               release the tick list, as otherwise the page buffer 
