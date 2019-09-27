@@ -76,8 +76,12 @@ On a non-slurm linux box which allows MPI applications to be run directly
 using mpirun or mpiexec, the set of HDF5 tests (not Query-Indexing related)
 can be run to validate the HDF5 build.
 
-On NERSC machines (e.g. Cori), do the following
-----
+```sh
+    make test
+```
+
+On NERSC machines (e.g. Cori), do the following to interactively run
+a simple test.
 * Job allocation (e.g. use 4 nodes)
 ```sh
     salloc -C haswell -N 1 -t 01:00:00 -q interactive --gres=craynetwork:2
@@ -88,7 +92,7 @@ Run a simple query example
 * Running a basic query example
 
 The command line format of this test application is:
-    <query_test> [number-of-objects] [metadata plugin-id] [rawdata plugin-id]
+    ./query [number-of-objects] [metadata plugin-id] [rawdata plugin-id]
         where ID values are:
             0 = none
             1 = dummy
