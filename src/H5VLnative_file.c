@@ -789,6 +789,24 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
+        /* H5Fget_mpi_atomicity */
+        case H5VL_NATIVE_FILE_GET_MPI_ATOMICITY:
+            {
+                hbool_t *flag = (hbool_t *)HDva_arg(arguments, hbool_t *);
+                if (H5F_get_mpi_atomicity(f, flag) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "cannot get MPI atomicity");
+                break;
+            }
+
+        /* H5Fset_mpi_atomicity */
+        case H5VL_NATIVE_FILE_SET_MPI_ATOMICITY:
+            {
+                hbool_t flag = (hbool_t)HDva_arg(arguments, int);
+                if (H5F_set_mpi_atomicity(f, flag) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set MPI atomicity");
+                break;
+            }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
     } /* end switch */

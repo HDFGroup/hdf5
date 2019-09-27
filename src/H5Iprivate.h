@@ -92,6 +92,7 @@ H5_DLL void *H5I_object(hid_t id);
 H5_DLL void *H5I_object_verify(hid_t id, H5I_type_t id_type);
 H5_DLL void *H5I_remove(hid_t id);
 H5_DLL void *H5I_subst(hid_t id, const void *new_object);
+H5_DLL htri_t H5I_is_file_object(hid_t id);
 
 /* ID registration functions */
 H5_DLL hid_t H5I_register(H5I_type_t type, const void *object, hbool_t app_ref);
