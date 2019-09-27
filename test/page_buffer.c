@@ -59,10 +59,43 @@ static unsigned verify_page_buffering_disabled(hid_t orig_fapl,
     const char *env_h5_drvr);
 #endif /* H5_HAVE_PARALLEL */
 
-const char *FILENAME[] = {
-    "filepaged",
-    NULL
-};
+#define FILENAME "filepaged"
+static const char *namebases[] = {FILENAME, NULL};
+static const char *namebase = FILENAME;
+
+static int
+swmr_fapl_augment(hid_t fapl, H5F_vfd_swmr_config_t *config,
+    const char *filename, uint32_t max_lag)
+{
+    *config = (H5F_vfd_swmr_config_t){
+      .version = H5F__CURR_VFD_SWMR_CONFIG_VERSION
+    , .tick_len = 4
+    , .max_lag = 5
+    , .vfd_swmr_writer = true
+    , .md_pages_reserved = 128
+#if 0
+    , .md_open_tries = 1
+#endif
+    };
+    const char *dname;
+    char *tname;
+
+    if ((tname = strdup(filename)) == NULL) {
+        HDfprintf(stderr, "temporary string allocation failed\n");
+        return -1;
+    }
+    dname = dirname(tname);
+    snprintf(config->md_file_path, sizeof(config->md_file_path),
+        "%s/my_md_file", dname);
+    free(tname);
+
+    /* Enable VFD SWMR configuration */
+    if(H5Pset_vfd_swmr_config(fapl, config) < 0) {
+        HDfprintf(stderr, "H5Pset_vrd_swmr_config failed\n");
+        return -1;
+    }
+    return 0;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -396,7 +429,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
 
     TESTING("Settings for Page Buffering");
 
-    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
+    h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
     if((fapl = H5Pcopy(orig_fapl)) < 0) TEST_ERROR
 
@@ -540,9 +573,31 @@ error:
     return 1;
 }
 
+static bool
+vfd_read_each_equals(H5F_t *f, H5FD_mem_t ty, haddr_t addr, size_t nelts,
+    int *data, int val)
+{
+    size_t i;
+
+    /* read all elements using the VFD.. this should result in 0s. */
+    if (H5FD_read(f->shared->lf, ty, addr,
+            sizeof(int) * nelts, data) < 0)
+        FAIL_STACK_ERROR;
+
+    for (i = 0; i < nelts; i++) {
+        if (data[i] != val) {
+            printf("Read %d at data[%d], expected 0\n", data[i], i);
+            return false;
+        }
+    }
+    return true;
+error:
+    return false;
+}
+
 
 /*
- * Function:    test_basic_metadata_handling()
+ * Function:    test_metadata_delay_basic()
  *
  * Purpose:     Perform a basic check that metadata is not written
  *              immediately to the HDF5 file in VFD SWMR mode, but
@@ -556,7 +611,7 @@ error:
  *              16 Sep 2019
  */
 static unsigned
-test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
+test_metadata_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
 {
     char filename[FILENAME_LEN]; /* Filename to use */
     hid_t file_id = -1;          /* File ID */
@@ -568,13 +623,11 @@ test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
     int *data, *odata;
     H5F_t *f;
     H5F_vfd_swmr_config_t config;   /* Configuration for VFD SWMR */
-    const char *dname;
-    char *tname;
     hsize_t pgsz = sizeof(int) * 200;
 
     TESTING("Metadata Handling");
 
-    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
+    h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         TEST_ERROR
@@ -591,31 +644,8 @@ test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pset_page_buffer_size(fapl, 10 * pgsz, 0, 0) < 0)
         TEST_ERROR;
 
-    memset(&config, '\0', sizeof(config));
-
-    config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config.tick_len = 4;
-    config.max_lag = 5;
-    config.vfd_swmr_writer = true;
-    config.md_pages_reserved = 128;
-#if 0
-    config.md_open_tries = 1;
-#endif
-
-    if ((tname = strdup(filename)) == NULL) {
-        HDfprintf(stderr, "temporary string allocation failed\n");
+    if (swmr_fapl_augment(fapl, &config, filename, 5) < 0)
         TEST_ERROR;
-    }
-    dname = dirname(tname);
-    snprintf(config.md_file_path, sizeof(config.md_file_path),
-        "%s/my_md_file", dname);
-    free(tname);
-
-    /* Enable VFD SWMR configuration */
-    if(H5Pset_vfd_swmr_config(fapl, &config) < 0) {
-        HDfprintf(stderr, "H5Pset_vrd_swmr_config failed\n");
-        TEST_ERROR;
-    }
 
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -653,22 +683,21 @@ test_basic_metadata_handling(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     for (i = 0; i < config.max_lag + 1; i++) {
+
+        /* All elements read using the VFD should be 0. */
+        if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data, 0))
+            TEST_ERROR;
         H5Fvfd_swmr_end_tick(file_id);
+#if 0
         if (H5PB_flush(f) < 0)
             FAIL_STACK_ERROR;
+#endif
     }
 
-    /* read all elements using the VFD.. this should result in -1s. */
-    if (H5FD_read(f->shared->lf, H5FD_MEM_BTREE, addr,
-            sizeof(int) * num_elements, data) < 0)
-        FAIL_STACK_ERROR;
+    /* All elements read using the VFD should be -1. */
+    if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data, -1))
+        TEST_ERROR;
 
-    for (i = 0; i < num_elements; i++) {
-        if (data[i] != -1) {
-            printf("Read %d at data[%d], expected -1\n", data[i], i);
-            TEST_ERROR;
-        }
-    }
 #if 0
     /* update the first 100 elements to have values 0-99 - this will be
        a page buffer update with 1 page resulting in the page
@@ -910,10 +939,11 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
     haddr_t addr = HADDR_UNDEF;
     int *data = NULL;
     H5F_t *f = NULL;
+    H5F_vfd_swmr_config_t config;
 
     TESTING("%sRaw Data Handling", vfd_swmr_mode ? "VFD SWMR " : "");
 
-    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
+    h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         TEST_ERROR
@@ -930,38 +960,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
     if (H5Pset_page_buffer_size(fapl, sizeof(int) * 2000, 0, 0) < 0)
         TEST_ERROR;
 
-    if (vfd_swmr_mode) {
-        H5F_vfd_swmr_config_t config;   /* Configuration for VFD SWMR */
-        const char *dname;
-        char *tname;
-
-        memset(&config, '\0', sizeof(config));
-
-        config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-        config.tick_len = 4;
-        config.max_lag = 5;
-        config.vfd_swmr_writer = true;
-        config.md_pages_reserved = 128;
-#if 0
-        config.md_open_tries = 1;
-#endif
-
-        if ((tname = strdup(filename)) == NULL) {
-            HDfprintf(stderr, "temporary string allocation failed\n");
-            TEST_ERROR;
-        }
-        dname = dirname(tname);
-        snprintf(config.md_file_path, sizeof(config.md_file_path),
-            "%s/my_md_file", dname);
-        free(tname);
-
-        /* Enable VFD SWMR configuration */
-        if(H5Pset_vfd_swmr_config(fapl, &config) < 0) {
-            HDfprintf(stderr, "H5Pset_vrd_swmr_config failed\n");
-            TEST_ERROR;
-        }
-    }
-
+    if (vfd_swmr_mode && swmr_fapl_augment(fapl, &config, filename, 5) < 0)
+        TEST_ERROR;
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
 
@@ -1231,7 +1231,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
 
     TESTING("LRU Processing");
 
-    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
+    h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
     if((fapl = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR
@@ -1508,7 +1508,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
 
     TESTING("Minimum Metadata threshold Processing");
     HDprintf("\n");
-    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
+    h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
     if((fapl = H5Pcopy(orig_fapl)) < 0)
         TEST_ERROR
@@ -2235,7 +2235,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
 
     TESTING("Statistics Collection");
 
-    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
+    h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
     if((fapl = H5Pcopy(orig_fapl)) < 0)
         TEST_ERROR
@@ -2605,7 +2605,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     hid_t fapl = -1;
 
     TESTING("Page Buffering Disabled");
-    h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
+    h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
 
 
     /* first, try to create a file with page buffering enabled */
@@ -2750,14 +2750,14 @@ main(void)
     nerrors += test_args(fapl, env_h5_drvr);
     nerrors += test_raw_data_handling(fapl, env_h5_drvr, false);
     nerrors += test_raw_data_handling(fapl, env_h5_drvr, true);
-    nerrors += test_basic_metadata_handling(fapl, env_h5_drvr);
+    nerrors += test_metadata_delay_basic(fapl, env_h5_drvr);
     nerrors += test_lru_processing(fapl, env_h5_drvr);
     nerrors += test_min_threshold(fapl, env_h5_drvr);
     nerrors += test_stats_collection(fapl, env_h5_drvr);
 
 #endif /* H5_HAVE_PARALLEL */
 
-    h5_clean_files(FILENAME, fapl);
+    h5_clean_files(namebases, fapl);
 
     if(nerrors)
         goto error;
