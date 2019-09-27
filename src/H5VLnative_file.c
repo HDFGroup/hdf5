@@ -800,6 +800,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
+#ifdef H5_HAVE_PARALLEL
         /* H5Fget_mpi_atomicity */
         case H5VL_NATIVE_FILE_GET_MPI_ATOMICITY:
             {
@@ -817,6 +818,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set MPI atomicity");
                 break;
             }
+#endif /* H5_HAVE_PARALLEL */
 
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
