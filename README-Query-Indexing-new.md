@@ -26,7 +26,6 @@ Berkeley DB
 ----
     libdb.so is often included with modern Linux distributions so a download may not be necessary.
 
-   libdb.so is often included with modern Linux distributions so a download may not be necessary.
    If otherwise unavailable, the latest Berkeley DB sources are available from:
    https://www.oracle.com/database/technologies/related/berkeleydb-downloads.html
    Follow the instructions found in the README file to build and install.
