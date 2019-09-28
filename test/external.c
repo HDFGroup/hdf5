@@ -447,13 +447,14 @@ test_unlimited(hid_t file)
 static int
 test_multiple_files(hid_t file)
 {
-    hid_t   dcpl = -1;           /* dataset creation properties          */
-    hid_t   space = -1;          /* dataspace                            */
-    hid_t   dset = -1;           /* dataset                              */
-    hsize_t cur_size[1] = {100}; /* data space current size              */
-    hsize_t max_size[1] = {100}; /* data space maximum size              */
-    hsize_t max_ext_size;        /* maximum size of external files       */
-    unsigned n_external_files = 4;
+    hid_t        dcpl = -1;           /* dataset creation properties         */
+    hid_t        space = -1;          /* dataspace                           */
+    hid_t        dset = -1;           /* dataset                             */
+    hsize_t      cur_size[1] = {100}; /* data space current size             */
+    hsize_t      max_size[1] = {100}; /* data space maximum size             */
+    hsize_t      max_ext_size;        /* maximum size of external files      */
+    unsigned int n_external_files = 4;
+    unsigned int i = 0;
 
     TESTING("multiple external files");
 
@@ -462,7 +463,7 @@ test_multiple_files(hid_t file)
 
     max_ext_size = (hsize_t)(sizeof(int) * max_size[0] / n_external_files);
 
-    for (unsigned i = 0; i < n_external_files; i++) {
+    for (i = 0; i < n_external_files; i++) {
         char exname[9] = "";
         HDsnprintf(exname, 9, "ext%d.data", i+1);
         if (H5Pset_external(dcpl, exname, (off_t)0, max_ext_size) < 0) {
@@ -490,7 +491,7 @@ test_multiple_files(hid_t file)
 
     max_ext_size -= 1;
 
-    for (unsigned i = 0; i < n_external_files; i++) {
+    for (i = 0; i < n_external_files; i++) {
         char exname[9] = "";
         HDsnprintf(exname, 9, "ext%d.data", i+1);
         if (H5Pset_external(dcpl, exname, (off_t)0, max_ext_size) < 0) {
