@@ -15432,7 +15432,7 @@ test_hyper_io_1d(void)
     CHECK(fid, H5I_INVALID_HID, "H5Fopen");
 
     /* Open the dataset */
-    did = H5Dopen(fid, DNAME, H5P_DEFAULT);
+    did = H5Dopen2(fid, DNAME, H5P_DEFAULT);
     CHECK(did, H5I_INVALID_HID, "H5Dopen");
 
     /* Set up to read every 10th element in file dataspace */
