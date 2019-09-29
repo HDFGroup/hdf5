@@ -432,6 +432,58 @@ test_unlimited(hid_t file)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    __add_external_files
+ *
+ * Purpose:     Add external file names to the DCPL with the given properties.
+ *              Used in test_multiple_files().
+ *              Limit to no more than 999 external files.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ * Programmer:  Jacob Smith
+ *              29 Sep 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+__add_external_files(
+        hid_t        dcpl_id,
+        unsigned int n_external_files,
+        off_t        offset,
+        hsize_t      max_ext_size)
+{
+#define E_AEF_EXNAME_SIZE 12
+    char exname[E_AEF_EXNAME_SIZE+1];
+    unsigned int i = 0;
+
+    if (dcpl_id < 0) {
+        return -1;
+    }
+    for (i = 0; i < n_external_files; i++) {
+        if (HDsnprintf(
+                exname,
+                E_AEF_EXNAME_SIZE,
+                "ext%d.data",
+                i+1)
+            > E_AEF_EXNAME_SIZE)
+        {
+            HDfprintf(stderr, "External file %d overflows name buffer\n", i+1);
+            fflush(stderr);
+            return -1;
+        }
+        if (H5Pset_external(dcpl_id, exname, offset, max_ext_size) < 0) {
+            HDfprintf(stderr, "Problem adding external file %s\n", exname);
+            fflush(stderr);
+            return -1;
+        }
+    }
+    return 0;
+#undef E_AEF_EXNAME_SIZE
+} /* end __add_external_files() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_multiple_files
  *
  * Purpose:     Test multiple external files for a dataset.
@@ -454,7 +506,6 @@ test_multiple_files(hid_t file)
     hsize_t      max_size[1] = {100}; /* data space maximum size             */
     hsize_t      max_ext_size;        /* maximum size of external files      */
     unsigned int n_external_files = 4;
-    unsigned int i = 0;
 
     TESTING("multiple external files");
 
@@ -463,14 +514,8 @@ test_multiple_files(hid_t file)
 
     max_ext_size = (hsize_t)(sizeof(int) * max_size[0] / n_external_files);
 
-    for (i = 0; i < n_external_files; i++) {
-        char exname[9] = "";
-        HDsnprintf(exname, 9, "ext%d.data", i+1);
-        if (H5Pset_external(dcpl, exname, (off_t)0, max_ext_size) < 0) {
-            HDfprintf(stderr, "Problem adding external file %s\n", exname);
-            fflush(stderr);
-            FAIL_STACK_ERROR
-        }
+    if (__add_external_files(dcpl, n_external_files, 0, max_ext_size) < 0) {
+        FAIL_STACK_ERROR;
     }
 
     if((space = H5Screate_simple(1, cur_size, max_size)) < 0)
@@ -491,15 +536,9 @@ test_multiple_files(hid_t file)
 
     max_ext_size -= 1;
 
-    for (i = 0; i < n_external_files; i++) {
-        char exname[9] = "";
-        HDsnprintf(exname, 9, "ext%d.data", i+1);
-        if (H5Pset_external(dcpl, exname, (off_t)0, max_ext_size) < 0) {
-            HDfprintf(stderr, "Problem adding external file %s\n", exname);
-            fflush(stderr);
-            FAIL_STACK_ERROR
-        }
-    } /* end for each external file */
+    if (__add_external_files(dcpl, n_external_files, 0, max_ext_size) < 0) {
+        FAIL_STACK_ERROR;
+    }
 
     H5E_BEGIN_TRY {
         dset = H5Dcreate2(file, "dset7", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
