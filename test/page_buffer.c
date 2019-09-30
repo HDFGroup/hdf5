@@ -621,7 +621,7 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     int64_t base_page_cnt;
     int64_t page_count = 0;
     size_t i, num_elements = 2000;
-    int *data, *odata;
+    int *data = NULL, *odata = NULL;
     H5F_t *f;
     H5F_vfd_swmr_config_t config;   /* Configuration for VFD SWMR */
     hsize_t pgsz = sizeof(int) * 200;
@@ -730,6 +730,8 @@ error:
         H5Fclose(file_id);
         if (data)
             HDfree(data);
+        if (odata)
+            HDfree(odata);
     } H5E_END_TRY;
     return 1;
 }
@@ -767,7 +769,7 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     int64_t base_page_cnt;
     int64_t page_count = 0;
     size_t i, num_elements = 20;
-    int *data, *odata;
+    int *data = NULL, *odata = NULL;
     H5F_t *f;
     H5F_vfd_swmr_config_t config;   /* Configuration for VFD SWMR */
     hsize_t pgsz = sizeof(int) * 200;
@@ -1043,6 +1045,8 @@ error:
         H5Fclose(file_id);
         if (data)
             HDfree(data);
+        if (odata)
+            HDfree(odata);
     } H5E_END_TRY;
     return 1;
 }
