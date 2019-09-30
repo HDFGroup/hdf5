@@ -68,7 +68,7 @@ static hid_t H5FD_ROS3_g = 0;
 #define ROS3_STATS_START_POWER 10
 #define ROS3_STATS_BIN_COUNT   16 /* MUST BE GREATER THAN 0 */
 
-
+
 /*
  * Calculate `BASE ^ (START_POWER + (INTERVAL * bin_i))`
  * Stores result at `(unsigned long long *) out_ptr`.
@@ -278,7 +278,7 @@ static const H5FD_class_t H5FD_ros3_g = {
 /* Declare a free list to manage the H5FD_ros3_t struct */
 H5FL_DEFINE_STATIC(H5FD_ros3_t);
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD__init_package
  *
@@ -307,7 +307,7 @@ done:
 
 } /* end H5FD__init_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_init
  *
@@ -325,6 +325,7 @@ hid_t
 H5FD_ros3_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
+    unsigned int bin_i;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -338,7 +339,7 @@ H5FD_ros3_init(void)
 #if ROS3_STATS
     /* pre-compute statsbin boundaries
      */
-    for (unsigned bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
+    for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
         unsigned long long value = 0;
         ROS3_STATS_POW(bin_i, &value)
         ros3_stats_boundaries[bin_i] = value;
@@ -353,7 +354,7 @@ done:
 
 } /* end H5FD_ros3_init() */
 
-
+
 /*---------------------------------------------------------------------------
  * Function:    H5FD_ros3_term
  *
@@ -381,7 +382,7 @@ H5FD_ros3_term(void)
 
 } /* end H5FD_ros3_term() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_ros3
  *
@@ -430,7 +431,7 @@ done:
 
 } /* end H5Pset_fapl_ros3() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_validate_config()
  *
@@ -481,7 +482,7 @@ done:
 
 } /* end H5FD_ros3_validate_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_ros3
  *
@@ -540,7 +541,7 @@ done:
 
 } /* end H5Pget_fapl_ros3() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_fapl_get
  *
@@ -589,7 +590,7 @@ done:
 
 } /* end H5FD_ros3_fapl_get() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_fapl_copy
  *
@@ -634,7 +635,7 @@ done:
 
 } /* end H5FD_ros3_fapl_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_fapl_free
  *
@@ -665,7 +666,7 @@ H5FD_ros3_fapl_free(void *_fa)
 } /* end H5FD_ros3_fapl_free() */
 
 #if ROS3_STATS
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: ros3_reset_stats()
@@ -723,7 +724,7 @@ done:
 
 #endif /* ROS3_STATS */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_open()
@@ -880,7 +881,7 @@ done:
 } /* end H5FD_ros3_open() */
 
 #if ROS3_STATS
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: ros3_fprint_stats()
@@ -1169,7 +1170,7 @@ done:
 } /* ros3_fprint_stats */
 #endif /* ROS3_STATS */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_close()
@@ -1230,7 +1231,7 @@ done:
 
 } /* end H5FD_ros3_close() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_cmp()
@@ -1395,7 +1396,7 @@ done:
 
 } /* H5FD_ros3_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_query
  *
@@ -1436,7 +1437,7 @@ H5FD_ros3_query(const H5FD_t H5_ATTR_UNUSED *_file,
 
 } /* H5FD_ros3_query() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_get_eoa()
@@ -1472,7 +1473,7 @@ H5FD_ros3_get_eoa(const H5FD_t                *_file,
 
 } /* end H5FD_ros3_get_eoa() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_set_eoa()
@@ -1509,7 +1510,7 @@ H5FD_ros3_set_eoa(H5FD_t                    *_file,
 
 } /* H5FD_ros3_set_eoa() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_get_eof()
@@ -1544,7 +1545,7 @@ H5FD_ros3_get_eof(const H5FD_t                *_file,
 
 } /* end H5FD_ros3_get_eof() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_get_handle()
@@ -1587,7 +1588,7 @@ done:
 
 } /* end H5FD_ros3_get_handle() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_read()
@@ -1685,7 +1686,7 @@ done:
 
 } /* end H5FD_ros3_read() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_write()
@@ -1728,7 +1729,7 @@ done:
 
 } /* H5FD_ros3_write() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_truncate()
@@ -1770,7 +1771,7 @@ done:
 
 } /* end H5FD_ros3_truncate() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_lock()
@@ -1801,7 +1802,7 @@ H5FD_ros3_lock(H5FD_t  H5_ATTR_UNUSED *_file,
 
 } /* end H5FD_ros3_lock() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_unlock()
