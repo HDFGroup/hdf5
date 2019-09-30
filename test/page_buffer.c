@@ -579,14 +579,13 @@ vfd_read_each_equals(H5F_t *f, H5FD_mem_t ty, haddr_t addr, size_t nelts,
 {
     size_t i;
 
-    /* read all elements using the VFD.. this should result in 0s. */
-    if (H5FD_read(f->shared->lf, ty, addr,
-            sizeof(int) * nelts, data) < 0)
+    /* Read all elements using the VFD. */
+    if (H5FD_read(f->shared->lf, ty, addr, sizeof(int) * nelts, data) < 0)
         FAIL_STACK_ERROR;
 
     for (i = 0; i < nelts; i++) {
         if (data[i] != val) {
-            printf("Read %d at data[%d], expected 0\n", data[i], i);
+            printf("Read %d at data[%d], expected %d\n", data[i], i, val);
             return false;
         }
     }
@@ -700,14 +699,154 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
      * multi-page metadata buffers are flushed *immediately*
      * when their delay elapses.
      *
-     * If we were waiting for a single-page metadata buffer to
+     * (If we were waiting for a single-page metadata buffer to
      * appear at the VFD layer, then it may reside in the LRU buffer
-     * for a while.
+     * for a while.)
      */
 #if 0
     if (H5PB_flush(f) < 0)
         FAIL_STACK_ERROR;
 #endif
+
+    /* All elements read using the VFD should be -1. */
+    if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data, -1))
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(fcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR;
+    HDfree(data);
+
+    PASSED()
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+        H5Fclose(file_id);
+        if (data)
+            HDfree(data);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*
+ * Function:    test_spmde_delay_basic()
+ *
+ * Purpose:     Perform a basic check that a single-page metadata entry
+ *              (SPMDE) is not written immediately to the HDF5 file in
+ *              VFD SWMR mode, but it is buffered in the shadow file
+ *              until max_lag + 1 ticks have elapsed.
+ *
+ *              The LRU list will hold onto SPMDEs, so it's necessary to
+ *              flush the page buffer to make sure the buffer is flushed
+ *              to the VFD layer.
+ *
+ *              XXX
+ *              XXX reduce duplication with test_mpmde_delay_basic!
+ *              XXX
+ *
+ * Return:      0 if test is sucessful
+ *              1 if test fails
+ *
+ * Programmer:  David Young
+ *              16 Sep 2019
+ */
+static unsigned
+test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
+{
+    char filename[FILENAME_LEN]; /* Filename to use */
+    hid_t file_id = -1;          /* File ID */
+    hid_t fcpl = -1;
+    hid_t fapl = -1;
+    int64_t base_page_cnt;
+    int64_t page_count = 0;
+    size_t i, num_elements = 20;
+    int *data, *odata;
+    H5F_t *f;
+    H5F_vfd_swmr_config_t config;   /* Configuration for VFD SWMR */
+    hsize_t pgsz = sizeof(int) * 200;
+
+    TESTING("Single Page Metadata Delay Handling");
+
+    h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
+
+    if ((fapl = H5Pcopy(orig_fapl)) < 0)
+        TEST_ERROR
+
+    if (set_multi_split(env_h5_drvr, fapl, pgsz) != 0)
+        TEST_ERROR;
+
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+        TEST_ERROR;
+    if (H5Pset_file_space_page_size(fcpl, pgsz) < 0)
+        TEST_ERROR;
+    if (H5Pset_page_buffer_size(fapl, 10 * pgsz, 0, 0) < 0)
+        TEST_ERROR;
+
+    if (swmr_fapl_augment(fapl, &config, filename, 5) < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
+        FAIL_STACK_ERROR;
+
+    /* opening the file inserts one or more pages into the page buffer.
+     * Get the number of pages inserted, and verify that it is the 
+     * expected value.
+     */
+    base_page_cnt = f->shared->pb_ptr->curr_pages;
+    if (base_page_cnt != 2)
+        TEST_ERROR;
+
+    const haddr_t addr = H5MF_alloc(f, H5FD_MEM_BTREE,
+        sizeof(int) * num_elements);
+    /* allocate space for 2000 elements */
+    if (HADDR_UNDEF == addr)
+        FAIL_STACK_ERROR;
+
+    if ((odata = (int *)HDcalloc(num_elements, sizeof(int))) == NULL)
+        TEST_ERROR;
+
+    if ((data = (int *)HDcalloc(num_elements, sizeof(int))) == NULL)
+        TEST_ERROR;
+
+    /* initialize all the elements to have a value of -1 */
+    for(i = 0; i < num_elements; i++)
+        odata[i] = -1;
+
+    if (H5F_block_write(f, H5FD_MEM_BTREE, addr, sizeof(int) * num_elements,
+           odata) < 0)
+        FAIL_STACK_ERROR;
+
+    /* H5Fvfd_swmr_end_tick() processes delayed writes before it increases
+     * the tick number, so only after `max_lag + 1` times through this loop
+     * is a metadata write eligible to be written to the HDF5 file.
+     */
+    for (i = 0; i < config.max_lag + 1; i++) {
+        /* All elements read using the VFD should be 0. */
+        if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements,
+                data, 0))
+            TEST_ERROR;
+        H5Fvfd_swmr_end_tick(file_id);
+    }
+
+    /* We are waiting for a single-page metadata buffer to
+     * appear at the VFD layer, but it may reside in the LRU buffer
+     * for a while if we do not flush the page buffer.
+     */
+    if (H5PB_flush(f) < 0)
+        FAIL_STACK_ERROR;
 
     /* All elements read using the VFD should be -1. */
     if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data, -1))
@@ -912,11 +1051,11 @@ error:
 /*
  * Function:    test_raw_data_handling()
  *
- * Purpose:     Perform a basic check that raw data is written
- *              to the HDF5 file when expected whether in VFD SWMR mode or not.
+ * Purpose:  Perform a basic check that raw data is written to the HDF5
+ *           file when expected whether in VFD SWMR mode or not.
  *
- *              Any data mis-matches or failures reported by the HDF5
- *              library result in test failure.
+ *           Any data mis-matches or failures reported by the HDF5
+ *           library result in test failure.
  *
  * Return:      0 if test is sucessful
  *              1 if test fails
@@ -2765,6 +2904,7 @@ main(void)
     nerrors += test_args(fapl, env_h5_drvr);
     nerrors += test_raw_data_handling(fapl, env_h5_drvr, false);
     nerrors += test_raw_data_handling(fapl, env_h5_drvr, true);
+    nerrors += test_spmde_delay_basic(fapl, env_h5_drvr);
     nerrors += test_mpmde_delay_basic(fapl, env_h5_drvr);
     nerrors += test_lru_processing(fapl, env_h5_drvr);
     nerrors += test_min_threshold(fapl, env_h5_drvr);
