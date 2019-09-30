@@ -20,6 +20,9 @@
 #include "external_common.h"
 #include "external_fname.h"
 
+#define AEF_EXNAME_MAX_LEN 12 /* string buffer size for external file name */
+                              /* used in __add_external_files()            */
+
 
 /*-------------------------------------------------------------------------
  * Function:    files_have_same_contents
@@ -453,8 +456,7 @@ __add_external_files(
         off_t        offset,
         hsize_t      max_ext_size)
 {
-#define E_AEF_EXNAME_SIZE 12
-    char exname[E_AEF_EXNAME_SIZE+1];
+    char exname[AEF_EXNAME_MAX_LEN+1];
     unsigned int i = 0;
 
     if (dcpl_id < 0) {
@@ -463,10 +465,10 @@ __add_external_files(
     for (i = 0; i < n_external_files; i++) {
         if (HDsnprintf(
                 exname,
-                E_AEF_EXNAME_SIZE,
+                AEF_EXNAME_MAX_LEN,
                 "ext%d.data",
                 i+1)
-            > E_AEF_EXNAME_SIZE)
+            > AEF_EXNAME_MAX_LEN)
         {
             HDfprintf(stderr, "External file %d overflows name buffer\n", i+1);
             fflush(stderr);
@@ -479,7 +481,6 @@ __add_external_files(
         }
     }
     return 0;
-#undef E_AEF_EXNAME_SIZE
 } /* end __add_external_files() */
 
 
