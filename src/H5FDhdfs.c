@@ -64,7 +64,7 @@ static hid_t H5FD_HDFS_g = 0;
 #define HDFS_STATS_START_POWER 10
 #define HDFS_STATS_BIN_COUNT   16 /* MUST BE GREATER THAN 0 */
 
-
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Calculate `BASE ^ (START_POWER + (INTERVAL * bin_i))`
  * Stores result at `(unsigned long long *) out_ptr`.
@@ -87,7 +87,7 @@ static hid_t H5FD_HDFS_g = 0;
 /* array to hold pre-computed boundaries for stats bins */
 static unsigned long long hdfs_stats_boundaries[HDFS_STATS_BIN_COUNT];
 
-
+
 /***************************************************************************
  *
  * Structure: hdfs_statsbin
@@ -137,7 +137,7 @@ typedef struct {
  */
 #define HDFS_HDFST_MAGIC 0x1AD5DE84
 
-
+
 /***************************************************************************
  *
  * Structure: hdfs_t
@@ -186,7 +186,7 @@ typedef struct {
     hdfsFile       file;
 } hdfs_t;
 
-
+
 /*--------------------------------------------------------------------------
  * Function:   H5FD_hdfs_handle_open
  *
@@ -313,7 +313,7 @@ done:
 
 } /* H5FD_hdfs_handle_open() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:   H5FD_hdfs_handle_close
  *
@@ -375,7 +375,7 @@ done:
 
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /***************************************************************************
  *
  * Structure: H5FD_hdfs_t
@@ -529,7 +529,7 @@ static const H5FD_class_t H5FD_hdfs_g = {
 H5FL_DEFINE_STATIC(H5FD_hdfs_t);
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD__init_package
  *
@@ -559,7 +559,7 @@ done:
 
 } /* H5FD__init_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_init
  *
@@ -581,6 +581,7 @@ hid_t
 H5FD_hdfs_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    unsigned int bin_i;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -598,7 +599,7 @@ H5FD_hdfs_init(void)
 #if HDFS_STATS
     /* pre-compute statsbin boundaries
      */
-    for (unsigned bin_i = 0; bin_i < HDFS_STATS_BIN_COUNT; bin_i++) {
+    for (bin_i = 0; bin_i < HDFS_STATS_BIN_COUNT; bin_i++) {
         unsigned long long value = 0;
         HDFS_STATS_POW(bin_i, &value)
         hdfs_stats_boundaries[bin_i] = value;
@@ -612,7 +613,7 @@ done:
 
 } /* end H5FD_hdfs_init() */
 
-
+
 /*---------------------------------------------------------------------------
  * Function:    H5FD_hdfs_term
  *
@@ -643,7 +644,7 @@ H5FD_hdfs_term(void)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_hdfs_term() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_hdfs
  *
@@ -696,7 +697,7 @@ done:
 
 } /* H5Pset_fapl_hdfs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_validate_config()
  *
@@ -747,7 +748,7 @@ done:
 
 } /* H5FD_hdfs_validate_config() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_hdfs
  *
@@ -808,7 +809,7 @@ done:
 
 } /* H5Pget_fapl_hdfs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_fapl_get
  *
@@ -855,7 +856,7 @@ done:
 
 } /* H5FD_hdfs_fapl_get() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_fapl_copy
  *
@@ -899,7 +900,7 @@ done:
 
 } /* H5FD_hdfs_fapl_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_fapl_free
  *
@@ -930,7 +931,7 @@ H5FD_hdfs_fapl_free(void *_fa)
 } /* H5FD_hdfs_fapl_free() */
 
 #if HDFS_STATS
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: hdfs_reset_stats()
@@ -989,7 +990,7 @@ done:
 } /* hdfs_reset_stats */
 #endif /* HDFS_STATS */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_open()
@@ -1138,7 +1139,7 @@ done:
 #endif /* H5_HAVE_LIBHDFS */
 
 #if HDFS_STATS
-
+
 /*----------------------------------------------------------------------------
  *
  * Function: hdfs_fprint_stats()
@@ -1425,7 +1426,7 @@ done:
 } /* hdfs_fprint_stats */
 #endif /* HDFS_STATS */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_close()
@@ -1508,7 +1509,7 @@ done:
 
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_cmp()
@@ -1592,7 +1593,7 @@ H5FD_hdfs_cmp(
 
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_query
  *
@@ -1631,7 +1632,7 @@ H5FD_hdfs_query(
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5FD_hdfs_query() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_get_eoa()
@@ -1689,7 +1690,7 @@ H5FD_hdfs_get_eoa(
 
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_set_eoa()
@@ -1749,7 +1750,7 @@ H5FD_hdfs_set_eoa(
 
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_get_eof()
@@ -1807,7 +1808,7 @@ H5FD_hdfs_get_eof(
 
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_get_handle()
@@ -1880,7 +1881,7 @@ done:
 
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_read()
@@ -2014,7 +2015,7 @@ done:
 
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_write()
@@ -2059,7 +2060,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_hdfs_write() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_truncate()
@@ -2103,7 +2104,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_hdfs_truncate() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_lock()
@@ -2136,7 +2137,7 @@ H5FD_hdfs_lock(
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_hdfs_lock() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_hdfs_unlock()
