@@ -895,13 +895,11 @@ test_clear (void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
  * Purpose:
  *
- * Return:	Success:
- *
- *		Failure:
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June 16, 1998
@@ -911,7 +909,7 @@ test_clear (void)
 int
 main(void)
 {
-    int	nerrors = 0;
+    int nerrors = 0;
 
     /*
      * Open the library explicitly.
@@ -930,12 +928,12 @@ main(void)
     if(nerrors) {
         HDprintf("***** %u FAILURE%s! *****\n",
                nerrors, 1 == nerrors ? "" : "S");
-        exit(EXIT_FAILURE);
+        HDexit(EXIT_FAILURE);
     }
     HDprintf("All bit tests passed.\n");
 
     H5close();
 
-    return 0;
-}
+    HDexit(EXIT_SUCCESS);
+} /* end main() */
 

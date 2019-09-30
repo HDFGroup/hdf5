@@ -93,7 +93,7 @@ SUBROUTINE test_table1()
   INTEGER(SIZE_T),  DIMENSION(1:nfields) :: field_offsetr ! field offset
   INTEGER(SIZE_T),  DIMENSION(1:nfields) :: field_sizesr  ! field sizes
   INTEGER(SIZE_T)  :: type_sizeout = 0                    ! size of the datatype
-  INTEGER :: maxlen = 0                                   ! max chararter length of a field name
+  INTEGER(SIZE_T)  :: maxlen = 0                          ! max character length of a field name
   INTEGER :: Cs_sizeof_double = H5_SIZEOF_DOUBLE          ! C's sizeof double
   INTEGER :: SIZEOF_X
   LOGICAL :: Exclude_double

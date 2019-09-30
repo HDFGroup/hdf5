@@ -37,8 +37,8 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh testexternal_env.sh \
     testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
-    filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
-    external_env$(EXEEXT) flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
+    external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
+    flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
     swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
     swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
@@ -55,15 +55,15 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
 TEST_PROG= testhdf5 \
-           cache cache_api cache_image cache_tagging lheap ohdr stab gheap \
-           evict_on_close farray earray btree2 fheap \
+           cache cache_api cache_image cache_tagging lheap ohdr \
+           stab gheap evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
            dtypes dsets chunk_info cmpd_dset filter_fail extend direct_chunk \
            external efc objcopy links unlink twriteorder big mtime fillval mount \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
-           enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
-           reserved cross_read freespace mf vds file_image unregister \
-           cache_logging cork swmr
+           enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
+           dangle dtransform reserved cross_read freespace mf vds file_image \
+           unregister cache_logging cork swmr
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -87,7 +87,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     use_append_chunk use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-    swmr_check_compat_vfd vds_swmr_gen vds_env vds_swmr_reader vds_swmr_writer
+    swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin
 endif
@@ -190,8 +190,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 btree2_tmp.h5 objcopy_src.h5 objcopy_dst.h5 \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 farray_tmp.h5 \
-    earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log              \
-    new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
+    earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log log_ros3_out.log    \
+    log_s3comms_out.log new_multi_file_v16-r.h5 new_multi_file_v16-s.h5     \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
     vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5 \

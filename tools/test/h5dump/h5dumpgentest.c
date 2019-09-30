@@ -6273,7 +6273,7 @@ static int gent_ldouble(void)
 
     return 0;
 
-    error:
+error:
     HDprintf("error !\n");
     return -1;
 
@@ -7526,6 +7526,7 @@ gent_attr_intsize(void)
     H5Gclose(root);
     H5Fclose(fid);
 }
+
 static void
 gent_nodata(void)
 {

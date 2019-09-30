@@ -45,18 +45,6 @@ foreach (HDFJAVA_JAR ${CMAKE_JAVA_INCLUDE_PATH})
   set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${HDFJAVA_JAR}")
 endforeach ()
 
-foreach (example ${HDF_JAVA_OBJECT_EXAMPLES})
-  file (WRITE ${PROJECT_BINARY_DIR}/${example}_Manifest.txt
-  "Main-Class: examples.intro.${example}
-"
-  )
-  add_jar (${example} MANIFEST ${PROJECT_BINARY_DIR}/${example}_Manifest.txt ${example}.java)
-  get_target_property (${example}_JAR_FILE ${example} JAR_FILE)
-#  install_jar (${example} ${HJAVA_INSTALL_DATA_DIR}/examples examples)
-  get_target_property (${example}_CLASSPATH ${example} CLASSDIR)
-  add_dependencies (${example} ${HDFJAVA_H5_LIB_TARGET})
-endforeach ()
-
 if (BUILD_TESTING)
   get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
   set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
@@ -89,7 +77,9 @@ if (BUILD_TESTING)
             -D "TEST_REFERENCE=intro/${example}.txt"
             -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
     )
-    set_tests_properties (JAVA_intro-${example} PROPERTIES DEPENDS JAVA_intro-${example}-copy-objects)
+    set_tests_properties (JAVA_intro-${example} PROPERTIES
+        DEPENDS JAVA_intro-${example}-copy-objects
+    )
   endforeach ()
 
 endif ()

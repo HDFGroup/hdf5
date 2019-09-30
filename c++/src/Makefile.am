@@ -32,15 +32,15 @@ bin_SCRIPTS=h5c++
 
 # Source files for the library
 libhdf5_cpp_la_SOURCES=H5Exception.cpp H5IdComponent.cpp	\
-	H5DataSpace.cpp H5PropList.cpp H5Library.cpp			\
-	H5FaccProp.cpp H5FcreatProp.cpp H5LcreatProp.cpp		\
-	H5LaccProp.cpp H5DaccProp.cpp H5DxferProp.cpp			\
+    H5DataSpace.cpp H5PropList.cpp H5Library.cpp			\
+    H5FaccProp.cpp H5FcreatProp.cpp H5LcreatProp.cpp		\
+    H5LaccProp.cpp H5DaccProp.cpp H5DxferProp.cpp			\
     H5DcreatProp.cpp H5Location.cpp H5AbstractDs.cpp		\
     H5Attribute.cpp H5Object.cpp H5OcreatProp.cpp			\
-	H5DataType.cpp H5AtomType.cpp H5PredType.cpp			\
+    H5DataType.cpp H5AtomType.cpp H5PredType.cpp			\
     H5EnumType.cpp H5IntType.cpp H5FloatType.cpp			\
     H5StrType.cpp H5ArrayType.cpp H5VarLenType.cpp			\
-	H5CompType.cpp H5DataSet.cpp H5CommonFG.cpp H5Group.cpp	\
+    H5CompType.cpp H5DataSet.cpp H5CommonFG.cpp H5Group.cpp	\
     H5File.cpp
 
 # HDF5 C++ library depends on HDF5 Library.

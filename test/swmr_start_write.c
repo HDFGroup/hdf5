@@ -357,7 +357,7 @@ usage(void)
     HDprintf("v1 b-tree indexing (-i b1), compression ('-c -1'),\n");
     HDprintf("will generate a random seed (no -r given), and verbose (no '-q' given)\n");
     HDprintf("\n");
-    HDexit(1);
+    HDexit(EXIT_FAILURE);
 } /* usage() */
 
 /*
@@ -468,7 +468,7 @@ int main(int argc, const char *argv[])
         HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_writer.out.%u", random_seed);
         if(NULL == (verbose_file = HDfopen(verbose_name, "w"))) {
             HDfprintf(stderr, "Can't open verbose output file!\n");
-            HDexit(1);
+            HDexit(EXIT_FAILURE);
         }
     } /* end if */
 
@@ -487,7 +487,7 @@ int main(int argc, const char *argv[])
     /* Create the test file */
     if((fid = create_file(FILENAME, verbose, verbose_file, random_seed)) < 0) {
         HDfprintf(stderr, "Error creating the file...\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 
     /* Emit informational message */
@@ -501,13 +501,13 @@ int main(int argc, const char *argv[])
     /* Create the datasets in the file */
     if(create_datasets(fid, comp_level, verbose, verbose_file, index_type) < 0) {
         HDfprintf(stderr, "Error creating datasets...\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 
     /* Enable SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0) {
         HDfprintf(stderr, "Error starting SWMR writing mode...\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -520,7 +520,7 @@ int main(int argc, const char *argv[])
     /* Append records to datasets */
     if(add_records(fid, verbose, verbose_file, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
         HDfprintf(stderr, "Error appending records to datasets!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -530,7 +530,7 @@ int main(int argc, const char *argv[])
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
         HDfprintf(stderr, "Error releasing symbols!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -540,7 +540,7 @@ int main(int argc, const char *argv[])
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
         HDfprintf(stderr, "Error closing file!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

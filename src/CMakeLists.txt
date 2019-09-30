@@ -219,11 +219,14 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDcore.c
     ${HDF5_SRC_DIR}/H5FDdirect.c
     ${HDF5_SRC_DIR}/H5FDfamily.c
+    ${HDF5_SRC_DIR}/H5FDhdfs.c
     ${HDF5_SRC_DIR}/H5FDint.c
     ${HDF5_SRC_DIR}/H5FDlog.c
     ${HDF5_SRC_DIR}/H5FDmpi.c
     ${HDF5_SRC_DIR}/H5FDmpio.c
     ${HDF5_SRC_DIR}/H5FDmulti.c
+    ${HDF5_SRC_DIR}/H5FDros3.c
+    ${HDF5_SRC_DIR}/H5FDs3comms.c
     ${HDF5_SRC_DIR}/H5FDsec2.c
     ${HDF5_SRC_DIR}/H5FDspace.c
     ${HDF5_SRC_DIR}/H5FDstdio.c
@@ -235,11 +238,14 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDcore.h
     ${HDF5_SRC_DIR}/H5FDdirect.h
     ${HDF5_SRC_DIR}/H5FDfamily.h
+    ${HDF5_SRC_DIR}/H5FDhdfs.h
     ${HDF5_SRC_DIR}/H5FDlog.h
     ${HDF5_SRC_DIR}/H5FDmpi.h
     ${HDF5_SRC_DIR}/H5FDmpio.h
     ${HDF5_SRC_DIR}/H5FDmulti.h
     ${HDF5_SRC_DIR}/H5FDpublic.h
+    ${HDF5_SRC_DIR}/H5FDros3.h
+    ${HDF5_SRC_DIR}/H5FDs3comms.c
     ${HDF5_SRC_DIR}/H5FDsec2.h
     ${HDF5_SRC_DIR}/H5FDstdio.h
     ${HDF5_SRC_DIR}/H5FDwindows.h
@@ -1073,7 +1079,6 @@ if (NOT ONLY_SHARED_LIBS)
       PUBLIC
           ${HDF_EXTRA_C_FLAGS}
           ${HDF_EXTRA_FLAGS}
-          $<IF:$<CONFIG:Debug>,DEBUG,NDEBUG>
       PRIVATE
           $<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>  # Enable tracing of the API
           $<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:H5Z_DEBUG;H5T_DEBUG;H5ST_DEBUG;H5S_DEBUG;H5O_DEBUG;H5I_DEBUG;H5HL_DEBUG;H5F_DEBUG;H5D_DEBUG;H5B2_DEBUG;H5AC_DEBUG>
@@ -1103,6 +1108,7 @@ if (BUILD_SHARED_LIBS)
   add_library (${HDF5_LIBSH_TARGET} SHARED ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
   target_include_directories (${HDF5_LIBSH_TARGET}
       PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PUBLIC "$<$<BOOL:${HDF5_ENABLE_HDFS}>:${HDFS_INCLUDE_DIR}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_definitions(${HDF5_LIBSH_TARGET}
@@ -1110,7 +1116,6 @@ if (BUILD_SHARED_LIBS)
           "H5_BUILT_AS_DYNAMIC_LIB"
           ${HDF_EXTRA_C_FLAGS}
           ${HDF_EXTRA_FLAGS}
-          $<IF:$<CONFIG:Debug>,DEBUG,NDEBUG>
       PRIVATE
           $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:H5_HAVE_THREADSAFE>
           $<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>  # Enable tracing of the API

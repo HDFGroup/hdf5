@@ -50,6 +50,20 @@ if (NOT HDF5_ENABLE_DEBUG_APIS)
   )
 endif ()
 
+if (HDF5_ENABLE_ROS3_VFD)
+  set (HDF5_JAVA_TEST_SOURCES
+      ${HDF5_JAVA_TEST_SOURCES}
+      TestH5Pfapls3
+  )
+endif ()
+
+if (HDF5_ENABLE_HDFS)
+  set (HDF5_JAVA_TEST_SOURCES
+      ${HDF5_JAVA_TEST_SOURCES}
+      TestH5Pfaplhdfs
+  )
+endif ()
+
 set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LIB_DIR}/junit.jar;${HDF5_JAVA_LIB_DIR}/hamcrest-core.jar;${HDF5_JAVA_JARS};${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_LOGGING_SIMPLE_JAR}")
 
 foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
