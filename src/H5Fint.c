@@ -3978,12 +3978,12 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
 {
     struct timespec curr;               /* Current time in struct timespec */
     struct timespec new_end_of_tick;    /* new end_of_tick in struct timespec */
-    uint64_t curr_nsecs;                    /* current time in nanoseconds */
-    uint64_t tlen_nsecs;                    /* tick_len in nanoseconds */
+    int64_t curr_nsecs;                    /* current time in nanoseconds */
+    int64_t tlen_nsecs;                    /* tick_len in nanoseconds */
 #if 0 /* JRM */
-    uint64_t end_nsecs;                     /* end_of_tick in nanoseconds */
+    int64_t end_nsecs;                     /* end_of_tick in nanoseconds */
 #endif /* JRM */
-    uint64_t new_end_nsecs;                 /* new end_of_tick in nanoseconds */
+    int64_t new_end_nsecs;                 /* new end_of_tick in nanoseconds */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
