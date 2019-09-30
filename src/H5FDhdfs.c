@@ -463,7 +463,9 @@ typedef struct H5FD_hdfs_t {
  *
  */
 #define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
+#ifdef H5_HAVE_LIBHDFS
 #define ADDR_OVERFLOW(A)    (HADDR_UNDEF==(A) || ((A) & ~(haddr_t)MAXADDR))
+#endif /* H5_HAVE_LIBHDFS */
 
 /* Prototypes */
 static void   *H5FD_hdfs_fapl_get(H5FD_t *_file);
@@ -471,21 +473,23 @@ static void   *H5FD_hdfs_fapl_copy(const void *_old_fa);
 static herr_t  H5FD_hdfs_fapl_free(void *_fa);
 static H5FD_t *H5FD_hdfs_open(const char *name, unsigned flags, hid_t fapl_id,
                               haddr_t maxaddr);
-static herr_t H5FD_hdfs_close(H5FD_t *_file);
-static int    H5FD_hdfs_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
-static herr_t H5FD_hdfs_query(const H5FD_t *_f1, unsigned long *flags);
+static herr_t  H5FD_hdfs_close(H5FD_t *_file);
+static int     H5FD_hdfs_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
+static herr_t  H5FD_hdfs_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_hdfs_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t H5FD_hdfs_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
+static herr_t  H5FD_hdfs_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_hdfs_get_eof(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t  H5FD_hdfs_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
-static herr_t H5FD_hdfs_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-            size_t size, void *buf);
-static herr_t H5FD_hdfs_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-            size_t size, const void *buf);
-static herr_t H5FD_hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t H5FD_hdfs_lock(H5FD_t *_file, hbool_t rw);
-static herr_t H5FD_hdfs_unlock(H5FD_t *_file);
-static herr_t H5FD_hdfs_validate_config(const H5FD_hdfs_fapl_t * fa);
+static herr_t  H5FD_hdfs_get_handle(H5FD_t *_file, hid_t fapl,
+                                    void** file_handle);
+static herr_t  H5FD_hdfs_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id,
+                               haddr_t addr, size_t size, void *buf);
+static herr_t  H5FD_hdfs_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id,
+                               haddr_t addr, size_t size, const void *buf);
+static herr_t  H5FD_hdfs_truncate(H5FD_t *_file, hid_t dxpl_id,
+                                  hbool_t closing);
+static herr_t  H5FD_hdfs_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD_hdfs_unlock(H5FD_t *_file);
+static herr_t  H5FD_hdfs_validate_config(const H5FD_hdfs_fapl_t * fa);
 
 static const H5FD_class_t H5FD_hdfs_g = {
     "hdfs",                     /* name                 */
@@ -526,7 +530,7 @@ static const H5FD_class_t H5FD_hdfs_g = {
 H5FL_DEFINE_STATIC(H5FD_hdfs_t);
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_init_interface
  *
@@ -564,6 +568,7 @@ hid_t
 H5FD_hdfs_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    unsigned int bin_i;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -572,12 +577,12 @@ H5FD_hdfs_init(void)
 #endif
 
     if (H5I_VFL != H5I_get_type(H5FD_HDFS_g))
-        H5FD_HDFS_g = H5FD_register( &H5FD_hdfs_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_HDFS_g = H5FD_register(&H5FD_hdfs_g sizeof(H5FD_class_t), FALSE);
 
 #if HDFS_STATS
     /* pre-compute statsbin boundaries
      */
-    for (unsigned bin_i = 0; bin_i < HDFS_STATS_BIN_COUNT; bin_i++) {
+    for (bin_i = 0; bin_i < HDFS_STATS_BIN_COUNT; bin_i++) {
         unsigned long long value = 0;
         HDFS_STATS_POW(bin_i, &value)
         hdfs_stats_boundaries[bin_i] = value;
@@ -590,7 +595,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_hdfs_init() */
 
-
+
 /*---------------------------------------------------------------------------
  * Function:    H5FD_log_term
  *
@@ -617,7 +622,7 @@ H5FD_hdfs_term(void)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5FD_hdfs_term() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_hdfs
  *
@@ -659,7 +664,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_fapl_hdfs() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_open()
  *

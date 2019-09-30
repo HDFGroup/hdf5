@@ -313,6 +313,7 @@ hid_t
 H5FD_ros3_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
+    unsigned int bin_i;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -326,7 +327,7 @@ H5FD_ros3_init(void)
 #if ROS3_STATS
     /* pre-compute statsbin boundaries
      */
-    for (unsigned bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
+    for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
         unsigned long long value = 0;
         ROS3_STATS_POW(bin_i, &value)
         ros3_stats_boundaries[bin_i] = value;
