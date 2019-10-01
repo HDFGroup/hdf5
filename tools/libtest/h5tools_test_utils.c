@@ -1134,6 +1134,7 @@ test_set_configured_fapl(void)
 #endif /* H5_HAVE_LIBHDFS */
 
     }; /* testcases `cases` array */
+    unsigned int i;
 
 #ifdef H5_HAVE_ROS3_VFD
     n_cases += 5;
@@ -1145,7 +1146,7 @@ test_set_configured_fapl(void)
 
     TESTING("programmatic fapl set");
 
-    for (unsigned i = 0; i < n_cases; i++) {
+    for (i = 0; i < n_cases; i++) {
         int      result;
         testcase C = cases[i];
 

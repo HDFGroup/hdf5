@@ -979,6 +979,7 @@
 ./test/external_common.c
 ./test/external_common.h
 ./test/external_env.c
+./test/external_fname.h
 ./test/error_test.c
 ./test/err_compat.c
 ./test/filter_error.h5
@@ -3218,6 +3219,7 @@
 
 # CMake-specific Files
 ./config/toolchain/build32.cmake
+./config/toolchain/clang.cmake
 ./config/toolchain/crayle.cmake
 ./config/toolchain/GCC.cmake
 ./config/toolchain/intel.cmake
