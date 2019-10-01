@@ -362,6 +362,16 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed the iteration error in test_versionbounds() in test/dtypes.c
+
+      The test was supposed to loop through all valid combinations of 
+      low and high bounds in the array versions[], but they were set to
+      H5F_LIBVER_EARLIEST always without changing.
+
+      The problem was fixed by indexing low and high into the array versions[].
+
+      (VC - 2019/09/30)
+
     - Fixed the slowness of regular hyperslab selection in a chunked dataset
 
       It was reported that the selection of every 10th element from a 20G
