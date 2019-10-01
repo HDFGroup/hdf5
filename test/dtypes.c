@@ -7648,8 +7648,7 @@ test_versionbounds(void)
     H5F_t *filep = NULL;       /* Pointer to internal structure of a file */
     H5T_t *dtypep = NULL;      /* Pointer to internal structure of a datatype */
     hsize_t arr_dim[] = {ARRAY_LEN}; /* Length of the array */
-    int i, j;                   /* Indices for iterating over versions */
-    H5F_libver_t low, high;    /* File format bounds */
+    int low, high;             /* Indices for iterating over versions */
     H5F_libver_t versions[] = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18, H5F_LIBVER_V110, H5F_LIBVER_V112};
     int versions_count = 4;     /* Number of version bounds in the array */
     unsigned highest_version;  /* Highest version in nested datatypes */
@@ -7751,13 +7750,13 @@ test_versionbounds(void)
        skipping invalid combinations */
     /* Create the file, create and write to a dataset with compound datatype */
     /* Verify the dataset's datatype and its members */
-    for(i = 0, low = versions[i]; i < versions_count; i++) {
+    for(low = 0; low < versions_count; low++) {
 
-        for(j = 0, high = versions[j]; j < versions_count; j++) {
+        for(high = 0; high < versions_count; high++) {
 
             /* Set version bounds */
             H5E_BEGIN_TRY {
-                ret = H5Pset_libver_bounds(fapl, low, high);
+                ret = H5Pset_libver_bounds(fapl, versions[low], versions[high]);
             } H5E_END_TRY;
 
             if (ret < 0) /* Invalid low/high combinations */
@@ -7783,7 +7782,7 @@ test_versionbounds(void)
             highest_version = dtypep->shared->version;
 
             /* Verify version of the datatype recursevily */
-            ret = verify_version(dset_dtype, low, &highest_version);
+            ret = verify_version(dset_dtype, versions[low], &highest_version);
 
             /* Close the dataset's datatype */
             if (H5Tclose(dset_dtype) < 0) TEST_ERROR
