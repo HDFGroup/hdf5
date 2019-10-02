@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Pdcpl.c
- *			February 26 1998
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:     H5Pdcpl.c
  *
- * Purpose:		Dataset creation property list class routines
+ * Purpose:     Dataset creation property list class routines
  *
  *-------------------------------------------------------------------------
  */
@@ -33,19 +31,19 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dpkg.h"		/* Datasets 				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5Ppkg.h"		/* Property lists		  	*/
-#include "H5Sprivate.h"         /* Dataspaces                           */
-#include "H5Tprivate.h"		/* Datatypes 				*/
-#include "H5VMprivate.h"	/* Vectors and arrays 			*/
-#include "H5Zprivate.h"		/* Data filters				*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
+#include "H5Dpkg.h"             /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free Lists                               */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Oprivate.h"         /* Object headers                           */
+#include "H5Ppkg.h"             /* Property lists                           */
+#include "H5Sprivate.h"         /* Dataspaces                               */
+#include "H5Tprivate.h"         /* Datatypes                                */
+#include "H5VMprivate.h"        /* Vectors and arrays                       */
+#include "H5Zprivate.h"         /* Data filters                             */
 
 
 /****************/
@@ -388,7 +386,6 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
     size_t u;                           /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-
     FUNC_ENTER_STATIC
 
     /* Sanity check */
@@ -440,7 +437,6 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
                  * list before we get here. */
                 tmp_size = (size_t)-1;
                 tmp_p = *pp;
-
                 if(H5S_encode(layout->storage.u.virt.list[u].source_select, pp, &tmp_size) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
                 *size += (size_t)(*pp - tmp_p);
@@ -3220,10 +3216,10 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
         H5T_path_t *tpath;      /* Conversion information */
 
         /* Retrieve pointer to datatype */
-	if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
-	/* Set the fill value */
+        /* Set the fill value */
         if(NULL == (fill.type = H5T_copy(type, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy datatype")
         fill.size = (ssize_t)H5T_get_size(type);
