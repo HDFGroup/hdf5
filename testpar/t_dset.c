@@ -4162,7 +4162,7 @@ dataset_atomicity(void)
     }
 
     /* should fail */
-    ret = H5Fset_mpi_atomicity (fid , TRUE);
+    ret = H5Fset_mpi_atomicity(fid , TRUE);
     VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
 
     if(MAINPROCESS){
@@ -4184,7 +4184,7 @@ dataset_atomicity(void)
     ret = H5Pclose(acc_tpl);
     VRFY((ret >= 0), "H5Pclose succeeded");
 
-    ret = H5Fset_mpi_atomicity (fid , TRUE);
+    ret = H5Fset_mpi_atomicity(fid , TRUE);
     VRFY((ret >= 0), "H5Fset_mpi_atomicity succeeded");
 
     /* open dataset1 (contiguous case) */
@@ -4203,7 +4203,7 @@ dataset_atomicity(void)
     }
 
     /* check that the atomicity flag is set */
-    ret = H5Fget_mpi_atomicity (fid , &atomicity);
+    ret = H5Fget_mpi_atomicity(fid , &atomicity);
     VRFY((ret >= 0), "atomcity get failed");
     VRFY((atomicity == TRUE), "atomcity set failed");
 
@@ -4272,7 +4272,7 @@ dataset_atomicity(void)
 
     atomicity = FALSE;
     /* check that the atomicity flag is set */
-    ret = H5Fget_mpi_atomicity (fid , &atomicity);
+    ret = H5Fget_mpi_atomicity(fid , &atomicity);
     VRFY((ret >= 0), "atomcity get failed");
     VRFY((atomicity == TRUE), "atomcity set failed");
 

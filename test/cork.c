@@ -1529,11 +1529,13 @@ error:
 static unsigned
 test_objs_cork(hbool_t swmr, hbool_t new_format)
 {
-    hid_t       fid;                    /* HDF5 File ID */
-    hid_t       fapl;                   /* File access property list */
-    hid_t       gid, did, tid;      /* Object IDs */
-    hid_t   sid;            /* Dataspace ID */
-    hid_t   aid;            /* Attribute ID */
+    hid_t   fid = H5I_INVALID_HID;                  /* HDF5 File ID */
+    hid_t   fapl = H5I_INVALID_HID;                 /* File access property list */
+    hid_t   gid = H5I_INVALID_HID;
+    hid_t   did = H5I_INVALID_HID;
+    hid_t   tid = H5I_INVALID_HID;                  /* Object IDs */
+    hid_t   sid = H5I_INVALID_HID;                  /* Dataspace ID */
+    hid_t   aid = H5I_INVALID_HID;                  /* Attribute ID */
     hsize_t     dims[RANK];     /* Dataset dimension sizes */
     hbool_t     corked;         /* Cork status of an object */
     unsigned flags;             /* File access flags */

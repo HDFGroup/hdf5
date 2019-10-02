@@ -25,7 +25,7 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5I_FRIEND		/*suppress error about including H5Ipkg	  */
+#define H5I_FRIEND        /*suppress error about including H5Ipkg      */
 
 /***********/
 /* Headers */
@@ -79,7 +79,7 @@
 /*******************/
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5_trace
  *
@@ -134,7 +134,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     /* FUNC_ENTER() should not be called */
 
     if(!out)
-        return 0.0F;	/*tracing is off*/
+        return 0.0F;    /*tracing is off*/
     HDva_start(ap, type);
 
     if(H5_debug_g.ttop) {
@@ -767,7 +767,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                     if(status >= 0)
                        HDfprintf(out, "SUCCEED");
-                    else 
+                    else
                        HDfprintf(out, "FAIL");
                 } /* end else */
                 break;
