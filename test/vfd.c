@@ -25,8 +25,13 @@
 #define FAMILY_SIZE     (1*KB)
 #define FAMILY_SIZE2    (5*KB)
 #define MULTI_SIZE      128
+
 #define CORE_INCREMENT  (4*KB)
-#define CORE_PAGE_SIZE  (1024 * 1024)
+#define CORE_PAGE_SIZE  (1024*KB)
+#define CORE_DSET_NAME  "core dset"
+#define CORE_DSET_DIM1  1024
+#define CORE_DSET_DIM2  32
+
 #define DSET1_NAME   "dset1"
 #define DSET1_DIM1   1024
 #define DSET1_DIM2   32
@@ -53,6 +58,7 @@ const char *FILENAME[] = {
     "stdio_file",        /*7*/
     "windows_file",      /*8*/
     "new_multi_file_v16",/*9*/
+    "ro_s3_file",        /*10*/
     NULL
 };
 
@@ -61,7 +67,7 @@ const char *FILENAME[] = {
 #define COMPAT_BASENAME "family_v16_"
 #define MULTI_COMPAT_BASENAME "multi_file_v16"
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_sec2
  *
@@ -78,56 +84,83 @@ const char *FILENAME[] = {
 static herr_t
 test_sec2(void)
 {
-    hid_t       file = -1;                   /* file ID                      */
-    hid_t       fapl = -1;               /* file access property list ID */
-    hid_t        access_fapl     = -1;
-    char         filename[1024];
-    int          *fhandle        = NULL;
-    hsize_t      file_size       = 0;
+    hid_t       fid = -1;                   /* file ID                      */
+    hid_t       fapl_id = -1;               /* file access property list ID */
+    hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
+    char        filename[1024];             /* filename                     */
+    void        *os_file_handle = NULL;     /* OS file handle               */
+    hsize_t     file_size;                  /* file size                    */
 
     TESTING("SEC2 file driver");
 
     /* Set property list and file name for SEC2 driver. */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
-    if(H5Pset_fapl_sec2(fapl) < 0)
+    if(H5Pset_fapl_sec2(fapl_id) < 0)
         TEST_ERROR;
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
 
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))     TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_POSIX_COMPAT_HANDLE))
+        TEST_ERROR
+
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
     /* Retrieve the access property list... */
-    if((access_fapl = H5Fget_access_plist(file)) < 0)
+    if((fapl_id_out = H5Fget_access_plist(fid)) < 0)
         TEST_ERROR;
 
     /* Check that the driver is correct */
-    if(H5FD_SEC2 != H5Pget_driver(access_fapl))
+    if(H5FD_SEC2 != H5Pget_driver(fapl_id_out))
         TEST_ERROR;
 
     /* ...and close the property list */
-    if(H5Pclose(access_fapl) < 0)
+    if(H5Pclose(fapl_id_out) < 0)
         TEST_ERROR;
 
-    /* Check file handle API */
-    if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle) < 0)
-        TEST_ERROR;
-    if(*fhandle < 0)
-        TEST_ERROR;
-
-    /* Check file size API */
-    if(H5Fget_filesize(file, &file_size) < 0)
-        TEST_ERROR;
-
-    /* There is no guarantee the size of metadata in file is constant.
-     * Just try to check if it's reasonable.  It's 2KB right now.
+    /* Check that we can get an operating-system-specific handle from
+     * the library.
      */
-    if(file_size < 1 * KB || file_size > 4 * KB)
+    if(H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
         TEST_ERROR;
-    h5_delete_test_file(FILENAME[0], fapl);
+    if(os_file_handle == NULL)
+        FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
+
+
+    /* There is no garantee the size of metadata in file is constant.
+     * Just try to check if it's reasonable.
+     *
+     * Currently it should be around 2 KB.
+     */
+    if(H5Fget_filesize(fid, &file_size) < 0)
+        TEST_ERROR;
+    if(file_size < 1 * KB || file_size > 4 * KB)
+        FAIL_PUTS_ERROR("suspicious file size obtained from H5Fget_filesize");
+
+    /* Close and delete the file */
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+    h5_delete_test_file(FILENAME[0], fapl_id);
 
     /* Close the fapl */
-    if(H5Pclose(fapl) < 0)
+    if(H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -135,14 +168,370 @@ test_sec2(void)
 
 error:
     H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Fclose(file);
+        H5Pclose(fapl_id);
+        H5Pclose(fapl_id_out);
+        H5Fclose(fid);
     } H5E_END_TRY;
     return -1;
-}
+} /* end test_sec2() */
 
 
-
+/*-------------------------------------------------------------------------
+ * Function:    test_core
+ *
+ * Purpose:     Tests the file handle interface for CORE driver
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Raymond Lu
+ *              Tuesday, Sept 24, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_core(void)
+{
+    hid_t       fid = -1;                   /* file ID                      */
+    hid_t       fapl_id = -1;               /* file access property list ID */
+    hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
+    hid_t       did = -1;                   /* dataset ID                   */
+    hid_t       sid = -1;                   /* dataspace ID                 */
+    char        filename[1024];             /* filename                     */
+    void        *os_file_handle = NULL;     /* OS file handle               */
+    hsize_t     file_size;                  /* file size                    */
+    size_t      increment;                  /* core VFD increment           */
+    hbool_t     backing_store;              /* use backing store?           */
+    hbool_t     use_write_tracking;         /* write tracking flag          */
+    size_t      write_tracking_page_size;   /* write tracking page size     */
+    int         *data_w = NULL;             /* data written to the dataset  */
+    int         *data_r = NULL;             /* data read from the dataset   */
+    int         val;                        /* data value                   */
+    int         *pw = NULL, *pr = NULL;     /* pointers for iterating over
+                                               data arrays (write & read)   */
+    hsize_t     dims[2];                    /* dataspace dimensions         */
+    int         i, j;                       /* iterators                    */
+    htri_t      status;                     /* return value from H5Lexists  */
+
+    TESTING("CORE file driver");
+
+    /* Get a file access property list and fix up the file name */
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
+
+    /************************************************************************
+     * Check that the backing store flag works by creating a file, close
+     * it, and ensure that the file does not exist.
+     ************************************************************************/
+
+    /* Make sure it's not present at the start of the test */
+    if(HDaccess(filename, F_OK) != -1)
+        if(HDremove(filename) < 0)
+            FAIL_PUTS_ERROR("unable to remove backing store file");
+
+    /* Create and close file w/ backing store off */
+    if(H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, FALSE) < 0)
+        TEST_ERROR;
+
+    /* Check that the VFD feature flags are correct.
+     * Note that the H5FDdriver_query() API call does not require a file
+     * so backing-store related flags will not be returned here.
+     */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))             TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))                      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))             TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ALLOW_FILE_IMAGE))                TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))    TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_ALLOW_FILE_IMAGE
+                        | H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
+        TEST_ERROR
+
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+    /* Check for the backing store file */
+    if(HDaccess(filename, F_OK) != -1)
+        FAIL_PUTS_ERROR("file created when backing store set to FALSE");
+
+    /************************************************************************
+     * Check basic core VFD operation and properties. This is done with the
+     * backing store on so a file will be created for later use.
+     ************************************************************************/
+
+    /* Turn the backing store on */
+    if(H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR;
+
+    /* Check that write tracking is off by default and that the default
+     * page size is non-zero.
+     */
+    if(H5Pget_core_write_tracking(fapl_id, &use_write_tracking, &write_tracking_page_size) < 0)
+        TEST_ERROR;
+    if(FALSE != use_write_tracking)
+        FAIL_PUTS_ERROR("write tracking should be off by default");
+    if(0 == write_tracking_page_size)
+        FAIL_PUTS_ERROR("write tracking page size should never be zero");
+
+    /* Set core VFD properties */
+    if(H5Pset_core_write_tracking(fapl_id, TRUE, CORE_PAGE_SIZE) < 0)
+        TEST_ERROR;
+
+    /* Create the file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve the access property list... */
+    if((fapl_id_out = H5Fget_access_plist(fid)) < 0)
+        TEST_ERROR;
+
+    /* Check that the driver is correct */
+    if(H5FD_CORE != H5Pget_driver(fapl_id_out))
+        TEST_ERROR;
+
+    /* Get the basic VFD properties from the fapl and ensure that
+     * they are correct.
+     */
+    if(H5Pget_fapl_core(fapl_id_out, &increment, &backing_store) < 0)
+        TEST_ERROR
+    if(increment != (size_t)CORE_INCREMENT)
+        FAIL_PUTS_ERROR("incorrect increment from file fapl");
+    if(backing_store != TRUE)
+        FAIL_PUTS_ERROR("incorrect backing store flag from file fapl");
+
+    /* Check that the backing store write tracking info was saved */
+    /* TODO: There is a bug where H5Fget_access_plist() does not return
+     *       the write tracking properties. Until this bug is fixed, just
+     *       test the main fapl_id.
+     */
+    if(H5Pget_core_write_tracking(fapl_id, &use_write_tracking, &write_tracking_page_size) < 0)
+        TEST_ERROR;
+    if(TRUE != use_write_tracking)
+        FAIL_PUTS_ERROR("write tracking flag incorrect in fapl obtained from H5Fget_access_plist");
+    if(CORE_PAGE_SIZE != write_tracking_page_size)
+        FAIL_PUTS_ERROR("write tracking page size incorrect in fapl obtained from H5Fget_access_plist");
+
+    /* Close the property list */
+    if(H5Pclose(fapl_id_out) < 0)
+        TEST_ERROR;
+
+    /* Check that we can get an operating-system-specific handle from
+     * the library.
+     */
+    if(H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
+        TEST_ERROR;
+    if(os_file_handle == NULL)
+        FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
+
+    /* There is no garantee the size of metadata in file is constant.
+     * Just try to check if it's reasonable.
+     *
+     * TODO: Needs justification of why is this is a reasonable size.
+     */
+    if(H5Fget_filesize(fid, &file_size) < 0)
+        TEST_ERROR;
+    if(file_size < 2 * KB || file_size > 6 * KB)
+        FAIL_PUTS_ERROR("suspicious file size obtained from H5Fget_filesize");
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+
+    /************************************************************************
+     * Make changes to the file with the backing store flag OFF to ensure
+     * that they ARE NOT propagated.
+     ************************************************************************/
+
+    /* Open the file with backing store off for read and write.
+     * Changes won't be saved in file.
+     */
+    if(H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, FALSE) < 0)
+        TEST_ERROR;
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
+
+    /* Allocate memory for data set. */
+    if(NULL == (data_w = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+        FAIL_PUTS_ERROR("unable to allocate memory for input array");
+    if(NULL == (data_r = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+        FAIL_PUTS_ERROR("unable to allocate memory for output array");
+
+    /* Initialize the buffers */
+    val = 0;
+    pw = data_w;
+    for(i = 0; i < CORE_DSET_DIM1; i++)
+        for(j = 0; j < CORE_DSET_DIM2; j++)
+            *pw++ = val++;
+    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
+
+    /* Create the dataspace */
+    dims[0] = CORE_DSET_DIM1;
+    dims[1] = CORE_DSET_DIM2;
+    if((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset */
+    if((did = H5Dcreate2(fid, CORE_DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_w) < 0)
+        TEST_ERROR;
+
+    /* Close and reopen the dataset */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if((did = H5Dopen2(fid, CORE_DSET_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Read the data back from dset1 */
+    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_r) < 0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    pw = data_w;
+    pr = data_r;
+    for(i = 0; i < CORE_DSET_DIM1; i++)
+        for(j = 0; j < CORE_DSET_DIM2; j++)
+            if(*pr++ != *pw++) {
+                H5_FAILED();
+                HDprintf("    Read different values than written in data set.\n");
+                HDprintf("    At index %d,%d\n", i, j);
+                TEST_ERROR;
+            } /* end if */
+
+    /* Close everything except the dataspace ID (needed below)*/
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Reopen the file and ensure that the dataset does not exist */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
+    status = H5Lexists(fid, CORE_DSET_NAME, H5P_DEFAULT);
+    if(status < 0)
+        TEST_ERROR;
+    if(status > 0)
+        FAIL_PUTS_ERROR("core VFD dataset created in file when backing store disabled");
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+
+    /************************************************************************
+     * Make changes to the file with the backing store flag ON to ensure
+     * that they ARE propagated.
+     ************************************************************************/
+
+    /* Open the file with backing store on for read and write.
+     * Changes will be saved in file.
+     */
+    if(H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR;
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset */
+    if((did = H5Dcreate2(fid, CORE_DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_w) < 0)
+        TEST_ERROR;
+
+    /* Close everything and reopen */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
+    if((did = H5Dopen2(fid, CORE_DSET_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Read the data back from the dataset */
+    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
+    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_r) < 0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    pw = data_w;
+    pr = data_r;
+    for(i = 0; i < CORE_DSET_DIM1; i++)
+        for(j = 0; j < CORE_DSET_DIM2; j++)
+            if(*pw++ != *pr++) {
+                H5_FAILED();
+                HDprintf("    Read different values than written in data set.\n");
+                HDprintf("    At index %d,%d\n", i, j);
+                TEST_ERROR;
+            } /* end if */
+
+    /* Check file size API.
+     * There is no garantee the size of metadata in file is constant.
+     * Just try to check if it's reasonable.
+     *
+     * TODO: Needs justification of why is this is a reasonable size.
+     */
+    if(H5Fget_filesize(fid, &file_size) < 0)
+        TEST_ERROR;
+    if(file_size < 64 * KB || file_size > 256 * KB)
+        FAIL_PUTS_ERROR("suspicious file size obtained from H5Fget_filesize");
+
+    /* Close everything */
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    HDfree(data_w);
+    HDfree(data_r);
+
+    /* Close and delete the file */
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+    h5_delete_test_file(FILENAME[1], fapl_id);
+
+    /* Close the fapl */
+    if(H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Pclose(fapl_id_out);
+        H5Pclose(fapl_id);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+    if(data_w)
+        HDfree(data_w);
+    if(data_r)
+        HDfree(data_r);
+
+    return -1;
+} /* end test_core() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    test_direct
  *
@@ -160,7 +549,7 @@ static herr_t
 test_direct(void)
 {
 #ifdef H5_HAVE_DIRECT
-    hid_t       file=(-1), fapl, access_fapl = -1;
+    hid_t       file=-1, fapl=-1, access_fapl = -1;
     hid_t  dset1=-1, dset2=-1, space1=-1, space2=-1;
     char        filename[1024];
     int         *fhandle=NULL;
@@ -169,7 +558,7 @@ test_direct(void)
     size_t  mbound;
     size_t  fbsize;
     size_t  cbsize;
-    int    *points = NULL, *check = NULL, *p1, *p2;
+    int    *points = NULL, *check = NULL, *p1 = NULL, *p2 = NULL;
     int    wdata2[DSET2_DIM] = {11,12,13,14};
     int    rdata2[DSET2_DIM];
     int    i, j, n;
@@ -327,14 +716,14 @@ test_direct(void)
         TEST_ERROR;
     if(H5Dclose(dset2) < 0)
         TEST_ERROR;
-    if(H5Fclose(file) < 0)
-        TEST_ERROR;
-    HDassert(points);
+
     HDfree(points);
-    HDassert(check);
     HDfree(check);
 
-    h5_delete_test_file(FILENAME[1], fapl);
+    /* Close and delete the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+    h5_delete_test_file(FILENAME[5], fapl);
 
     /* Close the fapl */
     if(H5Pclose(fapl) < 0)
@@ -362,241 +751,7 @@ error:
 #endif /*H5_HAVE_DIRECT*/
 }
 
-
-/*-------------------------------------------------------------------------
- * Function:    test_core
- *
- * Purpose:     Tests the file handle interface for CORE driver
- *
- * Return:      Success:        0
- *              Failure:        -1
- *
- * Programmer:  Raymond Lu
- *              Tuesday, Sept 24, 2002
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-test_core(void)
-{
-    hid_t       file=(-1), fapl, access_fapl = -1;
-    char        filename[1024];
-    void        *fhandle=NULL;
-    hsize_t     file_size;
-    hbool_t     use_write_tracking;
-    size_t      write_tracking_page_size;
-    int    *points = NULL, *check = NULL, *p1, *p2;
-    hid_t  dset1=-1, space1=-1;
-    hsize_t  dims1[2];
-    int    i, j, n;
 
-    TESTING("CORE file driver");
-
-    /* Set property list and file name for CORE driver */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        TEST_ERROR;
-    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
-        TEST_ERROR;
-    if(H5Pset_core_write_tracking(fapl, TRUE, CORE_PAGE_SIZE) < 0)
-        TEST_ERROR;
-    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR;
-
-    /* Retrieve the access property list... */
-    if ((access_fapl = H5Fget_access_plist(file)) < 0)
-        TEST_ERROR;
-
-    /* Check that the driver is correct */
-    if(H5FD_CORE != H5Pget_driver(access_fapl))
-        TEST_ERROR;
-
-    /* Check that the backing store write tracking info was saved */
-    if(H5Pget_core_write_tracking(fapl, &use_write_tracking, &write_tracking_page_size) < 0)
-        TEST_ERROR;
-    if(TRUE != use_write_tracking)
-        TEST_ERROR;
-    if(CORE_PAGE_SIZE != write_tracking_page_size)
-        TEST_ERROR;
-
-    /* ...and close the property list */
-    if (H5Pclose(access_fapl) < 0)
-        TEST_ERROR;
-
-    if(H5Fget_vfd_handle(file, H5P_DEFAULT, &fhandle) < 0)
-        TEST_ERROR;
-    if(fhandle==NULL)
-    {
-        HDprintf("fhandle==NULL\n");
-               TEST_ERROR;
-    }
-
-    /* Check file size API */
-    if(H5Fget_filesize(file, &file_size) < 0)
-        TEST_ERROR;
-
-    /* There is no garantee the size of metadata in file is constant.
-     * Just try to check if it's reasonable.  Why is this 4KB?
-     */
-    if(file_size<2*KB || file_size>6*KB)
-        TEST_ERROR;
-
-    if(H5Fclose(file) < 0)
-        TEST_ERROR;
-
-
-    /* Open the file with backing store off for read and write.
-     * Changes won't be saved in file. */
-    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, FALSE) < 0)
-        TEST_ERROR;
-
-    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        TEST_ERROR;
-
-    /* Allocate memory for data set. */
-    if(NULL == (points = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
-        TEST_ERROR;
-    if(NULL == (check = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
-        TEST_ERROR;
-
-    /* Initialize the dset1 */
-    p1 = points;
-    for(i = n = 0; i < DSET1_DIM1; i++)
-        for(j = 0; j < DSET1_DIM2; j++)
-            *p1++ = n++;
-
-    /* Create the data space1 */
-    dims1[0] = DSET1_DIM1;
-    dims1[1] = DSET1_DIM2;
-    if((space1 = H5Screate_simple(2, dims1, NULL)) < 0)
-        TEST_ERROR;
-
-    /* Create the dset1 */
-    if((dset1 = H5Dcreate2(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-
-    /* Write the data to the dset1 */
-    if(H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
-        TEST_ERROR;
-
-    if(H5Dclose(dset1) < 0)
-        TEST_ERROR;
-
-    if((dset1 = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-
-    /* Read the data back from dset1 */
-    if(H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0)
-        TEST_ERROR;
-
-    /* Check that the values read are the same as the values written */
-    p1 = points;
-    p2 = check;
-    for(i = 0; i < DSET1_DIM1; i++)
-        for(j = 0; j < DSET1_DIM2; j++)
-            if(*p1++ != *p2++) {
-                H5_FAILED();
-                HDprintf("    Read different values than written in data set 1.\n");
-                HDprintf("    At index %d,%d\n", i, j);
-                TEST_ERROR;
-            } /* end if */
-
-    if(H5Dclose(dset1) < 0)
-        TEST_ERROR;
-
-    if(H5Fclose(file) < 0)
-        TEST_ERROR;
-
-    /* Open the file with backing store on for read and write.
-     * Changes will be saved in file. */
-    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
-        TEST_ERROR;
-
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        TEST_ERROR;
-
-    /* Create the dset1 */
-    if((dset1 = H5Dcreate2(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-
-    /* Write the data to the dset1 */
-    if(H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
-        TEST_ERROR;
-
-    if(H5Dclose(dset1) < 0)
-        TEST_ERROR;
-
-    if((dset1 = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-
-    /* Reallocate memory for reading buffer. */
-    HDassert(check);
-    HDfree(check);
-    if(NULL == (check = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
-        TEST_ERROR;
-
-    /* Read the data back from dset1 */
-    if(H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0)
-        TEST_ERROR;
-
-    /* Check that the values read are the same as the values written */
-    p1 = points;
-    p2 = check;
-    for(i = 0; i < DSET1_DIM1; i++)
-        for(j = 0; j < DSET1_DIM2; j++)
-            if(*p1++ != *p2++) {
-                H5_FAILED();
-                HDprintf("    Read different values than written in data set 1.\n");
-                HDprintf("    At index %d,%d\n", i, j);
-                TEST_ERROR;
-            } /* end if */
-
-    /* Check file size API */
-    if(H5Fget_filesize(file, &file_size) < 0)
-        TEST_ERROR;
-
-    /* There is no garantee the size of metadata in file is constant.
-     * Just try to check if it's reasonable. */
-    if(file_size<64*KB || file_size>256*KB)
-        TEST_ERROR;
-
-    if(H5Sclose(space1) < 0)
-        TEST_ERROR;
-    if(H5Dclose(dset1) < 0)
-        TEST_ERROR;
-    HDassert(points);
-    HDfree(points);
-    HDassert(check);
-    HDfree(check);
-
-    /* Close and delete the file */
-    if(H5Fclose(file) < 0)
-        TEST_ERROR;
-    h5_delete_test_file(FILENAME[5], fapl);
-
-    /* Close the fapl */
-    if(H5Pclose(fapl) < 0)
-        TEST_ERROR;
-
-    PASSED();
-    return 0;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Fclose(file);
-    } H5E_END_TRY;
-
-    if(points)
-        HDfree(points);
-    if(check)
-        HDfree(check);
-
-    return -1;
-}
-
-
 /*-------------------------------------------------------------------------
  * Function:    test_family_opens
  *
@@ -611,6 +766,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'first_name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_family_opens(char *fname, hid_t fa_pl)
 {
@@ -667,8 +830,9 @@ test_family_opens(char *fname, hid_t fa_pl)
 error:
     return -1;
 } /* end test_family_opens() */
+#pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family
  *
@@ -687,6 +851,8 @@ test_family(void)
 {
     hid_t       file=-1, fapl=-1, fapl2=-1, space=-1, dset=-1;
     hid_t       access_fapl = -1;
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char        filename[1024];
     char        dname[]="dataset";
     unsigned int i, j;
@@ -703,6 +869,22 @@ test_family(void)
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA))
+        TEST_ERROR
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -832,7 +1014,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family_compat
  *
@@ -851,6 +1033,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'newname_individual', etc. in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_family_compat(void)
 {
@@ -934,26 +1124,34 @@ error:
 
     return -1;
 } /* end test_family_compat() */
+#pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi_opens
  *
  * Purpose:     Private function for test_multi() to tests wrong ways of
  *              reopening multi file.
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Thursday, May 19, 2005
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'sf_name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_multi_opens(char *fname)
 {
-    hid_t file=-1;
+    hid_t fid = H5I_INVALID_HID;
     char  super_name[1024];     /*name string "%%s-s.h5"*/
     char  sf_name[1024];        /*name string "multi_file-s.h5"*/
 
@@ -962,20 +1160,20 @@ test_multi_opens(char *fname)
     HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
 
     H5E_BEGIN_TRY {
-        file = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+        fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
 
-    return(file >= 0 ? -1 : 0);
-}
+    return(fid >= 0 ? FAIL : SUCCEED);
+} /* end test_multi_opens() */
+#pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi
  *
  * Purpose:     Tests the file handle interface for MUTLI driver
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
@@ -988,6 +1186,8 @@ test_multi(void)
     hid_t       file=-1, fapl=-1, fapl2=-1, dset=-1, space=-1;
     hid_t       root=-1, attr=-1, aspace=-1, atype=-1;
     hid_t       access_fapl = -1;
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char        filename[1024];
     int         *fhandle2=NULL, *fhandle=NULL;
     hsize_t     file_size;
@@ -1043,6 +1243,18 @@ test_multi(void)
     if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA))
+        TEST_ERROR
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1136,7 +1348,7 @@ test_multi(void)
     if((atype = H5Tcopy(H5T_C_S1)) < 0)
         TEST_ERROR;
 
-    if(H5Tset_size(atype, strlen(meta) + 1) < 0)
+    if(H5Tset_size(atype, HDstrlen(meta) + 1) < 0)
         TEST_ERROR;
 
     if(H5Tset_strpad(atype, H5T_STR_NULLTERM) < 0)
@@ -1171,7 +1383,7 @@ test_multi(void)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -1180,18 +1392,19 @@ error:
         H5Pclose(fapl);
         H5Pclose(fapl2);
         H5Fclose(file);
+        H5Aclose(attr);
     } H5E_END_TRY;
-    return -1;
-}
+    return FAIL;
+} /* end test_multi() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi_compat
  *
  * Purpose:     Tests the backward compatibility for MULTI driver.
  *              See if we can open files created with v1.6 library.
  *              The source file was created by the test/file_handle.c
- *              of the v1.6 library.  This test verifies the fix for 
+ *              of the v1.6 library.  This test verifies the fix for
  *              Issue 2598. In v1.6 library, there was EOA for the whole
  *              MULTI file saved in the super block.  We took it out in
  *              v1.8 library because it's meaningless for the MULTI file.
@@ -1252,8 +1465,9 @@ test_multi_compat(void)
 
     h5_fixname(FILENAME[9], fapl, newname, sizeof newname);
 
-    /* Make copy for the data file in the build directory, to protect the 
-     * original file in the source directory */
+    /* Make copy for the data file in the build directory, to protect the
+     * original file in the source directory
+     */
     HDsprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
     HDsprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
     h5_make_local_copy(filename_s, newname_s);
@@ -1263,7 +1477,8 @@ test_multi_compat(void)
     h5_make_local_copy(filename_r, newname_r);
 
     /* Reopen the file for read only.  Verify 1.8 library can open file
-     * created with 1.6 library. */
+     * created with 1.6 library.
+     */
     if((file=H5Fopen(newname, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
 
@@ -1289,7 +1504,7 @@ test_multi_compat(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
 
-    /* Reopen the file for adding another dataset. The new EOA for metadata file 
+    /* Reopen the file for adding another dataset. The new EOA for metadata file
      * should be written to the file */
     if((file=H5Fopen(newname, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
@@ -1316,7 +1531,7 @@ test_multi_compat(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
 
-    /* Reopen the file for read only again. Verify the library can handle 
+    /* Reopen the file for read only again. Verify the library can handle
      * the EOA correctly */
     if((file=H5Fopen(newname, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
@@ -1356,7 +1571,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_log
  *
@@ -1376,6 +1591,8 @@ test_log(void)
     hid_t        file            = -1;
     hid_t        fapl            = -1;
     hid_t        access_fapl     = -1;
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char         filename[1024];
     int          *fhandle        = NULL;
     hsize_t      file_size       = 0;
@@ -1390,6 +1607,24 @@ test_log(void)
     if(H5Pset_fapl_log(fapl, LOG_FILENAME, flags, buf_size) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))     TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_POSIX_COMPAT_HANDLE))
+        TEST_ERROR
 
     /* Create the test file */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -1443,7 +1678,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_stdio
  *
@@ -1463,6 +1698,8 @@ test_stdio(void)
     hid_t        file            = -1;
     hid_t        fapl            = -1;
     hid_t        access_fapl     = -1;
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char         filename[1024];
     FILE         *fhandle        = NULL;
     hsize_t      file_size       = 0;
@@ -1475,6 +1712,22 @@ test_stdio(void)
     if(H5Pset_fapl_stdio(fapl) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[7], fapl, filename, sizeof filename);
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA))
+        TEST_ERROR
 
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1528,7 +1781,7 @@ error:
 }
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_windows
  *
@@ -1550,6 +1803,8 @@ test_windows(void)
     hid_t        file            = -1;
     hid_t        fapl            = -1;
     hid_t        access_fapl     = -1;
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
     char         filename[1024];
     int          *fhandle        = NULL;
     hsize_t      file_size       = 0;
@@ -1571,6 +1826,24 @@ test_windows(void)
     if(H5Pset_fapl_windows(fapl) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl)) < 0)
+        TEST_ERROR
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))      TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))              TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))     TEST_ERROR
+    if(!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))     TEST_ERROR
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_AGGREGATE_METADATA
+                        | H5FD_FEAT_ACCUMULATE_METADATA
+                        | H5FD_FEAT_DATA_SIEVE
+                        | H5FD_FEAT_AGGREGATE_SMALLDATA
+                        | H5FD_FEAT_POSIX_COMPAT_HANDLE))
+        TEST_ERROR
 
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1623,10 +1896,107 @@ error:
     return -1;
 
 #endif /* H5_HAVE_WINDOWS */
-}
+} /* end test_windows() */
 
 
-
+/*-------------------------------------------------------------------------
+ * Function:    test_ros3
+ *
+ * Purpose:     Tests the file handle interface for the ROS3 driver
+ *
+ *              As the ROS3 driver is 1) read only, 2) requires access
+ *              to an S3 server (minio for now), this test is quite
+ *              different from the other tests.
+ *
+ *              For now, test only fapl & flags.  Extend as the
+ *              work on the VFD continues.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  John Mainzer
+ *              7/12/17
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_ros3(void)
+{
+#ifdef H5_HAVE_ROS3_VFD
+    hid_t       fid = -1;                   /* file ID                      */
+    hid_t       fapl_id = -1;               /* file access property list ID */
+    hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
+    char        filename[1024];             /* filename                     */
+    void        *os_file_handle = NULL;     /* OS file handle               */
+    hsize_t     file_size;                  /* file size                    */
+    H5FD_ros3_fapl_t test_ros3_fa;
+    H5FD_ros3_fapl_t ros3_fa_0 =
+    {
+        /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,
+        /* authenticate = */ FALSE,
+        /* aws_region   = */ "",
+        /* secret_id    = */ "",
+        /* secret_key   = */ "plugh",
+    };
+#endif /*H5_HAVE_ROS3_VFD */
+
+    TESTING("Read-only S3 file driver");
+
+#ifndef H5_HAVE_ROS3_VFD
+    SKIPPED();
+    return 0;
+#else /* H5_HAVE_ROS3_VFD */
+
+    /* Set property list and file name for ROS3 driver. */
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    if(H5Pset_fapl_ros3(fapl_id, &ros3_fa_0) < 0)
+        TEST_ERROR;
+
+    /* verify that the ROS3 FAPL entry is set as expected */
+    if(H5Pget_fapl_ros3(fapl_id, &test_ros3_fa) < 0)
+        TEST_ERROR;
+
+    /* need a macro to compare instances of H5FD_ros3_fapl_t */
+    if((test_ros3_fa.version != ros3_fa_0.version) ||
+       (test_ros3_fa.authenticate != ros3_fa_0.authenticate) ||
+       (strcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
+       (strcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
+       (strcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[10], fapl_id, filename, sizeof(filename));
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR;
+
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR;
+
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))
+        TEST_ERROR
+
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_DATA_SIEVE))
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_id);
+        H5Pclose(fapl_id_out);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+#endif /* H5_HAVE_ROS3_VFD */
+} /* end test_ros3() */
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -1651,22 +2021,24 @@ main(void)
 
     nerrors += test_sec2() < 0           ? 1 : 0;
     nerrors += test_core() < 0           ? 1 : 0;
+    nerrors += test_direct() < 0         ? 1 : 0;
     nerrors += test_family() < 0         ? 1 : 0;
     nerrors += test_family_compat() < 0  ? 1 : 0;
     nerrors += test_multi() < 0          ? 1 : 0;
     nerrors += test_multi_compat() < 0   ? 1 : 0;
-    nerrors += test_direct() < 0         ? 1 : 0;
     nerrors += test_log() < 0            ? 1 : 0;
     nerrors += test_stdio() < 0          ? 1 : 0;
     nerrors += test_windows() < 0        ? 1 : 0;
+    nerrors += test_ros3() < 0           ? 1 : 0;
 
     if(nerrors) {
-  HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n",
-    nerrors, nerrors > 1 ? "S" : "");
-  return 1;
-    }
+        HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n",
+            nerrors, nerrors > 1 ? "S" : "");
+        return 1;
+    } /* end if */
 
     HDprintf("All Virtual File Driver tests passed.\n");
+
     return 0;
-}
+} /* end main() */
 

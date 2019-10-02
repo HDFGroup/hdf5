@@ -158,7 +158,7 @@ int do_copy_refobjs(hid_t fidin,
                         if(nelmts) {
                             buf = (hobj_ref_t *)HDmalloc((unsigned)(nelmts * msize));
                             if(buf==NULL) {
-                                printf("cannot read into memory\n" );
+                                HDprintf("cannot read into memory\n" );
                                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDmalloc failed");
                             } /* end if */
                             if(H5Dread(dset_in, mtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
@@ -166,7 +166,7 @@ int do_copy_refobjs(hid_t fidin,
 
                             refbuf = (hobj_ref_t*) HDcalloc((unsigned)nelmts, msize);
                             if(refbuf == NULL){
-                                printf("cannot allocate memory\n" );
+                                HDprintf("cannot allocate memory\n" );
                                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDcalloc failed");
                             } /* end if */
                             for(u = 0; u < nelmts; u++) {
@@ -183,8 +183,8 @@ int do_copy_refobjs(hid_t fidin,
                                     if(H5Rcreate(&refbuf[u], fidout, refname, H5R_OBJECT, (hid_t)-1) < 0)
                                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Rcreate failed");
                                     if(options->verbose) {
-                                        printf(FORMAT_OBJ,"dset",travt->objs[i].name );
-                                        printf("object <%s> object reference created to <%s>\n",
+                                        HDprintf(FORMAT_OBJ,"dset",travt->objs[i].name );
+                                        HDprintf("object <%s> object reference created to <%s>\n",
                                             travt->objs[i].name,
                                             refname);
                                     }
@@ -234,7 +234,7 @@ int do_copy_refobjs(hid_t fidin,
                         if(nelmts) {
                             buf = (hdset_reg_ref_t *)HDmalloc((unsigned)(nelmts * msize));
                             if(buf == NULL) {
-                                printf("cannot read into memory\n");
+                                HDprintf("cannot read into memory\n");
                                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDmalloc failed");
                             } /* end if */
                             if(H5Dread(dset_in, mtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
@@ -246,7 +246,7 @@ int do_copy_refobjs(hid_t fidin,
                              */
                             refbuf = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)nelmts); /*init to zero */
                             if(refbuf == NULL) {
-                                printf("cannot allocate memory\n");
+                                HDprintf("cannot allocate memory\n");
                                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDcalloc failed");
                             } /* end if */
 
@@ -271,8 +271,8 @@ int do_copy_refobjs(hid_t fidin,
                                     if(H5Sclose(region_id) < 0)
                                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
                                     if(options->verbose) {
-                                        printf(FORMAT_OBJ,"dset",travt->objs[i].name );
-                                        printf("object <%s> region reference created to <%s>\n",
+                                        HDprintf(FORMAT_OBJ,"dset",travt->objs[i].name );
+                                        HDprintf("object <%s> region reference created to <%s>\n",
                                             travt->objs[i].name,
                                             refname);
                                     }
@@ -592,7 +592,7 @@ static int copy_refs_attr(hid_t loc_in,
             if((is_ref || is_ref_array) && (H5R_OBJ_REF_BUF_SIZE==msize)) {
                 buf = (hobj_ref_t *)HDmalloc((unsigned)(nelmts * msize));
                 if(buf == NULL) {
-                    printf("cannot read into memory\n");
+                    HDprintf("cannot read into memory\n");
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDmalloc failed");
                 } /* end if */
                 if(H5Aread(attr_id, mtype_id, buf) < 0)
@@ -600,12 +600,12 @@ static int copy_refs_attr(hid_t loc_in,
 
                 refbuf = (hobj_ref_t *)HDcalloc((unsigned)nelmts, msize);
                 if(refbuf == NULL) {
-                    printf("cannot allocate memory\n");
+                    HDprintf("cannot allocate memory\n");
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDcalloc failed");
                 } /* end if */
 
                 for(i = 0; i < (unsigned)nelmts; i++) {
-                    if (update_ref_value(attr_id, H5R_OBJECT, &((hobj_ref_t *)buf)[i], fidout, &((hobj_ref_t *)refbuf)[i], travt)<0)
+                    if(update_ref_value(attr_id, H5R_OBJECT, &((hobj_ref_t *)buf)[i], fidout, &((hobj_ref_t *)refbuf)[i], travt) < 0)
                         continue;
                     if(options->verbose)
                         printf("object <%s> reference created to <%s>\n", name, refname);
@@ -616,7 +616,7 @@ static int copy_refs_attr(hid_t loc_in,
                 buf = (hdset_reg_ref_t *)HDmalloc((unsigned)(nelmts * msize));
 
                 if(buf == NULL) {
-                    printf( "cannot read into memory\n" );
+                    HDprintf( "cannot read into memory\n" );
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDmalloc failed");
                 } /* end if */
                 if(H5Aread(attr_id, mtype_id, buf) < 0)
@@ -628,12 +628,12 @@ static int copy_refs_attr(hid_t loc_in,
                  */
                 refbuf = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)nelmts); /*init to zero */
                 if(refbuf == NULL) {
-                    printf( "cannot allocate memory\n" );
+                    HDprintf( "cannot allocate memory\n" );
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDcalloc failed");
                 } /* end if */
 
                 for(i = 0; i < (unsigned)nelmts; i++) {
-                    if (update_ref_value(attr_id, H5R_DATASET_REGION, &((hdset_reg_ref_t *)buf)[i], fidout, &((hdset_reg_ref_t *)refbuf)[i], travt)<0)
+                    if(update_ref_value(attr_id, H5R_DATASET_REGION, &((hdset_reg_ref_t *)buf)[i], fidout, &((hdset_reg_ref_t *)refbuf)[i], travt) < 0)
                         continue;
                     if(options->verbose)
                         printf("object <%s> region reference created to <%s>\n", name, refname);
@@ -646,7 +646,7 @@ static int copy_refs_attr(hid_t loc_in,
                 refbuf = buf; /* reuse the read buffer for write */
 
                 if(buf == NULL) {
-                    printf( "cannot read into memory\n" );
+                    HDprintf( "cannot read into memory\n" );
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDmalloc failed");
                 } /* end if */
 
@@ -687,7 +687,7 @@ static int copy_refs_attr(hid_t loc_in,
                 refbuf = buf; /* reuse the read buffer for write */
 
                 if(buf == NULL) {
-                    printf( "cannot read into memory\n" );
+                    HDprintf( "cannot read into memory\n" );
                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDmalloc failed");
                 } /* end if */
 
@@ -700,7 +700,7 @@ static int copy_refs_attr(hid_t loc_in,
                             size_t idx = (i * msize) + H5Tget_member_offset(mtype_id, ref_comp_index[j]);
                             hobj_ref_t ref_out;
 
-                            if (update_ref_value(attr_id, H5R_OBJECT, (hobj_ref_t *)(((char *)buf)+idx), fidout, &ref_out, travt)<0)
+                            if (update_ref_value(attr_id, H5R_OBJECT, (hobj_ref_t *)((void *)(((char *)buf)+idx)), fidout, &ref_out, travt) < 0) /* Extra (void *) cast to quiet "cast to create alignment" warning - 2019/07/05, QAK */
                                 continue;
                             HDmemcpy(((char *)buf)+idx, &ref_out, ref_comp_size[j]);
                         } /* if */

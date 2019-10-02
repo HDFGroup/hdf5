@@ -19,10 +19,7 @@
 /* Name of tool */
 #define PROGRAMNAME "h5jam"
 
-#define TRUE 1
-#define FALSE 0
-
-hsize_t write_pad (int, hsize_t);
+herr_t write_pad(int ofile, hsize_t old_where, hsize_t *new_where);
 hsize_t compute_user_block_size (hsize_t);
 hsize_t copy_some_to_file (int, int, hsize_t, hsize_t, ssize_t);
 void parse_command_line (int, const char *[]);
@@ -313,7 +310,7 @@ main (int argc, const char *argv[])
     h5fsize = (hsize_t)sbuf2.st_size;
 
     if (output_file == NULL) {
-        ofid = HDopen (input_file, O_WRONLY, 0);
+        ofid = HDopen(input_file, O_WRONLY, 0);
 
         if (ofid < 0) {
             error_msg("unable to open output file \"%s\"\n", output_file);
@@ -323,7 +320,7 @@ main (int argc, const char *argv[])
         }
     }
     else {
-        ofid = HDopen (output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        ofid = HDopen(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
         if (ofid < 0) {
             error_msg("unable to create output file \"%s\"\n", output_file);
@@ -366,7 +363,13 @@ main (int argc, const char *argv[])
     where = copy_some_to_file(ufid, ofid, (hsize_t) 0, startub, (ssize_t) - 1);
 
     /* pad the ub */
-    where = write_pad (ofid, where);
+    if(write_pad(ofid, where, &where) < 0) {
+        error_msg("Can't pad file \"%s\"\n", output_file);
+        HDclose (h5fid);
+        HDclose (ufid);
+        HDclose (ofid);
+        leave (EXIT_FAILURE);
+    } /* end if */
 
     if(ub_file)
         HDfree(ub_file);
@@ -503,7 +506,7 @@ copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout,
  *-------------------------------------------------------------------------
  */
 hsize_t
-compute_user_block_size (hsize_t ublock_size)
+compute_user_block_size(hsize_t ublock_size)
 {
     hsize_t where = 512;
 
@@ -521,23 +524,30 @@ compute_user_block_size (hsize_t ublock_size)
  *
  *  Returns the size of the padded file.
  */
-hsize_t
-write_pad(int ofile, hsize_t where)
+herr_t
+write_pad(int ofile, hsize_t old_where, hsize_t *new_where)
 {
     unsigned int i;
     char buf[1];
     hsize_t psize;
 
+    if(new_where == NULL)
+        return FAIL;
+
     buf[0] = '\0';
 
-    HDlseek(ofile, (off_t) where, SEEK_SET);
+    HDlseek(ofile, (off_t)old_where, SEEK_SET);
 
-    psize = compute_user_block_size (where);
-    psize -= where;
+    psize = compute_user_block_size(old_where);
+    psize -= old_where;
 
     for(i = 0; i < psize; i++)
-        HDwrite (ofile, buf, 1);
+        if(HDwrite(ofile, buf, 1) < 0)
+            return FAIL;
 
-    return(where + psize);  /* the new size of the file. */
-}
+    /* Set the new size of the file. */
+    *new_where = old_where + psize;
+
+    return SUCCEED;
+} /* end write_pad() */
 

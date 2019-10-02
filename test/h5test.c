@@ -113,8 +113,7 @@ static H5E_auto2_t err_func = NULL;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
 static char *h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix,
-                              char *fullname, size_t size);
-
+                              char *fullname, size_t size, hbool_t nest_printf);
 
 /*-------------------------------------------------------------------------
  * Function:  h5_errors
@@ -477,7 +476,7 @@ h5_test_init(void)
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE));
 }
 
 
@@ -497,7 +496,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 char *
 h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, NULL, fullname, size));
+    return (h5_fixname_real(base_name, fapl, NULL, fullname, size, FALSE));
 }
 
 
@@ -523,7 +522,7 @@ h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t s
 char *
 h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, TRUE));
 }
 
 
@@ -551,7 +550,7 @@ h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size
  */
 static char *
 h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
-                char *fullname, size_t size)
+                char *fullname, size_t size, hbool_t nest_printf)
 {
     const char     *prefix = NULL;
     const char     *env = NULL;    /* HDF5_DRIVER environment variable     */
@@ -572,10 +571,30 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
             return NULL;
 
         if(suffix) {
-            if(H5FD_FAMILY == driver)
-                suffix = "%05d.h5";
-            else if (H5FD_MULTI == driver)
-                suffix = NULL;
+            if(H5FD_FAMILY == driver) {
+                suffix = nest_printf ? "%%05d.h5" : "%05d.h5";
+            }
+            else if (H5FD_MULTI == driver) {
+
+                /* Get the environment variable, if it exists, in case
+                 * we are using the split driver since both of those
+                 * use the multi VFD under the hood.
+                 */
+                env = HDgetenv("HDF5_DRIVER");
+#ifdef HDF5_DRIVER
+                /* Use the environment variable, then the compile-time constant */
+                if(!env)
+                    env = HDF5_DRIVER;
+#endif
+                if(env && !HDstrcmp(env, "split")) {
+                    /* split VFD */
+                    suffix = NULL;
+                }
+                else {
+                    /* multi VFD */
+                    suffix = NULL;
+                }
+            }
         }
     }
 

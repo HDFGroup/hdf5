@@ -83,8 +83,7 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
         HDexit(EXIT_FAILURE);
     } /* end if */
     if (HDstrlen(TheName) >= MAXTESTNAME) {
-        HDprintf("Test name too long, increase MAXTESTNAME(%d).\n",
-                MAXTESTNAME);
+        HDprintf("Test name too long, increase MAXTESTNAME(%d).\n", MAXTESTNAME);
         HDexit(EXIT_FAILURE);
     } /* end if */
 
@@ -96,7 +95,7 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
         /* Reallocate array */
         if(NULL == (newTest = (TestStruct *)HDrealloc(Test, newAlloc * sizeof(TestStruct)))) {
             HDprintf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc, newAlloc);
-            exit(EXIT_FAILURE);
+            HDexit(EXIT_FAILURE);
         } /* end if */
 
         /* Update info */

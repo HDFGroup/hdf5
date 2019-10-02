@@ -112,6 +112,7 @@
 #define FILE83  "tvlenstr_array.h5"
 #define FILE84  "tudfilter.h5"
 #define FILE85  "tgrpnullspace.h5"
+#define FILE87  "tintsnodata.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -2683,14 +2684,14 @@ gent_vldatatypes2(void)
     for(i = 0; i < SPACE1_DIM1; i++) {
         wdata[i].p = (hvl_t *)HDmalloc((i + 1) * sizeof(hvl_t));
         if(wdata[i].p == NULL) {
-            printf("Cannot allocate memory for VL data! i=%u\n", i);
+            HDprintf("Cannot allocate memory for VL data! i=%u\n", i);
             return;
         } /* end if */
         wdata[i].len = i + 1;
         for(t1 = (hvl_t *)wdata[i].p, j = 0; j < (i + 1); j++, t1++) {
             t1->p = (unsigned *)HDmalloc((j + 1) * sizeof(unsigned));
             if(t1->p == NULL) {
-                printf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
+                HDprintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
                 return;
             } /* end if */
             t1->len=j+1;
@@ -3739,7 +3740,7 @@ void gent_multi(void)
         memb_map[mt] = mt;
         HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
         memb_name[mt] = sv[mt];
-        /*printf("memb_name[%d]=%s, memb_map[%d]=%d; ", mt, memb_name[mt], mt, memb_map[mt]);*/
+        /*HDprintf("memb_name[%d]=%s, memb_map[%d]=%d; ", mt, memb_name[mt], mt, memb_map[mt]);*/
         memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
     }
     memb_map[H5FD_MEM_DEFAULT] = H5FD_MEM_SUPER;
@@ -6248,8 +6249,8 @@ static int gent_ldouble(void)
 
     return 0;
 
-    error:
-    printf("error !\n");
+error:
+    HDprintf("error !\n");
     return -1;
 
 }
@@ -6412,7 +6413,7 @@ gent_bigdims(void)
     return;
 
     out:
-    printf("Error.....\n");
+    HDprintf("Error.....\n");
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
         H5Sclose(f_sid);
@@ -6604,7 +6605,7 @@ gent_group_creation_order(void)
     return;
 
     out:
-    printf("Error.....\n");
+    HDprintf("Error.....\n");
     H5E_BEGIN_TRY {
         H5Gclose(gid);
         H5Pclose(gcpl_id);
@@ -6873,7 +6874,7 @@ gent_attr_creation_order(void)
     return;
 
     out:
-    printf("Error.....\n");
+    HDprintf("Error.....\n");
     H5E_BEGIN_TRY {
         H5Gclose(gid);
         H5Dclose(did);
@@ -7388,6 +7389,80 @@ gent_attr_intsize(void)
     H5Gclose(root);
     H5Fclose(fid);
 }
+
+static void
+gent_nodata(void)
+{
+    hid_t fid, dataset, space;
+    hsize_t dims[2];
+
+    fid = H5Fcreate(FILE87, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Dataset of 8 bits unsigned int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM8;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETU08, H5T_STD_U8LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 16 bits unsigned int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM16;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETU16, H5T_STD_U16LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 32 bits unsigned int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM32;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETU32, H5T_STD_U32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 64 bits unsigned int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM64;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETU64, H5T_STD_U64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 8 bits signed int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM8;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETS08, H5T_STD_I8LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 16 bits signed int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM16;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETS16, H5T_STD_I16LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 32 bits signed int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM32;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETS32, H5T_STD_I32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 64 bits signed int */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM64;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DATASETS64, H5T_STD_I64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Double Dummy set for failure tests */
+    dims[0] = F66_XDIM; dims[1] = F66_YDIM8;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F66_DUMMYDBL, H5T_IEEE_F64BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose(space);
+    H5Dclose(dataset);
+    H5Fclose(fid);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    gent_charsets
@@ -9294,15 +9369,13 @@ gent_intattrscalars(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    gent_packedbits
+ * Function:    gent_intsattrs
  *
- * Purpose:     Generate a file to be used in the h5dump packed bits tests.
+ * Purpose:     Generate a file to be used in the h5dump tests.
  *   Four datasets of 1, 2, 4 and 8 bytes of unsigned int types are created.
  *   Four more datasets of 1, 2, 4 and 8 bytes of signed int types are created.
  *   Fill them with raw data such that no bit will be all zero in a dataset.
  *   A dummy dataset of double type is created for failure test.
- * Created:  Albert Cheng, 2010/5/10.
- * Modified: Allen Byrne, 2011/1/5 Use file to test Signed/Unsigned datatypes
  *-------------------------------------------------------------------------
  */
 static void
@@ -10051,7 +10124,6 @@ static void gent_compound_complex2(void)
         }
         H5Tclose(type);
     }
-
 */
     /* CompoundComplex4D */
 /*
@@ -10417,6 +10489,7 @@ int main(void)
     gent_intattrscalars();
     gent_intsattrs();
     gent_bitnopaquefields();
+    gent_nodata();
 
     gent_intsfourdims();
     gent_null_space_group();

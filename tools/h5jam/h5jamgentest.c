@@ -275,10 +275,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   H5Fclose(fid);
 
   /* If a user block is being used, write to it here */
-  if(ub_size > 0)
-  {
-    ssize_t nbytes;
-
+  if(ub_size > 0) {
     HDassert(ub_size <= BUF_SIZE);
 
     fd = HDopen(filename, O_RDWR, 0);
@@ -290,8 +287,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
     for (u = 0; u < ub_fill; u++)
       *bp++ = pattern[u % 10];
 
-    nbytes = HDwrite(fd, buf, ub_size);
-    HDassert(nbytes >= 0);
+    HDwrite(fd, buf, ub_size);
 
     HDclose(fd);
   }
@@ -304,7 +300,6 @@ create_textfile(const char *name, size_t size)
     int fd;
     size_t i;
     char *bp;
-    ssize_t nbytes;
 
     fd = HDcreat(name,0777);
     HDassert(fd >= 0);
@@ -316,8 +311,7 @@ create_textfile(const char *name, size_t size)
     for(i = 0; i < size; i++)
         *bp++ = pattern[i % 10];
 
-    nbytes = HDwrite(fd, buf, size);
-    HDassert(nbytes >= 0);
+    HDwrite(fd, buf, size);
 
     HDfree(buf);
 

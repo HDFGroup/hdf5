@@ -148,6 +148,31 @@ New Features
 
     Library
     -------
+    - Add S3 and HDFS VFDs to HDF5 maintenance
+
+      Fix windows requirements and java tests. Windows requires CMake 3.13.
+            Install openssl library (with dev files);
+            from "Shining Light Productions". msi package preferred.
+
+            PATH should have been updated with the installation dir.
+            set ENV variable OPENSSL_ROOT_DIR to the installation dir.
+            set ENV variable OPENSSL_CONF to the cfg file, likely %OPENSSL_ROOT_DIR%\bin\openssl.cfg
+            Install libcurl library (with dev files);
+            download the latest released version using git: https://github.com/curl/curl.git
+
+            Open a Visual Studio Command prompt
+            change to the libcurl root folder
+            run the "buildconf.bat" batch file
+            change to the winbuild directory
+            nmake /f Makefile.vc mode=dll MACHINE=x64
+            copy libcurl-vc-x64-release-dll-ipv6-sspi-winssl dir to C:\curl (installation dir)
+            set ENV variable CURL_ROOT to C:\curl (installation dir)
+            update PATH ENV variable to %CURL_ROOT%\bin (installation bin dir).
+            the aws credentials file should be in %USERPROFILE%\.aws folder
+            set the ENV variable "HDF5_ROS3_TEST_BUCKET_URL=https://s3.us-east-2.amazonaws.com/hdf5ros3"
+
+      (ADB - 2019/09/12, HDFFV-10854)
+
     - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
 
       Rather than always running H5detect and generating H5Tinit.c and

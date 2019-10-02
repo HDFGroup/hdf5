@@ -19,13 +19,13 @@
 #define _H5FDpublic_H
 
 #include "H5public.h"
-#include "H5Fpublic.h"		/*for H5F_close_degree_t */
+#include "H5Fpublic.h"        /*for H5F_close_degree_t */
 
 #define H5_HAVE_VFL 1 /*define a convenient app feature test*/
 #define H5FD_VFD_DEFAULT 0   /* Default VFL driver value */
 
 /* Types of allocation requests: see H5Fpublic.h  */
-typedef enum H5F_mem_t	H5FD_mem_t;
+typedef enum H5F_mem_t    H5FD_mem_t;
 
 /* Map "fractal heap" header blocks to 'ohdr' type file memory, since its
  * a fair amount of work to add a new kind of file memory and they are similar
@@ -79,42 +79,42 @@ typedef enum H5F_mem_t	H5FD_mem_t;
  * want to make most efficient reuse of freed memory.  The use of the
  * H5FD_MEM_SUPER free list is arbitrary.
  */
-#define H5FD_FLMAP_SINGLE {						      \
-    H5FD_MEM_SUPER,			/*default*/			      \
-    H5FD_MEM_SUPER,			/*super*/			      \
-    H5FD_MEM_SUPER,			/*btree*/			      \
-    H5FD_MEM_SUPER,			/*draw*/			      \
-    H5FD_MEM_SUPER,			/*gheap*/			      \
-    H5FD_MEM_SUPER,			/*lheap*/			      \
-    H5FD_MEM_SUPER			/*ohdr*/			      \
+#define H5FD_FLMAP_SINGLE {                              \
+    H5FD_MEM_SUPER,            /*default*/                  \
+    H5FD_MEM_SUPER,            /*super*/                  \
+    H5FD_MEM_SUPER,            /*btree*/                  \
+    H5FD_MEM_SUPER,            /*draw*/                  \
+    H5FD_MEM_SUPER,            /*gheap*/                  \
+    H5FD_MEM_SUPER,            /*lheap*/                  \
+    H5FD_MEM_SUPER            /*ohdr*/                  \
 }
 
 /*
  * A free-list map which segregates requests into `raw' or `meta' data
  * pools.
  */
-#define H5FD_FLMAP_DICHOTOMY {						      \
-    H5FD_MEM_SUPER,			/*default*/			      \
-    H5FD_MEM_SUPER,			/*super*/			      \
-    H5FD_MEM_SUPER,			/*btree*/			      \
-    H5FD_MEM_DRAW,			/*draw*/			      \
-    H5FD_MEM_DRAW,			/*gheap*/			      \
-    H5FD_MEM_SUPER,			/*lheap*/			      \
-    H5FD_MEM_SUPER			/*ohdr*/			      \
+#define H5FD_FLMAP_DICHOTOMY {                              \
+    H5FD_MEM_SUPER,            /*default*/                  \
+    H5FD_MEM_SUPER,            /*super*/                  \
+    H5FD_MEM_SUPER,            /*btree*/                  \
+    H5FD_MEM_DRAW,            /*draw*/                  \
+    H5FD_MEM_DRAW,            /*gheap*/                  \
+    H5FD_MEM_SUPER,            /*lheap*/                  \
+    H5FD_MEM_SUPER            /*ohdr*/                  \
 }
 
 /*
  * The default free list map which causes each request type to use it's own
  * free-list.
  */
-#define H5FD_FLMAP_DEFAULT {						      \
-    H5FD_MEM_DEFAULT,			/*default*/			      \
-    H5FD_MEM_DEFAULT,			/*super*/			      \
-    H5FD_MEM_DEFAULT,			/*btree*/			      \
-    H5FD_MEM_DEFAULT,			/*draw*/			      \
-    H5FD_MEM_DEFAULT,			/*gheap*/			      \
-    H5FD_MEM_DEFAULT,			/*lheap*/			      \
-    H5FD_MEM_DEFAULT			/*ohdr*/			      \
+#define H5FD_FLMAP_DEFAULT {                              \
+    H5FD_MEM_DEFAULT,            /*default*/                  \
+    H5FD_MEM_DEFAULT,            /*super*/                  \
+    H5FD_MEM_DEFAULT,            /*btree*/                  \
+    H5FD_MEM_DEFAULT,            /*draw*/                  \
+    H5FD_MEM_DEFAULT,            /*gheap*/                  \
+    H5FD_MEM_DEFAULT,            /*lheap*/                  \
+    H5FD_MEM_DEFAULT            /*ohdr*/                  \
 }
 
 
@@ -187,7 +187,7 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * instead of the default H5D_ALLOC_TIME_LATE
      */
 #define H5FD_FEAT_ALLOCATE_EARLY        0x00000200
-    /* 
+    /*
      * Defining the H5FD_FEAT_ALLOW_FILE_IMAGE for a VFL driver means that
      * the driver is able to use a file image in the fapl as the initial
      * contents of a file.
@@ -245,9 +245,9 @@ typedef struct H5FD_class_t {
 
 /* A free list is a singly-linked list of address/size pairs. */
 typedef struct H5FD_free_t {
-    haddr_t		addr;
-    hsize_t		size;
-    struct H5FD_free_t	*next;
+    haddr_t        addr;
+    hsize_t        size;
+    struct H5FD_free_t    *next;
 } H5FD_free_t;
 
 /*
@@ -270,7 +270,7 @@ struct H5FD_t {
 /* Define enum for the source of file image callbacks */
 typedef enum {
     H5FD_FILE_IMAGE_OP_NO_OP,
-    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,     
+    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
     H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
     H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
     H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
@@ -281,13 +281,13 @@ typedef enum {
 
 /* Define structure to hold file image callbacks */
 typedef struct {
-    void   *(*image_malloc)(size_t size, H5FD_file_image_op_t file_image_op, 
+    void   *(*image_malloc)(size_t size, H5FD_file_image_op_t file_image_op,
                             void *udata);
     void   *(*image_memcpy)(void *dest, const void *src, size_t size,
                             H5FD_file_image_op_t file_image_op, void *udata);
-    void   *(*image_realloc)(void *ptr, size_t size, 
+    void   *(*image_realloc)(void *ptr, size_t size,
                             H5FD_file_image_op_t file_image_op, void *udata);
-    herr_t  (*image_free)(void *ptr, H5FD_file_image_op_t file_image_op, 
+    herr_t  (*image_free)(void *ptr, H5FD_file_image_op_t file_image_op,
                           void *udata);
     void   *(*udata_copy)(void *udata);
     herr_t  (*udata_free)(void *udata);
@@ -319,6 +319,11 @@ H5_DLL herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                         haddr_t addr, size_t size, const void *buf);
 H5_DLL herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
 H5_DLL herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
+/* H5_DLL herr_t H5FDlock(H5FD_t *file, hbool_t rw);
+H5_DLL herr_t H5FDunlock(H5FD_t *file); */
+/* Allows querying a VFD ID for features before the file is opened */
+H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags/*out*/);
+
 
 #ifdef __cplusplus
 }

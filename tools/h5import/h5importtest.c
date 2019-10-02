@@ -436,7 +436,7 @@ main(void)
         {
             char c = bin8w[i];
             if ( HDfwrite( &c, sizeof(char), 1, sp) != 1 )
-                printf("error writing file\n");
+                HDprintf("error writing file\n");
         }
         HDfclose(sp);
 

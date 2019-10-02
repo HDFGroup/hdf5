@@ -347,17 +347,15 @@ error:
  * Purpose:     Tests the library's behavior when a mandate filter returns 
  *              failure.
  *
- * Return:      Success:        exit(EXIT_SUCCESS)
- *              Failure:        exit(EXIT_FAILURE)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  * 
  * Programmer:  Raymond Lu
  *              25 August 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-int main(void)
+int
+main(void)
 {
     hid_t       fapl;
     int         mdc_nelmts  = 0;
@@ -398,7 +396,7 @@ int main(void)
 
     if (nerrors) TEST_ERROR
 
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
     if (nerrors) {
@@ -406,4 +404,4 @@ error:
                nerrors, 1==nerrors?"":"S");
         HDexit(EXIT_FAILURE);
     }
-}
+} /* end main() */

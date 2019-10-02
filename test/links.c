@@ -14007,10 +14007,10 @@ main(void)
     HDrmdir(TMPDIR);
     HDrmdir(TMPDIR2);
 
-    return SUCCEED;
+    HDexit(EXIT_SUCCESS);
 
 error:
     HDputs("*** TESTS FAILED ***");
-    return 1;
+    HDexit(EXIT_FAILURE);
 }
 

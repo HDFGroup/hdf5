@@ -6,6 +6,15 @@ add_subdirectory (lib)
 #-- Add the h5diff and test executables
 add_subdirectory (h5diff)
 
+if (BUILD_TESTING)
+# --------------------------------------------------------------------
+# If S3 or HDFS enabled, then we need to test the tools library
+# --------------------------------------------------------------------
+  if (HDF5_ENABLE_ROS3_VFD OR HDF5_ENABLE_HDFS)
+    add_subdirectory (libtest)
+  endif ()
+endif ()
+
 #-- Add the h5ls executable
 add_subdirectory (h5ls)
 

@@ -55,9 +55,12 @@ check_dset(hid_t file, const char* name)
     size_t  i, j;
 
     /* Open the dataset */
-    if((dset = H5Dopen2(file, name, H5P_DEFAULT)) < 0) goto error;
-    if((space = H5Dget_space(dset)) < 0) goto error;
-    if(H5Sget_simple_extent_dims(space, ds_size, NULL) < 0) goto error;
+    if((dset = H5Dopen2(file, name, H5P_DEFAULT)) < 0)
+        goto error;
+    if((space = H5Dget_space(dset)) < 0)
+        goto error;
+    if(H5Sget_simple_extent_dims(space, ds_size, NULL) < 0)
+        goto error;
     assert(100 == ds_size[0] && 100 == ds_size[1]);
 
     /* Read some data */
@@ -73,10 +76,8 @@ check_dset(hid_t file, const char* name)
             error = fabs(the_data[i][j] - (double)(hssize_t)i / ((hssize_t)j + 1));
             if(error > 0.0001F) {
                 H5_FAILED();
-                HDprintf("    dset[%lu][%lu] = %g\n",
-                    (unsigned long)i, (unsigned long)j, the_data[i][j]);
-                HDprintf("    should be %g\n",
-                    (double)(hssize_t)i/(hssize_t)(j+1));
+                HDprintf("    dset[%lu][%lu] = %g\n", (unsigned long)i, (unsigned long)j, the_data[i][j]);
+                HDprintf("    should be %g\n", (double)(hssize_t)i/(hssize_t)(j+1));
                 goto error;
             } /* end if */
         } /* end for */
@@ -110,23 +111,31 @@ check_file(char* filename, hid_t fapl, int flag)
     char  name[1024];
     int    i;
 
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) goto error;
-    if(check_dset(file, "dset")) goto error;
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        goto error;
+    if(check_dset(file, "dset"))
+        goto error;
 
     /* Open some groups */
-    if((groups = H5Gopen2(file, "some_groups", H5P_DEFAULT)) < 0) goto error;
+    if((groups = H5Gopen2(file, "some_groups", H5P_DEFAULT)) < 0)
+        goto error;
     for(i = 0; i < 100; i++) {
         HDsprintf(name, "grp%02u", (unsigned)i);
-        if((grp = H5Gopen2(groups, name, H5P_DEFAULT)) < 0) goto error;
-        if(H5Gclose(grp) < 0) goto error;
+        if((grp = H5Gopen2(groups, name, H5P_DEFAULT)) < 0)
+            goto error;
+        if(H5Gclose(grp) < 0)
+            goto error;
     } /* end for */
 
     /* Check to see if that last added dataset in the third file is accessible
      * (it shouldn't be...but it might.  Flag an error in case it is for now */
-    if(flag && check_dset(file, "dset2")) goto error;
+    if(flag && check_dset(file, "dset2"))
+        goto error;
 
-    if(H5Gclose(groups) < 0) goto error;
-    if(H5Fclose(file) < 0) goto error;
+    if(H5Gclose(groups) < 0)
+        goto error;
+    if(H5Fclose(file) < 0)
+        goto error;
 
     return 0;
 
@@ -179,14 +188,13 @@ main(void)
     h5_fixname(FILENAME[1], fapl, name, sizeof name);
     if(check_file(name, fapl, FALSE))
         PASSED()
-    else
-    {
+    else {
 #if defined H5_HAVE_WIN32_API && !defined (hdf5_EXPORTS)
-    SKIPPED();
-    puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
+        SKIPPED();
+        HDputs("   DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
-    H5_FAILED()
-    goto error;
+        H5_FAILED()
+        goto error;
 #endif
     }
     H5Eset_auto2(H5E_DEFAULT, func, NULL);
@@ -200,14 +208,13 @@ main(void)
     h5_fixname(FILENAME[2], fapl, name, sizeof name);
     if(check_file(name, fapl, TRUE))
         PASSED()
-    else
-    {
+    else {
 #if defined H5_HAVE_WIN32_API && !defined (hdf5_EXPORTS)
-    SKIPPED();
-    puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
+        SKIPPED();
+        HDputs("   DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
-    H5_FAILED()
-    goto error;
+        H5_FAILED()
+        goto error;
 #endif
 
     }
@@ -218,6 +225,6 @@ main(void)
     return 0;
 
 error:
-    return 1;
-}
+    HDexit(EXIT_FAILURE);
+} /* end main() */
 

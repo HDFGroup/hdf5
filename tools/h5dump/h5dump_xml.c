@@ -1408,7 +1408,6 @@ xml_print_datatype(hid_t type, unsigned in_group)
 
                 /* Print lead-in */
                 ctx.need_prefix = TRUE;
-                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
@@ -2881,7 +2880,7 @@ xml_print_refs(hid_t did, int source)
             goto error;
     }
 
-    refbuf = (hobj_ref_t *) buf;
+    refbuf = (hobj_ref_t *)((void *)buf);
 
     /* setup */
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -3057,7 +3056,7 @@ xml_print_strs(hid_t did, int source)
 
     for (i = 0; i < (hsize_t)ssiz; i++) {
         if (is_vlstr) {
-            onestring = *(char **) bp;
+            onestring = *(char **)((void *)bp);
             if (onestring)
                 str_size = HDstrlen(onestring);
         }

@@ -22,13 +22,13 @@
 #include "H5FDpublic.h"
 
 /* Private headers needed by this file */
-#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Pprivate.h"        /* Property lists            */
 
 /*
  * The MPI drivers are needed because there are
  * places where we check for things that aren't handled by these drivers.
  */
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
+#include "H5FDmpi.h"            /* MPI-based file drivers        */
 
 
 /**************************/
@@ -88,6 +88,12 @@ typedef struct {
     }                                   \
 }
 
+/* Define structure to hold driver ID & info for FAPLs */
+typedef struct {
+    hid_t driver_id;            /* Driver's ID */
+    const void *driver_info;    /* Driver info, for open callbacks */
+} H5FD_driver_prop_t;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -113,7 +119,7 @@ H5_DLL herr_t H5FD_fapl_open(struct H5P_genplist_t *plist, hid_t driver_id, cons
 H5_DLL herr_t H5FD_fapl_close(hid_t driver_id, void *fapl);
 H5_DLL hid_t H5FD_register(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id,
-		  haddr_t maxaddr);
+        haddr_t maxaddr);
 H5_DLL herr_t H5FD_close(H5FD_t *file);
 H5_DLL int H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
 H5_DLL haddr_t H5FD_alloc(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, struct H5F_t *f,
@@ -134,6 +140,8 @@ H5_DLL herr_t H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t ty
     haddr_t addr, size_t size, const void *buf);
 H5_DLL herr_t H5FD_flush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
 H5_DLL herr_t H5FD_truncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
+H5_DLL herr_t H5FD_lock(H5FD_t *file, hbool_t rw);
+H5_DLL herr_t H5FD_unlock(H5FD_t *file);
 H5_DLL herr_t H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum);
 H5_DLL herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle);
 H5_DLL herr_t H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
@@ -145,7 +153,7 @@ H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 H5_DLL haddr_t H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off);
 H5_DLL herr_t H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/);
 H5_DLL herr_t H5FD_mpi_comm_info_dup(MPI_Comm comm, MPI_Info info,
-				MPI_Comm *comm_new, MPI_Info *info_new);
+                MPI_Comm *comm_new, MPI_Info *info_new);
 H5_DLL herr_t H5FD_mpi_comm_info_free(MPI_Comm *comm, MPI_Info *info);
 #ifdef NOT_YET
 H5_DLL herr_t H5FD_mpio_wait_for_left_neighbor(H5FD_t *file);

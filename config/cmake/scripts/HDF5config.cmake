@@ -44,6 +44,7 @@ set (CTEST_SOURCE_VERSEXT "-snap3")
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.8.x
 #MODEL - CDash group name
+#HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
 #MPI - enable MPI
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
@@ -55,6 +56,11 @@ if (DEFINED CTEST_SCRIPT_ARG)
             set ("${CMAKE_MATCH_1}" "${CMAKE_MATCH_2}")
         endif ()
     endforeach ()
+endif ()
+
+#HPC - run alternate configurations for HPC machines
+if (DEFINED HPC)
+  set (BUILD_GENERATOR "Unix")
 endif ()
 
 # build generator must be defined
@@ -94,6 +100,7 @@ endif ()
 
 ###################################################################
 #########       Following describes compiler           ############
+if (NOT DEFINED HPC)
   if (NOT DEFINED BUILD_GENERATOR)
     message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
   endif ()
@@ -169,6 +176,10 @@ endif ()
       set (ENV{CXXFLAGS} "${RR_WARNINGS_CXX} ${RR_FLAGS_CXX}")
     endif ()
   endif ()
+else ()
+  set (CTEST_SITE "${SITE_OS_NAME}")
+  set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
+endif ()
 ###################################################################
 
 ###################################################################

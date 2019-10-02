@@ -325,7 +325,7 @@ static void gent_nested_vl(hid_t loc_id)
  * Function:    gent_att_compound_vlstr
  *
  * Purpose:     Generate a dataset and a group.
- *              Both has an attribute with a compound datatype consisting 
+ *              Both has an attribute with a compound datatype consisting
  *              of a variable length string
  *
  *-------------------------------------------------------------------------
@@ -336,15 +336,15 @@ static void gent_att_compound_vlstr(hid_t loc_id)
         int i;
         const char *v;
     } s1;
-    hsize_t dim[1] = {1};	/* Dimension size */
-    hid_t sid = -1; 		/* Dataspace ID */
-    hid_t tid = -1; 		/* Datatype ID */
-    hid_t aid = -1; 		/* Attribute ID */
-    hid_t did = -1; 		/* Dataset ID */
-    hid_t gid = -1; 		/* Group ID */
-    hid_t vl_str_tid = -1;	/* Variable length datatype ID */
-    hid_t cmpd_tid = -1;	/* Compound datatype ID */
-    hid_t null_sid = -1;	/* Null dataspace ID */
+    hsize_t dim[1] = {1};    /* Dimension size */
+    hid_t sid = -1;         /* Dataspace ID */
+    hid_t tid = -1;         /* Datatype ID */
+    hid_t aid = -1;         /* Attribute ID */
+    hid_t did = -1;         /* Dataset ID */
+    hid_t gid = -1;         /* Group ID */
+    hid_t vl_str_tid = -1;    /* Variable length datatype ID */
+    hid_t cmpd_tid = -1;    /* Compound datatype ID */
+    hid_t null_sid = -1;    /* Null dataspace ID */
     s1 buf;                 /* Buffer */
 
     buf.i = 9;

@@ -155,7 +155,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
     return ret;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_all_cb
  *
@@ -181,6 +181,7 @@ static herr_t
 dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR_UNUSED *op_data)
 {
     hid_t       obj;
+    hid_t       dapl_id = H5P_DEFAULT;  /* dataset access property list ID */
     herr_t      ret = SUCCEED;
     char       *obj_path = NULL;    /* Full path of object */
     h5tools_str_t buffer;          /* string into which to render   */
@@ -267,7 +268,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             break;
 
         case H5O_TYPE_DATASET:
-            if((obj = H5Dopen2(group, name, H5P_DEFAULT)) >= 0) {
+            if((obj = H5Dopen2(group, name, dapl_id)) >= 0) {
                 if(oinfo.rc > 1 || hit_elink) {
                     obj_t  *found_obj;    /* Found object */
 
@@ -304,6 +305,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
 
                         h5tools_setstatus(EXIT_FAILURE);
                         ret = FAIL;
+                        if (dapl_id != H5P_DEFAULT)
+                            H5Pclose(dapl_id);
                         H5Dclose(obj);
                         goto done;
                     }
@@ -341,6 +344,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                             h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->datasetend);
                         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
+                        if (dapl_id != H5P_DEFAULT)
+                            H5Pclose(dapl_id);
                         H5Dclose(obj);
                         goto done;
                     }
@@ -350,9 +355,13 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                 } /* end if */
 
                 dump_function_table->dump_dataset_function(obj, name, NULL);
+                if (dapl_id != H5P_DEFAULT)
+                    H5Pclose(dapl_id);
                 H5Dclose(obj);
             }
             else {
+                if (dapl_id != H5P_DEFAULT)
+                    H5Pclose(dapl_id);
                 error_msg("unable to dump dataset \"%s\"\n", name);
                 h5tools_setstatus(EXIT_FAILURE);
                 ret = FAIL;
@@ -1133,7 +1142,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     h5tools_dump_data(rawoutstream, outputformat, &ctx, obj_id, print_dataset, sset, display_index, display_char);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_fcpl
  *
@@ -1648,10 +1657,11 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
 {
     H5O_info_t       oinfo;
     hid_t            dsetid;
+    hid_t            dapl_id = H5P_DEFAULT;  /* dataset access property list ID */
     struct subset_t *sset = (struct subset_t *)data;
     const char      *real_name = display_name ? display_name : dset;
 
-    if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0) {
+    if((dsetid = H5Dopen2(fid, dset, dapl_id)) < 0) {
         if (pe)
             handle_links(fid, dset, data, pe, display_name);
         return;
@@ -1775,7 +1785,8 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
         dump_dataset(dsetid, real_name, sset);
         dump_indent -= COL;
     }
-
+    if (dapl_id != H5P_DEFAULT)
+        H5Pclose(dapl_id);
     if(H5Dclose(dsetid) < 0)
         h5tools_setstatus(EXIT_FAILURE);
 }
@@ -1883,9 +1894,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
             break;
 
         case H5L_TYPE_EXTERNAL:
-            begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            PRINTVALSTREAM(rawoutstream, "\n");
-            indentation(COL);
             begin_obj(h5tools_dump_header_format->extlinkbegin, links, h5tools_dump_header_format->extlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
             if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0) {
@@ -1893,8 +1901,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
                 const char *elink_path;
 
                 if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &elink_file, &elink_path)>=0) {
-                    indentation(COL);
-                    PRINTSTREAM(rawoutstream, "LINKCLASS %d\n", linfo.type);
                     indentation(COL);
                     PRINTSTREAM(rawoutstream, "TARGETFILE \"%s\"\n", elink_file);
                     indentation(COL);
@@ -1916,9 +1922,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
         case H5L_TYPE_MAX:
         case H5L_TYPE_HARD:
         default:
-            begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            PRINTVALSTREAM(rawoutstream, "\n");
-            indentation(COL);
             begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);
@@ -2007,7 +2010,7 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED * data, int pe
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_extlink
  *
