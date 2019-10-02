@@ -237,11 +237,6 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   Using latest file format with maximum compact group size of 10 and\n");
     PRINTVALSTREAM(rawoutstream, "   minimum shared datatype size of 20\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "5) h5repack --low=0 --high=1 file1 file2\n");
-    PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via\n");
-    PRINTVALSTREAM(rawoutstream, "   H5Pset_libver_bounds() when creating the repacked file, file2\n");
-    PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "5) h5repack -f SHUF -f GZIP=1 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add both filters SHUF and GZIP in this order to all datasets\n");
@@ -249,6 +244,11 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,0,1,9 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add bzip2 filter to all datasets\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "7) h5repack --low=0 --high=1 file1 file2\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via\n");
+    PRINTVALSTREAM(rawoutstream, "   H5Pset_libver_bounds() when creating the repacked file, file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
 }
 
