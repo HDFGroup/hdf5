@@ -442,8 +442,6 @@ H5O__mtime_free(void *mesg)
  *        matzke@llnl.gov
  *        Jul 24 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t

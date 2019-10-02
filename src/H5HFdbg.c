@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:        H5HFdbg.c
- *            Feb 24 2006
- *            Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Created:		H5HFdbg.c
+ *			Feb 24 2006
+ *			Quincey Koziol <koziol@ncsa.uiuc.edu>
  *
- * Purpose:        Dump debugging information about a fractal heap
+ * Purpose:		Dump debugging information about a fractal heap
  *
  *-------------------------------------------------------------------------
  */
@@ -32,12 +32,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"        /* Generic Functions            */
-#include "H5Eprivate.h"        /* Error handling              */
-#include "H5FLprivate.h"    /* Free Lists                           */
-#include "H5HFpkg.h"        /* Fractal heaps            */
-#include "H5MMprivate.h"    /* Memory management            */
-#include "H5VMprivate.h"        /* Vectors and arrays             */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5HFpkg.h"		/* Fractal heaps			*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5VMprivate.h"		/* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */
@@ -96,17 +96,17 @@ static herr_t H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream,
 /* Local Variables */
 /*******************/
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5HF_id_print
+ * Function:	H5HF_id_print
  *
- * Purpose:    Prints a fractal heap ID.
+ * Purpose:	Prints a fractal heap ID.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
- *        Aug 20 2015
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug 20 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -163,24 +163,24 @@ HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
 
     /* Display the heap ID */
     HDfprintf(stream, "%*s%-*s (%c, %Hu, %Zu)\n", indent, "", fwidth,
-        "Heap ID info: (type, offset, length)",
+	      "Heap ID info: (type, offset, length)",
               id_type, obj_off, obj_len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_id_print() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5HF_dtable_debug
+ * Function:	H5HF_dtable_debug
  *
- * Purpose:    Prints debugging info about a doubling table
+ * Purpose:	Prints debugging info about a doubling table
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
- *        Feb 28 2006
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 28 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -202,57 +202,57 @@ H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwi
      */
     /* Creation parameter values */
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-        "Doubling table width:",
-        dtable->cparam.width);
+	      "Doubling table width:",
+	      dtable->cparam.width);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-        "Starting block size:",
-        dtable->cparam.start_block_size);
+	      "Starting block size:",
+	      dtable->cparam.start_block_size);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-        "Max. direct block size:",
-        dtable->cparam.max_direct_size);
+	      "Max. direct block size:",
+	      dtable->cparam.max_direct_size);
     HDfprintf(stream, "%*s%-*s %u (bits)\n", indent, "", fwidth,
-        "Max. index size:",
-        dtable->cparam.max_index);
+	      "Max. index size:",
+	      dtable->cparam.max_index);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-        "Starting # of rows in root indirect block:",
-        dtable->cparam.start_root_rows);
+	      "Starting # of rows in root indirect block:",
+	      dtable->cparam.start_root_rows);
 
     /* Run-time varying parameter values */
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-        "Table's root address:",
-        dtable->table_addr);
+	      "Table's root address:",
+	      dtable->table_addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-        "Current # of rows in root indirect block:",
-        dtable->curr_root_rows);
+	      "Current # of rows in root indirect block:",
+	      dtable->curr_root_rows);
 
     /* Computed values */
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-        "Max. # of rows in root indirect block:",
-        dtable->max_root_rows);
+	      "Max. # of rows in root indirect block:",
+	      dtable->max_root_rows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-        "Max. # of direct rows in any indirect block:",
-        dtable->max_direct_rows);
+	      "Max. # of direct rows in any indirect block:",
+	      dtable->max_direct_rows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-        "# of bits for IDs in first row:",
-        dtable->first_row_bits);
+	      "# of bits for IDs in first row:",
+	      dtable->first_row_bits);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "# of IDs in first row:",
-        dtable->num_id_first_row);
+	      "# of IDs in first row:",
+	      dtable->num_id_first_row);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_dtable_debug() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5HF_hdr_print
+ * Function:	H5HF_hdr_print
  *
- * Purpose:    Prints info about a fractal heap header.
+ * Purpose:	Prints info about a fractal heap header.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
- *        Feb 23 2012
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb 23 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -276,56 +276,56 @@ H5HF_hdr_print(const H5HF_hdr_t *hdr, hbool_t dump_internal, FILE *stream, int i
      * Print the values.
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-        "Heap is:",
-        hdr->man_dtable.curr_root_rows > 0 ? "Indirect" : "Direct");
+	      "Heap is:",
+	      hdr->man_dtable.curr_root_rows > 0 ? "Indirect" : "Direct");
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-        "Objects stored in 'debugging' format:",
-        hdr->debug_objs);
+	      "Objects stored in 'debugging' format:",
+	      hdr->debug_objs);
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-        "'Write once' flag:",
-        hdr->write_once);
+	      "'Write once' flag:",
+	      hdr->write_once);
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-        "'Huge' object IDs have wrapped:",
-        hdr->huge_ids_wrapped);
+	      "'Huge' object IDs have wrapped:",
+	      hdr->huge_ids_wrapped);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "Free space in managed blocks:",
-        hdr->total_man_free);
+	      "Free space in managed blocks:",
+	      hdr->total_man_free);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "Managed space data block size:",
-        hdr->man_size);
+	      "Managed space data block size:",
+	      hdr->man_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "Total managed space allocated:",
-        hdr->man_alloc_size);
+	      "Total managed space allocated:",
+	      hdr->man_alloc_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "Offset of managed space iterator:",
-        hdr->man_iter_off);
+	      "Offset of managed space iterator:",
+	      hdr->man_iter_off);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "Number of managed objects in heap:",
-        hdr->man_nobjs);
+	      "Number of managed objects in heap:",
+	      hdr->man_nobjs);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-        "Address of free space manager for managed blocks:",
-        hdr->fs_addr);
+	      "Address of free space manager for managed blocks:",
+	      hdr->fs_addr);
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-        "Max. size of managed object:",
-        (unsigned long)hdr->max_man_size);
+	      "Max. size of managed object:",
+	      (unsigned long)hdr->max_man_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "'Huge' object space used:",
-        hdr->huge_size);
+	      "'Huge' object space used:",
+	      hdr->huge_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "Number of 'huge' objects in heap:",
-        hdr->huge_nobjs);
+	      "Number of 'huge' objects in heap:",
+	      hdr->huge_nobjs);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "ID of next 'huge' object:",
-        hdr->huge_next_id);
+	      "ID of next 'huge' object:",
+	      hdr->huge_next_id);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-        "Address of v2 B-tree for 'huge' objects:",
-        hdr->huge_bt2_addr);
+	      "Address of v2 B-tree for 'huge' objects:",
+	      hdr->huge_bt2_addr);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "'Tiny' object space used:",
-        hdr->tiny_size);
+	      "'Tiny' object space used:",
+	      hdr->tiny_size);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "Number of 'tiny' objects in heap:",
-        hdr->tiny_nobjs);
+	      "Number of 'tiny' objects in heap:",
+	      hdr->tiny_nobjs);
 
     HDfprintf(stream, "%*sManaged Objects Doubling-Table Info...\n", indent, "");
     H5HF_dtable_debug(&hdr->man_dtable, stream, indent + 3, MAX(0, fwidth - 3));
@@ -362,24 +362,24 @@ H5HF_hdr_print(const H5HF_hdr_t *hdr, hbool_t dump_internal, FILE *stream, int i
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5HF_hdr_print() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5HF_hdr_debug
+ * Function:	H5HF_hdr_debug
  *
- * Purpose:    Prints debugging info about a fractal heap header.
+ * Purpose:	Prints debugging info about a fractal heap header.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
- *        Feb 24 2006
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 24 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5HF_hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
-    H5HF_hdr_t    *hdr = NULL;             /* Fractal heap header info */
+    H5HF_hdr_t	*hdr = NULL;             /* Fractal heap header info */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -395,7 +395,7 @@ H5HF_hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 
     /* Load the fractal heap header */
     if(NULL == (hdr = H5HF__hdr_protect(f, addr, H5AC__READ_ONLY_FLAG)))
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
 
     /* Print the information about the heap's header */
     H5HF_hdr_print(hdr, FALSE, stream, indent, fwidth);
@@ -407,17 +407,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_debug() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5HF_dblock_debug_cb
+ * Function:	H5HF_dblock_debug_cb
  *
- * Purpose:    Detect free space within a direct block
+ * Purpose:	Detect free space within a direct block
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
- *        May 13 2006
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 13 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -468,9 +468,9 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
         len = end - start;
 
         HDsnprintf(temp_str, sizeof(temp_str), "Section #%u:", (unsigned)udata->sect_count);
-    HDfprintf(udata->stream, "%*s%-*s %8Zu, %8Zu\n", udata->indent + 3, "", MAX(0, udata->fwidth - 9),
-        temp_str,
-        start, len);
+	HDfprintf(udata->stream, "%*s%-*s %8Zu, %8Zu\n", udata->indent + 3, "", MAX(0, udata->fwidth - 9),
+		temp_str,
+		start, len);
         udata->sect_count++;
 
         /* Mark this node's free space & check for overlaps w/other sections */
@@ -491,17 +491,17 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_dblock_debug_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5HF_dblock_debug
+ * Function:	H5HF_dblock_debug
  *
- * Purpose:    Prints debugging info about a fractal heap direct block.
+ * Purpose:	Prints debugging info about a fractal heap direct block.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
- *        Feb 28 2006
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 28 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -509,11 +509,11 @@ herr_t
 H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     haddr_t hdr_addr, size_t block_size)
 {
-    H5HF_hdr_t    *hdr = NULL;            /* Fractal heap header info */
+    H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
     H5HF_direct_t *dblock = NULL;       /* Fractal heap direct block info */
-    size_t    blk_prefix_size;        /* Size of prefix for block */
-    size_t    amount_free;            /* Amount of free space in block */
-    uint8_t    *marker = NULL;         /* Track free space for block */
+    size_t	blk_prefix_size;        /* Size of prefix for block */
+    size_t	amount_free;            /* Amount of free space in block */
+    uint8_t	*marker = NULL;         /* Track free space for block */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -531,13 +531,13 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
 
     /* Load the fractal heap header */
     if(NULL == (hdr = H5HF__hdr_protect(f, hdr_addr, H5AC__READ_ONLY_FLAG)))
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
 
     /*
      * Load the heap direct block
      */
     if(NULL == (dblock = H5HF__man_dblock_protect(hdr, addr, block_size, NULL, 0, H5AC__READ_ONLY_FLAG)))
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap direct block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap direct block")
 
     /* Print opening message */
     HDfprintf(stream, "%*sFractal Heap Direct Block...\n", indent, "");
@@ -546,19 +546,19 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
      * Print the values.
      */
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-        "Address of fractal heap that owns this block:",
-        hdr->heap_addr);
+	      "Address of fractal heap that owns this block:",
+	      hdr->heap_addr);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "Offset of direct block in heap:",
-        dblock->block_off);
+	      "Offset of direct block in heap:",
+	      dblock->block_off);
     blk_prefix_size = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-        "Size of block header:",
+	      "Size of block header:",
               blk_prefix_size);
 
     /* Allocate space for the free space markers */
     if(NULL == (marker = (uint8_t *)H5MM_calloc(dblock->size)))
-    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize the free space information for the heap */
     if(H5HF__space_start(hdr, FALSE) < 0)
@@ -618,17 +618,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_dblock_debug() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5HF_iblock_print
+ * Function:	H5HF_iblock_print
  *
- * Purpose:    Prints debugging info about a fractal heap indirect block.
+ * Purpose:	Prints debugging info about a fractal heap indirect block.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
- *        Feb 23 2012
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb 23 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -638,7 +638,7 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock,
 {
     const H5HF_hdr_t *hdr;              /* Pointer to heap's header */
     char temp_str[64];                  /* Temporary string, for formatting */
-    size_t    u, v;                   /* Local index variable */
+    size_t	u, v;                   /* Local index variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -661,23 +661,23 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock,
      * Print the values.
      */
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-        "Address of fractal heap that owns this block:",
-        hdr->heap_addr);
+	      "Address of fractal heap that owns this block:",
+	      hdr->heap_addr);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-        "Offset of indirect block in heap:",
-        iblock->block_off);
+	      "Offset of indirect block in heap:",
+	      iblock->block_off);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-        "Size of indirect block:",
-        iblock->size);
+	      "Size of indirect block:",
+	      iblock->size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-        "Current # of rows:",
-        iblock->nrows);
+	      "Current # of rows:",
+	      iblock->nrows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-        "Max. # of rows:",
-        iblock->max_rows);
+	      "Max. # of rows:",
+	      iblock->max_rows);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-        "Max direct block rows:",
-        hdr->man_dtable.max_direct_rows);
+	      "Max direct block rows:",
+	      hdr->man_dtable.max_direct_rows);
 
     /* Print the entry tables */
     if(hdr->filter_len > 0)
@@ -750,17 +750,17 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock,
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5HF_iblock_print() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5HF_iblock_debug
+ * Function:	H5HF_iblock_debug
  *
- * Purpose:    Prints debugging info about a fractal heap indirect block.
+ * Purpose:	Prints debugging info about a fractal heap indirect block.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
- *        Mar  7 2006
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar  7 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -768,7 +768,7 @@ herr_t
 H5HF_iblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     haddr_t hdr_addr, unsigned nrows)
 {
-    H5HF_hdr_t    *hdr = NULL;            /* Fractal heap header info */
+    H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
     H5HF_indirect_t *iblock = NULL;     /* Fractal heap direct block info */
     hbool_t did_protect;                /* Whether we protected the indirect block or not */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -788,13 +788,13 @@ H5HF_iblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
 
     /* Load the fractal heap header */
     if(NULL == (hdr = H5HF__hdr_protect(f, hdr_addr, H5AC__READ_ONLY_FLAG)))
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
 
     /*
      * Load the heap indirect block
      */
     if(NULL == (iblock = H5HF__man_iblock_protect(hdr, addr, nrows, NULL, 0, FALSE, H5AC__READ_ONLY_FLAG, &did_protect)))
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap indirect block")
 
     /* Print the information about the heap's indirect block */
     H5HF_iblock_print(iblock, FALSE, stream, indent, fwidth);
@@ -808,17 +808,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_iblock_debug() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5HF_sects_debug_cb
+ * Function:	H5HF_sects_debug_cb
  *
- * Purpose:    Prints debugging info about a free space section for a fractal heap.
+ * Purpose:	Prints debugging info about a free space section for a fractal heap.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
- *        May 13 2006
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May 13 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -839,20 +839,20 @@ H5HF_sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
 
     /* Print generic section information */
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
-        "Section type:",
-        (sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE ? "single" :
+	      "Section type:",
+	      (sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE ? "single" :
                   (sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW ? "first row" :
                   (sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW ? "normal row" : "unknown"))));
     HDfprintf(udata->stream, "%*s%-*s %a\n", udata->indent, "", udata->fwidth,
-        "Section address:",
-        sect->sect_info.addr);
+	      "Section address:",
+	      sect->sect_info.addr);
     HDfprintf(udata->stream, "%*s%-*s %Hu\n", udata->indent, "", udata->fwidth,
-        "Section size:",
-        sect->sect_info.size);
+	      "Section size:",
+	      sect->sect_info.size);
 #ifdef QAK
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
-        "Section state:",
-        (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
+	      "Section state:",
+	      (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
 #endif /* QAK */
 
     /* Dump section-specific debugging information */
@@ -863,25 +863,24 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_sects_debug_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:    H5HF_sects_debug
+ * Function:	H5HF_sects_debug
  *
- * Purpose:    Prints debugging info about free space sections for a fractal heap.
+ * Purpose:	Prints debugging info about free space sections for a fractal heap.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        koziol@ncsa.uiuc.edu
- *        May  9 2006
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		May  9 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_sects_debug(H5F_t *f, haddr_t fh_addr, FILE *stream, int indent,
-    int fwidth)
+H5HF_sects_debug(H5F_t *f, haddr_t fh_addr, FILE *stream, int indent, int fwidth)
 {
-    H5HF_hdr_t    *hdr = NULL;            /* Fractal heap header info */
+    H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -897,7 +896,7 @@ H5HF_sects_debug(H5F_t *f, haddr_t fh_addr, FILE *stream, int indent,
 
     /* Load the fractal heap header */
     if(NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__READ_ONLY_FLAG)))
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
 
     /* Initialize the free space information for the heap */
     if(H5HF__space_start(hdr, FALSE) < 0)
