@@ -158,11 +158,6 @@ Examples of use:
    Using latest file format with maximum compact group size of 10 and
    minimum shared datatype size of 20
 
-5) h5repack --low=0 --high=1 file1 file2
-
-   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
-   H5Pset_libver_bounds() when creating the repacked file, file2
-
 5) h5repack -f SHUF -f GZIP=1 file1 file2
 
    Add both filters SHUF and GZIP in this order to all datasets
@@ -170,4 +165,9 @@ Examples of use:
 6) h5repack -f UD=307,0,1,9 file1 file2
 
    Add bzip2 filter to all datasets
+
+7) h5repack --low=0 --high=1 file1 file2
+
+   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
+   H5Pset_libver_bounds() when creating the repacked file, file2
 

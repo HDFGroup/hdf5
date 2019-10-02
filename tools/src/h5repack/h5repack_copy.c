@@ -37,7 +37,7 @@
  * local functions
  *-------------------------------------------------------------------------
  */
-static int Get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
+static int get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
         size_t size_datum, hsize_t dims_hslab[], hsize_t * hslab_nbytes_p);
 static void print_dataset_info(hid_t dcpl_id, char *objname, double per, int pr);
 static int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
@@ -145,8 +145,7 @@ copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 
             /* Adjust group creation parameters for root group */
             /* (So that it is created in "dense storage" form) */
-            if (H5Pset_link_phase_change(fcpl, (unsigned) options->grp_compact,
-                        (unsigned) options->grp_indexed) < 0)
+            if (H5Pset_link_phase_change(fcpl, (unsigned) options->grp_compact, (unsigned) options->grp_indexed) < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_link_phase_change failed to adjust group creation parameters for root group");
 
             for (i = 0; i < 5; i++) {
@@ -368,7 +367,7 @@ done:
 } /* end copy_objects() */
 
 /*-------------------------------------------------------------------------
- * Function: Get_hyperslab
+ * Function: get_hyperslab
  *
  * Purpose: Calulate a hyperslab from a dataset for higher performance.
  *          The size of hyperslab is limitted by H5TOOLS_BUFSIZE.
@@ -400,7 +399,7 @@ done:
  *-----------------------------------------*/
 
 int
-Get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
+get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
         size_t size_datum, hsize_t dims_hslab[], hsize_t * hslab_nbytes_p)
 {
     int     ret_value = 0;
@@ -521,7 +520,7 @@ Get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
 
 done:
     return ret_value;
-} /* end Get_hyperslab() */
+} /* end get_hyperslab() */
 
 /*-------------------------------------------------------------------------
  * Function: do_copy_objects
@@ -569,7 +568,7 @@ done:
  *  in (2) is that, when using the strip mine size, it assures that the "remaining" part
  *  of the dataset that does not fill an entire strip mine is processed.
  *
- *  1. figure out a hyperslab (dimentions) and size  (refer to Get_hyperslab()).
+ *  1. figure out a hyperslab (dimentions) and size  (refer to get_hyperslab()).
  *  2. Calculate the hyperslab selections as the selection is moving forward.
  *     Selection would be same as the hyperslab except for the remaining edge portion
  *     of the dataset. The code take care of the remaining portion if exist.
@@ -678,11 +677,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                 }
                 else {
                     if (options->grp_compact > 0 || options->grp_indexed > 0)
-                        if (H5Pset_link_phase_change(
-                                gcpl_out,
-                                (unsigned) options->grp_compact,
-                                (unsigned) options->grp_indexed)
-                            < 0)
+                        if (H5Pset_link_phase_change(gcpl_out, (unsigned) options->grp_compact, (unsigned) options->grp_indexed) < 0)
                             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_link_phase_change failed");
 
                     if ((grp_out = H5Gcreate2(fidout, travt->objs[i].name, H5P_DEFAULT, gcpl_out, H5P_DEFAULT)) < 0)
@@ -799,8 +794,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                         if ((dcpl_out = H5Pcreate(H5P_DATASET_CREATE)) < 0)
                             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
                     }
-                    else
-                    if ((dcpl_out = H5Pcopy(dcpl_in)) < 0) {
+                    else if ((dcpl_out = H5Pcopy(dcpl_in)) < 0) {
                         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcopy failed");
                     }
 
@@ -847,25 +841,14 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                              * changing to COMPACT. For the reference, COMPACT is limited
                              * by size 64K by library.
                              */
-                            if (options->layout_g != H5D_COMPACT) {
-                                if (size_dset < options->min_comp) {
+                            if (options->layout_g != H5D_COMPACT)
+                                if (size_dset < options->min_comp)
                                     apply_s = 0;
-                                }
-                            }
 
                             /* apply the filter */
-                            if (apply_s) {
-                                if (apply_filters(
-                                        travt->objs[i].name, 
-                                        rank, 
-                                        dims, 
-                                        msize, 
-                                        dcpl_out, 
-                                        options, 
-                                        &has_filter)
-                                    < 0)
+                            if (apply_s)
+                                if (apply_filters(travt->objs[i].name, rank, dims, msize, dcpl_out, options, &has_filter) < 0)
                                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "apply_filters failed");
-                            }
 
                             /* only if layout change requested for entire file or
                              * individual obj */
@@ -904,36 +887,13 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                              * modified dcpl; in that case use the original instead
                              *-------------------------------------------------------------------------
                              */
-                            dset_out = H5Dcreate2(fidout,
-                                    travt->objs[i].name,
-                                    wtype_id,
-                                    f_space_id,
-                                    H5P_DEFAULT,
-                                    dcpl_out,
-                                    H5P_DEFAULT);
-                            /* if unable to create, retry with original DCPL */
-                            if (dset_out < 0) {
-                                H5Epush2(H5tools_ERR_STACK_g,
-                                        __FILE__,
-                                        FUNC,
-                                        __LINE__,
-                                        H5tools_ERR_CLS_g,
-                                        H5E_tools_g,
-                                        H5E_tools_min_id_g,
-                                        "H5Dcreate2 failed");
-                                if (options->verbose) {
-                                    HDprintf(" warning: could not create dataset <%s>. Applying original settings\n",
-                                            travt->objs[i].name);
-                                }
-                                dset_out = H5Dcreate2(
-                                        fidout,
-                                        travt->objs[i].name,
-                                        wtype_id,
-                                        f_space_id,
-                                        H5P_DEFAULT,
-                                        dcpl_in,
-                                        H5P_DEFAULT);
-                                if (dset_out < 0)
+                            dset_out = H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id, H5P_DEFAULT, dcpl_out, H5P_DEFAULT);
+                            if (dset_out == FAIL) {
+                                H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g, "H5Dcreate2 failed");
+                                if (options->verbose)
+                                    HDprintf(" warning: could not create dataset <%s>. Applying original settings\n", travt->objs[i].name);
+
+                                if ((dset_out = H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id, H5P_DEFAULT, dcpl_in, H5P_DEFAULT)) < 0)
                                     HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dcreate2 failed");
                                 apply_f = 0;
                             } /* end if retry dataset create */
@@ -1003,15 +963,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                             dcpl_tmp = dcpl_in; /* reading dataset */
                                     }
 
-                                    if (Get_hyperslab(
-                                            dcpl_tmp,
-                                            rank,
-                                            dims,
-                                            p_type_nbytes,
-                                            hslab_dims,
-                                            &hslab_nbytes)
-                                        < 0)
-                                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Get_hyperslab failed");
+                                    /* get hyperslab dims and size in byte */
+                                    if (get_hyperslab(dcpl_tmp, rank, dims, p_type_nbytes, hslab_dims, &hslab_nbytes) < 0)
+                                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "get_hyperslab failed");
 
                                     hslab_buf = HDmalloc((size_t)hslab_nbytes);
                                     if (hslab_buf == NULL)
@@ -1033,30 +987,14 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                              */
                                             for (k = 0, hs_select_nelmts = 1; k < rank; k++) {
                                                 /* MIN() is used to get the remaining edge portion if exist.
-                                                 * "dims[k] - hs_sel_offset[k]" is remaining edge portion that is
-                                                 * smaller then the hyperslab.
-                                                 */
+                                                 * "dims[k] - hs_sel_offset[k]" is remaining edge portion that is smaller then the hyperslab.*/
                                                 hs_sel_count[k] = MIN(dims[k] - hs_sel_offset[k], hslab_dims[k]);
                                                 hs_select_nelmts *= hs_sel_count[k];
                                             }
 
-                                            if (H5Sselect_hyperslab(
-                                                    f_space_id,
-                                                    H5S_SELECT_SET,
-                                                    hs_sel_offset,
-                                                    NULL,
-                                                    hs_sel_count,
-                                                    NULL)
-                                                 < 0)
+                                            if (H5Sselect_hyperslab(f_space_id, H5S_SELECT_SET, hs_sel_offset, NULL, hs_sel_count, NULL) < 0)
                                                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
-                                            if (H5Sselect_hyperslab(
-                                                    hslab_space,
-                                                    H5S_SELECT_SET,
-                                                    zero,
-                                                    NULL,
-                                                    &hs_select_nelmts,
-                                                    NULL)
-                                                < 0)
+                                            if (H5Sselect_hyperslab(hslab_space, H5S_SELECT_SET, zero, NULL, &hs_select_nelmts, NULL) < 0)
                                                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
                                         } /* end if rank > 0 */
                                         else {
@@ -1065,25 +1003,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                             hs_select_nelmts = 1;
                                         } /* end (else) rank  == 0 */
 
-                                        if (H5Dread(
-                                                dset_in,
-                                                wtype_id,
-                                                hslab_space,
-                                                f_space_id,
-                                                H5P_DEFAULT,
-                                                hslab_buf)
-                                            < 0)
+                                        if(H5Dread(dset_in, wtype_id, hslab_space, f_space_id, H5P_DEFAULT, hslab_buf) < 0)
                                             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
-                                        if (H5Dwrite(
-                                                dset_out,
-                                                wtype_id,
-                                                hslab_space,
-                                                f_space_id,
-                                                H5P_DEFAULT,
-                                                hslab_buf)
-                                            < 0)
+                                        if(H5Dwrite(dset_out, wtype_id,  hslab_space, f_space_id, H5P_DEFAULT, hslab_buf) < 0)
                                             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dwrite failed");
 
+                                        /* reclaim any VL memory, if necessary */
                                         if (vl_data)
                                             H5Dvlen_reclaim(wtype_id, hslab_space, H5P_DEFAULT, hslab_buf);
 
@@ -1129,11 +1054,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                 /* print a message that the filter was not applied
                                  * (in case there was a filter)
                                  */
-                                if (has_filter && apply_s == 0) {
-                                    HDprintf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
-                                            travt->objs[i].name,
-                                            (int) options->min_comp);
-                                }
+                                if (has_filter && apply_s == 0)
+                                    HDprintf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n", travt->objs[i].name, (int) options->min_comp);
 
                                 if (has_filter && apply_f == 0)
                                     HDprintf(" <warning: could not apply the filter to %s>\n", travt->objs[i].name);
