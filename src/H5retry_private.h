@@ -88,11 +88,11 @@ h5_retry_next(struct h5_retry_t *r)
     return true;
 }
 
-/* Return the number of retries performed since `h5_retry_init()`
+/* Return the number of tries performed since `h5_retry_init()`
  * was called on `r`.
  */
 static inline unsigned
-h5_retry_retries(struct h5_retry_t *r)
+h5_retry_tries(struct h5_retry_t *r)
 {
     return r->maxtries - r->tries;
 }

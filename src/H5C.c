@@ -7189,7 +7189,7 @@ H5C_load_entry(H5F_t *              f,
     /* Get the on-disk entry image */
     if ( 0 == (type->flags & H5C__CLASS_SKIP_READS) ) {
 
-        unsigned retries;             /* The # of retries                     */
+        unsigned tries;               /* The # of retries                     */
         htri_t chk_ret;               /* return from verify_chksum callback   */
         size_t actual_len = len;      /* The actual length, after speculative */
                                       /* reads have been resolved             */
@@ -7376,13 +7376,13 @@ H5C_load_entry(H5F_t *              f,
         }
 
         /* Calculate and track the # of retries */
-        if ((retries = h5_retry_retries(&retry)) != 0) {    /* Does not track 0 retry */
+        if ((tries = h5_retry_tries(&retry)) > 1) {    /* Does not track 0 retry */
 
             if ( H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, 
-                                                 retries) < 0)
+                                                 tries - 1) < 0)
 
                 HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, \
-                            "cannot track read tries = %u ", retries)
+                            "cannot track read tries = %u ", tries)
         }
 
         /* Set the final length (in case it wasn't set earlier) */
