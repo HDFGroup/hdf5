@@ -239,7 +239,6 @@ done:
  * Purpose:     Sets the atomicity mode
  *
  * Return:      Success:    Non-negative
- *
  *              Failure:    Negative
  *
  * Programmer:  Mohamad Chaarawi
@@ -253,7 +252,7 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     H5F_t       *file;
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(FAIL);
     H5TRACE2("e", "ib", file_id, flag);
 
     /* Check args */
@@ -261,8 +260,8 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Check VFD */
-    if(!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect VFL driver, does not support MPI atomicity mode")
+    if (!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect VFL driver, does not support MPI atomicity mode");
 
     /* set atomicity value */
     if (H5FD_set_mpio_atomicity (file->shared->lf, flag) < 0)
@@ -279,7 +278,6 @@ done:
  * Purpose:     Returns the atomicity mode
  *
  * Return:      Success:    Non-negative
- *
  *              Failure:    Negative
  *
  * Programmer:  Mohamad Chaarawi
@@ -293,7 +291,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag)
     H5F_t      *file;
     herr_t     ret_value = SUCCEED;
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(FAIL);
     H5TRACE2("e", "i*b", file_id, flag);
 
     /* Check args */
