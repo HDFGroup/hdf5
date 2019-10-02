@@ -550,7 +550,7 @@ static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
 static hbool_t H5T_top_package_initialize_s = FALSE;
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_init
  *
@@ -576,7 +576,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_init() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T__init_inf
  *
@@ -689,7 +689,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__init_inf() */
 
-
+
 /*--------------------------------------------------------------------------
 NAME
    H5T__init_package -- Initialize interface-specific information
@@ -1313,7 +1313,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__init_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5T__unlock_cb
  *
@@ -1346,7 +1346,7 @@ H5T__unlock_cb(void *_dt, hid_t H5_ATTR_UNUSED id, void *_udata)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__unlock_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5T_top_term_package
  *
@@ -1547,7 +1547,7 @@ H5T_top_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5T_top_term_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5T_term_package
  *
@@ -1589,7 +1589,7 @@ H5T_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5T_term_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T__close_cb
  *
@@ -1632,7 +1632,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__close_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5Tcreate
  *
@@ -1677,7 +1677,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcreate() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Tcopy
  *
@@ -1777,7 +1777,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcopy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Tclose
  *
@@ -1812,7 +1812,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tclose() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tequal
  *
@@ -1849,7 +1849,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tequal() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Tlock
  *
@@ -1896,7 +1896,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tlock() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tget_class
  *
@@ -1931,7 +1931,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_class() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_get_class
  *
@@ -1973,7 +1973,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_get_class() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5Tdetect_class
  *
@@ -2009,7 +2009,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tdetect_class() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5T_detect_class
  *
@@ -2085,7 +2085,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_detect_class() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tis_variable_str
  *
@@ -2119,7 +2119,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tis_variable_str() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_is_variable_str
  *
@@ -2140,7 +2140,7 @@ H5T_is_variable_str(const H5T_t *dt)
     FUNC_LEAVE_NOAPI(H5T_IS_VL_STRING(dt->shared))
 } /* end H5T_is_variable_str() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tget_size
  *
@@ -2177,7 +2177,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Tset_size
  *
@@ -2233,7 +2233,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tset_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tget_super
  *
@@ -2273,7 +2273,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_super() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_get_super
  *
@@ -2307,7 +2307,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_super() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T__register_int
  *
@@ -2347,7 +2347,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__register_int() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T__register
  *
@@ -2531,7 +2531,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__register() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Tregister
  *
@@ -2587,7 +2587,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tregister() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5T__unregister
  *
@@ -2691,7 +2691,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__unregister() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tunregister
  *
@@ -2731,7 +2731,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tunregister() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tfind
  *
@@ -2781,7 +2781,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tfind() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tcompiler_conv
  *
@@ -2821,7 +2821,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcompiler_conv() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tconvert
  *
@@ -2880,7 +2880,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tconvert() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tencode
  *
@@ -2919,7 +2919,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tencode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5Tdecode
  *
@@ -2974,7 +2974,7 @@ done:
  *-------------------------------------------------------------------------
  */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_encode
  *
@@ -3030,7 +3030,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_encode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_decode
  *
@@ -3084,7 +3084,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_decode() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T__create
  *
@@ -3216,7 +3216,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__create() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_copy
  *
@@ -3506,7 +3506,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_copy() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_lock
  *
@@ -3553,7 +3553,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T__alloc
  *
@@ -3603,7 +3603,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__alloc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T__free
  *
@@ -3683,7 +3683,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_close_real
  *
@@ -3727,7 +3727,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_close_real() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_close
  *
@@ -3812,7 +3812,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T__set_size
  *
@@ -4012,7 +4012,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__set_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_get_size
  *
@@ -4040,7 +4040,7 @@ H5T_get_size(const H5T_t *dt)
     FUNC_LEAVE_NOAPI(dt->shared->size)
 } /* end H5T_get_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_cmp
  *
@@ -4502,7 +4502,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_cmp() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_path_find
  *
@@ -4549,7 +4549,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_path_find() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T__path_find_real
  *
@@ -4856,7 +4856,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__path_find_real() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_path_noop
  *
@@ -4881,7 +4881,7 @@ H5T_path_noop(const H5T_path_t *p)
     FUNC_LEAVE_NOAPI(p->is_noop || (p->is_hard && 0==H5T_cmp(p->src, p->dst, FALSE)))
 } /* end H5T_path_noop() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_path_compound_subset
  *
@@ -4925,7 +4925,7 @@ H5T_path_compound_subset(const H5T_path_t *p)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_path_compound_subset */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_path_bkg
  *
@@ -4947,7 +4947,7 @@ H5T_path_bkg(const H5T_path_t *p)
     FUNC_LEAVE_NOAPI(p->cdata.need_bkg)
 } /* end H5T_path_bkg() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T__compiler_conv
  *
@@ -4981,7 +4981,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__compiler_conv() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_convert
  *
@@ -5032,7 +5032,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_convert() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_oloc
  *
@@ -5073,7 +5073,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_oloc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_nameof
  *
@@ -5113,7 +5113,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_nameof() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_is_immutable
  *
@@ -5143,7 +5143,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_is_named
  *
@@ -5228,7 +5228,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_convert_committed_datatype() */
 
-
+
 /*--------------------------------------------------------------------------
  * Function:    H5T_get_ref_type
  *
@@ -5257,7 +5257,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_get_ref_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  H5T_is_sensible
  *
@@ -5319,7 +5319,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5T_set_loc
@@ -5485,7 +5485,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_set_loc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_is_relocatable
  *
@@ -5524,7 +5524,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_relocatable() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5T_detect_reg_ref
  *
@@ -5532,7 +5532,7 @@ done:
  *             datatype.
  *
  * Return:      TRUE (1) or FALSE (0) on success
- *		(Can't fail)
+ *        (Can't fail)
  *
  * Programmer:  Quincey Koziol
  *              Saturday, January 5, 2019
@@ -5587,7 +5587,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__detect_reg_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_is_vl_storage
  *
@@ -5629,7 +5629,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_vl_storage() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_upgrade_version_cb
  *
@@ -5687,7 +5687,7 @@ H5T_upgrade_version_cb(H5T_t *dt, void *op_value)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T_upgrade_version_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T__upgrade_version
  *
@@ -5720,12 +5720,12 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__upgrade_version() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_set_version
  *
  * Purpose:     Set the encoding for a datatype to the version indicated by
- *              the file's low bound if that is higher than the datatype's 
+ *              the file's low bound if that is higher than the datatype's
  *              version.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -5752,7 +5752,7 @@ H5T_set_version(H5F_t *f, H5T_t *dt)
         if(H5T__upgrade_version(dt, vers) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade datatype encoding")
     }
-    
+
     /* Version bounds check */
     if(dt->shared->version > H5O_dtype_ver_bounds[H5F_HIGH_BOUND(f)])
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "Datatype version out of bounds")
@@ -5761,7 +5761,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_set_version() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_patch_file
  *
@@ -5797,7 +5797,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_patch_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5T_patch_vlen_file
  *
