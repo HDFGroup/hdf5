@@ -38,7 +38,7 @@
 #define H5O_COPY_SHALLOW_HIERARCHY_FLAG (0x0001u)   /* Copy only immediate members */
 #define H5O_COPY_EXPAND_SOFT_LINK_FLAG  (0x0002u)   /* Expand soft links into new objects */
 #define H5O_COPY_EXPAND_EXT_LINK_FLAG   (0x0004u)   /* Expand external links into new objects */
-#define H5O_COPY_EXPAND_REFERENCE_FLAG	(0x0008u)   /* Copy objects that are pointed by references */
+#define H5O_COPY_EXPAND_REFERENCE_FLAG  (0x0008u)   /* Copy objects that are pointed by references */
 #define H5O_COPY_WITHOUT_ATTR_FLAG      (0x0010u)   /* Copy object without copying attributes */
 #define H5O_COPY_PRESERVE_NULL_FLAG     (0x0020u)   /* Copy NULL messages (empty space) */
 #define H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG (0x0040u)   /* Merge committed datatypes in dest file */
@@ -75,7 +75,7 @@
 
 /* Flags for H5Oget_info.
  * Theses flags determine which fields will be filled in in the H5O_info_t
- * struct.  
+ * struct.
  */
 #define H5O_INFO_BASIC          0x0001u         /* Fill in the fileno, addr, type, and rc fields */
 #define H5O_INFO_TIME           0x0002u         /* Fill in the atime, mtime, ctime, and btime fields */
@@ -90,43 +90,43 @@
 
 /* Types of objects in file */
 typedef enum H5O_type_t {
-    H5O_TYPE_UNKNOWN = -1,	/* Unknown object type		*/
-    H5O_TYPE_GROUP,	        /* Object is a group		*/
-    H5O_TYPE_DATASET,		/* Object is a dataset		*/
-    H5O_TYPE_NAMED_DATATYPE, 	/* Object is a named data type	*/
+    H5O_TYPE_UNKNOWN = -1,    /* Unknown object type        */
+    H5O_TYPE_GROUP,            /* Object is a group        */
+    H5O_TYPE_DATASET,        /* Object is a dataset        */
+    H5O_TYPE_NAMED_DATATYPE,     /* Object is a named data type */
     H5O_TYPE_MAP,               /* Object is a map */
     H5O_TYPE_NTYPES             /* Number of different object types (must be last!) */
 } H5O_type_t;
 
 /* Information struct for object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx) */
 typedef struct H5O_hdr_info_t {
-    unsigned version;		/* Version number of header format in file */
-    unsigned nmesgs;		/* Number of object header messages */
-    unsigned nchunks;		/* Number of object header chunks */
+    unsigned version;        /* Version number of header format in file */
+    unsigned nmesgs;        /* Number of object header messages */
+    unsigned nchunks;        /* Number of object header chunks */
     unsigned flags;             /* Object header status flags */
     struct {
-        hsize_t total;		/* Total space for storing object header in file */
-        hsize_t meta;		/* Space within header for object header metadata information */
-        hsize_t mesg;		/* Space within header for actual message information */
-        hsize_t free;		/* Free space within object header */
+        hsize_t total;        /* Total space for storing object header in file */
+        hsize_t meta;        /* Space within header for object header metadata information */
+        hsize_t mesg;        /* Space within header for actual message information */
+        hsize_t free;        /* Free space within object header */
     } space;
     struct {
-        uint64_t present;	/* Flags to indicate presence of message type in header */
-        uint64_t shared;	/* Flags to indicate message type is shared in header */
+        uint64_t present;    /* Flags to indicate presence of message type in header */
+        uint64_t shared;    /* Flags to indicate message type is shared in header */
     } mesg;
 } H5O_hdr_info_t;
 
 /* Information struct for object (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx) */
 typedef struct H5O_info_t {
-    unsigned long 	fileno;		/* File number that object is located in */
-    haddr_t 		addr;		/* Object address in file	*/
-    H5O_type_t 		type;		/* Basic object type (group, dataset, etc.) */
-    unsigned 		rc;		/* Reference count of object    */
-    time_t		atime;		/* Access time			*/
-    time_t		mtime;		/* Modification time		*/
-    time_t		ctime;		/* Change time			*/
-    time_t		btime;		/* Birth time			*/
-    hsize_t 		num_attrs;	/* # of attributes attached to object */
+    unsigned long     fileno;        /* File number that object is located in */
+    haddr_t         addr;        /* Object address in file    */
+    H5O_type_t         type;        /* Basic object type (group, dataset, etc.) */
+    unsigned         rc;        /* Reference count of object    */
+    time_t        atime;        /* Access time            */
+    time_t        mtime;        /* Modification time        */
+    time_t        ctime;        /* Change time            */
+    time_t        btime;        /* Birth time            */
+    hsize_t         num_attrs;    /* # of attributes attached to object */
     H5O_hdr_info_t      hdr;            /* Object header information */
     /* Extra metadata storage for obj & attributes */
     struct {
@@ -143,14 +143,13 @@ typedef herr_t (*H5O_iterate_t)(hid_t obj, const char *name, const H5O_info_t *i
     void *op_data);
 
 typedef enum H5O_mcdt_search_ret_t {
-    H5O_MCDT_SEARCH_ERROR = -1,	/* Abort H5Ocopy */
-    H5O_MCDT_SEARCH_CONT,	/* Continue the global search of all committed datatypes in the destination file */
-    H5O_MCDT_SEARCH_STOP	/* Stop the search, but continue copying.  The committed datatype will be copied but not merged. */
+    H5O_MCDT_SEARCH_ERROR = -1,    /* Abort H5Ocopy */
+    H5O_MCDT_SEARCH_CONT,    /* Continue the global search of all committed datatypes in the destination file */
+    H5O_MCDT_SEARCH_STOP    /* Stop the search, but continue copying.  The committed datatype will be copied but not merged. */
 } H5O_mcdt_search_ret_t;
 
 /* Callback to invoke when completing the search for a matching committed datatype from the committed dtype list */
 typedef H5O_mcdt_search_ret_t (*H5O_mcdt_search_cb_t)(void *op_data);
-
 
 /********************/
 /* Public Variables */
