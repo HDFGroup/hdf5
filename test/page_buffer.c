@@ -19,6 +19,7 @@
 *
 *************************************************************/
 
+#include <err.h>
 #include <libgen.h>
 
 #include "h5test.h"
@@ -63,11 +64,52 @@ static unsigned verify_page_buffering_disabled(hid_t orig_fapl,
 static const char *namebases[] = {FILENAME, NULL};
 static const char *namebase = FILENAME;
 
-static int
-swmr_fapl_augment(hid_t fapl, H5F_vfd_swmr_config_t *config,
-    const char *filename, uint32_t max_lag)
+static hid_t
+paging_fcpl_create(const hsize_t pgsz)
+{ 
+    hid_t fcpl = H5I_INVALID_HID;
+
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        goto error;
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+        goto error;
+    if (H5Pset_file_space_page_size(fcpl, pgsz) < 0)
+        goto error;
+
+    return fcpl;
+error:
+    if (fcpl != H5I_INVALID_HID)
+        H5Pclose(fcpl);
+    return H5I_INVALID_HID;
+}
+
+static struct timespec
+print_elapsed_time(struct timespec *lastp, const char *fn, int ln)
 {
-    *config = (H5F_vfd_swmr_config_t){
+    uint64_t elapsed_ns;
+    struct timespec diff, now, last;
+
+    if (clock_gettime(CLOCK_MONOTONIC, &now) == -1)
+        err(EXIT_FAILURE, "%s: clock_gettime", __func__);
+
+    last = (lastp == NULL) ? now : *lastp;
+
+    timespecsub(&now, &last, &diff);
+
+    elapsed_ns = diff.tv_sec * (uint64_t)1000000000 + diff.tv_nsec;
+
+#if 0
+    printf("%5" PRIu64 ".%03" PRIu64 " %s.%d\n",
+        elapsed_ns / 1000000000, (elapsed_ns / 1000000) % 1000, fn, ln);
+#endif
+
+    return now;
+}
+
+static int
+swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
+{
+    H5F_vfd_swmr_config_t config = {
       .version = H5F__CURR_VFD_SWMR_CONFIG_VERSION
     , .tick_len = 4
     , .max_lag = 5
@@ -85,16 +127,62 @@ swmr_fapl_augment(hid_t fapl, H5F_vfd_swmr_config_t *config,
         return -1;
     }
     dname = dirname(tname);
-    snprintf(config->md_file_path, sizeof(config->md_file_path),
+    snprintf(config.md_file_path, sizeof(config.md_file_path),
         "%s/my_md_file", dname);
     free(tname);
 
     /* Enable VFD SWMR configuration */
-    if(H5Pset_vfd_swmr_config(fapl, config) < 0) {
+    if(H5Pset_vfd_swmr_config(fapl, &config) < 0) {
         HDfprintf(stderr, "H5Pset_vrd_swmr_config failed\n");
         return -1;
     }
     return 0;
+}
+
+static bool
+pgbuf_read_each_equals(H5F_t *f, H5FD_mem_t ty, haddr_t addr, size_t nelts,
+    int *data, int val)
+{
+    size_t i;
+
+    /* Read all elements using the VFD. */
+    if (H5F_block_read(f, ty, addr, sizeof(int) * nelts, data) < 0)
+        FAIL_STACK_ERROR;
+
+    for (i = 0; i < nelts; i++) {
+        if (data[i] != val) {
+            printf("%s: read %d at data[%d], expected %d\n", __func__,
+                data[i], i, val);
+            return false;
+        }
+    }
+    return true;
+error:
+    return false;
+}
+
+static bool
+vfd_read_each_equals(H5F_t *f, H5FD_mem_t ty, haddr_t addr, size_t nelts,
+    int *data, int val)
+{
+    size_t i;
+
+    /* Read all elements using the VFD. */
+    if (H5FD_read(f->shared->lf, ty, addr, sizeof(int) * nelts, data) < 0)
+        FAIL_STACK_ERROR;
+
+    for (i = 0; i < nelts; i++) {
+        if (data[i] != val) {
+#if 0
+            printf("%s: read %d at data[%d], expected %d\n", __func__,
+                data[i], i, val);
+#endif
+            return false;
+        }
+    }
+    return true;
+error:
+    return false;
 }
 
 
@@ -573,32 +661,11 @@ error:
     return 1;
 }
 
-static bool
-vfd_read_each_equals(H5F_t *f, H5FD_mem_t ty, haddr_t addr, size_t nelts,
-    int *data, int val)
-{
-    size_t i;
-
-    /* Read all elements using the VFD. */
-    if (H5FD_read(f->shared->lf, ty, addr, sizeof(int) * nelts, data) < 0)
-        FAIL_STACK_ERROR;
-
-    for (i = 0; i < nelts; i++) {
-        if (data[i] != val) {
-            printf("Read %d at data[%d], expected %d\n", data[i], i, val);
-            return false;
-        }
-    }
-    return true;
-error:
-    return false;
-}
-
 
 /*
  * Function:    test_mpmde_delay_basic()
  *
- * Purpose:     Perform a basic check that a multi-page metadata entry
+ * Purpose:     Check that a multi-page metadata entry
  *              (MPMDE) is not written immediately to the HDF5 file in
  *              VFD SWMR mode, but it is buffered in the shadow file
  *              until max_lag + 1 ticks have elapsed.  Furthermore,
@@ -618,12 +685,10 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     hid_t file_id = -1;          /* File ID */
     hid_t fcpl = -1;
     hid_t fapl = -1;
-    int64_t base_page_cnt;
-    int64_t page_count = 0;
     size_t i, num_elements = 2000;
     int *data = NULL, *odata = NULL;
     H5F_t *f;
-    H5F_vfd_swmr_config_t config;   /* Configuration for VFD SWMR */
+    const uint32_t max_lag = 5;
     hsize_t pgsz = sizeof(int) * 200;
 
     TESTING("Multipage Metadata Delay Handling");
@@ -645,7 +710,7 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pset_page_buffer_size(fapl, 10 * pgsz, 0, 0) < 0)
         TEST_ERROR;
 
-    if (swmr_fapl_augment(fapl, &config, filename, 5) < 0)
+    if (swmr_fapl_augment(fapl, filename, max_lag) < 0)
         TEST_ERROR;
 
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
@@ -654,14 +719,6 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5I_object(file_id)))
         FAIL_STACK_ERROR;
-
-    /* opening the file inserts one or more pages into the page buffer.
-     * Get the number of pages inserted, and verify that it is the 
-     * expected value.
-     */
-    base_page_cnt = f->shared->pb_ptr->curr_pages;
-    if (base_page_cnt != 2)
-        TEST_ERROR;
 
     const haddr_t addr = H5MF_alloc(f, H5FD_MEM_BTREE,
         sizeof(int) * num_elements);
@@ -687,7 +744,7 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
      * the tick number, so it takes `max_lag + 1` times through this loop
      * for a multi-page metadata write to make it to the HDF5 file.
      */
-    for (i = 0; i < config.max_lag + 1; i++) {
+    for (i = 0; i < max_lag + 1; i++) {
         /* All elements read using the VFD should be 0. */
         if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements,
                 data, 0))
@@ -700,7 +757,7 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
      * when their delay elapses.
      *
      * (If we were waiting for a single-page metadata buffer to
-     * appear at the VFD layer, then it may reside in the LRU buffer
+     * appear at the VFD layer, then it may reside in the LRU queue
      * for a while.)
      */
 #if 0
@@ -719,18 +776,222 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
     HDfree(data);
+    HDfree(odata);
 
     PASSED()
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(file_id);
-        if (data)
+        if (fapl != H5I_INVALID_HID)
+            H5Pclose(fapl);
+        if (fcpl != H5I_INVALID_HID)
+            H5Pclose(fcpl);
+        if (file_id != H5I_INVALID_HID)
+            H5Fclose(file_id);
+        if (data != NULL)
             HDfree(data);
-        if (odata)
+        if (odata != NULL)
+            HDfree(odata);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*
+ * Function:    test_spmde_lru_evict_basic()
+ *
+ * Purpose:     Check that once a single-page metadata entry
+ *              (SPMDE) is eligible to be written to the HDF5 file
+ *              (because it has resided unchanged in the metadata file
+ *              for max_lag + 1 ticks), filling the page buffer to
+ *              capacity causes the entry to be flushed.
+ *
+ *              Further check that the page was evicted by writing
+ *              changes to the VFD layer ("under" the page buffer)
+ *              and trying to read the changes back through the page
+ *              buffer: stale page-buffer content should not shadow
+ *              the changes.
+ *
+ *              XXX
+ *              XXX reduce duplication with test_spmde_delay_basic!
+ *              XXX
+ *
+ * Return:      0 if test is sucessful
+ *              1 if test fails
+ *
+ * Programmer:  David Young
+ *              16 Sep 2019
+ */
+static unsigned
+test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
+{
+    char filename[FILENAME_LEN]; /* Filename to use */
+    hid_t file_id = -1;          /* File ID */
+    hid_t fcpl = -1;
+    hid_t fapl = -1;
+    size_t i, num_elements = 20;
+    int *data = NULL, *odata = NULL;
+    H5F_t *f;
+    const uint32_t max_lag = 5;
+    const hsize_t pgsz = sizeof(int) * 200;
+    const hsize_t pgbufsz = 10 * pgsz;
+    hsize_t ofs;
+    bool flushed;
+    struct timespec last;
+
+    TESTING("Single Page Metadata Flush & Eviction Handling");
+
+    h5_fixname(namebase, orig_fapl, filename, sizeof(filename));
+
+    last = print_elapsed_time(NULL, __func__, __LINE__);
+    if ((fapl = H5Pcopy(orig_fapl)) < 0)
+        TEST_ERROR
+
+    if (set_multi_split(env_h5_drvr, fapl, pgsz) != 0)
+        TEST_ERROR;
+
+    if ((fcpl = paging_fcpl_create(pgsz)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pset_page_buffer_size(fapl, pgbufsz, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    if (swmr_fapl_augment(fapl, filename, max_lag) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
+        FAIL_STACK_ERROR;
+
+    last = print_elapsed_time(&last, __func__, __LINE__);
+
+    /* Allocate a region whose pages we can write to force eviction of
+     * least-recently used pages.
+     */
+    const haddr_t pressure = H5MF_alloc(f, H5FD_MEM_BTREE, pgbufsz);
+    if (HADDR_UNDEF == pressure)
+        FAIL_STACK_ERROR;
+
+    /* Allocate a whole page for our 20 elements so that they do
+     * not share a "hot" page with something else.
+     */
+    const haddr_t addr = H5MF_alloc(f, H5FD_MEM_BTREE, pgsz);
+    if (HADDR_UNDEF == addr)
+        FAIL_STACK_ERROR;
+
+    if ((odata = (int *)HDcalloc(num_elements, sizeof(int))) == NULL)
+        TEST_ERROR;
+
+    if ((data = (int *)HDcalloc(num_elements, sizeof(int))) == NULL)
+        TEST_ERROR;
+
+    /* initialize all the elements to have a value of -1 */
+    for(i = 0; i < num_elements; i++)
+        odata[i] = -1;
+
+    if (H5F_block_write(f, H5FD_MEM_BTREE, addr, sizeof(int) * num_elements,
+           odata) < 0)
+        FAIL_STACK_ERROR;
+
+    last = print_elapsed_time(&last, __func__, __LINE__);
+
+    /* H5Fvfd_swmr_end_tick() processes delayed writes before it increases
+     * the tick number, so only after `max_lag + 1` times through this loop
+     * is a metadata write eligible to be written to the HDF5 file.
+     */
+    for (i = 0; i < max_lag + 1; i++) {
+        /* All elements read using the VFD should be 0. */
+        if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements,
+                data, 0))
+            TEST_ERROR;
+        H5Fvfd_swmr_end_tick(file_id);
+    }
+
+    last = print_elapsed_time(&last, __func__, __LINE__);
+
+    flushed = false;
+    /* We are waiting for a single-page metadata buffer to
+     * appear at the VFD layer, but it may reside in the LRU queue.
+     * Dirty new blocks to apply pressure on the page buffer so that
+     * it empties the LRU queue.  Writing to N distinct pages,
+     * for N the number of pages in the page buffer, ought to do
+     * the trick.
+     */
+    for (ofs = 0; ofs < pgbufsz - pgsz * 2; ofs += pgsz) {
+        int tmp = -1;
+        if (H5F_block_write(f, H5FD_MEM_BTREE, pressure + ofs,
+                sizeof(tmp), &tmp) < 0)
+            FAIL_STACK_ERROR;
+        if (!flushed &&
+            vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements,
+                data, -1)) {
+            flushed = true;
+#if 0
+            printf("Writing page %" PRIuHSIZE " flushed target page.\n",
+                ofs / pgsz);
+#endif
+        }
+    }
+
+    last = print_elapsed_time(&last, __func__, __LINE__);
+
+    if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data, -1))
+        TEST_ERROR;
+
+    /* initialize all the elements to have a value of -2 */
+    for(i = 0; i < num_elements; i++)
+        odata[i] = -2;
+    /* Write -2 to our target page using the VFD. */
+    if (H5FD_write(f->shared->lf, H5FD_MEM_BTREE, addr,
+            sizeof(int) * num_elements, odata) < 0)
+        FAIL_STACK_ERROR;
+
+    last = print_elapsed_time(&last, __func__, __LINE__);
+
+    /* All elements read through the page buffer should be -2.  That is,
+     * no page-buffer entry should shadow the page.
+     */
+    if (!pgbuf_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data,
+            -2))
+        TEST_ERROR;
+
+    last = print_elapsed_time(&last, __func__, __LINE__);
+
+    /* Force ticks to occur so that H5Fclose() doesn't pause waiting
+     * for them to elapse.
+     */
+    for (i = 0; i < max_lag + 1; i++)
+        H5Fvfd_swmr_end_tick(file_id);
+
+    if (H5Fclose(file_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(fcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR;
+    HDfree(data);
+    HDfree(odata);
+
+    last = print_elapsed_time(&last, __func__, __LINE__);
+
+    PASSED()
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if (fapl != H5I_INVALID_HID)
+            H5Pclose(fapl);
+        if (fcpl != H5I_INVALID_HID)
+            H5Pclose(fcpl);
+        if (file_id != H5I_INVALID_HID)
+            H5Fclose(file_id);
+        if (data != NULL)
+            HDfree(data);
+        if (odata != NULL)
             HDfree(odata);
     } H5E_END_TRY;
     return 1;
@@ -740,7 +1001,7 @@ error:
 /*
  * Function:    test_spmde_delay_basic()
  *
- * Purpose:     Perform a basic check that a single-page metadata entry
+ * Purpose:     Check that a single-page metadata entry
  *              (SPMDE) is not written immediately to the HDF5 file in
  *              VFD SWMR mode, but it is buffered in the shadow file
  *              until max_lag + 1 ticks have elapsed.
@@ -766,12 +1027,10 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     hid_t file_id = -1;          /* File ID */
     hid_t fcpl = -1;
     hid_t fapl = -1;
-    int64_t base_page_cnt;
-    int64_t page_count = 0;
     size_t i, num_elements = 20;
     int *data = NULL, *odata = NULL;
     H5F_t *f;
-    H5F_vfd_swmr_config_t config;   /* Configuration for VFD SWMR */
+    const uint32_t max_lag = 5;
     hsize_t pgsz = sizeof(int) * 200;
 
     TESTING("Single Page Metadata Delay Handling");
@@ -793,7 +1052,7 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pset_page_buffer_size(fapl, 10 * pgsz, 0, 0) < 0)
         TEST_ERROR;
 
-    if (swmr_fapl_augment(fapl, &config, filename, 5) < 0)
+    if (swmr_fapl_augment(fapl, filename, max_lag) < 0)
         TEST_ERROR;
 
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
@@ -802,14 +1061,6 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5I_object(file_id)))
         FAIL_STACK_ERROR;
-
-    /* opening the file inserts one or more pages into the page buffer.
-     * Get the number of pages inserted, and verify that it is the 
-     * expected value.
-     */
-    base_page_cnt = f->shared->pb_ptr->curr_pages;
-    if (base_page_cnt != 2)
-        TEST_ERROR;
 
     const haddr_t addr = H5MF_alloc(f, H5FD_MEM_BTREE,
         sizeof(int) * num_elements);
@@ -835,7 +1086,7 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
      * the tick number, so only after `max_lag + 1` times through this loop
      * is a metadata write eligible to be written to the HDF5 file.
      */
-    for (i = 0; i < config.max_lag + 1; i++) {
+    for (i = 0; i < max_lag + 1; i++) {
         /* All elements read using the VFD should be 0. */
         if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements,
                 data, 0))
@@ -844,7 +1095,7 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     }
 
     /* We are waiting for a single-page metadata buffer to
-     * appear at the VFD layer, but it may reside in the LRU buffer
+     * appear at the VFD layer, but it may reside in the LRU queue
      * for a while if we do not flush the page buffer.
      */
     if (H5PB_flush(f) < 0)
@@ -854,179 +1105,6 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     if (!vfd_read_each_equals(f, H5FD_MEM_BTREE, addr, num_elements, data, -1))
         TEST_ERROR;
 
-#if 0
-    /* update the first 100 elements to have values 0-99 - this will be
-       a page buffer update with 1 page resulting in the page
-       buffer. */
-    for(i = 0; i < 100; i++)
-        data[i] = i;
-
-    if (H5F_block_write(f, H5FD_MEM_DRAW, addr, sizeof(int) * 100, data) < 0)
-        FAIL_STACK_ERROR;
-
-    page_count ++;
-
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
-
-    /* update elements 300 - 450, with values 300 -  - this will
-       bring two more pages into the page buffer. */
-    for(i = 0; i < 150; i++)
-        data[i] = i + 300;
-    if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 300), sizeof(int) * 150, data) < 0)
-        FAIL_STACK_ERROR;
-    page_count += 2;
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
-
-    /* update elements 100 - 300, this will go to disk but also update
-       existing pages in the page buffer. */
-    for(i=0 ; i<200 ; i++)
-        data[i] = i+100;
-    if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 100), sizeof(int) * 200, data) < 0)
-        FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
-
-    /* Update elements 225-300 - this will update an existing page in the PB */
-    /* Changes: 450 - 600; 150 */
-    for(i=0 ; i<150 ; i++)
-        data[i] = i+450;
-    if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 450), sizeof(int) * 150, data) < 0)
-        FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
-
-    /* Do a full page write to block 600-800 - should bypass the PB */
-    for(i=0 ; i<200 ; i++)
-        data[i] = i+600;
-    if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 600), sizeof(int) * 200, data) < 0)
-        FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
-
-    /* read elements 800 - 1200, this should not affect the PB, and should read -1s */
-    if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 800), sizeof(int) * 400, data) < 0)
-        FAIL_STACK_ERROR;
-    for (i=0; i < 400; i++) {
-        if (data[i] != -1) {
-            HDfprintf(stderr, "Read different values than written\n");
-            HDfprintf(stderr, "data[%d] = %d, %d expected.\n", i, data[i], -1);
-            FAIL_STACK_ERROR;
-        }
-    }
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
-
-    /* read elements 1200 - 1201, this should read -1 and bring in an 
-     * entire page of addr 1200 
-     */
-    if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 1200), sizeof(int) * 1, data) < 0)
-        FAIL_STACK_ERROR;
-    for (i=0; i < 1; i++) {
-        if (data[i] != -1) {
-            HDfprintf(stderr, "Read different values than written\n");
-            HDfprintf(stderr, "data[%d] = %d, %d expected.\n", i, data[i], -1);
-            TEST_ERROR;
-        }
-    }
-    page_count ++;
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        TEST_ERROR;
-
-    /* read elements 175 - 225, this should use the PB existing pages */
-    /* Changes: 350 - 450 */
-    /* read elements 175 - 225, this should use the PB existing pages */
-    if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 350), sizeof(int) * 100, data) < 0)
-        FAIL_STACK_ERROR;
-    for (i=0; i < 100; i++) {
-        if (data[i] != i + 350) {
-            HDfprintf(stderr, "Read different values than written\n");
-            HDfprintf(stderr, "data[%d] = %d, %d expected.\n", i, data[i], 
-                      i + 350);
-            TEST_ERROR;
-        }
-    }
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        TEST_ERROR;
-
-    /* read elements 0 - 800 using the VFD.. this should result in -1s
-       except for the writes that went through the PB (100-300 & 600-800) */
-    if (H5FD_read(f->shared->lf, H5FD_MEM_DRAW, addr, sizeof(int) * 800, data) < 0)
-        FAIL_STACK_ERROR;
-    i = 0;
-    while (i < 800) {
-        if((i>=100 && i<300) || i >= 600) {
-            if (data[i] != i) {
-                HDfprintf(stderr, "Read different values than written\n");
-                HDfprintf(stderr, "data[%d] = %d, %d expected.\n", 
-                          i, data[i], i);
-                TEST_ERROR;
-            }
-        } else {
-            if (data[i] != -1) {
-                HDfprintf(stderr, "Read different values than written\n");
-                HDfprintf(stderr, "data[%d] = %d, %d expected.\n", 
-                          i, data[i], -1);
-                TEST_ERROR;
-            }
-        }
-        i++;
-    }
-
-    /* read elements 0 - 800 using the PB.. this should result in all
-     * what we have written so far and should get the updates from the PB 
-     */
-    if (H5F_block_read(f, H5FD_MEM_DRAW, addr, sizeof(int) * 800, data) < 0)
-        FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        TEST_ERROR;
-    for (i=0; i < 800; i++) {
-        if (data[i] != i) {
-            HDfprintf(stderr, "Read different values than written\n");
-            HDfprintf(stderr, "data[%d] = %d, %d expected.\n", i, data[i], i);
-            TEST_ERROR;
-        }
-    }
-
-    /* update elements 400 - 1400 to value 0, this will go to disk but
-     * also evict existing pages from the PB (page 400 & 1200 that are
-     * existing). 
-     */
-    for(i=0 ; i<1000 ; i++)
-        data[i] = 0;
-    if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 400), sizeof(int) * 1000, data) < 0)
-        FAIL_STACK_ERROR;
-    page_count -= 2;
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        TEST_ERROR;
-
-    /* read elements 0 - 1000.. this should go to disk then update the
-     * buffer result 200-400 with existing pages
-     */
-    if (H5F_block_read(f, H5FD_MEM_DRAW, addr, sizeof(int) * 1000, data) < 0)
-        FAIL_STACK_ERROR;
-    for (i = 0; i < 1000; i++) {
-        if(i < 400) {
-            if (data[i] != i) {
-                HDfprintf(stderr, "Read different values than written\n");
-                HDfprintf(stderr, "data[%d] = %d, %d expected.\n", 
-                          i, data[i], i);
-                TEST_ERROR;
-            }
-        } else {
-            if (data[i] != 0) {
-                HDfprintf(stderr, "Read different values than written\n");
-                HDfprintf(stderr, "data[%d] = %d, %d expected.\n", 
-                          i, data[i], 0);
-                TEST_ERROR;
-            }
-        }
-    }
-    if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
-        TEST_ERROR;
-#endif
-
     if (H5Fclose(file_id) < 0)
         FAIL_STACK_ERROR;
     if (H5Pclose(fcpl) < 0)
@@ -1034,18 +1112,22 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
     HDfree(data);
+    HDfree(odata);
 
     PASSED()
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(file_id);
-        if (data)
+        if (fapl != H5I_INVALID_HID)
+            H5Pclose(fapl);
+        if (fcpl != H5I_INVALID_HID)
+            H5Pclose(fcpl);
+        if (file_id != H5I_INVALID_HID)
+            H5Fclose(file_id);
+        if (data != NULL)
             HDfree(data);
-        if (odata)
+        if (odata != NULL)
             HDfree(odata);
     } H5E_END_TRY;
     return 1;
@@ -1055,7 +1137,7 @@ error:
 /*
  * Function:    test_raw_data_handling()
  *
- * Purpose:  Perform a basic check that raw data is written to the HDF5
+ * Purpose:  Check that raw data is written to the HDF5
  *           file when expected whether in VFD SWMR mode or not.
  *
  *           Any data mis-matches or failures reported by the HDF5
@@ -1097,7 +1179,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
     haddr_t addr = HADDR_UNDEF;
     int *data = NULL;
     H5F_t *f = NULL;
-    H5F_vfd_swmr_config_t config;
+    const uint32_t max_lag = 5;
 
     TESTING("%sRaw Data Handling", vfd_swmr_mode ? "VFD SWMR " : "");
 
@@ -1118,7 +1200,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
     if (H5Pset_page_buffer_size(fapl, sizeof(int) * 2000, 0, 0) < 0)
         TEST_ERROR;
 
-    if (vfd_swmr_mode && swmr_fapl_augment(fapl, &config, filename, 5) < 0)
+    if (vfd_swmr_mode && swmr_fapl_augment(fapl, filename, max_lag) < 0)
         TEST_ERROR;
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -1337,10 +1419,13 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
 
 error:
     H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(file_id);
-        if (data)
+        if (fapl != H5I_INVALID_HID)
+            H5Pclose(fapl);
+        if (fcpl != H5I_INVALID_HID)
+            H5Pclose(fcpl);
+        if (file_id != H5I_INVALID_HID)
+            H5Fclose(file_id);
+        if (data != NULL)
             HDfree(data);
     } H5E_END_TRY;
     return 1;
@@ -1598,10 +1683,13 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
 
 error:
     H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(file_id);
-        if(data)
+        if (fapl != H5I_INVALID_HID)
+            H5Pclose(fapl);
+        if (fcpl != H5I_INVALID_HID)
+            H5Pclose(fcpl);
+        if (file_id != H5I_INVALID_HID)
+            H5Fclose(file_id);
+        if (data != NULL)
             HDfree(data);
     } H5E_END_TRY;
     return 1;
@@ -2327,17 +2415,17 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     return 0;
 
 error:
-
     H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(file_id);
-        if(data)
+        if (fapl != H5I_INVALID_HID)
+            H5Pclose(fapl);
+        if (fcpl != H5I_INVALID_HID)
+            H5Pclose(fcpl);
+        if (file_id != H5I_INVALID_HID)
+            H5Fclose(file_id);
+        if (data != NULL)
             HDfree(data);
     } H5E_END_TRY;
-
     return 1;
-
 }
 
 
@@ -2722,10 +2810,13 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
 
 error:
     H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(file_id);
-        if(data)
+        if (fapl != H5I_INVALID_HID)
+            H5Pclose(fapl);
+        if (fcpl != H5I_INVALID_HID)
+            H5Pclose(fcpl);
+        if (file_id != H5I_INVALID_HID)
+            H5Fclose(file_id);
+        if (data != NULL)
             HDfree(data);
     } H5E_END_TRY;
 
@@ -2837,9 +2928,12 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
 error:
 
     H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Pclose(fcpl);
-        H5Fclose(file_id);
+        if (fapl != H5I_INVALID_HID)
+            H5Pclose(fapl);
+        if (fcpl != H5I_INVALID_HID)
+            H5Pclose(fcpl);
+        if (file_id != H5I_INVALID_HID)
+            H5Fclose(file_id);
     } H5E_END_TRY;
 
     return 1;
@@ -2910,6 +3004,7 @@ main(void)
     nerrors += test_raw_data_handling(fapl, env_h5_drvr, true);
     nerrors += test_spmde_delay_basic(fapl, env_h5_drvr);
     nerrors += test_mpmde_delay_basic(fapl, env_h5_drvr);
+    nerrors += test_spmde_lru_evict_basic(fapl, env_h5_drvr);
     nerrors += test_lru_processing(fapl, env_h5_drvr);
     nerrors += test_min_threshold(fapl, env_h5_drvr);
     nerrors += test_stats_collection(fapl, env_h5_drvr);
@@ -2941,4 +3036,3 @@ error:
 
     HDexit(EXIT_FAILURE);
 }
-
