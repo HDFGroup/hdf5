@@ -199,10 +199,10 @@ Bug Fixes since HDF5-1.10.5 release
       There was an assertion failure when moving meessages from running a
       user test program with library release hdf5.1.10.4. It was because
       the tag value (object header's address) was not set up when entering
-      the library routine H5O__chunk_update_idx(), which will eventually 
+      the library routine H5O__chunk_update_idx(), which will eventually
       verifies the metadata tag value when protecting the object header.
 
-      The problem was fixed by replacing FUNC_ENTER_PACKAGE in H5O__chunk_update_idx() 
+      The problem was fixed by replacing FUNC_ENTER_PACKAGE in H5O__chunk_update_idx()
       with FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr) to set up the metadata tag.
 
       (VC - 2019/08/23, HDFFV-10873)
@@ -219,7 +219,7 @@ Bug Fixes since HDF5-1.10.5 release
       to unsigned later on, the decimal part is chopped off causing the test
       failure.
 
-      This was fixed by obtaining the rounded integer value (HDceil) for the 
+      This was fixed by obtaining the rounded integer value (HDceil) for the
       log10 value of read attempts first before casting the result to unsigned.
 
       (VC - 2019/8/14, HDFFV-10813)
@@ -333,7 +333,14 @@ Bug Fixes since HDF5-1.10.5 release
 
     Tools
     -----
-    -
+    - h5repack was fixed to repack datasets with external storage
+      to other types of storage.
+
+      New test added to repack files and verify the correct data using h5diff.
+
+      (JS - 2019/09/25, HDFFV-10408)
+      (ADB - 2019/10/02, HDFFV-10918)
+
 
     High-Level APIs:
     ------
