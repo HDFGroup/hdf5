@@ -2674,7 +2674,7 @@ done:
  *              if possible.
  *
  *              Note that the function must not be called under 
- *              non-sencicle conditions -- thus if either 
+ *              nonsensical conditions -- thus if either 
  *
  *                  1) the inserted type is metadata and min_rd_pages ==
  *                     max_pages, or 
@@ -3714,7 +3714,7 @@ done:
  *
  * Function:	H5PB__write_meta
  *
- * Purpose:	Satisfy a metadata read in cases 7 and 8 from H5PB_write().
+ * Purpose:	Satisfy a metadata write in cases 7 and 8 from H5PB_write().
  *              Specifically:
  *
  *              7) If the write is of metadata, the write is larger than
@@ -3753,13 +3753,13 @@ done:
  *              2) The page buffer has been configured to accept at least
  *                 one page of metadata.
  *
- *              3) This is a metadata read.
+ *              3) This is a metadata write.
  *
- *              Note also that if the metadata read is of size 
+ *              Note also that if the metadata write is of size 
  *              no larger than page size, it may not cross page 
  *              boundaries.
  *
- *              Further, for reads larger than page size (case 7 only), 
+ *              Further, for writes larger than page size (case 7 only), 
  *              the base address must be page aligned.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -3772,7 +3772,7 @@ done:
  */
 static herr_t
 H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
-                 const void *buf/*out*/)
+                 const void *buf/*in*/)
 {
     H5PB_t *pb_ptr;                    /* Page buffer for this file */
     H5PB_entry_t *entry_ptr;           /* Pointer to page buffer entry */
@@ -3811,7 +3811,7 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
          *
          * This requires the following actions:
          *
-         * 1) If the multi-page metadata entry is not alrady in the 
+         * 1) If the multi-page metadata entry is not already in the 
          *    page buffer, create an entry for it.
          *
          * 2) Overwrite the image of the entry with the write buffer.
