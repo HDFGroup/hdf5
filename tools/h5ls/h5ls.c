@@ -241,12 +241,12 @@ usage (void)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_string
+ * Function:    print_string
  *
- * Purpose: Print a string value by escaping unusual characters. If
- *          STREAM is null then we only count how large the output would be.
+ * Purpose:     Print a string value by escaping unusual characters. If
+ *              STREAM is null then we only count how large the output would be.
  *
- * Return: Number of characters printed.
+ * Return:      Number of characters printed.
  *-------------------------------------------------------------------------
  */
 static int
@@ -287,7 +287,8 @@ print_string(h5tools_str_t *buffer, const char *s, hbool_t escape_spaces)
                 nprint += 2;
                 break;
             case '\t':
-                if (buffer) h5tools_str_append(buffer, "\\t");
+                if (buffer)
+                    h5tools_str_append(buffer, "\\t");
                 nprint += 2;
                 break;
             case ' ':
@@ -321,17 +322,16 @@ print_string(h5tools_str_t *buffer, const char *s, hbool_t escape_spaces)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_obj_name
+ * Function:    print_obj_name
  *
- * Purpose: Print an object name and another string.
+ * Purpose:     Print an object name and another string.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static int
-print_obj_name(h5tools_str_t *buffer, const iter_t *iter, const char *oname,
-    const char *s)
+print_obj_name(h5tools_str_t *buffer, const iter_t *iter, const char *oname, const char *s)
 {
     static char fullname[NAME_BUF_SIZE];     /* Buffer for file and/or object name */
     const char *name = fullname;                /* Pointer to buffer for printing */
@@ -363,12 +363,12 @@ print_obj_name(h5tools_str_t *buffer, const iter_t *iter, const char *oname,
 
 
 /*-------------------------------------------------------------------------
- * Function: print_native_type
+ * Function:    print_native_type
  *
- * Purpose: Prints the name of a native C data type.
+ * Purpose:     Prints the name of a native C data type.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed.
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed.
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -515,7 +515,8 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
         else {
             return print_int_type(buffer, type, ind);
         }
-    } else {
+    }
+    else {
         return print_int_type(buffer, type, ind);
     }
     return TRUE;
@@ -523,12 +524,12 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_ieee_type
+ * Function:    print_ieee_type
  *
- * Purpose: Print the name of an IEEE floating-point data type.
+ * Purpose:     Print the name of an IEEE floating-point data type.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -554,13 +555,13 @@ print_ieee_type(h5tools_str_t *buffer, hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_precision
+ * Function:    print_precision
  *
- * Purpose: Prints information on the next line about precision and
- *          padding if the precision is less than the total data type
- *          size.
+ * Purpose:     Prints information on the next line about precision and
+ *              padding if the precision is less than the total data type
+ *              size.
  *
- * Return: void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
@@ -637,15 +638,15 @@ print_precision(h5tools_str_t *buffer, hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_int_type
+ * Function:    print_int_type
  *
- * Purpose: Print the name of an integer data type.  Common information
- *          like number of bits, byte order, and sign scheme appear on
- *          the first line. Additional information might appear in
- *          parentheses on the following lines.
+ * Purpose:     Print the name of an integer data type.  Common information
+ *              like number of bits, byte order, and sign scheme appear on
+ *              the first line. Additional information might appear in
+ *              parentheses on the following lines.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -704,12 +705,12 @@ print_int_type(h5tools_str_t *buffer, hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_float_type
+ * Function:    print_float_type
  *
- * Purpose: Print info about a floating point data type.
+ * Purpose:     Print info about a floating point data type.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -809,18 +810,18 @@ print_float_type(h5tools_str_t *buffer, hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_cmpd_type
+ * Function:    print_cmpd_type
  *
- * Purpose: Print info about a compound data type.
+ * Purpose:     Print info about a compound data type.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
 print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
-    char        *name=NULL;     /* member name */
+    char       *name = NULL;    /* member name */
     size_t      size;           /* total size of type in bytes */
     hid_t       subtype;        /* member data type */
     int         nmembs;         /* number of members */
@@ -854,12 +855,12 @@ print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_enum_type
+ * Function:    print_enum_type
  *
- * Purpose: Print info about an enumeration data type.
+ * Purpose:     Print info about an enumeration data type.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -971,12 +972,12 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_string_type
+ * Function:    print_string_type
  *
- * Purpose: Print information about a string data type.
+ * Purpose:     Print information about a string data type.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1066,12 +1067,12 @@ print_string_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_reference_type
+ * Function:    print_reference_type
  *
- * Purpose: Prints information about a reference data type.
+ * Purpose:     Prints information about a reference data type.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1095,12 +1096,12 @@ print_reference_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_opaque_type
+ * Function:    print_opaque_type
  *
- * Purpose: Prints information about an opaque data type.
+ * Purpose:     Prints information about an opaque data type.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -1191,19 +1192,19 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_bitfield_type
+ * Function:    print_bitfield_type
  *
- * Purpose: Print information about a bitfield type.
+ * Purpose:     Print information about a bitfield type.
  *
- * Return: Success: TRUE
- *         Failure: FALSE, nothing printed
+ * Return:      Success: TRUE
+ *              Failure: FALSE, nothing printed
  *-------------------------------------------------------------------------
  */
 static hbool_t
 print_bitfield_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
-    H5T_order_t order;          /* byte order value */
-    const char  *order_s=NULL;  /* byte order string */
+    H5T_order_t order;            /* byte order value */
+    const char  *order_s = NULL;  /* byte order string */
 
     if (H5T_BITFIELD != H5Tget_class(type))
         return FALSE;
@@ -1233,16 +1234,16 @@ print_bitfield_type(h5tools_str_t *buffer, hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_type
+ * Function:    print_type
  *
- * Purpose: Prints a data type definition.  The definition is printed
- *  without any leading space or trailing line-feed (although
- *  there might be line-feeds inside the type definition).  The
- *  first line is assumed to have IND characters before it on
- *  the same line (printed by the caller).
- *  Prints the OID of shared data types.
+ * Purpose:     Prints a data type definition.  The definition is printed
+ *              without any leading space or trailing line-feed (although
+ *              there might be line-feeds inside the type definition).  The
+ *              first line is assumed to have IND characters before it on
+ *              the same line (printed by the caller).
+ *              Prints the OID of shared data types.
  *
- * Return: void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
@@ -1285,11 +1286,11 @@ print_type(h5tools_str_t *buffer, hid_t type, int ind)
 
 
 /*-------------------------------------------------------------------------
- * Function: dump_dataset_values
+ * Function:    dump_dataset_values
  *
- * Purpose: Prints all values of a dataset.
+ * Purpose:     Prints all values of a dataset.
  *
- * Return: void
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
@@ -1298,7 +1299,7 @@ dump_dataset_values(hid_t dset)
     char                string_prefix[64];
     static char         fmt_double[16];
     static char         fmt_float[16];
-    hsize_t             curr_pos = 0;        /* total data element position   */
+    hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t     outputformat;
@@ -1408,22 +1409,22 @@ dump_dataset_values(hid_t dset)
 
 
 /*-------------------------------------------------------------------------
- * Function: list_attr
+ * Function:    list_attr
  *
- * Purpose: Prints information about attributes.
+ * Purpose:     Prints information about attributes.
  *
- * Return: Success: 0
- *         Failure: -1
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ainfo,
     void H5_ATTR_UNUSED *op_data)
 {
-    hid_t               attr = -1;
-    hid_t               space = -1;
-    hid_t               type = -1;
-    hid_t               p_type = -1;
+    hid_t               attr = H5I_INVALID_HID;
+    hid_t               space = H5I_INVALID_HID;
+    hid_t               type = H5I_INVALID_HID;
+    hid_t               p_type = H5I_INVALID_HID;
     hsize_t             size[H5S_MAX_RANK];
     hsize_t             nelmts = 1;
     hsize_t             temp_need;
@@ -1587,15 +1588,15 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
 
 
 /*-------------------------------------------------------------------------
- * Function: dataset_list1
+ * Function:    dataset_list1
  *
- * Purpose: List information about a dataset which should appear on the
- *  same line as the dataset name.  This information will precede
- *  information which is applicable to all objects which will be
- *  printed by the caller.
+ * Purpose:     List information about a dataset which should appear on the
+ *              same line as the dataset name.  This information will precede
+ *              information which is applicable to all objects which will be
+ *              printed by the caller.
  *
- * Return: Success: 0
- *         Failure: -1
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1603,13 +1604,13 @@ dataset_list1(hid_t dset)
 {
     hsize_t     cur_size[H5S_MAX_RANK];   /* current dataset dimensions */
     hsize_t     max_size[H5S_MAX_RANK];   /* maximum dataset dimensions */
-    hid_t       space;          /* data space                 */
-    int         ndims;          /* dimensionality             */
-    H5S_class_t space_type;     /* type of dataspace          */
-    int   i;
-    hsize_t             curr_pos = 0;        /* total data element position   */
-    h5tools_str_t       buffer;          /* string into which to render   */
-    h5tools_context_t   ctx;             /* print context  */
+    hid_t       space;                    /* data space                 */
+    int         ndims;                    /* dimensionality             */
+    H5S_class_t space_type;               /* type of dataspace          */
+    int         i;
+    hsize_t             curr_pos = 0;     /* total data element position   */
+    h5tools_str_t       buffer;           /* string into which to render   */
+    h5tools_context_t   ctx;              /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
@@ -1647,13 +1648,13 @@ dataset_list1(hid_t dset)
 
 
 /*-------------------------------------------------------------------------
- * Function: dataset_list2
+ * Function:    dataset_list2
  *
- * Purpose: List information about a dataset which should appear after
- *  information which is general to all objects.
+ * Purpose:     List information about a dataset which should appear after
+ *              information which is general to all objects.
  *
- * Return: Success: 0
- *         Failure: -1
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1678,8 +1679,8 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
     double      utilization;    /* percent utilization of storage */
     H5T_class_t tclass;         /* datatype class identifier */
     int         i;
-    H5D_layout_t     stl;
-    hsize_t             curr_pos = 0;        /* total data element position   */
+    H5D_layout_t        stl;
+    hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
@@ -1784,7 +1785,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
         case H5T_NCLASSES:
         default:
             h5tools_str_append(&buffer, HSIZE_T_FORMAT" logical byte%s, "HSIZE_T_FORMAT" allocated byte%s", total, 1==total?"":"s", used, 1==used?"":"s");
-            if (used>0) {
+            if (used > 0) {
                 utilization = ((double)total * (double)100.0f) / (double)used;
                 h5tools_str_append(&buffer, ", %1.2f%% utilization", utilization);
             }
@@ -1832,20 +1833,20 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
 
 
 /*-------------------------------------------------------------------------
- * Function: datatype_list2
+ * Function:    datatype_list2
  *
- * Purpose: List information about a datatype which should appear after
- *  information which is general to all objects.
+ * Purpose:     List information about a datatype which should appear after
+ *              information which is general to all objects.
  *
- * Return: Success: 0
- *         Failure: -1
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
 {
     if (verbose_g > 0) {
-        hsize_t             curr_pos = 0;        /* total data element position   */
+        hsize_t             curr_pos = 0;    /* total data element position   */
         h5tools_str_t       buffer;          /* string into which to render   */
         h5tools_context_t   ctx;             /* print context  */
         h5tool_format_t    *info = &ls_dataformat;
@@ -1867,12 +1868,12 @@ datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
 
 
 /*-------------------------------------------------------------------------
- * Function: list_obj
+ * Function:    list_obj
  *
- * Purpose: Prints information about an object
+ * Purpose:     Prints information about an object
  *
- * Return: Success: 0
- *         Failure: -1
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1880,7 +1881,7 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
 {
     H5O_type_t          obj_type = oinfo->type;          /* Type of the object */
     iter_t             *iter = (iter_t*)_iter;
-    hsize_t             curr_pos = 0;        /* total data element position   */
+    hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
@@ -1916,7 +1917,7 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
         h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
     } /* end if */
     else {
-        hid_t obj = (-1);               /* ID of object opened */
+        hid_t obj = H5I_INVALID_HID;               /* ID of object opened */
 
         /* Open the object.  Not all objects can be opened.  If this is the case
          * then return right away.
@@ -2028,11 +2029,11 @@ done:
 static herr_t
 list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
 {
-    char *buf=NULL;
+    char   *buf = NULL;
     iter_t *iter = (iter_t*)_iter;
-    int ret;
-    hsize_t             curr_pos = 0;        /* total data element position   */
-    h5tool_link_info_t lnk_info;
+    int     ret;
+    hsize_t             curr_pos = 0;    /* total data element position   */
+    h5tool_link_info_t  lnk_info;
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
@@ -2200,21 +2201,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: visit_obj
+ * Function:    visit_obj
  *
- * Purpose: Begins iteration on an object
+ * Purpose:     Begins iteration on an object
  *
- * Return:
- *  Success: 0
- *  Failure: -1
+ * Return:      Success: 0
+ *              Failure: -1
  *-------------------------------------------------------------------------
  */
 static herr_t
 visit_obj(hid_t file, const char *oname, iter_t *iter)
 {
-    int retval = 0;
-    H5O_info_t oi;              /* Information for object */
-    hsize_t             curr_pos = 0;        /* total data element position   */
+    int                 retval = 0;
+    H5O_info_t          oi;              /* Information for object */
+    hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
@@ -2275,21 +2275,21 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: get_width
+ * Function:    get_width
  *
- * Purpose: Figure out how wide the screen is.  This is highly
- *  unportable, but the user can always override the width we
- *  detect by giving a command-line option. These code snippets
- *  were borrowed from the GNU less(1).
+ * Purpose:     Figure out how wide the screen is.  This is highly
+ *              unportable, but the user can always override the width we
+ *              detect by giving a command-line option. These code snippets
+ *              were borrowed from the GNU less(1).
  *
- * Return: Success: Number of columns.
- *         Failure: Some default number of columms.
+ * Return:      Success: Number of columns.
+ *              Failure: Some default number of columms.
  *-------------------------------------------------------------------------
  */
 static int
 get_width(void)
 {
-    int  width = 80;  /*the default   */
+    int   width = 80;  /*the default   */
     char *s;
 
     /* Try to get it from the COLUMNS environment variable first since it's
@@ -2348,13 +2348,12 @@ get_width(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function: is_valid_args
+ * Function:    is_valid_args
  *
- * Purpose: check if command line arguments are valid
+ * Purpose:     check if command line arguments are valid
  *
- * Return:
- *  Success: TRUE (1)
- *  Failure: FALSE (0)
+ * Return:      Success: TRUE (1)
+ *              Failure: FALSE (0)
  *-------------------------------------------------------------------------*/
 static hbool_t
 is_valid_args(void)
@@ -2379,11 +2378,11 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * Function: leave
+ * Function:    leave
  *
- * Purpose: Close HDF5 and MPI and call exit()
+ * Purpose:     Close HDF5 and MPI and call exit()
  *
- * Return: Does not return
+ * Return:      Does not return
  *-------------------------------------------------------------------------
  */
 static void
@@ -2396,18 +2395,18 @@ leave(int ret)
 
 
 /*-------------------------------------------------------------------------
- * Function: main
+ * Function:    main
  *
- * Purpose: Opens a file and lists the specified group
+ * Purpose:     Opens a file and lists the specified group
  *
- * Return: Success: 0
- *         Failure: 1
+ * Return:      Success: 0
+ *              Failure: 1
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, const char *argv[])
 {
-    hid_t       file = -1;
+    hid_t       file = H5I_INVALID_HID;
     char       *fname = NULL, *oname = NULL, *x;
     const char *s = NULL;
     char       *rest;
@@ -2565,14 +2564,15 @@ main(int argc, const char *argv[])
                 leave(EXIT_FAILURE);
             }
 
-        } else if (!HDstrncmp(argv[argno], "--s3-cred=", (size_t)10)) {
+        }
+        else if (!HDstrncmp(argv[argno], "--s3-cred=", (size_t)10)) {
 #ifndef H5_HAVE_ROS3_VFD
             HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
             usage();
             leave(EXIT_FAILURE);
 #else
-            unsigned           nelems      = 0;
-            char              *start       = NULL;
+            unsigned           nelems     = 0;
+            char              *start      = NULL;
             char              *s3cred_src = NULL;
             char             **s3cred     = NULL;
             char const        *ccred[3];
@@ -2580,8 +2580,7 @@ main(int argc, const char *argv[])
              */
             start = strchr(argv[argno], '=');
             if (start == NULL) {
-                HDfprintf(rawerrorstream,
-                          "Error: Unable to parse null credentials tuple\n"
+                HDfprintf(rawerrorstream, "Error: Unable to parse null credentials tuple\n"
                           "    For anonymous access, omit \"--s3-cred\" and use only \"--vfd=ros3\"\n\n");
                 usage();
                 leave(EXIT_FAILURE);
@@ -2633,7 +2632,7 @@ main(int argc, const char *argv[])
             }
             start = argv[argno]+13; /* should never segfault: worst case of */
             if (*start != '(') {    /* null-termintor after '='.            */
-           
+
                 if (_debug) {
                     HDfprintf(stderr, "    no tuple.\n");
                 }
@@ -2654,8 +2653,7 @@ main(int argc, const char *argv[])
                 leave(EXIT_FAILURE);
             }
             if (_debug) {
-                HDfprintf(stderr, "    got hdfs-attrs tuple: `(%s,%s,%s,%s,%s)`\n",
-                        props[0], props[1], props[2], props[3], props[4]);
+                HDfprintf(stderr, "    got hdfs-attrs tuple: `(%s,%s,%s,%s,%s)`\n", props[0], props[1], props[2], props[3], props[4]);
             }
 
             /* Populate fapl configuration structure with given properties.
@@ -2866,7 +2864,7 @@ main(int argc, const char *argv[])
         while (fname && *fname) {
             if (fapl_id != H5P_DEFAULT) {
                 file = H5Fopen(fname, H5F_ACC_RDONLY, fapl_id);
-            } 
+            }
             else {
                 file = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, preferred_driver, drivername, sizeof drivername);
             }
