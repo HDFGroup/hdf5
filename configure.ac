@@ -232,6 +232,9 @@ case $host_os in
   freebsd*)
     host_os_novers=freebsd
     ;;
+  netbsd*)
+    host_os_novers=netbsd
+    ;;
   solaris*)
     host_os_novers=solaris
     ;;
