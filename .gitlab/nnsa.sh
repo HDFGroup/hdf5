@@ -166,7 +166,7 @@ elif [[ $UNAME == p90* ]]; then
 
     MASTER_MOD="openmpi/3.1.4"
     CC_VER=(1 gcc/8.3.0)
-    CTEST_OPTS="$CTEST_OPTS"
+    CTEST_OPTS="HPC=sbatch,$CTEST_OPTS"
 
     _CC=mpicc
     _FC=mpif90
