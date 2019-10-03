@@ -18,7 +18,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                               #
 # This script will compile and run the c++ examples from source files           #
-# installed in .../share/hdf5_examples/hl/c++ using h5c++.  The                 #
+# installed in @examplesdir@/hl/c++ using h5c++.  The                           #
 # order for running programs with RunTest in the MAIN section below is taken    #
 # from the Makefile.  The order is important since some of the test programs    #
 # use data files created by earlier test programs.  Any future additions should #

@@ -74,8 +74,8 @@ endif
 
 # Tell automake how to install examples
 # Note: no '/' after DESTDIR.  Explanation in commence.am
-EXAMPLEDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples/fortran
-EXAMPLETOPDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples
+EXAMPLEDIR=$(examplesdir)/fortran
+EXAMPLETOPDIR=$(examplesdir)
 
 # List dependencies for each example.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
