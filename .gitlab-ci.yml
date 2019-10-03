@@ -1,0 +1,47 @@
+variables:
+    NMC_FE1_SLURM_PARAMETERS: " --nodes=1 --partition=ecp-p9-4v100 -t 1:30:00"
+#    SCHEDULER_PARAMETERS:  "-N1 -p ecp-p9-4v100 --extra-node-info=*:*:* -t 0:30:00 srun --pty bash --login"
+stages:
+    - build
+# <<: *slurm
+.slurm: &slurm
+#    tags: ['nmc', 'slurm', 'xx-testing', 'dosequis']
+    tags: ['nmc-xxfe1-sched-001']   
+build:
+    stage: build
+    # Will inherit the .slurm: &slurm
+    <<: *slurm
+    script:
+        - echo "Running build"
+        - echo "this is a test"
+        - srun env | grep SLURM_JOB_NAME
+        - whoami
+        - echo "HOSTNAME=$HOSTNAME"
+#        - source ~mrajan/.bashrc
+#        - . set_modules_p9.sh
+#        - module load mpi/openmpi3-ppc64le
+        - module load gcc/8.3.0
+        - module load openmpi
+        - module load cmake/3.14.5
+        - module list
+        - ls
+#
+#
+        - CI_PROJ_DIR=${PWD}
+        - echo "CI_PROJ_DIR="${CI_PROJ_DIR}
+        - . .gitlab/nnsa.sh
+#        - ls -ltr
+#        - ls -ltr ./CI
+#      look at the dirs to see how the build worked
+        - echo $PWD
+    artifacts:
+        paths:
+#           - zlib-1.2.11/
+#           - hdf5-1.10.5/
+    only: 
+       - web
+    variables:
+        NMC_FE1_SLURM_PARAMETERS: "-N1 -p ecp-p9-4v100 -t 1:30:00"
+#    tags: ['nmc', 'slurm', 'xx-testing', 'dosequis']
+    tags: ['nmc-xxfe1-sched-001']
+
