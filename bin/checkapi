@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -12,6 +12,8 @@
 # help@hdfgroup.org.
 #
 require 5.003;
+
+use warnings;
 
 # Purpose: insures that API functions aren't called internally.
 # Usage:   checkapi H5*.c
