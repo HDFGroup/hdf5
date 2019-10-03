@@ -156,7 +156,7 @@ elif [[ $UNAME == p90* ]]; then
 #    echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_PREFLAGS:STRING=--mca;io;ompio")' >> hdf5-$HDF5_VER/config/cmake/scripts/HPC/sbatch-HDF5options.cmake
 
     echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_TOOLS:BOOL=OFF")' >> hdf5-$HDF5_VER/config/cmake/scripts/HPC/sbatch-HDF5options.cmake
-    set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_EXAMPLES:BOOL=OFF") hdf5-$HDF5_VER/config/cmake/scripts/HPC/sbatch-HDF5options.cmake
+    echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_EXAMPLES:BOOL=OFF")' >> hdf5-$HDF5_VER/config/cmake/scripts/HPC/sbatch-HDF5options.cmake
 
 #    perl -i -pe "s/^CMD=\"ctest.*/CMD=\"ctest . -R MPI_TEST_ -E MPI_TEST_testphdf5|MPI_TEST_t_filters_parallel|MPI_TEST_t_shapesame -C Release -T test\"/" hdf5-$HDF5_VER/bin/batch/ctestP.sl.in.cmake
 
