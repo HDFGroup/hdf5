@@ -205,7 +205,7 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
     info.dset_format =  "DSET-%s ";
     info.dset_hidefileno = 0;
 
-    info.obj_format = "-%lu:"H5_PRINTF_HADDR_FMT;
+    info.obj_format = "-%lu:%" PRIuHADDR;
     info.obj_hidefileno = 0;
 
     info.dset_blockformat_pre = "%sBlk%lu: ";

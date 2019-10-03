@@ -95,7 +95,7 @@ static h5tool_format_t         ls_dataformat = {
         0, /*skip_first */
 
         0, /*obj_hidefileno */
-        "-%lu:"H5_PRINTF_HADDR_FMT, /*obj_format */
+        "-%lu:%" PRIuHADDR, /*obj_format */
 
         0, /*dset_hidefileno */
         "DSET-%s ", /*dset_format */
@@ -1323,7 +1323,7 @@ print_type(h5tools_str_t *buffer, hid_t type, int ind)
         H5O_info_t  oi;
 
         if(H5Oget_info2(type, &oi, H5O_INFO_BASIC) >= 0)
-            h5tools_str_append(buffer,"shared-%lu:"H5_PRINTF_HADDR_FMT" ",
+            h5tools_str_append(buffer,"shared-%lu:%" PRIuHADDR " ",
                     oi.fileno, oi.addr);
         else
             h5tools_str_append(buffer,"shared ");
@@ -2098,7 +2098,7 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
 
             /* Object location & reference count */
             h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", oinfo->fileno, oinfo->addr);
+            h5tools_str_append(&buffer, "    %-10s %lu:%" PRIuHADDR "\n", "Location:", oinfo->fileno, oinfo->addr);
             h5tools_str_append(&buffer, "    %-10s %u\n", "Links:", (unsigned)oinfo->rc);
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
