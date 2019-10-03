@@ -51,7 +51,7 @@
  * local functions
  *-------------------------------------------------------------------------
  */
-static int Get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
+static int get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
         size_t size_datum, hsize_t dims_hslab[], hsize_t * hslab_nbytes_p);
 static void print_dataset_info(hid_t dcpl_id, char *objname, double per, int pr);
 static int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
@@ -337,7 +337,7 @@ done:
 } /* end copy_objects() */
 
 /*-------------------------------------------------------------------------
- * Function: Get_hyperslab
+ * Function: get_hyperslab
  *
  * Purpose: Calulate a hyperslab from a dataset for higher performance.
  *          The size of hyperslab is limitted by H5TOOLS_BUFSIZE.
@@ -369,7 +369,7 @@ done:
  *-----------------------------------------*/
 
 int
-Get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
+get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
         size_t size_datum, hsize_t dims_hslab[], hsize_t * hslab_nbytes_p)
 {
     int     ret_value = 0;
@@ -490,7 +490,7 @@ Get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
 
 done:
     return ret_value;
-} /* end Get_hyperslab() */
+} /* end get_hyperslab() */
 
 /*-------------------------------------------------------------------------
  * Function: do_copy_objects
@@ -538,7 +538,7 @@ done:
  *  in (2) is that, when using the strip mine size, it assures that the "remaining" part
  *  of the dataset that does not fill an entire strip mine is processed.
  *
- *  1. figure out a hyperslab (dimentions) and size  (refer to Get_hyperslab()).
+ *  1. figure out a hyperslab (dimentions) and size  (refer to get_hyperslab()).
  *  2. Calculate the hyperslab selections as the selection is moving forward.
  *     Selection would be same as the hyperslab except for the remaining edge portion
  *     of the dataset. The code take care of the remaining portion if exist.
@@ -935,8 +935,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                     }
 
                                     /* get hyperslab dims and size in byte */
-                                    if (Get_hyperslab(dcpl_tmp, rank, dims, p_type_nbytes, hslab_dims, &hslab_nbytes) < 0)
-                                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Get_hyperslab failed");
+                                    if (get_hyperslab(dcpl_tmp, rank, dims, p_type_nbytes, hslab_dims, &hslab_nbytes) < 0)
+                                        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "get_hyperslab failed");
 
                                     hslab_buf = HDmalloc((size_t)hslab_nbytes);
                                     if (hslab_buf == NULL)
