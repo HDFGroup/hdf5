@@ -1109,7 +1109,8 @@ H5I_is_file_object(hid_t id)
     FUNC_ENTER_NOAPI(FAIL);
 
     /* Fail if the ID type is out of range */
-    HDassert(id_type >= 1 && id_type < H5I_NTYPES);
+    if (id_type < 1 || id_type >= H5I_NTYPES)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID type out of range");
 
     /* Return TRUE if the ID is a file object (dataset, group, map, or committed
      * datatype), FALSE otherwise.
@@ -1122,7 +1123,7 @@ H5I_is_file_object(hid_t id)
         H5T_t *dt = NULL;
 
         if(NULL == (dt = (H5T_t *)H5I_object(id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get underlying datatype struct")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get underlying datatype struct");
 
         ret_value = H5T_is_named(dt);
     }
@@ -1131,7 +1132,7 @@ H5I_is_file_object(hid_t id)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5I_is_file_object() */
 
 
