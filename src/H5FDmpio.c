@@ -1434,10 +1434,10 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
     else if(size != (hsize_t)size_i) {
         /* If HERE, then we need to work around the integer size limit
          * of 2GB. The input size_t size variable cannot fit into an integer,
-	 * but we can get around that limitation by creating a different datatype
-	 * and then setting the integer size (or element count) to 1 when using
-	 * the derived_type.
-	 */
+         * but we can get around that limitation by creating a different datatype
+         * and then setting the integer size (or element count) to 1 when using
+         * the derived_type.
+         */
 
         if (H5S_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
