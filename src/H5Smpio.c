@@ -34,6 +34,7 @@
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Spkg.h"		/* Dataspaces 				*/
+#include "H5Sprivate.h"		/* H5S prototypes, etc.                 */
 #include "H5VMprivate.h"        /* Vector and array functions		*/
 
 #ifdef H5_HAVE_PARALLEL
@@ -44,7 +45,7 @@
 #define H5S_MPIO_INITIAL_ALLOC_COUNT    256
 #define TWO_GIG_LIMIT                   2147483648
 #ifndef H5S_MAX_MPI_COUNT
-#define H5S_MAX_MPI_COUNT               536870911  /* (2^29)-1  */
+#define H5S_MAX_MPI_COUNT               1073741824
 #endif
 
 
@@ -88,8 +89,6 @@ static herr_t H5S__release_datatype(H5S_mpio_mpitype_list_t *type_list);
 static herr_t H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
     size_t elmt_size, const MPI_Datatype *elmt_type, MPI_Datatype *span_type,
     H5S_mpio_mpitype_list_t *type_list, uint64_t op_gen);
-static herr_t H5S__mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
-    MPI_Datatype old_type, MPI_Datatype *new_type);
 
 
 /*****************************/
@@ -183,7 +182,7 @@ H5S__mpio_all_type(const H5S_t *space, size_t elmt_size,
     } /* end if */
     else {
         /* Create a LARGE derived datatype for this transfer */
-        if(H5S__mpio_create_large_type(total_bytes, 0, MPI_BYTE, new_type) < 0)
+        if(H5S_mpio_create_large_type(total_bytes, 0, MPI_BYTE, new_type) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large datatype from the all selection")
         *count = 1;
         *is_derived_type = TRUE;
@@ -824,7 +823,7 @@ if(H5DEBUG(S)) {
     } /* end if */
     else
         /* Create the compound datatype for this operation (> 2GB) */
-        if(H5S__mpio_create_large_type(elmt_size, 0, MPI_BYTE, &inner_type) < 0)
+        if(H5S_mpio_create_large_type(elmt_size, 0, MPI_BYTE, &inner_type) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large inner datatype in hyper selection")
 
 /*******************************************************
@@ -878,7 +877,7 @@ if(H5DEBUG(S))
              * Again we need to check that the number of BLOCKS can fit into
              * a 32 bit integer */
             if(bigio_count < d[i].block) {
-                if(H5S__mpio_create_large_type(d[i].block, 0, inner_type, &block_type) < 0)
+                if(H5S_mpio_create_large_type(d[i].block, 0, inner_type, &block_type) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large block datatype in hyper selection")
             } /* end if */
             else
@@ -899,7 +898,7 @@ if(H5DEBUG(S))
              * we call the large type creation function to handle that
              */
             if(bigio_count < d[i].count) {
-                if(H5S__mpio_create_large_type(d[i].count, stride_in_bytes, block_type, &outer_type) < 0)
+                if(H5S_mpio_create_large_type(d[i].count, stride_in_bytes, block_type, &outer_type) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large outer datatype in hyper selection")
             } /* end if */
             /* otherwise a regular create_hvector will do */
@@ -1020,7 +1019,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
     } /* end if */
     else
-        if(H5S__mpio_create_large_type(elmt_size, 0, MPI_BYTE, &elmt_type) < 0)
+        if(H5S_mpio_create_large_type(elmt_size, 0, MPI_BYTE, &elmt_type) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large element datatype in span_hyper selection")
     elmt_type_is_derived = TRUE;
 
@@ -1203,7 +1202,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
 
                     /* create the block type from elmt_type while checking the 32 bit int limit */
                     if(blocklen[u] > bigio_count) {
-                        if(H5S__mpio_create_large_type(blocklen[u], 0, *elmt_type, &temp_type) < 0)
+                        if(H5S_mpio_create_large_type(blocklen[u], 0, *elmt_type, &temp_type) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large element datatype in span_hyper selection")
                     } /* end if */
                     else
@@ -1455,7 +1454,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5S__mpio_create_large_type
+ * Function:    H5S_mpio_create_large_type
  *
  * Purpose:     Create a large datatype of size larger than what a 32 bit integer
  *              can hold.
@@ -1468,8 +1467,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5S__mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
+herr_t
+H5S_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
     MPI_Datatype old_type, MPI_Datatype *new_type)
 {
     int           num_big_types;          /* num times the 2G datatype will be repeated */
@@ -1481,7 +1480,7 @@ H5S__mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
     MPI_Aint      disp[2], old_extent;
     herr_t        ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Calculate how many Big MPI datatypes are needed to represent the buffer */
     num_big_types = (int)(num_elements/bigio_count);
@@ -1559,7 +1558,7 @@ H5S__mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S__mpio_create_large_type() */
+} /* end H5S_mpio_create_large_type() */
 
 #endif  /* H5_HAVE_PARALLEL */
 

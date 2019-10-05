@@ -145,7 +145,7 @@ test_page_buffer_access(void)
 
     ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 1, (hsize_t)0);
     VRFY((ret == 0), "");
-    ret = H5Pset_file_space_page_size(fcpl, sizeof(int)*100);
+    ret = H5Pset_file_space_page_size(fcpl, sizeof(int)*128);
     VRFY((ret == 0), "");
     ret = H5Pset_page_buffer_size(fapl, sizeof(int)*100000, 0, 0);
     VRFY((ret == 0), "");
@@ -180,7 +180,6 @@ test_page_buffer_access(void)
         data[i] = -1;
     if(MAINPROCESS) {
         hid_t fapl_self = H5I_INVALID_HID;
-
         fapl_self = create_faccess_plist(MPI_COMM_SELF, MPI_INFO_NULL, facc_type);
 
         ret = H5Pset_page_buffer_size(fapl_self, sizeof(int)*1000, 0, 0);
