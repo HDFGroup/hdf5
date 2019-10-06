@@ -93,17 +93,6 @@
 ./bin/timekeeper                    _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
-./bin/batch/ctestP.lsf.in.cmake
-./bin/batch/ctestP.sl.in.cmake
-./bin/batch/ctestS.lsf.in.cmake
-./bin/batch/ctestS.sl.in.cmake
-./bin/batch/knl_ctestP.sl.in.cmake
-./bin/batch/knl_ctestS.sl.in.cmake
-./bin/batch/knl_H5detect.sl.in.cmake
-./bin/batch/ctest.qsub.in.cmake
-./bin/batch/ray_ctestP.lsf.in.cmake
-./bin/batch/ray_ctestS.lsf.in.cmake
-./bin/batch/raybsub
 
 ./config/COPYING
 ./config/BlankForm
@@ -595,6 +584,8 @@
 ./src/H5FDdirect.h
 ./src/H5FDfamily.c
 ./src/H5FDfamily.h
+./src/H5FDhdfs.c
+./src/H5FDhdfs.h
 ./src/H5FDint.c
 ./src/H5FDlog.c
 ./src/H5FDlog.h
@@ -1159,6 +1150,7 @@
 ./tools/h5repack/dynlib_vrpk.c
 ./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack_plugin.sh.in
+./tools/h5repack/h5repackgentest.c
 ./tools/h5repack/h5repacktst.c
 ./tools/h5repack/testh5repack_detect_szip.c
 
@@ -2122,7 +2114,7 @@
 ./tools/h5repack/testfiles/h5repack_uint8be_ex-1.dat
 ./tools/h5repack/testfiles/h5repack_uint8be_ex-2.dat
 ./tools/h5repack/testfiles/h5repack_uint8be_ex-3.dat
-./tools//h5repack/testfiles/h5repack_uint8be_ex.h5
+./tools/h5repack/testfiles/h5repack_uint8be_ex.h5
 ./tools/h5repack/testfiles/ublock.bin
 ./tools/h5repack/testfiles/crtorder.tordergr.h5.ddl
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
