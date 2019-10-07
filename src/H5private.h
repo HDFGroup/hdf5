@@ -2669,11 +2669,6 @@ H5_DLL herr_t   H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
 
 #ifdef H5_HAVE_PARALLEL
-#define TWO_GIG_LIMIT           2147483648
-#ifndef H5_MAX_MPI_COUNT
-#define H5_MAX_MPI_COUNT        (1 << 30)
-#endif
-
 /* Generic MPI functions */
 H5_DLL hsize_t  H5_mpio_get_bigio_count();
 H5_DLL herr_t   H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new);

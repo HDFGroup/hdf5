@@ -26,7 +26,10 @@
 /****************/
 /* Local Macros */
 /****************/
-
+#define TWO_GIG_LIMIT           (1 << 31)
+#ifndef H5_MAX_MPI_COUNT
+#define H5_MAX_MPI_COUNT        (1 << 30)
+#endif
 
 /*******************/
 /* Local Variables */
@@ -52,7 +55,7 @@ H5_mpio_set_bigio_count(hsize_t new_count)
 {
     hsize_t orig_count = bigio_count;
 
-    if((new_count > 0) && (new_count < TWO_GIG_LIMIT)) {
+    if((new_count > 0) && (new_count < (hsize_t)TWO_GIG_LIMIT)) {
        bigio_count = new_count;
     }
     return orig_count;

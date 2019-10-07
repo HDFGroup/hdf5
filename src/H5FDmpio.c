@@ -32,7 +32,6 @@
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5Sprivate.h"         /* Large MPIO data type creation        */
 
 #ifdef H5_HAVE_PARALLEL
 
