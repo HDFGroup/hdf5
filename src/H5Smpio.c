@@ -45,7 +45,7 @@
 #define H5S_MPIO_INITIAL_ALLOC_COUNT    256
 #define TWO_GIG_LIMIT                   2147483648
 #ifndef H5S_MAX_MPI_COUNT
-#define H5S_MAX_MPI_COUNT               1073741824
+#define H5S_MAX_MPI_COUNT               (1 << 30)
 #endif
 
 
@@ -1124,7 +1124,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
 {
     H5S_hyper_span_t      *span;                /* Hyperslab span to iterate with */
     size_t                alloc_count = 0;      /* Number of span tree nodes allocated at this level */
-    size_t                outercount;           /* Number of span tree nodes at this level */
+    size_t                outercount = 0;       /* Number of span tree nodes at this level */
     MPI_Datatype          *inner_type = NULL;
     hbool_t inner_types_freed = FALSE;          /* Whether the inner_type MPI datatypes have been freed */
     int                   *blocklen = NULL;
@@ -1184,7 +1184,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
                 H5_CHECK_OVERFLOW(nelmts, hsize_t, int)
                 blocklen[outercount]  = (int)nelmts;
 
-                if(bigio_count < blocklen[outercount])
+                if(bigio_count < (hsize_t)blocklen[outercount])
                     large_block = TRUE; /* at least one block type is large, so set this flag to true */
 
                 span = span->next;
@@ -1201,7 +1201,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
                     MPI_Datatype temp_type = MPI_DATATYPE_NULL;
 
                     /* create the block type from elmt_type while checking the 32 bit int limit */
-                    if(blocklen[u] > bigio_count) {
+                    if((hsize_t)(blocklen[u]) > bigio_count) {
                         if(H5S_mpio_create_large_type(blocklen[u], 0, *elmt_type, &temp_type) < 0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create a large element datatype in span_hyper selection")
                     } /* end if */
