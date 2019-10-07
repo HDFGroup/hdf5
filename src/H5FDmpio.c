@@ -1439,7 +1439,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
          * the derived_type.
          */
 
-        if (H5S_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+       if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
 
         derived_type = TRUE;

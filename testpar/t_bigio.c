@@ -51,6 +51,8 @@ static void coll_chunktest(const char* filename, int chunk_factor, int select_fa
                            int api_option, int file_selection, int mem_selection, int mode);
 hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type);
 
+hsize_t H5_mpio_set_bigio_count(hsize_t new_count);
+
 /*
  * Setup the coordinates for point selection.
  */
@@ -478,22 +480,19 @@ static void
 dataset_big_write(void)
 {
 
-    hid_t xfer_plist;        /* Dataset transfer properties list */
-    hid_t sid;           /* Dataspace ID */
-    hid_t file_dataspace;    /* File dataspace ID */
-    hid_t mem_dataspace;    /* memory dataspace ID */
+    hid_t xfer_plist;                 /* Dataset transfer properties list */
+    hid_t sid;                        /* Dataspace ID */
+    hid_t file_dataspace;             /* File dataspace ID */
+    hid_t mem_dataspace;              /* memory dataspace ID */
     hid_t dataset;
-    hid_t datatype;        /* Datatype ID */
-    hsize_t dims[RANK];       /* dataset dim sizes */
-    hsize_t start[RANK];            /* for hyperslab setting */
-    hsize_t count[RANK], stride[RANK];        /* for hyperslab setting */
-    hsize_t block[RANK];            /* for hyperslab setting */
+    hsize_t dims[RANK];               /* dataset dim sizes */
+    hsize_t start[RANK];              /* for hyperslab setting */
+    hsize_t count[RANK],stride[RANK]; /* for hyperslab setting */
+    hsize_t block[RANK];              /* for hyperslab setting */
     hsize_t *coords = NULL;
-    int i;
-    herr_t ret;             /* Generic return value */
-    hid_t fid;                  /* HDF5 file ID */
-    hid_t acc_tpl;        /* File access templates */
-    hsize_t h;
+    herr_t ret;                       /* Generic return value */
+    hid_t fid;                        /* HDF5 file ID */
+    hid_t acc_tpl;                    /* File access templates */
     size_t num_points;
     B_DATATYPE * wdata;
 
@@ -806,8 +805,6 @@ dataset_big_read(void)
     hsize_t start[RANK];            /* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];        /* for hyperslab setting */
     hsize_t block[RANK];            /* for hyperslab setting */
-    int i,j,k;
-    hsize_t h;
     size_t num_points;
     hsize_t *coords = NULL;
     herr_t ret;             /* Generic return value */
@@ -1395,7 +1392,6 @@ coll_chunktest(const char* filename,
 
   size_t  num_points;           /* for point selection */
   hsize_t *coords = NULL;       /* for point selection */
-  int i;
 
   /* Create the data space */
 
@@ -1873,7 +1869,7 @@ int main(int argc, char **argv)
     int ExpressMode = 0;
     hsize_t newsize = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
-    hsize_t oldsize = H5S_mpio_set_bigio_count(newsize);
+    hsize_t oldsize = H5_mpio_set_bigio_count(newsize);
 
     /* Having set the bigio handling to a size that is managable,
      * we'll set our 'bigcount' variable to be 2X that limit so
