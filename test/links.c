@@ -1576,6 +1576,10 @@ test_deprec(hid_t fapl, hbool_t new_format)
     if(H5Gget_linkval(group2_id, "soft_link_to_group1", sb_soft1.linklen, tmpstr) < 0) FAIL_STACK_ERROR
     if(HDstrcmp("link_to_group1", tmpstr)) TEST_ERROR
 
+    /* Test non-existing links with H5Gget_objinfo */
+    H5E_BEGIN_TRY {
+        if(H5Gget_objinfo(file_id, "/group2/soft_link_no_exist", TRUE, NULL) >= 0) FAIL_STACK_ERROR
+    } H5E_END_TRY;
 
     /* Test the dangling soft link */
     if(H5Gget_objinfo(file_id, "/group2/dangle_soft_link", FALSE, &sb_soft2) < 0) FAIL_STACK_ERROR
@@ -14103,7 +14107,8 @@ main(void)
         nerrors += group_info_old(fapl) < 0 ? 1 : 0;
 
         if (minimize_dset_oh) {
-            if (H5Pclose(dcpl_g) < 0)  TEST_ERROR;
+            if (H5Pclose(dcpl_g) < 0)
+                TEST_ERROR;
             dcpl_g = -1;
         }
     } /* [un]minimized dataset object headers */
@@ -14141,5 +14146,5 @@ main(void)
 error:
     HDputs("*** TESTS FAILED ***");
     HDexit(EXIT_FAILURE);
-}
+} /* end main() */
 
