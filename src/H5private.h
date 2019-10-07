@@ -2083,16 +2083,7 @@ H5_DLL herr_t H5CX_pop(void);
                                                                               \
     BEGIN_MPE_LOG
 
-/* NetBSD provides these comparison macros as part of a nifty set that
- * performs addition and subtraction, too.  We probably should bring in
- * the whole set. -DCY
- */
-#if !defined(timespeccmp)
-#define timespeccmp(__l, __r, __op)                                           \
-    (((__l)->tv_sec == (__r)->tv_sec)                                         \
-        ? ((__l)->tv_nsec __op (__r)->tv_nsec)                                \
-        : ((__l)->tv_sec __op (__r)->tv_sec))
-#endif /* !defined(timespeccmp) */
+#include "H5time_private.h" /* for timespeccmp */
 
 #define VFD_SWMR_TEST_FOR_END_OF_TICK(entering, swmr_reader_exit, err)        \
     /* Initialize the library */                                              \
