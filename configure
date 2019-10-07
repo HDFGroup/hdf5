@@ -671,6 +671,11 @@ CONFIG_MODE
 CONFIG_USER
 CONFIG_DATE
 H5_VERSION
+JNI_LDFLAGS
+HAVE_LIBHDFS
+ROS3_VFD_CONDITIONAL_FALSE
+ROS3_VFD_CONDITIONAL_TRUE
+ROS3_VFD
 DIRECT_VFD_CONDITIONAL_FALSE
 DIRECT_VFD_CONDITIONAL_TRUE
 ADD_PARALLEL_FILES
@@ -925,6 +930,8 @@ enable_using_memchecker
 enable_parallel
 with_mpe
 enable_direct_vfd
+enable_ros3_vfd
+with_libhdfs
 with_default_plugindir
 enable_dconv_exception
 enable_dconv_accuracy
@@ -1624,6 +1631,8 @@ Optional Features:
   --enable-direct-vfd     Build the direct I/O virtual file driver (VFD). This
                           is based on the POSIX (sec2) VFD and requires the
                           open() call to take the O_DIRECT flag. [default=no]
+  --enable-ros3-vfd       Build the Read-Only S3 virtual file driver (VFD).
+                          [default=no]
   --enable-dconv-exception
                           if exception handling functions is checked during
                           data conversions [default=yes]
@@ -1667,6 +1676,8 @@ Optional Packages:
   --with-pthread=DIR      Specify alternative path to Pthreads library when
                           thread-safe capability is built
   --with-mpe=DIR          Use MPE instrumentation [default=no]
+  --with-libhdfs=DIR      Provide libhdfs library to enable HDFS virtual file
+                          driver (VFD) [default=no]
   --with-default-plugindir=location
                           Specify default location for plugins
                           [default="/usr/local/hdf5/lib/plugin"]
@@ -27982,6 +27993,7 @@ else
 $as_echo "no" >&6; }
 fi
 
+## Direct VFD files are not built if not required.
  if test "X$DIRECT_VFD" = "Xyes"; then
   DIRECT_VFD_CONDITIONAL_TRUE=
   DIRECT_VFD_CONDITIONAL_FALSE='#'
@@ -27990,6 +28002,517 @@ else
   DIRECT_VFD_CONDITIONAL_FALSE=
 fi
 
+
+## ----------------------------------------------------------------------
+## Check if Read-Only S3 virtual file driver is enabled by --enable-ros3-vfd
+##
+
+
+## Default is no Read-Only S3 VFD
+ROS3_VFD=no
+
+# Check whether --enable-ros3-vfd was given.
+if test "${enable_ros3_vfd+set}" = set; then :
+  enableval=$enable_ros3_vfd; ROS3_VFD=$enableval
+else
+  ROS3_VFD=no
+fi
+
+
+if test "X$ROS3_VFD" = "Xyes"; then
+    for ac_header in curl/curl.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "curl/curl.h" "ac_cv_header_curl_curl_h" "$ac_includes_default"
+if test "x$ac_cv_header_curl_curl_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_CURL_CURL_H 1
+_ACEOF
+
+else
+  unset ROS3_VFD
+fi
+
+done
+
+    for ac_header in openssl/evp.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "openssl/evp.h" "ac_cv_header_openssl_evp_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_evp_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_OPENSSL_EVP_H 1
+_ACEOF
+
+else
+  unset ROS3_VFD
+fi
+
+done
+
+    for ac_header in openssl/hmac.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "openssl/hmac.h" "ac_cv_header_openssl_hmac_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_hmac_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_OPENSSL_HMAC_H 1
+_ACEOF
+
+else
+  unset ROS3_VFD
+fi
+
+done
+
+    for ac_header in openssl/sha.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "openssl/sha.h" "ac_cv_header_openssl_sha_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_sha_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_OPENSSL_SHA_H 1
+_ACEOF
+
+else
+  unset ROS3_VFD
+fi
+
+done
+
+    if test "X$ROS3_VFD" = "Xyes"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for curl_global_init in -lcurl" >&5
+$as_echo_n "checking for curl_global_init in -lcurl... " >&6; }
+if ${ac_cv_lib_curl_curl_global_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcurl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char curl_global_init ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return curl_global_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_curl_curl_global_init=yes
+else
+  ac_cv_lib_curl_curl_global_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_curl_curl_global_init" >&5
+$as_echo "$ac_cv_lib_curl_curl_global_init" >&6; }
+if test "x$ac_cv_lib_curl_curl_global_init" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCURL 1
+_ACEOF
+
+  LIBS="-lcurl $LIBS"
+
+else
+  unset ROS3_VFD
+fi
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EVP_sha256 in -lcrypto" >&5
+$as_echo_n "checking for EVP_sha256 in -lcrypto... " >&6; }
+if ${ac_cv_lib_crypto_EVP_sha256+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char EVP_sha256 ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return EVP_sha256 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_crypto_EVP_sha256=yes
+else
+  ac_cv_lib_crypto_EVP_sha256=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_EVP_sha256" >&5
+$as_echo "$ac_cv_lib_crypto_EVP_sha256" >&6; }
+if test "x$ac_cv_lib_crypto_EVP_sha256" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCRYPTO 1
+_ACEOF
+
+  LIBS="-lcrypto $LIBS"
+
+else
+  unset ROS3_VFD
+fi
+
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if the Read-Only S3 virtual file driver (VFD) is enabled" >&5
+$as_echo_n "checking if the Read-Only S3 virtual file driver (VFD) is enabled... " >&6; }
+    if test "X$ROS3_VFD" = "Xyes"; then
+
+$as_echo "#define HAVE_ROS3_VFD 1" >>confdefs.h
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+        ROS3_VFD=no
+        as_fn_error $? "The Read-Only S3 VFD was requested but cannot be built.
+                      Please check that openssl and cURL are available on your
+                      system, and/or re-configure without option
+                      --enable-ros3-vfd." "$LINENO" 5
+    fi
+else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if the Read-Only S3 virtual file driver (VFD) is enabled" >&5
+$as_echo_n "checking if the Read-Only S3 virtual file driver (VFD) is enabled... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ROS3_VFD=no
+
+fi
+
+## Read-only S3 files are not built if not required.
+ if test "X$ROS3_VFD" = "Xyes"; then
+  ROS3_VFD_CONDITIONAL_TRUE=
+  ROS3_VFD_CONDITIONAL_FALSE='#'
+else
+  ROS3_VFD_CONDITIONAL_TRUE='#'
+  ROS3_VFD_CONDITIONAL_FALSE=
+fi
+
+
+
+## ----------------------------------------------------------------------
+## Is libhdfs (Hadoop Distributed File System) present?
+## It might be specified with the `--with-libhdfs' command-line switch.
+## If found, enables the HDFS VFD.
+##
+
+
+# Check whether --with-libhdfs was given.
+if test "${with_libhdfs+set}" = set; then :
+  withval=$with_libhdfs;
+else
+  withval=no
+fi
+
+
+case $withval in
+  no)
+    HAVE_LIBHDFS="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libhdfs" >&5
+$as_echo_n "checking for libhdfs... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+    ;;
+  *)
+    HAVE_LIBHDFS="yes"
+    case "$withval" in
+      *,*)
+        libhdfs_inc="`echo $withval |cut -f1 -d,`"
+        libhdfs_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      yes)
+        libhdfs_inc="$HADOOP_HOME/include"
+        libhdfs_lib="$HADOOP_HOME/lib"
+        ;;
+      *)
+        if test -n "$withval"; then
+          libhdfs_inc="$withval/include"
+          libhdfs_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    if test -n "$libhdfs_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$libhdfs_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$libhdfs_inc"
+    fi
+    for ac_header in hdfs.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "hdfs.h" "ac_cv_header_hdfs_h" "$ac_includes_default"
+if test "x$ac_cv_header_hdfs_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_HDFS_H 1
+_ACEOF
+
+else
+  unset HAVE_LIBHDFS
+fi
+
+done
+
+
+    if test "x$HAVE_LIBHDFS" = "xyes"; then
+            JNI_LDFLAGS=""
+      if test $JAVA_HOME != ""
+      then
+        JNI_LDFLAGS="-L$JAVA_HOME/jre/lib/$OS_ARCH -L$JAVA_HOME/jre/lib/$OS_ARCH/server"
+      fi
+      ldflags_bak=$LDFLAGS
+      LDFLAGS="$LDFLAGS $JNI_LDFLAGS"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for JNI_GetCreatedJavaVMs in -ljvm" >&5
+$as_echo_n "checking for JNI_GetCreatedJavaVMs in -ljvm... " >&6; }
+if ${ac_cv_lib_jvm_JNI_GetCreatedJavaVMs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ljvm  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char JNI_GetCreatedJavaVMs ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return JNI_GetCreatedJavaVMs ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_jvm_JNI_GetCreatedJavaVMs=yes
+else
+  ac_cv_lib_jvm_JNI_GetCreatedJavaVMs=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_jvm_JNI_GetCreatedJavaVMs" >&5
+$as_echo "$ac_cv_lib_jvm_JNI_GetCreatedJavaVMs" >&6; }
+if test "x$ac_cv_lib_jvm_JNI_GetCreatedJavaVMs" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBJVM 1
+_ACEOF
+
+  LIBS="-ljvm $LIBS"
+
+fi
+
+      LDFLAGS=$ldflags_bak
+
+      if test -n "$libhdfs_lib"; then
+        ## Hadoop distribution hides libraries down one level in 'lib/native'
+        libhdfs_lib="$libhdfs_lib/native"
+        LDFLAGS="$LDFLAGS -L$libhdfs_lib $JNI_LDFLAGS"
+        AM_LDFLAGS="$AM_LDFLAGS -L$libhdfs_lib $JNI_LDFLAGS"
+      fi
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for hdfsConnect in -lhdfs" >&5
+$as_echo_n "checking for hdfsConnect in -lhdfs... " >&6; }
+if ${ac_cv_lib_hdfs_hdfsConnect+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lhdfs  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char hdfsConnect ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return hdfsConnect ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_hdfs_hdfsConnect=yes
+else
+  ac_cv_lib_hdfs_hdfsConnect=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_hdfs_hdfsConnect" >&5
+$as_echo "$ac_cv_lib_hdfs_hdfsConnect" >&6; }
+if test "x$ac_cv_lib_hdfs_hdfsConnect" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBHDFS 1
+_ACEOF
+
+  LIBS="-lhdfs $LIBS"
+
+else
+  unset HAVE_LIBHDFS
+fi
+
+    fi
+
+    if test -z "$HAVE_LIBHDFS"; then
+      as_fn_error $? "Set to use libhdfs library, but could not find or use
+                    libhdfs. Please verify that the path to HADOOP_HOME is
+                    valid, and/or reconfigure without --with-libhdfs." "$LINENO" 5
+    fi
+    ;;
+esac
+
+if test "x$HAVE_LIBHDFS" = "xyes"; then
+
+$as_echo "#define HAVE_LIBHDFS 1" >>confdefs.h
+
+fi
+
+## Checkpoint the cache
+cat >confcache <<\_ACEOF
+# This file is a shell script that caches the results of configure
+# tests run on this system so they can be shared between configure
+# scripts and configure runs, see configure's option --config-cache.
+# It is not useful on other systems.  If it contains results you don't
+# want to keep, you may remove or edit it.
+#
+# config.status only pays attention to the cache file if you give it
+# the --recheck option to rerun configure.
+#
+# `ac_cv_env_foo' variables (set or unset) will be overridden when
+# loading this file, other *unset* `ac_cv_foo' will be assigned the
+# following values.
+
+_ACEOF
+
+# The following way of writing the cache mishandles newlines in values,
+# but we know of no workaround that is simple, portable, and efficient.
+# So, we kill variables containing newlines.
+# Ultrix sh set writes to stderr and can't be redirected directly,
+# and sets the high bit in the cache file unless we assign to the vars.
+(
+  for ac_var in `(set) 2>&1 | sed -n 's/^\([a-zA-Z_][a-zA-Z0-9_]*\)=.*/\1/p'`; do
+    eval ac_val=\$$ac_var
+    case $ac_val in #(
+    *${as_nl}*)
+      case $ac_var in #(
+      *_cv_*) { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: cache variable $ac_var contains a newline" >&5
+$as_echo "$as_me: WARNING: cache variable $ac_var contains a newline" >&2;} ;;
+      esac
+      case $ac_var in #(
+      _ | IFS | as_nl) ;; #(
+      BASH_ARGV | BASH_SOURCE) eval $ac_var= ;; #(
+      *) { eval $ac_var=; unset $ac_var;} ;;
+      esac ;;
+    esac
+  done
+
+  (set) 2>&1 |
+    case $as_nl`(ac_space=' '; set) 2>&1` in #(
+    *${as_nl}ac_space=\ *)
+      # `set' does not quote correctly, so add quotes: double-quote
+      # substitution turns \\\\ into \\, and sed turns \\ into \.
+      sed -n \
+	"s/'/'\\\\''/g;
+	  s/^\\([_$as_cr_alnum]*_cv_[_$as_cr_alnum]*\\)=\\(.*\\)/\\1='\\2'/p"
+      ;; #(
+    *)
+      # `set' quotes correctly as required by POSIX, so do not add quotes.
+      sed -n "/^[_$as_cr_alnum]*_cv_[_$as_cr_alnum]*=/p"
+      ;;
+    esac |
+    sort
+) |
+  sed '
+     /^ac_cv_env_/b end
+     t clear
+     :clear
+     s/^\([^=]*\)=\(.*[{}].*\)$/test "${\1+set}" = set || &/
+     t end
+     s/^\([^=]*\)=\(.*\)$/\1=${\1=\2}/
+     :end' >>confcache
+if diff "$cache_file" confcache >/dev/null 2>&1; then :; else
+  if test -w "$cache_file"; then
+    if test "x$cache_file" != "x/dev/null"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: updating cache $cache_file" >&5
+$as_echo "$as_me: updating cache $cache_file" >&6;}
+      if test ! -f "$cache_file" || test -h "$cache_file"; then
+	cat confcache >"$cache_file"
+      else
+        case $cache_file in #(
+        */* | ?:*)
+	  mv -f confcache "$cache_file"$$ &&
+	  mv -f "$cache_file"$$ "$cache_file" ;; #(
+        *)
+	  mv -f confcache "$cache_file" ;;
+	esac
+      fi
+    fi
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: not updating unwritable cache $cache_file" >&5
+$as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
+  fi
+fi
+rm -f confcache
 
 ## ----------------------------------------------------------------------
 ## Enable custom plugin default path for library.  It requires SHARED support.
@@ -30849,7 +31372,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile testpar/testpflush.sh tools/Makefile tools/h5dump/Makefile tools/h5dump/h5dump_plugin.sh tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/Makefile tools/h5ls/h5ls_plugin.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/h5diff_plugin.sh tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile tools/perform/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh bin/h5cc bin/Makefile c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
+ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile testpar/testpflush.sh tools/Makefile tools/h5dump/Makefile tools/h5dump/h5dump_plugin.sh tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/Makefile tools/h5ls/h5ls_plugin.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/h5diff_plugin.sh tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/libtest/Makefile tools/misc/Makefile tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile tools/perform/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh bin/h5cc bin/Makefile c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
 
 
 cat >confcache <<\_ACEOF
@@ -31032,6 +31555,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DIRECT_VFD_CONDITIONAL_TRUE}" && test -z "${DIRECT_VFD_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"DIRECT_VFD_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ROS3_VFD_CONDITIONAL_TRUE}" && test -z "${ROS3_VFD_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"ROS3_VFD_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_ALL_CONDITIONAL_TRUE}" && test -z "${BUILD_ALL_CONDITIONAL_FALSE}"; then
@@ -32169,6 +32696,7 @@ do
     "tools/h5copy/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5copy/Makefile" ;;
     "tools/h5copy/testh5copy.sh") CONFIG_FILES="$CONFIG_FILES tools/h5copy/testh5copy.sh" ;;
     "tools/lib/Makefile") CONFIG_FILES="$CONFIG_FILES tools/lib/Makefile" ;;
+    "tools/libtest/Makefile") CONFIG_FILES="$CONFIG_FILES tools/libtest/Makefile" ;;
     "tools/misc/Makefile") CONFIG_FILES="$CONFIG_FILES tools/misc/Makefile" ;;
     "tools/misc/testh5mkgrp.sh") CONFIG_FILES="$CONFIG_FILES tools/misc/testh5mkgrp.sh" ;;
     "tools/misc/testh5repart.sh") CONFIG_FILES="$CONFIG_FILES tools/misc/testh5repart.sh" ;;
