@@ -32,6 +32,20 @@ typedef struct h5_retry_t {
 /* One hour: */
 #define H5_RETRY_ONE_HOUR          (3600ULL * 1000ULL * 1000ULL * 1000ULL)
 
+/* If any tries remain, decrease the number of remaining tries and
+ * return true.  Otherwise, return false.
+ *
+ * XXX This is not part of the API. XXX
+ */
+static inline bool
+h5_retry_decrement(struct h5_retry_t *r)
+{
+    if (r->tries == 0)
+        return false;
+    --r->tries;
+    return true;
+}
+
 /* Establish state for a retry loop in `r`.  The loop will retry no
  * more than `maxtries` times, sleeping for no fewer than `minival`
  * nanoseconds between tries.  After each try, the sleep time will
@@ -63,7 +77,7 @@ h5_retry_init(struct h5_retry_t *r, unsigned int maxtries, uint64_t minival,
     r->tries = r->maxtries = maxtries;
     r->ival = minival;
     r->maxival = maxival;
-    return true;
+    return h5_retry_decrement(r);
 }
 
 /* If any tries remain, sleep for the mininum interval, or twice the
@@ -74,9 +88,8 @@ h5_retry_next(struct h5_retry_t *r)
 {
     uint64_t ival;
 
-    if (r->tries == 0)
+    if (!h5_retry_decrement(r))
         return false;
-    --r->tries;
     ival = r->ival;
     if (r->maxival < ival)
         ival = r->maxival;
