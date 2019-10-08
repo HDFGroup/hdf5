@@ -712,7 +712,7 @@ static int copy_refs_attr(hid_t loc_in,
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Awrite failed");
 
             if (is_ref_vlen && buf)
-                H5Dvlen_reclaim (mtype_id, space_id, H5P_DEFAULT, buf);
+                H5Treclaim (mtype_id, space_id, H5P_DEFAULT, buf);
         } /* if (nelmts) */
 
         if (refbuf == buf)

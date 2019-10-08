@@ -460,8 +460,8 @@ static void test_misc2_write_attribute(void)
     ret = H5Aread(att1, type, &data_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    ret = H5Dvlen_reclaim(type, dataspace, H5P_DEFAULT, &data_check);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(type, dataspace, H5P_DEFAULT, &data_check);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     ret = H5Aclose(att1);
     CHECK(ret, FAIL, "H5Aclose");
@@ -486,8 +486,8 @@ static void test_misc2_write_attribute(void)
     ret = H5Aread(att2, type, &data_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    ret = H5Dvlen_reclaim(type, dataspace, H5P_DEFAULT, &data_check);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(type, dataspace, H5P_DEFAULT, &data_check);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     ret = H5Aclose(att2);
     CHECK(ret, FAIL, "H5Aclose");
@@ -535,8 +535,8 @@ static void test_misc2_read_attribute(const char *filename, const char *att_name
     ret = H5Aread(att, type, &data_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    ret = H5Dvlen_reclaim(type, space, H5P_DEFAULT, &data_check);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(type, space, H5P_DEFAULT, &data_check);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     ret = H5Sclose(space);
     CHECK(ret, FAIL, "H5Sclose");
@@ -994,8 +994,8 @@ test_misc5(void)
     }
 
     /* Reclaim the memory for the VL information */
-    ret=H5Dvlen_reclaim(mem_type_id, space_id, H5P_DEFAULT, &buf);
-    CHECK(ret,FAIL,"H5Dvlen_reclaim");
+    ret=H5Treclaim(mem_type_id, space_id, H5P_DEFAULT, &buf);
+    CHECK(ret,FAIL,"H5Treclaim");
 
     /* Close dataspace */
     ret=H5Sclose(space_id);
@@ -2061,8 +2061,8 @@ test_misc12(void)
     CHECK(ret, FAIL, "H5Sselect_all");
 
     /* Reclaim VL data memory */
-    ret = H5Dvlen_reclaim(tid1, space, H5P_DEFAULT, rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid1, space, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Everything */
     ret = H5Dclose(dataset);

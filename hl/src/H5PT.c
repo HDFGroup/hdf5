@@ -940,7 +940,7 @@ herr_t H5PTfree_vlen_buff( hid_t table_id,
     goto error;
 
   /* Free the memory.  If this succeeds, ret_value should be 0. */
-  if((ret_value = H5Dvlen_reclaim(table->type_id, space_id, H5P_DEFAULT, buff)) < 0)
+  if((ret_value = H5Treclaim(table->type_id, space_id, H5P_DEFAULT, buff)) < 0)
     goto error;
 
   /* If the dataspace cannot be closed, return -2 to indicate that memory */

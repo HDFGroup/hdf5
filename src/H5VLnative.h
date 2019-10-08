@@ -17,6 +17,9 @@
 #ifndef _H5VLnative_H
 #define _H5VLnative_H
 
+/* Public headers needed by this file */
+#include "H5VLpublic.h"        /* Virtual Object Layer                 */
+
 /* Identifier for the native VOL connector */
 #define H5VL_NATIVE     (H5VL_native_register())
 

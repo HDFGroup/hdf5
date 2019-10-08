@@ -4079,7 +4079,7 @@ int write_dset_in(hid_t loc_id,
         goto out;
     if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5) < 0)
         goto out;
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf5) < 0)
         goto out;
     if (H5Dclose(did) < 0)
         goto out;
@@ -4312,7 +4312,7 @@ int write_dset_in(hid_t loc_id,
         goto out;
     if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf52) < 0)
         goto out;
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf52) < 0)
         goto out;
     if (H5Dclose(did) < 0)
         goto out;
@@ -4533,7 +4533,7 @@ int write_dset_in(hid_t loc_id,
     if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf53) < 0)
         goto out;
 
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf53) < 0)
         goto out;
 
     if (H5Dclose(did) < 0)
@@ -5009,7 +5009,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Awrite(aid, tid, buf5) < 0)
         goto out;
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf5) < 0)
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
@@ -5331,7 +5331,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Awrite(aid, tid, buf52) < 0)
         goto out;
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf52) < 0)
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
@@ -5793,7 +5793,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Awrite(aid, tid, buf53) < 0)
         goto out;
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf53) < 0)
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
@@ -7036,10 +7036,10 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     }
 
     /* close resource for vlen data */
-    status = H5Dvlen_reclaim (vlen_objref_attr_tid, vlen_objref_attr_sid, H5P_DEFAULT, vlen_objref_data);
+    status = H5Treclaim (vlen_objref_attr_tid, vlen_objref_attr_sid, H5P_DEFAULT, vlen_objref_data);
     if (status < 0)
     {
-        HDfprintf(stderr, "Error: %s %d> H5Dvlen_reclaim failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Treclaim failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7091,10 +7091,10 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     }
 
     /* close resource for vlen data */
-    status = H5Dvlen_reclaim (vlen_regref_attr_tid, vlen_regref_attr_sid, H5P_DEFAULT, vlen_regref_data);
+    status = H5Treclaim (vlen_regref_attr_tid, vlen_regref_attr_sid, H5P_DEFAULT, vlen_regref_data);
     if (status < 0)
     {
-        HDfprintf(stderr, "Error: %s %d> H5Dvlen_reclaim failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Treclaim failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
