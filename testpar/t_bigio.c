@@ -4,7 +4,8 @@
 #include "H5Dprivate.h"                /* For Chunk tests */
 
 /* FILENAME and filenames must have the same number of names */
-const char *FILENAME[2]={ "bigio_test.h5",
+const char *FILENAME[3]={ "bigio_test.h5",
+                          "single_rank_independent_io.h5",
                            NULL
                         };
 
@@ -29,7 +30,8 @@ const char *FILENAME[2]={ "bigio_test.h5",
 #define DATASET5 "DSET5"
 #define DXFER_COLLECTIVE_IO 0x1  /* Collective IO*/
 #define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
-#define DXFER_BIGCOUNT 536870916
+#define DXFER_BIGCOUNT (1 < 29)
+#define LARGE_DIM 1610612736
 
 #define HYPER 1
 #define POINT 2
@@ -40,7 +42,7 @@ typedef hsize_t B_DATATYPE;
 
 int facc_type = FACC_MPIO;        /*Test file access type */
 int dxfer_coll_type = DXFER_COLLECTIVE_IO;
-size_t bigcount = DXFER_BIGCOUNT;
+size_t bigcount = (size_t)DXFER_BIGCOUNT;
 int nerrors = 0;
 int mpi_size, mpi_rank;
 
@@ -1117,6 +1119,81 @@ dataset_big_read(void)
 
 } /* dataset_large_readAll */
 
+static void
+single_rank_independent_io(void)
+{
+    if (mpi_rank == 0)
+        HDprintf("single_rank_independent_io\n");
+
+    if (MAINPROCESS) {
+        FILE *debug_file = NULL;
+        char debug_filename[256];
+        hsize_t dims[] = { LARGE_DIM };
+        hid_t file_id = -1;
+        hid_t fapl_id = -1;
+        hid_t dset_id = -1;
+        hid_t fspace_id = -1;
+        hid_t mspace_id = -1;
+        void *data = NULL;
+
+        /*
+         * Setup a separate file for each MPI rank to cleanly capture output.
+         */
+        snprintf(debug_filename, 256, "rank_%d.out", mpi_rank);
+        debug_file = fopen(debug_filename, "w");
+
+        /*
+         * Redirect HDF5 errors to separate files for each rank.
+         */
+        H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t) H5Eprint2, debug_file);
+
+        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+	VRFY((fapl_id >= 0), "H5P_FILE_ACCESS");
+
+        H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
+        file_id = H5Fcreate(FILENAME[1], H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        VRFY((file_id >= 0), "H5Dcreate2 succeeded");
+
+        fspace_id = H5Screate_simple(1, dims, NULL);
+        VRFY((fspace_id >= 0), "H5Screate_simple fspace_id succeeded");
+
+        fprintf(debug_file, "Size of native int: %zu\n\n", sizeof(int));
+        fprintf(debug_file, "Size of dataset in bytes: %llu\n\n", (unsigned long long) (dims[0] * sizeof(int)));
+
+        /*
+         * Create and write to a >2GB dataset from a single rank.
+         */
+        dset_id = H5Dcreate2(file_id, "test_dset", H5T_NATIVE_INT, fspace_id,
+                  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
+        fprintf(debug_file, "Size of data written by this rank (in bytes): %llu\n\n", dims[0] * sizeof(int));
+
+        data = malloc(LARGE_DIM * sizeof(int));
+
+        if (mpi_rank == 0)
+            H5Sselect_all(fspace_id);
+        else
+            H5Sselect_none(fspace_id);
+
+        dims[0] = LARGE_DIM;
+        mspace_id = H5Screate_simple(1, dims, NULL);
+        VRFY((mspace_id >= 0), "H5Screate_simple mspace_id succeeded");
+        H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
+
+        fclose(debug_file);
+        free(data);
+        H5Sclose(mspace_id);
+        H5Sclose(fspace_id);
+        H5Pclose(fapl_id);
+        H5Dclose(dset_id);
+        H5Fclose(file_id);
+
+        HDremove(FILENAME[1]);
+
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+}
 
 /*
  * Create the appropriate File access property list
@@ -1914,6 +1991,8 @@ int main(int argc, char **argv)
       coll_chunk2();
       MPI_Barrier(MPI_COMM_WORLD);
       coll_chunk3();
+      MPI_Barrier(MPI_COMM_WORLD);
+      single_rank_independent_io();
     }
 
     /* turn off alarm */
