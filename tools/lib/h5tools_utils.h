@@ -26,6 +26,10 @@
 #include "H5FDros3.h"
 #endif
 
+#ifdef H5_HAVE_LIBHDFS
+#include "H5FDhdfs.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

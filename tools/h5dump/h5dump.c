@@ -27,7 +27,7 @@ static const char   *xml_dtd_uri = NULL;
 #ifdef H5_HAVE_ROS3_VFD
 static H5FD_ros3_fapl_t ros3_fa = {
     1,     /* version           */
-    false, /* authenticate      */
+    FALSE, /* authenticate      */
     "",    /* aws region        */
     "",    /* access key id     */
     "",    /* secret access key */

@@ -1482,6 +1482,7 @@ test_noops_and_autofails(void)
 
     /* no-op calls to `lock()` and `unlock()`
      */
+/*
     JSVERIFY( SUCCEED,
               H5FDlock(file, TRUE),
               "lock always succeeds; has no effect" )
@@ -1491,6 +1492,7 @@ test_noops_and_autofails(void)
     JSVERIFY( SUCCEED,
               H5FDunlock(file),
               NULL )
+*/
     /* Lock/unlock with null file or similar error crashes tests.
      * HDassert in calling heirarchy, `H5FD[un]lock()` and `H5FD_[un]lock()`
      */
