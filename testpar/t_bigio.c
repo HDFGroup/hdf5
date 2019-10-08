@@ -1126,8 +1126,6 @@ single_rank_independent_io(void)
         HDprintf("single_rank_independent_io\n");
 
     if (MAINPROCESS) {
-        FILE *debug_file = NULL;
-        char debug_filename[256];
         hsize_t dims[] = { LARGE_DIM };
         hid_t file_id = -1;
         hid_t fapl_id = -1;
@@ -1135,17 +1133,6 @@ single_rank_independent_io(void)
         hid_t fspace_id = -1;
         hid_t mspace_id = -1;
         void *data = NULL;
-
-        /*
-         * Setup a separate file for each MPI rank to cleanly capture output.
-         */
-        snprintf(debug_filename, 256, "rank_%d.out", mpi_rank);
-        debug_file = fopen(debug_filename, "w");
-
-        /*
-         * Redirect HDF5 errors to separate files for each rank.
-         */
-        H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t) H5Eprint2, debug_file);
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 	VRFY((fapl_id >= 0), "H5P_FILE_ACCESS");
@@ -1157,9 +1144,6 @@ single_rank_independent_io(void)
         fspace_id = H5Screate_simple(1, dims, NULL);
         VRFY((fspace_id >= 0), "H5Screate_simple fspace_id succeeded");
 
-        fprintf(debug_file, "Size of native int: %zu\n\n", sizeof(int));
-        fprintf(debug_file, "Size of dataset in bytes: %llu\n\n", (unsigned long long) (dims[0] * sizeof(int)));
-
         /*
          * Create and write to a >2GB dataset from a single rank.
          */
@@ -1167,7 +1151,6 @@ single_rank_independent_io(void)
                   H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
         VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
-        fprintf(debug_file, "Size of data written by this rank (in bytes): %llu\n\n", dims[0] * sizeof(int));
 
         data = malloc(LARGE_DIM * sizeof(int));
 
@@ -1181,7 +1164,6 @@ single_rank_independent_io(void)
         VRFY((mspace_id >= 0), "H5Screate_simple mspace_id succeeded");
         H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
 
-        fclose(debug_file);
         free(data);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
