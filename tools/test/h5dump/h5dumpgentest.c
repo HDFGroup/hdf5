@@ -2624,7 +2624,7 @@ static void gent_vldatatypes(void)
     dset = H5Dcreate2(file, "Dataset1.0", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     ret = H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     HDassert(ret >= 0);
-    ret = H5Dvlen_reclaim(type, space, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(type, space, H5P_DEFAULT, wdata);
     HDassert(ret >= 0);
 
     ret = H5Dclose(dset);
@@ -2651,7 +2651,7 @@ static void gent_vldatatypes(void)
     dset = H5Dcreate2(file, "Dataset2.0", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     ret = H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     HDassert(ret >= 0);
-    ret = H5Dvlen_reclaim(type, space, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(type, space, H5P_DEFAULT, wdata);
     HDassert(ret >= 0);
 
     ret = H5Dclose(dset);
@@ -2674,7 +2674,7 @@ static void gent_vldatatypes(void)
     dset = H5Dcreate2(file, "Dataset3.0", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     ret = H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &adata);
     HDassert(ret >= 0);
-    ret = H5Dvlen_reclaim(type, space, H5P_DEFAULT, &adata);
+    ret = H5Treclaim(type, space, H5P_DEFAULT, &adata);
     HDassert(ret >= 0);
 
     ret = H5Dclose(dset);
@@ -2740,7 +2740,7 @@ gent_vldatatypes2(void)
     HDassert(ret >= 0);
 
     /* Reclaim the write VL data */
-    ret = H5Dvlen_reclaim(tid2, sid1, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(tid2, sid1, H5P_DEFAULT, wdata);
     HDassert(ret >= 0);
 
     /* Close Dataset */
@@ -2811,7 +2811,7 @@ static void gent_vldatatypes3(void)
     HDassert(ret >= 0);
 
     /* Reclaim the write VL data */
-    ret = H5Dvlen_reclaim(tid2, sid1, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(tid2, sid1, H5P_DEFAULT, wdata);
     HDassert(ret >= 0);
 
     /* Close Dataset */
@@ -2878,7 +2878,7 @@ static void gent_vldatatypes4(void)
     HDassert(ret >= 0);
 
     /* Reclaim the write VL data */
-    ret = H5Dvlen_reclaim(tid1, sid1, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(tid1, sid1, H5P_DEFAULT, wdata);
     HDassert(ret >= 0);
 
     /* Close Dataset */
@@ -2942,7 +2942,7 @@ static void gent_vldatatypes5(void)
     ret = H5Dclose(dataset);
     HDassert(ret >= 0);
 
-    ret = H5Dvlen_reclaim(tid1, sid1, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(tid1, sid1, H5P_DEFAULT, wdata);
     HDassert(ret >= 0);
 
     ret = H5Tclose(tid1);
@@ -3385,7 +3385,7 @@ static void gent_array6(void)
     HDassert(ret >= 0);
 
     /* Reclaim the write VL data */
-    ret = H5Dvlen_reclaim(tid1, sid1, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(tid1, sid1, H5P_DEFAULT, wdata);
     HDassert(ret >= 0);
 
     /* Close Dataset */
@@ -3454,7 +3454,7 @@ static void gent_array7(void)
     HDassert(ret >= 0);
 
     /* Reclaim the write VL data */
-    ret = H5Dvlen_reclaim(tid1, sid1, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(tid1, sid1, H5P_DEFAULT, wdata);
     HDassert(ret >= 0);
 
     /* Close Dataset */
@@ -4054,7 +4054,7 @@ static void write_attr_in(hid_t loc_id,
     aid = H5Acreate2(loc_id, "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(aid, tid, buf5);
     HDassert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf5);
     HDassert(status >= 0);
     status = H5Aclose(aid);
     status = H5Tclose(tid);
@@ -4165,7 +4165,7 @@ static void write_attr_in(hid_t loc_id,
     aid = H5Acreate2(loc_id, "vlen2D", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(aid, tid, buf52);
     HDassert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf52);
     HDassert(status >= 0);
     status = H5Aclose(aid);
     status = H5Tclose(tid);
@@ -4298,7 +4298,7 @@ static void write_attr_in(hid_t loc_id,
     aid = H5Acreate2(loc_id, "vlen3D", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(aid, tid, buf53);
     HDassert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf53);
     HDassert(status >= 0);
     status = H5Aclose(aid);
     status = H5Tclose(tid);
@@ -4496,7 +4496,7 @@ static void write_dset_in(hid_t loc_id,
     did = H5Dcreate2(loc_id, "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
     HDassert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf5);
     HDassert(status >= 0);
     status = H5Dclose(did);
     status = H5Tclose(tid);
@@ -4606,7 +4606,7 @@ static void write_dset_in(hid_t loc_id,
     did = H5Dcreate2(loc_id, "vlen2D", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf52);
     HDassert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf52);
     HDassert(status >= 0);
     status = H5Dclose(did);
     status = H5Tclose(tid);
@@ -4745,7 +4745,7 @@ static void write_dset_in(hid_t loc_id,
     did = H5Dcreate2(loc_id, "vlen3D", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf53);
     HDassert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf53);
     HDassert(status >= 0);
     status = H5Dclose(did);
     status = H5Tclose(tid);
@@ -5966,7 +5966,7 @@ static void gent_fvalues(void)
     did = H5Dcreate2(fid, "fill_vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     ret = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf3);
     HDassert(ret >= 0);
-    ret = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf3);
+    ret = H5Treclaim(tid, sid, H5P_DEFAULT, buf3);
     HDassert(ret >= 0);
     ret = H5Dclose(did);
     ret = H5Tclose(tid);

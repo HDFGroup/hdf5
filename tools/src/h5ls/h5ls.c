@@ -1568,7 +1568,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
 
                     /* Reclaim any VL memory, if necessary */
                     if (vl_data)
-                        H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
+                        H5Treclaim(p_type, space, H5P_DEFAULT, buf);
 
                     HDfree(buf);
                 }

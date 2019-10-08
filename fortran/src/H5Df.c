@@ -544,7 +544,7 @@ h5dvlen_get_max_len_c ( hid_t_f *dset_id ,  hid_t_f *type_id, hid_t_f *space_id,
   c_len = 0;
   for (i=0; i < num_elem; i++) c_len = H5_MAX(c_len, c_buf[i].len);
   *len = (size_t_f)c_len;
-  H5Dvlen_reclaim(c_type_id, c_space_id, H5P_DEFAULT, c_buf);
+  H5Treclaim(c_type_id, c_space_id, H5P_DEFAULT, c_buf);
   ret_value = 0;
 
 DONE:
@@ -690,7 +690,7 @@ h5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_sp
        len[i] = (size_t_f)c_buf[i].len;
        memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(int_f));
   }
-  H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
+  H5Treclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
   ret_value = 0;
 DONE:
   HDfree(c_buf);
@@ -779,7 +779,7 @@ h5dwrite_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   if( status < 0) goto DONE;
   ret_value = 0;
 DONE:
-  H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
+  H5Treclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
   HDfree(c_buf);
   HDfree(tmp);
   return ret_value;
@@ -861,7 +861,7 @@ h5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
   }
   HD5packFstring(tmp, _fcdtocp(buf), (size_t)(max_len*num_elem));
   ret_value = 0;
-  H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
+  H5Treclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
   HDfree(c_buf);
   HDfree(tmp);
   return ret_value;
@@ -1006,7 +1006,7 @@ h5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space
        memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(real_f));
   }
 
-  H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
+  H5Treclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
   ret_value = 0;
 DONE:
   HDfree(c_buf);
@@ -1284,7 +1284,7 @@ h5dget_access_plist_c (hid_t_f *dset_id, hid_t_f *plist_id)
  * NAME
  *  h5dvlen_reclaim_c
  * PURPOSE
- *  Call H5Dvlen_reclaim
+ *  Call H5Treclaim
  * INPUTS
  *  type_id   - Identifier of the datatype. 
  *  space_id  - Identifier of the dataspace. 
@@ -1307,9 +1307,9 @@ h5dvlen_reclaim_c(hid_t_f *type_id, hid_t_f *space_id, hid_t_f *plist_id, void *
   herr_t status;
 
   /*
-   * Call H5Dvlen_reclaim function.
+   * Call H5Treclaim function.
    */
-  status = H5Dvlen_reclaim((hid_t)*type_id, (hid_t)*space_id, (hid_t)*plist_id, buf);
+  status = H5Treclaim((hid_t)*type_id, (hid_t)*space_id, (hid_t)*plist_id, buf);
   if ( status < 0 ) return ret_value;
 
   ret_value = 0;
