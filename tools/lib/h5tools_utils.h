@@ -22,6 +22,10 @@
 
 #include "hdf5.h"
 
+#ifdef H5_HAVE_ROS3_VFD
+#include "H5FDros3.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -183,7 +187,7 @@ H5TOOLS_DLL int h5tools_set_configured_fapl(hid_t       fapl_id,
                                             const char  vfd_name[],
                                             void       *fapl_t_ptr);
 #ifdef H5_HAVE_ROS3_VFD
-H5TOOLS_DLL int h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa, 
+H5TOOLS_DLL int h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa,
                                            const char       **values);
 #endif /* H5_HAVE_ROS3_VFD */
 
