@@ -935,6 +935,36 @@ GREPTEST()
     fi
 }
 
+# Call the h5dump tool and grep for an error string 
+#
+GREPERRTEST()
+{
+    expectdata=$1
+    actual=$TESTDIR/$2
+    actual_err="$TESTDIR/`basename $2 .ddl`.oerr"
+    shift
+    shift
+
+    # Run test.
+    TESTING $DUMPER -p $@
+    (
+      cd $TESTDIR
+      $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
+    ) >$actual 2>$actual_err
+    $GREP "$expectdata" $actual_err > /dev/null
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+}
+
 # Print a "SKIP" message
 SKIP() {
    TESTING $DUMPER $@
