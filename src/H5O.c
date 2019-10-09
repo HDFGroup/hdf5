@@ -263,8 +263,8 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "ia", loc_id, addr);
 
-    loc_params.type = H5VL_OBJECT_BY_ADDR;
-    loc_params.loc_data.loc_by_addr.addr = addr;
+    loc_params.type = H5VL_OBJECT_BY_TOKEN;
+    loc_params.loc_data.loc_by_token.token = &addr;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Get the location object */

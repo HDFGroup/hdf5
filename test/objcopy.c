@@ -547,7 +547,7 @@ done:
     if(tid >0 && sid > 0) {
         hid_t dxpl_id = H5Pcreate(H5P_DATASET_XFER);
         H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL);
-        H5Dvlen_reclaim(tid, sid, dxpl_id, buf);
+        H5Treclaim(tid, sid, dxpl_id, buf);
         H5Pclose(dxpl_id);
     }
     if(sid > 0)
@@ -794,9 +794,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
 
     /* Reclaim vlen data, if necessary */
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE)
-        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE)
-        if(H5Dvlen_reclaim(tid2, sid2, H5P_DEFAULT, rbuf2) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid2, H5P_DEFAULT, rbuf2) < 0) TEST_ERROR
 
     /* Release raw data buffers */
     HDfree(rbuf);
@@ -1306,9 +1306,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 
     /* Reclaim vlen data, if necessary */
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE)
-        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE)
-        if(H5Dvlen_reclaim(tid2, sid2, H5P_DEFAULT, rbuf2) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid2, H5P_DEFAULT, rbuf2) < 0) TEST_ERROR
 
     /* Release raw data buffers */
     HDfree(rbuf);
@@ -5290,7 +5290,7 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -5307,7 +5307,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Sclose(sid);
@@ -5473,7 +5473,7 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -5490,7 +5490,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Pclose(pid);
         H5Tclose(tid);
@@ -5618,7 +5618,7 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -5635,7 +5635,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Sclose(sid);
@@ -5896,8 +5896,8 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
     /* Reclaim vlen buffer */
     if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
     if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-    if(H5Dvlen_reclaim(tid, sid, dxpl_id, &rbuf) < 0) TEST_ERROR
-    if(H5Dvlen_reclaim(tid, sid, dxpl_id, &rbuf2) < 0) TEST_ERROR
+    if(H5Treclaim(tid, sid, dxpl_id, &rbuf) < 0) TEST_ERROR
+    if(H5Treclaim(tid, sid, dxpl_id, &rbuf2) < 0) TEST_ERROR
     if(H5Pclose(dxpl_id) < 0) TEST_ERROR
 
     /* Close the dataspaces */
@@ -5917,8 +5917,8 @@ error:
     H5E_BEGIN_TRY {
         H5Aclose(aid);
         H5Aclose(aid2);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf2);
+        H5Treclaim(tid, sid, H5P_DEFAULT, &rbuf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, &rbuf2);
         H5Sclose(sid);
         H5Sclose(sid2);
         H5Tclose(tid);
@@ -6219,7 +6219,7 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -6239,7 +6239,7 @@ error:
         H5Dclose(did2);
         H5Dclose(did);
         H5Pclose(pid);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Sclose(sid);
@@ -8050,7 +8050,7 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8068,7 +8068,7 @@ error:
         H5Pclose(pid);
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid_copy, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid_copy);
@@ -8197,7 +8197,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8214,7 +8214,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid_copy, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid_copy);
@@ -8364,7 +8364,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8382,7 +8382,7 @@ error:
         H5Pclose(pid);
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid_copy, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid_copy);
@@ -8521,7 +8521,7 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
     if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8539,7 +8539,7 @@ error:
         H5Pclose(pid);
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid_copy, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid_copy);
@@ -8683,7 +8683,7 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8701,7 +8701,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid2, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Pclose(pid);
         H5Tclose(tid);
@@ -8856,7 +8856,7 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8874,7 +8874,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid2, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Pclose(pid);
         H5Tclose(tid);
@@ -9057,7 +9057,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -9076,7 +9076,7 @@ error:
         H5Pclose(pid);
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid2, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid2);
@@ -9233,7 +9233,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -9252,7 +9252,7 @@ error:
         H5Pclose(pid);
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid2, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid2);
@@ -9389,7 +9389,7 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -9407,7 +9407,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid2);
         H5Tclose(tid);
@@ -9542,7 +9542,7 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -9560,7 +9560,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Pclose(pid);
         H5Tclose(tid2);
@@ -9695,7 +9695,7 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -9713,7 +9713,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Pclose(pid);
         H5Tclose(tid2);

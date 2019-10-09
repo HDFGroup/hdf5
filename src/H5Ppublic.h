@@ -71,6 +71,7 @@
 #define H5P_LINK_CREATE         (H5OPEN H5P_CLS_LINK_CREATE_ID_g)
 #define H5P_LINK_ACCESS         (H5OPEN H5P_CLS_LINK_ACCESS_ID_g)
 #define H5P_VOL_INITIALIZE      (H5OPEN H5P_CLS_VOL_INITIALIZE_ID_g)
+#define H5P_REFERENCE_ACCESS    (H5OPEN H5P_CLS_REFERENCE_ACCESS_ID_g)
 
 /*
  * The library's default property lists
@@ -93,6 +94,7 @@
 #define H5P_LINK_CREATE_DEFAULT        (H5OPEN H5P_LST_LINK_CREATE_ID_g)
 #define H5P_LINK_ACCESS_DEFAULT        (H5OPEN H5P_LST_LINK_ACCESS_ID_g)
 #define H5P_VOL_INITIALIZE_DEFAULT     (H5OPEN H5P_LST_VOL_INITIALIZE_ID_g)
+#define H5P_REFERENCE_ACCESS_DEFAULT   (H5OPEN H5P_LST_REFERENCE_ACCESS_ID_g)
 
 /* Common creation order flags (for links in groups and attributes on objects) */
 #define H5P_CRT_ORDER_TRACKED           0x0001
@@ -204,6 +206,7 @@ H5_DLLVAR hid_t H5P_CLS_OBJECT_COPY_ID_g;
 H5_DLLVAR hid_t H5P_CLS_LINK_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_CLS_LINK_ACCESS_ID_g;
 H5_DLLVAR hid_t H5P_CLS_VOL_INITIALIZE_ID_g;
+H5_DLLVAR hid_t H5P_CLS_REFERENCE_ACCESS_ID_g;
 
 /* Default roperty list IDs */
 /* (Internal to library, do not use!  Use macros above) */
@@ -225,6 +228,7 @@ H5_DLLVAR hid_t H5P_LST_OBJECT_COPY_ID_g;
 H5_DLLVAR hid_t H5P_LST_LINK_CREATE_ID_g;
 H5_DLLVAR hid_t H5P_LST_LINK_ACCESS_ID_g;
 H5_DLLVAR hid_t H5P_LST_VOL_INITIALIZE_ID_g;
+H5_DLLVAR hid_t H5P_LST_REFERENCE_ACCESS_ID_g;
 
 /*********************/
 /* Public Prototypes */

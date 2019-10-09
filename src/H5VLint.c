@@ -543,6 +543,7 @@ static H5VL_object_t *
 H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t wrap_obj)
 {
     H5VL_object_t  *new_vol_obj = NULL;     /* Pointer to new VOL object                    */
+    hbool_t         conn_rc_incr = FALSE;   /* Whether the VOL connector refcount has been incremented */
     H5VL_object_t  *ret_value = NULL;       /* Return value                                 */
 
     FUNC_ENTER_STATIC
@@ -569,6 +570,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
 
     /* Bump the reference count on the VOL connector */
     H5VL__conn_inc_rc(vol_connector);
+    conn_rc_incr = TRUE;
 
     /* If this is a datatype, we have to hide the VOL object under the H5T_t pointer */
     if(H5I_DATATYPE == type) {
@@ -579,6 +581,12 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
         ret_value = (H5VL_object_t *)new_vol_obj;
 
 done:
+    /* Cleanup on error */
+    if(NULL == ret_value) {
+        if(conn_rc_incr && H5VL__conn_dec_rc(vol_connector) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector")
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__new_vol_obj() */
 
@@ -759,16 +767,17 @@ done:
  *              get the connector information instead of it being passed in.
  *
  * Return:      Success:    A valid HDF5 ID
- *              Failure:    H5I_INVALID_HID 
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, hbool_t app_ref)
 {
-    H5VL_class_t    *cls = NULL;
-    H5VL_t          *connector = NULL;       /* VOL connector struct */
-    hid_t           ret_value = H5I_INVALID_HID;
+    H5VL_class_t    *cls = NULL;                /* VOL connector class */
+    H5VL_t          *connector = NULL;          /* VOL connector struct */
+    hbool_t         conn_id_incr = FALSE;       /* Whether the VOL connector ID has been incremented */
+    hid_t           ret_value = H5I_INVALID_HID;/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -783,12 +792,24 @@ H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, hbool
     connector->id = connector_id;
     if(H5I_inc_ref(connector->id, FALSE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL connector")
+    conn_id_incr = TRUE;
 
     /* Get an ID for the VOL object */
     if((ret_value = H5VL_register(type, obj, connector, app_ref)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle")
 
 done:
+    /* Clean up on error */
+    if(ret_value < 0) {
+        /* Decrement VOL connector ID ref count on error */
+        if(conn_id_incr && H5I_dec_ref(connector_id) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement ref count on VOL connector")
+
+        /* Free VOL connector struct */
+        if(NULL != connector)
+            connector = H5FL_FREE(H5VL_t, connector);
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register_using_vol_id() */
 

@@ -6088,23 +6088,15 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed")
 
         /* Reclaim space from variable length data */
-        if(H5D_vlen_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
+        if(H5T_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, H5_ITER_ERROR, "unable to reclaim variable-length data")
     } /* end if */
     else if(fix_ref) {
         /* Check for expanding references */
         /* (background buffer has already been zeroed out, if not expanding) */
         if(udata->cpy_info->expand_ref) {
-            size_t ref_count;
-            size_t dt_size;
-
-            /* Determine # of reference elements to copy */
-            if((dt_size = H5T_get_size(udata->dt_src)) == 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "size must not be 0")
-            ref_count = nbytes / dt_size;
-
             /* Copy the reference elements */
-            if(H5O_copy_expand_ref(udata->file_src, buf, udata->idx_info_dst->f, bkg, ref_count, H5T_get_ref_type(udata->dt_src), udata->cpy_info) < 0)
+            if(H5O_copy_expand_ref(udata->file_src, udata->tid_src, udata->dt_src, buf, nbytes, udata->idx_info_dst->f, bkg, udata->cpy_info) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy reference attribute")
         } /* end if */
 

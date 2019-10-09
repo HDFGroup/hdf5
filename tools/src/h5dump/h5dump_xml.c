@@ -1919,7 +1919,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
                     }
                     /* Reclaim any VL memory, if necessary */
                     if (vl_data)
-                        H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
+                        H5Treclaim(p_type, space, H5P_DEFAULT, buf);
 
                     HDfree(buf);
                 }
@@ -3099,7 +3099,7 @@ xml_print_strs(hid_t did, int source)
             HDfree(onestring);
     if (buf) {
         if (is_vlstr)
-            H5Dvlen_reclaim(type, space, H5P_DEFAULT, buf);
+            H5Treclaim(type, space, H5P_DEFAULT, buf);
         HDfree(buf);
     }
     H5Tclose(type);
