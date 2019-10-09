@@ -746,7 +746,7 @@ H5T_ref_reclaim(void *elem, const H5T_t *dt)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
     HDassert(elem);
