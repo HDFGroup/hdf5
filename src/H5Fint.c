@@ -139,18 +139,14 @@ H5F__set_vol_conn(H5F_t *file)
     /* Sanity check */
     HDassert(0 != connector_prop.connector_id);
 
-    /* Copy connector info, if it exists */
-    if(connector_prop.connector_info) {
-        H5VL_class_t *connector;           /* Pointer to connector */
+    /* Retrieve the connector for the ID */
+    if(NULL == (file->shared->vol_cls = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-        /* Retrieve the connector for the ID */
-        if(NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
-            HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-        /* Allocate and copy connector info */
-        if(H5VL_copy_connector_info(connector, &new_connector_info, connector_prop.connector_info) < 0)
+    /* Allocate and copy connector info, if it exists */
+    if(connector_prop.connector_info)
+        if(H5VL_copy_connector_info(file->shared->vol_cls, &new_connector_info, connector_prop.connector_info) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "connector info copy failed")
-    } /* end if */
 
     /* Cache the connector ID & info for the container */
     file->shared->vol_id = connector_prop.connector_id;
@@ -1377,6 +1373,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
             if(H5I_dec_ref(f->shared->vol_id) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close VOL connector ID")
+        f->shared->vol_cls = NULL;
 
         /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)

@@ -248,6 +248,16 @@ New Features
 
       (NAF - 2019/03/01)
 
+    - Add new H5R_ref_t type for object, dataset region and _attribute_
+      references. This new type will deprecate the current hobj_ref_t
+      and hdset_reg_ref_t types for references. Added H5T_REF datatype
+      to read and write new reference types. As opposed to previous
+      reference types, reference creation no longer modifies existing
+      files. New reference types also now support references to external
+      files.
+
+      (JS - 2019/10/08)
+
     - Remove H5I_REFERENCE from the library
 
       This ID class was never used by the library and has been removed.
@@ -370,6 +380,19 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed the slowness of regular hyperslab selection in a chunked dataset
+
+      It was reported that the selection of every 10th element from a 20G
+      chunked dataset was extremely slow and sometimes could hang the system.
+      The problem was due to the iteration and the building of the span tree
+      for all the selected elements in file space.
+
+      As the selected elements are going to a 1-d contiguous single block
+      memory space, the problem was fixed by building regular hyperslab selections
+      in memory space for the selected elements in file space.
+
+      (VC - 2019/09/26, HDFFV-10585)
+
     - Fixed a bug caused by bad tag value when condensing object header
       messages
 

@@ -4403,7 +4403,7 @@ static void test_comps_vlen(const char * fname, const char *dset, const char *at
     assert(ret >= 0);
 
     /* Reclaim the write VL data */
-    ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
     /* ----------------
@@ -4537,7 +4537,7 @@ static void test_comps_array_vlen(const char * fname, const char *dset, const ch
     assert(ret >= 0);
 
     /* Reclaim the write VL data */
-    ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
     /*-------------------
@@ -4680,7 +4680,7 @@ static void test_comps_vlen_arry(const char * fname, const char *dset, const cha
     assert(ret >= 0);
 
     /* Reclaim the write VL data */
-    ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
+    ret = H5Treclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
     /* ----------------
@@ -5446,7 +5446,7 @@ void write_attr_strings(hid_t loc_id, const char* dset_name, hid_t fid, int make
     aid = H5Acreate2(loc_id, "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(aid, tid, buf5);
     assert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf5);
     assert(status >= 0);
     status = H5Aclose(aid);
     status = H5Tclose(tid);
@@ -5712,7 +5712,7 @@ void write_attr_strings(hid_t loc_id, const char* dset_name, hid_t fid, int make
     aid = H5Acreate2(loc_id, "vlen2D", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(aid, tid, buf52);
     assert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf52);
     assert(status >= 0);
     status = H5Aclose(aid);
     status = H5Tclose(tid);
@@ -6108,7 +6108,7 @@ void write_attr_strings(hid_t loc_id, const char* dset_name, hid_t fid, int make
     aid = H5Acreate2(loc_id, "vlen3D", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(aid, tid, buf53);
     assert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf53);
     assert(status >= 0);
     status = H5Aclose(aid);
     status = H5Tclose(tid);
@@ -6434,7 +6434,7 @@ void write_attr_in(hid_t loc_id, const char* dset_name, hid_t fid, int make_diff
     aid = H5Acreate2(loc_id, "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(aid, tid, buf5);
     assert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf5);
     assert(status >= 0);
     status = H5Aclose(aid);
     status = H5Tclose(tid);
@@ -6702,7 +6702,7 @@ void write_attr_in(hid_t loc_id, const char* dset_name, hid_t fid, int make_diff
     aid = H5Acreate2(loc_id, "vlen2D", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(aid, tid, buf52);
     assert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf52);
     assert(status >= 0);
     status = H5Aclose(aid);
     status = H5Tclose(tid);
@@ -7100,7 +7100,7 @@ void write_attr_in(hid_t loc_id, const char* dset_name, hid_t fid, int make_diff
     aid = H5Acreate2(loc_id, "vlen3D", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(aid, tid, buf53);
     assert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf53);
     assert(status >= 0);
     status = H5Aclose(aid);
     status = H5Tclose(tid);
@@ -7395,7 +7395,7 @@ void write_dset_in(hid_t loc_id, const char* dset_name, hid_t fid, int make_diff
     H5P_DEFAULT);
     status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
     HDassert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf5);
     HDassert(status >= 0);
     status = H5Dclose(did);
     status = H5Tclose(tid);
@@ -7580,7 +7580,7 @@ void write_dset_in(hid_t loc_id, const char* dset_name, hid_t fid, int make_diff
     did = H5Dcreate2(loc_id, "vlen2D", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf52);
     assert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf52);
     assert(status >= 0);
     status = H5Dclose(did);
     status = H5Tclose(tid);
@@ -7759,7 +7759,7 @@ void write_dset_in(hid_t loc_id, const char* dset_name, hid_t fid, int make_diff
     did = H5Dcreate2(loc_id, "vlen3D", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf53);
     assert(status >= 0);
-    status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53);
+    status = H5Treclaim(tid, sid, H5P_DEFAULT, buf53);
     assert(status >= 0);
     status = H5Dclose(did);
     status = H5Tclose(tid);

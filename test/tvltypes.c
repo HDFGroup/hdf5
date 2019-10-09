@@ -415,11 +415,11 @@ test_vltypes_vlen_atomic(void)
     } /* end for */
 
     /* Reclaim the read VL data */
-    ret = H5Dvlen_reclaim(tid1, sid1, xfer_pid, rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid1, sid1, xfer_pid, rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used, 0, "H5Dvlen_reclaim");
+    VERIFY(mem_used, 0, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -499,24 +499,24 @@ test_vltypes_vlen_atomic(void)
     /* Try to reclaim read data using "bad" dataspace with no extent
      * Should fail */
     H5E_BEGIN_TRY {
-        ret=H5Dvlen_reclaim(tid1,sid2,xfer_pid,rdata);
+        ret=H5Treclaim(tid1,sid2,xfer_pid,rdata);
     } H5E_END_TRY
-    VERIFY(ret, FAIL, "H5Dvlen_reclaim");
+    VERIFY(ret, FAIL, "H5Treclaim");
 
     /* Reclaim the read VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close datatype */
     ret = H5Tclose(tid1);
@@ -659,15 +659,15 @@ rewrite_vltypes_vlen_atomic(void)
     } /* end for */
 
     /* Reclaim the read VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -803,15 +803,15 @@ test_vltypes_vlen_compound(void)
     } /* end for */
 
     /* Reclaim the VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -948,15 +948,15 @@ rewrite_vltypes_vlen_compound(void)
     } /* end for */
 
     /* Reclaim the VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -1118,12 +1118,12 @@ test_vltypes_compound_vlen_vlen(void)
     } /* end for */
 
     /* Reclaim the VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -1360,12 +1360,12 @@ test_vltypes_compound_vlstr(void)
     } /* end for */
 
     /* Reclaim the VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Use this part for new data */
     HDstrcpy(str, "bbbbbbbb\0");
@@ -1418,12 +1418,12 @@ test_vltypes_compound_vlstr(void)
     } /* end for */
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata2);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,wdata2);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Reclaim the VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,rdata2);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,rdata2);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     ret = H5Dclose(dset2);
     CHECK(ret, FAIL, "H5Dclose");
@@ -1568,11 +1568,11 @@ test_vltypes_compound_vlen_atomic(void)
     } /* end for */
 
     /* Reclaim the VL data */
-    ret = H5Dvlen_reclaim(tid2, sid1, xfer_pid, rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid2, sid1, xfer_pid, rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used, 0, "H5Dvlen_reclaim");
+    VERIFY(mem_used, 0, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -1634,16 +1634,16 @@ test_vltypes_compound_vlen_atomic(void)
     } /* end for */
 
     /* Reclaim the VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close datatype */
     ret = H5Tclose(tid2);
@@ -1786,15 +1786,15 @@ rewrite_vltypes_compound_vlen_atomic(void)
     } /* end for */
 
     /* Reclaim the VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -1997,15 +1997,15 @@ test_vltypes_vlen_vlen_atomic(void)
     } /* end for */
 
     /* Reclaim all the (nested) VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2177,15 +2177,15 @@ rewrite_longer_vltypes_vlen_vlen_atomic(void)
     } /* end for */
 
     /* Reclaim all the (nested) VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2353,15 +2353,15 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
     } /* end for */
 
     /* Reclaim all the (nested) VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid2,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2743,8 +2743,8 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
-            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+            ret = H5Treclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
             HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
@@ -2778,8 +2778,8 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
-            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+            ret = H5Treclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Treclaim");
 
             ret = H5Dclose(dset_id);
             CHECK(ret, FAIL, "H5Dclose");
@@ -2808,8 +2808,8 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
-            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+            ret = H5Treclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
             HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
@@ -2843,8 +2843,8 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_select_dspace_id, xfer_pid, rbuf);
-            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+            ret = H5Treclaim(dtype1_id, dset_select_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Treclaim");
 
             ret = H5Dclose(dset_id);
             CHECK(ret, FAIL, "H5Dclose");
@@ -2970,8 +2970,8 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
-            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+            ret = H5Treclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
             HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
@@ -3019,8 +3019,8 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_select_dspace_id, xfer_pid, rbuf);
-            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+            ret = H5Treclaim(dtype1_id, dset_select_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Treclaim");
 
             ret = H5Dclose(dset_id);
             CHECK(ret, FAIL, "H5Dclose");
@@ -3066,8 +3066,8 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
-            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+            ret = H5Treclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
             HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
@@ -3115,8 +3115,8 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_select_dspace_id, xfer_pid, rbuf);
-            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+            ret = H5Treclaim(dtype1_id, dset_select_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Treclaim");
 
             ret = H5Dclose(dset_id);
             CHECK(ret, FAIL, "H5Dclose");

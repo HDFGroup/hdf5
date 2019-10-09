@@ -167,8 +167,10 @@
 ./examples/h5_select.c
 ./examples/h5_attribute.c
 ./examples/h5_mount.c
-./examples/h5_reference.c
-./examples/h5_ref2reg.c
+./examples/h5_ref_compat.c
+./examples/h5_ref_extern.c
+./examples/h5_reference_deprec.c
+./examples/h5_ref2reg_deprec.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
 ./examples/h5_vds.c
@@ -782,6 +784,7 @@
 ./src/H5Ochunk.c
 ./src/H5Ocont.c
 ./src/H5Ocopy.c
+./src/H5Ocopy_ref.c
 ./src/H5Odbg.c
 ./src/H5Odeprec.c
 ./src/H5Odrvinfo.c
@@ -911,6 +914,7 @@
 ./src/H5Tprecis.c
 ./src/H5Tprivate.h
 ./src/H5Tpublic.h
+./src/H5Tref.c
 ./src/H5Tstrpad.c
 ./src/H5Tvisit.c
 ./src/H5Tvlen.c
@@ -925,6 +929,7 @@
 ./src/H5VLnative.c
 ./src/H5VLnative.h
 ./src/H5VLnative_attr.c
+./src/H5VLnative_blob.c
 ./src/H5VLnative_dataset.c
 ./src/H5VLnative_datatype.c
 ./src/H5VLnative_file.c
@@ -1106,6 +1111,7 @@
 ./test/null_vol_connector.h
 ./test/ohdr.c
 ./test/objcopy.c
+./test/objcopy_ref.c
 ./test/page_buffer.c
 ./test/paged_nopersist.h5
 ./test/paged_persist.h5
@@ -1175,6 +1181,7 @@
 ./test/tmtimeo.h5
 ./test/ttime.c
 ./test/trefer.c
+./test/trefer_deprec.c
 ./test/trefstr.c
 ./test/tselect.c
 ./test/tsizeslheap.h5
