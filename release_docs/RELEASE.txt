@@ -370,6 +370,19 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed the slowness of regular hyperslab selection in a chunked dataset
+
+      It was reported that the selection of every 10th element from a 20G
+      chunked dataset was extremely slow and sometimes could hang the system.
+      The problem was due to the iteration and the building of the span tree
+      for all the selected elements in file space.
+
+      As the selected elements are going to a 1-d contiguous single block
+      memory space, the problem was fixed by building regular hyperslab selections
+      in memory space for the selected elements in file space.
+
+      (VC - 2019/09/26, HDFFV-10585)
+
     - Fixed a bug caused by bad tag value when condensing object header
       messages
 
