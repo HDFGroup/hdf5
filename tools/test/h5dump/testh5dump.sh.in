@@ -906,12 +906,14 @@ TOOLTEST_HELP() {
 }
 
 # Call the h5dump tool and grep for a value
-#
+# "value" mode greps test output, otherwise test error output
 GREPTEST()
 {
     expectdata=$1
     actual=$TESTDIR/$2
     actual_err="$TESTDIR/`basename $2 .ddl`.oerr"
+    mode=$3
+    shift
     shift
     shift
 
@@ -921,37 +923,11 @@ GREPTEST()
       cd $TESTDIR
       $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
     ) >$actual 2>$actual_err
-    $GREP $expectdata $actual > /dev/null
-    if [ $? -eq 0 ]; then
-        echo " PASSED"
+    if [[ "$mode" = "value" ]]; then
+        $GREP $expectdata $actual > /dev/null
     else
-        echo " FAILED"
-        nerrors="`expr $nerrors + 1`"
+        $GREP "$expectdata" $actual_err > /dev/null
     fi
-
-    # Clean up output file
-    if test -z "$HDF5_NOCLEANUP"; then
-     rm -f $actual $actual_err
-    fi
-}
-
-# Call the h5dump tool and grep for an error string 
-#
-GREPERRTEST()
-{
-    expectdata=$1
-    actual=$TESTDIR/$2
-    actual_err="$TESTDIR/`basename $2 .ddl`.oerr"
-    shift
-    shift
-
-    # Run test.
-    TESTING $DUMPER -p $@
-    (
-      cd $TESTDIR
-      $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
-    ) >$actual 2>$actual_err
-    $GREP "$expectdata" $actual_err > /dev/null
     if [ $? -eq 0 ]; then
         echo " PASSED"
     else
@@ -1167,7 +1143,7 @@ TOOLTEST tvlenstr_array.ddl --enable-error-stack tvlenstr_array.h5
 # test for files with array data
 TOOLTEST tarray1.ddl --enable-error-stack tarray1.h5
 # # added for bug# 2092 - tarray1_big.h
-GREPERRTEST "unable to get object address" tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
+GREPTEST "Undefined reference pointer" tarray1_big.ddl errtxt --enable-error-stack -R tarray1_big.h5
 TOOLTEST tarray2.ddl --enable-error-stack tarray2.h5
 TOOLTEST tarray3.ddl --enable-error-stack tarray3.h5
 TOOLTEST tarray4.ddl --enable-error-stack tarray4.h5
@@ -1375,9 +1351,9 @@ fi
 
 # test for dataset region references
 TOOLTEST  tdatareg.ddl --enable-error-stack tdatareg.h5
-GREPERRTEST "unable to get object address" tdataregR.ddl --enable-error-stack -R tdatareg.h5
+GREPTEST "Undefined reference pointer" tdataregR.ddl errtxt --enable-error-stack -R tdatareg.h5
 TOOLTEST  tattrreg.ddl --enable-error-stack tattrreg.h5
-GREPERRTEST "unable to get object address" tattrregR.ddl --enable-error-stack -R tattrreg.h5
+GREPTEST "Undefined reference pointer" tattrregR.ddl errtxt --enable-error-stack -R tattrreg.h5
 TOOLTEST2 tbinregR.exp --enable-error-stack -d /Dataset1 -s 0 -R -y -o tbinregR.txt    tdatareg.h5
 
 # Clean up text output files
@@ -1426,7 +1402,7 @@ TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
 TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5
 
 # test to verify HDFFV-9407: long double full precision
-GREPTEST "1.123456789012345" t128bit_float.ddl -m %.35Lf t128bit_float.h5
+GREPTEST "1.123456789012345" t128bit_float.ddl value -m %.35Lf t128bit_float.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR
