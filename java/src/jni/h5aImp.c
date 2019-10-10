@@ -94,11 +94,18 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Aopen_1name
     (JNIEnv *env, jclass clss, jlong loc_id, jstring name)
 {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     const char *attrName = NULL;
+#endif
     hid_t       attr_id = H5I_INVALID_HID;
 
     UNUSED(clss);
 
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    UNUSED(loc_id);
+    UNUSED(name);
+    H5_UNIMPLEMENTED(ENVONLY, "H5Aopen_name: not implemented");
+#else
     if (NULL == name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Aopen_name: attribute name is null");
 
@@ -106,10 +113,13 @@ Java_hdf_hdf5lib_H5__1H5Aopen_1name
 
     if((attr_id = H5Aopen_name((hid_t)loc_id, attrName)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+#endif
 
 done:
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     if (attrName)
         UNPIN_JAVA_STRING(ENVONLY, name, attrName);
+#endif
 
     return (jlong)attr_id;
 } /* end Java_hdf_hdf5lib_H5__1H5Aopen_1name */
@@ -127,8 +137,14 @@ Java_hdf_hdf5lib_H5__1H5Aopen_1idx
 
     UNUSED(clss);
 
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    UNUSED(loc_id);
+    UNUSED(idx);
+    H5_UNIMPLEMENTED(ENVONLY, "H5Aopen_idx: not implemented");
+#else
     if ((attr_id = H5Aopen_idx((hid_t) loc_id, (unsigned int) idx)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+#endif
 
 done:
     return (jlong)attr_id;
@@ -1028,7 +1044,7 @@ H5AreadVL_str
 
     /*
      * When repeatedly reading a dataset with a large number of strs (e.g., 1,000,000 strings),
-     * H5Dvlen_reclaim() may crash on Windows because the Java GC will not be able to collect
+     * H5Treclaim() may crash on Windows because the Java GC will not be able to collect
      * free space in time. Instead, we use "H5free_memory(strs[i])" to free individual strings
      * once done.
      */
@@ -1125,7 +1141,7 @@ done:
     if (h5str.s)
         h5str_free(&h5str);
     if (readBuf) {
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, readBuf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, readBuf);
         HDfree(readBuf);
     }
     if (sid >= 0)
@@ -1313,7 +1329,7 @@ H5AwriteVL_asstr
 
     /*
      * When repeatedly writing a dataset with a large number of strs (e.g., 1,000,000 strings),
-     * H5Dvlen_reclaim() may crash on Windows because the Java GC will not be able to collect
+     * H5Treclaim() may crash on Windows because the Java GC will not be able to collect
      * free space in time. Instead, we use "H5free_memory(strs[i])" to free individual strings
      * once done.
      */
@@ -1356,7 +1372,7 @@ done:
     if (utf8)
         UNPIN_JAVA_STRING(ENVONLY, jstr, utf8);
     if (writeBuf) {
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, writeBuf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, writeBuf);
         HDfree(writeBuf);
     }
     if (sid >= 0)
@@ -1512,8 +1528,13 @@ Java_hdf_hdf5lib_H5_H5Aget_1num_1attrs
 
     UNUSED(clss);
 
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    UNUSED(loc_id);
+    H5_UNIMPLEMENTED(ENVONLY, "H5Aget_num_attrs: not implemented");
+#else
     if ((retVal = H5Aget_num_attrs((hid_t)loc_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+#endif
 
 done:
     return (jint)retVal;
