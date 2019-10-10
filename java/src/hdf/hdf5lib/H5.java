@@ -2155,7 +2155,10 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library.
      * @exception NullPointerException
      *                - buf is null.
+     *
+     * @deprecated As of HDF5 1.12.0 in favor of H5Treclaim
      **/
+    @Deprecated
     public synchronized static native int H5Dvlen_reclaim(long type_id, long space_id, long xfer_plist_id, byte[] buf)
             throws HDF5LibraryException, NullPointerException;
 
@@ -3093,6 +3096,7 @@ public class H5 implements java.io.Serializable {
      *
      * @deprecated As of HDF5 1.10.5 in favor of H5Fis_accessible.
      **/
+    @Deprecated
     public synchronized static native boolean H5Fis_hdf5(String name) throws HDF5LibraryException, NullPointerException;
 
     /**
@@ -10311,6 +10315,28 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library.
      **/
     public synchronized static native int H5Tpack(long type_id) throws HDF5LibraryException;
+
+    /**
+     * H5Treclaim reclaims buffer used for VL data.
+     *
+     * @param type_id
+     *            Identifier of the datatype.
+     * @param space_id
+     *            Identifier of the dataspace.
+     * @param xfer_plist_id
+     *            Identifier of a transfer property list for this I/O operation.
+     * @param buf
+     *            Buffer with data to be reclaimed.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - buf is null.
+     **/
+    public synchronized static native int H5Treclaim(long type_id, long space_id, long xfer_plist_id, byte[] buf)
+            throws HDF5LibraryException, NullPointerException;
 
     /**
      * H5Tvlen_create creates a new variable-length (VL) dataype.
