@@ -278,6 +278,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5VL_loc_params_t   loc_params1;
     H5VL_object_t      *vol_obj2            = NULL;         /* Object token of dst_id */
     H5VL_loc_params_t   loc_params2;
+    H5VL_object_t       tmp_vol_obj;                    /* Temporary object token */
     herr_t              ret_value       = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -329,8 +330,12 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         if (vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
 
+    /* Construct a temporary source VOL object */
+    tmp_vol_obj.data = (vol_obj1 ? vol_obj1->data : NULL);
+    tmp_vol_obj.connector = (vol_obj1 ? vol_obj1->connector : vol_obj2->connector);
+
     /* Move the link */
-    if(H5VL_link_move(vol_obj1, &loc_params1, vol_obj2, &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_move(&tmp_vol_obj, &loc_params1, vol_obj2, &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
 
 done:
@@ -360,7 +365,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5VL_loc_params_t   loc_params1;
     H5VL_object_t      *vol_obj2            = NULL;         /* Object token of dst_id */
     H5VL_loc_params_t   loc_params2;
-    H5VL_object_t       tmp_vol_obj;                    /* Temporary object token of */
+    H5VL_object_t       tmp_vol_obj;                    /* Temporary object token */
     herr_t              ret_value       = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -377,14 +382,14 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
+    /* Check the link create property list */
+    if(H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, 
             ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id), TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
-
-    /* Check the link create property list */
-    if(H5P_DEFAULT == lcpl_id)
-        lcpl_id = H5P_LINK_CREATE_DEFAULT;
 
     /* Set location paramter for source object */
     loc_params1.type                            = H5VL_OBJECT_BY_NAME;
