@@ -1516,7 +1516,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
         if(verify_rtn((unsigned)__LINE__, hs_offset, val_rd, fillval) < 0) TEST_ERROR
 
         /* Release any VL components */
-        if(H5Dvlen_reclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
+        if(H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
@@ -1572,7 +1572,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
         if(verify_rtn((unsigned)__LINE__, hs_offset, val_rd, should_be) < 0) TEST_ERROR
 
         /* Release any VL components */
-        if(H5Dvlen_reclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
+        if(H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
@@ -1613,7 +1613,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
         if(verify_rtn((unsigned)__LINE__, hs_offset, val_rd, should_be) < 0) TEST_ERROR
 
         /* Release any VL components */
-        if(H5Dvlen_reclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
+        if(H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
@@ -1652,7 +1652,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
         if(verify_rtn((unsigned)__LINE__, hs_offset, val_rd, should_be) < 0) TEST_ERROR
 
         /* Release any VL components */
-        if(H5Dvlen_reclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
+        if(H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
@@ -1693,7 +1693,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
         if(verify_rtn((unsigned)__LINE__, hs_offset, val_rd, should_be) < 0) TEST_ERROR
 
         /* Release any VL components */
-        if(H5Dvlen_reclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
+        if(H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);
@@ -1739,7 +1739,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     if(H5Dwrite(dset, dtype, mspace, fspace, H5P_DEFAULT, fillval) < 0) TEST_ERROR
 
     /* Release any VL components */
-    if(H5Dvlen_reclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
+    if(H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
 
     /* Clear the read buffer */
     HDmemset(val_rd, 0, val_size);
@@ -1758,7 +1758,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     if(verify_rtn((unsigned)__LINE__, hs_offset, val_rd, fillval) < 0) TEST_ERROR
 
     /* Release any VL components */
-    if(H5Dvlen_reclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
+    if(H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
 
     /* Clear the read buffer */
     HDmemset(val_rd, 0, val_size);
@@ -1786,7 +1786,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
         if(verify_rtn((unsigned)__LINE__, hs_offset, val_rd, should_be) < 0) TEST_ERROR
 
         /* Release any VL components */
-        if(H5Dvlen_reclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
+        if(H5Treclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
 
         /* Clear the read buffer */
         HDmemset(val_rd, 0, val_size);

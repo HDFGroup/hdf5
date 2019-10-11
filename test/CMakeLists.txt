@@ -194,6 +194,7 @@ set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/tmeta.c
     ${HDF5_TEST_SOURCE_DIR}/tmisc.c
     ${HDF5_TEST_SOURCE_DIR}/trefer.c
+    ${HDF5_TEST_SOURCE_DIR}/trefer_deprec.c
     ${HDF5_TEST_SOURCE_DIR}/trefstr.c
     ${HDF5_TEST_SOURCE_DIR}/tselect.c
     ${HDF5_TEST_SOURCE_DIR}/tskiplist.c
@@ -250,6 +251,7 @@ set (H5_TESTS
     external
     external_env
     efc
+    objcopy_ref
     objcopy
     links
     unlink

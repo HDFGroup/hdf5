@@ -1086,6 +1086,57 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5I_is_file_object
+ *
+ * Purpose:     Convenience function to determine if an ID represents
+ *              a file object.
+ *
+ *              In H5O calls, you can't use object_verify to ensure
+ *              the ID was of the correct class since there's no
+ *              H5I_OBJECT ID class.
+ *
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5I_is_file_object(hid_t id)
+{
+    H5I_type_t  id_type     = H5I_get_type(id);
+    htri_t      ret_value   = FAIL;
+
+    FUNC_ENTER_NOAPI(FAIL);
+
+    /* Fail if the ID type is out of range */
+    if (id_type < 1 || id_type >= H5I_NTYPES)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID type out of range");
+
+    /* Return TRUE if the ID is a file object (dataset, group, map, or committed
+     * datatype), FALSE otherwise.
+     */
+    if (H5I_DATASET == id_type || H5I_GROUP == id_type || H5I_MAP == id_type) {
+        ret_value = TRUE;
+    }
+    else if (H5I_DATATYPE == id_type) {
+
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get underlying datatype struct");
+
+        ret_value = H5T_is_named(dt);
+    }
+    else {
+        ret_value = FALSE;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5I_is_file_object() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Iremove_verify
  *
  * Purpose:     Removes the specified ID from its type, first checking that the

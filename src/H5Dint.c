@@ -547,7 +547,7 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
     /* To use at least v18 format versions or not */
     use_at_least_v18 = (H5F_LOW_BOUND(file) >= H5F_LIBVER_V18);
 
-    /* Copy the datatype if it's a custom datatype or if it'll change when it's location is changed */
+    /* Copy the datatype if it's a custom datatype or if it'll change when its location is changed */
     if(!immutable || relocatable || use_at_least_v18) {
         /* Copy datatype for dataset */
         if((dset->shared->type = H5T_copy(type, H5T_COPY_ALL)) == NULL)
@@ -2539,50 +2539,6 @@ H5D__get_offset(const H5D_t *dset)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_offset() */
-
-
-/*-------------------------------------------------------------------------
- * Function: H5D_vlen_reclaim
- *
- * Purpose:  Frees the buffers allocated for storing variable-length data
- *           in memory.  Only frees the VL data in the selection defined in the
- *           dataspace.
- *
- * Return:   Non-negative on success, negative on failure
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D_vlen_reclaim(hid_t type_id, H5S_t *space, void *buf)
-{
-    H5T_t *type;                /* Datatype */
-    H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
-    H5T_vlen_alloc_info_t vl_alloc_info;   /* VL allocation info */
-    herr_t ret_value = FAIL;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Check args */
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
-    HDassert(space);
-    HDassert(buf);
-
-    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
-
-    /* Get the allocation info */
-    if(H5CX_get_vlen_alloc_info(&vl_alloc_info) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
-
-    /* Call H5S_select_iterate with args, etc. */
-    dset_op.op_type = H5S_SEL_ITER_OP_APP;
-    dset_op.u.app_op.op = H5T_vlen_reclaim;
-    dset_op.u.app_op.type_id = type_id;
-
-    ret_value = H5S_select_iterate(buf, type, space, &dset_op, &vl_alloc_info);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}   /* end H5D_vlen_reclaim() */
 
 
 /*-------------------------------------------------------------------------

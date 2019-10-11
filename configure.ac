@@ -943,7 +943,7 @@ fi
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
 
 ## ----------------------------------------------------------------------
-## Check if they would like to disable building tests 
+## Check if they would like to disable building tests
 ##
 
 ## This needs to be exposed for the library info file.

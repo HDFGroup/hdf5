@@ -696,10 +696,14 @@ unsigned FileAccPropList::getGcReferences() const
 ///             Valid values of \a libver_low are as follows:
 ///             \li \c H5F_LIBVER_EARLIEST   (Default)
 ///             \li \c H5F_LIBVER_18
+///             \li \c H5F_LIBVER_110
+///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_LATEST
 ///
 ///             Valid values of \a libver_high are as follows:
 ///             \li \c H5F_LIBVER_18
+///             \li \c H5F_LIBVER_110
+///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_LATEST   (Default)
 ///
 ///             For more detail, please refer to the H5Pset_libver_bounds API in
@@ -729,10 +733,14 @@ void FileAccPropList::setLibverBounds(H5F_libver_t libver_low, H5F_libver_t libv
 ///             values:
 ///             \li \c H5F_LIBVER_EARLIEST
 ///             \li \c H5F_LIBVER_18
+///             \li \c H5F_LIBVER_110
+///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_LATEST
 ///
 ///             and \a libver_high:
 ///             \li \c H5F_LIBVER_18
+///             \li \c H5F_LIBVER_110
+///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_LATEST
 // Programmer   Binh-Minh Ribler - March, 2015
 //--------------------------------------------------------------------------

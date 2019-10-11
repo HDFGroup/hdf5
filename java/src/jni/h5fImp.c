@@ -156,15 +156,17 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Fis_1hdf5
     (JNIEnv *env, jclass clss, jstring name)
 {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     const char *fileName = NULL;
+#endif
     htri_t      bval = JNI_FALSE;
 
     UNUSED(clss);
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
+    UNUSED(name);
     H5_UNIMPLEMENTED(ENVONLY, "H5Fis_hdf5: not implemented");
-#endif
-
+#else
     if (NULL == name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Fis_hdf5: file name is NULL");
 
@@ -174,10 +176,13 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
         H5_LIBRARY_ERROR(ENVONLY);
 
     bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
+#endif
 
 done:
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     if (fileName)
         UNPIN_JAVA_STRING(ENVONLY, name, fileName);
+#endif
 
     return (jboolean)bval;
 } /* end Java_hdf_hdf5lib_H5_H5Fis_1hdf5 */

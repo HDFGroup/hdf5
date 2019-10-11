@@ -220,11 +220,7 @@ h5repack_addlayout(const char *str, pack_opt_t *options)
  *-------------------------------------------------------------------------
  */
 hid_t
-copy_named_datatype(hid_t          type_in,
-                    hid_t          fidout,
-                    named_dt_t   **named_dt_head_p,
-                    trav_table_t  *travt,
-                    pack_opt_t    *options)
+copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, trav_table_t *travt, pack_opt_t *options)
 {
     named_dt_t *dt = *named_dt_head_p; /* Stack pointer */
     named_dt_t *dt_ret = NULL;         /* Datatype to return */
@@ -248,8 +244,7 @@ copy_named_datatype(hid_t          type_in,
             if (travt->objs[i].type == H5TRAV_TYPE_NAMED_DATATYPE) {
                 /* Push onto the stack */
                 if (NULL == (dt = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                            "buffer allocation failed failed");
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "buffer allocation failed failed");
                 dt->next = *named_dt_head_p;
                 *named_dt_head_p = dt;
 
@@ -289,8 +284,7 @@ copy_named_datatype(hid_t          type_in,
         else
             dt_ret->id_out = H5Tcopy(type_in);
         if (dt_ret->id_out < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                    "H5Tget_native_type-H5Tcopy failed");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type-H5Tcopy failed");
         if (H5Tcommit_anon(fidout, dt_ret->id_out, H5P_DEFAULT, H5P_DEFAULT) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tcommit_anon failed");
     } /* end if named datatype not yet in output file */
@@ -347,12 +341,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-copy_attr(
-        hid_t          loc_in,
-        hid_t          loc_out,
-        named_dt_t   **named_dt_head_p,
-        trav_table_t  *travt,
-        pack_opt_t    *options)
+copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_t *travt, pack_opt_t *options)
 {
     int         ret_value = 0;
     hid_t       attr_id = -1;  /* attr ID */
@@ -382,13 +371,13 @@ copy_attr(
      */
     for (u = 0; u < (unsigned) oinfo.num_attrs; u++) {
         /* open attribute */
-        attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t) u, H5P_DEFAULT, H5P_DEFAULT);
-        if (attr_id < 0)
+        if ((attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t) u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aopen_by_idx failed");
 
         if (H5Aget_name(attr_id, (size_t) 255, name) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
 
+        /* get the file datatype  */
         if ((ftype_id = H5Aget_type(attr_id)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aget_type failed");
 
@@ -405,8 +394,7 @@ copy_attr(
             /* Copy named dt */
             if ((wtype_id = copy_named_datatype(ftype_id, fidout, named_dt_head_p, travt, options)) < 0) {
                 H5Fclose(fidout);
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                        "copy_named_datatype failed");
+                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "copy_named_datatype failed");
             }
 
             if (H5Fclose(fidout) < 0)
@@ -425,8 +413,7 @@ copy_attr(
 
         /* get dimensions  */
         if ((rank = H5Sget_simple_extent_dims(space_id, dims, NULL)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                    "H5Sget_simple_extent_dims failed");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
 
         nelmts = 1;
         for (j = 0; j < rank; j++)
@@ -499,7 +486,7 @@ copy_attr(
             /* Check if we have VL data and string in the attribute's  datatype that must
              * be reclaimed */
             if (TRUE == h5tools_detect_vlen(wtype_id))
-                H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
+                H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
             HDfree(buf);
             buf = NULL;
         } /*H5T_REFERENCE*/
@@ -532,7 +519,9 @@ done:
              * datatype that must be reclaimed
              */
             if (TRUE == h5tools_detect_vlen(wtype_id))
-                H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
+                H5Treclaim(wtype_id, space_id, H5P_DEFAULT, buf);
+
+            /* Free buf */
             HDfree(buf);
         }
 
@@ -622,8 +611,7 @@ check_options(pack_opt_t *options)
     } /* end for each object in options */
 
     if (options->all_layout == 1 && has_ck)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-            "invalid chunking input: 'all' option is present with other objects");
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid chunking input: 'all' option is present with other objects");
 
     /*-------------------------------------------------------------------------
      * Objects to filter
@@ -669,14 +657,10 @@ check_options(pack_opt_t *options)
             if (options->verbose) {
                 if (pack.filter[j].filtn >= 0) {
                     if (pack.filter[j].filtn > H5Z_FILTER_SCALEOFFSET) {
-                        HDprintf(" <%s> with %s filter %d\n", name,
-                                get_sfilter(pack.filter[j].filtn),
-                                pack.filter[j].filtn);
+                        HDprintf(" <%s> with %s filter %d\n", name, get_sfilter(pack.filter[j].filtn), pack.filter[j].filtn);
                     }
                     else {
-                        HDprintf(" <%s> with %s filter\n",
-                                name,
-                                get_sfilter(pack.filter[j].filtn));
+                        HDprintf(" <%s> with %s filter\n", name, get_sfilter(pack.filter[j].filtn));
                     }
                 }
             }
@@ -685,9 +669,7 @@ check_options(pack_opt_t *options)
     } /* end for each object in options table */
 
     if (options->all_filter == 1 && has_cp)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                "invalid compression input: 'all' option is present with " \
-                "other objects");
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid compression input: 'all' option is present with other objects");
 
     /*-------------------------------------------------------------------------
      * Check options for the latest format
@@ -695,18 +677,14 @@ check_options(pack_opt_t *options)
      */
 
     if (options->grp_compact < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                "invalid maximum number of links to store as header messages");
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid maximum number of links to store as header messages");
     if (options->grp_indexed < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                "invalid minimum number of links to store in indexed format");
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid minimum number of links to store in the indexed format");
     if (options->grp_indexed > options->grp_compact)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                "minimum indexed size is greater than maximum compact size");
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "minimum indexed size is greater than the maximum compact size");
     for (i = 0; i < 8; i++)
         if (options->msg_size[i] < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                "invalid shared message size");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid shared message size");
 
     /*------------------------------------------------------------------------
      * Verify new user userblock options; file name must be present
@@ -720,8 +698,7 @@ check_options(pack_opt_t *options)
     }
 
     if (options->ublock_filename == NULL && options->ublock_size != 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                "file name missing for user block", options->ublock_filename);
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file name missing for user block", options->ublock_filename);
 
     /*------------------------------------------------------------------------
      * Verify alignment options; threshold is zero default but alignment not
@@ -729,8 +706,7 @@ check_options(pack_opt_t *options)
      */
 
     if (options->alignment == 0 && options->threshold != 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                "alignment for H5Pset_alignment missing");
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "alignment for H5Pset_alignment missing");
 
 done:
     return ret_value;
@@ -765,8 +741,7 @@ check_objects(const char* fname, pack_opt_t *options)
      *-------------------------------------------------------------------------
      */
     if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                "h5tools_fopen failed <%s>: %s", fname, H5FOPENERROR);
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_fopen failed <%s>: %s", fname, H5FOPENERROR);
 
     /*-------------------------------------------------------------------------
      * get the list of objects in the file
@@ -775,6 +750,7 @@ check_objects(const char* fname, pack_opt_t *options)
 
     /* Initialize indexing options */
     h5trav_set_index(sort_by, sort_order);
+    /* init table */
     trav_table_init(&travt);
 
     /* get the list of objects in the file */
@@ -798,8 +774,7 @@ check_objects(const char* fname, pack_opt_t *options)
 
         /* the input object names are present in the file and are valid */
         if (h5trav_getindext(name, travt) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                    "%s Could not find <%s> in file <%s>. Exiting...\n",
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "%s Could not find <%s> in file <%s>. Exiting...\n",
                     (options->verbose ? "\n" : ""), name, fname);
         if (options->verbose)
             HDprintf("...Found\n");
@@ -825,27 +800,21 @@ check_objects(const char* fname, pack_opt_t *options)
                     }
                     else {
                         if ((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
-                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                                    "H5Dopen2 failed");
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
                         if ((sid = H5Dget_space(did)) < 0)
-                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                                    "H5Dget_space failed");
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
                         if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
-                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                                    "H5Sget_simple_extent_ndims failed");
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
                         HDmemset(dims, 0, sizeof dims);
                         if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
-                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                                    "H5Sget_simple_extent_dims failed");
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
                         for (j = 0; j < rank; j++)
                             csize *= dims[j];
                         if (H5Sclose(sid) < 0)
-                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                                    "H5Sclose failed");
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
                         if (H5Dclose(did) < 0)
-                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g,
-                                    "H5Dclose failed");
-                    } /* end else (chunk rank is 0) */
+                            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+                    }
 
                     if (csize < ppb) {
                         HDprintf(" <warning: SZIP settings, chunk size is smaller than pixels per block>\n");

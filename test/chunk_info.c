@@ -786,7 +786,7 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, NULL)) < 0)
         TEST_ERROR
@@ -840,7 +840,7 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     /* Get and verify info of the first and only chunk */
     if(verify_get_chunk_info(dset, H5S_ALL, 0, SINGLE_CHK_SIZE, offset, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification H5Dget_chunk_info failed\n");
- 
+
     /* Get and verify info of the chunk at logical coordinates (0,0) */
     if(verify_get_chunk_info_by_coord(dset, offset, SINGLE_CHK_SIZE, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
@@ -912,7 +912,7 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, NULL)) < 0)
         TEST_ERROR
@@ -984,7 +984,7 @@ error:
     H5_FAILED();
     return FAIL;
 } /* test_chunk_info_implicit() */
-        
+
 /*-------------------------------------------------------------------------
  * Function:    test_chunk_info_fixed_array
  *
@@ -1029,7 +1029,7 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, NULL)) < 0)
         TEST_ERROR
@@ -1115,7 +1115,7 @@ error:
     H5_FAILED();
     return FAIL;
 } /* test_chunk_info_fixed_array() */
-        
+
 /*-------------------------------------------------------------------------
  * Function:    test_chunk_info_extensible_array
  *
@@ -1161,7 +1161,7 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
         TEST_ERROR
@@ -1298,7 +1298,7 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
         TEST_ERROR
@@ -1475,7 +1475,7 @@ test_basic_query(hid_t fapl)
     /* Get and verify info of the first and only chunk */
     if(verify_get_chunk_info(dset, H5S_ALL, 0, CHK_SIZE, offset, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification H5Dget_chunk_info failed\n");
- 
+
     /* Get and verify info of the chunk at the offset (CHUNK_NX,CHUNK_NY) */
     if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
@@ -1504,7 +1504,7 @@ test_basic_query(hid_t fapl)
        offset should be (0,0) */
     if(verify_get_chunk_info(dset, H5S_ALL, 0, CHK_SIZE, offset, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification H5Dget_chunk_info failed\n");
- 
+
     /* Get and verify info of the chunk at the offset (0,0) */
     if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
@@ -1515,12 +1515,12 @@ test_basic_query(hid_t fapl)
     offset[1] = CHUNK_NY;
     if(verify_get_chunk_info(dset, H5S_ALL, 1, CHK_SIZE, offset, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification H5Dget_chunk_info failed\n");
- 
+
     /* Get and verify info of the chunk at the offset (CHUNK_NX, CHUNK_NY) */
     if(verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
 
-    /* Get and verify info of an empty chunk, at offset 
+    /* Get and verify info of an empty chunk, at offset
        (2*CHUNK_NX, 2*CHUNK_NY) */
     offset[0] = 2*CHUNK_NX;
     offset[1] = 2*CHUNK_NY;
@@ -1591,7 +1591,7 @@ test_failed_attempts(const char *filename, hid_t fapl)
     /* Open the file for reading/writing */
     if((chunkfile = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR
- 
+
     /* Create dataspace */
     if((dspace = H5Screate_simple(RANK, dims, NULL)) < 0)
         TEST_ERROR

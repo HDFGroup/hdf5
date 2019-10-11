@@ -500,12 +500,12 @@ __add_external_files(
 static int
 test_multiple_files(hid_t file)
 {
-    hid_t        dcpl = -1;           /* dataset creation properties          */
-    hid_t        space = -1;          /* dataspace                            */
-    hid_t        dset = -1;           /* dataset                              */
-    hsize_t      cur_size[1] = {100}; /* data space current size              */
-    hsize_t      max_size[1] = {100}; /* data space maximum size              */
-    hsize_t      max_ext_size;        /* maximum size of external files       */
+    hid_t        dcpl = -1;           /* dataset creation properties         */
+    hid_t        space = -1;          /* dataspace                           */
+    hid_t        dset = -1;           /* dataset                             */
+    hsize_t      cur_size[1] = {100}; /* data space current size             */
+    hsize_t      max_size[1] = {100}; /* data space maximum size             */
+    hsize_t      max_ext_size;        /* maximum size of external files      */
     unsigned int n_external_files = 4;
 
     TESTING("multiple external files");
