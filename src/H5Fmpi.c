@@ -38,6 +38,8 @@
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 
 /****************/
 /* Local Macros */
@@ -234,6 +236,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_set_mpi_atomicity
+ *
+ * Purpose:     Private call to set the atomicity mode
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_mpi_atomicity(H5F_t *file, hbool_t flag)
+{
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL);
+
+    /* Check args */
+    HDassert(file);
+
+    /* Check VFD */
+    if (!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect VFL driver, does not support MPI atomicity mode");
+
+    /* Set atomicity value */
+    if (H5FD_set_mpio_atomicity(file->shared->lf, flag) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set atomicity flag");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5F_set_mpi_atomicity() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Fset_mpi_atomicity
  *
  * Purpose:     Sets the atomicity mode
@@ -249,27 +283,57 @@ done:
 herr_t
 H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
 {
-    H5F_t       *file;
-    herr_t       ret_value = SUCCEED;
+    H5VL_object_t   *vol_obj = NULL;
+    int va_flag = (int)flag;    /* C is grumpy about passing hbool_t via va_arg */
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL);
     H5TRACE2("e", "ib", file_id, flag);
 
+    /* Get the file object */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
+
+    /* Set atomicity value */
+    if (H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_SET_MPI_ATOMICITY, va_flag) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set MPI atomicity");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5Fset_mpi_atomicity() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_mpi_atomicity
+ *
+ * Purpose:     Private call to get the atomicity mode
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_mpi_atomicity(H5F_t *file, hbool_t *flag)
+{
+    herr_t     ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL);
+
     /* Check args */
-    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    HDassert(file);
+    HDassert(flag);
 
     /* Check VFD */
     if (!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect VFL driver, does not support MPI atomicity mode");
 
-    /* set atomicity value */
-    if (H5FD_set_mpio_atomicity (file->shared->lf, flag) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set atomicity flag")
+    /* Get atomicity value */
+    if (H5FD_get_mpio_atomicity(file->shared->lf, flag) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get atomicity flag");
 
 done:
-    FUNC_LEAVE_API(ret_value)
-}
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5F_get_mpi_atomicity() */
 
 
 /*-------------------------------------------------------------------------
@@ -288,27 +352,23 @@ done:
 herr_t
 H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag)
 {
-    H5F_t      *file;
-    herr_t     ret_value = SUCCEED;
+    H5VL_object_t   *vol_obj = NULL;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL);
     H5TRACE2("e", "i*b", file_id, flag);
 
-    /* Check args */
-    if(NULL == (file = (H5F_t *)H5VL_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    /* Get the file object */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
-    /* Check VFD */
-    if(!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect VFL driver, does not support MPI atomicity mode")
-
-    /* get atomicity value */
-    if (H5FD_get_mpio_atomicity (file->shared->lf, flag) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get atomicity flag")
+    /* Get atomicity value */
+    if (H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_MPI_ATOMICITY, flag) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get MPI atomicity");
 
 done:
-    FUNC_LEAVE_API(ret_value)
-}
+    FUNC_LEAVE_API(ret_value);
+} /* end H5Fget_mpi_atomicity() */
 
 
 /*-------------------------------------------------------------------------

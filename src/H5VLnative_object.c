@@ -454,6 +454,40 @@ H5VL__native_object_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
+        /* H5Odisable_mdc_flushes */
+        case H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES:
+            {
+                H5O_loc_t  *oloc = loc.oloc;
+
+                if (H5O_disable_mdc_flushes(oloc) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCORK, FAIL, "unable to cork the metadata cache");
+
+                break;
+            }
+
+        /* H5Oenable_mdc_flushes */
+        case H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES:
+            {
+                H5O_loc_t  *oloc = loc.oloc;
+
+                if (H5O_enable_mdc_flushes(oloc) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTUNCORK, FAIL, "unable to uncork the metadata cache");
+
+                break;
+            }
+
+        /* H5Oare_mdc_flushes_disabled */
+        case H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED:
+            {
+                H5O_loc_t  *oloc = loc.oloc;
+                hbool_t *are_disabled = (hbool_t *)HDva_arg(arguments, hbool_t *);
+
+                if (H5O_are_mdc_flushes_disabled(oloc, are_disabled) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine metadata cache cork status");
+
+                break;
+            }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this operation on object");       
     } /* end switch */
