@@ -71,8 +71,14 @@ H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_typ
 
         case H5VL_OBJECT_BY_TOKEN:
             {
+                const uint8_t *p = (const uint8_t *)loc_params->loc_data.loc_by_token.token;
+                haddr_t addr;
+
+                /* Decode token */
+                H5F_addr_decode(loc.oloc->file, &p, &addr);
+
                 /* Open the object */
-                if(NULL == (ret_value = H5O_open_by_addr(&loc, *(haddr_t *)loc_params->loc_data.loc_by_token.token, opened_type)))
+                if(NULL == (ret_value = H5O_open_by_addr(&loc, addr, opened_type)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object by address")
                 break;
             }
@@ -158,11 +164,13 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                 } /* end if */
                 else if(loc_params->type == H5VL_OBJECT_BY_TOKEN) {
                     H5O_loc_t obj_oloc; /* Object location */
+                    const uint8_t *p = (const uint8_t *)loc_params->loc_data.loc_by_token.token;
 
                     /* Initialize the object location */
                     H5O_loc_reset(&obj_oloc);
                     obj_oloc.file = loc.oloc->file;
-                    obj_oloc.addr = *(haddr_t *)loc_params->loc_data.loc_by_token.token;
+                    /* Decode token */
+                    H5F_addr_decode(obj_oloc.file, &p, &obj_oloc.addr);
 
                     /* Retrieve object's name */
                     if((*ret = H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, name, size)) < 0)
@@ -181,11 +189,13 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                 if(loc_params->type == H5VL_OBJECT_BY_TOKEN) {
                     H5O_loc_t obj_oloc; /* Object location */
                     unsigned rc;        /* Reference count of object */
+                    const uint8_t *p = (const uint8_t *)loc_params->loc_data.loc_by_token.token;
 
                     /* Initialize the object location */
                     H5O_loc_reset(&obj_oloc);
                     obj_oloc.file = loc.oloc->file;
-                    obj_oloc.addr = *(haddr_t *)loc_params->loc_data.loc_by_token.token;
+                    /* Decode token */
+                    H5F_addr_decode(obj_oloc.file, &p, &obj_oloc.addr);
 
                     /* Get the # of links for object, and its type */
                     /* (To check to make certain that this object hasn't been deleted) */
@@ -265,6 +275,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
                     H5G_loc_t obj_loc;      /* Group hier. location of object */
                     H5G_name_t obj_path;    /* Object group hier. path */
                     H5O_loc_t obj_oloc;     /* Object object location */
+                    uint8_t *p = (uint8_t *)token; /* Pointer to token */
 
                     /* Set up opened group location to fill in */
                     obj_loc.oloc = &obj_oloc;
@@ -274,7 +285,9 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5V
                     /* Find the object */
                     if(H5G_loc_find(&loc, loc_params->loc_data.loc_by_name.name, &obj_loc) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
-                    *(haddr_t *)token = obj_loc.oloc->addr;
+
+                    /* Encode token */
+                    H5F_addr_encode(obj_oloc.file, &p, obj_loc.oloc->addr);
 
                     /* Release the object location */
                     if(H5G_loc_free(&obj_loc) < 0)

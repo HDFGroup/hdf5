@@ -1461,48 +1461,53 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5R__decode_addr_compat
+ * Function:    H5R__decode_token_compat
  *
- * Purpose: Decode an object address. (native only)
+ * Purpose: Decode an object token. (native only)
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R__decode_addr_compat(hid_t id, H5I_type_t type, H5R_type_t ref_type,
-    const unsigned char *buf, haddr_t *addr_ptr)
+H5R__decode_token_compat(hid_t id, H5I_type_t type, H5R_type_t ref_type,
+    const unsigned char *buf, H5VL_token_t *obj_token)
 {
     hid_t file_id = H5I_INVALID_HID;    /* File ID for region reference */
+    void *vol_obj_file = NULL;
+    H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
+
+    /* Get the file for the object */
+    if((file_id = H5F_get_file_id(id, type, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+    /* Retrieve VOL object */
+    if(NULL == (vol_obj_file = H5VL_vol_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Get container info */
+    if(H5VL_file_get(vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &cont_info) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get container info")
 
     if(ref_type == H5R_OBJECT1) {
         size_t buf_size = H5R_OBJ_REF_BUF_SIZE;
 
         /* Get object address */
-        if(H5R__decode_addr_obj_compat(buf, &buf_size, addr_ptr) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object address")
+        if(H5R__decode_token_obj_compat(buf, &buf_size, obj_token, cont_info.token_size) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object token")
     } else {
-        void *vol_obj_file = NULL;
-        H5F_t *f = NULL;
         size_t buf_size = H5R_DSET_REG_REF_BUF_SIZE;
-
-        /* Get the file for the object */
-        if((file_id = H5F_get_file_id(id, type, FALSE)) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-        /* Retrieve VOL object */
-        if(NULL == (vol_obj_file = H5VL_vol_object(file_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        H5F_t *f = NULL;
 
         /* Retrieve file from VOL object */
         if(NULL == (f = (H5F_t *)H5VL_object_data(vol_obj_file)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL object")
 
         /* Get object address */
-        if(H5R__decode_addr_region_compat(f, buf, &buf_size, addr_ptr, NULL) < 0)
+        if(H5R__decode_token_region_compat(f, buf, &buf_size, obj_token, cont_info.token_size, NULL) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object address")
     }
 
@@ -1510,48 +1515,52 @@ done:
     if(file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
         HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file")
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5R__decode_token_compat() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5R__encode_addr_obj_compat
+ * Function:    H5R__encode_token_obj_compat
  *
- * Purpose: Encode an object address. (native only)
+ * Purpose: Encode an object token. (native only)
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R__encode_addr_obj_compat(haddr_t addr, unsigned char *buf, size_t *nalloc)
+H5R__encode_token_obj_compat(const H5VL_token_t *obj_token, size_t token_size,
+    unsigned char *buf, size_t *nalloc)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
+    HDassert(obj_token);
+    HDassert(token_size);
     HDassert(nalloc);
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
-    if(buf && *nalloc >= sizeof(addr))
-        H5MM_memcpy(buf, &addr, sizeof(addr));
-    *nalloc = sizeof(addr);
+    if(buf && *nalloc >= token_size)
+        H5MM_memcpy(buf, obj_token, token_size);
+
+    *nalloc = token_size;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5R__encode_addr_obj_compat() */
+} /* end H5R__encode_token_obj_compat() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5R__decode_addr_obj_compat
+ * Function:    H5R__decode_token_obj_compat
  *
- * Purpose: Decode an object address. (native only)
+ * Purpose: Decode an object token. (native only)
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R__decode_addr_obj_compat(const unsigned char *buf, size_t *nbytes,
-    haddr_t *addr_ptr)
+H5R__decode_token_obj_compat(const unsigned char *buf, size_t *nbytes,
+    H5VL_token_t *obj_token, size_t token_size)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1559,23 +1568,24 @@ H5R__decode_addr_obj_compat(const unsigned char *buf, size_t *nbytes,
 
     HDassert(buf);
     HDassert(nbytes);
-    HDassert(addr_ptr);
+    HDassert(obj_token);
+    HDassert(token_size);
 
     /* Don't decode if buffer size isn't big enough */
-    if(*nbytes < sizeof(*addr_ptr))
+    if(*nbytes < token_size)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
 
-    H5MM_memcpy(addr_ptr, buf, sizeof(*addr_ptr));
+    H5MM_memcpy(obj_token, buf, token_size);
 
-    *nbytes = sizeof(*addr_ptr);
+    *nbytes = token_size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5R__decode_addr_obj_compat() */
+} /* H5R__decode_token_obj_compat() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5R__encode_addr_region_compat
+ * Function:    H5R__encode_token_region_compat
  *
  * Purpose: Encode dataset selection and insert data into heap (native only).
  *
@@ -1584,8 +1594,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R__encode_addr_region_compat(H5F_t *f, haddr_t obj_addr, H5S_t *space,
-    unsigned char *buf, size_t *nalloc)
+H5R__encode_token_region_compat(H5F_t *f, const H5VL_token_t *obj_token,
+    size_t token_size, H5S_t *space, unsigned char *buf, size_t *nalloc)
 {
     size_t buf_size;
     unsigned char *data = NULL;
@@ -1594,6 +1604,8 @@ H5R__encode_addr_region_compat(H5F_t *f, haddr_t obj_addr, H5S_t *space,
     FUNC_ENTER_PACKAGE
 
     HDassert(f);
+    HDassert(obj_token);
+    HDassert(token_size);
     HDassert(space);
     HDassert(nalloc);
 
@@ -1618,8 +1630,8 @@ H5R__encode_addr_region_compat(H5F_t *f, haddr_t obj_addr, H5S_t *space,
         if((data_size = H5S_SELECT_SERIAL_SIZE(space)) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "Invalid amount of space for serializing selection")
 
-        /* Increase buffer size to allow for the dataset OID */
-        data_size += (hssize_t)sizeof(haddr_t);
+        /* Increase buffer size to allow for the dataset token */
+        data_size += (hssize_t)token_size;
 
         /* Allocate the space to store the serialized information */
         H5_CHECK_OVERFLOW(data_size, hssize_t, size_t);
@@ -1628,7 +1640,8 @@ H5R__encode_addr_region_compat(H5F_t *f, haddr_t obj_addr, H5S_t *space,
 
         /* Serialize information for dataset OID into heap buffer */
         p = (uint8_t *)data;
-        H5F_addr_encode(f, &p, obj_addr);
+        H5MM_memcpy(p, obj_token, token_size);
+        p += token_size;
 
         /* Serialize the selection into heap buffer */
         if(H5S_SELECT_SERIALIZE(space, &p) < 0)
@@ -1643,11 +1656,11 @@ H5R__encode_addr_region_compat(H5F_t *f, haddr_t obj_addr, H5S_t *space,
 done:
     H5MM_free(data);
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5R__encode_addr_region_compat() */
+} /* H5R__encode_token_region_compat() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5R__decode_obj_addr_compat
+ * Function:    H5R__decode_token_region_compat
  *
  * Purpose: Decode dataset selection from data inserted into heap (native only).
  *
@@ -1656,12 +1669,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R__decode_addr_region_compat(H5F_t *f, const unsigned char *buf,
-    size_t *nbytes, haddr_t *obj_addr_ptr, H5S_t **space_ptr)
+H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf,
+    size_t *nbytes, H5VL_token_t *obj_token, size_t token_size,
+    H5S_t **space_ptr)
 {
     unsigned char *data = NULL;
+    H5VL_token_t token = { 0 };
     size_t data_size;
-    haddr_t obj_addr;
     const uint8_t *p;
     herr_t ret_value = SUCCEED;
 
@@ -1670,6 +1684,7 @@ H5R__decode_addr_region_compat(H5F_t *f, const unsigned char *buf,
     HDassert(f);
     HDassert(buf);
     HDassert(nbytes);
+    HDassert(token_size);
 
     /* Read from heap */
     if(H5R__decode_heap(f, buf, nbytes, &data, &data_size) < 0)
@@ -1677,18 +1692,18 @@ H5R__decode_addr_region_compat(H5F_t *f, const unsigned char *buf,
 
     /* Get object address */
     p = (const uint8_t *)data;
-    H5F_addr_decode(f, &p, &obj_addr);
-    if(!H5F_addr_defined(obj_addr) || obj_addr == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Undefined reference pointer")
+    H5MM_memcpy(token, p, token_size);
+    p += token_size;
 
     if(space_ptr) {
         H5O_loc_t oloc; /* Object location */
         H5S_t *space = NULL;
+        const uint8_t *q = token;
 
         /* Initialize the object location */
         H5O_loc_reset(&oloc);
         oloc.file = f;
-        oloc.addr = obj_addr;
+        H5F_addr_decode(f, &q, &oloc.addr);
 
         /* Open and copy the dataset's dataspace */
         if(NULL == (space = H5S_read(&oloc)))
@@ -1700,10 +1715,10 @@ H5R__decode_addr_region_compat(H5F_t *f, const unsigned char *buf,
 
         *space_ptr = space;
     }
-    if(obj_addr_ptr)
-        *obj_addr_ptr = obj_addr;
+    if(obj_token)
+        H5MM_memcpy(obj_token, token, token_size);
 
 done:
     H5MM_free(data);
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5R__decode_addr_region_compat() */
+} /* end H5R__decode_token_region_compat() */
