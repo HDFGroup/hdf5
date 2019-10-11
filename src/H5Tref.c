@@ -44,7 +44,7 @@
 
 /* For region compatibility support */
 struct H5Tref_dsetreg {
-    haddr_t obj_addr;   /* Object address */
+    H5VL_token_t token; /* Object token */
     H5S_t *space;       /* Dataspace */
 };
 
@@ -388,14 +388,17 @@ H5T__ref_mem_write(H5F_t *src_f, const void *src_buf, size_t src_size,
 
     switch(src_type) {
         case H5R_OBJECT1: {
-            if(H5R__create_object((const H5VL_token_t *)src_buf, sizeof(haddr_t), dst_ref) < 0)
+            size_t token_size = H5F_SIZEOF_ADDR(src_f);
+
+            if(H5R__create_object((const H5VL_token_t *)src_buf, token_size, dst_ref) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create object reference")
         }
             break;
         case H5R_DATASET_REGION1: {
             const struct H5Tref_dsetreg *src_reg = (const struct H5Tref_dsetreg *)src_buf;
+            size_t token_size = H5F_SIZEOF_ADDR(src_f);
 
-            if(H5R__create_region((const H5VL_token_t *)&src_reg->obj_addr, sizeof(src_reg->obj_addr), src_reg->space, dst_ref) < 0)
+            if(H5R__create_region(&src_reg->token, token_size, src_reg->space, dst_ref) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create region reference")
             /* create_region creates its internal copy of the space */
             if(H5S_close(src_reg->space) < 0)
@@ -626,16 +629,19 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5T__ref_obj_disk_getsize(H5F_t H5_ATTR_UNUSED *src_f,
-    const void H5_ATTR_UNUSED *src_buf, size_t H5_ATTR_UNUSED src_size,
-    H5F_t H5_ATTR_UNUSED *dst_f, hbool_t H5_ATTR_UNUSED *dst_copy)
+H5T__ref_obj_disk_getsize(H5F_t *src_f, const void H5_ATTR_UNUSED *src_buf,
+    size_t H5_ATTR_UNUSED src_size, H5F_t H5_ATTR_UNUSED *dst_f,
+    hbool_t H5_ATTR_UNUSED *dst_copy)
 {
-    size_t ret_value = sizeof(haddr_t);
+    size_t ret_value = 0;
 
     FUNC_ENTER_STATIC_NOERR
 
+    HDassert(src_f);
     HDassert(src_buf);
     HDassert(src_size == H5T_REF_OBJ_DISK_SIZE(src_f));
+
+    ret_value = H5T_REF_OBJ_DISK_SIZE(src_f);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T__ref_obj_disk_getsize() */
@@ -651,9 +657,8 @@ H5T__ref_obj_disk_getsize(H5F_t H5_ATTR_UNUSED *src_f,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__ref_obj_disk_read(H5F_t H5_ATTR_UNUSED *src_f, const void *src_buf,
-    size_t src_size, H5F_t H5_ATTR_UNUSED *dst_f, void *dst_buf,
-    size_t H5_ATTR_UNUSED dst_size)
+H5T__ref_obj_disk_read(H5F_t *src_f, const void *src_buf, size_t src_size,
+    H5F_t H5_ATTR_UNUSED *dst_f, void *dst_buf, size_t H5_ATTR_UNUSED dst_size)
 {
     herr_t ret_value = SUCCEED;
 
@@ -663,11 +668,12 @@ H5T__ref_obj_disk_read(H5F_t H5_ATTR_UNUSED *src_f, const void *src_buf,
     HDassert(src_buf);
     HDassert(src_size == H5T_REF_OBJ_DISK_SIZE(src_f));
     HDassert(dst_buf);
-    HDassert(dst_size == sizeof(haddr_t));
+    HDassert(dst_size == H5F_SIZEOF_ADDR(src_f));
 
     /* Get object address */
-    if(H5R__decode_addr_obj_compat((const unsigned char *)src_buf, &src_size, (haddr_t *)dst_buf) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, H5I_INVALID_HID, "unable to get object address")
+    if(H5R__decode_token_obj_compat((const unsigned char *)src_buf, &src_size,
+        dst_buf, H5F_SIZEOF_ADDR(src_f)) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object address")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -724,7 +730,8 @@ H5T__ref_dsetreg_disk_read(H5F_t *src_f, const void *src_buf, size_t src_size,
     HDassert(dst_size == sizeof(struct H5Tref_dsetreg));
 
     /* Retrieve object address and space */
-    if(H5R__decode_addr_region_compat(src_f, (const unsigned char *)src_buf, &src_size, &dst_reg->obj_addr, &dst_reg->space) < 0)
+    if(H5R__decode_token_region_compat(src_f, (const unsigned char *)src_buf,
+        &src_size, &dst_reg->token, H5F_SIZEOF_ADDR(src_f), &dst_reg->space) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object address")
 
 done:

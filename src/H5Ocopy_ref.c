@@ -165,6 +165,7 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
     const unsigned char zeros[H5R_OBJ_REF_BUF_SIZE] = { 0 };
     size_t buf_size = H5R_OBJ_REF_BUF_SIZE;
     size_t i; /* Local index variable */
+    size_t token_size = H5F_SIZEOF_ADDR(src_oloc->file);
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -173,6 +174,8 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
     for(i = 0; i < ref_count; i++) {
         const unsigned char *src_buf = (const unsigned char *)&src_ref[i];
         unsigned char *dst_buf = (unsigned char *)&dst_ref[i];
+        H5VL_token_t tmp_token = { 0 };
+        uint8_t *p;
 
         /* If data is not initialized, copy zeros and skip */
         if(0 == HDmemcmp(src_buf, zeros, buf_size)) {
@@ -181,8 +184,10 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
         }
 
         /* Set up for the object copy for the reference */
-        if(H5R__decode_addr_obj_compat(src_buf, &buf_size, &src_oloc->addr) < 0)
+        if(H5R__decode_token_obj_compat(src_buf, &buf_size, &tmp_token, token_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode src object address")
+        p = tmp_token;
+        H5F_addr_decode(src_oloc->file, (const uint8_t **)&p, &src_oloc->addr);
         if(!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
         dst_oloc->addr = HADDR_UNDEF;
@@ -192,7 +197,9 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
         /* Set the object reference info for the destination file */
-        if(H5R__encode_addr_obj_compat(dst_oloc->addr, dst_buf, &buf_size) < 0)
+        p = tmp_token;
+        H5F_addr_encode(dst_oloc->file, &p, dst_oloc->addr);
+        if(H5R__encode_token_obj_compat((const H5VL_token_t *)&tmp_token, token_size, dst_buf, &buf_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to encode dst object address")
     } /* end for */
 
@@ -306,6 +313,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, H5T_t *dt_src,
     void *reclaim_buf = NULL;               /* Buffer for reclaiming data */
     H5S_t *buf_space = NULL;                /* Dataspace describing buffer */
     hsize_t buf_dim[1] = {ref_count};       /* Dimension for buffer */
+    size_t token_size = H5F_SIZEOF_ADDR(src_oloc->file);
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -358,18 +366,23 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, H5T_t *dt_src,
     for(i = 0; i < ref_count; i++) {
         H5R_ref_t *ref_ptr  = (H5R_ref_t *)conv_buf;
         H5R_ref_priv_t *ref = (H5R_ref_priv_t *)&ref_ptr[i];
-        size_t token_size = sizeof(src_oloc->addr);
+        H5VL_token_t tmp_token = { 0 };
+        uint8_t *p;
 
         /* Get src object address */
-        if(H5R__get_obj_token(ref, (H5VL_token_t *)&src_oloc->addr, &token_size) < 0)
+        if(H5R__get_obj_token(ref, &tmp_token, &token_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object token")
+        p = tmp_token;
+        H5F_addr_decode(src_oloc->file, (const uint8_t **)&p, &src_oloc->addr);
 
         /* Attempt to copy object from source to destination file */
         if(H5O__copy_obj_by_ref(src_oloc, dst_oloc, dst_root_loc, cpy_info) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
         /* Set dst object address */
-        if(H5R__set_obj_token(ref, (const H5VL_token_t *)&dst_oloc->addr, token_size) < 0)
+        p = tmp_token;
+        H5F_addr_encode(dst_oloc->file, &p, dst_oloc->addr);
+        if(H5R__set_obj_token(ref, (const H5VL_token_t *)&tmp_token, token_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set object token")
         if(H5R__set_loc_id(ref, dst_loc_id, TRUE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set destination loc id")
