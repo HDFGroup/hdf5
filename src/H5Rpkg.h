@@ -118,13 +118,13 @@ H5_DLL herr_t   H5R__encode_heap(H5F_t *f, unsigned char *buf, size_t *nalloc, c
 H5_DLL herr_t   H5R__decode_heap(H5F_t *f, const unsigned char *buf, size_t *nbytes, unsigned char **data_ptr, size_t *data_size);
 H5_DLL herr_t   H5R__free_heap(H5F_t *f, const unsigned char *buf, size_t nbytes);
 
-H5_DLL herr_t   H5R__decode_addr_compat(hid_t id, H5I_type_t type, H5R_type_t ref_type, const unsigned char *buf, haddr_t *addr_ptr);
+H5_DLL herr_t   H5R__decode_token_compat(hid_t id, H5I_type_t type, H5R_type_t ref_type, const unsigned char *buf, H5VL_token_t *obj_token);
 
-H5_DLL herr_t   H5R__encode_addr_obj_compat(haddr_t obj_addr, unsigned char *buf, size_t *nalloc);
-H5_DLL herr_t   H5R__decode_addr_obj_compat(const unsigned char *buf, size_t *nbytes, haddr_t *obj_addr_ptr);
+H5_DLL herr_t   H5R__encode_token_obj_compat(const H5VL_token_t *obj_token, size_t token_size, unsigned char *buf, size_t *nalloc);
+H5_DLL herr_t   H5R__decode_token_obj_compat(const unsigned char *buf, size_t *nbytes, H5VL_token_t *obj_token, size_t token_size);
 
-H5_DLL herr_t   H5R__encode_addr_region_compat(H5F_t *f, haddr_t obj_addr, H5S_t *space, unsigned char *buf, size_t *nalloc);
-H5_DLL herr_t   H5R__decode_addr_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbytes, haddr_t *obj_addr_ptr, H5S_t **space_ptr);
+H5_DLL herr_t   H5R__encode_token_region_compat(H5F_t *f, const H5VL_token_t *obj_token, size_t token_size, H5S_t *space, unsigned char *buf, size_t *nalloc);
+H5_DLL herr_t   H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbytes, H5VL_token_t *obj_token, size_t token_size, H5S_t **space_ptr);
 
 #endif /* _H5Rpkg_H */
 
