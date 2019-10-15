@@ -145,7 +145,7 @@ test_page_buffer_access(void)
 
     ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 1, (hsize_t)0);
     VRFY((ret == 0), "");
-    ret = H5Pset_file_space_page_size(fcpl, sizeof(int)*100);
+    ret = H5Pset_file_space_page_size(fcpl, sizeof(int)*128);
     VRFY((ret == 0), "");
     ret = H5Pset_page_buffer_size(fapl, sizeof(int)*100000, 0, 0);
     VRFY((ret == 0), "");
@@ -180,7 +180,6 @@ test_page_buffer_access(void)
         data[i] = -1;
     if(MAINPROCESS) {
         hid_t fapl_self = H5I_INVALID_HID;
-
         fapl_self = create_faccess_plist(MPI_COMM_SELF, MPI_INFO_NULL, facc_type);
 
         ret = H5Pset_page_buffer_size(fapl_self, sizeof(int)*1000, 0, 0);
@@ -433,7 +432,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     hsize_t     dims[RANK], i;
     hsize_t     num_elements;
     int         k;
-    char        dset_name[10];
+    char        dset_name[20];
     H5F_t       *f = NULL;
     H5C_t       *cache_ptr = NULL;
     H5AC_cache_config_t config;
@@ -590,7 +589,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
     hsize_t     block[RANK];
     int         i, k, ndims;
     hsize_t     num_elements;
-    char        dset_name[10];
+    char        dset_name[20];
     H5F_t       *f = NULL;
     H5C_t       *cache_ptr = NULL;
     H5AC_cache_config_t config;
@@ -665,8 +664,8 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
 
         ndims = H5Sget_simple_extent_dims(sid, dims, NULL);
         VRFY((ndims == 2), "H5Sget_simple_extent_dims succeeded");
-        VRFY(dims[0] == ROW_FACTOR*mpi_size, "Wrong dataset dimensions");
-        VRFY(dims[1] == COL_FACTOR*mpi_size, "Wrong dataset dimensions");
+        VRFY(dims[0] == (hsize_t)(ROW_FACTOR*mpi_size), "Wrong dataset dimensions");
+        VRFY(dims[1] == (hsize_t)(COL_FACTOR*mpi_size), "Wrong dataset dimensions");
 
         ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
         VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -679,7 +678,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
         ret = H5Sclose(sid);
         VRFY((ret == 0), "");
 
-        for (i=0; i < num_elements; i++)
+        for (i=0; i < (int)num_elements; i++)
             VRFY((data_array[i] == mpi_rank+1), "Dataset Verify failed");
     }
 
