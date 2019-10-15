@@ -27,9 +27,9 @@
 #define H5TSprivate_H_
 
 /* Public headers needed by this file */
-#ifdef LATER
+/* #ifdef LATER */
 #include "H5TSpublic.h"		/*Public API prototypes */
-#endif /* LATER */
+/* #endif /1* LATER *1/ */
 
 #ifdef H5_HAVE_WIN_THREADS
 
@@ -80,6 +80,10 @@ typedef struct H5TS_mutex_struct {
     pthread_mutex_t atomic_lock;	/* lock for atomicity of new mechanism */
     pthread_cond_t cond_var;		/* condition variable */
     unsigned int lock_count;
+
+    pthread_mutex_t atomic_lock2;       /* lock for attempt_lock_count */
+    unsigned int attempt_lock_count;
+    pthread_t attempt_thread;
 } H5TS_mutex_t;
 typedef pthread_t      H5TS_thread_t;
 typedef pthread_attr_t H5TS_attr_t;

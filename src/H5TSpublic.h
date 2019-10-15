@@ -47,6 +47,8 @@ extern "C" {
 /* HDF5 global lock routines */
 H5_DLL herr_t H5TSmutex_acquire(hbool_t *acquired);
 H5_DLL herr_t H5TSmutex_release(void);
+H5_DLL herr_t H5TSmutex_get_attempt_count(unsigned int *count);
+herr_t H5TSmutex_get_attempt_thread(pthread_t *attemp_thread);
 
 #ifdef __cplusplus
 }

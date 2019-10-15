@@ -498,13 +498,14 @@ H5O__attr_open_by_name(const H5O_loc_t *loc, const char *name)
     /* If found the attribute is already opened, make a copy of it to share the
      * object information.  If not, open attribute as a new object
      */
-    if((found_open_attr = H5O__attr_find_opened_attr(loc, &exist_attr, name)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
-    else if(found_open_attr == TRUE) {
-        if(NULL == (opened_attr = H5A__copy(NULL, exist_attr)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
-    } /* end else if */
-    else {
+    // Tang: commented out below code so that async attr open works properly
+    /* if((found_open_attr = H5O__attr_find_opened_attr(loc, &exist_attr, name)) < 0) */
+    /*     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute") */
+    /* else if(found_open_attr == TRUE) { */
+    /*     if(NULL == (opened_attr = H5A__copy(NULL, exist_attr))) */
+    /*         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute") */
+    /* } /1* end else if *1/ */
+    /* else { */
         /* Check for attributes in dense storage */
         if(H5F_addr_defined(ainfo.fheap_addr)) {
             /* Open attribute with dense storage */
@@ -537,7 +538,7 @@ H5O__attr_open_by_name(const H5O_loc_t *loc, const char *name)
         /* Mark datatype as being on disk now */
         if(H5T_set_loc(opened_attr->shared->dt, loc->file, H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
-    } /* end else */
+    /* } /1* end else *1/ */
 
     /* Set return value */
     ret_value = opened_attr;

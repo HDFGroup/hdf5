@@ -104,6 +104,9 @@ H5TS_pthread_first_thread_init(void)
     HDpthread_cond_init(&H5_g.init_lock.cond_var, NULL);
     H5_g.init_lock.lock_count = 0;
 
+    HDpthread_mutex_init(&H5_g.init_lock.atomic_lock2, NULL);
+    H5_g.init_lock.attempt_lock_count = 0;
+
     /* initialize key for thread-specific error stacks */
     HDpthread_key_create(&H5TS_errstk_key_g, H5TS_key_destructor);
 
@@ -227,8 +230,20 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
     EnterCriticalSection(&mutex->CriticalSection); 
     return 0;
 #else /* H5_HAVE_WIN_THREADS */
-    herr_t ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
+    herr_t ret_value;
+    struct timeval now_time;
 
+    /* Acquire the lock, increment the attempt lock count, release the lock */
+    ret_value = HDpthread_mutex_lock(&mutex->atomic_lock2);
+    if (ret_value)
+        return ret_value;
+    mutex->attempt_lock_count++;
+    mutex->attempt_thread = HDpthread_self();
+    ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock2);
+    if (ret_value)
+        return ret_value;
+
+    ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
     if (ret_value)
         return ret_value;
 
@@ -237,6 +252,8 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
         mutex->lock_count++;
     } else {
         /* if owned by other thread, wait for condition signal */
+        /* gettimeofday(&now_time, NULL); */
+        /* HDfprintf(stdout, "%-20s lock count = %u, thread id = %u, time = %ld.%06ld\n", __func__, mutex->lock_count, pthread_self(), now_time.tv_sec, now_time.tv_usec, ret_value); */
         while(mutex->lock_count)
             HDpthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
 
@@ -279,11 +296,14 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
     return 0; 
 #else  /* H5_HAVE_WIN_THREADS */
     herr_t ret_value = HDpthread_mutex_lock(&mutex->atomic_lock);
+    struct timeval now_time;
 
     if(ret_value)
         return ret_value;
 
     mutex->lock_count--;
+    /* gettimeofday(&now_time, NULL); */
+    /* HDfprintf(stdout, "%-20s lock count = %u, thread id = %u, time = %ld.%06ld\n", __func__, mutex->lock_count, pthread_self(), now_time.tv_sec, now_time.tv_usec, ret_value); */
 
     ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock);
 
@@ -295,9 +315,83 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
             ret_value = err;
     } /* end if */
 
+    ret_value = HDpthread_mutex_lock(&mutex->atomic_lock2);
+    if (ret_value)
+        return ret_value;
+    /* mutex->attempt_lock_count--; */
+    mutex->attempt_thread = 0;
+    ret_value = HDpthread_mutex_unlock(&mutex->atomic_lock2);
+    if (ret_value)
+        return ret_value;
+
     return ret_value; 
 #endif /* H5_HAVE_WIN_THREADS */
 } /* H5TS_mutex_unlock */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TSmutex_get_attempt_count
+ *
+ * Purpose:     Get the current count of the global lock attempt
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Houjun Tang
+ *              June 24, 2019
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TSmutex_get_attempt_count(unsigned int *count)
+{
+    herr_t ret_value = 0;
+
+    ret_value = HDpthread_mutex_lock(&H5_g.init_lock.atomic_lock2);
+    if (ret_value)
+        return ret_value;
+
+    *count = H5_g.init_lock.attempt_lock_count;
+
+    ret_value = HDpthread_mutex_unlock(&H5_g.init_lock.atomic_lock2);
+    if (ret_value)
+        return ret_value;
+
+    return(ret_value);
+} /* end H5TSmutex_get_attempt_count() */
+
+
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5TSmutex_get_attempt_thread
+ *
+ * Purpose:     Get the current count of the global lock attempt
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Houjun Tang
+ *              June 24, 2019
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5TSmutex_get_attempt_thread(pthread_t *attemp_thread)
+{
+    herr_t ret_value = 0;
+
+    ret_value = HDpthread_mutex_lock(&H5_g.init_lock.atomic_lock2);
+    if (ret_value)
+        return ret_value;
+
+    *attemp_thread = H5_g.init_lock.attempt_thread;
+
+    ret_value = HDpthread_mutex_unlock(&H5_g.init_lock.atomic_lock2);
+    if (ret_value)
+        return ret_value;
+
+    return(ret_value);
+} /* end H5TSmutex_get_attempt_thread() */
+
 
 
 /*--------------------------------------------------------------------------
