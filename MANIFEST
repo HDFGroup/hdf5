@@ -2367,6 +2367,7 @@
 # CMake-specific Files
 ./config/toolchain/build32.cmake
 ./config/toolchain/clang.cmake
+./config/toolchain/crayle.cmake
 ./config/toolchain/GCC.cmake
 ./config/toolchain/intel.cmake
 ./config/toolchain/mingw64.cmake
