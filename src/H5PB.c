@@ -2572,7 +2572,6 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
     H5PB_entry_t **entry_ptr_ptr)
 {
     hbool_t skip_read = FALSE;
-    haddr_t eoa;
     haddr_t eof = HADDR_UNDEF;
     H5PB_entry_t *entry_ptr = NULL;
     void *image_ptr = NULL;
@@ -2588,12 +2587,13 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert((entry_ptr_ptr == NULL) || (*entry_ptr_ptr == NULL));
 
+#if 0 /* JRM */
+    haddr_t eoa;
     /* Retrieve the 'eoa' for the file */
     if ( HADDR_UNDEF == (eoa = H5F_get_eoa(f, type)))
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
                     "driver get_eoa request failed")
-#if 0 /* JRM */
     if ( addr + ((haddr_t)(pb_ptr->page_size)) > eoa )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
