@@ -817,7 +817,7 @@ H5PB_flush(H5F_t *f)
 
         HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
-        /* the current implementation if very inefficient, and will 
+        /* the current implementation is very inefficient, and will
          * fail if there are any delayed writes -- must fix this 
          */
         for ( i = 0; i < H5PB__HASH_TABLE_LEN; i++ ) {
@@ -2550,11 +2550,11 @@ done:
  *              metadata entries are always written in full, and they 
  *              may only enter the page buffer as the result of a write.
  *
- *              In the context of VFD SWMR, when an page is loaded from 
+ *              In the context of VFD SWMR, when a page is loaded from
  *              file, it is possible that the VFD SWMR writer must delay 
  *              writes to the page to avoid the possibility of message from 
  *              the future bugs on the VFD SWMR reader.  For this reason,
- *              make note of the fact that the entry has be loaded from 
+ *              make note of the fact that the entry has been loaded from
  *              from file, so that the necessary checks can be made when
  *              writing to the page.
  *              
