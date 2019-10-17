@@ -2481,8 +2481,8 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
     HDassert((pb_ptr->vfd_swmr_writer) || (!(entry_ptr->is_mpmde)));
     HDassert(0 == entry_ptr->delay_write_until);
 
-    ldbgf("%s: flushing %zu-byte page %" PRIu64 " @ %ju\n",
-        __func__, entry_ptr->size, entry_ptr->page, (uintmax_t)entry_ptr->addr);
+    ldbgf("%s: flushing %zu-byte page %" PRIu64 " @ %" PRIuHADDR "\n",
+        __func__, entry_ptr->size, entry_ptr->page, entry_ptr->addr);
 
     /* Retrieve the 'eoa' for the file */
     if ( HADDR_UNDEF == (eoa = H5F_get_eoa(f, entry_ptr->mem_type)) )
