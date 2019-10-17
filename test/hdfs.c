@@ -75,7 +75,7 @@
  *
  *****************************************************************************/
 
-
+
 /*----------------------------------------------------------------------------
  *
  * ifdef flag: JSVERIFY_EXP_ACT
@@ -87,7 +87,7 @@
  */
 #define JSVERIFY_EXP_ACT 1L
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSFAILED_AT()
@@ -108,7 +108,7 @@
     HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC); \
 }
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: FAIL_IF()
@@ -138,7 +138,7 @@ if (condition) {           \
     goto error;           \
 }
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: FAIL_UNLESS()
@@ -169,7 +169,7 @@ if (!(condition)) {            \
 }
 #endif /* UNUSED */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSERR_LONG()
@@ -205,7 +205,7 @@ if (!(condition)) {            \
     }                                                    \
 }
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSERR_STR()
@@ -248,7 +248,7 @@ if (!(condition)) {            \
 
 #ifdef JSVERIFY_EXP_ACT
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSVERIFY()
@@ -271,7 +271,7 @@ if ((long)(actual) != (long)(expected)) {      \
     goto error;                                \
 } /* JSVERIFY */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSVERIFY_NOT()
@@ -294,7 +294,7 @@ if ((long)(actual) == (long)(expected)) {      \
     goto error;                                \
 } /* JSVERIFY_NOT */
 
-
+
 /*----------------------------------------------------------------------------
  *
  * Macro: JSVERIFY_STR()
@@ -324,7 +324,7 @@ if (strcmp((actual), (expected)) != 0) {       \
  * Repeats macros above, but with actual/expected parameters reversed.
  */
 
-
+
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
  * See: JSVERIFY documentation above.
@@ -338,7 +338,7 @@ if ((long)(actual) != (long)(expected)) {       \
     goto error;                                 \
 } /* JSVERIFY */
 
-
+
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
  * See: JSVERIFY_NOT documentation above.
@@ -352,7 +352,7 @@ if ((long)(actual) == (long)(expected)) {      \
     goto error;                                \
 } /* JSVERIFY_NOT */
 
-
+
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
  * See: JSVERIFY_STR documentation above.
@@ -404,7 +404,7 @@ static H5FD_hdfs_fapl_t default_fa      = {
  * TEST FUNCTIONS *
  ******************/
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_fapl_config_validation()
@@ -607,7 +607,7 @@ error:
 
 } /* end test_fapl_config_validation() */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    test_hdfs_fapl()
@@ -684,7 +684,7 @@ error:
 
 } /* end test_hdfs_fapl() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_vfd_open()
@@ -936,7 +936,7 @@ error:
 
 } /* end test_vfd_open() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_eof_eoa()
@@ -1005,10 +1005,7 @@ test_eof_eoa(void)
 
     /* verify as found
      */
-    JSVERIFY( 5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), NULL )
-    JSVERIFY( H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
-              H5FDget_eof(fd_shakespeare, H5FD_MEM_DRAW),
-              "mismatch between DEFAULT and RAW memory types" )
+    JSVERIFY( 5458199, H5FDget_eof(fd_shakespeare), NULL )
     JSVERIFY( 0,
               H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT),
               "EoA should be unset by H5FDopen" )
@@ -1019,7 +1016,7 @@ test_eof_eoa(void)
               H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 44442202),
               "unable to set EoA (lower)" )
     JSVERIFY( 5458199,
-              H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
+              H5FDget_eof(fd_shakespeare),
               "EoF changed" )
     JSVERIFY( 44442202,
               H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT),
@@ -1031,7 +1028,7 @@ test_eof_eoa(void)
               H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 6789012),
               "unable to set EoA (higher)" )
     JSVERIFY( 5458199,
-              H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
+              H5FDget_eof(fd_shakespeare),
               "EoF changed" )
     JSVERIFY( 6789012,
               H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT),
@@ -1071,7 +1068,7 @@ error:
 
 } /* end test_eof_eoa() */
 
-
+
 /*-----------------------------------------------------------------------------
  *
  * Function: test_H5FDread_without_eoa_set_fails()
@@ -1183,7 +1180,7 @@ error:
 } /* end test_H5FDread_without_eoa_set_fails() */
 
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_read()
@@ -1310,7 +1307,7 @@ test_read(void)
             HADDR_UNDEF); /* Demonstrate success with "automatic" value */
     FAIL_IF( NULL == file_raven )
 
-    JSVERIFY( 6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), NULL )
+    JSVERIFY( 6464, H5FDget_eof(file_raven), NULL )
 
     /*********
      * TESTS *
@@ -1393,7 +1390,7 @@ error:
 
 } /* end test_read() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_noops_and_autofails()
@@ -1539,7 +1536,7 @@ error:
 
 } /* end test_noops_and_autofails() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_cmp()
@@ -1571,7 +1568,7 @@ test_cmp(void)
 
 } /* end test_cmp() */
 
-
+
 /*---------------------------------------------------------------------------
  *
  * Function: test_H5F_integration()
@@ -1699,7 +1696,7 @@ error:
 
 } /* test_H5F_integration */
 
-
+
 /*-------------------------------------------------------------------------
  *
  * Function:    main
