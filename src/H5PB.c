@@ -49,16 +49,6 @@
 /* Local Macros */
 /****************/
 
-/* In principle, we should be able to run the page buffer with the 
- * accumulator.  However, for whatever reason, the fheap test encounteres
- * metadata corruption if the page buffer uses H5F__accum_read/write()
- * for I/O.
- *
- * The following #define controls this.  Set VFD_IO to FALSE to reproduce
- * the bug.
- */
-#define VFD_IO 1
-
 
 /******************/
 /* Local Typedefs */
@@ -2604,6 +2594,7 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
                     "driver get_eof request failed")
 
+#if 0
     /* It is possible that this page been allocated but not
      * written.  Skip the read if addr > EOF.  In this case, tell 
      * H5PB__create_new_page() to zero the page image.
@@ -2611,6 +2602,7 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
      * Don't set "skip_read = (addr >= eof);" when accumulator is used.
      */
     skip_read = (addr >= eof);
+#endif
 
     /* make space in the page buffer if necessary */
     if ( ( pb_ptr->curr_pages >= pb_ptr->max_pages ) &&
