@@ -57,19 +57,18 @@ static int  h5tools_init_g;     /* if h5tools lib has been initialized */
 /* This enum should match the entries in the below drivers_list since they
  * are indexes into the drivers_list array. */
 typedef enum {
-    SWMR_IDX = 0
-   ,SEC2_IDX
+    SEC2_IDX = 0
    ,FAMILY_IDX
    ,SPLIT_IDX
    ,MULTI_IDX
 #ifdef H5_HAVE_PARALLEL
    ,MPIO_IDX
 #endif /* H5_HAVE_PARALLEL */
+   ,SWMR_IDX
 } driver_idx;
 
 /* Names of VFDs */
 static const char *drivernames[]={
-    [SWMR_IDX] = "swmr",
     [SEC2_IDX] = "sec2",
     [FAMILY_IDX] = "family",
     [SPLIT_IDX] = "split",
@@ -77,6 +76,7 @@ static const char *drivernames[]={
 #ifdef H5_HAVE_PARALLEL
     [MPIO_IDX] = "mpio",
 #endif /* H5_HAVE_PARALLEL */
+    [SWMR_IDX] = "swmr",
 };
 
 #define NUM_DRIVERS     (sizeof(drivernames) / sizeof(drivernames[0]))
