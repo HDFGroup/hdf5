@@ -21,10 +21,6 @@
 #include "H5private.h"
 #include "h5trav.h"
 
-#ifdef H5_HAVE_ROS3_VFD
-#include "H5FDros3.h"
-#endif
-
 /* global variables */
 unsigned h5tools_nCols = 80;
 /* ``get_option'' variables */

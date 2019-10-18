@@ -20,6 +20,14 @@
 
 #include "h5test.h"
 
+#ifdef H5_HAVE_ROS3_VFD
+#include "H5FDros3.h"
+#endif
+
+#ifdef H5_HAVE_LIBHDFS
+#include "H5FDhdfs.h"
+#endif
+
 #define KB              1024U
 #define FAMILY_NUMBER   4
 #define FAMILY_SIZE     (1*KB)

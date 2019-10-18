@@ -2421,7 +2421,7 @@ main(int argc, const char *argv[])
     /* default "anonymous" s3 configuration */
     H5FD_ros3_fapl_t ros3_fa = {
         1,     /* fapl version      */
-        false, /* authenticate      */
+        FALSE, /* authenticate      */
         "",    /* aws region        */
         "",    /* access key id     */
         "",    /* secret access key */
