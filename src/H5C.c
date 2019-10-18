@@ -7207,7 +7207,7 @@ H5C_load_entry(H5F_t *              f,
          *   --perform checksum verification
          */
         for (do_try = h5_retry_init(&retry, H5F_GET_READ_ATTEMPTS(f),
-                          1, H5_RETRY_ONE_HOUR);
+                          1, H5_RETRY_ONE_HOUR / 3600 / 100);
              do_try;
              do_try = h5_retry_next(&retry)) {
             if ( actual_len != len ) {
