@@ -79,6 +79,14 @@ static const char *drivernames[]={
     [SWMR_IDX] = "swmr",
 };
 
+/* If h5tools_fopen() may try the i'th driver if its arguments do not
+ * specify one and specified_only[i] is false.  If specified_only[i] is
+ * true, then the arguments must be specify the driver. 
+ */
+static bool specified_only[] = {
+    [SWMR_IDX] = true
+};
+
 #define NUM_DRIVERS     (sizeof(drivernames) / sizeof(drivernames[0]))
 
 /*-------------------------------------------------------------------------
@@ -604,51 +612,32 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
     hid_t       fid = FAIL;
     hid_t       my_fapl = H5P_DEFAULT;
 
-    if (driver && *driver) {
+    /* Try to open the file using every eligible driver. */
+    for (drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
+        if (driver == NULL && specified_only[drivernum])
+            continue;
+        if (driver != NULL && strcmp(drivernames[drivernum], driver) != 0)
+            continue;
         /* Get the correct FAPL for the given driver */
-        if ((my_fapl = h5tools_get_fapl(fapl, fname, driver, &drivernum)) < 0)
+        if((my_fapl = h5tools_get_fapl(fapl, fname, drivernames[drivernum],
+                NULL)) < 0)
             goto done;
 
         /* allow error stack display if enable-error-stack has optional arg number */
         if (enable_error_stack > 1) {
             fid = H5Fopen(fname, flags, my_fapl);
-        }
-        else {
+        } else {
             H5E_BEGIN_TRY {
                 fid = H5Fopen(fname, flags, my_fapl);
             } H5E_END_TRY;
         }
 
-        if (fid == FAIL)
-            goto done;
+        if (fid != FAIL)
+            break;
 
-    }
-    else {
-        /* Try to open the file using each of the drivers */
-        for (drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
-            /* Get the correct FAPL for the given driver */
-            if((my_fapl = h5tools_get_fapl(fapl, fname, drivernames[drivernum],
-                    NULL)) < 0)
-                goto done;
-
-            /* allow error stack display if enable-error-stack has optional arg number */
-            if (enable_error_stack > 1) {
-                fid = H5Fopen(fname, flags, my_fapl);
-            }
-            else {
-                H5E_BEGIN_TRY {
-                    fid = H5Fopen(fname, flags, my_fapl);
-                } H5E_END_TRY;
-            }
-
-            if (fid != FAIL)
-                break;
-            else {
-                /* Close the FAPL */
-                H5Pclose(my_fapl);
-                my_fapl = H5P_DEFAULT;
-            } /* end else */
-        }
+        /* Close the FAPL */
+        H5Pclose(my_fapl);
+        my_fapl = H5P_DEFAULT;
     }
 
     /* Save the driver name */
