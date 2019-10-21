@@ -73,7 +73,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5F__close_cb(H5VL_object_t *file_vol_obj);
+static herr_t H5F__close_cb(H5VL_object_t *file_vol_obj, void ** token);
 
 /* Callback for getting object counts in a file */
 static int H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key);
@@ -205,7 +205,7 @@ H5F_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__close_cb(H5VL_object_t *file_vol_obj)
+H5F__close_cb(H5VL_object_t *file_vol_obj, void **token)
 {
     herr_t          ret_value = SUCCEED;    /* Return value */
 
@@ -215,7 +215,7 @@ H5F__close_cb(H5VL_object_t *file_vol_obj)
     HDassert(file_vol_obj);
 
     /* Close the file */
-    if(H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, token) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     /* Free the VOL object */
@@ -759,6 +759,75 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fopen_async
+ *
+ * Purpose:     Asynchronous version of H5Fopen
+ * 
+ * See Also:    H5Fpublic.h for a list of possible values for FLAGS.
+ *
+ * Return:      Success:    A file ID
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, void **token)
+{
+    H5F_t              *new_file = NULL;        /* File struct for new file                 */
+    H5P_genplist_t     *plist;                  /* Property list pointer                    */
+    H5VL_connector_prop_t  connector_prop;      /* Property for VOL connector ID & info        */
+    hid_t               ret_value;              /* return value                             */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE3("i", "*sIui", filename, flags, fapl_id);
+
+    /* Check arguments */
+    if(!filename || !*filename)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file name")
+    /* Reject undefined flags (~H5F_ACC_PUBLIC_FLAGS) and the H5F_ACC_TRUNC & H5F_ACC_EXCL flags */
+    if((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
+            (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file open flags")
+    /* XXX (VOL MERGE): Might want to move SWMR flag checks to H5F_open() */
+    /* Asking for SWMR write access on a read-only file is invalid */
+    if((flags & H5F_ACC_SWMR_WRITE) && 0 == (flags & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "SWMR write access on a file open for read-only access is not allowed")
+    /* Asking for SWMR read access on a non-read-only file is invalid */
+    if((flags & H5F_ACC_SWMR_READ) && (flags & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "SWMR read access on a file open for read-write access is not allowed")
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+
+    /* Get the VOL info from the fapl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file access property list")
+    if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
+
+    /* Stash a copy of the "top-level" connector property, before any pass-through
+     *  connectors modify or unwrap it.
+     */
+    if(H5CX_set_vol_connector_prop(&connector_prop) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context")
+
+    /* Open the file through the VOL layer */
+    if(NULL == (new_file = (H5F_t *)H5VL_file_open(&connector_prop, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, token)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
+
+    /* Get an ID for the file */
+    if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fopen_async() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Fflush
@@ -834,7 +903,38 @@ H5Fclose(hid_t file_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Fclose() */
+} /* end H5Fclose() */ 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fclose_async
+ *
+ * Purpose:     Asynchronous version of H5Fclose
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fclose_async(hid_t file_id, void **token)
+{
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    /* Check arguments */
+    if(H5I_FILE != H5I_get_type(file_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
+
+    /* Decrement reference count on atom.  When it reaches zero the file will
+     * be closed.
+     */
+    if(H5I_dec_app_ref_async(file_id, token) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fclose_async() */
 
 
 /*-------------------------------------------------------------------------

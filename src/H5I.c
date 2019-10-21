@@ -602,7 +602,7 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
      */
     if(udata->force || (id->count - (!udata->app_ref * id->app_count)) <= 1) {
         /* Check for a 'free' function and call it, if it exists */
-        if(udata->type_ptr->cls->free_func && (udata->type_ptr->cls->free_func)((void *)id->obj_ptr) < 0) { /* (Casting away const OK -QAK) */
+        if(udata->type_ptr->cls->free_func && (udata->type_ptr->cls->free_func)((void *)id->obj_ptr, H5_REQUEST_NULL) < 0) { /* (Casting away const OK -QAK) */
             if(udata->force) {
 #ifdef H5I_DEBUG
                 if(H5DEBUG(I)) {
@@ -1317,7 +1317,7 @@ H5I_dec_ref(hid_t id)
         type_ptr = H5I_id_type_list_g[H5I_TYPE(id)];
 
         /* (Casting away const OK -QAK) */
-        if(!type_ptr->cls->free_func || (type_ptr->cls->free_func)((void *)id_ptr->obj_ptr) >= 0) {
+        if(!type_ptr->cls->free_func || (type_ptr->cls->free_func)((void *)id_ptr->obj_ptr, H5_REQUEST_NULL) >= 0) {
             /* Remove the node from the type */
             if(NULL == H5I__remove_common(type_ptr, id))
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, (-1), "can't remove ID node")
@@ -1334,6 +1334,125 @@ H5I_dec_ref(hid_t id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_ref() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I_dec_ref_async
+ *
+ * Purpose:     Asynchronous version of H5I_dec_ref
+ *              This will fail if the type is not a reference counted type.
+ *              The ID type's 'free' function will be called for the ID
+ *              if the reference count for the ID reaches 0 and a free
+ *              function has been defined at type creation time.
+ *
+ * Return:      Success:    New reference count
+ *
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5I_dec_ref_async(hid_t id, void **token)
+{
+    H5I_id_info_t *id_ptr;      /* Pointer to the new ID */
+    int ret_value = 0;          /* Return value */
+
+    FUNC_ENTER_NOAPI((-1))
+
+    /* Sanity check */
+    HDassert(id >= 0);
+
+    /* General lookup of the ID */
+    if(NULL == (id_ptr = H5I__find_id(id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, (-1), "can't locate ID")
+
+    /* If this is the last reference to the object then invoke the type's
+     * free method on the object. If the free method is undefined or
+     * successful then remove the object from the type; otherwise leave
+     * the object in the type without decrementing the reference
+     * count. If the reference count is more than one then decrement the
+     * reference count without calling the free method.
+     *
+     * Beware: the free method may call other H5I functions.
+     * 
+     * If an object is closing, we can remove the ID even though the free 
+     * method might fail.  This can happen when a mandatory filter fails to
+     * write when a dataset is closed and the chunk cache is flushed to the 
+     * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
+     */
+    if(1 == id_ptr->count) {
+        H5I_id_type_t	*type_ptr;		/*ptr to the type	*/
+
+        /* Get the ID's type */
+        type_ptr = H5I_id_type_list_g[H5I_TYPE(id)];
+
+        /* (Casting away const OK -QAK) */
+        if(!type_ptr->cls->free_func || (type_ptr->cls->free_func)((void *)id_ptr->obj_ptr, token) >= 0) {
+            /* Remove the node from the type */
+            if(NULL == H5I__remove_common(type_ptr, id))
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, (-1), "can't remove ID node")
+            ret_value = 0;
+        } /* end if */
+        else
+            ret_value = -1;
+    } /* end if */
+    else {
+        --(id_ptr->count);
+        ret_value = (int)id_ptr->count;
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_dec_ref(_async) */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I_dec_app_ref_async
+ *
+ * Purpose:     Asynchronous version of H5I_dec_app_ref
+ *
+ * Return:      Success:    New app. reference count
+ *              Failure:    -1
+ *
+ * Programmer:  Houjun Tang
+ *              Oct 21, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5I_dec_app_ref_async(hid_t id, void **token)
+{
+    H5I_id_info_t *id_ptr;      /* Pointer to the new ID */
+    int ret_value = 0;          /* Return value */
+
+    FUNC_ENTER_NOAPI((-1))
+
+    /* Sanity check */
+    HDassert(id >= 0);
+
+    /* Call regular decrement reference count routine */
+    if((ret_value = H5I_dec_ref_async(id, token)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, (-1), "can't decrement ID ref count")
+
+    /* Check if the ID still exists */
+    if(ret_value > 0) {
+        /* General lookup of the ID */
+        if(NULL == (id_ptr = H5I__find_id(id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, (-1), "can't locate ID")
+
+        /* Adjust app_ref */
+        --(id_ptr->app_count);
+        HDassert(id_ptr->count >= id_ptr->app_count);
+
+        /* Set return value */
+        ret_value = (int)id_ptr->app_count;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_dec_app_ref_async() */
+
 
 
 /*-------------------------------------------------------------------------

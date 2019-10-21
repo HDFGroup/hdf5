@@ -200,6 +200,59 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread() */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dread_async
+ *
+ * Purpose:     For asynchronous VOL with request token
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Houjun Tang
+ *              Oct 15, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dread_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+    hid_t file_space_id, hid_t dxpl_id, void *buf/*out*/, void **token)
+{
+    H5VL_object_t  *vol_obj     = NULL;
+    herr_t          ret_value   = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "iiiiix**x", dset_id, mem_type_id, mem_space_id, file_space_id,
+             dxpl_id, buf, token);
+
+    /* Check arguments */
+    if (mem_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid memory dataspace ID")
+    if (file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file dataspace ID")
+
+    /* Get dataset pointer */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
+
+    /* Read the data */
+    if ((ret_value = H5VL_dataset_read(vol_obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dread() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Dread_chunk
@@ -316,6 +369,59 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     /* Write the data */
     if ((ret_value = H5VL_dataset_write(vol_obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dwrite() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dwrite_async
+ *
+ * Purpose:     For asynchronous VOL with request token
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Houjun Tang
+ *              Oct 15, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dwrite_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+	 hid_t file_space_id, hid_t dxpl_id, const void *buf, void **token)
+{
+    H5VL_object_t          *vol_obj = NULL;
+    herr_t                  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "iiiii*x**x", dset_id, mem_type_id, mem_space_id, file_space_id,
+             dxpl_id, buf, token);
+
+    /* Check arguments */
+    if (mem_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid memory dataspace ID")
+    if (file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file dataspace ID")
+
+    /* Get dataset pointer */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
+
+    /* Write the data */
+    if ((ret_value = H5VL_dataset_write(vol_obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:

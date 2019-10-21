@@ -229,9 +229,12 @@ H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
 		  	  hid_t create_plist, hid_t access_plist);
 H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags,
 		        hid_t access_plist);
+H5_DLL hid_t  H5Fopen_async(const char *filename, unsigned flags,
+		        hid_t access_plist, void** token);
 H5_DLL hid_t  H5Freopen(hid_t file_id);
 H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
 H5_DLL herr_t H5Fclose(hid_t file_id);
+H5_DLL herr_t H5Fclose_async(hid_t file_id, void **token);
 H5_DLL hid_t  H5Fget_create_plist(hid_t file_id);
 H5_DLL hid_t  H5Fget_access_plist(hid_t file_id);
 H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned *intent);
