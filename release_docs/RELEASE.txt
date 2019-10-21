@@ -73,16 +73,16 @@ New Features
           https://portal.hdfgroup.org/display/HDF5/Update+to+References
 
       Current known limitations for references in this release: 
-      • HDF5 command-line tools have not be updated to read new references types
+      • HDF5 command-line tools have not been updated to read new references types.
       • When reading data with the H5T_STD_REF type, if data is filled with 0s, 
         H5A/Dread() currently returns an error. This will be fixed in an upcoming 
         release.
-      • h5dump will fail to display references on big-endian machines
+      • h5dump will fail to display references on big-endian machines.
 
     - New S3 and HDFS Virtual File Drivers (VFDs)
 
-      This release has two new VFDs. The S3 VFD allows to access HDF5 files on 
-      AWS S3 buckets. HDFS VFD allows access to HDF5 file stored on Apache HDFS. 
+      This release has two new VFDs. The S3 VFD allows accessing HDF5 files on 
+      AWS S3 buckets. HDFS VFD allows accessing HDF5 file stored on Apache HDFS. 
       See https://portal.hdfgroup.org/display/HDF5/H5P_SET_FAPL_ROS3
       and https://portal.hdfgroup.org/display/HDF5/H5P_SET_FAPL_HDFS
       for how to use those APIs. 
@@ -112,7 +112,7 @@ New Features
 
     Other improvements and changes:
 
-    - Hyperslab selection code was reworked to improve performance getting more 
+    - Hyperslab selection code was reworked to improve performance, getting more 
       than 10x speedup in some cases. 
      
     - The HDF5 Library was enhanced to open files with Unicode names on Windows.
