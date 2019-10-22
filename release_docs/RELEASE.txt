@@ -82,7 +82,7 @@ New Features
     - New S3 and HDFS Virtual File Drivers (VFDs)
 
       This release has two new VFDs. The S3 VFD allows accessing HDF5 files on 
-      AWS S3 buckets. HDFS VFD allows accessing HDF5 file stored on Apache HDFS. 
+      AWS S3 buckets. HDFS VFD allows accessing HDF5 files stored on Apache HDFS. 
       See https://portal.hdfgroup.org/display/HDF5/Virtual+File+Drivers+-+S3+and+HDFS
       for information on enabling those drivers and using those APIs. 
       
