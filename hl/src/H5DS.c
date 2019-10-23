@@ -275,7 +275,7 @@ herr_t H5DSattach_scale(hid_t did,
             goto out;
 
         /* close */
-        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0)
+        if(H5Treclaim(tid, sid, H5P_DEFAULT, buf) < 0)
             goto out;
         if(H5Sclose(sid) < 0)
             goto out;
@@ -361,7 +361,7 @@ herr_t H5DSattach_scale(hid_t did,
             goto out;
 
         /* close */
-        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0)
+        if(H5Treclaim(tid, sid, H5P_DEFAULT, buf) < 0)
             goto out;
         if(H5Sclose(sid) < 0)
             goto out;
@@ -753,7 +753,7 @@ herr_t H5DSdetach_scale(hid_t did,
     }
 
     /* close */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0)
+    if(H5Treclaim(tid, sid, H5P_DEFAULT, buf) < 0)
         goto out;
     if(H5Sclose(sid) < 0)
         goto out;
@@ -896,7 +896,7 @@ out:
             dsbuf = NULL;
         }
         if(buf) {
-            /* Failure occured before H5Dvlen_reclaim was called;
+            /* Failure occured before H5Treclaim was called;
                free the pointers allocated when we read data in */
             for(i = 0; i < rank; i++) {
                 if(buf[i].p)
@@ -1073,7 +1073,7 @@ htri_t H5DSis_attached(hid_t did,
 
 
         /* close */
-        if (H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf) < 0)
+        if (H5Treclaim(tid,sid,H5P_DEFAULT,buf) < 0)
             goto out;
         if (H5Sclose(sid) < 0)
             goto out;
@@ -1373,7 +1373,7 @@ herr_t H5DSiterate_scales(hid_t did,
         } /* if */
 
         /* close */
-        if (H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf) < 0)
+        if (H5Treclaim(tid,sid,H5P_DEFAULT,buf) < 0)
             goto out;
         if (H5Sclose(sid) < 0)
             goto out;
@@ -1391,7 +1391,7 @@ herr_t H5DSiterate_scales(hid_t did,
 out:
     H5E_BEGIN_TRY {
         if(buf) {
-            H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf);
+            H5Treclaim(tid,sid,H5P_DEFAULT,buf);
             HDfree(buf);
         }
         H5Sclose(sid);
@@ -2095,7 +2095,7 @@ int H5DSget_num_scales(hid_t did,
         nscales = (int)buf[idx].len;
 
         /* close */
-        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0)
+        if(H5Treclaim(tid, sid, H5P_DEFAULT, buf) < 0)
             goto out;
         if(H5Sclose(sid) < 0)
             goto out;

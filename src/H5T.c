@@ -226,18 +226,34 @@
 #define H5T_INIT_TYPE_REF_COMMON {                          \
     H5T_INIT_TYPE_ALLOC_COMMON(H5T_REFERENCE)               \
     H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_NONE)                \
+    dt->shared->force_conv = TRUE;                          \
+    dt->shared->u.atomic.u.r.f = NULL;                      \
+    dt->shared->u.atomic.u.r.loc = H5T_LOC_BADLOC;          \
+    dt->shared->u.atomic.u.r.cls = NULL;                    \
 }
 
 #define H5T_INIT_TYPE_OBJREF_CORE {                         \
     H5T_INIT_TYPE_REF_COMMON                                \
-    dt->shared->force_conv = TRUE;                          \
-    dt->shared->u.atomic.u.r.rtype = H5R_OBJECT;            \
-    dt->shared->u.atomic.u.r.loc = H5T_LOC_MEMORY;          \
+    dt->shared->u.atomic.u.r.rtype = H5R_OBJECT1;           \
+    dt->shared->u.atomic.u.r.opaque = FALSE;                \
+    dt->shared->u.atomic.u.r.version = 0;                   \
 }
 
 #define H5T_INIT_TYPE_REGREF_CORE {                         \
     H5T_INIT_TYPE_REF_COMMON                                \
-    dt->shared->u.atomic.u.r.rtype = H5R_DATASET_REGION;    \
+    dt->shared->u.atomic.u.r.rtype = H5R_DATASET_REGION1;   \
+    dt->shared->u.atomic.u.r.opaque = FALSE;                \
+    dt->shared->u.atomic.u.r.version = 0;                   \
+}
+
+/* rtype value is only used as a placeholder to differentiate the type from
+ * other types, any opaque (i.e. "new") reference type could be used.
+ */
+#define H5T_INIT_TYPE_REF_CORE {                            \
+    H5T_INIT_TYPE_REF_COMMON                                \
+    dt->shared->u.atomic.u.r.rtype = H5R_OBJECT2;           \
+    dt->shared->u.atomic.u.r.opaque = TRUE;                 \
+    dt->shared->u.atomic.u.r.version = H5R_ENCODE_VERSION;  \
 }
 
 /* Define the code templates for the "SIZE_TMPL" in the H5T_INIT_TYPE macro */
@@ -295,7 +311,7 @@ static htri_t H5T__compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T__set_size(H5T_t *dt, size_t size);
 static herr_t H5T__close_cb(H5T_t *dt);
 static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_conv_func_t *conv);
-static hbool_t H5T__detect_reg_ref(const H5T_t *dt);
+static hbool_t H5T__detect_vlen_ref(const H5T_t *dt);
 
 
 /*****************************/
@@ -354,6 +370,7 @@ hid_t H5T_STD_B64BE_g           = FAIL;
 hid_t H5T_STD_B64LE_g           = FAIL;
 hid_t H5T_STD_REF_OBJ_g         = FAIL;
 hid_t H5T_STD_REF_DSETREG_g     = FAIL;
+hid_t H5T_STD_REF_g             = FAIL;
 
 hid_t H5T_UNIX_D32BE_g          = FAIL;
 hid_t H5T_UNIX_D32LE_g          = FAIL;
@@ -444,6 +461,7 @@ size_t H5T_POINTER_COMP_ALIGN_g             = 0;
 size_t H5T_HVL_COMP_ALIGN_g                 = 0;
 size_t H5T_HOBJREF_COMP_ALIGN_g             = 0;
 size_t H5T_HDSETREGREF_COMP_ALIGN_g         = 0;
+size_t H5T_REF_COMP_ALIGN_g                 = 0;
 
 /*
  * Alignment constraints for native types. These are initialized at run time
@@ -737,7 +755,9 @@ H5T__init_package(void)
     H5T_t       *enum_type=NULL;        /* Datatype structure for enum objects */
     H5T_t       *vlen=NULL;             /* Datatype structure for vlen objects */
     H5T_t       *array=NULL;            /* Datatype structure for array objects */
-    H5T_t       *objref=NULL;           /* Datatype structure for object reference objects */
+    H5T_t       *objref=NULL;           /* Datatype structure for deprecated reference objects */
+    H5T_t       *regref=NULL;           /* Datatype structure for deprecated region references */
+    H5T_t       *ref=NULL;              /* Datatype structure for opaque references */
     hsize_t     dim[1]={1};             /* Dimension info for array datatype */
     herr_t      status;
     hbool_t     copied_dtype = TRUE;    /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
@@ -989,12 +1009,23 @@ H5T__init_package(void)
      *------------------------------------------------------------
      */
 
-    /* Object reference (i.e. object header address in file) */
-    H5T_INIT_TYPE(OBJREF, H5T_STD_REF_OBJ_g, ALLOC, -, SET, H5R_OBJ_REF_BUF_SIZE)
+    /* Deprecated object reference type */
+    H5T_INIT_TYPE(OBJREF, H5T_STD_REF_OBJ_g, ALLOC, -, NOSET, -)
+    if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
     objref = dt;    /* Keep type for later */
 
-    /* Dataset Region reference (i.e. selection inside a dataset) */
-    H5T_INIT_TYPE(REGREF, H5T_STD_REF_DSETREG_g, ALLOC, -, SET, H5R_DSET_REG_REF_BUF_SIZE)
+    /* Deprecated region reference type */
+    H5T_INIT_TYPE(REGREF, H5T_STD_REF_DSETREG_g, ALLOC, -, NOSET, -)
+    if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
+    regref = dt;    /* Keep type for later */
+
+    /* Opaque reference type */
+    H5T_INIT_TYPE(REF, H5T_STD_REF_g, ALLOC, -, NOSET, -)
+    if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
+    ref = dt;       /* Keep type for later */
 
     /*
      * Register conversion functions beginning with the most general and
@@ -1029,7 +1060,11 @@ H5T__init_package(void)
     status |= H5T__register_int(H5T_PERS_SOFT, "enum_f", enum_type, floatpt, H5T__conv_enum_numeric);
     status |= H5T__register_int(H5T_PERS_SOFT, "vlen", vlen, vlen, H5T__conv_vlen);
     status |= H5T__register_int(H5T_PERS_SOFT, "array", array, array, H5T__conv_array);
-    status |= H5T__register_int(H5T_PERS_SOFT, "objref", objref, objref, H5T__conv_order_opt);
+    status |= H5T__register_int(H5T_PERS_SOFT, "objref", objref, objref, H5T__conv_noop);
+    status |= H5T__register_int(H5T_PERS_SOFT, "regref", regref, regref, H5T__conv_noop);
+    status |= H5T__register_int(H5T_PERS_SOFT, "ref", ref, ref, H5T__conv_ref);
+    status |= H5T__register_int(H5T_PERS_SOFT, "objref_ref", objref, ref, H5T__conv_ref);
+    status |= H5T__register_int(H5T_PERS_SOFT, "regref_ref", regref, ref, H5T__conv_ref);
 
     /*
      * Native conversions should be listed last since we can use hardware to
@@ -1473,6 +1508,7 @@ H5T_top_term_package(void)
             H5T_STD_B64LE_g             = FAIL;
             H5T_STD_REF_OBJ_g           = FAIL;
             H5T_STD_REF_DSETREG_g       = FAIL;
+            H5T_STD_REF_g               = FAIL;
 
             H5T_UNIX_D32BE_g            = FAIL;
             H5T_UNIX_D32LE_g            = FAIL;
@@ -2880,6 +2916,56 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tconvert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Treclaim
+ *
+ * Purpose: Frees the buffers allocated for storing variable-length data
+ *      in memory.  Only frees the VL data in the selection defined in the
+ *      dataspace.  The dataset transfer property list is required to find the
+ *      correct allocation/free methods for the VL data in the buffer.
+ *
+ * Return:  Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, June 10, 1999
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Treclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf)
+{
+    H5S_t *space;               /* Dataspace for iteration */
+    herr_t ret_value;           /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "iii*x", type_id, space_id, dxpl_id, buf);
+
+    /* Check args */
+    if(H5I_DATATYPE != H5I_get_type(type_id) || buf == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
+    if(!(H5S_has_extent(space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
+
+    /* Call internal routine */
+    ret_value = H5T_reclaim(type_id, space, buf);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* end H5Treclaim() */
 
 
 /*-------------------------------------------------------------------------
@@ -4456,28 +4542,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                         HGOTO_DONE(-1);
                     if(dt1->shared->u.atomic.u.r.rtype > dt2->shared->u.atomic.u.r.rtype)
                         HGOTO_DONE(1);
-
-                    switch(dt1->shared->u.atomic.u.r.rtype) {
-                        case H5R_OBJECT:
-                            if(dt1->shared->u.atomic.u.r.loc < dt2->shared->u.atomic.u.r.loc)
-                                HGOTO_DONE(-1);
-                            if(dt1->shared->u.atomic.u.r.loc > dt2->shared->u.atomic.u.r.loc)
-                                HGOTO_DONE(1);
-                            break;
-
-                        case H5R_DATASET_REGION:
-                    /* Does this need more to distinguish it? -QAK 11/30/98 */
-                            /*void */
-                            break;
-
-                        case H5R_BADTYPE:
-                        case H5R_MAXTYPE:
-                            HDassert("invalid type" && 0);
-                            break;
-                        default:
-                            HDassert("not implemented yet" && 0);
-                            break;
-                    }
+                    if(dt1->shared->u.atomic.u.r.loc < dt2->shared->u.atomic.u.r.loc)
+                        HGOTO_DONE(-1);
+                    if(dt1->shared->u.atomic.u.r.loc > dt2->shared->u.atomic.u.r.loc)
+                        HGOTO_DONE(1);
                     break;
 
                 case H5T_NO_CLASS:
@@ -5330,7 +5398,7 @@ done:
     htri_t H5T_set_loc(dt,f,loc)
         H5T_t *dt;              IN/OUT: Pointer to the datatype to mark
         H5F_t *f;               IN: Pointer to the file the datatype is in
-        H5T_vlen_type_t loc     IN: location of type
+        H5T_loc_t loc           IN: location of type
 
  RETURNS
     One of two values on success:
@@ -5455,17 +5523,9 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                 break;
 
             case H5T_REFERENCE:
-                /* Only need to change location of object references */
-                if(dt->shared->u.atomic.u.r.rtype == H5R_OBJECT) {
-                    /* Mark this reference */
-                    if(loc != dt->shared->u.atomic.u.r.loc) {
-                        /* Set the location */
-                        dt->shared->u.atomic.u.r.loc = loc;
-
-                        /* Indicate that the location changed */
-                        ret_value = TRUE;
-                    } /* end if */
-                } /* end if */
+                /* Reference types go through type conversion */
+                if((ret_value = H5T__ref_set_loc(dt, f, loc)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "Unable to set reference location");
                 break;
 
             case H5T_NO_CLASS:
@@ -5492,7 +5552,7 @@ done:
  *
  * Purpose:     Check if a datatype will change between disk and memory.
  *
- * Notes:       Currently, only variable-length and object references change
+ * Notes:       Currently, only variable-length and references change
  *              between disk & memory (see cases where things are changed in
  *              the H5T_set_loc() code above).
  *
@@ -5527,9 +5587,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:   H5T_detect_reg_ref
+ * Function:   H5T__detect_vlen_ref
  *
- * Purpose:    Check whether a datatype contains (or is) a region reference
+ * Purpose:    Check whether a datatype contains (or is) a vlen reference
  *             datatype.
  *
  * Return:      TRUE (1) or FALSE (0) on success
@@ -5541,7 +5601,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5T__detect_reg_ref(const H5T_t *dt)
+H5T__detect_vlen_ref(const H5T_t *dt)
 {
     unsigned    u;                      /* Local index variable */
     hbool_t     ret_value = FALSE;      /* Return value */
@@ -5551,8 +5611,9 @@ H5T__detect_reg_ref(const H5T_t *dt)
     /* Sanity checks */
     HDassert(dt);
 
-    /* Check if this datatype is a region reference */
-    if(H5T_REFERENCE == dt->shared->type && H5R_DATASET_REGION == dt->shared->u.atomic.u.r.rtype)
+    /* Check if this datatype is a vlen reference */
+    /* TODO currently H5T_STD_REF is always considered as a vlen type */
+    if(H5T_REFERENCE == dt->shared->type && !dt->shared->u.atomic.u.r.opaque)
         HGOTO_DONE(TRUE);
 
     /* Check for types that might have the correct type as a component */
@@ -5561,14 +5622,14 @@ H5T__detect_reg_ref(const H5T_t *dt)
             /* Iterate over all the compound datatype's fields */
             for(u = 0; u < dt->shared->u.compnd.nmembs; u++)
                 /* Recurse on field's datatype */
-                if(H5T__detect_reg_ref(dt->shared->u.compnd.memb[u].type))
+                if(H5T__detect_vlen_ref(dt->shared->u.compnd.memb[u].type))
                     HGOTO_DONE(TRUE);
             break;
 
         case H5T_ARRAY:
         case H5T_VLEN:
         case H5T_ENUM:
-            HGOTO_DONE(H5T__detect_reg_ref(dt->shared->parent));
+            HGOTO_DONE(H5T__detect_vlen_ref(dt->shared->parent));
             break;
 
         case H5T_NO_CLASS:
@@ -5586,7 +5647,7 @@ H5T__detect_reg_ref(const H5T_t *dt)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T__detect_reg_ref() */
+} /* end H5T__detect_vlen_ref() */
 
 
 /*-------------------------------------------------------------------------
@@ -5622,7 +5683,7 @@ H5T_is_vl_storage(const H5T_t *dt)
     if(H5T_detect_class(dt, H5T_VLEN, FALSE))
         ret_value = TRUE;
     else if(H5T_detect_class(dt, H5T_REFERENCE, FALSE))
-        ret_value = H5T__detect_reg_ref(dt);
+        ret_value = H5T__detect_vlen_ref(dt);
     else
         ret_value = FALSE;
 

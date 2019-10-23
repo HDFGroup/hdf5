@@ -177,7 +177,12 @@ static herr_t H5VL__request_specific(void *req, const H5VL_class_t *cls,
 static herr_t H5VL__request_optional(void *req, const H5VL_class_t *cls,
     va_list arguments);
 static herr_t H5VL__request_free(void *req, const H5VL_class_t *cls);
-
+static herr_t H5VL__blob_put(void *obj, const H5VL_class_t *cls,
+    const void *buf, size_t size, void *blob_id, void *ctx);
+static herr_t H5VL__blob_get(void *obj, const H5VL_class_t *cls,
+    const void *blob_id, void *buf, size_t *size, void *ctx);
+static herr_t H5VL__blob_specific(void *obj, const H5VL_class_t *cls,
+    void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
 
 /*********************/
 /* Package Variables */
@@ -4185,7 +4190,7 @@ H5VL_link_copy(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL__link_copy((src_vol_obj->data ? src_vol_obj->data : NULL), loc_params1, (dst_vol_obj ? dst_vol_obj->data : NULL), loc_params2, vol_obj->connector->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    if(H5VL__link_copy(src_vol_obj->data, loc_params1, (dst_vol_obj ? dst_vol_obj->data : NULL), loc_params2, vol_obj->connector->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "link copy failed")
 
 done:
@@ -4288,13 +4293,13 @@ H5VL_link_move(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
-    vol_obj = (src_vol_obj ? src_vol_obj : dst_vol_obj);
+    vol_obj = (src_vol_obj->data ? src_vol_obj : dst_vol_obj);
     if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL__link_move((src_vol_obj ? src_vol_obj->data : NULL), loc_params1, (dst_vol_obj ? dst_vol_obj->data : NULL), loc_params2, vol_obj->connector->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    if(H5VL__link_move(src_vol_obj->data, loc_params1, (dst_vol_obj ? dst_vol_obj->data : NULL), loc_params2, vol_obj->connector->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTMOVE, FAIL, "link move failed")
 
 done:
@@ -6561,6 +6566,350 @@ H5VLrequest_free(void *req, hid_t connector_id)
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLrequest_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__blob_put
+ *
+ * Purpose:     Put a blob through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__blob_put(void *obj, const H5VL_class_t *cls, const void *buf, size_t size,
+    void *blob_id, void *ctx)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(obj);
+    HDassert(cls);
+    HDassert(size == 0 || buf);
+    HDassert(blob_id);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->blob_cls.put)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'blob put' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->blob_cls.put)(obj, buf, size, blob_id, ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "blob put callback failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__blob_put() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_blob_put
+ *
+ * Purpose:     Put a blob through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, August 21, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_blob_put(const H5VL_object_t *vol_obj, const void *buf, size_t size,
+    void *blob_id, void *ctx)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+    HDassert(size == 0 || buf);
+    HDassert(blob_id);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding VOL callback */
+    if(H5VL__blob_put(vol_obj->data, vol_obj->connector->cls, buf, size, blob_id, ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "blob put failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_blob_put() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLblob_put
+ *
+ * Purpose:     Put a blob through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLblob_put(void *obj, hid_t connector_id, const void *buf, size_t size,
+    void *blob_id, void *ctx)
+{
+    H5VL_class_t *cls;                  /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*xi*xz*x*x", obj, connector_id, buf, size, blob_id, ctx);
+
+    /* Get class pointer */
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* Call the corresponding VOL callback */
+    if(H5VL__blob_put(obj, cls, buf, size, blob_id, ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "blob put failed")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLblob_put() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__blob_get
+ *
+ * Purpose:     Get a blob through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__blob_get(void *obj, const H5VL_class_t *cls, const void *blob_id,
+    void *buf, size_t *size, void *ctx)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(obj);
+    HDassert(cls);
+    HDassert(blob_id);
+    HDassert(size || buf);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->blob_cls.get)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'blob get' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->blob_cls.get)(obj, blob_id, buf, size, ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "blob get callback failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__blob_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_blob_get
+ *
+ * Purpose:     Get a blob through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf,
+    size_t *size, void *ctx)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+    HDassert(blob_id);
+    HDassert(size || buf);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding VOL callback */
+    if(H5VL__blob_get(vol_obj->data, vol_obj->connector->cls, blob_id, buf, size, ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "blob get failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_blob_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLblob_get
+ *
+ * Purpose:     Get a blob through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf,
+    size_t *size, void *ctx)
+{
+    H5VL_class_t *cls;                  /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*xi*x*x*z*x", obj, connector_id, blob_id, buf, size, ctx);
+
+    /* Get class pointer */
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* Call the corresponding VOL callback */
+    if(H5VL__blob_get(obj, cls, blob_id, buf, size, ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "blob get failed")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLblob_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__blob_specific
+ *
+ * Purpose:	Specific operation on blobs through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, August 17, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id,
+    H5VL_blob_specific_t specific_type, va_list arguments)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(obj);
+    HDassert(cls);
+    HDassert(blob_id);
+
+    /* Check if the corresponding VOL callback exists */
+    if(NULL == cls->blob_cls.specific)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'blob specific' method")
+
+    /* Call the corresponding VOL callback */
+    if((cls->blob_cls.specific)(obj, blob_id, specific_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__blob_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_blob_specific
+ *
+ * Purpose: Specific operation on blobs through the VOL
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id,
+    H5VL_blob_specific_t specific_type, ...)
+{
+    va_list arguments;                  /* Argument list passed from the API call */
+    hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(vol_obj);
+    HDassert(blob_id);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    HDva_start(arguments, specific_type);
+    arg_started = TRUE;
+    if((ret_value = H5VL__blob_specific(vol_obj->data, vol_obj->connector->cls, blob_id, specific_type, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback")
+
+done:
+    /* End access to the va_list, if we started it */
+    if(arg_started)
+        HDva_end(arguments);
+
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_blob_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLblob_specific
+ *
+ * Purpose: Specific operation on blobs through the VOL
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id,
+    H5VL_blob_specific_t specific_type, va_list arguments)
+{
+    H5VL_class_t *cls;                  /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xi*xVBx", obj, connector_id, blob_id, specific_type, arguments);
+
+    /* Get class pointer */
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* Call the corresponding VOL callback */
+    if(H5VL__blob_specific(obj, cls, blob_id, specific_type, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "blob specific operation failed")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLblob_specific() */
 
 
 /*-------------------------------------------------------------------------

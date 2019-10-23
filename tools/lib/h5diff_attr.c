@@ -515,12 +515,12 @@ hsize_t diff_attr(hid_t loc1_id,
             /* Free buf1 and buf2, check both VLEN-data VLEN-string to reclaim any
             * VLEN memory first */
             if(TRUE == h5tools_detect_vlen(mtype1_id))
-                H5Dvlen_reclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
+                H5Treclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
             HDfree(buf1);
             buf1 = NULL;
 
             if(TRUE == h5tools_detect_vlen(mtype2_id))
-                H5Dvlen_reclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
+                H5Treclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
             HDfree(buf2);
             buf2 = NULL;
 
@@ -551,12 +551,12 @@ done:
     H5E_BEGIN_TRY {
         if(buf1) {
             if(buf1hasdata && TRUE == h5tools_detect_vlen(mtype1_id))
-                H5Dvlen_reclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
+                H5Treclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
             HDfree(buf1);
         } /* end if */
         if(buf2) {
             if(buf2hasdata && TRUE == h5tools_detect_vlen(mtype2_id))
-                H5Dvlen_reclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
+                H5Treclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
             HDfree(buf2);
         } /* end if */
 

@@ -2640,8 +2640,8 @@ test_file_double_file_dataset_open(hbool_t new_format)
     HDmemset(buffer, 0, sizeof(char*) * 5);
     ret = H5Dread(did2, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     CHECK(ret, FAIL, "H5Dread");
-    ret = H5Dvlen_reclaim(tid2, sid1, H5P_DEFAULT, buffer);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid2, sid1, H5P_DEFAULT, buffer);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Second file's dataset close */
     ret = H5Dclose(did2);
@@ -2655,8 +2655,8 @@ test_file_double_file_dataset_open(hbool_t new_format)
     HDmemset(buffer, 0, sizeof(char*) * 5);
     ret = H5Dread(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     CHECK(ret, FAIL, "H5Dread");
-    ret = H5Dvlen_reclaim(tid2, sid1, H5P_DEFAULT, buffer);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid2, sid1, H5P_DEFAULT, buffer);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* First file's dataset close */
     ret = H5Dclose(did1);

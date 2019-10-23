@@ -83,7 +83,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5O.c H5Odeprec.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
         H5Oattribute.c H5Obogus.c H5Obtreek.c H5Ocache.c H5Ocache_image.c \
         H5Ochunk.c \
-        H5Ocont.c H5Ocopy.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c \
+        H5Ocont.c H5Ocopy.c H5Ocopy_ref.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c \
         H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c \
         H5Oint.c H5Olayout.c \
         H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
@@ -114,10 +114,12 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c \
         H5Topaque.c \
         H5Torder.c \
+        H5Tref.c \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c \
         H5VL.c H5VLcallback.c H5VLint.c H5VLnative.c \
-        H5VLnative_attr.c H5VLnative_dataset.c H5VLnative_datatype.c \
-        H5VLnative_file.c H5VLnative_group.c H5VLnative_link.c H5VLnative_object.c \
+        H5VLnative_attr.c H5VLnative_blob.c H5VLnative_dataset.c \
+        H5VLnative_datatype.c H5VLnative_file.c H5VLnative_group.c \
+        H5VLnative_link.c H5VLnative_object.c \
         H5VLpassthru.c \
         H5VM.c H5WB.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c \
