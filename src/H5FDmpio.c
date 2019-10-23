@@ -22,15 +22,15 @@
 #include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
 
-#include "H5private.h"		/* Generic Functions			*/
+#include "H5private.h"          /* Generic Functions                    */
 #include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Dprivate.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5FDprivate.h"	/* File drivers				*/
-#include "H5FDmpi.h"            /* MPI-based file drivers		*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Dprivate.h"         /* Dataset functions                    */
+#include "H5Eprivate.h"         /* Error handling                       */
+#include "H5Fprivate.h"         /* File access                          */
+#include "H5FDprivate.h"        /* File drivers                         */
+#include "H5FDmpi.h"            /* MPI-based file drivers               */
+#include "H5Iprivate.h"         /* IDs                                  */
+#include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 
 #ifdef H5_HAVE_PARALLEL
@@ -1324,6 +1324,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mpio_read() */
 
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write
@@ -1366,6 +1367,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
 #endif
     int                         size_i;
     hbool_t                     use_view_this_time = FALSE;
+    hbool_t                     derived_type = FALSE;
     H5FD_mpio_xfer_t            xfer_mode;   /* I/O transfer mode */
     herr_t                      ret_value = SUCCEED;
 
@@ -1391,8 +1393,6 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
     if(H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
     size_i = (int)size;
-    if((hsize_t)size_i != size)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i")
 
 #ifdef H5FDmpio_DEBUG
     if(H5FD_mpio_Debug[(int)'w'])
@@ -1430,6 +1430,20 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
          */
         mpi_off = 0;
     } /* end if */
+    else if(size != (hsize_t)size_i) {
+        /* If HERE, then we need to work around the integer size limit
+         * of 2GB. The input size_t size variable cannot fit into an integer,
+         * but we can get around that limitation by creating a different datatype
+         * and then setting the integer size (or element count) to 1 when using
+         * the derived_type.
+         */
+
+       if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype")
+
+        derived_type = TRUE;
+        size_i = 1;
+    }
 
     /* Write the data. */
     if(use_view_this_time) {
@@ -1506,6 +1520,9 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
         file->local_eof = addr + (haddr_t)bytes_written;
 
 done:
+    if(derived_type) {
+        MPI_Type_free(&buf_type);
+    }
 #ifdef H5FDmpio_DEBUG
     if(H5FD_mpio_Debug[(int)'t'])
         HDfprintf(stdout, "%s: Leaving, proc %d: ret_value = %d\n", FUNC, file->mpi_rank, ret_value );

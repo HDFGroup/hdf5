@@ -4085,8 +4085,8 @@ test_nbit_compound_3(hid_t file)
      * Cleanup
      *----------------------------------------------------------------------
      */
-    if(H5Dvlen_reclaim(cmpd_tid, space, H5P_DEFAULT, new_data) < 0) goto error;
-    if(H5Dvlen_reclaim(cmpd_tid, space, H5P_DEFAULT, orig_data) < 0) goto error;
+    if(H5Treclaim(cmpd_tid, space, H5P_DEFAULT, new_data) < 0) goto error;
+    if(H5Treclaim(cmpd_tid, space, H5P_DEFAULT, orig_data) < 0) goto error;
     if(H5Tclose(i_tid) < 0) goto error;
     if(H5Tclose(str_tid) < 0) goto error;
     if(H5Tclose(vl_str_tid) < 0) goto error;

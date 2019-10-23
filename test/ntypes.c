@@ -1779,10 +1779,10 @@ test_vl_dtype(hid_t file)
     } /* end for */
 
     /* Reclaim the read VL data */
-    if(H5Dvlen_reclaim(native_type, space, H5P_DEFAULT, rdata) < 0) TEST_ERROR;
+    if(H5Treclaim(native_type, space, H5P_DEFAULT, rdata) < 0) TEST_ERROR;
 
     /* Reclaim the write VL data */
-    if(H5Dvlen_reclaim(native_type, space, H5P_DEFAULT, wdata) < 0) TEST_ERROR;
+    if(H5Treclaim(native_type, space, H5P_DEFAULT, wdata) < 0) TEST_ERROR;
 
     /* Close Dataset */
     if(H5Dclose(dataset) < 0) TEST_ERROR;
@@ -1808,8 +1808,8 @@ error:
 
     H5E_BEGIN_TRY {
         if(native_type > 0) {
-            H5Dvlen_reclaim(native_type, space, H5P_DEFAULT, rdata);
-            H5Dvlen_reclaim(native_type, space, H5P_DEFAULT, wdata);
+            H5Treclaim(native_type, space, H5P_DEFAULT, rdata);
+            H5Treclaim(native_type, space, H5P_DEFAULT, wdata);
         } /* end if */
         H5Sclose(space);
         H5Dclose(dataset);

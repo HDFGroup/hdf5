@@ -2781,7 +2781,7 @@ h5str_dump_simple_dset
 
                     /* Reclaim any VL memory, if necessary */
                     if (vl_data) {
-                        if (H5Dvlen_reclaim(p_type, sm_space, H5P_DEFAULT, sm_buf) < 0)
+                        if (H5Treclaim(p_type, sm_space, H5P_DEFAULT, sm_buf) < 0)
                             H5_LIBRARY_ERROR(ENVONLY);
                     }
 

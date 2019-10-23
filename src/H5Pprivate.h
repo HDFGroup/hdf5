@@ -81,6 +81,7 @@ typedef enum H5P_plist_type_t {
     H5P_TYPE_VOL_INITIALIZE    = 19,
     H5P_TYPE_MAP_CREATE        = 20,
     H5P_TYPE_MAP_ACCESS        = 21,
+    H5P_TYPE_REFERENCE_ACCESS  = 22,
     H5P_TYPE_MAX_TYPE
 } H5P_plist_type_t;
 
