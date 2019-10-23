@@ -464,7 +464,9 @@ fi
         $IFDEBUG ps
 
         # Wait for the readers and the writer to finish.
-        wait
+        wait $pid_readers
+	kill -USR1 $pid_writer
+	wait $pid_writer
 
         # Collect exit codes of the readers
         n=0

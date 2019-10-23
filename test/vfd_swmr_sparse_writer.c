@@ -28,6 +28,8 @@
 /***********/
 /* Headers */
 /***********/
+#include <err.h>
+#include <signal.h>
 
 #include "h5test.h"
 #include "vfd_swmr_common.h"
@@ -383,6 +385,48 @@ error:
     return -1;
 } /* add_records() */
 
+static volatile sig_atomic_t got_sigusr1 = 0;
+
+static void
+sigusr1_handler(int H5_ATTR_UNUSED signo)
+{
+    got_sigusr1 = 1;
+}
+
+static void
+await_signal(void)
+{
+    sigset_t sleepset, fullset, oldset;
+    struct sigaction sa, osa;
+
+    memset(&sa, '\0', sizeof(sa));
+    sa.sa_handler = sigusr1_handler;
+    if (sigemptyset(&sa.sa_mask) == -1 ||
+        sigfillset(&fullset) == -1 ||
+        sigemptyset(&sleepset) == -1) {
+        err(EXIT_FAILURE, "%s.%d: could not initialize signal masks",
+            __func__, __LINE__);
+    }
+
+    if (sigprocmask(SIG_BLOCK, &fullset, &oldset) == -1)
+        err(EXIT_FAILURE, "%s.%d: sigprocmask", __func__, __LINE__);
+
+    if (sigaction(SIGUSR1, &sa, &osa) == -1)
+        err(EXIT_FAILURE, "%s.%d: sigaction", __func__, __LINE__);
+
+    if (sigsuspend(&sleepset) == -1 && errno != EINTR)
+        err(EXIT_FAILURE, "%s.%d: sigsuspend", __func__, __LINE__);
+
+    if (got_sigusr1 != 0)
+        printf("Cancelled by SIGUSR1.\n");
+
+    if (sigaction(SIGUSR1, &osa, NULL) == -1)
+        err(EXIT_FAILURE, "%s.%d: sigaction", __func__, __LINE__);
+
+    if (sigprocmask(SIG_SETMASK, &oldset, NULL) == -1)
+        err(EXIT_FAILURE, "%s.%d: sigprocmask", __func__, __LINE__);
+}
+
 static void
 usage(void)
 {
@@ -498,6 +542,8 @@ int main(int argc, const char *argv[])
         HDfprintf(stderr, "WRITER: Error releasing symbols!\n");
         HDexit(1);
     } /* end if */
+
+    await_signal();
 
     /* Emit informational message */
     if(verbose)
