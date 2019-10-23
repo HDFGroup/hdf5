@@ -163,7 +163,7 @@ elif [[ $UNAME == p90* ]]; then
       SKIP_TESTS=$SKIP_TESTS"H5TEST_cache"
       SKIP_TESTS=$SKIP_TESTS"'"
     fi
-    perl -i -pe "s/^CMD=.*/CMD="ctest . -E MPI_TEST_ ${SKIP_TESTS} -C Release -j 16 -T test"/" hdf5-$HDF5_VER/bin/batch/ctestS.sl.in.cmake
+    perl -i -pe "s/^CMD=.*/CMD=\"ctest . -E MPI_TEST_ ${SKIP_TESTS} -C Release -j 16 -T test\"/" hdf5-$HDF5_VER/bin/batch/ctestS.sl.in.cmake
     perl -i -pe "s/^$CMD.*/ctest . -E MPI_TEST_ ${SKIP_TESTS} -C Release -j 16 -T test >& ctestS.out/" hdf5-$HDF5_VER/bin/batch/ctestS.sl.in.cmake
 
 #    echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_EXECUTABLE:STRING=mpirun")' >> hdf5-$HDF5_VER/config/cmake/scripts/HPC/sbatch-HDF5options.cmake
