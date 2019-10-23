@@ -876,6 +876,53 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5Z_has_optional_filter
+ *
+ * Purpose:  If one filter optional, this filter can be ignored.
+ *
+ * Return:   Non-negative(TRUE/FALSE) on success
+ *           0 
+ *           Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Z_has_optional_filter(hid_t dcpl_id)
+
+/*H5Z_can_ignore(hid_t dcpl_id, hid_t type_id) */
+/*H5Z_can_ignore(hid_t dcpl_id, hid_t type_id,const H5S_t *space) */
+{
+    htri_t ret_value = FALSE;   /* Return value */
+    H5P_genplist_t     *dc_plist;           /* Dataset creation property list object */
+    H5O_pline_t     dcpl_pline;     /* Object's I/O pipeline information */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+
+    if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list")
+
+    /* Get I/O pipeline information */
+    if (H5P_peek(dc_plist, H5O_CRT_PIPELINE_NAME, &dcpl_pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter")
+
+    if (dcpl_pline.nused > 0) {
+        size_t u;
+        for ( u = 0; u<dcpl_pline.nused;u++) {
+            if(dcpl_pline.filter[u].flags & H5Z_FLAG_OPTIONAL) {
+                ret_value = TRUE;
+                break;
+            }         
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_can_apply() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function: H5Z_can_apply
  *
  * Purpose:  Checks if all the filters defined in the dataset creation
