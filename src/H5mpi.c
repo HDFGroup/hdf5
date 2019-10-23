@@ -38,7 +38,7 @@ static hsize_t bigio_count = H5_MAX_MPI_COUNT;
 
 
 /*-------------------------------------------------------------------------
- * Function:  H5_mpio_set_bigio_count
+ * Function:  H5_mpi_set_bigio_count
  *
  * Purpose:   Allow us to programatically change the switch point
  *            when we utilize derived datatypes.  This is of
@@ -51,7 +51,7 @@ static hsize_t bigio_count = H5_MAX_MPI_COUNT;
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5_mpio_set_bigio_count(hsize_t new_count)
+H5_mpi_set_bigio_count(hsize_t new_count)
 {
     hsize_t orig_count = bigio_count;
 
@@ -59,11 +59,11 @@ H5_mpio_set_bigio_count(hsize_t new_count)
        bigio_count = new_count;
     }
     return orig_count;
-} /* end H5_mpio_set_bigio_count() */
+} /* end H5_mpi_set_bigio_count() */
 
 
 /*-------------------------------------------------------------------------
- * Function:  H5_mpio_get_bigio_count
+ * Function:  H5_mpi_get_bigio_count
  *
  * Purpose:   Allow other HDF5 library functions to access
  *            the current value for bigio_count.
@@ -75,7 +75,7 @@ H5_mpio_set_bigio_count(hsize_t new_count)
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5_mpio_get_bigio_count()
+H5_mpi_get_bigio_count()
 {
     return bigio_count;
 }
