@@ -53,8 +53,6 @@ static void coll_chunktest(const char* filename, int chunk_factor, int select_fa
                            int api_option, int file_selection, int mem_selection, int mode);
 hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type);
 
-hsize_t H5_mpi_set_bigio_count(hsize_t new_count);
-
 /*
  * Setup the coordinates for point selection.
  */
