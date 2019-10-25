@@ -290,7 +290,7 @@ message (STATUS "Dashboard script configuration:\n${vars}\n")
         execute_process(COMMAND ls ${CTEST_BINARY_DIRECTORY}/Testing/Temporary RESULT_VARIABLE result)
         if (result)
           message(STATUS "No ${CTEST_BINARY_DIRECTORY}/Testing/Temporary!")
-        else
+        else ()
           message(STATUS "Check for existence of ${CTEST_BINARY_DIRECTORY}/Testing/Temporary/LastTest*.log*")
           execute_process(COMMAND ls ${CTEST_BINARY_DIRECTORY}/Testing/Temporary/LastTest*.log* RESULT_VARIABLE result OUTPUT_QUIET ERROR_QUIET)
           while(result)
