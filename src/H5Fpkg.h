@@ -393,11 +393,7 @@ struct H5F_file_t {
                                              * not 
                                              */
     uint64_t tick_num;                      /* Number of the current tick */
-#if 1 /* use clock_gettime() */ /* JRM */
     struct timespec end_of_tick;            /* End time of the current tick */
-#else /* use gettimeofday() */ /* JRM */
-    struct timeval end_of_tick;             /* End time of the current tick */
-#endif /* use gettimeofday() */ /* JRM */
 
     /* VFD SWMR metadata file index */
     H5FD_vfd_swmr_idx_entry_t * mdf_idx;    /* pointer to an array of instance
