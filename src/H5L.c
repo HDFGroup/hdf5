@@ -299,6 +299,9 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
 
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
+
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, 
             ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id), TRUE) < 0)
@@ -385,6 +388,9 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* Check the link create property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, 
@@ -473,9 +479,12 @@ H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
-    /* Check the group access property list */
+    /* Get the link creation property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
 
     /* Set location fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -548,6 +557,9 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     /* Check the link create property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, cur_loc_id, TRUE) < 0)
@@ -635,9 +647,12 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     if(!udata && udata_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "udata cannot be NULL if udata_size is non-zero")
 
-    /* Check the group access property list */
+    /* Get the link creation property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
@@ -1850,8 +1865,8 @@ H5L__link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t H5_ATT
     /* Check for non-default link creation properties */
     if(udata->lc_plist) {
         /* Get character encoding property */
-        if(H5P_get(udata->lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &udata->lnk->cset) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get property value for character encoding")
+        if(H5CX_get_encoding(&udata->lnk->cset) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get 'character set' property")
     } /* end if */
     else
         udata->lnk->cset = H5F_DEFAULT_CSET;   /* Default character encoding for link */
@@ -1992,8 +2007,8 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Get intermediate group creation property */
-        if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &crt_intmd_group) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for creating missing groups")
+        if(H5CX_get_intermediate_group(&crt_intmd_group) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get 'create intermediate group' property")
 
         if(crt_intmd_group > 0)
             target_flags |= H5G_CRT_INTMD_GROUP;
@@ -2881,7 +2896,7 @@ H5L_move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_lo
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Get intermediate group creation property */
-        if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &crt_intmd_group) < 0)
+        if(H5CX_get_intermediate_group(&crt_intmd_group) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for creating missing groups")
 
         /* Set target flags for source and destination */
@@ -2889,7 +2904,7 @@ H5L_move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_lo
             dst_target_flags |= H5G_CRT_INTMD_GROUP;
 
         /* Get character encoding property */
-        if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &char_encoding) < 0)
+        if(H5CX_get_encoding(&char_encoding) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for character encoding")
     } /* end if */
 
