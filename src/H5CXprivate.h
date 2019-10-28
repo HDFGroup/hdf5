@@ -77,6 +77,7 @@ H5_DLL herr_t H5CX_free_state(H5CX_state_t *api_state);
 
 /* "Setter" routines for API context info */
 H5_DLL void H5CX_set_dxpl(hid_t dxpl_id);
+H5_DLL void H5CX_set_lcpl(hid_t lcpl_id);
 H5_DLL void H5CX_set_lapl(hid_t lapl_id);
 H5_DLL void H5CX_set_dcpl(hid_t dcpl_id);
 H5_DLL herr_t H5CX_set_libver_bounds(H5F_t *f);
@@ -121,6 +122,9 @@ H5_DLL herr_t H5CX_get_filter_cb(H5Z_cb_t *filter_cb);
 H5_DLL herr_t H5CX_get_data_transform(H5Z_data_xform_t **data_transform);
 H5_DLL herr_t H5CX_get_vlen_alloc_info(H5T_vlen_alloc_info_t *vl_alloc_info);
 H5_DLL herr_t H5CX_get_dt_conv_cb(H5T_conv_cb_t *cb_struct);
+
+/* "Getter" routines for LCPL properties cached in API context */
+H5_DLL herr_t H5CX_get_create_intermediate_group(unsigned* crt_intermed_group);
 
 /* "Getter" routines for LAPL properties cached in API context */
 H5_DLL herr_t H5CX_get_nlinks(size_t *nlinks);
