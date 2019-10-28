@@ -2170,6 +2170,17 @@ H5_DLL herr_t H5CX_pop(void);
     BEGIN_MPE_LOG                                                             \
     {
 
+/*
+ * Use this macro for API functions that shouldn't perform _any_ initialization
+ *      of the library or an interface, or push themselves on the function
+ *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
+ *	API name itself.  Examples are: H5TSmutex_acquire,
+ *
+ */
+#define FUNC_ENTER_API_NAMECHECK_ONLY {{{{{                                   \
+    FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                 \
+    {
+
 /* Note: this macro only works when there's _no_ interface initialization routine for the module */
 #define FUNC_ENTER_NOAPI_INIT(err)                                            \
     /* Initialize the package, if appropriate */                              \
@@ -2243,6 +2254,16 @@ H5_DLL herr_t H5CX_pop(void);
     FUNC_ENTER_COMMON_NOERR(!H5_IS_API(FUNC));                                \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
+/*
+ * Use this macro for non-API functions that shouldn't perform _any_ initialization
+ *      of the library or an interface, or push themselves on the function
+ *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
+ *	API name itself.  Examples are private routines in the H5TS package.
+ *
+ */
+#define FUNC_ENTER_NOAPI_NAMECHECK_ONLY {                                     \
+    FUNC_ENTER_COMMON_NOERR(!H5_IS_API(FUNC));
+
 /* Use the following two macros as replacements for the FUNC_ENTER_NOAPI
  * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
  * up a metadata tag. */
@@ -2302,6 +2323,16 @@ H5_DLL herr_t H5CX_pop(void);
     FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));                                 \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
+/*
+ * Use this macro for non-API functions that shouldn't perform _any_ initialization
+ *      of the library or an interface, or push themselves on the function
+ *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
+ *	API name itself.  Examples are static routines in the H5TS package.
+ *
+ */
+#define FUNC_ENTER_STATIC_NAMECHECK_ONLY {                                    \
+    FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));
+
 /* Use the following macro as replacement for the FUNC_ENTER_STATIC
  * macro when the function needs to set up a metadata tag. */
 #define FUNC_ENTER_STATIC_TAG(tag) {                                          \
@@ -2359,6 +2390,13 @@ H5_DLL herr_t H5CX_pop(void);
     return(ret_value);                                                        \
 }}}} /*end scope from beginning of FUNC_ENTER*/
 
+/* Use this macro to match the FUNC_ENTER_API_NAMECHECK_ONLY macro */
+#define FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)                              \
+        ;                                                                     \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+    return(ret_value);                                                        \
+}}}}} /*end scope from beginning of FUNC_ENTER*/
+
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
         ;                                                                     \
     } /*end scope from end of FUNC_ENTER*/                                    \
@@ -2382,6 +2420,14 @@ H5_DLL herr_t H5CX_pop(void);
         ;                                                                     \
     } /*end scope from end of FUNC_ENTER*/                                    \
     return(ret_value);                                                        \
+} /*end scope from beginning of FUNC_ENTER*/
+
+/* Use these macros to match the FUNC_ENTER_NOAPI_NAMECHECK_ONLY macro */
+#define FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                            \
+    return(ret_value);                                                        \
+} /*end scope from beginning of FUNC_ENTER*/
+#define FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY                                  \
+    return;                                                                   \
 } /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro when exiting a function that set up a metadata tag */
