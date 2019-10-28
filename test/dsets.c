@@ -7022,6 +7022,70 @@ error:
     return FAIL;
 } /* end test_missing_chunk() */
 
+/* Using Euclid's algorithm, find the greatest common divisor (GCD) of
+ * the two arguments and return it.
+ *
+ * The GCD is negative if the arguments have opposite sign.  Otherwise,
+ * it is positive.
+ *
+ * If either argument is zero, then the result is undefined.
+ */
+static long
+gcd(const long l0, const long r0)
+{
+    long magnitude, remainder;
+    bool negative = ((l0 < 0) != (r0 < 0));
+    long l = labs(l0), r = labs(r0);
+
+    do {
+        if (l < r) {
+            r = r % l;
+            remainder = r;
+        } else /* r <= l */ {
+            l = l % r;
+            remainder = l;
+        }
+    } while (remainder != 0);
+
+    magnitude = (l == 0) ? r : l;
+    return negative ? -magnitude : magnitude;
+}
+
+/* Choose a random offset into an array `nelts` elements long, and store
+ * it at `offsetp`.  The offset will be in the range [0, nelts - 1].
+ * Also choose a random increment, `inc`, that "generates" all
+ * indices in [0, nelts - 1] when it is added to itself repeatedly.
+ * That is, the range of the discrete function `f(i) = (i * inc)
+ * mod nelts` on the domain [0, nelts - 1] is [0, nelts - 1].  Store
+ * `inc` at `incp`.
+ *
+ * If `nelts <= 0`, results are undefined.
+ */
+static void
+make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
+{
+    long inc;
+
+    assert(0 < nelts);
+
+    *offsetp = random() % nelts;
+
+    /* `maxinc` is chosen so that for any `x` in [0, nelts - 1],
+     * `x + maxinc` does not overflow a long.
+     */
+    const long maxinc = MIN(nelts - 1, LONG_MAX - nelts);
+
+    /* Choose a random number in [1, nelts - 1].  If its greatest divisor
+     * in common with `nelts` is 1, then it will "generate" the additive ring
+     * [0, nelts - 1], so let it be our increment.  Otherwise, choose a new
+     * number.
+     */
+    do {
+        inc = 1 + random() % maxinc;
+    } while (gcd(inc, nelts) != 1);
+
+    *incp = inc;
+}
 
 /*-------------------------------------------------------------------------
  * Function: test_random_chunks_real
@@ -7046,7 +7110,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
                 rbuf[NPOINTS],
                 check2[20][20];
     hsize_t     coord[NPOINTS][2];
-    hsize_t     dsize[2]={100,100}, dmax[2]={H5S_UNLIMITED, H5S_UNLIMITED}, csize[2]={10,10}, nsize[2]={200,200};
+    const hsize_t     dsize[2]={100,100}, dmax[2]={H5S_UNLIMITED, H5S_UNLIMITED}, csize[2]={10,10}, nsize[2]={200,200};
     hsize_t    fixed_dmax[2] = {1000, 1000};
     hsize_t     msize[1]={NPOINTS};
     const char  dname[]="dataset";
@@ -7054,7 +7118,9 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     size_t      i, j;
     H5D_chunk_index_t idx_type; /* Dataset chunk index type */
     H5F_libver_t low;           /* File format low bound */
-
+    long ofs, inc;
+    long rows;
+    long cols;
 
     TESTING(testname);
 
@@ -7088,12 +7154,16 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j=0; j<dsize[1]/csize[1]; j++)
             check2[i][j] = 0;
 
+    rows = (long)(dsize[0]/csize[0]);
+    cols = (long)(dsize[1]/csize[1]);
+    make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i=0; i<NPOINTS; i++){
-        do {
-            chunk_row = (int)HDrandom () % (int)(dsize[0]/csize[0]);
-            chunk_col = (int)HDrandom () % (int)(dsize[1]/csize[1]);
-        } while (check2[chunk_row][chunk_col]);
+        chunk_row = ofs / cols;
+        chunk_col = ofs % cols;
+        ofs = (ofs + inc) % (rows * cols);
+        assert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row+chunk_col+1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -7211,12 +7281,16 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j = 0; j < nsize[1] / csize[1]; j++)
             check2[i][j] = 0;
 
+    rows = nsize[0] / csize[0];
+    cols = nsize[1] / csize[1];
+    make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        do {
-            chunk_row = (int)HDrandom() % (int)(nsize[0] / csize[0]);
-            chunk_col = (int)HDrandom() % (int)(nsize[1] / csize[1]);
-        } while (check2[chunk_row][chunk_col]);
+        chunk_row = ofs / cols;
+        chunk_col = ofs % cols;
+        ofs = (ofs + inc) % (rows * cols);
+        assert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -7317,12 +7391,16 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j = 0; j < nsize[1] / csize[1]; j++)
             check2[i][j] = 0;
 
+    rows = (long)(nsize[0] / csize[0]);
+    cols = (long)(nsize[1] / csize[1]);
+    make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        do {
-            chunk_row = (int)HDrandom() % (int)(nsize[0] / csize[0]);
-            chunk_col = (int)HDrandom() % (int)(nsize[1] / csize[1]);
-        } while (check2[chunk_row][chunk_col]);
+        chunk_row = ofs / cols;
+        chunk_col = ofs % cols;
+        ofs = (ofs + inc) % (rows * cols);
+        assert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -9338,7 +9416,7 @@ test_fixed_array(hid_t fapl)
     hid_t    dsid_max = -1;    /* Dataset ID for dataset with maximum dimensions set */
 
     hsize_t     dim2[2] = {48, 18};           /* Dataset dimensions */
-    hsize_t     dim2_big[2] = {500, 60};      /* Big dataset dimensions */
+    const hsize_t     dim2_big[2] = {500, 60};      /* Big dataset dimensions */
     hsize_t     dim2_max[2] = {120, 50};      /* Maximum dataset dimensions */
 
     hid_t       mem_id;          /* Memory space ID */
@@ -9352,7 +9430,7 @@ test_fixed_array(hid_t fapl)
     int         rbuf[POINTS];              /* read buffer */
     int         *rbuf_big = NULL;      /* read buffer for big dataset */
 
-    hsize_t     chunk_dim2[2] = {4, 3}; /* Chunk dimensions */
+    const hsize_t     chunk_dim2[2] = {4, 3}; /* Chunk dimensions */
     int         chunks[12][6];          /* # of chunks for dataset dimensions */
     int         chunks_big[125][20];    /* # of chunks for big dataset dimensions */
     int         chunk_row;              /* chunk row index */
@@ -9374,6 +9452,9 @@ test_fixed_array(hid_t fapl)
 
     size_t      i, j;               /* local index variables */
     herr_t      ret;                /* Generic return value */
+    long ofs, inc;
+    long rows;
+    long cols;
 
     TESTING("datasets w/fixed array as chunk index");
 
@@ -9432,16 +9513,20 @@ test_fixed_array(hid_t fapl)
         for(j = 0; j < dim2[1]/chunk_dim2[1]; j++)
             chunks[i][j] = 0;
 
+        rows = (long)(dim2[0]/chunk_dim2[0]);
+        cols = (long)(dim2[1]/chunk_dim2[1]);
+        make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS; i++){
-        do {
-            chunk_row = (int)HDrandom () % (int)(dim2[0]/chunk_dim2[0]);
-            chunk_col = (int)HDrandom () % (int)(dim2[1]/chunk_dim2[1]);
-        } while (chunks[chunk_row][chunk_col]);
+            chunk_row = ofs / cols;
+            chunk_col = ofs % cols;
+            ofs = (ofs + inc) % (rows * cols);
+            assert(!chunks[chunk_row][chunk_col]);
 
-        wbuf[i] = chunks[chunk_row][chunk_col] = chunk_row+chunk_col+1;
-        coord[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
-        coord[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
+            wbuf[i] = chunks[chunk_row][chunk_col] = chunk_row+chunk_col+1;
+            coord[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
+            coord[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
         } /* end for */
 
         /* Create first dataset with cur and max dimensions */
@@ -9557,16 +9642,20 @@ test_fixed_array(hid_t fapl)
         for(j = 0; j < dim2_big[1]/chunk_dim2[1]; j++)
             chunks_big[i][j] = 0;
 
+        rows = (long)(dim2_big[0]/chunk_dim2[0]);
+        cols = (long)(dim2_big[1]/chunk_dim2[1]);
+        make_random_offset_and_increment(rows * cols, &ofs, &inc);
+
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS_BIG; i++){
-        do {
-            chunk_row = (int)HDrandom () % (int)(dim2_big[0]/chunk_dim2[0]);
-            chunk_col = (int)HDrandom () % (int)(dim2_big[1]/chunk_dim2[1]);
-        } while (chunks_big[chunk_row][chunk_col]);
+            chunk_row = ofs / cols;
+            chunk_col = ofs % cols;
+            ofs = (ofs + inc) % (rows * cols);
+            assert(!chunks_big[chunk_row][chunk_col]);
 
-        wbuf_big[i] = chunks_big[chunk_row][chunk_col] = chunk_row+chunk_col+1;
-        coord_big[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
-        coord_big[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
+            wbuf_big[i] = chunks_big[chunk_row][chunk_col] = chunk_row+chunk_col+1;
+            coord_big[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
+            coord_big[i][1] = (hsize_t)chunk_col * chunk_dim2[1];
         } /* end for */
 
         /* Create dataspace for write buffer */
