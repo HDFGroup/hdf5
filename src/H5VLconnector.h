@@ -116,6 +116,7 @@ typedef enum H5VL_file_get_t {
 
 /* types for file SPECIFIC callback */
 typedef enum H5VL_file_specific_t {
+    H5VL_FILE_POST_OPEN,                    /* Adjust file after open, with wrapping context */
     H5VL_FILE_FLUSH,                        /* Flush file                       */
     H5VL_FILE_REOPEN,                       /* Reopen the file                  */
     H5VL_FILE_MOUNT,                        /* Mount a file                     */
@@ -380,7 +381,7 @@ typedef struct H5VL_request_class_t {
 /* 'blob' routines */
 typedef struct H5VL_blob_class_t {
     herr_t (*put)(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
-    herr_t (*get)(void *obj, const void *blob_id, void *buf, size_t *size, void *ctx);
+    herr_t (*get)(void *obj, const void *blob_id, void *buf, size_t size, void *ctx);
     herr_t (*specific)(void *obj, void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
     herr_t (*optional)(void *obj, void *blob_id, va_list arguments);
 } H5VL_blob_class_t;
@@ -440,6 +441,9 @@ extern "C" {
 
 /* Helper routines for VOL connector authors */
 H5_DLL void *H5VLobject(hid_t obj_id);
+H5_DLL hid_t H5VLget_file_type(void *file_obj, hid_t connector_id,
+    hid_t dtype_id);
+H5_DLL hid_t H5VLpeek_connector_id(const char *name);
 
 #ifdef __cplusplus
 }

@@ -624,6 +624,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5F_t              *new_file = NULL;    /* File struct for new file                 */
     H5P_genplist_t     *plist;              /* Property list pointer                    */
     H5VL_connector_prop_t  connector_prop;  /* Property for VOL connector ID & info        */
+    H5VL_object_t       *vol_obj = NULL;    /* VOL object for file                      */
     hid_t               ret_value;          /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -682,6 +683,14 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
+    /* Get the file object */
+    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
+
+    /* Make the post open callback */
+    if(H5VL_file_specific(vol_obj, H5VL_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file post open callback")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
@@ -712,6 +721,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     H5F_t              *new_file = NULL;        /* File struct for new file                 */
     H5P_genplist_t     *plist;                  /* Property list pointer                    */
     H5VL_connector_prop_t  connector_prop;      /* Property for VOL connector ID & info        */
+    H5VL_object_t       *vol_obj = NULL;        /* VOL object for file                      */
     hid_t               ret_value;              /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -755,6 +765,14 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* Get an ID for the file */
     if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+
+    /* Get the file object */
+    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
+
+    /* Make the post open callback */
+    if(H5VL_file_specific(vol_obj, H5VL_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file post open callback")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -940,6 +958,14 @@ H5Freopen(hid_t file_id)
     /* Get an atom for the file */
     if((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+
+    /* Get the file object */
+    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
+
+    /* Make the post open callback */
+    if(H5VL_file_specific(vol_obj, H5VL_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file post open callback")
 
 done:
     /* XXX (VOL MERGE): If registration fails, file will not be closed */

@@ -1160,9 +1160,15 @@ done:
                     HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list")
 
             f->shared = H5FL_FREE(H5F_shared_t, f->shared);
-        }
+        } /* end if */
+
+        /* Free VOL object */
+        if(f->vol_obj)
+            if(H5VL_free_object(f->vol_obj) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "unable to free VOL object")
+
         f = H5FL_FREE(H5F_t, f);
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__new() */
@@ -1460,6 +1466,9 @@ H5F__dest(H5F_t *f, hbool_t flush)
     /* Free the non-shared part of the file */
     f->open_name = (char *)H5MM_xfree(f->open_name);
     f->actual_name = (char *)H5MM_xfree(f->actual_name);
+    if(f->vol_obj && H5VL_free_object(f->vol_obj) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
+    f->vol_obj = NULL;
     if(H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     f->shared = NULL;
@@ -1932,6 +1941,35 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__post_open
+ *
+ * Purpose:     Finishes file open after wrapper context for file has been
+ *              set.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__post_open(H5F_t *f)
+{
+    herr_t   ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check arguments */
+    HDassert(f);
+
+    /* Store a vol object in the file struct */
+    if(NULL == (f->vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, f, f->shared->vol_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create VOL object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__flush() */
 
 
 /*-------------------------------------------------------------------------

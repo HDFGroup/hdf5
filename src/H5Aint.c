@@ -208,7 +208,7 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't get shared datatype info")
 
     /* Mark datatype as being on disk now */
-    if(H5T_set_loc(attr->shared->dt, loc->oloc->file, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(attr->shared->dt, H5F_VOL_OBJ(loc->oloc->file), H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
     /* Set the version for datatype */
@@ -2115,7 +2115,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "cannot copy datatype")
 
     /* Set the location of the destination datatype */
-    if(H5T_set_loc(attr_dst->shared->dt, file_dst, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(attr_dst->shared->dt, H5F_VOL_OBJ(file_dst), H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "cannot mark datatype on disk")
 
     if(!H5T_is_named(attr_src->shared->dt)) {

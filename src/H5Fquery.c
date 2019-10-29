@@ -1306,6 +1306,26 @@ H5F_get_vol_cls(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5F_get_vol_obj
+ *
+ * Purpose:  Get the VOL object for the file
+ *
+ * Return:   VOL object pointer for file, can't fail
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_object_t *
+H5F_get_vol_obj(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->vol_obj)
+} /* end H5F_get_vol_obj */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5F_get_cont_info
  *
  * Purpose:     Get the VOL container info for the file

@@ -535,7 +535,7 @@ H5O__attr_open_by_name(const H5O_loc_t *loc, const char *name)
         } /* end else */
 
         /* Mark datatype as being on disk now */
-        if(H5T_set_loc(opened_attr->shared->dt, loc->file, H5T_LOC_DISK) < 0)
+        if(H5T_set_loc(opened_attr->shared->dt, H5F_VOL_OBJ(loc->file), H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
     } /* end else */
 
@@ -642,7 +642,7 @@ H5O__attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
         } else {
             /* Mark datatype as being on disk now */
-            if(H5T_set_loc(opened_attr->shared->dt, loc->file, H5T_LOC_DISK) < 0)
+            if(H5T_set_loc(opened_attr->shared->dt, H5F_VOL_OBJ(loc->file), H5T_LOC_DISK) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
         } /* end if */
     } /* end if */

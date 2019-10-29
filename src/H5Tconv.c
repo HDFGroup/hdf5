@@ -3132,7 +3132,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
 
             /* Set flags to indicate we are writing to or reading from the file */
-            if(dst->shared->u.vlen.f != NULL)
+            if(dst->shared->u.vlen.file != NULL)
                 write_to_file = TRUE;
 
             /* Set the flag for nested VL case */
@@ -3183,18 +3183,18 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     hbool_t is_nil;      /* Whether sequence is "nil" */
 
                     /* Check for "nil" source sequence */
-                    if((*(src->shared->u.vlen.cls->isnull))(src->shared->u.vlen.f, s, &is_nil) < 0)
+                    if((*(src->shared->u.vlen.cls->isnull))(src->shared->u.vlen.file, s, &is_nil) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check if VL data is 'nil'")
                     else if(is_nil) {
                         /* Write "nil" sequence to destination location */
-                        if((*(dst->shared->u.vlen.cls->setnull))(dst->shared->u.vlen.f, d, b) < 0)
+                        if((*(dst->shared->u.vlen.cls->setnull))(dst->shared->u.vlen.file, d, b) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't set VL data to 'nil'")
                     } /* end else-if */
                     else {
                         size_t 	seq_len;    /* The number of elements in the current sequence */
 
                         /* Get length of element sequences */
-                        if((*(src->shared->u.vlen.cls->getlen))(src->shared->u.vlen.f, s, &seq_len) < 0)
+                        if((*(src->shared->u.vlen.cls->getlen))(src->shared->u.vlen.file, s, &seq_len) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "bad sequence length")
 
                         /* If we are reading from memory and there is no conversion, just get the pointer to sequence */
@@ -3226,7 +3226,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             } /* end else-if */
 
                             /* Read in VL sequence */
-                            if((*(src->shared->u.vlen.cls->read))(src->shared->u.vlen.f, s, conv_buf, src_size) < 0)
+                            if((*(src->shared->u.vlen.cls->read))(src->shared->u.vlen.file, s, conv_buf, src_size) < 0)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL data")
                         } /* end else */
 
@@ -3248,7 +3248,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 HDassert(write_to_file);
 
                                 /* Get length of background element sequence */
-                                if((*(dst->shared->u.vlen.cls->getlen))(dst->shared->u.vlen.f, b, &bg_seq_len) < 0)
+                                if((*(dst->shared->u.vlen.cls->getlen))(dst->shared->u.vlen.file, b, &bg_seq_len) < 0)
                                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "bad sequence length")
 
                                 /* Read sequence if length > 0 */
@@ -3261,7 +3261,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                     } /* end if */
 
                                     /* Read in background VL sequence */
-                                    if((*(dst->shared->u.vlen.cls->read))(dst->shared->u.vlen.f, b, tmp_buf, bg_seq_len) < 0)
+                                    if((*(dst->shared->u.vlen.cls->read))(dst->shared->u.vlen.file, b, tmp_buf, bg_seq_len * dst_base_size) < 0)
                                         HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL data")
                                 } /* end if */
 
@@ -3276,7 +3276,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         } /* end if */
 
                         /* Write sequence to destination location */
-                        if((*(dst->shared->u.vlen.cls->write))(dst->shared->u.vlen.f, &vl_alloc_info, d, conv_buf, b, seq_len, dst_base_size) < 0)
+                        if((*(dst->shared->u.vlen.cls->write))(dst->shared->u.vlen.file, &vl_alloc_info, d, conv_buf, b, seq_len, dst_base_size) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data")
 
                         if(!noop_conv) {
@@ -3291,7 +3291,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 tmp = (uint8_t *)tmp_buf + seq_len * dst_base_size;
                                 for(u = seq_len; u < bg_seq_len; u++, tmp += dst_base_size) {
                                     /* Delete sequence in destination location */
-                                    if((*(dst->shared->u.vlen.cls->del))(dst->shared->u.vlen.f, tmp) < 0)
+                                    if((*(dst->shared->u.vlen.cls->del))(dst->shared->u.vlen.file, tmp) < 0)
                                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove heap object")
                                 } /* end for */
                             } /* end if */
@@ -3612,8 +3612,8 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                     /* Get size of references */
                     if(0 == (buf_size = src->shared->u.atomic.u.r.cls->getsize(
-                        src->shared->u.atomic.u.r.f, s, src->shared->size,
-                        dst->shared->u.atomic.u.r.f, &dst_copy)))
+                        src->shared->u.atomic.u.r.file, s, src->shared->size,
+                        dst->shared->u.atomic.u.r.file, &dst_copy)))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect size")
 
                     /* Check if conversion buffer is large enough, resize if necessary. */
@@ -3629,8 +3629,8 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     } else {
                         /* Read reference */
                         if(src->shared->u.atomic.u.r.cls->read(
-                            src->shared->u.atomic.u.r.f, s, src->shared->size,
-                            dst->shared->u.atomic.u.r.f, conv_buf, buf_size) < 0)
+                            src->shared->u.atomic.u.r.file, s, src->shared->size,
+                            dst->shared->u.atomic.u.r.file, conv_buf, buf_size) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read reference data")
                     }
 
@@ -3639,8 +3639,8 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     } else {
                         /* Write reference to destination location */
                         if(dst->shared->u.atomic.u.r.cls->write(
-                            src->shared->u.atomic.u.r.f, conv_buf, buf_size, src->shared->u.atomic.u.r.rtype,
-                            dst->shared->u.atomic.u.r.f, d, dst->shared->size, b) < 0)
+                            src->shared->u.atomic.u.r.file, conv_buf, buf_size, src->shared->u.atomic.u.r.rtype,
+                            dst->shared->u.atomic.u.r.file, d, dst->shared->size, b) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write reference data")
                     }
 

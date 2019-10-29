@@ -489,6 +489,7 @@ struct H5F_t {
     char	       *open_name;      /* Name used to open file                                       */
     char	       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
     H5F_shared_t       *shared;         /* The shared file info                                         */
+    H5VL_object_t      *vol_obj;        /* VOL object                                                   */
     unsigned	        nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
     hbool_t             id_exists;      /* Whether an ID for this struct exists                         */
@@ -513,6 +514,7 @@ H5FL_EXTERN(H5F_shared_t);
 /******************************/
 
 /* General routines */
+H5_DLL herr_t H5F__post_open(H5F_t *f);
 H5_DLL H5F_t *H5F__reopen(H5F_t *f);
 H5_DLL herr_t H5F__dest(H5F_t *f, hbool_t flush);
 H5_DLL herr_t H5F__flush(H5F_t *f);

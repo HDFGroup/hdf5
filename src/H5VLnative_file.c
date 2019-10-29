@@ -305,6 +305,15 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
     FUNC_ENTER_PACKAGE
 
     switch(specific_type) {
+        /* Finalize H5Fopen */
+        case H5VL_FILE_POST_OPEN:
+            {
+                /* Call package routine */
+                if(H5F__post_open((H5F_t *)obj) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't finish opening file")
+                break;
+            }
+
         /* H5Fflush */
         case H5VL_FILE_FLUSH:
             {

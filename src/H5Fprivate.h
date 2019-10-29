@@ -26,7 +26,6 @@ typedef struct H5F_t H5F_t;
 
 /* Public headers needed by this file */
 #include "H5FDpublic.h"         /* File drivers                */
-#include "H5VLpublic.h"         /* Virtual Object Layer        */
 
 /* Private headers needed by this file */
 #include "H5MMprivate.h"	/* Memory management	       */
@@ -34,6 +33,7 @@ typedef struct H5F_t H5F_t;
 #include "H5Pprivate.h"         /* Property lists              */
 #endif /* H5_HAVE_PARALLEL */
 #include "H5VMprivate.h"        /* Vectors and arrays          */
+#include "H5VLprivate.h"        /* Virtual Object Layer        */
 
 
 /**************************/
@@ -355,6 +355,7 @@ uint64_decode(uint8_t **pp)
 #define H5F_GET_MIN_DSET_OHDR(F) ((F)->shared->crt_dset_min_ohdr_flag)
 #define H5F_SET_MIN_DSET_OHDR(F, V) ((F)->shared->crt_dset_min_ohdr_flag = (V))
 #define H5F_VOL_CLS(F)          ((F)->shared->vol_cls)
+#define H5F_VOL_OBJ(F)          ((F)->vol_obj)
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
@@ -419,6 +420,7 @@ uint64_decode(uint8_t **pp)
 #define H5F_GET_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr(F))
 #define H5F_SET_MIN_DSET_OHDR(F, V) (H5F_set_min_dset_ohdr((F), (V)))
 #define H5F_VOL_CLS(F)          (H5F_get_vol_cls(F))
+#define H5F_VOL_OBJ(F)          (H5F_get_vol_obj(F))
 #endif /* H5F_MODULE */
 
 
@@ -799,6 +801,7 @@ H5_DLL hbool_t H5F_get_null_fsm_addr(const H5F_t *f);
 H5_DLL hbool_t H5F_get_min_dset_ohdr(const H5F_t *f);
 H5_DLL herr_t H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize);
 H5_DLL const H5VL_class_t *H5F_get_vol_cls(const H5F_t *f);
+H5_DLL H5VL_object_t *H5F_get_vol_obj(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);

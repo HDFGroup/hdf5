@@ -29,9 +29,11 @@
 /***********/
 
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5Pprivate.h"         /* Property lists                       */
+#include "H5Tprivate.h"         /* Datatypes                            */
 #include "H5VLpkg.h"            /* Virtual Object Layer                 */
 
 /* VOL connectors */
@@ -279,6 +281,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VLpeek_connector_id
+ *
+ * Purpose:     Retrieves the ID for a registered VOL connector.
+ *
+ * Return:      A valid VOL connector ID if a connector by that name has
+ *              been registered. This ID is *not* owned by the caller and
+ *              H5VLclose() should not be called.  Intended for use by VOL
+ *              connectors to find their own ID.
+ *
+ *              H5I_INVALID_HID on error or if a VOL connector of that
+ *              name has not been registered.
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VLpeek_connector_id(const char *name)
+{
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE1("i", "*s", name);
+
+    /* Get connector ID with this name */
+    if((ret_value = H5VL__peek_connector_id(name)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLpeek_connector_id() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLget_connector_name
  *
  * Purpose:     Returns the connector name for the VOL associated with the
@@ -501,6 +535,73 @@ H5VLobject(hid_t id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5VLobject() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLget_file_type
+ *
+ * Purpose:     Returns a copy of dtype_id with its location set to be in
+ *              the file, with updated size, etc.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
+{
+    H5T_t         *dtype;                 /* unatomized type         */
+    H5T_t         *file_type = NULL;      /* copied file type        */
+    hid_t         file_type_id = -1;      /* copied file type id     */
+    H5VL_object_t *file_vol_obj = NULL;   /* VOL object for file     */
+    hid_t         ret_value = -1;    /* Return value            */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "*xii", file_obj, connector_id, dtype_id);
+
+    /* Check args */
+    if(!file_obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "no file object supplied")
+    if(NULL == (dtype = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+
+    /* Create VOL object for file */
+    if(NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object")
+
+    /* Copy the datatype */
+    if(NULL == (file_type = H5T_copy(dtype, H5T_COPY_TRANSIENT)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy datatype")
+
+    /* Register file type id */
+    if((file_type_id = H5I_register(H5I_DATATYPE, file_type, FALSE)) < 0) {
+        (void)H5T_close_real(file_type);
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
+    } /* end if */
+
+    /* Set the location of the datatype to be in the file */
+    if(H5T_set_loc(file_type, file_vol_obj, H5T_LOC_DISK) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't set datatype location")
+
+    /* file_type now owns file_vol_obj */
+    if(H5T_own_vol_obj(file_type, file_vol_obj) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't give ownership of VOL object")
+    file_vol_obj = NULL;
+
+    /* Set return value */
+    ret_value = file_type_id;
+
+done:
+    /* Cleanup on error */
+    if(ret_value < 0) {
+        if(file_vol_obj && H5VL_free_object(file_vol_obj) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object")
+        if(file_type_id >= 0 && H5I_dec_ref(file_type_id) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to close file datatype")
+    } /* end if */
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLget_file_type() */
 
 
 /*---------------------------------------------------------------------------

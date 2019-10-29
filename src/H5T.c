@@ -227,7 +227,7 @@
     H5T_INIT_TYPE_ALLOC_COMMON(H5T_REFERENCE)               \
     H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_NONE)                \
     dt->shared->force_conv = TRUE;                          \
-    dt->shared->u.atomic.u.r.f = NULL;                      \
+    dt->shared->u.atomic.u.r.file = NULL;                   \
     dt->shared->u.atomic.u.r.loc = H5T_LOC_BADLOC;          \
     dt->shared->u.atomic.u.r.cls = NULL;                    \
 }
@@ -3345,6 +3345,9 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     /* No VOL object */
     new_dt->vol_obj = NULL;
 
+    /* No owned VOL object */
+    new_dt->shared->owned_vol_obj = NULL;
+
     /* Check what sort of copy we are making */
     switch (method) {
         case H5T_COPY_TRANSIENT:
@@ -3765,6 +3768,11 @@ H5T__free(H5T_t *dt)
     if(dt->shared->parent && H5T_close_real(dt->shared->parent) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type")
     dt->shared->parent = NULL;
+
+    /* Close the owned VOL object */
+    if(dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
+    dt->shared->owned_vol_obj = NULL;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4413,9 +4421,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             }
 
             /* Don't allow VL types in different files to compare as equal */
-            if(dt1->shared->u.vlen.f < dt2->shared->u.vlen.f)
+            if(dt1->shared->u.vlen.file < dt2->shared->u.vlen.file)
                 HGOTO_DONE(-1);
-            if(dt1->shared->u.vlen.f > dt2->shared->u.vlen.f)
+            if(dt1->shared->u.vlen.file > dt2->shared->u.vlen.file)
                 HGOTO_DONE(1);
             break;
 
@@ -5411,7 +5419,7 @@ done:
  --------------------------------------------------------------------------
  */
 htri_t
-H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
+H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 {
     htri_t      changed;         /* Whether H5T_set_loc changed the type (even if the size didn't change) */
     htri_t      ret_value = 0;   /* Indicate that success, but no location change */
@@ -5435,7 +5443,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                     old_size=dt->shared->parent->shared->size;
 
                     /* Mark the VL, compound or array type */
-                    if((changed=H5T_set_loc(dt->shared->parent,f,loc))<0)
+                    if((changed=H5T_set_loc(dt->shared->parent, file, loc))<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location")
                     if(changed>0)
                         ret_value=changed;
@@ -5475,7 +5483,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                             old_size = memb_type->shared->size;
 
                             /* Mark the VL, compound, enum or array type */
-                            if((changed = H5T_set_loc(memb_type,f,loc)) < 0)
+                            if((changed = H5T_set_loc(memb_type, file, loc)) < 0)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location")
                             if(changed > 0)
                                 ret_value = changed;
@@ -5509,14 +5517,14 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                 /* Recurse if it's VL, compound, enum or array */
                 /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
                 if(dt->shared->parent->shared->force_conv && H5T_IS_COMPLEX(dt->shared->parent->shared->type)) {
-                    if((changed = H5T_set_loc(dt->shared->parent,f,loc)) < 0)
+                    if((changed = H5T_set_loc(dt->shared->parent, file, loc)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location")
                     if(changed > 0)
                         ret_value = changed;
                 } /* end if */
 
                 /* Mark this VL sequence */
-                if((changed = H5T__vlen_set_loc(dt, f, loc)) < 0)
+                if((changed = H5T__vlen_set_loc(dt, file, loc)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location")
                 if(changed > 0)
                     ret_value = changed;
@@ -5524,7 +5532,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 
             case H5T_REFERENCE:
                 /* Reference types go through type conversion */
-                if((ret_value = H5T__ref_set_loc(dt, f, loc)) < 0)
+                if((ret_value = H5T__ref_set_loc(dt, file, loc)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "Unable to set reference location");
                 break;
 
@@ -5863,8 +5871,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T_patch_vlen_file
  *
- * Purpose:     Patch the top-level file pointer contained in (dt->shared->u.vlen.f)
- *              to point to f.  This is possible because
+ * Purpose:     Patch the top-level file pointer contained in (dt->shared->u.vlen.file)
+ *              to point to file.  This is possible because
  *              the top-level file pointer can be closed out from under
  *              dt while dt is contained in the shared file's cache.
  *
@@ -5873,18 +5881,56 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_patch_vlen_file(H5T_t *dt, H5F_t *f)
+H5T_patch_vlen_file(H5T_t *dt, H5VL_object_t *file)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(dt);
     HDassert(dt->shared);
-    HDassert(f);
+    HDassert(file);
 
-    if((dt->shared->type == H5T_VLEN) && dt->shared->u.vlen.f != f)
-        dt->shared->u.vlen.f = f;
+    if((dt->shared->type == H5T_VLEN) && dt->shared->u.vlen.file != file)
+        dt->shared->u.vlen.file = file;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T_patch_vlen_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_own_vol_obj
+ *
+ * Purpose:     Transfers ownership of the supplied VOL object to the
+ *              datatype, the VOL object will be freed when the datatype
+ *              is closed.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_own_vol_obj(H5T_t *dt, H5VL_object_t *vol_obj)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(dt);
+    HDassert(dt->shared);
+    HDassert(vol_obj);
+
+    /* Currently no support for owning multiple VOL objects, free the previous
+     * owned object.  Currently this is only used for holding open VOL objects
+     * used in the "loc" for vlens and references, so if this is being
+     * overwritten we don't need the old one anyways. */
+    if(dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
+
+    /* Take ownership */
+    dt->shared->owned_vol_obj = vol_obj;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_own_vol_obj() */
 
