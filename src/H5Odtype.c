@@ -1559,7 +1559,7 @@ H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
 
         /* Set the location of the source datatype to describe the disk form of the data */
-        if(H5T_set_loc(udata->src_dtype, file_src, H5T_LOC_DISK) < 0)
+        if(H5T_set_loc(udata->src_dtype, H5F_VOL_OBJ(file_src), H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
     } /* end if */
 
@@ -1596,7 +1596,7 @@ H5O__dtype_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const H5O_msg_class_t *mesg
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy")
 
     /* The datatype will be in the new file; set its location. */
-    if(H5T_set_loc(dst_mesg, file_dst, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(dst_mesg, H5F_VOL_OBJ(file_dst), H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to set location")
 
     ret_value = dst_mesg;
