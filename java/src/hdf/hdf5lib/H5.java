@@ -50,6 +50,8 @@ import hdf.hdf5lib.structs.H5AC_cache_config_t;
 import hdf.hdf5lib.structs.H5A_info_t;
 import hdf.hdf5lib.structs.H5E_error2_t;
 import hdf.hdf5lib.structs.H5F_info2_t;
+import hdf.hdf5lib.structs.H5FD_hdfs_fapl_t;
+import hdf.hdf5lib.structs.H5FD_ros3_fapl_t;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
@@ -212,7 +214,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * exception handlers to print out the HDF-5 error stack.
  * <hr>
  *
- * @version HDF5 1.11.4 <BR>
+ * @version HDF5 1.13.0 <BR>
  *          <b>See also: <a href ="./hdf.hdf5lib.HDFArray.html"> hdf.hdf5lib.HDFArray</a> </b><BR>
  *          <a href ="./hdf.hdf5lib.HDF5Constants.html"> hdf.hdf5lib.HDF5Constants</a><BR>
  *          <a href ="./hdf.hdf5lib.HDF5CDataTypes.html"> hdf.hdf5lib.HDF5CDataTypes</a><BR>
@@ -235,7 +237,7 @@ public class H5 implements java.io.Serializable {
      *
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = { 1, 11, 4 };
+    public final static int LIB_VERSION[] = { 1, 13, 0 };
 
     public final static String H5PATH_PROPERTY_KEY = "hdf.hdf5lib.H5.hdf5lib";
 
@@ -2153,7 +2155,10 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library.
      * @exception NullPointerException
      *                - buf is null.
+     *
+     * @deprecated As of HDF5 1.12.0 in favor of H5Treclaim
      **/
+    @Deprecated
     public synchronized static native int H5Dvlen_reclaim(long type_id, long space_id, long xfer_plist_id, byte[] buf)
             throws HDF5LibraryException, NullPointerException;
 
@@ -2968,6 +2973,19 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Fget_intent(long file_id) throws HDF5LibraryException;
 
     /**
+     * H5Fget_fileno retrieves the "file number" for an open file.
+     *
+     * @param file_id
+     *            IN: File identifier for a currently-open HDF5 file
+     *
+     * @return the unique file number for the file.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native long H5Fget_fileno(long file_id) throws HDF5LibraryException;
+
+    /**
      * H5Fget_mdc_hit_rate queries the metadata cache of the target file to obtain its hit rate (cache hits / (cache
      * hits + cache misses)) since the last time hit rate statistics were reset.
      *
@@ -3078,6 +3096,7 @@ public class H5 implements java.io.Serializable {
      *
      * @deprecated As of HDF5 1.10.5 in favor of H5Fis_accessible.
      **/
+    @Deprecated
     public synchronized static native boolean H5Fis_hdf5(String name) throws HDF5LibraryException, NullPointerException;
 
     /**
@@ -5033,10 +5052,9 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native void H5Orefresh(long object_id) throws HDF5LibraryException;
 
-    // /////// unimplemented ////////
-    //  herr_t H5Odisable_mdc_flushes(hid_t object_id);
-    //  herr_t H5Oenable_mdc_flushes(hid_t object_id);
-    //  herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled);
+    public synchronized static native void  H5Odisable_mdc_flushes(long object_id);
+    public synchronized static native void  H5Oenable_mdc_flushes(long object_id);
+    public synchronized static native boolean  H5Oare_mdc_flushes_disabled(long object_id);
 
     // ////////////////////////////////////////////////////////////
     // //
@@ -7783,6 +7801,10 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_fapl_family(long fapl_id, long memb_size, long memb_fapl_id)
             throws HDF5LibraryException, NullPointerException;
 
+    public synchronized static native int H5Pset_fapl_hdfs(long fapl_id, H5FD_hdfs_fapl_t fapl_conf) throws HDF5LibraryException, NullPointerException;
+
+    public synchronized static native H5FD_hdfs_fapl_t H5Pget_fapl_hdfs(long fapl_id) throws HDF5LibraryException, NullPointerException;
+
     /**
      * H5Pget_fapl_multi Sets up use of the multi I/O driver.
      *
@@ -7866,6 +7888,10 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_fapl_stdio(long fapl_id) throws HDF5LibraryException, NullPointerException;
 
     public synchronized static native int H5Pset_fapl_windows(long fapl_id) throws HDF5LibraryException, NullPointerException;
+
+    public synchronized static native int H5Pset_fapl_ros3(long fapl_id, H5FD_ros3_fapl_t fapl_conf) throws HDF5LibraryException, NullPointerException;
+
+    public synchronized static native H5FD_ros3_fapl_t H5Pget_fapl_ros3(long fapl_id) throws HDF5LibraryException, NullPointerException;
 
     // /////// unimplemented ////////
 
@@ -10289,6 +10315,28 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library.
      **/
     public synchronized static native int H5Tpack(long type_id) throws HDF5LibraryException;
+
+    /**
+     * H5Treclaim reclaims buffer used for VL data.
+     *
+     * @param type_id
+     *            Identifier of the datatype.
+     * @param space_id
+     *            Identifier of the dataspace.
+     * @param xfer_plist_id
+     *            Identifier of a transfer property list for this I/O operation.
+     * @param buf
+     *            Buffer with data to be reclaimed.
+     *
+     * @return a non-negative value if successful
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - buf is null.
+     **/
+    public synchronized static native int H5Treclaim(long type_id, long space_id, long xfer_plist_id, byte[] buf)
+            throws HDF5LibraryException, NullPointerException;
 
     /**
      * H5Tvlen_create creates a new variable-length (VL) dataype.

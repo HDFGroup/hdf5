@@ -14,6 +14,8 @@
 #include "h5test.h"
 #include "vds_swmr.h"
 
+static hsize_t VDS_PLANE[RANK] = {1, FULL_HEIGHT, WIDTH};
+
 int
 main(void)
 {

@@ -84,9 +84,9 @@ typedef enum fill_t {
 static void
 usage(const char *prog)
 {
-    fprintf(stderr, "usage: %s [STYLE|cache] [LEFT [MIDDLE [RIGHT]]]\n",
+    HDfprintf(stderr, "usage: %s [STYLE|cache] [LEFT [MIDDLE [RIGHT]]]\n",
       prog);
-    fprintf(stderr, "\
+    HDfprintf(stderr, "\
     STYLE is the order that the dataset is filled and should be one of:\n\
         forward   --  Fill the dataset from lowest address to highest\n\
                       address. This style tests the right split ratio.\n\
@@ -401,6 +401,6 @@ main(int argc, char *argv[])
     return 0;
 
  error:
-    fprintf(stderr, "*** ERRORS DETECTED ***\n");
+    HDfprintf(stderr, "*** ERRORS DETECTED ***\n");
     return 1;
 }

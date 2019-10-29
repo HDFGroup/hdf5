@@ -508,10 +508,10 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx
 
     UNUSED(clss);
 
+    infobuf.type = H5L_TYPE_ERROR;
+
     if (NULL == name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lget_val_by_idx: group name is NULL");
-
-    infobuf.type = H5L_TYPE_ERROR;
 
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Lget_val_by_idx: group name not pinned");
 
@@ -628,7 +628,7 @@ H5L_iterate_cb
     jclass      cls;
     jvalue      args[5];
     void       *op_data = (void *)wrapper->op_data;
-    jint        status;
+    jint        status = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);

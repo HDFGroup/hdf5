@@ -62,8 +62,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Fsfile.c H5Fspace.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAint.c H5FAstat.c H5FAtest.c \
-        H5FD.c H5FDcore.c  \
-        H5FDfamily.c H5FDint.c H5FDlog.c \
+        H5FD.c H5FDcore.c H5FDfamily.c H5FDhdfs.c H5FDint.c H5FDlog.c \
         H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c H5FDtest.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSint.c H5FSsection.c \
         H5FSstat.c H5FStest.c \
@@ -78,12 +77,13 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5HG.c H5HGcache.c H5HGdbg.c H5HGquery.c \
         H5HL.c H5HLcache.c H5HLdbg.c H5HLint.c H5HLprfx.c H5HLdblk.c\
         H5HP.c H5I.c H5Itest.c H5L.c H5Lexternal.c H5lib_settings.c \
+        H5M.c \
         H5MF.c H5MFaggr.c H5MFdbg.c H5MFsection.c \
         H5MM.c H5MP.c H5MPtest.c \
         H5O.c H5Odeprec.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
         H5Oattribute.c H5Obogus.c H5Obtreek.c H5Ocache.c H5Ocache_image.c \
         H5Ochunk.c \
-        H5Ocont.c H5Ocopy.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c \
+        H5Ocont.c H5Ocopy.c H5Ocopy_ref.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c \
         H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c \
         H5Oint.c H5Olayout.c \
         H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
@@ -95,14 +95,15 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c \
         H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
-        H5Pgcpl.c H5Pint.c \
-        H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
+        H5Pgcpl.c H5Pint.c H5Plapl.c H5Plcpl.c \
+        H5Pmapl.c H5Pmcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c \
+        H5Ptest.c \
         H5PB.c \
         H5PL.c H5PLint.c H5PLpath.c H5PLplugin_cache.c \
         H5R.c H5Rint.c H5Rdeprec.c \
         H5UC.c \
         H5RS.c \
-        H5S.c H5Sall.c H5Sdbg.c H5Shyper.c H5Snone.c H5Spoint.c \
+        H5S.c H5Sall.c H5Sdbg.c H5Sdeprec.c H5Shyper.c H5Snone.c H5Spoint.c \
         H5Sselect.c H5Stest.c \
         H5SL.c \
         H5SM.c H5SMbtree2.c H5SMcache.c H5SMmessage.c H5SMtest.c \
@@ -113,23 +114,30 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c \
         H5Topaque.c \
         H5Torder.c \
+        H5Tref.c \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c \
         H5VL.c H5VLcallback.c H5VLint.c H5VLnative.c \
-		H5VLnative_attr.c H5VLnative_dataset.c H5VLnative_datatype.c \
-		H5VLnative_file.c H5VLnative_group.c H5VLnative_link.c H5VLnative_object.c \
-		H5VLpassthru.c \
+        H5VLnative_attr.c H5VLnative_blob.c H5VLnative_dataset.c \
+        H5VLnative_datatype.c H5VLnative_file.c H5VLnative_group.c \
+        H5VLnative_link.c H5VLnative_object.c \
+        H5VLpassthru.c \
         H5VM.c H5WB.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c \
         H5Zscaleoffset.c H5Zszip.c H5Ztrans.c
 
 # Only compile parallel sources if necessary
 if BUILD_PARALLEL_CONDITIONAL
-    libhdf5_la_SOURCES += H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
+    libhdf5_la_SOURCES += H5mpi.c H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
 endif
 
 # Only compile the direct VFD if necessary
 if DIRECT_VFD_CONDITIONAL
     libhdf5_la_SOURCES += H5FDdirect.c
+endif
+
+# Only compile the read-only S3 VFD if necessary
+if ROS3_VFD_CONDITIONAL
+    libhdf5_la_SOURCES += H5FDros3.c H5FDs3comms.c
 endif
 
 # Public headers
@@ -138,13 +146,15 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5ESpublic.h H5Fpublic.h \
         H5FDpublic.h H5FDcore.h H5FDdirect.h \
-        H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
-        H5FDmulti.h H5FDsec2.h  H5FDstdio.h H5FDwindows.h \
+        H5FDfamily.h H5FDhdfs.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
+        H5FDmulti.h H5FDros3.h H5FDsec2.h H5FDstdio.h H5FDwindows.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
-        H5MMpublic.h H5Opublic.h H5Ppublic.h \
+        H5Mpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
         H5Rpublic.h H5Spublic.h H5Tpublic.h H5TSpublic.h \
-        H5VLnative.h H5VLpassthru.h H5VLpublic.h H5Zpublic.h
+        H5VLconnector.h H5VLconnector_passthru.h \
+        H5VLnative.h H5VLpassthru.h H5VLpublic.h \
+        H5Zpublic.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)
@@ -209,3 +219,4 @@ trace: $(libhdf5_la_SOURCES)
 	done
 
 include $(top_srcdir)/config/conclude.am
+

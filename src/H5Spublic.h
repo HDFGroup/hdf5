@@ -28,6 +28,35 @@
 /* Define user-level maximum number of dimensions */
 #define H5S_MAX_RANK    32
 
+/* Flags for selection iterators */
+#define H5S_SEL_ITER_GET_SEQ_LIST_SORTED 0x0001 /* Retrieve elements from iterator
+                                                 * in increasing offset order, for
+                                                 * each call to retrieve sequences.
+                                                 * Currently, this only applies to
+                                                 * point selections, as hyperslab
+                                                 * selections are always returned
+                                                 * in increasing offset order.
+                                                 *
+                                                 * Note that the order is only
+                                                 * increasing for each call to
+                                                 * get_seq_list, the next set of
+                                                 * sequences could start with an
+                                                 * earlier offset than the previous
+                                                 * one.
+                                                 */
+#define H5S_SEL_ITER_SHARE_WITH_DATASPACE 0x0002 /* Don't copy the dataspace
+                                                 * selection when creating the
+                                                 * selection iterator.
+                                                 * 
+                                                 * This can improve performance
+                                                 * of creating the iterator, but
+                                                 * the dataspace _MUST_NOT_ be
+                                                 * modified or closed until the
+                                                 * selection iterator is closed
+                                                 * or the iterator's behavior
+                                                 * will be undefined.
+                                                 */
+
 /* Different types of dataspaces */
 typedef enum H5S_class_t {
     H5S_NO_CLASS         = -1,  /*error                                      */
@@ -97,7 +126,7 @@ H5_DLL herr_t H5Sset_extent_simple(hid_t space_id, int rank,
     const hsize_t dims[], const hsize_t max[]);
 H5_DLL hid_t H5Scopy(hid_t space_id);
 H5_DLL herr_t H5Sclose(hid_t space_id);
-H5_DLL herr_t H5Sencode(hid_t obj_id, void *buf, size_t *nalloc);
+H5_DLL herr_t H5Sencode2(hid_t obj_id, void *buf, size_t *nalloc, hid_t fapl);
 H5_DLL hid_t H5Sdecode(const void *buf);
 H5_DLL hssize_t H5Sget_simple_extent_npoints(hid_t space_id);
 H5_DLL int H5Sget_simple_extent_ndims(hid_t space_id);
@@ -114,8 +143,12 @@ H5_DLL H5S_sel_type H5Sget_select_type(hid_t spaceid);
 H5_DLL hssize_t H5Sget_select_npoints(hid_t spaceid);
 H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
 H5_DLL htri_t H5Sselect_valid(hid_t spaceid);
+H5_DLL herr_t H5Sselect_adjust_u(hid_t spaceid, const hsize_t *offset);
 H5_DLL herr_t H5Sget_select_bounds(hid_t spaceid, hsize_t start[],
     hsize_t end[]);
+H5_DLL htri_t H5Sselect_shape_same(hid_t space1_id, hid_t space2_id);
+H5_DLL htri_t H5Sselect_intersect_block(hid_t space_id, const hsize_t *start,
+    const hsize_t *end);
 H5_DLL herr_t H5Soffset_simple(hid_t space_id, const hssize_t *offset);
 H5_DLL herr_t H5Sselect_all(hid_t spaceid);
 H5_DLL herr_t H5Sselect_none(hid_t spaceid);
@@ -127,12 +160,34 @@ H5_DLL herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
 H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
     const hsize_t start[], const hsize_t _stride[], const hsize_t count[],
     const hsize_t _block[]);
+H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
+    const hsize_t start[], const hsize_t _stride[], const hsize_t count[],
+    const hsize_t _block[]);
+H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id);
+H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id);
 H5_DLL htri_t H5Sis_regular_hyperslab(hid_t spaceid);
 H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[],
     hsize_t stride[], hsize_t count[], hsize_t block[]);
 H5_DLL hssize_t H5Sget_select_hyper_nblocks(hid_t spaceid);
 H5_DLL herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
     hsize_t numblocks, hsize_t buf[/*numblocks*/]);
+H5_DLL herr_t H5Shyper_adjust_s(hid_t space_id, const hssize_t *offset);
+
+/* Operations on dataspace selection iterators */
+H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags);
+H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq,
+    size_t maxbytes, size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
+H5_DLL herr_t H5Ssel_iter_close(hid_t sel_iter_id);
+
+/* Symbols defined for compatibility with previous versions of the HDF5 API.
+ *
+ * Use of these symbols is deprecated.
+ */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+/* Function prototypes */
+H5_DLL herr_t H5Sencode1(hid_t obj_id, void *buf, size_t *nalloc);
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus
 }

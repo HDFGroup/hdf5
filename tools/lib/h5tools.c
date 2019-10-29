@@ -1241,10 +1241,10 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
     H5T_class_t        type_class;
 
     if((size = H5Tget_size(tid)) == 0)
-        H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_size failed")
+        H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
 
     if((type_class = H5Tget_class(tid)) < 0)
-        H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_class failed")
+        H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_class failed");
 
     switch (type_class) {
         case H5T_INTEGER:
@@ -1264,7 +1264,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 bytes_wrote = HDfwrite(mem, 1, bytes_in, stream);
 
                 if(bytes_wrote != bytes_in || (0 == bytes_wrote && HDferror(stream)))
-                    H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed")
+                    H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
 
                 block_index -= (hsize_t)bytes_wrote;
                 mem = mem + bytes_wrote;
@@ -1283,11 +1283,11 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     mem = ((unsigned char*)_mem) + block_index * size;
 
                     if (H5Tis_variable_str(tid)) {
-                        s = *(char**) mem;
+                        s = *(char **)((void *)mem);
                         if (s != NULL)
                             size = HDstrlen(s);
                         else
-                            H5E_THROW(FAIL, H5E_tools_min_id_g, "NULL string")
+                            H5E_THROW(FAIL, H5E_tools_min_id_g, "NULL string");
                     }
                     else {
                         s = (char *) mem;
@@ -1295,7 +1295,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     for (i = 0; i < size && (s[i] || pad != H5T_STR_NULLTERM); i++) {
                         HDmemcpy(&tempuchar, &s[i], sizeof(unsigned char));
                         if (1 != HDfwrite(&tempuchar, sizeof(unsigned char), 1, stream))
-                            H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed")
+                            H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
                     } /* i */
                 } /* for (block_index = 0; block_index < block_nelmts; block_index++) */
             }
@@ -1306,7 +1306,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 unsigned nmembs;
 
                 if((snmembs = H5Tget_nmembers(tid)) < 0)
-                    H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_nmembers of compound failed")
+                    H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_nmembers of compound failed");
                 nmembs = (unsigned)snmembs;
 
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
@@ -1322,7 +1322,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
 
                         if (render_bin_output(stream, container, memb, mem + offset, 1) < 0) {
                             H5Tclose(memb);
-                            H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output of compound member failed")
+                            H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output of compound member failed");
                         }
 
                         H5Tclose(memb);
@@ -1350,7 +1350,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 }
                 else {
                     H5Tclose(memb);
-                    H5E_THROW(FAIL, H5E_tools_min_id_g, "calculate the number of array elements failed")
+                    H5E_THROW(FAIL, H5E_tools_min_id_g, "calculate the number of array elements failed");
                 }
 
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
@@ -1358,7 +1358,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     /* dump the array element */
                     if (render_bin_output(stream, container, memb, mem, nelmts) < 0) {
                         H5Tclose(memb);
-                        H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed")
+                        H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed");
                     }
                 }
                 H5Tclose(memb);
@@ -1375,12 +1375,12 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
                     mem = ((unsigned char*)_mem) + block_index * size;
                     /* Get the number of sequence elements */
-                    nelmts = ((hvl_t *) mem)->len;
+                    nelmts = ((hvl_t *)((void *)mem))->len;
 
                     /* dump the array element */
-                    if (render_bin_output(stream, container, memb, ((char *) (((hvl_t *) mem)->p)), nelmts) < 0) {
+                    if (render_bin_output(stream, container, memb, ((char *) (((hvl_t *)((void *)mem))->p)), nelmts) < 0) {
                         H5Tclose(memb);
-                        H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed")
+                        H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed");
                     }
                 }
                 H5Tclose(memb);
@@ -1426,7 +1426,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             for (block_index = 0; block_index < block_nelmts; block_index++) {
                 mem = ((unsigned char*)_mem) + block_index * size;
                 if (size != HDfwrite(mem, sizeof(char), size, stream))
-                    H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed")
+                    H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
             } /* end for */
             break;
 
@@ -1434,7 +1434,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
         case H5T_NCLASSES:
         default:
             /* Badness */
-            H5E_THROW(FAIL, H5E_tools_min_id_g, "bad type class")
+            H5E_THROW(FAIL, H5E_tools_min_id_g, "bad type class");
             break;
     } /* end switch */
 
@@ -1562,12 +1562,12 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     hid_t        type_id = -1;
 
     if((snblocks = H5Sget_select_hyper_nblocks(region_space)) <= 0)
-        H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_hyper_nblocks failed")
+        H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_hyper_nblocks failed");
     nblocks = (hsize_t)snblocks;
 
     /* Print block information */
     if((sndims = H5Sget_simple_extent_ndims(region_space)) < 0)
-        H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed")
+        H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
     ndims = (unsigned)sndims;
 
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
@@ -1683,12 +1683,12 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
     hid_t    type_id = -1;
 
     if((snpoints = H5Sget_select_elem_npoints(region_space)) <= 0)
-        H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_elem_npoints failed")
+        H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_elem_npoints failed");
     npoints = (hsize_t)snpoints;
 
     /* Allocate space for the dimension array */
     if((sndims = H5Sget_simple_extent_ndims(region_space)) < 0)
-        H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed")
+        H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
     ndims = (unsigned)sndims;
 
     if((dtype = H5Dget_type(region_id)) < 0)

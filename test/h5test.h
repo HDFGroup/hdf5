@@ -78,7 +78,7 @@
 #define BEGINTEST  3  /* Skip all tests before this test */
 
 /*
- * This contains the filename prefix specificied as command line option for
+ * This contains the filename prefix specified as command line option for
  * the parallel test files.
  */
 H5TEST_DLLVAR char *paraprefix;
@@ -89,7 +89,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 /*
  * Print the current location on the standard output stream.
  */
-#define AT()     printf ("   at %s:%d in %s()...\n",        \
+#define AT()     HDprintf ("   at %s:%d in %s()...\n",        \
         __FILE__, __LINE__, FUNC);
 
 /*
@@ -101,18 +101,18 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
  * spaces.  If the h5_errors() is used for automatic error handling then
  * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
-#define TESTING(WHAT)  {printf("Testing %-62s",WHAT); fflush(stdout);}
-#define TESTING_2(WHAT)  {printf("  Testing %-60s",WHAT); fflush(stdout);}
-#define PASSED()  {puts(" PASSED");fflush(stdout);}
-#define H5_FAILED()  {puts("*FAILED*");fflush(stdout);}
-#define H5_WARNING()  {puts("*WARNING*");fflush(stdout);}
-#define SKIPPED()  {puts(" -SKIP-");fflush(stdout);}
-#define PUTS_ERROR(s)   {puts(s); AT(); goto error;}
+#define TESTING(WHAT)  {HDprintf("Testing %-62s",WHAT); HDfflush(stdout);}
+#define TESTING_2(WHAT)  {HDprintf("  Testing %-60s",WHAT); HDfflush(stdout);}
+#define PASSED()  {HDputs(" PASSED");HDfflush(stdout);}
+#define H5_FAILED()  {HDputs("*FAILED*");HDfflush(stdout);}
+#define H5_WARNING()  {HDputs("*WARNING*");HDfflush(stdout);}
+#define SKIPPED()  {HDputs(" -SKIP-");HDfflush(stdout);}
+#define PUTS_ERROR(s)   {HDputs(s); AT(); goto error;}
 #define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
 #define STACK_ERROR     {H5Eprint2(H5E_DEFAULT, stdout); goto error;}
 #define FAIL_STACK_ERROR {H5_FAILED(); AT(); H5Eprint2(H5E_DEFAULT, stdout); \
     goto error;}
-#define FAIL_PUTS_ERROR(s) {H5_FAILED(); AT(); puts(s); goto error;}
+#define FAIL_PUTS_ERROR(s) {H5_FAILED(); AT(); HDputs(s); goto error;}
 
 /*
  * Alarm definitions to wait up (terminate) a test that runs too long.
@@ -123,8 +123,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 
 /* Flags for h5_fileaccess_flags() */
 #define H5_FILEACCESS_VFD       0x01
-#define H5_FILEACCESS_VOL       0x02
-#define H5_FILEACCESS_LIBVER    0x04
+#define H5_FILEACCESS_LIBVER    0x02
 
 #ifdef __cplusplus
 extern "C" {
@@ -134,6 +133,7 @@ extern "C" {
 H5TEST_DLL void h5_clean_files(const char *base_name[], hid_t fapl);
 H5TEST_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
 H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5TEST_DLL char *h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL char *h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL char *h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL hid_t h5_fileaccess(void);
@@ -149,10 +149,10 @@ H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_co
 H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
 H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
 H5TEST_DLL H5VL_class_t *h5_get_dummy_vol_class(void);
+H5TEST_DLL const char *h5_get_version_string(H5F_libver_t libver);
 
 /* Functions that will replace components of a FAPL */
 H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);
-H5TEST_DLL herr_t h5_get_vol_fapl(hid_t fapl_id);
 H5TEST_DLL herr_t h5_get_libver_fapl(hid_t fapl_id);
 
 /* h5_clean_files() replacements */

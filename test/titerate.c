@@ -379,7 +379,7 @@ aiter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5A_info_t H5_ATTR_
             return(count2 > 10 ? 1 : 0);
 
         default:
-            printf("invalid iteration command");
+            HDprintf("invalid iteration command");
             return(-1);
     } /* end switch */
 } /* end aiter_cb() */
@@ -416,7 +416,7 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     CHECK(dataset, FAIL, "H5Dcreate2");
 
     for(i = 0; i < NATTR; i++) {
-        sprintf(name, "Attribute %02d", i);
+        HDsprintf(name, "Attribute %02d", i);
         attribute = H5Acreate2(dataset, name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attribute, FAIL, "H5Acreate2");
 
@@ -621,7 +621,7 @@ test_iter_group_large(hid_t fapl)
 
     /* Create a bunch of groups */
     for(i = 0; i < ITER_NGROUPS; i++) {
-        sprintf(gname, "Group_%d", i);
+        HDsprintf(gname, "Group_%d", i);
 
         /* Add the name to the list of objects in the root group */
         HDstrcpy(names[i].name, gname);
@@ -939,20 +939,21 @@ static void test_links(hid_t fapl)
  *-------------------------------------------------------------------------
  */
 static int
-find_err_msg_cb(unsigned n, const H5E_error2_t *err_desc, void *_client_data)
+find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_client_data)
 {
     int status = H5_ITER_CONT;
     searched_err_t *searched_err = (searched_err_t *)_client_data;
 
     if (searched_err == NULL)
-        return -1;
-    
+        return H5_ITER_ERROR;
+
     /* If the searched error message is found, stop the iteration */
     if (err_desc->desc != NULL && strcmp(err_desc->desc, searched_err->message) == 0)
     {
         searched_err->found = true;
         status = H5_ITER_STOP;
     }
+
     return status;
 } /* end find_err_msg_cb() */
 
@@ -988,6 +989,7 @@ static void test_corrupted_attnamelen(void)
     /* Call H5Aiterate2 to trigger the failure in HDFFV-10588.  Failure should
        occur in the decoding stage, so some arguments are not needed. */
     err_status = H5Aiterate2(did, H5_INDEX_NAME, H5_ITER_INC, NULL, NULL, NULL);
+    VERIFY(err_status, FAIL, "H5Aiterate2");
 
     /* Make sure the intended error was caught */
     if(err_status == -1)

@@ -57,6 +57,9 @@
 #   include <stddef.h>
 #endif
 #ifdef H5_HAVE_PARALLEL
+/* Don't link against MPI C++ bindings */
+#   define MPICH_SKIP_MPICXX 1
+#   define OMPI_SKIP_MPICXX 1
 #   include <mpi.h>
 #ifndef MPI_FILE_NULL		/*MPIO may be defined in mpi.h already       */
 #   include <mpio.h>
@@ -92,11 +95,11 @@ extern "C" {
 
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
-#define H5_VERS_MINOR	11	/* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	4	/* For tweaks, bug-fixes, or development     */
+#define H5_VERS_MINOR	13	/* For minor interface/format changes  	     */
+#define H5_VERS_RELEASE	0	/* For tweaks, bug-fixes, or development     */
 #define H5_VERS_SUBRELEASE ""	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.11.4"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.13.0"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)

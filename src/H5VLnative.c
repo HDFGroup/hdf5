@@ -11,8 +11,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:     The native VOL connector where access is to a single HDF5 file 
- *              using HDF5 VFDs. 
+ * Purpose:     The native VOL connector where access is to a single HDF5 file
+ *              using HDF5 VFDs.
  */
 
 #include "H5private.h"          /* Generic Functions                        */
@@ -50,6 +50,7 @@ static H5VL_class_t H5VL_native_cls_g = {
         NULL,                                       /* get_object   */
         NULL,                                       /* get_wrap_ctx */
         NULL,                                       /* wrap_object  */
+        NULL,                                       /* unwrap_object */
         NULL                                        /* free_wrap_ctx */
     },
     {   /* attribute_cls */
@@ -118,6 +119,12 @@ static H5VL_class_t H5VL_native_cls_g = {
         NULL,                                       /* specific     */
         NULL,                                       /* optional     */
         NULL                                        /* free         */
+    },
+    {   /* blob_cls */
+        H5VL__native_blob_put,                      /* put */
+        H5VL__native_blob_get,                      /* get */
+        H5VL__native_blob_specific,                 /* specific */
+        NULL                                        /* optional */
     },
     NULL                                            /* optional     */
 };

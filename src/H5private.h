@@ -309,6 +309,7 @@
 #   define H5_ATTR_NORETURN     /*void*/
 #   define H5_ATTR_CONST        /*void*/
 #   define H5_ATTR_PURE         /*void*/
+#   define H5_ATTR_FALLTHROUGH  /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
@@ -316,12 +317,18 @@
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
+#if defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
+#   define H5_ATTR_FALLTHROUGH  __attribute__((fallthrough));
+#else
+#   define H5_ATTR_FALLTHROUGH  /*void*/
+#endif
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
 #   define H5_ATTR_UNUSED       /*void*/
 #   define H5_ATTR_NORETURN     /*void*/
 #   define H5_ATTR_CONST        /*void*/
 #   define H5_ATTR_PURE         /*void*/
+#   define H5_ATTR_FALLTHROUGH  /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -1104,12 +1111,8 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDmemcmp
     #define HDmemcmp(X,Y,Z)    memcmp(X,Y,Z)
 #endif /* HDmemcmp */
-/*
- * The (char*) casts are required for the DEC when optimizations are turned
- * on and the source and/or destination are not aligned.
- */
 #ifndef HDmemcpy
-    #define HDmemcpy(X,Y,Z)    memcpy((char*)(X),(const char*)(Y),Z)
+    #define HDmemcpy(X,Y,Z)    memcpy(X,Y,Z)
 #endif /* HDmemcpy */
 #ifndef HDmemmove
     #define HDmemmove(X,Y,Z)  memmove((char*)(X),(const char*)(Y),Z)
@@ -1765,6 +1768,7 @@ typedef enum {
     H5_PKG_HG,      /* Global heaps             */
     H5_PKG_HL,      /* Local heaps              */
     H5_PKG_I,       /* IDs                      */
+    H5_PKG_M,       /* Maps                     */
     H5_PKG_MF,      /* File memory management   */
     H5_PKG_MM,      /* Core memory management   */
     H5_PKG_O,       /* Object headers           */
@@ -2727,6 +2731,8 @@ H5_DLL int H5G_term_package(void);
 H5_DLL int H5G_top_term_package(void);
 H5_DLL int H5I_term_package(void);
 H5_DLL int H5L_term_package(void);
+H5_DLL int H5M_term_package(void);
+H5_DLL int H5M_top_term_package(void);
 H5_DLL int H5P_term_package(void);
 H5_DLL int H5PL_term_package(void);
 H5_DLL int H5R_term_package(void);
@@ -2754,6 +2760,20 @@ H5_DLL double H5_get_time(void);
 /* Functions for building paths, etc. */
 H5_DLL herr_t   H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
+
+#ifdef H5_HAVE_PARALLEL
+/* Generic MPI functions */
+H5_DLL hsize_t  H5_mpi_set_bigio_count(hsize_t new_count);
+H5_DLL hsize_t  H5_mpi_get_bigio_count();
+H5_DLL herr_t   H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new);
+H5_DLL herr_t   H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new);
+H5_DLL herr_t   H5_mpi_comm_free(MPI_Comm *comm);
+H5_DLL herr_t   H5_mpi_info_free(MPI_Info *info);
+H5_DLL herr_t   H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result);
+H5_DLL herr_t   H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result);
+H5_DLL herr_t   H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
+                 MPI_Datatype old_type, MPI_Datatype *new_type);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Functions for debugging */
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,

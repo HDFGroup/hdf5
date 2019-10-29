@@ -242,9 +242,9 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     unsigned u;		/* Local index variable */
     int curr_dim;       /* Current rank */
     hsize_t idx;    	/* Array index of chunk */
-    int ret_value = -1; /* Return value */
+    int ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(idx_info);
@@ -266,34 +266,35 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     HDassert(ndims > 0);
 
     /* Iterate over all the chunks in the dataset's dataspace */
-    for(u = 0; u < idx_info->layout->nchunks; u++) {
-	/* Calculate the index of this chunk */
-	idx = H5VM_array_offset_pre(ndims, idx_info->layout->max_down_chunks, chunk_rec.scaled);
+    for(u = 0; u < idx_info->layout->nchunks && ret_value == H5_ITER_CONT; u++) {
+	    /* Calculate the index of this chunk */
+	    idx = H5VM_array_offset_pre(ndims, idx_info->layout->max_down_chunks, chunk_rec.scaled);
 
-	/* Calculate the address of the chunk */
-	chunk_rec.chunk_addr = idx_info->storage->idx_addr + idx * idx_info->layout->size;
+	    /* Calculate the address of the chunk */
+	    chunk_rec.chunk_addr = idx_info->storage->idx_addr + idx * idx_info->layout->size;
 
-	/* Make "generic chunk" callback */
-	if((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)
-	    HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
+	    /* Make "generic chunk" callback */
+	    if((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, H5_ITER_ERROR, "failure in generic chunk iterator callback")
 
-	/* Update coordinates of chunk in dataset */
-	curr_dim = (int)(ndims - 1);
-	while(curr_dim >= 0) {
-	    /* Increment coordinate in current dimension */
-	    chunk_rec.scaled[curr_dim]++;
+	    /* Update coordinates of chunk in dataset */
+	    curr_dim = (int)(ndims - 1);
+	    while(curr_dim >= 0) {
+	        /* Increment coordinate in current dimension */
+	        chunk_rec.scaled[curr_dim]++;
 
-	    /* Check if we went off the end of the current dimension */
-	    if(chunk_rec.scaled[curr_dim] >= idx_info->layout->chunks[curr_dim]) {
-		/* Reset coordinate & move to next faster dimension */
-		chunk_rec.scaled[curr_dim] = 0;
-		curr_dim--;
-	    } /* end if */
-	    else
-		break;
-	} /* end while */
+	        /* Check if we went off the end of the current dimension */
+	        if(chunk_rec.scaled[curr_dim] >= idx_info->layout->chunks[curr_dim]) {
+		        /* Reset coordinate & move to next faster dimension */
+		        chunk_rec.scaled[curr_dim] = 0;
+		        curr_dim--;
+	        } /* end if */
+	        else
+		        break;
+	    } /* end while */
     } /* end for */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__none_idx_iterate() */
 

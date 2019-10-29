@@ -539,6 +539,14 @@ get_fill_size(const fheap_test_param_t *tparam)
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      test_desc in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static int
 begin_test(fheap_test_param_t *tparam, const char *base_desc,
     fheap_heap_ids_t *keep_ids, size_t *fill_size)
@@ -567,6 +575,7 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc,
     /* Success */
     return(0);
 } /* end begin_test() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------
@@ -683,6 +692,7 @@ open_heap(char *filename, hid_t fapl, const H5HF_create_t *cparam,
         /* Close (empty) heap */
         if(H5HF_close(*fh) < 0)
             FAIL_STACK_ERROR
+        *fh = NULL;
     } /* end if */
 
     /* Close file */
@@ -759,6 +769,7 @@ reopen_heap(H5F_t *f, H5HF_t **fh, haddr_t fh_addr,
         /* Close (empty) heap */
         if(H5HF_close(*fh) < 0)
             FAIL_STACK_ERROR
+        *fh = NULL;
 
         /* Re-open heap */
         if(NULL == (*fh = H5HF_open(f, fh_addr)))
@@ -766,10 +777,10 @@ reopen_heap(H5F_t *f, H5HF_t **fh, haddr_t fh_addr,
     } /* end if */
 
     /* Success */
-    return(0);
+    return 0;
 
 error:
-    return(-1);
+    return -1;
 } /* end reopen_heap() */
 
 
@@ -1906,6 +1917,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         FAIL_STACK_ERROR
+    fh = NULL;
 
     /* Delete heap */
     if(H5HF_delete(f, fh_addr) < 0)
@@ -1926,15 +1938,15 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     /* All tests passed */
     PASSED()
 
-    return(0);
+    return 0;
 
 error:
     H5E_BEGIN_TRY {
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
-    return(1);
+    return 1;
 } /* test_create() */
 
 
@@ -2020,6 +2032,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         FAIL_STACK_ERROR
+    fh = NULL;
 
     /* Check for closing & re-opening the file */
     if(tparam->reopen_heap) {
@@ -2083,7 +2096,7 @@ error:
     H5E_BEGIN_TRY {
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_reopen() */
@@ -2250,7 +2263,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     /* All tests passed */
     PASSED()
 
-    return(0);
+    return 0;
 
 error:
     H5E_BEGIN_TRY {
@@ -2258,11 +2271,11 @@ error:
             H5HF_close(fh);
         if(fh2)
             H5HF_close(fh2);
-	H5Fclose(file);
-	H5Fclose(file2);
+        H5Fclose(file);
+        H5Fclose(file2);
     } H5E_END_TRY;
 
-    return(1);
+    return 1;
 } /* test_open_twice() */
 
 
@@ -2366,6 +2379,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     if(fh2) {
         /* Close opened heap */
         H5HF_close(fh2);
+        fh2 = NULL;
 
         /* Indicate error */
         TEST_ERROR
@@ -2403,6 +2417,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     if(fh) {
         /* Close opened heap */
         H5HF_close(fh);
+        fh = NULL;
 
         /* Indicate error */
         TEST_ERROR
@@ -2423,7 +2438,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     /* All tests passed */
     PASSED()
 
-    return(0);
+    return 0;
 
 error:
     H5E_BEGIN_TRY {
@@ -2431,9 +2446,9 @@ error:
             H5HF_close(fh);
         if(fh2)
             H5HF_close(fh2);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
-    return(1);
+    return 1;
 } /* test_delete_open() */
 
 
@@ -2769,15 +2784,15 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* All tests passed */
     PASSED()
 
-    return(0);
+    return 0;
 
 error:
     H5E_BEGIN_TRY {
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
-    return(1);
+    return 1;
 } /* test_id_limits() */
 
 
@@ -2878,6 +2893,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         FAIL_STACK_ERROR
+    fh = NULL;
 
 
     /* Close the file */
@@ -2891,15 +2907,15 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* All tests passed */
     PASSED()
 
-    return(0);
+    return 0;
 
 error:
     H5E_BEGIN_TRY {
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
-    return(1);
+    return 1;
 } /* test_filtered_create() */
 
 
@@ -3022,7 +3038,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         FAIL_STACK_ERROR
-
+    fh = NULL;
 
     /* Close the file */
     if(H5Fclose(file) < 0)
@@ -3031,7 +3047,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* All tests passed */
     PASSED()
 
-    return(0);
+    return 0;
 
 error:
     H5E_BEGIN_TRY {
@@ -3039,7 +3055,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     } H5E_END_TRY;
-    return(1);
+    return 1;
 } /* test_size() */
 
 
@@ -6645,6 +6661,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         TEST_ERROR
+    fh = NULL;
 
     /* Close the file */
     if(H5Fclose(file) < 0)
@@ -6836,6 +6853,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         TEST_ERROR
+    fh = NULL;
 
     /* Close the file */
     if(H5Fclose(file) < 0)
@@ -7003,6 +7021,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         FAIL_STACK_ERROR
+    fh = NULL;
 
     /* Close the file */
     if(H5Fclose(file) < 0)
@@ -7241,6 +7260,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         TEST_ERROR
+    fh = NULL;
 
     /* Close the file */
     if(H5Fclose(file) < 0)
@@ -7543,6 +7563,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     /* Close the fractal heap */
     if(H5HF_close(fh) < 0)
         TEST_ERROR
+    fh = NULL;
 
     /* Close the file */
     if(H5Fclose(file) < 0)
@@ -7599,7 +7620,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     unsigned char heap_id[100][MAX_HEAP_ID_LEN]; /* Heap ID for object inserted */
     struct a_type_t1 {
         char a[10];
-        char b[29];
+        char b[40];
     } obj1, obj2;                       /* Objects to insert/remove */
     size_t      id_len;                 /* Size of fractal heap IDs */
     fheap_heap_state_t state;           /* State of fractal heap */
@@ -7640,14 +7661,14 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
      */
     TESTING("incremental object insertion and removal")
 
+    HDmemset(&obj1, 0, sizeof(obj1));
+    HDmemset(&obj2, 0, sizeof(obj2));
     for(i = 0; i < 100; i++) {
-        HDsprintf(obj1.b, "%s%d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
-
         for(j = 0; j < i; j++) {
-            HDsprintf(obj2.b, "%s%d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
-
             if(H5HF_remove(fh, heap_id[j]) < 0)
                 FAIL_STACK_ERROR
+
+            HDsprintf(obj2.b, "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
             if(H5HF_insert(fh, (sizeof(obj2)), &obj2, heap_id[j]) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
@@ -7658,6 +7679,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
 
         /* Insert object */
         HDmemset(heap_id[i], 0, id_len);
+        HDsprintf(obj1.b, "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
         if(H5HF_insert(fh, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
             FAIL_STACK_ERROR
     } /* end for */
@@ -13685,16 +13707,17 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     H5HF_create_t tmp_cparam;           /* Local heap creation parameters */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     size_t      id_len;                 /* Size of fractal heap IDs */
-    h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
-    h5_stat_size_t       file_size;              /* Size of file currently */
+    h5_stat_size_t empty_size;          /* Size of a file with an empty heap */
+    h5_stat_size_t file_size;           /* Size of file currently */
     unsigned char *heap_id = NULL;      /* Heap ID for object */
     size_t      obj_size;               /* Size of object */
     size_t      robj_size;              /* Size of object read */
     unsigned char obj_type;             /* Type of storage for object */
     fheap_heap_state_t state;           /* State of fractal heap */
     unsigned    deflate_level;          /* Deflation level */
-    size_t      old_actual_id_len =0 ;  /* Old actual ID length */
+    size_t      old_actual_id_len = 0;  /* Old actual ID length */
     hbool_t     huge_ids_direct;        /* Are 'huge' objects directly acccessed? */
+    hbool_t     pline_init = FALSE;     /* Whether the I/O pipeline has been initialized */
     const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove %s";       /* Test description */
 
     /* Copy heap creation properties */
@@ -13704,6 +13727,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     deflate_level = 6;
     if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, (size_t)1, &deflate_level) < 0)
         FAIL_STACK_ERROR
+    pline_init = TRUE;
 
     /* Adjust actual ID length, if asking for IDs that can directly access 'huge' objects */
     if(cparam->id_len == 1) {
@@ -13866,7 +13890,9 @@ error:
         H5MM_xfree(heap_id);
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        if(pline_init)
+            H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_filtered_huge() */
@@ -15570,9 +15596,12 @@ error:
         H5MM_xfree(keep_ids.ids);
         H5MM_xfree(keep_ids.lens);
         H5MM_xfree(keep_ids.offs);
+
+        if(tparam->comp == FHEAP_TEST_COMPRESS)
+            H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_random() */
@@ -15788,7 +15817,9 @@ error:
         H5MM_xfree(keep_ids.offs);
         if(fh)
             H5HF_close(fh);
-	H5Fclose(file);
+        if(tparam->comp == FHEAP_TEST_COMPRESS)
+            H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
+        H5Fclose(file);
     } H5E_END_TRY;
     return(1);
 } /* test_random_pow2() */

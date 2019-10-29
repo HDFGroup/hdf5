@@ -2735,11 +2735,11 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data) {
     }
 
     if ((pass) && (write_data)) {
-        ret = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, wdata);
+        ret = H5Treclaim(tid, sid, H5P_DEFAULT, wdata);
 
         if (ret < 0) {
             pass = FALSE;
-            failure_mssg = "ds_ctg_v: H5Dvlen_reclaim() failed.";
+            failure_mssg = "ds_ctg_v: H5Treclaim() failed.";
         }
         HDassert(ret >= 0);
 
@@ -3003,11 +3003,11 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data) {
     }
 
     if ((pass) && (write_data)) {
-        ret = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, rdata);
+        ret = H5Treclaim(tid, sid, H5P_DEFAULT, rdata);
 
         if (ret < 0) {
             pass = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Dvlen_reclaim() failed.";
+            failure_mssg = "vrfy_ds_ctg_v: H5Treclaim() failed.";
         }
         HDassert(ret >= 0);
 

@@ -32,11 +32,6 @@
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
-#ifdef H5_HAVE_PARALLEL
-/* Remove this if H5R_DATASET_REGION is no longer used in this file */
-#include "H5Rpublic.h"
-#endif /*H5_HAVE_PARALLEL*/
-
 
 /****************/
 /* Local Macros */
@@ -584,33 +579,33 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
 
     /* H5S_select_shape_same() has been modified to accept topologically identical
-     * selections with different rank as having the same shape (if the most 
-     * rapidly changing coordinates match up), but the I/O code still has 
+     * selections with different rank as having the same shape (if the most
+     * rapidly changing coordinates match up), but the I/O code still has
      * difficulties with the notion.
      *
-     * To solve this, we check to see if H5S_select_shape_same() returns true, 
-     * and if the ranks of the mem and file spaces are different.  If the are, 
-     * construct a new mem space that is equivalent to the old mem space, and 
+     * To solve this, we check to see if H5S_select_shape_same() returns true,
+     * and if the ranks of the mem and file spaces are different.  If the are,
+     * construct a new mem space that is equivalent to the old mem space, and
      * use that instead.
      *
-     * Note that in general, this requires us to touch up the memory buffer as 
+     * Note that in general, this requires us to touch up the memory buffer as
      * well.
      */
-    if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
+    if(TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
             H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
-        void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
+        const void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
                                 /* to the beginning of the projected mem space.  */
 
         /* Attempt to construct projected dataspace for memory dataspace */
         if(H5S_select_construct_projection(mem_space, &projected_mem_space,
-                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, (const void **)&adj_buf, type_info.dst_type_size) < 0)
+                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.dst_type_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
         HDassert(projected_mem_space);
         HDassert(adj_buf);
 
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
-        buf = adj_buf;
+        buf = (void *)adj_buf;          /* Casting away 'const' OK -QAK */
     } /* end if */
 
 
@@ -624,7 +619,8 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      * has been overwritten.  So just proceed in reading.
      */
     if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
-            !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
+            !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) &&
+            !(dataset->shared->layout.ops->is_data_cached && (*dataset->shared->layout.ops->is_data_cached)(dataset->shared))) {
         H5D_fill_value_t fill_status;   /* Whether/How the fill value is defined */
 
         /* Retrieve dataset's fill-value properties */
@@ -656,6 +652,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Sanity check that space is allocated, if there are elements */
     if(nelmts > 0)
         HDassert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)
+                || (dataset->shared->layout.ops->is_data_cached && (*dataset->shared->layout.ops->is_data_cached)(dataset->shared))
                 || dataset->shared->dcpl_cache.efl.nused > 0
                 || dataset->shared->layout.type == H5D_COMPACT);
 
@@ -816,27 +813,27 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(!(H5S_has_extent(mem_space)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
 
-    /* H5S_select_shape_same() has been modified to accept topologically 
-     * identical selections with different rank as having the same shape 
-     * (if the most rapidly changing coordinates match up), but the I/O 
+    /* H5S_select_shape_same() has been modified to accept topologically
+     * identical selections with different rank as having the same shape
+     * (if the most rapidly changing coordinates match up), but the I/O
      * code still has difficulties with the notion.
      *
-     * To solve this, we check to see if H5S_select_shape_same() returns 
-     * true, and if the ranks of the mem and file spaces are different.  
-     * If the are, construct a new mem space that is equivalent to the 
+     * To solve this, we check to see if H5S_select_shape_same() returns
+     * true, and if the ranks of the mem and file spaces are different.
+     * If the are, construct a new mem space that is equivalent to the
      * old mem space, and use that instead.
      *
-     * Note that in general, this requires us to touch up the memory buffer 
+     * Note that in general, this requires us to touch up the memory buffer
      * as well.
      */
-    if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
+    if(TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
             H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
-        void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
+        const void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
                                 /* to the beginning of the projected mem space.  */
 
         /* Attempt to construct projected dataspace for memory dataspace */
         if(H5S_select_construct_projection(mem_space, &projected_mem_space,
-                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, (const void **)&adj_buf, type_info.src_type_size) < 0)
+                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.src_type_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
         HDassert(projected_mem_space);
         HDassert(adj_buf);
@@ -961,6 +958,7 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info,
 
     /* Set up "normal" I/O fields */
     io_info->dset = dset;
+    io_info->f_sh = H5F_SHARED(dset->oloc.file);
     io_info->store = store;
 
     /* Set I/O operations to initial values */

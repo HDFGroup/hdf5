@@ -24,6 +24,7 @@
 
 #include "H5ACpkg.h"
 #include "H5Cpkg.h"
+#include "H5CXprivate.h"
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
@@ -621,7 +622,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
         if ( verbose ) {
-                fprintf(stdout,
+                HDfprintf(stdout,
                         "%d:%s: MPI_Comm_group() failed with error %d.\n",
                         world_mpi_rank, FUNC, mpi_result);
             }
@@ -640,7 +641,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout,
+                HDfprintf(stdout,
                         "%d:%s: MPI_Group_excl() failed with error %d.\n",
                         world_mpi_rank, FUNC, mpi_result);
             }
@@ -657,7 +658,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout,
+                HDfprintf(stdout,
                         "%d:%s: MPI_Comm_create() failed with error %d.\n",
                         world_mpi_rank, FUNC, mpi_result);
             }
@@ -671,7 +672,7 @@ set_up_file_communicator(void)
                     nerrors++;
                     success = FALSE;
                     if ( verbose ) {
-                        fprintf(stdout,
+                        HDfprintf(stdout,
                                 "%d:%s: file_mpi_comm == MPI_COMM_NULL.\n",
                                 world_mpi_rank, FUNC);
                     }
@@ -685,7 +686,7 @@ set_up_file_communicator(void)
                     nerrors++;
                     success = FALSE;
                     if ( verbose ) {
-                        fprintf(stdout,
+                        HDfprintf(stdout,
                                 "%d:%s: file_mpi_comm != MPI_COMM_NULL.\n",
                                 world_mpi_rank, FUNC);
                     }
@@ -703,7 +704,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout,
+                HDfprintf(stdout,
                         "%d:%s: MPI_Comm_size() failed with error %d.\n",
                         world_mpi_rank, FUNC, mpi_result);
             }
@@ -719,7 +720,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout,
+                HDfprintf(stdout,
                         "%d:%s: MPI_Comm_rank() failed with error %d.\n",
                         world_mpi_rank, FUNC, mpi_result);
             }
@@ -7456,7 +7457,7 @@ main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-    printf("%d:Failed to turn off atexit processing. Continue.\n",
+        HDprintf("%d:Failed to turn off atexit processing. Continue.\n",
                mpi_rank);
     };
     H5open();
@@ -7475,24 +7476,24 @@ main(int argc, char **argv)
     }
 
 #ifdef H5_HAVE_MPE
-    if ( MAINPROCESS ) { printf("    Tests compiled for MPE.\n"); }
+    if ( MAINPROCESS ) { HDprintf("    Tests compiled for MPE.\n"); }
     virt_num_data_entries = MPE_VIRT_NUM_DATA_ENTIES;
 #endif /* H5_HAVE_MPE */
 
 
     if (MAINPROCESS){
-    printf("===================================\n");
-    printf("Parallel metadata cache tests\n");
-    printf("    mpi_size     = %d\n", mpi_size);
-    printf("    express_test = %d\n", express_test);
-    printf("===================================\n");
+    HDprintf("===================================\n");
+    HDprintf("Parallel metadata cache tests\n");
+    HDprintf("    mpi_size     = %d\n", mpi_size);
+    HDprintf("    express_test = %d\n", express_test);
+    HDprintf("===================================\n");
     }
 
     if ( mpi_size < 3 ) {
 
         if ( MAINPROCESS ) {
 
-            printf("    Need at least 3 processes.  Exiting.\n");
+            HDprintf("    Need at least 3 processes.  Exiting.\n");
         }
         goto finish;
     }
@@ -7638,15 +7639,15 @@ finish:
      */
     MPI_Barrier(MPI_COMM_WORLD);
     if (MAINPROCESS){        /* only process 0 reports */
-    printf("===================================\n");
+    HDprintf("===================================\n");
     if (failures){
-        printf("***metadata cache tests detected %d failures***\n",
+        HDprintf("***metadata cache tests detected %d failures***\n",
                    failures);
     }
     else{
-        printf("metadata cache tests finished with no failures\n");
+        HDprintf("metadata cache tests finished with no failures\n");
     }
-    printf("===================================\n");
+    HDprintf("===================================\n");
     }
 
     takedown_derived_types();

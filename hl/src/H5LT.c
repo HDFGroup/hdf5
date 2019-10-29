@@ -2264,7 +2264,7 @@ out:
 *-------------------------------------------------------------------------
 */
 static char* 
-realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, char *str_to_add)
+realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, const char *str_to_add)
 {
     size_t size_str_to_add, size_str;
 
@@ -2360,7 +2360,6 @@ print_enum(hid_t type, char* str, size_t *str_len, hbool_t no_ubuf, size_t indt)
 {
     char           **name = NULL;   /*member names                   */
     unsigned char   *value = NULL;  /*value array                    */
-    unsigned char   *copy = NULL;   /*a pointer to value array       */
     int              nmembs;        /*number of members              */
     char             tmp_str[TMP_LEN];
     int              nchars;        /*number of output characters    */
@@ -2418,17 +2417,15 @@ print_enum(hid_t type, char* str, size_t *str_len, hbool_t no_ubuf, size_t indt)
         nchars = HDsnprintf(tmp_str, TMP_LEN, "\"%s\"", name[i]);
         if(!(str = realloc_and_append(no_ubuf, str_len, str, tmp_str)))
             goto out;
-        HDsnprintf(tmp_str, TMP_LEN, "%*s   ", MAX(0, 16 - nchars), "");
+        HDmemset(tmp_str, ' ', (size_t)MAX(3, 19 - nchars) + 1);
+        tmp_str[MAX(3, 19 - nchars)] = '\0';
         if(!(str = realloc_and_append(no_ubuf, str_len, str, tmp_str)))
             goto out;
 
-        /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
-         *strangely, unless use another pointer "copy".*/
-        copy = value + (size_t)i * dst_size;
         if (H5T_SGN_NONE == H5Tget_sign(native))
-            HDsnprintf(tmp_str, TMP_LEN, "%u", *((unsigned int*)((void *)copy)));
+            HDsnprintf(tmp_str, TMP_LEN, "%u", *((unsigned int *)((void *)(value + (size_t)i * dst_size))));
         else
-            HDsnprintf(tmp_str, TMP_LEN, "%d", *((int*)((void *)copy)));
+            HDsnprintf(tmp_str, TMP_LEN, "%d", *((int *)((void *)(value + (size_t)i * dst_size))));
         if(!(str = realloc_and_append(no_ubuf, str_len, str, tmp_str)))
             goto out;
 
@@ -2450,8 +2447,12 @@ print_enum(hid_t type, char* str, size_t *str_len, hbool_t no_ubuf, size_t indt)
 out:
 
     if(0 == nmembs) {
-        HDsnprintf(tmp_str, TMP_LEN, "\n%*s <empty>", (int)(indt + 4), "");
+        str = realloc_and_append(no_ubuf, str_len, str, "\n");
+        HDassert((indt + 4) < TMP_LEN);
+        HDmemset(tmp_str, ' ', (indt + 4) + 1);
+        tmp_str[(indt + 4)] = '\0';
         str = realloc_and_append(no_ubuf, str_len, str, tmp_str);
+        str = realloc_and_append(no_ubuf, str_len, str, " <empty>");
     } /* end if */
 
     /* Release resources */

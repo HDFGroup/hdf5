@@ -980,6 +980,37 @@ done:
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Treclaim
+ * Signature: (JJJ[B)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5Treclaim
+    (JNIEnv *env, jclass clss, jlong type_id, jlong space_id,
+          jlong xfer_plist_id, jbyteArray buf)
+{
+    jboolean  bufIsCopy;
+    jbyte    *pinBuf = NULL;
+    herr_t    status = FAIL;
+
+    UNUSED(clss);
+
+    if (NULL == buf)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Treclaim: buffer is NULL");
+
+    PIN_BYTE_ARRAY(ENVONLY, buf, pinBuf, &bufIsCopy, "H5Treclaim: buffer not pinned");
+
+    if ((status = H5Treclaim((hid_t)type_id, (hid_t)space_id, (hid_t)xfer_plist_id, pinBuf)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (pinBuf)
+        UNPIN_BYTE_ARRAY(ENVONLY, buf, pinBuf, (status < 0) ? JNI_ABORT : 0);
+
+    return (jint)status;
+} /* end Java_hdf_hdf5lib_H5_H5Treclaim */
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    _H5Tclose
  * Signature: (J)I
  */
@@ -1620,7 +1651,7 @@ done:
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Tarray_get_dims2
+ * Method:    H5Tget_array_dims2
  * Signature: (J[J)I
  */
 JNIEXPORT jint JNICALL

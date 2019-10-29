@@ -13,7 +13,7 @@
 
 #include "h5test.h"
 
-#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER) 
+#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER)
 # define H5_ZLIB_HEADER "zlib.h"
 #endif
 #if defined(H5_ZLIB_HEADER)
@@ -46,10 +46,10 @@
 #define DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s))*H5_DOUBLE(1.001))+H5_DOUBLE(12.0))
 
 /* Temporary filter IDs used for testing */
-#define H5Z_FILTER_BOGUS1	305
-#define H5Z_FILTER_BOGUS2	306
-#define ADD_ON			7
-#define FACTOR			3
+#define H5Z_FILTER_BOGUS1    305
+#define H5Z_FILTER_BOGUS2    306
+#define ADD_ON            7
+#define FACTOR            3
 
 /* Constants for the overwrite test */
 #define OVERWRITE_NDIMS         3
@@ -57,6 +57,14 @@
 #define OVERWRITE_CHUNK_2NX     6
 #define OVERWRITE_CHUNK_NY      2
 #define OVERWRITE_VALUE         42
+
+/* Test configurations */
+#define CONFIG_LATEST       0x01
+#define CONFIG_REOPEN_FILE  0x02
+#define CONFIG_REOPEN_DSET  0x04
+#define CONFIG_DIRECT_WRITE 0x08
+#define CONFIG_DIRECT_READ  0x10
+#define CONFIG_END          0x20
 
 /* Defines used in test_single_chunk_latest() */
 #define FILE            "single_latest.h5"
@@ -75,33 +83,33 @@ static size_t filter_bogus2(unsigned int flags, size_t cd_nelmts,
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_BOGUS1[1] = {{
     H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
-    H5Z_FILTER_BOGUS1,		/* Filter id number		*/
+    H5Z_FILTER_BOGUS1,        /* Filter id number        */
     1, 1,               /* Encoding and decoding enabled */
-    "bogus1",			/* Filter name for debugging	*/
+    "bogus1",            /* Filter name for debugging    */
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
-    filter_bogus1,		/* The actual filter function	*/
+    filter_bogus1,        /* The actual filter function    */
 }};
 
 const H5Z_class2_t H5Z_BOGUS2[1] = {{
     H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
-    H5Z_FILTER_BOGUS2,		/* Filter id number		*/
+    H5Z_FILTER_BOGUS2,        /* Filter id number        */
     1, 1,               /* Encoding and decoding enabled */
-    "bogus2",			/* Filter name for debugging	*/
+    "bogus2",            /* Filter name for debugging    */
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
-    filter_bogus2,		/* The actual filter function	*/
+    filter_bogus2,        /* The actual filter function    */
 }};
 
 /*-------------------------------------------------------------------------
- * Function:	test_direct_chunk_write
+ * Function:    test_direct_chunk_write
  *
- * Purpose:	    Test the basic functionality of H5Dwrite_chunk
+ * Purpose:        Test the basic functionality of H5Dwrite_chunk
  *
- * Return:	    Success:	0
- *		        Failure:	1
+ * Return:        Success:    0
+ *                Failure:    1
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              30 November 2012
  *
  *-------------------------------------------------------------------------
@@ -113,7 +121,7 @@ test_direct_chunk_write (hid_t file)
     hid_t       dataspace = -1, dataset = -1;
     hid_t       mem_space = -1;
     hid_t       cparms = -1, dxpl = -1;
-    hsize_t     dims[2]  = {NX, NY};        
+    hsize_t     dims[2]  = {NX, NY};
     hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t     chunk_dims[2] ={CHUNK_NX, CHUNK_NY};
     herr_t      status;
@@ -128,11 +136,11 @@ test_direct_chunk_write (hid_t file)
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
 
     const Bytef *z_src = (const Bytef*)(direct_buf);
-    Bytef	    *z_dst = NULL;		    /*destination buffer		*/
-    uLongf	     z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
-    uLong	     z_src_nbytes = (uLong)buf_size;
+    Bytef        *z_dst = NULL;            /*destination buffer        */
+    uLongf         z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
+    uLong         z_src_nbytes = (uLong)buf_size;
     int          aggression = 9;        /* Compression aggression setting */
-    void	    *outbuf = NULL;         /* Pointer to new buffer */
+    void        *outbuf = NULL;         /* Pointer to new buffer */
 
     hsize_t start[2];  /* Start of hyperslab */
     hsize_t stride[2]; /* Stride of hyperslab */
@@ -167,29 +175,29 @@ test_direct_chunk_write (hid_t file)
      * creation properties.
      */
     if((dataset = H5Dcreate2(file, DATASETNAME1, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-			cparms, H5P_DEFAULT)) < 0)
+            cparms, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Initialize the dataset */
     for(i = n = 0; i < NX; i++)
         for(j = 0; j < NY; j++)
-	    data[i][j] = n++;
+        data[i][j] = n++;
 
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         goto error;
 
     /*
      * Write the data for the dataset.  It should stay in the chunk cache.
-     * It will be evicted from the cache by the H5Dwrite_chunk calls. 
+     * It will be evicted from the cache by the H5Dwrite_chunk calls.
      */
     if((status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-		      dxpl, data)) < 0)
+            dxpl, data)) < 0)
         goto error;
 
     /* Initialize data for one chunk */
     for(i = n = 0; i < CHUNK_NX; i++)
         for(j = 0; j < CHUNK_NY; j++)
-	    direct_buf[i][j] = n++;
+        direct_buf[i][j] = n++;
 
     /* Allocate output (compressed) buffer */
     outbuf = HDmalloc(z_dst_nbytes);
@@ -210,8 +218,8 @@ test_direct_chunk_write (hid_t file)
         goto error;
     }
 
-    /* Write the compressed chunk data repeatedly to cover all the chunks in the 
-     * dataset, using the direct writing function.     */ 
+    /* Write the compressed chunk data repeatedly to cover all the chunks in the
+     * dataset, using the direct writing function.     */
     for(i=0; i<NX/CHUNK_NX; i++) {
         for(j=0; j<NY/CHUNK_NY; j++) {
             status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, z_dst_nbytes, outbuf);
@@ -224,7 +232,7 @@ test_direct_chunk_write (hid_t file)
     if(outbuf)
         HDfree(outbuf);
 
-    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0) 
+    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
         goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -253,7 +261,7 @@ test_direct_chunk_write (hid_t file)
             if(direct_buf[i][j] != check_chunk[i][j]) {
                 HDprintf("    1. Read different values than written.");
                 HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]); 
+                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
                 goto error;
             }
         }
@@ -262,7 +270,7 @@ test_direct_chunk_write (hid_t file)
     /* Reinitialize different data for one chunk */
     for(i = 0; i < CHUNK_NX; i++)
         for(j = 0; j < CHUNK_NY; j++)
-	    direct_buf[i][j] = i + j;
+        direct_buf[i][j] = i + j;
 
     /* Allocate output (compressed) buffer */
     outbuf = HDmalloc(z_dst_nbytes);
@@ -283,8 +291,8 @@ test_direct_chunk_write (hid_t file)
         goto error;
     }
 
-    /* Rewrite the compressed chunk data repeatedly to cover all the chunks in the 
-     * dataset, using the direct writing function.     */ 
+    /* Rewrite the compressed chunk data repeatedly to cover all the chunks in the
+     * dataset, using the direct writing function.     */
     offset[0] = offset[1] = 0;
     for(i=0; i<NX/CHUNK_NX; i++) {
         for(j=0; j<NY/CHUNK_NY; j++) {
@@ -298,7 +306,7 @@ test_direct_chunk_write (hid_t file)
     if(outbuf)
         HDfree(outbuf);
 
-    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0) 
+    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
         goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -317,7 +325,7 @@ test_direct_chunk_write (hid_t file)
             if(direct_buf[i][j] != check_chunk[i][j]) {
                 HDprintf("    2. Read different values than written.");
                 HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]); 
+                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
                 goto error;
             }
         }
@@ -331,7 +339,7 @@ test_direct_chunk_write (hid_t file)
     H5Sclose(dataspace);
     H5Pclose(cparms);
     H5Pclose(dxpl);
-    
+
     PASSED();
     return 0;
 
@@ -459,15 +467,15 @@ error:
 } /* end test_direct_chunk_overwrite_data() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_skip_compress_write1
+ * Function:    test_skip_compress_write1
  *
- * Purpose:	Test skipping compression filter when it is the only filter
+ * Purpose:    Test skipping compression filter when it is the only filter
  *              for the dataset
  *
- * Return:	Success:	0
- *		    Failure:	1
+ * Return:    Success:    0
+ *            Failure:    1
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              30 November 2012
  *
  *-------------------------------------------------------------------------
@@ -528,7 +536,7 @@ test_skip_compress_write1(hid_t file)
      * creation properties.
      */
     if((dataset = H5Dcreate2(file, DATASETNAME2, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-			cparms, H5P_DEFAULT)) < 0)
+            cparms, H5P_DEFAULT)) < 0)
         goto error;
 
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -636,13 +644,13 @@ error:
 } /* test_skip_compress_write1() */
 
 /*-------------------------------------------------------------------------
- * Function:	filter_bogus1
+ * Function:    filter_bogus1
  *
- * Purpose:	    A bogus filter that adds ADD_ON to the original value
+ * Purpose:        A bogus filter that adds ADD_ON to the original value
  *
- * Return:	    Success:	Data chunk size
+ * Return:        Success:    Data chunk size
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              30 November 2012
  *
  *-------------------------------------------------------------------------
@@ -674,13 +682,13 @@ filter_bogus1(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 } /* filter_bogus1() */
 
 /*-------------------------------------------------------------------------
- * Function:	filter_bogus2
+ * Function:    filter_bogus2
  *
- * Purpose:	A bogus filter that multiplies the original value by FACTOR.
+ * Purpose:    A bogus filter that multiplies the original value by FACTOR.
  *
- * Return:	Success:	Data chunk size
+ * Return:    Success:    Data chunk size
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              30 November 2012
  *-------------------------------------------------------------------------
  */
@@ -711,15 +719,15 @@ filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 } /* filter_bogus2() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_skip_compress_write2
+ * Function:    test_skip_compress_write2
  *
- * Purpose:	Test skipping compression filter when there are three filters
+ * Purpose:    Test skipping compression filter when there are three filters
  *              for the dataset
  *
- * Return:	Success:	0
- *		    Failure:	1
+ * Return:    Success:    0
+ *            Failure:    1
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              30 November 2012
  *
  *-------------------------------------------------------------------------
@@ -797,7 +805,7 @@ test_skip_compress_write2(hid_t file)
      * creation properties.
      */
     if((dataset = H5Dcreate2(file, DATASETNAME3, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-			cparms, H5P_DEFAULT)) < 0)
+            cparms, H5P_DEFAULT)) < 0)
         goto error;
 
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -907,14 +915,14 @@ error:
 } /* test_skip_compress_write2() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_data_conv
+ * Function:    test_data_conv
  *
- * Purpose:	Test data conversion
+ * Purpose:    Test data conversion
  *
- * Return:	Success:	0
- *		    Failure:	1
+ * Return:    Success:    0
+ *            Failure:    1
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              30 November 2012
  *
  *-------------------------------------------------------------------------
@@ -932,13 +940,13 @@ test_data_conv(hid_t file)
     hid_t       dataspace = -1, dataset = -1;
     hid_t       mem_space = -1;
     hid_t       cparms = -1, dxpl = -1;
-    hsize_t     dims[2]  = {NX, NY};        
+    hsize_t     dims[2]  = {NX, NY};
     hsize_t     maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t     chunk_dims[2] ={CHUNK_NX, CHUNK_NY};
     herr_t      status;
     int         i, j, n;
-    const hsize_t	four = 4;
-    hid_t	st=-1, dt=-1;
+    const hsize_t    four = 4;
+    hid_t    st=-1, dt=-1;
     hid_t       array_dt;
 
     unsigned    filter_mask = 0;
@@ -1002,7 +1010,7 @@ test_data_conv(hid_t file)
      * creation properties.
      */
     if((dataset = H5Dcreate2(file, DATASETNAME4, st, dataspace, H5P_DEFAULT,
-			cparms, H5P_DEFAULT)) < 0)
+            cparms, H5P_DEFAULT)) < 0)
         goto error;
 
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -1022,7 +1030,7 @@ test_data_conv(hid_t file)
         }
     }
 
-    /* write the chunk data to dataset, using the direct writing function. 
+    /* write the chunk data to dataset, using the direct writing function.
      * There should be no data conversion involved. */
     offset[0] = CHUNK_NX;
     offset[1] = CHUNK_NY;
@@ -1030,7 +1038,7 @@ test_data_conv(hid_t file)
     if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) < 0)
         goto error;
 
-    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0) 
+    if(H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
         goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -1057,10 +1065,10 @@ test_data_conv(hid_t file)
                     HDprintf("    1. Read different values than written.");
                     HDprintf("    At index %d,%d\n", i, j);
                     HDprintf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
-                        (direct_buf[i][j]).a, (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1], 
+                        (direct_buf[i][j]).a, (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
                         (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d, (direct_buf[i][j]).e);
                     HDprintf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
-                        (read_chunk[i][j]).a, (read_chunk[i][j]).b, (read_chunk[i][j]).c[0], (read_chunk[i][j]).c[1], 
+                        (read_chunk[i][j]).a, (read_chunk[i][j]).b, (read_chunk[i][j]).c[0], (read_chunk[i][j]).c[1],
                         (read_chunk[i][j]).c[2], (read_chunk[i][j]).c[3], (read_chunk[i][j]).d, (read_chunk[i][j]).e);
 
                     goto error;
@@ -1094,10 +1102,10 @@ test_data_conv(hid_t file)
                     HDprintf("    1. Read different values than written.");
                     HDprintf("    At index %d,%d\n", i, j);
                     HDprintf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n",
-                        (direct_buf[i][j]).a, (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1], 
+                        (direct_buf[i][j]).a, (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
                         (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d, (direct_buf[i][j]).e);
                     HDprintf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n",
-                        (check_chunk[i][j]).a, (check_chunk[i][j]).c[0], (check_chunk[i][j]).c[1], (check_chunk[i][j]).c[2], 
+                        (check_chunk[i][j]).a, (check_chunk[i][j]).c[0], (check_chunk[i][j]).c[1], (check_chunk[i][j]).c[2],
                         (check_chunk[i][j]).c[3], (check_chunk[i][j]).e);
 
                     goto error;
@@ -1135,14 +1143,14 @@ error:
 } /* test_data_conv() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_invalid_parameters
+ * Function:    test_invalid_parameters
  *
  * Purpose:     Test invalid parameters for H5Dwrite_chunk and H5Dread_chunk
  *
- * Return:      Success:	0
- *              Failure:	1
+ * Return:      Success:    0
+ *              Failure:    1
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              30 November 2012
  *
  *-------------------------------------------------------------------------
@@ -1153,7 +1161,7 @@ test_invalid_parameters(hid_t file)
     hid_t       dataspace = -1, dataset = -1;
     hid_t       mem_space = -1;
     hid_t       cparms = -1, dxpl = -1;
-    hsize_t     dims[2]  = {NX, NY};        
+    hsize_t     dims[2]  = {NX, NY};
     hsize_t     chunk_dims[2] ={CHUNK_NX, CHUNK_NY};
     herr_t      status;
     int         i, j, n;
@@ -1187,7 +1195,7 @@ test_invalid_parameters(hid_t file)
      * Create a new contiguous dataset to verify H5Dwrite_chunk/H5Dread_chunk doesn't work
      */
     if((dataset = H5Dcreate2(file, DATASETNAME5, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-			cparms, H5P_DEFAULT)) < 0)
+            cparms, H5P_DEFAULT)) < 0)
         goto error;
 
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -1236,10 +1244,10 @@ test_invalid_parameters(hid_t file)
      * creation properties.
      */
     if((dataset = H5Dcreate2(file, DATASETNAME6, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-			cparms, H5P_DEFAULT)) < 0)
+            cparms, H5P_DEFAULT)) < 0)
         goto error;
 
-    /* Check invalid dataset ID for H5Dwrite_chunk and H5Dread_chunk */ 
+    /* Check invalid dataset ID for H5Dwrite_chunk and H5Dread_chunk */
     H5E_BEGIN_TRY {
         if((status = H5Dwrite_chunk((hid_t)-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
@@ -1301,7 +1309,7 @@ test_invalid_parameters(hid_t file)
     /* Check invalid buffer size for H5Dwrite_chunk only */
     offset[0] = CHUNK_NX;
     offset[1] = CHUNK_NY;
-    buf_size = 0; 
+    buf_size = 0;
     H5E_BEGIN_TRY {
         if((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
@@ -1329,7 +1337,7 @@ test_invalid_parameters(hid_t file)
     H5Sclose(dataspace);
     H5Pclose(cparms);
     H5Pclose(dxpl);
-    
+
     PASSED();
     return 0;
 
@@ -1635,7 +1643,7 @@ test_direct_chunk_read_cache (hid_t file, hbool_t flush)
                 goto error;
             if(read_buf_size == 0)
                 goto error;
-        
+
             /* Read the compressed chunk back using the direct read function. */
             if((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, outbuf)) < 0)
                 goto error;
@@ -1973,7 +1981,7 @@ error:
 } /* test_read_unallocated_chunk() */
 
 /*-------------------------------------------------------------------------
- * Function:    test_single_chunk_latest
+ * Function:    test_single_chunk
  *
  * Purpose:     This is to verify the fix for jira issue HDFFV-10425.
  *              The problem was due to a bug in the internal ilbrary routine
@@ -1986,8 +1994,11 @@ error:
  *              this jira issue:
  *                  Create a file with the latest format and a chunked dataset
  *                  with one single chunk.  The library will use single chunk
- *                  index for the dataset.  
+ *                  index for the dataset.
  *                  Verify that the data read is the same as the written data.
+ *
+ *              Since expanded to test multiple combinations of cases
+ *              involving a single chunk
  *
  * Return:      Success:        0
  *              Failure:        1
@@ -1995,21 +2006,22 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_single_chunk_latest(void)
+test_single_chunk(unsigned config)
 {
-    hid_t fid;              /* File ID */
-    hid_t fapl;             /* File access property list ID */
-    hid_t sid;              /* Dataspace ID */
-    hid_t did;              /* Dataset ID */
-    hid_t dcpl;             /* Dataset creation property list */
+    hid_t fid = H5I_INVALID_HID;            /* File ID */
+    hid_t fapl = H5I_INVALID_HID;           /* File access property list ID */
+    hid_t sid = H5I_INVALID_HID;            /* Dataspace ID */
+    hid_t did = H5I_INVALID_HID;            /* Dataset ID */
+    hid_t dcpl = H5I_INVALID_HID;           /* Dataset creation property list */
     hsize_t dims[2] = {DIM0, DIM1};         /* Dimension sizes */
     hsize_t chunk[2] = {CHUNK0, CHUNK1};    /* Chunk dimension sizes */
     hsize_t offset[2] = {0,0};              /* Offset for writing */
+    uint32_t filters;       /* Filter mask out */
     int wdata[DIM0][DIM1];  /* Write buffer */
     int rdata[DIM0][DIM1];  /* Read buffer */
     int i, j;               /* Local index variable */
 
-    TESTING("H5Dwrite_chunk with single chunk and latest format");
+    TESTING("Single chunk I/O");
 
     /* Initialize data */
     for (i=0; i<DIM0; i++) {
@@ -2020,8 +2032,9 @@ test_single_chunk_latest(void)
     /* Create a new file with the latest format  */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         goto error;
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        goto error;
+    if(config & CONFIG_LATEST)
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            goto error;
     if((fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         goto error;
 
@@ -2039,37 +2052,57 @@ test_single_chunk_latest(void)
     if((did = H5Dcreate2(fid, DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
-    /* Write the data directly to the dataset */
-    if(H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0*CHUNK1*4, (void *)wdata) < 0)
-        goto error;
+    if(config & CONFIG_DIRECT_WRITE) {
+        /* Write the data directly to the dataset */
+        if(H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0*CHUNK1*4, (void *)wdata) < 0)
+            goto error;
+    } /* end if */
+    else
+        /* Write the data to the dataset */
+        if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)wdata) < 0)
+            goto error;
 
     /*
      * Close and release resources.
      */
     if(H5Pclose(dcpl) < 0)
         goto error;
-    if(H5Dclose(did) < 0)
-        goto error;
+    if(config & CONFIG_REOPEN_DSET)
+        if(H5Dclose(did) < 0)
+            goto error;
     if(H5Sclose(sid) < 0)
         goto error;
     if(H5Pclose(fapl) < 0)
         goto error;
-    if(H5Fclose(fid) < 0)
-        goto error;
+    if(config & CONFIG_REOPEN_FILE)
+        if(H5Fclose(fid) < 0)
+            goto error;
 
     /* Open the file and dataset with default properties  */
-    if((fid = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        goto error;
-    if((did = H5Dopen2(fid, DATASET, H5P_DEFAULT)) < 0)
-        goto error;
+    if(config & CONFIG_REOPEN_FILE)
+        if((fid = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            goto error;
+    if(config & CONFIG_REOPEN_DSET)
+        if((did = H5Dopen2(fid, DATASET, H5P_DEFAULT)) < 0)
+            goto error;
 
     /* Retrieve dataset creation property list */
     if((dcpl = H5Dget_create_plist(did)) < 0)
         goto error;
 
-    /* Read the data */
-    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
-        goto error;
+    if(config & CONFIG_DIRECT_READ) {
+        /* Read the data directly */
+        if(H5Dread_chunk(did, H5P_DEFAULT, offset, &filters, rdata) < 0)
+            goto error;
+
+        /* Verify returned filter mask */
+        if(filters != 0)
+            goto error;
+    } /* end if */
+    else
+        /* Read the data */
+        if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
+            goto error;
 
     /* Verify that the data read was correct.  */
     for (i = 0; i < DIM0; i++) {
@@ -2106,15 +2139,15 @@ error:
 } /* test_single_chunk_latest() */
 
 /*-------------------------------------------------------------------------
- * Function:	Main function
+ * Function:    Main function
  *
- * Purpose:	    Test direct chunk write function H5Dwrite_chunk and
+ * Purpose:        Test direct chunk write function H5Dwrite_chunk and
  *              chunk direct read function H5Dread_chunk
  *
- * Return:	    Success:	0
- *		        Failure:	1
+ * Return:        Success:    0
+ *                Failure:    1
  *
- * Programmer:  Raymond Lu	
+ * Programmer:  Raymond Lu
  *              30 November 2012
  *
  *-------------------------------------------------------------------------
@@ -2122,6 +2155,7 @@ error:
 int main( void )
 {
     hid_t file_id;
+    unsigned config;
     int   nerrors=0;
 
     /*
@@ -2134,7 +2168,7 @@ int main( void )
 #ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += test_direct_chunk_write(file_id);
 #endif /* H5_HAVE_FILTER_DEFLATE */
-	nerrors += test_direct_chunk_overwrite_data(file_id);
+    nerrors += test_direct_chunk_overwrite_data(file_id);
     nerrors += test_skip_compress_write1(file_id);
     nerrors += test_skip_compress_write2(file_id);
     nerrors += test_data_conv(file_id);
@@ -2149,7 +2183,53 @@ int main( void )
     nerrors += test_read_unfiltered_dset(file_id);
     nerrors += test_read_unallocated_chunk(file_id);
 
-    nerrors += test_single_chunk_latest();
+    /* Loop over test configurations */
+    for(config = 0; config < CONFIG_END; config++) {
+        hbool_t need_comma = FALSE;
+
+        /* Check for invalid combinations */
+        if((config & CONFIG_REOPEN_FILE) && !(config & CONFIG_REOPEN_DSET))
+            continue;
+
+        /* Print configuration */
+        HDprintf("Configuration: ");
+        if(config == 0)
+            HDprintf("<empty>");
+        if(config & CONFIG_LATEST) {
+            if(need_comma)
+                HDprintf(", ");
+            HDprintf("latest format");
+            need_comma = TRUE;
+        } /* end if */
+        if(config & CONFIG_REOPEN_FILE) {
+            if(need_comma)
+                HDprintf(", ");
+            HDprintf("reopen file");
+            need_comma = TRUE;
+        } /* end if */
+        else if(config & CONFIG_REOPEN_DSET) {
+            if(need_comma)
+                HDprintf(", ");
+            HDprintf("reopen dataset");
+            need_comma = TRUE;
+        } /* end if */
+        if(config & CONFIG_DIRECT_WRITE) {
+            if(need_comma)
+                HDprintf(", ");
+            HDprintf("direct write");
+            need_comma = TRUE;
+        } /* end if */
+        if(config & CONFIG_DIRECT_READ) {
+            if(need_comma)
+                HDprintf(", ");
+            HDprintf("direct read");
+            need_comma = TRUE;
+        } /* end if */
+        HDprintf(":\n");
+        fflush(stdout);
+
+        nerrors += test_single_chunk(config);
+    } /* end for */
 
     if(H5Fclose(file_id) < 0)
         goto error;
@@ -2165,3 +2245,4 @@ error:
     HDputs("*** TESTS FAILED ***");
     return EXIT_FAILURE;
 }
+

@@ -78,6 +78,7 @@ MAJOR, H5E_FARRAY, Fixed Array
 MAJOR, H5E_PLUGIN, Plugin for dynamically loaded library
 MAJOR, H5E_PAGEBUF, Page Buffering
 MAJOR, H5E_CONTEXT, API Context
+MAJOR, H5E_MAP, Map
 MAJOR, H5E_NONE_MAJOR, No error
 
 # Sections (for grouping minor errors)
@@ -134,6 +135,7 @@ MINOR, FILEACC, H5E_NOTHDF5, Not an HDF5 file
 MINOR, FILEACC, H5E_BADFILE, Bad file ID accessed
 MINOR, FILEACC, H5E_TRUNCATED, File has been truncated
 MINOR, FILEACC, H5E_MOUNT, File mount error
+MINOR, FILEACC, H5E_CANTDELETEFILE, Unable to delete file
 
 # Generic low-level file I/O errors
 MINOR, FILE, H5E_SEEKERROR, Seek failed
@@ -226,6 +228,7 @@ MINOR, DSPACE, H5E_CANTSELECT, Can't select hyperslab
 MINOR, DSPACE, H5E_CANTNEXT, Can't move to next iterator location
 MINOR, DSPACE, H5E_BADSELECT, Invalid selection
 MINOR, DSPACE, H5E_CANTCOMPARE, Can't compare objects
+MINOR, DSPACE, H5E_INCONSISTENTSTATE, Internal states are inconsistent
 MINOR, DSPACE, H5E_CANTAPPEND, Can't append object
 
 # Property list errors

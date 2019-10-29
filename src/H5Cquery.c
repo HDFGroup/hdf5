@@ -156,6 +156,34 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_get_cache_flush_in_progress
+ *
+ * Purpose:	Return flush_in_progress in *flush_in_progress_ptr
+ *		    If the parameter is NULL, skip that value.
+ *
+ * Return:  SUCCEED on success, and FAIL on failure.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_get_cache_flush_in_progress(H5C_t * cache_ptr, hbool_t *flush_in_progress_ptr)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
+
+    if(flush_in_progress_ptr != NULL)
+        *flush_in_progress_ptr = cache_ptr->flush_in_progress;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_get_cache_flush_in_progress() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_get_cache_hit_rate
  *
  * Purpose:	Compute and return the current cache hit rate in

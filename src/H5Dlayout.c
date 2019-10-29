@@ -50,6 +50,8 @@
 const unsigned H5O_layout_ver_bounds[] = {
     H5O_LAYOUT_VERSION_1,       /* H5F_LIBVER_EARLIEST */
     H5O_LAYOUT_VERSION_3,       /* H5F_LIBVER_V18 */  /* H5O_LAYOUT_VERSION_DEFAULT */
+    H5O_LAYOUT_VERSION_4,       /* H5F_LIBVER_V110 */
+    H5O_LAYOUT_VERSION_4,       /* H5F_LIBVER_V112 */
     H5O_LAYOUT_VERSION_LATEST   /* H5F_LIBVER_LATEST */
 };
 
@@ -64,7 +66,7 @@ const unsigned H5O_layout_ver_bounds[] = {
 
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_set_io_ops
  *
@@ -81,7 +83,7 @@ const unsigned H5O_layout_ver_bounds[] = {
 herr_t
 H5D__layout_set_io_ops(const H5D_t *dataset)
 {
-    herr_t ret_value = SUCCEED;		/* Return value */
+    herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -151,7 +153,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_set_io_ops() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_meta_size
  *
@@ -282,7 +284,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_meta_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_set_version
  *
@@ -320,7 +322,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_set_version() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_set_latest_indexing
  *
@@ -334,7 +336,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, 
+H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
     const H5D_dcpl_cache_t *dcpl_cache)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -360,9 +362,9 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
         if(ndims > 0) {
             hsize_t max_dims[H5O_LAYOUT_NDIMS]; /* Maximum dimension sizes */
             hsize_t cur_dims[H5O_LAYOUT_NDIMS]; /* Current dimension sizes */
-            unsigned unlim_count = 0;          	/* Count of unlimited max. dimensions */
+            unsigned unlim_count = 0;              /* Count of unlimited max. dimensions */
             hbool_t single = TRUE;              /* Fulfill single chunk indexing */
-            unsigned u;                     	/* Local index variable */
+            unsigned u;                         /* Local index variable */
 
             /* Query the dataspace's dimensions */
             if(H5S_get_simple_extent_dims(space, cur_dims, max_dims) < 0)
@@ -416,7 +418,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
                     layout->storage.u.chunk.ops = H5D_COPS_SINGLE;
                 } /* end if */
-                else if(!dcpl_cache->pline.nused && 
+                else if(!dcpl_cache->pline.nused &&
                         dcpl_cache->fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
 
                     /* Set the chunk index type to "none" Index */
@@ -444,7 +446,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_set_latest_indexing() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_oh_create
  *
@@ -585,17 +587,17 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__layout_oh_create() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__layout_oh_read
+ * Function:    H5D__layout_oh_read
  *
- * Purpose:	Read layout/pline/efl information for dataset
+ * Purpose:    Read layout/pline/efl information for dataset
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
+ * Return:    Success:    SUCCEED
+ *        Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, July 27, 2009
+ * Programmer:    Quincey Koziol
+ *        Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -679,17 +681,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_oh_read() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5D__layout_oh_write
+ * Function:    H5D__layout_oh_write
  *
- * Purpose:	Write layout information for dataset
+ * Purpose:    Write layout information for dataset
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
+ * Return:    Success:    SUCCEED
+ *        Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, July 27, 2009
+ * Programmer:    Quincey Koziol
+ *        Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */

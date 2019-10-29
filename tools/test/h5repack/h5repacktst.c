@@ -2907,10 +2907,10 @@ out:
 static
 int make_all_filters(hid_t loc_id)
 {
-    hid_t    dcpl; /* dataset creation property list */
-    hid_t    sid;  /* dataspace ID */
-    hid_t    dtid;
-    hid_t    dsid;
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
+    hid_t    dtid = H5I_INVALID_HID;
+    hid_t    dsid = H5I_INVALID_HID;
 #if defined (H5_HAVE_FILTER_SZIP)
     unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block=8;
@@ -3083,7 +3083,7 @@ int make_early(void)
     hid_t   tid=-1;
     hid_t   dcpl=-1;
     int     i;
-    char    name[10];
+    char    name[16];
     int     iter=100;
 
     if ((fid = H5Fcreate(FNAME5, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -3108,7 +3108,7 @@ int make_early(void)
             goto out;
         if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             goto out;
-        sprintf(name, "%d", i);
+        HDsprintf(name, "%d", i);
         if ((H5Tcommit2(fid, name, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
         if (H5Tclose(tid) < 0)
@@ -3133,7 +3133,7 @@ int make_early(void)
     {
         if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             goto out;
-        sprintf(name, "%d", i);
+        HDsprintf(name, "%d", i);
         if ((H5Tcommit2(fid, name, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
         if (H5Tclose(tid) < 0)
@@ -3178,7 +3178,7 @@ int make_layout(hid_t loc_id)
     hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
     int      buf[DIM1][DIM2];
     int      i, j, n;
-    char     name[6];
+    char     name[16];
 
 
     for (i=n=0; i<DIM1; i++)
@@ -3195,7 +3195,7 @@ int make_layout(hid_t loc_id)
     */
     for (i=0; i<4; i++)
     {
-        sprintf(name,"dset%d",i+1);
+        HDsprintf(name,"dset%d",i+1);
         if (write_dset(loc_id,RANK,dims,name,H5T_NATIVE_INT,buf) < 0)
             return -1;
     }
@@ -4079,7 +4079,7 @@ int write_dset_in(hid_t loc_id,
         goto out;
     if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5) < 0)
         goto out;
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf5) < 0)
         goto out;
     if (H5Dclose(did) < 0)
         goto out;
@@ -4120,7 +4120,7 @@ int write_dset_in(hid_t loc_id,
         dbuf = (double*)HDmalloc( size );
         if (NULL == dbuf)
         {
-            printf ("\nError: Cannot allocate memory for \"arrayd\" data buffer size %dMB.\n", (int) size / 1000000 );
+            HDprintf ("\nError: Cannot allocate memory for \"arrayd\" data buffer size %dMB.\n", (int) size / 1000000 );
             goto out;
         }
 
@@ -4312,7 +4312,7 @@ int write_dset_in(hid_t loc_id,
         goto out;
     if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf52) < 0)
         goto out;
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf52) < 0)
         goto out;
     if (H5Dclose(did) < 0)
         goto out;
@@ -4533,7 +4533,7 @@ int write_dset_in(hid_t loc_id,
     if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf53) < 0)
         goto out;
 
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf53) < 0)
         goto out;
 
     if (H5Dclose(did) < 0)
@@ -5009,7 +5009,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Awrite(aid, tid, buf5) < 0)
         goto out;
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf5) < 0)
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
@@ -5331,7 +5331,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Awrite(aid, tid, buf52) < 0)
         goto out;
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf52) < 0)
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
@@ -5793,7 +5793,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Awrite(aid, tid, buf53) < 0)
         goto out;
-    if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53) < 0)
+    if (H5Treclaim(tid, sid, H5P_DEFAULT, buf53) < 0)
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
@@ -6182,7 +6182,7 @@ static herr_t add_attr_with_objref(hid_t file_id, hid_t obj_id)
     status = H5Rcreate(&data_attr_objref[0],file_id,NAME_OBJ_DS1,H5R_OBJECT,(hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6191,7 +6191,7 @@ static herr_t add_attr_with_objref(hid_t file_id, hid_t obj_id)
     status = H5Rcreate(&data_attr_objref[1],file_id,NAME_OBJ_GRP,H5R_OBJECT,(hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6200,7 +6200,7 @@ static herr_t add_attr_with_objref(hid_t file_id, hid_t obj_id)
     status = H5Rcreate(&data_attr_objref[2],file_id,NAME_OBJ_NDTYPE,H5R_OBJECT,(hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6209,7 +6209,7 @@ static herr_t add_attr_with_objref(hid_t file_id, hid_t obj_id)
     status = make_attr(obj_id,1,dim_attr_objref,"Attr_OBJREF",H5T_STD_REF_OBJ,data_attr_objref);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> make_attr failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> make_attr failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6251,7 +6251,7 @@ static herr_t add_attr_with_regref(hid_t file_id, hid_t obj_id)
     sid_regrefed_dset = H5Screate_simple (2, dim_regrefed_dset, NULL);
     if (sid_regrefed_dset < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6260,7 +6260,7 @@ static herr_t add_attr_with_regref(hid_t file_id, hid_t obj_id)
     status = H5Sselect_elements (sid_regrefed_dset, H5S_SELECT_SET, (size_t)3, coords_regrefed_dset[0]);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6269,7 +6269,7 @@ static herr_t add_attr_with_regref(hid_t file_id, hid_t obj_id)
     status = H5Rcreate (&data_attr_regref[0], file_id, NAME_OBJ_DS2, H5R_DATASET_REGION, sid_regrefed_dset);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6278,7 +6278,7 @@ static herr_t add_attr_with_regref(hid_t file_id, hid_t obj_id)
     status = make_attr(obj_id,1,dim_attr_regref,"Attr_REGREF",H5T_STD_REF_DSETREG,data_attr_regref);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> make_attr failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> make_attr failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6324,7 +6324,7 @@ static herr_t gen_refered_objs(hid_t loc_id)
     sid = H5Screate_simple(1, dims1, NULL);
     if (sid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6332,7 +6332,7 @@ static herr_t gen_refered_objs(hid_t loc_id)
     did1 = H5Dcreate2 (loc_id, NAME_OBJ_DS1, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (did1 < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6340,7 +6340,7 @@ static herr_t gen_refered_objs(hid_t loc_id)
     status = H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6352,7 +6352,7 @@ static herr_t gen_refered_objs(hid_t loc_id)
     gid = H5Gcreate2 (loc_id, NAME_OBJ_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6365,7 +6365,7 @@ static herr_t gen_refered_objs(hid_t loc_id)
      status = H5Tcommit2(loc_id, NAME_OBJ_NDTYPE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
      if (status < 0)
      {
-        fprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
      }
@@ -6378,7 +6378,7 @@ static herr_t gen_refered_objs(hid_t loc_id)
     sid2 = H5Screate_simple (2, dims2, NULL);
     if (sid2 < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6387,7 +6387,7 @@ static herr_t gen_refered_objs(hid_t loc_id)
     did2 = H5Dcreate2 (loc_id, NAME_OBJ_DS2, H5T_STD_I8LE, sid2, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     if (did2 < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6396,7 +6396,7 @@ static herr_t gen_refered_objs(hid_t loc_id)
     status = H5Dwrite (did2, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6453,7 +6453,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     status = H5Rcreate (&objref_buf[0], loc_id, NAME_OBJ_DS1, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6462,7 +6462,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     status = H5Rcreate (&objref_buf[1], loc_id, NAME_OBJ_GRP, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6471,7 +6471,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     status = H5Rcreate (&objref_buf[2], loc_id, NAME_OBJ_NDTYPE, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6482,7 +6482,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     sid = H5Screate_simple (1, dims_dset_objref, NULL);
     if (sid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6490,7 +6490,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     oid = H5Dcreate2 (loc_id, "Dset_OBJREF", H5T_STD_REF_OBJ, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     if (oid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6498,7 +6498,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     status = H5Dwrite(oid, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, objref_buf);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6511,7 +6511,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     status = add_attr_with_objref(loc_id, oid);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> add_attr_with_objref failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> add_attr_with_objref failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6520,7 +6520,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     status = add_attr_with_regref(loc_id, oid);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> add_attr_with_regref failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> add_attr_with_regref failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6573,7 +6573,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     sid_trg = H5Screate_simple (2, dims_trg, NULL);
     if (sid_trg < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6582,7 +6582,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Sselect_elements (sid_trg, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6591,7 +6591,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Rcreate (&rr_data[0], loc_id, NAME_OBJ_DS2, H5R_DATASET_REGION, sid_trg);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6600,7 +6600,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Sselect_hyperslab (sid_trg, H5S_SELECT_SET, start, stride, count, block);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Sselect_hyperslab failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Sselect_hyperslab failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6609,7 +6609,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Rcreate (&rr_data[1], loc_id, NAME_OBJ_DS2, H5R_DATASET_REGION, sid_trg);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6618,7 +6618,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     sid_ref = H5Screate_simple (1, dims1, NULL);
     if (sid_ref < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6627,7 +6627,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     oid_ref = H5Dcreate2 (loc_id, REG_REF_DS1, H5T_STD_REF_DSETREG, sid_ref, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     if (oid_ref < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6636,7 +6636,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = H5Dwrite (oid_ref, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rr_data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6649,7 +6649,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = add_attr_with_objref(loc_id, oid_ref);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> add_attr_with_objref failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> add_attr_with_objref failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6658,7 +6658,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     status = add_attr_with_regref(loc_id, oid_ref);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> add_attr_with_regref failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> add_attr_with_regref failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6691,7 +6691,7 @@ static herr_t make_references(hid_t loc_id)
     status = gen_refered_objs(loc_id);
     if (status == FAIL)
     {
-        fprintf(stderr, "Failed to generate referenced object.\n");
+        HDfprintf(stderr, "Failed to generate referenced object.\n");
         ret = FAIL;
     }
 
@@ -6699,7 +6699,7 @@ static herr_t make_references(hid_t loc_id)
     status = gen_obj_ref(loc_id);
     if (status == FAIL)
     {
-        fprintf(stderr, "Failed to generate object reference.\n");
+        HDfprintf(stderr, "Failed to generate object reference.\n");
         ret = FAIL;
     }
 
@@ -6707,7 +6707,7 @@ static herr_t make_references(hid_t loc_id)
     status = gen_region_ref(loc_id);
     if (status == FAIL)
     {
-        fprintf(stderr, "Failed to generate region reference.\n");
+        HDfprintf(stderr, "Failed to generate region reference.\n");
         ret = FAIL;
     }
 
@@ -6831,7 +6831,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Dwrite(objdid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_data[0]);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6841,7 +6841,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Tcommit2(loc_id, NAME_OBJ_NDTYPE, objtid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6854,7 +6854,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     main_gid = H5Gcreate2(loc_id, "group_main", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (main_gid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6869,7 +6869,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Dwrite(main_did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_data[0]);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6893,7 +6893,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Rcreate (&(comp_objref_data[0].val_objref), loc_id, NAME_OBJ_DS1, H5R_OBJECT,(hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6903,7 +6903,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Rcreate (&(comp_objref_data[1].val_objref), loc_id, NAME_OBJ_GRP, H5R_OBJECT,(hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6913,7 +6913,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Rcreate (&(comp_objref_data[2].val_objref), loc_id, NAME_OBJ_NDTYPE, H5R_OBJECT,(hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6927,7 +6927,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Awrite (comp_objref_aid, comp_objref_tid, comp_objref_data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Awrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Awrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6949,14 +6949,14 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Sselect_elements (objsid, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
     status = H5Rcreate (&(comp_regref_data[0].val_regref), loc_id, NAME_OBJ_DS1, H5R_DATASET_REGION, objsid);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6970,7 +6970,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Awrite (comp_regref_aid, comp_regref_tid, comp_regref_data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Awrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Awrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -6996,7 +6996,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      status = H5Rcreate (&((hobj_ref_t*)vlen_objref_data[0].p)[0], loc_id, NAME_OBJ_DS1, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7004,7 +7004,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      status = H5Rcreate (&((hobj_ref_t*)vlen_objref_data[1].p)[0], loc_id, NAME_OBJ_GRP, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7012,7 +7012,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      status = H5Rcreate (&((hobj_ref_t*)vlen_objref_data[2].p)[0], loc_id, NAME_OBJ_NDTYPE, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7030,16 +7030,16 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      status = H5Awrite (vlen_objref_attr_id, vlen_objref_attr_tid, vlen_objref_data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Awrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Awrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     /* close resource for vlen data */
-    status = H5Dvlen_reclaim (vlen_objref_attr_tid, vlen_objref_attr_sid, H5P_DEFAULT, vlen_objref_data);
+    status = H5Treclaim (vlen_objref_attr_tid, vlen_objref_attr_sid, H5P_DEFAULT, vlen_objref_data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dvlen_reclaim failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Treclaim failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7060,14 +7060,14 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Sselect_elements(objsid, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
     status = H5Rcreate (&((hdset_reg_ref_t*)vlen_regref_data[0].p)[0], loc_id, NAME_OBJ_DS1, H5R_DATASET_REGION, objsid);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -7085,16 +7085,16 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     status = H5Awrite(vlen_regref_attr_id, vlen_regref_attr_tid, vlen_regref_data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Awrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Awrite failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     /* close resource for vlen data */
-    status = H5Dvlen_reclaim (vlen_regref_attr_tid, vlen_regref_attr_sid, H5P_DEFAULT, vlen_regref_data);
+    status = H5Treclaim (vlen_regref_attr_tid, vlen_regref_attr_sid, H5P_DEFAULT, vlen_regref_data);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Dvlen_reclaim failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Treclaim failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }

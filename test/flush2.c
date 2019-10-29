@@ -15,10 +15,10 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Friday, October 23, 1998
  *
- * Purpose:	This is the second half of a two-part test that makes sure
- *		that a file can be read after an application crashes as long
- *		as the file was flushed first.  This half tries to read the
- *		file created by the first half.
+ * Purpose:  This is the second half of a two-part test that makes sure
+ *    that a file can be read after an application crashes as long
+ *    as the file was flushed first.  This half tries to read the
+ *    file created by the first half.
  */
 #include "h5test.h"
 
@@ -135,7 +135,7 @@ file_ok(const char *filename, hid_t fapl_id, hbool_t check_second_dset)
     hid_t   fid = -1;               /* file ID                          */
     hid_t   top_gid = -1;           /* containing group ID              */
     hid_t   gid = -1;               /* subgroup ID                      */
-    char    group_name[16];         /* group name                       */
+    char    group_name[32];         /* group name                       */
     int     i;                      /* iterator                         */
 
     /* open file */

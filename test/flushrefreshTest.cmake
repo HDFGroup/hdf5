@@ -18,7 +18,7 @@ if (NOT TEST_PROGRAM)
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
 endif ()
 if (NOT TEST_FOLDER)
-  message ( FATAL_ERROR "Require TEST_FOLDER to be defined")
+  message (FATAL_ERROR "Require TEST_FOLDER to be defined")
 endif ()
 if (NOT TEST_OUTPUT)
   message (FATAL_ERROR "Require TEST_OUTPUT to be defined")
@@ -30,18 +30,18 @@ if (NOT PERL_EXECUTABLE)
   message (STATUS "Require PERL_EXECUTABLE to be defined")
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
 message (STATUS "COMMAND: ${TEST_PROGRAM} ${TEST_ARGS}")
 
 if (TEST_LIBRARY_DIRECTORY)
-  if (WIN32 AND NOT MINGW)
+  if (WIN32 OR MINGW)
     set (ENV{PATH} "$ENV{PATH};${TEST_LIBRARY_DIRECTORY}")
   else ()
     set (ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${TEST_LIBRARY_DIRECTORY}")
@@ -69,10 +69,10 @@ endif ()
 set (verification_done "0")
 while (verification_done LESS "1")
   message (STATUS "checking first stage:${TEST_FOLDER}/${TEST_ARGS1}")
-  if (EXISTS ${TEST_FOLDER}/${TEST_ERR})
+  if (EXISTS "${TEST_FOLDER}/${TEST_ERR}")
     # Error exit script
     set (verification_done "3")
-  elseif (EXISTS ${TEST_FOLDER}/${TEST_ARGS1})
+  elseif (EXISTS "${TEST_FOLDER}/${TEST_ARGS1}")
     file (STRINGS ${TEST_FOLDER}/${TEST_ARGS1} v1)
     list (LENGTH v1 len_v1)
     message (STATUS "v1:${v1} len_v1:${len_v1}")
@@ -90,7 +90,7 @@ while (verification_done LESS "1")
     else ()
       message (STATUS "execute: ${TEST_PROGRAM} ${param1} ${param2}")
       execute_process (
-          COMMAND ${TEST_PROGRAM} ${param1} ${param2}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} ${TEST_PROGRAM} ${param1} ${param2}
           RESULT_VARIABLE TEST_RESULT
           OUTPUT_FILE ${TEST_OUTPUT}
           ERROR_FILE ${TEST_OUTPUT}.err
@@ -112,10 +112,10 @@ endwhile ()
 
 while (verification_done LESS "2")
   message (STATUS "checking second stage:${TEST_FOLDER}/${TEST_ARGS1}")
-  if (EXISTS ${TEST_FOLDER}/${TEST_ERR})
+  if (EXISTS "${TEST_FOLDER}/${TEST_ERR}")
     # Error exit script
     set (verification_done "3")
-  elseif (EXISTS ${TEST_FOLDER}/${TEST_ARGS1})
+  elseif (EXISTS "${TEST_FOLDER}/${TEST_ARGS1}")
     file (STRINGS ${TEST_FOLDER}/${TEST_ARGS1} v1)
     list (LENGTH v1 len_v1)
     message (STATUS "v1:${v1} len_v1:${len_v1}")
@@ -133,7 +133,7 @@ while (verification_done LESS "2")
     else ()
       message (STATUS "execute: ${TEST_PROGRAM} ${param1}")
       execute_process (
-          COMMAND ${TEST_PROGRAM} ${param1}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} ${TEST_PROGRAM} ${param1}
           RESULT_VARIABLE TEST_RESULT
           OUTPUT_FILE ${TEST_OUTPUT}
           ERROR_FILE ${TEST_OUTPUT}.err
@@ -158,7 +158,7 @@ message (STATUS "COMMAND Result: ${TEST_RESULT}")
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
       file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
       message (STATUS "Output :\n${TEST_STREAM}")
     endif ()
@@ -169,4 +169,4 @@ endif ()
 message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # everything went fine...
-message ("Passed")
+message (STATUS "Passed")

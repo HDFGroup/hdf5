@@ -40,6 +40,14 @@ class H5_DLLCPP LinkCreatPropList : public PropList {
         // using the property list id.
         LinkCreatPropList (const hid_t plist_id);
 
+        // Specifies in property list whether to create missing
+        // intermediate groups
+        void setCreateIntermediateGroup(bool crt_intmd_group) const;
+
+        // Determines whether property is set to enable creating missing
+        // intermediate groups
+        bool getCreateIntermediateGroup() const;
+
         // Sets the character encoding of the string.
         void setCharEncoding(H5T_cset_t encoding) const;
 

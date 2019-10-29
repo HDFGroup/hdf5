@@ -35,6 +35,13 @@
  *      until the virtual dataset is closed.
  */
 
+/*
+ * Note: H5S_select_project_intersection has been updated to no longer require
+ * that the source and source intersect spaces have the same extent.  This file
+ * should therefore be updated to remove code that ensures this condition, which
+ * should improve both maintainability and performance.
+ */
+
 /****************/
 /* Module Setup */
 /****************/
@@ -78,6 +85,7 @@
 /********************/
 
 /* Layout operation callbacks */
+static hbool_t H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset);
 static herr_t H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t
     *type_info, hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *fm);
@@ -121,6 +129,7 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
     NULL,
     H5D__virtual_init,
     H5D__virtual_is_space_alloc,
+    H5D__virtual_is_data_cached,
     NULL,
     H5D__virtual_read,
     H5D__virtual_write,
@@ -428,6 +437,10 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 
     /* Create block if # of used entries > 0 */
     if(layout->storage.u.virt.list_nused > 0) {
+
+        /* Set the low/high bounds according to 'f' for the API context */
+        H5CX_set_libver_bounds(f);
+
         /* Allocate array for caching results of strlen */
         if(NULL == (str_size = (size_t *)H5MM_malloc(2 * layout->storage.u.virt.list_nused * sizeof(size_t))))
             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, FAIL, "unable to allocate string length array")
@@ -491,11 +504,11 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
         /* Encode each entry */
         for(i = 0; i < layout->storage.u.virt.list_nused; i++) {
             /* Source file name */
-            HDmemcpy((char *)heap_block_p, layout->storage.u.virt.list[i].source_file_name, str_size[2 * i]);
+            H5MM_memcpy((char *)heap_block_p, layout->storage.u.virt.list[i].source_file_name, str_size[2 * i]);
             heap_block_p += str_size[2 * i];
 
             /* Source dataset name */
-            HDmemcpy((char *)heap_block_p, layout->storage.u.virt.list[i].source_dset_name, str_size[(2 * i) + 1]);
+            H5MM_memcpy((char *)heap_block_p, layout->storage.u.virt.list[i].source_dset_name, str_size[(2 * i) + 1]);
             heap_block_p += str_size[(2 * i) + 1];
 
             /* Source selection */
@@ -1107,7 +1120,7 @@ H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf,
 
     /* Copy string to *p.  Note that since src in not NULL terminated, we must
      * use memcpy */
-    (void)HDmemcpy(*p, src, src_len);
+    (void)H5MM_memcpy(*p, src, src_len);
 
     /* Advance *p */
     *p += src_len;
@@ -2207,6 +2220,54 @@ H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_is_data_cached
+ *
+ * Purpose:     Query if raw data is cached for dataset
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Wednessday, March 6, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset)
+{
+    const H5O_storage_virtual_t *storage;   /* Convenience pointer */
+    size_t i, j;                            /* Local index variables */
+    hbool_t ret_value = FALSE;              /* Return value */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(shared_dset);
+    storage = &shared_dset->layout.storage.u.virt;
+
+    /* Iterate over mappings */
+    for(i = 0; i < storage->list_nused; i++)
+        /* Check for "printf" source dataset resolution */
+        if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
+            /* Iterate over sub-source dsets */
+            for(j = storage->list[i].sub_dset_io_start; j < storage->list[i].sub_dset_io_end; j++)
+                /* Check for cahced data in source dset */
+                if(storage->list[i].sub_dset[j].dset
+                        && storage->list[i].sub_dset[j].dset->shared->layout.ops->is_data_cached
+                        && storage->list[i].sub_dset[j].dset->shared->layout.ops->is_data_cached(storage->list[i].sub_dset[j].dset->shared))
+                    HGOTO_DONE(TRUE);
+        } /* end if */
+        else
+            if(storage->list[i].source_dset.dset
+                    && storage->list[i].source_dset.dset->shared->layout.ops->is_data_cached
+                    && storage->list[i].source_dset.dset->shared->layout.ops->is_data_cached(storage->list[i].source_dset.dset->shared))
+                HGOTO_DONE(TRUE);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_is_data_cached() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__virtual_pre_io
  *
  * Purpose:     Project all virtual mappings onto mem_space, with the
@@ -2981,7 +3042,7 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
     /* Discard the identifier & replace the dataset */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_remove(temp_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't unregister source dataset ID")
-    if(NULL == (*dset = (H5D_t *)H5VL_object_data(vol_obj)))
+    if(NULL == (*dset = (H5D_t *)H5VL_object_unwrap(vol_obj)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve library object from VOL object")
     vol_obj->data = NULL;
 

@@ -270,12 +270,9 @@ CONTAINS
 ! A(8) = tm_yday  int   days since January 1       0-365
 ! A(9) = tm_isdst int   Daylight Saving Time flag
 !
-    INTEGER(C_INT), DIMENSION(:), POINTER :: c_atime, c_btime, c_ctime, c_mtime
-    INTEGER(C_INT), DIMENSION(1:8) :: atime, btime, ctime, mtime
     INTEGER :: len, i
     INTEGER :: idx
     INTEGER :: ierr
-    TYPE(C_PTR) :: cptr
 
     visit_obj_cb = 0
 

@@ -17,6 +17,9 @@
 #ifndef _H5VLnative_H
 #define _H5VLnative_H
 
+/* Public headers needed by this file */
+#include "H5VLpublic.h"        /* Virtual Object Layer                 */
+
 /* Identifier for the native VOL connector */
 #define H5VL_NATIVE     (H5VL_native_register())
 
@@ -36,8 +39,11 @@ typedef int H5VL_native_dataset_optional_t;
 #define H5VL_NATIVE_DATASET_FORMAT_CONVERT          0   /* H5Dformat_convert (internal) */
 #define H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE    1   /* H5Dget_chunk_index_type      */
 #define H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE  2   /* H5Dget_chunk_storage_size    */
-#define H5VL_NATIVE_DATASET_CHUNK_READ              3   /* H5Dchunk_read                */
-#define H5VL_NATIVE_DATASET_CHUNK_WRITE             4   /* H5Dchunk_write               */
+#define H5VL_NATIVE_DATASET_GET_NUM_CHUNKS          3   /* H5Dget_num_chunks            */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX   4   /* H5Dget_chunk_info            */
+#define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD 5   /* H5Dget_chunk_info_by_coord   */
+#define H5VL_NATIVE_DATASET_CHUNK_READ              6   /* H5Dchunk_read                */
+#define H5VL_NATIVE_DATASET_CHUNK_WRITE             7   /* H5Dchunk_write               */
 
 /* Typedef and values for native VOL connector file optional VOL operations */
 typedef int H5VL_native_file_optional_t;
@@ -68,6 +74,8 @@ typedef int H5VL_native_file_optional_t;
 #define H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS              24  /* H5Fset_latest_format/libver_bounds   */
 #define H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG         25  /* H5Fget_dset_no_attrs_hint            */
 #define H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG         26  /* H5Fset_dset_no_attrs_hint            */
+#define H5VL_NATIVE_FILE_GET_MPI_ATOMICITY              27  /* H5Fget_mpi_atomicity                 */
+#define H5VL_NATIVE_FILE_SET_MPI_ATOMICITY              28  /* H5Fset_mpi_atomicity                 */
 
 /* Typedef and values for native VOL connector group optional VOL operations */
 typedef int H5VL_native_group_optional_t;
@@ -78,9 +86,12 @@ typedef int H5VL_native_group_optional_t;
 
 /* Typedef and values for native VOL connector object optional VOL operations */
 typedef int H5VL_native_object_optional_t;
-#define H5VL_NATIVE_OBJECT_GET_COMMENT      0   /* H5G|H5Oget_comment, H5Oget_comment_by_name   */
-#define H5VL_NATIVE_OBJECT_GET_INFO         1   /* H5Oget_info(_by_idx, _by_name)(2)            */
-#define H5VL_NATIVE_OBJECT_SET_COMMENT      2   /* H5G|H5Oset_comment, H5Oset_comment_by_name   */
+#define H5VL_NATIVE_OBJECT_GET_COMMENT                  0   /* H5G|H5Oget_comment, H5Oget_comment_by_name   */
+#define H5VL_NATIVE_OBJECT_GET_INFO                     1   /* H5Oget_info(_by_idx, _by_name)(2)            */
+#define H5VL_NATIVE_OBJECT_SET_COMMENT                  2   /* H5G|H5Oset_comment, H5Oset_comment_by_name   */
+#define H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES          3   /* H5Odisable_mdc_flushes                       */
+#define H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES           4   /* H5Oenable_mdc_flushes                        */
+#define H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED     5   /* H5Oare_mdc_flushes_disabled                  */
 
 #ifdef __cplusplus
 extern "C" {

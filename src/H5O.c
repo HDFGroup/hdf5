@@ -255,21 +255,47 @@ hid_t
 H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 {
     H5VL_object_t *vol_obj;             /* Object token of loc_id */
-    H5I_type_t opened_type;
-    void *opened_obj = NULL;
-    H5VL_loc_params_t loc_params;
-    hid_t       ret_value = H5I_INVALID_HID;	/* Return value */
+    H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
+    H5I_type_t opened_type;             /* Opened object type */
+    void *opened_obj = NULL;            /* Opened object */
+    H5VL_loc_params_t loc_params;       /* Location parameters */
+    H5VL_token_t obj_token = {0};       /* Object token */
+    hid_t file_id = H5I_INVALID_HID;    /* File ID */
+    void *vol_obj_file = NULL;          /* Object token of file_id */
+    H5F_t *f = NULL;
+    uint8_t *p = NULL;
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "ia", loc_id, addr);
 
-    loc_params.type = H5VL_OBJECT_BY_ADDR;
-    loc_params.loc_data.loc_by_addr.addr = addr;
-    loc_params.obj_type = H5I_get_type(loc_id);
-
     /* Get the location object */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+    /* Get object type */
+    if((vol_obj_type = H5I_get_type(loc_id)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+    /* Get the file for the object */
+    if((file_id = H5F_get_file_id(loc_id, vol_obj_type, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file or file object")
+
+    /* Retrieve VOL object */
+    if(NULL == (vol_obj_file = H5VL_vol_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+    /* Retrieve file from VOL object */
+    if(NULL == (f = (H5F_t *)H5VL_object_data(vol_obj_file)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid VOL object")
+
+    /* This is a native specific routine that requires serialization of the token */
+    p = obj_token;
+    H5F_addr_encode(f, &p, addr);
+
+    loc_params.type = H5VL_OBJECT_BY_TOKEN;
+    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.obj_type = vol_obj_type;
 
     /* Open the object */
     if(NULL == (opened_obj = H5VL_object_open(vol_obj, &loc_params, &opened_type, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
@@ -280,6 +306,8 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize object handle")
 
 done:
+    if(file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement refcount on file")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_addr() */
 
@@ -314,7 +342,6 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     H5VL_object_t     tmp_vol_obj;            /* Temporary object token of */
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
-    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t         ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -363,22 +390,12 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
         if (vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
 
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* set creation properties */
-    if(H5P_set(plist, H5VL_PROP_LINK_TARGET, &vol_obj1->data) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-    if(H5P_set(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-
     /* Construct a temporary VOL object */
     tmp_vol_obj.data = vol_obj2->data;
     tmp_vol_obj.connector = (vol_obj1 != NULL ? vol_obj1->connector : vol_obj2->connector);
 
     /* Create a link to the object */
-    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, &tmp_vol_obj, &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, vol_obj1->data, &loc_params1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create link")
 
 done:
@@ -1095,6 +1112,7 @@ H5Oclose(hid_t object_id)
         case H5I_GROUP:
         case H5I_DATATYPE:
         case H5I_DATASET:
+        case H5I_MAP:
             if(H5I_object(object_id) == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object")
             if(H5I_dec_app_ref(object_id) < 0)
@@ -1113,6 +1131,7 @@ H5Oclose(hid_t object_id)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
@@ -1125,113 +1144,215 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Odisable_mdc_flushes
+ * Function:    H5O_disable_mdc_flushes
  *
- * Purpose:	To "cork" an object:
- *		--keep dirty entries associated with the object in the metadata cache
+ * Purpose:     Private version of the metadata cache cork function.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
- *		January 2014
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_disable_mdc_flushes(H5O_loc_t *oloc)
+{
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL);
+
+    if (H5AC_cork(oloc->file, oloc->addr, H5AC__SET_CORK, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCORK, FAIL, "unable to cork object");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5O_disable_mdc_flushes() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Odisable_mdc_flushes
+ *
+ * Purpose:     "Cork" an object, keeping dirty entries associated with the
+ *              object in the metadata cache.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Vailin Choi
+ *              January 2014
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Odisable_mdc_flushes(hid_t object_id)
 {
-    H5O_loc_t  *oloc;			/* Object location */
-    herr_t      ret_value = SUCCEED;	/* Return value */
+    H5VL_object_t       *vol_obj;               /* Object token of loc_id */
+    H5VL_loc_params_t   loc_params;             /* Location parameters */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(FAIL);
     H5TRACE1("e", "i", object_id);
 
-    /* Get the object's oloc */
-    if(NULL == (oloc = H5O_get_loc(object_id)))
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+    /* Make sure the ID is a file object */
+    if (H5I_is_file_object(object_id) != TRUE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID is not a file object");
 
-    if(H5AC_cork(oloc->file, oloc->addr, H5AC__SET_CORK, NULL) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCORK, FAIL, "unable to cork an object")
+    /* Get the VOL object */
+    if (NULL == (vol_obj = H5VL_vol_object(object_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object ID");
+
+    /* Fill in location struct fields */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(object_id);
+
+    /* Cork the object */
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES, &loc_params) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCORK, FAIL, "unable to cork object");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API(ret_value);
 } /* H5Odisable_mdc_flushes() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oenable_mdc_flushes
+ * Function:    H5O_enable_mdc_flushes
  *
- * Purpose:	To "uncork" an object
- *		--release keeping dirty entries associated with the object 
- *		  in the metadata cache
+ * Purpose:     Private version of the metadata cache uncork function.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
- *		January 2014
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_enable_mdc_flushes(H5O_loc_t *oloc)
+{
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL);
+
+    if (H5AC_cork(oloc->file, oloc->addr, H5AC__UNCORK, NULL) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNCORK, FAIL, "unable to uncork object");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5O_enable_mdc_flushes() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Oenable_mdc_flushes
+ *
+ * Purpose:     "Uncork" an object, allowing dirty entries associated with
+ *              the object to be flushed.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Vailin Choi
+ *              January 2014
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Oenable_mdc_flushes(hid_t object_id)
 {
-    H5O_loc_t  *oloc;			/* Object location */
-    herr_t      ret_value = SUCCEED;	/* Return value */
+    H5VL_object_t       *vol_obj;               /* Object token of loc_id */
+    H5VL_loc_params_t   loc_params;             /* Location parameters */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(FAIL);
     H5TRACE1("e", "i", object_id);
 
-    /* Get the object's oloc */
-    if(NULL == (oloc = H5O_get_loc(object_id)))
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+    /* Make sure the ID is a file object */
+    if (H5I_is_file_object(object_id) != TRUE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID is not a file object");
 
-    /* Set the value */
-    if(H5AC_cork(oloc->file, oloc->addr, H5AC__UNCORK, NULL) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNCORK, FAIL, "unable to uncork an object")
+    /* Get the VOL object */
+    if (NULL == (vol_obj = H5VL_vol_object(object_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object ID");
+
+    /* Fill in location struct fields */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(object_id);
+
+    /* Uncork the object */
+    if (H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES, &loc_params) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNCORK, FAIL, "unable to uncork object");
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API(ret_value);
 } /* H5Oenable_mdc_flushes() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oare_mdc_flushes_disabled
+ * Function:    H5O_are_mdc_flushes_disabled
  *
- * Purpose:	Retrieve the object's "cork" status in the parameter "are_disabled":
- *		  TRUE if mdc flushes for the object is disabled
- *		  FALSE if mdc flushes for the object is not disabled
- *		Return error if the parameter "are_disabled" is not supplied
+ * Purpose:     Private version of cork status getter.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
- *		January 2014
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_are_mdc_flushes_disabled(H5O_loc_t *oloc, hbool_t *are_disabled)
+{
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL);
+
+    HDassert(are_disabled);
+
+    if (H5AC_cork(oloc->file, oloc->addr, H5AC__GET_CORKED, are_disabled) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve object's cork status");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_are_mdc_flushes_disabled() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Oare_mdc_flushes_disabled
+ *
+ * Purpose:     Retrieve the object's "cork" status in the parameter "are_disabled":
+ *                  TRUE if mdc flushes for the object is disabled
+ *                  FALSE if mdc flushes for the object is not disabled
+ *
+ *              Return error if the parameter "are_disabled" is not supplied
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Vailin Choi
+ *              January 2014
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
 {
-    H5O_loc_t  *oloc;			/* Object location */
-    herr_t      ret_value = SUCCEED;	/* Return value */
+    H5VL_object_t       *vol_obj;               /* Object token of loc_id */
+    H5VL_loc_params_t   loc_params;             /* Location parameters */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(FAIL);
     H5TRACE2("e", "i*b", object_id, are_disabled);
 
-    /* Check args */
+    /* Sanity check */
+    if (!are_disabled)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from ID");
 
-    /* Get the object's oloc */
-    if(NULL == (oloc = H5O_get_loc(object_id)))
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unable to get object location from ID")
-    if(!are_disabled)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unable to get object location from ID")
+    /* Make sure the ID is a file object */
+    if (H5I_is_file_object(object_id) != TRUE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID is not a file object");
+
+    /* Get the VOL object */
+    if (NULL == (vol_obj = H5VL_vol_object(object_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object ID");
+
+    /* Fill in location struct fields */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(object_id);
 
     /* Get the cork status */
-    if(H5AC_cork(oloc->file, oloc->addr, H5AC__GET_CORKED, are_disabled) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve an object's cork status")
+    if (H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED, &loc_params, are_disabled) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve object's cork status");
 
 done:
     FUNC_LEAVE_API(ret_value)

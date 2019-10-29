@@ -1078,7 +1078,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
 		if(NULL == (data_xform_prop->dat_val_pointers->ptr_dat_val[i] = (void*)H5MM_malloc(array_size * H5T_get_size((H5T_t *)H5I_object(array_type)))))
 		    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "Ran out of memory trying to allocate space for data in data transform")
 
-                HDmemcpy(data_xform_prop->dat_val_pointers->ptr_dat_val[i], array, array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
+                H5MM_memcpy(data_xform_prop->dat_val_pointers->ptr_dat_val[i], array, array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
 	    } /* end for */
 	} /* end else */
 
@@ -1086,7 +1086,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
 
 	if(data_xform_prop->dat_val_pointers->num_ptrs > 1)
-	    HDmemcpy(array, res.value.dat_val, array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
+	    H5MM_memcpy(array, res.value.dat_val, array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
 
         /* Free the temporary arrays we used */
         if(data_xform_prop->dat_val_pointers->num_ptrs > 1)

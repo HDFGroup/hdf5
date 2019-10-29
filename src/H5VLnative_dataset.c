@@ -43,31 +43,16 @@
  */
 void *
 H5VL__native_dataset_create(void *obj, const H5VL_loc_params_t *loc_params,
-    const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
+    const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id,
+    hid_t dcpl_id, hid_t dapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED **req)
 {
-    H5P_genplist_t *plist;              /* Property list pointer */
     H5G_loc_t       loc;                 /* Object location to insert dataset into */
-    hid_t           type_id = H5I_INVALID_HID;
-    hid_t           space_id = H5I_INVALID_HID;
-    hid_t           lcpl_id = H5I_INVALID_HID;
     H5D_t          *dset = NULL;        /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
     void           *ret_value;
 
     FUNC_ENTER_PACKAGE
-
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
-
-    /* Get creation properties */
-    if(H5P_get(plist, H5VL_PROP_DSET_TYPE_ID, &type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for datatype id")
-    if(H5P_get(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id")
-    if(H5P_get(plist, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
 
     /* Check arguments */
     if(H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
@@ -354,7 +339,7 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
     switch(specific_type) {
         /* H5Dspecific_space */
         case H5VL_DATASET_SET_EXTENT:
-            {
+            { /* H5Dset_extent (H5Dextend - deprecated) */
                 const hsize_t *size = HDva_arg(arguments, const hsize_t *); 
 
                 if(H5D__set_extent(dset, size) < 0)
@@ -363,7 +348,7 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
             }
 
         case H5VL_DATASET_FLUSH:
-            {
+            { /* H5Dflush */
                 hid_t dset_id = HDva_arg(arguments, hid_t);
 
                 /* Flush the dataset */
@@ -374,7 +359,7 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
             }
 
         case H5VL_DATASET_REFRESH:
-            {
+            { /* H5Drefresh */
                 hid_t dset_id = HDva_arg(arguments, hid_t);
 
                 /* Refresh the dataset */
@@ -414,7 +399,7 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
 
     switch(optional_type) {
         case H5VL_NATIVE_DATASET_FORMAT_CONVERT:
-            {
+            {   /* H5Dformat_convert */
                 dset = (H5D_t *)obj;
 
                 switch(dset->shared->layout.type) {
@@ -449,7 +434,7 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
             }
 
         case H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE:
-            {
+            {   /* H5Dget_chunk_index_type */
                 H5D_chunk_index_t *idx_type = HDva_arg(arguments, H5D_chunk_index_t *);
 
                 dset = (H5D_t *)obj;
@@ -465,7 +450,7 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
             }
 
         case H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE:
-            {
+            {   /* H5Dget_chunk_storage_size */
                 hsize_t *offset = HDva_arg(arguments, hsize_t *);
                 hsize_t *chunk_nbytes = HDva_arg(arguments, hsize_t *);
 
@@ -482,8 +467,91 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                 break;
             }
 
+        case H5VL_NATIVE_DATASET_GET_NUM_CHUNKS:
+            {   /* H5Dget_num_chunks */
+                const H5S_t *space    = NULL;
+                hid_t        space_id = HDva_arg(arguments, hid_t);
+                hsize_t     *nchunks  = HDva_arg(arguments, hsize_t *);
+
+                dset = (H5D_t *)obj;
+                HDassert(dset);
+                HDassert(dset->shared);
+                HDassert(dset->shared->space);
+
+                /* When default dataspace is given, use the dataset's dataspace */
+                if(space_id == H5S_ALL)
+                    space = dset->shared->space;
+                else /*  otherwise, use the given space ID */
+                    if(NULL == (space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
+
+                /* Make sure the dataset is chunked */
+                if(H5D_CHUNKED != dset->shared->layout.type)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+
+                /* Call private function */
+                if(H5D__get_num_chunks(dset, space, nchunks) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of chunks")
+
+                break;
+            }
+
+        case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX:
+            {   /* H5Dget_chunk_info */
+                const H5S_t *space = NULL;
+                hid_t        space_id    = HDva_arg(arguments, hid_t);
+                hsize_t      chk_index   = HDva_arg(arguments, hsize_t);
+                hsize_t     *offset = HDva_arg(arguments, hsize_t *);
+                unsigned    *filter_mask = HDva_arg(arguments, unsigned *);
+                haddr_t     *addr        = HDva_arg(arguments, haddr_t *);
+                hsize_t     *size        = HDva_arg(arguments, hsize_t *);
+
+                dset = (H5D_t *)obj;
+                HDassert(dset);
+                HDassert(dset->shared);
+                HDassert(dset->shared->space);
+
+                /* When default dataspace is given, use the dataset's dataspace */
+                if(space_id == H5S_ALL)
+                    space = dset->shared->space;
+                else /*  otherwise, use the given space ID */
+                    if(NULL == (space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
+
+                /* Make sure the dataset is chunked */
+                if(H5D_CHUNKED != dset->shared->layout.type)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+
+                /* Call private function */
+                if(H5D__get_chunk_info(dset, space, chk_index, offset, filter_mask, addr, size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info by index")
+                break;
+            }
+
+        case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD:
+            {   /* H5Dget_chunk_info_by_coord */
+                hsize_t  *offset      = HDva_arg(arguments, hsize_t *);
+                unsigned *filter_mask = HDva_arg(arguments, unsigned *);
+                haddr_t  *addr        = HDva_arg(arguments, haddr_t *);
+                hsize_t  *size        = HDva_arg(arguments, hsize_t *);
+
+                dset = (H5D_t *)obj;
+                HDassert(dset);
+                HDassert(dset->shared);
+
+                /* Make sure the dataset is chunked */
+                if(H5D_CHUNKED != dset->shared->layout.type)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+
+                /* Call private function */
+                if(H5D__get_chunk_info_by_coord(dset, offset, filter_mask, addr, size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info by its logical coordinates")
+
+                break;
+            }
+
         case H5VL_NATIVE_DATASET_CHUNK_READ:
-            {
+            {   /* H5Dread_chunk */
                 const       hsize_t *offset     = HDva_arg(arguments, hsize_t *);
                 uint32_t   *filters             = HDva_arg(arguments, uint32_t *);
                 void       *buf                 = HDva_arg(arguments, void *);
@@ -511,7 +579,7 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
             }
 
         case H5VL_NATIVE_DATASET_CHUNK_WRITE:
-            {
+            {   /* H5Dwrite_chunk */
                 uint32_t        filters             = HDva_arg(arguments, uint32_t);
                 const  hsize_t *offset              = HDva_arg(arguments, const hsize_t *);
                 uint32_t        data_size_32        = HDva_arg(arguments, uint32_t);

@@ -95,12 +95,16 @@ static hbool_t H5_ntzset = FALSE;
  * Programmer:  Robb Matzke
  *              Thursday, April  9, 1998
  *
- * Modifications:
- *    Robb Matzke, 1999-07-27
- *    The `%a' format refers to an argument of `haddr_t' type
- *    instead of `haddr_t*' and the return value is correct.
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the fprintf() calls with
+ *      format_templ in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 int
 HDfprintf(FILE *stream, const char *fmt, ...)
 {
@@ -426,6 +430,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     HDva_end(ap);
     return nout;
 } /* end HDfprintf() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------
@@ -626,7 +631,7 @@ Pflock(int fd, int operation) {
     flk.l_pid = 0;              /* not used with set */
 
     /* Lock or unlock */
-    if(HDfcntl(fd, F_SETLK, flk) < 0)
+    if(HDfcntl(fd, F_SETLK, &flk) < 0)
         return -1;
 
     return 0;
@@ -985,6 +990,132 @@ Wroundf(float arg)
     return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
 }
 
+/*-------------------------------------------------------------------------
+* Function:     H5_get_utf16_str
+*
+* Purpose:      Gets a UTF-16 string from an UTF-8 (or ASCII) string.
+*
+* Return:       Success:    A pointer to a UTF-16 string
+*                           This must be freed by the caller using H5MM_xfree()
+*               Failure:    NULL
+*
+* Programmer:  Dana Robinson
+*              Spring 2019
+*
+*-------------------------------------------------------------------------
+*/
+const wchar_t *
+H5_get_utf16_str(const char *s)
+{
+    int     nwchars = -1;       /* Length of the UTF-16 buffer */
+    wchar_t *ret_s  = NULL;     /* UTF-16 version of the string */
+
+    /* Get the number of UTF-16 characters needed */
+    if(0 == (nwchars = MultiByteToWideChar(CP_UTF8, 0, s, -1, NULL, 0)))
+        goto error;
+
+    /* Allocate a buffer for the UTF-16 string */
+    if(NULL == (ret_s = (wchar_t *)H5MM_calloc(sizeof(wchar_t) * (size_t)nwchars)))
+        goto error;
+
+    /* Convert the input UTF-8 string to UTF-16 */
+    if(0 == MultiByteToWideChar(CP_UTF8, 0, s, -1, ret_s, nwchars))
+        goto error;
+
+    return ret_s;
+
+error:
+    if(ret_s)
+        H5MM_xfree((void *)ret_s);
+    return NULL;
+}   /* end H5_get_utf16_str() */
+
+/*-------------------------------------------------------------------------
+ * Function:     Wopen_utf8
+ *
+ * Purpose:      UTF-8 equivalent of open(2) for use on Windows.
+ *               Converts a UTF-8 input path to UTF-16 and then opens the
+ *               file via _wopen() under the hood
+ *
+ * Return:       Success:    A POSIX file descriptor
+ *               Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wopen_utf8(const char *path, int oflag, ...)
+{
+    int fd          = -1;       /* POSIX file descriptor to be returned */
+    wchar_t *wpath  = NULL;     /* UTF-16 version of the path */
+    int pmode       = 0;        /* mode (optionally set via variable args) */
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if(NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
+    * transformations when performing I/O. Note that this will
+    * produce Unix-style text files, though.
+    */
+    oflag |= _O_BINARY;
+
+    /* Get the mode, if O_CREAT was specified */
+    if(oflag & O_CREAT) {
+        va_list vl;
+
+        HDva_start(vl, oflag);
+        pmode = HDva_arg(vl, int);
+        HDva_end(vl);
+    }
+
+    /* Open the file */
+    fd = _wopen(wpath, oflag, pmode);
+
+done:
+    if(wpath)
+        H5MM_xfree((void *)wpath);
+
+    return fd;
+}   /* end Wopen_utf8() */
+
+/*-------------------------------------------------------------------------
+ * Function:     Wremove_utf8
+ *
+ * Purpose:      UTF-8 equivalent of remove(3) for use on Windows.
+ *               Converts a UTF-8 input path to UTF-16 and then opens the
+ *               file via _wremove() under the hood
+ *
+ * Return:       Success:    0
+ *               Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wremove_utf8(const char *path)
+{
+    wchar_t *wpath = NULL;     /* UTF-16 version of the path */
+    int ret;
+
+    /* Convert the input UTF-8 path to UTF-16 */
+    if(NULL == (wpath = H5_get_utf16_str(path)))
+        goto done;
+
+    /* Open the file */
+    ret = _wremove(wpath);
+
+done:
+    if(wpath)
+        H5MM_xfree((void *)wpath);
+
+    return ret;
+}   /* end Wremove_utf8() */
+
 #endif /* H5_HAVE_WIN32_API */
 
 
@@ -1130,13 +1261,13 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(path1);
     HDassert(path2);
 
-    path1_len = HDstrlen(path1);
+    if(path1)
+        path1_len = HDstrlen(path1);
     path2_len = HDstrlen(path2);
 
-    if(*path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
+    if(path1 == NULL || *path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
 
         /* If path1 is empty or path2 is absolute, simply use path2 */
         if(NULL == (*full_name = (char *)H5MM_strdup(path2)))
@@ -1170,11 +1301,11 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
          * Allocate a buffer to hold path1 + path2 + possibly the delimiter
          *      + terminating null byte
          */
-        if(NULL == (*full_name = (char *)H5MM_malloc(path1_len + path2_len + 2)))
+        if(NULL == (*full_name = (char *)H5MM_malloc(path1_len + path2_len + 2 + 2))) /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer")
 
         /* Compose the full file name */
-        HDsnprintf(*full_name, (path1_len + path2_len + 2), "%s%s%s", path1,
+        HDsnprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s", path1, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
                    (H5_CHECK_DELIMITER(path1[path1_len - 1]) ? "" : H5_DIR_SEPS), path2);
     } /* end else */
 

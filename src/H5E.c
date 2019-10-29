@@ -866,7 +866,7 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
     H5E_msg_t   *msg;           /* Pointer to error message */
     ssize_t      ret_value = -1;     /* Return value */
 
-    FUNC_ENTER_API((-1))
+    FUNC_ENTER_API_NOCLEAR((-1))
     H5TRACE4("Zs", "i*Et*sz", msg_id, type, msg_str, size);
 
     /* Get the message object */

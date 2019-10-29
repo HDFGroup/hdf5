@@ -66,7 +66,7 @@ Java_hdf_hdf5lib_H5__1H5Screate_1simple
     hsize_t  *lp = NULL;
     jlong    *dimsP = NULL, *maxdimsP = NULL;
     jlong    *jlp = NULL;
-    jsize     drank, mrank;
+    jsize     drank = 0, mrank = 0;
     int       i;
     hid_t     retVal = H5I_INVALID_HID;
 
@@ -1129,19 +1129,19 @@ done:
  */
 JNIEXPORT jbyteArray JNICALL
 Java_hdf_hdf5lib_H5_H5Sencode
-    (JNIEnv *env, jclass cls, jlong obj_id)
+    (JNIEnv *env, jclass clss, jlong obj_id)
 {
     unsigned char *bufPtr = NULL;
     size_t         buf_size = 0;
     herr_t         status = FAIL;
     jbyteArray     returnedArray = NULL;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (obj_id < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sencode: invalid object ID");
 
-    if ((status = H5Sencode(obj_id, NULL, &buf_size)) < 0)
+    if ((status = H5Sencode2(obj_id, NULL, &buf_size, H5P_DEFAULT)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (buf_size == 0)
@@ -1150,7 +1150,7 @@ Java_hdf_hdf5lib_H5_H5Sencode
     if (NULL == (bufPtr = (unsigned char *) HDcalloc((size_t) 1, buf_size)))
         H5_JNI_FATAL_ERROR(ENVONLY, "H5Sencode: failed to allocate encoding buffer");
 
-    if ((status = H5Sencode((hid_t) obj_id, bufPtr, &buf_size)) < 0)
+    if ((status = H5Sencode2((hid_t) obj_id, bufPtr, &buf_size, H5P_DEFAULT)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (returnedArray = ENVPTR->NewByteArray(ENVONLY, (jsize) buf_size)))
@@ -1173,13 +1173,13 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Sdecode
-    (JNIEnv *env, jclass cls, jbyteArray buf)
+    (JNIEnv *env, jclass clss, jbyteArray buf)
 {
     jboolean  isCopy;
     jbyte    *bufP = NULL;
     hid_t     sid = H5I_INVALID_HID;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Sdecode: buffer is NULL");
@@ -1203,11 +1203,11 @@ done:
  */
 JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Sis_1regular_1hyperslab
-    (JNIEnv *env, jclass cls, jlong obj_id)
+    (JNIEnv *env, jclass clss, jlong obj_id)
 {
     htri_t bval = JNI_FALSE;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if ((bval = H5Sis_regular_hyperslab((hid_t)obj_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);

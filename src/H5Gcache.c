@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
@@ -287,7 +288,7 @@ H5G__cache_node_serialize(const H5F_t *f, void *_image, size_t len,
     HDassert(len == sym->node_size);
 
     /* magic number */
-    HDmemcpy(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(image, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     image += H5_SIZEOF_MAGIC;
 
     /* version number */

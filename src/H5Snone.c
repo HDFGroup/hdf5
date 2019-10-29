@@ -28,11 +28,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		        */
-#include "H5Iprivate.h"		/* ID Functions		                */
-#include "H5Spkg.h"		/* Dataspace functions			*/
-#include "H5VMprivate.h"        /* Vector functions                     */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Eprivate.h"		/* Error handling			    */
+#include "H5Iprivate.h"         /* ID Functions                             */
+#include "H5Spkg.h"             /* Dataspace functions                      */
+#include "H5VMprivate.h"        /* Vector functions                         */
 
 
 /****************/
@@ -51,25 +51,25 @@
 
 /* Selection callbacks */
 static herr_t H5S__none_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
-static herr_t H5S__none_get_seq_list(const H5S_t *space, unsigned flags,
-    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
-    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__none_release(H5S_t *space);
 static htri_t H5S__none_is_valid(const H5S_t *space);
 static hssize_t H5S__none_serial_size(const H5S_t *space);
 static herr_t H5S__none_serialize(const H5S_t *space, uint8_t **p);
-static herr_t H5S__none_deserialize(H5S_t *space, uint32_t version, uint8_t flags,
-    const uint8_t **p);
+static herr_t H5S__none_deserialize(H5S_t **space, const uint8_t **p);
 static herr_t H5S__none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S__none_offset(const H5S_t *space, hsize_t *off);
 static int H5S__none_unlim_dim(const H5S_t *space);
 static htri_t H5S__none_is_contiguous(const H5S_t *space);
 static htri_t H5S__none_is_single(const H5S_t *space);
 static htri_t H5S__none_is_regular(const H5S_t *space);
+static htri_t H5S__none_shape_same(const H5S_t *space1, const H5S_t *space2);
+static htri_t H5S__none_intersect_block(const H5S_t *space, const hsize_t *start,
+    const hsize_t *end);
 static herr_t H5S__none_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S__none_project_scalar(const H5S_t *space, hsize_t *offset);
-static herr_t H5S__none_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t H5S__none_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
+static herr_t H5S__none_project_simple(const H5S_t *space, H5S_t *new_space,
+    hsize_t *offset);
+static herr_t H5S__none_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
 
 /* Selection iteration callbacks */
 static herr_t H5S__none_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
@@ -78,6 +78,8 @@ static hsize_t H5S__none_iter_nelmts(const H5S_sel_iter_t *iter);
 static htri_t H5S__none_iter_has_next_block(const H5S_sel_iter_t *iter);
 static herr_t H5S__none_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 static herr_t H5S__none_iter_next_block(H5S_sel_iter_t *sel_iter);
+static herr_t H5S__none_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq,
+    size_t maxbytes, size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S__none_iter_release(H5S_sel_iter_t *sel_iter);
 
 
@@ -96,7 +98,6 @@ const H5S_select_class_t H5S_sel_none[1] = {{
 
     /* Methods on selection */
     H5S__none_copy,
-    H5S__none_get_seq_list,
     H5S__none_release,
     H5S__none_is_valid,
     H5S__none_serial_size,
@@ -109,6 +110,8 @@ const H5S_select_class_t H5S_sel_none[1] = {{
     H5S__none_is_contiguous,
     H5S__none_is_single,
     H5S__none_is_regular,
+    H5S__none_shape_same,
+    H5S__none_intersect_block,
     H5S__none_adjust_u,
     H5S__none_project_scalar,
     H5S__none_project_simple,
@@ -131,6 +134,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
     H5S__none_iter_has_next_block,
     H5S__none_iter_next,
     H5S__none_iter_next_block,
+    H5S__none_iter_get_seq_list,
     H5S__none_iter_release,
 }};
 
@@ -149,7 +153,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__none_iter_init(H5S_sel_iter_t *iter, const H5S_t H5_ATTR_UNUSED *space)
+H5S__none_iter_init(const H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -334,13 +338,11 @@ H5S__none_iter_next_block(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S__none_get_seq_list
+    H5S__none_iter_get_seq_list
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S__none_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
-        H5S_t *space;           IN: Dataspace containing selection to use.
-        unsigned flags;         IN: Flags for extra information about operation
+    herr_t H5S__none_iter_get_seq_list(iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
         size_t maxseq;          IN: Maximum number of sequences to generate
@@ -364,14 +366,13 @@ H5S__none_iter_next_block(H5S_sel_iter_t H5_ATTR_UNUSED *iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t H5_ATTR_UNUSED *iter,
-    size_t H5_ATTR_UNUSED maxseq, size_t H5_ATTR_UNUSED maxelem, size_t *nseq, size_t *nelem,
-    hsize_t H5_ATTR_UNUSED *off, size_t H5_ATTR_UNUSED *len)
+H5S__none_iter_get_seq_list(H5S_sel_iter_t H5_ATTR_UNUSED *iter,
+    size_t H5_ATTR_UNUSED maxseq, size_t H5_ATTR_UNUSED maxelem, size_t *nseq,
+    size_t *nelem, hsize_t H5_ATTR_UNUSED *off, size_t H5_ATTR_UNUSED *len)
 {
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
-    HDassert(space);
     HDassert(iter);
     HDassert(maxseq > 0);
     HDassert(maxelem > 0);
@@ -387,7 +388,7 @@ H5S__none_get_seq_list(const H5S_t H5_ATTR_UNUSED *space, unsigned H5_ATTR_UNUSE
     *nelem = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5S__none_get_seq_list() */
+} /* end H5S__none_iter_get_seq_list() */
 
 
 /*--------------------------------------------------------------------------
@@ -584,7 +585,7 @@ H5S__none_serialize(const H5S_t *space, uint8_t **p)
 
     /* Store the preamble information */
     UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(pp, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(pp, (uint32_t)H5S_NONE_VERSION_1);  /* Store the version number */
     UINT32ENCODE(pp, (uint32_t)0);  /* Store the un-used padding */
     UINT32ENCODE(pp, (uint32_t)0);  /* Store the additional information length */
 
@@ -602,10 +603,8 @@ H5S__none_serialize(const H5S_t *space, uint8_t **p)
     Deserialize the current selection from a user-provided buffer.
  USAGE
     herr_t H5S__none_deserialize(space, version, flags, p)
-        H5S_t *space;           IN/OUT: Dataspace pointer to place
+        H5S_t **space;          IN/OUT: Dataspace pointer to place
                                 selection into
-        uint32_t version        IN: Selection version
-        uint8_t flags           IN: Selection flags
         uint8 **p;              OUT: Pointer to buffer holding serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
@@ -620,22 +619,50 @@ H5S__none_serialize(const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version,
-    uint8_t H5_ATTR_UNUSED flags, const uint8_t H5_ATTR_UNUSED **p)
+H5S__none_deserialize(H5S_t **space, const uint8_t **p)
 {
-    herr_t ret_value = SUCCEED;  /* return value */
+    H5S_t *tmp_space = NULL;    /* Pointer to actual dataspace to use,
+                                   either *space or a newly allocated one */
+    uint32_t version;           /* Version number */
+    herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_STATIC
 
-    HDassert(space);
     HDassert(p);
     HDassert(*p);
 
+    /* As part of the efforts to push all selection-type specific coding
+       to the callbacks, the coding for the allocation of a null dataspace
+       is moved from H5S_select_deserialize() in H5Sselect.c to here.
+       This is needed for decoding virtual layout in H5O__layout_decode() */
+    /* Allocate space if not provided */
+    if(!*space) {
+        if(NULL == (tmp_space = H5S_create(H5S_SIMPLE)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
+    } /* end if */
+    else
+        tmp_space = *space;
+
+    /* Decode version */
+    UINT32DECODE(*p, version);
+
+    /* Skip over the remainder of the header */
+    *p += 8;
+
     /* Change to "none" selection */
-    if(H5S_select_none(space) < 0)
+    if(H5S_select_none(tmp_space) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
+    /* Return space to the caller if allocated */
+    if(!*space)
+        *space = tmp_space;
+
 done:
+    /* Free temporary space if not passed to caller (only happens on error) */
+    if(!*space && tmp_space)
+        if(H5S_close(tmp_space) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__none_deserialize() */
 
@@ -830,7 +857,75 @@ H5S__none_is_regular(const H5S_t H5_ATTR_UNUSED *space)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_none_adjust_u
+    H5S__none_shape_same
+ PURPOSE
+    Check if a two "none" selections are the same shape
+ USAGE
+    htri_t H5S__none_shape_same(space1, space2)
+        const H5S_t *space1;     IN: First dataspace to check
+        const H5S_t *space2;     IN: Second dataspace to check
+ RETURNS
+    TRUE / FALSE / FAIL
+ DESCRIPTION
+    Checks to see if the current selection in each dataspace are the same
+    shape.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static htri_t
+H5S__none_shape_same(const H5S_t H5_ATTR_UNUSED *space1,
+    const H5S_t H5_ATTR_UNUSED *space2)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(space1);
+    HDassert(space2);
+
+    FUNC_LEAVE_NOAPI(TRUE)
+} /* end H5S__none_shape_same() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__none_intersect_block
+ PURPOSE
+    Detect intersections of selection with block
+ USAGE
+    htri_t H5S__none_intersect_block(space, start, end)
+        const H5S_t *space;     IN: Dataspace with selection to use
+        const hsize_t *start;   IN: Starting coordinate for block
+        const hsize_t *end;     IN: Ending coordinate for block
+ RETURNS
+    Non-negative TRUE / FALSE on success, negative on failure
+ DESCRIPTION
+    Quickly detect intersections with a block
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S__none_intersect_block(const H5S_t H5_ATTR_UNUSED *space,
+    const hsize_t H5_ATTR_UNUSED *start, const hsize_t H5_ATTR_UNUSED *end)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(space);
+    HDassert(H5S_SEL_NONE == H5S_GET_SELECT_TYPE(space));
+    HDassert(start);
+    HDassert(end);
+
+    FUNC_LEAVE_NOAPI(FALSE)
+} /* end H5S__none_intersect_block() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__none_adjust_u
  PURPOSE
     Adjust an "none" selection by subtracting an offset
  USAGE

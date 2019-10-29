@@ -78,6 +78,10 @@ typedef enum H5P_plist_type_t {
     H5P_TYPE_LINK_CREATE       = 16,
     H5P_TYPE_LINK_ACCESS       = 17,
     H5P_TYPE_ATTRIBUTE_ACCESS  = 18,
+    H5P_TYPE_VOL_INITIALIZE    = 19,
+    H5P_TYPE_MAP_CREATE        = 20,
+    H5P_TYPE_MAP_ACCESS        = 21,
+    H5P_TYPE_REFERENCE_ACCESS  = 22,
     H5P_TYPE_MAX_TYPE
 } H5P_plist_type_t;
 
@@ -124,6 +128,8 @@ H5_DLLVAR H5P_genclass_t *H5P_CLS_GROUP_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_GROUP_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_DATATYPE_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_DATATYPE_ACCESS_g;
+H5_DLLVAR H5P_genclass_t *H5P_CLS_MAP_CREATE_g;
+H5_DLLVAR H5P_genclass_t *H5P_CLS_MAP_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_ATTRIBUTE_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_ATTRIBUTE_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_OBJECT_COPY_g;
@@ -138,6 +144,7 @@ H5_DLLVAR const struct H5P_libclass_t H5P_CLS_AACC[1];  /* Attribute access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_DACC[1];  /* Dataset access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_GACC[1];  /* Group access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_TACC[1];  /* Named datatype access */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_MACC[1];  /* Map access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_FACC[1];  /* File access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_OCPY[1];  /* Object copy */
 
@@ -148,6 +155,7 @@ H5_DLLVAR const struct H5P_libclass_t H5P_CLS_OCPY[1];  /* Object copy */
 /* Forward declaration of structs used below */
 struct H5O_fill_t;
 struct H5T_t;
+struct H5VL_connector_prop_t;
 
 /* Package initialization routine */
 H5_DLL herr_t H5P_init(void);
@@ -178,6 +186,8 @@ H5_DLL const void *H5P_peek_driver_info(H5P_genplist_t *plist);
 H5_DLL herr_t H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id,
             const void *new_driver_info);
 H5_DLL herr_t H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info);
+H5_DLL herr_t H5P_reset_vol_class(const H5P_genclass_t *pclass,
+    const struct H5VL_connector_prop_t *vol_prop);
 H5_DLL herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist,
         H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func,
         void *free_info);

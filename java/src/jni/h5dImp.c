@@ -340,12 +340,21 @@ Java_hdf_hdf5lib_H5_H5Dvlen_1reclaim
     (JNIEnv *env, jclass clss, jlong type_id, jlong space_id,
           jlong xfer_plist_id, jbyteArray buf)
 {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     jboolean  vlenBufIsCopy;
     jbyte    *vlenBuf = NULL;
+#endif
     herr_t    status = FAIL;
 
     UNUSED(clss);
 
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    UNUSED(type_id);
+    UNUSED(space_id);
+    UNUSED(xfer_plist_id);
+    UNUSED(buf);
+    H5_UNIMPLEMENTED(ENVONLY, "H5Dvlen_reclaim: not implemented");
+#else
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dvlen_reclaim: buffer is NULL");
 
@@ -353,10 +362,13 @@ Java_hdf_hdf5lib_H5_H5Dvlen_1reclaim
 
     if ((status = H5Dvlen_reclaim((hid_t)type_id, (hid_t)space_id, (hid_t)xfer_plist_id, vlenBuf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+#endif
 
 done:
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     if (vlenBuf)
         UNPIN_BYTE_ARRAY(ENVONLY, buf, vlenBuf, (status < 0) ? JNI_ABORT : 0);
+#endif
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Dvlen_1reclaim */
@@ -1172,7 +1184,7 @@ H5DreadVL_str
 
     /*
      * When repeatedly reading a dataset with a large number of strs (e.g., 1,000,000 strings),
-     * H5Dvlen_reclaim() may crash on Windows because the Java GC will not be able to collect
+     * H5Treclaim() may crash on Windows because the Java GC will not be able to collect
      * free space in time. Instead, we use "H5free_memory(strs[i])" to free individual strings
      * once done.
      */
@@ -1230,7 +1242,7 @@ H5DreadVL_asstr
 
         if (mem_space == H5S_ALL) {
             /*
-             * Retrieve a valid dataspace for H5Dvlen_reclaim().
+             * Retrieve a valid dataspace for H5Treclaim().
              */
             if ((mem_space = H5Dget_space(did)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1285,7 +1297,7 @@ done:
     if (h5str.s)
         h5str_free(&h5str);
     if (readBuf) {
-        H5Dvlen_reclaim(tid, mem_space, xfer_plist_id, readBuf);
+        H5Treclaim(tid, mem_space, xfer_plist_id, readBuf);
         HDfree(readBuf);
     }
     if (close_mem_space)
@@ -1504,7 +1516,7 @@ H5DwriteVL_asstr
 
         if (mem_space == H5S_ALL) {
             /*
-             * Retrieve a valid dataspace for H5Dvlen_reclaim().
+             * Retrieve a valid dataspace for H5Treclaim().
              */
             if ((mem_space = H5Dget_space(did)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1565,7 +1577,7 @@ done:
     if (utf8)
         UNPIN_JAVA_STRING(ENVONLY, obj, utf8);
     if (writeBuf) {
-        H5Dvlen_reclaim(tid, mem_space, xfer_plist_id, writeBuf);
+        H5Treclaim(tid, mem_space, xfer_plist_id, writeBuf);
         HDfree(writeBuf);
     }
     if (close_mem_space)
@@ -1838,7 +1850,7 @@ Java_hdf_hdf5lib_H5_H5Dfill
 {
     jboolean  isCopy1;
     jboolean  isCopy2;
-    herr_t    status;
+    herr_t    status = FAIL;
     jbyte    *fillP = NULL;
     jbyte    *buffP = NULL;
 

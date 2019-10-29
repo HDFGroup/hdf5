@@ -127,7 +127,7 @@ done:
     if (libversionArray)
         UNPIN_INT_ARRAY(ENVONLY, libversion, libversionArray, (status < 0) ? JNI_ABORT : 0);
 
-	return (jint)status;
+    return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5get_1libversion */
 
 /*

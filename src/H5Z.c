@@ -322,7 +322,7 @@ H5Z_register (const H5Z_class2_t *cls)
 
         /* Initialize */
         i = H5Z_table_used_g++;
-        HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
+        H5MM_memcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
 #ifdef H5Z_DEBUG
         HDmemset(H5Z_stat_table_g+i, 0, sizeof(H5Z_stats_t));
 #endif /* H5Z_DEBUG */
@@ -330,7 +330,7 @@ H5Z_register (const H5Z_class2_t *cls)
     /* Filter already registered */
     else {
         /* Replace old contents */
-        HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
+        H5MM_memcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
     } /* end else */
 
 done:
