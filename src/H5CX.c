@@ -283,8 +283,8 @@ typedef struct H5CX_t {
 #endif /* H5_HAVE_PARALLEL */
 
     /* Cached LCPL properties */
-    unsigned create_intermediate_group;       /* Whether to create intermediate groups */
-    hbool_t create_intermediate_group_valid;  /* Whether create intermediate group flag is valid */
+    unsigned intermediate_group;       /* Whether to create intermediate groups */
+    hbool_t intermediate_group_valid;  /* Whether create intermediate group flag is valid */
 
     /* Cached LAPL properties */
     size_t nlinks;              /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
@@ -357,7 +357,7 @@ typedef struct H5CX_dxpl_cache_t {
 /* Typedef for cached default link creation property list information */
 /* (Same as the cached DXPL struct, above, except for the default LCPL) */
 typedef struct H5CX_lcpl_cache_t {
-    unsigned create_intermediate_group; /* Whether to create intermediate groups  */
+    unsigned intermediate_group; /* Whether to create intermediate groups  */
 } H5CX_lcpl_cache_t;
 
 /* Typedef for cached default link access property list information */
@@ -556,7 +556,7 @@ H5CX__init_package(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a link creation property list")
 
     /* Get flag whether to create intermediate groups */
-    if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &H5CX_def_lcpl_cache.create_intermediate_group) < 0)
+    if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &H5CX_def_lcpl_cache.intermediate_group) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve intermediate group creation flag")
 
     /* Get the default LAPL cache information */
@@ -2454,12 +2454,12 @@ H5CX_get_create_intermediate_group(unsigned* crt_intermed_group)
     /* Sanity check */
     HDassert(crt_intermed_group);
     HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+    HDassert(H5P_DEFAULT != (*head)->ctx.lcpl_id);
 
-    H5CX_RETRIEVE_PROP_VALID(lcpl, H5P_LINK_CREATE_DEFAULT, H5L_CRT_INTERMEDIATE_GROUP_NAME, create_intermediate_group)
+    H5CX_RETRIEVE_PROP_VALID(lcpl, H5P_LINK_CREATE_DEFAULT, H5L_CRT_INTERMEDIATE_GROUP_NAME, intermediate_group)
 
     /* Get the value */
-    *crt_intermed_group = (*head)->ctx.create_intermediate_group;
+    *crt_intermed_group = (*head)->ctx.intermediate_group;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2995,10 +2995,10 @@ H5CX_set_create_intermediate_group(unsigned crt_intermed_group)
     HDassert(head && *head);
 
     /* Set the API context value */
-    (*head)->ctx.create_intermediate_group = crt_intermed_group;
+    (*head)->ctx.intermediate_group = crt_intermed_group;
 
     /* Mark the value as valid */
-    (*head)->ctx.create_intermediate_group_valid = TRUE;
+    (*head)->ctx.intermediate_group_valid = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
