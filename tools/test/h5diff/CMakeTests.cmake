@@ -426,7 +426,7 @@
       if (last_test)
         set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
-      set (last_test "PH5DIFF-${resultfile}")
+      set (last_test "MPI_TEST_H5DIFF-${resultfile}")
     endif ()
   endmacro ()
 
