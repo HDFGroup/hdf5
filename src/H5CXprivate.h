@@ -43,6 +43,7 @@
 typedef struct H5CX_state_t {
     hid_t dxpl_id;              /* DXPL for operation */
     hid_t lapl_id;              /* LAPL for operation */
+    hid_t lcpl_id;              /* LCPL for operation */
     void *vol_wrap_ctx;         /* VOL connector's "wrap context" for creating IDs */
     H5VL_connector_prop_t vol_connector_prop;   /* VOL connector property */
 
@@ -124,7 +125,8 @@ H5_DLL herr_t H5CX_get_vlen_alloc_info(H5T_vlen_alloc_info_t *vl_alloc_info);
 H5_DLL herr_t H5CX_get_dt_conv_cb(H5T_conv_cb_t *cb_struct);
 
 /* "Getter" routines for LCPL properties cached in API context */
-H5_DLL herr_t H5CX_get_create_intermediate_group(unsigned* crt_intermed_group);
+H5_DLL herr_t H5CX_get_encoding(H5T_cset_t* encoding);
+H5_DLL herr_t H5CX_get_intermediate_group(unsigned* crt_intermed_group);
 
 /* "Getter" routines for LAPL properties cached in API context */
 H5_DLL herr_t H5CX_get_nlinks(size_t *nlinks);
