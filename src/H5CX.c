@@ -283,6 +283,9 @@ typedef struct H5CX_t {
 #endif /* H5_HAVE_PARALLEL */
 
     /* Cached LCPL properties */
+    H5T_cset_t encoding;     /* Link name character encoding */
+    hbool_t encoding_valid;  /* Whether link name character encoding is valid */
+
     unsigned intermediate_group;       /* Whether to create intermediate groups */
     hbool_t intermediate_group_valid;  /* Whether create intermediate group flag is valid */
 
@@ -357,6 +360,7 @@ typedef struct H5CX_dxpl_cache_t {
 /* Typedef for cached default link creation property list information */
 /* (Same as the cached DXPL struct, above, except for the default LCPL) */
 typedef struct H5CX_lcpl_cache_t {
+    H5T_cset_t encoding;         /* Link name character encoding */
     unsigned intermediate_group; /* Whether to create intermediate groups  */
 } H5CX_lcpl_cache_t;
 
@@ -543,9 +547,6 @@ H5CX__init_package(void)
     if(H5P_get(dx_plist, H5D_XFER_CONV_CB_NAME, &H5CX_def_dxpl_cache.dt_conv_cb) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve datatype conversion exception callback")
 
-    /* Reset the "default LAPL cache" information */
-    HDmemset(&H5CX_def_lapl_cache, 0, sizeof(H5CX_lapl_cache_t));
-
     /* Reset the "default LCPL cache" information */
     HDmemset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
 
@@ -555,9 +556,16 @@ H5CX__init_package(void)
     if(NULL == (lc_plist = (H5P_genplist_t *)H5I_object(H5P_LINK_CREATE_DEFAULT)))
         HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a link creation property list")
 
+    /* Get link name character encoding */
+    if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &H5CX_def_lcpl_cache.encoding) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve link name encoding")
+
     /* Get flag whether to create intermediate groups */
     if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &H5CX_def_lcpl_cache.intermediate_group) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve intermediate group creation flag")
+
+    /* Reset the "default LAPL cache" information */
+    HDmemset(&H5CX_def_lapl_cache, 0, sizeof(H5CX_lapl_cache_t));
 
     /* Get the default LAPL cache information */
 
@@ -2432,7 +2440,42 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5CX_get_create_intermediate_group
+ * Function:    H5CX_get_encoding
+ *
+ * Purpose:     Retrieves the character encoding for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Gerd Heber
+ *              October 21, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_encoding(H5T_cset_t* encoding)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(encoding);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.lcpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(lcpl, H5P_LINK_CREATE_DEFAULT, H5P_STRCRT_CHAR_ENCODING_NAME, encoding)
+
+    /* Get the value */
+    *encoding = (*head)->ctx.encoding;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_encoding() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_intermediate_group
  *
  * Purpose:     Retrieves the create intermediate group flag for the current API call context.
  *
@@ -2444,7 +2487,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5CX_get_create_intermediate_group(unsigned* crt_intermed_group)
+H5CX_get_intermediate_group(unsigned* crt_intermed_group)
 {
     H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2969,40 +3012,6 @@ H5CX_set_vlen_alloc_info(H5MM_allocate_t alloc_func,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_vlen_alloc_info() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5CX_set_create_intermediate_group
- *
- * Purpose:     Sets the create intermediate group flag for the current API call context.
- *
- * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Gerd Heber
- *              October 21, 2019
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5CX_set_create_intermediate_group(unsigned crt_intermed_group)
-{
-    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(head && *head);
-
-    /* Set the API context value */
-    (*head)->ctx.intermediate_group = crt_intermed_group;
-
-    /* Mark the value as valid */
-    (*head)->ctx.intermediate_group_valid = TRUE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX_set_create_intermediate_group() */
 
 
 /*-------------------------------------------------------------------------
