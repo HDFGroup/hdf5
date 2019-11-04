@@ -884,6 +884,18 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
     else
         (*api_state)->lapl_id = H5P_LINK_ACCESS_DEFAULT;
 
+    /* Check for non-default LCPL */
+    if(H5P_LINK_CREATE_DEFAULT != (*head)->ctx.lcpl_id) {
+        /* Retrieve the LCPL property list */
+        H5CX_RETRIEVE_PLIST(lcpl, FAIL)
+
+        /* Copy the LCPL ID */
+        if(((*api_state)->lcpl_id = H5P_copy_plist((H5P_genplist_t *)(*head)->ctx.lcpl, FALSE)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "can't copy property list")
+    } /* end if */
+    else
+        (*api_state)->lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
     /* Keep a reference to the current VOL wrapping context */
     (*api_state)->vol_wrap_ctx = (*head)->ctx.vol_wrap_ctx;
     if(NULL != (*api_state)->vol_wrap_ctx)
@@ -964,6 +976,10 @@ H5CX_restore_state(const H5CX_state_t *api_state)
     (*head)->ctx.lapl_id = api_state->lapl_id;
     (*head)->ctx.lapl = NULL;
 
+    /* Restore the LCPL info */
+    (*head)->ctx.lcpl_id = api_state->lcpl_id;
+    (*head)->ctx.lcpl = NULL;
+
     /* Restore the VOL wrapper context */
     (*head)->ctx.vol_wrap_ctx = api_state->vol_wrap_ctx;
 
@@ -1013,6 +1029,11 @@ H5CX_free_state(H5CX_state_t *api_state)
     if(api_state->lapl_id != H5P_LINK_ACCESS_DEFAULT)
         if(H5I_dec_ref(api_state->lapl_id) < 0)
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on LAPL")
+
+    /* Release the LCPL */
+    if(api_state->lcpl_id != H5P_LINK_CREATE_DEFAULT)
+        if(H5I_dec_ref(api_state->lcpl_id) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on LCPL")
 
     /* Release the VOL wrapper context */
     if(api_state->vol_wrap_ctx)
