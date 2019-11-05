@@ -284,7 +284,8 @@ static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *
 static herr_t H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     const hsize_t *curr_dims, const hsize_t *max_dims);
 static void *H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
-static void *H5D__chunk_mem_xfree(void *chk, const void *pline);
+static void *H5D__chunk_mem_xfree(void *chk, void *pline);
+static void H5D__chunk_mem_xfree_wrapper(void *chk, void *pline);
 static void *H5D__chunk_mem_realloc(void *chk, size_t size,
     const H5O_pline_t *pline);
 static herr_t H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
@@ -1432,7 +1433,7 @@ H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline)
  *-------------------------------------------------------------------------
  */
 static void *
-H5D__chunk_mem_xfree(void *chk, const void *_pline)
+H5D__chunk_mem_xfree(void *chk, void *_pline)
 {
     const H5O_pline_t *pline = (const H5O_pline_t *)_pline;
 
@@ -1447,6 +1448,12 @@ H5D__chunk_mem_xfree(void *chk, const void *_pline)
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* H5D__chunk_mem_xfree() */
+
+static void
+H5D__chunk_mem_xfree_wrapper(void *chk, void *_pline)
+{
+    (void)H5D__chunk_mem_xfree(chk, _pline);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -4452,7 +4459,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
         /* (delay allocating fill buffer for VL datatypes until refilling) */
         /* (casting away const OK - QAK) */
         if(H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
-                (void *)pline, (H5MM_free_t)H5D__chunk_mem_xfree, (void *)pline,
+                (void *)pline, H5D__chunk_mem_xfree_wrapper, (void *)pline,
                 &dset->shared->dcpl_cache.fill, dset->shared->type,
                 dset->shared->type_id, (size_t)0, orig_chunk_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")

@@ -371,15 +371,9 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
     /* Check if section info lock count dropped to zero */
     if(fspace->sinfo_lock_count == 0) {
         hbool_t release_sinfo_space = FALSE;    /* Flag to indicate section info space in file should be released */
-        hbool_t closing_or_flushing = f->shared->closing;
+        hbool_t closing_or_flushing = f->shared->closing;      /* Is closing or flushing in progress */
 
-        /* There is no need to check whether cache-flush is in progress if
-         * we already found that either closing is in progress.  Furthermore,
-         * if closing *is* in progress, then the cache may have been destroyed,
-         * already.  Calling H5AC_get_cache_flush_in_progress() on a destroyed
-         * cache *may* cause a crash, but it will definitely make us bail
-         * out of this routine with an error.
-         */
+        /* Check whether cache-flush is in progress if closing is not. */
         if(!closing_or_flushing && H5AC_get_cache_flush_in_progress(f->shared->cache, &closing_or_flushing) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get flush_in_progress")
 

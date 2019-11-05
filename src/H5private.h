@@ -1376,25 +1376,25 @@ typedef off_t               h5_stat_size_t;
     #define HDstrcpy(X,Y)    strcpy(X,Y)
 #endif /* HDstrcpy */
 #ifndef HDstrcspn
-    #define HDstrcspn(X,Y)    strcspn(X,Y)
+    #define HDstrcspn    strcspn
 #endif /* HDstrcspn */
 #ifndef HDstrerror
-    #define HDstrerror(N)    strerror(N)
+    #define HDstrerror    strerror
 #endif /* HDstrerror */
 #ifndef HDstrftime
-    #define HDstrftime(S,Z,F,T)  strftime(S,Z,F,T)
+    #define HDstrftime  strftime
 #endif /* HDstrftime */
 #ifndef HDstrlen
-    #define HDstrlen(S)    strlen(S)
+    #define HDstrlen    strlen
 #endif /* HDstrlen */
 #ifndef HDstrncat
-    #define HDstrncat(X,Y,Z)  strncat(X,Y,Z)
+    #define HDstrncat  strncat
 #endif /* HDstrncat */
 #ifndef HDstrncmp
-    #define HDstrncmp(X,Y,Z)  strncmp(X,Y,Z)
+    #define HDstrncmp  strncmp
 #endif /* HDstrncmp */
 #ifndef HDstrncpy
-    #define HDstrncpy(X,Y,Z)  strncpy(X,Y,Z)
+    #define HDstrncpy  strncpy
 #endif /* HDstrncpy */
 #ifndef HDstrpbrk
     #define HDstrpbrk(X,Y)    strpbrk(X,Y)

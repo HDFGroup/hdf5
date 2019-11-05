@@ -168,12 +168,41 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # NOTE: Disable the -Wformat-nonliteral from -Wformat=2 here and re-add
     # it to the developer flags.
     #
-    H5_CFLAGS="$H5_CFLAGS -pedantic -Wall -Wextra -Wbad-function-cast -Wc++-compat -Wcast-align"
-    H5_CFLAGS="$H5_CFLAGS -Wcast-qual -Wconversion -Wdeclaration-after-statement -Wdisabled-optimization -Wfloat-equal"
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Wno-format-nonliteral -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs"
-    H5_CFLAGS="$H5_CFLAGS -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked"
-    H5_CFLAGS="$H5_CFLAGS -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-enum -Wswitch-default"
-    H5_CFLAGS="$H5_CFLAGS -Wundef -Wunused-macros -Wunsafe-loop-optimizations -Wwrite-strings"
+    H5_CFLAGS="$H5_CFLAGS -pedantic -Wall -Wextra -Wcast-align"
+    H5_CFLAGS="$H5_CFLAGS -Wcast-qual -Wconversion -Wfloat-equal"
+    H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Wno-format-nonliteral -Winit-self -Winvalid-pch -Wmissing-include-dirs"
+    H5_CFLAGS="$H5_CFLAGS"
+    H5_CFLAGS="$H5_CFLAGS -Wshadow"
+    H5_CFLAGS="$H5_CFLAGS -Wundef -Wwrite-strings"
+
+    #
+    # Lots of noise, questionable benefit:
+    #
+    #H5_CFLAGS="$H5_CFLAGS -Wunused-macros -Wunsafe-loop-optimizations"
+
+    #
+    # HDF5 code should not trigger the following warnings under any
+    # circumstances, so ask the compiler to treat them as errors:
+    #
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=bad-function-cast"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=missing-declarations"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=missing-prototypes -Werror=nested-externs"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=old-style-definition -Werror=packed"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=redundant-decls -Werror=strict-prototypes"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=incompatible-pointer-types"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=switch"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=implicit-function-declaration"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=cast-function-type"
+
+#
+# Should be enabled only with discussion:
+#
+#   H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wdisabled-optimization"
+#
+# -Wswitch is helpful, but these seem a step too far:
+#
+#   H5_CFLAGS="$H5_CFLAGS -Wswitch-enum -Wswitch-default"
+#
 
     H5_CFLAGS="$H5_CFLAGS -Wno-c++-compat"
 
@@ -224,17 +253,34 @@ if test "X-gcc" = "X-$cc_vendor"; then
 
     # gcc 4.3                                                                    
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 3; then
-        H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560"                   
+        H5_CFLAGS="$H5_CFLAGS -Wlogical-op"
+        #
+        # Lots of noise, questionable benefit:
+        #
+        #H5_CFLAGS="$H5_CFLAGS -Wlarger-than=2560"
+        #
     fi 
 
     # gcc 4.4
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 4; then
-        H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
+        H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wpacked-bitfield-compat"
+        #
+        # Lots of noise, questionable benefit:
+        #
+        #H5_CFLAGS="$H5_CFLAGS -Wframe-larger-than=16384"
+        #
     fi
 
     # gcc 4.5
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5; then
-        H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
+        H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wunsuffixed-float-constants"
+        #
+        # -Wjump-misses-init makes lots of noise for a questionable benefit.
+        # Can jumping over an initialization in C cause any harm, if
+        # the variable is never *used* before it has been initialized?
+        #
+        #H5_CFLAGS="$H5_CFLAGS -Wjump-misses-init"
+        #
     fi
 
     # gcc 4.6
@@ -246,7 +292,16 @@ if test "X-gcc" = "X-$cc_vendor"; then
 
     # gcc 4.7
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 7; then
-        H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
+        #
+        # It's not clear that -Wvector-operation-performance warnigns are
+        # actionable.
+        #
+        # -Wstack-usage=8192 warnings need better justification;
+        # if justifiable, should be enabled on a branch and swept up there
+        # before burdening the whole development team.
+        #
+        #H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
+        #
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
         NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
     fi
@@ -269,7 +324,16 @@ if test "X-gcc" = "X-$cc_vendor"; then
 
     # gcc 6
     if test $cc_vers_major -ge 6; then
-        H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa -Wnormalized"
+        H5_CFLAGS="$H5_CFLAGS -Wunused-const-variable -Whsa -Wnormalized"
+        #
+        # Unacceptably noisy on HDF5 right now.
+        #
+        #H5_CFLAGS="$H5_CFLAGS -Wnull-dereference"
+        #
+        # Careful!  -Wduplicated-cond, combined with HDF5's heavy use of
+        # macros, can make a lot of noise.
+        #
+        H5_CFLAGS="$H5_CFLAGS -Wduplicated-cond"
     fi
 
     # gcc 7
