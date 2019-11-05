@@ -103,7 +103,11 @@ AC_SUBST([AR_FLAGS])
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
+##
+## H5_ECFLAGS is for warnings that should be treated as errors.
+##
 AC_SUBST([H5_CFLAGS])
+AC_SUBST([H5_ECFLAGS])
 AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
 AC_SUBST([H5_CXXFLAGS])

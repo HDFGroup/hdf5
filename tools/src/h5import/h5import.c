@@ -1428,7 +1428,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
     /* Initialize machine endian */
     volatile uint32_t ibyte=0x01234567;
     /* 0 for big endian, 1 for little endian. */
-    if ((*((uint8_t*)(&ibyte))) == 0x67) {
+    if ((*((volatile uint8_t*)(&ibyte))) == 0x67) {
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
             (void) HDfprintf(stderr, "%s", err11e);
             return (-1);
