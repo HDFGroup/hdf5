@@ -298,7 +298,7 @@ H5SM__message_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     /* Sanity check */
     HDassert(ctx);
 
-    *raw++ = message->location;
+    *raw++ = (uint8_t)message->location;
     UINT32ENCODE(raw, message->hash);
 
     if(message->location == H5SM_IN_HEAP) {

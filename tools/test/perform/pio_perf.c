@@ -1155,9 +1155,9 @@ report_parameters(struct options *opts)
     recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs), "\n");
 
     HDfprintf(output, "rank %d: File size=", rank);
-    recover_size_and_print((long long)(pow(opts->num_bpp * opts->min_num_procs,2)
+    recover_size_and_print((long long)(pow((double)(opts->num_bpp * opts->min_num_procs),2)
             * opts->num_dsets), ":");
-    recover_size_and_print((long long)(pow(opts->num_bpp * opts->max_num_procs,2)
+    recover_size_and_print((long long)(pow((double)(opts->num_bpp * opts->max_num_procs),2)
             * opts->num_dsets), "\n");
 
     HDfprintf(output, "rank %d: Transfer buffer size=", rank);
