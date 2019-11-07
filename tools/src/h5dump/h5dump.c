@@ -634,8 +634,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
 /*-------------------------------------------------------------------------
  * Function:    parse_subset_params
  *
- * Purpose:     Parse the so-called "terse" syntax for specifying subsetting
- *              parameters.
+ * Purpose:     Parse the so-called "terse" syntax for specifying subsetting parameters.
  *
  * Return:      Success:    struct subset_t object
  *              Failure:    NULL

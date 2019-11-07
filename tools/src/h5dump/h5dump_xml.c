@@ -1778,12 +1778,10 @@ xml_dump_dataspace(hid_t space)
  *              the h5tools library.
  *
  * Return:      void
- *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 void
-xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset, int H5_ATTR_UNUSED pindex)
+xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED *sset, int H5_ATTR_UNUSED pindex)
 {
     hid_t               space = -1;
     hid_t               type = -1;
@@ -1862,7 +1860,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
             datactx.need_prefix = TRUE;
             datactx.indent_level = ctx.indent_level;
             datactx.cur_column = ctx.cur_column;
-            status = h5tools_dump_dset(rawoutstream, outputformat, &datactx, obj_id, NULL);
+            status = h5tools_dump_dset(rawoutstream, outputformat, &datactx, obj_id);
         }
     }
     else {
@@ -3579,12 +3577,10 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
  * Purpose:     Dump a description of an HDF5 dataset in XML.
  *
  * Return:      void
- *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 void
-xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * sset)
+xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *sset)
 {
     hid_t               type;
     hid_t               space;
