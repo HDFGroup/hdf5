@@ -239,7 +239,7 @@ H5B2__split1(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     old_node_nrec = internal->node_ptrs[idx].node_nrec;
 
     /* Determine "middle" record to promote to internal node */
-    mid_record = old_node_nrec / 2;
+    mid_record = (uint16_t)(old_node_nrec / 2);
 
     /* Copy "upper half" of records to new child */
     H5MM_memcpy(H5B2_NAT_NREC(right_native, hdr, 0),
@@ -507,8 +507,8 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
     if(*left_nrec < *right_nrec) {
         /* Moving record from right node to left */
 
-        uint16_t new_right_nrec = (uint16_t)(*left_nrec + *right_nrec) / 2;             /* New number of records for right child */
-        uint16_t move_nrec = (uint16_t)(*right_nrec - new_right_nrec);      /* Number of records to move from right node to left */
+        uint16_t new_right_nrec = (uint16_t)((*left_nrec + *right_nrec) / 2);    /* New number of records for right child */
+        uint16_t move_nrec = (uint16_t)(*right_nrec - new_right_nrec);           /* Number of records to move from right node to left */
 
         /* Copy record from parent node down into left child */
         H5MM_memcpy(H5B2_NAT_NREC(left_native, hdr, *left_nrec), H5B2_INT_NREC(internal, hdr, idx), hdr->cls->nrec_size);
@@ -558,8 +558,8 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
     else {
         /* Moving record from left node to right */
 
-        uint16_t new_left_nrec = (uint16_t)(*left_nrec + *right_nrec) / 2;    /* New number of records for left child */
-        uint16_t move_nrec = (uint16_t)(*left_nrec - new_left_nrec);        /* Number of records to move from left node to right */
+        uint16_t new_left_nrec = (uint16_t)((*left_nrec + *right_nrec) / 2);    /* New number of records for left child */
+        uint16_t move_nrec = (uint16_t)(*left_nrec - new_left_nrec);            /* Number of records to move from left node to right */
 
         /* Sanity check */
         HDassert(*left_nrec > *right_nrec);
@@ -762,8 +762,8 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal,
     {
         /* Compute new # of records in each node */
         unsigned total_nrec = (unsigned)(*left_nrec + *middle_nrec + *right_nrec + 2);
-        uint16_t new_middle_nrec = (uint16_t)(total_nrec - 2) / 3;
-        uint16_t new_left_nrec = (uint16_t)((total_nrec - 2) - new_middle_nrec) / 2;
+        uint16_t new_middle_nrec = (uint16_t)((total_nrec - 2) / 3);
+        uint16_t new_left_nrec = (uint16_t)(((total_nrec - 2) - new_middle_nrec) / 2);
         uint16_t new_right_nrec = (uint16_t)((total_nrec - 2) - (unsigned)(new_left_nrec + new_middle_nrec));
         uint16_t curr_middle_nrec = *middle_nrec;
 

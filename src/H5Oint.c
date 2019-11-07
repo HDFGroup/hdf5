@@ -240,7 +240,7 @@ H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx
         version = H5O_VERSION_1;
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    version = MAX(version, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = (uint8_t)MAX(version, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(f)]);
 
     /* Version bounds check */
     if(version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(f)])
@@ -2322,7 +2322,7 @@ H5O_get_create_plist(const H5O_loc_t *loc, H5P_genplist_t *oc_plist)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set min. # of dense attributes in property list")
 
         /* Mask off non-"user visible" flags */
-        ohdr_flags = oh->flags & (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_STORE_TIMES);
+        ohdr_flags = (uint8_t)(oh->flags & (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_STORE_TIMES));
 
         /* Set object header flags */
         if(H5P_set(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
