@@ -981,9 +981,9 @@ done:
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Treclaim
- * Signature: (JJJ[B)I
+ * Signature: (JJJ[B)V
  */
-JNIEXPORT jint JNICALL
+JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Treclaim
     (JNIEnv *env, jclass clss, jlong type_id, jlong space_id,
           jlong xfer_plist_id, jbyteArray buf)
@@ -1005,8 +1005,6 @@ Java_hdf_hdf5lib_H5_H5Treclaim
 done:
     if (pinBuf)
         UNPIN_BYTE_ARRAY(ENVONLY, buf, pinBuf, (status < 0) ? JNI_ABORT : 0);
-
-    return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Treclaim */
 
 /*

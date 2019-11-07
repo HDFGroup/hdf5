@@ -259,7 +259,7 @@ traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
 
     /* Get info for starting object */
     if(H5Oget_info_by_name2(file_id, grp_name, &oinfo, fields, H5P_DEFAULT) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info_by_name failed");
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info_by_name failed");
 
     /* Visit the starting object */
     if(visit_start && visitor->visit_obj)
@@ -289,12 +289,12 @@ traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
         if(recurse) {
             /* Visit all links in group, recursively */
             if(H5Lvisit_by_name(file_id, grp_name, trav_index_by, trav_index_order, traverse_cb, &udata, H5P_DEFAULT) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lvisit_by_name failed");
+                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lvisit_by_name failed");
         } /* end if */
         else {
             /* Iterate over links in group */
             if(H5Literate_by_name(file_id, grp_name, trav_index_by, trav_index_order, NULL, traverse_cb, &udata, H5P_DEFAULT) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Literate_by_name failed");
+                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Literate_by_name failed");
         } /* end else */
 
         /* Free visited addresses table */
@@ -439,7 +439,7 @@ h5trav_getinfo(hid_t file_id, trav_info_t *info)
 
     /* Traverse all objects in the file, visiting each object & link */
     if(traverse(file_id, "/", TRUE, TRUE, &info_visitor, H5O_INFO_BASIC) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:
     return ret_value;
@@ -605,7 +605,7 @@ h5trav_gettable(hid_t fid, trav_table_t *table)
 
     /* Traverse all objects in the file, visiting each object & link */
     if(traverse(fid, "/", TRUE, TRUE, &table_visitor, H5O_INFO_BASIC) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:
     return ret_value;
@@ -1031,7 +1031,7 @@ h5trav_print(hid_t fid)
 
     /* Traverse all objects in the file, visiting each object & link */
     if(traverse(fid, "/", TRUE, TRUE, &print_visitor, H5O_INFO_BASIC) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:
     return ret_value;
@@ -1062,7 +1062,7 @@ h5trav_visit(hid_t fid, const char *grp_name, hbool_t visit_start,
 
     /* Traverse all objects in the file, visiting each object & link */
     if(traverse(fid, grp_name, visit_start, recurse, &visitor, fields) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
 
 done:
     return ret_value;
@@ -1089,7 +1089,7 @@ symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, co
 
         visited->nalloc = MAX(1, visited->nalloc * 2);
         if(NULL == (tmp_ptr = HDrealloc(visited->objs, visited->nalloc * sizeof(symlink_trav_path_t))))
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "visited data structure realloc failed");
+            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "visited data structure realloc failed");
         visited->objs = (symlink_trav_path_t *)tmp_ptr;
     } /* end if */
 
@@ -1103,7 +1103,7 @@ symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, co
     if(type == H5L_TYPE_EXTERNAL) {
         if(NULL == (visited->objs[idx].file = HDstrdup(file))) {
             visited->nused--;
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "visited data structure name allocation failed");
+            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "visited data structure name allocation failed");
         } /* end if */
     } /* end if */
 
@@ -1111,7 +1111,7 @@ symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, co
         visited->nused--;
         if(visited->objs[idx].file)
             HDfree (visited->objs[idx].file);
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "visited data structure path allocation failed");
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "visited data structure path allocation failed");
     } /* end if */
 
 done:

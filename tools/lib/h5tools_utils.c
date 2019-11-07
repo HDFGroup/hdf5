@@ -803,7 +803,7 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
 
     /* Find all shared objects */
     if((ret_value = h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info, H5O_INFO_BASIC)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "finding shared objects failed")
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "finding shared objects failed")
 
 done:
     /* Release resources */
@@ -1056,7 +1056,7 @@ h5tools_getenv_update_hyperslab_bufsize(void)
         errno = 0;
         hyperslab_bufsize_mb = HDstrtol(env_str, (char**)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "hyperslab buffer size failed");
+            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "hyperslab buffer size failed");
 
         /* convert MB to byte */
         H5TOOLS_BUFSIZE = (hsize_t)hyperslab_bufsize_mb * 1024 * 1024;
