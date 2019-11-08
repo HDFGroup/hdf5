@@ -172,6 +172,8 @@ H5_DLL hssize_t H5Sget_select_hyper_nblocks(hid_t spaceid);
 H5_DLL herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
     hsize_t numblocks, hsize_t buf[/*numblocks*/]);
 H5_DLL herr_t H5Shyper_adjust_s(hid_t space_id, const hssize_t *offset);
+H5_DLL hid_t H5Sselect_project_intersection(hid_t src_space_id,
+    hid_t dst_space_id, hid_t src_intersect_space_id);
 
 /* Operations on dataspace selection iterators */
 H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags);
