@@ -1860,7 +1860,7 @@ H5L__link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t H5_ATT
     if(udata->lc_plist) {
         /* Get character encoding property */
         if(H5CX_get_encoding(&udata->lnk->cset) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'character set' property")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get 'character set' property")
     } /* end if */
     else
         udata->lnk->cset = H5F_DEFAULT_CSET;   /* Default character encoding for link */
@@ -2002,7 +2002,7 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name,
 
         /* Get intermediate group creation property */
         if(H5CX_get_intermediate_group(&crt_intmd_group) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'create intermediate group' property")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get 'create intermediate group' property")
 
         if(crt_intmd_group > 0)
             target_flags |= H5G_CRT_INTMD_GROUP;
