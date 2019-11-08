@@ -180,7 +180,7 @@ static herr_t H5VL__request_free(void *req, const H5VL_class_t *cls);
 static herr_t H5VL__blob_put(void *obj, const H5VL_class_t *cls,
     const void *buf, size_t size, void *blob_id, void *ctx);
 static herr_t H5VL__blob_get(void *obj, const H5VL_class_t *cls,
-    const void *blob_id, void *buf, size_t *size, void *ctx);
+    const void *blob_id, void *buf, size_t size, void *ctx);
 static herr_t H5VL__blob_specific(void *obj, const H5VL_class_t *cls,
     void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
 
@@ -6692,7 +6692,7 @@ done:
  */
 static herr_t
 H5VL__blob_get(void *obj, const H5VL_class_t *cls, const void *blob_id,
-    void *buf, size_t *size, void *ctx)
+    void *buf, size_t size, void *ctx)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -6702,7 +6702,7 @@ H5VL__blob_get(void *obj, const H5VL_class_t *cls, const void *blob_id,
     HDassert(obj);
     HDassert(cls);
     HDassert(blob_id);
-    HDassert(size || buf);
+    HDassert(buf);
 
     /* Check if the corresponding VOL callback exists */
     if(NULL == cls->blob_cls.get)
@@ -6728,7 +6728,7 @@ done:
  */
 herr_t
 H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf,
-    size_t *size, void *ctx)
+    size_t size, void *ctx)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -6738,7 +6738,7 @@ H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf,
     /* Sanity check */
     HDassert(vol_obj);
     HDassert(blob_id);
-    HDassert(size || buf);
+    HDassert(buf);
 
     /* Set wrapper info in API context */
     if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
@@ -6768,13 +6768,13 @@ done:
  */
 herr_t
 H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf,
-    size_t *size, void *ctx)
+    size_t size, void *ctx)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xi*x*x*z*x", obj, connector_id, blob_id, buf, size, ctx);
+    H5TRACE6("e", "*xi*x*xz*x", obj, connector_id, blob_id, buf, size, ctx);
 
     /* Get class pointer */
     if(NULL == obj)
