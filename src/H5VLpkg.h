@@ -55,6 +55,7 @@ H5_DLL hid_t H5VL__register_connector_by_value(H5VL_class_value_t value,
     hbool_t app_ref, hid_t vipl_id);
 H5_DLL htri_t H5VL__is_connector_registered(const char *name);
 H5_DLL hid_t H5VL__get_connector_id(const char *name, hbool_t is_api);
+H5_DLL hid_t H5VL__peek_connector_id(const char *name);
 H5_DLL herr_t H5VL__connector_str_to_info(const char *str, hid_t connector_id,
     void **info);
 H5_DLL ssize_t H5VL__get_connector_name(hid_t id, char *name/*out*/, size_t size);

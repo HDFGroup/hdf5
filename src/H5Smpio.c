@@ -140,7 +140,7 @@ H5S__mpio_all_type(const H5S_t *space, size_t elmt_size,
     H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
 
     total_bytes = (hsize_t)elmt_size * nelmts;
-    bigio_count = H5_mpio_get_bigio_count();
+    bigio_count = H5_mpi_get_bigio_count();
 
     /* Verify that the size can be expressed as a 32 bit integer */
     if(bigio_count >= total_bytes) {
@@ -229,7 +229,7 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points,
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
     elmt_type_created = TRUE;
 
-    bigio_count = H5_mpio_get_bigio_count();
+    bigio_count = H5_mpi_get_bigio_count();
 
     /* Check whether standard or BIGIO processing will be employeed */
     if(bigio_count >= num_points) {
@@ -668,7 +668,7 @@ H5S__mpio_reg_hyper_type(const H5S_t *space, size_t elmt_size,
     HDassert(space);
     HDassert(sizeof(MPI_Aint) >= sizeof(elmt_size));
 
-    bigio_count = H5_mpio_get_bigio_count();
+    bigio_count = H5_mpi_get_bigio_count();
     /* Initialize selection iterator */
     if(H5S_select_iter_init(&sel_iter, space, elmt_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
@@ -988,7 +988,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
     HDassert(space->select.sel_info.hslab->span_lst);
     HDassert(space->select.sel_info.hslab->span_lst->head);
 
-    bigio_count = H5_mpio_get_bigio_count();
+    bigio_count = H5_mpi_get_bigio_count();
     /* Create the base type for an element */
     if(bigio_count >= elmt_size) {
         if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)elmt_size, MPI_BYTE, &elmt_type)))
@@ -1117,7 +1117,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
     HDassert(spans);
     HDassert(type_list);
 
-    bigio_count = H5_mpio_get_bigio_count();
+    bigio_count = H5_mpi_get_bigio_count();
     /* Check if we've visited this span tree before */
     if(spans->op_gen != op_gen) {
         H5S_mpio_mpitype_node_t *type_node;     /* Pointer to new node in MPI data type list */

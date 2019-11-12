@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -11,6 +11,8 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+use warnings;
+
 my $depend_file;
 my $new_depend_file;
 my $srcdir;
