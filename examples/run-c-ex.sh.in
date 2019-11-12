@@ -46,7 +46,7 @@ prefix=@prefix@
 examplesdir=@examplesdir@
 if [ ${examplesdir##${prefix}/} != ${examplesdir} ]; then
 	echo $(echo ${examplesdir##${prefix}/} | \
-	    sed -E 's,[^/]+,..,g')
+	    sed 's,[^/][^/]*,..,g')
 else
 	echo $prefix
 fi
