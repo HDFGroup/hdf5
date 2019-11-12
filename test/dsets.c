@@ -7066,9 +7066,9 @@ make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
 {
     long inc;
 
-    assert(0 < nelts);
+    HDassert(0 < nelts);
 
-    *offsetp = random() % nelts;
+    *offsetp = HDrandom() % nelts;
 
     /* `maxinc` is chosen so that for any `x` in [0, nelts - 1],
      * `x + maxinc` does not overflow a long.
@@ -7081,7 +7081,7 @@ make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
      * number.
      */
     do {
-        inc = 1 + random() % maxinc;
+        inc = 1 + HDrandom() % maxinc;
     } while (gcd(inc, nelts) != 1);
 
     *incp = inc;
@@ -7163,7 +7163,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         chunk_row = ofs / cols;
         chunk_col = ofs % cols;
         ofs = (ofs + inc) % (rows * cols);
-        assert(!check2[chunk_row][chunk_col]);
+        HDassert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row+chunk_col+1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -7290,7 +7290,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         chunk_row = ofs / cols;
         chunk_col = ofs % cols;
         ofs = (ofs + inc) % (rows * cols);
-        assert(!check2[chunk_row][chunk_col]);
+        HDassert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -7400,7 +7400,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         chunk_row = ofs / cols;
         chunk_col = ofs % cols;
         ofs = (ofs + inc) % (rows * cols);
-        assert(!check2[chunk_row][chunk_col]);
+        HDassert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0] = (hsize_t)chunk_row * csize[0];
@@ -9522,7 +9522,7 @@ test_fixed_array(hid_t fapl)
             chunk_row = ofs / cols;
             chunk_col = ofs % cols;
             ofs = (ofs + inc) % (rows * cols);
-            assert(!chunks[chunk_row][chunk_col]);
+            HDassert(!chunks[chunk_row][chunk_col]);
 
             wbuf[i] = chunks[chunk_row][chunk_col] = chunk_row+chunk_col+1;
             coord[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
@@ -9651,7 +9651,7 @@ test_fixed_array(hid_t fapl)
             chunk_row = ofs / cols;
             chunk_col = ofs % cols;
             ofs = (ofs + inc) % (rows * cols);
-            assert(!chunks_big[chunk_row][chunk_col]);
+            HDassert(!chunks_big[chunk_row][chunk_col]);
 
             wbuf_big[i] = chunks_big[chunk_row][chunk_col] = chunk_row+chunk_col+1;
             coord_big[i][0] = (hsize_t)chunk_row * chunk_dim2[0];
