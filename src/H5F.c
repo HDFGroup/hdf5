@@ -768,7 +768,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 
     /* Get the file object */
     if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "invalid object identifier")
 
     /* Make the post open callback */
     if(H5VL_file_specific(vol_obj, H5VL_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
