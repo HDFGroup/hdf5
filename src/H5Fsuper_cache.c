@@ -876,7 +876,7 @@ H5F__cache_drvrinfo_get_final_load_size(const void *_image, size_t image_len,
 {
     const uint8_t *image = _image; /* Pointer into raw data buffer */
     H5F_drvrinfo_cache_ud_t *udata = (H5F_drvrinfo_cache_ud_t *)_udata;	/* User data */
-    H5O_drvinfo_t drvrinfo;     /* Driver info */
+    H5O_drvinfo_t drvrinfo = {.len = 0};     /* Driver info */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
