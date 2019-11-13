@@ -86,7 +86,7 @@ static herr_t H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
 static herr_t H5S__release_datatype(H5S_mpio_mpitype_list_t *type_list);
 static herr_t H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
     size_t elmt_size, const MPI_Datatype *elmt_type, MPI_Datatype *span_type,
-    H5S_mpio_mpitype_list_t *type_list, uint64_t op_gen);
+    H5S_mpio_mpitype_list_t *type_list, unsigned op_info_i, uint64_t op_gen);
 
 
 /*****************************/
@@ -1007,8 +1007,10 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
     op_gen = H5S__hyper_get_op_gen();
 
     /* Obtain derived MPI data type */
+    /* Always use op_info[0] since we own this op_info, so there can be no
+     * simultaneous operations */
     type_list.head = type_list.tail = NULL;
-    if(H5S__obtain_datatype(space->select.sel_info.hslab->span_lst, down, elmt_size, &elmt_type, &span_type, &type_list, op_gen) < 0)
+    if(H5S__obtain_datatype(space->select.sel_info.hslab->span_lst, down, elmt_size, &elmt_type, &span_type, &type_list, 0, op_gen) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain MPI derived data type")
     if(MPI_SUCCESS != (mpi_code = MPI_Type_dup(span_type, new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
@@ -1096,7 +1098,7 @@ done:
 static herr_t
 H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
     size_t elmt_size, const MPI_Datatype *elmt_type, MPI_Datatype *span_type,
-    H5S_mpio_mpitype_list_t *type_list, uint64_t op_gen)
+    H5S_mpio_mpitype_list_t *type_list, unsigned op_info_i, uint64_t op_gen)
 {
     H5S_hyper_span_t      *span;                /* Hyperslab span to iterate with */
     hsize_t               bigio_count;          /* Transition point to create derived type */
@@ -1119,7 +1121,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
 
     bigio_count = H5_mpi_get_bigio_count();
     /* Check if we've visited this span tree before */
-    if(spans->op_gen != op_gen) {
+    if(spans->op_info[op_info_i].op_gen != op_gen) {
         H5S_mpio_mpitype_node_t *type_node;     /* Pointer to new node in MPI data type list */
 
         /* Allocate the initial displacement & block length buffers */
@@ -1172,7 +1174,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
 
             /* Everything fits into integers, so cast them and use hindexed */
             if(bigio_count >= outercount && large_block == FALSE) {
-                if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)outercount, blocklen, disp, *elmt_type, &spans->u.down_type)))
+                if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)outercount, blocklen, disp, *elmt_type, &spans->op_info[op_info_i].u.down_type)))
                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
             } /* end if */
             else {      /* LARGE_DATATYPE:: Something doesn't fit into a 32 bit integer */
@@ -1190,17 +1192,17 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
 
                     /* Combine the current datatype that is created with this current block type */
                     if(0 == u)      /* first iteration, there is no combined datatype yet */
-                        spans->u.down_type = temp_type;
+                        spans->op_info[op_info_i].u.down_type = temp_type;
                     else {
                         int bl[2] = {1, 1};
                         MPI_Aint ds[2] = {disp[u - 1], disp[u]};
-                        MPI_Datatype dt[2] = {spans->u.down_type, temp_type};
+                        MPI_Datatype dt[2] = {spans->op_info[op_info_i].u.down_type, temp_type};
 
                         if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct(2,              /* count */
                                                                              bl,             /* blocklength */
                                                                              ds,             /* stride in bytes*/
                                                                              dt,             /* old type */
-                                                                             &spans->u.down_type)))  /* new type */
+                                                                             &spans->op_info[op_info_i].u.down_type)))  /* new type */
                             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
 
                         /* Release previous temporary datatype */
@@ -1253,7 +1255,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
                 blocklen[outercount]  = 1;
 
                 /* Generate MPI datatype for next dimension down */
-                if(H5S__obtain_datatype(span->down, down + 1, elmt_size, elmt_type, &down_type, type_list, op_gen) < 0)
+                if(H5S__obtain_datatype(span->down, down + 1, elmt_size, elmt_type, &down_type, type_list, op_info_i, op_gen) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain MPI derived data type")
 
                 /* Compute the number of elements to attempt in this span */
@@ -1270,7 +1272,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
 
             /* Building the whole vector datatype */
             H5_CHECK_OVERFLOW(outercount, size_t, int)
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)outercount, blocklen, disp, inner_type, &spans->u.down_type)))
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)outercount, blocklen, disp, inner_type, &spans->op_info[op_info_i].u.down_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
 
             /* Release inner node types */
@@ -1285,7 +1287,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate MPI data type list node")
 
         /* Set up MPI type node */
-        type_node->type = spans->u.down_type;
+        type_node->type = spans->op_info[op_info_i].u.down_type;
         type_node->next = NULL;
 
         /* Add MPI type node to list */
@@ -1297,11 +1299,11 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
         } /* end else */
 
         /* Remember that we've visited this span tree */
-        spans->op_gen = op_gen;
+        spans->op_info[op_info_i].op_gen = op_gen;
     } /* end else */
 
     /* Return MPI data type for span tree */
-    *span_type = spans->u.down_type;
+    *span_type = spans->op_info[op_info_i].u.down_type;
 
 done:
     /* General cleanup */
