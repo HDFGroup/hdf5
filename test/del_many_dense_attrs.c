@@ -70,7 +70,7 @@ main(void)
     hid_t fapl = -1;            /* File access property lists   */
     hid_t gcpl = -1;            /* Group creation property list */
     char aname[50];             /* Name of attribute            */
-    char *basename="attr";      /* Name prefix for attribute    */
+    const char *basename="attr";/* Name prefix for attribute    */
     char filename[100];         /* File name                    */
     int i;                      /* Local index variable         */
 
