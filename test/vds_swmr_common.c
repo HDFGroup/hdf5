@@ -11,29 +11,26 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
- *              Wednesday, March 17, 2010
- *
- * Purpose:     srcdir querying support.
- */
-#ifndef _H5SRCDIR_H
-#define _H5SRCDIR_H
+#include "vds_swmr.h"
 
-/* Include the header file with the correct relative path for the srcdir string */
-#include "H5srcdir_str.h"
+hsize_t PLANES[N_SOURCES][RANK] = {
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH},
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH},
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH}
+};
 
-/* Buffer to construct path in and return pointer to */
-extern char srcdir_path[1024];
+char FILE_NAMES[N_SOURCES][NAME_LEN] = {
+    {"vds_swmr_src_a.h5"},
+    {"vds_swmr_src_b.h5"},
+    {"vds_swmr_src_c.h5"},
+    {"vds_swmr_src_d.h5"},
+    {"vds_swmr_src_e.h5"},
+    {"vds_swmr_src_f.h5"}
+};
 
-/* Buffer to construct file in and return pointer to */
-extern char srcdir_testpath[1024];
-
-/* Just return the srcdir path */
-const char *H5_get_srcdir(void);
-
-/* Append the test file name to the srcdir path and return the whole string */
-const char *H5_get_srcdir_filename(const char *);
-
-#endif /* _H5SRCDIR_H */
-
+char VDS_FILE_NAME[NAME_LEN] = "vds_swmr.h5";
+char SOURCE_DSET_PATH[NAME_LEN] = "/source_dset";
+char VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
