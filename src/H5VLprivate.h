@@ -89,6 +89,7 @@ H5_DLL void *H5VL_object_data(const H5VL_object_t *vol_obj);
 H5_DLL void *H5VL_object_unwrap(const H5VL_object_t *vol_obj);
 H5_DLL void *H5VL_object_verify(hid_t id, H5I_type_t obj_type);
 H5_DLL H5VL_object_t *H5VL_vol_object(hid_t id);
+H5_DLL H5VL_object_t *H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id);
 H5_DLL herr_t H5VL_free_object(H5VL_object_t *obj);
 
 /* Functions that wrap / unwrap VOL objects */
@@ -195,7 +196,7 @@ H5_DLL herr_t H5VL_request_free(const H5VL_object_t *vol_obj);
 
 /* Blob functions */
 H5_DLL herr_t H5VL_blob_put(const H5VL_object_t *vol_obj, const void *buf, size_t size, void *blob_id, void *ctx);
-H5_DLL herr_t H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf, size_t *size, void *ctx);
+H5_DLL herr_t H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf, size_t size, void *ctx);
 H5_DLL herr_t H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specific_t specific_type, ...);
 
 /* Generic functions */

@@ -109,12 +109,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_blob_get(void *obj, const void *blob_id, void *buf, size_t *size,
+H5VL__native_blob_get(void *obj, const void *blob_id, void *buf, size_t size,
     void H5_ATTR_UNUSED *ctx)
 {
     H5F_t *f = (H5F_t *)obj;            /* Retrieve file pointer */
     const uint8_t *id = (const uint8_t *)blob_id; /* Pointer to the disk blob ID */
     H5HG_t hobjid;                      /* Global heap ID for sequence */
+    size_t hobj_size;                   /* Global heap object size returned from H5HG_read() */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -131,8 +132,12 @@ H5VL__native_blob_get(void *obj, const void *blob_id, void *buf, size_t *size,
     /* Check if this sequence actually has any data */
     if(hobjid.addr > 0)
         /* Read the VL information from disk */
-        if(NULL == H5HG_read(f, &hobjid, buf, size))
+        if(NULL == H5HG_read(f, &hobjid, buf, &hobj_size))
             HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "unable to read VL information")
+
+    /* Verify the size is correct */
+    if(hobj_size != size)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "Expected global heap object size does not match")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -175,7 +180,7 @@ H5VL__native_blob_specific(void *obj, void *blob_id,
                 H5F_addr_decode(f, &id, &(hobjid.addr));
                 UINT32DECODE(id, hobjid.idx);
 
-                /* Free heap object */
+                /* Get heap object's size */
                 if(hobjid.addr > 0) {
                     if(H5HG_get_obj_size(f, &hobjid, size) < 0)
                         HGOTO_ERROR(H5E_VOL, H5E_CANTREMOVE, FAIL, "unable to remove heap object")
