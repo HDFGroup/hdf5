@@ -1102,14 +1102,10 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     H5D_chunk_map_t *fm)
 {
     const H5D_t *dataset = io_info->dset;     /* Local pointer to dataset info */
-    H5S_t *tmp_mspace = NULL;   /* Temporary memory dataspace */
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
     htri_t file_space_normalized = FALSE;   /* File dataspace was normalized */
-    H5T_t *file_type = NULL;    /* Temporary copy of file datatype for iteration */
-    hbool_t iter_init = FALSE;  /* Selection iteration info has been initialized */
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
-    char bogus;                 /* "bogus" buffer to pass to selection iterator */
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED;	/* Return value		*/
 
@@ -2148,12 +2144,6 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
 {
     H5D_chunk_info_t *chunk_info;           /* Pointer to chunk information */
     H5SL_node_t *curr_node;                 /* Current node in skip list */
-    hsize_t     file_sel_start[H5S_MAX_RANK];    /* Offset of low bound of file selection */
-    hsize_t     file_sel_end[H5S_MAX_RANK]; /* Offset of high bound of file selection */
-    hsize_t     mem_sel_start[H5S_MAX_RANK]; /* Offset of low bound of file selection */
-    hsize_t     mem_sel_end[H5S_MAX_RANK];  /* Offset of high bound of file selection */
-    hssize_t    adjust[H5S_MAX_RANK];       /* Adjustment to make to all file chunks */
-    unsigned    u;                          /* Local index variable */
     herr_t	ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
@@ -7201,7 +7191,6 @@ H5D__get_num_chunks(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
     hsize_t            num_chunks = 0;          /* Number of written chunks */
     H5D_rdcc_ent_t     *ent;                    /* Cache entry  */
     const H5D_rdcc_t   *rdcc = NULL;            /* Raw data chunk cache */
-    const H5O_layout_t *layout;                 /* Dataset layout */
     herr_t             ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
@@ -7211,7 +7200,6 @@ H5D__get_num_chunks(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
     HDassert(space);
     HDassert(nchunks);
 
-    layout = &(dset->shared->layout);    /* Dataset layout */
     rdcc = &(dset->shared->cache.chunk); /* raw data chunk cache */
     HDassert(rdcc);
 
