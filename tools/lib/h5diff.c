@@ -258,6 +258,8 @@ free_exclude_path_list(diff_opt_t *opts)
  * Parameter:
  *           table_out [OUT] : return the list
  *------------------------------------------------------------------------*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wunused-but-set-variable"
 static void
 build_match_list (const char *objname1, trav_info_t *info1, const char *objname2, trav_info_t *info2,
         trav_table_t ** table_out, diff_opt_t *opts)
@@ -374,6 +376,7 @@ done:
     *table_out = table;
     h5difftrace("build_match_list finish\n");
 }
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------
