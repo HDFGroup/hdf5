@@ -6267,7 +6267,7 @@ H5S__hyper_intersect_block(const H5S_t *space, const hsize_t *start, const hsize
 {
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(space);
