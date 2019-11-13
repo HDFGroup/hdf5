@@ -135,7 +135,7 @@ else
   noinst_LTLIBRARIES=libh5test.la
 endif
 
-libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_common.c
+libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_common.c H5srcdir.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
@@ -144,6 +144,12 @@ LDADD=libh5test.la $(LIBHDF5)
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c
 cache_image_SOURCES=cache_image.c genall5.c
+
+#filter_plugin_SOURCES=filter_plugin.c H5srcdir.c
+
+vds_swmr_gen_SOURCES=vds_swmr_gen.c vds_swmr_common.c
+vds_swmr_writer_SOURCES=vds_swmr_writer.c vds_swmr_common.c
+vds_swmr_reader_SOURCES=vds_swmr_reader.c vds_swmr_common.c
 
 VFD_LIST = sec2 stdio core core_paged split multi family
 if DIRECT_VFD_CONDITIONAL
