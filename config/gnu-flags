@@ -181,6 +181,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     H5_ECFLAGS="$H5_ECFLAGS -Werror=bad-function-cast"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=cast-align"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=cast-function-type"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=declaration-after-statement"
 #   H5_ECFLAGS="$H5_ECFLAGS -Werror=discarded-qualifiers"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=implicit-function-declaration"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=incompatible-pointer-types"
@@ -215,7 +216,6 @@ if test "X-gcc" = "X-$cc_vendor"; then
     #
     # Let's discuss:
     #
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wdeclaration-after-statement"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wdisabled-optimization"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wunused-macros"
     DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wunsafe-loop-optimizations"
