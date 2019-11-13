@@ -1445,6 +1445,11 @@ H5D__chunk_mem_xfree(void *chk, void *_pline)
     FUNC_LEAVE_NOAPI(NULL)
 } /* H5D__chunk_mem_xfree() */
 
+/* H5D__chunk_mem_xfree_wrapper() safely adapts the type of
+ * H5D__chunk_mem_xfree() to an H5MM_free_t callback, without making
+ * compilers warn.  It is used with H5D__chunk_mem_xfree_wrapper(), for
+ * example.
+ */
 static void
 H5D__chunk_mem_xfree_wrapper(void *chk, void *_pline)
 {
