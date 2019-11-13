@@ -1057,7 +1057,6 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
        oid_count = H5Fget_obj_count(fid1, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR);
        CHECK(oid_count, FAIL, "H5Fget_obj_count");
        VERIFY(oid_count, OBJ_ID_COUNT_4, "H5Fget_obj_count");
-        fprintf(stderr, "fid1: %zd datasets, %zd groups, %zd datatypes, %zd attributes\n", H5Fget_obj_count(fid1, H5F_OBJ_DATASET), H5Fget_obj_count(fid1, H5F_OBJ_GROUP), H5Fget_obj_count(fid1, H5F_OBJ_DATATYPE), H5Fget_obj_count(fid1, H5F_OBJ_ATTR));
 
        oid_count = H5Fget_obj_count(fid2, H5F_OBJ_ALL);
        CHECK(oid_count, FAIL, "H5Fget_obj_count");
