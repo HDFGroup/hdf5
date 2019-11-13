@@ -7065,15 +7065,14 @@ static void
 make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
 {
     long inc;
-
-    HDassert(0 < nelts);
-
-    *offsetp = HDrandom() % nelts;
-
     /* `maxinc` is chosen so that for any `x` in [0, nelts - 1],
      * `x + maxinc` does not overflow a long.
      */
     const long maxinc = MIN(nelts - 1, LONG_MAX - nelts);
+
+    HDassert(0 < nelts);
+
+    *offsetp = HDrandom() % nelts;
 
     /* Choose a random number in [1, nelts - 1].  If its greatest divisor
      * in common with `nelts` is 1, then it will "generate" the additive ring
