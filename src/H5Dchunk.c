@@ -2178,7 +2178,7 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
         /* Iterate over each chunk in the chunk list */
         curr_node = H5SL_first(fm->sel_chunks);
         while(curr_node) {
-            hssize_t    schunk_points;          /* Number of elements in chunk selection */
+            hsize_t    schunk_points;          /* Number of elements in chunk selection */
             hsize_t     tmp_count = 1;
 
             /* Get pointer to chunk's information */
