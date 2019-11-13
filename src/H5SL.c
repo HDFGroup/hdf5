@@ -1394,7 +1394,7 @@ H5SL_search(H5SL_t *slist, const void *key)
 {
     H5SL_node_t *x;                             /* Current node to examine */
     uint32_t hashval = 0;                       /* Hash value for key */
-    void *ret_value;                            /* Return value */
+    void *ret_value = NULL;                     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1695,7 +1695,7 @@ H5SL_find(H5SL_t *slist, const void *key)
 {
     H5SL_node_t *x;                             /* Current node to examine */
     uint32_t hashval = 0;                       /* Hash value for key */
-    H5SL_node_t *ret_value;                     /* Return value */
+    H5SL_node_t *ret_value = NULL;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
