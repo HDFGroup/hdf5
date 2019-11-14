@@ -285,7 +285,6 @@ typedef struct H5CX_t {
     /* Cached LCPL properties */
     H5T_cset_t encoding;     /* Link name character encoding */
     hbool_t encoding_valid;  /* Whether link name character encoding is valid */
-
     unsigned intermediate_group;       /* Whether to create intermediate groups */
     hbool_t intermediate_group_valid;  /* Whether create intermediate group flag is valid */
 
@@ -296,6 +295,8 @@ typedef struct H5CX_t {
     /* Cached DCPL properties */
     hbool_t   do_min_dset_ohdr;   /* Whether to minimize dataset object header */
     hbool_t   do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
+    uint8_t ohdr_flags;  /* Object header flags */
+    hbool_t ohdr_flags_valid;  /* Whether the object headers flags are valid */
 
     /* Cached DAPL properties */
     const char *extfile_prefix;         /* Prefix for external file                      */
@@ -374,6 +375,7 @@ typedef struct H5CX_lapl_cache_t {
 /* (Same as the cached DXPL struct, above, except for the default DCPL) */
 typedef struct H5CX_dcpl_cache_t {
     hbool_t do_min_dset_ohdr;   /* Whether to minimize dataset object header */
+    uint8_t ohdr_flags;  /* Object header flags */
 } H5CX_dcpl_cache_t;
 
 /* Typedef for cached default dataset access property list information */
@@ -590,6 +592,10 @@ H5CX__init_package(void)
     /* Get flag to indicate whether to minimize dataset object header */
     if(H5P_get(dc_plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &H5CX_def_dcpl_cache.do_min_dset_ohdr) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
+
+    /* Get object header flags */
+    if(H5P_get(dc_plist, H5O_CRT_OHDR_FLAGS_NAME, &H5CX_def_dcpl_cache.ohdr_flags) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve object header flags")
 
     /* Reset the "default DAPL cache" information */
     HDmemset(&H5CX_def_dapl_cache, 0, sizeof(H5CX_dapl_cache_t));
@@ -860,6 +866,18 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
     if(NULL == (*api_state = H5FL_CALLOC(H5CX_state_t)))
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTALLOC, FAIL, "unable to allocate new API context state")
 
+    /* Check for non-default DCPL */
+    if(H5P_DATASET_CREATE_DEFAULT != (*head)->ctx.dcpl_id) {
+        /* Retrieve the DCPL property list */
+        H5CX_RETRIEVE_PLIST(dcpl, FAIL)
+
+        /* Copy the DCPL ID */
+        if(((*api_state)->dcpl_id = H5P_copy_plist((H5P_genplist_t *)(*head)->ctx.dcpl, FALSE)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "can't copy property list")
+    } /* end if */
+    else
+        (*api_state)->dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+
     /* Check for non-default DXPL */
     if(H5P_DATASET_XFER_DEFAULT != (*head)->ctx.dxpl_id) {
         /* Retrieve the DXPL property list */
@@ -968,6 +986,10 @@ H5CX_restore_state(const H5CX_state_t *api_state)
     HDassert(head && *head);
     HDassert(api_state);
 
+    /* Restore the DCPL info */
+    (*head)->ctx.dcpl_id = api_state->dcpl_id;
+    (*head)->ctx.dcpl = NULL;
+
     /* Restore the DXPL info */
     (*head)->ctx.dxpl_id = api_state->dxpl_id;
     (*head)->ctx.dxpl = NULL;
@@ -1019,6 +1041,11 @@ H5CX_free_state(H5CX_state_t *api_state)
 
     /* Sanity check */
     HDassert(api_state);
+
+    /* Release the DCPL */
+    if(api_state->dcpl_id != H5P_DATASET_CREATE_DEFAULT)
+        if(H5I_dec_ref(api_state->dcpl_id) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on DCPL")
 
     /* Release the DXPL */
     if(api_state->dxpl_id != H5P_DATASET_XFER_DEFAULT)
@@ -3441,6 +3468,28 @@ done:
 } /* end H5CX_test_set_mpio_coll_rank0_bcast() */
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
+
+herr_t
+H5CX_get_ohdr_flags(uint8_t *ohdr_flags)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(ohdr_flags);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dcpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(dcpl, H5P_DATASET_CREATE_DEFAULT, H5O_CRT_OHDR_FLAGS_NAME, ohdr_flags)
+
+    /* Get the value */
+    *ohdr_flags = (*head)->ctx.ohdr_flags;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* End H5CX_get_ohdr_flags() */
 
 
 /*-------------------------------------------------------------------------

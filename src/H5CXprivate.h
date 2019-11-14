@@ -41,6 +41,7 @@
 
 /* API context state */
 typedef struct H5CX_state_t {
+    hid_t dcpl_id;              /* DCPL for operation */
     hid_t dxpl_id;              /* DXPL for operation */
     hid_t lapl_id;              /* LAPL for operation */
     hid_t lcpl_id;              /* LCPL for operation */
@@ -133,6 +134,7 @@ H5_DLL herr_t H5CX_get_nlinks(size_t *nlinks);
 
 /* "Getter" routines for DCPL properties cached in API context */
 H5_DLL herr_t H5CX_get_dset_min_ohdr_flag(hbool_t *dset_min_ohdr_flag);
+H5_DLL herr_t H5CX_get_ohdr_flags(uint8_t *ohdr_flags);
 
 /* "Getter" routines for DAPL properties cached in API context */
 H5_DLL herr_t H5CX_get_ext_file_prefix(const char **prefix_extfile);
