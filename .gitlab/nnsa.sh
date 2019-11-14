@@ -182,8 +182,8 @@ elif [[ $UNAME == p90* ]]; then
 #    module load cmake/3.13.4
 #    module load mpi/openmpi3-ppc64le
 
-    MASTER_MOD="openmpi/3.1.4"
-    CC_VER=(0)
+    MASTER_MOD="openmpi"
+    CC_VER=(1 gcc)
 #CC_VER=(1 gcc/8.3.0)
     CTEST_OPTS="$CTEST_OPTS"
 
