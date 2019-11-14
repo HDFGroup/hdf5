@@ -229,7 +229,6 @@ typedef struct H5F_vfd_swmr_config_t {
     int32_t     md_pages_reserved;
     char        md_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
     char        log_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
-    unsigned    md_open_tries;
 } H5F_vfd_swmr_config_t;
 
 #ifdef __cplusplus

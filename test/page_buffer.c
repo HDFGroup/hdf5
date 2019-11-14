@@ -115,9 +115,6 @@ swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
     , .max_lag = 5
     , .vfd_swmr_writer = true
     , .md_pages_reserved = 128
-#if 0
-    , .md_open_tries = 1
-#endif
     };
     const char *dname;
     char *tname;

@@ -304,7 +304,7 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     file->md_file_path[sizeof(file->md_file_path) - 1] = '\0';
 
     /* Retry on opening the metadata file */
-    for (do_try = h5_retry_init(&retry, vfd_swmr_config->md_open_tries,
+    for (do_try = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX,
                                  H5_RETRY_DEFAULT_MINIVAL,
                                  H5_RETRY_DEFAULT_MAXIVAL);
          do_try != 0;
