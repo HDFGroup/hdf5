@@ -1309,7 +1309,7 @@ H5F__cache_superblock_refresh(H5F_t *f, void * _thing, const void * _image,
 	H5F_addr_decode(f, (const uint8_t **)&image, &base_addr/*out*/);
 	H5F_addr_decode(f, (const uint8_t **)&image, &ext_addr/*out*/);
 	H5F_addr_decode(f, (const uint8_t **)&image, &stored_eof/*out*/);
-	H5F_addr_decode(f, (const uint8_t **)&image, &driver_addr/*out*/);
+	H5F_addr_decode(f, (const uint8_t **)&image, &root_addr/*out*/);
 
         if ( base_addr != sblock->base_addr )
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected base_addr")
@@ -1317,17 +1317,10 @@ H5F__cache_superblock_refresh(H5F_t *f, void * _thing, const void * _image,
         if ( ext_addr != sblock->ext_addr )
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected ext_addr")
 
+        if ( root_addr != sblock->root_addr )
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected root_addr")
+
         /* use stored_eof to update EOA below */
-#if 0 /* JRM */
-        /* VFD SWMR TODO:  This test is failing for some reason.  As it is 
-         * not an issue in phase 1 where we are only using sec2 for the 
-         * writer, we can bypass it for now.
-         *
-         *                                         JRM -- 1/16/19
-         */
-        if ( driver_addr != sblock->driver_addr )
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected driver_addr")
-#endif /* JRM */
 
 	/* Decode checksum */
 	UINT32DECODE(image, read_chksum);
