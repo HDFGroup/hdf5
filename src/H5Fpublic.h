@@ -220,13 +220,89 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 /* VFD SWMR configuration data used by H5Pset/get_vfd_swmr_config */
 #define H5F__CURR_VFD_SWMR_CONFIG_VERSION 1
 #define H5F__MAX_VFD_SWMR_FILE_NAME_LEN   1024
+#define H5F__MAX_PB_EXPANSION_THRESHOLD   100
+/*
+ *  struct H5F_vfd_swmr_config_t
+ *
+ *  Instances of H5F_vfd_swmr_config_t are used by VFD SWMR writers and readers 
+ *  to pass necessary configuration data to the HDF5 library on file open (or 
+ *  creation, in the case of writers).
+ *
+ *  The fields of the structure are discussed below:
+ *      version:
+ *          An integer field indicating the version of the H5F_vfd_swmr_config 
+ *          structure used.  This field must always be set to a known version 
+ *          number.  The most recent version of the structure will always be 
+ *          H5F__CURR_VFD_SWMR_CONFIG_VERSION.
+ *  
+ *      tick_len:
+ *          An integer field containing the length of a tick in tenths of 
+ *          a second.  If tick_len is zero, end of tick processing may only be 
+ *          triggered manually via the H5Fvfd_swmr_end_tick() function.
+ *
+ *      max_lag:
+ *          An integer field indicating the maximum expected lag (in ticks)
+ *          between the writer and the readers.  This value must be at least 3, 
+ *          with 10 being the recommended minimum value.
+ * 
+ *      writer:
+ *          A boolean flag indicating whether the file opened with this FAPL entry
+ *          will be opened R/W. (i.e. as a VFD SWMR writer)
+ *
+ *      flush_raw_data:
+ *          A boolean flag indicating whether raw data should be flushed 
+ *          as part of the end of tick processing.  If set to TRUE, raw 
+ *          data will be flushed and thus be consistent with the metadata file.
+ *          However, this will also greatly increase end of tick I/O, and will
+ *          likely break any real time guarantees unless a very large tick_len 
+ *          is selected.
+ *
+ *      md_pages_reserved:
+ *          An integer field indicating the number of pages reserved 
+ *          at the head of the metadata file.  This value must be greater than 
+ *          or equal to 1.  
+ *          When the metadata file is created, the specified number of pages is 
+ *          reserved at the head of the metadata file.  In the current
+ *          implementation, the size of the metadata file header plus the 
+ *          index is limited to this size.
+ *          Further, in the POSIX case, when readers check for an updated index, 
+ *          this check will start with a read of md_pages_reserved pages from
+ *          the head of the metadata file.
+ *         
+ *      pb_expansion_threshold:
+ *          An integer field indicating the threshold for the page buffer size.
+ *          During a tick, the page buffer must expand as necessary to retain copies 
+ *          of all modified metadata pages and multi-page metadata entries.  
+ *          If the page buffer size exceeds this thresold, an early end of tick 
+ *          will be triggered.
+ *          Note that this is not a limit on the maximum page buffer size, as the 
+ *          metadata cache is flushed as part of end of tick processing.
+ *          This threshold must be in the range [0, 100].  If the threshold is 0, 
+ *          the feature is disabled.  For all other values, the page buffer size is 
+ *          multiplied by this threshold.  If this value is exceeded, an early end 
+ *          of tick is triggered. 
+ *
+ *      md_file_path:
+ *          POSIX: this field contains the path of the metadata file.  
+ *          NFS: it contains the path and base name of the metadata file 
+ *          updater files.
+ *          Object store: it contains the base URL for the objects used
+ *          to store metadata file updater objects.
+ *
+ *      log_file_path:
+ *          This field contains the path to the log file.  If defined, this path should 
+ *          be unique to each process.  If this field contains the empty string, a log 
+ *          file will not be created.
+ *
+ */
 typedef struct H5F_vfd_swmr_config_t {
     int32_t     version;
     uint32_t    tick_len;
     uint32_t    max_lag;
-    hbool_t     vfd_swmr_writer;/****/
+    hbool_t     writer;
     hbool_t     flush_raw_data;
     int32_t     md_pages_reserved;
+    int32_t     pb_expansion_threshold;
     char        md_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
     char        log_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
 } H5F_vfd_swmr_config_t;

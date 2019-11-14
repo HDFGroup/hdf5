@@ -3677,7 +3677,7 @@ H5F__vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
     if(H5F_INTENT(f) & H5F_ACC_RDWR) {
 
-        HDassert(f->shared->vfd_swmr_config.vfd_swmr_writer);
+        HDassert(f->shared->vfd_swmr_config.writer);
 
         vfd_swmr_writer_g = f->shared->vfd_swmr_writer = TRUE;
         tick_num_g = f->shared->tick_num = 1;
@@ -3731,7 +3731,7 @@ H5F__vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
     } else { /* VFD SWMR reader  */
 
-        HDassert(!f->shared->vfd_swmr_config.vfd_swmr_writer);
+        HDassert(!f->shared->vfd_swmr_config.writer);
 
         vfd_swmr_writer_g = f->shared->vfd_swmr_writer = FALSE;
 

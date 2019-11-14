@@ -126,7 +126,7 @@ open_skeleton(const char *filename, unsigned verbose)
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->tick_len = 4;
     config->max_lag = 5;
-    config->vfd_swmr_writer = TRUE;
+    config->writer = TRUE;
     config->md_pages_reserved = 128;
     HDstrcpy(config->md_file_path, "./my_md_file");
 

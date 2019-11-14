@@ -522,6 +522,7 @@ typedef struct H5F_t H5F_t;
   /* hbool_t    vfd_swmr_writer         = */ FALSE,                                 \
   /* hbool_t    flush_raw_data          = */ FALSE,                                 \
   /* int32_t    md_pages_reserved       = */ 0,                                     \
+  /* int32_t    pb_expansion_threshold  = */ 0,                                     \
   /* char       md_file_path[]          = */ "",                                    \
   /* char       log_file_path[]         = */ ""                                     \
 }

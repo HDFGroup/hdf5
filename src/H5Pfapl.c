@@ -3974,9 +3974,10 @@ H5P__facc_vfd_swmr_config_enc(const void *value, void **_pp, size_t *size)
         INT32ENCODE(*pp, (int32_t)config->version);
         INT32ENCODE(*pp, (int32_t)config->tick_len);
         INT32ENCODE(*pp, (int32_t)config->max_lag);
-        H5_ENCODE_UNSIGNED(*pp, config->vfd_swmr_writer);
+        H5_ENCODE_UNSIGNED(*pp, config->writer);
         H5_ENCODE_UNSIGNED(*pp, config->flush_raw_data);
         INT32ENCODE(*pp, (int32_t)config->md_pages_reserved);
+        INT32ENCODE(*pp, (int32_t)config->pb_expansion_threshold);
         HDmemcpy(*pp, (const uint8_t *)(config->md_file_path), (size_t)(H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1));
         *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
         HDmemcpy(*pp, (const uint8_t *)(config->log_file_path), (size_t)(H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1));
@@ -3985,7 +3986,7 @@ H5P__facc_vfd_swmr_config_enc(const void *value, void **_pp, size_t *size)
     } /* end if */
 
     /* Compute encoded size */
-    *size += ( (4 * sizeof(int32_t)) + 
+    *size += ( (5 * sizeof(int32_t)) + 
                (2 * sizeof(unsigned)) + 
                (2 * (H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1)) );
 
@@ -4028,11 +4029,12 @@ H5P__facc_vfd_swmr_config_dec(const void **_pp, void *_value)
     INT32DECODE(*pp, config->tick_len);
     INT32DECODE(*pp, config->max_lag);
 
-    H5_DECODE_UNSIGNED(*pp, config->vfd_swmr_writer);
+    H5_DECODE_UNSIGNED(*pp, config->writer);
     H5_DECODE_UNSIGNED(*pp, config->flush_raw_data);
 
     /* int */
     INT32DECODE(*pp, config->md_pages_reserved);
+    INT32DECODE(*pp, config->pb_expansion_threshold);
 
     HDstrcpy(config->md_file_path, (const char *)(*pp));
     *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
@@ -5106,6 +5108,10 @@ H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
     if(config_ptr->md_pages_reserved < 1 )
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "md_pages_reserved must be at least 1")
 
+    /* This field must be in the range [0, 100] */
+    if(config_ptr->pb_expansion_threshold < 0 || config_ptr->pb_expansion_threshold > H5F__MAX_PB_EXPANSION_THRESHOLD)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "pb_expansion_threshold out of range")
+
     /* Must provide the path for the metadata file */
     name_len = HDstrlen(config_ptr->md_file_path);
     if(name_len == 0)
@@ -5118,7 +5124,7 @@ H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set metadata cache initial config")
 
     /* Hard-wired to use SWMR VFD */
-    if(!config_ptr->vfd_swmr_writer) {
+    if(!config_ptr->writer) {
         if(H5P_set_driver(plist, H5FD_VFD_SWMR, NULL) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VFD SWMR driver info")
     }

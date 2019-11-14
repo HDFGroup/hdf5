@@ -283,7 +283,7 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
                     "can't get VFD SWMR config info")
 
     /* Ensure that this is the reader */
-    HDassert(!vfd_swmr_config->vfd_swmr_writer);
+    HDassert(!vfd_swmr_config->writer);
 
     /* Create the new driver struct */
     if(NULL == (file = H5FL_CALLOC(H5FD_vfd_swmr_t)))

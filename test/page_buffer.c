@@ -113,7 +113,7 @@ swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
       .version = H5F__CURR_VFD_SWMR_CONFIG_VERSION
     , .tick_len = 4
     , .max_lag = 5
-    , .vfd_swmr_writer = true
+    , .writer = true
     , .md_pages_reserved = 128
     };
     const char *dname;

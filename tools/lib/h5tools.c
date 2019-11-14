@@ -461,11 +461,8 @@ swmr_fapl_augment(hid_t fapl, const char *fname)
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->tick_len = 4;
     config->max_lag = 5;
-    config->vfd_swmr_writer = FALSE;
+    config->writer = FALSE;
     config->md_pages_reserved = 128;
-#if 0
-    config->md_open_tries = 1;
-#endif
 
     if ((tname = strdup(fname)) == NULL) {
         HDfprintf(rawerrorstream, "temporary string allocation failed\n");

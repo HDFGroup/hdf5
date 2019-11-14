@@ -566,7 +566,7 @@ H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc,
     /* compute vfd_swmr_writer */
     if ( ( H5F_VFD_SWMR_CONFIG(f) ) && ( H5F_INTENT(f) & H5F_ACC_RDWR ) ) {
 
-        HDassert(f->shared->vfd_swmr_config.vfd_swmr_writer);
+        HDassert(f->shared->vfd_swmr_config.writer);
         vfd_swmr_writer = TRUE;
     }
 
@@ -650,7 +650,7 @@ H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc,
          ( 0 == (H5F_INTENT(f) & H5F_ACC_RDWR) ) ) {
 
         HDassert(f->shared->lf);
-        HDassert(! f->shared->vfd_swmr_config.vfd_swmr_writer);
+        HDassert(! f->shared->vfd_swmr_config.writer);
 
         H5FD_vfd_swmr_set_pb_configured(f->shared->lf);
     }

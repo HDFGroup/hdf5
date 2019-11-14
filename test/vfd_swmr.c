@@ -135,7 +135,7 @@ test_fapl(void)
 
     /* Set md_file_path */
     HDstrcpy(my_config->md_file_path, MD_FILENAME);
-    my_config->vfd_swmr_writer = TRUE;
+    my_config->writer = TRUE;
 
     /* Should succeed in setting the configuration info */
     if(H5Pset_vfd_swmr_config(fapl, my_config) < 0)
@@ -242,7 +242,7 @@ test_file_fapl(void)
     config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config1->tick_len = 4; 
     config1->max_lag = 6;
-    config1->vfd_swmr_writer = TRUE;
+    config1->writer = TRUE;
     config1->md_pages_reserved = 2;
     HDstrcpy(config1->md_file_path, MD_FILENAME);
 
@@ -332,7 +332,7 @@ test_file_fapl(void)
     config2->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config2->tick_len = 4; 
     config2->max_lag = 10;
-    config2->vfd_swmr_writer = TRUE;
+    config2->writer = TRUE;
     config2->md_pages_reserved = 2;
     HDstrcpy(config2->md_file_path, MD_FILENAME);
 
@@ -378,7 +378,7 @@ test_file_fapl(void)
     config2->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config2->tick_len = 4; 
     config2->max_lag = 10;
-    config2->vfd_swmr_writer = FALSE;
+    config2->writer = FALSE;
     config2->md_pages_reserved = 2;
     HDstrcpy(config2->md_file_path, MD_FILENAME);
 
@@ -409,10 +409,10 @@ test_file_fapl(void)
         TEST_ERROR;
 
     /* Verify that the retrieved config is a writer */
-    if(file_config->vfd_swmr_writer == FALSE)
+    if(file_config->writer == FALSE)
         TEST_ERROR;
     /* Verify that the retrieved config is not the same as the initial configuration */
-    if(file_config->vfd_swmr_writer == config2->vfd_swmr_writer)
+    if(file_config->writer == config2->writer)
         TEST_ERROR;
 
     /* Closing */
@@ -524,7 +524,7 @@ test_file_end_tick(void)
     my_config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     my_config->tick_len = 3; 
     my_config->max_lag = 3;
-    my_config->vfd_swmr_writer = TRUE;
+    my_config->writer = TRUE;
     my_config->md_pages_reserved = 2;
     HDstrcpy(my_config->md_file_path, MD_FILENAME);
 
@@ -655,7 +655,7 @@ test_writer_create_open_flush(void)
     my_config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     my_config->tick_len = 1; 
     my_config->max_lag = 3;
-    my_config->vfd_swmr_writer = TRUE;
+    my_config->writer = TRUE;
     my_config->md_pages_reserved = 1;
     HDstrcpy(my_config->md_file_path, MD_FILENAME);
 
@@ -792,7 +792,7 @@ test_writer_md(void)
     my_config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     my_config->tick_len = 1; 
     my_config->max_lag = 3;
-    my_config->vfd_swmr_writer = TRUE;
+    my_config->writer = TRUE;
     my_config->md_pages_reserved = 256;
     HDstrcpy(my_config->md_file_path, MD_FILENAME);
 
@@ -1075,7 +1075,7 @@ test_reader_md_concur(void)
     config_writer->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config_writer->tick_len = 1; 
     config_writer->max_lag = 3;
-    config_writer->vfd_swmr_writer = TRUE;
+    config_writer->writer = TRUE;
     config_writer->md_pages_reserved = 256;
     HDstrcpy(config_writer->md_file_path, MD_FILENAME);
 
@@ -1160,7 +1160,7 @@ test_reader_md_concur(void)
         config_reader->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
         config_reader->tick_len = 1;
         config_reader->max_lag = 3;
-        config_reader->vfd_swmr_writer = FALSE;
+        config_reader->writer = FALSE;
         config_reader->md_pages_reserved = 256;
         HDstrcpy(config_reader->md_file_path, MD_FILENAME);
 

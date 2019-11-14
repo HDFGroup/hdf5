@@ -427,7 +427,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
      * specified.
      */
     if ( ( H5F_VFD_SWMR_CONFIG(f) ) && 
-         ( !f->shared->vfd_swmr_config.vfd_swmr_writer ) ) {
+         ( !f->shared->vfd_swmr_config.writer ) ) {
 
         HDassert(!(H5F_INTENT(f) & H5F_ACC_RDWR));
         HDassert(f->shared->fs_page_size > 0);
