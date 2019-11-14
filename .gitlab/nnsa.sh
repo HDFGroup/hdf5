@@ -183,7 +183,8 @@ elif [[ $UNAME == p90* ]]; then
 #    module load mpi/openmpi3-ppc64le
 
     MASTER_MOD="openmpi/2.1.6"
-    CC_VER=(1 gcc/8.3.0)
+    CC_VER=(0)
+#CC_VER=(1 gcc/4.8.5)
     CTEST_OPTS="$CTEST_OPTS"
 
     _CC=mpicc
@@ -270,32 +271,44 @@ for master_mod in $MASTER_MOD; do
 
   module load $master_mod # Load the master module
 
-  icnt=$(($icnt+1))
-  COMPILER_TYPE=`echo ${CC_VER[icnt]} | sed 's/\/.*//'`
-  module unload ${COMPILER_TYPE} # unload the general compiler type
+  if [[ $icnt -gt 0 ]]; then
+    icnt=$(($icnt+1))
+    COMPILER_TYPE=`echo ${CC_VER[icnt]} | sed 's/\/.*//'`
+    module unload ${COMPILER_TYPE} # unload the general compiler type
 
-  for i in `seq 1 $num_CC`; do # loop over compiler versions
-    cc_ver=${CC_VER[$icnt]} # compiler version
-    rm -fr build
+    for i in `seq 1 $num_CC`; do # loop over compiler versions
+      cc_ver=${CC_VER[$icnt]} # compiler version
+      rm -fr build
 
-    module load $cc_ver # load the compiler with version
-    module load $master_mod
+      module load $cc_ver # load the compiler with version
+      module load $master_mod
 
+      export CC=$_CC
+      export FC=$_FC
+      export CXX=$_CXX
+
+      module list
+
+      echo "timeout 3h ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX=\"$HDF5_VER-$master_mod-$cc_ver\",${CTEST_OPTS}MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC -C Release -V -O hdf5.log"
+      timeout 3h ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="$HDF5_VER-$master_mod-$cc_ver",${CTEST_OPTS}MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC -C Release -V -O hdf5.log
+
+      module unload $cc_ver  # unload the compiler with version
+
+      icnt=$(($icnt+1))
+
+      #rm -fr build
+    done
+  else 
     export CC=$_CC
     export FC=$_FC
     export CXX=$_CXX
 
     module list
-
+    module avail gcc
+    $cc_ver="mpicc"
     echo "timeout 3h ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX=\"$HDF5_VER-$master_mod-$cc_ver\",${CTEST_OPTS}MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC -C Release -V -O hdf5.log"
-    timeout 3h ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="$HDF5_VER-$master_mod--$cc_ver",${CTEST_OPTS}MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC -C Release -V -O hdf5.log
-
-    module unload $cc_ver  # unload the compiler with version
-
-    icnt=$(($icnt+1))
-
-    #rm -fr build
-  done
+    timeout 3h ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="$HDF5_VER-$master_mod-$cc_ver",${CTEST_OPTS}MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC -C Release -V -O hdf5.log    
+  fi
   module unload $master_mod #unload master module
 done
 
