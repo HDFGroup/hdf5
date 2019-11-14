@@ -21,10 +21,10 @@ build:
 #        - source ~mrajan/.bashrc
 #        - . set_modules_p9.sh
 #        - module load mpi/openmpi3-ppc64le
-        - module load gcc
         - module load openmpi
         - module load cmake/3.14.5
         - module list
+        - module avail
         - ls
 #
 #
