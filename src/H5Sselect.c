@@ -2907,7 +2907,7 @@ H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes,
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "length array pointer is NULL")
 
     /* Get the sequences of bytes */
-    if(maxseq > 0 && maxbytes > 0) {
+    if(maxseq > 0 && maxbytes > 0 && sel_iter->elmt_left > 0) {
         if(H5S_SELECT_ITER_GET_SEQ_LIST(sel_iter, maxseq, maxbytes, nseq, nbytes, off, len) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed")
     } /* end if */
