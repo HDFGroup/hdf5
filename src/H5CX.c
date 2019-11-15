@@ -3469,6 +3469,19 @@ done:
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_ohdr_flags
+ *
+ * Purpose:     Retrieves the object header flags for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Chris Hogan
+ *              November 15, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5CX_get_ohdr_flags(uint8_t *ohdr_flags)
 {
