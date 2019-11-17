@@ -1,6 +1,6 @@
 variables:
 #    NMC_FE1_SLURM_PARAMETERS: " --nodes=1 --cpus-per-task=1 --partition=ecp-p9-4v100 -t 1:30:00"
-NMC_FE1_SLURM_PARAMETERS: " --nodes=1 --host node0:6 --ntasks=6 --cpus-per-task=1 --partition=ecp-p9-4v100 -t 1:30:00"
+NMC_FE1_SLURM_PARAMETERS: " --nodes=1 --host node0,node0,node0,node0,node0,node0 --ntasks=6 --cpus-per-task=1 --partition=ecp-p9-4v100 -t 1:30:00"
 #    SCHEDULER_PARAMETERS:  "-N1 -p ecp-p9-4v100 --extra-node-info=*:*:* -t 0:30:00 srun --pty bash --login"
 stages:
     - build
