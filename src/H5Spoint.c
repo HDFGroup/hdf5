@@ -78,7 +78,8 @@ static htri_t H5S__point_shape_same(const H5S_t *space1, const H5S_t *space2);
 static htri_t H5S__point_intersect_block(const H5S_t *space, const hsize_t *start,
     const hsize_t *end);
 static herr_t H5S__point_adjust_u(H5S_t *space, const hsize_t *offset);
-static herr_t H5S__point_project_scalar(const H5S_t *space, hsize_t *offset);
+static herr_t H5S__point_adjust_s(H5S_t *space, const hssize_t *offset);
+static herr_t H5S__point_project_scalar(const H5S_t *spasce, hsize_t *offset);
 static herr_t H5S__point_project_simple(const H5S_t *space, H5S_t *new_space,
     hsize_t *offset);
 static herr_t H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
@@ -128,6 +129,7 @@ const H5S_select_class_t H5S_sel_point[1] = {{
     H5S__point_shape_same,
     H5S__point_intersect_block,
     H5S__point_adjust_u,
+    H5S__point_adjust_s,
     H5S__point_project_scalar,
     H5S__point_project_simple,
     H5S__point_iter_init,
@@ -2112,6 +2114,64 @@ H5S__point_adjust_u(H5S_t *space, const hsize_t *offset)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__point_adjust_u() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__point_adjust_s
+ PURPOSE
+    Adjust a "point" selection by subtracting an offset
+ USAGE
+    herr_t H5S__point_adjust_u(space, offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
+        const hssize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves a point selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S__point_adjust_s(H5S_t *space, const hssize_t *offset)
+{
+    H5S_pnt_node_t *node;               /* Point node */
+    unsigned rank;                      /* Dataspace rank */
+    unsigned u;                         /* Local index variable */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(space);
+    HDassert(offset);
+
+    /* Iterate through the nodes, checking the bounds on each element */
+    node = space->select.sel_info.pnt_lst->head;
+    rank = space->extent.rank;
+    while(node) {
+        /* Adjust each coordinate for point node */
+        for(u = 0; u < rank; u++) {
+            /* Check for offset moving selection negative */
+            HDassert((hssize_t)node->pnt[u] >= offset[u]);
+
+            /* Adjust node's coordinate location */
+            node->pnt[u] = (hsize_t)((hssize_t)node->pnt[u] - offset[u]);
+        } /* end for */
+
+        /* Advance to next point node in selection */
+        node = node->next;
+    } /* end while */
+
+    /* update the bound box of the selection */
+    for(u = 0; u < rank; u++) {
+        HDassert((hssize_t)space->select.sel_info.pnt_lst->low_bounds[u] >= offset[u]);
+        space->select.sel_info.pnt_lst->low_bounds[u] = (hsize_t)((hssize_t)space->select.sel_info.pnt_lst->low_bounds[u] - offset[u]);
+        space->select.sel_info.pnt_lst->high_bounds[u] = (hsize_t)((hssize_t)space->select.sel_info.pnt_lst->high_bounds[u] - offset[u]);
+    } /* end for */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5S__point_adjust_s() */
 
 
 /*-------------------------------------------------------------------------
