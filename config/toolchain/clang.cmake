@@ -13,8 +13,8 @@ find_program(
     DOC "Path to clang-tidy executable"
 )
 
-set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_EXE}" -checks=*,clang-analyzer-*)
-set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}" -checks=*,clang-analyzer-*)
+set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_EXE}" -checks=*,clang-analyzer-*,-clang-analyzer-cplusplus*,-readability-*,-google*)
+set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}" -checks=*,clang-analyzer-*,-clang-analyzer-cplusplus*,-readability-*,-google*)
 
 #find_program(
 #    CLANG_FORMAT_EXE

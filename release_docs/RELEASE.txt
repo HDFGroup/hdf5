@@ -48,6 +48,14 @@ New Features
 
     Configuration:
     -------------
+    - Update CMake for VS2019 support
+
+      CMake added support for VS2019 in version 3.15. Changes to the CMake
+      generator setting required changes to scripts. Also updated version
+      references in CMake files as necessary.
+
+      (ADB - 2019/11/18, HDFFV-10962)
+
     - Update CMake tests to use FIXTURES
 
       CMake test fixtures allow setup/cleanup tests and other dependency
