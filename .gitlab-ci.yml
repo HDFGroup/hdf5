@@ -15,6 +15,7 @@ build:
     script:
         - echo "Running build"
         - echo "this is a test"
+        - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/ecp/sw/opt/ppc64le/linux-centos7-power9le/gcc-8.3.0/gettext-0.19.8.1-l2kvcy6fvcejwrxdrsyf5br5mqolyxs7/lib
         - srun env | grep SLURM_JOB_NAME
         - whoami
         - echo "HOSTNAME=$HOSTNAME"
