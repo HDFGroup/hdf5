@@ -971,9 +971,59 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_adjust_u() */
 
+
 /*--------------------------------------------------------------------------
  NAME
-    H5Sselect_adjust_u
+    H5S_select_adjust_s
+ PURPOSE
+    Adjust a selection by subtracting an offset
+ USAGE
+    herr_t H5S_select_adjust_u(space, offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
+        const hssize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves a selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    This routine participates in the "Inlining C function pointers"
+        pattern, don't call it directly, use the appropriate macro
+        defined in H5Sprivate.h.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_adjust_s(H5S_t *space, const hssize_t *offset)
+{
+    hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(space);
+    HDassert(offset);
+
+    /* Check for an all-zero offset vector */
+    for(u = 0; u < space->extent.rank; u++)
+        if(0 != offset[u]) {
+            non_zero_offset = TRUE;
+            break;
+        } /* end if */
+
+    /* Only perform operation if the offset is non-zero */
+    if(non_zero_offset)
+        ret_value = (*space->select.type->adjust_s)(space, offset);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_select_adjust_s() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_adjust
  PURPOSE
     Adjust a selection by subtracting an offset
  USAGE
@@ -990,25 +1040,35 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sselect_adjust_u(hid_t space_id, const hsize_t *offset)
+H5Sselect_adjust(hid_t space_id, const hssize_t *offset)
 {
     H5S_t *space;
+    hsize_t low_bounds[H5S_MAX_RANK];
+    hsize_t high_bounds[H5S_MAX_RANK];
+    unsigned u;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*h", space_id, offset);
+    H5TRACE2("e", "i*Hs", space_id, offset);
 
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
     if(NULL == offset)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "NULL offset pointer")
 
-    if(H5S_select_adjust_u(space, offset) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection");
+    /* Check bounds */
+    if(H5S_SELECT_BOUNDS(space, low_bounds, high_bounds) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get selection bounds")
+    for(u = 0; u < space->extent.rank; u++)
+        if(offset[u] > (hssize_t)low_bounds[u])
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjustment would move selection below zero offset")
+
+    if(H5S_select_adjust_s(space, offset) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Sselect_adjust_u() */
+} /* end H5Sselect_adjust() */
 
 
 /*--------------------------------------------------------------------------
