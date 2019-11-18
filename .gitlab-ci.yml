@@ -45,11 +45,14 @@ build:
         - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_MAX_NUMPROCS:STRING=6")' >> config/cmake/scripts/HDF5options.cmake
         - ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-openmpi-gcc/8.3.0-Linux-4.18.0-80.7.2.el7.ppc64le-ppc64le",MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC,LOCAL_SKIP_TEST=true
 # run ctest command for only MPI (parallel) tests
+        - cd build
         - ctest .  -R 'MPI_TEST_' -C Release -T test
 #        - . .gitlab/nnsa.sh
 #        - ls -ltr
 #        - ls -ltr ./CI
 #      look at the dirs to see how the build worked
+        - echo $PWD
+        - cd ..
         - echo $PWD
     artifacts:
         paths:
