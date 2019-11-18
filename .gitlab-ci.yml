@@ -1,6 +1,6 @@
 variables:
 #    NMC_FE1_SLURM_PARAMETERS: " --nodes=1 --cpus-per-task=1 --partition=ecp-p9-4v100 -t 1:30:00"
-    NMC_FE1_SLURM_PARAMETERS: " --nodes=6 --ntasks=6 --cpus-per-task=1 --partition=ecp-p9-4v100 -t 1:30:00"
+    NMC_FE1_SLURM_PARAMETERS: " --nodes=6 --ntasks=6 --cpus-per-task=1 --partition=ecp-p9-4v100 -t 2:00:00"
 #    SCHEDULER_PARAMETERS:  "-N1 -p ecp-p9-4v100 --extra-node-info=*:*:* -t 0:30:00 srun --pty bash --login"
 stages:
     - build
@@ -33,6 +33,8 @@ build:
         - CI_PROJ_DIR=${PWD}
         - echo "CI_PROJ_DIR="${CI_PROJ_DIR}
 # running 1 ctest process to build HDF5 without tools or examples and skip running tests.
+        - HDF5_VER=`bin/h5vers`
+        - ln -s . hdf5-$HDF5_VER
         - ln -s config/cmake/scripts/CTestScript.cmake .
         - ln -s config/cmake/scripts/HDF5config.cmake .
         - ln -s config/cmake/scripts/HDF5options.cmake .
