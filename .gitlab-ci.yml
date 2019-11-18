@@ -15,7 +15,6 @@ build:
     script:
         - echo "Running build"
         - echo "this is a test"
-        - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/ecp/sw/opt/ppc64le/linux-centos7-power9le/gcc-8.3.0/gettext-0.19.8.1-l2kvcy6fvcejwrxdrsyf5br5mqolyxs7/lib
         - srun env | grep SLURM_JOB_NAME
         - whoami
         - echo "HOSTNAME=$HOSTNAME"
@@ -32,13 +31,14 @@ build:
 #
         - CI_PROJ_DIR=${PWD}
         - echo "CI_PROJ_DIR="${CI_PROJ_DIR}
+        - echo 'set (MAX_PROC_COUNT 1)' >> config/cmake/scripts/HDF5options.cmake 
         - . .gitlab/nnsa.sh
 #        - ls -ltr
 #        - ls -ltr ./CI
 #      look at the dirs to see how the build worked
         - echo $PWD
     artifacts:
-        paths:
+    paths:
 #           - zlib-1.2.11/
 #           - hdf5-1.10.5/
     only: 
