@@ -947,8 +947,6 @@ H5S_select_is_regular(const H5S_t *space)
 herr_t
 H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
 {
-    hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
-    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -957,16 +955,8 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
     HDassert(space);
     HDassert(offset);
 
-    /* Check for an all-zero offset vector */
-    for(u = 0; u < space->extent.rank; u++)
-        if(0 != offset[u]) {
-            non_zero_offset = TRUE;
-            break;
-        } /* end if */
-
-    /* Only perform operation if the offset is non-zero */
-    if(non_zero_offset)
-        ret_value = (*space->select.type->adjust_u)(space, offset);
+    /* Perform operation */
+    ret_value = (*space->select.type->adjust_u)(space, offset);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_adjust_u() */
@@ -996,8 +986,6 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
 herr_t
 H5S_select_adjust_s(H5S_t *space, const hssize_t *offset)
 {
-    hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
-    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1006,16 +994,8 @@ H5S_select_adjust_s(H5S_t *space, const hssize_t *offset)
     HDassert(space);
     HDassert(offset);
 
-    /* Check for an all-zero offset vector */
-    for(u = 0; u < space->extent.rank; u++)
-        if(0 != offset[u]) {
-            non_zero_offset = TRUE;
-            break;
-        } /* end if */
-
-    /* Only perform operation if the offset is non-zero */
-    if(non_zero_offset)
-        ret_value = (*space->select.type->adjust_s)(space, offset);
+    /* Perform operation */
+    ret_value = (*space->select.type->adjust_s)(space, offset);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_adjust_s() */

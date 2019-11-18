@@ -2080,6 +2080,7 @@ done:
 static herr_t
 H5S__point_adjust_u(H5S_t *space, const hsize_t *offset)
 {
+    hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
     H5S_pnt_node_t *node;               /* Point node */
     unsigned rank;                      /* Dataspace rank */
     unsigned u;                         /* Local index variable */
@@ -2089,28 +2090,38 @@ H5S__point_adjust_u(H5S_t *space, const hsize_t *offset)
     HDassert(space);
     HDassert(offset);
 
-    /* Iterate through the nodes, checking the bounds on each element */
-    node = space->select.sel_info.pnt_lst->head;
-    rank = space->extent.rank;
-    while(node) {
-        /* Adjust each coordinate for point node */
+    /* Check for an all-zero offset vector */
+    for(u = 0; u < space->extent.rank; u++)
+        if(0 != offset[u]) {
+            non_zero_offset = TRUE;
+            break;
+        } /* end if */
+
+    /* Only perform operation if the offset is non-zero */
+    if(non_zero_offset) {
+        /* Iterate through the nodes, checking the bounds on each element */
+        node = space->select.sel_info.pnt_lst->head;
+        rank = space->extent.rank;
+        while(node) {
+            /* Adjust each coordinate for point node */
+            for(u = 0; u < rank; u++) {
+                /* Check for offset moving selection negative */
+                HDassert(node->pnt[u] >= offset[u]);
+
+                /* Adjust node's coordinate location */
+                node->pnt[u] -= offset[u];
+            } /* end for */
+
+            /* Advance to next point node in selection */
+            node = node->next;
+        } /* end while */
+
+        /* update the bound box of the selection */
         for(u = 0; u < rank; u++) {
-            /* Check for offset moving selection negative */
-            HDassert(node->pnt[u] >= offset[u]);
-
-            /* Adjust node's coordinate location */
-            node->pnt[u] -= offset[u];
+            space->select.sel_info.pnt_lst->low_bounds[u] -= offset[u];
+            space->select.sel_info.pnt_lst->high_bounds[u] -= offset[u];
         } /* end for */
-
-        /* Advance to next point node in selection */
-        node = node->next;
-    } /* end while */
-
-    /* update the bound box of the selection */
-    for(u = 0; u < rank; u++) {
-        space->select.sel_info.pnt_lst->low_bounds[u] -= offset[u];
-        space->select.sel_info.pnt_lst->high_bounds[u] -= offset[u];
-    } /* end for */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__point_adjust_u() */
@@ -2137,6 +2148,7 @@ H5S__point_adjust_u(H5S_t *space, const hsize_t *offset)
 static herr_t
 H5S__point_adjust_s(H5S_t *space, const hssize_t *offset)
 {
+    hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
     H5S_pnt_node_t *node;               /* Point node */
     unsigned rank;                      /* Dataspace rank */
     unsigned u;                         /* Local index variable */
@@ -2146,29 +2158,39 @@ H5S__point_adjust_s(H5S_t *space, const hssize_t *offset)
     HDassert(space);
     HDassert(offset);
 
-    /* Iterate through the nodes, checking the bounds on each element */
-    node = space->select.sel_info.pnt_lst->head;
-    rank = space->extent.rank;
-    while(node) {
-        /* Adjust each coordinate for point node */
+    /* Check for an all-zero offset vector */
+    for(u = 0; u < space->extent.rank; u++)
+        if(0 != offset[u]) {
+            non_zero_offset = TRUE;
+            break;
+        } /* end if */
+
+    /* Only perform operation if the offset is non-zero */
+    if(non_zero_offset) {
+        /* Iterate through the nodes, checking the bounds on each element */
+        node = space->select.sel_info.pnt_lst->head;
+        rank = space->extent.rank;
+        while(node) {
+            /* Adjust each coordinate for point node */
+            for(u = 0; u < rank; u++) {
+                /* Check for offset moving selection negative */
+                HDassert((hssize_t)node->pnt[u] >= offset[u]);
+
+                /* Adjust node's coordinate location */
+                node->pnt[u] = (hsize_t)((hssize_t)node->pnt[u] - offset[u]);
+            } /* end for */
+
+            /* Advance to next point node in selection */
+            node = node->next;
+        } /* end while */
+
+        /* update the bound box of the selection */
         for(u = 0; u < rank; u++) {
-            /* Check for offset moving selection negative */
-            HDassert((hssize_t)node->pnt[u] >= offset[u]);
-
-            /* Adjust node's coordinate location */
-            node->pnt[u] = (hsize_t)((hssize_t)node->pnt[u] - offset[u]);
+            HDassert((hssize_t)space->select.sel_info.pnt_lst->low_bounds[u] >= offset[u]);
+            space->select.sel_info.pnt_lst->low_bounds[u] = (hsize_t)((hssize_t)space->select.sel_info.pnt_lst->low_bounds[u] - offset[u]);
+            space->select.sel_info.pnt_lst->high_bounds[u] = (hsize_t)((hssize_t)space->select.sel_info.pnt_lst->high_bounds[u] - offset[u]);
         } /* end for */
-
-        /* Advance to next point node in selection */
-        node = node->next;
-    } /* end while */
-
-    /* update the bound box of the selection */
-    for(u = 0; u < rank; u++) {
-        HDassert((hssize_t)space->select.sel_info.pnt_lst->low_bounds[u] >= offset[u]);
-        space->select.sel_info.pnt_lst->low_bounds[u] = (hsize_t)((hssize_t)space->select.sel_info.pnt_lst->low_bounds[u] - offset[u]);
-        space->select.sel_info.pnt_lst->high_bounds[u] = (hsize_t)((hssize_t)space->select.sel_info.pnt_lst->high_bounds[u] - offset[u]);
-    } /* end for */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__point_adjust_s() */
