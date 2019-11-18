@@ -32,8 +32,19 @@ build:
 #
         - CI_PROJ_DIR=${PWD}
         - echo "CI_PROJ_DIR="${CI_PROJ_DIR}
+# running 1 ctest process to build HDF5 without tools or examples and skip running tests.
+        - ln -s config/cmake/scripts/CTestScript.cmake .
+        - ln -s config/cmake/scripts/HDF5config.cmake .
+        - ln -s config/cmake/scripts/HDF5options.cmake .
         - echo 'set (MAX_PROC_COUNT 1)' >> config/cmake/scripts/HDF5options.cmake 
-        - . .gitlab/nnsa.sh
+        - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_TOOLS:BOOL=OFF")' >> config/cmake/scripts/HDF5options.cmake
+        - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_EXAMPLES:BOOL=OFF")' >> config/cmake/scripts/HDF5options.cmake
+        - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_NUMPROC_FLAG:STRING=-n")' >> config/cmake/scripts/HDF5options.cmake
+        - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_MAX_NUMPROCS:STRING=6")' >> config/cmake/scripts/HDF5options.cmake
+        - ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-openmpi-gcc/8.3.0-Linux-4.18.0-80.7.2.el7.ppc64le-ppc64le",MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC,LOCAL_SKIP_TEST=true
+# run ctest command for only MPI (parallel) tests
+        - ctest .  -R 'MPI_TEST_' -C Release -T test
+#        - . .gitlab/nnsa.sh
 #        - ls -ltr
 #        - ls -ltr ./CI
 #      look at the dirs to see how the build worked
