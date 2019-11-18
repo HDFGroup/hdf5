@@ -49,7 +49,7 @@
 /********************/
 
 /* General stuff */
-static H5D_shared_t *H5D__new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
+static H5D_shared_t *H5D__new(hid_t dcpl_id, hid_t dapl, hbool_t creating, hbool_t vl_type);
 static herr_t H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
 static herr_t H5D__cache_dataspace_info(const H5D_t *dset);
 static herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
@@ -465,7 +465,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5D_shared_t *
-H5D__new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
+H5D__new(hid_t dcpl_id, hid_t dapl_id, hbool_t creating, hbool_t vl_type)
 {
     H5D_shared_t    *new_dset = NULL;   /* New dataset object */
     H5P_genplist_t  *plist;             /* Property list created */
@@ -496,6 +496,19 @@ H5D__new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
         new_dset->dcpl_id = H5P_copy_plist(plist, FALSE);
     } /* end else */
 
+    if(!vl_type && creating && dapl_id == H5P_DATASET_ACCESS_DEFAULT) {
+        if(H5I_inc_ref(dapl_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment default DAPL ID")
+        new_dset->dapl_id = dapl_id;
+    } /* end if */
+    else {
+        /* Get the property list */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dapl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
+
+        new_dset->dapl_id = H5P_copy_plist(plist, FALSE);
+    } /* end else */
+
     /* Set return value */
     ret_value = new_dset;
 
@@ -503,6 +516,8 @@ done:
     if(ret_value == NULL)
         if(new_dset != NULL) {
             if(new_dset->dcpl_id != 0 && H5I_dec_ref(new_dset->dcpl_id) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "can't decrement temporary datatype ID")
+            if(new_dset->dapl_id != 0 && H5I_dec_ref(new_dset->dapl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "can't decrement temporary datatype ID")
             new_dset = H5FL_FREE(H5D_shared_t, new_dset);
         } /* end if */
@@ -1225,9 +1240,8 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     H5G_loc_reset(&dset_loc);
 
     /* Initialize the shared dataset space */
-    if(NULL == (new_dset->shared = H5D__new(dcpl_id, TRUE, has_vl_type)))
+    if(NULL == (new_dset->shared = H5D__new(dcpl_id, dapl_id, TRUE, has_vl_type)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
     /* Copy & initialize datatype for dataset */
     if(H5D__init_type(file, new_dset, type_id, type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy datatype")
@@ -1686,7 +1700,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
     HDassert(dataset);
 
     /* (Set the 'vl_type' parameter to FALSE since it doesn't matter from here) */
-    if(NULL == (dataset->shared = H5D__new(H5P_DATASET_CREATE_DEFAULT, FALSE, FALSE)))
+    if(NULL == (dataset->shared = H5D__new(H5P_DATASET_CREATE_DEFAULT, dapl_id, FALSE, FALSE)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Open the dataset object */
@@ -3436,8 +3450,8 @@ H5D_get_access_plist(const H5D_t *dset)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Make a copy of the default dataset access property list */
-    if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_ACCESS_ID_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(dset->shared->dapl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get property list")
     if((new_dapl_id = H5P_copy_plist(old_plist, TRUE)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy dataset access property list")
     if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_dapl_id)))
