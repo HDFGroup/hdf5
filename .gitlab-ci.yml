@@ -38,7 +38,7 @@ build:
 #      look at the dirs to see how the build worked
         - echo $PWD
     artifacts:
-    paths:
+        paths:
 #           - zlib-1.2.11/
 #           - hdf5-1.10.5/
     only: 
