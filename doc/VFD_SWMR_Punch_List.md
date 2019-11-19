@@ -1,6 +1,8 @@
 VFD SWMR Punch List
 
-4 November 2019
+This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_fork/browse/doc/VFD_SWMR_Punch_List.md?at=refs%2Fheads%2Ffeature%2Fvfd_swmr](https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_fork/browse/doc/VFD_SWMR_Punch_List.md?at=refs%2Fheads%2Ffeature%2Fvfd_swmr)
+
+19 November 2019
 
 1.  Design optimizations in index writes. Perhaps write deltas only,
     with a full index every n ticks?
