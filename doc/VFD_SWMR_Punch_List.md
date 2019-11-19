@@ -11,7 +11,7 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
 
 3.  Design work for journaling variation.
 
-4.  Add support for opening multiple files in either VFD SWMR writer or
+4.  **Vailin** Add support for opening multiple files in either VFD SWMR writer or
     VFD SWMR writer mode. See addition of the EOT queue in section 3.2.2
     of the RFC, and related changes in sections 3.3 and 3.3.2.
 
@@ -29,7 +29,7 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
 8.  Implement option to flush raw data as part of EOT -- write
     performance test to characterize the performance hit.
 
-9.  Move VFD SWMR specific H5F code to its own file -- say
+9.  **Vailin, complete** Move VFD SWMR specific H5F code to its own file -- say
     H5Fvfd\_swmr.c.
 
 10. Update the new page buffer to support the pb\_expansion\_threshold,
