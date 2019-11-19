@@ -79,7 +79,7 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
 18. Flesh out designs for unit, integration and performance tests suites
     as outlined in the RFC. Implement same.
 
-19. **needs merge** Fix memory leak in sparse-reader test.
+19. **David, needs merge** Fix memory leak in sparse-reader test.
 
     David found that the shadow index was leaked by VFD SWMR readers
     and plugged the leak.  Now the sparse reader tests do not use up
@@ -87,7 +87,7 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
     `vfd_swmr-merge-attempt-2`, which as of 19 Nov 2019 has not been
     merged to `feature/vfd_swmr`.
 
-20. **needs merge** Test John's patch that repairs the superblock flags
+20. **David, needs merge** Test John's patch that repairs the superblock flags
     mismatch that crashes the reader.
 
     David found that the patch fixed the demo crashes.  He applied the
@@ -113,7 +113,7 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
     SWMR does not have to deal with it. However, if the global heap
     overhaul does not take place, then we have more work to do.
 
-26. **in-progress** Fix the expand/shrink test.
+26. **David, in-progress** Fix the expand/shrink test.
 
     The test *probably* fails because the dataset extent is enlarged
     before the data is written, so arbitrary data is present until the
