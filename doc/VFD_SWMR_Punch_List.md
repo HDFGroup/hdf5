@@ -79,10 +79,20 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
 18. Flesh out designs for unit, integration and performance tests suites
     as outlined in the RFC. Implement same.
 
-19. Fix memory leak in sparse-reader test.
+19. *in-progress* Fix memory leak in sparse-reader test.
 
-20. Test John's patch that repairs the superblock flags mismatch that
-    crashes the reader.
+    David found that the shadow index was leaked by VFD SWMR readers
+    and plugged the leak.  Now the sparse reader tests do not use up
+    all of the memory on `jelly`.  David fixed the bug on his branch
+    `vfd_swmr-merge-attempt-2`, which as of 19 Nov 2019 has not been
+    merged to `feature/vfd_swmr`.
+
+20. *in-progress* Test John's patch that repairs the superblock flags
+    mismatch that crashes the reader.
+
+    David found that the patch fixed the demo crashes.  He applied the
+    patch to his branch `vfd_swmr-merge-attempt-2`, which has not yet
+    been merged to `feature/vfd_swmr` as of 19 Nov 2019.
 
 21. Investigate a potential time-of-check, time-of-use race condition
     involving EOA/EOF and the skip\_read variable in some of the H5PB
@@ -102,3 +112,15 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
     the global heap is modified/replaced as currently planned, then VFD
     SWMR does not have to deal with it. However, if the global heap
     overhaul does not take place, then we have more work to do.
+
+26. Fix the expand/shrink test.
+
+    The test *probably* fails because the dataset extent is enlarged
+    before the data is written, so arbitrary data is present until the
+    data appears.  If a tick sneaks in between the `H5Dset_extent` and
+    the `H5Dwrite`, then the reader may read the arbitrary data.
+
+    In the `gaussian` test, I have a heuristic that avoids reading
+    arbitrary data.  I may replicate that in the expand/shrink test.
+
+    Ultimately, we should suspend ticks over the H5Dset_extent/H5Dwrite.
