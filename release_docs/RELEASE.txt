@@ -56,6 +56,14 @@ New Features
 
     Configuration
     -------------
+    - Update CMake for VS2019 support
+
+      CMake added support for VS2019 in version 3.15. Changes to the CMake
+      generator setting required changes to scripts. Also updated version
+      references in CMake files as necessary.
+
+      (ADB - 2019/11/18, HDFFV-10962)
+
     - Add options to enable or disable building tools and tests
 
       Configure options --enable-tests and --enable-tools were added for
@@ -350,21 +358,16 @@ They are built with the configure process unless specified otherwise.
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 7                     Visual Studio 2015 w/ Intel Fortran 18 (cmake)
 
-    Windows 7 x64                 Visual Studio 2013
-                                  Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
+    Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
                                   Visual Studio 2015 w/ MSMPI 8 (cmake)
 
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-                                  Visual Studio 2017 w/ Intel Fortran 18 (cmake)
-
-    Mac OS X Mavericks 10.9.5     Apple LLVM version 6.0 (clang-600.0.57)
-    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
-    (wren/quail)                  Intel icc/icpc/ifort version 15.0.3
+                                  Visual Studio 2017 w/ Intel Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ Intel Fortran 19 (cmake)
 
     Mac OS X Yosemite 10.10.5     Apple LLVM version 6.1 (clang-602.0.53)
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
@@ -451,20 +454,10 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (Debian 4.9.2-10) 4.9.2
                                   (cmake and autotools)
 
-    Fedora24 4.7.2-201.fc24.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (GCC) 6.1.1 20160621 (Red Hat 6.1.1-3)
-                                  GNU Fortran (GCC) 6.1.1 20160621 (Red Hat 6.1.1-3)
-                                  (cmake and autotools)
-
-    CentOS 7.2 3.10.0-327.28.2.el7.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-4)
-                                  GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-4)
-                                  (cmake and autotools)
-
-    Ubuntu 16.04 4.4.0-38-generic #62-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu 5.4.0-6ubuntu1~16.04.2) 5.4.0
-                                  GNU Fortran (Ubuntu 5.4.0-6ubuntu1~16.04.2) 5.4.0
-                                  (cmake and autotools)
+   Fedora30 5.3.11-200.fc30.x86_64
+   #1 SMP x86_64  GNU/Linux       GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+                                  GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+                                     (cmake and autotools)
 
 
 Known Problems
