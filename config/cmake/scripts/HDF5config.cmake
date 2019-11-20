@@ -22,6 +22,8 @@ cmake_minimum_required (VERSION 3.10)
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
 #            Unix      * Unix Makefiles
+#            VS2019    * Visual Studio 16 2019
+#            VS201964  * Visual Studio 16 2019
 #            VS2017    * Visual Studio 15 2017
 #            VS201764  * Visual Studio 15 2017 Win64
 #            VS2015    * Visual Studio 14 2015
@@ -106,8 +108,20 @@ if (NOT DEFINED HPC)
   endif ()
   if (WIN32 AND NOT MINGW)
     set (SITE_OS_NAME "Windows")
-    set (SITE_OS_VERSION "WIN7")
-    if (BUILD_GENERATOR STREQUAL "VS201764")
+    set (SITE_OS_VERSION "WIN10")
+    if (BUILD_GENERATOR STREQUAL "VS201964")
+      set (CTEST_CMAKE_GENERATOR "Visual Studio 16 2019")
+      set (CMAKE_GENERATOR_ARCHITECTURE "x64")
+      set (SITE_OS_BITS "64")
+      set (SITE_COMPILER_NAME "vs2019")
+      set (SITE_COMPILER_VERSION "16")
+    elseif (BUILD_GENERATOR STREQUAL "VS2019")
+      set (CTEST_CMAKE_GENERATOR "Visual Studio 16 2019")
+      set (CMAKE_GENERATOR_ARCHITECTURE "Win32")
+      set (SITE_OS_BITS "32")
+      set (SITE_COMPILER_NAME "vs2019")
+      set (SITE_COMPILER_VERSION "16")
+    elseif (BUILD_GENERATOR STREQUAL "VS201764")
       set (CTEST_CMAKE_GENERATOR "Visual Studio 15 2017 Win64")
       set (SITE_OS_BITS "64")
       set (SITE_COMPILER_NAME "vs2017")
@@ -203,7 +217,7 @@ endif ()
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
 set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
-set (REPOSITORY_BRANCH "develop")
+set (REPOSITORY_BRANCH "hdf5_1_12")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
