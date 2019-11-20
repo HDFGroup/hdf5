@@ -1365,9 +1365,12 @@ H5F__dest(H5F_t *f, hbool_t flush)
             if(H5F_vfd_swmr_close_or_flush(f, TRUE) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close the metadata file")
         }
-        vfd_swmr_file_g = NULL;
-        vfd_swmr_g = vfd_swmr_writer_g = FALSE;
-    
+
+        if(f->shared->vfd_swmr) {
+            if(H5F_vfd_swmr_remove_entry_eot(f) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to remove entry from EOT queue")
+        }
+
         /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)
             /* Push error, but keep going*/
@@ -1392,6 +1395,11 @@ H5F__dest(H5F_t *f, hbool_t flush)
          * Only decrement the reference count.
          */
         --f->shared->nrefs;
+
+         if(f->shared->vfd_swmr) {
+            if(H5F_vfd_swmr_remove_entry_eot(f) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to remove entry from EOT queue")
+        }
     }
 
     /* Free the non-shared part of the file */
@@ -1502,6 +1510,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t             ci_write = FALSE;   /* whether MDC CI write requested */
     hbool_t             file_create = FALSE;    /* creating a new file or not */
     H5FD_t             *underlying_lf = NULL;   /* underlying file driver for VFD SWMR */
+    H5F_vfd_swmr_config_t *vfd_swmr_config_ptr = NULL;  /* Points to VFD SMWR config info */
     H5F_t              *ret_value = NULL;       /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1736,6 +1745,21 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             if(H5F_vfd_swmr_init(file, file_create) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "file open fail with initialization for VFD SWMR")
         }
+        /* Insert the entry that corresponds to file onto the EOT queue */
+        if(H5F_vfd_swmr_insert_entry_eot(file) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "unable to insert entry into the EOT queue")
+    }
+
+    /* For multiple opens of the same file, verify that the VFD SWMR setting is consistent */
+    if(shared->nrefs > 1) {
+        if(NULL == (vfd_swmr_config_ptr = (H5F_vfd_swmr_config_t *)H5MM_calloc(sizeof(H5F_vfd_swmr_config_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate memory for mdc log file name")
+
+        if(H5P_get(a_plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, vfd_swmr_config_ptr) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get VFD SWMR config info")
+
+        if(HDmemcmp(vfd_swmr_config_ptr, &shared->vfd_swmr_config, sizeof(H5F_vfd_swmr_config_t)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "inconsistent VFD SWMR config info")
     }
 
     /*
@@ -1850,6 +1874,8 @@ done:
         if(H5F__dest(file, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
     }
+    if(vfd_swmr_config_ptr)
+        H5MM_free(vfd_swmr_config_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */

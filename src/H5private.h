@@ -382,10 +382,6 @@
 /* Raise an integer to a power of 2 */
 #  define H5_EXP2(n)    (1 << (n))
 
-/* VFD SWMR */
-#define nanosecs_per_second          1000000000 /* nanoseconds per second */
-#define nanosecs_per_tenth_sec       100000000  /* nanoseconds per 0.1 second */
-
 /*
  * HDF Boolean type.
  */
@@ -2085,32 +2081,39 @@ H5_DLL herr_t H5CX_pop(void);
 
 #include "H5time_private.h" /* for timespeccmp */
 
-#define VFD_SWMR_TEST_FOR_END_OF_TICK(entering, swmr_reader_exit, err)        \
-    /* Initialize the library */                                              \
-    /* TBD assert that the API lock is held.  The API lock */                 \
-    /* synchronizes access to `vfd_swmr_api_entries_g`     */                 \
-    if (!entering && --vfd_swmr_api_entries_g > 0) {                          \
-        ;   /* Do nothing: we are still in an API call. */                    \
-    } else if (entering && vfd_swmr_api_entries_g++ > 0) {                    \
-        ;   /* Do nothing: we are *re-*entering the API. */                   \
-    } else if(err_occurred) {                                                 \
-        ;   /* Do nothing: an error occurred. */                              \
-    } else if(vfd_swmr_g) {                                                   \
-        struct timespec curr_time;                                            \
-        if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0) {                \
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err,                           \
-                        "can't get time via clock_gettime")                   \
-        } else if(timespeccmp(&curr_time, &end_of_tick_g, <)) {               \
-            ; /* Do nothing: it's not time, yet. */                           \
-        } else if (vfd_swmr_writer_g) {                                       \
-            if(H5F_vfd_swmr_writer_end_of_tick() < 0)                         \
-                HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                       \
-                            "end of tick error for VFD SWMR writer")          \
-        } else if(!swmr_reader_exit) {                                        \
-            if(H5F_vfd_swmr_reader_end_of_tick() < 0)                         \
-                HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                       \
-                            "end of tick error for VFD SWMR reader")          \
-        }                                                                     \
+#define VFD_SWMR_TEST_FOR_END_OF_TICK(entering, swmr_reader_exit, err)                              \
+    /* Initialize the library */                                                                    \
+    /* TBD assert that the API lock is held.  The API lock */                                       \
+    /* synchronizes access to `vfd_swmr_api_entries_g`     */                                       \
+    {                                                                                               \
+        if (!entering && --vfd_swmr_api_entries_g > 0) {                                            \
+            ;   /* Do nothing: we are still in an API call. */                                      \
+        } else if (entering && vfd_swmr_api_entries_g++ > 0) {                                      \
+            ;   /* Do nothing: we are *re-*entering the API. */                                     \
+        } else if(err_occurred) {                                                                   \
+            ;   /* Do nothing: an error occurred. */                                                \
+        } else if(vfd_swmr_eot_queue_head_g != NULL) {                                              \
+            struct H5F_vfd_swmr_eot_queue_entry_t *init_eot_queue_head = vfd_swmr_eot_queue_head_g; \
+            struct timespec curr_time;                                                              \
+            do {                                                                                    \
+                if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0)                                \
+                    HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err,                                         \
+                                "can't get time via clock_gettime")                                 \
+                if(timespeccmp(&curr_time, &end_of_tick_g, <)) {                                    \
+                    break;                                                                          \
+                } else if(vfd_swmr_writer_g) {                                                      \
+                    if(H5F_vfd_swmr_writer_end_of_tick(NULL) < 0)                                   \
+                        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                                     \
+                                    "end of tick error for VFD SWMR writer")                        \
+                } else if(!swmr_reader_exit) {                                                      \
+                    if(H5F_vfd_swmr_reader_end_of_tick(NULL) < 0)                                   \
+                        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                                     \
+                                    "end of tick error for VFD SWMR reader")                        \
+                } else                                                                              \
+                    break;                                                                          \
+            } while ((vfd_swmr_eot_queue_head_g != NULL) &&                                         \
+                     (vfd_swmr_eot_queue_head_g != init_eot_queue_head));                           \
+        }                                                                                           \
     }
 
 /* Use this macro for all "normal" API functions */

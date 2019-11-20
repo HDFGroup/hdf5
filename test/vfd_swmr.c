@@ -27,20 +27,28 @@
 
 #define H5F_FRIEND		    /*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
-#include "H5FDprivate.h"
 #include "H5Fpkg.h"
+
 #include "H5Iprivate.h"
+
+#define H5FD_FRIEND       /*suppress error about including H5FDpkg      */
+#define H5FD_TESTING
+#include "H5FDpkg.h"
 
 #define FS_PAGE_SIZE    512
 #define FILENAME        "vfd_swmr_file.h5"
 #define MD_FILENAME     "vfd_swmr_metadata_file"
+
+#define FILENAME2        "vfd_swmr_file2.h5"
+#define MD_FILENAME2     "vfd_swmr_metadata_file2"
+
+#define FNAME            "non_vfd_swmr_file.h5"
 
 /* test routines for VFD SWMR */
 static unsigned test_fapl(void);
 static unsigned test_file_end_tick(void);
 static unsigned test_file_fapl(void);
 static unsigned test_writer_md(void);
-static unsigned test_writer_update_md(void);
 
 
 /*-------------------------------------------------------------------------
@@ -185,13 +193,6 @@ error:
  *              B) Verify the VFD SWMR configuration set in fapl
  *                 used to create/open the file is the same as the
  *                 configuration retrieved from the file's fapl.
- *              C) Verify the following when configured as VFD SWMR reader:
- *                  (1) there is an existing file opened as writer:
- *                      --same process open as reader: will just increment the
- *                        file reference count and use the same shared struct
- *                  (2) there is no existing file opened as writer:
- *                      --opening the file as reader will fail
- *                        because there is no metadata file
  *
  * Return:      0 if test is sucessful
  *              1 if test fails
@@ -204,7 +205,7 @@ static unsigned
 test_file_fapl(void)
 {
     hid_t fid = -1;         /* File ID */
-    hid_t fid_read = -1;    /* File ID */
+    hid_t fid2 = -1;        /* File ID */
     hid_t fcpl = -1;        /* File creation property list ID */
     hid_t fapl1 = -1;       /* File access property list ID */
     hid_t fapl2 = -1;       /* File access property list ID */
@@ -323,6 +324,8 @@ test_file_fapl(void)
         FAIL_STACK_ERROR;
     if(H5Pclose(file_fapl) < 0)
         FAIL_STACK_ERROR;
+    if(H5Pclose(fapl1) < 0)
+        FAIL_STACK_ERROR;
 
     /* Create a copy of the file access property list */
     if((fapl2 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -367,37 +370,68 @@ test_file_fapl(void)
     if(HDmemcmp(config2, file_config, sizeof(H5F_vfd_swmr_config_t)) != 0)
         TEST_ERROR;
 
-    /*
-     * The file previously opened as writer is not closed.
-     */
+    /* The file previously opened as VDF SWMR writer is still open */
+    /* with VFD SWMR configuration in config2 */
+
     /* Create a copy of the file access property list */
-    if((fapl2 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    /* Set up as VFD SWMR reader */
-    config2->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config2->tick_len = 4; 
-    config2->max_lag = 10;
-    config2->writer = FALSE;
-    config2->md_pages_reserved = 2;
-    HDstrcpy(config2->md_file_path, MD_FILENAME);
+    /* Set up as VFD SWMR writer in config1 but different from config2 */
+    config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config1->tick_len = 3; 
+    config1->max_lag = 8;
+    config1->writer = TRUE;
+    config1->md_pages_reserved = 3;
+    HDstrcpy(config1->md_file_path, MD_FILENAME);
 
-    /* Should succeed in setting the VFD SWMR configuration in fapl2 */
-    if(H5Pset_vfd_swmr_config(fapl2, config2) < 0)
+    if(H5Pset_vfd_swmr_config(fapl1, config1) < 0)
         TEST_ERROR;
 
     /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl2, 4096, 0, 0) < 0)
+    if(H5Pset_page_buffer_size(fapl1, 4096, 0, 0) < 0)
         FAIL_STACK_ERROR;
 
-    /* Should succeed in opening the file */
-    /* Same process open: even though opened with reader configuration, 
-     * it just increments the file reference count and uses the writer's 
-     * shared file struct */
-    if((fid_read = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl2)) < 0)
+    /* Re-open the same file with config1 */
+    /* Should fail to open since config1 is different from config2 setting */
+    H5E_BEGIN_TRY {
+        fid2 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl1);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
         TEST_ERROR;
 
-    /* Clear info in file_config */
+    /* Close fapl1 */
+    if(H5Pclose(fapl1) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create a copy of the file access property list */
+    if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set up as VFD SWMR reader in config1 with is same as config2 */
+    config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config1->tick_len = 4; 
+    config1->max_lag = 10;
+    config1->writer = TRUE;
+    config1->md_pages_reserved = 2;
+    HDstrcpy(config1->md_file_path, MD_FILENAME);
+
+    if(H5Pset_vfd_swmr_config(fapl1, config1) < 0)
+        TEST_ERROR;
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl1, 4096, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Re-open the same file as VFD SWMR writer */
+    /* Should succeed since config1 is same as the setting in config2 */
+    if((fid2 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl1)) < 0)
+        TEST_ERROR
+
+    /* Close fapl1 */
+    if(H5Pclose(fapl1) < 0)
+        FAIL_STACK_ERROR;
+
     HDmemset(file_config, 0, sizeof(H5F_vfd_swmr_config_t));
 
     /* Get the file's file access property list */
@@ -408,35 +442,25 @@ test_file_fapl(void)
     if(H5Pget_vfd_swmr_config(file_fapl, file_config) < 0)
         TEST_ERROR;
 
-    /* Verify that the retrieved config is a writer */
-    if(file_config->writer == FALSE)
+    /* Should be the same as config1 */
+    if(HDmemcmp(config1, file_config, sizeof(H5F_vfd_swmr_config_t)) != 0)
         TEST_ERROR;
-    /* Verify that the retrieved config is not the same as the initial configuration */
-    if(file_config->writer == config2->writer)
+
+    /* Should be the the same as config2 */
+    if(HDmemcmp(config2, file_config, sizeof(H5F_vfd_swmr_config_t)) != 0)
         TEST_ERROR;
 
     /* Closing */
-    if(H5Fclose(fid_read) < 0)
+    if(H5Fclose(fid2) < 0)
         FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
-    if(H5Pclose(file_fapl) < 0)
-        FAIL_STACK_ERROR;
-
-    /*
-     * The file opened as writer is closed.
-     */
-    /* Should fail to open the file as VFD SWMR reader: no metadata file */
-    H5E_BEGIN_TRY {
-        fid_read = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl2);
-    } H5E_END_TRY;
-    if(fid_read >= 0)
-        TEST_ERROR;
 
     /* Closing */
     if(H5Pclose(fapl1) < 0)
         FAIL_STACK_ERROR;
     if(H5Pclose(fapl2) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(file_fapl) < 0)
         FAIL_STACK_ERROR;
     if(H5Pclose(fcpl) < 0)
         FAIL_STACK_ERROR;
@@ -456,6 +480,7 @@ error:
     H5E_BEGIN_TRY {
         H5Pclose(fapl1);
         H5Pclose(fapl2);
+        H5Pclose(file_fapl);
         H5Pclose(fcpl);
         H5Fclose(fid);
     } H5E_END_TRY;
@@ -1688,6 +1713,905 @@ error:
 
 #endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK)) */
 
+/*-------------------------------------------------------------------------
+ * Function:    test_multiple_file_opens()
+ *
+ * Purpose:     Verify the entries on the EOT queue when opening files
+ *              with and without VFD SWMR configured.
+ *
+ * Return:      0 if test is sucessful
+ *              1 if test fails
+ *
+ * Programmer:  Vailin Choi; 11/18/2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_multiple_file_opens(void) 
+{
+    hid_t fid1 = -1;        /* File ID */
+    hid_t fid2 = -1;        /* File ID */
+    hid_t fid = -1;         /* File ID */
+    hid_t fcpl = -1;        /* File creation property list ID */
+    hid_t fapl1 = -1;       /* File access property list ID */
+    hid_t fapl2 = -1;       /* File access property list ID */
+    H5F_t *f1, *f2, *f;     /* File pointer */
+    H5F_vfd_swmr_config_t *config1 = NULL;      /* Configuration for VFD SWMR */
+    H5F_vfd_swmr_config_t *config2 = NULL;      /* Configuration for VFD SWMR */
+    H5F_vfd_swmr_eot_queue_entry_t *curr;
+
+    TESTING("EOT queue entries when opening files with/without VFD SWMR");
+
+    /* Allocate memory for the configuration structure */
+    if((config1 = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        FAIL_STACK_ERROR;
+    if((config2 = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        FAIL_STACK_ERROR;
+    HDmemset(config1, 0, sizeof(H5F_vfd_swmr_config_t));
+    HDmemset(config2, 0, sizeof(H5F_vfd_swmr_config_t));
+
+    /* Create a copy of the file access property list */
+    if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Configured as VFD SWMR writer */
+    config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config1->tick_len = 4; 
+    config1->max_lag = 6;
+    config1->writer = TRUE;
+    config1->md_pages_reserved = 2;
+    HDstrcpy(config1->md_file_path, MD_FILENAME);
+
+    /* Should succeed in setting the VFD SWMR configuration */
+    if(H5Pset_vfd_swmr_config(fapl1, config1) < 0)
+        TEST_ERROR;
+
+    /* Create a copy of the file access property list */
+    if((fapl2 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Configured as VFD SWMR writer */
+    config2->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config2->tick_len = 4; 
+    config2->max_lag = 6;
+    config2->writer = TRUE;
+    config2->md_pages_reserved = 2;
+    HDstrcpy(config2->md_file_path, MD_FILENAME2);
+
+    /* Should succeed in setting the VFD SWMR configuration */
+    if(H5Pset_vfd_swmr_config(fapl2, config2) < 0)
+        TEST_ERROR;
+
+    /* Create a copy of the file creation property list */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+            FAIL_STACK_ERROR
+
+    /* Set file space strategy */
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl1, 4096, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl2, 4096, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create a file without VFD SWMR */
+    if((fid = H5Fcreate(FNAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        FAIL_STACK_ERROR
+
+    /* Verify the global vfd_swmr_writer_g is not set */
+    if(vfd_swmr_writer_g)
+        TEST_ERROR;
+    /* The EOT queue should be empty */
+    if(vfd_swmr_eot_queue_head_g != NULL)
+        TEST_ERROR;
+
+    /* Create a file with VFD SWMR writer */
+    if((fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl1)) < 0)
+        TEST_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f1 = (H5F_t *)H5I_object(fid1)))
+        FAIL_STACK_ERROR
+
+    /* The global vfd_swmr_writer_g should be set */
+    if(!vfd_swmr_writer_g)
+        TEST_ERROR;
+    /* The EOT queue should be initialized with the first entry equals to f1 */
+    if(vfd_swmr_eot_queue_head_g == NULL ||
+       vfd_swmr_eot_queue_head_g->vfd_swmr_file != f1)
+        TEST_ERROR;
+
+    /* Create another file with VFD SWMR writer */
+    if((fid2 = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, fcpl, fapl2)) < 0)
+        TEST_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f2 = (H5F_t *)H5I_object(fid2)))
+        FAIL_STACK_ERROR
+
+    /* The global vfd_swmr_writer_g should still be set */
+    if(!vfd_swmr_writer_g)
+        TEST_ERROR;
+    /* The EOT queue's first entry should be f1 */
+    if(vfd_swmr_eot_queue_head_g == NULL ||
+       vfd_swmr_eot_queue_head_g->vfd_swmr_file != f1)
+        TEST_ERROR;
+
+    /* The file without VFD SWMR should not exist on the EOT queue */
+    curr = vfd_swmr_eot_queue_head_g;
+    while(curr != NULL) {
+        if(curr->vfd_swmr_file == f)
+            TEST_ERROR
+        curr = curr->next;
+    }
+
+    /* Close the first file with VFD SWMR */
+    if(H5Fclose(fid1) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The global vfd_swmr_writer_g should still be set */
+    if(!vfd_swmr_writer_g)
+        TEST_ERROR;
+    /* The EOT queue's first entry should be f2 */
+    if(vfd_swmr_eot_queue_head_g == NULL ||
+       vfd_swmr_eot_queue_head_g->vfd_swmr_file != f2)
+        TEST_ERROR;
+
+    /* Close the second file with VFD SWMR */
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The global vfd_swmr_writer_g should not be set */
+    if(vfd_swmr_writer_g)
+        TEST_ERROR;
+    /* The EOT queue should be empty */
+    if(vfd_swmr_eot_queue_head_g != NULL)
+        TEST_ERROR;
+
+    /* Closing */
+    if(H5Pclose(fapl1) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(fapl2) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(fcpl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Free buffers */
+    if(config1)
+        HDfree(config1);
+    if(config2)
+        HDfree(config2);
+
+    PASSED()
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl1);
+        H5Pclose(fapl2);
+        H5Pclose(fcpl);
+        H5Fclose(fid);
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+    } H5E_END_TRY;
+    if(config1)
+        HDfree(config1);
+    if(config2)
+        HDfree(config2);
+
+    return 1;
+} /* test_multiple_file_opens() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_multiple_concur_file_opens()
+ *
+ * Purpose:     Verify the entries on the EOT queue when opening files
+ *              with and without VFD SWMR configured.
+ *
+ * Return:      0 if test is sucessful
+ *              1 if test fails
+ *
+ * Programmer:  Vailin Choi; 11/18/2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_multiple_concur_file_opens(void)
+{
+    hid_t fcpl = -1;            /* File creation property list */
+    pid_t tmppid;               /* Child process ID returned by waitpid */
+    pid_t childpid = 0;         /* Child process ID */
+    int child_status;           /* Status passed to waitpid */
+    int child_wait_option=0;    /* Options passed to waitpid */
+    int child_exit_val;         /* Exit status of the child */
+    int parent_pfd[2];          /* Pipe for parent process as writer */
+    int child_pfd[2];           /* Pipe for child process as reader */
+    int notify = 0;             /* Notification between parent and child */
+    hid_t fid1, fid2;           /* File IDs */
+    hid_t fapl1, fapl2;         /* File access property list */
+    H5F_vfd_swmr_config_t *config1 = NULL;    /* VFD SWMR configuration */
+    H5F_vfd_swmr_config_t *config2 = NULL;    /* VFD SWMR configuration */
+    H5F_t *f1, *f2;             /* File pointer */
+
+    TESTING("EOT queue entries when opening files concurrently with VFD SWMR");
+
+    /* Create a copy of the file creation property list */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set file space strategy */
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 
+                                  FALSE, (hsize_t)1) < 0)
+        FAIL_STACK_ERROR;
+
+    if(H5Pset_file_space_page_size(fcpl, FS_PAGE_SIZE) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create file A */
+    if((fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Close the file */
+    if(H5Fclose(fid1) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create file B */
+    if((fid2 = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Close the file */
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create 2 pipes */
+    if(HDpipe(parent_pfd) < 0)
+        FAIL_STACK_ERROR
+
+    if(HDpipe(child_pfd) < 0)
+        FAIL_STACK_ERROR
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    /*
+     * Child process
+     */
+    if(childpid == 0) {
+        int child_notify = 0;       /* Notification between child and parent */
+        hid_t fid_writer = -1;      /* File ID for writer */
+        hid_t fapl_writer = -1;     /* File access property list for writer */
+        H5F_vfd_swmr_config_t *config_writer = NULL;    /* VFD SWMR configuration for reader */
+
+        /* Close unused write end for writer pipe */
+        if(HDclose(parent_pfd[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Close unused read end for reader pipe */
+        if(HDclose(child_pfd[0]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* 
+         * Set up and open file B as VFD SWMR writer
+         */
+
+        /* Wait for notification 1 from parent before opening file B */
+        while(child_notify != 1) {
+            if(HDread(parent_pfd[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+
+        /* Allocate memory for VFD SMWR configuration */
+        if((config_writer = (H5F_vfd_swmr_config_t *)
+                            HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+            HDexit(EXIT_FAILURE);
+
+        HDmemset(config_writer, 0, sizeof(H5F_vfd_swmr_config_t));
+
+        /* Set up the VFD SWMR configuration */
+        config_writer->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+        config_writer->tick_len = 1;
+        config_writer->max_lag = 3;
+        config_writer->writer = TRUE;
+        config_writer->md_pages_reserved = 256;
+        HDstrcpy(config_writer->md_file_path, MD_FILENAME2);
+
+        /* Create a copy of the file access property list */
+        if((fapl_writer = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Set the VFD SWMR configuration in fapl_writer */
+        if(H5Pset_vfd_swmr_config(fapl_writer, config_writer) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Enable page buffering */
+        if(H5Pset_page_buffer_size(fapl_writer, FS_PAGE_SIZE, 0, 0) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Open file B as VFD SWMR writer */
+        if((fid_writer = H5Fopen(FILENAME2, H5F_ACC_RDWR, fapl_writer)) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Send notification 2 to parent that file B is open */
+        child_notify = 2;
+        if(HDwrite(child_pfd[1], &child_notify, sizeof(int)) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Wait for notification 3 from parent before closing file B */
+        while(child_notify != 3) {
+            if(HDread(parent_pfd[0], &child_notify, sizeof(int)) < 0)
+                HDexit(EXIT_FAILURE);
+        }
+
+        if(config_writer )
+            HDfree(config_writer);
+
+        /* Close the file */
+        if(H5Fclose(fid_writer) < 0)
+            HDexit(EXIT_FAILURE);
+        if(H5Pclose(fapl_writer) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Send notification 4 to parent that file B is closed */
+        child_notify = 4;
+        if(HDwrite(child_pfd[1], &child_notify, sizeof(int)) < 0)
+            HDexit(EXIT_FAILURE);
+
+        /* Close the pipes */
+        if(HDclose(parent_pfd[0]) < 0)
+            HDexit(EXIT_FAILURE);
+        if(HDclose(child_pfd[1]) < 0)
+            HDexit(EXIT_FAILURE);
+
+        HDexit(EXIT_SUCCESS);
+    } /* end child process */
+
+    /* 
+     * Parent process
+     */
+
+    /* Close unused read end for writer pipe */
+    if(HDclose(parent_pfd[0]) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close unused write end for reader pipe */
+    if(HDclose(child_pfd[1]) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Set up and open file A as VFD SWMR writer
+     */
+
+    /* Allocate memory for VFD SWMR configuration */
+    if((config1 = (H5F_vfd_swmr_config_t *) HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        FAIL_STACK_ERROR
+
+    HDmemset(config1, 0, sizeof(H5F_vfd_swmr_config_t));
+
+    /* Set up the VFD SWMR configuration */
+    config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config1->tick_len = 7;
+    config1->max_lag = 10;
+    config1->writer = TRUE;
+    config1->md_pages_reserved = 256;
+    HDstrcpy(config1->md_file_path, MD_FILENAME);
+
+    /* Create a copy of the file access property list */
+    if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the VFD SWMR configuration in fapl1 */
+    if(H5Pset_vfd_swmr_config(fapl1, config1) < 0)
+        FAIL_STACK_ERROR
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl1, FS_PAGE_SIZE, 0, 0) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open file A as VFD SWMR writer */
+    if((fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl1)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f1 = (H5F_t *)H5I_object(fid1)))
+        FAIL_STACK_ERROR
+
+    /* The global vfd_swmr_writer_g should be set */
+    if(!vfd_swmr_writer_g)
+        TEST_ERROR;
+
+    /* The EOT queue's first entry should be f1 */
+    if(vfd_swmr_eot_queue_head_g == NULL ||
+       vfd_swmr_eot_queue_head_g->vfd_swmr_file != f1)
+        TEST_ERROR;
+
+
+    /* Send notification 1 to child to open file B */
+    notify = 1;
+    if(HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Wait for notification 2 from child that file B is open */
+    while(notify != 2) {
+        if(HDread(child_pfd[0], &notify, sizeof(int)) < 0)
+            FAIL_STACK_ERROR;
+    }
+
+    /* Open file B as VFD SWMR reader */
+
+    /* Allocate memory for VFD SWMR configuration */
+    if((config2 = (H5F_vfd_swmr_config_t *) HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        FAIL_STACK_ERROR
+
+    HDmemset(config2, 0, sizeof(H5F_vfd_swmr_config_t));
+
+    /* Set up the VFD SWMR configuration */
+    config2->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config2->tick_len = 1;
+    config2->max_lag = 3;
+    config2->writer = FALSE;
+    config2->md_pages_reserved = 256;
+    HDstrcpy(config2->md_file_path, MD_FILENAME2);
+
+    /* Create a copy of the file access property list */
+    if((fapl2 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the VFD SWMR configuration in fapl2 */
+    if(H5Pset_vfd_swmr_config(fapl2, config2) < 0)
+        FAIL_STACK_ERROR
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl2, FS_PAGE_SIZE, 0, 0) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open file B as VFD SWMR reader */
+    if((fid2 = H5Fopen(FILENAME2, H5F_ACC_RDONLY, fapl2)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f2 = (H5F_t *)H5I_object(fid2)))
+        FAIL_STACK_ERROR
+
+    /* The global vfd_swmr_writer_g should not be set */
+    if(vfd_swmr_writer_g)
+        TEST_ERROR;
+
+    /* The EOT queue's first entry should be f2 */
+    if(vfd_swmr_eot_queue_head_g == NULL ||
+       vfd_swmr_eot_queue_head_g->vfd_swmr_file != f2)
+        TEST_ERROR;
+
+    /* Send notification 3 to child to close file B */
+    notify = 3;
+    if(HDwrite(parent_pfd[1], &notify, sizeof(int)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Wait for notification 4 from child that file B is closed */
+    while(notify != 4) {
+        if(HDread(child_pfd[0], &notify, sizeof(int)) < 0)
+            FAIL_STACK_ERROR;
+    }
+
+    /*
+     * Done
+     */
+
+    /* Close the pipes */
+    if(HDclose(parent_pfd[1]) < 0)
+        FAIL_STACK_ERROR;
+    if(HDclose(child_pfd[0]) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Wait for child process to complete */
+    if((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check exit status of child process */
+    if(WIFEXITED(child_status)) {
+        if((child_exit_val = WEXITSTATUS(child_status)) != 0)
+            TEST_ERROR
+    } else { /* child process terminated abnormally */
+        TEST_ERROR
+    }
+
+    /* Closing */
+    if(H5Fclose(fid1) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(fapl1) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(fapl2) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(fcpl) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Free resources */
+    if(config1)
+        HDfree(config1);
+    if(config2)
+        HDfree(config2);
+
+    PASSED()
+    return 0;
+
+error:
+    if(config1)
+        HDfree(config1);
+    if(config2)
+        HDfree(config2);
+
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl1);
+        H5Pclose(fapl2);
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+        H5Pclose(fcpl);
+    } H5E_END_TRY;
+
+    return 1;
+} /* test_multiple_concur_file_opens() */
+
+
+/*-------------------------------------------------------------------------
+ *  Function:    test_same_file_opens()
+ *
+ *  Purpose:     Verify multiple opens of the same file as listed below:
+ *
+ *                #1st open#                     
+ *  #2nd open#    VW  VR   W   R 
+ *              ------------------
+ *          VW  |  s   f   f   f | 
+ *          VR  |  f   f   f   f | 
+ *           W  |  f   f   s   f | 
+ *           R  |  f   f   s   s |       
+ *              ------------------
+ *
+ *  Notations:
+ *        W:  H5F_ACC_RDWR
+ *        R:  H5F_ACC_RDONLY
+ *        VW: VFD SWMR writer
+ *        VR: VFD SWMR reader
+ *
+ *        f: the open fails 
+ *        s: the open succeeds 
+ *
+ * Return:      0 if test is sucessful
+ *              1 if test fails
+ *
+ * Programmer:  Vailin Choi; October 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_same_file_opens(void)
+{
+    hid_t fid = -1;         /* File ID */
+    hid_t fid2 = -1;        /* File ID */
+    hid_t fcpl = -1;        /* File creation property list ID */
+    hid_t fapl1 = -1;       /* File access property list ID */
+    hid_t fapl2 = -1;       /* File access property list ID */
+    H5F_vfd_swmr_config_t *config1 = NULL;      /* Configuration for VFD SWMR */
+    H5F_vfd_swmr_config_t *config2 = NULL;      /* Configuration for VFD SWMR */
+
+    TESTING("Multiple opens of the same file with VFD SWMR configuration");
+
+    /* Should succeed without VFD SWMR configured */
+    if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close the file  */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Allocate memory for the configuration structure */
+    if((config1 = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        FAIL_STACK_ERROR;
+    if((config2 = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        FAIL_STACK_ERROR;
+    HDmemset(config1, 0, sizeof(H5F_vfd_swmr_config_t));
+    HDmemset(config2, 0, sizeof(H5F_vfd_swmr_config_t));
+
+    /* Create a copy of the file creation property list */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+            FAIL_STACK_ERROR
+
+    /* Set file space strategy */
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+        FAIL_STACK_ERROR;
+
+    /* 
+     * Tests for first column
+     */
+
+    /* Create the test file */
+    if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+
+    /* Create a copy of the file access property list */
+    if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set up as VFD SWMR writer */
+    config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config1->tick_len = 4; 
+    config1->max_lag = 10;
+    config1->writer = TRUE;
+    config1->md_pages_reserved = 2;
+    HDstrcpy(config1->md_file_path, MD_FILENAME);
+
+    /* Set the VFD SWMR configuration in fapl1 */
+    if(H5Pset_vfd_swmr_config(fapl1, config1) < 0)
+        TEST_ERROR;
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl1, 4096, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Open the file as VFD SWMR writer */
+    /* Keep the file open */
+    if((fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl1)) < 0)
+        TEST_ERROR;
+
+    /* Open the same file again as VFD SWMR writer */
+    /* Should succeed: 1st open--VFD SWMR writer, 2nd open--VFD SWMR writer */
+    if((fid2 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl1)) < 0)
+        TEST_ERROR;
+
+    /* Close the second file open */
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create a copy of the file access property list */
+    if((fapl2 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set up as VFD SWMR reader */
+    config2->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config2->tick_len = 3; 
+    config2->max_lag = 8;
+    config2->writer = FALSE;
+    config2->md_pages_reserved = 3;
+    HDstrcpy(config2->md_file_path, MD_FILENAME);
+
+    if(H5Pset_vfd_swmr_config(fapl2, config2) < 0)
+        TEST_ERROR;
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl2, 4096, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Open the same file again as VFD SWMR reader */
+    /* Should fail: 1st open--VFD SWMR writer, 2nd open--VFD SWMR reader */
+    H5E_BEGIN_TRY {
+        fid2 = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl2);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+        TEST_ERROR;
+    
+    if(H5Pclose(fapl2) < 0)
+        FAIL_STACK_ERROR;
+
+
+    /* Open the same file again as regular writer */
+    /* Should fail: 1st open--VFD SWMR writer, 2nd open--regular writer */
+    H5E_BEGIN_TRY {
+        fid2 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+        TEST_ERROR;
+
+    /* Open the same file again as regular reader */
+    /* Should fail: 1st open--VFD SWMR writer, 2nd open--regular reader */
+    H5E_BEGIN_TRY {
+        fid2 = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+        TEST_ERROR;
+
+    /* Close the 1st open file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+
+    /* 
+     * Tests for second column
+     */
+
+    /* Create a copy of the file access property list */
+    if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set up as VFD SWMR reader */
+    config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config1->tick_len = 4; 
+    config1->max_lag = 10;
+    config1->writer = FALSE;
+    config1->md_pages_reserved = 2;
+    HDstrcpy(config1->md_file_path, MD_FILENAME);
+
+    /* Set up the configuration in fapl1 */
+    if(H5Pset_vfd_swmr_config(fapl1, config1) < 0)
+        TEST_ERROR;
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl1, 4096, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Open the file as VFD SWMR reader */
+    /* Should fail because there is no metadata file */
+    /* Take a while to complete due to retries */
+    H5E_BEGIN_TRY {
+        fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl1);
+    } H5E_END_TRY;
+    if(fid >= 0)
+        TEST_ERROR;
+
+    if(H5Pclose(fapl1) < 0)
+        FAIL_STACK_ERROR;
+
+    /* 
+     * Tests for third column
+     */
+
+    /* Open the file as regular writer */
+    /* Keep the file open */
+    if((fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create a copy of the file access property list */
+    if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set up as VFD SWMR writer */
+    config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config1->tick_len = 4; 
+    config1->max_lag = 10;
+    config1->writer = TRUE;
+    config1->md_pages_reserved = 2;
+    HDstrcpy(config1->md_file_path, MD_FILENAME);
+
+    if(H5Pset_vfd_swmr_config(fapl1, config1) < 0)
+        TEST_ERROR;
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl1, 4096, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Open the same file again as VFD SWMR writer */
+    /* Should fail: 1st open--regular writer, 2nd open--VFD SWMR writer */
+    H5E_BEGIN_TRY {
+        fid2 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl1);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+        TEST_ERROR;
+
+    if(H5Pclose(fapl1) < 0)
+        FAIL_STACK_ERROR;
+
+
+    /* Open the same file again as regular writer */
+    /* Should succeed: 1st open--regular writer, 2nd open--regular writer */
+    if((fid2 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR;
+
+
+    /* Open the same file again as regular reader */
+    /* Should succeed: 1st open is writer, 2nd open is the same file as reader */
+    if((fid2 = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Close the 1st open file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* 
+     * Tests for fourth column
+     */
+
+    /* Open the file as regular reader */
+    /* keep the file open */
+    if((fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create a copy of the file access property list */
+    if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set up as VFD SWMR writer */
+    config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config1->tick_len = 4; 
+    config1->max_lag = 10;
+    config1->writer = TRUE;
+    config1->md_pages_reserved = 2;
+    HDstrcpy(config1->md_file_path, MD_FILENAME);
+
+    if(H5Pset_vfd_swmr_config(fapl1, config1) < 0)
+        TEST_ERROR;
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl1, 4096, 0, 0) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Open the same file again as VFD SMWR writer */
+    /* Should fail: 1st open--regular reader, 2nd open--VFD SWMR writer */
+    H5E_BEGIN_TRY {
+        fid2 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl1);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+        TEST_ERROR;
+
+    if(H5Pclose(fapl1) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Open the same file again as regular reader */
+    /* Should succeed: 1st open--regular reader, 2nd open--regular reader */
+    if((fid2 = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Open the same file again as regular writer */
+    /* Should fail: 1st open--regular reader, 2nd open--regular writer */
+    H5E_BEGIN_TRY {
+        fid2 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+        TEST_ERROR;
+
+    /* Close the 1st open file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    if(H5Pclose(fcpl) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Free buffers */
+    if(config1)
+        HDfree(config1);
+    if(config2)
+        HDfree(config2);
+
+    PASSED()
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl1);
+        H5Pclose(fapl2);
+        H5Pclose(fcpl);
+        H5Fclose(fid);
+        H5Fclose(fid2);
+    } H5E_END_TRY;
+    if(config1)
+        HDfree(config1);
+    if(config2)
+        HDfree(config2);
+    return 1;
+} /* test_same_file_opens() */
 
 
 /*-------------------------------------------------------------------------
@@ -1748,12 +2672,14 @@ main(void)
     nerrors += test_fapl();
 
     if(use_file_locking) {
-
         nerrors += test_file_fapl();
         nerrors += test_file_end_tick();
         nerrors += test_writer_create_open_flush();
         nerrors += test_writer_md();
         nerrors += test_reader_md_concur();
+        nerrors += test_multiple_file_opens();
+        nerrors += test_multiple_concur_file_opens();
+        nerrors += test_same_file_opens();
 
         } /* end if */
 

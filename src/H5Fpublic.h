@@ -297,8 +297,8 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
  */
 typedef struct H5F_vfd_swmr_config_t {
     int32_t     version;
-    uint32_t    tick_len;
-    uint32_t    max_lag;
+    int32_t     tick_len;
+    int32_t     max_lag;
     hbool_t     writer;
     hbool_t     flush_raw_data;
     int32_t     md_pages_reserved;

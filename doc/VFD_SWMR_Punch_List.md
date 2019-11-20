@@ -11,19 +11,19 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
 
 3.  Design work for journaling variation.
 
-4.  **Vailin** Add support for opening multiple files in either VFD SWMR writer or
+4.  **Vailin, complete** Add support for opening multiple files in either VFD SWMR writer or
     VFD SWMR writer mode. See addition of the EOT queue in section 3.2.2
     of the RFC, and related changes in sections 3.3 and 3.3.2.
 
-5.  Add the pb\_expansion\_threshold field to the
+5.  **Vailin, complete**Add the pb\_expansion\_threshold field to the
     H5F\_vfd\_swmr\_config\_t structure, and update
     H5Pset\_vfd\_swmr\_config()and
     H5Pget\_vfd\_swmr\_config()accordingly.
 
-6.  Implement end tick now API call. See section 3.1.2 of the RFC for
+6.  **Vailin, in progress**Implement end tick now API call. See section 3.1.2 of the RFC for
     specifications.
 
-7.  Implement enable / disable EOT call. See section 3.1.3 of the RFC
+7.  **Vailin, in progress**Implement enable / disable EOT call. See section 3.1.3 of the RFC
     for specifications.
 
 8.  Implement option to flush raw data as part of EOT -- write
@@ -44,11 +44,11 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
 
 13. Tidy short cuts in the initial implementation. These include:
 
-    -   Odd behavior in the superblock refresh routine (see comments in
+    -   **Vailin complete**Odd behavior in the superblock refresh routine (see comments in
         code). Figure out what is going on, and then either bypass the
         issue or fix it as seems appropriate.
 
-    -   Comment H5F\_vfd\_swmr\_config\_t in H5Fpublic.h properly.
+    -   **Vailin complete**Comment H5F\_vfd\_swmr\_config\_t in H5Fpublic.h properly.
 
     -   Cleanup EOA hack in H5FD\_read().
 
@@ -124,3 +124,6 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
     arbitrary data.  I may replicate that in the expand/shrink test.
 
     Ultimately, we should suspend ticks over the H5Dset_extent/H5Dwrite.
+
+27. **Vailin, complete** Change the field name "vfd_swmr_writer" to "writer" in 
+    "struct H5F_vfd_swmr_config_t" and all references to it.  See page 11 in the RFC.

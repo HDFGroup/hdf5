@@ -54,22 +54,8 @@
 /* Local Macros */
 /****************/
 
-/* Prepend entry to the delayed free spaced release linked list */
-#define H5F_DC_PREPEND(entry_ptr, head_ptr, tail_ptr, len)          \
-{                                                                   \
-    if((head_ptr) == NULL) {                                        \
-       (head_ptr) = (entry_ptr);                                    \
-       (tail_ptr) = (entry_ptr);                                    \
-    } else {                                                        \
-       (head_ptr)->prev = (entry_ptr);                              \
-       (entry_ptr)->next = (head_ptr);                              \
-       (head_ptr) = (entry_ptr);                                    \
-    }                                                               \
-    (len)++;                                                        \
-} /* H5F_DC_PREPEND() */
-
-/* Remove entry from delayed free spaced release linked list */
-#define H5F_DC_REMOVE(entry_ptr, head_ptr, tail_ptr, len)           \
+/* Remove an entry from the doubly linked list */
+#define H5F__LL_REMOVE(entry_ptr, head_ptr, tail_ptr)               \
 {                                                                   \
     if((head_ptr) == (entry_ptr)) {                                 \
           (head_ptr) = (entry_ptr)->next;                           \
@@ -85,8 +71,55 @@
         (entry_ptr)->next->prev = (entry_ptr)->prev;                \
     entry_ptr->next = NULL;                                         \
     entry_ptr->prev = NULL;                                         \
-    (len)--;                                                        \
-} /* H5F_DC_REMOVE() */
+} /* H5F__LL_REMOVE() */
+
+/* Append an entry to the doubly linked list */
+#define H5F__LL_APPEND(entry_ptr, head_ptr, tail_ptr)               \
+{                                                                   \
+    if((head_ptr) == NULL ) {                                       \
+       (head_ptr) = (entry_ptr);                                    \
+       (tail_ptr) = (entry_ptr);                                    \
+    }                                                               \
+    else {                                                          \
+       (tail_ptr)->next = (entry_ptr);                              \
+       (entry_ptr)->prev = (tail_ptr);                              \
+       (tail_ptr) = (entry_ptr);                                    \
+    }                                                               \
+} /* H5F__LL_APPEND() */
+
+/* Prepend an entry to the doubly linked list */ 
+#define H5F__LL_PREPEND(entry_ptr, head_ptr, tail_ptr)              \
+{                                                                   \
+    if((head_ptr) == NULL) {                                        \
+       (head_ptr) = (entry_ptr);                                    \
+       (tail_ptr) = (entry_ptr);                                    \
+    } else {                                                        \
+       (head_ptr)->prev = (entry_ptr);                              \
+       (entry_ptr)->next = (head_ptr);                              \
+       (head_ptr) = (entry_ptr);                                    \
+    }                                                               \
+} /* H5F__LL_PREPEND() */
+
+/* Insert an entry after the predecessor entry "prec_ptr" on the EOT queue */
+#define H5F_EOT_INSERT_AFTER(entry_ptr, prec_ptr, head_ptr, tail_ptr)       \
+{                                                                           \
+    /* The list is empty or has no predecessor -- prepend */                \
+    if(prec_ptr == NULL)                                                    \
+        H5F__LL_PREPEND(entry_ptr, head_ptr, tail_ptr)                      \
+                                                                            \
+    /* The predecessor entry is at head of list -- append */                \
+    else if(prec_ptr->prev == NULL)                                         \
+        H5F__LL_APPEND(entry_ptr, head_ptr, tail_ptr)                       \
+                                                                            \
+    /* The predecessor entry is in the body of list -- insert after it */   \
+    else                                                                    \
+    {                                                                       \
+        entry_ptr->prev = prec_ptr;                                         \
+        entry_ptr->next = prec_ptr->next;                                   \
+        prec_ptr->next->prev = entry_ptr;                                   \
+        prec_ptr->next = entry_ptr;                                         \
+    }                                                                       \
+} /* H5F_EOT_INSERT_AFTER() */
 
 /********************/
 /* Local Prototypes */
@@ -103,8 +136,13 @@ static herr_t H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f);
 /* Package Variables */
 /*********************/
 
-H5F_t *vfd_swmr_file_g = NULL;          /* Points to the file struct */
-hbool_t vfd_swmr_g = FALSE;             /* Is this a VFD SWMR configured file */
+/* 
+ * Globals for VFD SWMR 
+ */
+
+hbool_t vfd_swmr_writer_g = FALSE;      /* Is this the VFD SWMR writer */
+struct timespec end_of_tick_g;          /* The current end_of_tick */
+
 unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          * and re-entered minus the times
                                          * it was exited.  We only perform
@@ -112,9 +150,12 @@ unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          * on the 0->1 and 1->0
                                          * transitions.
                                          */
-hbool_t vfd_swmr_writer_g = FALSE;      /* Is this the VFD SWMR writer */
-uint64_t tick_num_g = 0;                /* The current tick_num */
-struct timespec end_of_tick_g;          /* The current end_of_tick */
+/*
+ *  The head and tail of the end of tick queue (EOT queue) for files opened in either
+ *  VFD SWMR write or VFD SWMR read mode
+ */
+H5F_vfd_swmr_eot_queue_entry_t *vfd_swmr_eot_queue_head_g = NULL;
+H5F_vfd_swmr_eot_queue_entry_t *vfd_swmr_eot_queue_tail_g = NULL;
 
 /*******************/
 /* Local Variables */
@@ -122,6 +163,9 @@ struct timespec end_of_tick_g;          /* The current end_of_tick */
 
 /* Declare a free list to manage the H5F_vfd_swmr_dl_entry_t struct */
 H5FL_DEFINE(H5F_vfd_swmr_dl_entry_t);
+
+/* Declare a free list to manage the H5F_vfd_swmr_eot_queue_entry_t struct */
+H5FL_DEFINE(H5F_vfd_swmr_eot_queue_entry_t);
 
 
 /*-------------------------------------------------------------------------
@@ -171,15 +215,14 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
     HDassert(H5F_VFD_SWMR_CONFIG(f));
 
-    vfd_swmr_g = f->shared->vfd_swmr = TRUE;
-    vfd_swmr_file_g = f;
+    f->shared->vfd_swmr = TRUE;
 
     if(H5F_INTENT(f) & H5F_ACC_RDWR) {
 
         HDassert(f->shared->vfd_swmr_config.writer);
 
-        vfd_swmr_writer_g = f->shared->vfd_swmr_writer = TRUE;
-        tick_num_g = f->shared->tick_num = 1;
+        f->shared->vfd_swmr_writer = TRUE;
+        f->shared->tick_num = 1;
 
         if ( H5PB_vfd_swmr__set_tick(f) < 0 )
 
@@ -232,7 +275,7 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
         HDassert(!f->shared->vfd_swmr_config.writer);
 
-        vfd_swmr_writer_g = f->shared->vfd_swmr_writer = FALSE;
+        f->shared->vfd_swmr_writer = FALSE;
 
         HDassert(f->shared->mdf_idx == NULL);
 
@@ -246,14 +289,12 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         /* Set tick_num_g to the current tick read from the metadata file */
         f->shared->mdf_idx_entries_used = f->shared->mdf_idx_len;
         if ( H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, FALSE, 
-                                            &tick_num_g, 
+                                            &f->shared->tick_num, 
                                             &(f->shared->mdf_idx_entries_used),
                                             f->shared->mdf_idx) < 0 )
 
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL, \
                         "unable to load/decode metadata file")
-
-        f->shared->tick_num = tick_num_g;
 
 #if 0 /* JRM */
         HDfprintf(stderr, 
@@ -327,7 +368,7 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create header in md")
 
     /* Increment tick_num */
-    tick_num_g = ++f->shared->tick_num;
+    ++f->shared->tick_num;
 
     if ( closing ) { /* For file close */
 
@@ -377,6 +418,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5F_vfd_swmr_close_or_flush() */
+
 
 
 /*-------------------------------------------------------------------------
@@ -465,8 +507,8 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
                 dl_entry->length = index[i].length;
                 dl_entry->tick_num = f->shared->tick_num;
 
-                H5F_DC_PREPEND(dl_entry, f->shared->dl_head_ptr, \
-                               f->shared->dl_tail_ptr, f->shared->dl_len);
+                H5F__LL_PREPEND(dl_entry, f->shared->dl_head_ptr, f->shared->dl_tail_ptr);
+                f->shared->dl_len++;
             }
 
             /* Allocate space for the entry in the metadata file */
@@ -555,8 +597,8 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
                             "unable to flush clean entry")
 
             /* Remove the entry from the delayed list */
-            H5F_DC_REMOVE(dl_entry, f->shared->dl_head_ptr, \
-                          f->shared->dl_tail_ptr, f->shared->dl_len)
+            H5F__LL_REMOVE(dl_entry, f->shared->dl_head_ptr, f->shared->dl_tail_ptr)
+            f->shared->dl_len--;
 
             /* Free the delayed entry struct */
             H5FL_FREE(H5F_vfd_swmr_dl_entry_t, dl_entry);
@@ -621,10 +663,10 @@ herr_t
 H5F_vfd_swmr_writer__delay_write(H5F_t *f, uint64_t page, 
     uint64_t * delay_write_until_ptr)
 {
-    uint32_t top = 0;
-    uint32_t bottom = 1;
-    uint32_t probe;
-    uint64_t until = 0;
+    int32_t top = -1;
+    int32_t bottom = 0;
+    int32_t probe;
+    uint64_t delay_write_until = 0;
     H5FD_vfd_swmr_idx_entry_t * ie_ptr = NULL;
     H5FD_vfd_swmr_idx_entry_t * idx = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
@@ -641,7 +683,7 @@ H5F_vfd_swmr_writer__delay_write(H5F_t *f, uint64_t page,
     HDassert((idx) ||( f->shared->tick_num <= 1));
 
     /* do a binary search on the metadata file index to see if
-     * it already contains an entry for `page`.
+     * it already contains an entry for *pbe_ptr.
      */
 
     ie_ptr = NULL;
@@ -677,21 +719,25 @@ H5F_vfd_swmr_writer__delay_write(H5F_t *f, uint64_t page,
 
         if ( ie_ptr->delayed_flush >= f->shared->tick_num ) {
 
-            until = ie_ptr->delayed_flush;
+             delay_write_until = ie_ptr->delayed_flush;
         }
     } else {
 
-        until = f->shared->tick_num + 
+        delay_write_until = f->shared->tick_num +
                             f->shared->vfd_swmr_config.max_lag;
     }
 
-    if (until != 0 && 
-        (until < f->shared->tick_num ||
-         until > (f->shared->tick_num + f->shared->vfd_swmr_config.max_lag)))
+    if ( ( delay_write_until != 0 ) &&
+          ( ! ( ( delay_write_until >= f->shared->tick_num ) &&
+                ( delay_write_until <=
+                   (f->shared->tick_num + f->shared->vfd_swmr_config.max_lag) )
+               )
+           )
+         )
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                     "VFD SWMR write delay out of range")
 
-    *delay_write_until_ptr = until;
+    *delay_write_until_ptr = delay_write_until;
   
 done:
 
@@ -742,7 +788,7 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
      * tick so as to avoid attempts to flush entries on the page buffer 
      * tick list that were modified during the current tick.
      */
-    if ( H5F_vfd_swmr_writer_end_of_tick() < 0 )
+    if ( H5F_vfd_swmr_writer_end_of_tick(f) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
                     "H5F_vfd_swmr_writer_end_of_tick() failed.")
@@ -820,18 +866,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_writer_end_of_tick(void)
+H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
 {
-    uint32_t idx_entries_added = 0;
-    uint32_t idx_entries_modified = 0;
-    uint32_t idx_ent_not_in_tl = 0;
-    uint32_t idx_ent_not_in_tl_flushed = 0;
-    H5F_t * f;
+    int32_t idx_entries_added = 0;
+    int32_t idx_entries_modified = 0;
+    int32_t idx_ent_not_in_tl = 0;
+    int32_t idx_ent_not_in_tl_flushed = 0;
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    f = vfd_swmr_file_g;
+    /* When called from FUNC ENTER/EXIT, get the first entry on the EOT queue */
+    if(f == NULL)
+        f = vfd_swmr_eot_queue_head_g->vfd_swmr_file;
 
     HDassert(f);
     HDassert(f->shared);
@@ -968,15 +1015,23 @@ H5F_vfd_swmr_writer_end_of_tick(void)
  
 
     /* 9) Increment the tick, and update the end of tick. */
-    if( vfd_swmr_file_g ) {
+    if( f) {
 
         /* Update end_of_tick */
-        if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(vfd_swmr_file_g, 
-                                                           TRUE) < 0 )
+        if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, TRUE) < 0 )
 
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
                         "unable to update end of tick")
     }
+
+    /* Remove the entry from the EOT queue */
+    if(H5F_vfd_swmr_remove_entry_eot(f) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to remove entry from EOT queue")
+
+     /* Re-insert the entry that corresponds to f onto the EOT queue */
+    if(H5F_vfd_swmr_insert_entry_eot(f) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
+
 #if 0 /* JRM */
     HDfprintf(stderr, "*** writer EOT %lld exiting. idx len = %d ***\n", 
               f->shared->tick_num, 
@@ -989,10 +1044,9 @@ done:
 } /* end H5F_vfd_swmr_writer_end_of_tick() */
 
 
-#if 0
 /*-------------------------------------------------------------------------
  *
- * Function: H5F__vfd_swmr_writer__dump_index
+ * Function: H5F_vfd_swmr_writer__dump_index
  *
  * Purpose:  Dump a summary of the metadata file index.
  *
@@ -1005,17 +1059,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__vfd_swmr_writer__dump_index(H5F_t * f)
+H5F_vfd_swmr_writer__dump_index(H5F_t * f)
 {
-    unsigned int i;
-    uint32_t mdf_idx_len;
-    uint32_t mdf_idx_entries_used;
+    int i;
+    int32_t mdf_idx_len;
+    int32_t mdf_idx_entries_used;
     H5FD_vfd_swmr_idx_entry_t * index = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-
-    f = vfd_swmr_file_g;
 
     HDassert(f);
     HDassert(f->shared);
@@ -1041,8 +1093,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5F__vfd_swmr_writer__dump_index() */
-#endif
+} /* end H5F_vfd_swmr_writer__dump_index() */
 
 
 /*-------------------------------------------------------------------------
@@ -1085,24 +1136,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_reader_end_of_tick(void)
+H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
 {
     int pass = 0;
     uint64_t tmp_tick_num = 0;
-    H5F_t * f;
     H5FD_vfd_swmr_idx_entry_t * tmp_mdf_idx;
-    uint32_t entries_added = 0;
-    uint32_t entries_removed = 0;
-    uint32_t entries_changed = 0;
-    uint32_t tmp_mdf_idx_len;
-    uint32_t tmp_mdf_idx_entries_used;
+    int32_t entries_added = 0;
+    int32_t entries_removed = 0;
+    int32_t entries_changed = 0;
+    int32_t tmp_mdf_idx_len;
+    int32_t tmp_mdf_idx_entries_used;
     uint32_t mdf_idx_entries_used;
-
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    f = vfd_swmr_file_g;
+    /* When called from FUNC ENTER/EXIT, get the first entry on the EOT queue */
+    if(f == NULL)
+        f = vfd_swmr_eot_queue_head_g->vfd_swmr_file;
 
     HDassert(f);
     HDassert(f->shared);
@@ -1132,7 +1183,7 @@ H5F_vfd_swmr_reader_end_of_tick(void)
               tick_num_g, tmp_tick_num);
 #endif /* JRM */
 
-    if ( tmp_tick_num != tick_num_g ) {
+    if ( tmp_tick_num != f->shared->tick_num ) {
 
         /* swap the old and new metadata file indexes */
 
@@ -1142,7 +1193,7 @@ H5F_vfd_swmr_reader_end_of_tick(void)
 
         f->shared->old_mdf_idx              = f->shared->mdf_idx;
         f->shared->old_mdf_idx_len          = f->shared->mdf_idx_len;
-        f->shared->old_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
+        f->shared->old_mdf_idx_entries_used = (int32_t)f->shared->mdf_idx_entries_used;
 
         f->shared->mdf_idx              = tmp_mdf_idx;
         f->shared->mdf_idx_len          = tmp_mdf_idx_len;
@@ -1193,12 +1244,12 @@ H5F_vfd_swmr_reader_end_of_tick(void)
         while ( pass <= 1 ) {
 
             haddr_t page_addr;
-            uint32_t i = 0;
-            uint32_t j = 0;
+            int32_t i = 0;
+            int32_t j = 0;
             H5FD_vfd_swmr_idx_entry_t * new_mdf_idx;
             H5FD_vfd_swmr_idx_entry_t * old_mdf_idx;
-            uint32_t new_mdf_idx_entries_used;
-            uint32_t old_mdf_idx_entries_used;
+            int32_t new_mdf_idx_entries_used;
+            int32_t old_mdf_idx_entries_used;
 
             new_mdf_idx              = f->shared->mdf_idx;
             new_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
@@ -1351,16 +1402,23 @@ H5F_vfd_swmr_reader_end_of_tick(void)
          *
          * Start the next tick.
          */
-        vfd_swmr_file_g->shared->tick_num = tick_num_g = tmp_tick_num;
+        f->shared->tick_num = tmp_tick_num;
 
         /* Update end_of_tick */
-        if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(vfd_swmr_file_g, 
-                                                           FALSE) < 0 )
+        if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, FALSE) < 0 )
 
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
                         "unable to update end of tick")
 
     } /* if ( tmp_tick_num != tick_num_g ) */
+
+    /* Remove the entry from the EOT queue */
+    if(H5F_vfd_swmr_remove_entry_eot(f) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to remove entry from EOT queue")
+
+     /* Re-insert the entry that corresponds to f onto the EOT queue */
+    if(H5F_vfd_swmr_insert_entry_eot(f) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
 
 #if 0 /* JRM */
     HDfprintf(stderr, "--- reader EOT final index used / len = %d / %d ---\n",
@@ -1377,6 +1435,146 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5F_vfd_swmr_reader_end_of_tick() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5F__vfd_swmr_remove_entry_eot
+ *
+ * Purpose:     Remove an entry from the EOT queue
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi -- 11/18/2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_vfd_swmr_remove_entry_eot(H5F_t *f)
+{
+    H5F_vfd_swmr_eot_queue_entry_t *curr;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Free the entry on the EOT queue that corresponds to f */
+    curr = vfd_swmr_eot_queue_head_g;
+    while(curr != NULL) {
+        if(curr->vfd_swmr_file == f) {
+            H5F__LL_REMOVE(curr, vfd_swmr_eot_queue_head_g, vfd_swmr_eot_queue_tail_g)
+            curr = H5FL_FREE(H5F_vfd_swmr_eot_queue_entry_t, curr);
+            break;
+        }
+        curr = curr->next;
+    }
+
+    if(vfd_swmr_eot_queue_head_g) {
+        vfd_swmr_writer_g = vfd_swmr_eot_queue_head_g->vfd_swmr_writer;
+        end_of_tick_g = vfd_swmr_eot_queue_head_g->end_of_tick;
+    } else
+        vfd_swmr_writer_g = FALSE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_vfd_swmr_remove_entry_eot() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5F_vfd_swmr_insert_entry_eot
+ *
+ * Purpose:     Insert an entry onto the EOT queue
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi -- 11/18/2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
+{
+    H5F_vfd_swmr_eot_queue_entry_t *entry_ptr;    /* An entry on the EOT end of tick queue */
+    H5F_vfd_swmr_eot_queue_entry_t *prec_ptr;     /* The predecessor entry on the EOT end of tick queue */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Allocate an entry to be inserted onto the EOT queue */
+    if (NULL == (entry_ptr = H5FL_CALLOC(H5F_vfd_swmr_eot_queue_entry_t)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate the endo of tick queue entry")
+
+    /* Initialize the entry */
+    entry_ptr->vfd_swmr_writer = f->shared->vfd_swmr_writer;
+    entry_ptr->tick_num = f->shared->tick_num;
+    entry_ptr->end_of_tick = f->shared->end_of_tick;
+    entry_ptr->vfd_swmr_file = f;
+    entry_ptr->next = NULL;
+    entry_ptr->prev = NULL;
+
+    /* Found the position to insert the entry on the EOT queue */
+    prec_ptr = vfd_swmr_eot_queue_tail_g;
+
+    while (prec_ptr) {
+        if(timespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, >))
+           prec_ptr = prec_ptr->prev;                                     
+        else 
+            break;
+    }
+
+    /* Insert the entry onto the EOT queue */
+    H5F_EOT_INSERT_AFTER(entry_ptr, prec_ptr, vfd_swmr_eot_queue_head_g, vfd_swmr_eot_queue_tail_g);
+
+    /* Set up globals accordinly */
+    if(vfd_swmr_eot_queue_head_g) {
+        vfd_swmr_writer_g = vfd_swmr_eot_queue_head_g->vfd_swmr_writer;
+        end_of_tick_g = vfd_swmr_eot_queue_head_g->end_of_tick;
+    } else
+        vfd_swmr_writer_g = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5F_vfd_swmr_insert_entry_eot() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5F_dump_eot_queue()
+ *
+ * Purpose:     Dump the contents of the EOT queue
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi -- 11/18/2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_dump_eot_queue(void)
+{
+    int i = 0;
+    H5F_vfd_swmr_eot_queue_entry_t *curr;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(vfd_swmr_eot_queue_head_g == NULL)
+        HDfprintf(stderr, "EOT head is null\n");
+
+    curr = vfd_swmr_eot_queue_head_g;
+    while(curr != NULL) {
+        ++i;
+        HDfprintf(stderr, "%d: vfd_swmr_writer=%d tick_num=%lld, end_of_tick:%lld, %lld, vfd_swmr_file=0x%x\n", 
+                  i, curr->vfd_swmr_writer, curr->tick_num, 
+                  curr->end_of_tick.tv_sec, curr->end_of_tick.tv_nsec, curr->vfd_swmr_file);
+
+        curr = curr->next;
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+
+} /* H5F_dump_eot_queue() */
 
 /*
  * Beginning of static functions
@@ -1404,12 +1602,12 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
 {
     struct timespec curr;               /* Current time in struct timespec */
     struct timespec new_end_of_tick;    /* new end_of_tick in struct timespec */
-    int64_t curr_nsecs;                    /* current time in nanoseconds */
-    int64_t tlen_nsecs;                    /* tick_len in nanoseconds */
+    long curr_nsecs;                    /* current time in nanoseconds */
+    long tlen_nsecs;                    /* tick_len in nanoseconds */
 #if 0 /* JRM */
-    int64_t end_nsecs;                     /* end_of_tick in nanoseconds */
+    long end_nsecs;                     /* end_of_tick in nanoseconds */
 #endif /* JRM */
-    int64_t new_end_nsecs;                 /* new end_of_tick in nanoseconds */
+    long new_end_nsecs;                 /* new end_of_tick in nanoseconds */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1421,31 +1619,17 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
                     "can't get time via clock_gettime")
 
     /* Convert curr to nsecs */
-    curr_nsecs = curr.tv_sec * nanosecs_per_second + curr.tv_nsec;
+    curr_nsecs = curr.tv_sec * SECOND_TO_NANOSECS + curr.tv_nsec;
 
     /* Convert tick_len to nanosecs */
-    tlen_nsecs = f->shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
+    tlen_nsecs = f->shared->vfd_swmr_config.tick_len * TENTH_SEC_TO_NANOSECS;
 
     /* 
      *  Update tick_num_g, f->shared->tick_num 
      */
     if ( incr_tick_num ) {
 
-#if 0 /* JRM */
-        /* Convert end_of_tick_g to nanoseconds */
-        end_nsecs = end_of_tick_g.tv_sec * nanosecs_per_second +
-                                           end_of_tick_g.tv_nsec;
-
-        /* Increment tick_num by # of elapsed ticks */
-        tick_num_g += (1+ (uint64_t)((curr_nsecs - end_nsecs) / tlen_nsecs));
-#else /* JRM */
-        /* Regardless of elapsed time, only increment the tick num by 1
-         * so as to avoid the possibility of using up all of max_lag in
-         * one or two ticks.
-         */
-        tick_num_g++;
-#endif /* JRM */
-        f->shared->tick_num = tick_num_g;
+        f->shared->tick_num++;
 
         if ( H5PB_vfd_swmr__set_tick(f) < 0 )
 
@@ -1465,8 +1649,8 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
      */
 
     new_end_nsecs = curr_nsecs + tlen_nsecs;
-    new_end_of_tick.tv_nsec = new_end_nsecs % nanosecs_per_second;
-    new_end_of_tick.tv_sec = new_end_nsecs / nanosecs_per_second;
+    new_end_of_tick.tv_nsec = new_end_nsecs % SECOND_TO_NANOSECS;
+    new_end_of_tick.tv_sec = new_end_nsecs / SECOND_TO_NANOSECS;
 
     /* Update end_of_tick */
     HDmemcpy(&end_of_tick_g, &new_end_of_tick, sizeof(struct timespec));
@@ -1716,19 +1900,17 @@ H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F__vfd_swmr_writer__create_index(H5F_t * f)
 {
-    unsigned int i;
+    int i;
     size_t bytes_available;
-    size_t entries_in_index;
+    int32_t entries_in_index;
     size_t index_size;
     H5FD_vfd_swmr_idx_entry_t * index = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
-
-    f = vfd_swmr_file_g;
+    FUNC_ENTER_STATIC
 
     HDassert(f);
     HDassert(f->shared);
@@ -1743,11 +1925,11 @@ H5F__vfd_swmr_writer__create_index(H5F_t * f)
 
     HDassert(bytes_available > 0);
 
-    entries_in_index = bytes_available / H5FD_MD_INDEX_ENTRY_SIZE;
+    entries_in_index = (int32_t)(bytes_available / H5FD_MD_INDEX_ENTRY_SIZE);
 
     HDassert(entries_in_index > 0);
 
-    index_size = sizeof(H5FD_vfd_swmr_idx_entry_t) * entries_in_index;
+    index_size = sizeof(H5FD_vfd_swmr_idx_entry_t) * (size_t)entries_in_index;
     index = (H5FD_vfd_swmr_idx_entry_t *)HDmalloc(index_size);
 
     if ( index == NULL ) 
@@ -1769,10 +1951,8 @@ H5F__vfd_swmr_writer__create_index(H5F_t * f)
         index[i].moved_to_hdf5_file  = FALSE;
     }
 
-    HDassert(entries_in_index <= UINT32_MAX);
-
     f->shared->mdf_idx              = index;
-    f->shared->mdf_idx_len          = (uint32_t)entries_in_index;
+    f->shared->mdf_idx_len          = entries_in_index;
     f->shared->mdf_idx_entries_used = 0;
 
 done:
@@ -1802,7 +1982,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
 {
     int result;
@@ -1811,18 +1991,16 @@ H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
     uint64_t tick_in_nsec;
     herr_t ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->vfd_swmr);
     HDassert(f->shared->vfd_swmr_writer);
-    HDassert((f == vfd_swmr_file_g) ||
-             ((vfd_swmr_file_g) && (f->shared == vfd_swmr_file_g->shared)));
 
-    tick_in_nsec = f->shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
-    req.tv_nsec = (long)(tick_in_nsec % nanosecs_per_second);
-    req.tv_sec = (time_t)(tick_in_nsec / nanosecs_per_second);
+    tick_in_nsec = f->shared->vfd_swmr_config.tick_len * TENTH_SEC_TO_NANOSECS;
+    req.tv_nsec = (long)(tick_in_nsec % SECOND_TO_NANOSECS);
+    req.tv_sec = (time_t)(tick_in_nsec / SECOND_TO_NANOSECS);
 
     result = HDnanosleep(&req, &rem);
 
@@ -1837,7 +2015,7 @@ H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "HDnanosleep() failed.")
         
-    if ( H5F_vfd_swmr_writer_end_of_tick() < 0 )
+    if ( H5F_vfd_swmr_writer_end_of_tick(f) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
                     "H5F_vfd_swmr_writer_end_of_tick() failed.")
