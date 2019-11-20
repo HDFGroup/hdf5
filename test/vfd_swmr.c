@@ -190,7 +190,10 @@ error:
  * Purpose:     A) Verify that page buffering and paged aggregation
  *                 have to be enabled for a file to be configured
  *                 with VFD SWMR.
- *              B) Verify the VFD SWMR configuration set in fapl
+ *              B) Verify that the "writer" setting in the fapl's VFD
+ *                 SWMR configuration should be consistent with the
+ *                 file access flags.
+ *              C) Verify the VFD SWMR configuration set in fapl
  *                 used to create/open the file is the same as the
  *                 configuration retrieved from the file's fapl.
  *
@@ -239,6 +242,32 @@ test_file_fapl(void)
     if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
+    /* Configured as VFD SWMR reader */
+    config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config1->tick_len = 4; 
+    config1->max_lag = 6;
+    config1->writer = FALSE;
+    config1->md_pages_reserved = 2;
+    HDstrcpy(config1->md_file_path, MD_FILENAME);
+
+    /* Should succeed in setting the VFD SWMR configuration */
+    if(H5Pset_vfd_swmr_config(fapl1, config1) < 0)
+        TEST_ERROR;
+
+    /* Should fail to create: file access is writer but VFD SWMR config is reader */
+    H5E_BEGIN_TRY {
+        fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl1);
+    } H5E_END_TRY;
+    if(fid >= 0)
+        TEST_ERROR;
+
+    if(H5Pclose(fapl1) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a copy of the file access property list */
+    if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
     /* Configured as VFD SWMR writer */
     config1->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config1->tick_len = 4; 
@@ -257,6 +286,7 @@ test_file_fapl(void)
     } H5E_END_TRY;
     if(fid >= 0)
         TEST_ERROR;
+
 
     /* Create a copy of the file creation property list */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -299,8 +329,14 @@ test_file_fapl(void)
     if(H5Pclose(file_fapl) < 0)
         FAIL_STACK_ERROR;
 
+    /* Should fail to open: file access is reader but VFD SWMR config is writer */
+    H5E_BEGIN_TRY {
+        fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl1);
+    } H5E_END_TRY;
+    if(fid >= 0)
+        TEST_ERROR;
 
-    /* Should succeed to open the file as VFD SWMR writer */
+    /* Should succeed to open: file access and VFD SWMR config are consistent */
     if((fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl1)) < 0)
         TEST_ERROR;
 

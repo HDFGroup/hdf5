@@ -44,42 +44,6 @@
 /* Local Macros */
 /****************/
 
-/* VFD SWMR */
-
-/* Prepend entry to the delayed free spaced release linked list */ 
-#define H5F_DC_PREPEND(entry_ptr, head_ptr, tail_ptr, len)          \
-{                                                                   \
-    if((head_ptr) == NULL) {                                        \
-       (head_ptr) = (entry_ptr);                                    \
-       (tail_ptr) = (entry_ptr);                                    \
-    } else {                                                        \
-       (head_ptr)->prev = (entry_ptr);                              \
-       (entry_ptr)->next = (head_ptr);                              \
-       (head_ptr) = (entry_ptr);                                    \
-    }                                                               \
-    (len)++;                                                        \
-} /* H5F_DC_PREPEND() */
-
-/* Remove entry from delayed free spaced release linked list */ 
-#define H5F_DC_REMOVE(entry_ptr, head_ptr, tail_ptr, len)           \
-{                                                                   \
-    if((head_ptr) == (entry_ptr)) {                                 \
-          (head_ptr) = (entry_ptr)->next;                           \
-          if((head_ptr) != NULL )                                   \
-             (head_ptr)->prev = NULL;                               \
-    } else                                                          \
-        (entry_ptr)->prev->next = (entry_ptr)->next;                \
-    if((tail_ptr) == (entry_ptr)) {                                 \
-        (tail_ptr) = (entry_ptr)->prev;                             \
-        if((tail_ptr) != NULL)                                      \
-            (tail_ptr)->next = NULL;                                \
-    } else                                                          \
-        (entry_ptr)->next->prev = (entry_ptr)->prev;                \
-    entry_ptr->next = NULL;                                         \
-    entry_ptr->prev = NULL;                                         \
-    (len)--;                                                        \
-} /* H5F_DC_REMOVE() */
-
 /******************/
 /* Local Typedefs */
 /******************/
@@ -1515,6 +1479,27 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     FUNC_ENTER_NOAPI(NULL)
 
+    /* Get the file access property list, for future queries */
+    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
+    /* Allocate space for VFD SWMR configuration info */
+    if(NULL == (vfd_swmr_config_ptr = (H5F_vfd_swmr_config_t *)H5MM_calloc(sizeof(H5F_vfd_swmr_config_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate memory for mdc log file name")
+
+    /* Get VFD SWMR configuration */
+    if(H5P_get(a_plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, vfd_swmr_config_ptr) < 0)
+       HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get VFD SWMR config info")
+
+    /* When configured with VFD SWMR */
+    if(vfd_swmr_config_ptr->version) {
+        /* Verify that file access flags are consistent with VFD SWMR configuartion */
+        if((flags & H5F_ACC_RDWR) && !vfd_swmr_config_ptr->writer)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "file access is writer but VFD SWMR config is reader")
+        if((flags & H5F_ACC_RDWR) == 0 && vfd_swmr_config_ptr->writer)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "file access is reader but VFD SWMR config is writer")
+    }
+
     /*
      * If the driver has a `cmp' method then the driver is capable of
      * determining when two file handles refer to the same file and the
@@ -1664,10 +1649,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     shared = file->shared;
     lf = shared->lf;
 
-    /* Get the file access property list, for future queries */
-    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
-
     /* Check if page buffering is enabled */
     if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get page buffer size")
@@ -1745,6 +1726,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             if(H5F_vfd_swmr_init(file, file_create) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "file open fail with initialization for VFD SWMR")
         }
+
         /* Insert the entry that corresponds to file onto the EOT queue */
         if(H5F_vfd_swmr_insert_entry_eot(file) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "unable to insert entry into the EOT queue")
@@ -1752,12 +1734,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* For multiple opens of the same file, verify that the VFD SWMR setting is consistent */
     if(shared->nrefs > 1) {
-        if(NULL == (vfd_swmr_config_ptr = (H5F_vfd_swmr_config_t *)H5MM_calloc(sizeof(H5F_vfd_swmr_config_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate memory for mdc log file name")
-
-        if(H5P_get(a_plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, vfd_swmr_config_ptr) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get VFD SWMR config info")
-
         if(HDmemcmp(vfd_swmr_config_ptr, &shared->vfd_swmr_config, sizeof(H5F_vfd_swmr_config_t)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "inconsistent VFD SWMR config info")
     }

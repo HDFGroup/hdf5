@@ -127,3 +127,8 @@ This document lives at [https://bitbucket.hdfgroup.org/users/dyoung/repos/vchoi_
 
 27. **Vailin, complete** Change the field name "vfd_swmr_writer" to "writer" in 
     "struct H5F_vfd_swmr_config_t" and all references to it.  See page 11 in the RFC.
+
+28. **Vailin, complete** Fix bug as stated on page 9 in the RFC section 3.1.1:
+    Given that the VFD SWMR configuration FAPL property is set, the writer field must
+    be consistent with the flags passed in the H5Fopen() (either H5F_ACC_RDWR for the 
+    VFD SWMR writer, or H5F_ACC_RDONLY for the VFD SWMR readers).
