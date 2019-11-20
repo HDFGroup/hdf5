@@ -22,7 +22,7 @@
 static herr_t
 free_wrapper(void *p)
 {
-    free(p);
+    HDfree(p);
     return SUCCEED;
 }
 
