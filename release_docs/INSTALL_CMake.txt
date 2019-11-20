@@ -31,7 +31,8 @@ Obtaining HDF5 source code
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
       The HDF5 1.10."X" product requires a minimum CMake version 3.10,
-      where "X" is the current HDF5 release version.
+      where "X" is the current HDF5 release version. If you are using
+      VS2019, the minimum version is 3.15.
 
 Note:
    To change the install prefix from the platform defaults initialize
@@ -90,6 +91,10 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
    5. From the "myhdfstuff" directory execute the CTest Script with the
       following options:
 
+      On 32-bit Windows with Visual Studio 2019, execute:
+         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2019 -C Release -VV -O hdf5.log
+      On 64-bit Windows with Visual Studio 2019, execute:
+         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201964 -C Release -VV -O hdf5.log
       On 32-bit Windows with Visual Studio 2017, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2017 -C Release -VV -O hdf5.log
       On 64-bit Windows with Visual Studio 2017, execute:
@@ -439,12 +444,11 @@ These five steps are described in detail below.
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
-            * Visual Studio 11 2012
-            * Visual Studio 11 2012 Win64
-            * Visual Studio 12 2013
-            * Visual Studio 12 2013 Win64
             * Visual Studio 14 2015
             * Visual Studio 14 2015 Win64
+            * Visual Studio 15 2017
+            * Visual Studio 15 2017 Win64
+            * Visual Studio 16 2019
 
         <options> is:
             * SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
