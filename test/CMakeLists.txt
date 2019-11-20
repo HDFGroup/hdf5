@@ -17,9 +17,11 @@ set (TEST_LIB_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/external_common.c
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
     ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_common.c
+    ${HDF5_TEST_SOURCE_DIR}/vds_swmr_common.c
 )
 
 set (TEST_LIB_HEADERS
+    ${HDF5_TEST_SOURCE_DIR}/H5srcdir.h
     ${HDF5_TEST_SOURCE_DIR}/h5test.h
     ${HDF5_TEST_SOURCE_DIR}/cache_common.h
     ${HDF5_TEST_SOURCE_DIR}/external_common.h
