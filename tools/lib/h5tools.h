@@ -513,7 +513,7 @@ typedef struct h5tools_context_t {
     hsize_t p_max_idx[H5S_MAX_RANK];  /* max selected index */
     int  prev_multiline;              /* was prev datum multiline? */
     size_t prev_prefix_len;           /* length of previous prefix */
-    int  continuation;                /*c ontinuation of previous data?*/
+    int  continuation;                /* continuation of previous data?*/
     hsize_t size_last_dim;            /* the size of the last dimension, needed so we can break after each row */
     unsigned  indent_level;           /* the number of times we need some extra indentation */
     unsigned  default_indent_level;   /* this is used when the indent level gets changed */

@@ -1952,7 +1952,7 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED * data, int pe
  * Function:    dump_extlink
  *
  * Purpose:     Dump an external link
- *      Function does directly open the target file,
+ *      Function does not directly open the target file,
  *      it initializes a new set of tables for the external file.
  *      Errors are suppressed.
  *
