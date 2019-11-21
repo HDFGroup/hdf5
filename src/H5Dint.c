@@ -1334,14 +1334,14 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to construct layout information")
 
     /* Update the dataset's object header info. */
-    if(H5D__update_oh_info(file, new_dset, dapl_id) < 0)
+    if(H5D__update_oh_info(file, new_dset, new_dset->shared->dapl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't update the metadata cache")
 
     /* Indicate that the layout information was initialized */
     layout_init = TRUE;
 
     /* Set up append flush parameters for the dataset */
-    if(H5D__append_flush_setup(new_dset, dapl_id) < 0)
+    if(H5D__append_flush_setup(new_dset, new_dset->shared->dapl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set up flush append property")
 
     /* Set the external file prefix */
@@ -1395,6 +1395,8 @@ done:
                 } /* end if */
             } /* end if */
             if(new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
+            if(new_dset->shared->dapl_id != 0 && H5I_dec_ref(new_dset->shared->dapl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
             new_dset->shared->extfile_prefix = (char *)H5MM_xfree(new_dset->shared->extfile_prefix);
             new_dset->shared->vds_prefix = (char *)H5MM_xfree(new_dset->shared->vds_prefix);
@@ -1982,12 +1984,13 @@ H5D_close(H5D_t *dataset)
             if(H5AC_cork(dataset->oloc.file, dataset->oloc.addr, H5AC__UNCORK, NULL) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTUNCORK, FAIL, "unable to uncork an object")
 
-        /* Release datatype, dataspace and creation property list -- there isn't
+        /* Release datatype, dataspace and creation and access property lists -- there isn't
          * much we can do if one of these fails, so we just continue.
          */
         free_failed |= (H5I_dec_ref(dataset->shared->type_id) < 0) ||
                           (H5S_close(dataset->shared->space) < 0) ||
-                          (H5I_dec_ref(dataset->shared->dcpl_id) < 0);
+                          (H5I_dec_ref(dataset->shared->dcpl_id) < 0) ||
+                          (H5I_dec_ref(dataset->shared->dapl_id) < 0);
 
         /* Remove the dataset from the list of opened objects in the file */
         if(H5FO_top_decr(dataset->oloc.file, dataset->oloc.addr) < 0)
