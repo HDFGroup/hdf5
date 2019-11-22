@@ -198,8 +198,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     #
 #   H5_ECFLAGS="$H5_ECFLAGS -Werror=discarded-qualifiers"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=implicit-function-declaration"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=incompatible-pointer-types"
-    H5_ECFLAGS="$H5_ECFLAGS -Wmaybe-uninitialized"
+    H5_CFLAGS="$H5_CFLAGS -Wmaybe-uninitialized"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=pointer-sign"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=pointer-to-int-cast"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=switch"
@@ -325,6 +324,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # gcc 5
     if test $cc_vers_major -ge 5; then
         H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
+        H5_ECFLAGS="$H5_ECFLAGS -Werror=incompatible-pointer-types"
     fi
 
     # gcc 6
