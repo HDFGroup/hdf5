@@ -169,33 +169,40 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # it to the developer flags.
     #
     H5_CFLAGS="$H5_CFLAGS -pedantic -Wall -Wextra"
-    H5_CFLAGS="$H5_CFLAGS -Wcast-qual -Wconversion -Wfloat-equal"
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Wno-format-nonliteral -Winit-self -Winvalid-pch -Wmissing-include-dirs"
-    H5_CFLAGS="$H5_CFLAGS -Wshadow"
-    H5_CFLAGS="$H5_CFLAGS -Wundef -Wwrite-strings"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=bad-function-cast"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=cast-align"
+    H5_CFLAGS="$H5_CFLAGS -Wcast-qual -Wconversion"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=declaration-after-statement"
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wdisabled-optimization"
+    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal"
+    H5_CFLAGS="$H5_CFLAGS -Wformat=2 -Wno-format-nonliteral -Winit-self -Winvalid-pch"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=missing-declarations"
+    H5_CFLAGS="$H5_CFLAGS -Wmissing-include-dirs"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=missing-prototypes"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=nested-externs"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=old-style-definition"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=packed"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=redundant-decls"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=shadow"
+    H5_ECFLAGS="$H5_ECFLAGS -Werror=strict-prototypes"
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wswitch-default"
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wswitch-enum"
+    H5_CFLAGS="$H5_CFLAGS -Wundef"
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wunused-macros"
+    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wunsafe-loop-optimizations"
+    H5_CFLAGS="$H5_CFLAGS -Wwrite-strings"
 
     #
     # HDF5 code should not trigger the following warnings under any
     # circumstances, so ask the compiler to treat them as errors:
     #
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=bad-function-cast"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=cast-align"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=cast-function-type"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=declaration-after-statement"
 #   H5_ECFLAGS="$H5_ECFLAGS -Werror=discarded-qualifiers"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=implicit-function-declaration"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=incompatible-pointer-types"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=maybe-uninitialized"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=missing-declarations"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=missing-prototypes"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=nested-externs"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=old-style-definition"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=packed"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=pointer-sign"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=pointer-to-int-cast"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=redundant-decls"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=shadow"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=strict-prototypes"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=switch"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=unused-but-set-variable"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=unused-function"
@@ -212,19 +219,6 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # NOTE: -Wformat-nonliteral added back in here (from being disabled in H5_CFLAGS)
     DEVELOPER_WARNING_CFLAGS="-Winline -Waggregate-return -Wmissing-format-attribute -Wmissing-noreturn -Wformat-nonliteral"
     NO_DEVELOPER_WARNING_CFLAGS="-Wno-inline -Wno-aggregate-return -Wno-missing-format-attribute -Wno-missing-noreturn"
-
-    #
-    # Let's discuss:
-    #
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wdisabled-optimization"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wunused-macros"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wunsafe-loop-optimizations"
-
-    #
-    # -Wswitch is helpful, but these seem a step too far---let's discuss:
-    #
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wswitch-default"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wswitch-enum"
 
     #######################
     # gcc 4 special cases #
@@ -312,7 +306,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
         # before burdening the whole development team.
         #
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstack-usage=8192"
-	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wvector-operation-performance"
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wvector-operation-performance"
 
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
         NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
