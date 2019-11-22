@@ -199,7 +199,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
 #   H5_ECFLAGS="$H5_ECFLAGS -Werror=discarded-qualifiers"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=implicit-function-declaration"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=incompatible-pointer-types"
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=maybe-uninitialized"
+    H5_ECFLAGS="$H5_ECFLAGS -Wmaybe-uninitialized"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=pointer-sign"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=pointer-to-int-cast"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=switch"
@@ -349,6 +349,12 @@ if test "X-gcc" = "X-$cc_vendor"; then
 
     # gcc 8
     if test $cc_vers_major -ge 8; then
+        # For GCC 8, promote maybe-initialized warnings to an error.  GCC 8
+        # reports 0 maybe-uninitialized warnings where earlier versions
+        # make many false reports.  GCC 8 seems to analyze calls to static
+        # in order to detect initializations that occur there.  It's possible
+        # that GCC 8 only performs that analysis at -O3, though.
+        H5_ECFLAGS="$H5_ECFLAGS -Werror=maybe-uninitialized"
         H5_ECFLAGS="$H5_ECFLAGS -Werror=cast-function-type"
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstringop-overflow=4 -Wsuggest-attribute=cold -Wsuggest-attribute=malloc"
         NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=cold -Wno-suggest-attribute=malloc"
