@@ -409,7 +409,12 @@ static herr_t
 H5HF__cache_hdr_get_final_load_size(const void *_image, size_t image_len,
     void *_udata, size_t *actual_len)
 {
-    H5HF_hdr_t hdr;             /* Temporary fractal heap header */
+    /* Temporary fractal heap header, initialized because GCC 5.5 does
+     * not realize that the H5HF__hdr_prefix_decode() call is sufficient
+     * to initialize.  GCC 8 is clever enough to see that the variable
+     * is initialized.  TBD condition on compiler version.
+     */
+    H5HF_hdr_t hdr = {.filter_len = 0};
     const uint8_t *image = (const uint8_t *)_image;       /* Pointer into into supplied image */
     H5HF_hdr_cache_ud_t *udata = (H5HF_hdr_cache_ud_t *)_udata; /* User data for callback */
     herr_t ret_value = SUCCEED; /* Return value */

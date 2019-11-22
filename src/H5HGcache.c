@@ -206,7 +206,11 @@ static herr_t
 H5HG__cache_heap_get_final_load_size(const void *image, size_t image_len,
     void *udata, size_t *actual_len)
 {
-    H5HG_heap_t heap;                   /* Global heap */
+    /* Global heap, initialized because GCC 5.5 cannot see that
+     * H5HG__hdr_deserialize() initializes.  TBD condition on compiler
+     * version.
+     */
+    H5HG_heap_t heap = {.size = 0};
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
