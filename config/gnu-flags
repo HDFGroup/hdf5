@@ -196,7 +196,6 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # HDF5 code should not trigger the following warnings under any
     # circumstances, so ask the compiler to treat them as errors:
     #
-    H5_ECFLAGS="$H5_ECFLAGS -Werror=cast-function-type"
 #   H5_ECFLAGS="$H5_ECFLAGS -Werror=discarded-qualifiers"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=implicit-function-declaration"
     H5_ECFLAGS="$H5_ECFLAGS -Werror=incompatible-pointer-types"
@@ -350,6 +349,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
 
     # gcc 8
     if test $cc_vers_major -ge 8; then
+        H5_ECFLAGS="$H5_ECFLAGS -Werror=cast-function-type"
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstringop-overflow=4 -Wsuggest-attribute=cold -Wsuggest-attribute=malloc"
         NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=cold -Wno-suggest-attribute=malloc"
         H5_CFLAGS="$H5_CFLAGS -Wattribute-alias -Wcast-align=strict -Wshift-overflow=2"
