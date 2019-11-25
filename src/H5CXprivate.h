@@ -41,8 +41,10 @@
 
 /* API context state */
 typedef struct H5CX_state_t {
+    hid_t dcpl_id;              /* DCPL for operation */
     hid_t dxpl_id;              /* DXPL for operation */
     hid_t lapl_id;              /* LAPL for operation */
+    hid_t lcpl_id;              /* LCPL for operation */
     void *vol_wrap_ctx;         /* VOL connector's "wrap context" for creating IDs */
     H5VL_connector_prop_t vol_connector_prop;   /* VOL connector property */
 
@@ -77,6 +79,7 @@ H5_DLL herr_t H5CX_free_state(H5CX_state_t *api_state);
 
 /* "Setter" routines for API context info */
 H5_DLL void H5CX_set_dxpl(hid_t dxpl_id);
+H5_DLL void H5CX_set_lcpl(hid_t lcpl_id);
 H5_DLL void H5CX_set_lapl(hid_t lapl_id);
 H5_DLL void H5CX_set_dcpl(hid_t dcpl_id);
 H5_DLL herr_t H5CX_set_libver_bounds(H5F_t *f);
@@ -122,11 +125,16 @@ H5_DLL herr_t H5CX_get_data_transform(H5Z_data_xform_t **data_transform);
 H5_DLL herr_t H5CX_get_vlen_alloc_info(H5T_vlen_alloc_info_t *vl_alloc_info);
 H5_DLL herr_t H5CX_get_dt_conv_cb(H5T_conv_cb_t *cb_struct);
 
+/* "Getter" routines for LCPL properties cached in API context */
+H5_DLL herr_t H5CX_get_encoding(H5T_cset_t* encoding);
+H5_DLL herr_t H5CX_get_intermediate_group(unsigned* crt_intermed_group);
+
 /* "Getter" routines for LAPL properties cached in API context */
 H5_DLL herr_t H5CX_get_nlinks(size_t *nlinks);
 
 /* "Getter" routines for DCPL properties cached in API context */
 H5_DLL herr_t H5CX_get_dset_min_ohdr_flag(hbool_t *dset_min_ohdr_flag);
+H5_DLL herr_t H5CX_get_ohdr_flags(uint8_t *ohdr_flags);
 
 /* "Getter" routines for DAPL properties cached in API context */
 H5_DLL herr_t H5CX_get_ext_file_prefix(const char **prefix_extfile);
