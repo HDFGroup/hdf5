@@ -353,11 +353,7 @@ H5F__cache_superblock_get_final_load_size(const void *_image, size_t image_len,
 {
     const uint8_t *image = _image; /* Pointer into raw data buffer */
     H5F_superblock_cache_ud_t *udata = (H5F_superblock_cache_ud_t *)_udata; /* User data */
-    /* Temporary file superblock, initialized because GCC 5.5 does not
-     * realize that H5F__superblock_prefix_decode() initializes it.
-     * TBD condition on compiler version.
-     */
-    H5F_super_t sblock = {.super_vers = 0, .sizeof_addr = 0, .sizeof_size = 0};
+    H5F_super_t sblock; /* Temporary file superblock */
     htri_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -368,6 +364,15 @@ H5F__cache_superblock_get_final_load_size(const void *_image, size_t image_len,
     HDassert(actual_len);
     HDassert(*actual_len == image_len);
     HDassert(image_len >= H5F_SUPERBLOCK_FIXED_SIZE + 6);
+
+    /* Initialize because GCC 5.5 does not realize that
+     * H5F__superblock_prefix_decode() initializes it.
+     *
+     * TBD condition on compiler version.
+     */
+    sblock.super_vers = 0;
+    sblock.sizeof_addr = 0;
+    sblock.sizeof_size = 0;
 
     /* Deserialize the file superblock's prefix */
     if(H5F__superblock_prefix_decode(&sblock, &image, udata, TRUE) < 0)

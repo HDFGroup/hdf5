@@ -206,11 +206,7 @@ static herr_t
 H5HG__cache_heap_get_final_load_size(const void *image, size_t image_len,
     void *udata, size_t *actual_len)
 {
-    /* Global heap, initialized because GCC 5.5 cannot see that
-     * H5HG__hdr_deserialize() initializes.  TBD condition on compiler
-     * version.
-     */
-    H5HG_heap_t heap = {.size = 0};
+    H5HG_heap_t heap = {.size = 0}; /* Global heap */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -222,6 +218,12 @@ H5HG__cache_heap_get_final_load_size(const void *image, size_t image_len,
     HDassert(*actual_len == image_len);
     HDassert(image_len == H5HG_MINSIZE);
 
+    /* Initialize because GCC 5.5 cannot see that
+     * H5HG__hdr_deserialize() initializes.
+     *
+     * TBD condition on compiler version.
+     */
+    heap.size = 0;
     /* Deserialize the heap's header */
     if(H5HG__hdr_deserialize(&heap, (const uint8_t *)image, (const H5F_t *)udata) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode global heap prefix")
