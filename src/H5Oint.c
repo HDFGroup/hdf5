@@ -240,7 +240,7 @@ H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx
         version = H5O_VERSION_1;
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    version = (uint8_t)MAX(version, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(f)]);
+    ASSIGN_TO_SMALLER_SIZE(version, uint8_t, MAX(version, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(f)]), int);
 
     /* Version bounds check */
     if(version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(f)])

@@ -4707,14 +4707,20 @@ static int process(struct Options *opt)
     return (0);
 }
 
-uint16_t swap_uint16( uint16_t val)
+uint16_t swap_uint16(uint16_t val)
 {
-    return (uint16_t)((val << 8) | (val >> 8));
+    uint16_t ret;
+
+    ASSIGN_TO_SMALLER_SIZE(ret, uint16_t, (val << 8) | (val >> 8), int);
+    return ret;
 }
 
 int16_t swap_int16(int16_t val)
 {
-    return (uint16_t)((val << 8) | ((val >> 8) & 0xFF));
+    uint16_t ret;
+
+    ASSIGN_TO_SMALLER_SIZE(ret, int16_t, (val << 8) | ((val >> 8) & 0xFF), int);
+    return ret;
 }
 
 uint32_t swap_uint32(uint32_t val)

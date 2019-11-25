@@ -256,8 +256,9 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     *p++ = (uint8_t)flags;
 
     /* Dataspace type */
-    if(sdim->version > H5O_SDSPACE_VERSION_1)
-        *p++ = (uint8_t)sdim->type;
+    if(sdim->version > H5O_SDSPACE_VERSION_1) {
+        ASSIGN_TO_SMALLER_SIZE(*p++, uint8_t, sdim->type, int);
+    }
     else {
         *p++ = 0; /*reserved*/
         *p++ = 0; /*reserved*/

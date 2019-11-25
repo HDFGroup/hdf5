@@ -266,7 +266,7 @@ generate_uint8be(hbool_t external) {
     for (i = 0, n = 0; i < dims[0]; i++) {
         for (j = 0; j < dims[1]; j++) {
             for (k = 0; k < dims[2]; k++, n++) {
-                wdata[n] = (uint8_t)(n * ((n & 1) ? (-1) : (1)));
+                ASSIGN_TO_SMALLER_SIZE(wdata[n], uint8_t, n * ((n & 1) ? (-1) : (1)), int);
             }
         }
     }
