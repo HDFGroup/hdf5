@@ -15,13 +15,13 @@
 #define H5S_FRIEND		/*prevent warning from including H5Spkg.h */
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free lists                           */
-#include "H5Gprivate.h"		/* Groups			  	*/
+#include "H5Dprivate.h"		/* Datasets	                    */
+#include "H5Eprivate.h"		/* Error handling		  	    */
+#include "H5FLprivate.h"	/* Free lists                   */
+#include "H5Gprivate.h"		/* Groups			  	        */
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"		/* Object headers		  	*/
-#include "H5Spkg.h"		/* Dataspaces 				*/
+#include "H5Opkg.h"	        /* Object headers		  	    */
+#include "H5Spkg.h"	        /* Dataspaces 				    */
 
 
 /* PRIVATE PROTOTYPES */
@@ -257,7 +257,7 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 
     /* Dataspace type */
     if(sdim->version > H5O_SDSPACE_VERSION_1) {
-        ASSIGN_TO_SMALLER_SIZE(*p++, uint8_t, sdim->type, int);
+        H5_CHECKED_ASSIGN(*p++, uint8_t, sdim->type, int);
     }
     else {
         *p++ = 0; /*reserved*/

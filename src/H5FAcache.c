@@ -421,7 +421,7 @@ H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
 
     /* Fixed array type */
     *image++ = (uint8_t)hdr->cparam.cls->id;
-    ASSIGN_TO_SMALLER_SIZE(*image++, uint8_t, hdr->cparam.cls->id, int);
+    H5_CHECKED_ASSIGN(*image++, uint8_t, hdr->cparam.cls->id, int);
 
     /* General array creation/configuration information */
     *image++ = hdr->cparam.raw_elmt_size;          /* Element size in file (in bytes) */

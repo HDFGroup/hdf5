@@ -24,17 +24,17 @@
 
 #define H5G_FRIEND		/*suppress error about including H5Gpkg   */
 #define H5L_FRIEND		/*suppress error about including H5Lpkg	  */
-#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+#include "H5Omodule.h"      /* This source code file is part of the H5O module */
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5private.h"		/* Generic Functions                    */
+#include "H5Eprivate.h"		/* Error handling                       */
 #include "H5FLprivate.h"	/* Free lists                           */
-#include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5Iprivate.h"         /* IDs                                  */
-#include "H5Lpkg.h"             /* Links                                */
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
+#include "H5Gpkg.h"		    /* Groups		  	                    */
+#include "H5Iprivate.h"     /* IDs                                  */
+#include "H5Lpkg.h"         /* Links                                */
+#include "H5MMprivate.h"	/* Memory management	                */
+#include "H5Opkg.h"         /* Object headers		                */
 
 
 /* PRIVATE PROTOTYPES */
@@ -316,7 +316,7 @@ H5O_link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
 
     /* Store the type of a non-default link */
     if(link_flags & H5O_LINK_STORE_LINK_TYPE)
-        ASSIGN_TO_SMALLER_SIZE(*p++, uint8_t, lnk->type, int);
+        H5_CHECKED_ASSIGN(*p++, uint8_t, lnk->type, int);
 
     /* Store the link creation order in the file, if its valid */
     if(lnk->corder_valid)

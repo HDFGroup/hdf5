@@ -206,6 +206,7 @@ while (<>) {
         ($last_c_name, $toss) = split /\:/, $_;
     }
 
+    # Retain C/C++ compile line, which comes with the line of warning
     if($_ =~ /.*[A-Za-z0-9_]\.[chC]\(.*[0-9]\):.*#.*/) {
         $last_c_name = $_;
     }
@@ -266,6 +267,7 @@ while (<>) {
 	    $line =~ s/^\s*line\s*//g;
 # print "name:'", $name, "'-'", $line, "'\n";
 # print "warning:'", $warning, "'\n";
+    # Check for Intel icc warning
     } elsif($_ =~ /.*[A-Za-z0-9_]\.[chC]\(.*[0-9]\):.*#.*/) {
         ($last_c_name, $toss, $warning) = split /\:/, $last_c_name;
         ($name, $line) = split /\(/, $last_c_name;

@@ -22,13 +22,13 @@
  *-------------------------------------------------------------------------
  */
 
-#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+#include "H5Omodule.h"      /* This source code file is part of the H5O module */
 
 
-#include "H5private.h"		/* Generic Functions			*/
+#include "H5private.h"		/* Generic Functions		*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free lists                           */
-#include "H5Opkg.h"             /* Object headers			*/
+#include "H5FLprivate.h"	/* Free lists               */
+#include "H5Opkg.h"         /* Object headers			*/
 
 
 /* PRIVATE PROTOTYPES */
@@ -183,7 +183,7 @@ H5O_ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
     *p++ = H5O_GINFO_VERSION;
 
     /* The flags for the group info */
-    ASSIGN_TO_SMALLER_SIZE(flags, unsigned char, ginfo->store_link_phase_change ?  H5O_GINFO_STORE_PHASE_CHANGE : 0, int);
+    H5_CHECKED_ASSIGN(flags, unsigned char, ginfo->store_link_phase_change ?  H5O_GINFO_STORE_PHASE_CHANGE : 0, int);
     flags = (unsigned char)(flags | (ginfo->store_est_entry_info ?  H5O_GINFO_STORE_EST_ENTRY_INFO : 0));
     *p++ = flags;
 

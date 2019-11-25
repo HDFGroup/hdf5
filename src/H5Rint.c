@@ -1020,7 +1020,7 @@ H5R__decode(const unsigned char *buf, size_t *nbytes, H5R_ref_priv_t *ref)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
 
     /* Set new reference */
-    ASSIGN_TO_SMALLER_SIZE(ref->type, int8_t, (H5R_type_t)*p++, int);
+    H5_CHECKED_ASSIGN(ref->type, int8_t, (H5R_type_t)*p++, int);
     if(ref->type <= H5R_BADTYPE || ref->type >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
 

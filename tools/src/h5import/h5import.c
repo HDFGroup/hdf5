@@ -4711,7 +4711,7 @@ uint16_t swap_uint16(uint16_t val)
 {
     uint16_t ret;
 
-    ASSIGN_TO_SMALLER_SIZE(ret, uint16_t, (val << 8) | (val >> 8), int);
+    H5_CHECKED_ASSIGN(ret, uint16_t, (val << 8) | (val >> 8), int);
     return ret;
 }
 
@@ -4719,7 +4719,7 @@ int16_t swap_int16(int16_t val)
 {
     uint16_t ret;
 
-    ASSIGN_TO_SMALLER_SIZE(ret, int16_t, (val << 8) | ((val >> 8) & 0xFF), int);
+    H5_CHECKED_ASSIGN(ret, int16_t, (val << 8) | ((val >> 8) & 0xFF), int);
     return ret;
 }
 

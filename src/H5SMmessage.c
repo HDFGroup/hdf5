@@ -22,9 +22,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"          /* Generic Functions                    */
+#include "H5Eprivate.h"         /* Error handling		                */
+#include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Opkg.h"             /* Object Headers                       */
 #include "H5SMpkg.h"            /* Shared object header messages        */
 
@@ -298,7 +298,7 @@ H5SM__message_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
     /* Sanity check */
     HDassert(ctx);
 
-    ASSIGN_TO_SMALLER_SIZE(*raw++, uint8_t, message->location, int);
+    H5_CHECKED_ASSIGN(*raw++, uint8_t, message->location, int);
     UINT32ENCODE(raw, message->hash);
 
     if(message->location == H5SM_IN_HEAP) {

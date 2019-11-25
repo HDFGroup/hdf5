@@ -30,8 +30,8 @@
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
 #include "H5CXprivate.h"        /* API Contexts                             */
-#include "H5Eprivate.h"        /* Error handling                */
-#include "H5FLprivate.h"    /* Free Lists                    */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free Lists                               */
 #include "H5Iprivate.h"         /* ID Functions                             */
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Spkg.h"             /* Dataspace functions                      */
@@ -3688,7 +3688,7 @@ H5S__hyper_get_version_enc_size(const H5S_t *space, hsize_t block_count, uint32_
                 /* Determine the encoding size */
                 enc2 = H5S__hyper_get_enc_size_real(max2);
 
-                ASSIGN_TO_SMALLER_SIZE(*enc_size, uint8_t, MAX(enc1, enc2), int);
+                H5_CHECKED_ASSIGN(*enc_size, uint8_t, MAX(enc1, enc2), int);
             } /* end if */
             else {
                 hsize_t max_size = block_count;

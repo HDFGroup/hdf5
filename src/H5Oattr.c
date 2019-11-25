@@ -16,12 +16,12 @@
 #define H5S_FRIEND	        /*suppress error about including H5Spkg	  */
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Apkg.h"		/* Attributes				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5Spkg.h"		/* Dataspaces				*/
+#include "H5private.h"	    /* Generic Functions		*/
+#include "H5Apkg.h"		    /* Attributes				*/
+#include "H5Eprivate.h"	    /* Error handling		    */
+#include "H5MMprivate.h"	/* Memory management		*/
+#include "H5Opkg.h"         /* Object headers			*/
+#include "H5Spkg.h"		    /* Dataspaces				*/
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg);
@@ -329,7 +329,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 
     /* The character encoding for the attribute's name, in later versions */
     if(attr->shared->version >= H5O_ATTR_VERSION_3) {
-        ASSIGN_TO_SMALLER_SIZE(*p++, uint8_t, attr->shared->encoding, int);
+        H5_CHECKED_ASSIGN(*p++, uint8_t, attr->shared->encoding, int);
     }
 
     /* Write the name including null terminator */
