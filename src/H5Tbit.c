@@ -21,9 +21,9 @@
 
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Tpkg.h"		/*data-type functions			  */
-#include "H5WBprivate.h"        /* Wrapped Buffers                      */
+#include "H5MMprivate.h"	/* Memory management		  */
+#include "H5Tpkg.h"		    /*data-type functions	      */
+#include "H5WBprivate.h"    /* Wrapped Buffers            */
 
 
 
@@ -363,7 +363,7 @@ H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value)
 
     /* The middle bytes */
     while (size >= 8) {
-        ASSIGN_TO_SMALLER_SIZE(buf[idx++], uint8_t, value ? 0xff : 0x00, int);
+        H5_CHECKED_ASSIGN(buf[idx++], uint8_t, value ? 0xff : 0x00, int);
         size -= 8;
     }
 
@@ -532,7 +532,7 @@ H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
         acc = buf[idx];
         acc++;
         carry = acc & 0x100;
-        ASSIGN_TO_SMALLER_SIZE(buf[idx], uint8_t, acc & 0xff, unsigned);
+        H5_CHECKED_ASSIGN(buf[idx], uint8_t, acc & 0xff, unsigned);
         idx++;
         size -= 8;
     }

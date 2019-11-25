@@ -29,7 +29,8 @@ typedef struct H5F_t H5F_t;
 #include "H5VLpublic.h"         /* Virtual Object Layer        */
 
 /* Private headers needed by this file */
-#include "H5MMprivate.h"	/* Memory management	       */
+#include "H5private.h"          /* Generic Functions           */
+#include "H5MMprivate.h"	    /* Memory management	       */
 #ifdef H5_HAVE_PARALLEL
 #include "H5Pprivate.h"         /* Property lists              */
 #endif /* H5_HAVE_PARALLEL */

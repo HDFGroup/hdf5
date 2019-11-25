@@ -408,10 +408,10 @@ H5O_fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 
     if(fill->version < H5O_FILL_VERSION_3) {
         /* Space allocation time */
-        ASSIGN_TO_SMALLER_SIZE(*p++, uint8_t, fill->alloc_time, int);
+        H5_CHECKED_ASSIGN(*p++, uint8_t, fill->alloc_time, int);
 
         /* Fill value writing time */
-        ASSIGN_TO_SMALLER_SIZE(*p++, uint8_t, fill->fill_time, int);
+        H5_CHECKED_ASSIGN(*p++, uint8_t, fill->fill_time, int);
 
         /* Whether fill value is defined */
         *p++ = (uint8_t)fill->fill_defined;
