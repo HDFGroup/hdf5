@@ -709,7 +709,7 @@ H5T__ref_obj_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t src_
 
     /* Get object address */
     if(H5R__decode_token_obj_compat((const unsigned char *)src_buf, &src_size,
-        (unsigned char *)dst_buf, H5F_SIZEOF_ADDR(src_f)) < 0)
+        (H5VL_token_t *)dst_buf, H5F_SIZEOF_ADDR(src_f)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object address")
 
 done:

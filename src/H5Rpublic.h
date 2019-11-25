@@ -70,14 +70,18 @@ typedef haddr_t hobj_ref_t;
  * machine (8 bytes currently) plus an int.
  * Note! This type can only be used with the "native" HDF5 VOL connector.
  */
-typedef unsigned char hdset_reg_ref_t[H5R_DSET_REG_REF_BUF_SIZE];
+typedef struct {
+    unsigned char content[H5R_DSET_REG_REF_BUF_SIZE];
+} hdset_reg_ref_t;
 
 /**
  * Opaque reference type. The same reference type is used for object,
  * dataset region and attribute references. This is the type that
  * should always be used with the current reference API.
  */
-typedef unsigned char H5R_ref_t[H5R_REF_BUF_SIZE];
+typedef struct {
+    unsigned char content[H5R_REF_BUF_SIZE];
+} H5R_ref_t;
 
 /********************/
 /* Public Variables */
