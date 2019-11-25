@@ -3445,14 +3445,17 @@ done:
 hid_t
 H5D_get_access_plist(const H5D_t *dset)
 {
-    H5P_genplist_t      *old_plist;     /* Default DAPL */
+    H5P_genplist_t      *old_plist;     /* Stored DAPL from dset */
     H5P_genplist_t      *new_plist;     /* New DAPL */
+    H5P_genplist_t      *def_fapl;      /* Default FAPL */
+    H5D_append_flush_t  def_append_flush_info = {0};  /* Default append flush property */
+    H5D_rdcc_t          def_chunk_info;               /* Default chunk cache property */
     hid_t               new_dapl_id = FAIL;
     hid_t               ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Make a copy of the default dataset access property list */
+    /* Make a copy of the dataset's dataset access property list */
     if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(dset->shared->dapl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get property list")
     if((new_dapl_id = H5P_copy_plist(old_plist, TRUE)) < 0)
@@ -3460,7 +3463,8 @@ H5D_get_access_plist(const H5D_t *dset)
     if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_dapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
-    /* If the dataset is chunked then copy the rdcc & append flush parameters */
+    /* If the dataset is chunked then copy the rdcc & append flush parameters.
+     * Otherwise, use the default values. */
     if(dset->shared->layout.type == H5D_CHUNKED) {
         if(H5P_set(new_plist, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &(dset->shared->cache.chunk.nslots)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache number of slots")
@@ -3470,7 +3474,33 @@ H5D_get_access_plist(const H5D_t *dset)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set preempt read chunks")
         if(H5P_set(new_plist, H5D_ACS_APPEND_FLUSH_NAME, &dset->shared->append_flush) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set append flush property")
-    } /* end if */
+    } else {
+        /* Get the default FAPL */
+        if(NULL == (def_fapl = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_ID_g)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a property list")
+
+        /* Set the data cache number of slots to the value of the default FAPL */
+        if (H5P_get(def_fapl, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &def_chunk_info.nslots) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET,FAIL, "can't get data number of slots");
+        if(H5P_set(new_plist, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &def_chunk_info.nslots) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set data cache number of slots")
+
+        /* Set the data cache byte size to the value of the default FAPL */
+        if (H5P_get(def_fapl, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &def_chunk_info.nbytes_max) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET,FAIL, "can't get data cache byte size");
+        if(H5P_set(new_plist, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &def_chunk_info.nbytes_max) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set data cache byte size")
+
+        /* Set the preempt read chunks property to the value of the default FAPL */
+        if (H5P_get(def_fapl, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &def_chunk_info.w0) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET,FAIL, "can't get preempt read chunks");
+        if(H5P_set(new_plist, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &def_chunk_info.w0) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set preempt read chunks")
+
+        /* Set the append flush property to its default value */
+        if(H5P_set(new_plist, H5D_ACS_APPEND_FLUSH_NAME, &def_append_flush_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set append flush property")
+    }/* end if-else */
 
     /* Set the VDS view & printf gap options */
     if(H5P_set(new_plist, H5D_ACS_VDS_VIEW_NAME, &(dset->shared->layout.storage.u.virt.view)) < 0)
