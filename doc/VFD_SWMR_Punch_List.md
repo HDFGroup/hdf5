@@ -120,15 +120,16 @@ guide to the syntax.
     SWMR does not have to deal with it. However, if the global heap
     overhaul does not take place, then we have more work to do.
 
-26. **David, in-progress** Fix the expand/shrink test.
+26. **David, needs merge** Fix the expand/shrink test.
 
-    The test *probably* fails because the dataset extent is enlarged
-    before the data is written, so arbitrary data is present until the
-    data appears.  If a tick sneaks in between the `H5Dset_extent` and
-    the `H5Dwrite`, then the reader may read the arbitrary data.
+    The test appeared to fail because the dataset extent was enlarged
+    before the data was written, so arbitrary data was present.
+    If a tick snuck in between the `H5Dset_extent` and
+    the `H5Dwrite`, then the reader read the arbitrary data.
 
     In the `gaussian` test, I have a heuristic that avoids reading
-    arbitrary data.  I may replicate that in the expand/shrink test.
+    arbitrary data.  Replicating that in the expand/shrink test has
+    fixed it.  Essentially, the reader trails the writer by a bit.
 
     Ultimately, we should suspend ticks over the H5Dset_extent/H5Dwrite.
 
