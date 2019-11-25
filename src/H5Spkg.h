@@ -147,6 +147,21 @@ struct H5S_hyper_span_t {
     struct H5S_hyper_span_t *next;      /* Pointer to next span in list */
 };
 
+/* "Operation info" struct.  Used to hold temporary information during  copies,
+ * 'adjust', 'nelem', and 'rebuild' operations, and higher level algorithms that
+ * generate this information. */
+typedef struct H5S_hyper_op_info_t {
+    uint64_t op_gen;            /* Generation of the scratch info */
+    union {
+        struct H5S_hyper_span_info_t *copied;  /* Pointer to already copied span tree */
+        hsize_t nelmts;         /* # of elements */
+        hsize_t nblocks;        /* # of blocks */
+#ifdef H5_HAVE_PARALLEL
+        MPI_Datatype down_type; /* MPI datatype for span tree */
+#endif  /* H5_HAVE_PARALLEL */
+    }u;
+} H5S_hyper_op_info_t;
+
 /* Information about a list of hyperslab spans in one dimension (typedef'd in H5Sprivate.h) */
 struct H5S_hyper_span_info_t {
     unsigned count;     /* Ref. count of number of spans which share this span */
@@ -165,17 +180,10 @@ struct H5S_hyper_span_info_t {
     hsize_t *low_bounds;        /* The smallest element selected in each dimension */
     hsize_t *high_bounds;       /* The largest element selected in each dimension */
 
-    /* "Operation generation" fields */
+    /* "Operation info" fields */
     /* (Used during copies, 'adjust', 'nelem', and 'rebuild' operations) */
-    uint64_t op_gen;            /* Generation of the scratch info */
-    union {
-        struct H5S_hyper_span_info_t *copied;  /* Pointer to already copied span tree */
-        hsize_t nelmts;         /* # of elements */
-        hsize_t nblocks;        /* # of blocks */
-#ifdef H5_HAVE_PARALLEL
-        MPI_Datatype down_type; /* MPI datatype for span tree */
-#endif  /* H5_HAVE_PARALLEL */
-    }u;
+    /* Currently the maximum number of simultaneous operations is 2 */
+    H5S_hyper_op_info_t op_info[2];
 
     struct H5S_hyper_span_t *head;  /* Pointer to the first span of list of spans in the current dimension */
     struct H5S_hyper_span_t *tail;  /* Pointer to the last span of list of spans in the current dimension */
@@ -377,7 +385,8 @@ H5_DLL uint64_t H5S__hyper_get_op_gen(void);
 H5_DLL void H5S__hyper_rebuild(H5S_t *space);
 H5_DLL herr_t H5S__modify_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
 H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
-    const H5S_t *dst_space, const H5S_t *src_intersect_space, H5S_t *proj_space);
+    const H5S_t *dst_space, const H5S_t *src_intersect_space, H5S_t *proj_space,
+    hbool_t share_space);
 
 /* Testing functions */
 #ifdef H5S_TESTING
