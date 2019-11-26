@@ -578,20 +578,6 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 
-        /* H5Iget_file_id */
-        case H5VL_NATIVE_FILE_GET_FILE_ID:
-            {
-                H5I_type_t  type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
-                hbool_t     app_ref = (hbool_t)HDva_arg(arguments, int);
-                hid_t      *file_id = HDva_arg(arguments, hid_t *);
-
-                if(NULL == (f = H5F__get_file(obj, type)))
-                    HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file or file object")
-                if((*file_id = H5F__get_file_id(f, app_ref)) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file ID")
-                break;
-            }
-
         /* H5Fclear_elink_file_cache */
         case H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE:
             {

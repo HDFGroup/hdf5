@@ -57,25 +57,24 @@ typedef int H5VL_native_file_optional_t;
 #define H5VL_NATIVE_FILE_GET_MDC_SIZE                   7   /* H5Fget_mdc_size                      */
 #define H5VL_NATIVE_FILE_GET_SIZE                       8   /* H5Fget_filesize                      */
 #define H5VL_NATIVE_FILE_GET_VFD_HANDLE                 9   /* H5Fget_vfd_handle                    */
-#define H5VL_NATIVE_FILE_GET_FILE_ID                    10  /* H5Fget_file_id                       */
-#define H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE             11  /* H5Freset_mdc_hit_rate_stats          */
-#define H5VL_NATIVE_FILE_SET_MDC_CONFIG                 12  /* H5Fset_mdc_config                    */
-#define H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO   13  /* H5Fget_metadata_read_retry_info      */
-#define H5VL_NATIVE_FILE_START_SWMR_WRITE               14  /* H5Fstart_swmr_write                  */
-#define H5VL_NATIVE_FILE_START_MDC_LOGGING              15  /* H5Fstart_mdc_logging                 */
-#define H5VL_NATIVE_FILE_STOP_MDC_LOGGING               16  /* H5Fstop_mdc_logging                  */
-#define H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS         17  /* H5Fget_mdc_logging_status            */
-#define H5VL_NATIVE_FILE_FORMAT_CONVERT                 18  /* H5Fformat_convert                    */
-#define H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS     19  /* H5Freset_page_buffering_stats        */
-#define H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS       20  /* H5Fget_page_buffering_stats          */
-#define H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO             21  /* H5Fget_mdc_image_info                */
-#define H5VL_NATIVE_FILE_GET_EOA                        22  /* H5Fget_eoa                           */
-#define H5VL_NATIVE_FILE_INCR_FILESIZE                  23  /* H5Fincrement_filesize                */
-#define H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS              24  /* H5Fset_latest_format/libver_bounds   */
-#define H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG         25  /* H5Fget_dset_no_attrs_hint            */
-#define H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG         26  /* H5Fset_dset_no_attrs_hint            */
-#define H5VL_NATIVE_FILE_GET_MPI_ATOMICITY              27  /* H5Fget_mpi_atomicity                 */
-#define H5VL_NATIVE_FILE_SET_MPI_ATOMICITY              28  /* H5Fset_mpi_atomicity                 */
+#define H5VL_NATIVE_FILE_RESET_MDC_HIT_RATE             10  /* H5Freset_mdc_hit_rate_stats          */
+#define H5VL_NATIVE_FILE_SET_MDC_CONFIG                 11  /* H5Fset_mdc_config                    */
+#define H5VL_NATIVE_FILE_GET_METADATA_READ_RETRY_INFO   12  /* H5Fget_metadata_read_retry_info      */
+#define H5VL_NATIVE_FILE_START_SWMR_WRITE               13  /* H5Fstart_swmr_write                  */
+#define H5VL_NATIVE_FILE_START_MDC_LOGGING              14  /* H5Fstart_mdc_logging                 */
+#define H5VL_NATIVE_FILE_STOP_MDC_LOGGING               15  /* H5Fstop_mdc_logging                  */
+#define H5VL_NATIVE_FILE_GET_MDC_LOGGING_STATUS         16  /* H5Fget_mdc_logging_status            */
+#define H5VL_NATIVE_FILE_FORMAT_CONVERT                 17  /* H5Fformat_convert                    */
+#define H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS     18  /* H5Freset_page_buffering_stats        */
+#define H5VL_NATIVE_FILE_GET_PAGE_BUFFERING_STATS       19  /* H5Fget_page_buffering_stats          */
+#define H5VL_NATIVE_FILE_GET_MDC_IMAGE_INFO             20  /* H5Fget_mdc_image_info                */
+#define H5VL_NATIVE_FILE_GET_EOA                        21  /* H5Fget_eoa                           */
+#define H5VL_NATIVE_FILE_INCR_FILESIZE                  22  /* H5Fincrement_filesize                */
+#define H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS              23  /* H5Fset_latest_format/libver_bounds   */
+#define H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG         24  /* H5Fget_dset_no_attrs_hint            */
+#define H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG         25  /* H5Fset_dset_no_attrs_hint            */
+#define H5VL_NATIVE_FILE_GET_MPI_ATOMICITY              26  /* H5Fget_mpi_atomicity                 */
+#define H5VL_NATIVE_FILE_SET_MPI_ATOMICITY              27  /* H5Fset_mpi_atomicity                 */
 
 /* Typedef and values for native VOL connector group optional VOL operations */
 typedef int H5VL_native_group_optional_t;
