@@ -161,6 +161,7 @@ typedef enum H5VL_link_specific_t {
 
 /* types for object GET callback */
 typedef enum H5VL_object_get_t {
+    H5VL_OBJECT_GET_FILE,              /* object file                       */
     H5VL_OBJECT_GET_NAME,              /* object name                       */
     H5VL_OBJECT_GET_TYPE               /* object type                       */
 } H5VL_object_get_t;
