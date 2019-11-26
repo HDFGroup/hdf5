@@ -12,7 +12,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include <stdio.h>
 #include <stdlib.h>
-#include "H5private.h"
 
 #include "gif.h"
 
@@ -174,7 +173,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
     /* Now read in values from the image descriptor */
     IWidth = GifImageDesc->ImageWidth;
     IHeight = GifImageDesc->ImageHeight;
-    H5_CHECKED_ASSIGN(Interlace, unsigned char, GifImageDesc->PackedField & 0x40, int);
+    ASSIGN_TO_SMALLER_SIZE(Interlace, unsigned char, GifImageDesc->PackedField & 0x40, int);
 
     /*
      * Note that I ignore the possible existence of a local color map.  I'm

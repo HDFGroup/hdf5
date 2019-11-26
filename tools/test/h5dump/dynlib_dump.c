@@ -70,7 +70,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
         /* Subtract the original value with MULTIPLIER */
         while(buf_left > 0) {
             char temp = *int_ptr;
-            H5_CHECKED_ASSIGN(*int_ptr, char, temp - MULTIPLIER, int);
+            ASSIGN_TO_SMALLER_SIZE(*int_ptr, char, temp - MULTIPLIER, int);
             int_ptr++;
             buf_left -= sizeof(*int_ptr);
         } /* end while */
@@ -79,7 +79,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
         /* Add the original value with MULTIPLIER */
         while(buf_left > 0) {
             char temp = *int_ptr;
-            H5_CHECKED_ASSIGN(*int_ptr, char, temp + MULTIPLIER, int);
+            ASSIGN_TO_SMALLER_SIZE(*int_ptr, char, temp + MULTIPLIER, int);
             int_ptr++;
             buf_left -= sizeof(*int_ptr);
         } /* end while */
