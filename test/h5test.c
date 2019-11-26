@@ -1329,21 +1329,23 @@ h5_dump_info_object(MPI_Info info)
 {
     char  key[MPI_MAX_INFO_KEY+1];
     char  value[MPI_MAX_INFO_VAL+1];
-    int   flag;
-    int   i, nkeys;
+    int    flag;
+    int    i, nkeys;
 
-    HDprintf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
-    if (info==MPI_INFO_NULL) {
-        HDprintf("object is MPI_INFO_NULL\n");
+    HDprintf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", (int)info,
+  MPI_MAX_INFO_VAL);
+    if (info==MPI_INFO_NULL){
+  HDprintf("object is MPI_INFO_NULL\n");
     }
     else {
-        MPI_Info_get_nkeys(info, &nkeys);
-        HDprintf("object has %d items\n", nkeys);
-        for (i=0; i<nkeys; i++) {
-            MPI_Info_get_nthkey(info, i, key);
-            MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
-            HDprintf("%s=%s\n", key, value);
-        }
+  MPI_Info_get_nkeys(info, &nkeys);
+  HDprintf("object has %d items\n", nkeys);
+  for (i=0; i<nkeys; i++){
+      MPI_Info_get_nthkey(info, i, key);
+      MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
+      HDprintf("%s=%s\n", key, value);
+  }
+
     }
 }
 #endif  /* H5_HAVE_PARALLEL */
