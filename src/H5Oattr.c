@@ -328,9 +328,8 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     UINT16ENCODE(p, attr->shared->ds_size);
 
     /* The character encoding for the attribute's name, in later versions */
-    if(attr->shared->version >= H5O_ATTR_VERSION_3) {
-        ASSIGN_TO_SMALLER_SIZE(*p++, uint8_t, attr->shared->encoding, int);
-    }
+    if(attr->shared->version >= H5O_ATTR_VERSION_3)
+        *p++ = (uint8_t)attr->shared->encoding;
 
     /* Write the name including null terminator */
     H5MM_memcpy(p, attr->shared->name, name_len);

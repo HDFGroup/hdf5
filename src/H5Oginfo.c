@@ -183,7 +183,7 @@ H5O_ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
     *p++ = H5O_GINFO_VERSION;
 
     /* The flags for the group info */
-    ASSIGN_TO_SMALLER_SIZE(flags, unsigned char, ginfo->store_link_phase_change ?  H5O_GINFO_STORE_PHASE_CHANGE : 0, int);
+    flags = (unsigned char)(ginfo->store_link_phase_change ?  H5O_GINFO_STORE_PHASE_CHANGE : 0);
     flags = (unsigned char)(flags | (ginfo->store_est_entry_info ?  H5O_GINFO_STORE_EST_ENTRY_INFO : 0));
     *p++ = flags;
 

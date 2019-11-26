@@ -1216,8 +1216,8 @@ test_compound_6(void)
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)((void *)orig)) + i;
-        ASSIGN_TO_SMALLER_SIZE(s_ptr->b, short, (i*8+1) & 0x7fff, int);
-        ASSIGN_TO_SMALLER_SIZE(s_ptr->d, short, (i*8+6) & 0x7fff, int);
+        s_ptr->b    = (short)((i*8+1) & 0x7fff);
+        s_ptr->d    = (short)((i*8+6) & 0x7fff);
     }
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 

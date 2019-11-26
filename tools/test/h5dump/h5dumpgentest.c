@@ -2565,7 +2565,7 @@ static void gent_bitfields(void)
         goto error;
 
     for(i = 0; i < sizeof buf; i++)
-        ASSIGN_TO_SMALLER_SIZE(buf[i], unsigned char, 0xff ^ i, size_t);
+        buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         goto error;
     if(H5Sclose(space) < 0) goto error;
@@ -2579,7 +2579,7 @@ static void gent_bitfields(void)
             (dset = H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
     for(i = 0; i < sizeof buf; i++)
-        ASSIGN_TO_SMALLER_SIZE(buf[i], unsigned char, 0xff ^ i, size_t);
+        buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         goto error;
     if(H5Sclose(space) < 0) goto error;
@@ -9814,7 +9814,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        ASSIGN_TO_SMALLER_SIZE(buf[i], uint8_t, 0xff ^ i, size_t);
+                        buf[i] = (uint8_t)(0xff ^ i);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                     H5Dclose(dset);
@@ -9829,7 +9829,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        ASSIGN_TO_SMALLER_SIZE(buf2[i], uint16_t, 0xffff ^ (i * 16), size_t);
+                        buf2[i] = (uint16_t)(0xffff ^ (i * 16));
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
                     H5Dclose(dset);
@@ -9879,7 +9879,7 @@ static void gent_bitnopaquefields(void)
                 if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                     if ((dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         for(i = 0; i < nelmts; i++)
-                            ASSIGN_TO_SMALLER_SIZE(buf[i], uint8_t, 0xff ^ i, size_t);
+                            buf[i] = (uint8_t)(0xff ^ i);
                         H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                         H5Dclose(dset);
                     }
@@ -9895,7 +9895,7 @@ static void gent_bitnopaquefields(void)
                 if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                     if ((dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         for(i = 0; i < nelmts; i++)
-                            ASSIGN_TO_SMALLER_SIZE(buf2[i], uint16_t, 0xffff ^ (i * 16), size_t);
+                            buf2[i] = (uint16_t)(0xffff ^ (i * 16));
 
                         H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
                         H5Dclose(dset);
@@ -9918,8 +9918,8 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for(i = 0; i < nelmts; i++) {
-                        ASSIGN_TO_SMALLER_SIZE(buf5[i].a, uint8_t, 0xff ^ i, size_t);
-                        ASSIGN_TO_SMALLER_SIZE(buf5[i].b, uint16_t, 0xffff ^ (i * 16), size_t);
+                        buf5[i].a = (uint8_t)(0xff ^ i);
+                        buf5[i].b = (uint16_t)(0xffff ^ (i * 16));
                         buf5[i].c = (uint32_t)0xffffffff ^ (uint32_t)(i * 32);
                         buf5[i].d = (uint64_t)0xffffffffffffffff ^ (uint64_t)(i * 64);
                     }
