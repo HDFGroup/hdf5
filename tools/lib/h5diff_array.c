@@ -2251,6 +2251,9 @@ static hsize_t character_compare(char *mem1, char *mem2, hsize_t i, size_t u,
  *-------------------------------------------------------------------------
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wunused-but-set-variable"
+
 static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2,
         hsize_t i, int rank, hsize_t *dims, hsize_t *acc, hsize_t *pos, diff_opt_t *opts, const char *obj1, const char *obj2, int *ph)
 {
@@ -2311,6 +2314,7 @@ static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2,
 
     return nfound;
 }
+#pragma GCC diagnostic pop
 
 /*-------------------------------------------------------------------------
  * Function: diff_float
