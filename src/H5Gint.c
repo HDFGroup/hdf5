@@ -583,7 +583,7 @@ H5G_nameof(const H5G_t *grp)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI((H5G_name_t *)(grp ? &(grp->path) : NULL))
+    FUNC_LEAVE_NOAPI(grp ? &(grp->path) : NULL)
 } /* end H5G_nameof() */
 
 
