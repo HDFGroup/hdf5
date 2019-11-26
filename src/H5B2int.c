@@ -239,7 +239,7 @@ H5B2__split1(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     old_node_nrec = internal->node_ptrs[idx].node_nrec;
 
     /* Determine "middle" record to promote to internal node */
-    ASSIGN_TO_SMALLER_SIZE(mid_record, uint16_t, old_node_nrec / 2, int);
+    mid_record = (uint16_t)(old_node_nrec / 2);
 
     /* Copy "upper half" of records to new child */
     H5MM_memcpy(H5B2_NAT_NREC(right_native, hdr, 0),

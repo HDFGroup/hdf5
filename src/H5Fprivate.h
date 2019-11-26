@@ -178,19 +178,19 @@ typedef struct H5F_t H5F_t;
 
 /* Decode a variable-sized buffer */
 /* (Assumes that the high bits of the integer will be zero) */
-#  define DECODE_VAR(p, typ, n, l) {                              \
+#  define DECODE_VAR(p, n, l) {                              \
    size_t _i;                                      \
                                         \
    n = 0;                                      \
    (p) += l;                                      \
    for (_i = 0; _i < l; _i++)                              \
-      n = (typ)((n << 8) | *(--p));                              \
+      n = (uint16_t)((n << 8) | *(--p));                              \
    (p) += l;                                      \
 }
 
 /* Decode a variable-sized buffer into a 32-bit unsigned integer */
 /* (Assumes that the high bits of the integer will be zero) */
-#  define UINT32DECODE_VAR(p, n, l)     DECODE_VAR(p, uint32_t, n, l)
+#  define UINT32DECODE_VAR(p, n, l)     DECODE_VAR(p, n, l)
 
 #  define INT64DECODE(p, n) {                              \
    /* WE DON'T CHECK FOR OVERFLOW! */                          \
@@ -230,14 +230,14 @@ uint64_decode(uint8_t **pp)
 
 /* Decode a variable-sized buffer into a 64-bit unsigned integer */
 /* (Assumes that the high bits of the integer will be zero) */
-#  define UINT64DECODE_VAR(p, n, l)     DECODE_VAR(p, uint64_t, n, l)
+#  define UINT64DECODE_VAR(p, n, l)     DECODE_VAR(p, n, l)
 
 /* Decode a 64-bit unsigned integer and its length from a variable-sized buffer */
 /* (Assumes that the high bits of the integer will be zero) */
 #  define UINT64DECODE_VARLEN(p, n) {                          \
    unsigned _s = *(p)++;                              \
                                         \
-   UINT64DECODE_VAR(p, uint64_t, n, _s);                              \
+   UINT64DECODE_VAR(p, n, _s);                              \
 }
 
 #  define H5_DECODE_UNSIGNED(p, n) {                          \

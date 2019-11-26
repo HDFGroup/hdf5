@@ -1176,12 +1176,12 @@ YY_DECL
 yy_match:
 		do
 			{
-			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+			register YY_CHAR yy_c = (YY_CHAR)yy_ec[YY_SC_TO_UI(*yy_cp)];
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
 				if ( yy_current_state >= 545 )
-					yy_c = yy_meta[(unsigned int) yy_c];
+					yy_c = (YY_CHAR)yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			*(yy_state_ptr)++ = yy_current_state;
@@ -1831,12 +1831,12 @@ static int yy_get_next_buffer (void)
 
 	for ( yy_cp = (yytext_ptr) + YY_MORE_ADJ; yy_cp < (yy_c_buf_p); ++yy_cp )
 		{
-		register YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
+		register YY_CHAR yy_c = (YY_CHAR)(*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
 			if ( yy_current_state >= 545 )
-				yy_c = yy_meta[(unsigned int) yy_c];
+				yy_c = (YY_CHAR)yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 		*(yy_state_ptr)++ = yy_current_state;
@@ -1859,7 +1859,7 @@ static int yy_get_next_buffer (void)
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
 		if ( yy_current_state >= 545 )
-			yy_c = yy_meta[(unsigned int) yy_c];
+			yy_c = (YY_CHAR)yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 	yy_is_jam = (yy_current_state == 544);
