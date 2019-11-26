@@ -793,7 +793,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     } H5E_END_TRY;
 
     if(libver_high < H5F_LIBVER_V110)
-        VERIFY(ret, FAIL, "H5Dread");
+        CHECK(ret, FAIL, "H5Dread");
     else {
         CHECK(ret, FAIL, "H5Dread");
 
@@ -2102,7 +2102,7 @@ test_reference_compat_conv(void)
     hid_t   tid1, tid2;         /* Datatype ID              */
     hsize_t dims1[] = {SPACE1_DIM1},
             dims2[] = {SPACE2_DIM1, SPACE2_DIM2},
-            dims3[] = {2};
+            dims3[] = {SPACE1_DIM1}; /* Purposedly set dimension larger to test NULL references */
     hsize_t start[SPACE2_RANK]; /* Starting location of hyperslab */
     hsize_t stride[SPACE2_RANK];/* Stride of hyperslab      */
     hsize_t count[SPACE2_RANK]; /* Element count of hyperslab */
@@ -2122,8 +2122,8 @@ test_reference_compat_conv(void)
     /* Allocate write & read buffers */
     wbuf_obj = (hobj_ref_t *)HDcalloc(sizeof(hobj_ref_t), SPACE1_DIM1);
     rbuf_obj = (H5R_ref_t *)HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    wbuf_reg = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), 2);
-    rbuf_reg = (H5R_ref_t *)HDcalloc(sizeof(H5R_ref_t), 2);
+    wbuf_reg = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    rbuf_reg = (H5R_ref_t *)HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE_REF_COMPAT, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
