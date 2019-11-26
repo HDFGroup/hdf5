@@ -413,6 +413,7 @@ H5R__destroy(H5R_ref_priv_t *ref)
             break;
         case H5R_OBJECT1:
         case H5R_DATASET_REGION1:
+            break;
         case H5R_BADTYPE:
         case H5R_MAXTYPE:
             HDassert("invalid reference type" && 0);
@@ -423,7 +424,7 @@ H5R__destroy(H5R_ref_priv_t *ref)
     } /* end switch */
 
     /* Decrement refcount of attached loc_id */
-    if((ref->loc_id != H5I_INVALID_HID) && (H5I_dec_ref(ref->loc_id) < 0))
+    if(ref->type && (ref->loc_id != H5I_INVALID_HID) && (H5I_dec_ref(ref->loc_id) < 0))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "decrementing location ID failed")
 
 done:
