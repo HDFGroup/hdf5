@@ -32,14 +32,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"      /* Generic Functions             */
-#include "H5Eprivate.h"		/* Error handling		  	     */
-#include "H5Fprivate.h"		/* File access                   */
-#include "H5FLprivate.h"	/* Free Lists                    */
-#include "H5MFprivate.h"    /* File memory management        */
-#include "H5MMprivate.h"	/* Memory management		     */
-#include "H5SMpkg.h"        /* Shared object header messages */
-#include "H5WBprivate.h"    /* Wrapped Buffers               */
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* File access                          */
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5MFprivate.h"        /* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5SMpkg.h"            /* Shared object header messages        */
+#include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
 /****************/
@@ -398,7 +397,7 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t len,
         *image++ = H5SM_LIST_VERSION;
 
         /* Is message index a list or a B-tree? */
-        H5_CHECKED_ASSIGN(*image++, uint8_t, table->indexes[u].index_type, int);
+        ASSIGN_TO_SMALLER_SIZE(*image++, uint8_t, table->indexes[u].index_type, int);
 
         /* Type of messages in the index */
         UINT16ENCODE(image, table->indexes[u].mesg_types);

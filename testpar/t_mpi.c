@@ -303,7 +303,7 @@ static int test_mpio_gb_file(char *filename) {
                             mpi_rank, mpi_off, mpi_off);
                 /* set data to some trivial pattern for easy verification */
                 for (j = 0; j < MB; j++)
-                    H5_CHECKED_ASSIGN(*(buf + j), char, i * mpi_size + mpi_rank, int);
+                    ASSIGN_TO_SMALLER_SIZE(*(buf + j), char, i * mpi_size + mpi_rank, int);
                 if (VERBOSE_MED)
                     HDfprintf(stdout,
                             "proc %d: writing %d bytes at offset %lld\n",
@@ -351,7 +351,7 @@ static int test_mpio_gb_file(char *filename) {
                 mrc = MPI_File_read_at(fh, mpi_off, buf, MB, MPI_BYTE,
                         &mpi_stat);
                 INFO((mrc == MPI_SUCCESS), "GB size file read");
-                H5_CHECKED_ASSIGN(expected, char, i * mpi_size + (mpi_size - mpi_rank - 1), int);
+                ASSIGN_TO_SMALLER_SIZE(expected, char, i * mpi_size + (mpi_size - mpi_rank - 1), int);
                 vrfyerrs = 0;
                 for (j = 0; j < MB; j++) {
                     if ((*(buf + j) != expected)
@@ -526,7 +526,7 @@ static int test_mpio_1wMr(char *filename, int special_request) {
     * ==================================================*/
     irank = 0;
     for (i = 0; i < DIMSIZE; i++)
-        H5_CHECKED_ASSIGN(writedata[i], unsigned char, irank * DIMSIZE + i, int)
+        ASSIGN_TO_SMALLER_SIZE(writedata[i], unsigned char, irank * DIMSIZE + i, int)
     mpi_off = irank * DIMSIZE;
 
     /* Only one process writes */
@@ -597,7 +597,7 @@ static int test_mpio_1wMr(char *filename, int special_request) {
         return 1;
     };
     for (i = 0; i < DIMSIZE; i++) {
-        H5_CHECKED_ASSIGN(expect_val, unsigned char, irank * DIMSIZE + i, int);
+        ASSIGN_TO_SMALLER_SIZE(expect_val, unsigned char, irank * DIMSIZE + i, int);
         if (readdata[i] != expect_val) {
             PRINTID;
             HDprintf("read data[%d:%d] got %02x, expect %02x\n", irank, i,
@@ -697,7 +697,7 @@ static int test_mpio_derived_dtype(char *filename) {
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     retcode = 0;
     for (i = 0; i < 3; i++)
-        H5_CHECKED_ASSIGN(buf[i], char, i + 1, int);
+        ASSIGN_TO_SMALLER_SIZE(buf[i], char, i + 1, int);
 
     if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename,
             MPI_MODE_RDWR | MPI_MODE_CREATE, MPI_INFO_NULL, &fh))
