@@ -182,11 +182,15 @@ struct H5T_path_t {
 };
 
 /* Reference function pointers */
+typedef herr_t (*H5T_ref_isnullfunc_t)(const H5VL_object_t *file, const void *src_buf, hbool_t *isnull);
+typedef herr_t (*H5T_ref_setnullfunc_t)(H5VL_object_t *file, void *dst_buf, void *bg_buf);
 typedef size_t (*H5T_ref_getsizefunc_t)(H5VL_object_t *src_file, const void *src_buf, size_t src_size, H5VL_object_t *dst_file, hbool_t *dst_copy);
 typedef herr_t (*H5T_ref_readfunc_t)(H5VL_object_t *src_file, const void *src_buf, size_t src_size, H5VL_object_t *dst_file, void *dst_buf, size_t dst_size);
 typedef herr_t (*H5T_ref_writefunc_t)(H5VL_object_t *src_file, const void *src_buf, size_t src_size, H5R_type_t src_type, H5VL_object_t *dst_file, void *dst_buf, size_t dst_size, void *bg_buf);
 
 typedef struct H5T_ref_class_t {
+    H5T_ref_isnullfunc_t    isnull;     /* check if reference value is NIL */
+    H5T_ref_setnullfunc_t   setnull;    /* set a reference value to NIL */
     H5T_ref_getsizefunc_t   getsize;    /* get reference size (bytes)   */
     H5T_ref_readfunc_t      read;       /* read reference into buffer   */
     H5T_ref_writefunc_t     write;      /* write reference from buffer  */

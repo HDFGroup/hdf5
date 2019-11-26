@@ -3609,39 +3609,52 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 for(elmtno = 0; elmtno < safe; elmtno++) {
                     size_t buf_size;
                     hbool_t dst_copy = FALSE;
+                    hbool_t is_nil; /* Whether sequence is "nil" */
 
-                    /* Get size of references */
-                    if(0 == (buf_size = src->shared->u.atomic.u.r.cls->getsize(
-                        src->shared->u.atomic.u.r.file, s, src->shared->size,
-                        dst->shared->u.atomic.u.r.file, &dst_copy)))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect size")
+                    /* Check for "nil" source sequence */
+                    if((*(src->shared->u.atomic.u.r.cls->isnull))(src->shared->u.atomic.u.r.file, s, &is_nil) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check if reference data is 'nil'")
 
-                    /* Check if conversion buffer is large enough, resize if necessary. */
-                    if(conv_buf_size < buf_size) {
-                        conv_buf_size = buf_size;
-                        if(NULL == (conv_buf = H5FL_BLK_REALLOC(ref_seq, conv_buf, conv_buf_size)))
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
-                        HDmemset(conv_buf, 0, conv_buf_size);
-                    } /* end if */
+                    if(is_nil) {
 
-                    if(dst_copy && (src->shared->u.atomic.u.r.loc == H5T_LOC_DISK)) {
-                        H5MM_memcpy(conv_buf, s, buf_size);
-                    } else {
-                        /* Read reference */
-                        if(src->shared->u.atomic.u.r.cls->read(
+                        /* Write "nil" sequence to destination location */
+                        if((*(dst->shared->u.atomic.u.r.cls->setnull))(dst->shared->u.atomic.u.r.file, d, b) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't set reference data to 'nil'")
+                    } /* end else-if */
+                    else {
+                        /* Get size of references */
+                        if(0 == (buf_size = src->shared->u.atomic.u.r.cls->getsize(
                             src->shared->u.atomic.u.r.file, s, src->shared->size,
-                            dst->shared->u.atomic.u.r.file, conv_buf, buf_size) < 0)
-                            HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read reference data")
-                    }
+                            dst->shared->u.atomic.u.r.file, &dst_copy)))
+                            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect size")
 
-                    if(dst_copy && (dst->shared->u.atomic.u.r.loc == H5T_LOC_DISK)) {
-                        H5MM_memcpy(d, conv_buf, buf_size);
-                    } else {
-                        /* Write reference to destination location */
-                        if(dst->shared->u.atomic.u.r.cls->write(
-                            src->shared->u.atomic.u.r.file, conv_buf, buf_size, src->shared->u.atomic.u.r.rtype,
-                            dst->shared->u.atomic.u.r.file, d, dst->shared->size, b) < 0)
-                            HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write reference data")
+                        /* Check if conversion buffer is large enough, resize if necessary. */
+                        if(conv_buf_size < buf_size) {
+                            conv_buf_size = buf_size;
+                            if(NULL == (conv_buf = H5FL_BLK_REALLOC(ref_seq, conv_buf, conv_buf_size)))
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                            HDmemset(conv_buf, 0, conv_buf_size);
+                        } /* end if */
+
+                        if(dst_copy && (src->shared->u.atomic.u.r.loc == H5T_LOC_DISK)) {
+                            H5MM_memcpy(conv_buf, s, buf_size);
+                        } else {
+                            /* Read reference */
+                            if(src->shared->u.atomic.u.r.cls->read(
+                                src->shared->u.atomic.u.r.file, s, src->shared->size,
+                                dst->shared->u.atomic.u.r.file, conv_buf, buf_size) < 0)
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read reference data")
+                        }
+
+                        if(dst_copy && (dst->shared->u.atomic.u.r.loc == H5T_LOC_DISK)) {
+                            H5MM_memcpy(d, conv_buf, buf_size);
+                        } else {
+                            /* Write reference to destination location */
+                            if(dst->shared->u.atomic.u.r.cls->write(
+                                src->shared->u.atomic.u.r.file, conv_buf, buf_size, src->shared->u.atomic.u.r.rtype,
+                                dst->shared->u.atomic.u.r.file, d, dst->shared->size, b) < 0)
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write reference data")
+                        }
                     }
 
                     /* Advance pointers */
