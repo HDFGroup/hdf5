@@ -173,7 +173,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
     /* Now read in values from the image descriptor */
     IWidth = GifImageDesc->ImageWidth;
     IHeight = GifImageDesc->ImageHeight;
-    Interlace = (unsigned char)(GifImageDesc->PackedField & 0x40);
+    Interlace = GifImageDesc->PackedField & 0x40;
 
     /*
      * Note that I ignore the possible existence of a local color map.  I'm

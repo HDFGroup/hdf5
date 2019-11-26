@@ -2180,7 +2180,7 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
 
             schunk_points = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
 
-            if(H5S_select_hyperslab(chunk_info->mspace, H5S_SELECT_SET, mem_sel_start, NULL, &tmp_count, &(const hsize_t)schunk_points) < 0)
+            if(H5S_select_hyperslab(chunk_info->mspace, H5S_SELECT_SET, mem_sel_start, NULL, &tmp_count, &schunk_points) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "can't create chunk memory selection")
 
             mem_sel_start[0] += schunk_points;
@@ -5702,6 +5702,7 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* Set it in the userdata to return */
     udata->chunk_addr[chunk_index] = chunk_rec->chunk_addr;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_addrmap_cb() */
 

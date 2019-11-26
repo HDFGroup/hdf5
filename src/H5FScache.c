@@ -737,7 +737,7 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t len,
     *image++ = H5FS_HDR_VERSION;
 
     /* Client ID */
-    *image++ = (uint8_t)fspace->client;
+    *image++ = fspace->client;
 
     /* Total space tracked */
     H5F_ENCODE_LENGTH(f, image, fspace->tot_space);
