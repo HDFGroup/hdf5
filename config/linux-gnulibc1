@@ -194,9 +194,6 @@ fi
 # Figure out GNU CXX compiler flags
 . $srcdir/config/gnu-cxxflags
 
-# Figure out Intel CXX compiler flags
-. $srcdir/config/intel-cxxflags
-
 # compiler version strings
 
 # check if the compiler_version_info is already set

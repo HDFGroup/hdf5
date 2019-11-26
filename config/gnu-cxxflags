@@ -28,32 +28,29 @@ if test X = "X$cxx_flags_set"; then
     # filter it out.
     # icc beginning with version 12 includes a "gcc version compatiblilty"
     # string, causing the gcc H5_CFLAGS to be erroneously added.  The line
-    # "grep -v 'icpc version'" causes the discarding of any output
-    # containing 'icpc version'. The line "grep -v 'icpc.orig version'"
-    # causes the discarding of any output containing 'icpc.orig version'.
-    # The cxx_version for icc is correctly determined
-    # and flags added in the intel-cxxflags script.
+    # "grep -v 'icc version'" causes the discarding of any output
+    # containing 'icc version'.  The cc_version for icc is correctly determined
+    # and flags added in the intel-flags script.
     cxx_version="`$CXX $CXXFLAGS $H5_CXXFLAGS -v 2>&1 | grep -v 'PathScale' |\
         grep -v 'icc version' |\
-        grep -v 'icpc version' |\
-        grep -v 'icpc.orig version' |\
         grep 'gcc version' | sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
     cxx_vendor=`echo $cxx_version |sed 's/\([a-z]*\).*/\1/'`
     cxx_version=`echo $cxx_version |sed 's/[-a-z]//g'`
     if test X = "X$cxx_vendor" -a X != "X$cxx_version"; then
-	    cxx_vendor=g++
+	cxx_vendor=g++
     fi
     if test "-" != "$cxx_vendor-$cxx_version"; then
-	    echo "compiler '$CXX' is GNU $cxx_vendor-$cxx_version"
+	echo "compiler '$CXX' is GNU $cxx_vendor-$cxx_version"
     fi
 
     # Some version numbers
     cxx_vers_major=`echo $cxx_version | cut -f1 -d.`
     cxx_vers_minor=`echo $cxx_version | cut -f2 -d.`
     cxx_vers_patch=`echo $cxx_version | cut -f3 -d.`
-    test -n "$cxx_vers_major" || cxx_vers_major=0
-    test -n "$cxx_vers_minor" || cxx_vers_minor=0
-    test -n "$cxx_vers_patch" || cxx_vers_patch=0
+    test -n "$cc_vers_major" || cxx_vers_major=0
+    test -n "$cc_vers_minor" || cxx_vers_minor=0
+    test -n "$cc_vers_patch" || cxx_vers_patch=0
+    cxx_vers_all=`expr $cxx_vers_major '*' 1000000 + $cxx_vers_minor '*' 1000 + $cxx_vers_patch`
 fi
 
 # Common g++ flags for various situations
