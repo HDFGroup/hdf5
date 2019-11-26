@@ -1479,18 +1479,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R__decode_token_compat(hid_t id, H5I_type_t type, H5R_type_t ref_type,
+H5R__decode_token_compat(H5VL_object_t *vol_obj, H5I_type_t type, H5R_type_t ref_type,
     const unsigned char *buf, H5VL_token_t *obj_token)
 {
     hid_t file_id = H5I_INVALID_HID;    /* File ID for region reference */
-    void *vol_obj_file = NULL;
+    H5VL_object_t *vol_obj_file = NULL;
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(id, type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Retrieve VOL object */

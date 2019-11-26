@@ -103,7 +103,7 @@ H5Rcreate_object(hid_t loc_id, const char *name, H5R_ref_t *ref_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(loc_id, obj_type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, obj_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Retrieve VOL file object */
@@ -186,7 +186,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(loc_id, obj_type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, obj_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Retrieve VOL file object */
@@ -265,7 +265,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(loc_id, obj_type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, obj_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Retrieve VOL file object */

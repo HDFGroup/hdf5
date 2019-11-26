@@ -2270,7 +2270,14 @@ H5Iget_file_id(hid_t obj_id)
 
     /* Call internal function */
     if (H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
-        if ((ret_value = H5F_get_file_id(obj_id, type, TRUE)) < 0)
+        H5VL_object_t *vol_obj = NULL; /* Object token of obj_id */
+
+        /* Get the VOL object */
+        if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+        /* Get the file ID */
+        if ((ret_value = H5F_get_file_id(vol_obj, type, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file ID")
     } /* end if */
     else

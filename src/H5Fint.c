@@ -3783,49 +3783,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F__get_file_id
- *
- * Purpose:     The package version of H5Iget_file_id(), obtains the file
- *              ID given an object ID.
- *
- * Return:      Success:    The file ID associated with the object
- *              Failure:    H5I_INVALID_HID
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5F__get_file_id(H5F_t *file, hbool_t app_ref)
-{
-    hid_t file_id = H5I_INVALID_HID;    /* File ID */
-    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Check if the file's ID already exists */
-    if(H5I_find_id(file, H5I_FILE, &file_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
-
-    /* If the ID does not exist, register it with the VOL connector */
-    if(H5I_INVALID_HID == file_id) {
-        if((file_id = H5VL_wrap_register(H5I_FILE, file, app_ref)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
-        file->id_exists = TRUE;
-    } /* end if */
-    else {
-        /* Increment ref count on existing ID */
-        if(H5I_inc_ref(file_id, app_ref) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
-    } /* end else */
-
-    /* Set return value */
-    ret_value = file_id;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__get_file_id() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5F_get_file_id
  *
  * Purpose:     The private version of H5Iget_file_id(), obtains the file
@@ -3837,23 +3794,37 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5F_get_file_id(hid_t obj_id, H5I_type_t type, hbool_t app_ref)
+H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
 {
-    H5VL_object_t  *vol_obj;                    /* File info */
+    void *vol_obj_file = NULL;                  /* File object pointer */
+    H5VL_loc_params_t loc_params;               /* Location parameters */
     hid_t           file_id = H5I_INVALID_HID;  /* File ID for object */
     hid_t           ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    /* Get the object pointer */
-    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
+    /* Set location parameters */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = obj_type;
 
-    /* Get the file through the VOL */
-    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_FILE_ID, (int)type, (int)app_ref, &file_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get file ID")
-    if(H5I_INVALID_HID == file_id)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the file ID through the VOL")
+    /* Retrieve VOL file from object */
+    if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_FILE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &vol_obj_file) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file from object")
+
+    /* Check if the file's ID already exists */
+    if(H5I_find_id(vol_obj_file, H5I_FILE, &file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
+
+    /* If the ID does not exist, register it with the VOL connector */
+    if(H5I_INVALID_HID == file_id) {
+        if((file_id = H5VL_register(H5I_FILE, vol_obj_file, vol_obj->connector, app_ref)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+    } /* end if */
+    else {
+        /* Increment ref count on existing ID */
+        if(H5I_inc_ref(file_id, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
+    } /* end else */
 
     /* Set return value */
     ret_value = file_id;

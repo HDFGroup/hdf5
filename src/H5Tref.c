@@ -468,7 +468,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     /* If no filename set, this is not an external reference */
     if(NULL == H5R_REF_FILENAME(dst_ref)) {
         /* TODO temporary hack to retrieve file object */
-        if((file_id = H5F__get_file_id(src_f, FALSE)) < 0)
+        if((file_id = H5F_get_file_id(src_file, H5I_FILE, FALSE)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
         /* Attach loc ID to reference and hold reference to it */

@@ -278,7 +278,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(loc_id, vol_obj_type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, vol_obj_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file or file object")
 
     /* Retrieve VOL object */

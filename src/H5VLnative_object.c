@@ -16,10 +16,11 @@
  */
 
 #define H5O_FRIEND              /* Suppress error about including H5Opkg    */
+#define H5F_FRIEND              /* Suppress error about including H5Fpkg    */
 
 #include "H5private.h"          /* Generic Functions                        */
 #include "H5Eprivate.h"         /* Error handling                           */
-#include "H5Fprivate.h"         /* Files                                    */
+#include "H5Fpkg.h"             /* Files (pkg needed for id_exists)         */
 #include "H5Gprivate.h"         /* Groups                                   */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Opkg.h"             /* Object headers                           */
@@ -150,6 +151,25 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     switch(get_type) {
+
+        /* Object file */
+        case H5VL_OBJECT_GET_FILE:
+            {
+                void **ret = HDva_arg(arguments, void **);
+
+                if(loc_params->type == H5VL_OBJECT_BY_SELF) {
+                    *ret = (void *)loc.oloc->file;
+
+                    /* TODO we currently need to set id_exists to TRUE because
+                     * the upper layer will create an ID from the returned
+                     * object. In theory this should not be needed and id_exists
+                     * should be removed once the H5Fmount code gets fixed. */
+                    loc.oloc->file->id_exists = TRUE;
+                } else
+                    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get_file parameters")
+                break;
+            }
+
         /* Object name */
         case H5VL_OBJECT_GET_NAME:
             {
