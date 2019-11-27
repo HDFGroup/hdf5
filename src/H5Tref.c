@@ -345,10 +345,12 @@ static size_t
 H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     size_t H5_ATTR_UNUSED src_size, H5VL_object_t *dst_file, hbool_t *dst_copy)
 {
-    H5F_t *src_f;
-    H5F_t *dst_f;
     H5VL_object_t *vol_obj = NULL;
     const H5R_ref_priv_t *src_ref = (const H5R_ref_priv_t *)src_buf;
+    hbool_t files_equal = FALSE;
+    char file_name_buf_static[256];
+    char *file_name_buf_dyn = NULL;
+    ssize_t file_name_len;
     unsigned flags = 0;
     size_t ret_value = 0;
 
@@ -361,27 +363,43 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
     if(NULL == (vol_obj = H5VL_vol_object(src_ref->loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid location identifier")
 
-    /* We should assert here that the terminal connector is H5VL_NATIVE once
-     * there is a facility to do so -NAF 2019/10/30 */
-
-    /* Retrieve files from VOL objects */
-    if(NULL == (src_f = (H5F_t *)H5VL_object_data(vol_obj)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid VOL object")
-    if(NULL == (dst_f = (H5F_t *)H5VL_object_data(dst_file)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid VOL object")
-
     /* Set external flag if referenced file is not destination file */
-    flags |= (src_f->shared != dst_f->shared) ? H5R_IS_EXTERNAL : 0;
+    if(H5VL_file_specific(vol_obj, H5VL_FILE_IS_EQUAL, H5P_DATASET_XFER_DEFAULT, NULL, dst_file, &files_equal) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOMPARE, 0, "can't check if files are equal")
+    flags |= files_equal ? H5R_IS_EXTERNAL : 0;
 
     /* Force re-calculating encoding size if any flags are set */
     if(flags || !src_ref->encode_size) {
         /* Pass the correct encoding version for the selection depending on the
          * file libver bounds, this is later retrieved in H5S hyper encode */
-        if(src_ref->type == (int8_t)H5R_DATASET_REGION2)
-            H5CX_set_libver_bounds(dst_f);
+        if(src_ref->type == (int8_t)H5R_DATASET_REGION2) {
+            /* Temporary hack to check if this is the native connector.  We need to
+             * add a way to check if the terminal connector is native.  For now this
+             * will break passthroughs, but it's needed for other VOL connectors to
+             * work.  -NAF */
+            if(dst_file->connector->cls->value == H5VL_NATIVE_VALUE) {
+                H5F_t *dst_f;
+
+                if(NULL == (dst_f = (H5F_t *)H5VL_object_data(dst_file)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid VOL object")
+                H5CX_set_libver_bounds(dst_f);
+            } /* end if */
+            else
+                H5CX_set_libver_bounds(NULL);
+        } /* end if */
+
+        /* Get file name */
+        if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, sizeof(file_name_buf_static), file_name_buf_static, &file_name_len) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't get file name")
+        if(file_name_len >= (ssize_t)sizeof(file_name_buf_static)) {
+            if(NULL == (file_name_buf_dyn = (char *)H5MM_malloc((size_t)file_name_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, 0, "can't allocate space for file name")
+            if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, (size_t)file_name_len + 1, file_name_buf_dyn, &file_name_len) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't get file name")
+        } /* end if */
 
         /* Determine encoding size */
-        if(H5R__encode(H5F_ACTUAL_NAME(src_f), src_ref, NULL, &ret_value, flags) < 0)
+        if(H5R__encode(file_name_buf_dyn ? file_name_buf_dyn : file_name_buf_static, src_ref, NULL, &ret_value, flags) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, 0, "unable to determine encoding size")
     } else {
         /* Can do a direct copy and skip blob decoding */
@@ -393,6 +411,8 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
     }
 
 done:
+    H5MM_xfree(file_name_buf_dyn);
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T__ref_mem_getsize() */
 
@@ -411,10 +431,12 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     size_t H5_ATTR_UNUSED src_size, H5VL_object_t *dst_file, void *dst_buf,
     size_t dst_size)
 {
-    H5F_t *src_f;
-    H5F_t *dst_f;
     H5VL_object_t *vol_obj = NULL;
     const H5R_ref_priv_t *src_ref = (const H5R_ref_priv_t *)src_buf;
+    hbool_t files_equal = FALSE;
+    char file_name_buf_static[256];
+    char *file_name_buf_dyn = NULL;
+    ssize_t file_name_len;
     unsigned flags = 0;
     herr_t ret_value = SUCCEED;
 
@@ -430,25 +452,41 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     if(NULL == (vol_obj = H5VL_vol_object(src_ref->loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid location identifier")
 
-    /* We should assert here that the terminal connector is H5VL_NATIVE once
-     * there is a facility to do so -NAF 2019/10/30 */
-
-    /* Retrieve files from VOL objects */
-    if(NULL == (src_f = (H5F_t *)H5VL_object_data(vol_obj)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid VOL object")
-    if(NULL == (dst_f = (H5F_t *)H5VL_object_data(dst_file)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid VOL object")
-
     /* Set external flag if referenced file is not destination file */
-    flags |= (src_f->shared != dst_f->shared) ? H5R_IS_EXTERNAL : 0;
+    if(H5VL_file_specific(vol_obj, H5VL_FILE_IS_EQUAL, H5P_DATASET_XFER_DEFAULT, NULL, dst_file, &files_equal) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOMPARE, FAIL, "can't check if files are equal")
+    flags |= files_equal ? H5R_IS_EXTERNAL : 0;
 
     /* Pass the correct encoding version for the selection depending on the
      * file libver bounds, this is later retrieved in H5S hyper encode */
-    if(src_ref->type == (int8_t)H5R_DATASET_REGION2)
-        H5CX_set_libver_bounds(dst_f);
+    if(src_ref->type == (int8_t)H5R_DATASET_REGION2) {
+        /* Temporary hack to check if this is the native connector.  We need to
+         * add a way to check if the terminal connector is native.  For now this
+         * will break passthroughs, but it's needed for other VOL connectors to
+         * work.  -NAF */
+        if(dst_file->connector->cls->value == H5VL_NATIVE_VALUE) {
+            H5F_t *dst_f;
+
+            if(NULL == (dst_f = (H5F_t *)H5VL_object_data(dst_file)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid VOL object")
+            H5CX_set_libver_bounds(dst_f);
+        } /* end if */
+        else
+            H5CX_set_libver_bounds(NULL);
+    } /* end if */
+
+    /* Get file name */
+    if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, sizeof(file_name_buf_static), file_name_buf_static, &file_name_len) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't get file name")
+    if(file_name_len >= (ssize_t)sizeof(file_name_buf_static)) {
+        if(NULL == (file_name_buf_dyn = (char *)H5MM_malloc((size_t)file_name_len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, 0, "can't allocate space for file name")
+        if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, (size_t)file_name_len + 1, file_name_buf_dyn, &file_name_len) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't get file name")
+    } /* end if */
 
     /* Encode reference */
-    if(H5R__encode(H5F_ACTUAL_NAME(src_f), src_ref, (unsigned char *)dst_buf, &dst_size, flags) < 0)
+    if(H5R__encode(file_name_buf_dyn ? file_name_buf_dyn : file_name_buf_static, src_ref, (unsigned char *)dst_buf, &dst_size, flags) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "Cannot encode reference")
 
 done:
@@ -1067,3 +1105,4 @@ H5T_ref_reclaim(void *elem, const H5T_t *dt)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_ref_reclaim() */
+
