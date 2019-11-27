@@ -1999,7 +1999,7 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name,
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize name")
 
     /* Check for flags present in creation property list */
-    if(lcpl_id != H5P_DEFAULT) {
+    if(lcpl_id != H5P_DEFAULT && lcpl_id != H5P_LINK_CREATE_DEFAULT) {
         unsigned crt_intmd_group;
 
         /* Get link creation property list */
@@ -2889,7 +2889,7 @@ H5L_move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_lo
     HDassert(dst_name && *dst_name);
 
     /* Check for flags present in creation property list */
-    if(lcpl_id != H5P_DEFAULT) {
+    if(lcpl_id != H5P_DEFAULT && lcpl_id != H5P_LINK_CREATE_DEFAULT) {
         unsigned crt_intmd_group;
 
         if(NULL == (lc_plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
