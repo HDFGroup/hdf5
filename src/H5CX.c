@@ -190,6 +190,10 @@ typedef struct H5CX_t {
     hid_t lapl_id;              /* LAPL ID for API operation */
     H5P_genplist_t *lapl;       /* Link Access Property List */
 
+    /* DCPL */
+    hid_t dcpl_id;              /* DCPL ID for API operation */
+    H5P_genplist_t *dcpl;       /* Dataset Creation Property List */
+
     /* DAPL */
     hid_t dapl_id;              /* DAPL ID for API operation */
     H5P_genplist_t *dapl;       /* Dataset Access Property List */
@@ -289,6 +293,12 @@ typedef struct H5CX_t {
     size_t nlinks;              /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
     hbool_t nlinks_valid;       /* Whether number of soft / UD links to traverse is valid */
 
+    /* Cached DCPL properties */
+    hbool_t do_min_dset_ohdr;   /* Whether to minimize dataset object header */
+    hbool_t do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
+    uint8_t ohdr_flags;  /* Object header flags */
+    hbool_t ohdr_flags_valid;  /* Whether the object headers flags are valid */
+
     /* Cached DAPL properties */
     char *extfile_prefix;               /* Prefix for external file                      */
     hbool_t extfile_prefix_valid;       /* Whether the prefix for external file is valid */
@@ -356,6 +366,13 @@ typedef struct H5CX_lapl_cache_t {
     size_t nlinks;                  /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
 } H5CX_lapl_cache_t;
 
+/* Typedef for cached default dataset creation property list information */
+/* (Same as the cached DXPL struct, above, except for the default DCPL) */
+typedef struct H5CX_dcpl_cache_t {
+    hbool_t do_min_dset_ohdr;   /* Whether to minimize dataset object header */
+    uint8_t ohdr_flags;  /* Object header flags */
+} H5CX_dcpl_cache_t;
+
 /* Typedef for cached default dataset access property list information */
 /* (Same as the cached DXPL struct, above, except for the default DXPL) */
 typedef struct H5CX_dapl_cache_t {
@@ -404,6 +421,9 @@ static H5CX_lcpl_cache_t H5CX_def_lcpl_cache;
 /* Define a "default" link access property list cache structure to use for default LAPLs */
 static H5CX_lapl_cache_t H5CX_def_lapl_cache;
 
+/* Define a "default" dataset creation property list cache structure to use for default DCPLs */
+static H5CX_dcpl_cache_t H5CX_def_dcpl_cache;
+
 /* Define a "default" dataset access property list cache structure to use for default DAPLs */
 static H5CX_dapl_cache_t H5CX_def_dapl_cache;
 
@@ -431,6 +451,7 @@ H5CX__init_package(void)
     H5P_genplist_t *dx_plist;           /* Data transfer property list */
     H5P_genplist_t *lc_plist;           /* Link creation property list */
     H5P_genplist_t *la_plist;           /* Link access property list */
+    H5P_genplist_t *dc_plist;           /* Dataset creation property list */
     H5P_genplist_t *da_plist;           /* Dataset access property list */
     H5P_genplist_t *fa_plist;           /* File access property list */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -548,6 +569,23 @@ H5CX__init_package(void)
     /* Get number of soft / UD links to traverse */
     if(H5P_get(la_plist, H5L_ACS_NLINKS_NAME, &H5CX_def_lapl_cache.nlinks) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve number of soft / UD links to traverse")
+
+    /* Reset the "default DCPL cache" information */
+    HDmemset(&H5CX_def_dcpl_cache, 0, sizeof(H5CX_dcpl_cache_t));
+
+    /* Get the default DCPL cache information */
+
+    /* Get the default link access property list */
+    if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(H5P_DATASET_CREATE_DEFAULT)))
+        HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a dataset create property list")
+
+    /* Get flag to indicate whether to minimize dataset object header */
+    if(H5P_get(dc_plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &H5CX_def_dcpl_cache.do_min_dset_ohdr) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
+
+    /* Get object header flags */
+    if(H5P_get(dc_plist, H5O_CRT_OHDR_FLAGS_NAME, &H5CX_def_dcpl_cache.ohdr_flags) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve object header flags")
 
     /* Reset the "default DAPL cache" information */
     HDmemset(&H5CX_def_dapl_cache, 0, sizeof(H5CX_dapl_cache_t));
@@ -837,6 +875,35 @@ H5CX_set_dxpl(hid_t dxpl_id)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_dxpl() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_dcpl
+ *
+ * Purpose:     Sets the DCPL for the current API call context.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Quincey Koziol
+ *              March 6, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_dcpl(hid_t dcpl_id)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(*head);
+
+    /* Set the API context's DCPL to a new value */
+    (*head)->ctx.dcpl_id = dcpl_id;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_dcpl() */
 
 
 /*-------------------------------------------------------------------------
@@ -2119,6 +2186,42 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_get_dset_min_ohdr_flag
+ *
+ * Purpose:     Retrieves the flag that indicates whether the dataset object
+ *		header should be minimized
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              March 6, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_dset_min_ohdr_flag(hbool_t *dset_min_ohdr_flag)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(dset_min_ohdr_flag);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dcpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(dcpl, H5P_DATASET_CREATE_DEFAULT, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, do_min_dset_ohdr)
+
+    /* Get the value */
+    *dset_min_ohdr_flag = (*head)->ctx.do_min_dset_ohdr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_dset_min_ohdr_flag() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_get_libver_bounds
  *
  * Purpose:     Retrieves the low/high bounds for the current API call context.
@@ -2958,6 +3061,41 @@ done:
 } /* end H5CX_test_set_mpio_coll_rank0_bcast() */
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_ohdr_flags
+ *
+ * Purpose:     Retrieves the object header flags for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Chris Hogan
+ *              November 15, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_ohdr_flags(uint8_t *ohdr_flags)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(ohdr_flags);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dcpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(dcpl, H5P_DATASET_CREATE_DEFAULT, H5O_CRT_OHDR_FLAGS_NAME, ohdr_flags)
+
+    /* Get the value */
+    *ohdr_flags = (*head)->ctx.ohdr_flags;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* End H5CX_get_ohdr_flags() */
 
 
 /*-------------------------------------------------------------------------
