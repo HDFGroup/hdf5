@@ -271,35 +271,35 @@ check_stats(const H5HF_t *fh, const fheap_heap_state_t *state)
     if(H5HF_stat_info(fh, &heap_stats) < 0)
         FAIL_STACK_ERROR
     if(heap_stats.man_nobjs != state->man_nobjs) {
-        HDfprintf(stdout, "heap_stats.man_nobjs = %Hu, state->man_nobjs = %Zu\n", heap_stats.man_nobjs, state->man_nobjs);
+        HDfprintf(stdout, "heap_stats.man_nobjs = %" PRIuHSIZE ", state->man_nobjs = %zu\n", heap_stats.man_nobjs, state->man_nobjs);
         TEST_ERROR
     } /* end if */
     if(heap_stats.man_size != state->man_size) {
-        HDfprintf(stdout, "heap_stats.man_size = %Hu, state->man_size = %Hu\n", heap_stats.man_size, state->man_size);
+        HDfprintf(stdout, "heap_stats.man_size = %" PRIuHSIZE ", state->man_size = %" PRIuHSIZE "\n", heap_stats.man_size, state->man_size);
         TEST_ERROR
     } /* end if */
     if(heap_stats.man_alloc_size != state->man_alloc_size) {
-        HDfprintf(stdout, "heap_stats.man_alloc_size = %Hu, state->man_alloc_size = %Hu\n", heap_stats.man_alloc_size, state->man_alloc_size);
+        HDfprintf(stdout, "heap_stats.man_alloc_size = %" PRIuHSIZE ", state->man_alloc_size = %" PRIuHSIZE "\n", heap_stats.man_alloc_size, state->man_alloc_size);
         TEST_ERROR
     } /* end if */
     if(heap_stats.man_free_space != state->man_free_space) {
-        HDfprintf(stdout, "heap_stats.man_free_space = %Hu, state->man_free_space = %Hu\n", heap_stats.man_free_space, state->man_free_space);
+        HDfprintf(stdout, "heap_stats.man_free_space = %" PRIuHSIZE ", state->man_free_space = %" PRIuHSIZE "\n", heap_stats.man_free_space, state->man_free_space);
         TEST_ERROR
     } /* end if */
     if(heap_stats.huge_nobjs != state->huge_nobjs) {
-        HDfprintf(stdout, "heap_stats.huge_nobjs = %Hu, state->huge_nobjs = %Zu\n", heap_stats.huge_nobjs, state->huge_nobjs);
+        HDfprintf(stdout, "heap_stats.huge_nobjs = %" PRIuHSIZE ", state->huge_nobjs = %zu\n", heap_stats.huge_nobjs, state->huge_nobjs);
         TEST_ERROR
     } /* end if */
     if(heap_stats.huge_size != state->huge_size) {
-        HDfprintf(stdout, "heap_stats.huge_size = %Hu, state->huge_size = %Hu\n", heap_stats.huge_size, state->huge_size);
+        HDfprintf(stdout, "heap_stats.huge_size = %" PRIuHSIZE ", state->huge_size = %" PRIuHSIZE "\n", heap_stats.huge_size, state->huge_size);
         TEST_ERROR
     } /* end if */
     if(heap_stats.tiny_nobjs != state->tiny_nobjs) {
-        HDfprintf(stdout, "heap_stats.tiny_nobjs = %Hu, state->tiny_nobjs = %Zu\n", heap_stats.tiny_nobjs, state->tiny_nobjs);
+        HDfprintf(stdout, "heap_stats.tiny_nobjs = %" PRIuHSIZE ", state->tiny_nobjs = %zu\n", heap_stats.tiny_nobjs, state->tiny_nobjs);
         TEST_ERROR
     } /* end if */
     if(heap_stats.tiny_size != state->tiny_size) {
-        HDfprintf(stdout, "heap_stats.tiny_size = %Hu, state->tiny_size = %Hu\n", heap_stats.tiny_size, state->tiny_size);
+        HDfprintf(stdout, "heap_stats.tiny_size = %" PRIuHSIZE ", state->tiny_size = %" PRIuHSIZE "\n", heap_stats.tiny_size, state->tiny_size);
         TEST_ERROR
     } /* end if */
 
@@ -9590,7 +9590,7 @@ test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -9726,7 +9726,7 @@ test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -9748,7 +9748,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Insert object too large for initial block size in skipped indirect blocks */
     obj_size = (size_t)DBLOCK_SIZE(fh, 3) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, 4);
     if(add_obj(fh, (size_t)10, obj_size, &state, &keep_ids))
@@ -9761,7 +9761,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Insert object to fill space in (medium) block just created */
     obj_size = (size_t)DBLOCK_FREE(fh, 4) - obj_size;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -10507,7 +10507,7 @@ test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(h
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -10661,7 +10661,7 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows + 1);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -10674,7 +10674,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
     /* Insert object to fill space in (large) block created */
     obj_size = (size_t)DBLOCK_FREE(fh, num_first_indirect_rows + 1) - obj_size;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
         TEST_ERROR
@@ -10830,7 +10830,7 @@ test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -10999,7 +10999,7 @@ test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_s
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -11156,7 +11156,7 @@ test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -11333,7 +11333,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_blo
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -11545,7 +11545,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -11741,7 +11741,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_star
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -11973,7 +11973,7 @@ test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
      */
     obj_size = (size_t)DBLOCK_SIZE(fh, num_first_indirect_rows - 1) + 1;
 #ifdef QAK
-HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
+HDfprintf(stderr, "obj_size = %zu\n", obj_size);
 #endif /* QAK */
     state.man_alloc_size += DBLOCK_SIZE(fh, num_first_indirect_rows);
     if(add_obj(fh, (size_t)20, obj_size, &state, &keep_ids))
@@ -15523,7 +15523,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
         total_obj_added += obj_size;
     } /* end while */
 #ifdef QAK
-HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %Hu\n", keep_ids.num_ids, total_obj_added, size_limit);
+HDfprintf(stderr, "keep_ids.num_ids = %zu, total_obj_added = %" PRIuHSIZE ", size_limit = %" PRIuHSIZE "\n", keep_ids.num_ids, total_obj_added, size_limit);
 #endif /* QAK */
 
     /* Randomize the order of the IDs kept */
@@ -15741,7 +15741,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
         total_obj_added += obj_size;
     } /* end while */
 #ifdef QAK
-HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %Hu\n", keep_ids.num_ids, total_obj_added, size_limit);
+HDfprintf(stderr, "keep_ids.num_ids = %zu, total_obj_added = %" PRIuHSIZE ", size_limit = %" PRIuHSIZE "\n", keep_ids.num_ids, total_obj_added, size_limit);
 #endif /* QAK */
 
     /* Randomize the order of the IDs kept */

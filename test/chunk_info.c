@@ -337,7 +337,7 @@ verify_selected_chunks(hid_t dset, hid_t plist, hsize_t *start, hsize_t *end)
             /* Verify that read chunk is the same as the corresponding written one */
             if(HDmemcmp(expected_buf[chk_index], read_buf, CHUNK_NX*CHUNK_NY) != 0)
             {
-                HDfprintf(stderr, "Read chunk differs from written chunk at offset (%d,%d)\n", offset[0], offset[1]);
+                HDfprintf(stderr, "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n", offset[0], offset[1]);
                 return FAIL;
             }
         }

@@ -199,12 +199,12 @@ H5SM__bt2_debug(FILE *stream, int indent, int fwidth,
     FUNC_ENTER_STATIC_NOERR
 
     if(sohm->location == H5SM_IN_HEAP)
-        HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx}\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s {%" PRIu64 ", %" PRIo32 ", %" PRIxHSIZE "}\n", indent, "", fwidth,
             "Shared Message in heap:",
-            sohm->u.heap_loc.fheap_id, sohm->hash, sohm->u.heap_loc.ref_count);
+            sohm->u.heap_loc.fheap_id.val, sohm->hash, sohm->u.heap_loc.ref_count);
     else {
         HDassert(sohm->location == H5SM_IN_OH);
-        HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx, %Hx}\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIo32 ", %x, %" PRIx32 "}\n", indent, "", fwidth,
             "Shared Message in OH:",
             sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id, sohm->u.mesg_loc.index);
     } /* end else */
