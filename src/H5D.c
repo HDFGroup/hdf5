@@ -136,6 +136,9 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
+    /* Set the DCPL for the API context */
+    H5CX_set_dcpl(dcpl_id);
+
     /* Set the LCPL for the API context */
     H5CX_set_lcpl(lcpl_id);
 
