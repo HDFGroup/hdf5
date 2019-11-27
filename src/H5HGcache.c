@@ -206,7 +206,7 @@ static herr_t
 H5HG__cache_heap_get_final_load_size(const void *image, size_t image_len,
     void *udata, size_t *actual_len)
 {
-    H5HG_heap_t heap; /* Global heap */
+    H5HG_heap_t heap = {.size = 0}; /* Global heap */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
