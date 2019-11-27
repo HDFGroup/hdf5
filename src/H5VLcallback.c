@@ -82,10 +82,10 @@ static void *H5VL__dataset_open(void *obj, const H5VL_loc_params_t *loc_params,
     const H5VL_class_t *cls, const char *name, hid_t dapl_id, hid_t dxpl_id,
     void **req);
 static herr_t H5VL__dataset_read(void *dset, const H5VL_class_t *cls,
-    hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id,
+    hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
     void *buf, void **req);
 static herr_t H5VL__dataset_write(void *obj, const H5VL_class_t *cls,
-    hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id,
+    hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
     const void *buf, void **req);
 static herr_t H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_t get_type, 
     hid_t dxpl_id, void **req, va_list arguments);
@@ -180,7 +180,7 @@ static herr_t H5VL__request_free(void *req, const H5VL_class_t *cls);
 static herr_t H5VL__blob_put(void *obj, const H5VL_class_t *cls,
     const void *buf, size_t size, void *blob_id, void *ctx);
 static herr_t H5VL__blob_get(void *obj, const H5VL_class_t *cls,
-    const void *blob_id, void *buf, size_t *size, void *ctx);
+    const void *blob_id, void *buf, size_t size, void *ctx);
 static herr_t H5VL__blob_specific(void *obj, const H5VL_class_t *cls,
     void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
 
@@ -2013,7 +2013,7 @@ done:
  */
 static herr_t 
 H5VL__dataset_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
-    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf,
+    hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf,
     void **req)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2025,7 +2025,7 @@ H5VL__dataset_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'dataset read' method")
 
     /* Call the corresponding VOL callback */
-    if((cls->dataset_cls.read)(obj, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+    if((cls->dataset_cls.read)(obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "dataset read failed")
 
 done:
@@ -2045,7 +2045,7 @@ done:
  */
 herr_t 
 H5VL_dataset_read(const H5VL_object_t *vol_obj, hid_t mem_type_id,
-    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf,
+    hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf,
     void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -2059,7 +2059,7 @@ H5VL_dataset_read(const H5VL_object_t *vol_obj, hid_t mem_type_id,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL__dataset_read(vol_obj->data, vol_obj->connector->cls, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+    if(H5VL__dataset_read(vol_obj->data, vol_obj->connector->cls, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "dataset read failed")
 
 done:
@@ -2083,14 +2083,14 @@ done:
  */
 herr_t
 H5VLdataset_read(void *obj, hid_t connector_id, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t plist_id, void *buf, void **req)
+    hid_t file_space_id, hid_t dxpl_id, void *buf, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
     H5TRACE8("e", "*xiiiii*x**x", obj, connector_id, mem_type_id, mem_space_id,
-             file_space_id, plist_id, buf, req);
+             file_space_id, dxpl_id, buf, req);
 
     /* Check args and get class pointer */
     if(NULL == obj)
@@ -2099,7 +2099,7 @@ H5VLdataset_read(void *obj, hid_t connector_id, hid_t mem_type_id, hid_t mem_spa
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL__dataset_read(obj, cls, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+    if(H5VL__dataset_read(obj, cls, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to read dataset")
 
 done:
@@ -2119,7 +2119,7 @@ done:
  */
 static herr_t 
 H5VL__dataset_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
-    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf,
+    hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf,
     void **req)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2131,7 +2131,7 @@ H5VL__dataset_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id,
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'dataset write' method")
 
     /* Call the corresponding VOL callback */
-    if((cls->dataset_cls.write)(obj, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+    if((cls->dataset_cls.write)(obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "dataset write failed")
 
 done:
@@ -2151,7 +2151,7 @@ done:
  */
 herr_t 
 H5VL_dataset_write(const H5VL_object_t *vol_obj, hid_t mem_type_id,
-    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf,
+    hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf,
     void **req)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -2165,7 +2165,7 @@ H5VL_dataset_write(const H5VL_object_t *vol_obj, hid_t mem_type_id,
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL__dataset_write(vol_obj->data, vol_obj->connector->cls, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+    if(H5VL__dataset_write(vol_obj->data, vol_obj->connector->cls, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "dataset write failed")
 
 done:
@@ -2189,14 +2189,14 @@ done:
  */
 herr_t
 H5VLdataset_write(void *obj, hid_t connector_id, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t plist_id, const void *buf, void **req)
+    hid_t file_space_id, hid_t dxpl_id, const void *buf, void **req)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
     H5TRACE8("e", "*xiiiii*x**x", obj, connector_id, mem_type_id, mem_space_id,
-             file_space_id, plist_id, buf, req);
+             file_space_id, dxpl_id, buf, req);
 
     /* Check args and get class pointer */
     if(NULL == obj)
@@ -2205,7 +2205,7 @@ H5VLdataset_write(void *obj, hid_t connector_id, hid_t mem_type_id, hid_t mem_sp
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if(H5VL__dataset_write(obj, cls, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req) < 0)
+    if(H5VL__dataset_write(obj, cls, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to write dataset")
 
 done:
@@ -6692,7 +6692,7 @@ done:
  */
 static herr_t
 H5VL__blob_get(void *obj, const H5VL_class_t *cls, const void *blob_id,
-    void *buf, size_t *size, void *ctx)
+    void *buf, size_t size, void *ctx)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -6702,7 +6702,7 @@ H5VL__blob_get(void *obj, const H5VL_class_t *cls, const void *blob_id,
     HDassert(obj);
     HDassert(cls);
     HDassert(blob_id);
-    HDassert(size || buf);
+    HDassert(buf);
 
     /* Check if the corresponding VOL callback exists */
     if(NULL == cls->blob_cls.get)
@@ -6728,7 +6728,7 @@ done:
  */
 herr_t
 H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf,
-    size_t *size, void *ctx)
+    size_t size, void *ctx)
 {
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -6738,7 +6738,7 @@ H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf,
     /* Sanity check */
     HDassert(vol_obj);
     HDassert(blob_id);
-    HDassert(size || buf);
+    HDassert(buf);
 
     /* Set wrapper info in API context */
     if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
@@ -6768,13 +6768,13 @@ done:
  */
 herr_t
 H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf,
-    size_t *size, void *ctx)
+    size_t size, void *ctx)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xi*x*x*z*x", obj, connector_id, blob_id, buf, size, ctx);
+    H5TRACE6("e", "*xi*x*xz*x", obj, connector_id, blob_id, buf, size, ctx);
 
     /* Get class pointer */
     if(NULL == obj)

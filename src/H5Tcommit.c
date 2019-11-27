@@ -137,6 +137,9 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
         if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
 
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
+
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
@@ -229,7 +232,7 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects")
 
             /* Close the datatype object */
-	    if(H5O_close(&(dt->oloc), NULL) < 0)
+            if(H5O_close(&(dt->oloc), NULL) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
             /* Remove the datatype's object header from the file */
@@ -237,7 +240,7 @@ done:
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header")
 
             /* Mark datatype as being back in memory */
-            if(H5T_set_loc(dt, dt->sh_loc.file, H5T_LOC_MEMORY))
+            if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY))
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to return datatype to memory")
             dt->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;
             dt->shared->state = old_state;
@@ -414,7 +417,7 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
     /* Mark datatype as being on disk now.  This step changes the size of
      *  datatype as stored on disk.
      */
-    if(H5T_set_loc(type, file, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(type, H5F_VOL_OBJ(file), H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
 
     /* Reset datatype location and path */

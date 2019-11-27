@@ -560,7 +560,7 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get shared datatype info")
 
         /* Mark any datatypes as being on disk now */
-        if(H5T_set_loc(dset->shared->type, file, H5T_LOC_DISK) < 0)
+        if(H5T_set_loc(dset->shared->type, H5F_VOL_OBJ(file), H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set datatype location")
 
         /* Set the version for datatype */
@@ -1697,7 +1697,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
     if(NULL == (dataset->shared->type = (H5T_t *)H5O_msg_read(&(dataset->oloc), H5O_DTYPE_ID, NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load type info from dataset header")
 
-    if(H5T_set_loc(dataset->shared->type, dataset->oloc.file, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(dataset->shared->type, H5F_VOL_OBJ(dataset->oloc.file), H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
 
     if(NULL == (dataset->shared->space = H5S_read(&(dataset->oloc))))

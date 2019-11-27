@@ -116,6 +116,7 @@ typedef enum H5VL_file_get_t {
 
 /* types for file SPECIFIC callback */
 typedef enum H5VL_file_specific_t {
+    H5VL_FILE_POST_OPEN,                    /* Adjust file after open, with wrapping context */
     H5VL_FILE_FLUSH,                        /* Flush file                       */
     H5VL_FILE_REOPEN,                       /* Reopen the file                  */
     H5VL_FILE_MOUNT,                        /* Mount a file                     */
@@ -285,9 +286,9 @@ typedef struct H5VL_dataset_class_t {
     void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
                   hid_t dapl_id, hid_t dxpl_id, void **req);
     herr_t (*read)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
-                   hid_t xfer_plist_id, void * buf, void **req);
+                   hid_t dxpl_id, void * buf, void **req);
     herr_t (*write)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
-                    hid_t xfer_plist_id, const void * buf, void **req);
+                    hid_t dxpl_id, const void * buf, void **req);
     herr_t (*get)(void *obj, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*specific)(void *obj, H5VL_dataset_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
@@ -339,10 +340,10 @@ typedef struct H5VL_link_class_t {
             hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*copy)(void *src_obj, const H5VL_loc_params_t *loc_params1,
                    void *dst_obj, const H5VL_loc_params_t *loc_params2,
-                   hid_t lcpl, hid_t lapl, hid_t dxpl_id, void **req);
+                   hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
     herr_t (*move)(void *src_obj, const H5VL_loc_params_t *loc_params1,
                    void *dst_obj, const H5VL_loc_params_t *loc_params2,
-                   hid_t lcpl, hid_t lapl, hid_t dxpl_id, void **req);
+                   hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_t get_type,
                   hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_t specific_type,
@@ -380,7 +381,7 @@ typedef struct H5VL_request_class_t {
 /* 'blob' routines */
 typedef struct H5VL_blob_class_t {
     herr_t (*put)(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
-    herr_t (*get)(void *obj, const void *blob_id, void *buf, size_t *size, void *ctx);
+    herr_t (*get)(void *obj, const void *blob_id, void *buf, size_t size, void *ctx);
     herr_t (*specific)(void *obj, void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
     herr_t (*optional)(void *obj, void *blob_id, va_list arguments);
 } H5VL_blob_class_t;
@@ -440,6 +441,9 @@ extern "C" {
 
 /* Helper routines for VOL connector authors */
 H5_DLL void *H5VLobject(hid_t obj_id);
+H5_DLL hid_t H5VLget_file_type(void *file_obj, hid_t connector_id,
+    hid_t dtype_id);
+H5_DLL hid_t H5VLpeek_connector_id(const char *name);
 
 #ifdef __cplusplus
 }

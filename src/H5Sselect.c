@@ -947,8 +947,6 @@ H5S_select_is_regular(const H5S_t *space)
 herr_t
 H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
 {
-    hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
-    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -957,23 +955,55 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
     HDassert(space);
     HDassert(offset);
 
-    /* Check for an all-zero offset vector */
-    for(u = 0; u < space->extent.rank; u++)
-        if(0 != offset[u]) {
-            non_zero_offset = TRUE;
-            break;
-        } /* end if */
-
-    /* Only perform operation if the offset is non-zero */
-    if(non_zero_offset)
-        ret_value = (*space->select.type->adjust_u)(space, offset);
+    /* Perform operation */
+    ret_value = (*space->select.type->adjust_u)(space, offset);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_adjust_u() */
 
+
 /*--------------------------------------------------------------------------
  NAME
-    H5Sselect_adjust_u
+    H5S_select_adjust_s
+ PURPOSE
+    Adjust a selection by subtracting an offset
+ USAGE
+    herr_t H5S_select_adjust_u(space, offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
+        const hssize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves a selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    This routine participates in the "Inlining C function pointers"
+        pattern, don't call it directly, use the appropriate macro
+        defined in H5Sprivate.h.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_adjust_s(H5S_t *space, const hssize_t *offset)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(space);
+    HDassert(offset);
+
+    /* Perform operation */
+    ret_value = (*space->select.type->adjust_s)(space, offset);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_select_adjust_s() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_adjust
  PURPOSE
     Adjust a selection by subtracting an offset
  USAGE
@@ -990,25 +1020,35 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sselect_adjust_u(hid_t space_id, const hsize_t *offset)
+H5Sselect_adjust(hid_t space_id, const hssize_t *offset)
 {
     H5S_t *space;
+    hsize_t low_bounds[H5S_MAX_RANK];
+    hsize_t high_bounds[H5S_MAX_RANK];
+    unsigned u;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*h", space_id, offset);
+    H5TRACE2("e", "i*Hs", space_id, offset);
 
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
     if(NULL == offset)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "NULL offset pointer")
 
-    if(H5S_select_adjust_u(space, offset) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection");
+    /* Check bounds */
+    if(H5S_SELECT_BOUNDS(space, low_bounds, high_bounds) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get selection bounds")
+    for(u = 0; u < space->extent.rank; u++)
+        if(offset[u] > (hssize_t)low_bounds[u])
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjustment would move selection below zero offset")
+
+    if(H5S_select_adjust_s(space, offset) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Sselect_adjust_u() */
+} /* end H5Sselect_adjust() */
 
 
 /*--------------------------------------------------------------------------
@@ -2533,11 +2573,12 @@ done:
     within the selection of dst_space
 
  USAGE
-    herr_t H5S_select_project_intersection(src_space,dst_space,src_intersect_space,proj_space)
+    herr_t H5S_select_project_intersection(src_space,dst_space,src_intersect_space,proj_space,share_selection)
         H5S_t *src_space;       IN: Selection that is mapped to dst_space, and intersected with src_intersect_space
-        H5S_t *dst_space;       IN: Selection that is mapped to src_space, and which contains the result
+        H5S_t *dst_space;       IN: Selection that is mapped to src_space
         H5S_t *src_intersect_space; IN: Selection whose intersection with src_space is projected to dst_space to obtain the result
         H5S_t **new_space_ptr;  OUT: Will contain the result (intersection of src_intersect_space and src_space projected from src_space to dst_space) after the operation
+        hbool_t share_selection; IN: Whether we are allowed to share structures inside dst_space with proj_space
 
  RETURNS
     Non-negative on success/Negative on failure.
@@ -2555,7 +2596,8 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
-    const H5S_t *src_intersect_space, H5S_t **new_space_ptr)
+    const H5S_t *src_intersect_space, H5S_t **new_space_ptr,
+    hbool_t share_selection)
 {
     H5S_t *new_space = NULL;           /* New dataspace constructed */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2602,8 +2644,8 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
         /* Intersecting space is hyperslab selection.  Call the hyperslab
          * routine to project to another hyperslab selection. */
-        if(H5S__hyper_project_intersection(src_space, dst_space, src_intersect_space, new_space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't project hyperslab ondot destination selection")
+        if(H5S__hyper_project_intersection(src_space, dst_space, src_intersect_space, new_space, share_selection) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't project hyperslab onto destination selection")
     } /* end else */
 
     /* load the address of the new space into *new_space_ptr */
@@ -2617,6 +2659,75 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_project_intersection() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_project_intersection
+
+ PURPOSE
+    Projects the intersection of of the selections of src_space_id and
+    src_intersect_space_id within the selection of src_space_id as a
+    selection within the selection of dst_space_id.  Currently does not
+    support point selections.
+
+ USAGE
+    hid_t H5Sselect_project_intersection(src_space_id,dst_space_d,src_intersect_space_id)
+        hid_t src_space_id;         IN: Selection that is mapped to dst_space_id, and intersected with src_intersect_space_id
+        hid_t dst_space_id;         IN: Selection that is mapped to src_space_id
+        hid_t src_intersect_space_id; IN: Selection whose intersection with src_space_id is projected to dst_space_id to obtain the result
+
+ RETURNS
+    A dataspace with a selection equal to the intersection of
+    src_intersect_space_id and src_space_id projected from src_space to
+    dst_space on success, negative on failure.
+
+ DESCRIPTION
+    Projects the intersection of of the selections of src_space and
+    src_intersect_space within the selection of src_space as a selection
+    within the selection of dst_space.  The result is placed in the
+    selection of new_space_ptr.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hid_t
+H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_id,
+    hid_t src_intersect_space_id)
+{
+    H5S_t *src_space, *dst_space, *src_intersect_space; /* Input dataspaces */
+    H5S_t *proj_space = NULL;  /* Output dataspace */
+    hid_t ret_value;           /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "iii", src_space_id, dst_space_id, src_intersect_space_id);
+
+    /* Check args */
+    if(NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(NULL == (dst_space = (H5S_t *)H5I_object_verify(dst_space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(NULL == (src_intersect_space = (H5S_t *)H5I_object_verify(src_intersect_space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
+
+    /* Perform operation */
+    if(H5S_select_project_intersection(src_space, dst_space,
+            src_intersect_space, &proj_space, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project dataspace intersection")
+
+    /* Atomize */
+    if((ret_value = H5I_register(H5I_DATASPACE, proj_space, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+
+done:
+    if(ret_value < 0)
+        if(proj_space && H5S_close(proj_space) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Sselect_project_intersection() */
 
 
 /*--------------------------------------------------------------------------
@@ -2836,7 +2947,7 @@ H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes,
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "length array pointer is NULL")
 
     /* Get the sequences of bytes */
-    if(maxseq > 0 && maxbytes > 0) {
+    if(maxseq > 0 && maxbytes > 0 && sel_iter->elmt_left > 0) {
         if(H5S_SELECT_ITER_GET_SEQ_LIST(sel_iter, maxseq, maxbytes, nseq, nbytes, off, len) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed")
     } /* end if */

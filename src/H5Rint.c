@@ -504,6 +504,7 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
     H5VL_connector_prop_t connector_prop;
     unsigned flags = H5F_ACC_RDWR; /* Must open file read-write to allow for object modifications */
     H5P_genplist_t *plist;
+    H5VL_object_t *vol_obj = NULL; /* VOL object for file */
     hid_t ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_PACKAGE
@@ -533,6 +534,14 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
     /* Get an ID for the file */
     if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+
+    /* Get the file object */
+    if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "invalid object identifier")
+
+    /* Make the post open callback */
+    if(H5VL_file_specific(vol_obj, H5VL_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file post open callback")
 
     /* Attach loc_id to reference */
     if(H5R__set_loc_id((H5R_ref_priv_t *)ref, ret_value, FALSE) < 0)
@@ -1160,8 +1169,8 @@ H5R__encode_region(H5S_t *space, unsigned char *buf, size_t *nalloc)
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
     if(buf && *nalloc >= ((size_t)buf_size + 2 * H5_SIZEOF_UINT32_T)) {
-        p = (uint8_t *)buf;
         int rank;
+        p = (uint8_t *)buf;
 
         /* Encode the size for safety check */
         UINT32ENCODE(p, (uint32_t)buf_size);

@@ -11,10 +11,26 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* If you are reading this file and it has a '.h' suffix, it was automatically
- * generated from the '.in' version.  Make changes there.
- */
+#include "vds_swmr.h"
 
-/* Set the 'srcdir' path from configure time */
-#define config_srcdir "@srcdir@"
+hsize_t PLANES[N_SOURCES][RANK] = {
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH},
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH},
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH}
+};
 
+char FILE_NAMES[N_SOURCES][NAME_LEN] = {
+    {"vds_swmr_src_a.h5"},
+    {"vds_swmr_src_b.h5"},
+    {"vds_swmr_src_c.h5"},
+    {"vds_swmr_src_d.h5"},
+    {"vds_swmr_src_e.h5"},
+    {"vds_swmr_src_f.h5"}
+};
+
+char VDS_FILE_NAME[NAME_LEN] = "vds_swmr.h5";
+char SOURCE_DSET_PATH[NAME_LEN] = "/source_dset";
+char VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
