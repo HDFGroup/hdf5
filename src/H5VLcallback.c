@@ -101,6 +101,8 @@ static void * H5VL__file_open(const H5VL_class_t *cls, const char *name,
     unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_t get_type, 
     hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__file_specific_wrap_va_list(void *obj, const H5VL_class_t *cls,
+    H5VL_file_specific_t specific_type,  hid_t dxpl_id, void **req, ...);
 static herr_t H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t specific_type, 
     hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__file_optional(void *obj, const H5VL_class_t *cls, hid_t dxpl_id,
@@ -2989,6 +2991,43 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__file_specific_wrap_va_list
+ *
+ * Purpose:     Perform File specific operations through the VOL.  Just
+ *              starts a va_list and passes it to the connector's
+ *              callback.  Needed when the VOL layer needs to replace one
+ *              of the variable arguments.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_specific_wrap_va_list(void *obj, const H5VL_class_t *cls,
+    H5VL_file_specific_t specific_type,  hid_t dxpl_id, void **req, ...)
+{
+    va_list arguments;                  /* Argument list passed from the API call */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Start access to the varargs, so they are available in all situations below */
+    HDva_start(arguments, req);
+
+    /* Call the corresponding VOL callback */
+    if((cls->file_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
+
+done:
+    /* End access to the va_list */
+    HDva_end(arguments);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_specific_wrap_va_list() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL__file_specific
  *
  * Purpose:	Perform File specific operations through the VOL
@@ -3009,6 +3048,35 @@ H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t spe
     /* Check if the corresponding VOL callback exists */
     if(NULL == cls->file_cls.specific)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'file specific' method")
+
+    /* Special handling for file is equal */
+    if(specific_type == H5VL_FILE_IS_EQUAL) {
+        va_list             tmp_args;       /* Argument list passed from the API call */
+        H5VL_object_t       *vol_obj2;      /* Second VOL object */
+        hbool_t             *is_equal;      /* Output variable */
+        int                 cmp_value;      /* Comparison result */
+
+        /* Get parameters */
+        HDva_copy(tmp_args, arguments);
+        vol_obj2 = HDva_arg(tmp_args, H5VL_object_t *);
+        is_equal = HDva_arg(tmp_args, hbool_t *);
+        HDva_end(tmp_args);
+
+        HDassert(vol_obj2);
+
+        /* Compare connector classes */
+        if(H5VL_cmp_connector_cls(&cmp_value, cls, vol_obj2->connector->cls) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
+
+        /* If the classes are different the files are different */
+        if(cmp_value)
+            *is_equal = FALSE;
+        else
+            /* Make callback (need to extract data from vol_obj2 and redo the
+             * va_list) */
+            if(H5VL__file_specific_wrap_va_list(obj, cls, specific_type, dxpl_id, req, vol_obj2->data, is_equal) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
+    } /* end if */
 
     /* Call the corresponding VOL callback */
     if((cls->file_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
