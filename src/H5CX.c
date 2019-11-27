@@ -182,6 +182,10 @@ typedef struct H5CX_t {
     hid_t dxpl_id;              /* DXPL ID for API operation */
     H5P_genplist_t *dxpl;       /* Dataset Transfer Property List */
 
+    /* LCPL */
+    hid_t lcpl_id;              /* LCPL ID for API operation */
+    H5P_genplist_t *lcpl;       /* Link Creation Property List */
+
     /* LAPL */
     hid_t lapl_id;              /* LAPL ID for API operation */
     H5P_genplist_t *lapl;       /* Link Access Property List */
@@ -275,6 +279,12 @@ typedef struct H5CX_t {
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 
+    /* Cached LCPL properties */
+    H5T_cset_t encoding;     /* Link name character encoding */
+    hbool_t encoding_valid;  /* Whether link name character encoding is valid */
+    unsigned intermediate_group;       /* Whether to create intermediate groups */
+    hbool_t intermediate_group_valid;  /* Whether create intermediate group flag is valid */
+
     /* Cached LAPL properties */
     size_t nlinks;              /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
     hbool_t nlinks_valid;       /* Whether number of soft / UD links to traverse is valid */
@@ -333,6 +343,13 @@ typedef struct H5CX_dxpl_cache_t {
     H5T_conv_cb_t dt_conv_cb;       /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
 } H5CX_dxpl_cache_t;
 
+/* Typedef for cached default link creation property list information */
+/* (Same as the cached DXPL struct, above, except for the default LCPL) */
+typedef struct H5CX_lcpl_cache_t {
+    H5T_cset_t encoding;         /* Link name character encoding */
+    unsigned intermediate_group; /* Whether to create intermediate groups  */
+} H5CX_lcpl_cache_t;
+
 /* Typedef for cached default link access property list information */
 /* (Same as the cached DXPL struct, above, except for the default LAPL) */
 typedef struct H5CX_lapl_cache_t {
@@ -381,6 +398,9 @@ static H5CX_node_t *H5CX_head_g = NULL;         /* Pointer to head of context st
 /* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
 static H5CX_dxpl_cache_t H5CX_def_dxpl_cache;
 
+/* Define a "default" link creation property list cache structure to use for default LCPLs */
+static H5CX_lcpl_cache_t H5CX_def_lcpl_cache;
+
 /* Define a "default" link access property list cache structure to use for default LAPLs */
 static H5CX_lapl_cache_t H5CX_def_lapl_cache;
 
@@ -409,6 +429,7 @@ herr_t
 H5CX__init_package(void)
 {
     H5P_genplist_t *dx_plist;           /* Data transfer property list */
+    H5P_genplist_t *lc_plist;           /* Link creation property list */
     H5P_genplist_t *la_plist;           /* Link access property list */
     H5P_genplist_t *da_plist;           /* Dataset access property list */
     H5P_genplist_t *fa_plist;           /* File access property list */
@@ -497,6 +518,23 @@ H5CX__init_package(void)
     /* Get datatype conversion struct */
     if(H5P_get(dx_plist, H5D_XFER_CONV_CB_NAME, &H5CX_def_dxpl_cache.dt_conv_cb) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve datatype conversion exception callback")
+
+    /* Reset the "default LCPL cache" information */
+    HDmemset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
+
+    /* Get the default LCPL cache information */
+
+    /* Get the default link creation property list */
+    if(NULL == (lc_plist = (H5P_genplist_t *)H5I_object(H5P_LINK_CREATE_DEFAULT)))
+        HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a link creation property list")
+
+    /* Get link name character encoding */
+    if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &H5CX_def_lcpl_cache.encoding) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve link name encoding")
+
+    /* Get flag whether to create intermediate groups */
+    if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &H5CX_def_lcpl_cache.intermediate_group) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve intermediate group creation flag")
 
     /* Reset the "default LAPL cache" information */
     HDmemset(&H5CX_def_lapl_cache, 0, sizeof(H5CX_lapl_cache_t));
@@ -667,6 +705,7 @@ H5CX__push_common(H5CX_node_t *cnode)
 
     /* Set non-zero context info */
     cnode->ctx.dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    cnode->ctx.lcpl_id = H5P_LINK_CREATE_DEFAULT;
     cnode->ctx.lapl_id = H5P_LINK_ACCESS_DEFAULT;
     cnode->ctx.dapl_id = H5P_DATASET_ACCESS_DEFAULT;
     cnode->ctx.fapl_id = H5P_FILE_ACCESS_DEFAULT;
@@ -835,6 +874,35 @@ H5CX_set_libver_bounds(H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_libver_bounds() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_lcpl
+ *
+ * Purpose:     Sets the LCPL for the current API call context.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Chris Hogan
+ *              November 27, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_lcpl(hid_t lcpl_id)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(*head);
+
+    /* Set the API context's LCPL to a new value */
+    (*head)->ctx.lcpl_id = lcpl_id;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_lcpl() */
 
 
 /*-------------------------------------------------------------------------
@@ -1943,6 +2011,76 @@ H5CX_get_dt_conv_cb(H5T_conv_cb_t *dt_conv_cb)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_dt_conv_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_encoding
+ *
+ * Purpose:     Retrieves the character encoding for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Gerd Heber
+ *              October 21, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_encoding(H5T_cset_t* encoding)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(encoding);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.lcpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(lcpl, H5P_LINK_CREATE_DEFAULT, H5P_STRCRT_CHAR_ENCODING_NAME, encoding)
+
+    /* Get the value */
+    *encoding = (*head)->ctx.encoding;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_encoding() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_intermediate_group
+ *
+ * Purpose:     Retrieves the create intermediate group flag for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Gerd Heber
+ *              October 21, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_intermediate_group(unsigned* crt_intermed_group)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(crt_intermed_group);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.lcpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(lcpl, H5P_LINK_CREATE_DEFAULT, H5L_CRT_INTERMEDIATE_GROUP_NAME, intermediate_group)
+
+    /* Get the value */
+    *crt_intermed_group = (*head)->ctx.intermediate_group;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_create_intermediate_group() */
 
 
 /*-------------------------------------------------------------------------
