@@ -418,6 +418,19 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 break;
             }
 
+        /* Check if two files are the same */
+        case H5VL_FILE_IS_EQUAL:
+            {
+                H5F_t *file2 = (H5F_t *)HDva_arg(arguments, void *);
+                hbool_t *is_equal = HDva_arg(arguments, hbool_t *);
+
+                if(!obj || !file2)
+                    *is_equal = FALSE;
+                else
+                    *is_equal = (((H5F_t *)obj)->shared == file2->shared);
+                break;
+            }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
     } /* end switch */
