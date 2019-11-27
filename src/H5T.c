@@ -3320,7 +3320,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
+H5T_copy(H5T_t *old_dt, H5T_copy_t method)
 {
     H5T_t           *new_dt = NULL, *tmp = NULL;
     H5T_shared_t    *reopened_fo = NULL;
