@@ -138,7 +138,6 @@ done:
 } /* end H5P__macc_reg_prop() */
 
 
-#ifdef H5_HAVE_MAP_API
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_map_iterate_hints
  *
@@ -215,4 +214,4 @@ H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size, size_t *key_a
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_map_iterate_hints() */
-#endif /*  H5_HAVE_MAP_API */
+

@@ -24,16 +24,47 @@
 #include "H5srcdir_str.h"
 
 /* Buffer to construct path in and return pointer to */
-extern char srcdir_path[1024];
+static char srcdir_path[1024] = "";
 
 /* Buffer to construct file in and return pointer to */
-extern char srcdir_testpath[1024];
+static char srcdir_testpath[1024] = "";
 
 /* Just return the srcdir path */
-const char *H5_get_srcdir(void);
+static const char *
+H5_get_srcdir(void)
+{
+    const char *srcdir = HDgetenv("srcdir");
+
+    /* Check for using the srcdir from configure time */
+    if(NULL == srcdir)
+        srcdir = config_srcdir;
+
+    /* Build path to all test files */
+    if((HDstrlen(srcdir) + 2) < sizeof(srcdir_path)) {
+        HDsnprintf(srcdir_path, sizeof(srcdir_path), "%s/", srcdir);
+        return(srcdir_path);
+    } /* end if */
+    else
+        return(NULL);
+} /* end H5_get_srcdir() */
 
 /* Append the test file name to the srcdir path and return the whole string */
-const char *H5_get_srcdir_filename(const char *);
+static const char *H5_get_srcdir_filename(const char *filename)
+{
+    const char *srcdir = H5_get_srcdir();
 
+    /* Check for error */
+    if(NULL == srcdir)
+        return(NULL);
+    else {
+        /* Build path to test file */
+        if((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(srcdir_testpath)) {
+            HDsnprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s%s", srcdir, filename);
+            return(srcdir_testpath);
+        } /* end if */
+        else
+            return(NULL);
+    } /* end else */
+} /* end H5_get_srcdir_filename() */
 #endif /* _H5SRCDIR_H */
 

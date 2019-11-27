@@ -1169,8 +1169,8 @@ H5R__encode_region(H5S_t *space, unsigned char *buf, size_t *nalloc)
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
     if(buf && *nalloc >= ((size_t)buf_size + 2 * H5_SIZEOF_UINT32_T)) {
-        int rank;
         p = (uint8_t *)buf;
+        int rank;
 
         /* Encode the size for safety check */
         UINT32ENCODE(p, (uint32_t)buf_size);

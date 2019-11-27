@@ -39,7 +39,7 @@ Languages:
                     H5_CPPFLAGS: @H5_CPPFLAGS@
                     AM_CPPFLAGS: @AM_CPPFLAGS@
                         C Flags: @CFLAGS@
-                     H5 C Flags: @H5_CFLAGS@ @H5_ECFLAGS@
+                     H5 C Flags: @H5_CFLAGS@
                      AM C Flags: @AM_CFLAGS@
                Shared C Library: @enable_shared@
                Static C Library: @enable_static@

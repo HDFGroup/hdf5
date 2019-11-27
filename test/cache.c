@@ -16926,7 +16926,7 @@ check_move_entry_errs(unsigned paged)
 {
     herr_t result;
     H5F_t * file_ptr = NULL;
-    H5C_t * cache_ptr;
+    H5C_t * cache_ptr = NULL;
     test_entry_t * entry_ptr = NULL;
     test_entry_t * entry_0_0_ptr;
     test_entry_t * entry_0_1_ptr;

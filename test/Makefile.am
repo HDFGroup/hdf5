@@ -165,12 +165,6 @@ vfd_swmr_zoo_reader_SOURCES=vfd_swmr_zoo_writer.c genall5.c
 
 vfd_swmr_bigset_reader_SOURCES=vfd_swmr_bigset_writer.c
 
-#filter_plugin_SOURCES=filter_plugin.c
-
-vds_swmr_gen_SOURCES=vds_swmr_gen.c vds_swmr_common.c
-vds_swmr_writer_SOURCES=vds_swmr_writer.c vds_swmr_common.c
-vds_swmr_reader_SOURCES=vds_swmr_reader.c vds_swmr_common.c
-
 VFD_LIST = sec2 stdio core core_paged split multi family
 if DIRECT_VFD_CONDITIONAL
   VFD_LIST += direct

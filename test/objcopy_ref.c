@@ -1587,6 +1587,7 @@ main(void)
     unsigned    max_compact, min_dense;
     int     configuration;  /* Configuration of tests. */
     int    ExpressMode;
+    hbool_t same_file;  /* Whether to run tests that only use one file */
 
     /* Setup */
     h5_reset();
@@ -1619,6 +1620,11 @@ main(void)
         hid_t fcpl_src;
         hid_t fcpl_dst;
 
+        /* Start with same_file == TRUE.  Use source file settings for these
+         * tests.  Don't run with a non-default destination file setting, as
+         * destination settings have no effect. */
+        same_file = TRUE;
+
         /* No need to test dense attributes with old format */
         if(!(configuration & CONFIG_SRC_NEW_FORMAT) && (configuration & CONFIG_DENSE))
             continue;
@@ -1640,6 +1646,7 @@ main(void)
         if(configuration & CONFIG_SHARE_DST) {
             HDputs("Testing with shared dst messages:");
             fcpl_dst = fcpl_shared;
+            same_file = FALSE;
         }
         else {
             HDputs("Testing without shared dst messages:");
@@ -1671,6 +1678,7 @@ main(void)
         if(configuration & CONFIG_DST_NEW_FORMAT) {
             HDputs("Testing with latest format for destination file:");
             dst_fapl = fapl2;
+            same_file = FALSE;
         } /* end if */
         else {
             HDputs("Testing with oldest file format for destination file:");

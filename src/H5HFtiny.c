@@ -377,7 +377,7 @@ done:
 herr_t
 H5HF_tiny_remove(H5HF_hdr_t *hdr, const uint8_t *id)
 {
-    size_t enc_obj_size = 0;            /* Encoded object size */
+    size_t enc_obj_size;                /* Encoded object size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

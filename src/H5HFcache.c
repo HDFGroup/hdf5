@@ -409,7 +409,7 @@ static herr_t
 H5HF__cache_hdr_get_final_load_size(const void *_image, size_t image_len,
     void *_udata, size_t *actual_len)
 {
-    H5HF_hdr_t hdr; /* Temporary fractal heap header */
+    H5HF_hdr_t hdr;             /* Temporary fractal heap header */
     const uint8_t *image = (const uint8_t *)_image;       /* Pointer into into supplied image */
     H5HF_hdr_cache_ud_t *udata = (H5HF_hdr_cache_ud_t *)_udata; /* User data for callback */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -422,12 +422,6 @@ H5HF__cache_hdr_get_final_load_size(const void *_image, size_t image_len,
     HDassert(actual_len);
     HDassert(*actual_len == image_len);
 
-    /* Initialize because GCC 5.5 does not realize that the
-     * H5HF__hdr_prefix_decode() call is sufficient to initialize.
-     * GCC 8 is clever enough to see that the variable is initialized.
-     * TBD condition on compiler version.
-     */
-    hdr.filter_len = 0;
     /* Deserialize the fractal heap header's prefix */
     if(H5HF__hdr_prefix_decode(&hdr, &image) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode fractal heap header prefix")

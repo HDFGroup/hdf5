@@ -4795,7 +4795,7 @@ struct H5C_t {
     uint32_t                    num_last_entries;
 #if H5C_DO_SANITY_CHECKS
     int32_t			slist_len_increase;
-    int64_t			slist_size_increase;
+    ssize_t			slist_size_increase;
 #endif /* H5C_DO_SANITY_CHECKS */
 
     /* Fields for maintaining list of tagged entries */

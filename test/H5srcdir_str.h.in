@@ -16,5 +16,5 @@
  */
 
 /* Set the 'srcdir' path from configure time */
-#define config_srcdir "@srcdir@"
+static const char *config_srcdir = "@srcdir@";
 

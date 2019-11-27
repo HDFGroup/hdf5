@@ -116,12 +116,6 @@ static const H5VL_class_t null_vol_g = {
         NULL,                                       /* optional     */
         NULL                                        /* free         */
     },
-    {   /* blob_cls */
-        NULL,                                       /* put */
-        NULL,                                       /* get */
-        NULL,                                       /* specific */
-        NULL                                        /* optional */
-    },
     NULL                                            /* optional     */
 };
 

@@ -581,6 +581,7 @@ hid_t
 H5FD_hdfs_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    unsigned int bin_i;
 
     FUNC_ENTER_NOAPI(FAIL)
 

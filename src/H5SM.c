@@ -313,7 +313,7 @@ ssize_t
 H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
 {
     size_t x;
-    unsigned type_flag = 0;
+    unsigned type_flag;
     ssize_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -353,7 +353,7 @@ htri_t
 H5SM_type_shared(H5F_t *f, unsigned type_id)
 {
     H5SM_master_table_t *table = NULL;  /* Shared object master table */
-    unsigned type_flag = 0;             /* Flag corresponding to message type */
+    unsigned type_flag;                 /* Flag corresponding to message type */
     size_t u;                           /* Local index variable */
     htri_t ret_value = FALSE;           /* Return value */
 

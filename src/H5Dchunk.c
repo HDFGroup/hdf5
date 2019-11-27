@@ -284,8 +284,7 @@ static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *
 static herr_t H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     const hsize_t *curr_dims, const hsize_t *max_dims);
 static void *H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
-static void *H5D__chunk_mem_xfree(void *chk, void *pline);
-static void H5D__chunk_mem_xfree_wrapper(void *chk, void *pline);
+static void *H5D__chunk_mem_xfree(void *chk, const void *pline);
 static void *H5D__chunk_mem_realloc(void *chk, size_t size,
     const H5O_pline_t *pline);
 static herr_t H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
@@ -1102,10 +1101,14 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     H5D_chunk_map_t *fm)
 {
     const H5D_t *dataset = io_info->dset;     /* Local pointer to dataset info */
+    H5S_t *tmp_mspace = NULL;   /* Temporary memory dataspace */
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
     htri_t file_space_normalized = FALSE;   /* File dataspace was normalized */
+    H5T_t *file_type = NULL;    /* Temporary copy of file datatype for iteration */
+    hbool_t iter_init = FALSE;  /* Selection iteration info has been initialized */
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
+    char bogus;                 /* "bogus" buffer to pass to selection iterator */
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED;	/* Return value		*/
 
@@ -1429,7 +1432,7 @@ H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline)
  *-------------------------------------------------------------------------
  */
 static void *
-H5D__chunk_mem_xfree(void *chk, void *_pline)
+H5D__chunk_mem_xfree(void *chk, const void *_pline)
 {
     const H5O_pline_t *pline = (const H5O_pline_t *)_pline;
 
@@ -1444,17 +1447,6 @@ H5D__chunk_mem_xfree(void *chk, void *_pline)
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* H5D__chunk_mem_xfree() */
-
-/* H5D__chunk_mem_xfree_wrapper() safely adapts the type of
- * H5D__chunk_mem_xfree() to an H5MM_free_t callback, without making
- * compilers warn.  It is used with H5D__chunk_mem_xfree_wrapper(), for
- * example.
- */
-static void
-H5D__chunk_mem_xfree_wrapper(void *chk, void *_pline)
-{
-    (void)H5D__chunk_mem_xfree(chk, _pline);
-}
 
 
 /*-------------------------------------------------------------------------
@@ -2148,6 +2140,12 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
 {
     H5D_chunk_info_t *chunk_info;           /* Pointer to chunk information */
     H5SL_node_t *curr_node;                 /* Current node in skip list */
+    hsize_t     file_sel_start[H5S_MAX_RANK];    /* Offset of low bound of file selection */
+    hsize_t     file_sel_end[H5S_MAX_RANK]; /* Offset of high bound of file selection */
+    hsize_t     mem_sel_start[H5S_MAX_RANK]; /* Offset of low bound of file selection */
+    hsize_t     mem_sel_end[H5S_MAX_RANK];  /* Offset of high bound of file selection */
+    hssize_t    adjust[H5S_MAX_RANK];       /* Adjustment to make to all file chunks */
+    unsigned    u;                          /* Local index variable */
     herr_t	ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
@@ -2172,10 +2170,9 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
         chunk_info->mspace_shared = TRUE;
     } /* end if */
     else {
+        HDassert(fm->m_ndims == 1);
         hsize_t     mem_sel_start[H5S_MAX_RANK]; /* Offset of low bound of file selection */
         hsize_t     mem_sel_end[H5S_MAX_RANK];  /* Offset of high bound of file selection */
-
-        HDassert(fm->m_ndims == 1);
 
         if(H5S_SELECT_BOUNDS(fm->mem_space, mem_sel_start, mem_sel_end) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
@@ -2183,7 +2180,7 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
         /* Iterate over each chunk in the chunk list */
         curr_node = H5SL_first(fm->sel_chunks);
         while(curr_node) {
-            hsize_t    schunk_points;          /* Number of elements in chunk selection */
+            hssize_t    schunk_points;          /* Number of elements in chunk selection */
             hsize_t     tmp_count = 1;
 
             /* Get pointer to chunk's information */
@@ -4454,7 +4451,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
         /* (delay allocating fill buffer for VL datatypes until refilling) */
         /* (casting away const OK - QAK) */
         if(H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
-                (void *)pline, H5D__chunk_mem_xfree_wrapper, (void *)pline,
+                (void *)pline, (H5MM_free_t)H5D__chunk_mem_xfree, (void *)pline,
                 &dset->shared->dcpl_cache.fill, dset->shared->type,
                 dset->shared->type_id, (size_t)0, orig_chunk_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
@@ -7196,6 +7193,7 @@ H5D__get_num_chunks(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
     hsize_t            num_chunks = 0;          /* Number of written chunks */
     H5D_rdcc_ent_t     *ent;                    /* Cache entry  */
     const H5D_rdcc_t   *rdcc = NULL;            /* Raw data chunk cache */
+    const H5O_layout_t *layout;                 /* Dataset layout */
     herr_t             ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
@@ -7205,6 +7203,7 @@ H5D__get_num_chunks(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
     HDassert(space);
     HDassert(nchunks);
 
+    layout = &(dset->shared->layout);    /* Dataset layout */
     rdcc = &(dset->shared->cache.chunk); /* raw data chunk cache */
     HDassert(rdcc);
 

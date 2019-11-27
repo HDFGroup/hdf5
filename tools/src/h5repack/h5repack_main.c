@@ -281,7 +281,7 @@ int read_info(const char *filename, pack_opt_t *options)
     char comp_info[1024];
     FILE *fp = NULL;
     char c;
-    int i;
+    int i, rc = 1;
     int ret_value = EXIT_SUCCESS;
 
     if (NULL == (fp = HDfopen(filename, "r"))) {
@@ -412,7 +412,7 @@ set_sort_order(const char *form)
 static
 int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 {
-    int bound, opt;
+    int opt;
     int ret_value = 0;
 
     /* parse command line options */
@@ -492,21 +492,19 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'j':
-                bound = HDatoi(opt_arg);
-                if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
+                options->low_bound = (H5F_libver_t)HDatoi(opt_arg);
+                if (options->low_bound < H5F_LIBVER_EARLIEST || options->low_bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing low bound\n");
                     goto done;
                 }
-                options->low_bound = bound;
                 break;
 
             case 'k':
-                bound = HDatoi(opt_arg);
-                if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
+                options->high_bound = (H5F_libver_t)HDatoi(opt_arg);
+                if (options->high_bound < H5F_LIBVER_EARLIEST || options->high_bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing high bound\n");
                     goto done;
                 }
-                options->high_bound = bound;
                 break;
 
             case 'c':

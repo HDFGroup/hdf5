@@ -31,7 +31,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5CXprivate.h"        /* API contexts                             */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Fprivate.h"         /* File access                              */
 #include "H5FLprivate.h"        /* Free lists                               */

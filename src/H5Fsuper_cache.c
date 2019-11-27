@@ -351,9 +351,9 @@ static herr_t
 H5F__cache_superblock_get_final_load_size(const void *_image, size_t image_len,
     void *_udata, size_t *actual_len)
 {
-    const uint8_t *image = _image; /* Pointer into raw data buffer */
+    const uint8_t *image = (const uint8_t *)_image;   			    /* Pointer into raw data buffer */
     H5F_superblock_cache_ud_t *udata = (H5F_superblock_cache_ud_t *)_udata; /* User data */
-    H5F_super_t sblock; /* Temporary file superblock */
+    H5F_super_t sblock;                 /* Temporary file superblock */
     htri_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -364,15 +364,6 @@ H5F__cache_superblock_get_final_load_size(const void *_image, size_t image_len,
     HDassert(actual_len);
     HDassert(*actual_len == image_len);
     HDassert(image_len >= H5F_SUPERBLOCK_FIXED_SIZE + 6);
-
-    /* Initialize because GCC 5.5 does not realize that
-     * H5F__superblock_prefix_decode() initializes it.
-     *
-     * TBD condition on compiler version.
-     */
-    sblock.super_vers = 0;
-    sblock.sizeof_addr = 0;
-    sblock.sizeof_size = 0;
 
     /* Deserialize the file superblock's prefix */
     if(H5F__superblock_prefix_decode(&sblock, &image, udata, TRUE) < 0)
@@ -406,7 +397,7 @@ done:
 static htri_t
 H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata)
 {
-    const uint8_t *image = _image;    	/* Pointer into raw data buffer */
+    const uint8_t *image = (const uint8_t *)_image;    	/* Pointer into raw data buffer */
     H5F_superblock_cache_ud_t *udata = (H5F_superblock_cache_ud_t *)_udata; /* User data */
     uint32_t stored_chksum;     /* Stored metadata checksum value */
     uint32_t computed_chksum;   /* Computed metadata checksum value */
@@ -452,7 +443,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata,
 {
     H5F_super_t         *sblock = NULL; /* File's superblock */
     H5F_superblock_cache_ud_t *udata = (H5F_superblock_cache_ud_t *)_udata; /* User data */
-    const uint8_t	*image = _image; /* Pointer into raw data buffer */
+    const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     H5F_super_t         *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
@@ -677,7 +668,7 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
     void *_thing)
 {
     H5F_super_t *sblock = (H5F_super_t *)_thing;      /* Pointer to the object */
-    uint8_t *image = _image;         /* Pointer into raw data buffer */
+    uint8_t *image = (uint8_t *)_image;         /* Pointer into raw data buffer */
     haddr_t rel_eof;            /* Relative EOF for file */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -883,9 +874,9 @@ static herr_t
 H5F__cache_drvrinfo_get_final_load_size(const void *_image, size_t image_len,
     void *_udata, size_t *actual_len)
 {
-    const uint8_t *image = _image; /* Pointer into raw data buffer */
+    const uint8_t *image = (const uint8_t *)_image;   			/* Pointer into raw data buffer */
     H5F_drvrinfo_cache_ud_t *udata = (H5F_drvrinfo_cache_ud_t *)_udata;	/* User data */
-    H5O_drvinfo_t drvrinfo = {.len = 0};     /* Driver info */
+    H5O_drvinfo_t drvrinfo;     /* Driver info */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -929,7 +920,7 @@ H5F__cache_drvrinfo_deserialize(const void *_image, size_t len, void *_udata,
 {
     H5O_drvinfo_t       *drvinfo = NULL; /* Driver info */
     H5F_drvrinfo_cache_ud_t *udata = (H5F_drvrinfo_cache_ud_t *)_udata;     /* User data */
-    const uint8_t	*image = _image; /* Pointer into raw data buffer */
+    const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     char                drv_name[9];    /* Name of driver */
     H5O_drvinfo_t       *ret_value = NULL;      /* Return value */
 
@@ -1023,7 +1014,7 @@ H5F__cache_drvrinfo_serialize(const H5F_t *f, void *_image, size_t len,
     void *_thing)
 {
     H5O_drvinfo_t *drvinfo = (H5O_drvinfo_t *)_thing;   /* Pointer to the object */
-    uint8_t *image = _image;         /* Pointer into raw data buffer */
+    uint8_t *image = (uint8_t *)_image;         /* Pointer into raw data buffer */
     uint8_t *dbuf;              /* Pointer to beginning of driver info */
     herr_t ret_value = SUCCEED; /* Return value */
 
