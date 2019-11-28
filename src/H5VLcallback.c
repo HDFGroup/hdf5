@@ -3077,10 +3077,10 @@ H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t spe
             if(H5VL__file_specific_wrap_va_list(obj, cls, specific_type, dxpl_id, req, vol_obj2->data, is_equal) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
     } /* end if */
-
-    /* Call the corresponding VOL callback */
-    if((cls->file_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
+    else
+        /* Call the corresponding VOL callback */
+        if((cls->file_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

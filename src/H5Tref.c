@@ -366,7 +366,7 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
     /* Set external flag if referenced file is not destination file */
     if(H5VL_file_specific(vol_obj, H5VL_FILE_IS_EQUAL, H5P_DATASET_XFER_DEFAULT, NULL, dst_file, &files_equal) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOMPARE, 0, "can't check if files are equal")
-    flags |= files_equal ? H5R_IS_EXTERNAL : 0;
+    flags |= !files_equal ? H5R_IS_EXTERNAL : 0;
 
     /* Force re-calculating encoding size if any flags are set */
     if(flags || !src_ref->encode_size) {
@@ -389,12 +389,12 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
         } /* end if */
 
         /* Get file name */
-        if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, sizeof(file_name_buf_static), file_name_buf_static, &file_name_len) < 0)
+        if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, H5I_FILE, sizeof(file_name_buf_static), file_name_buf_static, &file_name_len) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't get file name")
         if(file_name_len >= (ssize_t)sizeof(file_name_buf_static)) {
             if(NULL == (file_name_buf_dyn = (char *)H5MM_malloc((size_t)file_name_len + 1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, 0, "can't allocate space for file name")
-            if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, (size_t)file_name_len + 1, file_name_buf_dyn, &file_name_len) < 0)
+            if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, H5I_FILE, (size_t)file_name_len + 1, file_name_buf_dyn, &file_name_len) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't get file name")
         } /* end if */
 
@@ -455,7 +455,7 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     /* Set external flag if referenced file is not destination file */
     if(H5VL_file_specific(vol_obj, H5VL_FILE_IS_EQUAL, H5P_DATASET_XFER_DEFAULT, NULL, dst_file, &files_equal) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOMPARE, FAIL, "can't check if files are equal")
-    flags |= files_equal ? H5R_IS_EXTERNAL : 0;
+    flags |= !files_equal ? H5R_IS_EXTERNAL : 0;
 
     /* Pass the correct encoding version for the selection depending on the
      * file libver bounds, this is later retrieved in H5S hyper encode */
@@ -476,12 +476,12 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     } /* end if */
 
     /* Get file name */
-    if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, sizeof(file_name_buf_static), file_name_buf_static, &file_name_len) < 0)
+    if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, H5I_FILE, sizeof(file_name_buf_static), file_name_buf_static, &file_name_len) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't get file name")
     if(file_name_len >= (ssize_t)sizeof(file_name_buf_static)) {
         if(NULL == (file_name_buf_dyn = (char *)H5MM_malloc((size_t)file_name_len + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, 0, "can't allocate space for file name")
-        if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, (size_t)file_name_len + 1, file_name_buf_dyn, &file_name_len) < 0)
+        if(H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, NULL, H5I_FILE, (size_t)file_name_len + 1, file_name_buf_dyn, &file_name_len) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't get file name")
     } /* end if */
 
