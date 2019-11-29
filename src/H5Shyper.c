@@ -11503,7 +11503,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     HDassert(src_intersect_space);
     HDassert(proj_space);
 
-    /* Assert that src_space and src_intersect_space have same extent and there
+    /* Assert that src_space and src_intersect_space have same rank and there
      * are no point selections */
     HDassert(H5S_GET_EXTENT_NDIMS(src_space) == H5S_GET_EXTENT_NDIMS(src_intersect_space));
     HDassert(H5S_GET_SELECT_NPOINTS(src_space) == H5S_GET_SELECT_NPOINTS(dst_space));
