@@ -490,6 +490,8 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "Cannot encode reference")
 
 done:
+    H5MM_xfree(file_name_buf_dyn);
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T__ref_mem_read() */
 
