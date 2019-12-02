@@ -140,3 +140,8 @@ guide to the syntax.
     Given that the VFD SWMR configuration FAPL property is set, the writer field must
     be consistent with the flags passed in the H5Fopen() (either H5F_ACC_RDWR for the 
     VFD SWMR writer, or H5F_ACC_RDONLY for the VFD SWMR readers).
+
+29. **Vailin, complete** Fix the FSM bug when setting the FSM threshold to a non-default value.
+    The problem was manifested when setting the threshold value in vfd_swmr_generator.c via
+    H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1024 * 1024 * 1024) and
+    then run the vfd_swmr_addrem_writer.c.
