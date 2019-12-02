@@ -195,33 +195,33 @@ test_reference_params(void)
     CHECK(ret, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Test parameters to H5Rcreate_object */
-    ret = H5Rcreate_object(fid1, "/Group1/Dataset1", NULL);
+    ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, NULL);
     VERIFY(ret, FAIL, "H5Rcreate_object ref");
-    ret = H5Rcreate_object(H5I_INVALID_HID, "/Group1/Dataset1", &wbuf[0]);
+    ret = H5Rcreate_object(H5I_INVALID_HID, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
     VERIFY(ret, FAIL, "H5Rcreate_object loc_id");
-    ret = H5Rcreate_object(fid1, NULL, &wbuf[0]);
+    ret = H5Rcreate_object(fid1, NULL, H5P_DEFAULT, &wbuf[0]);
     VERIFY(ret, FAIL, "H5Rcreate_object name");
-    ret = H5Rcreate_object(fid1, "", &wbuf[0]);
+    ret = H5Rcreate_object(fid1, "", H5P_DEFAULT, &wbuf[0]);
     VERIFY(ret, FAIL, "H5Rcreate_object null name");
 
     /* Test parameters to H5Rcreate_region */
-    ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, NULL);
+    ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, H5P_DEFAULT, NULL);
     VERIFY(ret, FAIL, "H5Rcreate_region ref");
-    ret = H5Rcreate_region(H5I_INVALID_HID, "/Group1/Dataset1", sid1, &wbuf[0]);
+    ret = H5Rcreate_region(H5I_INVALID_HID, "/Group1/Dataset1", sid1, H5P_DEFAULT, &wbuf[0]);
     VERIFY(ret, FAIL, "H5Rcreate_region loc_id");
-    ret = H5Rcreate_region(fid1, NULL, sid1, &wbuf[0]);
+    ret = H5Rcreate_region(fid1, NULL, sid1, H5P_DEFAULT, &wbuf[0]);
     VERIFY(ret, FAIL, "H5Rcreate_region name");
-    ret = H5Rcreate_region(fid1, "/Group1/Dataset1", H5I_INVALID_HID, &wbuf[0]);
+    ret = H5Rcreate_region(fid1, "/Group1/Dataset1", H5I_INVALID_HID, H5P_DEFAULT, &wbuf[0]);
     VERIFY(ret, FAIL, "H5Rcreate_region dataspace");
 
     /* Test parameters to H5Rcreate_attr */
-    ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", "Attr", NULL);
+    ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", "Attr", H5P_DEFAULT, NULL);
     VERIFY(ret, FAIL, "H5Rcreate_attr ref");
-    ret = H5Rcreate_attr(H5I_INVALID_HID, "/Group1/Dataset2", "Attr", &wbuf[0]);
+    ret = H5Rcreate_attr(H5I_INVALID_HID, "/Group1/Dataset2", "Attr", H5P_DEFAULT, &wbuf[0]);
     VERIFY(ret, FAIL, "H5Rcreate_attr loc_id");
-    ret = H5Rcreate_attr(fid1, NULL, "Attr", &wbuf[0]);
+    ret = H5Rcreate_attr(fid1, NULL, "Attr", H5P_DEFAULT, &wbuf[0]);
     VERIFY(ret, FAIL, "H5Rcreate_attr name");
-    ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", NULL, &wbuf[0]);
+    ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", NULL, H5P_DEFAULT, &wbuf[0]);
     VERIFY(ret, FAIL, "H5Rcreate_attr attr_name");
 
     /* Test parameters to H5Rdestroy */
@@ -403,28 +403,28 @@ test_reference_obj(void)
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Create reference to dataset */
-    ret = H5Rcreate_object(fid1, "/Group1/Dataset1", &wbuf[0]);
+    ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
     CHECK(ret, FAIL, "H5Rcreate_object");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&wbuf[0], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
 
     /* Create reference to dataset */
-    ret = H5Rcreate_object(fid1, "/Group1/Dataset2", &wbuf[1]);
+    ret = H5Rcreate_object(fid1, "/Group1/Dataset2", H5P_DEFAULT, &wbuf[1]);
     CHECK(ret, FAIL, "H5Rcreate_object");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&wbuf[1], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
 
     /* Create reference to group */
-    ret = H5Rcreate_object(fid1, "/Group1", &wbuf[2]);
+    ret = H5Rcreate_object(fid1, "/Group1", H5P_DEFAULT, &wbuf[2]);
     CHECK(ret, FAIL, "H5Rcreate_object");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&wbuf[2], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_GROUP, "H5Rget_obj_type3");
 
     /* Create reference to named datatype */
-    ret = H5Rcreate_object(fid1, "/Group1/Datatype1", &wbuf[3]);
+    ret = H5Rcreate_object(fid1, "/Group1/Datatype1", H5P_DEFAULT, &wbuf[3]);
     CHECK(ret, FAIL, "H5Rcreate_object");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&wbuf[3], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
@@ -645,7 +645,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(ret, 36, "H5Sget_select_npoints");
 
     /* Store first dataset region */
-    ret = H5Rcreate_region(fid1, "/Dataset2", sid2, &wbuf[0]);
+    ret = H5Rcreate_region(fid1, "/Dataset2", sid2, H5P_DEFAULT, &wbuf[0]);
     CHECK(ret, FAIL, "H5Rcreate_region");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&wbuf[0], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
@@ -669,7 +669,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(ret, SPACE2_DIM2, "H5Sget_select_npoints");
 
     /* Store second dataset region */
-    ret = H5Rcreate_region(fid1, "/Dataset2", sid2, &wbuf[1]);
+    ret = H5Rcreate_region(fid1, "/Dataset2", sid2, H5P_DEFAULT, &wbuf[1]);
     CHECK(ret, FAIL, "H5Rcreate_region");
 
     /* Select unlimited hyperslab for third reference */
@@ -688,7 +688,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(hssize_ret, (hssize_t)H5S_UNLIMITED, "H5Sget_select_npoints");
 
     /* Store third dataset region */
-    ret = H5Rcreate_region(fid1, "/Dataset2", sid2, &wbuf[2]);
+    ret = H5Rcreate_region(fid1, "/Dataset2", sid2, H5P_DEFAULT, &wbuf[2]);
     CHECK(ret, FAIL, "H5Rcreate_region");
 
     ret = H5Rget_obj_type3((const H5R_ref_t *)&wbuf[2], H5P_DEFAULT, &obj_type);
@@ -696,7 +696,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
 
     /* Store fourth dataset region */
-    ret = H5Rcreate_region(fid1, "/Dataset2", sid2, &wbuf[3]);
+    ret = H5Rcreate_region(fid1, "/Dataset2", sid2, H5P_DEFAULT, &wbuf[3]);
     CHECK(ret, FAIL, "H5Rcreate_region");
 
     /* Write selection to disk */
@@ -1068,7 +1068,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(ret, (block[0] * count[0]), "H5Sget_select_npoints");
 
     /* Store first dataset region */
-    ret = H5Rcreate_region(fid1, "/Dataset2", sid3, &wbuf[0]);
+    ret = H5Rcreate_region(fid1, "/Dataset2", sid3, H5P_DEFAULT, &wbuf[0]);
     CHECK(ret, FAIL, "H5Rcreate_region");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&wbuf[0], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
@@ -1092,7 +1092,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     VERIFY(ret, POINT1_NPOINTS, "H5Sget_select_npoints");
 
     /* Store second dataset region */
-    ret = H5Rcreate_region(fid1, "/Dataset2", sid3, &wbuf[1]);
+    ret = H5Rcreate_region(fid1, "/Dataset2", sid3, H5P_DEFAULT, &wbuf[1]);
     CHECK(ret, FAIL, "H5Rcreate_region");
 
     /* Write selection to disk */
@@ -1311,7 +1311,7 @@ test_reference_obj_deleted(void)
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Create reference to dataset */
-    ret = H5Rcreate_object(fid1, "/Dataset1", &oref);
+    ret = H5Rcreate_object(fid1, "/Dataset1", H5P_DEFAULT, &oref);
     CHECK(ret, FAIL, "H5Rcreate_object");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&oref, H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
@@ -1469,7 +1469,7 @@ test_reference_group(void)
     CHECK(did, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Create reference to group */
-    ret = H5Rcreate_object(fid, GROUPNAME, &wref);
+    ret = H5Rcreate_object(fid, GROUPNAME, H5P_DEFAULT, &wref);
     CHECK(ret, FAIL, "H5Rcreate_object");
 
     /* Write reference to disk */
@@ -1678,28 +1678,28 @@ test_reference_attr(void)
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Create reference to dataset1 attribute */
-    ret = H5Rcreate_attr(fid, "/Group1/Dataset1", "Attr1", &ref_wbuf[0]);
+    ret = H5Rcreate_attr(fid, "/Group1/Dataset1", "Attr1", H5P_DEFAULT, &ref_wbuf[0]);
     CHECK(ret, FAIL, "H5Rcreate_attr");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&ref_wbuf[0], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
 
     /* Create reference to dataset2 attribute */
-    ret = H5Rcreate_attr(fid, "/Group1/Dataset2", "Attr1", &ref_wbuf[1]);
+    ret = H5Rcreate_attr(fid, "/Group1/Dataset2", "Attr1", H5P_DEFAULT, &ref_wbuf[1]);
     CHECK(ret, FAIL, "H5Rcreate_attr");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&ref_wbuf[1], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
 
     /* Create reference to group attribute */
-    ret = H5Rcreate_attr(fid, "/Group1", "Attr2", &ref_wbuf[2]);
+    ret = H5Rcreate_attr(fid, "/Group1", "Attr2", H5P_DEFAULT, &ref_wbuf[2]);
     CHECK(ret, FAIL, "H5Rcreate_attr");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&ref_wbuf[2], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_GROUP, "H5Rget_obj_type3");
 
     /* Create reference to named datatype attribute */
-    ret = H5Rcreate_attr(fid, "/Group1/Datatype1", "Attr3", &ref_wbuf[3]);
+    ret = H5Rcreate_attr(fid, "/Group1/Datatype1", "Attr3", H5P_DEFAULT, &ref_wbuf[3]);
     CHECK(ret, FAIL, "H5Rcreate_attr");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&ref_wbuf[3], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
@@ -1938,28 +1938,28 @@ test_reference_external(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Create reference to dataset1 attribute */
-    ret = H5Rcreate_attr(fid1, "/Group1/Dataset1", "Attr1", &ref_wbuf[0]);
+    ret = H5Rcreate_attr(fid1, "/Group1/Dataset1", "Attr1", H5P_DEFAULT, &ref_wbuf[0]);
     CHECK(ret, FAIL, "H5Rcreate_attr");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&ref_wbuf[0], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
 
     /* Create reference to dataset2 attribute */
-    ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", "Attr1", &ref_wbuf[1]);
+    ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", "Attr1", H5P_DEFAULT, &ref_wbuf[1]);
     CHECK(ret, FAIL, "H5Rcreate_attr");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&ref_wbuf[1], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type3");
 
     /* Create reference to group attribute */
-    ret = H5Rcreate_attr(fid1, "/Group1", "Attr2", &ref_wbuf[2]);
+    ret = H5Rcreate_attr(fid1, "/Group1", "Attr2", H5P_DEFAULT, &ref_wbuf[2]);
     CHECK(ret, FAIL, "H5Rcreate_attr");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&ref_wbuf[2], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
     VERIFY(obj_type, H5O_TYPE_GROUP, "H5Rget_obj_type3");
 
     /* Create reference to named datatype attribute */
-    ret = H5Rcreate_attr(fid1, "/Group1/Datatype1", "Attr3", &ref_wbuf[3]);
+    ret = H5Rcreate_attr(fid1, "/Group1/Datatype1", "Attr3", H5P_DEFAULT, &ref_wbuf[3]);
     CHECK(ret, FAIL, "H5Rcreate_attr");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&ref_wbuf[3], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
@@ -2506,7 +2506,7 @@ test_reference_perf(void)
     t = 0;
     for(i = 0; i < MAX_ITER_CREATE; i++) {
         t1 = H5_get_time();
-        ret = H5Rcreate_object(fid1, "/Group1/Dataset1", &wbuf[0]);
+        ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
         CHECK(ret, FAIL, "H5Rcreate_object");
         t2 = H5_get_time();
         t += t2 - t1;
@@ -2516,7 +2516,7 @@ test_reference_perf(void)
     HDprintf("--- Object reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Create reference to dataset */
-    ret = H5Rcreate_object(fid1, "/Group1/Dataset1", &wbuf[0]);
+    ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
     CHECK(ret, FAIL, "H5Rcreate_object");
     ret = H5Rget_obj_type3((const H5R_ref_t *)&wbuf[0], H5P_DEFAULT, &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type3");
@@ -2578,7 +2578,7 @@ test_reference_perf(void)
     for(i = 0; i < MAX_ITER_CREATE; i++) {
         t1 = H5_get_time();
         /* Store first dataset region */
-        ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, &wbuf_reg[0]);
+        ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, H5P_DEFAULT, &wbuf_reg[0]);
         CHECK(ret, FAIL, "H5Rcreate_region");
         t2 = H5_get_time();
         t += t2 - t1;
@@ -2588,7 +2588,7 @@ test_reference_perf(void)
     HDprintf("--- Region reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Store first dataset region */
-    ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, &wbuf_reg[0]);
+    ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, H5P_DEFAULT, &wbuf_reg[0]);
     CHECK(ret, FAIL, "H5Rcreate_region");
 
     t = 0;
