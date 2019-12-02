@@ -1279,7 +1279,7 @@ done:
 int
 h5tools_set_configured_fapl(hid_t      fapl_id,
                            const char  vfd_name[],
-                           void       *fapl_t_ptr H5_ATTR_UNUSED)
+                           void       *fapl_t_ptr)
 {
     int ret_value = 1;
 

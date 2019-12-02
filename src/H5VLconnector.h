@@ -122,7 +122,8 @@ typedef enum H5VL_file_specific_t {
     H5VL_FILE_MOUNT,                        /* Mount a file                     */
     H5VL_FILE_UNMOUNT,                      /* Unmount a file                   */
     H5VL_FILE_IS_ACCESSIBLE,                /* Check if a file is accessible    */
-    H5VL_FILE_DELETE                        /* Delete a file                    */
+    H5VL_FILE_DELETE,                       /* Delete a file                    */
+    H5VL_FILE_IS_EQUAL                      /* Check if two files are the same  */
 } H5VL_file_specific_t;
 
 /* types for group GET callback */
@@ -160,6 +161,7 @@ typedef enum H5VL_link_specific_t {
 
 /* types for object GET callback */
 typedef enum H5VL_object_get_t {
+    H5VL_OBJECT_GET_FILE,              /* object file                       */
     H5VL_OBJECT_GET_NAME,              /* object name                       */
     H5VL_OBJECT_GET_TYPE               /* object type                       */
 } H5VL_object_get_t;
