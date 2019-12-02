@@ -247,8 +247,8 @@ attach_ref_attr(hid_t file_id, hid_t loc_id)
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data2) < 0) TEST_ERROR
 
     /* create an attribute with two object references */
-    if(H5Rcreate_object(file_id, dsetname1, &ref[0]) < 0) TEST_ERROR
-    if(H5Rcreate_object(file_id, dsetname2, &ref[1]) < 0) TEST_ERROR
+    if(H5Rcreate_object(file_id, dsetname1, H5P_DEFAULT, &ref[0]) < 0) TEST_ERROR
+    if(H5Rcreate_object(file_id, dsetname2, H5P_DEFAULT, &ref[1]) < 0) TEST_ERROR
     if((aid = H5Acreate2(loc_id, "obj_ref_attr", H5T_STD_REF, sid_ref, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Awrite(aid, H5T_STD_REF, ref) < 0) TEST_ERROR
 
@@ -315,12 +315,12 @@ attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
 
     /* create reg_ref of block selection */
     if(H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0) TEST_ERROR
-    if(H5Rcreate_region(file_id, dsetnamev, space_id, &ref[0]) < 0) TEST_ERROR
+    if(H5Rcreate_region(file_id, dsetnamev, space_id, H5P_DEFAULT, &ref[0]) < 0) TEST_ERROR
 
     /* create reg_ref of point selection */
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
     if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord) < 0) TEST_ERROR
-    if(H5Rcreate_region(file_id, dsetnamev, space_id, &ref[1]) < 0) TEST_ERROR
+    if(H5Rcreate_region(file_id, dsetnamev, space_id, H5P_DEFAULT, &ref[1]) < 0) TEST_ERROR
 
     /* create reg_ref attribute */
     if((aid = H5Acreate2(loc_id, "reg_ref_attr", H5T_STD_REF, spacer_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -402,10 +402,10 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     count[0] = 2;
     count[1] = 3;
     if(H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0) TEST_ERROR
-    if(H5Rcreate_region(file_id, dsetnamev, space_id, &ref[0]) < 0) TEST_ERROR
+    if(H5Rcreate_region(file_id, dsetnamev, space_id, H5P_DEFAULT, &ref[0]) < 0) TEST_ERROR
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
     if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord) < 0) TEST_ERROR
-    if(H5Rcreate_region(file_id, dsetnamev, space_id, &ref[1]) < 0) TEST_ERROR
+    if(H5Rcreate_region(file_id, dsetnamev, space_id, H5P_DEFAULT, &ref[1]) < 0) TEST_ERROR
     if(H5Dwrite(dsetr_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref) < 0) TEST_ERROR
     if(H5Dclose(dsetr_id) < 0) TEST_ERROR
 

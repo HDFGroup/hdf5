@@ -74,7 +74,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Rcreate_object(hid_t loc_id, const char *name, H5R_ref_t *ref_ptr)
+H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr)
 {
     H5VL_object_t *vol_obj = NULL;  /* Object token of loc_id */
     H5I_type_t obj_type;            /* Object type of loc_id */
@@ -86,13 +86,22 @@ H5Rcreate_object(hid_t loc_id, const char *name, H5R_ref_t *ref_ptr)
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*s*Rr", loc_id, name, ref_ptr);
+    H5TRACE4("e", "i*si*Rr", loc_id, name, oapl_id, ref_ptr);
 
     /* Check args */
     if(ref_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
+    if(oapl_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Get object access property list */
+    if(H5P_DEFAULT == oapl_id)
+        oapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(oapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "oapl_id is not a link access property list ID")
 
     /* Get the VOL object */
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
@@ -117,6 +126,7 @@ H5Rcreate_object(hid_t loc_id, const char *name, H5R_ref_t *ref_ptr)
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.lapl_id = oapl_id;
     loc_params.obj_type = obj_type;
 
     /* Get the object token */
@@ -152,7 +162,7 @@ done:
  */
 herr_t
 H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id,
-    H5R_ref_t *ref_ptr)
+    hid_t oapl_id, H5R_ref_t *ref_ptr)
 {
     H5VL_object_t *vol_obj = NULL;  /* Object token of loc_id */
     H5I_type_t obj_type;            /* Object type of loc_id */
@@ -165,7 +175,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id,
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*si*Rr", loc_id, name, space_id, ref_ptr);
+    H5TRACE5("e", "i*sii*Rr", loc_id, name, space_id, oapl_id, ref_ptr);
 
     /* Check args */
     if(ref_ptr == NULL)
@@ -176,6 +186,15 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "reference region dataspace id must be valid")
     if(NULL == (space = (struct H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(oapl_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Get object access property list */
+    if(H5P_DEFAULT == oapl_id)
+        oapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(oapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "oapl_id is not a link access property list ID")
 
     /* Get the VOL object */
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
@@ -200,6 +219,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id,
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.lapl_id = oapl_id;
     loc_params.obj_type = obj_type;
 
     /* Get the object token */
@@ -234,7 +254,7 @@ done:
  */
 herr_t
 H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name,
-    H5R_ref_t *ref_ptr)
+    hid_t oapl_id, H5R_ref_t *ref_ptr)
 {
     H5VL_object_t *vol_obj = NULL;  /* Object token of loc_id */
     H5I_type_t obj_type;            /* Object type of loc_id */
@@ -246,7 +266,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name,
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*s*s*Rr", loc_id, name, attr_name, ref_ptr);
+    H5TRACE5("e", "i*s*si*Rr", loc_id, name, attr_name, oapl_id, ref_ptr);
 
     /* Check args */
     if(ref_ptr == NULL)
@@ -255,6 +275,15 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
     if(!attr_name || !*attr_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name given")
+    if(oapl_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Get object access property list */
+    if(H5P_DEFAULT == oapl_id)
+        oapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(oapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "oapl_id is not a link access property list ID")
 
     /* Get the VOL object */
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
@@ -279,6 +308,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name,
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.lapl_id = oapl_id;
     loc_params.obj_type = obj_type;
 
     /* Get the object token */

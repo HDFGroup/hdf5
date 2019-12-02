@@ -258,6 +258,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.lapl_id = H5P_LINK_ACCESS_DEFAULT;
     loc_params.obj_type = vol_obj_type;
 
     /* Get the object token */
