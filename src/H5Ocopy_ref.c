@@ -24,7 +24,6 @@
 /****************/
 
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
-#define H5F_FRIEND              /* Suppress error about including H5Fpkg   */
 #define H5R_FRIEND              /* Suppress error about including H5Rpkg   */
 
 
@@ -32,7 +31,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5Fpkg.h"             /* File                                     */
+#include "H5Fprivate.h"         /* File                                     */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Lprivate.h"         /* Links                                    */
 #include "H5MMprivate.h"        /* Memory management                        */
@@ -359,7 +358,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, H5T_t *dt_src,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
 
     /* Retrieve loc ID */
-    if((dst_loc_id = H5F__get_file_id(dst_oloc->file, FALSE)) < 0)
+    if((dst_loc_id = H5F_get_id(dst_oloc->file)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Making equivalent references in the destination file */

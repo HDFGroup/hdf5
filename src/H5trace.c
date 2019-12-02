@@ -3000,6 +3000,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                             H5VL_object_get_t get = (H5VL_object_get_t)HDva_arg(ap, int);
 
                             switch(get) {
+                                case H5VL_OBJECT_GET_FILE:
+                                    HDfprintf(out, "H5VL_OBJECT_GET_FILE");
+                                    break;
                                 case H5VL_OBJECT_GET_NAME:
                                     HDfprintf(out, "H5VL_OBJECT_GET_NAME");
                                     break;

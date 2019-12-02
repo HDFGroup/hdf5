@@ -489,8 +489,8 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 #endif
 #ifdef H5_HAVE_GETTIMEOFDAY
     struct timeval timeval_start;
-    struct timeval open_timeval_diff = {0, 0};
-    struct timeval stat_timeval_diff = {0, 0};
+    struct timeval open_timeval_diff;
+    struct timeval stat_timeval_diff;
 #endif /* H5_HAVE_GETTIMEOFDAY */
     h5_stat_t       sb;
     H5FD_t          *ret_value = NULL;  /* Return value */
