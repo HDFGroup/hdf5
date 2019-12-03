@@ -8112,6 +8112,8 @@ public class H5 implements java.io.Serializable {
      *            IN: Location identifier used to locate the object being pointed to.
      * @param name
      *            IN: Name of object at location loc_id.
+     * @param access_id
+     *            IN: Object access identifier to the object being pointed to.
      *
      * @return the reference (byte[]) if successful
      *
@@ -8135,6 +8137,8 @@ public class H5 implements java.io.Serializable {
      *            IN: Name of object at location loc_id.
      * @param space_id
      *            IN: Identifies the dataset region that a dataset region reference points to.
+     * @param access_id
+     *            IN: Object access identifier to the object being pointed to.
      *
      * @return the reference (byte[]) if successful
      *
@@ -8158,6 +8162,8 @@ public class H5 implements java.io.Serializable {
      *            IN: Name of object at location loc_id.
      * @param attr_name
      *            IN: Name of the attribute within the object.
+     * @param access_id
+     *            IN: Object access identifier to the object being pointed to.
      *
      * @return the reference (byte[]) if successful
      *
