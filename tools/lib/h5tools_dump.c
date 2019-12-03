@@ -274,7 +274,8 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                                      * to the ctx->size_last_dim.   */
 
     H5TOOLS_PUSH_STACK();
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter");
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter file=%p", (void*)stream);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "rawdata file=%p", (void*)rawdatastream);
     /* binary dump */
     if (bin_output && (rawdatastream != NULL)) {
         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "render_bin_output");
@@ -375,7 +376,8 @@ h5tools_dump_region_attribute(hid_t region_id,
     outputformat.idx_sep   = "";
     outputformat.line_pre  = "";
 
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter");
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter file=%p", (void*)stream);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "rawdata file=%p", (void*)rawdatastream);
 
     /* Render the region { element begin */
     h5tools_str_reset(buffer);
@@ -438,7 +440,7 @@ h5tools_dump_region_attribute(hid_t region_id,
     if (region_output) {
         ctx->need_prefix = TRUE;
 
-        h5tools_dump_data(rawdatastream, &outputformat, ctx, region_id, FALSE);
+        h5tools_dump_data(stream, &outputformat, ctx, region_id, FALSE);
     }
  done:
 
@@ -814,7 +816,7 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
 
         ctx->need_prefix = TRUE;
 
-        h5tools_print_region_data_blocks(region_id, stream, info, ctx, buffer, ncols, ndims, type_id, nblocks, ptdata);
+        h5tools_print_region_data_blocks(region_id, rawdatastream, info, ctx, buffer, ncols, ndims, type_id, nblocks, ptdata);
     }
  done:
     HDfree(ptdata);
@@ -1165,7 +1167,7 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
 
         ctx->need_prefix = TRUE;
 
-        h5tools_print_region_data_points(region_space, region_id, stream, info, ctx, buffer, ncols, ndims, type_id, npoints, ptdata);
+        h5tools_print_region_data_points(region_space, region_id, rawdatastream, info, ctx, buffer, ncols, ndims, type_id, npoints, ptdata);
     }
 
  done:
@@ -3924,7 +3926,8 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     H5R_ref_t         *ref_buf = NULL;
 
     H5TOOLS_PUSH_STACK();
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter");
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter file=%p", (void*)stream);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "rawdata file=%p", (void*)rawdatastream);
     /* setup */
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
     if (info->line_ncols > 0)
@@ -4209,8 +4212,9 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             h5tools_context_t datactx = *ctx;            /* print context  */
             string_dataformat = *info;
 
-            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print all the dataset values");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print all the dataset values file=%p", (void*)stream);
             if((datactx.display_char && H5Tget_size(f_type) == 1) && (H5Tget_class(f_type) == H5T_INTEGER)) {
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string");
                 /*
                 * Print 1-byte integer data as an ASCII character string
                 * instead of integers if the `-r' or `--string' command-line
@@ -4237,6 +4241,12 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5tools_dump_dset");
             status = h5tools_dump_dset(stream, &string_dataformat, &datactx, obj_id);
             if((datactx.display_char && H5Tget_size(f_type) == 1) && (H5Tget_class(f_type) == H5T_INTEGER)) {
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string eol=%s",string_dataformat.line_suf);
+                datactx.need_prefix = FALSE;
+                string_dataformat.arr_linebreak = 0;
+                string_dataformat.idx_fmt = "";
+                string_dataformat.line_multi_new = 0;
+                string_dataformat.line_suf = "";
                 h5tools_str_reset(&buffer);
                 h5tools_str_append(&buffer, "\"");
                 h5tools_render_element(stream, &string_dataformat, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
@@ -4276,6 +4286,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     if (H5Aread(obj_id, p_type, buf) >= 0) {
                         string_dataformat = *info;
                         if (datactx.display_char && H5Tget_size(f_type) == 1 && H5Tget_class(f_type) == H5T_INTEGER) {
+                            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string");
                             /*
                             * Print 1-byte integer data as an ASCII character string
                             * instead of integers if the `-r' or `--string' command-line
@@ -4302,6 +4313,12 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "call h5tools_dump_mem");
                         status = h5tools_dump_mem(stream, &string_dataformat, &datactx, obj_id, p_type, space, buf);
                         if (datactx.display_char && H5Tget_size(f_type) == 1 && H5Tget_class(f_type) == H5T_INTEGER) {
+                            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string eol=%s",string_dataformat.line_suf);
+                            datactx.need_prefix = FALSE;
+                            string_dataformat.arr_linebreak = 0;
+                            string_dataformat.idx_fmt = "";
+                            string_dataformat.line_multi_new = 0;
+                            string_dataformat.line_suf = "";
                             h5tools_str_reset(&buffer);
                             h5tools_str_append(&buffer, "\"");
                             h5tools_render_element(stream, &string_dataformat, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
