@@ -8122,7 +8122,7 @@ public class H5 implements java.io.Serializable {
      * @exception IllegalArgumentException
      *                - an input array is invalid.
      **/
-    public synchronized static native byte[] H5Rcreate_object(long loc_id, String name)
+    public synchronized static native byte[] H5Rcreate_object(long loc_id, String name, long access_id)
             throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
     /**
@@ -8145,7 +8145,7 @@ public class H5 implements java.io.Serializable {
      * @exception IllegalArgumentException
      *                - an input array is invalid.
      **/
-    public synchronized static native byte[] H5Rcreate_region(long loc_id, String name, long space_id)
+    public synchronized static native byte[] H5Rcreate_region(long loc_id, String name, long space_id, long access_id)
             throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
     /**
@@ -8168,7 +8168,7 @@ public class H5 implements java.io.Serializable {
      * @exception IllegalArgumentException
      *                - an input array is invalid.
      **/
-    public synchronized static native byte[] H5Rcreate_attr(long loc_id, String name, String attr_name)
+    public synchronized static native byte[] H5Rcreate_attr(long loc_id, String name, String attr_name, long access_id)
             throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
     /**

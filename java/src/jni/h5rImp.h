@@ -30,7 +30,7 @@ extern "C" {
  */
 JNIEXPORT jbyteArray JNICALL
 Java_hdf_hdf5lib_H5_H5Rcreate_1object
-  (JNIEnv *, jclass, jlong, jstring);
+  (JNIEnv *, jclass, jlong, jstring, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -39,7 +39,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1object
  */
 JNIEXPORT jbyteArray JNICALL
 Java_hdf_hdf5lib_H5_H5Rcreate_1region
-  (JNIEnv *, jclass, jlong, jstring, jlong);
+  (JNIEnv *, jclass, jlong, jstring, jlong, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -48,7 +48,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1region
  */
 JNIEXPORT jbyteArray JNICALL
 Java_hdf_hdf5lib_H5_H5Rcreate_1attr
-  (JNIEnv *, jclass, jlong, jstring, jstring);
+  (JNIEnv *, jclass, jlong, jstring, jstring, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
