@@ -736,7 +736,7 @@ herr_t
 H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         hsize_t *size)
 {
-    H5D_vlen_bufsize_t vlen_bufsize = {0, 0, 0, 0, 0, 0};
+    H5D_vlen_bufsize_t vlen_bufsize = {NULL, H5I_INVALID_HID, H5I_INVALID_HID, NULL, NULL, 0, H5P_DATASET_XFER_DEFAULT};
     H5VL_object_t  *vol_obj;       /* Dataset for this operation */
     H5S_t *mspace = NULL;       /* Memory dataspace */
     char bogus;                 /* bogus value to pass to H5Diterate() */
@@ -763,8 +763,6 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
 
     /* Save the dataset */
     vlen_bufsize.dset_vol_obj = vol_obj;
-    vlen_bufsize.fspace_id = H5I_INVALID_HID;
-    vlen_bufsize.mspace_id = H5I_INVALID_HID;
 
     /* Get a copy of the dataset's dataspace */
     if(H5VL_dataset_get(vol_obj, H5VL_DATASET_GET_SPACE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &vlen_bufsize.fspace_id) < 0)
@@ -786,6 +784,22 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     if(H5CX_set_vlen_alloc_info(H5D__vlen_get_buf_size_alloc, &vlen_bufsize, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VL data allocation routine")
 
+    /* If we are not using the native VOL connector we must also set this
+     * property on the DXPL since the context is not visible to the connector
+     * and will be ignored if the connector re-enters the library */
+    if(vol_obj->connector->cls->value != H5VL_NATIVE_VALUE) {
+        H5P_genplist_t *dxpl;
+
+        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(H5P_DATASET_XFER_DEFAULT)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get default DXPL")
+        if((vlen_bufsize.dxpl_id = H5P_copy_plist(dxpl, TRUE)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, H5I_INVALID_HID, "can't copy property list");
+        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(vlen_bufsize.dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get copied DXPL")
+        if(H5P_set_vlen_mem_manager(dxpl, H5D__vlen_get_buf_size_alloc, &vlen_bufsize, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VL data allocation routine on DXPL")
+    } /* end if */
+
     /* Set the initial number of bytes required */
     vlen_bufsize.size = 0;
 
@@ -805,14 +819,17 @@ done:
         if(mspace && H5S_close(mspace) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
 
-    if(vlen_bufsize.fspace_id && H5I_dec_app_ref(vlen_bufsize.fspace_id) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "problem freeing id")
-    if(vlen_bufsize.mspace_id && H5I_dec_app_ref(vlen_bufsize.mspace_id) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "problem freeing id")
+    if(vlen_bufsize.fspace_id >= 0 && H5I_dec_app_ref(vlen_bufsize.fspace_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "problem freeing id")
+    if(vlen_bufsize.mspace_id >= 0 && H5I_dec_app_ref(vlen_bufsize.mspace_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "problem freeing id")
     if(vlen_bufsize.fl_tbuf != NULL)
         vlen_bufsize.fl_tbuf = H5FL_BLK_FREE(vlen_fl_buf, vlen_bufsize.fl_tbuf);
     if(vlen_bufsize.vl_tbuf != NULL)
         vlen_bufsize.vl_tbuf = H5FL_BLK_FREE(vlen_vl_buf, vlen_bufsize.vl_tbuf);
+    if(vlen_bufsize.dxpl_id != H5P_DATASET_XFER_DEFAULT)
+        if(H5I_dec_app_ref(vlen_bufsize.dxpl_id) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close property list")
 
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Dvlen_get_buf_size() */

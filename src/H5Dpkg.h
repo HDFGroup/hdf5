@@ -524,6 +524,7 @@ typedef struct {
     void *fl_tbuf;                  /* Ptr to the temporary buffer we are using for fixed-length data */
     void *vl_tbuf;                  /* Ptr to the temporary buffer we are using for VL data */
     hsize_t size;                   /* Accumulated number of bytes for the selection */
+    hid_t dxpl_id;                  /* Dataset transfer property list to pass to dataset read */
 } H5D_vlen_bufsize_t;
 
 

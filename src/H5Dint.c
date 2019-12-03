@@ -2639,7 +2639,7 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
-    if(H5VL_dataset_read(vol_obj, type_id, vlen_bufsize->mspace_id, vlen_bufsize->fspace_id, H5P_DATASET_XFER_DEFAULT, vlen_bufsize->fl_tbuf, H5_REQUEST_NULL) < 0)
+    if(H5VL_dataset_read(vol_obj, type_id, vlen_bufsize->mspace_id, vlen_bufsize->fspace_id, vlen_bufsize->dxpl_id, vlen_bufsize->fl_tbuf, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point")
 
 done:
