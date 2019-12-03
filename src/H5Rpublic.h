@@ -93,9 +93,9 @@ extern "C" {
 #endif
 
 /* Constructors */
-H5_DLL herr_t   H5Rcreate_object(hid_t loc_id, const char *name, H5R_ref_t *ref_ptr);
-H5_DLL herr_t   H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, H5R_ref_t *ref_ptr);
-H5_DLL herr_t   H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, H5R_ref_t *ref_ptr);
+H5_DLL herr_t   H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
+H5_DLL herr_t   H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, H5R_ref_t *ref_ptr);
+H5_DLL herr_t   H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl_id, H5R_ref_t *ref_ptr);
 H5_DLL herr_t   H5Rdestroy(H5R_ref_t *ref_ptr);
 
 /* Info */
