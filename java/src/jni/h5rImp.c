@@ -36,7 +36,7 @@ extern "C" {
  */
 JNIEXPORT jbyteArray JNICALL
 Java_hdf_hdf5lib_H5_H5Rcreate_1object
-  (JNIEnv *env, jclass clss, jlong loc_id, jstring name)
+  (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong aid)
 {
     const char *refName = NULL;
     jboolean    isCopy;
@@ -54,7 +54,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1object
     if (NULL == (refBuf = (unsigned char *) HDcalloc((size_t) 1, H5R_REF_BUF_SIZE)))
         H5_JNI_FATAL_ERROR(ENVONLY, "H5Rcreate_object: failed to allocate reference buffer");
 
-    if ((status = H5Rcreate_object((hid_t)loc_id, refName, (const H5R_ref_t *)refBuf)) < 0)
+    if ((status = H5Rcreate_object((hid_t)loc_id, refName, (hid_t)aid, (const H5R_ref_t *)refBuf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (ref = ENVPTR->NewByteArray(ENVONLY, (jsize)H5R_REF_BUF_SIZE)))
@@ -80,7 +80,7 @@ done:
  */
 JNIEXPORT jbyteArray JNICALL
 Java_hdf_hdf5lib_H5_H5Rcreate_1region
-  (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong space_id)
+  (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong space_id, jlong aid)
 {
     const char *refName = NULL;
     jboolean    isCopy;
@@ -98,7 +98,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1region
     if (NULL == (refBuf = (unsigned char *) HDcalloc((size_t) 1, H5R_REF_BUF_SIZE)))
         H5_JNI_FATAL_ERROR(ENVONLY, "H5Rcreate_region: failed to allocate reference buffer");
 
-    if ((status = H5Rcreate_region((hid_t)loc_id, refName, space_id, (const H5R_ref_t *)refBuf)) < 0)
+    if ((status = H5Rcreate_region((hid_t)loc_id, refName, space_id, (hid_t)aid, (const H5R_ref_t *)refBuf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (ref = ENVPTR->NewByteArray(ENVONLY, (jsize)H5R_REF_BUF_SIZE)))
@@ -123,7 +123,7 @@ done:
  */
 JNIEXPORT jbyteArray JNICALL
 Java_hdf_hdf5lib_H5_H5Rcreate_1attr
-  (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jstring attr_name)
+  (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jstring attr_name, jlong aid)
 {
     const char *refName = NULL;
     const char *attrName = NULL;
@@ -146,7 +146,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1attr
     if (NULL == (refBuf = (unsigned char *) HDcalloc((size_t) 1, H5R_REF_BUF_SIZE)))
         H5_JNI_FATAL_ERROR(ENVONLY, "H5Rcreate_attr: failed to allocate reference buffer");
 
-    if ((status = H5Rcreate_attr((hid_t)loc_id, refName, attrName, (const H5R_ref_t *)refBuf)) < 0)
+    if ((status = H5Rcreate_attr((hid_t)loc_id, refName, attrName, (hid_t)aid, (const H5R_ref_t *)refBuf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (ref = ENVPTR->NewByteArray(ENVONLY, (jsize)H5R_REF_BUF_SIZE)))

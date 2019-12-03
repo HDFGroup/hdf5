@@ -803,6 +803,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     HDmemset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "before CR elmtno=%ld, ctx->cur_column=%d, info->idx_fmt=%s, info->line_suf=%s", elmtno, ctx->cur_column, info->idx_fmt, info->line_suf);
     if (ctx->cur_column) {
         PUTSTREAM(OPT(info->line_suf, ""), stream);
         HDputc('\n', stream);
@@ -1023,6 +1024,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
              */
             ctx->need_prefix = TRUE;
         }
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->need_prefix=%d", ctx->need_prefix);
     }
 
     /*
@@ -1038,8 +1040,9 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
             ctx->need_prefix = TRUE;
             dimension_break = FALSE;
         }
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->need_prefix=%d", ctx->need_prefix);
     }
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "elmt_counter=%ld - ctx->size_last_dim=%ld", elmt_counter, ctx->size_last_dim);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "elmt_counter=%ld - ctx->size_last_dim=%ld info->line_suf=%s", elmt_counter, ctx->size_last_dim, info->line_suf);
 
     /*
      * If the previous element occupied multiple lines and this element
@@ -1053,6 +1056,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
             HDstrlen(OPT(info->elmt_suf2, " ")) +
             HDstrlen(OPT(info->line_suf, ""))) > ncols)
         ctx->need_prefix = TRUE;
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->need_prefix=%d", ctx->need_prefix);
 
     /*
      * If too many elements have already been printed then we need to
@@ -1060,6 +1064,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
      */
     if (info->line_per_line > 0 && ctx->cur_elmt >= info->line_per_line)
         ctx->need_prefix = TRUE;
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->need_prefix=%d", ctx->need_prefix);
 
     /*
      * Each OPTIONAL_LINE_BREAK embedded in the rendered string can cause
@@ -1088,6 +1093,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
          * Print the prefix or separate the beginning of this element
          * from the previous element.
          */
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->need_prefix=%d", ctx->need_prefix);
         if (ctx->need_prefix) {
             if (secnum)
                 multiline++;
