@@ -684,7 +684,7 @@ char *
 h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t container,
                    hid_t type, void *vp, h5tools_context_t *ctx)
 {
-    H5TOOLS_ERR_INIT(char*, NULL);
+    H5TOOLS_ERR_INIT(char*, NULL)
     size_t         nsize, offset, size=0, nelmts, start;
     H5T_sign_t     nsign;
     char          *name = NULL;
@@ -1357,7 +1357,7 @@ void
 h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info,
         hid_t container, H5R_ref_t *ref_vp)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED);
+    H5TOOLS_ERR_INIT(int, SUCCEED)
     ssize_t  buf_size, status;
 
     H5TOOLS_PUSH_STACK();

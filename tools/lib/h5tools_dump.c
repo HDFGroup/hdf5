@@ -257,7 +257,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                          h5tools_context_t *ctx,    /* in,out */
                          unsigned flags, hsize_t nelmts, hid_t type, void *_mem)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED);
+    H5TOOLS_ERR_INIT(int, SUCCEED)
     unsigned char *mem = (unsigned char*) _mem;
     hsize_t        i;               /* element counter  */
     size_t         size;            /* size of each datum  */
@@ -493,7 +493,7 @@ h5tools_print_region_data_blocks(hid_t region_id,
         h5tools_str_t *buffer,    /* string into which to render */
         size_t ncols, unsigned ndims, hid_t type_id, hsize_t nblocks, hsize_t *ptdata)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED);
+    H5TOOLS_ERR_INIT(int, SUCCEED)
     hbool_t      dimension_break = TRUE;
     hsize_t     *dims1 = NULL;
     hsize_t     *start = NULL;
@@ -888,7 +888,7 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id,
         h5tools_str_t *buffer, size_t ncols,
         unsigned ndims, hid_t type_id, hsize_t npoints, hsize_t *ptdata)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED);
+    H5TOOLS_ERR_INIT(int, SUCCEED)
     hbool_t  dimension_break = TRUE;
     hsize_t *dims1 = NULL;
     hsize_t  elmtno; /* elemnt index  */
@@ -1709,7 +1709,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
     if (ctx->ndims > 0) {
         for (i = ctx->ndims; i > 0; --i) {
             hsize_t size = H5TOOLS_BUFSIZE / sm_nbytes;
-            if ( size == 0) /* datum size > H5TOOLS_BUFSIZE */
+            if (size == 0) /* datum size > H5TOOLS_BUFSIZE */
                 size = 1;
             sm_size[i - 1] = MIN(total_size[i - 1], size);
             sm_nbytes *= sm_size[i - 1];
@@ -1788,7 +1788,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
                 }
             }
             else
-                H5TOOLS_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
+                H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Dread failed");
 
             ctx->continuation++;
             H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "stripmine read loop:%d complete", i);
@@ -1817,17 +1817,27 @@ CATCH
  *-------------------------------------------------------------------------
  */
 static int
-h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t obj_id,
-                        hid_t type, hid_t space, void *mem)
+h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
+                        hid_t attr_id, hid_t p_type)
 {
     H5TOOLS_ERR_INIT(herr_t, SUCCEED)
-    int            sndims; /* rank of dataspace */
-    unsigned       i;      /*counters  */
-    hsize_t        nelmts; /*total selected elmts */
+    hid_t          f_space = H5I_INVALID_HID;    /* file data space */
+    hsize_t        alloc_size;
+    int            sndims;                       /* rank of dataspace */
+    unsigned       i;                            /* counters  */
+    hsize_t        total_size[H5S_MAX_RANK];     /* total size of dataset*/
+    hsize_t        p_nelmts;                     /* total selected elmts */
+    unsigned char  *buf = NULL;                  /* buffer for raw data */
+
+    /* VL data special information */
+    unsigned int        vl_data = 0; /* contains VL datatypes */
 
     H5TOOLS_PUSH_STACK();
     H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter");
-    sndims = H5Sget_simple_extent_ndims(space);
+    if (FAIL == (f_space = H5Aget_space(attr_id)))
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
+
+    sndims = H5Sget_simple_extent_ndims(f_space);
     if(sndims < 0)
         H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Dget_simple_extent_ndims failed");
     ctx->ndims = (unsigned)sndims;
@@ -1837,30 +1847,54 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, h5tools_conte
         H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "ctx->ndims > NELMTS(ctx->p_min_idx) failed");
 
     /* Assume entire data space to be printed */
-    for (i = 0; i < ctx->ndims; i++)
-        ctx->p_min_idx[i] = 0;
+    if (ctx->ndims > 0)
+        for (i = 0; i < (size_t)ctx->ndims; i++)
+            ctx->p_min_idx[i] = 0;
 
-    H5Sget_simple_extent_dims(space, ctx->p_max_idx, NULL);
+    H5Sget_simple_extent_dims(f_space, total_size, NULL);
 
-    for (i = 0, nelmts = 1; ctx->ndims != 0 && i < ctx->ndims; i++)
-        nelmts *= ctx->p_max_idx[i] - ctx->p_min_idx[i];
+    /* calculate the number of elements we're going to print */
+    p_nelmts = 1;
 
-    if (nelmts == 0)
-        H5_LEAVE(SUCCEED); /* nothing to print */
     if (ctx->ndims > 0) {
-        HDassert(ctx->p_max_idx[ctx->ndims - 1] == (hsize_t) ((int) ctx->p_max_idx[ctx->ndims - 1]));
-        ctx->size_last_dim = ctx->p_max_idx[ctx->ndims - 1];
+        for (i = 0; i < ctx->ndims; i++)
+            p_nelmts *= total_size[i];
+        ctx->size_last_dim = (total_size[ctx->ndims - 1]);
     } /* end if */
     else
         ctx->size_last_dim = 0;
 
-    if (ctx->ndims > 0)
-        init_acc_pos(ctx, ctx->p_max_idx);
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->ndims:%d", ctx->ndims);
+    if (p_nelmts == 0)
+        H5_LEAVE(SUCCEED); /* nothing to print */
 
-    if(h5tools_dump_simple_data(stream, info, obj_id, ctx, START_OF_DATA | END_OF_DATA, nelmts, type, mem) < 0)
-        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "h5tools_dump_simple_data failed");
+    /* Check if we have VL data in the dataset's datatype */
+    if (h5tools_detect_vlen(p_type) == TRUE)
+        vl_data = TRUE;
 
+    alloc_size = p_nelmts * H5Tget_size(p_type);
+    HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+    if (NULL != (buf = (unsigned char *)HDmalloc((size_t)alloc_size))) {
+        if (ctx->ndims > 0)
+            init_acc_pos(ctx, total_size);
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->ndims:%d", ctx->ndims);
+
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Read the data");
+        /* Read the data */
+        if (H5Aread(attr_id, p_type, buf) >= 0) {
+            if(h5tools_dump_simple_data(stream, info, attr_id, ctx, START_OF_DATA | END_OF_DATA, p_nelmts, p_type, buf) < 0)
+                H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "h5tools_dump_simple_data failed");
+
+            /* Reclaim any VL memory, if necessary */
+            if (vl_data)
+                H5Treclaim(p_type, f_space, H5P_DEFAULT, buf);
+        }
+        else
+            H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Aread failed");
+        HDfree(buf);
+    } /* if (NULL != (buf...)) */
+done:
+    if(f_space >= 0 && H5Sclose(f_space) < 0)
+        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
 CATCH
     H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
     H5TOOLS_POP_STACK();
@@ -1888,11 +1922,11 @@ CATCH
 int
 h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t dset)
 {
-    hid_t     f_space = -1;
-    hid_t     p_type = -1;
-    hid_t     f_type = -1;
+    H5TOOLS_ERR_INIT(int, SUCCEED)
+    hid_t     f_space = H5I_INVALID_HID;
+    hid_t     p_type = H5I_INVALID_HID;
+    hid_t     f_type = H5I_INVALID_HID;
     H5S_class_t space_type;
-    int       status = FAIL;
     h5tool_format_t info_dflt;
     /* Use default values */
     if (!stream)
@@ -1929,13 +1963,13 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     /* Print the data */
     if (space_type == H5S_SIMPLE || space_type == H5S_SCALAR) {
         if(!ctx->sset)
-            status = h5tools_dump_simple_dset(rawdatastream, info, ctx, dset, p_type);
+            ret_value = h5tools_dump_simple_dset(rawdatastream, info, ctx, dset, p_type);
         else
-            status = h5tools_dump_simple_subset(rawdatastream, info, ctx, dset, p_type);
+            ret_value = h5tools_dump_simple_subset(rawdatastream, info, ctx, dset, p_type);
     }
     else {
         /* space is H5S_NULL */
-        status = SUCCEED;
+        ret_value = SUCCEED;
     }
 done:
     if (f_type > 0)
@@ -1945,7 +1979,7 @@ done:
     if (f_space > 0)
         H5Sclose(f_space);
 
-    return status;
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -1960,10 +1994,12 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx,
-                hid_t obj_id, hid_t type, hid_t space, void *mem)
+h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t attr_id)
 {
     H5TOOLS_ERR_INIT(int, SUCCEED)
+    hid_t     f_space = H5I_INVALID_HID;
+    hid_t     p_type = H5I_INVALID_HID;
+    hid_t     f_type = H5I_INVALID_HID;
     h5tool_format_t    info_dflt;
 
     /* Use default values */
@@ -1975,13 +2011,42 @@ h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, h5tools_context_t *c
         info = &info_dflt;
     }
 
+    f_type = H5Aget_type(attr_id);
+    if (f_type < 0)
+        goto done;
+
+    if (info->raw || bin_form == 1)
+        p_type = H5Tcopy(f_type);
+    else if (bin_form == 2)
+        p_type = h5tools_get_little_endian_type(f_type);
+    else if (bin_form == 3)
+        p_type = h5tools_get_big_endian_type(f_type);
+    else
+        p_type = H5Tget_native_type(f_type, H5T_DIR_DEFAULT);
+
+    if (p_type < 0)
+        goto done;
+
     /* Check the data space */
-    if (H5Sis_simple(space) <= 0)
-        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Sis_simple failed")
+    f_space = H5Aget_space(attr_id);
+    if (f_space < 0)
+        goto done;
 
-     H5_LEAVE(h5tools_dump_simple_mem(rawattrstream, info, ctx, obj_id, type, space, mem))
+    /* Check the data space */
+    if (H5Sis_simple(f_space) <= 0) {
+        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sis_simple failed");
+    }
+    else {
+        ret_value = h5tools_dump_simple_mem(rawattrstream, info, ctx, attr_id, p_type);
+    }
+done:
+    if (f_type > 0)
+        H5Tclose(f_type);
+    if (p_type > 0)
+        H5Tclose(p_type);
+    if (f_space > 0)
+        H5Sclose(f_space);
 
-CATCH
     return ret_value;
 }
 
@@ -3901,22 +3966,17 @@ h5tools_dump_subsetting_header(FILE *stream, const h5tool_format_t *info, h5tool
 void
 h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t obj_id, int obj_data)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED);
+    H5TOOLS_ERR_INIT(int, SUCCEED)
     H5S_class_t space_type;
     int         ndims;
     size_t      i;
     hid_t       space = H5I_INVALID_HID;
-    hid_t       p_type = H5I_INVALID_HID;
     hid_t       f_type = H5I_INVALID_HID;
     hid_t       new_obj_id = H5I_INVALID_HID;
     hid_t       new_obj_sid = H5I_INVALID_HID;
     hsize_t     total_size[H5S_MAX_RANK];
-    hsize_t     size[64];
-    hsize_t     alloc_size;
-    hsize_t     nelmts = 1;
     hsize_t     elmt_counter = 0;  /*counts the # elements printed. */
     int         status = -1;
-    void       *buf = NULL;
     hbool_t            dimension_break;
     h5tools_str_t      buffer;          /* string into which to render   */
     hsize_t            curr_pos = 0;    /* total data element position   */
@@ -4205,139 +4265,61 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         }
     }
     else {
+        h5tools_context_t datactx = *ctx;            /* print context  */
         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print all the values");
+        string_dataformat = *info;
+        if((datactx.display_char && H5Tget_size(f_type) == 1) && (H5Tget_class(f_type) == H5T_INTEGER)) {
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string");
+            /*
+            * Print 1-byte integer data as an ASCII character string
+            * instead of integers if the `-r' or `--string' command-line
+            * option was given.
+            *
+            * We don't want to modify the global dataformat, so make a
+            * copy of it instead.
+            */
+            string_dataformat.idx_fmt = "\"";
+            datactx.indent_level++;
+            datactx.need_prefix = TRUE;
+            h5tools_simple_prefix(stream, &string_dataformat, &datactx, (hsize_t)0, 0);
+
+            string_dataformat.line_multi_new = 1;
+            string_dataformat.str_repeat = 8;
+            string_dataformat.ascii = TRUE;
+            string_dataformat.elmt_suf1 = "";
+            string_dataformat.elmt_suf2 = "";
+            string_dataformat.line_suf = "\"";
+        }
+        else {
+            datactx.need_prefix = TRUE;
+        }
 
         /* Print all the values. */
         if(obj_data) {
-            h5tools_context_t datactx = *ctx;            /* print context  */
-            string_dataformat = *info;
-
-            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print all the dataset values file=%p", (void*)stream);
-            if((datactx.display_char && H5Tget_size(f_type) == 1) && (H5Tget_class(f_type) == H5T_INTEGER)) {
-                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string");
-                /*
-                * Print 1-byte integer data as an ASCII character string
-                * instead of integers if the `-r' or `--string' command-line
-                * option was given.
-                *
-                * We don't want to modify the global dataformat, so make a
-                * copy of it instead.
-                */
-                string_dataformat.idx_fmt = "\"";
-                datactx.indent_level++;
-                datactx.need_prefix = TRUE;
-                h5tools_simple_prefix(stream, &string_dataformat, &datactx, (hsize_t)0, 0);
-
-                string_dataformat.line_multi_new = 1;
-                string_dataformat.str_repeat = 8;
-                string_dataformat.ascii = TRUE;
-                string_dataformat.elmt_suf1 = "";
-                string_dataformat.elmt_suf2 = "";
-                string_dataformat.line_suf = "\"";
-            }
-            else {
-                datactx.need_prefix = TRUE;
-            }
             H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5tools_dump_dset");
             status = h5tools_dump_dset(stream, &string_dataformat, &datactx, obj_id);
-            if((datactx.display_char && H5Tget_size(f_type) == 1) && (H5Tget_class(f_type) == H5T_INTEGER)) {
-                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string eol=%s",string_dataformat.line_suf);
-                datactx.need_prefix = FALSE;
-                string_dataformat.arr_linebreak = 0;
-                string_dataformat.idx_fmt = "";
-                string_dataformat.line_multi_new = 0;
-                string_dataformat.line_suf = "";
-                h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "\"");
-                h5tools_render_element(stream, &string_dataformat, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-            }
         }
         else {
-            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print all the attribute values");
-
-            h5tools_context_t datactx = *ctx;            /* print context  */
             /* need to call h5tools_dump_mem for the attribute data */
             space_type = H5Sget_simple_extent_type(space);
             if(space_type == H5S_NULL || space_type == H5S_NO_CLASS) {
                 status = SUCCEED;
             }
             else {
-                /* VL data special information */
-                unsigned int        vl_data = 0; /* contains VL datatypes */
-
-                p_type = H5Tget_native_type(f_type, H5T_DIR_DEFAULT);
-
-                ndims = H5Sget_simple_extent_dims(space, size, NULL);
-
-                /* Check if we have VL data in the dataset's datatype */
-                if (h5tools_detect_vlen(p_type) == TRUE)
-                    vl_data = TRUE;
-
-                for (i = 0; i < ndims; i++)
-                    nelmts *= size[i];
-
-                alloc_size = nelmts * MAX(H5Tget_size(f_type), H5Tget_size(p_type));
-                HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
-
-                if (alloc_size) {
-                    buf = HDmalloc((size_t)alloc_size);
-                    HDassert(buf);
-
-                    if (H5Aread(obj_id, p_type, buf) >= 0) {
-                        string_dataformat = *info;
-                        if (datactx.display_char && H5Tget_size(f_type) == 1 && H5Tget_class(f_type) == H5T_INTEGER) {
-                            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string");
-                            /*
-                            * Print 1-byte integer data as an ASCII character string
-                            * instead of integers if the `-r' or `--string' command-line
-                            * option was given.
-                            *
-                            * We don't want to modify the global dataformat, so make a
-                            * copy of it instead.
-                            */
-                            string_dataformat.idx_fmt = "\"";
-                            datactx.indent_level++;
-                            datactx.need_prefix = TRUE;
-                            h5tools_simple_prefix(stream, &string_dataformat, &datactx, (hsize_t)0, 0);
-
-                            string_dataformat.line_multi_new = 1;
-                            string_dataformat.str_repeat = 8;
-                            string_dataformat.ascii = TRUE;
-                            string_dataformat.elmt_suf1 = "";
-                            string_dataformat.elmt_suf2 = "";
-                            string_dataformat.line_suf = "\"";
-                        }
-                        else
-                            datactx.need_prefix = TRUE;
-
-                        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "call h5tools_dump_mem");
-                        status = h5tools_dump_mem(stream, &string_dataformat, &datactx, obj_id, p_type, space, buf);
-                        if (datactx.display_char && H5Tget_size(f_type) == 1 && H5Tget_class(f_type) == H5T_INTEGER) {
-                            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string eol=%s",string_dataformat.line_suf);
-                            datactx.need_prefix = FALSE;
-                            string_dataformat.arr_linebreak = 0;
-                            string_dataformat.idx_fmt = "";
-                            string_dataformat.line_multi_new = 0;
-                            string_dataformat.line_suf = "";
-                            h5tools_str_reset(&buffer);
-                            h5tools_str_append(&buffer, "\"");
-                            h5tools_render_element(stream, &string_dataformat, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-                        }
-                    }
-                    else
-                        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Aread failed");
-
-                    /* Reclaim any VL memory, if necessary */
-                    if (vl_data)
-                        H5Treclaim(p_type, space, H5P_DEFAULT, buf);
-
-                    HDfree(buf);
-                }
-                else {
-                    status = SUCCEED;
-                } /* end if (alloc_size) */
-                H5Tclose(p_type);
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "call h5tools_dump_mem");
+                status = h5tools_dump_mem(stream, &string_dataformat, &datactx, obj_id);
             }
+        }
+        if (datactx.display_char && H5Tget_size(f_type) == 1 && H5Tget_class(f_type) == H5T_INTEGER) {
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string eol=%s",string_dataformat.line_suf);
+            datactx.need_prefix = FALSE;
+            string_dataformat.arr_linebreak = 0;
+            string_dataformat.idx_fmt = "";
+            string_dataformat.line_multi_new = 0;
+            string_dataformat.line_suf = "";
+            h5tools_str_reset(&buffer);
+            h5tools_str_append(&buffer, "\"");
+            h5tools_render_element(stream, &string_dataformat, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
         }
         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print all the values Complete");
 
