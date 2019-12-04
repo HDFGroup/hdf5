@@ -1,6 +1,6 @@
 variables:
-#    NMC_FE1_SLURM_PARAMETERS: " --nodes=1 --cpus-per-task=1 --partition=ecp-p9-4v100 -t 1:30:00"
-    NMC_FE1_SLURM_PARAMETERS: " --nodes=1 --ntasks-per-node=6 --partition=ecp-p9-4v100 --ntasks=6 -t 2:00:00"
+    NMC_FE1_SLURM_PARAMETERS: " --nodes=1 --cpus-per-task=1 --partition=ecp-p9-4v100 -t 1:30:00"
+#    NMC_FE1_SLURM_PARAMETERS: " --nodes=1 --ntasks-per-node=6 --partition=ecp-p9-4v100 --ntasks=6 -t 2:00:00"
 #    SCHEDULER_PARAMETERS:  "-N1 -p ecp-p9-4v100 --extra-node-info=*:*:* -t 0:30:00 srun --pty bash --login"
 stages:
     - build
@@ -43,7 +43,7 @@ build:
         - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_EXAMPLES:BOOL=OFF")' >> config/cmake/scripts/HDF5options.cmake
         - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_NUMPROC_FLAG:STRING=-n")' >> config/cmake/scripts/HDF5options.cmake
         - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_MAX_NUMPROCS:STRING=6")' >> config/cmake/scripts/HDF5options.cmake
-        - ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-openmpi-gcc/8.3.0-Linux-4.18.0-80.7.2.el7.ppc64le-ppc64le",MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC
+        - ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-openmpi-gcc/8.3.0-Linux-4.18.0-80.7.2.el7.ppc64le-ppc64le",BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC
 #        - ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-openmpi-gcc/8.3.0-Linux-4.18.0-80.7.2.el7.ppc64le-ppc64le",MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC,LOCAL_SKIP_TEST=true
 # run ctest command for only MPI (parallel) tests
 #        - cd build
