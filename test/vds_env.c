@@ -312,8 +312,8 @@ main(void)
     if((my_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
 
      /* Loop through all the combinations of low/high version bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             char msg[80];       /* Message for file version bounds */
             const char *low_string;   /* The low bound string */
             const char *high_string;  /* The high bound string */

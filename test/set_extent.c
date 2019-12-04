@@ -358,7 +358,7 @@ static int do_ranks( hid_t fapl, hbool_t new_format )
 
         /* Iterate over different index types, but only if using the new format
          */
-        for(index_type = RANK4_INDEX_BTREE; index_type < RANK4_NINDICES; H5_INC_ENUM(rank4_index_t, index_type)) {
+        for(index_type = RANK4_INDEX_BTREE; index_type < RANK4_NINDICES; index_type++) {
             /* Standard test */
             if(test_random_rank4(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) < 0) {
                 DO_RANKS_PRINT_CONFIG("Randomized rank 4")
@@ -433,8 +433,8 @@ static int do_layouts( hid_t fapl )
 
     TESTING("storage layout use - tested with all low/high library format bounds");
     /* Loop through all the combinations of low/high library format bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Copy plist to use locally to avoid modifying the original */
             new_fapl = H5Pcopy(fapl);

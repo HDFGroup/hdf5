@@ -4083,7 +4083,7 @@ test_filespace_info(const char *env_h5_drvr)
             for(fs_threshold = 0; fs_threshold <= TEST_THRESHOLD10; fs_threshold++) {
 
                 /* Test with 4 file space strategies */
-                for(fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_strategy < H5F_FSPACE_STRATEGY_NTYPES; H5_INC_ENUM(H5F_fspace_strategy_t, fs_strategy)) {
+                for(fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_strategy < H5F_FSPACE_STRATEGY_NTYPES; fs_strategy++) {
 
                     if(!contig_addr_vfd && (fs_strategy == H5F_FSPACE_STRATEGY_PAGE || fs_persist))
                         continue;
@@ -4231,7 +4231,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
         memb_addr[H5FD_MEM_DRAW] = ((memb_addr[H5FD_MEM_DRAW] + pagesize - 1) / pagesize) * pagesize;
     } else {
         /* Set memb_addr aligned */
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
             memb_addr[mt] = ((memb_addr[mt] + pagesize - 1) / pagesize) * pagesize;
     } /* end else */
 
@@ -4240,7 +4240,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
         TEST_ERROR
 
     /* Free memb_name */
-    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
         free(memb_name[mt]);
 
     return 0;
@@ -4607,7 +4607,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         if(multi_vfd) {
             hssize_t ntmp;
 
-            for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+            for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++) {
                 if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
                     continue;
                 /* Get the # of free-space sections in the file for metadata */
@@ -5348,7 +5348,7 @@ test_libver_bounds_open(void)
     /* Opening VERBFNAME in these combination should succeed.
        For each low bound, verify that it is upgraded properly */
     high = H5F_LIBVER_LATEST;
-    for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low))
+    for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++)
     {
         H5F_libver_t new_low = H5F_LIBVER_EARLIEST;
 
@@ -5515,8 +5515,8 @@ test_libver_bounds_low_high(void)
     CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Loop through all the combinations of low/high version bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low))
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++)
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             H5E_BEGIN_TRY {
                 /* Set the low/high version bounds */
@@ -5919,8 +5919,8 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non
         CHECK(new_fapl, FAIL, "H5Pcreate");
 
         /* Loop through all the combinations of low/high bounds in new_fapl */
-        for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-            for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+        for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+            for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
                 H5E_BEGIN_TRY {
                     ret = H5Pset_libver_bounds(new_fapl, low, high);
                 } H5E_END_TRY;
@@ -6095,8 +6095,8 @@ test_libver_bounds_obj(hid_t fapl)
     /* Loop through all the combinations of low/high bounds in new_fapl */
     /* Open the file with the fapl; create a group and verify the
        object header version, then delete the group and close the file.*/
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -6306,8 +6306,8 @@ test_libver_bounds_dataset(hid_t fapl)
     /* Loop through all the combinations of low/high bounds in new_fapl */
     /* Open the file with the fapl and create the chunked dataset */
     /* Verify the dataset's layout, fill value and filter pipleline message versions */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -6519,8 +6519,8 @@ test_libver_bounds_dataspace(hid_t fapl)
     /* Loop through all the combinations of low/high bounds in new_fapl */
     /* Open the file and create the chunked/compact/contiguous datasets */
     /* Verify the dataspace message version for the three datasets */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             hid_t tmp_sid, tmp_sid_compact, tmp_sid_contig;             /* Dataspace IDs */
             H5S_t *tmp_space, *tmp_space_compact, *tmp_space_contig;    /* Internal dataspace pointers */
 
@@ -6844,8 +6844,8 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
     /* Open the file and create the chunked dataset with the input tid */
     /* Verify the dataset's datatype message version */
     /* Also verify the committed atatype message version */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -7165,8 +7165,8 @@ test_libver_bounds_attributes(hid_t fapl)
     /* Loop through all the combinations of low/high bounds */
     /* Open the file and group and attach an attribute to the group */
     /* Verify the attribute version */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
