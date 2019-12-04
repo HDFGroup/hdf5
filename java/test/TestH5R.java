@@ -438,7 +438,7 @@ public class TestH5R {
             fail("testH5Rget_object: H5Sselect_hyperslab " + err);
         }
         try {
-            ref = H5.H5Rcreate_region(H5fid, objName, H5dsid);
+            ref = H5.H5Rcreate_region(H5fid, objName, H5dsid, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -447,6 +447,7 @@ public class TestH5R {
         assertNotNull(ref);
     }
 
+// These tests need to be updated with new APIs
 //    @Test//
 //    public void testH5Rget_group() {
 //        long loc_id = H5fid;
@@ -457,7 +458,7 @@ public class TestH5R {
 //        String objName = "/dset";
 //
 //        try {
-//            ref = H5.H5Rcreate_object(H5fid, objName);
+//            ref = H5.H5Rcreate_object(H5fid, objName, HDF5Constants.H5P_DEFAULT);
 //        }
 //        catch (Throwable err) {
 //            err.printStackTrace();
@@ -494,7 +495,7 @@ public class TestH5R {
 //        String objName = "/dset";
 //
 //        try {
-//            ref = H5.H5Rcreate_object(H5fid, objName);
+//            ref = H5.H5Rcreate_object(H5fid, objName, HDF5Constants.H5P_DEFAULT);
 //        }
 //        catch (Throwable err) {
 //            err.printStackTrace();
@@ -524,7 +525,7 @@ public class TestH5R {
 //        String objName = "/dset";
 //
 //        try {
-//            ref = H5.H5Rcreate_object(H5fid, objName);
+//            ref = H5.H5Rcreate_object(H5fid, objName, HDF5Constants.H5P_DEFAULT);
 //        }
 //        catch (Throwable err) {
 //            err.printStackTrace();
@@ -548,26 +549,26 @@ public class TestH5R {
     @Test(expected = NullPointerException.class)
     public void testH5Rcreate_object_Nullname() throws Throwable {
         String name = null;
-        H5.H5Rcreate_object(H5fid, name);
+        H5.H5Rcreate_object(H5fid, name, HDF5Constants.H5P_DEFAULT);
     }
 
     @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Rget_name_Invalidloc() throws Throwable {
         String name= "";
-        H5.H5Rcreate_object(-1, name);
+        H5.H5Rcreate_object(-1, name, HDF5Constants.H5P_DEFAULT);
     }
 
     // Test parameters to H5Rcreate_region
     @Test(expected = NullPointerException.class)
     public void testH5Rcreate_region_Nullname() throws Throwable {
         String name = null;
-        H5.H5Rcreate_region(H5fid, name, -1);
+        H5.H5Rcreate_region(H5fid, name, -1, HDF5Constants.H5P_DEFAULT);
     }
 
     @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Rcreate_region_Invalidloc() throws Throwable {
         String name= "";
-        H5.H5Rcreate_region(-1, name, -1);
+        H5.H5Rcreate_region(-1, name, -1, HDF5Constants.H5P_DEFAULT);
     }
 
     // Test parameters to H5Rcreate_attr
@@ -575,21 +576,21 @@ public class TestH5R {
     public void testH5Rcreate_attr_Nullname() throws Throwable {
         String name = null;
         String attrname = "";
-        H5.H5Rcreate_attr(H5fid, name, attrname);
+        H5.H5Rcreate_attr(H5fid, name, attrname, HDF5Constants.H5P_DEFAULT);
     }
 
     @Test(expected = NullPointerException.class)
     public void testH5Rcreate_attr_Nullattrname() throws Throwable {
         String name = "";
         String attrname = null;
-        H5.H5Rcreate_attr(H5fid, name, attrname);
+        H5.H5Rcreate_attr(H5fid, name, attrname, HDF5Constants.H5P_DEFAULT);
     }
 
     @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Rcreate_attr_Invalidloc() throws Throwable {
         String name= "";
         String attrname= "";
-        H5.H5Rcreate_attr(-1, name, attrname);
+        H5.H5Rcreate_attr(-1, name, attrname, HDF5Constants.H5P_DEFAULT);
     }
 
     // Test parameters to H5Rdestroy
