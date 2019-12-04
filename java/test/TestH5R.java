@@ -361,7 +361,7 @@ public class TestH5R {
         String objName = "/dset";
 
         try {
-            ref = H5.H5Rcreate_object(H5fid, objName);
+            ref = H5.H5Rcreate_object(H5fid, objName, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -403,7 +403,7 @@ public class TestH5R {
         String objName = "/dset";
 
         try {
-            ref = H5.H5Rcreate_object(H5fid, objName);
+            ref = H5.H5Rcreate_object(H5fid, objName, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             err.printStackTrace();
