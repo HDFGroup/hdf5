@@ -1569,7 +1569,7 @@ int
 render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
     hid_t container, unsigned ndims, hid_t type_id, hsize_t nblocks, hsize_t *ptdata)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED);
+    H5TOOLS_ERR_INIT(int, SUCCEED)
     hsize_t     *dims1 = NULL;
     hsize_t     *start = NULL;
     hsize_t     *count = NULL;
@@ -1735,7 +1735,7 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
         FILE *stream, hid_t container,
         unsigned ndims, hid_t type_id, hsize_t npoints)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED);
+    H5TOOLS_ERR_INIT(int, SUCCEED)
     hsize_t *dims1 = NULL;
     size_t   type_size;
     hid_t    mem_space = -1;

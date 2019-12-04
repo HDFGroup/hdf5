@@ -1703,6 +1703,8 @@ main(int argc, const char *argv[])
 
     /* To Do:  clean up XML table */
 
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
+
     leave(h5tools_getstatus());
 
 done:
