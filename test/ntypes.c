@@ -2484,7 +2484,7 @@ test_opaque_dtype(hid_t file)
         TEST_ERROR;
 
     for(i = 0; i < sizeof(wbuf); i++)
-        wbuf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        H5_CHECKED_ASSIGN(wbuf[i], uint8_t, 0xff ^ i, size_t);
 
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
     if(H5Sclose(space) < 0) TEST_ERROR;

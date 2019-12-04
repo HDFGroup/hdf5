@@ -224,7 +224,7 @@ H5O_fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     HDassert(fsinfo);
 
     *p++ = (uint8_t)fsinfo->version;    /* message version */
-    *p++ = fsinfo->strategy;        /* File space strategy */
+    H5_CHECKED_ASSIGN(*p++, uint8_t, fsinfo->strategy, unsigned); /* File space strategy */
     *p++ = (unsigned char)fsinfo->persist;    /* Free-space persist or not */
     H5F_ENCODE_LENGTH(f, p, fsinfo->threshold); /* Free-space section size threshold */
 

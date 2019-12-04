@@ -912,8 +912,14 @@ h5diff(const char *fname1,
              parallel_print("---------------------------------------\n");
              for(u = 0; u < match_list->nobjs; u++) {
                  char c1, c2;
-                 c1 = (match_list->objs[u].flags[0]) ? 'x' : ' ';
-                 c2 = (match_list->objs[u].flags[1]) ? 'x' : ' ';
+                 if (match_list->objs[u].flags[0])
+                     c1 = 'x';
+                 else
+                     c1 = ' ';
+                 if (match_list->objs[u].flags[1])
+                     c2 = 'x';
+                 else
+                     c2 = ' ';
                  parallel_print("%5c %6c    %-15s\n", c1, c2, match_list->objs[u].name);
              } /* end for */
              parallel_print ("\n");
