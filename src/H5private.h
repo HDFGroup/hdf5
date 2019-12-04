@@ -521,13 +521,6 @@
 #   define H5_POSIX_CREATE_MODE_RW      0666
 #endif
 
-/*
- * A macro to portably increment enumerated types.
- */
-#ifndef H5_INC_ENUM
-#  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
-#endif
-
 /* Represents an empty asynchronous request handle.
  * Used in the VOL code.
  */
