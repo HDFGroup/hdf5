@@ -324,7 +324,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 
 #define H5Z_XFORM_DO_OP5(TYPE, SIZE)                                                               \
 {                                                                                                  \
-    TYPE val = ((tree->type == H5Z_XFORM_INTEGER) ? (TYPE)tree->value.int_val : (TYPE)tree->value.float_val); \
+    TYPE val = (TYPE)((tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val); \
     H5VM_array_fill(array, &val, sizeof(TYPE), (SIZE));                                             \
 }
 

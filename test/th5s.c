@@ -1583,7 +1583,7 @@ test_h5s_encode1(void)
 ****************************************************************/
 static herr_t
 test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, 
-    uint32_t expected_version, uint8_t expected_enc_size, hbool_t expected_to_fail)
+    uint32_t expected_version, uint32_t expected_enc_size, hbool_t expected_to_fail)
 {
     char *buf = NULL;       /* Pointer to the encoded buffer */
     size_t buf_size;        /* Size of the encoded buffer */
@@ -1697,7 +1697,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
     unsigned unlim;                    /* H5S_UNLIMITED setting or not */
     herr_t ret;                        /* Generic return value */
     uint32_t expected_version = 0;     /* Expected version for selection info */
-    uint8_t expected_enc_size = 0;     /* Expected encoded size for selection info */
+    uint32_t expected_enc_size = 0;    /* Expected encoded size for selection info */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace encoding of regular hyperslabs\n"));
@@ -1912,7 +1912,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
     for(config = CONFIG_8; config <= CONFIG_32; config++) {
         hbool_t expected_to_fail = FALSE;   /* Whether H5Sencode2 is expected to fail */
         uint32_t expected_version = 0;      /* Expected version for selection info */
-        uint8_t expected_enc_size = 0;      /* Expected encoded size for selection info */
+        uint32_t expected_enc_size = 0;     /* Expected encoded size for selection info */
 
         start = 0;
         count = 2;

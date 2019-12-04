@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "H5PLextern.h"
+#include "H5private.h"
 
 #define H5Z_FILTER_DYNLIBUD      300
 #define MULTIPLIER              3
@@ -69,7 +70,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
         /* Subtract the original value with MULTIPLIER */
         while(buf_left > 0) {
             char temp = *int_ptr;
-            *int_ptr = temp - MULTIPLIER;
+            H5_CHECKED_ASSIGN(*int_ptr, int8_t, temp - MULTIPLIER, int);
             int_ptr++;
             buf_left -= sizeof(*int_ptr);
         } /* end while */
@@ -78,7 +79,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
         /* Add the original value with MULTIPLIER */
         while(buf_left > 0) {
             char temp = *int_ptr;
-            *int_ptr = temp + MULTIPLIER;
+            H5_CHECKED_ASSIGN(*int_ptr, int8_t, temp + MULTIPLIER, int);
             int_ptr++;
             buf_left -= sizeof(*int_ptr);
         } /* end while */

@@ -21,6 +21,7 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 #include "H5Iprivate.h"     /* For checking that datatype id's don't leak */
+#include "H5private.h"
 
 /* Number of elements in each test */
 #define NTESTELEM    100000
@@ -1216,8 +1217,8 @@ test_compound_6(void)
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)((void *)orig)) + i;
-        s_ptr->b    = (i*8+1) & 0x7fff;
-        s_ptr->d    = (i*8+6) & 0x7fff;
+        H5_CHECKED_ASSIGN(s_ptr->b, int16_t, (i*8+1) & 0x7fff, int);
+        H5_CHECKED_ASSIGN(s_ptr->d, int16_t, (i*8+6) & 0x7fff, int);
     }
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 

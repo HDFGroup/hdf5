@@ -171,7 +171,7 @@ static herr_t
 H5O_ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_ginfo_t  *ginfo = (const H5O_ginfo_t *) _mesg;
-    unsigned char       flags;          /* Flags for encoding group info */
+    unsigned char       flags = 0;          /* Flags for encoding group info */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -183,8 +183,7 @@ H5O_ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
     *p++ = H5O_GINFO_VERSION;
 
     /* The flags for the group info */
-    flags = ginfo->store_link_phase_change ?  H5O_GINFO_STORE_PHASE_CHANGE : 0;
-    flags = (unsigned char)(flags | (ginfo->store_est_entry_info ?  H5O_GINFO_STORE_EST_ENTRY_INFO : 0));
+    H5_CHECKED_ASSIGN(flags, uint8_t, flags | (ginfo->store_est_entry_info ?  H5O_GINFO_STORE_EST_ENTRY_INFO : 0), int);
     *p++ = flags;
 
     /* Store the max. # of links to store compactly & the min. # of links to store densely */
