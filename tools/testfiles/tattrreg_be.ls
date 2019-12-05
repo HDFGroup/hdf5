@@ -3,12 +3,12 @@ Dataset1                 Dataset {NULL}
     Attribute: Attribute1 {4}
         Type:      dataset region reference
         Data:
-               DATASET tattrreg.h5/Dataset2 {
+               DATASET "tattrreg.h5/Dataset2" {
                   REGION_TYPE BLOCK  Blk0: (2,2)-(7,7)
                   DATATYPE  H5T_STD_U8BE
                   DATASPACE  SIMPLE { ( 10, 10 ) / ( 10, 10 ) }
                }
-               DATASET tattrreg.h5/Dataset2 {
+               DATASET "tattrreg.h5/Dataset2" {
                   REGION_TYPE POINT  Pt0: (6,9), Pt1: (2,2), Pt2: (8,4),
                     Pt3: (1,6), Pt4: (2,8), Pt5: (3,2), Pt6: (0,4),
                     Pt7: (9,0), Pt8: (7,1), Pt9: (3,3)

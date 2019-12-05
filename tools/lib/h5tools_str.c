@@ -1363,7 +1363,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info,
     H5TOOLS_PUSH_STACK();
     H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter");
 
-    h5tools_str_append(str, " ");
+    h5tools_str_append(str, " \"");
     buf_size = H5Rget_file_name(ref_vp, NULL, 0);
     H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "buf_size=%ld", buf_size);
     if (buf_size) {
@@ -1401,6 +1401,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info,
             HDfree(attr_name);
         }
     }
+    h5tools_str_append(str, "\"");
 
 CATCH
     H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");

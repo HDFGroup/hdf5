@@ -1,6 +1,7 @@
 JUnit version 4.11
 .testH5get_libversion_null_param
 .testJ2C
+.testH5export_dataset
 .testIsSerializable
 .testH5garbage_collect
 .testH5error_off
@@ -12,5 +13,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (10 tests)
+OK (11 tests)
 

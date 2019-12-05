@@ -80,7 +80,7 @@ public class TestH5 {
     private final long _createDataset(long fid, long dsid, String name, long dapl) {
         long did = -1;
         try {
-            did = H5.H5Dcreate(fid, name, HDF5Constants.H5T_STD_I32BE, dsid,
+            did = H5.H5Dcreate(fid, name, HDF5Constants.H5T_STD_I32LE, dsid,
                     HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, dapl);
         }
         catch (Throwable err) {
@@ -364,9 +364,9 @@ public class TestH5 {
 
         try {
             if (H5did >= 0)
-                H5.H5Dwrite(H5did, HDF5Constants.H5T_NATIVE_INT,
+                H5.H5Dwrite(H5did, HDF5Constants.H5T_STD_I32LE,
                         HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, dset_data[0]);
+                        HDF5Constants.H5P_DEFAULT, dset_data);
         }
         catch (Exception e) {
             e.printStackTrace();
