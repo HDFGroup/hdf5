@@ -130,7 +130,7 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
     loc_params.obj_type = obj_type;
 
     /* Get the object token */
-    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_token) < 0)
+    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to retrieve object token")
 
     /* Create the reference (do not pass filename, since file_id is attached) */
@@ -223,7 +223,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id,
     loc_params.obj_type = obj_type;
 
     /* Get the object token */
-    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_token) < 0)
+    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to retrieve object token")
 
     /* Create the reference (do not pass filename, since file_id is attached) */
@@ -312,7 +312,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name,
     loc_params.obj_type = obj_type;
 
     /* Get the object token */
-    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_token) < 0)
+    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to retrieve object token")
 
     /* Create the reference (do not pass filename, since file_id is attached) */
@@ -511,7 +511,7 @@ H5Ropen_object(const H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Open object by token */
@@ -583,7 +583,7 @@ H5Ropen_region(const H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Open object by token */
@@ -675,7 +675,7 @@ H5Ropen_attr(const H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id)
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Open object by token */
@@ -765,7 +765,7 @@ H5Rget_obj_type3(const H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type)
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Retrieve object's type */
@@ -873,7 +873,7 @@ H5Rget_obj_name(const H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf, size_t size)
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Retrieve object's name */

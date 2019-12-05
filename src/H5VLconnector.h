@@ -52,7 +52,9 @@
 
 /* type for tokens. Token are unique and permanent identifiers that are
  * used to reference HDF5 objects. */
-typedef unsigned char H5VL_token_t[H5VL_MAX_TOKEN_SIZE];
+typedef struct {
+    char __data[H5VL_MAX_TOKEN_SIZE];
+} H5VL_token_t;
 
 /* types for attribute GET callback */
 typedef enum H5VL_attr_get_t {
@@ -213,7 +215,7 @@ typedef struct H5VL_loc_by_idx {
 } H5VL_loc_by_idx_t;
 
 typedef struct H5VL_loc_by_token {
-    void *token;
+    H5VL_token_t *token;
 } H5VL_loc_by_token_t;
 
 /* Structure to hold parameters for object locations.

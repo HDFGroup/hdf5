@@ -185,7 +185,7 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
         /* Set up for the object copy for the reference */
         if(H5R__decode_token_obj_compat(src_buf, &buf_size, &tmp_token, token_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode src object address")
-        p = tmp_token;
+        p = (uint8_t *)&tmp_token;
         H5F_addr_decode(src_oloc->file, (const uint8_t **)&p, &src_oloc->addr);
         if(!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
@@ -196,7 +196,7 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
         /* Set the object reference info for the destination file */
-        p = tmp_token;
+        p = (uint8_t *)&tmp_token;
         H5F_addr_encode(dst_oloc->file, &p, dst_oloc->addr);
         if(H5R__encode_token_obj_compat((const H5VL_token_t *)&tmp_token, token_size, dst_buf, &buf_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to encode dst object address")
@@ -371,7 +371,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, H5T_t *dt_src,
         /* Get src object address */
         if(H5R__get_obj_token(ref, &tmp_token, &token_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object token")
-        p = tmp_token;
+        p = (uint8_t *)&tmp_token;
         H5F_addr_decode(src_oloc->file, (const uint8_t **)&p, &src_oloc->addr);
 
         /* Attempt to copy object from source to destination file */
@@ -379,7 +379,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, H5T_t *dt_src,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
         /* Set dst object address */
-        p = tmp_token;
+        p = (uint8_t *)&tmp_token;
         H5F_addr_encode(dst_oloc->file, &p, dst_oloc->addr);
         if(H5R__set_obj_token(ref, (const H5VL_token_t *)&tmp_token, token_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set object token")
