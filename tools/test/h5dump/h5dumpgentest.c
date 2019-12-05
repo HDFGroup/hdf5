@@ -3760,7 +3760,7 @@ void gent_multi(void)
 
     HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 
-    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
         memb_fapl[mt] = H5P_DEFAULT;
         memb_map[mt] = mt;
         HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
