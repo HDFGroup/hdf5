@@ -4030,6 +4030,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     h5tools_render_element(stream, &outputformat, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
     if (H5Tget_class(f_type) == H5T_REFERENCE) {
+        ctx->indent_level++;
         h5tools_context_t datactx = *ctx;            /* print context  */
         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "reference class type");
         if (!H5Tequal(f_type, H5T_STD_REF) && !H5Tequal(f_type, H5T_STD_REF_DSETREG) && !H5Tequal(f_type, H5T_STD_REF_OBJ)) {
@@ -4263,6 +4264,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             } /* end for(i = 0; i < ndims; i++, ctx->cur_elmt++, elmt_counter++) */
             HDfree(ref_buf);
         }
+        ctx->indent_level--;
     }
     else {
         h5tools_context_t datactx = *ctx;            /* print context  */

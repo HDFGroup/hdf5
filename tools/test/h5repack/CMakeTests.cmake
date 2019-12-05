@@ -85,6 +85,9 @@
       ${HDF5_TOOLS_DIR}/testfiles/tfamily00009.h5
       ${HDF5_TOOLS_DIR}/testfiles/tfamily00010.h5
       ${HDF5_TOOLS_DIR}/testfiles/tordergr.h5
+      # reference conversion files
+      ${HDF5_TOOLS_DIR}/testfiles/tattrreg.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tdatareg.h5
       # tools/testfiles/vds
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_a.h5
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_b.h5
@@ -148,6 +151,9 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/3_1_vds.h5-vds_chunk2x5x8-v
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_compa-v
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_conti-v
+      # refs
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/attrregion.tattrreg.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/dataregion.tdatareg.h5
   )
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES})
@@ -1467,6 +1473,12 @@
     set (TESTTYPE "SKIP")
   endif ()
   ADD_H5_VERIFY_VDS (vds_conti ${TESTTYPE} 0 ${FILEV4} vds_dset CONTIGUOUS -l vds_dset:CONTI)
+
+################################################################
+# reference new api conversions
+###############################################################
+ADD_H5_DMP_TEST (attrregion "TEST" 0 tattrreg.h5)
+ADD_H5_DMP_TEST (dataregion "TEST" 0 tdatareg.h5)
 
 ##############################################################################
 ###    V E R S I O N  B O U N D S  T E S T S

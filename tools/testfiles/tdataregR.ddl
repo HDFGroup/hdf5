@@ -4,39 +4,39 @@ GROUP "/" {
       DATATYPE  H5T_REFERENCE { H5T_STD_REF_DSETREG }
       DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
       DATA {
-      DATASET tdatareg.h5/Dataset2 {
-         REGION_TYPE BLOCK  (2,2)-(7,7)
-         DATATYPE  H5T_STD_U8BE
-         DATASPACE  SIMPLE { ( 10, 10 ) / ( 10, 10 ) }
-         DATA {
-            66, 69, 72, 75, 78, 81,
-            96, 99, 102, 105, 108, 111,
-            126, 129, 132, 135, 138, 141,
-            156, 159, 162, 165, 168, 171,
-            186, 189, 192, 195, 198, 201,
-            216, 219, 222, 225, 228, 231
+         DATASET "tdatareg.h5/Dataset2" {
+            REGION_TYPE BLOCK  (2,2)-(7,7)
+            DATATYPE  H5T_STD_U8BE
+            DATASPACE  SIMPLE { ( 10, 10 ) / ( 10, 10 ) }
+            DATA {
+               66, 69, 72, 75, 78, 81,
+               96, 99, 102, 105, 108, 111,
+               126, 129, 132, 135, 138, 141,
+               156, 159, 162, 165, 168, 171,
+               186, 189, 192, 195, 198, 201,
+               216, 219, 222, 225, 228, 231
+            }
          }
-      }
-      DATASET tdatareg.h5/Dataset2 {
-         REGION_TYPE POINT  (6,9), (2,2), (8,4), (1,6), (2,8), (3,2), (0,4),
-          (9,0), (7,1), (3,3)
-         DATATYPE  H5T_STD_U8BE
-         DATASPACE  SIMPLE { ( 10, 10 ) / ( 10, 10 ) }
-         DATA {
-            207,
-            66,
-            252,
-            48,
-            84,
-            96,
-            12,
-            14,
-            213,
-            99
+         DATASET "tdatareg.h5/Dataset2" {
+            REGION_TYPE POINT  (6,9), (2,2), (8,4), (1,6), (2,8), (3,2),
+             (0,4), (9,0), (7,1), (3,3)
+            DATATYPE  H5T_STD_U8BE
+            DATASPACE  SIMPLE { ( 10, 10 ) / ( 10, 10 ) }
+            DATA {
+               207,
+               66,
+               252,
+               48,
+               84,
+               96,
+               12,
+               14,
+               213,
+               99
+            }
          }
-      }
-      NULL
-      NULL
+         NULL
+         NULL
       }
    }
    DATASET "Dataset2" {
