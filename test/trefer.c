@@ -2811,7 +2811,7 @@ test_reference(void)
         for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Invalid combinations, just continue */
-            if(high == H5F_LIBVER_EARLIEST || high < low)
+            if(high <= H5F_LIBVER_V112 || high < low)
                 continue;
 
             test_reference_region(low, high);       /* Test basic H5R dataset region reference code */

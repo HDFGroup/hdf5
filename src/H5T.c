@@ -254,6 +254,7 @@
     dt->shared->u.atomic.u.r.rtype = H5R_OBJECT2;           \
     dt->shared->u.atomic.u.r.opaque = TRUE;                 \
     dt->shared->u.atomic.u.r.version = H5R_ENCODE_VERSION;  \
+    dt->shared->version = H5O_DTYPE_VERSION_4;              \
 }
 
 /* Define the code templates for the "SIZE_TMPL" in the H5T_INIT_TYPE macro */

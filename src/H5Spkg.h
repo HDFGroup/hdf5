@@ -41,9 +41,10 @@
 #define H5S_SELECT_FLAG_BITS    (H5S_HYPER_REGULAR)
 
 /* Versions for H5S_SEL_HYPER selection info */
-#define H5S_HYPER_VERSION_1     1
-#define H5S_HYPER_VERSION_2     2
-#define H5S_HYPER_VERSION_3     3
+#define H5S_HYPER_VERSION_1         1
+#define H5S_HYPER_VERSION_2         2
+#define H5S_HYPER_VERSION_3         3
+#define H5S_HYPER_VERSION_LATEST    H5S_HYPER_VERSION_3
 
 /* Versions for H5S_SEL_POINTS selection info */
 #define H5S_POINT_VERSION_1     1
