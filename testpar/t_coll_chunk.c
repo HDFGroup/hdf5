@@ -620,7 +620,6 @@ coll_chunktest(const char* filename,
   size_t  num_points;           /* for point selection */
   hsize_t *coords = NULL;       /* for point selection */
   hsize_t current_dims;         /* for point selection */
-  int i;
 
   /* set up MPI parameters */
   MPI_Comm_size(comm,&mpi_size);

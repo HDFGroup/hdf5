@@ -314,7 +314,6 @@ generate_f32le(hbool_t external) {
 int
 main(void) {
     int i = 0;
-    int ret_value = 0;
 
     for (i = 0; i < 2; i++) {
         hbool_t external = (i & 1) ? TRUE : FALSE;

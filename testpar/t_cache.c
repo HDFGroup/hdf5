@@ -38,7 +38,6 @@ int        failures = 0;
 hbool_t        verbose = TRUE; /* used to control error messages */
 
 #define NFILENAME 2
-#define PARATESTFILE filenames[0]
 const char *FILENAME[NFILENAME]={"CacheTestDummy", NULL};
 #ifndef PATH_MAX
 #define PATH_MAX    512
@@ -219,7 +218,9 @@ struct datum data[NUM_DATA_ENTRIES];
 #define STD_VIRT_NUM_DATA_ENTRIES    NUM_DATA_ENTRIES
 #define EXPRESS_VIRT_NUM_DATA_ENTRIES    (NUM_DATA_ENTRIES / 10)
 /* Use a smaller test size to avoid creating huge MPE logfiles. */
+#ifdef H5_HAVE_MPE
 #define MPE_VIRT_NUM_DATA_ENTIES    (NUM_DATA_ENTRIES / 100)
+#endif
 
 int virt_num_data_entries = NUM_DATA_ENTRIES;
 

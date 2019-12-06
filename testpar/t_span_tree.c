@@ -662,7 +662,7 @@ void coll_write_test(int chunk_factor)
  *-------------------------------------------------------------------------
  */
 static void
-coll_read_test(int chunk_factor)
+coll_read_test(int H5_ATTR_UNUSED chunk_factor)
 {
 
   const   char *filename;
@@ -923,7 +923,9 @@ coll_read_test(int chunk_factor)
 ****************************************************************/
 
 #define LDSCT_DS_RANK    5
+#if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
 #define LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK 0
+#endif
 
 #define LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG 0
 

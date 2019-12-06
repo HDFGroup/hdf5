@@ -27,7 +27,6 @@ const char *FILENAME[3]={ "bigio_test.h5",
 #define DATASET2 "DSET2"
 #define DATASET3 "DSET3"
 #define DATASET4 "DSET4"
-#define DATASET5 "DSET5"
 #define DXFER_COLLECTIVE_IO 0x1  /* Collective IO*/
 #define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
 #define DXFER_BIGCOUNT (1 < 29)
