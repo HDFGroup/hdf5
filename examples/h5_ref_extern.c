@@ -56,7 +56,7 @@ main(void) {
 
     /* Create reference to dataset1 in "refer_extern1.h5" */
     file1 = H5Fopen(H5FILE_NAME1, H5F_ACC_RDONLY, H5P_DEFAULT);
-    H5Rcreate_object(file1, "dataset1", &ref_buf[0]);
+    H5Rcreate_object(file1, "dataset1", H5P_DEFAULT, &ref_buf[0]);
     H5Fclose(file1);
 
     /* Store reference in dataset in separate file "refer_extern2.h5" */
