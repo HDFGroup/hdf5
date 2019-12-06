@@ -39,7 +39,6 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1object
   (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong aid)
 {
     const char *refName = NULL;
-    jboolean    isCopy;
     jbyteArray  ref = NULL;
     jbyte      *refBuf = NULL;
     herr_t      status = FAIL;
@@ -83,7 +82,6 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1region
   (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong space_id, jlong aid)
 {
     const char *refName = NULL;
-    jboolean    isCopy;
     jbyteArray  ref = NULL;
     jbyte      *refBuf = NULL;
     herr_t      status = FAIL;
@@ -127,7 +125,6 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1attr
 {
     const char *refName = NULL;
     const char *attrName = NULL;
-    jboolean    isCopy;
     jbyteArray  ref = NULL;
     jbyte      *refBuf = NULL;
     herr_t      status = FAIL;
@@ -212,7 +209,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1type
     jboolean    isCopy;
     jbyte      *refBuf = NULL;
     jsize       refBufLen;
-    H5R_type_t  ref_type;
+    H5R_type_t  ref_type = -1;
 
     UNUSED(clss);
 
@@ -493,7 +490,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1file_1name
     jbyte      *refBuf = NULL;
     jstring     str = NULL;
     ssize_t     buf_size;
-    ssize_t     check_size;
+    ssize_t     check_size = -1;
     char       *namePtr = NULL;
 
     UNUSED(clss);
@@ -539,7 +536,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1name
     jbyte      *refBuf = NULL;
     jstring     str = NULL;
     ssize_t     buf_size;
-    ssize_t     check_size;
+    ssize_t     check_size = -1;
     char       *namePtr = NULL;
 
     UNUSED(clss);
@@ -585,7 +582,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1attr_1name
     jbyte      *refBuf = NULL;
     jstring     str = NULL;
     ssize_t     buf_size;
-    ssize_t     check_size;
+    ssize_t     check_size = -1;
     char       *namePtr = NULL;
 
     UNUSED(clss);

@@ -3977,7 +3977,6 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     hsize_t     total_size[H5S_MAX_RANK];
     hsize_t     elmt_counter = 0;  /*counts the # elements printed. */
     int         status = -1;
-    hbool_t            dimension_break;
     h5tools_str_t      buffer;          /* string into which to render   */
     hsize_t            curr_pos = 0;    /* total data element position   */
     size_t             ncols = 80;      /* available output width        */
@@ -4195,13 +4194,13 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                     if(region_type == H5S_SEL_POINTS) {
                                         /* Print point information */
                                         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5S_SEL_POINTS H5R_DATASET_REGION2");
-                                        dimension_break = h5tools_dump_region_data_points(new_obj_sid, new_obj_id, stream, &outputformat, &datactx,
+                                        h5tools_dump_region_data_points(new_obj_sid, new_obj_id, stream, &outputformat, &datactx,
                                                             &buffer, &curr_pos, ncols, i, elmt_counter);
                                     }
                                     else if(region_type == H5S_SEL_HYPERSLABS) {
                                         /* Print block information */
                                         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5S_SEL_HYPERSLABS H5R_DATASET_REGION2");
-                                        dimension_break = h5tools_dump_region_data_blocks(new_obj_sid, new_obj_id, stream, &outputformat, &datactx,
+                                        h5tools_dump_region_data_blocks(new_obj_sid, new_obj_id, stream, &outputformat, &datactx,
                                                             &buffer, &curr_pos, ncols, i, elmt_counter);
                                     }
                                     else
@@ -4221,7 +4220,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     case H5R_ATTR:
                         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ref_type is H5R_ATTR");
                         if((new_obj_id = H5Ropen_attr((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                            dimension_break = h5tools_dump_region_attribute(new_obj_id, stream, &outputformat, &datactx,
+                            h5tools_dump_region_attribute(new_obj_id, stream, &outputformat, &datactx,
                                                 &buffer, &curr_pos, ncols, i, elmt_counter);
                             if(H5Aclose(new_obj_id) < 0)
                                 H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Aclose H5R_ATTR failed");

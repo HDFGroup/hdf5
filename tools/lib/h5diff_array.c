@@ -2258,7 +2258,6 @@ static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2,
     unsigned char temp1_uchar;
     unsigned char temp2_uchar;
     double        per;
-    hbool_t       both_zero;
 
     HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
     HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));

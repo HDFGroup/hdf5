@@ -1502,7 +1502,7 @@ H5DwriteVL_asstr
     (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hid_t xfer_plist_id, jobjectArray buf)
 {
     const char *utf8 = NULL;
-    jstring     obj;
+    jstring     obj = NULL;
     hbool_t     close_mem_space = FALSE;
     size_t      typeSize;
     size_t      i;
