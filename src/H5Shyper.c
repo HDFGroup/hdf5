@@ -194,6 +194,7 @@ static htri_t H5S__hyper_shape_same(const H5S_t *space1, const H5S_t *space2);
 static htri_t H5S__hyper_intersect_block(const H5S_t *space, const hsize_t *start,
     const hsize_t *end);
 static herr_t H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset);
+static herr_t H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset);
 static herr_t H5S__hyper_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S__hyper_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 static herr_t H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
@@ -240,6 +241,7 @@ const H5S_select_class_t H5S_sel_hyper[1] = {{
     H5S__hyper_shape_same,
     H5S__hyper_intersect_block,
     H5S__hyper_adjust_u,
+    H5S__hyper_adjust_s,
     H5S__hyper_project_scalar,
     H5S__hyper_project_simple,
     H5S__hyper_iter_init,
@@ -6478,39 +6480,50 @@ H5S__hyper_adjust_u_helper(H5S_hyper_span_info_t *spans, unsigned rank,
 static herr_t
 H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset)
 {
+    hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
+    unsigned u;                         /* Local index variable */
+
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(space);
     HDassert(offset);
 
-    /* Subtract the offset from the "regular" coordinates, if they exist */
-    /* (No need to rebuild the dimension info yet -QAK) */
-    if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES) {
-        unsigned u;                         /* Local index variable */
+    /* Check for an all-zero offset vector */
+    for(u = 0; u < space->extent.rank; u++)
+        if(0 != offset[u]) {
+            non_zero_offset = TRUE;
+            break;
+        } /* end if */
 
-        for(u = 0; u < space->extent.rank; u++) {
-            HDassert(space->select.sel_info.hslab->diminfo.opt[u].start >= offset[u]);
-            space->select.sel_info.hslab->diminfo.opt[u].start -= offset[u];
+    /* Only perform operation if the offset is non-zero */
+    if(non_zero_offset) {
+        /* Subtract the offset from the "regular" coordinates, if they exist */
+        /* (No need to rebuild the dimension info yet -QAK) */
+        if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES) {
+            for(u = 0; u < space->extent.rank; u++) {
+                HDassert(space->select.sel_info.hslab->diminfo.opt[u].start >= offset[u]);
+                space->select.sel_info.hslab->diminfo.opt[u].start -= offset[u];
 
-            /* Adjust the low & high bounds */
-            HDassert(space->select.sel_info.hslab->diminfo.low_bounds[u] >= offset[u]);
-            space->select.sel_info.hslab->diminfo.low_bounds[u] -= offset[u];
-            space->select.sel_info.hslab->diminfo.high_bounds[u] -= offset[u];
-        } /* end for */
-    } /* end if */
+                /* Adjust the low & high bounds */
+                HDassert(space->select.sel_info.hslab->diminfo.low_bounds[u] >= offset[u]);
+                space->select.sel_info.hslab->diminfo.low_bounds[u] -= offset[u];
+                space->select.sel_info.hslab->diminfo.high_bounds[u] -= offset[u];
+            } /* end for */
+        } /* end if */
 
-    /* Subtract the offset from the span tree coordinates, if they exist */
-    if(space->select.sel_info.hslab->span_lst) {
-        uint64_t op_gen;            /* Operation generation value */
+        /* Subtract the offset from the span tree coordinates, if they exist */
+        if(space->select.sel_info.hslab->span_lst) {
+            uint64_t op_gen;            /* Operation generation value */
 
-        /* Acquire an operation generation value for this operation */
-        op_gen = H5S__hyper_get_op_gen();
+            /* Acquire an operation generation value for this operation */
+            op_gen = H5S__hyper_get_op_gen();
 
-        /* Perform adjustment */
-        /* Always use op_info[0] since we own this op_info, so there can be no
-         * simultaneous operations */
-        H5S__hyper_adjust_u_helper(space->select.sel_info.hslab->span_lst, space->extent.rank, offset, 0, op_gen);
+            /* Perform adjustment */
+            /* Always use op_info[0] since we own this op_info, so there can be no
+             * simultaneous operations */
+            H5S__hyper_adjust_u_helper(space->select.sel_info.hslab->span_lst, space->extent.rank, offset, 0, op_gen);
+        } /* end if */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -6983,11 +6996,11 @@ H5S__hyper_adjust_s_helper(H5S_hyper_span_info_t *spans, unsigned rank,
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_hyper_adjust_s
+    H5S__hyper_adjust_s
  PURPOSE
     Adjust a hyperslab selection by subtracting an offset
  USAGE
-    herr_t H5S_hyper_adjust_s(space,offset)
+    herr_t H5S__hyper_adjust_s(space,offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
         const hssize_t *offset; IN: Offset to subtract
  RETURNS
@@ -6999,8 +7012,8 @@ H5S__hyper_adjust_s_helper(H5S_hyper_span_info_t *spans, unsigned rank,
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
-H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset)
+static herr_t
+H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset)
 {
     hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
     unsigned u;                         /* Local index variable */
@@ -7051,48 +7064,7 @@ H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_hyper_adjust_s() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Shyper_adjust_s
- PURPOSE
-    Adjust a hyperslab selection by subtracting an offset
- USAGE
-    herr_t H5Shyper_adjust_s(space_id,offset)
-        hid_t space_id;         IN: ID of the dataspace to adjust
-        const hssize_t *offset; IN: Offset to subtract
- RETURNS
-    Non-negative on success, negative on failure
- DESCRIPTION
-    Moves a hyperslab selection by subtracting an offset from it.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-herr_t
-H5Shyper_adjust_s(hid_t space_id, const hssize_t *offset)
-{
-    H5S_t *space;
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Hs", space_id, offset);
-
-    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
-    if(H5S_GET_SELECT_TYPE(space) != H5S_SEL_HYPERSLABS)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection")
-    if(NULL == offset)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "NULL offset pointer")
-
-    if(H5S_hyper_adjust_s(space, offset) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Shyper_adjust_s() */
+} /* end H5S__hyper_adjust_s() */
 
 
 /*--------------------------------------------------------------------------
@@ -7138,7 +7110,7 @@ H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset)
         } /* end for */
 
         /* Call the 'adjust' routine */
-        if(H5S_hyper_adjust_s(space, space->select.offset) < 0)
+        if(H5S__hyper_adjust_s(space, space->select.offset) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
 
         /* Zero out the selection offset */
@@ -7186,7 +7158,7 @@ H5S_hyper_denormalize_offset(H5S_t *space, const hssize_t *old_offset)
     HDassert(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS);
 
     /* Call the 'adjust' routine */
-    if(H5S_hyper_adjust_s(space, old_offset) < 0)
+    if(H5S__hyper_adjust_s(space, old_offset) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
 
     /* Copy the selection offset over */

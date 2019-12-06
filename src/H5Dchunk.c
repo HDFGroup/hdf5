@@ -2116,7 +2116,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
                 } /* end for */
 
                 /* Adjust the selection */
-                if(H5S_hyper_adjust_s(chunk_info->mspace, chunk_adjust) < 0)
+                if(H5S_SELECT_ADJUST_S(chunk_info->mspace, chunk_adjust) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to adjust selection")
             } /* end else */
 
@@ -2128,7 +2128,6 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_chunk_mem_map_hyper() */
-
 
 
 /*-------------------------------------------------------------------------
