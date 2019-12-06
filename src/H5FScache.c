@@ -1048,8 +1048,8 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
 
         /* Walk through the image, deserializing sections */
         do {
-            hsize_t sect_size = 1;      /* Current section size */
-            size_t node_count = 1;      /* # of sections of this size */
+            hsize_t sect_size = 0;      /* Current section size */
+            size_t node_count = 0;      /* # of sections of this size */
             size_t u;               /* Local index variable */
 
             /* The number of sections of this node's size */
@@ -1063,7 +1063,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
             /* Loop over nodes of this size */
             for(u = 0; u < node_count; u++) {
                 H5FS_section_info_t *new_sect;  /* Section that was deserialized */
-                haddr_t sect_addr = 1;  /* Address of free space section in the address space */
+                haddr_t sect_addr = 0;  /* Address of free space section in the address space */
                 unsigned sect_type;     /* Type of free space section */
                 unsigned des_flags;     /* Flags from deserialize callback */
 
