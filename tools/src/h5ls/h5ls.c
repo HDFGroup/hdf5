@@ -1530,17 +1530,12 @@ dump_dataset_values(hid_t dset)
     H5TOOLS_ERR_INIT(herr_t, SUCCEED)
     hid_t               f_type = H5I_INVALID_HID;
     hid_t               space = H5I_INVALID_HID;
-    hid_t               new_obj_id = H5I_INVALID_HID;
-    hid_t               new_obj_sid = H5I_INVALID_HID;
     hsize_t             total_size[H5S_MAX_RANK];
-    hsize_t             nelmts = 1;
-    hsize_t             elmt_counter = 0;  /*counts the # elements printed. */
     int                 ndims;
     size_t              i;
     char                string_prefix[64];
     static char         fmt_double[16];
     static char         fmt_float[16];
-    size_t              ncols = 80;      /* available output width        */
     hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
@@ -1708,22 +1703,13 @@ dump_attribute_values(hid_t attr, const char *attr_name)
 {
     H5TOOLS_ERR_INIT(herr_t, SUCCEED)
     hid_t               f_type = H5I_INVALID_HID;
-    hid_t               p_type = H5I_INVALID_HID;
     hid_t               space = H5I_INVALID_HID;
-    hid_t               new_obj_id = H5I_INVALID_HID;
-    hid_t               new_obj_sid = H5I_INVALID_HID;
     hsize_t             total_size[H5S_MAX_RANK];
-    hsize_t             nelmts = 1;
-    hsize_t             elmt_counter = 0;  /*counts the # elements printed. */
-    hsize_t             temp_need;
-    size_t              need;
     int                 ndims;
     size_t              i;
-    void               *buf;
     char                string_prefix[64];
     static char         fmt_double[16];
     static char         fmt_float[16];
-    size_t              ncols = 80;      /* available output width        */
     hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
@@ -1899,18 +1885,14 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
     hid_t               attr = H5I_INVALID_HID;
     hid_t               space = H5I_INVALID_HID;
     hid_t               type = H5I_INVALID_HID;
-    hid_t               new_obj_id = H5I_INVALID_HID;
-    hid_t               new_obj_sid = H5I_INVALID_HID;
     hsize_t             size[H5S_MAX_RANK];
     hsize_t             nelmts = 1;
     int                 ndims;
     int                 i;
     H5S_class_t         space_type;
     hsize_t             curr_pos = 0;        /* total data element position   */
-    hsize_t             elmt_counter = 0;    /*counts the # elements printed. */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
-    size_t              ncols = 80;      /* available output width        */
     h5tool_format_t    *info = &ls_dataformat;
 
     H5TOOLS_PUSH_STACK();

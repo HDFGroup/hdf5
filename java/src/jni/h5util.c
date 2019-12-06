@@ -223,7 +223,7 @@ h5str_convert
             switch (typeSize) {
                 case sizeof(float):
                 {
-                    float tmp_float = 0.0;
+                    float tmp_float = 0.0f;
 
                     sscanf(token, "%f", &tmp_float);
                     HDmemcpy(cptr, &tmp_float, sizeof(float));
@@ -744,7 +744,7 @@ h5str_sprintf
             switch (typeSize) {
                 case sizeof(float):
                 {
-                    float tmp_float = 0.0;
+                    float tmp_float = 0.0f;
 
                     HDmemcpy(&tmp_float, cptr, sizeof(float));
 
@@ -1161,6 +1161,8 @@ h5str_sprintf
                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                         h5str_sprint_reference(ENVONLY, out_str, container, (void*)cptr);
                         break;
+                    case H5R_BADTYPE:
+                    case H5R_MAXTYPE:
                     default:
                         break;
                 } /* end switch */

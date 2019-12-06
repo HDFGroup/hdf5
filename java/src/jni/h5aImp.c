@@ -1304,7 +1304,7 @@ H5AwriteVL_asstr
 {
     const char *utf8 = NULL;
     hsize_t     dims[H5S_MAX_RANK];
-    jstring     jstr;
+    jstring     jstr = NULL;
     size_t      typeSize;
     size_t      i;
     hid_t       sid = H5I_INVALID_HID;
