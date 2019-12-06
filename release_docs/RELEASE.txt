@@ -199,6 +199,14 @@ New Features
 
     Library:
     --------
+    - Add new public function H5Sselect_adjust.
+
+      This function shifts a dataspace selection by a specified logical offset
+      within the dataspace extent.  This can be useful for VOL developers to
+      implement chunked datasets.
+
+      (NAF - 2019/11/18)
+
     - Add new public function H5Sselect_project_intersection.
 
       This function computes the intersection between two dataspace selections
