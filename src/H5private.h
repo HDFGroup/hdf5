@@ -1193,13 +1193,23 @@ typedef off_t               h5_stat_size_t;
         #define HDrandom()    HDrand()
     #endif /* HDrandom */
     H5_DLL int HDrand(void);
-#elif H5_HAVE_RANDOM
+    #ifndef HDsrandom
+        #define HDsrandom(S)    HDsrand(S)
+    #endif /* HDsrandom */
+    H5_DLL void HDsrand(unsigned int seed);
+#elif defined(H5_HAVE_RANDOM)
     #ifndef HDrand
         #define HDrand()    random()
     #endif /* HDrand */
     #ifndef HDrandom
         #define HDrandom()    random()
     #endif /* HDrandom */
+    #ifndef HDsrand
+        #define HDsrand(S)    srandom(S)
+    #endif /* HDsrand */
+    #ifndef HDsrandom
+        #define HDsrandom(S)    srandom(S)
+    #endif /* HDsrandom */
 #else /* H5_HAVE_RANDOM */
     #ifndef HDrand
         #define HDrand()    rand()
@@ -1207,6 +1217,12 @@ typedef off_t               h5_stat_size_t;
     #ifndef HDrandom
         #define HDrandom()    rand()
     #endif /* HDrandom */
+    #ifndef HDsrand
+        #define HDsrand(S)    srand(S)
+    #endif /* HDsrand */
+    #ifndef HDsrandom
+        #define HDsrandom(S)    srand(S)
+    #endif /* HDsrandom */
 #endif /* H5_HAVE_RANDOM */
 
 #ifndef HDread
@@ -1327,26 +1343,6 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsqrt
     #define HDsqrt(X)    sqrt(X)
 #endif /* HDsqrt */
-#ifdef H5_HAVE_RAND_R
-    H5_DLL void HDsrand(unsigned int seed);
-    #ifndef HDsrandom
-        #define HDsrandom(S)    HDsrand(S)
-    #endif /* HDsrandom */
-#elif H5_HAVE_RANDOM
-    #ifndef HDsrand
-        #define HDsrand(S)    srandom(S)
-    #endif /* HDsrand */
-    #ifndef HDsrandom
-        #define HDsrandom(S)    srandom(S)
-    #endif /* HDsrandom */
-#else /* H5_HAVE_RAND_R */
-    #ifndef HDsrand
-        #define HDsrand(S)    srand(S)
-    #endif /* HDsrand */
-    #ifndef HDsrandom
-        #define HDsrandom(S)    srand(S)
-    #endif /* HDsrandom */
-#endif /* H5_HAVE_RAND_R */
 #ifndef HDsscanf
     #define HDsscanf(S,FMT,...)   sscanf(S,FMT,__VA_ARGS__)
 #endif /* HDsscanf */

@@ -764,7 +764,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         /* cp_vp is the pointer into the struct where a `char*' is stored. So we have
                          * to dereference the pointer to get the `char*' to pass to HDstrlen(). */
                         s = *(char **)((void *)cp_vp);
-                        if(s != NULL) size = HDstrlen(s);
+                        if(s != NULL)
+                            size = HDstrlen(s);
                     }
                     else {
                         s = cp_vp;
@@ -784,8 +785,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                              * threshold is zero then that means it can repeat any number
                              * of times.
                              */
-                            if(info->str_repeat > 0) while (i + j < size && s[i] == s[i + j])
-                                j++;
+                            if(info->str_repeat > 0)
+                                while (i + j < size && s[i] == s[i + j])
+                                    j++;
 
                             /*
                              * Print the opening quote.  If the repeat count is high enough to
@@ -1091,7 +1093,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     h5tools_str_append(str, "NULL");
                 else {
                     if (H5Tequal(type, H5T_STD_REF)) {
-                        char    *obj_name = NULL;
                         H5O_type_t obj_type;   /* Object type */
                         H5R_type_t ref_type;   /* Reference type */
                         const H5R_ref_t *ref_vp = (const H5R_ref_t *)vp;
@@ -1358,7 +1359,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info,
         hid_t container, H5R_ref_t *ref_vp)
 {
     H5TOOLS_ERR_INIT(int, SUCCEED)
-    ssize_t  buf_size, status;
+    ssize_t  buf_size;
 
     H5TOOLS_PUSH_STACK();
     H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter");
@@ -1368,11 +1369,11 @@ h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info,
     H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "buf_size=%ld", buf_size);
     if (buf_size) {
         char *file_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
-        status = H5Rget_file_name(ref_vp, file_name, buf_size + 1);
-        file_name[buf_size] = '\0';
-        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "name=%s", file_name);
-
-        h5tools_str_append(str, "%s", file_name);
+        if (H5Rget_file_name(ref_vp, file_name, buf_size + 1) >= 0) {
+            file_name[buf_size] = '\0';
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "name=%s", file_name);
+            h5tools_str_append(str, "%s", file_name);
+        }
         HDfree(file_name);
     }
 
@@ -1380,11 +1381,11 @@ h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info,
     H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "buf_size=%ld", buf_size);
     if (buf_size) {
         char *obj_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
-        status = H5Rget_obj_name(ref_vp, H5P_DEFAULT, obj_name, buf_size + 1);
-        obj_name[buf_size] = '\0';
-        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "name=%s", obj_name);
-
-        h5tools_str_append(str, "%s", obj_name);
+        if (H5Rget_obj_name(ref_vp, H5P_DEFAULT, obj_name, buf_size + 1) >= 0) {
+            obj_name[buf_size] = '\0';
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "name=%s", obj_name);
+            h5tools_str_append(str, "%s", obj_name);
+        }
         HDfree(obj_name);
     }
 
@@ -1393,11 +1394,11 @@ h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info,
         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "buf_size=%ld", buf_size);
         if (buf_size) {
             char *attr_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
-            status = H5Rget_attr_name(ref_vp, attr_name, buf_size + 1);
-            attr_name[buf_size] = '\0';
-            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "name=%s", attr_name);
-
-            h5tools_str_append(str, "/%s", attr_name);
+            if (H5Rget_attr_name(ref_vp, attr_name, buf_size + 1) >= 0) {
+                attr_name[buf_size] = '\0';
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "name=%s", attr_name);
+                h5tools_str_append(str, "/%s", attr_name);
+            }
             HDfree(attr_name);
         }
     }
