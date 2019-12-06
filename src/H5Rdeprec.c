@@ -128,7 +128,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Retrieve object's type */
@@ -188,7 +188,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Dereference */
@@ -262,7 +262,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
     loc_params.obj_type = vol_obj_type;
 
     /* Get the object token */
-    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_token) < 0)
+    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to retrieve object token")
 
     /* Get the file for the object */
@@ -357,7 +357,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Retrieve object's type */
@@ -421,7 +421,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type,
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Open object by token */
@@ -554,7 +554,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name,
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Retrieve object's name */

@@ -290,11 +290,11 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid VOL object")
 
     /* This is a native specific routine that requires serialization of the token */
-    p = obj_token;
+    p = (uint8_t *)&obj_token;
     H5F_addr_encode(f, &p, addr);
 
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Open the object */
