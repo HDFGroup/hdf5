@@ -567,7 +567,6 @@ dataset_writeAll(void)
     size_t  num_points;         /* for point selection */
     hsize_t *coords = NULL;     /* for point selection */
     hsize_t current_dims;       /* for point selection */
-    int i;
 
     herr_t ret;             /* Generic return value */
     int mpi_size, mpi_rank;
@@ -1098,7 +1097,6 @@ dataset_readAll(void)
 
     size_t num_points;          /* for point selection */
     hsize_t *coords = NULL;     /* for point selection */
-    hsize_t current_dims;       /* for point selection */
     int i,j,k;
 
     herr_t ret;             /* Generic return value */
@@ -3470,8 +3468,9 @@ actual_io_mode_tests(void) {
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
+#ifdef LATER
 #define DSET_NOCOLCAUSE "nocolcause"
-#define NELM          2
+#endif
 #define FILE_EXTERNAL "nocolcause_extern.data"
 static void
 test_no_collective_cause_mode(int selection_mode)
@@ -3482,7 +3481,6 @@ test_no_collective_cause_mode(int selection_mode)
     uint32_t no_collective_cause_global_write = 0;
     uint32_t no_collective_cause_global_read = 0;
     uint32_t no_collective_cause_global_expected = 0;
-    hsize_t coord[NELM][RANK];
 
     const char  * filename;
     const char  * test_name;
@@ -3797,6 +3795,7 @@ test_no_collective_cause_mode(int selection_mode)
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
+#ifdef LATER
 static void
 test_no_collective_cause_mode_filter(int selection_mode)
 {
@@ -4008,6 +4007,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     HDfree(buffer);
     return;
 }
+#endif
 
 /* Function: no_collective_cause_tests
  *

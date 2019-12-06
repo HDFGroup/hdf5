@@ -2132,7 +2132,7 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
 {
     H5D_chunk_info_t *chunk_info;           /* Pointer to chunk information */
     H5SL_node_t *curr_node;                 /* Current node in skip list */
-    herr_t	ret_value = SUCCEED;        /* Return value */
+    herr_t	ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -5701,7 +5701,7 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* Set it in the userdata to return */
     udata->chunk_addr[chunk_index] = chunk_rec->chunk_addr;
 
-    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_addrmap_cb() */
 
 

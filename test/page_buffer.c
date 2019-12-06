@@ -46,19 +46,22 @@
 #define NY                      50
 
 /* helper routines */
+#ifndef H5_HAVE_PARALLEL
 static unsigned create_file(char *filename, hid_t fcpl, hid_t fapl);
 static unsigned open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size);
+#endif /* H5_HAVE_PARALLEL */
 
 /* test routines */
+#ifdef H5_HAVE_PARALLEL
+static unsigned verify_page_buffering_disabled(hid_t orig_fapl, 
+    const char *env_h5_drvr);
+#else
 static unsigned test_args(hid_t fapl, const char *env_h5_drvr);
 static unsigned test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
     bool);
 static unsigned test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr);
 static unsigned test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr);
 static unsigned test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr);
-#ifdef H5_HAVE_PARALLEL
-static unsigned verify_page_buffering_disabled(hid_t orig_fapl, 
-    const char *env_h5_drvr);
 #endif /* H5_HAVE_PARALLEL */
 
 #define FILENAME "filepaged"
@@ -508,6 +511,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+
+#ifndef H5_HAVE_PARALLEL
 static unsigned
 test_args(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -661,7 +666,8 @@ error:
         H5Pclose(fcpl);
     } H5E_END_TRY;
     return 1;
-}
+} /* test_args */
+#endif
 
 
 /*
@@ -1170,6 +1176,9 @@ error:
  *
  *                                                    JRM -- 10/26/18
  */
+
+/* Changes due to file space page size has a minimum size of 512 */
+#ifndef H5_HAVE_PARALLEL
 static unsigned
 test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
     bool vfd_swmr_mode)
@@ -1434,7 +1443,8 @@ error:
             HDfree(data);
     } H5E_END_TRY;
     return 1;
-}
+} /* test_raw_data_handling */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1462,6 +1472,7 @@ error:
  *-------------------------------------------------------------------------
  */
 
+#ifndef H5_HAVE_PARALLEL
 static unsigned
 test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -1697,7 +1708,8 @@ error:
             HDfree(data);
     } H5E_END_TRY;
     return 1;
-}
+} /* test_lru_processing */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1739,6 +1751,7 @@ error:
  *-------------------------------------------------------------------------
  */
 
+#ifndef H5_HAVE_PARALLEL
 static unsigned
 test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -2430,7 +2443,9 @@ error:
             HDfree(data);
     } H5E_END_TRY;
     return 1;
-}
+
+} /* test_min_threshold */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -2467,6 +2482,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_HAVE_PARALLEL
 static unsigned
 test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -2824,7 +2840,8 @@ error:
     } H5E_END_TRY;
 
     return 1;
-}
+} /* test_stats_collection */
+#endif
 
 
 /*-------------------------------------------------------------------------
