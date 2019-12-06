@@ -139,7 +139,8 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "        1: This is H5F_LIBVER_V18 in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "        2: This is H5F_LIBVER_V110 in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "        3: This is H5F_LIBVER_V112 in H5F_libver_t struct\n");
-    PRINTVALSTREAM(rawoutstream, "           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V112 for this release\n");
+    PRINTVALSTREAM(rawoutstream, "        4: This is H5F_LIBVER_V114 in H5F_libver_t struct\n");
+    PRINTVALSTREAM(rawoutstream, "           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V114 for this release\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    FS_STRATEGY is a string indicating the file space strategy used:\n");
     PRINTVALSTREAM(rawoutstream, "        FSM_AGGR:\n");
@@ -280,7 +281,7 @@ int read_info(const char *filename, pack_opt_t *options)
     char comp_info[1024];
     FILE *fp = NULL;
     char c;
-    int i, rc = 1;
+    int i;
     int ret_value = EXIT_SUCCESS;
 
     if (NULL == (fp = HDfopen(filename, "r"))) {
@@ -411,7 +412,7 @@ set_sort_order(const char *form)
 static
 int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 {
-    int opt;
+    int bound, opt;
     int ret_value = 0;
 
     /* parse command line options */
@@ -491,19 +492,21 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'j':
-                options->low_bound = (H5F_libver_t)HDatoi(opt_arg);
-                if (options->low_bound < H5F_LIBVER_EARLIEST || options->low_bound > H5F_LIBVER_LATEST) {
+                bound = HDatoi(opt_arg);
+                if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing low bound\n");
                     goto done;
                 }
+                options->low_bound = bound;
                 break;
 
             case 'k':
-                options->high_bound = (H5F_libver_t)HDatoi(opt_arg);
-                if (options->high_bound < H5F_LIBVER_EARLIEST || options->high_bound > H5F_LIBVER_LATEST) {
+                bound = HDatoi(opt_arg);
+                if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing high bound\n");
                     goto done;
                 }
+                options->high_bound = bound;
                 break;
 
             case 'c':

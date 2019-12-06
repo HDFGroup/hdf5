@@ -762,6 +762,11 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     comp_datatype    *buf_c=NULL;
     H5D_space_status_t  allocation;
 
+    fill_c.a = 0;
+    fill_c.x = 0;
+    fill_c.y = 0;
+    fill_c.z = 0;
+
     if(datatype == H5T_INTEGER) {
         fillval = *(int*)_fillval;
     }

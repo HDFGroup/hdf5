@@ -40,6 +40,7 @@
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* Other public headers needed by this file */
 #include "H5Spublic.h"		/* Dataspace functions			*/
@@ -331,6 +332,7 @@ typedef struct H5T_shared_t {
     unsigned            version;        /* Version of object header message to encode this object with */
     hbool_t		force_conv;/* Set if this type always needs to be converted and H5T__conv_noop cannot be called */
     struct H5T_t	*parent;/*parent type for derived datatypes	     */
+    H5VL_object_t       *owned_vol_obj; /* Vol object owned by this type (free on close) */
     union {
         H5T_atomic_t	atomic; /* an atomic datatype              */
         H5T_compnd_t	compnd; /* a compound datatype (struct)    */
@@ -1173,7 +1175,7 @@ H5_DLL void H5T__bit_neg(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
 H5_DLL H5T_t * H5T__vlen_create(const H5T_t *base);
-H5_DLL htri_t H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc);
+H5_DLL htri_t H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Array functions */
 H5_DLL H5T_t *H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */]);

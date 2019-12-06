@@ -252,8 +252,9 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
+H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 {
+    H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
     htri_t ret_value = FALSE;   /* Indicate success, but no location change */
 
     FUNC_ENTER_PACKAGE
@@ -263,10 +264,10 @@ H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
     HDassert(loc >= H5T_LOC_BADLOC && loc < H5T_LOC_MAXLOC);
 
     /* Only change the location if it's different */
-    if(loc != dt->shared->u.vlen.loc || f != dt->shared->u.vlen.f) {
+    if(loc != dt->shared->u.vlen.loc || file != dt->shared->u.vlen.file) {
         switch(loc) {
             case H5T_LOC_MEMORY:   /* Memory based VL datatype */
-                HDassert(NULL == f);
+                HDassert(NULL == file);
 
                 /* Mark this type as being stored in memory */
                 dt->shared->u.vlen.loc = H5T_LOC_MEMORY;
@@ -288,12 +289,12 @@ H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                 else
                     HDassert(0 && "Invalid VL type");
 
-                /* Reset file ID (since this VL is in memory) */
-                dt->shared->u.vlen.f = NULL;
+                /* Reset file pointer (since this VL is in memory) */
+                dt->shared->u.vlen.file = NULL;
                 break;
 
             case H5T_LOC_DISK:   /* Disk based VL datatype */
-                HDassert(f);
+                HDassert(file);
 
                 /* Mark this type as being stored on disk */
                 dt->shared->u.vlen.loc = H5T_LOC_DISK;
@@ -310,7 +311,7 @@ H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                 dt->shared->u.vlen.cls = &H5T_vlen_disk_g;
 
                 /* Set file ID (since this VL is on disk) */
-                dt->shared->u.vlen.f = f;
+                dt->shared->u.vlen.file = file;
                 break;
 
             case H5T_LOC_BADLOC:
@@ -1002,7 +1003,7 @@ H5T__vlen_disk_write(H5F_t *f, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_al
     /* check parameters */
     HDassert(vl);
     HDassert(seq_len == 0 || buf);
-    HDassert(f);
+    HDassert(file);
 
     /* Free heap object for old data, if non-NULL */
     if(bg != NULL)

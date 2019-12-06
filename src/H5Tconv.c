@@ -3132,7 +3132,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
 
             /* Set flags to indicate we are writing to or reading from the file */
-            if(dst->shared->u.vlen.f != NULL)
+            if(dst->shared->u.vlen.file != NULL)
                 write_to_file = TRUE;
 
             /* Set the flag for nested VL case */
