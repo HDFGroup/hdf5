@@ -4263,6 +4263,9 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
     /* Decode version */
     UINT32DECODE(pp, version);
 
+    if(version < H5S_HYPER_VERSION_1 || version > H5S_HYPER_VERSION_LATEST)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for hyperslab selection")
+
     if(version >= (uint32_t)H5S_HYPER_VERSION_2) {
         /* Decode flags */
         flags = *(pp)++;

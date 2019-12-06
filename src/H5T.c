@@ -227,7 +227,7 @@
     H5T_INIT_TYPE_ALLOC_COMMON(H5T_REFERENCE)               \
     H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_NONE)                \
     dt->shared->force_conv = TRUE;                          \
-    dt->shared->u.atomic.u.r.f = NULL;                      \
+    dt->shared->u.atomic.u.r.file = NULL;                   \
     dt->shared->u.atomic.u.r.loc = H5T_LOC_BADLOC;          \
     dt->shared->u.atomic.u.r.cls = NULL;                    \
 }
@@ -254,6 +254,7 @@
     dt->shared->u.atomic.u.r.rtype = H5R_OBJECT2;           \
     dt->shared->u.atomic.u.r.opaque = TRUE;                 \
     dt->shared->u.atomic.u.r.version = H5R_ENCODE_VERSION;  \
+    dt->shared->version = H5O_DTYPE_VERSION_4;              \
 }
 
 /* Define the code templates for the "SIZE_TMPL" in the H5T_INIT_TYPE macro */
@@ -5532,7 +5533,7 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
             case H5T_REFERENCE:
                 /* Reference types go through type conversion */
-                if((ret_value = H5T__ref_set_loc(dt, f, loc)) < 0)
+                if((ret_value = H5T__ref_set_loc(dt, file, loc)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "Unable to set reference location");
                 break;
 

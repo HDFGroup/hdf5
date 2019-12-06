@@ -1,0 +1,389 @@
+HDF5 version 1.12.0-alpha0 currently under development
+================================================================================
+
+
+INTRODUCTION
+
+This document describes the new features introduced in the HDF5 1.12.0 release. 
+It contains information on the platforms tested and known problems in this 
+release. For more details check the HISTORY*.txt files in the HDF5 source.
+
+Note that documentation in the links below will be updated at the time of the
+release.
+
+Links to HDF5 documentation can be found on The HDF5 web page:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5
+
+The official HDF5 releases can be obtained from:
+
+     https://www.hdfgroup.org/downloads/hdf5/
+
+More information about the new features can be found at:
+
+     https://portal.hdfgroup.org/display/HDF5/New+Features+in+HDF5+Release+1.12
+
+If you have any questions or comments, please send them to the HDF Help Desk:
+
+     help@hdfgroup.org
+
+
+CONTENTS
+
+- New Features
+- Support for new platforms and languages
+- Major Bug Fixes since HDF5-1.10.0
+- Supported Platforms
+- Tested Configuration Features Summary
+- More Tested Platforms
+- Known Problems
+- CMake vs. Autotools installations
+
+
+New Features
+============
+
+    Configuration:
+    -------------
+    - Update CMake for VS2019 support
+
+      CMake added support for VS2019 in version 3.15. Changes to the CMake
+      generator setting required changes to scripts. Also updated version
+      references in CMake files as necessary.
+
+      (ADB - 2019/11/18, HDFFV-10962)
+
+
+    Library:
+    --------
+    - Virtual Object Layer (VOL)
+
+      In this major HDF5 release we introduce HDF5 Virtual Object Layer (VOL). 
+      VOL is an abstraction layer within the HDF5 library that enables different 
+      methods for accessing data and objects that conform to the HDF5 data model. 
+      The VOL layer intercepts all HDF5 API calls that potentially modify data 
+      on disk and forwards those calls to a plugin "object driver". The data on 
+      disk can be a different format than the HDF5 format. For more information 
+      about VOL we refer the reader to the following documents (under review):
+
+          VOL HDF5 APIs
+          https://portal.hdfgroup.org/display/HDF5/Virtual+Object++Layer
+
+          VOL Documentation
+          https://bitbucket.hdfgroup.org/projects/HDFFV/repos/hdf5doc/browse/RFCs/HDF5/VOL
+
+          Repository with VOL plugins
+          https://bitbucket.hdfgroup.org/projects/HDF5VOL
+
+    - Enhancements to HDF5 References
+        
+      HDF5 references were extended to support attributes, and object and dataset 
+      selections that reside in another HDF5 file. For more information including 
+      a list of new APIs, see 
+      
+          https://portal.hdfgroup.org/display/HDF5/Update+to+References
+
+      Current known limitations for references in this release: 
+      • HDF5 command-line tools have not been updated to read new references types.
+      • When reading data with the H5T_STD_REF type, if data is filled with 0s, 
+        H5A/Dread() currently returns an error. This will be fixed in an upcoming 
+        release.
+      • h5dump will fail to display references on big-endian machines.
+
+    - Add new public function H5Sselect_project_intersection.
+
+      This function computes the intersection between two dataspace selections
+      and projects that intersection into a third selection.  This can be useful
+      for VOL developers to implement chunked or virtual datasets.
+
+      (NAF - 2019/11/13, ID-148)
+
+    - Add new public function H5VLget_file_type.
+
+      This function returns a datatype equivalent to the supplied datatype but
+      with the location set to be in the file.  This datatype can then be used
+      with H5Tconvert to convert data between file and in-memory representation.
+      This funcition is intended for use only by VOL connector developers.
+
+      (NAF - 2019/11/08, ID-127)
+
+    - New S3 and HDFS Virtual File Drivers (VFDs)
+
+      This release has two new VFDs. The S3 VFD allows accessing HDF5 files on 
+      AWS S3 buckets. HDFS VFD allows accessing HDF5 files stored on Apache HDFS. 
+      See https://portal.hdfgroup.org/display/HDF5/Virtual+File+Drivers+-+S3+and+HDFS
+      for information on enabling those drivers and using those APIs. 
+      
+      Below are specific instructions for enabling S3 VFD on Windows:
+
+      Fix windows requirements and java tests. Windows requires CMake 3.13.
+          - Install openssl library (with dev files);
+                from "Shining Light Productions". msi package preferred.
+          - PATH should have been updated with the installation dir.
+          - set ENV variable OPENSSL_ROOT_DIR to the installation dir.
+          - set ENV variable OPENSSL_CONF to the cfg file, likely %OPENSSL_ROOT_DIR%\bin\openssl.cfg
+          - Install libcurl library (with dev files);
+          - download the latest released version using git: https://github.com/curl/curl.git
+          - Open a Visual Studio Command prompt
+          - change to the libcurl root folder
+          - run the "buildconf.bat" batch file
+          - change to the winbuild directory
+          - nmake /f Makefile.vc mode=dll MACHINE=x64
+          - copy libcurl-vc-x64-release-dll-ipv6-sspi-winssl dir to C:\curl (installation dir)
+          - set ENV variable CURL_ROOT to C:\curl (installation dir)
+          - update PATH ENV variable to %CURL_ROOT%\bin (installation bin dir).
+          - the aws credentials file should be in %USERPROFILE%\.aws folder
+          - set the ENV variable HDF5_ROS3_TEST_BUCKET_URL to the s3 url for the 
+                s3 bucket containing the HDF5 files to be accessed.
+
+    Other improvements and changes:
+
+    - Hyperslab selection code was reworked to improve performance, getting more 
+      than 10x speedup in some cases. 
+     
+    - The HDF5 Library was enhanced to open files with Unicode names on Windows.
+
+    - Deprecated H5Dvlen_reclaim() and replaced it with H5Treclaim().
+      This routine is meant to be used when resources are internally allocated
+      when reading data, i.e. when using either vlen or new reference types.
+      This is applicable to both attribute and dataset reads.
+
+    - h5repack was fixed to repack datasets with external storage
+      to other types of storage.
+
+
+Support for new platforms, languages and compilers.
+=======================================
+    - Added spectrum-mpi with clang, gcc and xl compilers on Linux 3.10.0
+    - Added OpenMPI 3.1 and 4.0 with clang, gcc and Intel compilers on Linux 3.10.0
+    - Added cray-mpich/PrgEnv with gcc and Intel compilers on Linux 4.14.180
+    - Added spectrum mpi with clang, gcc and xl compilers on Linux 4.14.0
+    
+
+Major Bug Fixes since HDF5-1.10.0 release
+==================================
+
+    - For major bug fixes please see HISTORY-1_10_0-1_12_0.txt file
+
+
+Supported Platforms
+===================
+
+    Linux 2.6.32-696.16.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+                                  IBM XL C/C++ V13.1
+                                  IBM XL Fortran V15.1
+
+    Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (kituo/moohan)                Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+                                    Version 4.9.3, 5.2.0, 7.1.0 
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 17.0.0.098 Build 20160721
+                                  MPICH 3.1.4 
+
+    Linux-3.10.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
+    862.14.4.1chaos.ch6.ppc64le   clang/3.9,8.0
+    #1 SMP ppc64le GNU/Linux      gcc/7.3
+    (ray)                         xl/2016,2019
+
+    Linux 3.10.0-                 openmpi/3.1,4.0 with cmake>3.10 and
+    957.12.2.1chaos.ch6.x86_64    clang 5.0
+    #1 SMP x86_64 GNU/Linux       gcc/7.3,8.2
+    (serrano)                     intel/17.0,18.0/19.0
+
+    Linux 3.10.0-                 openmpi/3.1/4.0 with cmake>3.10 and
+    1062.1.1.1chaos.ch6.x86_64    clang/3.9,5.0,8.0
+    #1 SMP x86_64 GNU/Linux       gcc/7.3,8.1,8.2
+    (chama,quartz)                intel/16.0,18.0,19.0
+
+    Linux 4.4.180-94.100-default  cray-mpich/7.7.6 with PrgEnv-*/6.0.5, cmake>3.10 and
+    #1 SMP x86_64 GNU/Linux       gcc/7.2.0,8.2.0
+    (mutrino)                     intel/17.0,18.0
+ 
+    Linux 4.14.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
+    49.18.1.bl6.ppc64le           clang/6.0,8.0
+    #1 SMP ppc64le GNU/Linux      gcc/7.3
+    (lassen)                      xl/2019
+
+    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
+    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
+                                  Sun C++ 5.12 SunOS_sparc
+
+    Windows 7                     Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+
+    Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
+
+    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+
+    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2017 w/ Intel Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+
+    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
+    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
+    (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
+
+    Mac OS X El Capitan 10.11.6   Apple clang/clang++ version 7.3.0 from Xcode 7.3
+    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
+
+    Mac OS High Sierra 10.13.6    Apple LLVM version 10.0.0 (clang/clang++-1000.10.44.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                        Intel icc/icpc/ifort version 19.0.4
+
+    Mac OS Mojave 10.14.6         Apple LLVM version 10.0.1 (clang/clang++-1001.0.46.4)
+    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+    (bobcat)                      Intel icc/icpc/ifort version 19.0.4
+
+
+Tested Configuration Features Summary
+=====================================
+
+    In the tables below
+          y   = tested
+          n   = not tested in this release
+          C   = Cluster
+          W   = Workstation
+          x   = not working in this release
+          dna = does not apply
+          ( ) = footnote appears below second table
+          <blank> = testing incomplete on this feature or platform
+
+Platform                              C         F90/   F90      C++  zlib  SZIP
+                                      parallel  F2003  parallel
+Solaris2.11 32-bit                      n        y/y    n        y    y     y
+Solaris2.11 64-bit                      n        y/n    n        y    y     y
+Windows 7                               y        y/y    n        y    y     y
+Windows 7 x64                           y        y/y    y        y    y     y
+Windows 7 Cygwin                        n        y/n    n        y    y     y
+Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
+Windows 10                              y        y/y    n        y    y     y
+Windows 10 x64                          y        y/y    n        y    y     y
+Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
+Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     ?
+Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     ?
+Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     ?
+CentOS 6.7 Linux 2.6.18 x86_64 GNU      n        y/y    n        y    y     y
+CentOS 6.7 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
+CentOS 6.7 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
+CentOS 7.2 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 7.2 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
+Linux 2.6.32-573.18.1.el6.ppc64         n        y/n    n        y    y     y
+
+
+Platform                                 Shared  Shared    Shared    Thread-
+                                         C libs  F90 libs  C++ libs  safe
+Solaris2.11 32-bit                         y       y         y         y
+Solaris2.11 64-bit                         y       y         y         y
+Windows 7                                  y       y         y         y
+Windows 7 x64                              y       y         y         y
+Windows 7 Cygwin                           n       n         n         y
+Windows 7 x64 Cygwin                       n       n         n         y
+Windows 10                                 y       y         y         y
+Windows 10 x64                             y       y         y         y
+Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y
+Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
+Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
+Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
+CentOS 6.7 Linux 2.6.18 x86_64 GNU         y       y         y         y
+CentOS 6.7 Linux 2.6.18 x86_64 Intel       y       y         y         n
+CentOS 6.7 Linux 2.6.32 x86_64 PGI         y       y         y         n
+CentOS 7.2 Linux 2.6.32 x86_64 GNU         y       y         y         n
+CentOS 7.2 Linux 2.6.32 x86_64 Intel       y       y         y         n
+Linux 2.6.32-573.18.1.el6.ppc64            y       y         y         n
+
+Compiler versions for each platform are listed in the preceding
+"Supported Platforms" table.
+
+
+More Tested Platforms
+=====================
+The following platforms are not supported but have been tested for this release.
+
+    Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (mayll/platypus)                 Version 4.4.7 20120313
+                                     Version 4.9.3, 5.3.0, 6.2.0
+                                  PGI C, Fortran, C++ for 64-bit target on
+                                  x86-64;
+                                      Version 17.10-0
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 17.0.4.196 Build 20170411
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
+
+    Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
+    #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+    (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
+                                  GCC Version 7.1.0
+                                  OpenMPI 3.0.0-GCC-7.2.0-2.29
+                                  Intel(R) C (icc) and C++ (icpc) compilers
+                                     Version 17.0.0.098 Build 20160721
+                                  with NAG Fortran Compiler Release 6.1(Tozai)
+                                  PGI C (pgcc), C++ (pgc++), Fortran (pgf90)
+                                  compilers:
+                                     Version 18.4, 19.4
+                                  MPICH 3.3
+                                  OpenMPI 2.1.5, 3.1.3, 4.0.0 
+
+   Fedora30 5.3.11-200.fc30.x86_64
+   #1 SMP x86_64  GNU/Linux       GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+                                  GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+                                     (cmake and autotools)
+
+
+Known Problems
+==============
+    CMake files do not behave correctly with paths containing spaces.
+    Do not use spaces in paths because the required escaping for handling spaces
+    results in very complex and fragile build files.
+    ADB - 2019/05/07
+
+    At present, metadata cache images may not be generated by parallel
+    applications.  Parallel applications can read files with metadata cache
+    images, but since this is a collective operation, a deadlock is possible
+    if one or more processes do not participate.
+
+    Known problems in previous releases can be found in the HISTORY*.txt files
+    in the HDF5 source. Please report any new problems found to
+    help@hdfgroup.org.
+
+
+CMake vs. Autotools installations
+=================================
+While both build systems produce similar results, there are differences.
+Each system produces the same set of folders on linux (only CMake works
+on standard Windows); bin, include, lib and share. Autotools places the
+COPYING and RELEASE.txt file in the root folder, CMake places them in
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+creates dynamic versions of the tools with the suffix "-shared". Autotools
+installs one set of tools depending on the "--enable-shared" configuration
+option.
+  build scripts
+  -------------
+  Autotools: h5c++, h5cc, h5fc
+  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+
+The include folder holds the header files and the fortran mod files. CMake
+places the fortran mod files into separate shared and static subfolders,
+while Autotools places one set of mod files into the include folder. Because
+CMake produces a tools library, the header files for tools will appear in
+the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig
+subfolder with the hdf5*.pc files used by the bin/build scripts created by
+the CMake build. CMake separates the C interface code from the fortran code by
+creating C-stub libraries for each Fortran library. In addition, only CMake
+installs the tools library. The names of the szip libraries are different
+between the build systems.
+
+The share folder will have the most differences because CMake builds include
+a number of CMake specific files for support of CMake's find_package and support
+for the HDF5 Examples CMake project.
+

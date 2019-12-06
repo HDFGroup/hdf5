@@ -86,7 +86,7 @@ static herr_t H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size,
 static herr_t H5S__release_datatype(H5S_mpio_mpitype_list_t *type_list);
 static herr_t H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down,
     size_t elmt_size, const MPI_Datatype *elmt_type, MPI_Datatype *span_type,
-    H5S_mpio_mpitype_list_t *type_list, uint64_t op_gen);
+    H5S_mpio_mpitype_list_t *type_list, unsigned op_info_i, uint64_t op_gen);
 
 
 /*****************************/
