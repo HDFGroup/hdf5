@@ -416,6 +416,7 @@ struct H5D_shared_t {
     hbool_t             space_dirty;    /* Whether the dataspace info needs to be flushed to the file */
     hbool_t             layout_dirty;   /* Whether the layout info needs to be flushed to the file */
     hid_t               dcpl_id;        /* Dataset creation property id */
+    hid_t               dapl_id;        /* Dataset access property id */
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5O_layout_t        layout;         /* Data layout                  */
     hbool_t             checked_filters;/* TRUE if dataset passes can_apply check */
