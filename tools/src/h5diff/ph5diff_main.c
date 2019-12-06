@@ -176,6 +176,7 @@ ph5diff_worker(int nID)
 
             /* Recv parameters for diff from manager task */
             MPI_Recv(&args, sizeof(args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
+	    HDprintf("[%d] Recv complete: diff'ing object - %s\n", nID, args.name1);
 
             /* Do the diff */
             diffs.nfound = diff(file1_id, args.name1, file2_id, args.name2, &(args.opts), &(args.argdata));
