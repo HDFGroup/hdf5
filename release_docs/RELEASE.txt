@@ -348,6 +348,15 @@ New Features
 
     Tools:
     ------
+    - h5dump and h5ls were updated to use the new reference APIs.
+
+      The tools library now use the new reference APIs to inspect a
+      file. Also the DDL spec was updated to reflect the format
+      changes produced with the new APIs. The export API and support
+      functions in the JNI were updated to match.
+
+      (ADB - 2019/12/06, HDFFV-10876 and HDFFV-10877)
+
     - h5repack was fixed to repack datasets with external storage
       to other types of storage.
 
