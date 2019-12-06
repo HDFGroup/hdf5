@@ -1639,6 +1639,12 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
     HDassert(cls1);
     HDassert(cls2);
 
+    /* If the pointers are the same the classes are the same */
+    if(cls1 == cls2) {
+        *cmp_value = 0;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
+
     /* Compare connector "values" */
     if(cls1->value < cls2->value) {
         *cmp_value = -1;
