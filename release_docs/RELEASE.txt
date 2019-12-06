@@ -199,6 +199,15 @@ New Features
 
     Library:
     --------
+    - Add new public function H5VLget_file_type.
+
+      This function returns a datatype equivalent to the supplied datatype but
+      with the location set to be in the file.  This datatype can then be used
+      with H5Tconvert to convert data between file and in-memory representation.
+      This funcition is intended for use only by VOL connector developers.
+
+      (NAF - 2019/11/08, ID-127)
+
     - Add S3 and HDFS VFDs to HDF5 maintenance
 
       Fix windows requirements and java tests. Windows requires CMake 3.13.
