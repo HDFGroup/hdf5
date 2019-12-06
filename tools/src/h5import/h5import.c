@@ -4714,10 +4714,7 @@ uint16_t swap_uint16(uint16_t val)
 
 int16_t swap_int16(int16_t val)
 {
-    int16_t ret;
-
-    H5_CHECKED_ASSIGN(ret, int16_t, ((val & 0xff) << 8) | ((val & 0xff00) >> 8), int);
-    return ret;
+    return (uint16_t)(((val & 0xff) << 8) | ((val & 0xff00) >> 8));
 }
 
 uint32_t swap_uint32(uint32_t val)
