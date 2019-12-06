@@ -90,6 +90,15 @@ New Features
         release.
       • h5dump will fail to display references on big-endian machines.
 
+    - Add new public function H5VLget_file_type.
+
+      This function returns a datatype equivalent to the supplied datatype but
+      with the location set to be in the file.  This datatype can then be used
+      with H5Tconvert to convert data between file and in-memory representation.
+      This funcition is intended for use only by VOL connector developers.
+
+      (NAF - 2019/11/08, ID-127)
+
     - New S3 and HDFS Virtual File Drivers (VFDs)
 
       This release has two new VFDs. The S3 VFD allows accessing HDF5 files on 

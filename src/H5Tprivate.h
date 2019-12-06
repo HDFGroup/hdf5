@@ -138,12 +138,13 @@ H5_DLL herr_t H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned ndim, const h
 H5_DLL herr_t H5T_ref_reclaim(void *elem, const H5T_t *dt);
 H5_DLL herr_t H5T_vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info);
 H5_DLL herr_t H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt);
-H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);
+H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
 H5_DLL uint32_t H5T_hash(H5F_t * file, const H5T_t *dt);
 H5_DLL herr_t H5T_set_version(H5F_t *f, H5T_t *dt);
 H5_DLL herr_t H5T_patch_file(H5T_t *dt, H5F_t *f);
-H5_DLL herr_t H5T_patch_vlen_file(H5T_t *dt, H5F_t *f);
+H5_DLL herr_t H5T_patch_vlen_file(H5T_t *dt, H5VL_object_t *file);
+H5_DLL herr_t H5T_own_vol_obj(H5T_t *dt, H5VL_object_t *vol_obj);
 H5_DLL htri_t H5T_is_variable_str(const H5T_t *dt);
 H5_DLL H5T_t *H5T_construct_datatype(H5VL_object_t *dt_obj);
 H5_DLL H5VL_object_t *H5T_get_named_type(const H5T_t *dt);
