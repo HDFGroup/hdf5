@@ -480,10 +480,10 @@ typedef struct h5tool_format_t {
     /*used to skip the first set of checks for line length*/
     int skip_first;
 
-    /*flag used to hide or show the file number for obj refs*/
+    /*flag used to hide or show the file number for object refs*/
     int obj_hidefileno;
 
-    /*string used to format the output for the obje refs*/
+    /*string used to format the output for the object refs*/
     const char *obj_format;
 
     /*flag used to hide or show the file number for dataset regions*/
