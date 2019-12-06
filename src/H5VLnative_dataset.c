@@ -241,7 +241,7 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type,
                 break;
             }
 
-        /* H5Dget_space_statuc */
+        /* H5Dget_space_status */
         case H5VL_DATASET_GET_SPACE_STATUS:
             {
                 H5D_space_status_t *allocation = HDva_arg(arguments, H5D_space_status_t *);

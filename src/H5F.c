@@ -937,7 +937,7 @@ hid_t
 H5Freopen(hid_t file_id)
 {
     H5VL_object_t   *vol_obj = NULL;
-    H5F_t           *file = NULL;                   /* File struct for new file */
+    void            *file = NULL;                   /* File struct for new file */
     hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
