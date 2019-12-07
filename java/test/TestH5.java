@@ -409,6 +409,6 @@ public class TestH5 {
             for(int col = 0; col < DIM_Y; col++) {
                 assertTrue("H5export_dataset: <"+row+","+col+">"+dset_indata[row][col]+"=99", dset_indata[row][col]==99);
             }
-//        _deleteH5file();
+        _deleteH5file();
     }
 }
