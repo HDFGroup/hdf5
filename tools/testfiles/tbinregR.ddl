@@ -16,8 +16,8 @@ DATASET "/Dataset1" {
             }
          }
          DATASET "tdatareg.h5/Dataset2" {
-            REGION_TYPE POINT  (6,9), (2,2), (8,4), (1,6), (2,8), (3,2), (0,4),
-             (9,0), (7,1), (3,3)
+            REGION_TYPE POINT  (6,9), (2,2), (8,4), (1,6), (2,8), (3,2),
+             (0,4), (9,0), (7,1), (3,3)
             DATATYPE  H5T_STD_U8BE
             DATASPACE  SIMPLE { ( 10, 10 ) / ( 10, 10 ) }
             DATA {
