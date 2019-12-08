@@ -297,6 +297,7 @@ public class TestH5R {
             fail("testH5Rget_object: H5Rget_obj_name: " + err);
         }
         assertTrue("The name of the object: ", objName.equals(name));
+        H5.H5Rdestroy(ref);
     }
 
     @Test
@@ -321,6 +322,7 @@ public class TestH5R {
             fail("testH5Rget_obj_type3: H5.H5Rget_obj_type3: " + err);
         }
         assertEquals(obj_type, HDF5Constants.H5O_TYPE_DATASET);
+        H5.H5Rdestroy(ref);
     }
 
     @Test
@@ -348,6 +350,7 @@ public class TestH5R {
             fail("testH5Rget_object: H5Rcreate_region " + err);
         }
         assertNotNull(ref);
+        H5.H5Rdestroy(ref);
     }
 
 // These tests need to be updated with new APIs
