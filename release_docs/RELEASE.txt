@@ -84,10 +84,6 @@ New Features
           https://portal.hdfgroup.org/display/HDF5/Update+to+References
 
       Current known limitations for references in this release: 
-      • HDF5 command-line tools have not been updated to read new references types.
-      • When reading data with the H5T_STD_REF type, if data is filled with 0s, 
-        H5A/Dread() currently returns an error. This will be fixed in an upcoming 
-        release.
       • h5dump will fail to display references on big-endian machines.
 
     - Add new public function H5Sselect_adjust.
