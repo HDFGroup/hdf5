@@ -111,7 +111,7 @@ aux_inctable(pack_opttbl_t *table, unsigned n_objs)
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: options_table_init
  *
@@ -144,7 +144,7 @@ int options_table_init(pack_opttbl_t **tbl) {
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: options_table_free
  *
@@ -190,7 +190,7 @@ options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack, pa
                 if (HDstrcmp(obj_list[j].obj,table->objs[i].path) == 0) {
                     /* already chunk info inserted for this one; exit */
                     if (table->objs[i].chunk.rank > 0) {
-                        H5TOOLS_INFO(H5E_tools_min_id_g, "chunk information already inserted for <%s>\n", obj_list[j].obj);
+                        H5TOOLS_INFO(H5E_tools_min_info_id_g, "chunk information already inserted for <%s>\n", obj_list[j].obj);
                         HDexit(EXIT_FAILURE);
                     }
                     /* insert the layout info */

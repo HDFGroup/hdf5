@@ -27,16 +27,28 @@
 #define MAX_PAL 768
 
 /* typedef H5T_NATIVE_UINT8  BYTE; */
+#ifndef BYTE
 typedef unsigned char BYTE;
+#endif
 
 /* typedef H5T_NATIVE_UINT16  WORD; */
+#ifndef WORD
 typedef unsigned long WORD;
+#endif
 
+#ifndef CHAR
 typedef char CHAR;
+#endif
+#ifndef boolean
 typedef unsigned char boolean;
+#endif
 
+#ifndef false
 #define false       0
+#endif
+#ifndef true
 #define true        1
+#endif
 
 /* Set the EndianOrder.
 ** The GIF Reader file should do this.
@@ -128,12 +140,12 @@ typedef struct _GifCommentExtension {
 **           extension.
 */
 typedef struct _GifToMem {
-	GIFHEAD            *GifHeader;
-	GIFIMAGEDESC      **GifImageDesc;
-	GIFGRAPHICCONTROL **GifGraphicControlExtension;
-	GIFPLAINTEXT      **GifPlainTextExtension;
-	GIFAPPLICATION    **GifApplicationExtension;
-	GIFCOMMENT        **GifCommentExtension;
+    GIFHEAD            *GifHeader;
+    GIFIMAGEDESC      **GifImageDesc;
+    GIFGRAPHICCONTROL **GifGraphicControlExtension;
+    GIFPLAINTEXT      **GifPlainTextExtension;
+    GIFAPPLICATION    **GifApplicationExtension;
+    GIFCOMMENT        **GifCommentExtension;
 } GIFTOMEM;
 
 /*
