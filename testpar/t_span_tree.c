@@ -1560,7 +1560,9 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
     size_t        small_ds_size;
     size_t        small_ds_slice_size;
     size_t        large_ds_size;
+#if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     size_t        large_ds_slice_size;
+#endif
     uint32_t      expected_value;
     uint32_t    * small_ds_buf_0 = NULL;
     uint32_t    * small_ds_buf_1 = NULL;
@@ -1614,9 +1616,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
     small_ds_size       = (size_t)((mpi_size + 1) *  1 *  1 * 10 * 10);
     small_ds_slice_size = (size_t)                 ( 1 *  1 * 10 * 10);
     large_ds_size       = (size_t)((mpi_size + 1) * 10 * 10 * 10 * 10);
-    large_ds_slice_size = (size_t)                 (10 * 10 * 10 * 10);
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
+    large_ds_slice_size = (size_t)                 (10 * 10 * 10 * 10);
+
     if ( mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK ) {
         HDfprintf(stdout, "%s:%d: small ds size / slice size = %d / %d.\n",
                   fcnName, mpi_rank,
