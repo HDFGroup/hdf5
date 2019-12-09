@@ -1,6 +1,5 @@
-#!/usr/bin/env perl
+#!/usr/local/bin/perl -w
 require 5.003;
-use warnings;
 use Text::Tabs;
 
 # NOTE: THE FORMAT OF HRETURN_ERROR AND HGOTO_ERROR MACROS HAS

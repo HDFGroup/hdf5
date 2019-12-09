@@ -371,10 +371,10 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
     /* Check if section info lock count dropped to zero */
     if(fspace->sinfo_lock_count == 0) {
         hbool_t release_sinfo_space = FALSE;    /* Flag to indicate section info space in file should be released */
-        hbool_t closing_or_flushing = f->shared->closing;      /* Is closing or flushing in progress */
+        hbool_t flush_in_progress = FALSE;      /* Is flushing in progress */
 
-        /* Check whether cache-flush is in progress if closing is not. */
-        if(!closing_or_flushing && H5AC_get_cache_flush_in_progress(f->shared->cache, &closing_or_flushing) < 0)
+        /* Check whether cache is flush_in_progress */
+        if(H5AC_get_cache_flush_in_progress(f->shared->cache, &flush_in_progress) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get flush_in_progress")
 
         /* Check if we actually protected the section info */
@@ -390,7 +390,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
                 cache_flags |= H5AC__DIRTIED_FLAG;
 
                 /* On file close or flushing, does not allow section info to shrink in size */
-                if(closing_or_flushing) {
+                if(f->shared->closing || flush_in_progress) {
                     if(fspace->sect_size > fspace->alloc_sect_size)
                         cache_flags |= H5AC__DELETED_FLAG | H5AC__TAKE_OWNERSHIP_FLAG;
                     else
@@ -441,7 +441,7 @@ HDfprintf(stderr, "%s: Relinquishing section info ownership\n", FUNC);
                     /* Set flag to release section info space in file */
                     /* On file close or flushing, only need to release section info with size 
                        bigger than previous section */
-                    if(closing_or_flushing) {
+                    if(f->shared->closing || flush_in_progress) {
                         if(fspace->sect_size > fspace->alloc_sect_size)
                             release_sinfo_space = TRUE;
                         else

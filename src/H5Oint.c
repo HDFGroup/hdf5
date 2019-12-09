@@ -31,7 +31,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5CXprivate.h"        /* API contexts                             */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Fprivate.h"         /* File access                              */
 #include "H5FLprivate.h"        /* Free lists                               */
@@ -132,7 +131,6 @@ const unsigned H5O_obj_ver_bounds[] = {
     H5O_VERSION_1,      /* H5F_LIBVER_EARLIEST */
     H5O_VERSION_2,      /* H5F_LIBVER_V18 */
     H5O_VERSION_2,      /* H5F_LIBVER_V110 */
-    H5O_VERSION_2,      /* H5F_LIBVER_V112 */
     H5O_VERSION_LATEST  /* H5F_LIBVER_LATEST */
 };
 

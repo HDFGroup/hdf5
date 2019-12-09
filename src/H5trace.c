@@ -1059,11 +1059,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
 
                                 case H5F_LIBVER_V112:
-                                    HDfprintf(out, "H5F_LIBVER_V112");
-                                    break;
-
-                                case H5F_LIBVER_V114:
-                                    HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V114);
+                                    HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V112);
                                     HDfprintf(out, "H5F_LIBVER_LATEST");
                                     break;
 

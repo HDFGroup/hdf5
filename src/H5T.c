@@ -533,7 +533,6 @@ const unsigned H5O_dtype_ver_bounds[] = {
     H5O_DTYPE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
     H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V18 */
     H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V110 */
-    H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V112 */
     H5O_DTYPE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
 };
 
@@ -3321,7 +3320,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
+H5T_copy(H5T_t *old_dt, H5T_copy_t method)
 {
     H5T_t           *new_dt = NULL, *tmp = NULL;
     H5T_shared_t    *reopened_fo = NULL;

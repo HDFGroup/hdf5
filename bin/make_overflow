@@ -1,7 +1,6 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl -w
 require 5.003;
 use strict;
-use warnings;
 
 # Global settings
 

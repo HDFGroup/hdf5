@@ -137,7 +137,7 @@ test_reference_params(void)
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Write selection to disk */
-    ret = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, obuf);
+    ret = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -357,7 +357,7 @@ test_reference_obj(void)
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Write selection to disk */
-    ret = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, obuf);
+    ret = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -470,11 +470,11 @@ test_reference_obj(void)
     VERIFY(ret, SPACE1_DIM1, "H5Sget_simple_extent_npoints");
 
     /* Read from disk */
-    ret = H5Dread(dset2, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf);
+    ret = H5Dread(dset2, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, tbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    for(i = 0; i < SPACE1_DIM1; i++)
-        VERIFY(ibuf[i], i * 3, "Data");
+    for(tu32 = (unsigned *)tbuf, i = 0; i < SPACE1_DIM1; i++, tu32++)
+        VERIFY(*tu32, (uint32_t)(i*3), "Data");
 
     /* Close dereferenced Dataset */
     ret = H5Dclose(dset2);
@@ -530,8 +530,7 @@ test_reference_obj(void)
     /* Free memory buffers */
     HDfree(wbuf);
     HDfree(rbuf);
-    HDfree(ibuf);
-    HDfree(obuf);
+    HDfree(tbuf);
 }   /* test_reference_obj() */
 
 /****************************************************************
@@ -1735,7 +1734,6 @@ test_reference_attr(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Open attribute on dataset object */
-
     attr = H5Ropen_attr((const H5R_ref_t *)&ref_rbuf[0], H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, H5I_INVALID_HID, "H5Ropen_attr");
 
@@ -2271,9 +2269,9 @@ test_reference_compat_conv(void)
     ret = H5Sclose(sid3);
     CHECK(ret, FAIL, "H5Sclose");
 
-    /* Open attribute on group object */
-    attr = H5Ropen_attr(&ref_rbuf[2], H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(attr, H5I_INVALID_HID, "H5Ropen_attr");
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open the file */
     fid1 = H5Fopen(FILE_REF_COMPAT, H5F_ACC_RDWR, H5P_DEFAULT);

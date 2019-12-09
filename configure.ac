@@ -103,11 +103,7 @@ AC_SUBST([AR_FLAGS])
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
-##
-## H5_ECFLAGS is for warnings that should be treated as errors.
-##
 AC_SUBST([H5_CFLAGS])
-AC_SUBST([H5_ECFLAGS])
 AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
 AC_SUBST([H5_CXXFLAGS])
@@ -235,9 +231,6 @@ case $host_os in
     ;;
   freebsd*)
     host_os_novers=freebsd
-    ;;
-  netbsd*)
-    host_os_novers=netbsd
     ;;
   solaris*)
     host_os_novers=solaris
@@ -2971,28 +2964,6 @@ fi
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Use custom examples path.
-##
-AC_MSG_CHECKING([for custom examples path definition])
-AC_ARG_WITH([examplesdir],
-            [AS_HELP_STRING([--with-examplesdir=location],
-                            [Specify path for examples
-                            [default="DATAROOTDIR/hdf5_examples"]])],,
-            withval="${datarootdir}/hdf5_examples")
-
-if test "X$withval" = "X"; then
-    AC_MSG_RESULT([default])
-    examplesdir="${datarootdir}/hdf5_examples"
-else
-    AC_MSG_RESULT([$withval])
-    examplesdir=$withval
-fi
-
-AC_SUBST([examplesdir])
-AC_DEFINE_UNQUOTED([EXAMPLESDIR], ["$examplesdir"],
-            [Define the examples directory])
-
-## ----------------------------------------------------------------------
 ## Enable custom plugin default path for library.  It requires SHARED support.
 ##
 AC_MSG_CHECKING([for custom plugin default path definition])
@@ -3419,10 +3390,10 @@ esac
 AC_SUBST([DEFAULT_API_VERSION])
 AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
-            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110|v112|v114)],
+            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110|v112)],
                             [Specify default release version of public symbols
-                             [default=v114]])],,
-            [withval=v114])
+                             [default=v112]])],,
+            [withval=v112])
 
 if test "X$withval" = "Xv16"; then
     AC_MSG_RESULT([v16])
@@ -3444,11 +3415,6 @@ elif test "X$withval" = "Xv112"; then
     DEFAULT_API_VERSION=v112
     AC_DEFINE([USE_112_API_DEFAULT], [1],
               [Define using v1.12 public API symbols by default])
-elif test "X$withval" = "Xv114"; then
-    AC_MSG_RESULT([v114])
-    DEFAULT_API_VERSION=v114
-    AC_DEFINE([USE_114_API_DEFAULT], [1],
-              [Define using v1.14 public API symbols by default])
 else
     AC_MSG_ERROR([invalid version of public symbols given])
 fi
@@ -3458,7 +3424,7 @@ fi
 ## if the user insists on doing this via the --enable-unsupported configure
 ## flag, we'll let them.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${DEFAULT_API_VERSION}" != "Xv114" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
+  if test "X${DEFAULT_API_VERSION}" != "Xv112" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
     AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols. Use --enable-unsupported to override this error.])
   fi
 fi

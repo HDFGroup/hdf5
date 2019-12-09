@@ -1434,10 +1434,6 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
       char  ** buf;            /* discarding the 'const' qualifier in the free */
       char const ** const_buf; /* buf calls */
     } u;
-
-    u.buf = NULL;
-    u.const_buf = NULL;
-
     /*-------------------------------------------------------------------------
     * parameter checking
     *-------------------------------------------------------------------------
