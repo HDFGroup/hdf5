@@ -123,12 +123,12 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "invalid location identifier")
 
     /* Get object token */
-    if(H5R__decode_token_compat(id, vol_obj_type, ref_type, buf, &obj_token) < 0)
+    if(H5R__decode_token_compat(vol_obj, vol_obj_type, ref_type, buf, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, H5G_UNKNOWN, "unable to get object token")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Retrieve object's type */
@@ -183,12 +183,12 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Get object token */
-    if(H5R__decode_token_compat(obj_id, vol_obj_type, ref_type, buf, &obj_token) < 0)
+    if(H5R__decode_token_compat(vol_obj, vol_obj_type, ref_type, buf, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, H5I_INVALID_HID, "unable to get object token")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Dereference */
@@ -262,11 +262,11 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
     loc_params.obj_type = vol_obj_type;
 
     /* Get the object token */
-    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_token) < 0)
+    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to retrieve object token")
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(loc_id, vol_obj_type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, vol_obj_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Retrieve VOL object */
@@ -352,12 +352,12 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get object token */
-    if(H5R__decode_token_compat(id, vol_obj_type, ref_type, buf, &obj_token) < 0)
+    if(H5R__decode_token_compat(vol_obj, vol_obj_type, ref_type, buf, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object token")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Retrieve object's type */
@@ -416,12 +416,12 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Get object token */
-    if(H5R__decode_token_compat(obj_id, vol_obj_type, ref_type, buf, &obj_token) < 0)
+    if(H5R__decode_token_compat(vol_obj, vol_obj_type, ref_type, buf, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, H5I_INVALID_HID, "unable to get object token")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Open object by token */
@@ -480,7 +480,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(id, vol_obj_type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, vol_obj_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file or file object")
 
     /* Retrieve VOL object */
@@ -549,12 +549,12 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
     /* Get object token */
-    if(H5R__decode_token_compat(id, vol_obj_type, ref_type, buf, &obj_token) < 0)
+    if(H5R__decode_token_compat(vol_obj, vol_obj_type, ref_type, buf, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, (-1), "unable to get object token")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Retrieve object's name */
