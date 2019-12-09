@@ -594,7 +594,7 @@ test_file_end_tick(void)
         FAIL_STACK_ERROR
 
     /* Set file space strategy */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
         FAIL_STACK_ERROR;
 
     /* Create the file with VFD SWMR configured */
@@ -725,7 +725,7 @@ test_writer_create_open_flush(void)
         FAIL_STACK_ERROR
 
     /* Set file space strategy */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
         FAIL_STACK_ERROR;
 
     /* Create an HDF5 file with VFD SWMR configured */
@@ -862,7 +862,7 @@ test_writer_md(void)
         FAIL_STACK_ERROR
 
     /* Set file space strategy */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
         FAIL_STACK_ERROR;
     if(H5Pset_file_space_page_size(fcpl, FS_PAGE_SIZE) < 0)
         FAIL_STACK_ERROR;
@@ -1145,8 +1145,7 @@ test_reader_md_concur(void)
         FAIL_STACK_ERROR
 
     /* Set file space strategy */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 
-                                  FALSE, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, FS_PAGE_SIZE) < 0)
@@ -1815,7 +1814,7 @@ test_multiple_file_opens(void)
             FAIL_STACK_ERROR
 
     /* Set file space strategy */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
         FAIL_STACK_ERROR;
 
     /* Enable page buffering */
@@ -1978,8 +1977,7 @@ test_multiple_concur_file_opens(void)
         FAIL_STACK_ERROR
 
     /* Set file space strategy */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 
-                                  FALSE, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, FS_PAGE_SIZE) < 0)
@@ -2356,7 +2354,7 @@ test_same_file_opens(void)
             FAIL_STACK_ERROR
 
     /* Set file space strategy */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
         FAIL_STACK_ERROR;
 
     /* 

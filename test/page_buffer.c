@@ -540,7 +540,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     /* Test setting a page buffer with a size smaller than a single 
      * page size - should fail 
      */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         TEST_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, 512) < 0)
@@ -571,7 +571,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Test setting a page buffer with a size equal to a single page size */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         TEST_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, 512) < 0)
@@ -590,7 +590,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     /* Test setting a page buffer with a size slightly larger than a 
      * single page size 
      */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         TEST_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, 512) < 0)
@@ -610,7 +610,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
 
 
     /* Test setting a large page buffer size and page size */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         TEST_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, 4194304) < 0)
@@ -630,7 +630,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
 
 
     /* Test setting a 512 byte page buffer size and page size */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         TEST_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, 512) < 0)
@@ -1486,8 +1486,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 
-                                  (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, sizeof(int)*200) < 0)
@@ -1766,7 +1765,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, sizeof(int)*200) < 0)
@@ -2493,8 +2492,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         TEST_ERROR;
 
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 
-                                  (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         TEST_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, sizeof(int)*200) < 0)
@@ -2866,7 +2864,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, 4096) < 0)
@@ -2889,7 +2887,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pset_file_space_page_size(fcpl, 4096) < 0)
