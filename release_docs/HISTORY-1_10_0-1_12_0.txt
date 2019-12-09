@@ -380,6 +380,12 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Fixed user-created data access properties not existing in the property list
+      returned by H5Dget_access_plist. Thanks to Steven Varga for submitting a
+      reproducer and a patch.
+
+      (CJH - 2019/12/9, HDFFV-10934)
+
     - Fixed the iteration error in test_versionbounds() in test/dtypes.c
 
       The test was supposed to loop through all valid combinations of
