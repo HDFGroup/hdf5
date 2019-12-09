@@ -1,4 +1,4 @@
-HDF5 version 1.10.6-snap4 currently under development
+HDF5 version 1.10.6-pre1 currently under development
 ================================================================================
 
 
@@ -152,10 +152,6 @@ New Features
 
       (ADB - 2019/09/12, HDFFV-10854)
 
-     Parallel Library:
-    -----------------
-    -
-
     C++ Library:
     ------------
     - Added new wrappers for H5Pset/get_create_intermediate_group()
@@ -172,35 +168,53 @@ New Features
       (JTH - 2019/04/30)
 
 
-    Tools:
-    ------
-    -
-
-    High-Level APIs:
-    ---------------
-    -
-
-    C Packet Table API
-    ------------------
-    -
-
-    Internal header file
-    --------------------
-    -
-
-    Documentation
-    -------------
-    -
-
 Support for new platforms, languages and compilers.
 =======================================
-    -
+    - CMake added support for VS2019 in version 3.15. Updated scripts.
+
+    - macOS 10.13.6 Darwin 17.7.0 with Apple clang LLVM version 10.0.0
+
+    - macOS 10.14.6 Darwin 18.7.0 with Apple clang LLVM version 10.0.1
+
 
 Bug Fixes since HDF5-1.10.5 release
 ==================================
 
     Library
     -------
+    - Inappropriate linking with deprecated MPI C++ libraries
+
+      HDF5 does not define *_SKIP_MPICXX in the public headers, so applications
+      can inadvertently wind up linking to the deprecated MPI C++ wrappers.
+
+      MPICH_SKIP_MPICXX and OMPI_SKIP_MPICXX have both been defined in H5public.h
+      so this should no longer be an issue. HDF5 makes no use of the deprecated
+      MPI C++ wrappers.
+
+      (DER - 2019/09/17, HDFFV-10893)
+
+    - fcntl(2)-based file locking incorrectly passed the lock argument struct
+      instead of a pointer to the struct, causing errors on systems where
+      flock(2) is not available.
+
+      File locking is used when files are opened to enforce SWMR semantics. A
+      lock operation takes place on all file opens unless the
+      HDF5_USE_FILE_LOCKING environment variable is set to the string "FALSE".
+      flock(2) is preferentially used, with fcntl(2) locks as a backup if
+      flock(2) is unavailable on a system (if neither is available, the lock
+      operation fails). On these systems, the file lock will often fail, which
+      causes HDF5 to not open the file and report an error.
+
+      This bug only affects POSIX systems. Win32 builds on Windows use a no-op
+      locking call which always succeeds. Systems which exhibit this bug will
+      have H5_HAVE_FCNTL defined but not H5_HAVE_FLOCK in the configure output.
+
+      This bug affects HDF5 1.10.0 through 1.10.5.
+
+      fcntl(2)-based file locking now correctly passes the struct pointer.
+
+      (DER - 2019/08/27, HDFFV-10892)
+
     - Fixed a bug caused by bad tag value when condensing object header
       messages
 
@@ -283,43 +297,6 @@ Bug Fixes since HDF5-1.10.5 release
 
       (RL - 2019/3/4, HDFFV-10705)
 
-    - fcntl(2)-based file locking incorrectly passed the lock argument struct
-      instead of a pointer to the struct, causing errors on systems where
-      flock(2) is not available.
-
-      File locking is used when files are opened to enforce SWMR semantics. A
-      lock operation takes place on all file opens unless the
-      HDF5_USE_FILE_LOCKING environment variable is set to the string "FALSE".
-      flock(2) is preferentially used, with fcntl(2) locks as a backup if
-      flock(2) is unavailable on a system (if neither is available, the lock
-      operation fails). On these systems, the file lock will often fail, which
-      causes HDF5 to not open the file and report an error.
-
-      This bug only affects POSIX systems. Win32 builds on Windows use a no-op
-      locking call which always succeeds. Systems which exhibit this bug will
-      have H5_HAVE_FCNTL defined but not H5_HAVE_FLOCK in the configure output.
-
-      This bug affects HDF5 1.10.0 through 1.10.5.
-
-      fcntl(2)-based file locking now correctly passes the struct pointer.
-
-      (DER - 2019/08/27, HDFFV-10892)
-
-    - Inappropriate linking with deprecated MPI C++ libraries
-
-      HDF5 does not define *_SKIP_MPICXX in the public headers, so applications
-      can inadvertently wind up linking to the deprecated MPI C++ wrappers.
-
-      MPICH_SKIP_MPICXX and OMPI_SKIP_MPICXX have both been defined in H5public.h
-      so this should no longer be an issue. HDF5 makes no use of the deprecated
-      MPI C++ wrappers.
-
-      (DER - 2019/09/17, HDFFV-10893)
-
-
-    Java Library:
-    ----------------
-    -
 
     Configuration
     -------------
@@ -330,14 +307,6 @@ Bug Fixes since HDF5-1.10.5 release
       strings; v16, v18, v110.
 
       (ADB - 2019/08/12, HDFFV-10879)
-
-    Performance
-    -------------
-    -
-
-    Fortran
-    --------
-    -
 
     Tools
     -----
@@ -350,43 +319,18 @@ Bug Fixes since HDF5-1.10.5 release
       (ADB - 2019/10/02, HDFFV-10918)
 
 
-    High-Level APIs:
-    ------
-    -
-
-    Fortran High-Level APIs:
-    ------
-    -
-
-    Documentation
-    -------------
-    -
-
-    F90 APIs
-    --------
-    -
-
-    C++ APIs
-    --------
-    -
-
-    Testing
-    -------
-    -
-
-
 Supported Platforms
 ===================
 
-    Linux 2.6.32-696.16.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+    Linux 2.6.32-696.20.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-23)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-23)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-23)
                                   IBM XL C/C++ V13.1
                                   IBM XL Fortran V15.1
 
     Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (kituo/moohan)                Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+    (jelly/kituo/moohan)          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
                                     Version 4.9.3, Version 5.2.0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
@@ -408,17 +352,21 @@ Supported Platforms
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
 
-    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
-    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
-    (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
+    Mac OS X 10.11.6, Darwin,     Apple clang version 7.3.0 from Xcode 7.3
+    15.6.0, x86-64                gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                 Intel icc/icpc/ifort version 16.0.2
 
-    Mac OS X El Capitan 10.11.6   Apple clang/clang++ version 7.3.0 from Xcode 7.3
-    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
-    (osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
+    macOS 10.12.6, Darwin,        Apple clang LLVM version 8.1.0 from Xcode 8.3
+    16.6.0, x86_64                gfortran GNU Fortran (GCC) 7.1.0
+    (kite)                        Intel icc/icpc/ifort version 17.0.2
 
-    Mac OS Sierra 10.12.6         Apple LLVM version 8.1.0 (clang/clang++-802.0.42)
-    64-bit                        gfortran GNU Fortran (GCC) 7.1.0
-    (swallow/kite)                Intel icc/icpc/ifort version 17.0.2
+    macOS 10.13.6, Darwin,        Apple clang LLVM version 10.0.0 
+    17.7.0, x86_64                gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                        Intel icc/icpc/ifort version 19.0.4
+
+    macOS 10.14.6, Darwin         Apple clang LLVM version 10.0.1
+    18.7.0, x86_64                gfortran GNU Fortran (GCC) 6.3.0
+    (bobcat)                      Intel icc/icpc/ifort version 19.0.4
 
 
 Tested Configuration Features Summary
@@ -481,7 +429,7 @@ More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
 
-    Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.32-754.11.1.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (mayll/platypus)                 Version 4.4.7 20120313
                                      Version 4.9.3, 5.3.0, 6.2.0
@@ -495,13 +443,13 @@ The following platforms are not supported but have been tested for this release.
 
     Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
     #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-    (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
+    (jelly)                       with NAG Fortran Compiler Release 6.2(Chiyoda)
                                   GCC Version 7.1.0
                                   OpenMPI 3.0.0-GCC-7.2.0-2.29,
                                      3.1.0-GCC-7.2.0-2.29
                                   Intel(R) C (icc) and C++ (icpc) compilers
                                      Version 17.0.0.098 Build 20160721
-                                  with NAG Fortran Compiler Release 6.1(Tozai)
+                                  with NAG Fortran Compiler Release 6.2(Chiyoda)
 
     Linux 3.10.0-327.10.1.el7     MPICH 3.2 compiled with GCC 5.3.0
     #1 SMP x86_64 GNU/Linux
@@ -511,8 +459,8 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP ppc64 GNU/Linux           IBM XL C/C++ for Linux, V13.1
     (ostrich)                        and IBM XL Fortran for Linux, V15.1
 
-   Fedora30 5.3.11-200.fc30.x86_64
-   #1 SMP x86_64  GNU/Linux       GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+    Fedora30 5.3.11-200.fc30.x86_64
+    #1 SMP x86_64  GNU/Linux      GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
                                   GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
                                      (cmake and autotools)
 
