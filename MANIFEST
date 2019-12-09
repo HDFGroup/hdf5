@@ -1360,6 +1360,7 @@
 ./testpar/t_prestart.c
 ./testpar/t_span_tree.c
 ./testpar/t_init_term.c
+./testpar/t_2Gio.c
 ./testpar/testpar.h
 ./testpar/testpflush.sh.in
 ./testpar/testphdf5.c
@@ -2666,8 +2667,8 @@
 ./tools/test/h5repack/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl
 ./tools/test/h5repack/testfiles/4_vds.h5-vds_conti-v.ddl
 ./tools/test/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
-./tools/test/h5repack/testfiles/attrregion.tattrreg.h5
-./tools/test/h5repack/testfiles/dataregion.tdatareg.h5
+./tools/test/h5repack/testfiles/attrregion.tattrreg.h5.ddl
+./tools/test/h5repack/testfiles/dataregion.tdatareg.h5.ddl
 
 # jam utility and tests
 ./tools/src/h5jam/Makefile.am
