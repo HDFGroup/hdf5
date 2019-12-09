@@ -148,7 +148,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
 
     if(vfd_swmr_write) {
         /* Set file space strategy to paged aggregation in fcpl */
-        if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1024 * 1024 * 1024) < 0)
+        if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
             return -1;
 
          /* Enable page buffering in fapl */

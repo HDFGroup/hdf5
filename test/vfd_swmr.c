@@ -286,7 +286,7 @@ test_file_fapl(void)
             FAIL_STACK_ERROR
 
     /* Set file space strategy */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1024 * 1024 * 1024) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
         FAIL_STACK_ERROR;
 
     /* Should fail to create: no page buffering */
