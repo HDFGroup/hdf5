@@ -258,7 +258,7 @@ H5R__create_object(const H5VL_token_t *obj_token, size_t token_size,
     HDassert(ref);
 
     /* Create new reference */
-    H5MM_memcpy(ref->ref.obj.token, obj_token, token_size);
+    H5MM_memcpy(&ref->ref.obj.token, obj_token, token_size);
     ref->ref.obj.filename = NULL;
     ref->loc_id = H5I_INVALID_HID;
     ref->type = (uint8_t)H5R_OBJECT2;
@@ -300,7 +300,7 @@ H5R__create_region(const H5VL_token_t *obj_token, size_t token_size,
     HDassert(ref);
 
     /* Create new reference */
-    H5MM_memcpy(ref->ref.obj.token, obj_token, token_size);
+    H5MM_memcpy(&ref->ref.obj.token, obj_token, token_size);
     ref->ref.obj.filename = NULL;
     if(NULL == (ref->ref.reg.space = H5S_copy(space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "unable to copy dataspace")
@@ -355,7 +355,7 @@ H5R__create_attr(const H5VL_token_t *obj_token, size_t token_size,
         HGOTO_ERROR(H5E_REFERENCE, H5E_ARGS, FAIL, "attribute name too long (%d > %d)", (int)HDstrlen(attr_name), H5R_MAX_STRING_LEN)
 
     /* Create new reference */
-    H5MM_memcpy(ref->ref.obj.token, obj_token, token_size);
+    H5MM_memcpy(&ref->ref.obj.token, obj_token, token_size);
     ref->ref.obj.filename = NULL;
     if(NULL == (ref->ref.attr.name = HDstrdup(attr_name)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "Cannot copy attribute name")
@@ -413,6 +413,7 @@ H5R__destroy(H5R_ref_priv_t *ref)
             break;
         case H5R_OBJECT1:
         case H5R_DATASET_REGION1:
+            break;
         case H5R_BADTYPE:
         case H5R_MAXTYPE:
             HDassert("invalid reference type" && 0);
@@ -423,7 +424,7 @@ H5R__destroy(H5R_ref_priv_t *ref)
     } /* end switch */
 
     /* Decrement refcount of attached loc_id */
-    if((ref->loc_id != H5I_INVALID_HID) && (H5I_dec_ref(ref->loc_id) < 0))
+    if(ref->type && (ref->loc_id != H5I_INVALID_HID) && (H5I_dec_ref(ref->loc_id) < 0))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "decrementing location ID failed")
 
 done:
@@ -601,7 +602,7 @@ H5R__equal(const H5R_ref_priv_t *ref1, const H5R_ref_priv_t *ref2)
     /* Compare object addresses */
     if(ref1->token_size != ref2->token_size)
         HGOTO_DONE(FALSE);
-    if(0 != HDmemcmp(ref1->ref.obj.token, ref2->ref.obj.token, ref1->token_size))
+    if(0 != HDmemcmp(&ref1->ref.obj.token, &ref2->ref.obj.token, ref1->token_size))
         HGOTO_DONE(FALSE);
 
     /* Compare filenames */
@@ -658,7 +659,7 @@ H5R__copy(const H5R_ref_priv_t *src_ref, H5R_ref_priv_t *dst_ref)
 
     HDassert((src_ref != NULL) && (dst_ref != NULL));
 
-    H5MM_memcpy(dst_ref->ref.obj.token, src_ref->ref.obj.token, src_ref->token_size);
+    H5MM_memcpy(&dst_ref->ref.obj.token, &src_ref->ref.obj.token, src_ref->token_size);
     dst_ref->encode_size = src_ref->encode_size;
     dst_ref->type = src_ref->type;
     dst_ref->token_size = src_ref->token_size;
@@ -728,7 +729,7 @@ H5R__get_obj_token(const H5R_ref_priv_t *ref, H5VL_token_t *obj_token,
     if(obj_token) {
         if(0 == ref->token_size)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "NULL token size")
-        H5MM_memcpy(obj_token, ref->ref.obj.token, ref->token_size);
+        H5MM_memcpy(obj_token, &ref->ref.obj.token, ref->token_size);
     }
     if(token_size)
         *token_size = ref->token_size;
@@ -760,7 +761,7 @@ H5R__set_obj_token(H5R_ref_priv_t *ref, const H5VL_token_t *obj_token,
     HDassert(token_size);
     HDassert(token_size <= H5VL_MAX_TOKEN_SIZE);
 
-    H5MM_memcpy(ref->ref.obj.token, obj_token, ref->token_size);
+    H5MM_memcpy(&ref->ref.obj.token, obj_token, ref->token_size);
     ref->token_size = token_size;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1169,8 +1170,8 @@ H5R__encode_region(H5S_t *space, unsigned char *buf, size_t *nalloc)
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
     if(buf && *nalloc >= ((size_t)buf_size + 2 * H5_SIZEOF_UINT32_T)) {
-        int rank;
         p = (uint8_t *)buf;
+        int rank;
 
         /* Encode the size for safety check */
         UINT32ENCODE(p, (uint32_t)buf_size);
@@ -1479,18 +1480,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R__decode_token_compat(hid_t id, H5I_type_t type, H5R_type_t ref_type,
+H5R__decode_token_compat(H5VL_object_t *vol_obj, H5I_type_t type, H5R_type_t ref_type,
     const unsigned char *buf, H5VL_token_t *obj_token)
 {
     hid_t file_id = H5I_INVALID_HID;    /* File ID for region reference */
-    void *vol_obj_file = NULL;
+    H5VL_object_t *vol_obj_file = NULL;
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(id, type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Retrieve VOL object */
@@ -1701,13 +1702,13 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf,
 
     /* Get object address */
     p = (const uint8_t *)data;
-    H5MM_memcpy(token, p, token_size);
+    H5MM_memcpy(&token, p, token_size);
     p += token_size;
 
     if(space_ptr) {
         H5O_loc_t oloc; /* Object location */
         H5S_t *space = NULL;
-        const uint8_t *q = token;
+        const uint8_t *q = (const uint8_t *)&token;
 
         /* Initialize the object location */
         H5O_loc_reset(&oloc);
@@ -1725,7 +1726,7 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf,
         *space_ptr = space;
     }
     if(obj_token)
-        H5MM_memcpy(obj_token, token, token_size);
+        H5MM_memcpy(obj_token, &token, token_size);
 
 done:
     H5MM_free(data);

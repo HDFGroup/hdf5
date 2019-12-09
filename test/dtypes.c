@@ -6858,8 +6858,8 @@ test_delete_obj_named(hid_t fapl)
 
     /* Loop through all valid the combinations of low/high library format bounds,
        to test delete objects that use named datatypes through different file IDs */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Skip invalid low/high combination */
             if ((high == H5F_LIBVER_EARLIEST) || (low > high))
@@ -6959,8 +6959,8 @@ test_delete_obj_named_fileid(hid_t fapl)
     h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
 
     /* Loop through all the combinations of low/high library format bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Skip invalid low/high combination */
             if ((high == H5F_LIBVER_EARLIEST) || (low > high))

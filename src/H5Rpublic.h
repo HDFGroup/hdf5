@@ -71,7 +71,7 @@ typedef haddr_t hobj_ref_t;
  * Note! This type can only be used with the "native" HDF5 VOL connector.
  */
 typedef struct {
-    unsigned char content[H5R_DSET_REG_REF_BUF_SIZE];
+    char __data[H5R_DSET_REG_REF_BUF_SIZE];
 } hdset_reg_ref_t;
 
 /**
@@ -80,7 +80,7 @@ typedef struct {
  * should always be used with the current reference API.
  */
 typedef struct {
-    unsigned char content[H5R_REF_BUF_SIZE];
+    char __data[H5R_REF_BUF_SIZE];
 } H5R_ref_t;
 
 /********************/
@@ -97,9 +97,9 @@ extern "C" {
 #endif
 
 /* Constructors */
-H5_DLL herr_t   H5Rcreate_object(hid_t loc_id, const char *name, H5R_ref_t *ref_ptr);
-H5_DLL herr_t   H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, H5R_ref_t *ref_ptr);
-H5_DLL herr_t   H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, H5R_ref_t *ref_ptr);
+H5_DLL herr_t   H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
+H5_DLL herr_t   H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, H5R_ref_t *ref_ptr);
+H5_DLL herr_t   H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl_id, H5R_ref_t *ref_ptr);
 H5_DLL herr_t   H5Rdestroy(H5R_ref_t *ref_ptr);
 
 /* Info */

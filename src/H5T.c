@@ -254,6 +254,7 @@
     dt->shared->u.atomic.u.r.rtype = H5R_OBJECT2;           \
     dt->shared->u.atomic.u.r.opaque = TRUE;                 \
     dt->shared->u.atomic.u.r.version = H5R_ENCODE_VERSION;  \
+    dt->shared->version = H5O_DTYPE_VERSION_4;              \
 }
 
 /* Define the code templates for the "SIZE_TMPL" in the H5T_INIT_TYPE macro */
@@ -3320,7 +3321,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
+H5T_copy(H5T_t *old_dt, H5T_copy_t method)
 {
     H5T_t           *new_dt = NULL, *tmp = NULL;
     H5T_shared_t    *reopened_fo = NULL;

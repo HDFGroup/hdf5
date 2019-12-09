@@ -3324,19 +3324,19 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value/*out*/)
      */
     if(H5T_get_size(type) >= H5T_get_size(fill.type)) {
         buf = value;
-        if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_malloc(H5T_get_size(type))))
+        if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_calloc(H5T_get_size(type))))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for type conversion")
     } /* end if */
     else {
-        if(NULL == (buf = H5MM_malloc(H5T_get_size(fill.type))))
+        if(NULL == (buf = H5MM_calloc(H5T_get_size(fill.type))))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for type conversion")
-        if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_malloc(H5T_get_size(fill.type))))
+        if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_calloc(H5T_get_size(fill.type))))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for type conversion")
     } /* end else */
     H5MM_memcpy(buf, fill.buf, H5T_get_size(fill.type));
 
     /* Do the conversion */
-    if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(type, H5T_COPY_TRANSIENT), FALSE)) < 0)
+    if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(type, H5T_COPY_ALL), FALSE)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy/register datatype")
     if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "datatype conversion failed")
