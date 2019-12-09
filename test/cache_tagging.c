@@ -528,7 +528,7 @@ check_file_open_tags(hid_t fcpl, int type)
     hid_t fid = -1;          /* File Identifier */
     int verbose = FALSE;     /* verbose file outout */
     hid_t fapl = -1;         /* File access prop list */
-    haddr_t root_tag = HADDR_UNDEF;       /* Root Group Tag */
+    haddr_t root_tag;       /* Root Group Tag */
     haddr_t sbe_tag;        /* Sblock Extension Tag */
 
     /* Testing Macro */

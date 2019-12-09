@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl -w
 ##
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -12,7 +12,6 @@
 # help@hdfgroup.org.
 ##
 require 5.003;
-use warnings;
 $Source = "";
 
 ##############################################################################
