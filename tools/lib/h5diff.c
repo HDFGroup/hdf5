@@ -274,14 +274,13 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
     int      cmp;
     trav_table_t *table = NULL;
     size_t   idx;
-    int      ret_value = 0;
 
     h5difftrace("build_match_list start\n");
     /* init */
     trav_table_init(&table);
     if (table == NULL) {
         H5TOOLS_INFO(H5E_tools_min_id_g, "Cannot create traverse table");
-        HGOTO_DONE(-1);
+        goto done;
     }
     /*
      * This is necessary for the case that given objects are group and

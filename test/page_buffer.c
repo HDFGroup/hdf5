@@ -38,9 +38,6 @@
 
 
 #define FILENAME_LEN            1024
-#define NUM_DSETS               5
-#define NX                      100
-#define NY                      50
 
 /* helper routines */
 #ifndef H5_HAVE_PARALLEL
@@ -65,6 +62,7 @@ const char *FILENAME[] = {
     NULL
 };
 
+#ifndef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:    create_file()
@@ -299,6 +297,7 @@ error:
     } H5E_END_TRY;
     return 1;
 }
+#endif
 
 /*
  *
@@ -360,6 +359,7 @@ error:
 
 } /* set_multi_split() */
 
+#ifndef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:    test_args()
@@ -383,7 +383,6 @@ error:
  *-------------------------------------------------------------------------
  */
 
-#ifndef H5_HAVE_PARALLEL
 static unsigned
 test_args(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -538,7 +537,6 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* test_args */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -571,7 +569,6 @@ error:
  */
 
 /* Changes due to file space page size has a minimum size of 512 */
-#ifndef H5_HAVE_PARALLEL
 static unsigned
 test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -817,7 +814,6 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* test_raw_data_handling */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -850,7 +846,6 @@ error:
  *-------------------------------------------------------------------------
  */
 
-#ifndef H5_HAVE_PARALLEL
 static unsigned
 test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -1072,7 +1067,6 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* test_lru_processing */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1106,7 +1100,6 @@ error:
  *-------------------------------------------------------------------------
  */
 
-#ifndef H5_HAVE_PARALLEL
 static unsigned
 test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -1710,7 +1703,6 @@ error:
     return 1;
 
 } /* test_min_threshold */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1743,7 +1735,6 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-#ifndef H5_HAVE_PARALLEL
 static unsigned
 test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
 {
