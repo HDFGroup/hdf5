@@ -674,6 +674,21 @@ Bug Fixes since HDF5-1.10.3 release
 
       (DER - 2019/08/27, HDFFV-10892)
 
+    - Torn pread/pwrite I/O would result in read and write corruption.
+
+      In the sec2, log, and core (with backing store) virtual file drivers
+      (VFDs), the read and write calls incorrectly reset the offset parameter
+      on torn pread and pwrite operations (i.e., I/O operations which fail to
+      be written atomically by the OS). For this bug to occur, pread/pwrite
+      have to be configured (this is the default if they are present on the
+      system) and the pread/pwrite operation has to fail to transfer all
+      the bytes, resulting in a multiple pread/pwrite calls.
+
+      This feature was initially enabled in HDF5 1.10.5 so the bug is
+      limited to that version.
+
+      (DER - 2019/12/09, HDFFV-10945)
+
 
     Java Library:
     ----------------
