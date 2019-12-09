@@ -122,21 +122,9 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
     if(!HDstrcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
-#ifdef QAK
-    H5Pset_small_data_block_size(fapl, (hsize_t)(50 * CHUNK_SIZE * DTYPE_SIZE));
-#endif /* QAK */
-
-#ifdef QAK
-    H5Pset_fapl_log(fapl, "append.log", H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
-#endif /* QAK */
-
     /* Create file creation property list */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         return -1;
-
-#ifdef QAK
-    H5Pset_link_phase_change(fcpl, 0, 0);
-#endif /* QAK */
 
     /* Emit informational message */
     if(verbose)

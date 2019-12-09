@@ -91,26 +91,6 @@ open_skeleton(const char *filename, unsigned verbose,
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         goto error;
 
-#ifdef QAK
-/* Increase the initial size of the metadata cache */
-    {
-        H5AC_cache_config_t mdc_config;
-
-        mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-        H5Pget_mdc_config(fapl, &mdc_config);
-        HDfprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-        HDfprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
-        mdc_config.set_initial_size = 1;
-        mdc_config.initial_size = 16 * 1024 * 1024;
-        /* mdc_config.epoch_length = 5000; */
-        H5Pset_mdc_config(fapl, &mdc_config);
-    }
-#endif /* QAK */
-
-#ifdef QAK
-    H5Pset_fapl_log(fapl, "append.log", H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
-#endif /* QAK */
-
      /*
      * Set up to open the file with VFD SWMR configured.
      */

@@ -91,10 +91,6 @@ open_skeleton(const char *filename, unsigned verbose)
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         goto error;
 
-#ifdef QAK
-    H5Pset_fapl_log(fapl, "append.log", H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
-#endif /* QAK */
-
     /*
      * Set up to open the file with VFD SWMR configured.
      */
