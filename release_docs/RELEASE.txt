@@ -239,6 +239,12 @@ Bug Fixes since HDF5-1.8.21
 
     Library
     -------
+    - Fixed user-created data access properties not existing in the property list
+      returned by H5Dget_access_plist. Thanks to Steven Varga for submitting a
+      reproducer and a patch.
+
+      (CJH - 2019/12/09, HDFFV-10934)
+
     - Fixed a bug that could cause an error or cause fill values to be
       incorrectly read from a dataset that was written to using H5Dwrite_chunk
       if the dataset was not closed after writing.
