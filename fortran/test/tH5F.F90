@@ -105,6 +105,10 @@ CONTAINS
           INTEGER(SIZE_T) :: obj_count
           INTEGER(HID_T) :: t1, t2, t3, t4
 
+          ! File numbers
+          INTEGER  :: file_num1
+          INTEGER  :: file_num2
+
           !
           !data buffers
           !
@@ -232,7 +236,24 @@ CONTAINS
               CALL check("h5fclose_f",error,total_error)
 
           !
-          !test whether files are in hdf5 format
+          !test whether files are accessible as HDF5 (new, VOL-safe, way)
+          !
+          CALL h5fis_accessible_f(fix_filename1, status, error)
+               CALL check("h5fis_accessible_f",error,total_error)
+          IF ( .NOT. status ) THEN
+              write(*,*) "File ", fix_filename1, " is not accessible as hdf5"
+              stop
+          END IF
+
+          CALL h5fis_accessible_f(fix_filename2, status, error)
+               CALL check("h5fis_accessible_f",error,total_error)
+          IF ( .NOT. status ) THEN
+              write(*,*) "File ", fix_filename2, " is not accessible as hdf5"
+              stop
+          END IF
+
+          !
+          !test whether files are in hdf5 format (old way)
           !
           CALL h5fis_hdf5_f(fix_filename1, status, error)
                CALL check("h5fis_hdf5_f",error,total_error)
@@ -270,6 +291,18 @@ CONTAINS
           IF(obj_count.NE.2)THEN
              total_error = total_error + 1
           ENDIF  
+
+          !
+          !Check file numbers
+          !
+          CALL h5fget_fileno_f(file1_id, file_num1, error)
+               CALL check("h5fget_fileno_f",error,total_error)
+          CALL h5fget_fileno_f(file2_id, file_num2, error)
+               CALL check("h5fget_fileno_f",error,total_error)
+          IF(file_num1 .EQ. file_num2) THEN
+               write(*,*) "file numbers aren't supposed to match"
+          END IF
+
           !
           !mount the second file under the first file's "/G" group.
           !
@@ -414,6 +447,8 @@ CONTAINS
           INTEGER, DIMENSION(4,6) :: dset_data, data_out
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER(HSIZE_T)  :: file_size
+          INTEGER  :: file_num1
+          INTEGER  :: file_num2
           CHARACTER(LEN=80) :: file_name
           INTEGER(SIZE_T) :: name_size
 
@@ -480,6 +515,17 @@ CONTAINS
          !
          CALL h5fget_filesize_f(file_id, file_size, error)
               CALL check("h5fget_filesize_f",error,total_error)
+
+         !
+         !Check file numbers
+         !
+         CALL h5fget_fileno_f(file_id, file_num1, error)
+              CALL check("h5fget_fileno_f",error,total_error)
+         CALL h5fget_fileno_f(reopen_id, file_num2, error)
+              CALL check("h5fget_fileno_f",error,total_error)
+         IF(file_num1 .NE. file_num2) THEN
+              write(*,*) "file numbers don't match"
+         END IF
 
          !
          !Open the dataset based on the reopen_id.
@@ -840,6 +886,5 @@ CONTAINS
           RETURN
 
         END SUBROUTINE file_space
-
 
 END MODULE TH5F

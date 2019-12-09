@@ -85,6 +85,9 @@ static int
 check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file,
     const char *sym_name, symbol_t *record, hid_t rec_sid)
 {
+    int fill_count = 0;         /* # of times fill value (0) was read
+                                 * instead of the expected value.
+                                 */
     hid_t dsid;                 /* Dataset ID */
     hid_t file_sid;             /* Dataset's space ID */
     hssize_t snpoints;          /* Number of elements in dataset */
@@ -96,16 +99,23 @@ check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file,
     HDassert(rec_sid >= 0);
 
     /* Open dataset for symbol */
-    if((dsid = H5Dopen2(fid, sym_name, H5P_DEFAULT)) < 0)
+    if((dsid = H5Dopen2(fid, sym_name, H5P_DEFAULT)) < 0) {
+        fprintf(stderr, "%s.%d: H5Dopen2 failed\n", __func__, __LINE__);
         goto error;
+    }
 
     /* Get the dataset's dataspace */
-    if((file_sid = H5Dget_space(dsid)) < 0)
+    if((file_sid = H5Dget_space(dsid)) < 0) {
+        fprintf(stderr, "%s.%d: H5Dget_space failed\n", __func__, __LINE__);
         goto error;
+    }
 
     /* Get the number of elements (= records, for 1-D datasets) */
-    if((snpoints = H5Sget_simple_extent_npoints(file_sid)) < 0)
+    if((snpoints = H5Sget_simple_extent_npoints(file_sid)) < 0) {
+        fprintf(stderr, "%s.%d: H5Sget_simple_extent_npoints failed\n",
+            __func__, __LINE__);
         goto error;
+    }
 
     /* Emit informational message */
     if(verbose)
@@ -115,16 +125,23 @@ check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file,
     if(snpoints > 0) {
         /* Choose the last record in the dataset */
         start[1] = (hsize_t)(snpoints - 1);
-        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0) {
+            fprintf(stderr, "%s.%d: H5Sselect_hyperslab failed\n",
+                __func__, __LINE__);
             goto error;
+        }
 
         /* Read record from dataset */
-        record->rec_id = (uint64_t)ULLONG_MAX;
-        if(H5Dread(dsid, symbol_tid, rec_sid, file_sid, H5P_DEFAULT, record) < 0)
+        record->rec_id = UINT64_MAX;
+        if(H5Dread(dsid, symbol_tid, rec_sid, file_sid, H5P_DEFAULT, record) < 0) {
+            fprintf(stderr, "%s.%d: H5Dread failed\n", __func__, __LINE__);
             goto error;
+        }
 
         /* Verify record value */
-        if(record->rec_id != start[1]) {
+        if (record->rec_id != start[1] && record->rec_id == 0)
+            fill_count++;
+        else if (record->rec_id != start[1]) {
             struct timeval tv;
 
             HDgettimeofday(&tv, NULL);
@@ -132,21 +149,33 @@ check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file,
             if(verbose) {
                 HDfprintf(verbose_file, "*** READER ERROR ***\n");
                 HDfprintf(verbose_file, "Incorrect record value!\n");
-                HDfprintf(verbose_file, "Time = %llu.%llu, Symbol = '%s', # of records = %lld, record->rec_id = %llu\n", (unsigned long long)tv.tv_sec, (unsigned long long)tv.tv_usec, sym_name, (long long)snpoints, (unsigned long long)record->rec_id);
+                HDfprintf(verbose_file,
+                    "Time = %jd.%06jd, Symbol = '%s'"
+                    ", # of records = %" PRIdHSIZE
+                    ", record->rec_id = %" PRIu64 "\n",
+                    (intmax_t)tv.tv_sec, (intmax_t)tv.tv_usec,
+                    sym_name, snpoints, record->rec_id);
             } /* end if */
+            fprintf(stderr,
+                "%s.%d: record value %" PRIu64 " != %" PRIuHSIZE "\n",
+                __func__, __LINE__, record->rec_id, start[1]);
             goto error;
         } /* end if */
     } /* end if */
 
     /* Close the dataset's dataspace */
-    if(H5Sclose(file_sid) < 0)
+    if(H5Sclose(file_sid) < 0) {
+        fprintf(stderr, "%s.%d: H5Sclose failed\n", __func__, __LINE__);
         goto error;
+    }
 
     /* Close dataset for symbol */
-    if(H5Dclose(dsid) < 0)
+    if(H5Dclose(dsid) < 0) {
+        fprintf(stderr, "%s.%d: H5Dclose failed\n", __func__, __LINE__);
         goto error;
+    }
 
-    return 0;
+    return fill_count;
 
 error:
     H5E_BEGIN_TRY {
@@ -231,8 +260,10 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     /* Allocate space for 'common' datasets, if any */
     if(ncommon > 0) {
         /* Allocate array to hold pointers to symbols for common datasets */
-        if(NULL == (sym_com = (symbol_info_t **)HDmalloc(sizeof(symbol_info_t *) * ncommon)))
+        if(NULL == (sym_com = (symbol_info_t **)HDmalloc(sizeof(symbol_info_t *) * ncommon))) {
+            fprintf(stderr, "%s.%d: malloc failed\n", __func__, __LINE__);
             goto error;
+        }
 
         /* Open the common datasets */
         for(v = 0; v < ncommon; v++) {
@@ -252,15 +283,17 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     /* Allocate space for 'random' datasets, if any */
     if(nrandom > 0) {
         /* Allocate array to hold pointers to symbols for random datasets */
-        if(NULL == (sym_rand = (symbol_info_t **)HDmalloc(sizeof(symbol_info_t *) * nrandom)))
+        if(NULL == (sym_rand = (symbol_info_t **)HDmalloc(sizeof(symbol_info_t *) * nrandom))) {
+            fprintf(stderr, "%s.%d: malloc failed\n", __func__, __LINE__);
             goto error;
+        }
 
         /* Determine the random datasets */
         for(v = 0; v < nrandom; v++) {
             symbol_info_t *sym;         /* Symbol to use */
 
             /* Determine the symbol, within all symbols */
-            if(NULL == (sym = choose_dataset()))
+            if(NULL == (sym = choose_dataset(NULL, NULL)))
                 return -1;
             sym_rand[v] = sym;
 
@@ -271,8 +304,10 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     } /* end if */
 
     /* Create a dataspace for the record to read */
-    if((mem_sid = H5Screate(H5S_SCALAR)) < 0)
+    if((mem_sid = H5Screate(H5S_SCALAR)) < 0) {
+        fprintf(stderr, "%s.%d: H5Screate failed\n", __func__, __LINE__);
         goto error;
+    }
 
     /* Emit informational message */
     if(verbose)
@@ -283,8 +318,10 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     curr_time = start_time;
 
     /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0)
+    if((fapl = h5_fileaccess()) < 0) {
+        fprintf(stderr, "%s.%d: h5_fileaccess failed\n", __func__, __LINE__);
         goto error;
+    }
 
     /* Log I/O when verbose output it enbabled */
     if(use_log_vfd) {
@@ -299,14 +336,17 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
      * Set up to open the file with VFD SWMR configured.
      */
     /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl, 4096, 0, 0) < 0)
+    if(H5Pset_page_buffer_size(fapl, 4096, 0, 0) < 0) {
+        fprintf(stderr, "%s.%d: H5Pset_page_buffer_size failed\n",
+            __func__, __LINE__);
         goto error;
+    }
 
     /* Allocate memory for the configuration structure */
-    if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL) {
+        fprintf(stderr, "%s.%d: malloc failed\n", __func__, __LINE__);
         goto error;
-
-    memset(config, '\0', sizeof(*config));
+    }
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->tick_len = 4;
@@ -316,8 +356,11 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     HDstrcpy(config->md_file_path, "./my_md_file");
 
     /* Enable VFD SWMR configuration */
-    if(H5Pset_vfd_swmr_config(fapl, config) < 0)
+    if(H5Pset_vfd_swmr_config(fapl, config) < 0) {
+        fprintf(stderr, "%s.%d: H5Pset_vfd_swmr_config failed\n",
+            __func__, __LINE__);
         goto error;
+    }
 
     /* Loop over reading records until [at least] the correct # of seconds have passed */
     while(curr_time < (time_t)(start_time + (time_t)nseconds)) {
@@ -345,9 +388,19 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
             /* Iterate over common datasets */
             for(v = 0; v < ncommon; v++) {
                 /* Check common dataset */
-                if(check_dataset(fid, verbose, verbose_file, sym_com[v]->name, &record, mem_sid) < 0)
+                const int fill_count =
+                    check_dataset(fid, verbose, verbose_file, sym_com[v]->name,
+                        &record, mem_sid);
+                if(fill_count < 0) {
+                    fprintf(stderr, "%s.%d: check_dataset failed\n",
+                        __func__, __LINE__);
                     goto error;
+                }
                 HDmemset(&record, 0, sizeof(record));
+                if (fill_count > 0) {
+                    fprintf(stderr, "common dataset: read fill at %d records\n",
+                        fill_count);
+                }
             } /* end for */
         } /* end if */
 
@@ -360,9 +413,18 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
             /* Iterate over random datasets */
             for(v = 0; v < nrandom; v++) {
                 /* Check random dataset */
-                if(check_dataset(fid, verbose, verbose_file, sym_rand[v]->name, &record, mem_sid) < 0)
+                const int fill_count = check_dataset(fid, verbose, verbose_file,
+                    sym_rand[v]->name, &record, mem_sid);
+                if(fill_count < 0) {
+                    fprintf(stderr, "%s.%d: check_dataset failed\n",
+                        __func__, __LINE__);
                     goto error;
+                }
                 HDmemset(&record, 0, sizeof(record));
+                if (fill_count > 0) {
+                    fprintf(stderr, "random dataset: read fill at %d records\n",
+                        fill_count);
+                }
             } /* end for */
         } /* end if */
 
@@ -371,8 +433,10 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
             HDfprintf(verbose_file, "READER: Closing file\n");
             
         /* Close the file */
-        if(H5Fclose(fid) < 0)
+        if(H5Fclose(fid) < 0) {
+            fprintf(stderr, "%s.%d: H5Fclose failed\n", __func__, __LINE__);
             goto error;
+        }
 
         /* Sleep for the appropriate # of seconds */
         HDsleep(poll_time);
@@ -382,12 +446,16 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     } /* end while */
 
     /* Close the memory dataspace */
-    if(H5Sclose(mem_sid) < 0)
+    if(H5Sclose(mem_sid) < 0) {
+        fprintf(stderr, "%s.%d: H5Sclose failed\n", __func__, __LINE__);
         goto error;
+    }
 
     /* Close the fapl */
-    if(H5Pclose(fapl) < 0)
+    if(H5Pclose(fapl) < 0) {
+        fprintf(stderr, "%s.%d: H5Pclose failed\n", __func__, __LINE__);
         goto error;
+    }
 
     if(config)
         HDfree(config);

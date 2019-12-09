@@ -123,22 +123,6 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
         max_dims[0] = H5S_UNLIMITED;
 
 #ifdef QAK
-    /* Increase the initial size of the metadata cache */
-    {
-        H5AC_cache_config_t mdc_config;
-
-        mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-        H5Pget_mdc_config(fapl, &mdc_config);
-        HDfprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-        HDfprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
-        mdc_config.set_initial_size = 1;
-        mdc_config.initial_size = 16 * 1024 * 1024;
-        /* mdc_config.epoch_length = 5000; */
-        H5Pset_mdc_config(fapl, &mdc_config);
-    }
-#endif /* QAK */
-
-#ifdef QAK
     H5Pset_small_data_block_size(fapl, (hsize_t)(50 * CHUNK_SIZE * DTYPE_SIZE));
 #endif /* QAK */
 
@@ -164,7 +148,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
 
     if(vfd_swmr_write) {
         /* Set file space strategy to paged aggregation in fcpl */
-        if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+        if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1024 * 1024 * 1024) < 0)
             return -1;
 
          /* Enable page buffering in fapl */
@@ -172,7 +156,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write,
             return -1;
 
         /* Allocate memory for the VFD SWMR configuration structure */
-        if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+        if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
             return -1;
 
         config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;

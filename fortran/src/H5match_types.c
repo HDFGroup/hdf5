@@ -143,7 +143,7 @@ void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char
 int main(void)
 {
   int i;
-  char chrA[32],chrB[32];
+  char chrA[64],chrB[64];
 
   int IntKinds[] = H5_FORTRAN_INTEGER_KINDS;
   int IntKinds_SizeOf[] = H5_FORTRAN_INTEGER_KINDS_SIZEOF;
@@ -191,6 +191,8 @@ int main(void)
       }
     if(sizeof(size_t) == IntKinds_SizeOf[i])
       writeTypedef("size_t", "size_t", IntKinds[i]);
+    if(sizeof(time_t) == IntKinds_SizeOf[i])
+      writeTypedef("time_t", "time_t", IntKinds[i]);
     if(sizeof(hsize_t) == IntKinds_SizeOf[i])
       writeTypedef("hsize_t", "hsize_t", IntKinds[i]);
   }
@@ -306,6 +308,17 @@ int main(void)
       return -1;
   }
 
+  /* time_t */
+  for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
+    if(IntKinds_SizeOf[i] == H5_SIZEOF_TIME_T) {
+      writeToFiles("time_t","TIME_T", "time_t_f", IntKinds[i]);
+      break;
+    }
+    if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
+      /* Error: couldn't find a size for time_t */
+      return -1;
+  }
+
   /* int */
   writeToFiles("int","Fortran_INTEGER", "int_f", H5_FORTRAN_NATIVE_INTEGER_KIND);
 
@@ -334,8 +347,8 @@ int main(void)
 
   for(i=0;i<H5_FORTRAN_NUM_REAL_KINDS;i++) {
     if (RealKinds[i] > 0) {
-      sprintf(chrA, "Fortran_REAL_%s", Real_C_TYPES[i]);
-      sprintf(chrB, "real_%s_f", Real_C_TYPES[i]);
+      snprintf(chrA, sizeof(chrA), "Fortran_REAL_%s", Real_C_TYPES[i]);
+      snprintf(chrB, sizeof(chrB), "real_%s_f", Real_C_TYPES[i]);
       writeToFiles("float",chrA, chrB, RealKinds[i]);
     }
   }

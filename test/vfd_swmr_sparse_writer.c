@@ -92,22 +92,6 @@ open_skeleton(const char *filename, unsigned verbose)
         goto error;
 
 #ifdef QAK
-    /* Increase the initial size of the metadata cache */
-    {
-        H5AC_cache_config_t mdc_config;
-
-        mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-        H5Pget_mdc_config(fapl, &mdc_config);
-        HDfprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-        HDfprintf(stderr,"mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
-        mdc_config.set_initial_size = 1;
-        mdc_config.initial_size = 16 * 1024 * 1024;
-        /* mdc_config.epoch_length = 5000; */
-        H5Pset_mdc_config(fapl, &mdc_config);
-    }
-#endif /* QAK */
-
-#ifdef QAK
     H5Pset_fapl_log(fapl, "append.log", H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
 #endif /* QAK */
 
@@ -120,7 +104,7 @@ open_skeleton(const char *filename, unsigned verbose)
         goto error;
 
      /* Allocate memory for the configuration structure */
-     if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+     if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         goto error;
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
@@ -244,22 +228,15 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
     rec_to_flush = flush_count;
     for(u = 0; u < nrecords; u++) {
         symbol_info_t *symbol;  /* Symbol to write record to */
-        hbool_t corked;         /* Whether the dataset was corked */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset();
+        symbol = choose_dataset(NULL, NULL);
 
         /* If this is the first time the dataset has been opened, extend it and
          * add the sequence attribute */
         if(symbol->nrecords == 0) {
             symbol->nrecords = nrecords / 5;
             dim[1] = symbol->nrecords;
-
-            /* Cork the metadata cache, to prevent the object header from being
-             * flushed before the data has been written */
-            if(H5Odisable_mdc_flushes(symbol->dsid) < 0)
-                goto error;
-            corked = TRUE;
 
             if(H5Dset_extent(symbol->dsid, dim) < 0)
                 goto error;
@@ -270,12 +247,8 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
                 goto error;
             if(H5Sclose(file_sid) < 0)
                 goto error;
-        } /* end if */
-        else {
-            if((aid = H5Aopen(symbol->dsid, "seq", H5P_DEFAULT)) < 0)
+        } else if ((aid = H5Aopen(symbol->dsid, "seq", H5P_DEFAULT)) < 0)
                 goto error;
-            corked = FALSE;
-        } /* end else */
 
         /* Get the coordinate to write */
         start[1] = (hsize_t)HDrandom() % symbol->nrecords;
@@ -307,11 +280,6 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
         /* Close the attribute */
         if(H5Aclose(aid) < 0)
             goto error;
-
-        /* Uncork the metadata cache, if it's been */
-        if(corked)
-            if(H5Oenable_mdc_flushes(symbol->dsid) < 0)
-                goto error;
 
         /* Close the dataset's dataspace */
         if(H5Sclose(file_sid) < 0)
@@ -385,48 +353,6 @@ error:
     return -1;
 } /* add_records() */
 
-static volatile sig_atomic_t got_sigusr1 = 0;
-
-static void
-sigusr1_handler(int H5_ATTR_UNUSED signo)
-{
-    got_sigusr1 = 1;
-}
-
-static void
-await_signal(void)
-{
-    sigset_t sleepset, fullset, oldset;
-    struct sigaction sa, osa;
-
-    memset(&sa, '\0', sizeof(sa));
-    sa.sa_handler = sigusr1_handler;
-    if (sigemptyset(&sa.sa_mask) == -1 ||
-        sigfillset(&fullset) == -1 ||
-        sigemptyset(&sleepset) == -1) {
-        err(EXIT_FAILURE, "%s.%d: could not initialize signal masks",
-            __func__, __LINE__);
-    }
-
-    if (sigprocmask(SIG_BLOCK, &fullset, &oldset) == -1)
-        err(EXIT_FAILURE, "%s.%d: sigprocmask", __func__, __LINE__);
-
-    if (sigaction(SIGUSR1, &sa, &osa) == -1)
-        err(EXIT_FAILURE, "%s.%d: sigaction", __func__, __LINE__);
-
-    if (sigsuspend(&sleepset) == -1 && errno != EINTR)
-        err(EXIT_FAILURE, "%s.%d: sigsuspend", __func__, __LINE__);
-
-    if (got_sigusr1 != 0)
-        printf("Cancelled by SIGUSR1.\n");
-
-    if (sigaction(SIGUSR1, &osa, NULL) == -1)
-        err(EXIT_FAILURE, "%s.%d: sigaction", __func__, __LINE__);
-
-    if (sigprocmask(SIG_SETMASK, &oldset, NULL) == -1)
-        err(EXIT_FAILURE, "%s.%d: sigprocmask", __func__, __LINE__);
-}
-
 static void
 usage(void)
 {
@@ -447,11 +373,14 @@ usage(void)
 
 int main(int argc, const char *argv[])
 {
+    sigset_t oldset;
     hid_t fid;                  /* File ID for file opened */
     long nrecords = 0;          /* # of records to append */
     long flush_count = 1000;    /* # of records to write between flushing file */
     unsigned verbose = 1;       /* Whether to emit some informational messages */
     unsigned u;                 /* Local index variable */
+
+    block_signals(&oldset);
 
     /* Parse command line options */
     if(argc < 2)
@@ -543,7 +472,9 @@ int main(int argc, const char *argv[])
         HDexit(1);
     } /* end if */
 
-    await_signal();
+    await_signal(fid);
+
+    restore_signals(&oldset);
 
     /* Emit informational message */
     if(verbose)

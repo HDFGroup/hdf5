@@ -32,15 +32,15 @@
 /* Headers */
 /***********/
 
+#include <err.h> /* errx(3) */
+#include <stdlib.h> /* EXIT_FAILURE */
+
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
 /****************/
 /* Local Macros */
 /****************/
-
-/* The maximum # of records to add/remove from the dataset in one step */
-#define MAX_SIZE_CHANGE     10
 
 /********************/
 /* Local Prototypes */
@@ -73,6 +73,7 @@ static void usage(void);
 static hid_t
 open_skeleton(const char *filename, unsigned verbose)
 {
+    hid_t dapl = H5I_INVALID_HID;
     hid_t fid = -1;     /* File ID for new HDF5 file */
     hid_t fapl = -1;    /* File access property list */
     hid_t sid = -1;     /* Dataspace ID */
@@ -85,6 +86,13 @@ open_skeleton(const char *filename, unsigned verbose)
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0)
         goto error;
+
+    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed", __func__, __LINE__);
+
+    if (H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 0,
+                           H5D_CHUNK_CACHE_W0_DEFAULT) < 0)
+        errx(EXIT_FAILURE, "H5Pset_chunk_cache failed");
 
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
@@ -119,7 +127,7 @@ open_skeleton(const char *filename, unsigned verbose)
         goto error;
 
      /* Allocate memory for the configuration structure */
-     if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+     if((config = (H5F_vfd_swmr_config_t *)calloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         goto error;
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
@@ -151,8 +159,12 @@ open_skeleton(const char *filename, unsigned verbose)
     /* Open the datasets */
     for(u = 0; u < NLEVELS; u++)
         for(v = 0; v < symbol_count[u]; v++) {
-            if((symbol_info[u][v].dsid = H5Dopen2(fid, symbol_info[u][v].name, H5P_DEFAULT)) < 0)
+            hid_t dsid;
+
+            if((dsid = H5Dopen2(fid, symbol_info[u][v].name, dapl)) < 0)
                 goto error;
+
+            symbol_info[u][v].dsid = dsid;
 
             if((sid = H5Dget_space(symbol_info[u][v].dsid)) < 0)
                 goto error;
@@ -179,6 +191,7 @@ error:
         H5Sclose(sid);
         H5Pclose(fapl);
         H5Fclose(fid);
+        H5Pclose(dapl);
     } H5E_END_TRY;
 
     return -1;
@@ -241,7 +254,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
         symbol_info_t *symbol;  /* Symbol to write record to */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset();
+        symbol = choose_dataset(NULL, NULL);
 
         /* Decide whether to shrink or expand, and by how much */
         count[1] = (hsize_t)HDrandom() % (MAX_SIZE_CHANGE * 2) + 1;
@@ -261,11 +274,6 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
             /* Get the coordinates to write */
             start[1] = symbol->nrecords;
 
-            /* Cork the metadata cache, to prevent the object header from being
-             * flushed before the data has been written */
-            if(H5Odisable_mdc_flushes(symbol->dsid) < 0)
-                goto error;
-
              /* Extend the dataset's dataspace to hold the new record */
             symbol->nrecords+= count[1];
             dim[1] = symbol->nrecords;
@@ -284,8 +292,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
             if(H5Dwrite(symbol->dsid, tid, mem_sid, file_sid, H5P_DEFAULT, &buf) < 0)
                 goto error;
 
-            /* Uncork the metadata cache */
-            if(H5Oenable_mdc_flushes(symbol->dsid) < 0)
+            if(H5Dflush(symbol->dsid) < 0)
                 goto error;
 
             /* Close the dataset's dataspace */
@@ -372,6 +379,7 @@ usage(void)
 
 int main(int argc, const char *argv[])
 {
+    sigset_t oldset;
     hid_t fid;                  /* File ID for file opened */
     long nops = 0;              /* # of times to grow or shrink the dataset */
     long flush_count = 1000;    /* # of records to write between flushing file */
@@ -380,6 +388,8 @@ int main(int argc, const char *argv[])
     unsigned random_seed = 0;   /* Random # seed */
     unsigned u;                 /* Local index variable */
     int temp;
+
+    block_signals(&oldset);
 
     /* Parse command line options */
     if(argc < 2)
@@ -491,6 +501,10 @@ int main(int argc, const char *argv[])
         HDfprintf(stderr, "WRITER: Error releasing symbols!\n");
         HDexit(1);
     } /* end if */
+
+    await_signal(fid);
+
+    restore_signals(&oldset);
 
     /* Emit informational message */
     if(verbose)

@@ -68,6 +68,15 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fis_accessible
+ * Signature: (Ljava/lang/String;J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Fis_1accessible
+  (JNIEnv*, jclass, jstring, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Fget_create_plist
  * Signature: (J)J
  */
@@ -91,6 +100,15 @@ Java_hdf_hdf5lib_H5__1H5Fget_1access_1plist
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Fget_1intent
+  (JNIEnv*, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fget_fileno
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Fget_1fileno
   (JNIEnv*, jclass, jlong);
 
 /*
@@ -245,6 +263,33 @@ Java_hdf_hdf5lib_H5_H5Fstop_1mdc_1logging
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status
   (JNIEnv *, jclass, jlong, jbooleanArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fset_dset_no_attrs_hint
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fset_1dset_1no_1attrs_1hint
+  (JNIEnv *, jclass, jlong, jboolean);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fget_dset_no_attrs_hint
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fset_libver_bounds
+ * Signature: (JII)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fset_1libver_1bounds
+(JNIEnv *, jclass, jlong, jint, jint);
 
 #ifdef __cplusplus
 } /* end extern "C" */

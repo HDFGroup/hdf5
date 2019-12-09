@@ -17,7 +17,9 @@ catch_out_err_and_rc()
 	outbase=$1
 	shift
 	{
-		eval "$@" 2>&1
+		"$@" 2>&1 &
+		echo $! > ${outbase}.pid
+		wait $(cat ${outbase}.pid)
 		echo $? > ${outbase}.rc
 	} | tee ${outbase}.out
 }

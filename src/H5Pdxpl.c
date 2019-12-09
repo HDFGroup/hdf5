@@ -695,7 +695,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
             HDassert(pexp);
 
             /* Copy the expression into the buffer */
-            HDmemcpy(*pp, (const uint8_t *)pexp, len);
+            H5MM_memcpy(*pp, (const uint8_t *)pexp, len);
             *pp += len;
             *pp[0] = '\0';
         } /* end if */
@@ -1519,7 +1519,7 @@ done:
  *
  * Purpose:	Sets the memory allocate/free pair for VL datatypes.  The
  *		allocation routine is called when data is read into a new
- *		array and the free routine is called when H5Dvlen_reclaim is
+ *		array and the free routine is called when H5Treclaim is
  *		called.  The alloc_info and free_info are user parameters
  *		which are passed to the allocation and freeing functions
  *		respectively.  To reset the allocate/free functions to the
@@ -1563,7 +1563,7 @@ done:
  *
  * Purpose:	Sets the memory allocate/free pair for VL datatypes.  The
  *		allocation routine is called when data is read into a new
- *		array and the free routine is called when H5Dvlen_reclaim is
+ *		array and the free routine is called when H5Treclaim is
  *		called.  The alloc_info and free_info are user parameters
  *		which are passed to the allocation and freeing functions
  *		respectively.  To reset the allocate/free functions to the
@@ -2017,6 +2017,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mpio_actual_io_mode() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_mpio_no_collective_cause
  *
@@ -2053,8 +2054,6 @@ H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_ca
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mpio_no_collective_cause() */
-
-
 #endif /* H5_HAVE_PARALLEL */
 
 

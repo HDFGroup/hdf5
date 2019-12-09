@@ -49,8 +49,6 @@
       h5clear_missing_file.ddl
       h5clear_noclose_after_size.ddl
       h5clear_noclose_before_size.ddl
-      h5clear_no_mdc_image.ddl
-      h5clear_open_fail.ddl
       h5clear_status_noclose_after_size.ddl
       h5clear_usage.ddl
       h5clear_user_equal_after_size.ddl
@@ -60,8 +58,15 @@
       h5clear_user_less_after_size.ddl
       h5clear_user_less_before_size.ddl
   )
+  set (HDF5_REFERENCE_ERR_FILES
+      h5clear_no_mdc_image.err
+      h5clear_open_fail.err
+  )
 
   foreach (h5_file ${HDF5_TEST_FILES} ${HDF5_SEC2_TEST_FILES} ${HDF5_REFERENCE_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5clear_files")
+  endforeach ()
+  foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5clear_files")
   endforeach ()
   # make second copy of h5clear_sec2.h5
@@ -78,24 +83,21 @@
 ##############################################################################
 ##############################################################################
 
+  if (NOT BUILD_SHARED_LIBS)
+    set (tgt_ext "")
+  else ()
+    set (tgt_ext "-shared")
+  endif ()
+
   # Need special dependencies for tests that use the same reference file
   # This is an issue on Windows
   macro (ADD_H5_CMP testname resultfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
-          NAME H5CLEAR_CMP-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  testfiles/${testname}.out
-                  testfiles/${testname}.out.err
-      )
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5CLEAR_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
-      add_test (
           NAME H5CLEAR_CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testname}.out"
@@ -103,8 +105,24 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS H5CLEAR_CMP-${testname}-clear-objects)
-      set (last_test "H5CLEAR_CMP-${testname}")
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_ERR_CMP testname resultfile resultcode)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5CLEAR_CMP-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear${tgt_ext}>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
+              -D "TEST_ERRREF=${resultfile}.err"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
     endif ()
   endmacro ()
 
@@ -112,26 +130,21 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5CLEAR_CMP-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  testfiles/${testname}.out
-                  testfiles/${testname}.out.err
-                  testfiles/${testfile}
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/${testfile}
       )
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5CLEAR_CMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
       add_test (
           NAME H5CLEAR_CMP-copy_${testname}
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different
               "${PROJECT_SOURCE_DIR}/testfiles/${testfile}" "${PROJECT_BINARY_DIR}/testfiles/${testfile}"
       )
-      set_tests_properties (H5CLEAR_CMP-copy_${testname} PROPERTIES DEPENDS H5CLEAR_CMP-${testname}-clear-objects)
+      set_tests_properties (H5CLEAR_CMP-copy_${testname} PROPERTIES
+          DEPENDS H5CLEAR_CMP-${testname}-clear-objects
+      )
       add_test (
           NAME H5CLEAR_CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear${tgt_ext}>"
               -D "TEST_ARGS:STRING=${ARGN};${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testname}.out"
@@ -139,8 +152,42 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS H5CLEAR_CMP-copy_${testname})
-      set (last_test "H5CLEAR_CMP-${testname}")
+      set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES
+          DEPENDS H5CLEAR_CMP-copy_${testname}
+      )
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_ERR_CMP_WITH_COPY testname resultcode resultfile testfile)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5CLEAR_CMP-${testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/${testfile}
+      )
+      add_test (
+          NAME H5CLEAR_CMP-copy_${testname}
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different
+              "${PROJECT_SOURCE_DIR}/testfiles/${testfile}" "${PROJECT_BINARY_DIR}/testfiles/${testfile}"
+      )
+      set_tests_properties (H5CLEAR_CMP-copy_${testname} PROPERTIES
+          DEPENDS H5CLEAR_CMP-${testname}-clear-objects
+      )
+      add_test (
+          NAME H5CLEAR_CMP-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear${tgt_ext}>"
+              -D "TEST_ARGS:STRING=${ARGN};${testfile}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
+              -D "TEST_ERRREF=${resultfile}.err"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES
+          DEPENDS H5CLEAR_CMP-copy_${testname}
+      )
     endif ()
   endmacro ()
 
@@ -148,14 +195,12 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5CLEAR_RET-${testname}
-          COMMAND $<TARGET_FILE:h5clear> ${ARGN}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5clear${tgt_ext}> ${ARGN}
       )
-      set_tests_properties (H5CLEAR_RET-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      set_tests_properties (H5CLEAR_RET-${testname} PROPERTIES WILL_FAIL "${resultcode}")
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5CLEAR_RET-${testname} PROPERTIES DEPENDS ${last_test})
-      endif ()
-      set (last_test "H5CLEAR_RET-${testname}")
+      set_tests_properties (H5CLEAR_RET-${testname} PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+          WILL_FAIL "${resultcode}"
+      )
     endif ()
   endmacro ()
 
@@ -163,28 +208,21 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5CLEAR_FILESIZE_TEST-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-                  testfiles/${testname}_before_size.out
-                  testfiles/${testname}_before_size.out.err
-                  testfiles/${testname}_after_size.out
-                  testfiles/${testname}_after_size.out.err
-                  testfiles/${testname}.h5
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/${testname}.h5
       )
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5CLEAR_FILESIZE_TEST-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
       add_test (
           NAME H5CLEAR_FILESIZE_TEST-copy_${testname}
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different
               "${PROJECT_SOURCE_DIR}/testfiles/${testname}.h5" "${PROJECT_BINARY_DIR}/testfiles/${testname}.h5"
       )
-      set_tests_properties (H5CLEAR_FILESIZE_TEST-copy_${testname} PROPERTIES DEPENDS H5CLEAR_FILESIZE_TEST-${testname}-clear-objects)
+      set_tests_properties (H5CLEAR_FILESIZE_TEST-copy_${testname} PROPERTIES
+          DEPENDS H5CLEAR_FILESIZE_TEST-${testname}-clear-objects
+      )
       add_test (
           NAME H5CLEAR_FILESIZE_CMP-${testname}_before_size
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear${tgt_ext}>"
               -D "TEST_ARGS:STRING=--filesize;${testname}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testname}_before_size.out"
@@ -192,34 +230,102 @@
               -D "TEST_REFERENCE=${resultfile}_before_size.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_before_size PROPERTIES DEPENDS H5CLEAR_FILESIZE_TEST-copy_${testname})
+      set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_before_size PROPERTIES
+          DEPENDS H5CLEAR_FILESIZE_TEST-copy_${testname}
+      )
       if (NOT ${incr_size} MATCHES "NONE")
           add_test (
               NAME H5CLEAR_FILESIZE_INCR-${testname}
-              COMMAND $<TARGET_FILE:h5clear> --increment=${incr_size} ${testname}.h5
+              COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5clear${tgt_ext}> --increment=${incr_size} ${testname}.h5
           )
       else ()
           add_test (
               NAME H5CLEAR_FILESIZE_INCR-${testname}
-              COMMAND $<TARGET_FILE:h5clear> --increment ${testname}.h5
+              COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5clear${tgt_ext}> --increment ${testname}.h5
           )
       endif ()
-      set_tests_properties (H5CLEAR_FILESIZE_INCR-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      set_tests_properties (H5CLEAR_FILESIZE_INCR-${testname} PROPERTIES WILL_FAIL "${resultcode}")
-      set_tests_properties (H5CLEAR_FILESIZE_INCR-${testname} PROPERTIES DEPENDS H5CLEAR_FILESIZE_CMP-${testname}_before_size)
+      set_tests_properties (H5CLEAR_FILESIZE_INCR-${testname} PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+          WILL_FAIL "${resultcode}"
+          DEPENDS H5CLEAR_FILESIZE_CMP-${testname}_before_size
+      )
       add_test (
           NAME H5CLEAR_FILESIZE_CMP-${testname}_after_size
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear>"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear${tgt_ext}>"
               -D "TEST_ARGS:STRING=--filesize;${testname}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testname}_after_size.out"
-              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=${resultfile}_after_size.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_after_size PROPERTIES DEPENDS H5CLEAR_FILESIZE_INCR-${testname})
-      set (last_test "H5CLEAR_FILESIZE_CMP-${testname}_after_size")
+      set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_after_size PROPERTIES
+          DEPENDS H5CLEAR_FILESIZE_INCR-${testname}
+      )
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_FILESIZE_FAIL_TEST testname resultcode resultfile incr_size)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5CLEAR_FILESIZE_FAIL_TEST-${testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/${testname}.h5
+      )
+      add_test (
+          NAME H5CLEAR_FILESIZE_FAIL_TEST-copy_${testname}
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different
+              "${PROJECT_SOURCE_DIR}/testfiles/${testname}.h5" "${PROJECT_BINARY_DIR}/testfiles/${testname}.h5"
+      )
+      set_tests_properties (H5CLEAR_FILESIZE_FAIL_TEST-copy_${testname} PROPERTIES
+          DEPENDS H5CLEAR_FILESIZE_FAIL_TEST-${testname}-clear-objects
+      )
+      add_test (
+          NAME H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear${tgt_ext}>"
+              -D "TEST_ARGS:STRING=--filesize;${testname}.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}_before_size.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.mty"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size PROPERTIES
+          DEPENDS H5CLEAR_FILESIZE_FAIL_TEST-copy_${testname}
+      )
+      if (NOT ${incr_size} MATCHES "NONE")
+          add_test (
+              NAME H5CLEAR_FILESIZE_FAIL_INCR-${testname}
+              COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5clear${tgt_ext}> -s --increment=${incr_size} ${testname}.h5
+          )
+      else ()
+          add_test (
+              NAME H5CLEAR_FILESIZE_FAIL_INCR-${testname}
+              COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5clear${tgt_ext}> -s --increment ${testname}.h5
+          )
+      endif ()
+      set_tests_properties (H5CLEAR_FILESIZE_FAIL_INCR-${testname} PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+          DEPENDS H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size
+      )
+      add_test (
+          NAME H5CLEAR_FILESIZE_FAIL_CMP-${testname}_after_size
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5clear${tgt_ext}>"
+              -D "TEST_ARGS:STRING=--filesize;${testname}.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}_after_size.out"
+              -D "TEST_EXPECT=0"
+              -D "TEST_REFERENCE=${resultfile}_after_size.ddl"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5CLEAR_FILESIZE_FAIL_CMP-${testname}_after_size PROPERTIES
+          DEPENDS H5CLEAR_FILESIZE_FAIL_INCR-${testname}
+      )
     endif ()
   endmacro ()
 
@@ -227,32 +333,39 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5CLEAR-clr_open_chk-copy_${testname}.h5
-          COMMAND    ${CMAKE_COMMAND}
-              -E copy_if_different
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different
               "${PROJECT_SOURCE_DIR}/testfiles/${testfile}.h5" "${PROJECT_BINARY_DIR}/testfiles/${testfile}.h5"
       )
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5CLEAR-clr_open_chk-copy_${testname}.h5 PROPERTIES DEPENDS ${last_test})
-      endif ()
-      set (last_test "H5CLEAR-clr_open_chk-copy_${testname}.h5")
 
       # Initial file open fails OR
       # File open succeeds because the library does not check status_flags for file with < v3 superblock
-      add_test (NAME H5CLEAR-clr_open_chk-${testname}_${resultcode} COMMAND $<TARGET_FILE:clear_open_chk> ${testfile}.h5)
-      set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES WILL_FAIL "${resultcode}")
-      set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES DEPENDS ${last_test})
-      endif ()
+      add_test (
+          NAME H5CLEAR-clr_open_chk-${testname}_${resultcode}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:clear_open_chk> ${testfile}.h5
+      )
+      set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES
+          WILL_FAIL "${resultcode}"
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+          DEPENDS H5CLEAR-clr_open_chk-copy_${testname}.h5
+      )
 
       # After "h5clear" the file, the subsequent file open succeeds
-      add_test (NAME H5CLEAR-h5clr-${testname} COMMAND $<TARGET_FILE:h5clear> -s ${testfile}.h5)
-      set_tests_properties (H5CLEAR-h5clr-${testname} PROPERTIES DEPENDS H5CLEAR-clr_open_chk-${testname}_${resultcode})
-      set_tests_properties (H5CLEAR-h5clr-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      add_test (NAME H5CLEAR-clr_open_chk-${testname} COMMAND $<TARGET_FILE:clear_open_chk> ${testfile}.h5)
-      set_tests_properties (H5CLEAR-clr_open_chk-${testname} PROPERTIES DEPENDS H5CLEAR-h5clr-${testname})
-      set_tests_properties (H5CLEAR-clr_open_chk-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      set (last_test "H5CLEAR-clr_open_chk-${testname}")
+      add_test (
+          NAME H5CLEAR-h5clr-${testname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5clear${tgt_ext}> -s ${testfile}.h5
+      )
+      set_tests_properties (H5CLEAR-h5clr-${testname} PROPERTIES
+          DEPENDS H5CLEAR-clr_open_chk-${testname}_${resultcode}
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+      )
+      add_test (
+          NAME H5CLEAR-clr_open_chk-${testname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:clear_open_chk> ${testfile}.h5
+      )
+      set_tests_properties (H5CLEAR-clr_open_chk-${testname} PROPERTIES
+          DEPENDS H5CLEAR-h5clr-${testname}
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+      )
     endif ()
   endmacro ()
 
@@ -261,73 +374,6 @@
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-#
-#
-#
-# The following are tests to verify the status_flags field is cleared properly:
-if (HDF5_ENABLE_USING_MEMCHECKER)
-  # Remove any output file left over from previous test run
-  add_test (
-    NAME H5CLEAR-clearall-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        h5clear_log_v3.h5
-        h5clear_mdc_image.h5
-        h5clear_sec2_v0.h5
-        h5clear_sec2_v2.h5
-        h5clear_sec2_v3.h5
-        orig_h5clear_sec2_v0.h5
-        orig_h5clear_sec2_v2.h5
-        orig_h5clear_sec2_v3.h5
-        latest_h5clear_log_v3.h5
-        latest_h5clear_sec2_v3.h5
-        mod_h5clear_mdc_image.h5
-        mod_h5clear_mdc_image2.h5
-        ${HDF5_TEST_FILES}
-  )
-  if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (H5CLEAR-clearall-objects PROPERTIES DEPENDS ${last_test})
-  endif ()
-  set (last_test "H5CLEAR-clearall-objects")
-
-  foreach (h5_file ${HDF5_TEST_FILES} ${HDF5_SEC2_TEST_FILES})
-    add_test (
-      NAME H5CLEAR-copy_${h5_file}
-      COMMAND    ${CMAKE_COMMAND}
-          -E copy_if_different
-          "${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}"
-    )
-    if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (H5CLEAR-copy_${h5_file} PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5CLEAR-copy_${h5_file}")
-  endforeach ()
-  # make second copy of h5clear_sec2.h5
-  foreach (h5_file ${HDF5_SEC2_TEST_FILES})
-    add_test (
-      NAME H5CLEAR-copy_orig_${h5_file}
-      COMMAND    ${CMAKE_COMMAND}
-          -E copy_if_different
-          "${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/orig_${h5_file}"
-    )
-    if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (H5CLEAR-copy_orig_${h5_file} PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "H5CLEAR-copy_orig_${h5_file}")
-  endforeach ()
-  # make second copy of mod_h5clear_mdc_image.h5
-  add_test (
-      NAME H5CLEAR-copy_mod_h5clr_mdc_image2.h5
-      COMMAND    ${CMAKE_COMMAND}
-          -E copy_if_different
-          "${PROJECT_SOURCE_DIR}/testfiles/mod_h5clear_mdc_image.h5" "${PROJECT_BINARY_DIR}/testfiles/mod_h5clear_mdc_image2.h5"
-  )
-  if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (H5CLEAR-copy_mod_h5clr_mdc_image2.h5 PROPERTIES DEPENDS ${last_test})
-  endif ()
-  set (last_test "H5CLEAR-copy_mod_h5clr_mdc_image2.h5")
-endif()
-
 #
 #
 #
@@ -347,11 +393,11 @@ endif()
   ADD_H5_CMP (h5clr_usage_junk h5clear_usage 1 "" junk.h5)
   ADD_H5_CMP (h5clr_usage_none h5clear_usage 1 "" orig_h5clear_sec2_v3.h5)
   ADD_H5_CMP (h5clr_missing_file_m h5clear_missing_file 1 "-m")
-  ADD_H5_CMP (h5clr_open_fail_s h5clear_open_fail 1 "-s" junk.h5)
+  ADD_H5_ERR_CMP (h5clr_open_fail_s h5clear_open_fail 1 "-s" junk.h5)
   ADD_H5_CMP (h5clr_missing_file_ms h5clear_missing_file 1 "-m" "-s")
-  ADD_H5_CMP (h5clr_open_fail_ms h5clear_open_fail 1 "-m" "-s"  junk.h5)
-  ADD_H5_CMP (h5clr_no_mdc_image_m h5clear_no_mdc_image 0 "-m" orig_h5clear_sec2_v2.h5)
-  ADD_H5_CMP (h5clr_no_mdc_image_ms h5clear_no_mdc_image 0 "-s" "-m" orig_h5clear_sec2_v0.h5)
+  ADD_H5_ERR_CMP (h5clr_open_fail_ms h5clear_open_fail 1 "-m" "-s"  junk.h5)
+  ADD_H5_ERR_CMP (h5clr_no_mdc_image_m h5clear_no_mdc_image 0 "-m" orig_h5clear_sec2_v2.h5)
+  ADD_H5_ERR_CMP (h5clr_no_mdc_image_ms h5clear_no_mdc_image 0 "-s" "-m" orig_h5clear_sec2_v0.h5)
 #
 #
 #
@@ -382,8 +428,8 @@ endif()
 #
 #
 # h5clear_mdc_image.h5 already has cache image removed earlier, verify the expected warning from h5clear:
-  ADD_H5_CMP (h5clr_mdc_image_m h5clear_no_mdc_image 0 "-m" mod_h5clear_mdc_image.h5)
-  ADD_H5_CMP (h5clr_mdc_image_sm h5clear_no_mdc_image 0 "-s" "-m" mod_h5clear_mdc_image2.h5)
+  ADD_H5_ERR_CMP (h5clr_mdc_image_m h5clear_no_mdc_image 0 "-m" mod_h5clear_mdc_image.h5)
+  ADD_H5_ERR_CMP (h5clr_mdc_image_sm h5clear_no_mdc_image 0 "-s" "-m" mod_h5clear_mdc_image2.h5)
 #
 #
 #
@@ -404,9 +450,7 @@ endif()
 # "h5clear -s --increment=0 h5clear_status_noclose.h5"  (clear status_flag, EOA = MAX(EOA, EOF) + 0)
 #                                                       (no output, check exit code)
 # "h5clear --filesize h5clear_status_noclose.h5"        (print EOA/EOF after the last action)
-  ADD_H5_CMP_WITH_COPY (h5clr_open_fail_nc_s 1 h5clear_open_fail h5clear_status_noclose.h5 "--filesize")
-  ADD_H5_RETTEST (h5clr_mdc_image_nc "false" "-s" "--increment=0" h5clear_status_noclose.h5)
-  ADD_H5_CMP (h5clr_no_mdc_image_nc_m h5clear_status_noclose_after_size 0 "--filesize" h5clear_status_noclose.h5)
+  ADD_H5_FILESIZE_FAIL_TEST (h5clear_status_noclose 1 h5clear_status_noclose 0)
 #
 # (2) h5clear_fsm_persist_noclose.h5
 # "h5clear --filesize h5clear_fsm_persist_noclose.h5"       (print EOA/EOF before the next action)

@@ -88,7 +88,7 @@ MODULE H5LIB
   !
   ! H5I flags declaration
   !
-  INTEGER, PARAMETER :: H5I_FLAGS_LEN = 7
+  INTEGER, PARAMETER :: H5I_FLAGS_LEN = 17
   INTEGER, DIMENSION(1:H5I_FLAGS_LEN) :: H5I_flags
   !
   ! H5L flags declaration
@@ -98,8 +98,8 @@ MODULE H5LIB
   !
   ! H5O flags declaration
   !
-  INTEGER, PARAMETER :: H5O_FLAGS_LEN = 27
-  INTEGER, DIMENSION(1:H5O_FLAGS_LEN) :: H5o_flags
+  INTEGER, PARAMETER :: H5O_FLAGS_LEN = 33
+  INTEGER, DIMENSION(1:H5O_FLAGS_LEN) :: H5O_flags
   !
   ! H5P flags declaration
   !
@@ -129,6 +129,7 @@ MODULE H5LIB
   !
   INTEGER, PARAMETER :: H5T_FLAGS_LEN = 35
   INTEGER, DIMENSION(1:H5T_FLAGS_LEN) :: H5T_flags
+
   !
   ! H5Z flags declaration
   !
@@ -139,8 +140,8 @@ MODULE H5LIB
   !
   INTEGER, PARAMETER :: H5LIB_FLAGS_LEN =  2
   INTEGER, DIMENSION(1:H5LIB_FLAGS_LEN) :: H5LIB_flags
-  
-  PUBLIC :: h5open_f, h5close_f, h5get_libversion_f, h5dont_atexit_f, h5kind_to_type, h5offsetof
+
+  PUBLIC :: h5open_f, h5close_f, h5get_libversion_f, h5dont_atexit_f, h5kind_to_type, h5offsetof, h5gmtime
   PUBLIC :: h5garbage_collect_f, h5check_version_f
 
 CONTAINS
@@ -443,13 +444,23 @@ CONTAINS
     !
     ! H5I flags declaration
     !
-    H5I_FILE_F      = H5I_flags(1)
-    H5I_GROUP_F     = H5I_flags(2)
-    H5I_DATATYPE_F  = H5I_flags(3)
-    H5I_DATASPACE_F = H5I_flags(4)
-    H5I_DATASET_F   = H5I_flags(5)
-    H5I_ATTR_F      = H5I_flags(6)
-    H5I_BADID_F     = H5I_flags(7)
+    H5I_FILE_F        = H5I_flags(1)
+    H5I_GROUP_F       = H5I_flags(2)
+    H5I_DATATYPE_F    = H5I_flags(3)
+    H5I_DATASPACE_F   = H5I_flags(4)
+    H5I_DATASET_F     = H5I_flags(5)
+    H5I_ATTR_F        = H5I_flags(6)
+    H5I_BADID_F       = H5I_flags(7)
+    H5I_UNINIT_F      = H5I_flags(8)
+    H5I_VFL_F         = H5I_flags(9)
+    H5I_VOL_F         = H5I_flags(10)
+    H5I_GENPROP_CLS_F = H5I_flags(11)
+    H5I_GENPROP_LST_F = H5I_flags(12)
+    H5I_ERROR_CLASS_F = H5I_flags(13)
+    H5I_ERROR_MSG_F   = H5I_flags(14)
+    H5I_ERROR_STACK_F = H5I_flags(15)
+    H5I_NTYPES_F      = H5I_flags(16)
+    H5I_INVALID_HID_F = H5I_flags(17)
     !
     ! H5L flags
     !    
@@ -488,7 +499,13 @@ CONTAINS
     H5O_TYPE_GROUP_F               = h5o_flags(24) 
     H5O_TYPE_DATASET_F             = h5o_flags(25) 
     H5O_TYPE_NAMED_DATATYPE_F      = h5o_flags(26) 
-    H5O_TYPE_NTYPES_F              = h5o_flags(27) 
+    H5O_TYPE_NTYPES_F              = h5o_flags(27)
+    H5O_INFO_ALL_F                 = h5o_flags(28)
+    H5O_INFO_BASIC_F               = h5o_flags(29)
+    H5O_INFO_TIME_F                = h5o_flags(30)
+    H5O_INFO_NUM_ATTRS_F           = h5o_flags(31)
+    H5O_INFO_HDR_F                 = h5o_flags(32)
+    H5O_INFO_META_SIZE_F           = h5o_flags(33)
     !
     ! H5P flags
     !    
@@ -897,5 +914,63 @@ CONTAINS
     offset = int_address_end - int_address_start
 
   END FUNCTION h5offsetof
+
+!****f* H5LIB_PROVISIONAL/h5gmtime
+!
+! NAME
+!  h5gmtime
+!
+! PURPOSE
+!  Convert time_t structure (C) to Fortran DATE AND TIME storage format.
+!
+! Inputs:
+!  stdtime_t - Object of type time_t that contains a time value
+!
+! Outputs:
+!   datetime - A date/time array using Fortran conventions:
+!   datetime(1)     = year
+!   datetime(2)     = month
+!   datetime(3)     = day
+!   datetime(4)     = 0 ! time is expressed as UTC (or GMT timezone) */
+!   datetime(5)     = hour
+!   datetime(6)     = minute
+!   datetime(7)     = second
+!   datetime(8)     = millisecond -- not available, assigned - HUGE(0)
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  January, 2019
+!
+! Fortran Interface:
+  FUNCTION h5gmtime(stdtime_t)
+    IMPLICIT NONE
+    INTEGER(KIND=TIME_T), INTENT(IN) :: stdtime_t
+    INTEGER, DIMENSION(1:8) :: h5gmtime
+!*****
+    TYPE(C_PTR) :: cptr
+    INTEGER(C_INT), DIMENSION(:), POINTER :: c_time
+
+    INTERFACE
+       FUNCTION gmtime(stdtime_t) BIND(C, NAME='gmtime')
+         IMPORT :: TIME_T, C_PTR
+         IMPLICIT NONE
+         INTEGER(KIND=TIME_T) :: stdtime_t
+         TYPE(C_PTR) :: gmtime
+       END FUNCTION gmtime
+    END INTERFACE
+
+    cptr = gmtime(stdtime_t)
+    CALL C_F_POINTER(cptr, c_time, [9])
+
+    h5gmtime(1) = INT(c_time(6)+1900) ! year starts at 1900
+    h5gmtime(2) = INT(c_time(5)+1)    ! month starts at 0 in C
+    h5gmtime(3) = INT(c_time(4))      ! day
+    h5gmtime(4) = 0                   ! time is expressed as UTC (or GMT timezone)
+    h5gmtime(5) = INT(c_time(3))      ! hour
+    h5gmtime(6) = INT(c_time(2))      ! minute
+    h5gmtime(7) = INT(c_time(1))      ! second
+    h5gmtime(8) = -32767              ! millisecond is not available, assign it -HUGE(0)
+
+  END FUNCTION h5gmtime
 
 END MODULE H5LIB

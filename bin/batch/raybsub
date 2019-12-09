@@ -1,0 +1,7 @@
+#!/bin/tcsh
+
+# ray.llnl.gov requires a '<' with bsub for submitting .lsf batch jobs.
+# CMake is reluctant to pass the '<', so we put it in this script and use
+# the script to submit the bsub command on ray.
+
+bsub < $1

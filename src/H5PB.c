@@ -75,32 +75,28 @@ static void H5PB__deallocate_page(H5PB_entry_t *entry_ptr);
 static herr_t H5PB__evict_entry(H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr, 
     hbool_t force);
 
-static herr_t H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, 
-    H5PB_entry_t *entry_ptr);
+static herr_t H5PB__flush_entry(H5F_shared_t *, H5PB_t *, H5PB_entry_t *);
 
-static herr_t H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, 
-    H5FD_mem_t type, H5PB_entry_t **entry_ptr_ptr);
+static herr_t H5PB__load_page(H5F_shared_t *, H5PB_t *, haddr_t,
+    H5FD_mem_t, H5PB_entry_t **);
 
-static herr_t H5PB__make_space(H5F_t *f, H5PB_t *pb_ptr, 
-    H5FD_mem_t inserted_type);
+static herr_t H5PB__make_space(H5F_shared_t *, H5PB_t *, H5FD_mem_t);
 
-static herr_t H5PB__mark_entry_clean(H5PB_t *pb_ptr, 
-    H5PB_entry_t *entry_ptr);
+static herr_t H5PB__mark_entry_clean(H5PB_t *, H5PB_entry_t *);
 
-static herr_t H5PB__mark_entry_dirty(H5F_t * f, H5PB_t *pb_ptr, 
-    H5PB_entry_t *entry_ptr);
+static herr_t H5PB__mark_entry_dirty(H5F_shared_t *, H5PB_t *, H5PB_entry_t *);
 
-static herr_t H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, 
-    size_t size, void *buf/*out*/);
+static herr_t H5PB__read_meta(H5F_shared_t *, H5FD_mem_t, haddr_t,
+    size_t, void *);
 
-static herr_t H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, 
-    size_t size, void *buf/*out*/);
+static herr_t H5PB__read_raw(H5F_shared_t *, H5FD_mem_t, haddr_t,
+    size_t, void *);
 
-static herr_t H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, 
-    size_t size, const void *buf/*out*/);
+static herr_t H5PB__write_meta(H5F_shared_t *, H5FD_mem_t, haddr_t, 
+    size_t, const void *);
 
-static herr_t H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, 
-    size_t size, const void *buf/*out*/);
+static herr_t H5PB__write_raw(H5F_shared_t *, H5FD_mem_t, haddr_t, 
+    size_t, const void *);
 
 static void ldbgf(const char *, ...) H5_ATTR_FORMAT(printf, 1, 2);
 
@@ -438,7 +434,7 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5PB_add_new_page(H5F_t *f, H5FD_mem_t type, haddr_t page_addr)
+H5PB_add_new_page(H5F_shared_t *shared, H5FD_mem_t type, haddr_t page_addr)
 {
     hbool_t can_insert = TRUE;
     H5PB_t *pb_ptr = NULL;
@@ -448,11 +444,10 @@ H5PB_add_new_page(H5F_t *f, H5FD_mem_t type, haddr_t page_addr)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->pb_ptr);
+    HDassert(shared);
+    HDassert(shared->pb_ptr);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
@@ -509,7 +504,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc, 
+H5PB_create(H5F_shared_t *shared, size_t size, unsigned page_buf_min_meta_perc, 
             unsigned page_buf_min_raw_perc)
 {
     hbool_t vfd_swmr_writer = FALSE;
@@ -522,30 +517,29 @@ H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    HDassert(shared);
     HDassert(page_buf_min_meta_perc <= 100);
     HDassert(page_buf_min_raw_perc <= 100);
     HDassert((page_buf_min_meta_perc + page_buf_min_raw_perc) <= 100);
 
     /* Check args */
-    if ( f->shared->fs_strategy != H5F_FSPACE_STRATEGY_PAGE )
+    if ( shared->fs_strategy != H5F_FSPACE_STRATEGY_PAGE )
 
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, \
                     "Enabling Page Buffering requires PAGE file space strategy")
 
-    else if ( size > f->shared->fs_page_size ) {
+    else if ( size > shared->fs_page_size ) {
 
         /* round size down to the next multiple of fs_page_size */
 
         hsize_t temp_size;
 
-        temp_size = (size / f->shared->fs_page_size) * f->shared->fs_page_size;
+        temp_size = (size / shared->fs_page_size) * shared->fs_page_size;
 
         H5_CHECKED_ASSIGN(size, size_t, temp_size, hsize_t);
 
     } /* end if */
-    else if ( 0 != size % f->shared->fs_page_size )
+    else if ( 0 != size % shared->fs_page_size )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTINIT, FAIL, \
                     "Page Buffer size must be >= to the page size")
@@ -554,19 +548,19 @@ H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc,
      * based on the fractions provided 
      */
     min_md_pages = (int32_t)((size * page_buf_min_meta_perc) / 
-                             (f->shared->fs_page_size * 100));
+                             (shared->fs_page_size * 100));
     min_rd_pages = (int32_t)((size * page_buf_min_raw_perc) / 
-                             (f->shared->fs_page_size * 100));
+                             (shared->fs_page_size * 100));
     HDassert(min_md_pages >= 0);
     HDassert(min_rd_pages >= 0);
     HDassert((min_md_pages + min_rd_pages) <= 
-             (int32_t)(size / f->shared->fs_page_size));
+             (int32_t)(size / shared->fs_page_size));
 
 
     /* compute vfd_swmr_writer */
-    if ( ( H5F_VFD_SWMR_CONFIG(f) ) && ( H5F_INTENT(f) & H5F_ACC_RDWR ) ) {
+    if ( ( H5F_SHARED_VFD_SWMR_CONFIG(shared) ) && ( H5F_SHARED_INTENT(shared) & H5F_ACC_RDWR ) ) {
 
-        HDassert(f->shared->vfd_swmr_config.writer);
+        HDassert(shared->vfd_swmr_config.writer);
         vfd_swmr_writer = TRUE;
     }
 
@@ -579,10 +573,10 @@ H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc,
     /* initialize the new instance of H5PB_t */
 
     pb_ptr->magic            = H5PB__H5PB_T_MAGIC;
-    pb_ptr->page_size        = f->shared->fs_page_size;
+    pb_ptr->page_size        = shared->fs_page_size;
     H5_CHECKED_ASSIGN(pb_ptr->page_size, size_t, \
-                      f->shared->fs_page_size, hsize_t);
-    pb_ptr->max_pages        = (int32_t)(size / f->shared->fs_page_size);
+                      shared->fs_page_size, hsize_t);
+    pb_ptr->max_pages        = (int32_t)(size / shared->fs_page_size);
     pb_ptr->curr_pages       = 0;
     pb_ptr->curr_md_pages    = 0;
     pb_ptr->curr_rd_pages    = 0;
@@ -636,7 +630,7 @@ H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc,
 
     H5PB_reset_stats(pb_ptr);
 
-    f->shared->pb_ptr = pb_ptr;
+    shared->pb_ptr = pb_ptr;
 
     /* if this is a VFD SWMR reader, inform the reader VFD that the 
      * page buffer is configured.  Note that this is for sanity 
@@ -646,13 +640,13 @@ H5PB_create(H5F_t *f, size_t size, unsigned page_buf_min_meta_perc,
      * removed.
      *                               JRM -- 1/29/19
      */
-    if ( ( H5F_VFD_SWMR_CONFIG(f) ) && 
-         ( 0 == (H5F_INTENT(f) & H5F_ACC_RDWR) ) ) {
+    if ( ( H5F_SHARED_VFD_SWMR_CONFIG(shared) ) && 
+         ( 0 == (H5F_SHARED_INTENT(shared) & H5F_ACC_RDWR) ) ) {
 
-        HDassert(f->shared->lf);
-        HDassert(! f->shared->vfd_swmr_config.writer);
+        HDassert(shared->lf);
+        HDassert(! shared->vfd_swmr_config.writer);
 
-        H5FD_vfd_swmr_set_pb_configured(f->shared->lf);
+        H5FD_vfd_swmr_set_pb_configured(shared->lf);
     }
 
 done:
@@ -687,7 +681,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_dest(H5F_t *f)
+H5PB_dest(H5F_shared_t *shared)
 {
     int i;
     H5PB_t *pb_ptr = NULL;
@@ -698,13 +692,12 @@ H5PB_dest(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    HDassert(shared);
 
     /* flush and destroy the page buffer, if it exists */
-    if ( f->shared->pb_ptr ) {
+    if ( shared->pb_ptr ) {
 
-        pb_ptr = f->shared->pb_ptr;
+        pb_ptr = shared->pb_ptr;
 
         HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
@@ -724,7 +717,7 @@ H5PB_dest(H5F_t *f)
 
                 if ( evict_ptr->is_dirty ) {
 
-                    if ( H5PB__flush_entry(f, pb_ptr, evict_ptr) < 0 )
+                    if ( H5PB__flush_entry(shared, pb_ptr, evict_ptr) < 0 )
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                                     "Can't flush entry")
@@ -762,7 +755,7 @@ H5PB_dest(H5F_t *f)
         HDassert(pb_ptr->tl_tail_ptr == NULL);
 
         pb_ptr->magic = 0;
-        f->shared->pb_ptr = H5FL_FREE(H5PB_t, pb_ptr);
+        shared->pb_ptr = H5FL_FREE(H5PB_t, pb_ptr);
     }
 
 done:
@@ -787,7 +780,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_flush(H5F_t *f)
+H5PB_flush(H5F_shared_t *shared)
 {
     int i;
     H5PB_t *pb_ptr = NULL;
@@ -798,10 +791,9 @@ H5PB_flush(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
+    HDassert(shared);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     if ( pb_ptr ) {
 
@@ -830,11 +822,11 @@ H5PB_flush(H5F_t *f)
                               " until %" PRIu64 " (now %" PRIu64 ")\n",
                               __func__, flush_ptr->size, flush_ptr->page,
                               flush_ptr->delay_write_until,
-                              f->shared->tick_num);
+                              shared->tick_num);
                         continue;
                     }
 
-                    if ( H5PB__flush_entry(f, pb_ptr, flush_ptr) < 0 )
+                    if ( H5PB__flush_entry(shared, pb_ptr, flush_ptr) < 0 )
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                                     "Can't flush entry")
@@ -869,7 +861,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_page_exists(H5F_t *f, haddr_t addr, hbool_t *page_exists_ptr)
+H5PB_page_exists(H5F_shared_t *shared, haddr_t addr, hbool_t *page_exists_ptr)
 {
     uint64_t page;
     H5PB_t *pb_ptr = NULL;
@@ -879,11 +871,10 @@ H5PB_page_exists(H5F_t *f, haddr_t addr, hbool_t *page_exists_ptr)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->pb_ptr);
+    HDassert(shared);
+    HDassert(shared->pb_ptr);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert(page_exists_ptr);
@@ -1053,7 +1044,7 @@ done:
  * are operating in parallel mode.
  */
 herr_t
-H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, 
           void *buf/*out*/)
 {
     H5PB_t *pb_ptr;                    /* Page buffer for this file */
@@ -1063,11 +1054,10 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    HDassert(shared);
     HDassert(type != H5FD_MEM_GHEAP);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     if ( pb_ptr == NULL ) {
 
@@ -1099,7 +1089,7 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     /* at present, the page buffer must be disabled in the parallel case.
      * However, just in case ...
      */
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+    if(H5F_SHARED_HAS_FEATURE(shared, H5FD_FEAT_HAS_MPI)) {
 
         bypass_pb = TRUE;
 
@@ -1108,7 +1098,7 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
     if ( bypass_pb ) { /* cases 1, 2. and 5 */
 
-        if ( H5FD_read(f->shared->lf, type, addr, size, buf) < 0 ) 
+        if ( H5FD_read(shared->lf, type, addr, size, buf) < 0 ) 
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                         "read through metadata accumulator failed")
@@ -1122,14 +1112,14 @@ H5PB_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
         if ( H5FD_MEM_DRAW == type ) { /* cases 3 and 4 */
 
-            if ( H5PB__read_raw(f, type, addr, size, buf) < 0 )
+            if ( H5PB__read_raw(shared, type, addr, size, buf) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                             "H5PB_read_raw() failed")
 
         } else { /* cases 6, 7, 8, 9, and 10 */
 
-            if ( H5PB__read_meta(f, type, addr, size, buf) < 0 )
+            if ( H5PB__read_meta(shared, type, addr, size, buf) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                             "H5PB_read_meta() failed")
@@ -1187,7 +1177,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_remove_entry(const H5F_t *f, haddr_t addr)
+H5PB_remove_entry(const H5F_shared_t *shared, haddr_t addr)
 {
     uint64_t page;
     H5PB_t *pb_ptr = NULL;
@@ -1197,11 +1187,10 @@ H5PB_remove_entry(const H5F_t *f, haddr_t addr)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->pb_ptr);
+    HDassert(shared);
+    HDassert(shared->pb_ptr);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     /* Calculate the page offset */
     page = (addr / pb_ptr->page_size);
@@ -1395,7 +1384,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5PB_vfd_swmr__release_delayed_writes(H5F_t * f)
+H5PB_vfd_swmr__release_delayed_writes(H5F_shared_t *shared)
 {
     H5PB_t * pb_ptr = NULL;
     H5PB_entry_t *entry_ptr = NULL;
@@ -1404,19 +1393,18 @@ H5PB_vfd_swmr__release_delayed_writes(H5F_t * f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->vfd_swmr);
-    HDassert(f->shared->vfd_swmr_writer);
+    HDassert(shared);
+    HDassert(shared->vfd_swmr);
+    HDassert(shared->vfd_swmr_writer);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr);
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert(pb_ptr->vfd_swmr_writer);
 
     while (pb_ptr->dwl_tail_ptr &&
-           pb_ptr->dwl_tail_ptr->delay_write_until <= f->shared->tick_num) {
+           pb_ptr->dwl_tail_ptr->delay_write_until <= shared->tick_num) {
 
         entry_ptr = pb_ptr->dwl_tail_ptr;
 
@@ -1428,7 +1416,7 @@ H5PB_vfd_swmr__release_delayed_writes(H5F_t * f)
 
         if ( entry_ptr->is_mpmde ) { /* flush and evict now */
             
-            if ( H5PB__flush_entry(f, pb_ptr, entry_ptr) < 0 )
+            if ( H5PB__flush_entry(shared, pb_ptr, entry_ptr) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "flush of mpmde failed")
@@ -1472,7 +1460,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5PB_vfd_swmr__release_tick_list(H5F_t * f)
+H5PB_vfd_swmr__release_tick_list(H5F_shared_t *shared)
 {
     H5PB_t * pb_ptr = NULL;
     H5PB_entry_t *entry_ptr = NULL;
@@ -1481,12 +1469,11 @@ H5PB_vfd_swmr__release_tick_list(H5F_t * f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->vfd_swmr);
-    HDassert(f->shared->vfd_swmr_writer);
+    HDassert(shared);
+    HDassert(shared->vfd_swmr);
+    HDassert(shared->vfd_swmr_writer);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr);
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
@@ -1508,7 +1495,7 @@ H5PB_vfd_swmr__release_tick_list(H5F_t * f)
             if ( entry_ptr->delay_write_until == 0 ) {
 
                 /* flush and evict the multi-page metadata entry immediately */
-                if ( H5PB__flush_entry(f, pb_ptr, entry_ptr) < 0 )
+                if ( H5PB__flush_entry(shared, pb_ptr, entry_ptr) < 0 )
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                                 "flush of mpmde failed")
@@ -1556,7 +1543,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5PB_vfd_swmr__set_tick(H5F_t * f)
+H5PB_vfd_swmr__set_tick(H5F_shared_t *shared)
 {
     H5PB_t * pb_ptr = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1564,24 +1551,23 @@ H5PB_vfd_swmr__set_tick(H5F_t * f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->vfd_swmr);
-    HDassert(f->shared->vfd_swmr_writer);
+    HDassert(shared);
+    HDassert(shared->vfd_swmr);
+    HDassert(shared->vfd_swmr_writer);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr);
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert(pb_ptr->vfd_swmr_writer);
 
     /* the tick must always increase by 1 -- verify this */
-    if ( f->shared->tick_num != pb_ptr->cur_tick + 1 )
+    if ( shared->tick_num != pb_ptr->cur_tick + 1 )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
-                    "f->shared->tick_num != pb_ptr->cur_tick + 1 ?!?!")
+                    "shared->tick_num != pb_ptr->cur_tick + 1 ?!?!")
 
-    pb_ptr->cur_tick = f->shared->tick_num;
+    pb_ptr->cur_tick = shared->tick_num;
 
 done:
 
@@ -1610,35 +1596,35 @@ done:
  *              This function is called to accomplish this.  Its cycle of
  *              operation is as follows:
  *
- *              1) Scan the tick list.  For each entry (*pbe_ptr), test 
+ *              1) Scan the tick list.  For each entry (*entry), test 
  *                 to see if it appears in the index.
  *
  *                 If it does the entry must have been modified in the 
  *                 past tick.  Update the index entry (*ie_ptr) as follows:
  *
- *                 a) Set ie_ptr->entry_ptr = pbe_ptr->image_ptr.  This 
+ *                 a) Set ie_ptr->entry_ptr = entry->image_ptr.  This 
  *                    is needed to give the metadata file update code 
  *                    access to the image of the target page or multi-page
  *                    multi-date entry.  Note that ie_ptr->entry_ptr will
  *                    be set to NULL as soon as the metadata file is updated,
- *                    so the buffer pointed to by pbe_ptr->image_ptr can 
+ *                    so the buffer pointed to by entry->image_ptr can 
  *                    be safely discarded at any time after the metadata 
  *                    file update.
  *
  *                 b) Set ie_ptr->tick_of_last_change to the current tick.
  *
- *                 c) If pbe_ptr->is_dirty, set ie_ptr->clean to FALSE.
- *                    If pbe_ptr->is_dirty is FALSE, set ie_ptr->clean
+ *                 c) If entry->is_dirty, set ie_ptr->clean to FALSE.
+ *                    If entry->is_dirty is FALSE, set ie_ptr->clean
  *                    to TRUE and set ie_ptr->tick_of_last_flush to the 
  *                    current tick.
  *
- *                 If the tick list entry (*pbe_ptr) doesn't appear in 
+ *                 If the tick list entry (*entry) doesn't appear in 
  *                 the index, allocate a metadata file index entry (*ie_ptr), 
  *                 and initialize it as follows:
  *
- *                     ie_ptr->hdf5_page_offset = pbe_ptr->page
- *                     ie_ptr->length           = pbe_ptr->size
- *                     ie_ptr->delayed_flush    = pbe_ptr->delay_write_until
+ *                     ie_ptr->hdf5_page_offset = entry->page
+ *                     ie_ptr->length           = entry->size
+ *                     ie_ptr->delayed_flush    = entry->delay_write_until
  * 
  *                 and then update the new entry as per the existing entry
  *                 case described above.
@@ -1677,7 +1663,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5PB_vfd_swmr__update_index(H5F_t * f, 
+H5PB_vfd_swmr__update_index(H5F_shared_t *shared, 
                             uint32_t * idx_ent_added_ptr, 
                             uint32_t * idx_ent_modified_ptr,
                             uint32_t * idx_ent_not_in_tl_ptr,
@@ -1689,7 +1675,7 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
     uint32_t idx_ent_not_in_tl = 0;
     uint32_t idx_ent_not_in_tl_flushed = 0;
     H5PB_t * pb_ptr = NULL;
-    H5PB_entry_t *pbe_ptr = NULL;
+    H5PB_entry_t *entry;
     H5FD_vfd_swmr_idx_entry_t * ie_ptr = NULL;
     H5FD_vfd_swmr_idx_entry_t * idx = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1697,16 +1683,15 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->vfd_swmr);
-    HDassert(f->shared->vfd_swmr_writer);
+    HDassert(shared);
+    HDassert(shared->vfd_swmr);
+    HDassert(shared->vfd_swmr_writer);
 
-    idx = f->shared->mdf_idx;
+    idx = shared->mdf_idx;
 
     HDassert(idx);
     
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr);
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
@@ -1721,44 +1706,19 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
      * as appropriate.
      */
 
-    pbe_ptr = pb_ptr->tl_head_ptr;
-    
-    while ( pbe_ptr ) {
+    for (entry = pb_ptr->tl_head_ptr;
+         entry != NULL;
+         entry = entry->tl_next) {
+        uint64_t target_page = entry->page;
 
-        uint64_t target_page;
-        int32_t top;
-        int32_t bottom;
-        int32_t probe;
-
-        HDassert(pbe_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
+        HDassert(entry->magic == H5PB__H5PB_ENTRY_T_MAGIC);
 
         /* do a binary search on the metadata file index to see if 
-         * it already contains an entry for *pbe_ptr.
+         * it already contains an entry for *entry.
          */
 
-        ie_ptr = NULL; 
-        top = f->shared->mdf_idx_entries_used - 1;
-        bottom = 0;
-        target_page = pbe_ptr->page;
-        
-        while ( top >= bottom ) {
-
-            probe = (top + bottom) / 2;
-
-            if ( idx[probe].hdf5_page_offset < target_page ) {
-
-                bottom = probe + 1;
-
-            } else if ( idx[probe].hdf5_page_offset > target_page ) {
-
-                top = probe - 1;
-
-            } else { /* found it */
-
-                ie_ptr = idx + probe;
-                bottom = top + 1; /* to exit loop */
-            }
-        }
+        ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx,
+            shared->mdf_idx_entries_used, target_page);
 
         if ( ie_ptr == NULL ) { /* alloc new entry in the metadata file index*/
 
@@ -1769,14 +1729,15 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
              */
             uint32_t new_index_entry_index;
 
-            new_index_entry_index = f->shared->mdf_idx_entries_used + 
+            new_index_entry_index = shared->mdf_idx_entries_used + 
                                     idx_ent_added++;
 
-            if ( new_index_entry_index >= f->shared->mdf_idx_len ) {
+            if ( new_index_entry_index >= shared->mdf_idx_len ) {
 
-                HDfprintf(stderr, "\n\nmax mdf index len (%d)exceeded.\n\n",
-                          f->shared->mdf_idx_len);
-                HDfprintf(stderr, "tick = %lld.\n", f->shared->tick_num);
+                HDfprintf(stderr,
+                    "\n\nmax mdf index len (%" PRIu32 ") exceeded.\n\n",
+                    shared->mdf_idx_len);
+                HDfprintf(stderr, "tick = %" PRIu64 ".\n", shared->tick_num);
                 exit(1);
             }
 
@@ -1785,13 +1746,13 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
             /* partial initialization of new entry -- rest done later */
             ie_ptr->hdf5_page_offset     = target_page;
             ie_ptr->md_file_page_offset  = 0; /* undefined at this point */
-            ie_ptr->length               = (uint32_t)(pbe_ptr->size);
+            ie_ptr->length               = (uint32_t)entry->size;
             ie_ptr->chksum               = 0; /* undefined at this point */
             /* ie_ptr->entry_ptr            initialized below */
             /* ie_ptr->tick_of_last_change  initialized below */
             /* ie_ptr->clean                initialized below */
             /* ie_ptr->tick_of_last_flush   initialized below */
-            ie_ptr->delayed_flush        = pbe_ptr->delay_write_until;
+            ie_ptr->delayed_flush        = entry->delay_write_until;
             ie_ptr->moved_to_hdf5_file   = FALSE;
 
         } else {
@@ -1799,13 +1760,13 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
             idx_ent_modified++;
         }
 
-        ie_ptr->entry_ptr            = pbe_ptr->image_ptr;
-        ie_ptr->tick_of_last_change  = f->shared->tick_num;
-        ie_ptr->clean                = !(pbe_ptr->is_dirty);
+        ie_ptr->entry_ptr            = entry->image_ptr;
+        ie_ptr->tick_of_last_change  = shared->tick_num;
+        ie_ptr->clean                = !entry->is_dirty;
 
         if ( ie_ptr->clean ) {
 
-            ie_ptr->tick_of_last_flush = f->shared->tick_num;
+            ie_ptr->tick_of_last_flush = shared->tick_num;
 
         } else {
 
@@ -1813,8 +1774,6 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
         }
 
         HDassert(ie_ptr);
-
-        pbe_ptr = pbe_ptr->tl_next;
     }
 
     /* scan the metadata file index for entries that don't appear in the 
@@ -1822,37 +1781,37 @@ H5PB_vfd_swmr__update_index(H5F_t * f,
      * in the page buffer, or is clean in the page buffer, mark the index
      * entry clean and as having been flushed in the current tick.
      */
-    for ( i = 0; i < f->shared->mdf_idx_entries_used; i++ ) {
+    for ( i = 0; i < shared->mdf_idx_entries_used; i++ ) {
 
         HDassert( ( i == 0 ) || 
                   ( idx[i - 1].hdf5_page_offset < idx[i].hdf5_page_offset ) );
 
-        if ( idx[i].tick_of_last_change < f->shared->tick_num ) {
+        if ( idx[i].tick_of_last_change < shared->tick_num ) {
 
             idx_ent_not_in_tl++;
 
             ie_ptr = idx + i;
 
-            if ( ! ( ie_ptr->clean ) ) {
+            if (!ie_ptr->clean) {
 
                 H5PB__SEARCH_INDEX(pb_ptr, ie_ptr->hdf5_page_offset, \
-                                   pbe_ptr, FAIL);
+                                   entry, FAIL);
 
-                if ( ( ! pbe_ptr ) || ( ! ( pbe_ptr->is_dirty ) ) ) {
+                if (entry == NULL || !entry->is_dirty) {
 
                     idx_ent_not_in_tl_flushed++;
                     ie_ptr->clean = TRUE;
-                    ie_ptr->tick_of_last_flush = f->shared->tick_num;
+                    ie_ptr->tick_of_last_flush = shared->tick_num;
                 }
             }
         }
     }
 
     HDassert(idx_ent_modified + idx_ent_not_in_tl == 
-             f->shared->mdf_idx_entries_used);
+             shared->mdf_idx_entries_used);
 
     HDassert(idx_ent_modified + idx_ent_not_in_tl + idx_ent_added <=
-             f->shared->mdf_idx_len);
+             shared->mdf_idx_len);
 
     *idx_ent_added_ptr             = idx_ent_added;
     *idx_ent_modified_ptr          = idx_ent_modified;
@@ -1944,7 +1903,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, 
            const void *buf)
 {
     H5PB_t *pb_ptr;                    /* Page buffer for this file */
@@ -1954,11 +1913,10 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    HDassert(shared);
     HDassert(type != H5FD_MEM_GHEAP);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     if ( pb_ptr == NULL ) {
 
@@ -1998,7 +1956,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     /* at present, the page buffer must be disabled in the parallel case.
      * However, just in case ...
      */
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+    if(H5F_SHARED_HAS_FEATURE(shared, H5FD_FEAT_HAS_MPI)) {
 
         bypass_pb = TRUE;
 
@@ -2007,7 +1965,7 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
     if ( bypass_pb ) { /* cases 1, 2. 5, and 6 */
 
-        if ( H5FD_write(f->shared->lf, type, addr, size, buf) < 0 )
+        if ( H5FD_write(shared->lf, type, addr, size, buf) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                         "write through metadata accumulator failed")
@@ -2021,14 +1979,14 @@ H5PB_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
         if ( H5FD_MEM_DRAW == type ) { /* cases 3 and 4 */
 
-            if ( H5PB__write_raw(f, type, addr, size, buf) < 0 )
+            if ( H5PB__write_raw(shared, type, addr, size, buf) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "H5PB_read_raw() failed")
 
         } else { /* cases 7, and 8 */
 
-            if ( H5PB__write_meta(f, type, addr, size, buf) < 0 )
+            if ( H5PB__write_meta(shared, type, addr, size, buf) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "H5PB_read_meta() failed")
@@ -2448,7 +2406,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
+H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
 {
     haddr_t eoa;                   /* Current EOA for the file */
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -2456,9 +2414,8 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
+    HDassert(shared);
+    HDassert(shared->lf);
     HDassert(pb_ptr);
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert(entry_ptr);
@@ -2475,7 +2432,7 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
         __func__, entry_ptr->size, entry_ptr->page, entry_ptr->addr);
 
     /* Retrieve the 'eoa' for the file */
-    if ( HADDR_UNDEF == (eoa = H5F_get_eoa(f, entry_ptr->mem_type)) )
+    if ( HADDR_UNDEF == (eoa = H5FD_get_eoa(shared->lf, entry_ptr->mem_type)) )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
                     "driver get_eoa request failed")
@@ -2499,7 +2456,7 @@ H5PB__flush_entry(H5F_t *f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
     HDassert( eoa >= entry_ptr->addr + entry_ptr->size );
 
     /* flush the entry */
-    if ( H5FD_write(f->shared->lf, entry_ptr->mem_type, entry_ptr->addr, 
+    if ( H5FD_write(shared->lf, entry_ptr->mem_type, entry_ptr->addr, 
                     entry_ptr->size, entry_ptr->image_ptr) < 0 )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed")
@@ -2558,8 +2515,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
-    H5PB_entry_t **entry_ptr_ptr)
+H5PB__load_page(H5F_shared_t *shared, H5PB_t *pb_ptr, haddr_t addr,
+    H5FD_mem_t type, H5PB_entry_t **entry_ptr_ptr)
 {
     hbool_t skip_read = FALSE;
     haddr_t eof = HADDR_UNDEF;
@@ -2570,9 +2527,8 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
+    HDassert(shared);
+    HDassert(shared->lf);
     HDassert(pb_ptr);
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert((entry_ptr_ptr == NULL) || (*entry_ptr_ptr == NULL));
@@ -2580,7 +2536,7 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
 #if 0 /* JRM */
     haddr_t eoa;
     /* Retrieve the 'eoa' for the file */
-    if ( HADDR_UNDEF == (eoa = H5F_get_eoa(f, type)))
+    if ( HADDR_UNDEF == (eoa = H5FD_get_eoa(shared->lf, type)))
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
                     "driver get_eoa request failed")
@@ -2589,7 +2545,7 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                     "Attempt to load page that extends past EOA")
 #endif /* JRM */
-    if ( HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)) )
+    if ( HADDR_UNDEF == (eof = H5FD_get_eof(shared->lf, H5FD_MEM_DEFAULT)) )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, \
                     "driver get_eof request failed")
@@ -2606,7 +2562,7 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
 
     /* make space in the page buffer if necessary */
     if ( ( pb_ptr->curr_pages >= pb_ptr->max_pages ) &&
-         ( H5PB__make_space(f, pb_ptr, type) < 0 ) )
+         ( H5PB__make_space(shared, pb_ptr, type) < 0 ) )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                     "H5PB__make_space() reports an error")
@@ -2631,7 +2587,7 @@ H5PB__load_page(H5F_t *f, H5PB_t *pb_ptr, haddr_t addr, H5FD_mem_t type,
      * image buffer associated with the new entry.
      */
     if ( ( ! skip_read ) &&
-         ( H5FD_read(f->shared->lf, type, addr, entry_ptr->size, image_ptr) < 0 ) )
+         ( H5FD_read(shared->lf, type, addr, entry_ptr->size, image_ptr) < 0 ) )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                     "driver read request failed")
@@ -2738,7 +2694,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__make_space(H5F_t *f, H5PB_t *pb_ptr, H5FD_mem_t inserted_type)
+H5PB__make_space(H5F_shared_t *shared, H5PB_t *pb_ptr, H5FD_mem_t inserted_type)
 {
     hbool_t inserting_md;
     H5PB_entry_t *search_ptr;
@@ -2749,7 +2705,6 @@ H5PB__make_space(H5F_t *f, H5PB_t *pb_ptr, H5FD_mem_t inserted_type)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* sanity checks */
-    HDassert(f);
     HDassert(pb_ptr);
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert(pb_ptr->min_md_pages + pb_ptr->min_rd_pages <= pb_ptr->max_pages);
@@ -2813,7 +2768,7 @@ H5PB__make_space(H5F_t *f, H5PB_t *pb_ptr, H5FD_mem_t inserted_type)
                 search_ptr = search_ptr->prev;
             }
 
-            if ( H5PB__flush_entry(f, pb_ptr, flush_ptr) < 0 )
+            if ( H5PB__flush_entry(shared, pb_ptr, flush_ptr) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "Can't flush entry")
@@ -2924,7 +2879,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__mark_entry_dirty(H5F_t * f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
+H5PB__mark_entry_dirty(H5F_shared_t *shared, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
 {
     herr_t ret_value = SUCCEED;    /* Return value */
 
@@ -2954,7 +2909,7 @@ H5PB__mark_entry_dirty(H5F_t * f, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
         if ( ( pb_ptr->vfd_swmr_writer ) &&
              ( entry_ptr->loaded ) &&
              ( entry_ptr->mem_type != H5FD_MEM_DRAW ) &&
-             ( H5F_vfd_swmr_writer__delay_write(f, entry_ptr->page, 
+             ( H5F_vfd_swmr_writer__delay_write(shared, entry_ptr->page, 
                                         &(entry_ptr->delay_write_until)) < 0 ) )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
@@ -3128,7 +3083,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, 
                 void *buf/*out*/)
 {
     H5PB_t *pb_ptr;                         /* Page buffer for this file */
@@ -3144,17 +3099,16 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->pb_ptr);
+    HDassert(shared);
+    HDassert(shared->pb_ptr);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert(pb_ptr->min_rd_pages < pb_ptr->max_pages);
-    HDassert(f->shared->lf);
+    HDassert(shared->lf);
 
-    file = f->shared->lf;
+    file = shared->lf;
 
     HDassert(H5FD_MEM_DRAW != type);
     HDassert(buf);
@@ -3196,7 +3150,7 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                                        TRUE, FALSE)
 
         if ( ( NULL == entry_ptr ) &&
-             ( H5PB__load_page(f, pb_ptr, page_addr, type, &entry_ptr) < 0 ) )
+             ( H5PB__load_page(shared, pb_ptr, page_addr, type, &entry_ptr) < 0 ) )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                         "page buffer page load request failed (1)")
@@ -3372,7 +3326,7 @@ H5PB__read_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                                            TRUE, FALSE)
 
             if ( ( NULL == entry_ptr ) &&
-                 ( H5PB__load_page(f, pb_ptr, page_addr, type, &entry_ptr) < 0))
+                 ( H5PB__load_page(shared, pb_ptr, page_addr, type, &entry_ptr) < 0))
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                             "page buffer page load request failed (2)")
@@ -3445,7 +3399,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+H5PB__read_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, 
                void *buf/*out*/)
 {
     H5PB_t *pb_ptr;                    /* Page buffer for this file */
@@ -3465,11 +3419,10 @@ H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->pb_ptr);
+    HDassert(shared);
+    HDassert(shared->pb_ptr);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert(pb_ptr->min_md_pages < pb_ptr->max_pages);
@@ -3497,10 +3450,9 @@ H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     /* case 3) raw data read of page size or greater. */
     if ( size >= pb_ptr->page_size ) {
 
-        if ( H5FD_read(f->shared->lf, type, addr, size, buf) < 0)
+        if ( H5FD_read(shared->lf, type, addr, size, buf) < 0)
 
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
-                        "read through metadata accumulator failed")
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "read failed")
 
 
         H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
@@ -3532,8 +3484,8 @@ H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                 HDassert( entry_ptr->addr == search_addr );
                 HDassert( entry_ptr->size == pb_ptr->page_size );
                 HDassert( entry_ptr->delay_write_until == 0 );
-                HDassert( entry_ptr->addr <= addr + size );
-                HDassert( entry_ptr->addr + entry_ptr->size <= addr + size );
+                /* This page and [addr, addr + size) should NOT be disjoint. */
+                HDassert(!(addr + size <= entry_ptr->addr || entry_ptr->addr + entry_ptr->size <= addr));
 
                 if ( entry_ptr->is_dirty ) {
 
@@ -3587,7 +3539,7 @@ H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                         HDassert ( addr + offset == search_addr );
                         HDassert ( offset + pb_ptr->page_size <= size );
 
-                        HDmemcpy(((uint8_t *)(buf) + offset), 
+                        HDmemcpy((uint8_t *)buf + offset,
                                  entry_ptr->image_ptr, 
                                  pb_ptr->page_size);
                     }
@@ -3643,7 +3595,7 @@ H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                                        FALSE, FALSE)
 
         if ( ( NULL == entry_ptr ) &&
-             ( H5PB__load_page(f, pb_ptr, first_page_addr, 
+             ( H5PB__load_page(shared, pb_ptr, first_page_addr, 
                                 type, &entry_ptr) < 0 ) )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
@@ -3676,7 +3628,7 @@ H5PB__read_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                                            FALSE, FALSE)
 
             if ( ( NULL == entry_ptr ) &&
-                 ( H5PB__load_page(f, pb_ptr, last_page_addr, 
+                 ( H5PB__load_page(shared, pb_ptr, last_page_addr, 
                                     type, &entry_ptr) < 0 ) )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
@@ -3763,8 +3715,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
-                 const void *buf/*in*/)
+H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
+    size_t size, const void *buf/*in*/)
 {
     H5PB_t *pb_ptr;                    /* Page buffer for this file */
     H5PB_entry_t *entry_ptr;           /* Pointer to page buffer entry */
@@ -3776,11 +3728,10 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->pb_ptr);
+    HDassert(shared);
+    HDassert(shared->pb_ptr);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert(pb_ptr->min_rd_pages < pb_ptr->max_pages);
@@ -3859,7 +3810,7 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
         HDmemcpy((uint8_t *)(entry_ptr->image_ptr), buf, size);
 
         /* mark the entry dirty */
-        if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
+        if ( H5PB__mark_entry_dirty(shared, pb_ptr, entry_ptr) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "mark entry dirty failed (1)")
@@ -3889,7 +3840,7 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                                       TRUE, FALSE)
 
         if ( ( NULL == entry_ptr ) &&
-             ( H5PB__load_page(f, pb_ptr, page_addr, type, &entry_ptr) < 0 ) )
+             ( H5PB__load_page(shared, pb_ptr, page_addr, type, &entry_ptr) < 0 ) )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                         "page buffer page load request failed (1)")
@@ -3906,7 +3857,7 @@ H5PB__write_meta(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
         HDmemcpy(((uint8_t *)(entry_ptr->image_ptr) + offset), 
                  (const uint8_t *)buf, size);
 
-        if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
+        if ( H5PB__mark_entry_dirty(shared, pb_ptr, entry_ptr) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "mark entry dirty failed (2)")
@@ -3974,7 +3925,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, 
+H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size, 
                 const void *buf/*out*/)
 {
     H5PB_t *pb_ptr;                    /* Page buffer for this file */
@@ -3994,15 +3945,14 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->pb_ptr);
+    HDassert(shared);
+    HDassert(shared->pb_ptr);
 
-    pb_ptr = f->shared->pb_ptr;
+    pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
     HDassert(pb_ptr->min_md_pages < pb_ptr->max_pages);
-    HDassert(f->shared->lf);
+    HDassert(shared->lf);
 
     HDassert(H5FD_MEM_DRAW == type);
 
@@ -4026,7 +3976,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 
     /* case 3) raw data write of page size or greater. */
     if ( size >= pb_ptr->page_size ) {
-        if ( H5FD_write(f->shared->lf, type, addr, size, buf) < 0 )
+        if ( H5FD_write(shared->lf, type, addr, size, buf) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                         "write through metadata accumulator failed")
@@ -4100,7 +4050,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                     HDmemcpy((uint8_t *)entry_ptr->image_ptr + offset, buf, 
                              pb_ptr->page_size - (size_t)offset);
 
-                    if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
+                    if ( H5PB__mark_entry_dirty(shared, pb_ptr, entry_ptr) < 0 )
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "mark entry dirty failed (1)")
@@ -4121,7 +4071,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                              (const uint8_t *)buf + offset,
                              (size_t)((addr + size) - last_page_addr));
 
-                    if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
+                    if ( H5PB__mark_entry_dirty(shared, pb_ptr, entry_ptr) < 0 )
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "mark entry dirty failed (2)")
@@ -4168,7 +4118,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                                        FALSE, FALSE)
 
         if ( ( NULL == entry_ptr ) &&
-             ( H5PB__load_page(f, pb_ptr, first_page_addr, 
+             ( H5PB__load_page(shared, pb_ptr, first_page_addr, 
                                 type, &entry_ptr) < 0 ) )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
@@ -4183,7 +4133,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
         HDmemcpy(((uint8_t *)(entry_ptr->image_ptr)) + offset, 
                  (const uint8_t *)buf, length);
 
-        if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
+        if ( H5PB__mark_entry_dirty(shared, pb_ptr, entry_ptr) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "mark entry dirty failed (3)")
@@ -4204,7 +4154,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
                                            FALSE, FALSE)
 
             if ( ( NULL == entry_ptr ) &&
-                 ( H5PB__load_page(f, pb_ptr, last_page_addr, 
+                 ( H5PB__load_page(shared, pb_ptr, last_page_addr, 
                                     type, &entry_ptr) < 0 ) )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
@@ -4219,7 +4169,7 @@ H5PB__write_raw(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
             HDmemcpy((uint8_t *)(entry_ptr->image_ptr), 
                      ((const uint8_t *)(buf) + offset), length);
 
-            if ( H5PB__mark_entry_dirty(f, pb_ptr, entry_ptr) < 0 )
+            if ( H5PB__mark_entry_dirty(shared, pb_ptr, entry_ptr) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                             "mark entry dirty failed (3)")

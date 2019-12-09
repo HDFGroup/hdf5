@@ -15,4 +15,4 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-add_test (NAME FORT_parallel_test COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:parallel_test> ${MPIEXEC_POSTFLAGS})
+add_test (NAME MPI_TEST_FORT_parallel_test COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:parallel_test> ${MPIEXEC_POSTFLAGS})

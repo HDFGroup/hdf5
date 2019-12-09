@@ -104,17 +104,6 @@ typedef enum H5D_vds_view_t {
 /* Callback for H5Pset_append_flush() in a dataset access property list */
 typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_data);
 
-/********************/
-/* Public Variables */
-/********************/
-
-/*********************/
-/* Public Prototypes */
-/*********************/
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Define the operator function pointer for H5Diterate() */
 typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim,
 				 const hsize_t *point, void *operator_data);
@@ -127,6 +116,18 @@ typedef herr_t (*H5D_scatter_func_t)(const void **src_buf/*out*/,
 /* Define the operator function pointer for H5Dgather() */
 typedef herr_t (*H5D_gather_func_t)(const void *dst_buf,
                                     size_t dst_buf_bytes_used, void *op_data);
+
+
+/********************/
+/* Public Variables */
+/********************/
+
+/*********************/
+/* Public Prototypes */
+/*********************/
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id,
     hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
@@ -141,6 +142,9 @@ H5_DLL hid_t H5Dget_create_plist(hid_t dset_id);
 H5_DLL hid_t H5Dget_access_plist(hid_t dset_id);
 H5_DLL hsize_t H5Dget_storage_size(hid_t dset_id);
 H5_DLL herr_t H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_bytes);
+H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks);
+H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *coord, unsigned *filter_mask, haddr_t *addr, hsize_t *size);
+H5_DLL herr_t H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_idx, hsize_t *coord, unsigned *filter_mask, haddr_t *addr, hsize_t *size);
 H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
 H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
@@ -152,7 +156,6 @@ H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id,
             const hsize_t *offset, uint32_t *filters, void *buf);
 H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
             H5D_operator_t op, void *operator_data);
-H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 H5_DLL herr_t H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size);
 H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type, void *buf,
         hid_t buf_type, hid_t space);
@@ -199,6 +202,7 @@ H5_DLL hid_t H5Dcreate1(hid_t file_id, const char *name, hid_t type_id,
     hid_t space_id, hid_t dcpl_id);
 H5_DLL hid_t H5Dopen1(hid_t file_id, const char *name);
 H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t size[]);
+H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

@@ -24,6 +24,11 @@
 /* Macros */
 /**********/
 
+/* The maximum # of records to add/remove from the dataset in one step,
+ * used by vfd_swmr_addrem_writer and vfd_swmr_remove_reader.
+ */
+#define MAX_SIZE_CHANGE     10
+
 #define NLEVELS         5   /* # of datasets in the SWMR test file */
 
 #define NMAPPING        9   
@@ -64,7 +69,7 @@ H5TEST_DLLVAR unsigned symbol_count[NLEVELS];
 extern "C" {
 #endif
 
-H5TEST_DLL symbol_info_t * choose_dataset(void);
+H5TEST_DLL symbol_info_t * choose_dataset(unsigned *, unsigned *);
 H5TEST_DLL hid_t create_symbol_datatype(void);
 H5TEST_DLL int generate_name(char *name_buf, unsigned level, unsigned count);
 H5TEST_DLL int generate_symbols(void);
@@ -74,5 +79,9 @@ H5TEST_DLL int print_metadata_retries_info(hid_t fid);
 #ifdef __cplusplus
 }
 #endif
+
+H5TEST_DLL void block_signals(sigset_t *);
+H5TEST_DLL void restore_signals(sigset_t *);
+H5TEST_DLL void await_signal(hid_t);
 
 #endif /* _SWMR_COMMON_H */

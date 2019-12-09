@@ -229,7 +229,7 @@ main(int argc, const char *argv[])
         goto done;
     }
 
-    testval = H5Fis_hdf5(input_file);
+    testval = H5Fis_accessible(input_file, H5P_DEFAULT);
 
     if (testval <= 0) {
         error_msg("Input HDF5 file \"%s\" is not HDF\n", input_file);

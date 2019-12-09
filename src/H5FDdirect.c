@@ -206,30 +206,27 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:  H5FD_direct_init
+ * Function:    H5FD_direct_init
  *
- * Purpose:  Initialize this driver by registering the driver with the
- *    library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:  Success:  The driver ID for the direct driver.
- *
- *    Failure:  Negative.
+ * Return:      Success:    The driver ID for the direct driver
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5FD_direct_init(void)
 {
-    hid_t ret_value;        /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;        /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    if (H5I_VFL!=H5I_get_type(H5FD_DIRECT_g))
+    if (H5I_VFL != H5I_get_type(H5FD_DIRECT_g))
         H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g,sizeof(H5FD_class_t),FALSE);
 
     /* Set return value */
@@ -237,7 +234,7 @@ H5FD_direct_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_direct_init() */
 
 
 /*---------------------------------------------------------------------------
@@ -291,6 +288,7 @@ H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbu
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
+    HDmemset(&fa, 0, sizeof(H5FD_direct_fapl_t));
     if(boundary != 0)
         fa.mboundary = boundary;
     else
@@ -417,14 +415,14 @@ static void *
 H5FD_direct_fapl_copy(const void *_old_fa)
 {
     const H5FD_direct_fapl_t *old_fa = (const H5FD_direct_fapl_t*)_old_fa;
-    H5FD_direct_fapl_t *new_fa = H5MM_malloc(sizeof(H5FD_direct_fapl_t));
+    H5FD_direct_fapl_t *new_fa = H5MM_calloc(sizeof(H5FD_direct_fapl_t));
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(new_fa);
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_direct_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_direct_fapl_t));
 
     FUNC_LEAVE_NOAPI(new_fa)
 } /* end H5FD_direct_fapl_copy() */
@@ -978,12 +976,12 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                  * next section of data. */
         p2 = (unsigned char*)copy_buf + copy_offset;
         if((copy_size + copy_offset) <= alloc_size) {
-            HDmemcpy(buf, p2, copy_size);
+            H5MM_memcpy(buf, p2, copy_size);
             buf = (unsigned char *)buf + copy_size;
             copy_size = 0;
                 } /* end if */
                 else {
-                    HDmemcpy(buf, p2, alloc_size - copy_offset);
+                    H5MM_memcpy(buf, p2, alloc_size - copy_offset);
                     buf = (unsigned char*)buf + alloc_size - copy_offset;
                     copy_size -= alloc_size - copy_offset;
                     copy_offset = 0;
@@ -1191,11 +1189,11 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
          */
         p1 = (unsigned char *)copy_buf + copy_offset;
         if((copy_size + copy_offset) <= alloc_size) {
-                    HDmemcpy(p1, p3, copy_size);
+                    H5MM_memcpy(p1, p3, copy_size);
                     copy_size = 0;
                 } /* end if */
                 else {
-                    HDmemcpy(p1, p3, alloc_size - copy_offset);
+                    H5MM_memcpy(p1, p3, alloc_size - copy_offset);
                     p3 = (const unsigned char *)p3 + (alloc_size - copy_offset);
                     copy_size -= alloc_size - copy_offset;
                     copy_offset = 0;

@@ -192,16 +192,17 @@ H5File::H5File(const H5File& original) : Group()
 //--------------------------------------------------------------------------
 bool H5File::isHdf5(const char* name)
 {
-    // Calls C routine H5Fis_hdf5 to determine whether the file is in
+    // Calls C routine H5Fis_accessible to determine whether the file is in
     // HDF5 format.  It returns positive value, 0, or negative value
-    htri_t ret_value = H5Fis_hdf5(name);
+    htri_t ret_value = H5Fis_accessible(name, H5P_DEFAULT);
+
     if (ret_value > 0)
         return true;
     else if (ret_value == 0)
         return false;
-    else // Raise exception when H5Fis_hdf5 returns a negative value
+    else // Raise exception when H5Fis_accessible returns a negative value
     {
-        throw FileIException("H5File::isHdf5", "H5Fis_hdf5 returned negative value");
+        throw FileIException("H5File::isHdf5", "H5Fis_accessible returned negative value");
     }
 }
 
@@ -215,6 +216,46 @@ bool H5File::isHdf5(const char* name)
 bool H5File::isHdf5(const H5std_string& name)
 {
    return(isHdf5( name.c_str()));
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5File::isAccessible (static)
+///\brief       Determines whether a file can be accessed as HDF5. (Static)
+///\param       name - IN: Name of the file
+///\param       access_plist - IN: File access property list.  Default to
+///             FileAccPropList::DEFAULT
+///\return      true if the file can be accessed as HDF5, and false, otherwise
+///\exception   H5::FileIException
+// September 2018
+//--------------------------------------------------------------------------
+bool H5File::isAccessible(const char* name, const FileAccPropList& access_plist)
+{
+    // Calls C routine H5Fis_accessible to determine whether the file is in
+    // HDF5 format.  It returns positive value, 0, or negative value
+    hid_t access_plist_id = access_plist.getId();
+    htri_t ret_value = H5Fis_accessible(name, access_plist_id);
+    if (ret_value > 0)
+        return true;
+    else if (ret_value == 0)
+        return false;
+    else // Raise exception when H5Fis_accessible returns a negative value
+    {
+        throw FileIException("H5File::isAccessible", "H5Fis_accessible returned negative value");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5File::isAccessible (static)
+///\brief       This is an overloaded member function, provided for convenience.
+///             It takes an \c H5std_string for \a name. (Static)
+///\param       name - IN: Name of the file - \c H5std_string
+///\param       access_plist - IN: File access property list.  Default to
+///             FileAccPropList::DEFAULT
+// September 2018
+//--------------------------------------------------------------------------
+bool H5File::isAccessible(const H5std_string& name, const FileAccPropList& access_plist)
+{
+    return(isAccessible(name.c_str(), access_plist));
 }
 
 //--------------------------------------------------------------------------
@@ -536,6 +577,27 @@ hsize_t H5File::getFileSize() const
         throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
     }
     return (file_size);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5File::getFileNum
+///\brief       Returns the file number of the HDF5 file.
+///\return      File number
+///\exception   H5::FileIException
+///\par Description
+///             This function is called after an existing file is opened in
+///             order to retrieve the unique 'file number' for the file.
+// Programmer   Quincey Koziol - April 13, 2019
+//--------------------------------------------------------------------------
+unsigned long H5File::getFileNum() const
+{
+    unsigned long fileno = 0;
+    herr_t ret_value = H5Fget_fileno(id, &fileno);
+    if (ret_value < 0)
+    {
+        throw FileIException("H5File::getFileNum", "H5Fget_fileno failed");
+    }
+    return (fileno);
 }
 
 //--------------------------------------------------------------------------

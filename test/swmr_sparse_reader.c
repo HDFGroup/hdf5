@@ -232,7 +232,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
         unsigned long file_u;           /* Attribute sequence number (writer's "u") */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset();
+        symbol = choose_dataset(NULL, NULL);
 
         /* Fill in "nrecords" field.  Note that this depends on the writer
          * using the same algorithm and "nrecords" */
@@ -327,19 +327,19 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>]\n");
-    printf("    [-n <# of reads between reopens>] <# of records>\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read\n");
-    printf("between reopens ('-r 1')\n");
-    printf("\n");
-    printf("Note that the # of records *must* be the same as that supplied to\n");
-    printf("swmr_sparse_writer\n");
-    printf("\n");
-    HDexit(1);
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>]\n");
+    HDprintf("    [-n <# of reads between reopens>] <# of records>\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read\n");
+    HDprintf("between reopens ('-r 1')\n");
+    HDprintf("\n");
+    HDprintf("Note that the # of records *must* be the same as that supplied to\n");
+    HDprintf("swmr_sparse_writer\n");
+    HDprintf("\n");
+    HDexit(EXIT_FAILURE);
 } /* end usage() */
 
 int main(int argc, const char *argv[])
@@ -411,7 +411,7 @@ int main(int argc, const char *argv[])
     /* Generate dataset names */
     if(generate_symbols() < 0) {
         HDfprintf(stderr, "Error generating symbol names!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Create datatype for creating datasets */
@@ -421,7 +421,7 @@ int main(int argc, const char *argv[])
     /* Reading records from datasets */
     if(read_records(FILENAME, verbose, (unsigned long) nrecords, (unsigned)poll_time, (unsigned)reopen_count) < 0) {
         HDfprintf(stderr, "Error reading records from datasets!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -431,7 +431,7 @@ int main(int argc, const char *argv[])
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
         HDfprintf(stderr, "Error releasing symbols!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -441,7 +441,7 @@ int main(int argc, const char *argv[])
     /* Close objects created */
     if(H5Tclose(symbol_tid) < 0) {
         HDfprintf(stderr, "Error closing symbol datatype!\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

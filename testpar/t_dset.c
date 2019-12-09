@@ -2649,7 +2649,7 @@ compress_readAll(void)
 
             /* Try reading the data */
             ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
-            VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+            VRFY((ret >= 0), "H5Dread succeeded");
 
             /* Verify data read */
             for(u=0; u<dim; u++)
@@ -2659,8 +2659,10 @@ compress_readAll(void)
                     nerrors++;
                 }
 
+#if MPI_VERSION >= 3
             ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer_plist, data_read);
             VRFY((ret >= 0), "H5Dwrite succeeded");
+#endif
 
             ret = H5Pclose(xfer_plist);
             VRFY((ret >= 0), "H5Pclose succeeded");
@@ -4160,7 +4162,7 @@ dataset_atomicity(void)
     }
 
     /* should fail */
-    ret = H5Fset_mpi_atomicity (fid , TRUE);
+    ret = H5Fset_mpi_atomicity(fid , TRUE);
     VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
 
     if(MAINPROCESS){
@@ -4182,7 +4184,7 @@ dataset_atomicity(void)
     ret = H5Pclose(acc_tpl);
     VRFY((ret >= 0), "H5Pclose succeeded");
 
-    ret = H5Fset_mpi_atomicity (fid , TRUE);
+    ret = H5Fset_mpi_atomicity(fid , TRUE);
     VRFY((ret >= 0), "H5Fset_mpi_atomicity succeeded");
 
     /* open dataset1 (contiguous case) */
@@ -4201,7 +4203,7 @@ dataset_atomicity(void)
     }
 
     /* check that the atomicity flag is set */
-    ret = H5Fget_mpi_atomicity (fid , &atomicity);
+    ret = H5Fget_mpi_atomicity(fid , &atomicity);
     VRFY((ret >= 0), "atomcity get failed");
     VRFY((atomicity == TRUE), "atomcity set failed");
 
@@ -4270,7 +4272,7 @@ dataset_atomicity(void)
 
     atomicity = FALSE;
     /* check that the atomicity flag is set */
-    ret = H5Fget_mpi_atomicity (fid , &atomicity);
+    ret = H5Fget_mpi_atomicity(fid , &atomicity);
     VRFY((ret >= 0), "atomcity get failed");
     VRFY((atomicity == TRUE), "atomcity set failed");
 

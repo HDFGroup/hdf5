@@ -24,6 +24,7 @@
 
 #include "H5ACpkg.h"
 #include "H5Cpkg.h"
+#include "H5CXprivate.h"
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
@@ -467,9 +468,7 @@ static void lock_and_unlock_random_entry(H5F_t * file_ptr,
 static void lock_entry(H5F_t * file_ptr, int32_t idx);
 static void mark_entry_dirty(int32_t idx);
 static void pin_entry(H5F_t * file_ptr, int32_t idx, hbool_t global, hbool_t dirty);
-#ifdef H5_METADATA_TRACE_FILE
 static void pin_protected_entry(int32_t idx, hbool_t global);
-#endif /* H5_METADATA_TRACE_FILE */
 static void move_entry(H5F_t * file_ptr, int32_t old_idx, int32_t new_idx);
 static hbool_t reset_server_counts(void);
 static void resize_entry(int32_t idx, size_t  new_size);
@@ -623,7 +622,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
         if ( verbose ) {
-                fprintf(stdout,
+                HDfprintf(stdout,
                         "%d:%s: MPI_Comm_group() failed with error %d.\n",
                         world_mpi_rank, FUNC, mpi_result);
             }
@@ -642,7 +641,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout,
+                HDfprintf(stdout,
                         "%d:%s: MPI_Group_excl() failed with error %d.\n",
                         world_mpi_rank, FUNC, mpi_result);
             }
@@ -659,7 +658,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout,
+                HDfprintf(stdout,
                         "%d:%s: MPI_Comm_create() failed with error %d.\n",
                         world_mpi_rank, FUNC, mpi_result);
             }
@@ -673,7 +672,7 @@ set_up_file_communicator(void)
                     nerrors++;
                     success = FALSE;
                     if ( verbose ) {
-                        fprintf(stdout,
+                        HDfprintf(stdout,
                                 "%d:%s: file_mpi_comm == MPI_COMM_NULL.\n",
                                 world_mpi_rank, FUNC);
                     }
@@ -687,7 +686,7 @@ set_up_file_communicator(void)
                     nerrors++;
                     success = FALSE;
                     if ( verbose ) {
-                        fprintf(stdout,
+                        HDfprintf(stdout,
                                 "%d:%s: file_mpi_comm != MPI_COMM_NULL.\n",
                                 world_mpi_rank, FUNC);
                     }
@@ -705,7 +704,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout,
+                HDfprintf(stdout,
                         "%d:%s: MPI_Comm_size() failed with error %d.\n",
                         world_mpi_rank, FUNC, mpi_result);
             }
@@ -721,7 +720,7 @@ set_up_file_communicator(void)
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                fprintf(stdout,
+                HDfprintf(stdout,
                         "%d:%s: MPI_Comm_rank() failed with error %d.\n",
                         world_mpi_rank, FUNC, mpi_result);
             }
@@ -1217,20 +1216,20 @@ setup_derived_types(void)
     struct mssg_t sample; /* used to compute displacements */
 
     /* setup the displacements array */
-    if ( ( MPI_SUCCESS != MPI_Address(&sample.req, &displs[0]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.src, &displs[1]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.dest, &displs[2]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.mssg_num, &displs[3]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.base_addr, &displs[4]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.len, &displs[5]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.ver, &displs[6]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.count, &displs[7]) ) ||
-         ( MPI_SUCCESS != MPI_Address(&sample.magic, &displs[8]) ) ) {
+    if ( ( MPI_SUCCESS != MPI_Get_address(&sample.req, &displs[0]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.src, &displs[1]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.dest, &displs[2]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.mssg_num, &displs[3]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.base_addr, &displs[4]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.len, &displs[5]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.ver, &displs[6]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.count, &displs[7]) ) ||
+         ( MPI_SUCCESS != MPI_Get_address(&sample.magic, &displs[8]) ) ) {
 
         nerrors++;
         success = FALSE;
         if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: MPI_Address() call failed.\n",
+            HDfprintf(stdout, "%d:%s: MPI_Get_address() call failed.\n",
                       world_mpi_rank, FUNC);
         }
 
@@ -1245,14 +1244,14 @@ setup_derived_types(void)
 
     if ( success ) {
 
-        result = MPI_Type_struct(9, block_len, displs, mpi_types, &mpi_mssg_t);
+        result = MPI_Type_create_struct(9, block_len, displs, mpi_types, &mpi_mssg_t);
 
         if ( result != MPI_SUCCESS ) {
 
             nerrors++;
             success = FALSE;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: MPI_Type_struct() call failed.\n",
+                HDfprintf(stdout, "%d:%s: MPI_Type_create_struct() call failed.\n",
                           world_mpi_rank, FUNC);
             }
         }
@@ -3693,7 +3692,6 @@ pin_entry(H5F_t * file_ptr,
 
 } /* pin_entry() */
 
-#ifdef H5_METADATA_TRACE_FILE
 
 /*****************************************************************************
  * Function:    pin_protected_entry()
@@ -3762,7 +3760,6 @@ pin_protected_entry(int32_t idx,
     return;
 
 } /* pin_protected_entry() */
-#endif /* H5_METADATA_TRACE_FILE */
 
 
 /*****************************************************************************
@@ -4091,7 +4088,7 @@ setup_cache_for_test(hid_t * fid_ptr,
                       world_mpi_rank, FUNC);
         }
     } else {
-        file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE);
+        file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE);
     }
 
     if ( file_ptr == NULL ) {
@@ -6809,8 +6806,6 @@ smoke_check_5(int metadata_write_strategy)
  *                    - H5AC_expunge_entry()
  *                    - H5AC_resize_entry()
  *
- *              This test is skipped if H5_METADATA_TRACE_FILE is undefined.
- *
  * Return:    Success:    TRUE
  *
  *        Failure:    FALSE
@@ -6823,63 +6818,63 @@ trace_file_check(int metadata_write_strategy)
 {
     hbool_t success = TRUE;
 
-#ifdef H5_METADATA_TRACE_FILE
-
     const char *((* expected_output)[]) = NULL;
     const char * expected_output_0[] =
     {
       "### HDF5 metadata cache trace file version 1 ###\n",
-      "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 2097152 0.300000 33554432 1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0 0\n",
-      "H5AC_insert_entry 0x400 27 0x0 2 0\n",
-      "H5AC_insert_entry 0x402 27 0x0 2 0\n",
-      "H5AC_insert_entry 0x404 27 0x0 4 0\n",
-      "H5AC_insert_entry 0x408 27 0x0 6 0\n",
-      "H5AC_protect 0x400 27 0x0 2 1\n",
-      "H5AC_mark_entry_dirty 0x400 0\n",
-      "H5AC_unprotect 0x400 27 0x0 0\n",
-      "H5AC_protect 0x402 27 0x0 2 1\n",
-      "H5AC_pin_protected_entry 0x402 0\n",
-      "H5AC_unprotect 0x402 27 0x0 0\n",
-      "H5AC_unpin_entry 0x402 0\n",
-      "H5AC_expunge_entry 0x402 27 0\n",
-      "H5AC_protect 0x404 27 0x0 4 1\n",
-      "H5AC_pin_protected_entry 0x404 0\n",
-      "H5AC_unprotect 0x404 27 0x0 0\n",
-      "H5AC_mark_entry_dirty 0x404 0\n",
-      "H5AC_resize_entry 0x404 2 0\n",
-      "H5AC_resize_entry 0x404 4 0\n",
-      "H5AC_unpin_entry 0x404 0\n",
-      "H5AC_move_entry 0x400 0x8e65 27 0\n",
-      "H5AC_move_entry 0x8e65 0x400 27 0\n",
-      "H5AC_flush 0\n",
+      "H5AC_set_cache_auto_resize_config",
+      "H5AC_insert_entry",
+      "H5AC_insert_entry",
+      "H5AC_insert_entry",
+      "H5AC_insert_entry",
+      "H5AC_protect",
+      "H5AC_mark_entry_dirty",
+      "H5AC_unprotect",
+      "H5AC_protect",
+      "H5AC_pin_protected_entry",
+      "H5AC_unprotect",
+      "H5AC_unpin_entry",
+      "H5AC_expunge_entry",
+      "H5AC_protect",
+      "H5AC_pin_protected_entry",
+      "H5AC_unprotect",
+      "H5AC_mark_entry_dirty",
+      "H5AC_resize_entry",
+      "H5AC_resize_entry",
+      "H5AC_unpin_entry",
+      "H5AC_move_entry",
+      "H5AC_move_entry",
+      "H5AC_flush",
+      "H5AC_flush",
       NULL
     };
     const char * expected_output_1[] =
     {
       "### HDF5 metadata cache trace file version 1 ###\n",
-      "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 2097152 0.300000 33554432 1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 1 0\n",
-      "H5AC_insert_entry 0x400 27 0x0 2 0\n",
-      "H5AC_insert_entry 0x402 27 0x0 2 0\n",
-      "H5AC_insert_entry 0x404 27 0x0 4 0\n",
-      "H5AC_insert_entry 0x408 27 0x0 6 0\n",
-      "H5AC_protect 0x400 27 0x0 2 1\n",
-      "H5AC_mark_entry_dirty 0x400 0\n",
-      "H5AC_unprotect 0x400 27 0x0 0\n",
-      "H5AC_protect 0x402 27 0x0 2 1\n",
-      "H5AC_pin_protected_entry 0x402 0\n",
-      "H5AC_unprotect 0x402 27 0x0 0\n",
-      "H5AC_unpin_entry 0x402 0\n",
-      "H5AC_expunge_entry 0x402 27 0\n",
-      "H5AC_protect 0x404 27 0x0 4 1\n",
-      "H5AC_pin_protected_entry 0x404 0\n",
-      "H5AC_unprotect 0x404 27 0x0 0\n",
-      "H5AC_mark_entry_dirty 0x404 0\n",
-      "H5AC_resize_entry 0x404 2 0\n",
-      "H5AC_resize_entry 0x404 4 0\n",
-      "H5AC_unpin_entry 0x404 0\n",
-      "H5AC_move_entry 0x400 0x8e65 27 0\n",
-      "H5AC_move_entry 0x8e65 0x400 27 0\n",
-      "H5AC_flush 0\n",
+      "H5AC_set_cache_auto_resize_config",
+      "H5AC_insert_entry",
+      "H5AC_insert_entry",
+      "H5AC_insert_entry",
+      "H5AC_insert_entry",
+      "H5AC_protect",
+      "H5AC_mark_entry_dirty",
+      "H5AC_unprotect",
+      "H5AC_protect",
+      "H5AC_pin_protected_entry",
+      "H5AC_unprotect",
+      "H5AC_unpin_entry",
+      "H5AC_expunge_entry",
+      "H5AC_protect",
+      "H5AC_pin_protected_entry",
+      "H5AC_unprotect",
+      "H5AC_mark_entry_dirty",
+      "H5AC_resize_entry",
+      "H5AC_resize_entry",
+      "H5AC_unpin_entry",
+      "H5AC_move_entry",
+      "H5AC_move_entry",
+      "H5AC_flush",
+      "H5AC_flush",
       NULL
     };
     char buffer[256];
@@ -6887,8 +6882,8 @@ trace_file_check(int metadata_write_strategy)
     hbool_t done = FALSE;
     int i;
     int max_nerrors;
-    int expected_line_len;
-    int actual_line_len;
+    size_t expected_line_len;
+    size_t actual_line_len;
     hid_t fid = -1;
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;
@@ -6896,188 +6891,151 @@ trace_file_check(int metadata_write_strategy)
     H5AC_cache_config_t config;
     struct mssg_t mssg;
 
-#endif /* H5_METADATA_TRACE_FILE */
 
-    switch ( metadata_write_strategy ) {
+    switch(metadata_write_strategy) {
 
-    case H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY:
-#ifdef H5_METADATA_TRACE_FILE
+        case H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY:
+
             expected_output = &expected_output_0;
-#endif /* H5_METADATA_TRACE_FILE */
-            if ( world_mpi_rank == 0 ) {
-            TESTING(
-            "trace file collection -- process 0 only md write strategy");
-            }
-        break;
 
-    case H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED:
-#ifdef H5_METADATA_TRACE_FILE
+            if(world_mpi_rank == 0)
+                TESTING("trace file collection -- process 0 only md write strategy");
+            break;
+
+        case H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED:
+
             expected_output = &expected_output_1;
-#endif /* H5_METADATA_TRACE_FILE */
-            if ( world_mpi_rank == 0 ) {
-            TESTING(
-            "trace file collection -- distributed md write strategy");
-            }
-        break;
+
+            if(world_mpi_rank == 0)
+                TESTING("trace file collection -- distributed md write strategy");
+            break;
 
         default:
-#ifdef H5_METADATA_TRACE_FILE
+
             /* this will almost certainly cause a failure, but it keeps us
              * from de-referenceing a NULL pointer.
              */
             expected_output = &expected_output_0;
-#endif /* H5_METADATA_TRACE_FILE */
-            if ( world_mpi_rank == 0 ) {
-            TESTING("trace file collection -- unknown md write strategy");
-            }
-        break;
-    }
 
-#ifdef H5_METADATA_TRACE_FILE
+            if(world_mpi_rank == 0)
+                TESTING("trace file collection -- unknown md write strategy");
+            break;
+    } /* end switch */
+
 
     nerrors = 0;
     init_data();
     reset_stats();
 
-    if ( world_mpi_rank == world_server_mpi_rank ) {
+    if(world_mpi_rank == world_server_mpi_rank) {
 
-    if ( ! server_main() ) {
+        if(!server_main()) {
 
             /* some error occured in the server -- report failure */
             nerrors++;
-            if ( verbose ) {
-        HDfprintf(stdout, "%d:%s: server_main() failed.\n",
-                          world_mpi_rank, FUNC);
-            }
+            if ( verbose )
+                HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, FUNC);
         }
     }
-    else /* run the clients */
-    {
+    else {
+        /* run the clients */
 
-        if ( ! setup_cache_for_test(&fid, &file_ptr, &cache_ptr,
-                                    metadata_write_strategy) ) {
+        if(!setup_cache_for_test(&fid, &file_ptr, &cache_ptr, metadata_write_strategy) ) {
 
             nerrors++;
             fid = -1;
             cache_ptr = NULL;
-            if ( verbose ) {
-        HDfprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n",
-                          world_mpi_rank, FUNC);
-            }
+            if(verbose)
+                HDfprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n", world_mpi_rank, FUNC);
         }
 
-        if ( nerrors == 0 ) {
+        if(nerrors == 0) {
 
             config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
 
-            if ( H5AC_get_cache_auto_resize_config(cache_ptr, &config)
-                 != SUCCEED ) {
-
-        nerrors++;
-            HDfprintf(stdout,
-                        "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n",
-                        world_mpi_rank, FUNC);
-
-            } else {
-
+            if(H5AC_get_cache_auto_resize_config(cache_ptr, &config) != SUCCEED) {
+                nerrors++;
+                HDfprintf(stdout, "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n", world_mpi_rank, FUNC);
+            }
+            else {
                 config.open_trace_file = TRUE;
-        strcpy(config.trace_file_name, "t_cache_trace.txt");
+                strcpy(config.trace_file_name, "t_cache_trace.txt");
 
-                if ( H5AC_set_cache_auto_resize_config(cache_ptr, &config)
-            != SUCCEED ) {
-
-            nerrors++;
-                HDfprintf(stdout,
-                         "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n",
-                          world_mpi_rank, FUNC);
+                if(H5AC_set_cache_auto_resize_config(cache_ptr, &config) != SUCCEED) {
+                    nerrors++;
+                    HDfprintf(stdout, "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n", world_mpi_rank, FUNC);
                 }
             }
-        }
+        } /* end if */
 
-    insert_entry(cache_ptr, file_ptr, 0, H5AC__NO_FLAGS_SET);
-    insert_entry(cache_ptr, file_ptr, 1, H5AC__NO_FLAGS_SET);
-    insert_entry(cache_ptr, file_ptr, 2, H5AC__NO_FLAGS_SET);
-    insert_entry(cache_ptr, file_ptr, 3, H5AC__NO_FLAGS_SET);
+        insert_entry(cache_ptr, file_ptr, 0, H5AC__NO_FLAGS_SET);
+        insert_entry(cache_ptr, file_ptr, 1, H5AC__NO_FLAGS_SET);
+        insert_entry(cache_ptr, file_ptr, 2, H5AC__NO_FLAGS_SET);
+        insert_entry(cache_ptr, file_ptr, 3, H5AC__NO_FLAGS_SET);
 
-    lock_entry(file_ptr, 0);
-    mark_entry_dirty(0);
-    unlock_entry(file_ptr, 0, H5AC__NO_FLAGS_SET);
+        lock_entry(file_ptr, 0);
+        mark_entry_dirty(0);
+        unlock_entry(file_ptr, 0, H5AC__NO_FLAGS_SET);
 
-    lock_entry(file_ptr, 1);
+        lock_entry(file_ptr, 1);
         pin_protected_entry(1, TRUE);
-    unlock_entry(file_ptr, 1, H5AC__NO_FLAGS_SET);
+        unlock_entry(file_ptr, 1, H5AC__NO_FLAGS_SET);
         unpin_entry(file_ptr, 1, TRUE, FALSE, FALSE);
 
         expunge_entry(file_ptr, 1);
 
-    lock_entry(file_ptr, 2);
+        lock_entry(file_ptr, 2);
         pin_protected_entry(2, TRUE);
-    unlock_entry(file_ptr, 2, H5AC__NO_FLAGS_SET);
-    mark_entry_dirty(2);
+        unlock_entry(file_ptr, 2, H5AC__NO_FLAGS_SET);
+        mark_entry_dirty(2);
         resize_entry(2, data[2].len / 2);
         resize_entry(2, data[2].len);
         unpin_entry(file_ptr, 2, TRUE, FALSE, FALSE);
 
-    move_entry(file_ptr, 0, 20);
-    move_entry(file_ptr, 0, 20);
+        move_entry(file_ptr, 0, 20);
+        move_entry(file_ptr, 0, 20);
 
-        if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
+        if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) {
             nerrors++;
-            if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n",
-                          world_mpi_rank, FUNC);
-            }
+            if(verbose)
+                HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n", world_mpi_rank, FUNC);
         }
 
-        if ( nerrors == 0 ) {
-
+        if(nerrors == 0) {
             config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
 
-            if ( H5AC_get_cache_auto_resize_config(cache_ptr, &config)
-                 != SUCCEED ) {
-
-        nerrors++;
-            HDfprintf(stdout,
-                        "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n",
-                        world_mpi_rank, FUNC);
-
-            } else {
-
+            if(H5AC_get_cache_auto_resize_config(cache_ptr, &config) != SUCCEED) {
+                nerrors++;
+                HDfprintf(stdout, "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n", world_mpi_rank, FUNC);
+            }
+            else {
                 config.open_trace_file = FALSE;
                 config.close_trace_file = TRUE;
-        config.trace_file_name[0] = '\0';
+                config.trace_file_name[0] = '\0';
 
-                if ( H5AC_set_cache_auto_resize_config(cache_ptr, &config)
-            != SUCCEED ) {
-
-            nerrors++;
-                HDfprintf(stdout,
-                        "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n",
-                        world_mpi_rank, FUNC);
+                if(H5AC_set_cache_auto_resize_config(cache_ptr, &config) != SUCCEED) {
+                    nerrors++;
+                    HDfprintf(stdout, "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n", world_mpi_rank, FUNC);
                 }
             }
-        }
+        } /* end if */
 
-        if ( fid >= 0 ) {
-
-            if ( ! take_down_cache(fid, cache_ptr) ) {
+        if(fid >= 0) {
+            if(!take_down_cache(fid, cache_ptr)) {
 
                 nerrors++;
-                if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: take_down_cache() failed.\n",
-                              world_mpi_rank, FUNC);
-                }
+                if(verbose)
+                    HDfprintf(stdout, "%d:%s: take_down_cache() failed.\n", world_mpi_rank, FUNC);
             }
-        }
+        } /* end if */
 
         /* verify that all instance of datum are back where the started
          * and are clean.
          */
 
-        for ( i = 0; i < NUM_DATA_ENTRIES; i++ )
-        {
-            HDassert( data_index[i] == i );
-            HDassert( ! (data[i].dirty) );
+        for(i = 0; i < NUM_DATA_ENTRIES; i++) {
+            HDassert(data_index[i] == i);
+            HDassert(!(data[i].dirty));
         }
 
         /* compose the done message */
@@ -7091,117 +7049,121 @@ trace_file_check(int metadata_write_strategy)
         mssg.count     = 0; /* not used */
         mssg.magic     = MSSG_MAGIC;
 
-        if ( success ) {
-
+        if(success) {
             success = send_mssg(&mssg, FALSE);
 
-            if ( ! success ) {
+            if(!success) {
+                nerrors++;
+                if(verbose)
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n", world_mpi_rank, FUNC);
+            }
+        } /* end if */
+
+        if(nerrors == 0) {
+            HDsprintf(trace_file_name, "t_cache_trace.txt.%d", (int)file_mpi_rank);
+
+            if((trace_file_ptr = HDfopen(trace_file_name, "r")) == NULL ) {
 
                 nerrors++;
-                if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n",
-                              world_mpi_rank, FUNC);
+                if(verbose)
+                    HDfprintf(stdout, "%d:%s: HDfopen failed.\n", world_mpi_rank, FUNC);
+            }
+        } /* end if */
+
+
+        i = 0;
+        while((nerrors == 0) && (!done)) {
+            /* Get lines of actual and expected data */
+            if((*expected_output)[i] == NULL)
+                expected_line_len = (size_t)0;
+            else
+                expected_line_len = HDstrlen((*expected_output)[i]);
+
+            if(HDfgets(buffer, 255, trace_file_ptr) != NULL)
+                actual_line_len = HDstrlen(buffer);
+            else
+                actual_line_len = (size_t)0;
+
+            /* Compare the lines */
+            /* Handle running out of data */
+            if((actual_line_len == 0) || (expected_line_len == 0)) {
+                if((actual_line_len == 0) && (expected_line_len == 0)) {
+                    /* Both ran out at the same time - we're done */
+                    done = TRUE;
+                }
+                else {
+                    /* One ran out before the other - BADNESS */
+                    nerrors++;
+                    if(verbose) {
+                        HDfprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank, FUNC, i);
+                        if(expected_line_len == 0) {
+                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC, "<EMPTY>", expected_line_len);
+                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC, buffer, actual_line_len);
+                        }
+                        if(actual_line_len == 0) {
+                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC, (*expected_output)[i], expected_line_len);
+                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC, "<EMPTY>", actual_line_len);
+                        }
+                    }
+                    HDfprintf(stdout, "BADNESS BADNESS BADNESS\n");
                 }
             }
-        }
+            /* We directly compare the header line (line 0) */
+            else if(0 == i) {
+                if((actual_line_len != expected_line_len) || (HDstrcmp(buffer, (*expected_output)[i]) != 0 )) {
 
-        if ( nerrors == 0 ) {
-
-        sprintf(trace_file_name, "t_cache_trace.txt.%d",
-            (int)file_mpi_rank);
-
-        if ( (trace_file_ptr = HDfopen(trace_file_name, "r")) == NULL ) {
-
-                nerrors++;
-                if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: HDfopen failed.\n",
-                              world_mpi_rank, FUNC);
+                    nerrors++;
+                    if(verbose) {
+                        HDfprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank, FUNC, i);
+                        HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC, (*expected_output)[i], expected_line_len);
+                        HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC, buffer, actual_line_len);
+                    }
                 }
             }
-    }
+            /* All other lines we tokenize and just compare the function name. This
+             * keeps the test from being too fragile.
+             */
+            else {
+                char *tok = NULL;     /* token for actual line */
 
-    i = 0;
-    while ( ( nerrors == 0 ) && ( ! done ) )
-    {
-        if ( (*expected_output)[i] == NULL ) {
+                tok = HDstrtok(buffer, " ");
 
-        expected_line_len = 0;
+                if(HDstrcmp(tok, (*expected_output)[i]) != 0 ) {
 
-        } else {
-
-        expected_line_len = HDstrlen((*expected_output)[i]);
-        }
-
-        if ( HDfgets(buffer, 255, trace_file_ptr) != NULL ) {
-
-            actual_line_len = HDstrlen(buffer);
-
-        } else {
-
-            actual_line_len = 0;
-        }
-
-        if ( ( actual_line_len == 0 ) && ( expected_line_len == 0 ) ) {
-
-            done = TRUE;
-
-        } else if ( ( actual_line_len != expected_line_len ) ||
-                ( HDstrcmp(buffer, (*expected_output)[i]) != 0 ) ) {
-
-            nerrors++;
-                if ( verbose ) {
-                    HDfprintf(stdout,
-                "%d:%s: Unexpected data in trace file line %d.\n",
-                              world_mpi_rank, FUNC, i);
-            HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n",
-                world_mpi_rank, FUNC, (*expected_output)[i],
-                expected_line_len);
-            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n",
-                world_mpi_rank, FUNC, buffer,
-                actual_line_len);
+                    nerrors++;
+                    if(verbose) {
+                        HDfprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank, FUNC, i);
+                        HDfprintf(stdout, "%d:%s: expected = \"%s\"\n", world_mpi_rank, FUNC, (*expected_output)[i]);
+                        HDfprintf(stdout, "%d:%s: actual   = \"%s\"\n", world_mpi_rank, FUNC, tok);
+                    }
                 }
-        } else {
+            } /* end else */
+
             i++;
-        }
-    }
+        } /* end while */
 
-    if ( trace_file_ptr != NULL ) {
-
-        HDfclose(trace_file_ptr);
-        trace_file_ptr = NULL;
-#if 1
-        HDremove(trace_file_name);
-#endif
+        /* Clean up the trace file */
+        if(trace_file_ptr != NULL) {
+            HDfclose(trace_file_ptr);
+            trace_file_ptr = NULL;
+            HDremove(trace_file_name);
         }
-    }
+    } /* end giant else that runs clients */
 
     max_nerrors = get_max_nerrors();
 
-    if ( world_mpi_rank == 0 ) {
+    if(world_mpi_rank == 0) {
 
-    if ( max_nerrors == 0 ) {
-
-        PASSED();
-
-        } else {
-
+        if(max_nerrors == 0) {
+            PASSED();
+        }
+        else {
             failures++;
             H5_FAILED();
         }
     }
 
-    success = ( ( success ) && ( max_nerrors == 0 ) );
-
-#else /* H5_METADATA_TRACE_FILE */
-
-    if ( world_mpi_rank == 0 ) {
-
-        SKIPPED();
-
-        HDfprintf(stdout, " trace file support disabled.\n");
-    }
-
-#endif /* H5_METADATA_TRACE_FILE */
+    success = ((success) && (max_nerrors == 0));
 
     return(success);
 
@@ -7264,7 +7226,7 @@ smoke_check_6(int metadata_write_strategy)
             /* some error occured in the server -- report failure */
             nerrors++;
             if ( verbose ) {
-        HDfprintf(stdout, "%d:%s: server_main() failed.\n",
+                HDfprintf(stdout, "%d:%s: server_main() failed.\n",
                           world_mpi_rank, FUNC);
             }
         }
@@ -7280,7 +7242,7 @@ smoke_check_6(int metadata_write_strategy)
             fid = -1;
             cache_ptr = NULL;
             if ( verbose ) {
-        HDfprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n",
+                HDfprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n",
                           world_mpi_rank, FUNC);
             }
         }
@@ -7289,7 +7251,7 @@ smoke_check_6(int metadata_write_strategy)
         virt_num_data_entries = NUM_DATA_ENTRIES;
 
         /* insert the first half collectively */
-        file_ptr->coll_md_read = H5P_USER_TRUE;
+        H5CX_set_coll_metadata_read(TRUE);
         for ( i = 0; i < virt_num_data_entries/2; i++ )
         {
             struct datum * entry_ptr;
@@ -7310,7 +7272,7 @@ smoke_check_6(int metadata_write_strategy)
         }
 
         /* insert the other half independently */
-        file_ptr->coll_md_read = H5P_USER_FALSE;
+        H5CX_set_coll_metadata_read(FALSE);
         for ( i = virt_num_data_entries/2; i < virt_num_data_entries; i++ )
         {
             struct datum * entry_ptr;
@@ -7330,7 +7292,7 @@ smoke_check_6(int metadata_write_strategy)
             HDassert(cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
         }
 
-    /* flush the file */
+        /* flush the file */
         if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
             nerrors++;
             if ( verbose ) {
@@ -7340,7 +7302,7 @@ smoke_check_6(int metadata_write_strategy)
         }
 
         /* Protect the first half of the entries collectively */
-        file_ptr->coll_md_read = H5P_USER_TRUE;
+        H5CX_set_coll_metadata_read(TRUE);
         for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
             struct datum * entry_ptr;
@@ -7361,13 +7323,13 @@ smoke_check_6(int metadata_write_strategy)
         }
 
         /* protect the other half independently */
-        file_ptr->coll_md_read = H5P_USER_FALSE;
+        H5CX_set_coll_metadata_read(FALSE);
         for ( i = virt_num_data_entries/2; i < virt_num_data_entries; i++ )
         {
             struct datum * entry_ptr;
             entry_ptr = &(data[i]);
 
-        lock_entry(file_ptr, i);
+            lock_entry(file_ptr, i);
 
             if(FALSE != entry_ptr->header.coll_access) {
                 nerrors++;
@@ -7495,7 +7457,7 @@ main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-    printf("%d:Failed to turn off atexit processing. Continue.\n",
+        HDprintf("%d:Failed to turn off atexit processing. Continue.\n",
                mpi_rank);
     };
     H5open();
@@ -7514,24 +7476,24 @@ main(int argc, char **argv)
     }
 
 #ifdef H5_HAVE_MPE
-    if ( MAINPROCESS ) { printf("    Tests compiled for MPE.\n"); }
+    if ( MAINPROCESS ) { HDprintf("    Tests compiled for MPE.\n"); }
     virt_num_data_entries = MPE_VIRT_NUM_DATA_ENTIES;
 #endif /* H5_HAVE_MPE */
 
 
     if (MAINPROCESS){
-    printf("===================================\n");
-    printf("Parallel metadata cache tests\n");
-    printf("    mpi_size     = %d\n", mpi_size);
-    printf("    express_test = %d\n", express_test);
-    printf("===================================\n");
+    HDprintf("===================================\n");
+    HDprintf("Parallel metadata cache tests\n");
+    HDprintf("    mpi_size     = %d\n", mpi_size);
+    HDprintf("    express_test = %d\n", express_test);
+    HDprintf("===================================\n");
     }
 
     if ( mpi_size < 3 ) {
 
         if ( MAINPROCESS ) {
 
-            printf("    Need at least 3 processes.  Exiting.\n");
+            HDprintf("    Need at least 3 processes.  Exiting.\n");
         }
         goto finish;
     }
@@ -7677,15 +7639,15 @@ finish:
      */
     MPI_Barrier(MPI_COMM_WORLD);
     if (MAINPROCESS){        /* only process 0 reports */
-    printf("===================================\n");
+    HDprintf("===================================\n");
     if (failures){
-        printf("***metadata cache tests detected %d failures***\n",
+        HDprintf("***metadata cache tests detected %d failures***\n",
                    failures);
     }
     else{
-        printf("metadata cache tests finished with no failures\n");
+        HDprintf("metadata cache tests finished with no failures\n");
     }
-    printf("===================================\n");
+    HDprintf("===================================\n");
     }
 
     takedown_derived_types();

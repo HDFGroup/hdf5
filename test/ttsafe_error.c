@@ -38,7 +38,7 @@
 
 /* Having a common dataset name is an error */
 #define DATASETNAME             "commonname"
-#define EXPECTED_ERROR_DEPTH	7
+#define EXPECTED_ERROR_DEPTH    10
 #define WRITE_NUMBER            37
 
 /* Typedefs */
@@ -63,6 +63,8 @@ static void *tts_error_thread(void *);
 void
 tts_error(void)
 {
+    hid_t           def_fapl = H5I_INVALID_HID;
+    hid_t           vol_id = H5I_INVALID_HID;
     hid_t           dataset = H5I_INVALID_HID;
     H5TS_thread_t   threads[NUM_THREAD];
     H5TS_attr_t     attribute;
@@ -73,23 +75,32 @@ tts_error(void)
     expected_g[0].maj_num = H5E_DATASET;
     expected_g[0].min_num = H5E_CANTINIT;
 
-    expected_g[1].maj_num = H5E_DATASET;
-    expected_g[1].min_num = H5E_CANTINIT;
+    expected_g[1].maj_num = H5E_VOL;
+    expected_g[1].min_num = H5E_CANTCREATE;
 
-    expected_g[2].maj_num = H5E_LINK;
-    expected_g[2].min_num = H5E_CANTINIT;
+    expected_g[2].maj_num = H5E_VOL;
+    expected_g[2].min_num = H5E_CANTCREATE;
 
-    expected_g[3].maj_num = H5E_LINK;
-    expected_g[3].min_num = H5E_CANTINSERT;
+    expected_g[3].maj_num = H5E_DATASET;
+    expected_g[3].min_num = H5E_CANTINIT;
 
-    expected_g[4].maj_num = H5E_SYM;
-    expected_g[4].min_num = H5E_NOTFOUND;
+    expected_g[4].maj_num = H5E_DATASET;
+    expected_g[4].min_num = H5E_CANTINIT;
 
-    expected_g[5].maj_num = H5E_SYM;
-    expected_g[5].min_num = H5E_CALLBACK;
+    expected_g[5].maj_num = H5E_LINK;
+    expected_g[5].min_num = H5E_CANTINIT;
 
     expected_g[6].maj_num = H5E_LINK;
-    expected_g[6].min_num = H5E_EXISTS;
+    expected_g[6].min_num = H5E_CANTINSERT;
+
+    expected_g[7].maj_num = H5E_SYM;
+    expected_g[7].min_num = H5E_NOTFOUND;
+
+    expected_g[8].maj_num = H5E_SYM;
+    expected_g[8].min_num = H5E_CALLBACK;
+
+    expected_g[9].maj_num = H5E_LINK;
+    expected_g[9].min_num = H5E_EXISTS;
 
     /* set up mutex for global count of errors */
     H5TS_mutex_init(&error_mutex_g);
@@ -102,39 +113,52 @@ tts_error(void)
     H5TS_attr_setscope(&attribute, H5TS_SCOPE_SYSTEM);
 #endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
-    /* Create a hdf5 file using H5F_ACC_TRUNC access, default file
-     * creation plist and default file access plist
-     */
-    error_file_g = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(error_file_g, H5I_INVALID_HID, "H5Fcreate");
+    def_fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(def_fapl, H5I_INVALID_HID, "H5Pcreate");
 
-    for (i = 0; i < NUM_THREAD; i++)
-        threads[i] = H5TS_create_thread(tts_error_thread, &attribute, NULL);
+    status = H5Pget_vol_id(def_fapl, &vol_id);
+    CHECK(status, FAIL, "H5Pget_vol_id");
 
-    for (i = 0; i < NUM_THREAD; i++)
-        H5TS_wait_for_thread(threads[i]);
+    if(vol_id == H5VL_NATIVE) {
+        /* Create a hdf5 file using H5F_ACC_TRUNC access, default file
+         * creation plist and default file access plist
+         */
+        error_file_g = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, def_fapl);
+        CHECK(error_file_g, H5I_INVALID_HID, "H5Fcreate");
 
-    if (error_flag_g) {
-        TestErrPrintf("At least one thread reported a value that was different from the exected value\n");
-        HDprintf("(Update this test if the error stack changed!)\n");
-    }
+        for (i = 0; i < NUM_THREAD; i++)
+            threads[i] = H5TS_create_thread(tts_error_thread, &attribute, NULL);
 
-    if (error_count_g != NUM_THREAD - 1)
-        TestErrPrintf("Error: %d threads failed instead of %d\n", error_count_g, NUM_THREAD-1);
+        for (i = 0; i < NUM_THREAD; i++)
+            H5TS_wait_for_thread(threads[i]);
 
-    dataset = H5Dopen2(error_file_g, DATASETNAME, H5P_DEFAULT);
-    CHECK(dataset, H5I_INVALID_HID, "H5Dopen2");
+        if (error_flag_g) {
+            TestErrPrintf("At least one thread reported a value that was different from the expected value\n");
+            HDprintf("(Update this test if the error stack changed!)\n");
+        }
 
-    status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
-    CHECK(status, FAIL, "H5Dread");
+        if (error_count_g != NUM_THREAD - 1)
+            TestErrPrintf("Error: %d threads failed instead of %d\n", error_count_g, NUM_THREAD-1);
 
-    if (value != WRITE_NUMBER)
-        TestErrPrintf("Error: Successful thread wrote value %d instead of %d\n", value, WRITE_NUMBER);
+        dataset = H5Dopen2(error_file_g, DATASETNAME, H5P_DEFAULT);
+        CHECK(dataset, H5I_INVALID_HID, "H5Dopen2");
 
-    status = H5Dclose(dataset);
-    CHECK(status, FAIL, "H5Dclose");
-    status = H5Fclose(error_file_g);
-    CHECK(status, FAIL, "H5Fclose");
+        status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
+        CHECK(status, FAIL, "H5Dread");
+
+        if (value != WRITE_NUMBER)
+            TestErrPrintf("Error: Successful thread wrote value %d instead of %d\n", value, WRITE_NUMBER);
+
+        status = H5Dclose(dataset);
+        CHECK(status, FAIL, "H5Dclose");
+        status = H5Fclose(error_file_g);
+        CHECK(status, FAIL, "H5Fclose");
+    } /* end if */
+    else
+        HDprintf("Non-native VOL connector used, skipping test\n");
+
+    status = H5Idec_ref(vol_id);
+    CHECK(status, FAIL, "H5Idec_ref");
 
     H5TS_attr_destroy(&attribute);
 } /* end tts_error() */

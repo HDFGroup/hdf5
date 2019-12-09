@@ -381,9 +381,6 @@ H5_DLL herr_t H5G__stab_lookup_by_idx(const H5O_loc_t *grp_oloc, H5_iter_order_t
 #ifndef H5_STRICT_FORMAT_CHECKS
 H5_DLL herr_t H5G__stab_valid(H5O_loc_t *grp_oloc, H5O_stab_t *alt_stab);
 #endif /* H5_STRICT_FORMAT_CHECKS */
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-H5_DLL H5G_obj_t H5G__stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*
@@ -448,10 +445,6 @@ H5_DLL htri_t H5G__compact_lookup(const H5O_loc_t *grp_oloc, const char *name,
 H5_DLL herr_t H5G__compact_lookup_by_idx(const H5O_loc_t *oloc,
     const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t n, H5O_link_t *lnk);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-H5_DLL H5G_obj_t H5G__compact_get_type_by_idx(H5O_loc_t *oloc, 
-    const H5O_linfo_t *linfo, hsize_t idx);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Functions that understand "dense" link storage */
 H5_DLL herr_t H5G__dense_build_table(H5F_t *f, const H5O_linfo_t *linfo,
@@ -476,10 +469,6 @@ H5_DLL herr_t H5G__dense_remove_by_idx(H5F_t *f, const H5O_linfo_t *linfo,
     H5RS_str_t *grp_full_path_r, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t n);
 H5_DLL herr_t H5G__dense_delete(H5F_t *f, H5O_linfo_t *linfo, hbool_t adj_link);
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-H5_DLL H5G_obj_t H5G__dense_get_type_by_idx(H5F_t  *f, H5O_linfo_t *linfo,
-    hsize_t idx);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Functions that understand group objects */
 H5_DLL herr_t H5G__obj_create(H5F_t *f, H5G_obj_create_t *gcrt_info,
@@ -494,6 +483,10 @@ H5_DLL herr_t H5G__obj_iterate(const H5O_loc_t *grp_oloc,
 H5_DLL herr_t H5G__obj_info(const H5O_loc_t *oloc, H5G_info_t *grp_info);
 H5_DLL htri_t H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *lnk);
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+H5_DLL herr_t H5G__get_objinfo(const H5G_loc_t *loc, const char *name,
+    hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /*
  * These functions operate on group hierarchy names.

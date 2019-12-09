@@ -41,7 +41,7 @@
 
 #define GOTOERROR(errcode)  { ret_code = errcode; goto done; }
 #define ERRMSG(mesg) {                                                  \
-    fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
+    HDfprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
         mesg, (int)__LINE__, __FILE__);                             \
 }
 
@@ -54,6 +54,12 @@
 } while(0)
 
 /* POSIX I/O macros */
+#ifdef H5_HAVE_WIN32_API
+/* Can't link against the library, so this test will use the older, non-Unicode
+ * _open() call on Windows.
+ */
+#define HDopen(S,F,...)           _open(S, F | _O_BINARY, __VA_ARGS__)
+#endif /* H5_HAVE_WIN32_API */
 #define POSIXCREATE(fn)           HDopen(fn, O_CREAT|O_TRUNC|O_RDWR, 0600)
 #define POSIXOPEN(fn, F)          HDopen(fn, F, 0600)
 #define POSIXCLOSE(F)             HDclose(F)
@@ -192,7 +198,7 @@ do_sio(parameters param, results *res)
     if (sio_debug_level >= 4)
 
     /* output all of the times for all iterations */
-        fprintf(output, "Timer details:\n");
+        HDfprintf(output, "Timer details:\n");
 
     /*
      * Write performance measurement
@@ -206,18 +212,18 @@ do_sio(parameters param, results *res)
         HDfprintf(output, "data filename=%s\n",
              fname);
 
-    set_time(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
     hrc = do_fopen(&param, fname, &fd, SIO_CREATE | SIO_WRITE);
     VRFY((hrc == SUCCESS), "do_fopen failed");
 
-    set_time(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
     hrc = do_write(res, &fd, &param, buffer);
-    set_time(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_write failed");
 
     /* Close file for write */
     hrc = do_fclose(iot, &fd);
-    set_time(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_fclose failed");
 
     if (!param.h5_write_only) {
@@ -226,19 +232,19 @@ do_sio(parameters param, results *res)
          */
 
         /* Open file for read */
-        set_time(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
+        io_time_set(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
         hrc = do_fopen(&param, fname, &fd, SIO_READ);
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-        set_time(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
+        io_time_set(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
         hrc = do_read(res, &fd, &param, buffer);
-        set_time(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
+        io_time_set(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
         hrc = do_fclose(iot, &fd);
 
-        set_time(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
+        io_time_set(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_fclose failed");
     }
 
@@ -258,7 +264,7 @@ done:
         case HDF5:
             if (fd.h5fd != -1)
                 hrc = do_fclose(iot, &fd);
-			break;
+            break;
         default:
             /* unknown request */
             HDassert(0 && "Unknown IO type");
@@ -484,7 +490,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
         /* Create the dataset transfer property list */
         h5dxpl = H5Pcreate(H5P_DATASET_XFER);
         if (h5dxpl < 0) {
-            fprintf(stderr, "HDF5 Property List Create failed\n");
+            HDfprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -506,7 +512,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
             h5dcpl = H5Pcreate(H5P_DATASET_CREATE);
 
         if (h5dcpl < 0) {
-            fprintf(stderr, "HDF5 Property List Create failed\n");
+            HDfprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -514,12 +520,12 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
         /* Set the chunk size to be the same as the buffer size */
             hrc = H5Pset_chunk(h5dcpl, rank, h5chunk);
             if (hrc < 0) {
-                fprintf(stderr, "HDF5 Property List Set failed\n");
+                HDfprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);
             } /* end if */
         } /* end if */
 
-        sprintf(dname, "Dataset_%ld", (unsigned long)parms->num_bytes);
+        HDsprintf(dname, "Dataset_%ld", (unsigned long)parms->num_bytes);
         h5ds_id = H5Dcreate2(fd->h5fd, dname, ELMT_H5_TYPE,
             h5dset_space_id, H5P_DEFAULT, h5dcpl, H5P_DEFAULT);
 
@@ -544,19 +550,19 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
     }
 
     /* Start "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTART);
 
     /* Perform write */
     hrc = dset_write(rank-1, fd, parms, buffer);
 
     if (hrc < 0) {
-        fprintf(stderr, "Error in dataset write\n");
+        HDfprintf(stderr, "Error in dataset write\n");
         GOTOERROR(FAIL);
     }
 
 
     /* Stop "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTOP);
 
     /* Calculate write time */
 
@@ -565,7 +571,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
         hrc = H5Dclose(h5ds_id);
 
         if (hrc < 0) {
-            fprintf(stderr, "HDF5 Dataset Close failed\n");
+            HDfprintf(stderr, "HDF5 Dataset Close failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -578,7 +584,7 @@ done:
     if (h5dset_space_id != -1) {
         hrc = H5Sclose(h5dset_space_id);
         if (hrc < 0){
-            fprintf(stderr, "HDF5 Dataset Space Close failed\n");
+            HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
             ret_code = FAIL;
         } else {
             h5dset_space_id = -1;
@@ -588,7 +594,7 @@ done:
     if (h5mem_space_id != -1) {
         hrc = H5Sclose(h5mem_space_id);
         if (hrc < 0) {
-            fprintf(stderr, "HDF5 Memory Space Close failed\n");
+            HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
             ret_code = FAIL;
         } else {
             h5mem_space_id = -1;
@@ -598,7 +604,7 @@ done:
     if (h5dxpl != -1) {
         hrc = H5Pclose(h5dxpl);
         if (hrc < 0) {
-            fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+            HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
             ret_code = FAIL;
         } else {
             h5dxpl = -1;
@@ -679,7 +685,7 @@ dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
                 VRFY((hrc >= 0), "H5Dwrite");
 
                 break;
-				
+
             default:
                 /* unknown request */
                 HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -831,7 +837,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
         /* Create the dataset transfer property list */
         h5dxpl = H5Pcreate(H5P_DATASET_XFER);
         if (h5dxpl < 0) {
-            fprintf(stderr, "HDF5 Property List Create failed\n");
+            HDfprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
         break;
@@ -850,14 +856,14 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
         break;
 
         case HDF5:
-        sprintf(dname, "Dataset_%ld", (long)parms->num_bytes);
+        HDsprintf(dname, "Dataset_%ld", (long)parms->num_bytes);
         h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
         if (h5ds_id < 0) {
             HDfprintf(stderr, "HDF5 Dataset open failed\n");
             GOTOERROR(FAIL);
         }
         break;
-		
+
         default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -866,16 +872,16 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
     } /* end switch */
 
     /* Start "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTART);
     hrc = dset_read(rank-1, fd, parms, buffer, buffer2);
 
     if (hrc < 0) {
-        fprintf(stderr, "Error in dataset read\n");
+        HDfprintf(stderr, "Error in dataset read\n");
         GOTOERROR(FAIL);
     }
 
     /* Stop "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTOP);
 
     /* Calculate read time */
 
@@ -884,7 +890,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
         hrc = H5Dclose(h5ds_id);
 
         if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Close failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -897,7 +903,7 @@ done:
     if (h5dset_space_id != -1) {
     hrc = H5Sclose(h5dset_space_id);
     if (hrc < 0){
-        fprintf(stderr, "HDF5 Dataset Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
         h5dset_space_id = -1;
@@ -907,7 +913,7 @@ done:
     if (h5mem_space_id != -1) {
     hrc = H5Sclose(h5mem_space_id);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Memory Space Close failed\n");
+        HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
         h5mem_space_id = -1;
@@ -917,7 +923,7 @@ done:
     if (h5dxpl != -1) {
     hrc = H5Pclose(h5dxpl);
     if (hrc < 0) {
-        fprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
+        HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
         h5dxpl = -1;
@@ -981,7 +987,7 @@ dset_read(int local_dim, file_descr *fd, parameters *parms, void *buffer,
                     h5dset_space_id, h5dxpl, buffer);
                 VRFY((hrc >= 0), "H5Dread");
                 break;
-				
+
             default:
                 /* unknown request */
                 HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -1083,7 +1089,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
         fapl = set_vfd(param);
 
         if (fapl < 0) {
-            fprintf(stderr, "HDF5 Property List Create failed\n");
+            HDfprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -1104,11 +1110,11 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 
 
         if (fd->h5fd < 0) {
-            fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
+            HDfprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
             GOTOERROR(FAIL);
         }
         break;
-		
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)param->io_type);
@@ -1170,7 +1176,7 @@ set_vfd(parameters *param)
         HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
         for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
-            sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+            HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1,0) * (HADDR_MAX / 10);
         }
@@ -1219,7 +1225,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
         rc = POSIXCLOSE(fd->posixfd);
 
         if (rc != 0){
-        fprintf(stderr, "POSIX File Close failed\n");
+        HDfprintf(stderr, "POSIX File Close failed\n");
         GOTOERROR(FAIL);
         }
 
@@ -1230,13 +1236,13 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
         hrc = H5Fclose(fd->h5fd);
 
         if (hrc < 0) {
-        fprintf(stderr, "HDF5 File Close failed\n");
+        HDfprintf(stderr, "HDF5 File Close failed\n");
         GOTOERROR(FAIL);
         }
 
         fd->h5fd = -1;
         break;
-		
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
@@ -1256,7 +1262,15 @@ done:
  * Programmer:  Albert Cheng 2001/12/12
  * Modifications: Support for file drivers. Christian Chilan, April, 2008
  */
-    static void
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'temp' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+static void
 do_cleanupfile(iotype iot, char *filename)
 {
     char        temp[2048];
@@ -1269,12 +1283,12 @@ do_cleanupfile(iotype iot, char *filename)
     if (clean_file_g){
 
     switch (iot) {
-    case POSIXIO:
-          HDremove(filename);
-        break;
+        case POSIXIO:
+            HDremove(filename);
+            break;
 
-    case HDF5:
-           driver = H5Pget_driver(fapl);
+        case HDF5:
+            driver = H5Pget_driver(fapl);
 
             if (driver == H5FD_FAMILY) {
                 for (j = 0; /*void*/; j++) {
@@ -1307,14 +1321,15 @@ do_cleanupfile(iotype iot, char *filename)
                 HDremove(filename);
             }
             H5Pclose(fapl);
-        break;
-			
-    default:
-        /* unknown request */
-        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
-        HDassert(0 && "Unknown IO type");
-        break;
-    }
+            break;
+                            
+        default:
+            /* unknown request */
+            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+            HDassert(0 && "Unknown IO type");
+            break;
+        }
     }
 }
+#pragma GCC diagnostic pop
 

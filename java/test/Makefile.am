@@ -61,6 +61,8 @@ noinst_JAVA = \
     TestH5P.java \
     TestH5PData.java \
     TestH5Pfapl.java \
+    TestH5Pfaplhdfs.java \
+    TestH5Pfapls3.java \
     TestH5Pvirtual.java \
     TestH5Plist.java \
     TestH5A.java \
@@ -69,6 +71,7 @@ noinst_JAVA = \
     TestH5Ocreate.java \
     TestH5Ocopy.java \
     TestH5PL.java \
+    TestH5VL.java \
     TestH5Z.java \
     TestH5E.java \
     TestH5Edefault.java \

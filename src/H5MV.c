@@ -310,17 +310,17 @@ HDfprintf(stderr, "%s: size = %Hu\n", FUNC, size);
             /* Start up the free-space manager if not so */
             if(f->shared->fs_man_md == NULL) {
                 if(H5MV__create(f) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space manager")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize free space manager")
             }
             HDassert(f->shared->fs_man_md);
 
             /* Create the free-space section for the fragment */
             if(NULL == (node = H5MV__sect_new(eoa, frag_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize free space section")
 
             /* Add the section */
             if(H5FS_sect_add(f, f->shared->fs_man_md, (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, f) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF, "can't re-add section to file free space")
 
             node = NULL;
         }

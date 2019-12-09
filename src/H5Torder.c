@@ -100,11 +100,11 @@ H5Tget_order(hid_t type_id)
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5T_ORDER_ERROR, "not a datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, H5T_ORDER_ERROR, "not a datatype")
 
     /* Get order */
     if(H5T_ORDER_ERROR == (ret_value = H5T_get_order(dt)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_ORDER_ERROR, "cant't get order for specified datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_ORDER_ERROR, "can't get order for specified datatype")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -210,6 +210,8 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
     if(order < H5T_ORDER_LE || order > H5T_ORDER_NONE || order == H5T_ORDER_MIXED)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "illegal byte order")
+    if(NULL != dt->vol_obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is already committed")
     if(H5T_STATE_TRANSIENT != dt->shared->state)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype is read-only")
 

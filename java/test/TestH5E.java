@@ -38,9 +38,6 @@ import org.junit.rules.TestName;
 public class TestH5E {
     @Rule public TestName testname = new TestName();
 
-    public static final int ERRSTACK_CNT = 3;
-    public static final int ERRSTACK_MTY_CNT = 0;
-
     long hdf_java_classid = -1;
     long current_stackid = -1;
 
@@ -79,7 +76,7 @@ public class TestH5E {
     public void testH5Eget_msg_major() {
 
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (HDF5LibraryException hdferr) {
             long errnum = hdferr.getMajorErrorNumber();
@@ -93,7 +90,7 @@ public class TestH5E {
                 fail("H5.H5Eget_msg(Throwable): " + err);
             }
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
-            assertEquals("H5.H5Eget_msg: ", "Object atom", msg);
+            assertEquals("H5.H5Eget_msg: ", "File accessibility", msg);
             assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MAJOR, error_msg_type[0]);
         }
         catch (Throwable err) {
@@ -105,7 +102,7 @@ public class TestH5E {
     @Test
     public void testH5Eget_msg_minor() {
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (HDF5LibraryException hdferr) {
             long errnum = hdferr.getMinorErrorNumber();
@@ -119,7 +116,7 @@ public class TestH5E {
                 fail("H5.H5Eget_msg: " + err);
             }
             assertNotNull("H5.H5Eget_msg: " + msg, msg);
-            assertEquals("H5.H5Eget_msg: ", "Unable to find atom information (already closed?)", msg);
+            assertEquals("H5.H5Eget_msg: ", "Unable to open file", msg);
             assertEquals("H5.H5Eget_msg: ", HDF5Constants.H5E_MINOR, error_msg_type[0]);
         }
         catch (Throwable err) {
@@ -130,6 +127,10 @@ public class TestH5E {
 
     @Test
     public void testH5Epop() {
+
+        long num_msg = -1;
+        long saved_num_msg = -1;
+
         try {
             H5.H5Eset_current_stack(current_stackid);
         }
@@ -139,12 +140,12 @@ public class TestH5E {
         }
 
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
         }
 
-        // save current stack contents
+        // Save current stack contents
         try {
             current_stackid = H5.H5Eget_current_stack();
         }
@@ -153,7 +154,6 @@ public class TestH5E {
             fail("H5.H5Epop: " + err);
         }
 
-        long num_msg = -1;
         try {
             num_msg = H5.H5Eget_num(HDF5Constants.H5E_DEFAULT);
         }
@@ -162,7 +162,7 @@ public class TestH5E {
             fail("H5.H5Epop: " + err);
         }
 
-        assertTrue("H5.H5Epop #:" + num_msg, num_msg == TestH5E.ERRSTACK_MTY_CNT);
+        assertTrue("H5.H5Epop #:" + num_msg, num_msg == 0);
 
         try {
             num_msg = H5.H5Eget_num(current_stackid);
@@ -172,8 +172,9 @@ public class TestH5E {
             fail("H5.H5Epop: " + err);
         }
 
-        assertTrue("H5.H5Epop #:" + num_msg, num_msg == TestH5E.ERRSTACK_CNT);
+        assertTrue("H5.H5Epop #:" + num_msg, num_msg > 0);
 
+        saved_num_msg = num_msg;
         try {
             H5.H5Epop(current_stackid, 1);
         }
@@ -190,7 +191,7 @@ public class TestH5E {
             fail("H5.H5Epop: " + err);
         }
 
-        assertTrue("H5.H5Epop", num_msg == TestH5E.ERRSTACK_CNT - 1);
+        assertTrue("H5.H5Epop", num_msg == saved_num_msg - 1);
     }
 
     @Test
@@ -231,7 +232,7 @@ public class TestH5E {
 
             try {
                 num_msg = H5.H5Eget_num(estack_id);
-                assertTrue("testH5Epush #:" + num_msg, num_msg == TestH5E.ERRSTACK_MTY_CNT);
+                assertTrue("testH5Epush #:" + num_msg, num_msg == 0);
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -242,7 +243,7 @@ public class TestH5E {
 
             try {
                 num_msg = H5.H5Eget_num(estack_id);
-                assertTrue("testH5Epush #:" + num_msg, num_msg == TestH5E.ERRSTACK_MTY_CNT + 1);
+                assertTrue("testH5Epush #:" + num_msg, num_msg == 1);
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -297,12 +298,12 @@ public class TestH5E {
             fail("testH5Ewalk:H5Eset_current_stack " + err);
         }
         try {
-            H5.H5Fopen("test", 0, 1);
+            H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
         }
 
-        // save current stack contents
+        // Save current stack contents
         try {
             current_stackid = H5.H5Eget_current_stack();
         }
@@ -318,7 +319,7 @@ public class TestH5E {
             err.printStackTrace();
             fail("testH5Ewalk:H5Eget_num " + err);
         }
-        assertTrue("testH5Ewalk #:" + num_msg, num_msg == TestH5E.ERRSTACK_CNT);
+        assertTrue("testH5Ewalk #:" + num_msg, num_msg > 0);
 
         try {
             H5.H5Ewalk2(current_stackid, HDF5Constants.H5E_WALK_UPWARD, walk_cb, walk_data);
@@ -328,7 +329,8 @@ public class TestH5E {
             fail("testH5Ewalk:H5Ewalk2 " + err);
         }
         assertFalse("testH5Ewalk:H5Ewalk2 ",((H5E_walk_data)walk_data).walkdata.isEmpty());
-        assertTrue("testH5Ewalk:H5Ewalk2 "+((H5E_walk_data)walk_data).walkdata.size(),((H5E_walk_data)walk_data).walkdata.size()==TestH5E.ERRSTACK_CNT);
+        assertTrue("testH5Ewalk:H5Ewalk2 "+((H5E_walk_data)walk_data).walkdata.size(),((H5E_walk_data)walk_data).walkdata.size() > 0);
     }
 
 }
+

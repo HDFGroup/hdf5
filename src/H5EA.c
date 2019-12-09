@@ -46,6 +46,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VMprivate.h"        /* Vector functions			*/
 
 
@@ -693,7 +694,7 @@ H5EA_set(const H5EA_t *ea, hsize_t idx, const void *elmt))
     HDassert(thing_unprot_func);
 
     /* Set element in thing's element buffer */
-    HDmemcpy(thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), elmt, hdr->cparam.cls->nat_elmt_size);
+    H5MM_memcpy(thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), elmt, hdr->cparam.cls->nat_elmt_size);
     thing_cache_flags |= H5AC__DIRTIED_FLAG;
 
     /* Update max. element set in array, if appropriate */
@@ -765,7 +766,7 @@ H5EA_get(const H5EA_t *ea, hsize_t idx, void *elmt))
         } /* end if */
         else
             /* Get element from thing's element buffer */
-            HDmemcpy(elmt, thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), hdr->cparam.cls->nat_elmt_size);
+            H5MM_memcpy(elmt, thing_elmt_buf + (hdr->cparam.cls->nat_elmt_size * thing_elmt_idx), hdr->cparam.cls->nat_elmt_size);
     } /* end else */
 
 CATCH
@@ -986,19 +987,25 @@ END_FUNC(PRIV)  /* end H5EA_delete() */
  * Purpose:	Iterate over the elements of an extensible array
  *		(copied and modified from FA_iterate() in H5FA.c)
  *
- * Return:      SUCCEED/FAIL
+ * Return:      H5_ITER_CONT/H5_ITER_ERROR
  *
  * Programmer:  Vailin Choi; Feb 2015
  *
+ * Modification:
+ *              Prototype changed (HDFFV-10661)
+ *              - herr_t to int
+ *              - SUCCEED/FAIL to H5_ITER_CONT/H5_ITER_ERROR
+ *              June 6, 2019 -BMR
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
+int, H5_ITER_CONT, H5_ITER_ERROR,
 H5EA_iterate(H5EA_t *ea, H5EA_operator_t op, void *udata))
 
     /* Local variables */
     uint8_t     *elmt = NULL;
     hsize_t     u;
+    int         cb_ret = H5_ITER_CONT;     /* Return value from callback */
 
     /*
      * Check arguments.
@@ -1012,9 +1019,7 @@ H5EA_iterate(H5EA_t *ea, H5EA_operator_t op, void *udata))
         H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array element")
 
     /* Iterate over all elements in array */
-    for(u = 0; u < ea->hdr->stats.stored.max_idx_set; u++) {
-        int cb_ret;     /* Return value from callback */
-
+    for(u = 0; u < ea->hdr->stats.stored.max_idx_set && cb_ret == H5_ITER_CONT; u++) {
         /* Get array element */
         if(H5EA_get(ea, u, elmt) < 0)
             H5E_THROW(H5E_CANTGET, "unable to delete fixed array")

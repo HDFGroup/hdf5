@@ -86,7 +86,7 @@ guide to the syntax.
 18. Flesh out designs for unit, integration and performance tests suites
     as outlined in the RFC. Implement same.
 
-19. **David, needs merge** Fix memory leak in sparse-reader test.
+19. **David, complete** Fix memory leak in sparse-reader test.
 
     David found that the shadow index was leaked by VFD SWMR readers
     and plugged the leak.  Now the sparse reader tests do not use up
@@ -94,7 +94,7 @@ guide to the syntax.
     `vfd_swmr-merge-attempt-2`, which as of 19 Nov 2019 has not been
     merged to `feature/vfd_swmr`.
 
-20. **David, needs merge** Test John's patch that repairs the superblock flags
+20. **David, complete** Test John's patch that repairs the superblock flags
     mismatch that crashes the reader.
 
     David found that the patch fixed the demo crashes.  He applied the
@@ -120,7 +120,7 @@ guide to the syntax.
     SWMR does not have to deal with it. However, if the global heap
     overhaul does not take place, then we have more work to do.
 
-26. **David, needs merge** Fix the expand/shrink test.
+26. **David, complete** Fix the expand/shrink test.
 
     The test appeared to fail because the dataset extent was enlarged
     before the data was written, so arbitrary data was present.
@@ -145,3 +145,6 @@ guide to the syntax.
     The problem was manifested when setting the threshold value in vfd_swmr_generator.c via
     H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1024 * 1024 * 1024) and
     then run the vfd_swmr_addrem_writer.c.
+
+30. **David, merged, needs more testing** Add a delay to the FSM so that
+    freed regions are not reused before max_lag ticks are up.

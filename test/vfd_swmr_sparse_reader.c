@@ -39,7 +39,7 @@
 /* Local Macros */
 /****************/
 
-#define TIMEOUT 300
+#define TIMEOUT 30
 
 /*******************/
 /* Local Variables */
@@ -215,7 +215,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
         goto error;
 
     /* Allocate memory for the configuration structure */
-    if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         goto error;
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
@@ -265,24 +265,28 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
     if(verbose)
         HDfprintf(stderr, "READER: Reading records\n");
 
-    /* Get the starting time */
-    start_time = HDtime(NULL);
-
     /* Read records */
     for(u = 0; u < nrecords; u++) {
+        unsigned level, offset;
         symbol_info_t *symbol = NULL;   /* Symbol (dataset) */
         htri_t attr_exists;             /* Whether the sequence number attribute exists */
         unsigned long file_u;           /* Attribute sequence number (writer's "u") */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset();
+        symbol = choose_dataset(&level, &offset);
 
         /* Fill in "nrecords" field.  Note that this depends on the writer
          * using the same algorithm and "nrecords" */
         symbol->nrecords = nrecords / 5;
 
+        /* Get the starting time */
+        if ((start_time = HDtime(NULL)) == (time_t)-1) {
+            fprintf(stderr, "READER: could not read time.\n");
+            goto error;
+        }
+
         /* Wait until we can read the dataset */
-        do {
+        for (;;) {
             /* Check if sequence attribute exists */
             if((attr_exists = H5Aexists_by_name(fid, symbol->name, "seq", H5P_DEFAULT)) < 0)
                 goto error;
@@ -304,16 +308,24 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
 
             /* Check for timeout */
             if(HDtime(NULL) >= (time_t)(start_time + (time_t)TIMEOUT)) {
-                HDfprintf(stderr, "READER: Reader timed out\n");
+                HDfprintf(stderr,
+                    "READER: Reader timed at record %lu level %u offset %u",
+                        u, level, offset);
+                if (attr_exists) {
+                    HDfprintf(stderr, ", read sequence %lu\n", file_u);
+                } else {
+                    HDfprintf(stderr, ", read no sequence\n");
+                    HDfprintf(stderr, ", read no sequence\n");
+                }
                 goto error;
             } /* end if */
 
             /* Pause */
             HDsleep(poll_time);
 
-        /* Emit informational message */
-        if(verbose)
-            HDfprintf(stderr, "READER: Reopening file (do while loop): %s\n", filename);
+            /* Emit informational message */
+            if(verbose)
+                HDfprintf(stderr, "READER: Reopening file (do while loop): %s\n", filename);
 
             /* Retrieve and print the collection of metadata read retries */
             if(print_metadata_retries_info(fid) < 0)
@@ -332,7 +344,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
                 goto error;
             } 
             iter_to_reopen = reopen_count;
-        } while(1);
+        }
 
         /* Emit informational message */
         if(verbose)
@@ -359,9 +371,9 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
                 goto error;
 
             /* Remove H5E_BEGIN_TRY/END_TRY to see the error stack if error */
-            H5E_BEGIN_TRY {
+//            H5E_BEGIN_TRY {
                 fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
-            } H5E_END_TRY;
+ //           } H5E_END_TRY;
             if(fid < 0) {
                 HDfprintf(stderr, "READER: Error in reopening the file (iter_to_reopen): %s\n", filename);
                 goto error;

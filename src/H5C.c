@@ -80,6 +80,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5retry_private.h"	/* Retry loops.				*/
 #include "H5Cpkg.h"		/* Cache				*/
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -105,6 +106,9 @@
 /******************/
 /* Local Typedefs */
 /******************/
+
+/* Alias for pointer to cache entry, for use when allocating sequences of them */
+typedef H5C_cache_entry_t *H5C_cache_entry_ptr_t;
 
 
 /********************/
@@ -207,8 +211,8 @@ H5FL_DEFINE(H5C_tag_info_t);
 /* Declare a free list to manage the H5C_t struct */
 H5FL_DEFINE_STATIC(H5C_t);
 
-/* Declare a free list to manage flush dependency arrays */
-H5FL_BLK_DEFINE_STATIC(parent);
+/* Declare a free list to manage arrays of cache entries */
+H5FL_SEQ_DEFINE_STATIC(H5C_cache_entry_ptr_t);
 
 
 
@@ -282,13 +286,8 @@ H5C_create(size_t		      max_cache_size,
 
     cache_ptr->flush_in_progress		= FALSE;
 
-    cache_ptr->logging_enabled                  = FALSE;
-
-    cache_ptr->currently_logging                = FALSE;
-
-    cache_ptr->log_file_ptr			= NULL;
-
-    cache_ptr->trace_file_ptr			= NULL;
+    if(NULL == (cache_ptr->log_info = (H5C_log_info_t *)H5MM_calloc(sizeof(H5C_log_info_t))))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     cache_ptr->aux_ptr				= aux_ptr;
 
@@ -340,6 +339,7 @@ H5C_create(size_t		      max_cache_size,
 
     /* Tagging Field Initializations */
     cache_ptr->ignore_tags                      = FALSE;
+    cache_ptr->num_objs_corked                  = 0;
 
     cache_ptr->slist_changed			= FALSE;
     cache_ptr->slist_len			= 0;
@@ -500,6 +500,9 @@ done:
 
             if(cache_ptr->tag_list != NULL)
                 H5SL_close(cache_ptr->tag_list);
+
+            if(cache_ptr->log_info != NULL)
+                H5MM_xfree(cache_ptr->log_info);
 
             cache_ptr->magic = 0;
             cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
@@ -873,6 +876,9 @@ H5C_dest(H5F_t * f)
         H5SL_destroy(cache_ptr->tag_list, H5C_free_tag_list_cb, NULL);
         cache_ptr->tag_list = NULL;
     } /* end if */
+
+    if(cache_ptr->log_info != NULL)
+        H5MM_xfree(cache_ptr->log_info);
 
 #ifndef NDEBUG
 #if H5C_DO_SANITY_CHECKS
@@ -2762,13 +2768,8 @@ H5C_protect(H5F_t *		f,
     ring = H5CX_get_ring();
 
 #ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-        coll_access = (H5P_USER_TRUE == f->coll_md_read ? TRUE : FALSE);
-
-        /* If not explicitly disabled, get the cmdr setting from the API context */
-        if(!coll_access && H5P_FORCE_FALSE != f->coll_md_read)
-            coll_access = H5CX_get_coll_metadata_read();
-    } /* end if */
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI))
+        coll_access = H5CX_get_coll_metadata_read();
 #endif /* H5_HAVE_PARALLEL */
 
     /* first check to see if the target is in cache */
@@ -2805,7 +2806,7 @@ H5C_protect(H5F_t *		f,
            the entry in their cache still have to participate in the
            bcast. */
 #ifdef H5_HAVE_PARALLEL
-        if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI) && coll_access) {
+        if(coll_access) {
             if(!(entry_ptr->is_dirty) && !(entry_ptr->coll_access)) {
                 MPI_Comm  comm;           /* File MPI Communicator */
                 int       mpi_code;       /* MPI error code */
@@ -2823,7 +2824,7 @@ H5C_protect(H5F_t *		f,
                     if(NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for on disk image buffer")
 #if H5C_DO_MEMORY_SANITY_CHECKS
-                    HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+                    H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
                     if(0 == mpi_rank)
                         if(H5C__generate_image(f, cache_ptr, entry_ptr) < 0)
@@ -3120,21 +3121,11 @@ H5C_protect(H5F_t *		f,
     } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
-    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-        /* Make sure the size of the collective entries in the cache remain in check */
-        if(coll_access) {
-            if(H5P_USER_TRUE == f->coll_md_read) {
-                if(cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100)
-                    if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "can't clear collective metadata entries")
-            } /* end if */
-            else {
-                if(cache_ptr->max_cache_size * 40 < cache_ptr->coll_list_size * 100)
-                    if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "can't clear collective metadata entries")
-            } /* end else */
-        } /* end if */
-    } /* end if */
+    /* Make sure the size of the collective entries in the cache remain in check */
+    if(coll_access)
+        if(cache_ptr->max_cache_size * 80 < cache_ptr->coll_list_size * 100)
+            if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "can't clear collective metadata entries")
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -4185,7 +4176,7 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
             /* Array does not exist yet, allocate it */
             HDassert(!child_entry->flush_dep_parent);
 
-            if(NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_MALLOC(parent, H5C_FLUSH_DEP_PARENT_INIT * sizeof(H5C_cache_entry_t *))))
+            if(NULL == (child_entry->flush_dep_parent = H5FL_SEQ_MALLOC(H5C_cache_entry_ptr_t, H5C_FLUSH_DEP_PARENT_INIT)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency parent list")
             child_entry->flush_dep_parent_nalloc = H5C_FLUSH_DEP_PARENT_INIT;
         } /* end if */
@@ -4193,7 +4184,7 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
             /* Resize existing array */
             HDassert(child_entry->flush_dep_parent);
 
-            if(NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(parent, child_entry->flush_dep_parent, 2 * child_entry->flush_dep_parent_nalloc * sizeof(H5C_cache_entry_t *))))
+            if(NULL == (child_entry->flush_dep_parent = H5FL_SEQ_REALLOC(H5C_cache_entry_ptr_t, child_entry->flush_dep_parent, 2 * child_entry->flush_dep_parent_nalloc)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency parent list")
             child_entry->flush_dep_parent_nalloc *= 2;
         } /* end else */
@@ -4351,12 +4342,12 @@ H5C_destroy_flush_dependency(void *parent_thing, void * child_thing)
 
     /* Shrink or free the parent array if apporpriate */
     if(child_entry->flush_dep_nparents == 0) {
-        child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_FREE(parent, child_entry->flush_dep_parent);
+        child_entry->flush_dep_parent = H5FL_SEQ_FREE(H5C_cache_entry_ptr_t, child_entry->flush_dep_parent);
         child_entry->flush_dep_parent_nalloc = 0;
     } /* end if */
     else if(child_entry->flush_dep_parent_nalloc > H5C_FLUSH_DEP_PARENT_INIT
             && child_entry->flush_dep_nparents <= (child_entry->flush_dep_parent_nalloc / 4)) {
-        if(NULL == (child_entry->flush_dep_parent = (H5C_cache_entry_t **)H5FL_BLK_REALLOC(parent, child_entry->flush_dep_parent, (child_entry->flush_dep_parent_nalloc / 4) * sizeof(H5C_cache_entry_t *))))
+        if(NULL == (child_entry->flush_dep_parent = H5FL_SEQ_REALLOC(H5C_cache_entry_ptr_t, child_entry->flush_dep_parent, child_entry->flush_dep_parent_nalloc / 4)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for flush dependency parent list")
         child_entry->flush_dep_parent_nalloc /= 4;
     } /* end if */
@@ -6627,7 +6618,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             if(NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for on disk image buffer")
 #if H5C_DO_MEMORY_SANITY_CHECKS
-            HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+            H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
         } /* end if */
 
@@ -7169,7 +7160,7 @@ H5C_load_entry(H5F_t *              f,
                     "memory allocation failed for on disk image buffer")
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
-    HDmemcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+    H5MM_memcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
 #ifdef H5_HAVE_PARALLEL
@@ -7221,7 +7212,7 @@ H5C_load_entry(H5F_t *              f,
                 image = (uint8_t *)new_image;
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
-                HDmemcpy(image + len, H5C_IMAGE_SANITY_VALUE, 
+                H5MM_memcpy(image + len, H5C_IMAGE_SANITY_VALUE,
                          H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
             } /* end if */
@@ -7290,7 +7281,7 @@ H5C_load_entry(H5F_t *              f,
                     image = (uint8_t *)new_image;
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
-                    HDmemcpy(image + actual_len, H5C_IMAGE_SANITY_VALUE, 
+                    H5MM_memcpy(image + actual_len, H5C_IMAGE_SANITY_VALUE,
                              H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
@@ -8414,6 +8405,8 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 
             /* Set the corked status for the entire object */
             tag_info->corked = TRUE;
+            cache_ptr->num_objs_corked++;
+
         } /* end if */
         else {
             /* Sanity check */
@@ -8425,6 +8418,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 
             /* Set the corked status for the entire object */
             tag_info->corked = FALSE;
+            cache_ptr->num_objs_corked--;
 
             /* Remove the tag info from the tag list, if there's no more entries with this tag */
             if(0 == tag_info->entry_cnt) {
@@ -9166,7 +9160,7 @@ H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry
         if(NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)) )
             HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for on disk image buffer")
 #if H5C_DO_MEMORY_SANITY_CHECKS
-        HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + image_size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+        H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + image_size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
     } /* end if */
 
@@ -9310,7 +9304,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
                            "memory allocation failed for on disk image buffer")
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
-            HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + new_len, \
+            H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + new_len,
                      H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 

@@ -289,8 +289,8 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
     HDassert(calling_fcn != NULL);
 
     HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
-    HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
-    HDfprintf(stdout, "	slist size = %lld.\n", (long long)(cache_ptr->slist_size));
+    HDfprintf(stdout, "	slist len = %" PRIu32 ".\n", cache_ptr->slist_len);
+    HDfprintf(stdout, "	slist size = %zu.\n", cache_ptr->slist_size);
 
     if(cache_ptr->slist_len > 0) {
         /* If we get this far, all entries in the cache are listed in the
@@ -310,18 +310,17 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
             HDassert( entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
 
             HDfprintf(stdout,
-               "%s%d       0x%016llx  %4lld    %d/%d       %d    %s\n",
+               "%s%d       0x%016" PRIxHADDR "  %4zu    %d/%d       %d    %s\n",
                cache_ptr->prefix, i,
-               (long long)(entry_ptr->addr),
-               (long long)(entry_ptr->size),
+               entry_ptr->addr,
+               entry_ptr->size,
                (int)(entry_ptr->is_protected),
                (int)(entry_ptr->is_pinned),
                (int)(entry_ptr->is_dirty),
                entry_ptr->type->name);
 
-            HDfprintf(stdout, "		node_ptr = 0x%llx, item = %p\n",
-                      (unsigned long long)node_ptr,
-                      H5SL_item(node_ptr));
+            HDfprintf(stdout, "		node_ptr = %p, item = %p\n",
+                      node_ptr, H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
             node_ptr = H5SL_next(node_ptr);
@@ -409,10 +408,10 @@ H5C_dump_coll_write_list(H5C_t * cache_ptr, char * calling_fcn)
             HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
             HDfprintf(stdout,
-               "%s%d       0x%016llx  %4lld    %d/%d       %d    %s\n",
+               "%s%d       0x%016" PRIxHADDR "  %4%zu    %d/%d       %d    %s\n",
                cache_ptr->prefix, i,
-               (long long)(entry_ptr->addr),
-               (long long)(entry_ptr->size),
+               entry_ptr->addr,
+               entry_ptr->size,
                (int)(entry_ptr->is_protected),
                (int)(entry_ptr->is_pinned),
                (int)(entry_ptr->is_dirty),
@@ -473,42 +472,6 @@ H5C_set_prefix(H5C_t * cache_ptr, char * prefix)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_set_prefix() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_set_trace_file_ptr
- *
- * Purpose:     Set the trace_file_ptr field for the cache.
- *
- *              This field must either be NULL (which turns of trace
- *              file logging), or be a pointer to an open file to which
- *              trace file data is to be written.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              1/20/06
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_set_trace_file_ptr(H5C_t * cache_ptr, FILE * trace_file_ptr)
-{
-    herr_t		ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* This would normally be an assert, but we need to use an HGOTO_ERROR
-     * call to shut up the compiler.
-     */
-    if((NULL == cache_ptr) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
-
-    cache_ptr->trace_file_ptr = trace_file_ptr;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_set_trace_file_ptr() */
 
 
 /*-------------------------------------------------------------------------

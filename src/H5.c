@@ -137,7 +137,7 @@ H5_init_library(void)
         if (mpi_initialized && !mpi_finalized) {
             int key_val;
 
-            if(MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(MPI_NULL_COPY_FN, 
+            if(MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN, 
                                                                  (MPI_Comm_delete_attr_function *)H5_mpi_delete_cb, 
                                                                  &key_val, NULL)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Comm_create_keyval failed", mpi_code)
@@ -165,6 +165,7 @@ H5_init_library(void)
     H5_debug_g.pkg[H5_PKG_HG].name = "hg";
     H5_debug_g.pkg[H5_PKG_HL].name = "hl";
     H5_debug_g.pkg[H5_PKG_I].name = "i";
+    H5_debug_g.pkg[H5_PKG_M].name = "m";
     H5_debug_g.pkg[H5_PKG_MF].name = "mf";
     H5_debug_g.pkg[H5_PKG_MM].name = "mm";
     H5_debug_g.pkg[H5_PKG_O].name = "o";
@@ -172,6 +173,7 @@ H5_init_library(void)
     H5_debug_g.pkg[H5_PKG_S].name = "s";
     H5_debug_g.pkg[H5_PKG_T].name = "t";
     H5_debug_g.pkg[H5_PKG_V].name = "v";
+    H5_debug_g.pkg[H5_PKG_VL].name = "vl";
     H5_debug_g.pkg[H5_PKG_Z].name = "z";
 
     /*
@@ -212,6 +214,8 @@ H5_init_library(void)
      */
     if(H5E_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
+    if(H5VL_init_phase1() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
     if(H5P_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface")
     if(H5T_init() < 0)
@@ -224,6 +228,10 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface")
     if(H5FS_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize FS interface")
+
+    /* Finish initializing interfaces that depend on the interfaces above */
+    if(H5VL_init_phase2() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
 
     /* Debugging? */
     H5_debug_mask("-all");
@@ -304,6 +312,7 @@ H5_term_library(void)
         pending += DOWN(A_top);
         pending += DOWN(D_top);
         pending += DOWN(G_top);
+        pending += DOWN(M_top);
         pending += DOWN(R_top);
         pending += DOWN(S_top);
         pending += DOWN(T_top);
@@ -329,6 +338,7 @@ H5_term_library(void)
             pending += DOWN(A);
             pending += DOWN(D);
             pending += DOWN(G);
+            pending += DOWN(M);
             pending += DOWN(R);
             pending += DOWN(S);
             pending += DOWN(T);
@@ -343,6 +353,7 @@ H5_term_library(void)
             pending += DOWN(AC);
             pending += DOWN(Z);
             pending += DOWN(FD);
+            pending += DOWN(VL);
             pending += DOWN(PL);
             /* Don't shut down the error code until other APIs which use it are shut down */
             if(pending == 0)

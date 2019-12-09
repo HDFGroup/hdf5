@@ -15,7 +15,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, November 24, 1998
  *
- * Purpose:	Test local heaps used by symbol tables (groups).
+ * Purpose:    Test local heaps used by symbol tables (groups).
  */
 #include "h5test.h"
 #include "H5srcdir.h"
@@ -23,6 +23,7 @@
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5HLprivate.h"
 #include "H5Iprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 const char *FILENAME[] = {
     "lheap",
@@ -33,7 +34,7 @@ const char *FILENAME[] = {
 
 #define NOBJS   40
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -78,7 +79,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if(FAIL == (file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)))
         goto error;
-    if(NULL == (f = (H5F_t *)H5I_object(file))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -99,7 +100,7 @@ main(void)
         goto error;
     }
     for(i = 0; i < NOBJS; i++) {
-        sprintf(buf, "%03d-", i);
+        HDsprintf(buf, "%03d-", i);
         for(j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if(j > 4)
@@ -128,7 +129,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if(FAIL == (file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)))
         goto error;
-    if(NULL == (f = (H5F_t *)H5I_object(file))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -139,7 +140,7 @@ main(void)
         goto error;
     }
     for(i = 0; i < NOBJS; i++) {
-        sprintf(buf, "%03d-", i);
+        HDsprintf(buf, "%03d-", i);
         for(j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if(j > 4)

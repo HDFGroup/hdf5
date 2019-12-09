@@ -26,27 +26,32 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       testlibinfo.sh:
 #       testcheck_version.sh: tcheck_version
 #       testlinks_env.sh: links_env
+#       testexternal_env.sh: external_env
 #       testflushrefresh.sh: flushrefresh
+#       testvds_env.sh: vds_env
 #       testswmr.sh: swmr*
 #       testvdsswmr.sh: vds_swmr*
-#       test_filenotclosed.sh: filenotclosed.c
+#       testabort_fail.sh: filenotclosed.c and del_many_dense_attrs.c
 #       test_filter_plugin.sh: filter_plugin.c
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filenotclosed.sh\
-    testswmr.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh \
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh testexternal_env.sh \
+    testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh \
     testvfdswmr.sh
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) filenotclosed$(EXEEXT) \
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
+    external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
     swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
     swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
     vfd_swmr_generator$(EXEEXT) vfd_swmr_reader$(EXEEXT) vfd_swmr_writer$(EXEEXT)  \
     vfd_swmr_remove_reader$(EXEEXT) vfd_swmr_remove_writer$(EXEEXT)  \
-    vfd_swmr_addrem_writer$(EXEEXT) vfd_swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) \
+    vfd_swmr_addrem_writer$(EXEEXT) vfd_swmr_sparse_reader$(EXEEXT) \
+    vfd_swmr_sparse_writer$(EXEEXT) \
+    vds_env$(EXEEXT) \
     vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-  TEST_SCRIPT += test_filter_plugin.sh
-  SCRIPT_DEPEND += filter_plugin$(EXEEXT)
+  TEST_SCRIPT += test_filter_plugin.sh test_vol_plugin.sh
+  SCRIPT_DEPEND += filter_plugin$(EXEEXT) vol_plugin$(EXEEXT)
 endif
 
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -56,15 +61,15 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
 TEST_PROG= testhdf5 \
-           cache cache_api cache_image cache_tagging lheap ohdr stab gheap \
-           evict_on_close farray earray btree2 fheap \
-           pool accum hyperslab istore bittests dt_arith page_buffer vfd_swmr\
-           dtypes dsets cmpd_dset filter_fail extend direct_chunk external efc \
-           objcopy links unlink twriteorder big mtime fillval mount \
+           cache cache_api cache_image cache_tagging lheap ohdr \
+           stab gheap evict_on_close farray earray btree2 fheap \
+           pool accum hyperslab istore bittests dt_arith page_buffer vfd_swmr \
+           dtypes dsets chunk_info cmpd_dset filter_fail extend direct_chunk \
+           external efc objcopy objcopy_ref links unlink twriteorder big mtime fillval mount \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
-           enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
-           reserved cross_read freespace mf vds file_image unregister \
-           cache_logging cork swmr
+           enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
+           dangle dtransform reserved cross_read freespace mf vds file_image \
+           unregister cache_logging cork swmr vol
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -72,25 +77,28 @@ TEST_PROG= testhdf5 \
 # accum_swmr_reader is used by accum.c.
 # atomic_writer and atomic_reader are standalone programs.
 # links_env is used by testlinks_env.sh
-# filenotclosed is used by test_filenotclosed.sh
+# external_env is used by testexternal_env.sh
+# filenotclosed and del_many_dense_attrs are used by testabort_fail.sh
 # flushrefresh is used by testflushrefresh.sh.
 # use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_usecases.sh
 # swmr_* files (besides swmr.c) are used by testswmr.sh.
 # vds_swmr_* files are used by testvdsswmr.sh
+# vds_env is used by testvds_env.sh
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
-    testmeta accum_swmr_reader atomic_writer atomic_reader \
-    links_env filenotclosed flushrefresh use_append_chunk use_append_mchunks use_disable_mdc_flushes \
+    testmeta accum_swmr_reader atomic_writer atomic_reader external_env \
+    links_env filenotclosed del_many_dense_attrs flushrefresh \
+    use_append_chunk use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
     vfd_swmr_generator vfd_swmr_reader vfd_swmr_writer \
     vfd_swmr_remove_reader vfd_swmr_remove_writer vfd_swmr_addrem_writer \
     vfd_swmr_sparse_reader vfd_swmr_sparse_writer \
-    swmr_check_compat_vfd vds_swmr_gen vds_swmr_reader vds_swmr_writer
+    swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
-  check_PROGRAMS+= filter_plugin
+  check_PROGRAMS+= filter_plugin vol_plugin
 endif
 
 # These programs generate test files for the tests.  They don't need to be
@@ -113,7 +121,7 @@ if HAVE_SHARED_CONDITIONAL
   # The libh5test library provides common support code for the tests.
   # The filter_plugin* libraries are for use in filter_plugin.c.
   # Build them as shared libraries if that option was enabled in configure.
-  noinst_LTLIBRARIES=libh5test.la libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la
+  noinst_LTLIBRARIES=libh5test.la libfilter_plugin1_dsets.la libfilter_plugin2_dsets.la libfilter_plugin3_dsets.la libfilter_plugin4_groups.la libnull_vol_connector.la
   libfilter_plugin1_dsets_la_SOURCES=filter_plugin1_dsets.c
   libfilter_plugin2_dsets_la_SOURCES=filter_plugin2_dsets.c
   libfilter_plugin3_dsets_la_SOURCES=filter_plugin3_dsets.c
@@ -124,12 +132,19 @@ if HAVE_SHARED_CONDITIONAL
   libfilter_plugin4_groups_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
   libfilter_plugin3_dsets_la_LIBADD=$(LIBHDF5)
   libfilter_plugin4_groups_la_LIBADD=$(LIBHDF5)
+
+  # VOL plugin test libraries
+  #
+  # null_vol_connector is used for testing basic VOL plugin functionality.
+  libnull_vol_connector_la_SOURCES=null_vol_connector.c
+  libnull_vol_connector_la_LDFLAGS=$(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
+
 else
   # The libh5test library provides common support code for the tests.
   noinst_LTLIBRARIES=libh5test.la
 endif
 
-libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c
+libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_common.c vfd_swmr_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
@@ -143,6 +158,11 @@ VFD_LIST = sec2 stdio core core_paged split multi family
 if DIRECT_VFD_CONDITIONAL
   VFD_LIST += direct
 endif
+
+# Test with just the native connector, with a single pass-through connector
+# and with a doubly-stacked pass-through.
+VOL_LIST = native "pass_through under_vol=0;under_info={}" \
+           "pass_through under_vol=505;under_info={under_vol=0;under_info={}}"
 
 # Additional target for running timing test
 timings _timings: testmeta
@@ -172,12 +192,14 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
-    dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
+    ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5\
+    dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 \
+    tmp tmp_links tmp2_links tmp_links_env tmp_vds_env \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
     fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
-    trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 twriteorder.dat \
+    trefer[1-3].h5 trefer_*.h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 twriteorder.dat \
     flush.h5 flush-swmr.h5 noflush.h5 noflush-swmr.h5 flush_extend.h5 \
     flush_extend-swmr.h5 noflush_extend.h5 noflush_extend-swmr.h5 \
     enum1.h5 titerate.h5 ttsafe.h5 tarray1.h5 tgenprop.h5            \
@@ -189,8 +211,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 btree2_tmp.h5 objcopy_src.h5 objcopy_dst.h5 \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 farray_tmp.h5 \
-    earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log              \
-    new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
+    earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log log_ros3_out.log    \
+    log_s3comms_out.log new_multi_file_v16-r.h5 new_multi_file_v16-s.h5     \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
     vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5 \
@@ -200,12 +222,12 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
-    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5
+    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \
-    trefer.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
+    trefer.c trefer_deprec.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
     tvlstr.c tvltypes.c
 
 # Sources for Use Cases
@@ -215,6 +237,7 @@ use_disable_mdc_flushes_SOURCES=use_disable_mdc_flushes.c
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filter_plugin.sh \
-    testswmr.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh test_filenotclosed.sh
+    testexternal_env.sh testswmr.sh testvds_env.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh testabort_fail.sh \
+	test_vol_plugin.sh
 
 include $(top_srcdir)/config/conclude.am

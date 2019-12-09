@@ -30,116 +30,124 @@ const char *FILENAME[] = {
     NULL
 };
 
-static double	the_data[100][100];
+static int  data_g[100][100];
 
+#define N_GROUPS    100
 
 /*-------------------------------------------------------------------------
- * Function:	check_file
+ * Function:    check_test_file
  *
- * Purpose:	Part 2 of a two-part H5Fflush() test.
+ * Purpose:     Part 2 of a two-part H5Fflush() test.
  *
- * Return:	Success:	0
+ * Return:      SUCCEED/FAIL
  *
- *		Failure:	1
- *
- * Programmer:	Leon Arber
+ * Programmer:  Leon Arber
  *              Sept. 26, 2006.
  *
  *-------------------------------------------------------------------------
  */
-static int
-check_file(char* name, hid_t fapl)
+static herr_t
+check_test_file(char* name, hid_t fapl_id)
 {
-    hid_t	file, space, dset, groups, grp, plist;
-    hsize_t	ds_size[2];
-    double	error;
-    hsize_t	i, j;
+    hid_t       fid             = H5I_INVALID_HID;
+    hid_t       sid             = H5I_INVALID_HID;
+    hid_t       did             = H5I_INVALID_HID;
+    hid_t       top_level_gid   = H5I_INVALID_HID;
+    hid_t       gid             = H5I_INVALID_HID;
+    hid_t       dxpl_id         = H5I_INVALID_HID;
+    hsize_t     dims[2];
+    int         val;
+    hsize_t     i, j;
 
-    plist = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plist, H5FD_MPIO_COLLECTIVE);
-    if((file = H5Fopen(name, H5F_ACC_RDONLY, fapl)) < 0) goto error;
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        goto error;
+    if(H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+        goto error;
+    if((fid = H5Fopen(name, H5F_ACC_RDONLY, fapl_id)) < 0)
+        goto error;
 
     /* Open the dataset */
-    if((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0) goto error;
-    if((space = H5Dget_space(dset)) < 0) goto error;
-    if(H5Sget_simple_extent_dims(space, ds_size, NULL) < 0) goto error;
-    assert(100==ds_size[0] && 100==ds_size[1]);
+    if((did = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0)
+        goto error;
+    if((sid = H5Dget_space(did)) < 0)
+        goto error;
+    if(H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
+        goto error;
+    HDassert(100 == dims[0] && 100 == dims[1]);
 
     /* Read some data */
-    if (H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, plist,
-		the_data) < 0) goto error;
-    for (i=0; i<ds_size[0]; i++) {
-	for (j=0; j<ds_size[1]; j++) {
-	    /*
-	     * The extra cast in the following statement is a bug workaround
-	     * for the Win32 version 5.0 compiler.
-	     * 1998-11-06 ptl
-	     */
-	    error = fabs(the_data[i][j]-(double)(hssize_t)i/((hssize_t)j+1));
-	    if (error>0.0001) {
-		H5_FAILED();
-		printf("    dset[%lu][%lu] = %g\n",
-			(unsigned long)i, (unsigned long)j, the_data[i][j]);
-		printf("    should be %g\n",
-			(double)(hssize_t)i/(hssize_t)(j+1));
-		goto error;
-	    }
-	}
+    if(H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data_g) < 0)
+        goto error;
+    for(i = 0; i < dims[0]; i++) {
+        for(j = 0; j < dims[1]; j++) {
+            val = (int)(i + (i * j) + j);
+            if(data_g[i][j] != val) {
+                H5_FAILED();
+                HDprintf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j, data_g[i][j]);
+                HDprintf("    should be %d\n", val);
+            }
+        }
     }
 
     /* Open some groups */
-    if((groups = H5Gopen2(file, "some_groups", H5P_DEFAULT)) < 0) goto error;
-    for(i = 0; i < 100; i++) {
-	sprintf(name, "grp%02u", (unsigned)i);
-	if((grp = H5Gopen2(groups, name, H5P_DEFAULT)) < 0) goto error;
-	if(H5Gclose(grp) < 0) goto error;
+    if((top_level_gid = H5Gopen2(fid, "some_groups", H5P_DEFAULT)) < 0)
+        goto error;
+    for(i = 0; i < N_GROUPS; i++) {
+        HDsprintf(name, "grp%02u", (unsigned)i);
+        if((gid = H5Gopen2(top_level_gid, name, H5P_DEFAULT)) < 0)
+            goto error;
+        if(H5Gclose(gid) < 0)
+            goto error;
     }
 
-    if(H5Gclose(groups) < 0) goto error;
-    if(H5Dclose(dset) < 0) goto error;
-    if(H5Fclose(file) < 0) goto error;
-    if(H5Pclose(plist) < 0) goto error;
-    if(H5Sclose(space) < 0) goto error;
+    if(H5Gclose(top_level_gid) < 0)
+        goto error;
+    if(H5Dclose(did) < 0)
+        goto error;
+    if(H5Fclose(fid) < 0)
+        goto error;
+    if(H5Pclose(dxpl_id) < 0)
+        goto error;
+    if(H5Sclose(sid) < 0)
+        goto error;
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
-        H5Pclose(plist);
-        H5Gclose(groups);
-        H5Dclose(dset);
-        H5Fclose(file);
-        H5Sclose(space);
+        H5Pclose(dxpl_id);
+        H5Gclose(top_level_gid);
+        H5Dclose(did);
+        H5Fclose(fid);
+        H5Sclose(sid);
+        H5Gclose(gid);
     } H5E_END_TRY;
-    return 1;
-}
+    return FAIL;
+} /* end check_test_file() */
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Part 2 of a two-part H5Fflush() test.
+ * Purpose:     Part 2 of a two-part H5Fflush() test.
  *
- * Return:	Success:	0
+ * Return:      EXIT_SUCCESS/EXIT_FAIL
  *
- *		Failure:	1
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, October 23, 1998
- *
- * Modifications:
- * 		Leon Arber
- * 		Sept. 26, 2006, expand to check for case where the was file not flushed.
  *
  *-------------------------------------------------------------------------
  */
 int
-main(int argc, char* argv[])
+main(int argc, char *argv[])
 {
+    hid_t       fapl_id1    = H5I_INVALID_HID;
+    hid_t       fapl_id2    = H5I_INVALID_HID;
     H5E_auto2_t func;
-    char	name[1024];
+    char        name[1024];
     const char *envval = NULL;
 
-    int mpi_size, mpi_rank;
+    int mpi_size;
+    int mpi_rank;
     MPI_Comm comm  = MPI_COMM_WORLD;
     MPI_Info info  = MPI_INFO_NULL;
 
@@ -148,69 +156,70 @@ main(int argc, char* argv[])
     MPI_Comm_rank(comm, &mpi_rank);
 
     if(mpi_rank == 0)
-	TESTING("H5Fflush (part2 with flush)");
+        TESTING("H5Fflush (part2 with flush)");
 
-    /* Don't run this test using the core or split file drivers */
+    /* Don't run using the split VFD */
     envval = HDgetenv("HDF5_DRIVER");
-    if (envval == NULL)
+    if(envval == NULL)
         envval = "nomatch";
-    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split")) {
-        hid_t fapl1, fapl2;
 
-        fapl1 = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_mpio(fapl1, comm, info);
-
-        fapl2 = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_mpio(fapl2, comm, info);
-
-	/* Check the case where the file was flushed */
-	h5_fixname(FILENAME[0], fapl1, name, sizeof name);
-	if(check_file(name, fapl1))
-	{
-	    H5_FAILED()
-	    goto error;
-	}
-	else if(mpi_rank == 0)
-	{
-	    PASSED()
-	}
-
-	/* Check the case where the file was not flushed.  This should give an error
-	 * so we turn off the error stack temporarily */
-	if(mpi_rank == 0)
-	    TESTING("H5Fflush (part2 without flush)");
-	H5Eget_auto2(H5E_DEFAULT,&func,NULL);
-	H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-	h5_fixname(FILENAME[1], fapl2, name, sizeof name);
-	if(check_file(name, fapl2))
-	{
-	    if(mpi_rank == 0)
-	    {
-		PASSED()
-	    }
-	}
-	else
-	{
-	    H5_FAILED()
-	    goto error;
-	}
-	H5Eset_auto2(H5E_DEFAULT, func, NULL);
-
-
-	h5_clean_files(&FILENAME[0], fapl1);
-	h5_clean_files(&FILENAME[1], fapl2);
+    if(!HDstrcmp(envval, "split")) {
+        if(mpi_rank == 0) {
+            SKIPPED();
+            HDputs("    Test not compatible with current Virtual File Driver");
+        }
+        MPI_Finalize();
+        HDexit(EXIT_FAILURE);
     }
-    else
-    {
-        SKIPPED();
-        puts("    Test not compatible with current Virtual File Driver");
+
+    if((fapl_id1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+    if(H5Pset_fapl_mpio(fapl_id1, comm, info) < 0)
+        goto error;
+
+    if((fapl_id2 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+    if(H5Pset_fapl_mpio(fapl_id2, comm, info) < 0)
+        goto error;
+
+    /* Check the case where the file was flushed */
+    h5_fixname(FILENAME[0], fapl_id1, name, sizeof(name));
+    if(check_test_file(name, fapl_id1)) {
+        H5_FAILED()
+        goto error;
     }
+    else if(mpi_rank == 0) {
+        PASSED()
+    }
+
+    /* Check the case where the file was not flushed.  This should give an error
+     * so we turn off the error stack temporarily.
+     */
+    if(mpi_rank == 0)
+        TESTING("H5Fflush (part2 without flush)");
+    H5Eget_auto2(H5E_DEFAULT,&func, NULL);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+    h5_fixname(FILENAME[1], fapl_id2, name, sizeof(name));
+    if(check_test_file(name, fapl_id2)) {
+        if(mpi_rank == 0)
+            PASSED()
+    }
+    else {
+        H5_FAILED()
+        goto error;
+    }
+
+    H5Eset_auto2(H5E_DEFAULT, func, NULL);
+
+    h5_clean_files(&FILENAME[0], fapl_id1);
+    h5_clean_files(&FILENAME[1], fapl_id2);
 
     MPI_Finalize();
-    return 0;
 
-    error:
-        return 1;
-}
+    HDexit(EXIT_SUCCESS);
+
+error:
+    HDexit(EXIT_FAILURE);
+} /* end main() */
 

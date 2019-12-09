@@ -174,8 +174,8 @@ H5I_type_t IdComponent::getHDFObjType() const
 ///             \li \c H5I_DATASPACE
 ///             \li \c H5I_DATASET
 ///             \li \c H5I_ATTR
-///             \li \c H5I_REFERENCE (DEPRECATED)
 ///             \li \c H5I_VFL
+///             \li \c H5I_VOL
 ///             \li \c H5I_GENPROP_CLS
 ///             \li \c H5I_GENPROP_LST
 ///             \li \c H5I_ERROR_CLASS
@@ -227,8 +227,8 @@ bool IdComponent::isValid(hid_t an_id)
 ///             \li \c H5I_DATASPACE
 ///             \li \c H5I_DATASET
 ///             \li \c H5I_ATTR
-///             \li \c H5I_REFERENCE (DEPRECATED)
 ///             \li \c H5I_VFL
+///             \li \c H5I_VOL
 ///             \li \c H5I_GENPROP_CLS
 ///             \li \c H5I_GENPROP_LST
 ///             \li \c H5I_ERROR_CLASS

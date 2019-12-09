@@ -196,18 +196,15 @@ H5_DLL H5A_t *H5A__copy(H5A_t *new_attr, const H5A_t *old_attr);
 H5_DLL hid_t H5A__get_type(H5A_t *attr);
 H5_DLL herr_t H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo);
 H5_DLL hid_t H5A__get_create_plist(H5A_t* attr);
-H5_DLL herr_t H5A__free(H5A_t *attr);
+H5_DLL herr_t H5A__shared_free(H5A_t *attr);
 H5_DLL herr_t H5A__close(H5A_t *attr);
-H5_DLL herr_t H5A__close_cb(H5A_t *attr);
+H5_DLL herr_t H5A__close_cb(H5VL_object_t *attr_vol_obj);
 H5_DLL htri_t H5A__get_ainfo(H5F_t *f, H5O_t *oh, H5O_ainfo_t *ainfo);
 H5_DLL herr_t H5A__set_version(const H5F_t *f, H5A_t *attr);
 H5_DLL herr_t H5A__rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_name,
     const char *new_attr_name);
-H5_DLL herr_t H5A__iterate(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
+H5_DLL herr_t H5A__iterate(const H5G_loc_t *loc, const char *obj_name,H5_index_t idx_type, H5_iter_order_t order,
     hsize_t *idx, H5A_operator2_t op, void *op_data);
-H5_DLL herr_t H5A__iterate_by_name(const H5G_loc_t *loc, const char *obj_name,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op,
-    void *op_data);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL herr_t H5A__iterate_old(hid_t loc_id, unsigned *attr_num,
     H5A_operator1_t op, void *op_data);

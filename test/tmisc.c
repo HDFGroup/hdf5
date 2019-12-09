@@ -460,8 +460,8 @@ static void test_misc2_write_attribute(void)
     ret = H5Aread(att1, type, &data_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    ret = H5Dvlen_reclaim(type, dataspace, H5P_DEFAULT, &data_check);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(type, dataspace, H5P_DEFAULT, &data_check);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     ret = H5Aclose(att1);
     CHECK(ret, FAIL, "H5Aclose");
@@ -486,8 +486,8 @@ static void test_misc2_write_attribute(void)
     ret = H5Aread(att2, type, &data_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    ret = H5Dvlen_reclaim(type, dataspace, H5P_DEFAULT, &data_check);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(type, dataspace, H5P_DEFAULT, &data_check);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     ret = H5Aclose(att2);
     CHECK(ret, FAIL, "H5Aclose");
@@ -535,8 +535,8 @@ static void test_misc2_read_attribute(const char *filename, const char *att_name
     ret = H5Aread(att, type, &data_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    ret = H5Dvlen_reclaim(type, space, H5P_DEFAULT, &data_check);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(type, space, H5P_DEFAULT, &data_check);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     ret = H5Sclose(space);
     CHECK(ret, FAIL, "H5Sclose");
@@ -981,21 +981,21 @@ test_misc5(void)
 
     /* Verify the correct information was read in */
     for(i=0; i<(buf.len); i++) {
-        /* printf("[%d]=%d\n",i, ((misc5_struct1 *)(buf.p))[i].st1_el1); */
+        /* HDprintf("[%d]=%d\n",i, ((misc5_struct1 *)(buf.p))[i].st1_el1); */
         VERIFY(((misc5_struct1 *)(buf.p))[i].st1_el1,MISC5_DBGELVAL1,"H5Dread");
         for(j=0; j<(((misc5_struct1 *)(buf.p)) [i].st1_el2.len); j++) {
-            /* printf("   [%d]=%d\n",j, ((misc5_struct2 *)(((misc5_struct1 *) (buf.p))[i].st1_el2.p))[j].st2_el1); */
+            /* HDprintf("   [%d]=%d\n",j, ((misc5_struct2 *)(((misc5_struct1 *) (buf.p))[i].st1_el2.p))[j].st2_el1); */
             VERIFY(((misc5_struct2 *)(((misc5_struct1 *) (buf.p))[i].st1_el2.p))[j].st2_el1, MISC5_DBGELVAL2,"H5Dread");
             for(k=0; k<(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.len); k++) {
-                /* printf("      [%d]=%d\n",k, ((misc5_struct3 *)(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.p))[k].st3_el1); */
+                /* HDprintf("      [%d]=%d\n",k, ((misc5_struct3 *)(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.p))[k].st3_el1); */
                 VERIFY(((misc5_struct3 *)(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.p))[k].st3_el1, MISC5_DBGELVAL3,"H5Dread");
             } /* end for */
         }
     }
 
     /* Reclaim the memory for the VL information */
-    ret=H5Dvlen_reclaim(mem_type_id, space_id, H5P_DEFAULT, &buf);
-    CHECK(ret,FAIL,"H5Dvlen_reclaim");
+    ret=H5Treclaim(mem_type_id, space_id, H5P_DEFAULT, &buf);
+    CHECK(ret,FAIL,"H5Treclaim");
 
     /* Close dataspace */
     ret=H5Sclose(space_id);
@@ -1064,7 +1064,7 @@ test_misc6(void)
     /* Loop through adding attributes to each dataset */
     for(u = 0; u < MISC6_NUMATTR; u++) {
         /* Create name for attribute */
-        sprintf(attr_name, "Attr#%u", u);
+        HDsprintf(attr_name, "Attr#%u", u);
 
         /* Open the file */
         loc_id = H5Fopen(MISC6_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -2061,8 +2061,8 @@ test_misc12(void)
     CHECK(ret, FAIL, "H5Sselect_all");
 
     /* Reclaim VL data memory */
-    ret = H5Dvlen_reclaim(tid1, space, H5P_DEFAULT, rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid1, space, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Everything */
     ret = H5Dclose(dataset);
@@ -2717,7 +2717,7 @@ test_misc15(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is still OK */
-    ret = H5Fis_hdf5(MISC15_FILE);
+    ret = H5Fis_accessible(MISC15_FILE, fapl);
     CHECK(ret, FAIL, "H5Fis_hdf5");
 
     ret = H5Pclose(fapl);
@@ -2953,7 +2953,7 @@ test_misc18(void)
     /* Loop creating attributes on each dataset, flushing them to the file each time */
     for(u = 0; u < 10; u++) {
         /* Set up attribute name */
-        sprintf(attr_name, "Attr %u", u);
+        HDsprintf(attr_name, "Attr %u", u);
 
         /* Create & close attribute on first dataset */
         aid = H5Acreate2(did1, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
@@ -3028,7 +3028,9 @@ test_misc19(void)
     hid_t emid = -1;                /* Error Message ID         */
     hid_t esid = -1;                /* Error Stack ID           */
     hid_t vfdid = -1;               /* Virtual File Driver ID   */
+    hid_t volid = -1;               /* Virtual Object Layer ID  */
     H5FD_class_t *vfd_cls = NULL;   /* VFD class                */
+    H5VL_class_t *vol_cls = NULL;   /* VOL class                */
     int rc;                         /* Reference count          */
     herr_t ret;                     /* Generic return value     */
 
@@ -3478,6 +3480,44 @@ test_misc19(void)
     VERIFY(ret, FAIL, "H5FDunregister");
 
     HDfree(vfd_cls);
+
+/* Check H5I operations on virtual object connectors */
+
+    /* Get a VOL class to register */
+    vol_cls = h5_get_dummy_vol_class();
+    CHECK(vol_cls, NULL, "h5_get_dummy_vol_class");
+
+    /* Register a VOL connector */
+    volid = H5VLregister_connector(vol_cls, H5P_DEFAULT);
+    CHECK(volid, FAIL, "H5VLregister_connector");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(volid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Increment the reference count */
+    rc = H5Iinc_ref(volid);
+    VERIFY(rc, 2, "H5Iinc_ref");
+
+    /* Unregister the VOL connector normally */
+    ret = H5VLunregister_connector(volid);
+    CHECK(ret, FAIL, "H5VLunregister_connector");
+
+    /* Check the reference count */
+    rc = H5Iget_ref(volid);
+    VERIFY(rc, 1, "H5Iget_ref");
+
+    /* Unregister the VOL connector by decrementing the reference count */
+    rc = H5Idec_ref(volid);
+    VERIFY(rc, 0, "H5Idec_ref");
+
+    /* Try unregistering the VOL connector again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5VLunregister_connector(volid);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5VLunregister_connector");
+
+    HDfree(vol_cls);
 
 } /* end test_misc19() */
 
@@ -4721,7 +4761,7 @@ test_misc25a(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25a() */
 
-
+
 /****************************************************************
 **
 **  test_misc25b(): Exercise null object header message merge bug
@@ -4757,7 +4797,7 @@ test_misc25b(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25b() */
 
-
+
 /****************************************************************
 **
 **  test_misc25c(): Exercise another null object header message merge bug.
@@ -4891,7 +4931,7 @@ test_misc25c(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25c() */
 
-
+
 /****************************************************************
 **
 **  test_misc26(): Regression test: ensure that copying filter
@@ -4977,7 +5017,7 @@ test_misc26(void)
     CHECK_I(ret, "H5Pclose");
 }
 
-
+
 /****************************************************************
 **
 **  test_misc27(): Ensure that objects with incorrect # of object
@@ -5022,7 +5062,7 @@ test_misc27(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc27() */
 
-
+
 /****************************************************************
 **
 **  test_misc28(): Ensure that the dataset chunk cache will hold
@@ -5199,7 +5239,7 @@ test_misc28(void)
     CHECK_I(ret, "H5Pclose");
 } /* end test_misc28() */
 
-
+
 /****************************************************************
 **
 **  test_misc29(): Ensure that speculative metadata reads don't
@@ -5248,7 +5288,7 @@ test_misc30_get_info(hid_t loc_id)
     return H5Literate(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, test_misc30_get_info_cb, NULL);
 }
 
-
+
 /****************************************************************
 **
 **  test_misc30(): Exercise local heap code that loads prefix
@@ -5292,7 +5332,7 @@ test_misc30(void)
                 CHECK(ret, FAIL, "test_misc30_get_info");
             }
 
-            sprintf(gname, "/g0/group%d", i);
+            HDsprintf(gname, "/g0/group%d", i);
             gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(gid, FAIL, "H5Gcreate2");
 
@@ -5313,7 +5353,7 @@ test_misc30(void)
     VERIFY(file_size[0], file_size[1], "test_misc30");
 } /* end test_misc30() */
 
-
+
 /****************************************************************
 **
 **  test_misc31(): Test reentering library through deprecated
@@ -5411,7 +5451,7 @@ test_misc31(void)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* end test_misc31() */
 
-
+
 /****************************************************************
  *
  *  test_misc32(): Simple test of filter memory allocation
@@ -5585,7 +5625,7 @@ test_misc34(void)
 
 } /* end test_misc34() */
 
-
+
 /****************************************************************
 **
 **  test_misc(): Main misc. test routine.
@@ -5638,7 +5678,7 @@ test_misc(void)
 
 } /* test_misc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_misc
  *

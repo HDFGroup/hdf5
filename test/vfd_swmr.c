@@ -25,10 +25,13 @@
  * This file needs to access private information from the H5F package.
  */
 
-#define H5F_FRIEND		    /*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND		    /*suppress error about including H5Fpkg */
+#define H5FD_FRIEND		    /*suppress error about including H5FDpkg */
 #define H5F_TESTING
+#define H5FD_TESTING
+#include "H5FDprivate.h"
 #include "H5Fpkg.h"
-
+#include "H5FDpkg.h"
 #include "H5Iprivate.h"
 
 #define H5FD_FRIEND       /*suppress error about including H5FDpkg      */
@@ -105,13 +108,6 @@ test_fapl(void)
 
     /* Set valid version */
     my_config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    /* Should fail: tick_len is -1 */
-    my_config->tick_len = -1;
-    H5E_BEGIN_TRY {
-        ret = H5Pset_vfd_swmr_config(fapl, my_config);
-    } H5E_END_TRY;
-    if(ret >= 0)
-        TEST_ERROR;
 
     /* Set valid tick_len */
     my_config->tick_len = 3; 
@@ -228,15 +224,12 @@ test_file_fapl(void)
         FAIL_STACK_ERROR;
 
     /* Allocate memory for the configuration structure */
-    if((config1 = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config1 = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
-    if((config2 = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config2 = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
-    if((file_config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((file_config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
-    HDmemset(config1, 0, sizeof(H5F_vfd_swmr_config_t));
-    HDmemset(config2, 0, sizeof(H5F_vfd_swmr_config_t));
-    HDmemset(file_config, 0, sizeof(H5F_vfd_swmr_config_t));
 
     /* Create a copy of the file access property list */
     if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -293,7 +286,7 @@ test_file_fapl(void)
             FAIL_STACK_ERROR
 
     /* Set file space strategy */
-    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+    if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1024 * 1024 * 1024) < 0)
         FAIL_STACK_ERROR;
 
     /* Should fail to create: no page buffering */
@@ -573,9 +566,8 @@ test_file_end_tick(void)
         FAIL_STACK_ERROR;
 
     /* Allocate memory for the configuration structure */
-    if((my_config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((my_config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
-    HDmemset(my_config, 0, sizeof(H5F_vfd_swmr_config_t));
 
     /* Create a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -1242,7 +1234,7 @@ test_reader_md_concur(void)
             HDexit(EXIT_FAILURE);
 
         /* Get file pointer */
-        file_reader = (H5F_t *)H5I_object(fid_reader);
+        file_reader = (H5F_t *)H5VL_object(fid_reader);
 
         /* Read and verify header and an empty index in the metadata file */
         if(H5FD__vfd_swmr_reader_md_test(file_reader->shared->lf, 0, NULL) < 0)
@@ -1515,7 +1507,7 @@ test_reader_md_concur(void)
     }
 
     /* Get the file pointer */
-    file_writer = (H5F_t *)H5I_object(fid_writer);
+    file_writer = (H5F_t *)H5VL_object(fid_writer);
 
     /* Update the metadata file with the index */
     if(H5F_update_vfd_swmr_metadata_file(file_writer, num_entries, index) < 0)
@@ -1839,7 +1831,7 @@ test_multiple_file_opens(void)
         TEST_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         FAIL_STACK_ERROR
 
     /* Verify the global vfd_swmr_writer_g is not set */
@@ -1854,7 +1846,7 @@ test_multiple_file_opens(void)
         TEST_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f1 = (H5F_t *)H5I_object(fid1)))
+    if(NULL == (f1 = (H5F_t *)H5VL_object(fid1)))
         FAIL_STACK_ERROR
 
     /* The global vfd_swmr_writer_g should be set */
@@ -1870,7 +1862,7 @@ test_multiple_file_opens(void)
         TEST_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5I_object(fid2)))
+    if(NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
         FAIL_STACK_ERROR
 
     /* The global vfd_swmr_writer_g should still be set */
@@ -2159,7 +2151,7 @@ test_multiple_concur_file_opens(void)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f1 = (H5F_t *)H5I_object(fid1)))
+    if(NULL == (f1 = (H5F_t *)H5VL_object(fid1)))
         FAIL_STACK_ERROR
 
     /* The global vfd_swmr_writer_g should be set */
@@ -2216,7 +2208,7 @@ test_multiple_concur_file_opens(void)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5I_object(fid2)))
+    if(NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
         FAIL_STACK_ERROR
 
     /* The global vfd_swmr_writer_g should not be set */

@@ -27,6 +27,9 @@
 /* Headers */
 /***********/
 
+#include <err.h>    /* errx(3) */
+#include <stdlib.h> /* EXIT_FAILURE */
+
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
@@ -40,10 +43,10 @@ static hid_t symbol_tid = -1;
 /* Local Prototypes */
 /********************/
 
-static int check_dataset(hid_t fid, unsigned verbose, const char *sym_name,
-    symbol_t *record, hid_t rec_sid);
-static int read_records(const char *filename, unsigned verbose, unsigned long nseconds,
-    unsigned poll_time, unsigned ncommon, unsigned nrandom);
+static int check_dataset(hid_t, hid_t, unsigned, const char *,
+    symbol_t *, hid_t);
+static int read_records(const char *, unsigned, unsigned long,
+    unsigned, unsigned, unsigned);
 static void usage(void);
 
 
@@ -77,7 +80,7 @@ static void usage(void);
  *-------------------------------------------------------------------------
  */
 static int
-check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *record,
+check_dataset(hid_t fid, hid_t dapl, unsigned verbose, const char *sym_name, symbol_t *record,
     hid_t rec_sid)
 {
     hid_t dsid;                 /* Dataset ID */
@@ -91,7 +94,7 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
     HDassert(rec_sid >= 0);
 
     /* Open dataset for symbol */
-    if((dsid = H5Dopen2(fid, sym_name, H5P_DEFAULT)) < 0)
+    if((dsid = H5Dopen2(fid, sym_name, dapl)) < 0)
         goto error;
 
     /* Get the dataset's dataspace */
@@ -102,9 +105,17 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
     if((snpoints = H5Sget_simple_extent_npoints(file_sid)) < 0)
         goto error;
 
+    /* Back off by one: it's possible that the metadata indicating
+     * `snpoints` available is new, but the data is stale, because
+     * a tick occurred on the writer between H5Dset_extent() and H5Dwrite().
+     */
+    snpoints -= MAX_SIZE_CHANGE;
+
     /* Emit informational message */
-    if(verbose)
-        HDfprintf(stderr, "READER: Symbol = '%s', # of records = %lld\n", sym_name, (long long)snpoints);
+    if(verbose) {
+        HDfprintf(stderr, "READER: Symbol = '%s'"
+            ", # of records = %" PRIdHSIZE "\n", sym_name, snpoints);
+    }
 
     /* Check if there are records for symbol */
     if(snpoints > 0) {
@@ -132,10 +143,12 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
         /* Verify record value - note that it may be the fill value, because the
          * chunk may be deleted before the object header has the updated
          * dimensions */
-        if(record->rec_id != start[1] && record->rec_id != (uint64_t)0) {
+        if(record->rec_id != start[1] && record->rec_id != 0) {
             HDfprintf(stderr, "*** READER: ERROR ***\n");
             HDfprintf(stderr, "Incorrect record value!\n");
-            HDfprintf(stderr, "Symbol = '%s', # of records = %lld, record->rec_id = %llx\n", sym_name, (long long)snpoints, (unsigned long long)record->rec_id);
+            HDfprintf(stderr, "Symbol = '%s', # of records = %" PRIdHSIZE
+                ", record->rec_id = %" PRIx64 ", expected %" PRIxHSIZE "\n",
+                sym_name, snpoints, record->rec_id, start[1]);
             return -1;
         } /* end if */
     } /* end if */
@@ -203,6 +216,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
     time_t curr_time;           /* Current time */
     symbol_info_t **sym_com = NULL;     /* Pointers to array of common dataset IDs */
     symbol_info_t **sym_rand = NULL;    /* Pointers to array of random dataset IDs */
+    hid_t dapl;
     hid_t mem_sid;              /* Memory dataspace ID */
     hid_t fid;                  /* SWMR test file ID */
     hid_t fapl;                 /* File access property list */
@@ -217,6 +231,13 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
     HDmemset(&record, 0, sizeof(record));
+
+    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed", __func__, __LINE__);
+
+    if (H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 0,
+                           H5D_CHUNK_CACHE_W0_DEFAULT) < 0)
+        errx(EXIT_FAILURE, "H5Pset_chunk_cache failed");
 
     /* Emit informational message */
     if(verbose)
@@ -254,7 +275,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
             symbol_info_t *sym;         /* Symbol to use */
 
             /* Determine the symbol, within all symbols */
-            if(NULL == (sym = choose_dataset()))
+            if(NULL == (sym = choose_dataset(NULL, NULL)))
                 goto error;
             sym_rand[v] = sym;
 
@@ -288,7 +309,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
         goto error;
 
     /* Allocate memory for the configuration structure */
-    if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         goto error;
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
@@ -328,7 +349,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
             /* Iterate over common datasets */
             for(v = 0; v < ncommon; v++) {
                 /* Check common dataset */
-                if(check_dataset(fid, verbose, sym_com[v]->name, &record, mem_sid) < 0)
+                if(check_dataset(fid, dapl, verbose, sym_com[v]->name, &record, mem_sid) < 0)
                     goto error;
                 HDmemset(&record, 0, sizeof(record));
             } /* end for */
@@ -343,7 +364,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
             /* Iterate over random datasets */
             for(v = 0; v < nrandom; v++) {
                 /* Check random dataset */
-                if(check_dataset(fid, verbose, sym_rand[v]->name, &record, mem_sid) < 0)
+                if(check_dataset(fid, dapl, verbose, sym_rand[v]->name, &record, mem_sid) < 0)
                     goto error;
                 HDmemset(&record, 0, sizeof(record));
             } /* end for */
@@ -407,6 +428,7 @@ error:
         H5Sclose(mem_sid);
         H5Fclose(fid);
         H5Pclose(fapl);
+        H5Pclose(dapl);
     } H5E_END_TRY;
 
     return -1;

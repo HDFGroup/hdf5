@@ -29,7 +29,7 @@
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
 #define H5O_MIN_SIZE	22		/* Min. obj header data size (must be big enough for a message prefix and a continuation message) */
-#define H5O_MSG_TYPES   27              /* # of types of messages            */
+#define H5O_MSG_TYPES   26              /* # of types of messages            */
 #define H5O_MAX_CRT_ORDER_IDX 65535     /* Max. creation order index value   */
 
 /* Versions of object header structure */
@@ -134,9 +134,9 @@
                 ) : 0))							      \
     )
 #define H5O_SIZEOF_MSGHDR_OH(O)						      \
-    H5O_SIZEOF_MSGHDR_VERS((O)->version, (O)->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
+    (unsigned)H5O_SIZEOF_MSGHDR_VERS((O)->version, (O)->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
 #define H5O_SIZEOF_MSGHDR_F(F, C)						      \
-    H5O_SIZEOF_MSGHDR_VERS(MAX((H5F_STORE_MSG_CRT_IDX(F) ? H5O_VERSION_LATEST : H5O_VERSION_1), (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(F)]), (C))
+    (unsigned)H5O_SIZEOF_MSGHDR_VERS(MAX((H5F_STORE_MSG_CRT_IDX(F) ? H5O_VERSION_LATEST : H5O_VERSION_1), (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(F)]), (C))
 
 /*
  * Size of chunk "header" for each chunk
@@ -339,7 +339,7 @@ typedef struct H5O_obj_class_t {
     void       *(*get_copy_file_udata)(void);	/*retrieve user data for 'copy file' operation */
     void	(*free_copy_file_udata)(void *); /*free user data for 'copy file' operation */
     htri_t	(*isa)(const H5O_t *);		/*if a header matches an object class */
-    hid_t	(*open)(const H5G_loc_t *, hbool_t );	/*open an object of this class */
+    void	*(*open)(const H5G_loc_t *, H5I_type_t *);	/*open an object of this class */
     void	*(*create)(H5F_t *, void *, H5G_loc_t *);	/*create an object of this class */
     H5O_loc_t	*(*get_oloc)(hid_t );		/*get the object header location for an object */
     herr_t      (*bh_info)(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info); /*get the index & heap info for an object */
@@ -413,7 +413,6 @@ typedef struct H5O_chk_cache_ud_t {
     size_t size;                        /* Size of chunk in the file */
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_chk_cache_ud_t;
-
 
 /* Header message ID to class mapping */
 H5_DLLVAR const H5O_msg_class_t *const H5O_msg_class_g[H5O_MSG_TYPES];

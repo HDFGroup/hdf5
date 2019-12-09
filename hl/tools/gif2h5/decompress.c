@@ -261,7 +261,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
              * chain puts its associated output code on the output queue.
              */
             while (CurCode > DataMask) {
-                if (OutCount > 1024) {
+                if (OutCount >= 1024) {
                     /*return error message*/
                 }
 

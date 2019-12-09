@@ -171,28 +171,25 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_family_init
+ * Function:    H5FD_family_init
  *
- * Purpose:	Initialize this driver by registering the driver with the
- *		library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:	Success:	The driver ID for the family driver.
+ * Return:      Success:    The driver ID for the family driver
+ *              Failure:    H5I_INVALID_HID
  *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5FD_family_init(void)
 {
-    hid_t ret_value = H5FD_FAMILY_g;   /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     if(H5I_VFL != H5I_get_type(H5FD_FAMILY_g))
         H5FD_FAMILY_g = H5FD_register(&H5FD_family_g, sizeof(H5FD_class_t), FALSE);
@@ -414,7 +411,7 @@ H5FD_family_fapl_copy(const void *_old_fa)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the fields of the structure */
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
 
     /* Deep copy the property list objects in the structure */
     if(old_fa->memb_fapl_id==H5P_FILE_ACCESS_DEFAULT) {
@@ -616,6 +613,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      memb_name & temp in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static H5FD_t *
 H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 		 haddr_t maxaddr)
@@ -718,7 +723,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
                 (0==file->nmembs ? flags : t_flags), file->memb_fapl_id, HADDR_UNDEF);
         } H5E_END_TRY;
         if (!file->memb[file->nmembs]) {
-            if (0==file->nmembs)
+            if (0 == file->nmembs)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open member file")
             H5E_clear_stack(NULL);
             break;
@@ -726,7 +731,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         file->nmembs++;
     }
 
-    /* If the file is reopened and there's only one member file existing, this file maybe
+    /* If the file is reopened and there's only one member file existing, this file may be
      * smaller than the size specified through H5Pset_fapl_family().  Update the actual
      * member size.
      */
@@ -766,6 +771,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_family_open() */
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------
@@ -945,6 +951,14 @@ H5FD_family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() call with
+ *      memb_name in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
 {
@@ -1011,6 +1025,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
+#pragma GCC diagnostic pop
 
 
 /*-------------------------------------------------------------------------

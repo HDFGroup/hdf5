@@ -11,12 +11,12 @@ include (${HDF_RESOURCES_DIR}/UseJava.cmake)
 
 message (STATUS "JAVA: JAVA_HOME=$ENV{JAVA_HOME} JAVA_ROOT=$ENV{JAVA_ROOT}")
 find_package (JNI)
-message ("JNI_LIBRARIES=${JNI_LIBRARIES}")
-message ("JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
+message (STATUS "JNI_LIBRARIES=${JNI_LIBRARIES}")
+message (STATUS "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
 
 
 if (WIN32)
-  set (HDF_JRE_DIRECTORY "C:/Program Files/Java/jre8")
+  set (HDF_JRE_DIRECTORY "C:/Program Files/Java/jre")
 else ()
   set (HDF_JRE_DIRECTORY "/usr/lib/jvm/jre")
 endif ()

@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
@@ -544,7 +545,7 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
      * Can we rework things so that the object header and the cache 
      * share a buffer?
      */
-    HDmemcpy(image, oh->chunk[0].image, len);
+    H5MM_memcpy(image, oh->chunk[0].image, len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -902,7 +903,7 @@ H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     /* copy the chunk into the image -- this is potentially expensive.
      * Can we rework things so that the chunk and the cache share a buffer?
      */
-    HDmemcpy(image, chk_proxy->oh->chunk[chk_proxy->chunkno].image, len);
+    H5MM_memcpy(image, chk_proxy->oh->chunk[chk_proxy->chunkno].image, len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1354,7 +1355,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
     oh->chunk[chunkno].chunk_proxy = NULL;
 
     /* Copy disk image into chunk's image */
-    HDmemcpy(oh->chunk[chunkno].image, image, oh->chunk[chunkno].size);
+    H5MM_memcpy(oh->chunk[chunkno].image, image, oh->chunk[chunkno].size);
 
     /* Point into chunk image to decode */
     chunk_image = oh->chunk[chunkno].image;
@@ -1392,7 +1393,8 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
         /* Message size */
         UINT16DECODE(chunk_image, mesg_size);
-        HDassert(mesg_size == H5O_ALIGN_OH(oh, mesg_size));
+        if(mesg_size != H5O_ALIGN_OH(oh, mesg_size))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "message not aligned")
 
         /* Message flags */
         flags = *chunk_image++;
@@ -1404,10 +1406,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "bad flag combination for message")
         if((flags & H5O_MSG_FLAG_WAS_UNKNOWN) && !(flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "bad flag combination for message")
-        if((flags & H5O_MSG_FLAG_SHAREABLE)
-                && H5O_msg_class_g[id]
-                && !(H5O_msg_class_g[id]->share_flags & H5O_SHARE_IS_SHARABLE))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "message of unsharable class flagged as sharable")
+        /* Delay checking the "shareable" flag until we've made sure id
+         * references a valid message class that this version of the library
+         * knows about */
 
         /* Reserved bytes/creation index */
         if(oh->version == H5O_VERSION_1)
@@ -1519,9 +1520,17 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                     mesgs_modified = TRUE;
                 } /* end if */
             } /* end if */
-            else
+            else {
+                /* Check for message of unshareable class marked as "shareable"
+                 */
+                if((flags & H5O_MSG_FLAG_SHAREABLE)
+                        && H5O_msg_class_g[id]
+                        && !(H5O_msg_class_g[id]->share_flags & H5O_SHARE_IS_SHARABLE))
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "message of unshareable class flagged as shareable")
+
                 /* Set message class for "known" messages */
                 mesg->type = H5O_msg_class_g[id];
+            } /* end else */
 
             /* Do some inspection/interpretation of new messages from this chunk */
             /* (detect continuation messages, ref. count messages, etc.) */
@@ -1621,7 +1630,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
 done:
     if(ret_value < 0 && udata->cont_msg_info->msgs) {
-        udata->cont_msg_info->msgs = (H5O_chunk_t *)H5FL_SEQ_FREE(H5O_cont_t, udata->cont_msg_info->msgs);
+        udata->cont_msg_info->msgs = H5FL_SEQ_FREE(H5O_cont_t, udata->cont_msg_info->msgs);
         udata->cont_msg_info->alloc_nmsgs = 0;
     }
     FUNC_LEAVE_NOAPI(ret_value)

@@ -21,12 +21,14 @@ add_test (
     COMMAND    ${CMAKE_COMMAND}
         -E remove
             PTcppexampleFL.h5
+            ptExampleFL.txt
 )
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME HL_CPP_ex_ptExampleFL COMMAND $<TARGET_FILE:ptExampleFL>)
+  add_test (NAME HL_CPP_ex_ptExampleFL COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:ptExampleFL>)
 else ()
   add_test (NAME HL_CPP_ex_ptExampleFL COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:ptExampleFL>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"

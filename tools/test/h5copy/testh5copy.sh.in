@@ -60,6 +60,7 @@ $SRC_H5COPY_TESTFILES/h5copy_extlinks_trg.h5
 # List of expect files that will be copied over to local test dir
 LIST_OTHER_TEST_FILES="
 $SRC_H5COPY_TESTFILES/h5copy_misc1.out
+$SRC_H5COPY_TESTFILES/h5copy_misc1.err
 "
 
 H5COPY=../../src/h5copy/h5copy               # The tool name
@@ -396,6 +397,7 @@ CMP_OUTPUT()
 TOOLTEST_FAIL()
 {
     expectout="$TESTDIR/$1"
+    expecterr="$TESTDIR/`basename $1 .out`.err"
     actualout="$TESTDIR/$1.actualout"
     actualerr="$TESTDIR/$1.actualerr"
     actualout_sav=${actualout}-sav
@@ -426,10 +428,7 @@ TOOLTEST_FAIL()
         echo " PASSED"
         # Verifying output text from h5copy
         if [ "$expectout" != "SKIP" ]; then
-            # combine stderr to stdout to compare the output at once.
-            # We may seperate stdout and stderr later.
-            cat $actualerr >> $actualout
-            CMP_OUTPUT $expectout $actualout
+            CMP_OUTPUT $expecterr $actualerr
         fi
     else
         echo "*FAILED*"
@@ -505,22 +504,21 @@ fi
     TOOLTEST -i $TESTFILE -o $TESTDIR/dsrename.out.h5 -v -s compound   -d rename
 
     echo "Test copying empty, 'full' & 'nested' groups"
-if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_empty.out.h5 -v -s grp_empty  -d grp_empty
-fi
+if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_dsets.out.h5 -v -s grp_dsets  -d grp_dsets
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_nested.out.h5 -v -s grp_nested -d grp_nested
+fi
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_attr.out.h5 -v -s grp_attr -d grp_attr
 
-if test $USE_FILTER_DEFLATE = "yes" ; then
     echo "Test copying dataset within group in source file to group in destination"
     TOOLTEST_PREFILL -i $TESTFILE -o $TESTDIR/simple_group.out.h5 grp_dsets grp_dsets /grp_dsets/simple /grp_dsets/simple_group
+if test $USE_FILTER_DEFLATE = "yes" ; then
     echo "Test copying & renaming group"
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_rename.out.h5 -v -s grp_dsets  -d grp_rename
-fi
-
     echo "Test copying 'full' group hierarchy into group in destination file"
     TOOLTEST_PREFILL -i $TESTFILE -o $TESTDIR/grp_dsets_rename.out.h5 grp_dsets grp_rename grp_dsets /grp_rename/grp_dsets
+fi
 
     echo "Test copying objects into group hier. that doesn't exist yet in destination file"
     TOOLTEST -i $TESTFILE -o $TESTDIR/A_B1_simple.out.h5 -vp -s simple    -d /A/B1/simple

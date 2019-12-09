@@ -713,7 +713,7 @@ H5O__attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char* name_
             unsigned long attr_fnum;        /* Attributes file serial number */
 
             /* Get pointer to attribute */
-            if(NULL == (*attr = (H5A_t *)H5I_object_verify(attr_id_list[u], H5I_ATTR)))
+            if(NULL == (*attr = (H5A_t *)H5VL_object_verify(attr_id_list[u], H5I_ATTR)))
                 HGOTO_ERROR(H5E_ATTR, H5E_BADTYPE, FAIL, "not an attribute")
 
             /* Get file serial number for attribute */
@@ -862,7 +862,7 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
             /* (Needs to occur before updating the shared message, or the hash
              *      value on the old & new messages will be the same) */
-            HDmemcpy(((H5A_t *)mesg->native)->shared->data, udata->attr->shared->data, udata->attr->shared->data_size);
+            H5MM_memcpy(((H5A_t *)mesg->native)->shared->data, udata->attr->shared->data, udata->attr->shared->data_size);
         } /* end if */
 
         /* Mark the message as modified */
@@ -1304,7 +1304,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type,
 
         /* Iterate over attributes in table */
         if((ret_value = H5A__attr_iterate_table(&atable, skip, last_attr, loc_id, attr_op, op_data)) < 0)
-            HERROR(H5E_ATTR, H5E_CANTNEXT, "iteration operator failed");
+            HERROR(H5E_ATTR, H5E_BADITER, "iteration operator failed");
     } /* end else */
 
 done:

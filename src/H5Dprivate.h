@@ -45,6 +45,7 @@
 #define H5D_CRT_FILL_VALUE_NAME    "fill_value"          /* Fill value */
 #define H5D_CRT_ALLOC_TIME_STATE_NAME "alloc_time_state" /* Space allocation time state */
 #define H5D_CRT_EXT_FILE_LIST_NAME "efl"                 /* External file list */
+#define H5D_CRT_MIN_DSET_HDR_SIZE_NAME "dset_oh_minimize"/* Minimize object header */
 
 /* ========  Dataset access property names ======== */
 #define H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME   "rdcc_nslots"    /* Size of raw data chunk cache(slots) */
@@ -94,7 +95,13 @@
 /* Definitions for all collective chunk instrumentation properties */
 #define H5D_XFER_COLL_CHUNK_SIZE        sizeof(unsigned)
 #define H5D_XFER_COLL_CHUNK_DEF         1
-#define H5D_XFER_COLL_CHUNK_FIX         0
+
+/* General collective I/O instrumentation properties */
+#define H5D_XFER_COLL_RANK0_BCAST_NAME  "coll_rank0_bcast"
+
+/* Definitions for general collective I/O instrumentation properties */
+#define H5D_XFER_COLL_RANK0_BCAST_SIZE  sizeof(hbool_t)
+#define H5D_XFER_COLL_RANK0_BCAST_DEF   FALSE
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
 /* Default temporary buffer size */
@@ -158,14 +165,10 @@ H5_DLL herr_t H5D_close(H5D_t *dataset);
 H5_DLL herr_t H5D_mult_refresh_close(hid_t dset_id);
 H5_DLL herr_t H5D_mult_refresh_reopen(H5D_t *dataset);
 H5_DLL H5O_loc_t *H5D_oloc(H5D_t *dataset);
-H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);
-H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);
-H5_DLL herr_t H5D_flush_all(const H5F_t *f);
+H5_DLL H5G_name_t *H5D_nameof(const H5D_t *dataset);
+H5_DLL herr_t H5D_flush_all(H5F_t *f);
 H5_DLL hid_t H5D_get_create_plist(const H5D_t *dset);
 H5_DLL hid_t H5D_get_access_plist(const H5D_t *dset);
-
-/* Functions that operate on vlen data */
-H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, void *buf);
 
 /* Functions that operate on chunked storage */
 H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);

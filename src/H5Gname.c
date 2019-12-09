@@ -522,7 +522,7 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
     HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
-    HDmemcpy(dst, src, sizeof(H5G_name_t));
+    H5MM_memcpy(dst, src, sizeof(H5G_name_t));
 
     /* Deep copy the names */
     if(depth == H5_COPY_DEEP) {
@@ -584,21 +584,9 @@ H5G_get_name(const H5G_loc_t *loc, char *name/*out*/, size_t size,
             *cached = TRUE;
     } /* end if */
     else if(!loc->path->obj_hidden) {
-        hid_t	  file;
-
-        /* Retrieve file ID for name search */
-        if((file = H5F_get_id(loc->oloc->file, FALSE)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get file ID")
-
         /* Search for name of object */
-        if((len = H5G_get_name_by_addr(file, loc->oloc, name, size)) < 0) {
-            H5I_dec_ref(file);
+        if((len = H5G_get_name_by_addr(loc->oloc->file, loc->oloc, name, size)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
-        } /* end if */
-
-        /* Close file ID used for search */
-        if(H5I_dec_ref(file) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEFILE, FAIL, "can't determine name")
 
         /* Indicate that the name is _not_ cached, if requested */
         /* (Currently only used for testing - QAK, 2010/07/26) */
@@ -828,18 +816,22 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             obj_path = H5T_nameof((H5T_t *)obj_ptr);
             break;
 
+        case H5I_MAP:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector")
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_FILE:
         case H5I_DATASPACE:
         case H5I_ATTR:
-        case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")
@@ -1123,6 +1115,9 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
                                 search_datatype = TRUE;
                                 break;
 
+                            case H5O_TYPE_MAP:
+                                HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector")
+
                             case H5O_TYPE_UNKNOWN:
                             case H5O_TYPE_NTYPES:
                                 /* Search and replace names through datatype IDs */
@@ -1281,8 +1276,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_get_name_by_addr(hid_t file, const H5O_loc_t *loc,
-    char *name, size_t size)
+H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size)
 {
     H5G_gnba_iter_t udata;                  /* User data for iteration  */
     H5G_loc_t       root_loc;               /* Root group's location    */
@@ -1295,8 +1289,8 @@ H5G_get_name_by_addr(hid_t file, const H5O_loc_t *loc,
 
     FUNC_ENTER_NOAPI((-1))
 
-    /* Construct the link info for the file's root group */
-    if(H5G_loc(file, &root_loc) < 0)
+    /* Construct a group location for root group of the file */
+    if(H5G_root_loc(f, &root_loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, (-1), "can't get root group's location")
 
     /* Check for root group being the object looked for */

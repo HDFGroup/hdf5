@@ -38,6 +38,7 @@
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5SMprivate.h"        /* Shared object header messages            */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -96,7 +97,7 @@ H5A__is_shared_test(hid_t attr_id)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Check if attribute is shared */
@@ -129,7 +130,7 @@ H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5A_t *)H5VL_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Push API context */

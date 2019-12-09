@@ -273,7 +273,7 @@ H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvrinfo, char *drv_name,
 
     /* Driver name and/or version */
     if(drv_name) { 
-        HDmemcpy(drv_name, (const char *)image, (size_t)8);
+        H5MM_memcpy(drv_name, (const char *)image, (size_t)8);
         drv_name[8] = '\0';
         image += 8; /* advance past name/version */
     } /* end if */
@@ -686,7 +686,7 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
     HDassert(sblock->cache_info.flush_me_last);    
 
     /* Encode the common portion of the file superblock for all versions */
-    HDmemcpy(image, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN);
+    H5MM_memcpy(image, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN);
     image += H5F_SIGNATURE_LEN;
     *image++ = (uint8_t)sblock->super_vers;
 
@@ -1229,8 +1229,12 @@ H5F__cache_superblock_refresh(H5F_t *f, void * _thing, const void * _image,
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected snode_btree_k")
 
         /* File status flags (not really used yet) */
+        /* If the file has closed, the status flags will be zero.
+         * Allow this.
+         */
         UINT32DECODE(image, status_flags);
-        if ( status_flags != sblock->status_flags )
+        if ( ( status_flags != sblock->status_flags ) &&
+             ( status_flags != 0 ) )
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected status_flags")
 
 	/*
@@ -1300,7 +1304,12 @@ H5F__cache_superblock_refresh(H5F_t *f, void * _thing, const void * _image,
 
         /* File status flags (not really used yet) */
 	status_flags = *image++;
-        if ( status_flags != sblock->status_flags )
+
+        /* If the file has closed, the status flags will be zero.
+         * Allow this.
+         */
+        if ( ( status_flags != sblock->status_flags ) &&
+             ( status_flags != 0 ) )
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected status_flags")
 
 	/* Base, superblock extension, end of file & root group object 

@@ -25,13 +25,15 @@ typedef struct H5F_t H5F_t;
 #include "H5Fpublic.h"
 
 /* Public headers needed by this file */
-#include "H5FDpublic.h"        /* File drivers                */
+#include "H5FDpublic.h"         /* File drivers                */
+#include "H5VLpublic.h"         /* Virtual Object Layer        */
 
 /* Private headers needed by this file */
+#include "H5MMprivate.h"	/* Memory management	       */
 #ifdef H5_HAVE_PARALLEL
-#include "H5Pprivate.h"        /* Property lists            */
+#include "H5Pprivate.h"         /* Property lists              */
 #endif /* H5_HAVE_PARALLEL */
-#include "H5VMprivate.h"        /* Vectors and arrays */
+#include "H5VMprivate.h"        /* Vectors and arrays          */
 
 
 /**************************/
@@ -134,7 +136,7 @@ typedef struct H5F_t H5F_t;
                                         \
     HDcompile_assert(sizeof(double) == 8);                      \
     HDcompile_assert(sizeof(double) == sizeof(uint64_t));              \
-    HDmemcpy(&_n, &n, sizeof(double));                          \
+    H5MM_memcpy(&_n, &n, sizeof(double));                          \
     for(_u = 0; _u < sizeof(uint64_t); _u++, _n >>= 8)                  \
         *_p++ = (uint8_t)(_n & 0xff);                          \
     (p) = (uint8_t *)(p) + 8;                              \
@@ -159,16 +161,16 @@ typedef struct H5F_t H5F_t;
    (i) |= (uint16_t)((*(p) & 0xff) << 8); (p)++;                  \
 }
 
-#  define INT32DECODE(p, i) {                              \
-   (i)    = ((int32_t)(*(p) & (unsigned)0xff));      (p)++;              \
-   (i) |= ((int32_t)(*(p) & (unsigned)0xff) <<  8); (p)++;              \
-   (i) |= ((int32_t)(*(p) & (unsigned)0xff) << 16); (p)++;              \
-   (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) |                        \
-                   ((*(p) & (unsigned)0x80) ? (unsigned)(~0xffffffff) : (unsigned)0x0))); (p)++; \
+#  define INT32DECODE(p, i) {                                \
+   (i)  = ((int32_t)(*(p) & 0xff));      (p)++;              \
+   (i) |= ((int32_t)(*(p) & 0xff) <<  8); (p)++;             \
+   (i) |= ((int32_t)(*(p) & 0xff) << 16); (p)++;             \
+   (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) |                 \
+            ((*(p) & 0x80) ? ~0xffffffffULL : 0x0ULL))); (p)++;    \
 }
 
-#  define UINT32DECODE(p, i) {                              \
-   (i)    =  (uint32_t)(*(p) & 0xff);       (p)++;                  \
+#  define UINT32DECODE(p, i) {                                     \
+   (i)  =  (uint32_t)(*(p) & 0xff);       (p)++;                   \
    (i) |= ((uint32_t)(*(p) & 0xff) <<  8); (p)++;                  \
    (i) |= ((uint32_t)(*(p) & 0xff) << 16); (p)++;                  \
    (i) |= ((uint32_t)(*(p) & 0xff) << 24); (p)++;                  \
@@ -240,7 +242,7 @@ typedef struct H5F_t H5F_t;
     (p) += 8;                                      \
     for(_u = 0; _u < sizeof(uint64_t); _u++)                      \
         _n = (_n << 8) | *(--p);                          \
-    HDmemcpy(&(n), &_n, sizeof(double));                          \
+    H5MM_memcpy(&(n), &_n, sizeof(double));                          \
     (p) += 8;                                      \
 }
 
@@ -277,21 +279,23 @@ typedef struct H5F_t H5F_t;
 #ifdef H5F_MODULE
 #define H5F_LOW_BOUND(F)        ((F)->shared->low_bound)
 #define H5F_HIGH_BOUND(F)       ((F)->shared->high_bound)
+#define H5F_SHARED_INTENT(F_SH) ((F_SH)->flags)
 #define H5F_INTENT(F)           ((F)->shared->flags)
 #define H5F_OPEN_NAME(F)        ((F)->open_name)
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)
-#define H5F_EXTPATH(F)          ((F)->extpath)
+#define H5F_EXTPATH(F)          ((F)->shared->extpath)
 #define H5F_SHARED(F)           ((F)->shared)
 #define H5F_SAME_SHARED(F1, F2) ((F1)->shared == (F2)->shared)
 #define H5F_NOPEN_OBJS(F)       ((F)->nopen_objs)
 #define H5F_INCR_NOPEN_OBJS(F)  ((F)->nopen_objs++)
 #define H5F_DECR_NOPEN_OBJS(F)  ((F)->nopen_objs--)
-#define H5F_FILE_ID(F)          ((F)->file_id)
+#define H5F_ID_EXISTS(F)        ((F)->id_exists)
 #define H5F_PARENT(F)           ((F)->parent)
 #define H5F_NMOUNTS(F)          ((F)->nmounts)
 #define H5F_GET_READ_ATTEMPTS(F) ((F)->shared->read_attempts)
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
 #define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
+#define H5F_SHARED_HAS_FEATURE(F_SH,FL) ((F_SH)->lf->feature_flags & (FL))
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
 #define H5F_BASE_ADDR(F)        ((F)->shared->sblock->base_addr)
 #define H5F_SYM_LEAF_K(F)       ((F)->shared->sblock->sym_leaf_k)
@@ -320,7 +324,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_USE_TMP_SPACE(F)    ((F)->shared->fs.use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->fs.tmp_addr, (ADDR)))
 #ifdef H5_HAVE_PARALLEL
-#define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
+#define H5F_COLL_MD_READ(F)     ((F)->shared->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
 #define H5F_USE_MDC_LOGGING(F)  ((F)->shared->use_mdc_logging)
 #define H5F_START_MDC_LOG_ON_ACCESS(F)  ((F)->shared->start_mdc_log_on_access)
@@ -333,9 +337,14 @@ typedef struct H5F_t H5F_t;
 #define H5F_EOA_PRE_FSM_FSALLOC(F) ((F)->shared->eoa_pre_fsm_fsalloc)
 #define H5F_USE_VFD_SWMR(F)         ((F)->shared->vfd_swmr)
 #define H5F_VFD_SWMR_MD_EOA(F)      ((F)->shared->vfd_swmr_md_eoa)
+#define H5F_NULL_FSM_ADDR(F)    ((F)->shared->null_fsm_addr)
+#define H5F_GET_MIN_DSET_OHDR(F) ((F)->shared->crt_dset_min_ohdr_flag)
+#define H5F_SET_MIN_DSET_OHDR(F, V) ((F)->shared->crt_dset_min_ohdr_flag = (V))
+#define H5F_VOL_CLS(F)          ((F)->shared->vol_cls)
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
+#define H5F_SHARED_INTENT(F_SH) (H5F_shared_get_intent(F_SH))
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_OPEN_NAME(F)        (H5F_get_open_name(F))
 #define H5F_ACTUAL_NAME(F)      (H5F_get_actual_name(F))
@@ -345,12 +354,13 @@ typedef struct H5F_t H5F_t;
 #define H5F_NOPEN_OBJS(F)       (H5F_get_nopen_objs(F))
 #define H5F_INCR_NOPEN_OBJS(F)  (H5F_incr_nopen_objs(F))
 #define H5F_DECR_NOPEN_OBJS(F)  (H5F_decr_nopen_objs(F))
-#define H5F_FILE_ID(F)          (H5F_get_file_id(F))
+#define H5F_ID_EXISTS(F)        (H5F_file_id_exists(F))
 #define H5F_PARENT(F)           (H5F_get_parent(F))
 #define H5F_NMOUNTS(F)          (H5F_get_nmounts(F))
 #define H5F_GET_READ_ATTEMPTS(F) (H5F_get_read_attempts(F))
 #define H5F_DRIVER_ID(F)        (H5F_get_driver_id(F))
 #define H5F_GET_FILENO(F,FILENUM) (H5F_get_fileno((F), &(FILENUM)))
+#define H5F_SHARED_HAS_FEATURE(F_SH,FL) (H5F_shared_has_feature(F_SH,FL))
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
 #define H5F_BASE_ADDR(F)        (H5F_get_base_addr(F))
 #define H5F_SYM_LEAF_K(F)       (H5F_sym_leaf_k(F))
@@ -392,6 +402,10 @@ typedef struct H5F_t H5F_t;
 #define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
 #define H5F_USE_VFD_SWMR(F)     (H5F_use_vfd_swmr(F))
 #define H5F_VFD_SWMR_MD_EOA(F)  (H5F_get_vfd_swmr_md_eoa(F))
+#define H5F_NULL_FSM_ADDR(F)    (H5F_get_null_fsm_addr(F))
+#define H5F_GET_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr(F))
+#define H5F_SET_MIN_DSET_OHDR(F, V) (H5F_set_min_dset_ohdr((F), (V)))
+#define H5F_VOL_CLS(F)          (H5F_get_vol_cls(F))
 #endif /* H5F_MODULE */
 
 
@@ -483,10 +497,11 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_SDATA_BLOCK_SIZE_NAME           "sdata_block_size" /* Minimum "small data" allocation block size (when aggregating "small" raw data allocations) */
 #define H5F_ACS_GARBG_COLCT_REF_NAME            "gc_ref"        /* Garbage-collect references */
 #define H5F_ACS_FILE_DRV_NAME                   "vfd_info" /* File driver ID & info */
+#define H5F_ACS_VOL_CONN_NAME                   "vol_connector_info" /* VOL connector ID & info */
 #define H5F_ACS_CLOSE_DEGREE_NAME               "close_degree"  /* File close degree */
 #define H5F_ACS_FAMILY_OFFSET_NAME              "family_offset" /* Offset position in file for family file driver */
 #define H5F_ACS_FAMILY_NEWSIZE_NAME             "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */
-#define H5F_ACS_FAMILY_TO_SEC2_NAME             "family_to_sec2" /* Whether to convert family to sec2 driver.  (private property only used by h5repart) */
+#define H5F_ACS_FAMILY_TO_SINGLE_NAME           "family_to_single" /* Whether to convert family to a single-file driver.  (private property only used by h5repart) */
 #define H5F_ACS_MULTI_TYPE_NAME                 "multi_type"    /* Data type in multi file driver */
 #define H5F_ACS_LIBVER_LOW_BOUND_NAME           "libver_low_bound"     /* 'low' bound of library format versions */
 #define H5F_ACS_LIBVER_HIGH_BOUND_NAME          "libver_high_bound"    /* 'high' bound of library format versions */
@@ -503,14 +518,16 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_USE_MDC_LOGGING_NAME            "use_mdc_logging" /* Whether to use metadata cache logging */
 #define H5F_ACS_MDC_LOG_LOCATION_NAME           "mdc_log_location" /* Name of metadata cache log location */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME    "start_mdc_log_on_access" /* Whether logging starts on file create/open */
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME   "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME        "evict_on_close_flag" /* Whether or not the metadata cache will evict objects on close */
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 #define H5F_ACS_COLL_MD_WRITE_FLAG_NAME         "collective_metadata_write" /* property indicating whether metadata writes are done collectively or not */
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME "mdc_initCacheImageCfg" /* Initial metadata cache image creation configuration */
 #define H5F_ACS_PAGE_BUFFER_SIZE_NAME           "page_buffer_size" /* the maximum size for the page buffer cache */
 #define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME  "page_buffer_min_meta_perc" /* the min metadata percentage for the page buffer cache */
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME   "page_buffer_min_raw_perc" /* the min raw data percentage for the page buffer cache */
+#ifdef H5_HAVE_PARALLEL
+#define H5F_ACS_MPI_PARAMS_COMM_NAME            "mpi_params_comm" /* the MPI communicator */
+#define H5F_ACS_MPI_PARAMS_INFO_NAME            "mpi_params_info" /* the MPI info struct */
+#endif /* H5_HAVE_PARALLEL */
 
 /* Default configuration for VFD SWMR: not configured */
 #define H5F_ACS_VFD_SWMR_CONFIG_NAME    "vfd_swmr_config" 
@@ -592,10 +609,12 @@ typedef struct H5F_t H5F_t;
 #define H5F_SDATA_BLOCK_SIZE_DEF    2048
 
 /* Check for file using paged aggregation */
+#define H5F_SHARED_PAGED_AGGR(F_SH) ((F_SH)->fs_strategy == H5F_FSPACE_STRATEGY_PAGE && (F_SH)->fs_page_size)
 #define H5F_PAGED_AGGR(F) (F->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE && F->shared->fs_page_size)
 
 /* Check for file configured with VFD SWMR */
-#define H5F_VFD_SWMR_CONFIG(F)  (F->shared->vfd_swmr_config.version >= H5F__CURR_VFD_SWMR_CONFIG_VERSION)
+#define H5F_SHARED_VFD_SWMR_CONFIG(S)  (S->vfd_swmr_config.version >= H5F__CURR_VFD_SWMR_CONFIG_VERSION)
+#define H5F_VFD_SWMR_CONFIG(F)  H5F_SHARED_VFD_SWMR_CONFIG(F->shared)
 
 /* Metadata read attempt values */
 #define H5F_METADATA_READ_ATTEMPTS        1    /* Default # of read attempts for non-SWMR access */
@@ -671,7 +690,7 @@ struct H5P_genplist_t;
 /* Forward declarations for anonymous H5F objects */
 
 /* Main file structures */
-typedef struct H5F_file_t H5F_file_t;
+typedef struct H5F_shared_t H5F_shared_t;
 
 /* Block aggregation structure */
 typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
@@ -720,8 +739,9 @@ typedef enum H5F_mem_page_t {
 
 /* Type of prefix for opening prefixed files */
 typedef enum H5F_prefix_open_t {
-    H5F_PREFIX_VDS,             /* Virtual dataset prefix */
-    H5F_PREFIX_ELINK            /* External link prefix */
+    H5F_PREFIX_VDS   = 0,           /* Virtual dataset prefix */
+    H5F_PREFIX_ELINK = 1,           /* External link prefix   */
+    H5F_PREFIX_EFILE = 2            /* External file prefix   */
 } H5F_prefix_open_t;
 
 
@@ -737,31 +757,35 @@ typedef enum H5F_prefix_open_t {
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
+H5_DLL hid_t H5F_get_file_id(hid_t obj_id, H5I_type_t id_type, hbool_t app_ref);
 
 /* Functions that retrieve values from the file struct */
 H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);
 H5_DLL H5F_libver_t H5F_get_high_bound(const H5F_t *f);
+H5_DLL unsigned H5F_shared_get_intent(const H5F_shared_t *f);
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL char *H5F_get_open_name(const H5F_t *f);
 H5_DLL char *H5F_get_actual_name(const H5F_t *f);
 H5_DLL char *H5F_get_extpath(const H5F_t *f);
-H5_DLL H5F_file_t *H5F_get_shared(const H5F_t *f);
+H5_DLL H5F_shared_t *H5F_get_shared(const H5F_t *f);
 H5_DLL hbool_t H5F_same_shared(const H5F_t *f1, const H5F_t *f2);
 H5_DLL unsigned H5F_get_nopen_objs(const H5F_t *f);
 H5_DLL unsigned H5F_incr_nopen_objs(H5F_t *f);
 H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
-H5_DLL hid_t H5F_get_file_id(const H5F_t *f);
+H5_DLL hbool_t H5F_file_id_exists(const H5F_t *f);
 H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);
 H5_DLL unsigned H5F_get_read_attempts(const H5F_t *f);
 H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
-H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
+H5_DLL hid_t H5F_get_id(H5F_t *file);
 H5_DLL herr_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL herr_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 H5_DLL hsize_t H5F_get_pgend_meta_thres(const H5F_t *f);
 H5_DLL hbool_t H5F_get_point_of_no_return(const H5F_t *f);
-H5_DLL hbool_t H5F_get_first_alloc_dealloc(const H5F_t *f);
-H5_DLL haddr_t H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f);
+H5_DLL hbool_t H5F_get_null_fsm_addr(const H5F_t *f);
+H5_DLL hbool_t H5F_get_min_dset_ohdr(const H5F_t *f);
+H5_DLL herr_t H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize);
+H5_DLL const H5VL_class_t *H5F_get_vol_cls(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
@@ -803,7 +827,9 @@ H5_DLL char *H5F_mdc_log_location(const H5F_t *f);
 /* Functions that retrieve values from VFD layer */
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
+H5_DLL hbool_t H5F_shared_has_feature(const H5F_shared_t *f, unsigned feature);
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
+H5_DLL haddr_t H5F_shared_get_eoa(const H5F_shared_t *f_sh, H5FD_mem_t type);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
 H5_DLL herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle);
 
@@ -814,7 +840,9 @@ H5_DLL herr_t H5F_traverse_mount(struct H5O_loc_t *oloc/*in,out*/);
 H5_DLL herr_t H5F_flush_mounts(H5F_t *f);
 
 /* Functions that operate on blocks of bytes wrt super block */
+H5_DLL herr_t H5F_shared_block_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/);
 H5_DLL herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/);
+H5_DLL herr_t H5F_shared_block_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
 H5_DLL herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
 
 /* Functions that flush or evict */
@@ -854,9 +882,12 @@ H5_DLL herr_t H5F_eoa_dirty(H5F_t *f);
 H5_DLL herr_t H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle);
 H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
+H5_DLL int H5F_shared_mpi_get_size(const H5F_shared_t *f_sh);
 H5_DLL int H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
 H5_DLL herr_t H5F_get_mpi_info(const H5F_t *f, MPI_Info **f_info);
+H5_DLL herr_t H5F_get_mpi_atomicity(H5F_t *file, hbool_t *flag);
+H5_DLL herr_t H5F_set_mpi_atomicity(H5F_t *file, hbool_t flag);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */
@@ -870,7 +901,7 @@ H5_DLL H5F_t *H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix
 H5_DLL herr_t H5F_cwfs_add(H5F_t *f, struct H5HG_heap_t *heap);
 H5_DLL herr_t H5F_cwfs_find_free_heap(H5F_t *f, size_t need, haddr_t *addr);
 H5_DLL herr_t H5F_cwfs_advance_heap(H5F_t *f, struct H5HG_heap_t *heap, hbool_t add_heap);
-H5_DLL herr_t H5F_cwfs_remove_heap(H5F_file_t *shared, struct H5HG_heap_t *heap);
+H5_DLL herr_t H5F_cwfs_remove_heap(H5F_shared_t *shared, struct H5HG_heap_t *heap);
 
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE * stream, int indent, int fwidth);

@@ -76,10 +76,12 @@ H5FL_DEFINE(H5F_super_t);
 static const unsigned HDF5_superblock_ver_bounds[] = {
     HDF5_SUPERBLOCK_VERSION_DEF,    /* H5F_LIBVER_EARLIEST */
     HDF5_SUPERBLOCK_VERSION_2,      /* H5F_LIBVER_V18 */
+    HDF5_SUPERBLOCK_VERSION_3,      /* H5F_LIBVER_V110 */
+    HDF5_SUPERBLOCK_VERSION_3,      /* H5F_LIBVER_V112 */
     HDF5_SUPERBLOCK_VERSION_LATEST  /* H5F_LIBVER_LATEST */
 };
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__super_ext_create
  *
@@ -132,7 +134,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__super_ext_create() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__super_ext_open
  *
@@ -170,7 +172,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__super_ext_open() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5F__super_ext_close
  *
@@ -223,14 +225,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__super_ext_close() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__update_super_ext_driver_msg
  *
- * Purpose:     Update the superblock extension file driver info message if 
+ * Purpose:     Update the superblock extension file driver info message if
  *              we are using a V 2 superblock.  Observe that the function
  *              is a NO-OP if the file driver info message does not exist.
- *              This is necessary, as the function is called whenever the 
+ *              This is necessary, as the function is called whenever the
  *              EOA is updated, and were it to create the file driver info
  *              message, it would find itself in an infinite recursion.
  *
@@ -270,8 +272,8 @@ H5F__update_super_ext_driver_msg(H5F_t *f)
                 /* Check for driver info */
                 H5_CHECKED_ASSIGN(driver_size, size_t, H5FD_sb_size(f->shared->lf), hsize_t);
 
-                /* Nothing to do unless there is both driver info and 
-                 * the driver info superblock extension message has 
+                /* Nothing to do unless there is both driver info and
+                 * the driver info superblock extension message has
                  * already been created.
                  */
                 if(driver_size > 0) {
@@ -287,7 +289,7 @@ H5F__update_super_ext_driver_msg(H5F_t *f)
 
                     /* Write the message to the superblock extension.
                      *
-                     * Note that the superblock extension and the 
+                     * Note that the superblock extension and the
                      * file driver info message must already exist.
                      */
                     drvinfo.len = driver_size;
@@ -303,7 +305,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__update_super_ext_driver_msg() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__super_read
  *
@@ -342,7 +344,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
     FUNC_ENTER_PACKAGE_TAG(H5AC__SUPERBLOCK_TAG)
 
     /* initialize the drvinfo to NULL -- we will overwrite this if there
-     * is a driver information block 
+     * is a driver information block
      */
     f->shared->drvinfo = NULL;
 
@@ -434,7 +436,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Make certain we can read the fixed-size portion of the superblock */
-    if(H5F__set_eoa(f, H5FD_MEM_SUPER, 
+    if(H5F__set_eoa(f, H5FD_MEM_SUPER,
               (haddr_t)(H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "set end of space allocation request failed")
 
@@ -454,12 +456,12 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
     if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, H5AC_SUPERBLOCK, (haddr_t)0, &udata, rw_flags)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
 
-    /* 
+    /*
      * When opening a file with SWMR-write access, the library will first
-     * check to ensure that superblock version 3 is used.  Otherwise fail 
+     * check to ensure that superblock version 3 is used.  Otherwise fail
      * file open.
      *
-     * Then the library will upgrade the file's low_bound depending on 
+     * Then the library will upgrade the file's low_bound depending on
      * superblock version as follows:
      *      --version 0 or 1: no change to low_bound
      *      --version 2: upgrade low_bound to at least V18
@@ -512,15 +514,12 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 #endif /* H5_HAVE_PARALLEL */
 
     /* Check if superblock address is different from base address and adjust
-     * base address and "end of address" address if so.
+     * base address and "end of file" address if so.
      */
     if(!H5F_addr_eq(super_addr, sblock->base_addr)) {
-        /* Check if the superblock moved earlier in the file */
-        if(H5F_addr_lt(super_addr, sblock->base_addr))
-            udata.stored_eof -= (sblock->base_addr - super_addr);
-        else
-            /* The superblock moved later in the file */
-            udata.stored_eof += (super_addr - sblock->base_addr);
+        /* If the superblock moved in the file, adjust the EOF */
+        /* (Handles moving earlier & later) */
+        udata.stored_eof -= (sblock->base_addr - super_addr);
 
         /* Adjust base address for offsets of the HDF5 data in the file */
         sblock->base_addr = super_addr;
@@ -555,7 +554,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         /* Set the B-tree internal node values, etc */
         if(H5P_set(c_plist, H5F_CRT_BTREE_RANK_NAME, udata.btree_k) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set rank for btree internal nodes")
-        HDmemcpy(sblock->btree_k, udata.btree_k, sizeof(unsigned) * (size_t)H5B_NUM_BTREE_ID);
+        H5MM_memcpy(sblock->btree_k, udata.btree_k, sizeof(unsigned) * (size_t)H5B_NUM_BTREE_ID);
     } /* end if */
     else {
         /* Get the (default) B-tree internal node values, etc */
@@ -592,8 +591,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
      * as the file can appear truncated if only part of it has been
      * been flushed to disk by the SWMR writer process.
      */
-    /* The EOF check is also skipped when the private property 
-     * H5F_ACS_SKIP_EOF_CHECK_NAME exists in the fapl.  
+    /* The EOF check is also skipped when the private property
+     * H5F_ACS_SKIP_EOF_CHECK_NAME exists in the fapl.
      * This property is enabled by the tool h5clear with these
      * two options: (1) --filesize (2) --increment
      */
@@ -604,7 +603,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get skip EOF check value")
 
     if(H5F_INTENT(f) & H5F_ACC_SWMR_READ) {
-        /* 
+        /*
          * When the file is opened for SWMR read access, skip the check if:
          * --the file is already marked for SWMR writing and
          * --the file has version 3 superblock for SWMR support
@@ -646,10 +645,10 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         drvrinfo_udata.f           = f;
         drvrinfo_udata.driver_addr = sblock->driver_addr;
 
-        /* extend EOA so we can read at least the fixed sized 
-         * portion of the driver info block 
+        /* extend EOA so we can read at least the fixed sized
+         * portion of the driver info block
          */
-        if(H5FD_set_eoa(f->shared->lf, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE) < 0) /* will extend eoa later if required */ 
+        if(H5FD_set_eoa(f->shared->lf, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE) < 0) /* will extend eoa later if required */
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
 
         /* Look up the driver info block */
@@ -662,7 +661,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         if(((rw_flags & H5AC__READ_ONLY_FLAG) == 0) && H5F_HAS_FEATURE(f, H5FD_FEAT_DIRTY_DRVRINFO_LOAD))
             drvinfo_flags |= H5AC__DIRTIED_FLAG;
 
-        /* set the pin entry flag so that the driver information block 
+        /* set the pin entry flag so that the driver information block
          * cache entry will be pinned in the cache.
          */
         drvinfo_flags |= H5AC__PIN_ENTRY_FLAG;
@@ -770,20 +769,26 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
             /* If message is NOT marked "unknown"--set up file space info  */
             if(!(flags & H5O_MSG_FLAG_WAS_UNKNOWN)) {
                 H5O_fsinfo_t fsinfo;   /* File space info message from superblock extension */
-                hbool_t null_fsm_addr = FALSE;  /* Whether to drop free-space to the floor */
 
+                /* f->shared->null_fsm_addr: Whether to drop free-space to the floor */
                 /* The h5clear tool uses this property to tell the library
                  * to drop free-space to the floor
                  */
                 if(H5P_exist_plist(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME) > 0)
-                    if(H5P_get(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME, &null_fsm_addr) < 0)
+                    if(H5P_get(fa_plist, H5F_ACS_NULL_FSM_ADDR_NAME, &f->shared->null_fsm_addr) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get clearance for persisting fsm addr")
 
                 /* Retrieve the 'file space info' structure */
                 if(NULL == H5O_msg_read(&ext_loc, H5O_FSINFO_ID, &fsinfo))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get free-space manager info message")
 
+                /* Version bounds check */
+                if(H5O_fsinfo_check_version(H5F_HIGH_BOUND(f), &fsinfo) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "File space info message's version out of bounds")
+
                 /* Update changed values */
+                if(f->shared->fs_version != fsinfo.version)
+                    f->shared->fs_version = fsinfo.version;
                 if(f->shared->fs_strategy != fsinfo.strategy) {
                     f->shared->fs_strategy = fsinfo.strategy;
 
@@ -819,59 +824,66 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                     /* Initialize page end meta threshold */
                     f->shared->pgend_meta_thres = fsinfo.pgend_meta_thres;
 
-                if(f->shared->eoa_pre_fsm_fsalloc != fsinfo.eoa_pre_fsm_fsalloc)
-                    f->shared->eoa_pre_fsm_fsalloc = fsinfo.eoa_pre_fsm_fsalloc;
+                if(f->shared->eoa_fsm_fsalloc != fsinfo.eoa_pre_fsm_fsalloc)
+                    f->shared->eoa_fsm_fsalloc = fsinfo.eoa_pre_fsm_fsalloc;
 
-               /* f->shared->eoa_pre_fsm_fsalloc must always be HADDR_UNDEF
-                * in the absence of persistent free space managers.
-                */
-                /* If the following two conditions are true:
+                /*
+                 * If the following two conditions are true:
                  *       (1) skipping EOF check (skip_eof_check)
-                 *       (2) dropping free-space to the floor (null_fsm_addr)
-                 *  skip the asserts as "eoa_pre_fsm_fsalloc" may be undefined
+                 *       (2) dropping free-space to the floor (f->shared->null_fsm_addr)
+                 *  skip the asserts as "eoa_fsm_fsalloc" may be undefined
                  *  for a crashed file with persistent free space managers.
-                 *  #1 and #2 are enabled when the tool h5clear --increment
+                 *  The above two conditions are enabled when the tool h5clear --increment
                  *  option is used.
                  */
-                if(!skip_eof_check && !null_fsm_addr) {
-                     HDassert((!f->shared->fs_persist) || (f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF));
-                     HDassert(!f->shared->first_alloc_dealloc);
-                }
+                if(!skip_eof_check && !f->shared->null_fsm_addr)
+                     HDassert((!f->shared->fs_persist) || (f->shared->eoa_fsm_fsalloc != HADDR_UNDEF));
 
-                /* As "eoa_pre_fsm_fsalloc" may be undefined for a crashed file
-                 * with persistent free space managers, therefore, set
-                 * "first_alloc_dealloc" when the condition 
-                 * "dropping free-space to the floor is true.
-                 * This will ensure that no action is done to settle things on file
-                 * close via H5MF_settle_meta_data_fsm() and H5MF_settle_raw_data_fsm().
+                /*
+                 * A crashed file with persistent free-space managers may have
+                 * undefined f->shared->eoa_fsm_fsalloc.
+                 * eoa_fsm_fsalloc is the final eoa which is saved in the free-space
+                 * info message's eoa_pre_fsm_fsalloc field for backward compatibility.
+                 * If the tool h5clear sets to dropping free-space to the floor
+                 * as indicated by f->shared->null_fsm_addr, we are not going to
+                 * perform actions to settle things on file close in the routines
+                 * H5MF_settle_meta_data_fsm() and H5MF_settle_raw_data_fsm().
+                 *
+                 * We remove the following check:
+                 *   if((f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF || null_fsm_addr) &&
+                 *       (H5F_INTENT(f) & H5F_ACC_RDWR))
+                 *      f->shared->first_alloc_dealloc = TRUE;
+                 *
+                 * Because:
+                 * --there is no more f->shared->eoa_pre_fsm_fsalloc and
+                 *   f->shared->first_alloc_dealloc
+                 * --the check for null_fsm_addr is directly done in H5MF_settle_meta_data_fsm()
+                 *   and H5MF_settle_raw_data_fsm()
                  */
-                if((f->shared->eoa_pre_fsm_fsalloc != HADDR_UNDEF || null_fsm_addr) &&
-                        (H5F_INTENT(f) & H5F_ACC_RDWR))
-                    f->shared->first_alloc_dealloc = TRUE;
 
                 f->shared->fs_addr[0] = HADDR_UNDEF;
                 for(u = 1; u < NELMTS(f->shared->fs_addr); u++)
                     f->shared->fs_addr[u] = fsinfo.fs_addr[u - 1];
 
                 /* If the following two conditions are true:
-                 *      (1) file is persisting free-space 
-                 *      (2) dropping free-space to the floor (null_fsm_addr)
-                 * nullify the addresses of the FSMs 
+                 *      (1) file is persisting free-space
+                 *      (2) dropping free-space to the floor (f->shared->null_fsm_addr)
+                 * nullify the addresses of the FSMs
                  */
-                if(f->shared->fs_persist && null_fsm_addr)
+                if(f->shared->fs_persist && f->shared->null_fsm_addr)
                     for(u = 0; u < NELMTS(fsinfo.fs_addr); u++)
                         f->shared->fs_addr[u] = fsinfo.fs_addr[u] = HADDR_UNDEF;
 
                 /* For fsinfo.mapped: remove the FSINFO message from the superblock extension
                    and write a new message to the extension */
-                /* For null_fsm_addr: just update FSINFO message in the superblock extension */
-                if(((fsinfo.mapped || null_fsm_addr) && (rw_flags & H5AC__READ_ONLY_FLAG) == 0)) {
+                /* For f->shared->null_fsm_addr: just update FSINFO message in the superblock extension */
+                if(((fsinfo.mapped || f->shared->null_fsm_addr) && (rw_flags & H5AC__READ_ONLY_FLAG) == 0)) {
 
                     /* Do the same kluge until we know for sure.  VC */
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
                     /* KLUGE ALERT!!
                      *
-                     * H5F__super_ext_write_msg() expects f->shared->sblock to 
+                     * H5F__super_ext_write_msg() expects f->shared->sblock to
                      * be set -- verify that it is NULL, and then set it.
                      * Set it back to NULL when we are done.
                      */
@@ -879,7 +891,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                      f->shared->sblock = sblock;
 #endif /* JRM */
 
-                    if(null_fsm_addr) {
+                    if(f->shared->null_fsm_addr) {
                         if(H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, FALSE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
                             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension")
                     }
@@ -908,12 +920,12 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
             /* if the metadata cache image superblock extension message exists,
              * read its contents and pass the data on to the metadata cache.
              * Given this data, the cache will load and decode the metadata
-             * cache image block, decoded it and load its contents into the 
-             * the cache on the test protect call.  
+             * cache image block, decoded it and load its contents into the
+             * the cache on the test protect call.
              *
-             * Further, if the file is opened R/W, the metadata cache will 
+             * Further, if the file is opened R/W, the metadata cache will
              * delete the metadata cache image superblock extension and free
-             * the cache image block.  Don't do this now as f->shared 
+             * the cache image block.  Don't do this now as f->shared
              * is not fully setup, which complicates matters.
              */
 
@@ -964,7 +976,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
                 /* KLUGE ALERT!!
                  *
-                 * H5F__super_ext_write_msg() expects f->shared->sblock to 
+                 * H5F__super_ext_write_msg() expects f->shared->sblock to
                  * be set -- verify that it is NULL, and then set it.
                  * Set it back to NULL when we are done.
                  */
@@ -1008,10 +1020,10 @@ done:
     if(sblock && H5AC_unprotect(f, H5AC_SUPERBLOCK, (haddr_t)0, sblock, sblock_flags) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTUNPROTECT, FAIL, "unable to close superblock")
 
-    /* If we have failed, make sure no entries are left in the 
+    /* If we have failed, make sure no entries are left in the
      * metadata cache, so that it can be shut down and discarded.
      */
-    if(ret_value < 0) { 
+    if(ret_value < 0) {
         /* Unpin and discard drvinfo cache entry */
         if(f->shared->drvinfo) {
             if(H5AC_unpin_entry(f->shared->drvinfo) < 0)
@@ -1037,7 +1049,7 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5F__super_read() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__super_init
  *
@@ -1101,10 +1113,10 @@ H5F__super_init(H5F_t *f)
     if(!(f->shared->fs_strategy == H5F_FILE_SPACE_STRATEGY_DEF &&
             f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
             f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
-	    f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF))
+        f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF))
         non_default_fs_settings = TRUE;
 
-    /* 
+    /*
      * When creating a file with write access, the library will:
      *      -- set superblock version to 0, 1 or 2 based on feature enabled
      *      -- no change to low_bound
@@ -1113,9 +1125,9 @@ H5F__super_init(H5F_t *f)
      *      -- set superblock version to 3
      *      -- upgrade low_bound to at least V110
      *
-     * Then the library will finalize superblock version to that allowed by 
+     * Then the library will finalize superblock version to that allowed by
      * low_bound if that is higher.
-     * Lastly, the library will check to ensure the superblock version does not 
+     * Lastly, the library will check to ensure the superblock version does not
      * exceed the version allowed by high_bound. Otherwise fail file open.
      *
      * For details, please see RFC:Setting Bounds for Object Creation in HDF5 1.10.0.
@@ -1125,12 +1137,12 @@ H5F__super_init(H5F_t *f)
      * the status_flags field in the superblock. The problem is discussed in
      * jira issue SWMR-79 and also in the RFC: File Format Changes in HDF5 1.10.0.
      * The file's low_bound is upgraded for SWMR so that the library will
-     * use the best format versions available in 1.10.  
-     * Due to the possible upgrade, the fapl returned from H5Fget_access_plist() 
+     * use the best format versions available in 1.10.
+     * Due to the possible upgrade, the fapl returned from H5Fget_access_plist()
      * might indicate a low_bound higher than what the user originally set.
      */
 
-    /* 
+    /*
      * Creating a file with SWMR-write access will
      * upgrade superblock version and low_bound
      */
@@ -1141,10 +1153,10 @@ H5F__super_init(H5F_t *f)
     /* Bump superblock version to create superblock extension for SOHM info */
     } else if(f->shared->sohm_nindexes > 0)
         super_vers = HDF5_SUPERBLOCK_VERSION_2;
-    /* 
-     *	Bump superblock version to create superblock extension for:
-     * 	-- non-default file space strategy or 
-     * 	-- non-default persisting free-space or 
+    /*
+     *    Bump superblock version to create superblock extension for:
+     *     -- non-default file space strategy or
+     *     -- non-default persisting free-space or
      *  -- non-default free-space threshold or
      *  -- non-default page_size
      */
@@ -1221,7 +1233,7 @@ H5F__super_init(H5F_t *f)
     /* Compute the size of the driver information block */
     H5_CHECKED_ASSIGN(driver_size, size_t, H5FD_sb_size(f->shared->lf), hsize_t);
 
-    /* The following code sets driver_size to the valued needed 
+    /* The following code sets driver_size to the valued needed
      * for the driver info block, and sets the driver info block
      * address regardless of the version of the superblock.
      */
@@ -1262,7 +1274,7 @@ H5F__super_init(H5F_t *f)
 
     /* Allocate space for the superblock */
     if(HADDR_UNDEF == H5MF_alloc(f, H5FD_MEM_SUPER, superblock_size))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for superblock")
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for superblock")
 
     /* set the drvinfo filed to NULL -- will overwrite this later if needed */
     f->shared->drvinfo = NULL;
@@ -1313,7 +1325,7 @@ H5F__super_init(H5F_t *f)
          * be tuned if more information is added to the superblock
          * extension.
          */
-	if(H5F__super_ext_create(f, &ext_loc) < 0)
+    if(H5F__super_ext_create(f, &ext_loc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
         ext_created = TRUE;
 
@@ -1377,12 +1389,17 @@ H5F__super_init(H5F_t *f)
             fsinfo.eoa_pre_fsm_fsalloc = HADDR_UNDEF;
             fsinfo.mapped = FALSE;
 
+            /* Set the version for the fsinfo message */
+            if(H5O_fsinfo_set_version(H5F_LOW_BOUND(f), H5F_HIGH_BOUND(f), &fsinfo) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set version of fsinfo")
+            f->shared->fs_version = fsinfo.version;
+
             for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
                 fsinfo.fs_addr[ptype - 1] = HADDR_UNDEF;
 
             if(H5O_msg_create(&ext_loc, H5O_FSINFO_ID, H5O_MSG_FLAG_DONTSHARE | H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &fsinfo) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update free-space info header message")
-	} /* end if */
+    } /* end if */
     } /* end if */
     else {
         /* Check for creating an "old-style" driver info block */
@@ -1465,7 +1482,7 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5F__super_init() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_eoa_dirty
  *
@@ -1495,8 +1512,8 @@ H5F_eoa_dirty(H5F_t *f)
     if(H5F_super_dirty(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
-    /* If the driver information block exists, mark it dirty as well 
-     * so that the change in eoa will be reflected there as well if 
+    /* If the driver information block exists, mark it dirty as well
+     * so that the change in eoa will be reflected there as well if
      * appropriate.
      */
     if(f->shared->drvinfo) {
@@ -1513,7 +1530,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_eoa_dirty() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F_super_dirty
  *
@@ -1547,7 +1564,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_super_dirty() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__super_free
  *
@@ -1578,7 +1595,7 @@ H5F__super_free(H5F_super_t *sblock)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F__super_free() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__super_size
  *
@@ -1607,7 +1624,7 @@ H5F__super_size(H5F_t *f, hsize_t *super_size, hsize_t *super_ext_size)
 
     /* Set the superblock size */
     if(super_size)
-	*super_size = (hsize_t)H5F_SUPERBLOCK_SIZE(f->shared->sblock);
+    *super_size = (hsize_t)H5F_SUPERBLOCK_SIZE(f->shared->sblock);
 
     /* Set the superblock extension size */
     if(super_ext_size) {
@@ -1643,7 +1660,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__super_size() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__super_ext_write_msg()
  *
@@ -1662,9 +1679,9 @@ H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg,
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
     hbool_t     ext_created = FALSE;   /* Whether superblock extension was created */
     hbool_t     ext_opened = FALSE;    /* Whether superblock extension was opened */
-    H5O_loc_t 	ext_loc; 	/* "Object location" for superblock extension */
-    htri_t 	status;       	/* Indicate whether the message exists or not */
-    herr_t 	ret_value = SUCCEED;         /* Return value */
+    H5O_loc_t     ext_loc;     /* "Object location" for superblock extension */
+    htri_t     status;           /* Indicate whether the message exists or not */
+    herr_t     ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1728,7 +1745,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__super_ext_write_msg() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5F__super_ext_remove_msg
  *
@@ -1744,11 +1761,11 @@ herr_t
 H5F__super_ext_remove_msg(H5F_t *f, unsigned id)
 {
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
-    H5O_loc_t 	ext_loc; 	/* "Object location" for superblock extension */
+    H5O_loc_t     ext_loc;     /* "Object location" for superblock extension */
     hbool_t     ext_opened = FALSE;     /* Whether the superblock extension was opened */
-    int		null_count = 0;	/* # of null messages */
+    int        null_count = 0;    /* # of null messages */
     htri_t      status;         /* Indicate whether the message exists or not */
-    herr_t 	ret_value = SUCCEED;         /* Return value */
+    herr_t     ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1768,7 +1785,7 @@ H5F__super_ext_remove_msg(H5F_t *f, unsigned id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check object header for message")
     else if(status) {
         /* message exists */
-        H5O_hdr_info_t 	hdr_info;       /* Object header info for superblock extension */
+        H5O_hdr_info_t     hdr_info;       /* Object header info for superblock extension */
 
         /* Remove the message */
         if(H5O_msg_remove(&ext_loc, id, H5O_ALL, TRUE) < 0)

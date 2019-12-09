@@ -1506,7 +1506,7 @@ CONTAINS
 !  !$!****s* H5S/
 !  !$!
 !  !$! NAME
-!  !$!		h5sselect_select_f
+!  !$!		h5smodify_select_f
 !  !$!
 !  !$! PURPOSE
 !  !$!	Refine a hyperslab selection with an operation
@@ -1543,7 +1543,7 @@ CONTAINS
 !  !$!
 
 !  ! SOURCE
-!  SUBROUTINE h5sselect_select_f(space1_id, operator, space2_id, &
+!  SUBROUTINE h5smodify_select_f(space1_id, operator, space2_id, &
 !  hdferr)
 !  IMPLICIT NONE
 !  INTEGER(HID_T), INTENT(INOUT) :: space1_id ! Dataspace identifier to
@@ -1563,22 +1563,22 @@ CONTAINS
 !  INTEGER, INTENT(OUT) :: hdferr     ! Error code
 
 !  INTERFACE
-!  INTEGER FUNCTION h5sselect_select_c(space1_id, operator, &
+!  INTEGER FUNCTION h5smodify_select_c(space1_id, operator, &
 !  space2_id)
 !  USE H5GLOBAL
 !  !DEC$IF DEFINED(HDF5F90_WINDOWS)
-!  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5SSELECT_SELECT_C'::h5sselect_select_c
+!  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5SMODIFY_SELECT_C'::h5smodify_select_c
 !  !DEC$ENDIF
 !  INTEGER(HID_T), INTENT(INOUT) :: space1_id
 !  INTEGER(HID_T), INTENT(IN) :: space2_id
 !  INTEGER, INTENT(IN) :: operator
-!  END FUNCTION h5sselect_select_c
+!  END FUNCTION h5smodify_select_c
 !  END INTERFACE
 
-!  hdferr = h5sselect_select_c(space1_id, operator, space2_id)
+!  hdferr = h5smodify_select_c(space1_id, operator, space2_id)
 !  return
 
-!  END SUBROUTINE h5sselect_select_f
+!  END SUBROUTINE h5smodify_select_f
 
 !
 !****s* H5S/h5sget_select_type_f
@@ -1683,25 +1683,32 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  March 26, 2008
 ! SOURCE
-  SUBROUTINE h5sencode_f(obj_id, buf, nalloc, hdferr)
+  SUBROUTINE h5sencode_f(obj_id, buf, nalloc, hdferr, fapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
     CHARACTER(LEN=*), INTENT(OUT) :: buf
     INTEGER(SIZE_T), INTENT(INOUT) :: nalloc
     INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: fapl_id ! File access property list
 !*****
+    INTEGER(HID_T) :: fapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5sencode_c(buf, obj_id, nalloc) BIND(C,NAME='h5sencode_c')
+       INTEGER FUNCTION h5sencode_c(buf, obj_id, nalloc, fapl_id_default) BIND(C,NAME='h5sencode_c')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
          INTEGER(HID_T), INTENT(IN) :: obj_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buf
          INTEGER(SIZE_T), INTENT(INOUT) :: nalloc
+         INTEGER(HID_T) :: fapl_id_default
        END FUNCTION h5sencode_c
     END INTERFACE
 
-    hdferr = h5sencode_c(buf, obj_id, nalloc)
+    fapl_id_default = H5P_DEFAULT_F
+
+    IF(PRESENT(fapl_id)) fapl_id_default = fapl_id
+
+    hdferr = h5sencode_c(buf, obj_id, nalloc, fapl_id_default)
 
   END SUBROUTINE h5sencode_f
 

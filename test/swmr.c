@@ -26,6 +26,7 @@
 
 #include "h5test.h"
 #include "H5Iprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /*
  * This file needs to access private information from the H5F package.
@@ -1168,7 +1169,7 @@ test_metadata_read_retry_info(hid_t in_fapl)
             TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if((f = (H5F_t *)H5I_object(fid)) == NULL)
+    if((f = (H5F_t *)H5VL_object(fid)) == NULL)
         FAIL_STACK_ERROR
 
     /*
@@ -1326,7 +1327,7 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if((f = (H5F_t *)H5I_object(fid)) == NULL)
+    if((f = (H5F_t *)H5VL_object(fid)) == NULL)
         FAIL_STACK_ERROR
 
     /* File's superblock: log retry 1 for 1 time */
@@ -1430,7 +1431,7 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object for fid */
-    if((f = (H5F_t *)H5I_object(fid)) == NULL)
+    if((f = (H5F_t *)H5VL_object(fid)) == NULL)
         FAIL_STACK_ERROR
 
     /* Re-open fid */
@@ -1438,7 +1439,7 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object for fid1 */
-    if((f1 = (H5F_t *)H5I_object(fid1)) == NULL)
+    if((f1 = (H5F_t *)H5VL_object(fid1)) == NULL)
         FAIL_STACK_ERROR
 
     /* For fid: fixed array data block page--log retry 9 for 500 times */
@@ -6288,7 +6289,7 @@ test_bug_refresh(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+    if(NULL == (f = (H5F_t *)H5VL_object(fid)))
         FAIL_STACK_ERROR
 
     /* Create groups: compact to dense storage */
@@ -6499,10 +6500,9 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
             HDexit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
-        while(child_notify != 1) {
+        while(child_notify != 1)
             if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
                 HDexit(EXIT_FAILURE);
-        }
 
         /* Open the file 2 times */
         if((child_fid1 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
@@ -6539,10 +6539,9 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
             HDexit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
-        while(child_notify != 3) {
+        while(child_notify != 3)
             if(HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
                 HDexit(EXIT_FAILURE);
-        }
 
         /* Refresh dataset via did1 */
         if(H5Drefresh(child_did1) < 0)
@@ -6618,8 +6617,8 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
 
     /* Wait for notification from child process */
     while(notify != 2) {
-    if(HDread(in_pdf[0], &notify, sizeof(int)) < 0)
-        FAIL_STACK_ERROR;
+        if(HDread(in_pdf[0], &notify, sizeof(int)) < 0)
+            FAIL_STACK_ERROR;
     }
 
     /* Cork the metadata cache, to prevent the object header from being
@@ -7043,7 +7042,7 @@ main(void)
      */
     driver = HDgetenv("HDF5_DRIVER");
     if(!H5FD__supports_swmr_test(driver)) {
-        printf("This VFD does not support SWMR I/O\n");
+        HDprintf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
     } /* end if */
 
@@ -7133,7 +7132,7 @@ main(void)
     if(nerrors)
         goto error;
 
-    printf("All tests passed.\n");
+    HDprintf("All tests passed.\n");
 
     h5_cleanup(FILENAME, fapl);
 
@@ -7141,7 +7140,7 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    printf("***** %d SWMR TEST%s FAILED! *****\n",
+    HDprintf("***** %d SWMR TEST%s FAILED! *****\n",
         nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 

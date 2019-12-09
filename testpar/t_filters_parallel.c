@@ -32,8 +32,27 @@ char filenames[1][256];
 int nerrors = 0;
 
 size_t cur_filter_idx = 0;
+#define GZIP_INDEX 0
+#define FLETCHER32_INDEX 1
 
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
+
+/*
+ * Used to check if a filter is available before running a test.
+ */
+#define CHECK_CUR_FILTER_AVAIL()                                               \
+{                                                                              \
+    htri_t filter_is_avail;                                                    \
+                                                                               \
+    if (cur_filter_idx == GZIP_INDEX) {                                        \
+        if ((filter_is_avail = H5Zfilter_avail(H5Z_FILTER_DEFLATE)) != TRUE) { \
+            if (MAINPROCESS) {                                                 \
+                HDputs("    - SKIPPED - Deflate filter not available");        \
+            }                                                                  \
+            return;                                                            \
+        }                                                                      \
+    }                                                                          \
+}
 
 static herr_t set_dcpl_filter(hid_t dcpl);
 
@@ -144,9 +163,9 @@ static herr_t
 set_dcpl_filter(hid_t dcpl)
 {
     switch (cur_filter_idx) {
-        case 0:
+        case GZIP_INDEX:
             return H5Pset_deflate(dcpl, DEFAULT_DEFLATE_LEVEL);
-        case 1:
+        case FLETCHER32_INDEX:
             return H5Pset_fletcher32(dcpl);
         default:
             return H5Pset_deflate(dcpl, DEFAULT_DEFLATE_LEVEL);
@@ -178,7 +197,9 @@ test_write_one_chunk_filtered_dataset(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write to one-chunk filtered dataset");
+    if (MAINPROCESS) HDputs("Testing write to one-chunk filtered dataset");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -238,9 +259,9 @@ test_write_one_chunk_filtered_dataset(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -292,7 +313,7 @@ test_write_one_chunk_filtered_dataset(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -333,7 +354,9 @@ test_write_filtered_dataset_no_overlap(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write to unshared filtered chunks");
+    if (MAINPROCESS) HDputs("Testing write to unshared filtered chunks");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -394,9 +417,9 @@ test_write_filtered_dataset_no_overlap(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -450,7 +473,7 @@ test_write_filtered_dataset_no_overlap(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -492,7 +515,9 @@ test_write_filtered_dataset_overlap(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write to shared filtered chunks");
+    if (MAINPROCESS) HDputs("Testing write to shared filtered chunks");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -553,9 +578,9 @@ test_write_filtered_dataset_overlap(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -609,7 +634,7 @@ test_write_filtered_dataset_overlap(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -654,7 +679,9 @@ test_write_filtered_dataset_single_no_selection(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write to filtered chunks with a single process having no selection");
+    if (MAINPROCESS) HDputs("Testing write to filtered chunks with a single process having no selection");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -718,9 +745,9 @@ test_write_filtered_dataset_single_no_selection(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -782,7 +809,7 @@ test_write_filtered_dataset_single_no_selection(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -823,7 +850,9 @@ test_write_filtered_dataset_all_no_selection(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write to filtered chunks with all processes having no selection");
+    if (MAINPROCESS) HDputs("Testing write to filtered chunks with all processes having no selection");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -912,7 +941,7 @@ test_write_filtered_dataset_all_no_selection(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -949,7 +978,9 @@ test_write_filtered_dataset_point_selection(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write to filtered chunks with point selection");
+    if (MAINPROCESS) HDputs("Testing write to filtered chunks with point selection");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1058,7 +1089,7 @@ test_write_filtered_dataset_point_selection(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (coords) HDfree(coords);
@@ -1102,7 +1133,9 @@ test_write_filtered_dataset_interleaved_write(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing interleaved write to filtered chunks");
+    if (MAINPROCESS) HDputs("Testing interleaved write to filtered chunks");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1163,9 +1196,9 @@ test_write_filtered_dataset_interleaved_write(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -1225,7 +1258,7 @@ test_write_filtered_dataset_interleaved_write(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -1265,7 +1298,9 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write to unshared filtered chunks on separate pages in 3D dataset");
+    if (MAINPROCESS) HDputs("Testing write to unshared filtered chunks on separate pages in 3D dataset");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1333,9 +1368,9 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(void)
     start[2] = (hsize_t) mpi_rank;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu, %llu ], stride[ %llu, %llu, %llu ], start[ %llu, %llu, %llu ], block size[ %llu, %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu, %llu ], stride[ %llu, %llu, %llu ], start[ %llu, %llu, %llu ], block size[ %llu, %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1], start[2], block[0], block[1], block[2]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -1385,7 +1420,7 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -1426,7 +1461,9 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(void)
     hid_t       file_id, dset_id, plist_id;
     hid_t       filespace, memspace;
 
-    if (MAINPROCESS) puts("Testing write to unshared filtered chunks on the same pages in 3D dataset");
+    if (MAINPROCESS) HDputs("Testing write to unshared filtered chunks on the same pages in 3D dataset");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1494,9 +1531,9 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(void)
     start[2] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu, %llu ], stride[ %llu, %llu, %llu ], start[ %llu, %llu, %llu ], block size[ %llu, %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu, %llu ], stride[ %llu, %llu, %llu ], start[ %llu, %llu, %llu ], block size[ %llu, %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1], start[2], block[0], block[1], block[2]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -1549,7 +1586,7 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -1590,7 +1627,9 @@ test_write_3d_filtered_dataset_overlap(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write to shared filtered chunks in 3D dataset");
+    if (MAINPROCESS) HDputs("Testing write to shared filtered chunks in 3D dataset");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1658,9 +1697,9 @@ test_write_3d_filtered_dataset_overlap(void)
     start[2] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu, %llu ], stride[ %llu, %llu, %llu ], start[ %llu, %llu, %llu ], block size[ %llu, %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu, %llu ], stride[ %llu, %llu, %llu ], start[ %llu, %llu, %llu ], block size[ %llu, %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1], start[2], block[0], block[1], block[2]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -1722,7 +1761,7 @@ test_write_3d_filtered_dataset_overlap(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -1762,7 +1801,9 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(void)
     hid_t                file_id = -1, dset_id = -1, plist_id = -1, memtype = -1;
     hid_t                filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write to unshared filtered chunks in Compound Datatype dataset without Datatype conversion");
+    if (MAINPROCESS) HDputs("Testing write to unshared filtered chunks in Compound Datatype dataset without Datatype conversion");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1834,9 +1875,9 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(void)
     start[1] = ((hsize_t) mpi_rank * WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NCOLS);
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -1902,7 +1943,7 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(void)
     VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -1943,7 +1984,9 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(void)
     hid_t                file_id, dset_id, plist_id, memtype;
     hid_t                filespace, memspace;
 
-    if (MAINPROCESS) puts("Testing write to shared filtered chunks in Compound Datatype dataset without Datatype conversion");
+    if (MAINPROCESS) HDputs("Testing write to shared filtered chunks in Compound Datatype dataset without Datatype conversion");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -2015,9 +2058,9 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -2086,7 +2129,7 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(void)
     VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -2132,7 +2175,9 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(void)
     hid_t                file_id = -1, dset_id = -1, plist_id = -1, filetype = -1, memtype = -1;
     hid_t                filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write to unshared filtered chunks in Compound Datatype dataset with Datatype conversion");
+    if (MAINPROCESS) HDputs("Testing write to unshared filtered chunks in Compound Datatype dataset with Datatype conversion");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -2215,9 +2260,9 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(void)
     start[1] = ((hsize_t) mpi_rank * WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NCOLS);
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -2269,7 +2314,7 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(void)
     VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -2316,7 +2361,9 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(void)
     hid_t                file_id, dset_id, plist_id, filetype, memtype;
     hid_t                filespace, memspace;
 
-    if (MAINPROCESS) puts("Testing write to shared filtered chunks in Compound Datatype dataset with Datatype conversion");
+    if (MAINPROCESS) HDputs("Testing write to shared filtered chunks in Compound Datatype dataset with Datatype conversion");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -2399,9 +2446,9 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -2453,7 +2500,7 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(void)
     VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -2503,6 +2550,10 @@ test_read_one_chunk_filtered_dataset(void)
     int        *recvcounts = NULL;
     int        *displs = NULL;
 
+    if (MAINPROCESS) HDputs("Testing read from one-chunk filtered dataset");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_ONE_CHUNK_FILTERED_DATASET_NROWS;
     dataset_dims[1] = (hsize_t) READ_ONE_CHUNK_FILTERED_DATASET_NCOLS;
 
@@ -2517,8 +2568,6 @@ test_read_one_chunk_filtered_dataset(void)
                            + ((C_DATATYPE) i / (READ_ONE_CHUNK_FILTERED_DATASET_CH_NROWS / mpi_size * READ_ONE_CHUNK_FILTERED_DATASET_CH_NCOLS));
 
     if (MAINPROCESS) {
-        puts("Testing read from one-chunk filtered dataset");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -2606,9 +2655,9 @@ test_read_one_chunk_filtered_dataset(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -2648,7 +2697,7 @@ test_read_one_chunk_filtered_dataset(void)
     VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int) flat_dims[0], C_DATATYPE_MPI, global_buf, recvcounts, displs, C_DATATYPE_MPI, comm)),
             "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -2698,6 +2747,10 @@ test_read_filtered_dataset_no_overlap(void)
     int        *recvcounts = NULL;
     int        *displs = NULL;
 
+    if (MAINPROCESS) HDputs("Testing read from unshared filtered chunks");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_UNSHARED_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t) READ_UNSHARED_FILTERED_CHUNKS_NCOLS;
 
@@ -2714,8 +2767,6 @@ test_read_filtered_dataset_no_overlap(void)
                                       );
 
     if (MAINPROCESS) {
-        puts("Testing read from unshared filtered chunks");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -2803,9 +2854,9 @@ test_read_filtered_dataset_no_overlap(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -2845,7 +2896,7 @@ test_read_filtered_dataset_no_overlap(void)
     VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int) flat_dims[0], C_DATATYPE_MPI, global_buf, recvcounts, displs, C_DATATYPE_MPI, comm)),
             "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -2896,6 +2947,10 @@ test_read_filtered_dataset_overlap(void)
     int        *recvcounts = NULL;
     int        *displs = NULL;
 
+    if (MAINPROCESS) HDputs("Testing read from shared filtered chunks");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_SHARED_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t) READ_SHARED_FILTERED_CHUNKS_NCOLS;
 
@@ -2913,8 +2968,6 @@ test_read_filtered_dataset_overlap(void)
                                       );
 
     if (MAINPROCESS) {
-        puts("Testing read from shared filtered chunks");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -3002,9 +3055,9 @@ test_read_filtered_dataset_overlap(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -3059,7 +3112,7 @@ test_read_filtered_dataset_overlap(void)
         }
     }
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -3111,6 +3164,10 @@ test_read_filtered_dataset_single_no_selection(void)
     int        *recvcounts = NULL;
     int        *displs = NULL;
 
+    if (MAINPROCESS) HDputs("Testing read from filtered chunks with a single process having no selection");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t) READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NCOLS;
 
@@ -3133,8 +3190,6 @@ test_read_filtered_dataset_single_no_selection(void)
             0, segment_length * sizeof(*correct_buf));
 
     if (MAINPROCESS) {
-        puts("Testing read from filtered chunks with a single process having no selection");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -3225,9 +3280,9 @@ test_read_filtered_dataset_single_no_selection(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     if (mpi_rank == READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC)
@@ -3275,7 +3330,7 @@ test_read_filtered_dataset_single_no_selection(void)
         VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int) flat_dims[0], C_DATATYPE_MPI, global_buf, recvcounts, displs, C_DATATYPE_MPI, comm)),
                 "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -3319,6 +3374,10 @@ test_read_filtered_dataset_all_no_selection(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
+    if (MAINPROCESS) HDputs("Testing read from filtered chunks with all processes having no selection");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_ALL_NO_SELECTION_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t) READ_ALL_NO_SELECTION_FILTERED_CHUNKS_NCOLS;
 
@@ -3329,8 +3388,6 @@ test_read_filtered_dataset_all_no_selection(void)
     VRFY((NULL != correct_buf), "HDcalloc succeeded");
 
     if (MAINPROCESS) {
-        puts("Testing read from filtered chunks with all processes having no selection");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -3460,6 +3517,10 @@ test_read_filtered_dataset_point_selection(void)
     int        *recvcounts = NULL;
     int        *displs = NULL;
 
+    if (MAINPROCESS) HDputs("Testing read from filtered chunks with point selection");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_POINT_SELECTION_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t) READ_POINT_SELECTION_FILTERED_CHUNKS_NCOLS;
 
@@ -3477,8 +3538,6 @@ test_read_filtered_dataset_point_selection(void)
                                       );
 
     if (MAINPROCESS) {
-        puts("Testing read from filtered chunks with point selection");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -3615,7 +3674,7 @@ test_read_filtered_dataset_point_selection(void)
         }
     }
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -3623,6 +3682,8 @@ test_read_filtered_dataset_point_selection(void)
     if (global_buf) HDfree(global_buf);
     if (read_buf) HDfree(read_buf);
     if (correct_buf) HDfree(correct_buf);
+
+    HDfree(coords);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -3669,6 +3730,10 @@ test_read_filtered_dataset_interleaved_read(void)
     int        *recvcounts = NULL;
     int        *displs = NULL;
 
+    if (MAINPROCESS) HDputs("Testing interleaved read from filtered chunks");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) INTERLEAVED_READ_FILTERED_DATASET_NROWS;
     dataset_dims[1] = (hsize_t) INTERLEAVED_READ_FILTERED_DATASET_NCOLS;
 
@@ -3692,8 +3757,6 @@ test_read_filtered_dataset_interleaved_read(void)
                              );
 
     if (MAINPROCESS) {
-        puts("Testing interleaved read from filtered chunks");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -3781,9 +3844,9 @@ test_read_filtered_dataset_interleaved_read(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -3838,7 +3901,7 @@ test_read_filtered_dataset_interleaved_read(void)
         }
     }
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -3889,6 +3952,10 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(void)
     hid_t         file_id = -1, dset_id = -1, plist_id = -1;
     hid_t         filespace = -1, memspace = -1;
 
+    if (MAINPROCESS) HDputs("Testing read from unshared filtered chunks on separate pages in 3D dataset");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_NROWS;
     dataset_dims[1] = (hsize_t) READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_NCOLS;
     dataset_dims[2] = (hsize_t) READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DEPTH;
@@ -3903,8 +3970,6 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(void)
         correct_buf[i] = (C_DATATYPE) ((i % (hsize_t) mpi_size) + (i / (hsize_t) mpi_size));
 
     if (MAINPROCESS) {
-        puts("Testing read from unshared filtered chunks on separate pages in 3D dataset");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -3998,9 +4063,9 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(void)
     start[2] = (hsize_t) mpi_rank;
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -4043,7 +4108,7 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(void)
     VRFY((MPI_SUCCESS == MPI_Allgather(read_buf, (int) flat_dims[0], C_DATATYPE_MPI, global_buf, 1, resized_vector_type, comm)),
             "MPI_Allgather succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     VRFY((MPI_SUCCESS == MPI_Type_free(&vector_type)), "MPI_Type_free succeeded");
@@ -4096,6 +4161,10 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(void)
     int        *recvcounts = NULL;
     int        *displs = NULL;
 
+    if (MAINPROCESS) HDputs("Testing read from unshared filtered chunks on the same pages in 3D dataset");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_NROWS;
     dataset_dims[1] = (hsize_t) READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_NCOLS;
     dataset_dims[2] = (hsize_t) READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DEPTH;
@@ -4113,8 +4182,6 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(void)
                                       );
 
     if (MAINPROCESS) {
-        puts("Testing read from unshared filtered chunks on the same pages in 3D dataset");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -4208,9 +4275,9 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(void)
     start[2] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -4250,7 +4317,7 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(void)
     VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int) flat_dims[0], C_DATATYPE_MPI, global_buf, recvcounts, displs, C_DATATYPE_MPI, comm)),
             "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -4302,6 +4369,10 @@ test_read_3d_filtered_dataset_overlap(void)
     hid_t         file_id = -1, dset_id = -1, plist_id = -1;
     hid_t         filespace = -1, memspace = -1;
 
+    if (MAINPROCESS) HDputs("Testing read from shared filtered chunks in 3D dataset");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_SHARED_FILTERED_CHUNKS_3D_NROWS;
     dataset_dims[1] = (hsize_t) READ_SHARED_FILTERED_CHUNKS_3D_NCOLS;
     dataset_dims[2] = (hsize_t) READ_SHARED_FILTERED_CHUNKS_3D_DEPTH;
@@ -4328,8 +4399,6 @@ test_read_3d_filtered_dataset_overlap(void)
                              );
 
     if (MAINPROCESS) {
-        puts("Testing read from shared filtered chunks in 3D dataset");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -4423,9 +4492,9 @@ test_read_3d_filtered_dataset_overlap(void)
     start[2] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -4473,7 +4542,7 @@ test_read_3d_filtered_dataset_overlap(void)
     VRFY((MPI_SUCCESS == MPI_Allgather(read_buf, (int) flat_dims[0], C_DATATYPE_MPI, global_buf, 1, resized_vector_type, comm)),
             "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     VRFY((MPI_SUCCESS == MPI_Type_free(&vector_type)), "MPI_Type_free succeeded");
@@ -4525,6 +4594,10 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(void)
     int                 *recvcounts = NULL;
     int                 *displs = NULL;
 
+    if (MAINPROCESS) HDputs("Testing read from unshared filtered chunks in Compound Datatype dataset without Datatype conversion");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_NROWS;
     dataset_dims[1] = (hsize_t) READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_NCOLS;
 
@@ -4563,8 +4636,6 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(void)
             "Datatype insertion succeeded");
 
     if (MAINPROCESS) {
-        puts("Testing read from unshared filtered chunks in Compound Datatype dataset without Datatype conversion");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -4652,9 +4723,9 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(void)
     start[1] = ((hsize_t) mpi_rank * READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NCOLS);
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -4694,7 +4765,7 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(void)
     VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int) (flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)), MPI_BYTE, global_buf, recvcounts, displs, MPI_BYTE, comm)),
             "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -4746,6 +4817,10 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(void)
     int                 *recvcounts = NULL;
     int                 *displs = NULL;
 
+    if (MAINPROCESS) HDputs("Testing read from shared filtered chunks in Compound Datatype dataset without Datatype conversion");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_NROWS;
     dataset_dims[1] = (hsize_t) READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_NCOLS;
 
@@ -4787,8 +4862,6 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(void)
             "Datatype insertion succeeded");
 
     if (MAINPROCESS) {
-        puts("Testing read from shared filtered chunks in Compound Datatype dataset without Datatype conversion");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -4876,9 +4949,9 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -4918,7 +4991,7 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(void)
     VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int) (flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)), MPI_BYTE, global_buf, recvcounts, displs, MPI_BYTE, comm)),
             "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -4970,6 +5043,10 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(void)
     int                 *recvcounts = NULL;
     int                 *displs = NULL;
 
+    if (MAINPROCESS) HDputs("Testing read from unshared filtered chunks in Compound Datatype dataset with Datatype conversion");
+
+    CHECK_CUR_FILTER_AVAIL();
+
     dataset_dims[0] = (hsize_t) READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_NROWS;
     dataset_dims[1] = (hsize_t) READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_NCOLS;
 
@@ -5019,8 +5096,6 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(void)
             "Datatype insertion succeeded");
 
     if (MAINPROCESS) {
-        puts("Testing read from unshared filtered chunks in Compound Datatype dataset with Datatype conversion");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -5108,9 +5183,9 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(void)
     start[1] = ((hsize_t) mpi_rank * READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NCOLS);
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -5150,7 +5225,7 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(void)
     VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int) (flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)), MPI_BYTE, global_buf, recvcounts, displs, MPI_BYTE, comm)),
             "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -5202,6 +5277,10 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(void)
     hid_t                filespace, memspace;
     int                 *recvcounts = NULL;
     int                 *displs = NULL;
+
+    if (MAINPROCESS) HDputs("Testing read from shared filtered chunks in Compound Datatype dataset with Datatype conversion");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     dataset_dims[0] = (hsize_t) READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_NROWS;
     dataset_dims[1] = (hsize_t) READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_NCOLS;
@@ -5255,8 +5334,6 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(void)
             "Datatype insertion succeeded");
 
     if (MAINPROCESS) {
-        puts("Testing read from shared filtered chunks in Compound Datatype dataset with Datatype conversion");
-
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
 
@@ -5344,9 +5421,9 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is reading with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -5386,7 +5463,7 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(void)
     VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int) (flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)), MPI_BYTE, global_buf, recvcounts, displs, MPI_BYTE, comm)),
             "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (displs) HDfree(displs);
@@ -5427,7 +5504,9 @@ test_write_serial_read_parallel(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1;
 
-    if (MAINPROCESS) puts("Testing write file serially; read file in parallel");
+    if (MAINPROCESS) HDputs("Testing write file serially; read file in parallel");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     dataset_dims[0] = (hsize_t) WRITE_SERIAL_READ_PARALLEL_NROWS;
     dataset_dims[1] = (hsize_t) WRITE_SERIAL_READ_PARALLEL_NCOLS;
@@ -5527,7 +5606,7 @@ test_write_serial_read_parallel(void)
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
             "Dataset read succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
             "Data verification succeeded");
 
     if (correct_buf) HDfree(correct_buf);
@@ -5568,7 +5647,9 @@ test_write_parallel_read_serial(void)
     hid_t       file_id = -1, dset_id = -1, plist_id = -1;
     hid_t       filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing write file in parallel; read serially");
+    if (MAINPROCESS) HDputs("Testing write file in parallel; read serially");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -5636,9 +5717,9 @@ test_write_parallel_read_serial(void)
     offset[2] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu, %llu ], stride[ %llu, %llu, %llu ], offset[ %llu, %llu, %llu ], block size[ %llu, %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu, %llu ], stride[ %llu, %llu, %llu ], offset[ %llu, %llu, %llu ], block size[ %llu, %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], offset[0], offset[1], offset[2], block[0], block[1], block[2]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -5707,11 +5788,14 @@ test_write_parallel_read_serial(void)
         VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) >= 0),
                 "Dataset read succeeded");
 
-        VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)),
+        VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)),
                 "Data verification succeeded");
 
         VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+        HDfree(correct_buf);
+        HDfree(read_buf);
     }
 
     return;
@@ -5729,7 +5813,7 @@ test_write_parallel_read_serial(void)
 static void
 test_shrinking_growing_chunks(void)
 {
-    float   *data = NULL;
+    double  *data = NULL;
     hsize_t  dataset_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
     hsize_t  chunk_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
     hsize_t  sel_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
@@ -5741,7 +5825,9 @@ test_shrinking_growing_chunks(void)
     hid_t    file_id = -1, dset_id = -1, plist_id = -1;
     hid_t    filespace = -1, memspace = -1;
 
-    if (MAINPROCESS) puts("Testing continually shrinking/growing chunks");
+    if (MAINPROCESS) HDputs("Testing continually shrinking/growing chunks");
+
+    CHECK_CUR_FILTER_AVAIL();
 
     /* Set up file access property list with parallel I/O access */
     plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -5803,9 +5889,9 @@ test_shrinking_growing_chunks(void)
     start[1] = 0;
 
     if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
+        HDprintf("Process %d is writing with count[ %llu, %llu ], stride[ %llu, %llu ], start[ %llu, %llu ], block size[ %llu, %llu ]\n",
                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+        HDfflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -5822,9 +5908,9 @@ test_shrinking_growing_chunks(void)
     VRFY((H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) >= 0),
             "Set DXPL MPIO succeeded");
 
-    data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(double);
 
-    data = (float *) HDcalloc(1, data_size);
+    data = (double *) HDcalloc(1, data_size);
     VRFY((NULL != data), "HDcalloc succeeded");
 
     for (i = 0; i < SHRINKING_GROWING_CHUNKS_NLOOPS; i++) {
@@ -5868,8 +5954,8 @@ main(int argc, char** argv)
 
     if (mpi_size <= 0) {
         if (MAINPROCESS) {
-            printf("The Parallel Filters tests require at least 1 rank.\n");
-            printf("Quitting...\n");
+            HDprintf("The Parallel Filters tests require at least 1 rank.\n");
+            HDprintf("Quitting...\n");
         }
 
         MPI_Abort(MPI_COMM_WORLD, 1);
@@ -5877,16 +5963,16 @@ main(int argc, char** argv)
 
     if (H5dont_atexit() < 0) {
         if (MAINPROCESS) {
-            printf("Failed to turn off atexit processing. Continue.\n");
+            HDprintf("Failed to turn off atexit processing. Continue.\n");
         }
     }
 
     H5open();
 
     if (MAINPROCESS) {
-        printf("==========================\n");
-        printf("Parallel Filters tests\n");
-        printf("==========================\n\n");
+        HDprintf("==========================\n");
+        HDprintf("Parallel Filters tests\n");
+        HDprintf("==========================\n\n");
     }
 
     if (VERBOSE_MED) h5_show_hostname();
@@ -5942,9 +6028,9 @@ main(int argc, char** argv)
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
     if (MAINPROCESS) {
-        printf("\n=================================================================\n");
-        printf("Re-running Parallel Filters tests with Fletcher32 checksum filter\n");
-        printf("=================================================================\n\n");
+        HDprintf("\n=================================================================\n");
+        HDprintf("Re-running Parallel Filters tests with Fletcher32 checksum filter\n");
+        HDprintf("=================================================================\n\n");
     }
 
     for (i = 0; i < ARRAY_SIZE(tests); i++) {
@@ -5959,12 +6045,12 @@ main(int argc, char** argv)
 
     if (nerrors) goto exit;
 
-    if (MAINPROCESS) puts("All Parallel Filters tests passed\n");
+    if (MAINPROCESS) HDputs("All Parallel Filters tests passed\n");
 
 exit:
     if (nerrors)
         if (MAINPROCESS)
-            printf("*** %d TEST ERROR%s OCCURRED ***\n", nerrors,
+            HDprintf("*** %d TEST ERROR%s OCCURRED ***\n", nerrors,
                     nerrors > 1 ? "S" : "");
 
     ALARM_OFF;

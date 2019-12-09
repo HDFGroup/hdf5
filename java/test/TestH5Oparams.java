@@ -124,7 +124,7 @@ public class TestH5Oparams {
         H5.H5Oset_comment(-1, "Bogus");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Oget_comment_invalid() throws Throwable {
         H5.H5Oget_comment(-1);
     }
@@ -139,7 +139,7 @@ public class TestH5Oparams {
         H5.H5Oset_comment_by_name(-1, null, null, -1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Oget_comment_by_name_invalid() throws Throwable {
         H5.H5Oget_comment_by_name(-1, "Bogus", -1);
     }
@@ -157,6 +157,21 @@ public class TestH5Oparams {
     @Test(expected = HDF5LibraryException.class)
     public void testH5Orefresh_invalid() throws Throwable {
         H5.H5Orefresh(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Odisable_mdc_flushes() throws Throwable {
+        H5.H5Odisable_mdc_flushes(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oenable_mdc_flushes() throws Throwable {
+        H5.H5Oenable_mdc_flushes(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oare_mdc_flushes_disabled() throws Throwable {
+        H5.H5Oare_mdc_flushes_disabled(-1);
     }
 
 }

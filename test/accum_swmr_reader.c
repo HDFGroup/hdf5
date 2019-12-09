@@ -20,9 +20,15 @@
 
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* Filename: this is the same as the define in accum.c used by test_swmr_write_big() */
-#define SWMR_FILENAME "accum_swmr_big.h5"
+const char *FILENAME[] = {
+    "accum",
+    "accum_swmr_big",
+    NULL
+};
+
 
 
 /*-------------------------------------------------------------------------
@@ -46,6 +52,7 @@ main(void)
     hid_t fid = -1;	        /* File ID */
     hid_t fapl = -1;        /* file access property list ID */
     H5F_t *f = NULL;	    /* File pointer */
+    char  filename[1024];
     unsigned u;		        /* Local index variable */
     uint8_t rbuf[1024];	    /* Buffer for reading */
     uint8_t buf[1024];	    /* Buffer for holding the expected data */
@@ -67,32 +74,33 @@ main(void)
 
     if((fapl = h5_fileaccess()) < 0)
         FAIL_STACK_ERROR
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
     /* Open the file with SWMR_READ */
-    if((fid = H5Fopen(SWMR_FILENAME, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-	    FAIL_STACK_ERROR
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
+        FAIL_STACK_ERROR
 
     /* Push API context */
     if(H5CX_push() < 0) FAIL_STACK_ERROR
     api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
-    if(NULL == (f = (H5F_t *)H5I_object(fid))) 
-	    FAIL_STACK_ERROR
+    if(NULL == (f = (H5F_t *)H5VL_object(fid))) 
+        FAIL_STACK_ERROR
 
     /* Should read in [1024, 2024] with buf data */
     if(H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, rbuf) < 0)
-	    FAIL_STACK_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify the data read is correct */
     if(HDmemcmp(buf, rbuf, (size_t)1024) != 0) 
-	    TEST_ERROR;
+        TEST_ERROR;
 
     /* CLose the file */
     if(H5Pclose(fapl) < 0)
-	    FAIL_STACK_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-	    FAIL_STACK_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Pop API context */
     if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR

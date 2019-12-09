@@ -30,23 +30,27 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"          /* Generic Functions                    */
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5Dprivate.h"         /* Datasets                             */
-#include "H5Eprivate.h"         /* Error handling                       */
-#include "H5Fprivate.h"         /* Files                                */
-#include "H5FDprivate.h"        /* File drivers                         */
-#include "H5Iprivate.h"         /* IDs                                  */
-#include "H5MMprivate.h"        /* Memory Management                    */
-#include "H5Ppkg.h"             /* Property lists                       */
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Fprivate.h"         /* Files                                    */
+#include "H5FDprivate.h"        /* File drivers                             */
+#include "H5Iprivate.h"         /* IDs                                      */
+#include "H5MMprivate.h"        /* Memory Management                        */
+#include "H5Ppkg.h"             /* Property lists                           */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VMprivate.h"        /* Vector Functions                         */
 
-/* Includes needed to set as default file driver */
-#include "H5FDsec2.h"           /* Posix unbuffered I/O    file driver  */
-#include "H5FDstdio.h"          /* Standard C buffered I/O              */
+/* Includes needed to set default file driver */
+#include "H5FDsec2.h"           /* POSIX unbuffered I/O                     */
+#include "H5FDstdio.h"          /* Standard C buffered I/O                  */
 #ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Win32 I/O                            */
+#include "H5FDwindows.h"        /* Win32 I/O                                */
 #endif
 #include "H5FDvfd_swmr.h"       /* Posix unbuffered I/O    file driver  */
+
+/* Includes needed to set default VOL connector */
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 
 /****************/
@@ -108,7 +112,7 @@
 #define H5F_ACS_GARBG_COLCT_REF_DEF             0
 #define H5F_ACS_GARBG_COLCT_REF_ENC             H5P__encode_unsigned
 #define H5F_ACS_GARBG_COLCT_REF_DEC             H5P__decode_unsigned
-/* Definition for file driver ID & info*/
+/* Definition for file driver ID & info */
 #define H5F_ACS_FILE_DRV_SIZE                   sizeof(H5FD_driver_prop_t)
 #define H5F_ACS_FILE_DRV_DEF                    {H5_DEFAULT_VFD, NULL}
 #define H5F_ACS_FILE_DRV_CRT                    H5P__facc_file_driver_create
@@ -132,10 +136,11 @@
  * property only used by h5repart */
 #define H5F_ACS_FAMILY_NEWSIZE_SIZE             sizeof(hsize_t)
 #define H5F_ACS_FAMILY_NEWSIZE_DEF              0
-/* Definition for whether to convert family to sec2 driver. It's private
- * property only used by h5repart */
-#define H5F_ACS_FAMILY_TO_SEC2_SIZE             sizeof(hbool_t)
-#define H5F_ACS_FAMILY_TO_SEC2_DEF              FALSE
+/* Definition for whether to convert family to a single-file driver.
+ * It's a private property only used by h5repart.
+ */
+#define H5F_ACS_FAMILY_TO_SINGLE_SIZE           sizeof(hbool_t)
+#define H5F_ACS_FAMILY_TO_SINGLE_DEF            FALSE
 /* Definition for data type in multi file driver */
 #define H5F_ACS_MULTI_TYPE_SIZE                 sizeof(H5FD_mem_t)
 #define H5F_ACS_MULTI_TYPE_DEF                  H5FD_MEM_DEFAULT
@@ -173,16 +178,6 @@
 #define H5F_ACS_FILE_IMAGE_INFO_COPY            H5P__facc_file_image_info_copy
 #define H5F_ACS_FILE_IMAGE_INFO_CMP             H5P__facc_file_image_info_cmp
 #define H5F_ACS_FILE_IMAGE_INFO_CLOSE           H5P__facc_file_image_info_close
-/* Definition of core VFD write tracking flag */
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE   sizeof(hbool_t)
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF    FALSE
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_ENC    H5P__encode_hbool_t
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEC    H5P__decode_hbool_t
-/* Definition of core VFD write tracking page size */
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE      sizeof(size_t)
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF       524288
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC       H5P__encode_size_t
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC       H5P__decode_size_t
 /* Definition for # of metadata read attempts */
 #define H5F_ACS_METADATA_READ_ATTEMPTS_SIZE    sizeof(unsigned)
 #define H5F_ACS_METADATA_READ_ATTEMPTS_DEF         0
@@ -237,6 +232,24 @@
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEF    FALSE
 #define H5F_ACS_COLL_MD_WRITE_FLAG_ENC    H5P__encode_hbool_t
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEC    H5P__decode_hbool_t
+/* Definition for the file's MPI communicator */
+#define H5F_ACS_MPI_PARAMS_COMM_SIZE            sizeof(MPI_Comm)
+#define H5F_ACS_MPI_PARAMS_COMM_DEF             MPI_COMM_NULL
+#define H5F_ACS_MPI_PARAMS_COMM_SET             H5P__facc_mpi_comm_set
+#define H5F_ACS_MPI_PARAMS_COMM_GET             H5P__facc_mpi_comm_get
+#define H5F_ACS_MPI_PARAMS_COMM_DEL             H5P__facc_mpi_comm_del
+#define H5F_ACS_MPI_PARAMS_COMM_COPY            H5P__facc_mpi_comm_copy
+#define H5F_ACS_MPI_PARAMS_COMM_CMP             H5P__facc_mpi_comm_cmp
+#define H5F_ACS_MPI_PARAMS_COMM_CLOSE           H5P__facc_mpi_comm_close
+/* Definition for the file's MPI info */
+#define H5F_ACS_MPI_PARAMS_INFO_SIZE            sizeof(MPI_Info)
+#define H5F_ACS_MPI_PARAMS_INFO_DEF             MPI_INFO_NULL
+#define H5F_ACS_MPI_PARAMS_INFO_SET             H5P__facc_mpi_info_set
+#define H5F_ACS_MPI_PARAMS_INFO_GET             H5P__facc_mpi_info_get
+#define H5F_ACS_MPI_PARAMS_INFO_DEL             H5P__facc_mpi_info_del
+#define H5F_ACS_MPI_PARAMS_INFO_COPY            H5P__facc_mpi_info_copy
+#define H5F_ACS_MPI_PARAMS_INFO_CMP             H5P__facc_mpi_info_cmp
+#define H5F_ACS_MPI_PARAMS_INFO_CLOSE           H5P__facc_mpi_info_close
 #endif /* H5_HAVE_PARALLEL */
 /* Definitions for the initial metadata cache image configuration */
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_SIZE sizeof(H5AC_cache_image_config_t)
@@ -259,6 +272,16 @@
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF            0
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC            H5P__encode_unsigned
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC            H5P__decode_unsigned
+/* Definition for file VOL connector properties (ID, etc.) */
+#define H5F_ACS_VOL_CONN_SIZE                   sizeof(H5VL_connector_prop_t)
+#define H5F_ACS_VOL_CONN_DEF                    {H5_DEFAULT_VOL, NULL}
+#define H5F_ACS_VOL_CONN_CRT                    H5P__facc_vol_create
+#define H5F_ACS_VOL_CONN_SET                    H5P__facc_vol_set
+#define H5F_ACS_VOL_CONN_GET                    H5P__facc_vol_get
+#define H5F_ACS_VOL_CONN_DEL                    H5P__facc_vol_del
+#define H5F_ACS_VOL_CONN_COPY                   H5P__facc_vol_copy
+#define H5F_ACS_VOL_CONN_CMP                    H5P__facc_vol_cmp
+#define H5F_ACS_VOL_CONN_CLOSE                  H5P__facc_vol_close
 
 /* Definitions for the VFD SWMR configuration */
 #define H5F_ACS_VFD_SWMR_CONFIG_SIZE   sizeof(H5F_vfd_swmr_config_t)
@@ -328,6 +351,33 @@ static int H5P__facc_cache_image_config_cmp(const void *_config1, const void *_c
 static herr_t H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_cache_image_config_dec(const void **_pp, void *_value);
 
+/* VOL connector callbacks */
+static herr_t H5P__facc_vol_create(const char *name, size_t size, void *value);
+static herr_t H5P__facc_vol_set(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_vol_get(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_vol_del(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_vol_copy(const char *name, size_t size, void *value);
+static int H5P__facc_vol_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__facc_vol_close(const char *name, size_t size, void *value);
+
+#ifdef H5_HAVE_PARALLEL
+/* MPI communicator callbacks */
+static herr_t H5P__facc_mpi_comm_set(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_mpi_comm_get(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_mpi_comm_del(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_mpi_comm_copy(const char *name, size_t size, void *value);
+static int    H5P__facc_mpi_comm_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__facc_mpi_comm_close(const char *name, size_t size, void *value);
+
+/* MPI info callbacks */
+static herr_t H5P__facc_mpi_info_set(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_mpi_info_get(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_mpi_info_del(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_mpi_info_copy(const char *name, size_t size, void *value);
+static int    H5P__facc_mpi_info_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__facc_mpi_info_close(const char *name, size_t size, void *value);
+#endif /* H5_HAVE_PARALLEL */
+
 
 /*********************/
 /* Package Variables */
@@ -376,7 +426,7 @@ static const unsigned H5F_def_gc_ref_g = H5F_ACS_GARBG_COLCT_REF_DEF;           
 static const H5F_close_degree_t H5F_def_close_degree_g = H5F_CLOSE_DEGREE_DEF;     /* Default file close degree */
 static const hsize_t H5F_def_family_offset_g = H5F_ACS_FAMILY_OFFSET_DEF;          /* Default offset for family VFD */
 static const hsize_t H5F_def_family_newsize_g = H5F_ACS_FAMILY_NEWSIZE_DEF;        /* Default size of new files for family VFD */
-static const hbool_t H5F_def_family_to_sec2_g = H5F_ACS_FAMILY_TO_SEC2_DEF;        /* Default ?? for family VFD */
+static const hbool_t H5F_def_family_to_single_g = H5F_ACS_FAMILY_TO_SINGLE_DEF;    /* Default ?? for family VFD */
 static const H5FD_mem_t H5F_def_mem_type_g = H5F_ACS_MULTI_TYPE_DEF;               /* Default file space type for multi VFD */
 
 static const H5F_libver_t H5F_def_libver_low_bound_g = H5F_ACS_LIBVER_LOW_BOUND_DEF;    /* Default setting for "low" bound of format version */
@@ -385,8 +435,6 @@ static const H5F_libver_t H5F_def_libver_high_bound_g = H5F_ACS_LIBVER_HIGH_BOUN
 static const hbool_t H5F_def_want_posix_fd_g = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
 static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
 static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMAGE_INFO_DEF;                 /* Default file image info and callbacks */
-static const hbool_t H5F_def_core_write_tracking_flag_g = H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF;              /* Default setting for core VFD write tracking */
-static const size_t H5F_def_core_write_tracking_page_size_g = H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF;     /* Default core VFD write tracking page size */
 static const unsigned H5F_def_metadata_read_attempts_g = H5F_ACS_METADATA_READ_ATTEMPTS_DEF;  /* Default setting for the # of metadata read attempts */
 static const H5F_object_flush_t H5F_def_object_flush_cb_g = H5F_ACS_OBJECT_FLUSH_CB_DEF;      /* Default setting for object flush callback */
 static const hbool_t H5F_def_clear_status_flags_g = H5F_ACS_CLEAR_STATUS_FLAGS_DEF;           /* Default to clear the superblock status_flags */
@@ -400,6 +448,8 @@ static const hbool_t H5F_def_evict_on_close_flag_g = H5F_ACS_EVICT_ON_CLOSE_FLAG
 #ifdef H5_HAVE_PARALLEL
 static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
 static const hbool_t H5F_def_coll_md_write_flag_g = H5F_ACS_COLL_MD_WRITE_FLAG_DEF;  /* Default setting for the collective metedata write flag */
+static const MPI_Comm H5F_def_mpi_params_comm_g = H5F_ACS_MPI_PARAMS_COMM_DEF;  /* Default MPI communicator */
+static const MPI_Info H5F_def_mpi_params_info_g = H5F_ACS_MPI_PARAMS_INFO_DEF;  /* Default MPI info struct */
 #endif /* H5_HAVE_PARALLEL */
 static const H5AC_cache_image_config_t H5F_def_mdc_initCacheImageCfg_g = H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEF;  /* Default metadata cache image settings */
 static const size_t H5F_def_page_buf_size_g = H5F_ACS_PAGE_BUFFER_SIZE_DEF;      /* Default page buffer size */
@@ -424,6 +474,7 @@ static herr_t
 H5P__facc_reg_prop(H5P_genclass_t *pclass)
 {
     const H5FD_driver_prop_t def_driver_prop    = H5F_ACS_FILE_DRV_DEF;     /* Default VFL driver ID & info (initialized from a variable) */
+    const H5VL_connector_prop_t def_vol_prop    = H5F_ACS_VOL_CONN_DEF;     /* Default VOL connector ID & info (initialized from a variable) */
     herr_t ret_value = SUCCEED;                                             /* Return value */
 
     FUNC_ENTER_STATIC
@@ -513,9 +564,9 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the private property of whether convert family to sec2 driver. It's used by h5repart only. */
+    /* Register the private property of whether convert family to a single-file driver. It's used by h5repart only. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P__register_real(pclass, H5F_ACS_FAMILY_TO_SEC2_NAME, H5F_ACS_FAMILY_TO_SEC2_SIZE, &H5F_def_family_to_sec2_g,
+    if(H5P__register_real(pclass, H5F_ACS_FAMILY_TO_SINGLE_NAME, H5F_ACS_FAMILY_TO_SINGLE_SIZE, &H5F_def_family_to_single_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -555,18 +606,6 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
     if(H5P__register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE, &H5F_def_file_image_info_g,
             NULL, H5F_ACS_FILE_IMAGE_INFO_SET, H5F_ACS_FILE_IMAGE_INFO_GET, NULL, NULL,
             H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, H5F_ACS_FILE_IMAGE_INFO_CMP, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the core VFD backing store write tracking flag */
-    if(H5P__register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE, &H5F_def_core_write_tracking_flag_g,
-            NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_FLAG_ENC, H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEC,
-            NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the size of the core VFD backing store page size */
-    if(H5P__register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE, &H5F_def_core_write_tracking_page_size_g,
-            NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC,
-            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the # of read attempts */
@@ -630,6 +669,19 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, H5F_ACS_COLL_MD_WRITE_FLAG_ENC, H5F_ACS_COLL_MD_WRITE_FLAG_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the MPI communicator */
+    if(H5P__register_real(pclass, H5F_ACS_MPI_PARAMS_COMM_NAME, H5F_ACS_MPI_PARAMS_COMM_SIZE, &H5F_def_mpi_params_comm_g,
+            NULL, H5F_ACS_MPI_PARAMS_COMM_SET, H5F_ACS_MPI_PARAMS_COMM_GET, NULL, NULL,
+            H5F_ACS_MPI_PARAMS_COMM_DEL, H5F_ACS_MPI_PARAMS_COMM_COPY, H5F_ACS_MPI_PARAMS_COMM_CMP, H5F_ACS_MPI_PARAMS_COMM_CLOSE) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the MPI info struct */
+    if(H5P__register_real(pclass, H5F_ACS_MPI_PARAMS_INFO_NAME, H5F_ACS_MPI_PARAMS_INFO_SIZE, &H5F_def_mpi_params_info_g,
+            NULL, H5F_ACS_MPI_PARAMS_INFO_SET, H5F_ACS_MPI_PARAMS_INFO_GET, NULL, NULL,
+            H5F_ACS_MPI_PARAMS_INFO_DEL, H5F_ACS_MPI_PARAMS_INFO_COPY, H5F_ACS_MPI_PARAMS_INFO_CMP, H5F_ACS_MPI_PARAMS_INFO_CLOSE) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 #endif /* H5_HAVE_PARALLEL */
 
     /* Register the initial metadata cache image configuration */
@@ -643,11 +695,13 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_SIZE_ENC, H5F_ACS_PAGE_BUFFER_SIZE_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
     /* Register the size of the page buffer minimum metadata size */
     if(H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_SIZE, &H5F_def_page_buf_min_meta_perc_g,
             NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_ENC, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
     /* Register the size of the page buffer minimum raw data size */
     if(H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE, &H5F_def_page_buf_min_raw_perc_g,
             NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC,
@@ -658,6 +712,13 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
     if(H5P__register_real(pclass, H5F_ACS_VFD_SWMR_CONFIG_NAME, H5F_ACS_VFD_SWMR_CONFIG_SIZE, &H5F_def_vfd_swmr_config_g,
             NULL, NULL, NULL, H5F_ACS_VFD_SWMR_CONFIG_ENC, H5F_ACS_VFD_SWMR_CONFIG_DEC,
             NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the file VOL connector ID & info */
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if(H5P__register_real(pclass, H5F_ACS_VOL_CONN_NAME, H5F_ACS_VOL_CONN_SIZE, &def_vol_prop,
+            H5F_ACS_VOL_CONN_CRT, H5F_ACS_VOL_CONN_SET, H5F_ACS_VOL_CONN_GET, NULL, NULL,
+            H5F_ACS_VOL_CONN_DEL, H5F_ACS_VOL_CONN_COPY, H5F_ACS_VOL_CONN_CMP, H5F_ACS_VOL_CONN_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -1072,7 +1133,7 @@ H5P__file_driver_copy(void *value)
                 else if(driver->fapl_size > 0) {
                     if(NULL == (new_pl = H5MM_malloc(driver->fapl_size)))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "driver info allocation failed")
-                    HDmemcpy(new_pl, info->driver_info, driver->fapl_size);
+                    H5MM_memcpy(new_pl, info->driver_info, driver->fapl_size);
                 } /* end else-if */
                 else
                     HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "no way to copy driver info")
@@ -2605,7 +2666,7 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
         } /* end if */
     else
-            HDmemcpy(image_info.buffer, buf_ptr, buf_len);
+            H5MM_memcpy(image_info.buffer, buf_ptr, buf_len);
     } /* end if */
     else
         image_info.buffer = NULL;
@@ -2699,7 +2760,7 @@ H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
             } /* end if */
         else
-                HDmemcpy(copy_ptr, image_info.buffer, image_info.size);
+                H5MM_memcpy(copy_ptr, image_info.buffer, image_info.size);
         } /* end if */
 
         *buf_ptr_ptr = copy_ptr;
@@ -2902,7 +2963,7 @@ H5P__file_image_info_copy(void *value)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
             } /* end if */
         else
-                HDmemcpy(info->buffer, old_buffer, info->size);
+                H5MM_memcpy(info->buffer, old_buffer, info->size);
         } /* end if */
 
         /* Copy udata if it exists */
@@ -3097,7 +3158,7 @@ H5P__facc_cache_image_config_dec(const void **_pp, void *_value)
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Set property to default value */
-    HDmemcpy(config, &H5F_def_mdc_initCacheImageCfg_g, sizeof(H5AC_cache_image_config_t));
+    H5MM_memcpy(config, &H5F_def_mdc_initCacheImageCfg_g, sizeof(H5AC_cache_image_config_t));
 
     /* Decode type sizes */
     enc_size = *(*pp)++;
@@ -3488,7 +3549,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
         H5_ENCODE_UNSIGNED(*pp, config->close_trace_file);
 
-        HDmemcpy(*pp, (const uint8_t *)(config->trace_file_name), (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + 1));
+        H5MM_memcpy(*pp, (const uint8_t *)(config->trace_file_name), (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + 1));
         *pp += H5AC__MAX_TRACE_FILE_NAME_LEN + 1;
 
         H5_ENCODE_UNSIGNED(*pp, config->evictions_enabled);
@@ -3623,7 +3684,7 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Set property to default value */
-    HDmemcpy(config, &H5F_def_mdc_initCacheCfg_g, sizeof(H5AC_cache_config_t));
+    H5MM_memcpy(config, &H5F_def_mdc_initCacheCfg_g, sizeof(H5AC_cache_config_t));
 
     /* Decode type sizes */
     enc_size = *(*pp)++;
@@ -4045,88 +4106,6 @@ H5P__facc_vfd_swmr_config_dec(const void **_pp, void *_value)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_vfd_swmr_config_dec() */
 
-/*-------------------------------------------------------------------------
- * Function:    H5Pset_core_write_tracking
- *
- * Purpose:    Enables/disables core VFD write tracking and page
- *              aggregation size.
- *
- * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:  Dana Robinson
- *              Tuesday, April 8, 2014
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
-{
-    H5P_genplist_t *plist;        /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ibz", plist_id, is_enabled, page_size);
-
-    /* The page size cannot be zero */
-    if(page_size == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page_size cannot be zero")
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* Set values */
-    if(H5P_set(plist, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, &is_enabled) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set core VFD write tracking flag")
-    if(H5P_set(plist, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, &page_size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set core VFD write tracking page size")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_core_write_tracking() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5Pget_core_write_tracking
- *
- * Purpose:    Gets information about core VFD write tracking and page
- *              aggregation size.
- *
- * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:  Dana Robinson
- *              Tuesday, April 8, 2014
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled, size_t *page_size)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*b*z", plist_id, is_enabled, page_size);
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* Get values */
-    if(is_enabled) {
-        if(H5P_get(plist, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, is_enabled) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core VFD write tracking flag")
-    } /* end if */
-
-    if(page_size) {
-        if(H5P_get(plist, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, page_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core VFD write tracking page size")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_core_write_tracking() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_metadata_read_attempts
@@ -4389,7 +4368,7 @@ H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location,
 
     /* Copy log location to output buffer */
     if(location_ptr && location)
-        HDmemcpy(location, location_ptr, *location_size);
+        H5MM_memcpy(location, location_ptr, *location_size);
 
     /* Get location size, including terminating NULL */
     if(location_size) {
@@ -4444,7 +4423,7 @@ H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
 
         /* encode the prefix */
         if(NULL != log_location) {
-            HDmemcpy(*(char **)pp, log_location, len);
+            H5MM_memcpy(*(char **)pp, log_location, len);
             *pp += len;
         } /* end if */
     } /* end if */
@@ -4730,7 +4709,7 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
 
     if(NULL != *pp) {
         /* Encode the value */
-        HDmemcpy(*pp, coll_md_read_flag, sizeof(H5P_coll_md_read_flag_t));
+        H5MM_memcpy(*pp, coll_md_read_flag, sizeof(H5P_coll_md_read_flag_t));
         *pp += sizeof(H5P_coll_md_read_flag_t);
     } /* end if */
 
@@ -4932,6 +4911,468 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Pget_mpi_params
+ *
+ * Purpose:     Gets the MPI communicator and info stored in the fapl.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Dana Robinson
+ *              August 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_mpi_params(hid_t plist_id, MPI_Comm *comm, MPI_Info *info)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*Mc*Mi", plist_id, comm, info);
+
+    /* Make sure that the property list is a fapl */
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get the properties */
+    if(H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, comm) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI communicator from plist")
+    if(H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI info from plist")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_mpi_params() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_mpi_params
+ *
+ * Purpose:     Set the MPI communicator and info
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Dana Robinson
+ *              August 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_mpi_params(hid_t plist_id, MPI_Comm comm, MPI_Info info)
+{
+    H5P_genplist_t  *plist;                 /* Property list pointer */
+    herr_t          ret_value = SUCCEED;    /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iMcMi", plist_id, comm, info);
+
+    /* Make sure the MPI communicator is valid */
+    if(MPI_COMM_NULL == comm)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "not a valid argument")
+
+    /* Make sure that the property list is a fapl */
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI communicator")
+    if(H5P_set(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI info object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_mpi_params() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_mpi_comm_set
+ *
+ * Purpose:     Copies an MPI comminicator property when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_mpi_comm_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    MPI_Comm    *comm = (MPI_Comm *)value;
+    MPI_Comm    comm_tmp = MPI_COMM_NULL;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Make a copy of the MPI communicator */
+    if(H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI communicator")
+
+done:
+    /* Copy the communicator to the in/out parameter */
+    if(ret_value != SUCCEED)
+        *comm = MPI_COMM_NULL;
+    else
+        *comm = comm_tmp;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_comm_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_mpi_comm_get
+ *
+ * Purpose:     Copies an MPI comminicator property when it's retrieved from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_mpi_comm_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    MPI_Comm    *comm = (MPI_Comm *)value;
+    MPI_Comm    comm_tmp = MPI_COMM_NULL;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Make a copy of the MPI communicator */
+    if(H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI communicator")
+
+done:
+    /* Copy the communicator to the out parameter */
+    if(ret_value != SUCCEED)
+        *comm = MPI_COMM_NULL;
+    else
+        *comm = comm_tmp;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_comm_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_mpi_comm_del
+ *
+ * Purpose:     Frees an MPI communicator property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_mpi_comm_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    MPI_Comm    *comm = (MPI_Comm *)value;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Free the MPI communicator */
+    if(H5_mpi_comm_free(comm) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI communicator")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_comm_del() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_mpi_comm_copy
+ *
+ * Purpose:     Copy callback for the MPI communicator property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_mpi_comm_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    MPI_Comm    *comm = (MPI_Comm *)value;
+    MPI_Comm    comm_tmp = MPI_COMM_NULL;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Make a copy of the MPI communicator */
+    if(H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI communicator")
+
+done:
+    /* Copy the communicator to the in/out parameter */
+    if(ret_value != SUCCEED)
+        *comm = MPI_COMM_NULL;
+    else
+        *comm = comm_tmp;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_comm_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_mpi_comm_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the MPI
+ *                 communicator property in the file access property list
+ *                 is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                 VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                 VALUE2 are equal.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__facc_mpi_comm_cmp(const void *_comm1, const void *_comm2, size_t H5_ATTR_UNUSED size)
+{
+    const MPI_Comm  *comm1 = (const MPI_Comm *)_comm1;
+    const MPI_Comm  *comm2 = (const MPI_Comm *)_comm2;
+    int         ret_value = 0;
+
+    FUNC_ENTER_STATIC
+
+    /* Compare the MPI communicators */
+    if(H5_mpi_comm_cmp(*comm1, *comm2, &ret_value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, 0, "unable to compare MPI communicator")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_comm_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_mpi_comm_close
+ *
+ * Purpose:     Close callback for the MPI communicator property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_mpi_comm_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    MPI_Comm    *comm = (MPI_Comm *)value;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Free the MPI communicator */
+    if(H5_mpi_comm_free(comm) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI communicator")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_comm_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_mpi_info_set
+ *
+ * Purpose:     Copies an MPI info object property when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_mpi_info_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    MPI_Info    *info = (MPI_Info *)value;
+    MPI_Info    info_tmp = MPI_INFO_NULL;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Make a copy of the MPI info object */
+    if(H5_mpi_info_dup(*info, &info_tmp) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI info object")
+
+done:
+    /* Copy the info object to the in/out parameter */
+    if(ret_value != SUCCEED)
+        *info = MPI_INFO_NULL;
+    else
+        *info = info_tmp;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_info_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_mpi_info_get
+ *
+ * Purpose:     Copies an MPI comminicator property when it's retrieved from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_mpi_info_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    MPI_Info    *info = (MPI_Info *)value;
+    MPI_Info    info_tmp = MPI_INFO_NULL;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Make a copy of the MPI communicator */
+    if(H5_mpi_info_dup(*info, &info_tmp) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI info object")
+
+done:
+    /* Copy the info object to the out parameter */
+    if(ret_value != SUCCEED)
+        *info = MPI_INFO_NULL;
+    else
+        *info = info_tmp;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_info_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_mpi_info_del
+ *
+ * Purpose:     Frees an MPI info object property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_mpi_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    MPI_Info    *info = (MPI_Info *)value;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Free the MPI info object */
+    if(H5_mpi_info_free(info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI info object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_info_del() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_mpi_info_copy
+ *
+ * Purpose:     Copy callback for the MPI info object property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_mpi_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    MPI_Info    *info = (MPI_Info *)value;
+    MPI_Info    info_tmp = MPI_INFO_NULL;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Make a copy of the MPI info object */
+    if(H5_mpi_info_dup(*info, &info_tmp) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI info object")
+
+done:
+    /* Copy the info object to the in/out parameter */
+    if(ret_value != SUCCEED)
+        *info = MPI_INFO_NULL;
+    else
+        *info = info_tmp;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_info_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_mpi_info_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the MPI
+ *                 info object property in the file access property list
+ *                 is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                 VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                 VALUE2 are equal.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__facc_mpi_info_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED size)
+{
+    const MPI_Info  *info1 = (const MPI_Info *)_info1;
+    const MPI_Info  *info2 = (const MPI_Info *)_info2;
+    int         ret_value = 0;
+
+    FUNC_ENTER_STATIC
+
+    /* Compare the MPI info objects */
+    if(H5_mpi_info_cmp(*info1, *info2, &ret_value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, 0, "unable to compare MPI info objects")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_info_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_mpi_info_close
+ *
+ * Purpose:     Close callback for the MPI info object property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_mpi_info_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    MPI_Info    *info = (MPI_Info *)value;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Free the MPI info object */
+    if(H5_mpi_info_free(info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI info object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_mpi_info_close() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Pget_coll_metadata_write
  *
  * Purpose:    Gets information about collective metadata write mode.
@@ -5058,6 +5499,47 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_page_buffer_size() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_set_vol
+ *
+ * Purpose:     Set the VOL connector for a file access property list
+ *              (PLIST_ID).  The VOL properties will
+ *              be copied into the property list and the reference count on
+ *              the VOL will be incremented.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
+{
+    herr_t  ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == H5I_object_verify(vol_id, H5I_VOL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        H5VL_connector_prop_t vol_prop;         /* Property for VOL ID & info */
+
+        /* Prepare the VOL connector property */
+        vol_prop.connector_id = vol_id;
+        vol_prop.connector_info = (void *)vol_info;
+
+        /* Set the connector ID & info property */
+        if(H5P_set(plist, H5F_ACS_VOL_CONN_NAME, &vol_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL connector ID & info")
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_set_vol() */
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_vfd_swmr_config
  *
@@ -5096,10 +5578,6 @@ H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
     if(config_ptr->version != H5F__CURR_VFD_SWMR_CONFIG_VERSION)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "Unknown config version")
 
-    /* This field must be >= 0 */
-    if(config_ptr->tick_len < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "tick_len must be greater than 0")
-
     /* This field must be at least 3 */
     if(config_ptr->max_lag < 3 )
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "max_lag must be at least 3")
@@ -5133,6 +5611,125 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_vfd_swmr_config() */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_reset_vol_class
+ *
+ * Purpose:     Change the VOL connector for a file access property class.
+ *
+ * Note:	The VOL property will be copied into the property list and
+ *		the reference count on the previous VOL will _NOT_ be decremented.
+ *		The reference count on the new VOL will _NOT_ be incremented.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              March 8, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_reset_vol_class(const H5P_genclass_t *pclass, const H5VL_connector_prop_t *vol_prop)
+{
+    H5VL_connector_prop_t old_vol_prop;         /* Previous VOL connector property */
+    herr_t  ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get the connector ID & info property */
+    if(H5P__class_get(pclass, H5F_ACS_VOL_CONN_NAME, &old_vol_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector ID & info")
+
+    /* Set the new connector ID & info property */
+    if(H5P__class_set(pclass, H5F_ACS_VOL_CONN_NAME, vol_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL connector ID & info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_set_vol_class() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_vol
+ *
+ * Purpose:     Set the file VOL connector (VOL_ID) for a file access
+ *              property list (PLIST_ID)
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ii*x", plist_id, new_vol_id, new_vol_info);
+
+    /* Check arguments */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if(NULL == H5I_object_verify(new_vol_id, H5I_VOL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file VOL ID")
+
+    /* Set the VOL */
+    if(H5P_set_vol(plist, new_vol_id, new_vol_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_vol() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_vol_id
+ *
+ * Purpose:     Returns the ID of the current VOL connector.
+ *              This ID should be closed with H5VLclose().
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_vol_id(hid_t plist_id, hid_t *vol_id)
+{
+    H5P_genplist_t  *plist;             /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*i", plist_id, vol_id);
+
+    /* Get property list for ID */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Get the current VOL ID */
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
+
+        /* Get the connector property */
+        if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector info")
+
+        /* Increment the VOL ID's ref count */
+        if(H5I_inc_ref(connector_prop.connector_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector ID")
+
+        /* Set the connector ID to return */
+        *vol_id = connector_prop.connector_id;
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_vol_id() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_vfd_swmr_config
@@ -5169,3 +5766,285 @@ H5Pget_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_vfd_swmr_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_vol_info
+ *
+ * Purpose:     Returns a copy of the VOL info for a connector.
+ *              This information should be freed with H5VLfree_connector_info.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_vol_info(hid_t plist_id, void **vol_info)
+{
+    H5P_genplist_t  *plist;             /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i**x", plist_id, vol_info);
+
+    /* Get property list for ID */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Get the current VOL info */
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        void *new_connector_info = NULL;   /* Copy of connector info */
+        H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
+
+        /* Get the connector property */
+        if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector property")
+
+        /* Copy connector info, if it exists */
+        if(connector_prop.connector_info) {
+            H5VL_class_t *connector;           /* Pointer to connector */
+
+            /* Retrieve the connector for the ID */
+            if(NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
+                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+            /* Allocate and copy connector info */
+            if(H5VL_copy_connector_info(connector, &new_connector_info, connector_prop.connector_info) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "connector info copy failed")
+        } /* end if */
+
+        /* Set the connector info */
+        *vol_info = new_connector_info;
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_vol_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_create
+ *
+ connectorose:     Create callback for the VOL connector ID & info property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_create(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Make copy of the VOL connector */
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_set
+ *
+ * Purpose:     Copies a VOL connector property when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of VOL connector ID & info */
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_get
+ *
+ * Purpose:     Copies a VOL connector property when it's retrieved from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of VOL connector */
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_del
+ *
+ * Purpose:     Frees memory used to store the VOL connector ID & info property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Free the VOL connector ID & info */
+    if(H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_del() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_copy
+ *
+ * Purpose:     Copy callback for the VOL connector ID & info property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Make copy of VOL connector */
+    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_vol_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the VOL connector
+ *                 ID & info property in the file access property list
+ *                 is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                 VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                 VALUE2 are equal.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED size)
+{
+    const H5VL_connector_prop_t *info1 = (const H5VL_connector_prop_t *)_info1; /* Create local aliases for values */
+    const H5VL_connector_prop_t *info2 = (const H5VL_connector_prop_t *)_info2;
+    H5VL_class_t *cls1, *cls2;  /* connector class for each property */
+    int cmp_value = 0;          /* Value from comparison */
+    herr_t status;              /* Status from info comparison */
+    int ret_value = 0;          /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(info1);
+    HDassert(info2);
+    HDassert(size == sizeof(H5VL_connector_prop_t));
+
+    /* Compare connectors */
+    if(NULL == (cls1 = (H5VL_class_t *)H5I_object(info1->connector_id)))
+        HGOTO_DONE(-1)
+    if(NULL == (cls2 = (H5VL_class_t *)H5I_object(info2->connector_id)))
+        HGOTO_DONE(1)
+    status = H5VL_cmp_connector_cls(&cmp_value, cls1, cls2);
+    HDassert(status >= 0);
+    if(cmp_value != 0)
+        HGOTO_DONE(cmp_value);
+
+    /* At this point, we should be able to assume that we are dealing with
+     * the same connector class struct (or a copies of the same class struct)
+     */
+
+
+    /* Use one of the classes (cls1) info comparison routines to compare the
+     * info objects
+     */
+    HDassert(cls1->info_cls.cmp == cls2->info_cls.cmp);
+    status = H5VL_cmp_connector_info(cls1, &cmp_value, info1->connector_info, info2->connector_info);
+    HDassert(status >= 0);
+
+    /* Set return value */
+    ret_value = cmp_value;
+    
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vol_close
+ *
+ * Purpose:     Close callback for the VOL connector ID & info property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vol_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Free the VOL connector */
+    if(H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_vol_close() */
+

@@ -35,7 +35,7 @@
  */
 static void catch_signal(int H5_ATTR_UNUSED signo)
 {
-    HDexit(1);
+    HDexit(EXIT_FAILURE);
 } /* catch_signal() */
 
 

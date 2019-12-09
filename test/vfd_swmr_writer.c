@@ -29,6 +29,8 @@
 /* Headers */
 /***********/
 
+#include <unistd.h> /* getopt(3) */
+
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
@@ -72,7 +74,7 @@ static void usage(void);
  */
 static hid_t
 open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
-    unsigned random_seed, hbool_t old)
+    unsigned random_seed, hbool_t old H5_ATTR_UNUSED)
 {
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fapl;         /* File access property list */
@@ -123,7 +125,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
         return -1;
 
      /* Allocate memory for the configuration structure */
-     if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+     if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         return -1;
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
@@ -223,18 +225,13 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file,
         hid_t file_sid;         /* Dataset's space ID */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset();
+        symbol = choose_dataset(NULL, NULL);
 
         /* Set the record's ID (equal to its position) */
         record.rec_id = symbol->nrecords;
 
         /* Get the coordinate to write */
         start[1] = symbol->nrecords;
-
-        /* Cork the metadata cache, to prevent the object header from being
-         * flushed before the data has been written */
-        if(H5Odisable_mdc_flushes(symbol->dsid) < 0)
-            return -1;
 
         /* Extend the dataset's dataspace to hold the new record */
         symbol->nrecords++;
@@ -252,10 +249,6 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file,
 
         /* Write record to the dataset */
         if(H5Dwrite(symbol->dsid, tid, mem_sid, file_sid, H5P_DEFAULT, &record) < 0)
-            return -1;
-
-        /* Uncork the metadata cache */
-        if(H5Oenable_mdc_flushes(symbol->dsid) < 0)
             return -1;
 
         /* Close the dataset's dataspace */
@@ -322,8 +315,10 @@ usage(void)
     HDexit(1);
 }
 
-int main(int argc, const char *argv[])
+int
+main(int argc, char * const *argv)
 {
+    sigset_t oldset;
     hid_t fid;                  /* File ID for file opened */
     long nrecords = 0;          /* # of records to append */
     long flush_count = 10000;   /* # of records to write between flushing file */
@@ -331,64 +326,55 @@ int main(int argc, const char *argv[])
     FILE *verbose_file = NULL;  /* File handle for verbose output */
     hbool_t old = FALSE;        /* Whether to use non-latest-format when opening file */
     hbool_t use_seed = FALSE;   /* Set to TRUE if a seed was set on the command line */
+    hbool_t wait_for_signal = TRUE;
     unsigned random_seed = 0;   /* Random # seed */
-    unsigned u;                 /* Local index variable */
-    int temp;
+    int ch, temp;
 
+    block_signals(&oldset);
+
+    while ((ch = getopt(argc, argv, "Wf:qr:o")) != -1) {
+        switch(ch) {
+        /* # of records to write between flushing file */
+        case 'f':
+            flush_count = HDatol(optarg);
+            if(flush_count < 0)
+                usage();
+            break;
+
+        /* Be quiet */
+        case 'q':
+            verbose = FALSE;
+            break;
+        
+        /* Random # seed */
+        case 'r':
+            use_seed = TRUE;
+            temp = HDatoi(optarg);
+            random_seed = (unsigned)temp;
+            break;
+
+        case 'W':
+            wait_for_signal = FALSE;
+            break;
+
+        /* Use non-latest-format when opening file */
+        case 'o':
+            old = TRUE;
+            break;
+
+        default:
+            usage();
+            break;
+        }
+    }
+    argv += optind;
+    argc -= optind;
     /* Parse command line options */
-    if(argc < 2)
+    if(argc < 1)
         usage();
-    if(argc > 1) {
-        u = 1;
-        while(u < (unsigned)argc) {
-            if(argv[u][0] == '-') {
-                switch(argv[u][1]) {
-                    /* # of records to write between flushing file */
-                    case 'f':
-                        flush_count = HDatol(argv[u + 1]);
-                        if(flush_count < 0)
-                            usage();
-                        u += 2;
-                        break;
-
-                    /* Be quiet */
-                    case 'q':
-                        verbose = FALSE;
-                        u++;
-                        break;
-                    
-                    /* Random # seed */
-                    case 'r':
-                        use_seed = TRUE;
-                        temp = HDatoi(argv[u + 1]);
-                        random_seed = (unsigned)temp;
-                        u += 2;
-                        break;
-
-                    /* Use non-latest-format when opening file */
-                    case 'o':
-                        old = TRUE;
-                        u++;
-                        break;
-
-                    default:
-                        usage();
-                        break;
-                } /* end switch */
-            } /* end if */
-            else {
-                /* Get the number of records to append */
-                nrecords = HDatol(argv[u]);
-                if(nrecords <= 0)
-                    usage();
-
-                u++;
-            } /* end else */
-        } /* end while */
-    } /* end if */
-    if(nrecords <= 0)
-        usage();
-    if(flush_count >= nrecords)
+    /* Get the number of records to append */
+    nrecords = HDatol(argv[0]);
+    if(nrecords <= 0 || flush_count >= nrecords)
         usage();
 
     /* Set the random seed */
@@ -461,6 +447,11 @@ int main(int argc, const char *argv[])
         HDfprintf(stderr, "WRITER: Error releasing symbols!\n");
         HDexit(1);
     } /* end if */
+
+    if (wait_for_signal)
+        await_signal(fid);
+
+    restore_signals(&oldset);
 
     /* Emit informational message */
     if(verbose)

@@ -9,7 +9,7 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *S
+!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -41,6 +41,14 @@ MODULE H5P
   USE, INTRINSIC :: ISO_C_BINDING
   USE H5GLOBAL
   USE H5fortkit
+
+  PRIVATE h5pset_fapl_multi_l, h5pset_fapl_multi_s
+  PRIVATE h5pset_fill_value_integer, h5pset_fill_value_char, h5pset_fill_value_ptr
+  PRIVATE h5pget_fill_value_integer, h5pget_fill_value_char, h5pget_fill_value_ptr
+  PRIVATE h5pset_integer, h5pset_char, h5pset_ptr
+  PRIVATE h5pget_integer, h5pget_char, h5pget_ptr
+  PRIVATE h5pregister_integer, h5pregister_ptr
+  PRIVATE h5pinsert_integer, h5pinsert_char, h5pinsert_ptr
 
   INTERFACE h5pset_fapl_multi_f
      MODULE PROCEDURE h5pset_fapl_multi_l
@@ -7921,7 +7929,7 @@ SUBROUTINE h5pget_virtual_filename_f(dcpl_id, index, name, hdferr, name_len)
   
   INTERFACE
      INTEGER(SIZE_T) FUNCTION h5pget_virtual_filename(dcpl_id, index, name, size) BIND(C, NAME='H5Pget_virtual_filename')
-       IMPORT :: HID_T, SIZE_T, C_PTR, C_CHAR
+       IMPORT :: HID_T, SIZE_T, C_PTR
          IMPLICIT NONE
        INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
        INTEGER(SIZE_T), INTENT(IN), VALUE :: index
@@ -7989,7 +7997,7 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
   
   INTERFACE
      INTEGER(SIZE_T) FUNCTION h5pget_virtual_dsetname(dcpl_id, index, name, size) BIND(C, NAME='H5Pget_virtual_dsetname')
-       IMPORT :: HID_T, SIZE_T, C_PTR, C_CHAR
+       IMPORT :: HID_T, SIZE_T, C_PTR
          IMPLICIT NONE
        INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
        INTEGER(SIZE_T), INTENT(IN), VALUE :: index
@@ -8010,13 +8018,193 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
      ELSE
         CALL HD5c2fstring(name,c_name,LEN(name))
      ENDIF
-
   ENDIF
 
 END SUBROUTINE h5pget_virtual_dsetname_f
 
+!****s* H5P (F03)/h5pget_dset_no_attrs_hint_f_F03
+!
+! NAME
+!  h5pget_dset_no_attrs_hint_f
+!
+! PURPOSE
+!  Gets the value of the "minimize dataset headers" value which creates
+!  smaller dataset object headers when its set and no attributes are present.
+!
+! INPUTS
+!  dcpl_id    - Target dataset creation property list identifier.
+!
+! OUTPUTS
+!  minimize   - Value of the setting.
+!  hdferr     - error code:
+!                 0 on success and -1 on failure
+!
+! AUTHOR
+!  Dana Robinson
+!  January 2019
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5pget_dset_no_attrs_hint_f(dcpl_id, minimize, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)              :: dcpl_id
+    LOGICAL        , INTENT(OUT)             :: minimize
+    INTEGER        , INTENT(OUT)             :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_minimize
+
+    INTERFACE
+       INTEGER FUNCTION h5pget_dset_no_attrs_hint_c(dcpl_id, minimize) BIND(C, NAME='H5Pget_dset_no_attrs_hint')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: dcpl_id
+         LOGICAL(C_BOOL), INTENT(OUT) :: minimize
+       END FUNCTION h5pget_dset_no_attrs_hint_c
+    END INTERFACE
+
+    hdferr = INT(h5pget_dset_no_attrs_hint_c(dcpl_id, c_minimize))
+
+    ! Transfer value of C C_BOOL type to Fortran LOGICAL 
+    minimize = c_minimize
+
+   END SUBROUTINE h5pget_dset_no_attrs_hint_f
+
+!****s* H5P (F03)/h5pset_dset_no_attrs_hint_f_F03
+!
+! NAME
+!  h5pset_dset_no_attrs_hint_f
+!
+! PURPOSE
+!  Sets the value of the "minimize dataset headers" value which creates
+!  smaller dataset object headers when its set and no attributes are present.
+!
+! INPUTS
+!  dcpl_id    - Target dataset creation property list identifier.
+!  minimize   - Value of the setting.
+!
+! OUTPUTS
+!  hdferr     - error code:
+!                 0 on success and -1 on failure
+!
+! AUTHOR
+!  Dana Robinson
+!  January 2019
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5pset_dset_no_attrs_hint_f(dcpl_id, minimize, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)              :: dcpl_id
+    LOGICAL        , INTENT(IN)              :: minimize
+    INTEGER        , INTENT(OUT)             :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_minimize
+
+    INTERFACE
+       INTEGER FUNCTION h5pset_dset_no_attrs_hint_c(dcpl_id, minimize) BIND(C, NAME='H5Pset_dset_no_attrs_hint')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: dcpl_id
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: minimize
+       END FUNCTION h5pset_dset_no_attrs_hint_c
+    END INTERFACE
+
+    ! Transfer value of Fortran LOGICAL to C C_BOOL type
+    c_minimize = minimize
+
+    hdferr = INT(h5pset_dset_no_attrs_hint_c(dcpl_id, c_minimize))
+
+  END SUBROUTINE h5pset_dset_no_attrs_hint_f
+
+!****s* H5P/H5Pset_vol_f
+!
+! NAME
+!  H5Pset_vol_f
+!
+! PURPOSE
+!  Set the file VOL connector (VOL_ID) for a file access
+!  property list (PLIST_ID)
+! INPUTS
+!  plist_id     - access property list identifier.
+!  new_vol_id   - VOL connector id.
+!
+! OUTPUTS
+!  hdferr       - error code:
+!                  0 on success and -1 on failure
+!
+! OPTIONAL
+!  new_vol_info - VOL connector info.
+!
+! AUTHOR
+!  M.S. Breitenfeld
+!  May 2019
+!
+! Fortran Interface:
+  SUBROUTINE h5pset_vol_f(plist_id, new_vol_id, hdferr, new_vol_info)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)   :: plist_id
+    INTEGER(HID_T) , INTENT(IN)   :: new_vol_id
+    INTEGER        , INTENT(OUT)  :: hdferr
+    TYPE(C_PTR)    , OPTIONAL     :: new_vol_info
+!*****
+
+    TYPE(C_PTR) :: new_vol_info_default
+
+    INTERFACE
+       INTEGER FUNCTION h5pset_vol(plist_id, new_vol_id, new_vol_info) BIND(C, NAME='H5Pset_vol')
+         IMPORT :: HID_T, C_PTR
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: plist_id
+         INTEGER(HID_T), INTENT(IN), VALUE :: new_vol_id
+         TYPE(C_PTR)   , INTENT(IN), VALUE :: new_vol_info
+       END FUNCTION h5pset_vol
+    END INTERFACE
+
+    new_vol_info_default = C_NULL_PTR
+    IF(PRESENT(new_vol_info)) new_vol_info_default=new_vol_info
+
+    hdferr = INT(h5pset_vol(plist_id, new_vol_id, new_vol_info_default))
+
+  END SUBROUTINE h5pset_vol_f
+
+!****s* H5P/H5Pget_vol_id_f
+!
+! NAME
+!  H5Pget_vol_id_f
+!
+! PURPOSE
+!  Get the file VOL connector (VOL_ID) for a file access
+!  property list (PLIST_ID)
+! INPUTS
+!  plist_id - access property list identifier.
+!
+! OUTPUTS
+!  vol_id   - VOL connector id.
+!  hdferr   - error code:
+!               0 on success and -1 on failure
+!
+! AUTHOR
+!  M.S. Breitenfeld
+!  May 2019
+!
+! Fortran Interface:
+  SUBROUTINE h5pget_vol_id_f(plist_id, vol_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)   :: plist_id
+    INTEGER(HID_T) , INTENT(OUT)  :: vol_id
+    INTEGER        , INTENT(OUT)  :: hdferr
+!*****
+
+    INTERFACE
+       INTEGER FUNCTION h5pget_vol_id(plist_id, vol_id) BIND(C, NAME='H5Pget_vol_id')
+         IMPORT :: HID_T, C_PTR
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: plist_id
+         INTEGER(HID_T), INTENT(OUT) :: vol_id
+       END FUNCTION h5pget_vol_id
+    END INTERFACE
+
+    hdferr = INT(h5pget_vol_id(plist_id, vol_id))
+
+  END SUBROUTINE h5pget_vol_id_f
 
 END MODULE H5P
-
-
 

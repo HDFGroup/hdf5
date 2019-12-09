@@ -168,7 +168,7 @@ H5HG__create(H5F_t *f, size_t size)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
 
     /* Initialize the header */
-    HDmemcpy(heap->chunk, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    H5MM_memcpy(heap->chunk, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     p = heap->chunk + H5_SIZEOF_MAGIC;
     *p++ = H5HG_VERSION;
     *p++ = 0; /*reserved*/
@@ -553,7 +553,7 @@ H5HG_insert(H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
 
     /* Copy data into the heap */
     if(size > 0) {
-        HDmemcpy(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f), obj, size);
+        H5MM_memcpy(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f), obj, size);
 #ifdef OLD_WAY
 /* Don't bother zeroing out the rest of the info in the heap -QAK */
         HDmemset(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f) + size, 0,
@@ -618,7 +618,7 @@ H5HG_read(H5F_t *f, H5HG_t *hobj, void *object/*out*/, size_t *buf_size)
     /* Allocate a buffer for the object read in, if the user didn't give one */
     if(!object && NULL == (object = H5MM_malloc(size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemcpy(object, p, size);
+    H5MM_memcpy(object, p, size);
 
     /*
      * Advance the heap in the CWFS list. We might have done this already
@@ -785,7 +785,14 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
 
     HDassert(hobj->idx < heap->nused);
-    HDassert(heap->obj[hobj->idx].begin);
+    
+    /* When the application selects the same location to rewrite the VL element by using H5Sselect_elements,
+     * it can happen that the entry has been removed by first rewrite.  Here we simply skip the removal of
+     * the entry and let the second rewrite happen (see HDFFV-10635).  In the future, it'd be nice to handle
+     * this situation in H5T_conv_vlen in H5Tconv.c instead of this level (HDFFV-10648). */
+    if(heap->obj[hobj->idx].nrefs == 0 && heap->obj[hobj->idx].size == 0 && !heap->obj[hobj->idx].begin)
+        HGOTO_DONE(ret_value)
+        
     obj_start = heap->obj[hobj->idx].begin;
     /* Include object header size */
     need = H5HG_ALIGN(heap->obj[hobj->idx].size) + H5HG_SIZEOF_OBJHDR(f);

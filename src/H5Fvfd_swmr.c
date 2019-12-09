@@ -54,6 +54,9 @@
 /* Local Macros */
 /****************/
 
+#define nanosecs_per_second          1000000000 /* nanoseconds per second */
+#define nanosecs_per_tenth_sec       100000000  /* nanoseconds per 0.1 second */
+
 /* Remove an entry from the doubly linked list */
 #define H5F__LL_REMOVE(entry_ptr, head_ptr, tail_ptr)               \
 {                                                                   \
@@ -221,10 +224,11 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
         HDassert(f->shared->vfd_swmr_config.writer);
 
+        SIMPLEQ_INIT(&f->shared->deferred_frees);
         f->shared->vfd_swmr_writer = TRUE;
         f->shared->tick_num = 1;
 
-        if ( H5PB_vfd_swmr__set_tick(f) < 0 )
+        if ( H5PB_vfd_swmr__set_tick(f->shared) < 0 )
 
             HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
                         "Can't update page buffer current tick")
@@ -392,15 +396,11 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
                 "unable to close the free-space manager for the metadata file")
 
         /* Free the delayed list */ 
-        curr = f->shared->dl_head_ptr;
-
-        while ( curr != NULL ) {
-
-            next = curr->next;
-            curr = H5FL_FREE(H5F_vfd_swmr_dl_entry_t, curr);
-            curr = next;
-
-        } /* end while */
+        for (curr = f->shared->dl_head_ptr;
+             curr != NULL && (next = curr->next, true);
+             curr = next) {
+            H5FL_FREE(H5F_vfd_swmr_dl_entry_t, curr);
+        }
 
         f->shared->dl_head_ptr = f->shared->dl_tail_ptr = NULL;
 
@@ -546,7 +546,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
                             "unable to seek in the metadata file")
 
             if ( HDwrite(f->shared->vfd_swmr_md_fd, index[i].entry_ptr, 
-                         index[i].length) != index[i].length )
+                         index[i].length) != (ssize_t)index[i].length )
 
                 HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
                  "error in writing the page/multi-page entry to metadata file")
@@ -579,11 +579,10 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
      *
      *      --remove the associated entries from the list
      */
-     dl_entry = f->shared->dl_tail_ptr;
-
-     while ( dl_entry != NULL ) {
-
-        prev = dl_entry->prev;
+     
+     for (dl_entry = f->shared->dl_tail_ptr;
+          dl_entry != NULL && (prev = dl_entry->prev, true);
+          dl_entry = prev) {
 
         /* max_lag is at least 3 */
         if ( ( f->shared->tick_num > f->shared->vfd_swmr_config.max_lag ) &&
@@ -607,10 +606,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
 
             break;
         }
-
-        dl_entry = prev;
-
-    } /* end while */
+    }
 
 done:
 
@@ -660,85 +656,50 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_writer__delay_write(H5F_t *f, uint64_t page, 
-    uint64_t * delay_write_until_ptr)
+H5F_vfd_swmr_writer__delay_write(H5F_shared_t *shared, uint64_t page, 
+    uint64_t *untilp)
 {
-    int32_t top = -1;
-    int32_t bottom = 0;
-    int32_t probe;
-    uint64_t delay_write_until = 0;
+    uint64_t until;
     H5FD_vfd_swmr_idx_entry_t * ie_ptr = NULL;
     H5FD_vfd_swmr_idx_entry_t * idx = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->vfd_swmr);
-    HDassert(f->shared->vfd_swmr_writer);
+    HDassert(shared);
+    HDassert(shared->vfd_swmr);
+    HDassert(shared->vfd_swmr_writer);
 
-    idx = f->shared->mdf_idx;
+    idx = shared->mdf_idx;
 
-    HDassert((idx) ||( f->shared->tick_num <= 1));
+    HDassert(idx != NULL || shared->tick_num <= 1);
 
     /* do a binary search on the metadata file index to see if
-     * it already contains an entry for *pbe_ptr.
+     * it already contains an entry for `page`.
      */
 
-    ie_ptr = NULL;
-
-    if ( idx ) {
-
-        top = f->shared->mdf_idx_entries_used - 1;
-        bottom = 0;
-    }
-
-    while ( top >= bottom ) {
-
-        HDassert(idx);
-
-        probe = (top + bottom) / 2;
-
-        if ( idx[probe].hdf5_page_offset < page ) {
-
-            bottom = probe + 1;
-
-        } else if ( idx[probe].hdf5_page_offset > page ) {
-
-            top = probe - 1;
-
-        } else { /* found it */
-
-            ie_ptr = idx + probe;
-            bottom = top + 1; /* to exit loop */
-        }
-    }
-
-    if ( ie_ptr ) {
-
-        if ( ie_ptr->delayed_flush >= f->shared->tick_num ) {
-
-             delay_write_until = ie_ptr->delayed_flush;
-        }
+    if (idx == NULL) {
+        ie_ptr = NULL;
     } else {
-
-        delay_write_until = f->shared->tick_num +
-                            f->shared->vfd_swmr_config.max_lag;
+        ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx,
+            shared->mdf_idx_entries_used, page);
     }
 
-    if ( ( delay_write_until != 0 ) &&
-          ( ! ( ( delay_write_until >= f->shared->tick_num ) &&
-                ( delay_write_until <=
-                   (f->shared->tick_num + f->shared->vfd_swmr_config.max_lag) )
-               )
-           )
-         )
+    if (ie_ptr == NULL)
+        until = shared->tick_num + shared->vfd_swmr_config.max_lag;
+    else if (ie_ptr->delayed_flush >= shared->tick_num)
+        until = ie_ptr->delayed_flush;
+    else
+        until = 0;
+
+    if (until != 0 &&
+        (until < shared->tick_num ||
+         shared->tick_num + shared->vfd_swmr_config.max_lag < until))
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                     "VFD SWMR write delay out of range")
 
-    *delay_write_until_ptr = delay_write_until;
-  
+    *untilp = until;
+
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -868,10 +829,10 @@ done:
 herr_t
 H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
 {
-    int32_t idx_entries_added = 0;
-    int32_t idx_entries_modified = 0;
-    int32_t idx_ent_not_in_tl = 0;
-    int32_t idx_ent_not_in_tl_flushed = 0;
+    uint32_t idx_entries_added = 0;
+    uint32_t idx_entries_modified = 0;
+    uint32_t idx_ent_not_in_tl = 0;
+    uint32_t idx_ent_not_in_tl_flushed = 0;
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -953,7 +914,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
      *    the metadata file index, adding or modifying entries as 
      *    appropriate.
      */
-    if ( H5PB_vfd_swmr__update_index(f, &idx_entries_added, 
+    if ( H5PB_vfd_swmr__update_index(f->shared, &idx_entries_added, 
                                      &idx_entries_modified, 
                                      &idx_ent_not_in_tl, 
                                      &idx_ent_not_in_tl_flushed) < 0 )
@@ -1003,13 +964,13 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
 #endif /* JRM */
 
     /* 7) Release the page buffer tick list. */
-    if ( H5PB_vfd_swmr__release_tick_list(f) < 0 )
+    if ( H5PB_vfd_swmr__release_tick_list(f->shared) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't release tick list")
 
 
     /* 8) Release any delayed writes whose delay has expired */
-    if ( H5PB_vfd_swmr__release_delayed_writes(f) < 0 )
+    if ( H5PB_vfd_swmr__release_delayed_writes(f->shared) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't release delayed writes")
  
@@ -1033,9 +994,9 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
 
 #if 0 /* JRM */
-    HDfprintf(stderr, "*** writer EOT %lld exiting. idx len = %d ***\n", 
-              f->shared->tick_num, 
-              (int32_t)(f->shared->mdf_idx_entries_used));
+    HDfprintf(stderr,
+        "*** writer EOT %" PRIu64 " exiting. idx len = %" PRIu32 " ***\n",
+        f->shared->tick_num, f->shared->mdf_idx_entries_used);
 #endif /* JRM */
 done:
 
@@ -1061,9 +1022,9 @@ done:
 herr_t
 H5F_vfd_swmr_writer__dump_index(H5F_t * f)
 {
-    int i;
-    int32_t mdf_idx_len;
-    int32_t mdf_idx_entries_used;
+    unsigned int i;
+    uint32_t mdf_idx_len;
+    uint32_t mdf_idx_entries_used;
     H5FD_vfd_swmr_idx_entry_t * index = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
 
@@ -1080,13 +1041,15 @@ H5F_vfd_swmr_writer__dump_index(H5F_t * f)
     mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
 
     HDfprintf(stderr, "\n\nDumping Index:\n\n");
-    HDfprintf(stderr, "index len / entries used = %d / %d\n\n", 
-              mdf_idx_len, mdf_idx_entries_used);
+    HDfprintf(stderr,
+        "index len / entries used = %" PRIu32 " / %" PRIu32 "\n\n",
+        mdf_idx_len, mdf_idx_entries_used);
 
     for ( i = 0; i < mdf_idx_entries_used; i++ ) {
 
-        HDfprintf(stderr, "%d: %lld %lld %d\n", i, index[i].hdf5_page_offset,
-                  index[i].md_file_page_offset, index[i].length);
+        HDfprintf(stderr, "%u: %" PRIu64 " %" PRIu64 " %" PRIu32 "\n",
+            i, index[i].hdf5_page_offset, index[i].md_file_page_offset,
+            index[i].length);
     }
 
 done:
@@ -1141,11 +1104,11 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
     int pass = 0;
     uint64_t tmp_tick_num = 0;
     H5FD_vfd_swmr_idx_entry_t * tmp_mdf_idx;
-    int32_t entries_added = 0;
-    int32_t entries_removed = 0;
-    int32_t entries_changed = 0;
-    int32_t tmp_mdf_idx_len;
-    int32_t tmp_mdf_idx_entries_used;
+    uint32_t entries_added = 0;
+    uint32_t entries_removed = 0;
+    uint32_t entries_changed = 0;
+    uint32_t tmp_mdf_idx_len;
+    uint32_t tmp_mdf_idx_entries_used;
     uint32_t mdf_idx_entries_used;
     herr_t ret_value = SUCCEED;              /* Return value */
 
@@ -1179,8 +1142,9 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
                     "error in retrieving tick_num from driver")
 
 #if 0 /* JRM */
-    HDfprintf(stderr, "--- reader EOT curr/new tick = %lld/%lld ---\n",
-              tick_num_g, tmp_tick_num);
+    HDfprintf(stderr,
+        "--- reader EOT curr/new tick = %" PRIu64 "/%" PRIu64 " ---\n",
+        tick_num_g, tmp_tick_num);
 #endif /* JRM */
 
     if ( tmp_tick_num != f->shared->tick_num ) {
@@ -1193,7 +1157,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
 
         f->shared->old_mdf_idx              = f->shared->mdf_idx;
         f->shared->old_mdf_idx_len          = f->shared->mdf_idx_len;
-        f->shared->old_mdf_idx_entries_used = (int32_t)f->shared->mdf_idx_entries_used;
+        f->shared->old_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
 
         f->shared->mdf_idx              = tmp_mdf_idx;
         f->shared->mdf_idx_len          = tmp_mdf_idx_len;
@@ -1207,7 +1171,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
                        "unable to allocate metadata file index")
 
 
-        mdf_idx_entries_used = (uint32_t)(f->shared->mdf_idx_len);
+        mdf_idx_entries_used = f->shared->mdf_idx_len;
 
 #if 0 /* JRM */
         HDfprintf(stderr, "--- reader EOT mdf_idx_entries_used = %d ---\n",
@@ -1221,13 +1185,14 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, \
                         "error in retrieving tick_num from driver")
 
-        HDassert(mdf_idx_entries_used <= (uint32_t)(f->shared->mdf_idx_len));
+        HDassert(mdf_idx_entries_used <= f->shared->mdf_idx_len);
 
         f->shared->mdf_idx_entries_used = mdf_idx_entries_used;
 
 #if 0 /* JRM */
-        HDfprintf(stderr, "--- reader EOT index used / len = %d/%d ---\n",
-                  f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
+        HDfprintf(stderr,
+            "--- reader EOT index used / len = %" PRIu32 "/%" PRIu32 " ---\n",
+            f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
 #endif /* JRM */
 
 
@@ -1244,12 +1209,12 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
         while ( pass <= 1 ) {
 
             haddr_t page_addr;
-            int32_t i = 0;
-            int32_t j = 0;
+            uint32_t i = 0;
+            uint32_t j = 0;
             H5FD_vfd_swmr_idx_entry_t * new_mdf_idx;
             H5FD_vfd_swmr_idx_entry_t * old_mdf_idx;
-            int32_t new_mdf_idx_entries_used;
-            int32_t old_mdf_idx_entries_used;
+            uint32_t new_mdf_idx_entries_used;
+            uint32_t old_mdf_idx_entries_used;
 
             new_mdf_idx              = f->shared->mdf_idx;
             new_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
@@ -1277,7 +1242,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
                                 (new_mdf_idx[j].hdf5_page_offset *
                                  f->shared->pb_ptr->page_size);
                                     
-                            if ( H5PB_remove_entry(f, page_addr) < 0 )
+                            if ( H5PB_remove_entry(f->shared, page_addr) < 0 )
 
                                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
                                             "remove page buffer entry failed")
@@ -1313,7 +1278,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
                         page_addr = (haddr_t)(old_mdf_idx[i].hdf5_page_offset *
                                               f->shared->pb_ptr->page_size);
                                     
-                        if ( H5PB_remove_entry(f, page_addr) < 0 )
+                        if ( H5PB_remove_entry(f->shared, page_addr) < 0 )
 
                             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
                                         "remove page buffer entry failed")
@@ -1372,7 +1337,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
                     page_addr = (haddr_t)(old_mdf_idx[i].hdf5_page_offset *
                                           f->shared->pb_ptr->page_size);
                                     
-                    if ( H5PB_remove_entry(f, page_addr) < 0 )
+                    if ( H5PB_remove_entry(f->shared, page_addr) < 0 )
 
                         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
                                         "remove page buffer entry failed")
@@ -1393,9 +1358,9 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
 
         } /* while ( pass <= 1 ) */
 #if 0 /* JRM */
-        HDfprintf(stderr, 
-                  "--- reader EOT pre new tick index used/len = %d/ %d ---\n",
-                  f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
+        HDfprintf(stderr, "--- reader EOT pre new tick index "
+            "used/len = %" PRIu32 "/ %" PRIu32 " ---\n",
+            f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
 #endif /* JRM */
         /* At this point, we should have evicted or refreshed all stale 
          * page buffer and metadata cache entries.  
@@ -1421,13 +1386,16 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
 
 #if 0 /* JRM */
-    HDfprintf(stderr, "--- reader EOT final index used / len = %d / %d ---\n",
-              f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
-    HDfprintf(stderr, "--- reader EOT old index used / len = %d / %d ---\n",
-              f->shared->old_mdf_idx_entries_used, f->shared->old_mdf_idx_len);
-    HDfprintf(stderr, "--- reader EOT %lld exiting t/a/r/c = %d/%d/%d/%d---\n", 
-              f->shared->tick_num, (int32_t)(f->shared->mdf_idx_entries_used),
-              entries_added, entries_removed, entries_changed);
+    HDfprintf(stderr, "--- reader EOT final index "
+        "used / len = %" PRIu32 " / %" PRIu32 " ---\n",
+        f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
+    HDfprintf(stderr, "--- reader EOT old index "
+        "used / len = %" PRIu32 " / %" PRIu32 " ---\n",
+        f->shared->old_mdf_idx_entries_used, f->shared->old_mdf_idx_len);
+    HDfprintf(stderr, "--- reader EOT %" PRIu64 " exiting "
+        "t/a/r/c = %" PRIu32 "/%" PRIu32 "/%" PRIu32 "/%" PRIu32 "---\n",
+        f->shared->tick_num, f->shared->mdf_idx_entries_used,
+        entries_added, entries_removed, entries_changed);
 #endif /* JRM */
 
 done:
@@ -1458,14 +1426,16 @@ H5F_vfd_swmr_remove_entry_eot(H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Free the entry on the EOT queue that corresponds to f */
-    curr = vfd_swmr_eot_queue_head_g;
-    while(curr != NULL) {
-        if(curr->vfd_swmr_file == f) {
-            H5F__LL_REMOVE(curr, vfd_swmr_eot_queue_head_g, vfd_swmr_eot_queue_tail_g)
-            curr = H5FL_FREE(H5F_vfd_swmr_eot_queue_entry_t, curr);
+    
+    for (curr = vfd_swmr_eot_queue_head_g; curr != NULL; curr = curr->next) {
+        if (curr->vfd_swmr_file == f)
             break;
-        }
-        curr = curr->next;
+    }
+
+    if (curr != NULL) {
+        H5F__LL_REMOVE(curr, vfd_swmr_eot_queue_head_g,
+            vfd_swmr_eot_queue_tail_g)
+        curr = H5FL_FREE(H5F_vfd_swmr_eot_queue_entry_t, curr);
     }
 
     if(vfd_swmr_eot_queue_head_g) {
@@ -1502,7 +1472,7 @@ H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
 
     /* Allocate an entry to be inserted onto the EOT queue */
     if (NULL == (entry_ptr = H5FL_CALLOC(H5F_vfd_swmr_eot_queue_entry_t)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate the endo of tick queue entry")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate the end of tick queue entry")
 
     /* Initialize the entry */
     entry_ptr->vfd_swmr_writer = f->shared->vfd_swmr_writer;
@@ -1513,12 +1483,10 @@ H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
     entry_ptr->prev = NULL;
 
     /* Found the position to insert the entry on the EOT queue */
-    prec_ptr = vfd_swmr_eot_queue_tail_g;
-
-    while (prec_ptr) {
-        if(timespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, >))
-           prec_ptr = prec_ptr->prev;                                     
-        else 
+    for (prec_ptr = vfd_swmr_eot_queue_tail_g;
+         prec_ptr != NULL;
+         prec_ptr = prec_ptr->prev) {
+        if (timespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, <=))
             break;
     }
 
@@ -1554,23 +1522,24 @@ done:
 herr_t
 H5F_dump_eot_queue(void)
 {
-    int i = 0;
+    int i;
     H5F_vfd_swmr_eot_queue_entry_t *curr;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(vfd_swmr_eot_queue_head_g == NULL)
-        HDfprintf(stderr, "EOT head is null\n");
-
-    curr = vfd_swmr_eot_queue_head_g;
-    while(curr != NULL) {
-        ++i;
-        HDfprintf(stderr, "%d: vfd_swmr_writer=%d tick_num=%lld, end_of_tick:%lld, %lld, vfd_swmr_file=0x%x\n", 
-                  i, curr->vfd_swmr_writer, curr->tick_num, 
-                  curr->end_of_tick.tv_sec, curr->end_of_tick.tv_nsec, curr->vfd_swmr_file);
-
-        curr = curr->next;
+    for (i = 0, curr = vfd_swmr_eot_queue_head_g;
+         curr != NULL;
+         curr = curr->next, i++) {
+        HDfprintf(stderr, "%d: %s tick_num %" PRIu64
+            ", end_of_tick %jd.%09ld, vfd_swmr_file %p\n", 
+                  i, curr->vfd_swmr_writer ? "writer" : "not writer",
+                  curr->tick_num,
+                  curr->end_of_tick.tv_sec, curr->end_of_tick.tv_nsec,
+                  curr->vfd_swmr_file);
     }
+
+    if(i == 0)
+        HDfprintf(stderr, "EOT head is null\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 
@@ -1602,12 +1571,12 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
 {
     struct timespec curr;               /* Current time in struct timespec */
     struct timespec new_end_of_tick;    /* new end_of_tick in struct timespec */
-    long curr_nsecs;                    /* current time in nanoseconds */
-    long tlen_nsecs;                    /* tick_len in nanoseconds */
+    int64_t curr_nsecs;                    /* current time in nanoseconds */
+    int64_t tlen_nsecs;                    /* tick_len in nanoseconds */
 #if 0 /* JRM */
-    long end_nsecs;                     /* end_of_tick in nanoseconds */
+    int64_t end_nsecs;                     /* end_of_tick in nanoseconds */
 #endif /* JRM */
-    long new_end_nsecs;                 /* new end_of_tick in nanoseconds */
+    int64_t new_end_nsecs;                 /* new end_of_tick in nanoseconds */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1619,10 +1588,10 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
                     "can't get time via clock_gettime")
 
     /* Convert curr to nsecs */
-    curr_nsecs = curr.tv_sec * SECOND_TO_NANOSECS + curr.tv_nsec;
+    curr_nsecs = curr.tv_sec * nanosecs_per_second + curr.tv_nsec;
 
     /* Convert tick_len to nanosecs */
-    tlen_nsecs = f->shared->vfd_swmr_config.tick_len * TENTH_SEC_TO_NANOSECS;
+    tlen_nsecs = f->shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
 
     /* 
      *  Update tick_num_g, f->shared->tick_num 
@@ -1631,7 +1600,7 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
 
         f->shared->tick_num++;
 
-        if ( H5PB_vfd_swmr__set_tick(f) < 0 )
+        if ( H5PB_vfd_swmr__set_tick(f->shared) < 0 )
 
             HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
                         "Can't update page buffer current tick")
@@ -1649,13 +1618,12 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
      */
 
     new_end_nsecs = curr_nsecs + tlen_nsecs;
-    new_end_of_tick.tv_nsec = new_end_nsecs % SECOND_TO_NANOSECS;
-    new_end_of_tick.tv_sec = new_end_nsecs / SECOND_TO_NANOSECS;
+    new_end_of_tick.tv_nsec = (long)(new_end_nsecs % nanosecs_per_second);
+    new_end_of_tick.tv_sec = new_end_nsecs / nanosecs_per_second;
 
     /* Update end_of_tick */
-    HDmemcpy(&end_of_tick_g, &new_end_of_tick, sizeof(struct timespec));
-    HDmemcpy(&f->shared->end_of_tick, &new_end_of_tick, 
-             sizeof(struct timespec));
+    end_of_tick_g = new_end_of_tick;
+    f->shared->end_of_tick = new_end_of_tick;
 
 done:
 
@@ -1692,7 +1660,9 @@ H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries)
     uint8_t image[H5FD_MD_HEADER_SIZE]; /* Buffer for header */
     uint8_t *p = NULL;                  /* Pointer to buffer */
     uint32_t metadata_chksum;           /* Computed metadata checksum value */
-    unsigned hdr_size = H5FD_MD_HEADER_SIZE;    /* Size of header and index */
+    /* Size of header and index */
+    const size_t hdr_size = H5FD_MD_HEADER_SIZE;
+    ssize_t nwritten;
     herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1719,7 +1689,7 @@ H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries)
     UINT32ENCODE(p, metadata_chksum);
 
     /* Sanity checks on header */
-    HDassert((size_t)(p - image == hdr_size));
+    HDassert(p - image == (ptrdiff_t)hdr_size);
 
     /* Set to beginning of the file */
     if ( HDlseek(f->shared->vfd_swmr_md_fd, (HDoff_t)H5FD_MD_HEADER_OFF, SEEK_SET) < 0 )
@@ -1727,11 +1697,12 @@ H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries)
         HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
                     "unable to seek in metadata file")
 
+    nwritten = HDwrite(f->shared->vfd_swmr_md_fd, image, hdr_size);
     /* Write header to the metadata file */
-    if ( HDwrite(f->shared->vfd_swmr_md_fd, image, hdr_size) !=  hdr_size )
-
+    if (nwritten != (ssize_t)hdr_size) {
         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
                     "error in writing header to metadata file")
+    }
 
 done:
 
@@ -1769,7 +1740,9 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries,
     uint8_t *image = NULL;      /* Pointer to buffer */
     uint8_t *p = NULL;          /* Pointer to buffer */
     uint32_t metadata_chksum;   /* Computed metadata checksum value */
-    unsigned idx_size = H5FD_MD_INDEX_SIZE(num_entries);  /* Size of index */
+    /* Size of index */
+    const size_t idx_size = H5FD_MD_INDEX_SIZE(num_entries);
+    ssize_t nwritten;
     unsigned i;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1814,7 +1787,7 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries,
     UINT32ENCODE(p, metadata_chksum);
 
     /* Sanity checks on index */
-    HDassert((size_t)(p - image ==  idx_size));
+    HDassert(p - image == (ptrdiff_t)idx_size);
 
     /* Verify the md file descriptor exists */
     HDassert(f->shared->vfd_swmr_md_fd >= 0);
@@ -1825,12 +1798,13 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries,
 
         HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
                     "unable to seek in metadata file")
-
+    
+    nwritten = HDwrite(f->shared->vfd_swmr_md_fd, image, idx_size);
     /* Write index to the metadata file */
-    if ( HDwrite(f->shared->vfd_swmr_md_fd, image, idx_size) != idx_size )
-
+    if (nwritten != (ssize_t)idx_size) {
         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
                     "error in writing index to metadata file")
+    }
 
 done:
 
@@ -1903,9 +1877,9 @@ H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
 static herr_t
 H5F__vfd_swmr_writer__create_index(H5F_t * f)
 {
-    int i;
+    unsigned int i;
     size_t bytes_available;
-    int32_t entries_in_index;
+    size_t entries_in_index;
     size_t index_size;
     H5FD_vfd_swmr_idx_entry_t * index = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
@@ -1925,11 +1899,11 @@ H5F__vfd_swmr_writer__create_index(H5F_t * f)
 
     HDassert(bytes_available > 0);
 
-    entries_in_index = (int32_t)(bytes_available / H5FD_MD_INDEX_ENTRY_SIZE);
+    entries_in_index = bytes_available / H5FD_MD_INDEX_ENTRY_SIZE;
 
     HDassert(entries_in_index > 0);
 
-    index_size = sizeof(H5FD_vfd_swmr_idx_entry_t) * (size_t)entries_in_index;
+    index_size = sizeof(H5FD_vfd_swmr_idx_entry_t) * entries_in_index;
     index = (H5FD_vfd_swmr_idx_entry_t *)HDmalloc(index_size);
 
     if ( index == NULL ) 
@@ -1951,8 +1925,10 @@ H5F__vfd_swmr_writer__create_index(H5F_t * f)
         index[i].moved_to_hdf5_file  = FALSE;
     }
 
+    HDassert(entries_in_index <= UINT32_MAX);
+
     f->shared->mdf_idx              = index;
-    f->shared->mdf_idx_len          = entries_in_index;
+    f->shared->mdf_idx_len          = (uint32_t)entries_in_index;
     f->shared->mdf_idx_entries_used = 0;
 
 done:
@@ -1998,9 +1974,9 @@ H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
     HDassert(f->shared->vfd_swmr);
     HDassert(f->shared->vfd_swmr_writer);
 
-    tick_in_nsec = f->shared->vfd_swmr_config.tick_len * TENTH_SEC_TO_NANOSECS;
-    req.tv_nsec = (long)(tick_in_nsec % SECOND_TO_NANOSECS);
-    req.tv_sec = (time_t)(tick_in_nsec / SECOND_TO_NANOSECS);
+    tick_in_nsec = f->shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
+    req.tv_nsec = (long)(tick_in_nsec % nanosecs_per_second);
+    req.tv_sec = (time_t)(tick_in_nsec / nanosecs_per_second);
 
     result = HDnanosleep(&req, &rem);
 

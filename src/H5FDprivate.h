@@ -203,6 +203,39 @@ typedef struct H5FD_vfd_swmr_md_header {
         uint64_t index_length;
 } H5FD_vfd_swmr_md_header;
 
+static inline H5FD_vfd_swmr_idx_entry_t *
+vfd_swmr_pageno_to_mdf_idx_entry(H5FD_vfd_swmr_idx_entry_t *idx,
+    uint32_t nindices, uint64_t target_page)
+{
+    uint32_t top;
+    uint32_t bottom;
+    uint32_t probe;
+
+    if (nindices < 1)
+        return NULL;
+
+    bottom = 0;
+    top = nindices;
+
+    do {
+        probe = (top + bottom) / 2;
+
+        if (idx[probe].hdf5_page_offset < target_page)
+            bottom = probe + 1;
+        else if (idx[probe].hdf5_page_offset > target_page)
+            top = probe;
+        else
+            return &idx[probe]; /* found it */
+    } while (bottom < top);
+    /* Previous interval was [top - 1, top] or [bottom, bottom + 1].
+     * The new interval is [top, top] or [bottom, bottom], respectively.
+     * We probed idx[bottom] in the last step, and idx[top] (if it is
+     * not out of bounds) in an earlier round.  So there is nothing
+     * to be found at (top + bottom) / 2.
+     */
+    return NULL;
+}
+
 #ifdef H5_HAVE_PARALLEL
 /* ======== Temporary data transfer properties ======== */
 /* Definitions for memory MPI type property */
@@ -259,14 +292,6 @@ typedef struct {
     hid_t driver_id;            /* Driver's ID */
     const void *driver_info;    /* Driver info, for open callbacks */
 } H5FD_driver_prop_t;
-
-#ifdef H5_HAVE_PARALLEL
-/* MPIO-specific file access properties */
-typedef struct H5FD_mpio_fapl_t {
-    MPI_Comm		comm;		/*communicator			*/
-    MPI_Info		info;		/*file information		*/
-} H5FD_mpio_fapl_t;
-#endif /* H5_HAVE_PARALLEL */
 
 
 /*****************************/
@@ -335,9 +360,6 @@ H5_DLL void H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file);
 /* General routines */
 H5_DLL haddr_t H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off);
 H5_DLL herr_t H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/);
-H5_DLL herr_t H5FD_mpi_comm_info_dup(MPI_Comm comm, MPI_Info info,
-				MPI_Comm *comm_new, MPI_Info *info_new);
-H5_DLL herr_t H5FD_mpi_comm_info_free(MPI_Comm *comm, MPI_Info *info);
 #ifdef NOT_YET
 H5_DLL herr_t H5FD_mpio_wait_for_left_neighbor(H5FD_t *file);
 H5_DLL herr_t H5FD_mpio_signal_right_neighbor(H5FD_t *file);

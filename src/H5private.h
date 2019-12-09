@@ -169,6 +169,9 @@
  */
 #define H5_DEFAULT_VFD      H5FD_SEC2
 
+/* Define the default VOL driver */
+#define H5_DEFAULT_VOL      H5VL_NATIVE
+
 #ifdef H5_HAVE_WIN32_API
 /* The following two defines must be before any windows headers are included */
 #define WIN32_LEAN_AND_MEAN    /* Exclude rarely-used stuff from Windows headers */
@@ -306,6 +309,7 @@
 #   define H5_ATTR_NORETURN     /*void*/
 #   define H5_ATTR_CONST        /*void*/
 #   define H5_ATTR_PURE         /*void*/
+#   define H5_ATTR_FALLTHROUGH  /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
@@ -313,12 +317,18 @@
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
+#if defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
+#   define H5_ATTR_FALLTHROUGH  __attribute__((fallthrough));
+#else
+#   define H5_ATTR_FALLTHROUGH  /*void*/
+#endif
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
 #   define H5_ATTR_UNUSED       /*void*/
 #   define H5_ATTR_NORETURN     /*void*/
 #   define H5_ATTR_CONST        /*void*/
 #   define H5_ATTR_PURE         /*void*/
+#   define H5_ATTR_FALLTHROUGH  /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -517,6 +527,11 @@
 #ifndef H5_INC_ENUM
 #  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
 #endif
+
+/* Represents an empty asynchronous request handle.
+ * Used in the VOL code.
+ */
+#define H5_REQUEST_NULL                 NULL
 
 /*
  * A macro to portably decrement enumerated types.
@@ -1107,12 +1122,8 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDmemcmp
     #define HDmemcmp(X,Y,Z)    memcmp(X,Y,Z)
 #endif /* HDmemcmp */
-/*
- * The (char*) casts are required for the DEC when optimizations are turned
- * on and the source and/or destination are not aligned.
- */
 #ifndef HDmemcpy
-    #define HDmemcpy(X,Y,Z)    memcpy((char*)(X),(const char*)(Y),Z)
+    #define HDmemcpy(X,Y,Z)    memcpy(X,Y,Z)
 #endif /* HDmemcpy */
 #ifndef HDmemmove
     #define HDmemmove(X,Y,Z)  memmove((char*)(X),(const char*)(Y),Z)
@@ -1159,6 +1170,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDpowf
     #define HDpowf(X,Y)   powf(X,Y)
 #endif /* HDpowf */
+#ifndef HDpread
+    #define HDpread(F,B,C,O)    pread(F,B,C,O)
+#endif /* HDpread */
 #ifndef HDprintf
     #define HDprintf(...)   HDfprintf(stdout, __VA_ARGS__)
 #endif /* HDprintf */
@@ -1171,6 +1185,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDputs
     #define HDputs(S)    puts(S)
 #endif /* HDputs */
+#ifndef HDpwrite
+    #define HDpwrite(F,B,C,O)    pwrite(F,B,C,O)
+#endif /* HDpwrite */
 #ifndef HDqsort
     #define HDqsort(M,N,Z,F)  qsort(M,N,Z,F)
 #endif /* HDqsort*/
@@ -1337,8 +1354,9 @@ typedef off_t               h5_stat_size_t;
         #define HDsrandom(S)    srand(S)
     #endif /* HDsrandom */
 #endif /* H5_HAVE_RAND_R */
-/* sscanf() variable arguments */
-
+#ifndef HDsscanf
+    #define HDsscanf(S,FMT,...)   sscanf(S,FMT,__VA_ARGS__)
+#endif /* HDsscanf */
 #ifndef HDstrcat
     #define HDstrcat(X,Y)    strcat(X,Y)
 #endif /* HDstrcat */
@@ -1395,6 +1413,9 @@ typedef off_t               h5_stat_size_t;
 #endif /* HDstrtod */
 #ifndef HDstrtok
     #define HDstrtok(X,Y)    strtok(X,Y)
+#endif /* HDstrtok */
+#ifndef HDstrtok_r
+    #define HDstrtok_r(X,Y,Z) strtok_r(X,Y,Z)
 #endif /* HDstrtok */
 #ifndef HDstrtol
     #define HDstrtol(S,R,N)    strtol(S,R,N)
@@ -1498,6 +1519,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDva_arg
     #define HDva_arg(A,T)    va_arg(A,T)
 #endif /* HDva_arg */
+#ifndef HDva_copy
+#define HDva_copy(D,S)    va_copy(D,S)
+#endif /* HDva_copy */
 #ifndef HDva_end
     #define HDva_end(A)    va_end(A)
 #endif /* HDva_end */
@@ -1717,6 +1741,7 @@ typedef enum {
     H5_PKG_HG,      /* Global heaps             */
     H5_PKG_HL,      /* Local heaps              */
     H5_PKG_I,       /* IDs                      */
+    H5_PKG_M,       /* Maps                     */
     H5_PKG_MF,      /* File memory management   */
     H5_PKG_MM,      /* Core memory management   */
     H5_PKG_O,       /* Object headers           */
@@ -1724,6 +1749,7 @@ typedef enum {
     H5_PKG_S,       /* Dataspaces               */
     H5_PKG_T,       /* Datatypes                */
     H5_PKG_V,       /* Vector functions         */
+    H5_PKG_VL,      /* VOL functions            */
     H5_PKG_Z,       /* Raw data filters         */
     H5_NPKGS        /* Must be last             */
 } H5_pkg_t;
@@ -1962,8 +1988,6 @@ extern hbool_t H5_libterm_g;    /* Is the library being shutdown? */
 #define H5_INIT_GLOBAL (H5_libinit_g)
 #define H5_TERM_GLOBAL (H5_libterm_g)
 
-#include "H5FDvfd_swmr_private.h"
-
 #endif /* H5_HAVE_THREADSAFE */
 
 #ifdef H5_HAVE_CODESTACK
@@ -2079,42 +2103,42 @@ H5_DLL herr_t H5CX_pop(void);
                                                                               \
     BEGIN_MPE_LOG
 
+#include "H5FDvfd_swmr_private.h"
 #include "H5time_private.h" /* for timespeccmp */
 
-#define VFD_SWMR_TEST_FOR_END_OF_TICK(entering, swmr_reader_exit, err)                              \
-    /* Initialize the library */                                                                    \
-    /* TBD assert that the API lock is held.  The API lock */                                       \
-    /* synchronizes access to `vfd_swmr_api_entries_g`     */                                       \
-    {                                                                                               \
-        if (!entering && --vfd_swmr_api_entries_g > 0) {                                            \
-            ;   /* Do nothing: we are still in an API call. */                                      \
-        } else if (entering && vfd_swmr_api_entries_g++ > 0) {                                      \
-            ;   /* Do nothing: we are *re-*entering the API. */                                     \
-        } else if(err_occurred) {                                                                   \
-            ;   /* Do nothing: an error occurred. */                                                \
-        } else if(vfd_swmr_eot_queue_head_g != NULL) {                                              \
-            struct H5F_vfd_swmr_eot_queue_entry_t *init_eot_queue_head = vfd_swmr_eot_queue_head_g; \
-            struct timespec curr_time;                                                              \
-            do {                                                                                    \
-                if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0)                                \
-                    HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err,                                         \
-                                "can't get time via clock_gettime")                                 \
-                if(timespeccmp(&curr_time, &end_of_tick_g, <)) {                                    \
-                    break;                                                                          \
-                } else if(vfd_swmr_writer_g) {                                                      \
-                    if(H5F_vfd_swmr_writer_end_of_tick(NULL) < 0)                                   \
-                        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                                     \
-                                    "end of tick error for VFD SWMR writer")                        \
-                } else if(!swmr_reader_exit) {                                                      \
-                    if(H5F_vfd_swmr_reader_end_of_tick(NULL) < 0)                                   \
-                        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                                     \
-                                    "end of tick error for VFD SWMR reader")                        \
-                } else                                                                              \
-                    break;                                                                          \
-            } while ((vfd_swmr_eot_queue_head_g != NULL) &&                                         \
-                     (vfd_swmr_eot_queue_head_g != init_eot_queue_head));                           \
-        }                                                                                           \
-    }
+#define VFD_SWMR_TEST_FOR_END_OF_TICK(entering, _swmr_reader_exit, err)       \
+    /* Initialize the library */                                              \
+    /* TBD assert that the API lock is held.  The API lock */                 \
+    /* synchronizes access to `vfd_swmr_api_entries_g`     */                 \
+    if (!entering && --vfd_swmr_api_entries_g > 0) {                          \
+        ;   /* Do nothing: we are still in an API call. */                    \
+    } else if (entering && vfd_swmr_api_entries_g++ > 0) {                    \
+        ;   /* Do nothing: we are *re-*entering the API. */                   \
+    } else if(err_occurred) {                                                 \
+        ;   /* Do nothing: an error occurred. */                              \
+    } else if(vfd_swmr_eot_queue_head_g != NULL) {                            \
+        const bool swmr_reader_exit = _swmr_reader_exit;                      \
+        struct timespec curr_time;                                            \
+        struct H5F_vfd_swmr_eot_queue_entry_t *init_eot_queue_head = vfd_swmr_eot_queue_head_g; \
+        do {                                                                  \
+            if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0) {            \
+                HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err,                       \
+                            "can't get time via clock_gettime")               \
+            } else if(timespeccmp(&curr_time, &end_of_tick_g, <)) {           \
+                break;                                                        \
+            } else if (vfd_swmr_writer_g) {                                   \
+                if(H5F_vfd_swmr_writer_end_of_tick(NULL) < 0)                 \
+                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                   \
+                                "end of tick error for VFD SWMR writer")      \
+            } else if(!swmr_reader_exit) {                                    \
+                if(H5F_vfd_swmr_reader_end_of_tick(NULL) < 0)                 \
+                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                   \
+                                "end of tick error for VFD SWMR reader")      \
+            } else                                                            \
+                break;                                                        \
+        } while ((vfd_swmr_eot_queue_head_g != NULL) &&                       \
+                 (vfd_swmr_eot_queue_head_g != init_eot_queue_head));         \
+    }                                                                         \
 
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(err) {{                                                \
@@ -2138,10 +2162,11 @@ H5_DLL herr_t H5CX_pop(void);
 /*
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, just perform tracing, etc.  Examples
- *      are: H5allocate_memory, H5is_library_threadsafe, etc.
+ *      are: H5allocate_memory, H5is_library_threadsafe, public VOL callback
+ *      wrappers (e.g. H5VLfile_create, H5VLdataset_read, etc.), etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT {{                                              \
+#define FUNC_ENTER_API_NOINIT {{{                                             \
     FUNC_ENTER_API_COMMON                                                     \
     H5_PUSH_FUNC                                                              \
     BEGIN_MPE_LOG                                                             \
@@ -2154,7 +2179,7 @@ H5_DLL herr_t H5CX_pop(void);
  *      are: H5close, H5check_version, etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT_NOERR_NOFS {{                                   \
+#define FUNC_ENTER_API_NOINIT_NOERR_NOFS {{{{                                 \
     FUNC_ENTER_API_VARS                                                       \
     FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                 \
     FUNC_ENTER_API_THREADSAFE;                                                \
@@ -2342,14 +2367,14 @@ H5_DLL herr_t H5CX_pop(void);
        (void)H5E_dump_api_stack(TRUE);                                        \
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
-}} /*end scope from beginning of FUNC_ENTER*/
+}}} /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOFS macro */
 #define FUNC_LEAVE_API_NOFS(ret_value)                                        \
     FUNC_LEAVE_API_COMMON(ret_value);                                         \
     FUNC_LEAVE_API_THREADSAFE                                                 \
     return(ret_value);                                                        \
-}} /*end scope from beginning of FUNC_ENTER*/
+}}}} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
         ;                                                                     \
@@ -2673,6 +2698,8 @@ H5_DLL int H5G_term_package(void);
 H5_DLL int H5G_top_term_package(void);
 H5_DLL int H5I_term_package(void);
 H5_DLL int H5L_term_package(void);
+H5_DLL int H5M_term_package(void);
+H5_DLL int H5M_top_term_package(void);
 H5_DLL int H5P_term_package(void);
 H5_DLL int H5PL_term_package(void);
 H5_DLL int H5R_term_package(void);
@@ -2682,6 +2709,7 @@ H5_DLL int H5S_top_term_package(void);
 H5_DLL int H5SL_term_package(void);
 H5_DLL int H5T_term_package(void);
 H5_DLL int H5T_top_term_package(void);
+H5_DLL int H5VL_term_package(void);
 H5_DLL int H5Z_term_package(void);
 
 /* Checksum functions */
@@ -2700,11 +2728,23 @@ H5_DLL double H5_get_time(void);
 H5_DLL herr_t   H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
 
+#ifdef H5_HAVE_PARALLEL
+/* Generic MPI functions */
+H5_DLL hsize_t  H5_mpi_set_bigio_count(hsize_t new_count);
+H5_DLL hsize_t  H5_mpi_get_bigio_count();
+H5_DLL herr_t   H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new);
+H5_DLL herr_t   H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new);
+H5_DLL herr_t   H5_mpi_comm_free(MPI_Comm *comm);
+H5_DLL herr_t   H5_mpi_info_free(MPI_Info *info);
+H5_DLL herr_t   H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result);
+H5_DLL herr_t   H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result);
+H5_DLL herr_t   H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
+                 MPI_Datatype old_type, MPI_Datatype *new_type);
+#endif /* H5_HAVE_PARALLEL */
+
 /* Functions for debugging */
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,
     const uint8_t *marker, size_t buf_offset, size_t buf_size);
-
-#include "H5retry_private.h"
 
 #endif /* _H5private_H */
 

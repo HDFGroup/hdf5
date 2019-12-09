@@ -34,7 +34,10 @@
 #include "H5private.h"          /* Generic Functions                        */
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Opkg.h"             /* Object headers                           */
+
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 
 /****************/
@@ -88,20 +91,27 @@
 herr_t
 H5Oget_info1(hid_t loc_id, H5O_info_t *oinfo)
 {
-    H5G_loc_t   loc;                    /* Location of group */
+    H5VL_object_t      *vol_obj         = NULL;         /* Object token of loc_id */
+    H5VL_loc_params_t   loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", loc_id, oinfo);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "oinfo parameter cannot be NULL")
 
+    /* Set location struct fields */
+    loc_params.type         = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type     = H5I_get_type(loc_id);
+
+    /* Get the location object */
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
     /* Retrieve the object's information */
-    if(H5G_loc_info(&loc, ".", oinfo/*out*/, H5O_INFO_ALL) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_GET_INFO, &loc_params, oinfo, H5O_INFO_ALL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
 done:
@@ -122,15 +132,14 @@ done:
 herr_t
 H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
 {
-    H5G_loc_t   loc;                    /* Location of group */
+    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*s*xi", loc_id, name, oinfo, lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name parameter cannot be NULL")
     if(!*name)
@@ -142,8 +151,18 @@ H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t la
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Fill out location struct */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name    = name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+
+    /* Get the location object */
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
     /* Retrieve the object's information */
-    if(H5G_loc_info(&loc, name, oinfo/*out*/, H5O_INFO_ALL) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_GET_INFO, &loc_params, oinfo, H5O_INFO_ALL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object: '%s'", name)
 
 done:
@@ -169,9 +188,8 @@ herr_t
 H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, hid_t lapl_id)
 {
-    H5G_loc_t   loc;                    /* Location of group */
-    H5G_loc_t   obj_loc;                /* Location used to open group */
-    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
+    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -179,8 +197,6 @@ H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type,
              lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!group_name || !*group_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -194,15 +210,23 @@ H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    loc_params.type = H5VL_OBJECT_BY_IDX;
+    loc_params.loc_data.loc_by_idx.name = group_name;
+    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params.loc_data.loc_by_idx.order = order;
+    loc_params.loc_data.loc_by_idx.n = n;
+    loc_params.loc_data.loc_by_idx.lapl_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* Get the location object */
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
     /* Retrieve the object's information */
-    if(H5O__get_info_by_idx(&loc, group_name, idx_type, order, n, oinfo, H5O_INFO_ALL) < 0)
+    if(H5VL_object_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_OBJECT_GET_INFO, &loc_params, oinfo, H5O_INFO_ALL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get info for object")
 
 done:
-    /* Release the object location */
-    if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_idx1() */
 
@@ -243,15 +267,14 @@ herr_t
 H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     H5O_iterate_t op, void *op_data)
 {
-    H5G_loc_t           loc;
+    H5VL_object_t      *vol_obj     = NULL;     /* Object token of loc_id */
+    H5VL_loc_params_t   loc_params;
     herr_t              ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iIiIox*x", obj_id, idx_type, order, op, op_data);
 
     /* Check args */
-    if(H5G_loc(obj_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
@@ -259,8 +282,16 @@ H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
+    /* Get the location object */
+    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set location parameters */
+    loc_params.type         = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type     = H5I_get_type(obj_id);
+
     /* Visit the objects */
-    if((ret_value = H5O__visit(&loc, ".", idx_type, order, op, op_data, H5O_INFO_ALL)) < 0)
+    if((ret_value = H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)idx_type, (int)order, op, op_data, H5O_INFO_ALL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
@@ -304,7 +335,8 @@ herr_t
 H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id)
 {
-    H5G_loc_t           loc;
+    H5VL_object_t       *vol_obj    = NULL;     /* Object token of loc_id */
+    H5VL_loc_params_t   loc_params; 
     herr_t              ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -312,8 +344,6 @@ H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
              lapl_id);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!obj_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "obj_name parameter cannot be NULL")
     if(!*obj_name)
@@ -329,8 +359,18 @@ H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Get the location object */
+    if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Set location parameters */
+    loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name    = obj_name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type                     = H5I_get_type(loc_id);
+
     /* Visit the objects */
-    if((ret_value = H5O__visit(&loc, obj_name, idx_type, order, op, op_data, H5O_INFO_ALL)) < 0)
+    if((ret_value = H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)idx_type, (int)order, op, op_data, H5O_INFO_ALL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:

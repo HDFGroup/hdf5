@@ -27,6 +27,7 @@
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
 #include "H5PBprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /*
  * This file needs to access private information from the H5F package.
@@ -96,7 +97,7 @@ print_elapsed_time(struct timespec *lastp, const char *fn, int ln)
 
     timespecsub(&now, &last, &diff);
 
-    elapsed_ns = diff.tv_sec * (uint64_t)1000000000 + diff.tv_nsec;
+    elapsed_ns = (uint64_t)diff.tv_sec * (uint64_t)1000000000 + diff.tv_nsec;
 
 #if 0
     printf("%5" PRIu64 ".%03" PRIu64 " %s.%d\n",
@@ -112,7 +113,7 @@ swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
     H5F_vfd_swmr_config_t config = {
       .version = H5F__CURR_VFD_SWMR_CONFIG_VERSION
     , .tick_len = 4
-    , .max_lag = 5
+    , .max_lag = max_lag
     , .writer = true
     , .md_pages_reserved = 128
     };
@@ -218,7 +219,7 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
     int         i;
     int         num_elements;
     int         j;
-    char        dset_name[10];
+    char        dset_name[32];
 
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -355,14 +356,14 @@ open_file(char *filename, hid_t fapl, hsize_t page_size,
     int         i;
     int         j;
     int         num_elements;
-    char        dset_name[10];
+    char        dset_name[32];
     H5F_t       *f = NULL;
 
     if((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     if(f->shared->pb_ptr == NULL)
@@ -714,7 +715,7 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     const haddr_t addr = H5MF_alloc(f, H5FD_MEM_BTREE,
@@ -861,7 +862,7 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     last = print_elapsed_time(&last, __func__, __LINE__);
@@ -1056,7 +1057,7 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     const haddr_t addr = H5MF_alloc(f, H5FD_MEM_BTREE,
@@ -1095,7 +1096,7 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
      * appear at the VFD layer, but it may reside in the LRU queue
      * for a while if we do not flush the page buffer.
      */
-    if (H5PB_flush(f) < 0)
+    if (H5PB_flush(f->shared) < 0)
         FAIL_STACK_ERROR;
 
     /* All elements read using the VFD should be -1. */
@@ -1203,7 +1204,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if (NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
@@ -1500,7 +1501,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* allocate space for 2000 elements */
@@ -1531,7 +1532,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
 
     /* verify addr + 0 is the only raw data page in the page buffer */
     search_addr = addr;
-    if((H5PB_page_exists(f, search_addr, &page_exists) < 0) || (!page_exists))
+    if((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
     if (f->shared->pb_ptr->curr_rd_pages != 1)
         FAIL_STACK_ERROR;
@@ -1552,10 +1553,10 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
      * the page buffer.
      */
     search_addr = addr + sizeof(int)*200;
-    if((H5PB_page_exists(f, search_addr, &page_exists) < 0) || (!page_exists))
+    if((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
     search_addr = addr + sizeof(int)*400;
-    if((H5PB_page_exists(f, search_addr, &page_exists) < 0) || (!page_exists))
+    if((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
     if (f->shared->pb_ptr->curr_rd_pages != 2)
         FAIL_STACK_ERROR;
@@ -1580,10 +1581,10 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
      * the page buffer.
      */
     search_addr = addr + sizeof(int)*200;
-    if((H5PB_page_exists(f, search_addr, &page_exists) < 0) || (!page_exists))
+    if((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
     search_addr = addr + sizeof(int)*400;
-    if((H5PB_page_exists(f, search_addr, &page_exists) < 0) || (!page_exists))
+    if((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
     if (f->shared->pb_ptr->curr_rd_pages != 2)
         FAIL_STACK_ERROR;
@@ -1608,10 +1609,10 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
      * the page buffer.
      */
     search_addr = addr + sizeof(int)*200;
-    if((H5PB_page_exists(f, search_addr, &page_exists) < 0) || (!page_exists))
+    if((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
     search_addr = addr + sizeof(int)*1200;
-    if((H5PB_page_exists(f, search_addr, &page_exists) < 0) || (!page_exists))
+    if((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
     if (f->shared->pb_ptr->curr_rd_pages != 2)
         FAIL_STACK_ERROR;
@@ -1637,10 +1638,10 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
      * the page buffer.
      */
     search_addr = addr + sizeof(int)*200;
-    if((H5PB_page_exists(f, search_addr, &page_exists) < 0) || (!page_exists))
+    if((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
     search_addr = addr + sizeof(int)*400;
-    if((H5PB_page_exists(f, search_addr, &page_exists) < 0) || (!page_exists))
+    if((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
     if (f->shared->pb_ptr->curr_rd_pages != 2)
         FAIL_STACK_ERROR;
@@ -1660,7 +1661,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     /* verify that addr + 200 is the only raw data page in the page buffer.
      */
     search_addr = addr + sizeof(int)*200;
-    if((H5PB_page_exists(f, search_addr, &page_exists) < 0) || (!page_exists))
+    if((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
     if (f->shared->pb_ptr->curr_rd_pages != 1)
         FAIL_STACK_ERROR;
@@ -1782,7 +1783,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
@@ -1925,7 +1926,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
@@ -2069,7 +2070,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
@@ -2258,7 +2259,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     pb_ptr = f->shared->pb_ptr;
@@ -2507,7 +2508,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.

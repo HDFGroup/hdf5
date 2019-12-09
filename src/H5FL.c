@@ -642,7 +642,7 @@ H5FL__reg_term(void)
         tmp = H5FL_reg_gc_head.first->next;
 
 #ifdef H5FL_DEBUG
-printf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_reg_gc_head.first->list->name, (int)H5FL_reg_gc_head.first->list->allocated);
+HDprintf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_reg_gc_head.first->list->name, (int)H5FL_reg_gc_head.first->list->allocated);
 #endif /* H5FL_DEBUG */
         /* Check if the list has allocations outstanding */
         if(H5FL_reg_gc_head.first->list->allocated > 0) {
@@ -1055,7 +1055,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 #endif /* H5FL_TRACK */
 
     /* Get the pointer to the native block info header in front of the native block to free */
-    temp=(H5FL_blk_list_t *)((unsigned char *)block-sizeof(H5FL_blk_list_t)); /*lint !e826 Pointer-to-pointer cast is appropriate here */
+    temp = (H5FL_blk_list_t *)((void *)((unsigned char *)block - sizeof(H5FL_blk_list_t))); /*lint !e826 Pointer-to-pointer cast is appropriate here */
 
     /* Save the block's size for later */
     free_size=temp->size;
@@ -1133,7 +1133,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
         H5FL_blk_list_t *temp;      /* Temp. ptr to the new block node allocated */
 
         /* Get the pointer to the chunk info header in front of the chunk to free */
-        temp=(H5FL_blk_list_t *)((unsigned char *)block - (sizeof(H5FL_blk_list_t) + H5FL_TRACK_SIZE)); /*lint !e826 Pointer-to-pointer cast is appropriate here */
+        temp = (H5FL_blk_list_t *)((void *)((unsigned char *)block - (sizeof(H5FL_blk_list_t) + H5FL_TRACK_SIZE))); /*lint !e826 Pointer-to-pointer cast is appropriate here */
 
         /* check if we are actually changing the size of the buffer */
         if(new_size!=temp->size) {
@@ -1142,7 +1142,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
             if((ret_value=H5FL_blk_malloc(head,new_size H5FL_TRACK_INFO_INT))==NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for block")
             blk_size=MIN(new_size,temp->size);
-            HDmemcpy(ret_value,block,blk_size);
+            H5MM_memcpy(ret_value,block,blk_size);
             H5FL_blk_free(head,block);
         } /* end if */
         else {
@@ -1312,7 +1312,7 @@ H5FL__blk_term(void)
         tmp = H5FL_blk_gc_head.first->next;
 
 #ifdef H5FL_DEBUG
-printf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_blk_gc_head.first->pq->name, (int)H5FL_blk_gc_head.first->pq->allocated);
+HDprintf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_blk_gc_head.first->pq->name, (int)H5FL_blk_gc_head.first->pq->allocated);
 #endif /* H5FL_DEBUG */
 
         /* Check if the list has allocations outstanding */
@@ -1430,7 +1430,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
     HDassert(head->init);
 
     /* Get the pointer to the info header in front of the block to free */
-    temp=(H5FL_arr_list_t *)((unsigned char *)obj-sizeof(H5FL_arr_list_t)); /*lint !e826 Pointer-to-pointer cast is appropriate here */
+    temp = (H5FL_arr_list_t *)((void *)((unsigned char *)obj - sizeof(H5FL_arr_list_t))); /*lint !e826 Pointer-to-pointer cast is appropriate here */
 
     /* Get the number of elements */
     free_nelem=temp->nelem;
@@ -1619,7 +1619,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
         HDassert((int)new_elem <= head->maxelem);
 
         /* Get the pointer to the info header in front of the block to free */
-        temp = (H5FL_arr_list_t *)((unsigned char *)obj - sizeof(H5FL_arr_list_t)); /*lint !e826 Pointer-to-pointer cast is appropriate here */
+        temp = (H5FL_arr_list_t *)((void *)((unsigned char *)obj - sizeof(H5FL_arr_list_t))); /*lint !e826 Pointer-to-pointer cast is appropriate here */
 
         /* Check if the size is really changing */
         if(temp->nelem != new_elem) {
@@ -1630,7 +1630,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
 
             /* Copy the appropriate amount of elements */
             blk_size = head->list_arr[MIN(temp->nelem, new_elem)].size;
-            HDmemcpy(ret_value, obj, blk_size);
+            H5MM_memcpy(ret_value, obj, blk_size);
 
             /* Free the old block */
             H5FL_arr_free(head, obj);
@@ -1780,7 +1780,7 @@ H5FL__arr_term(void)
 
         /* Check if the list has allocations outstanding */
 #ifdef H5FL_DEBUG
-printf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_arr_gc_head.first->list->name, (int)H5FL_arr_gc_head.first->list->allocated);
+HDprintf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_arr_gc_head.first->list->name, (int)H5FL_arr_gc_head.first->list->allocated);
 #endif /* H5FL_DEBUG */
         if(H5FL_arr_gc_head.first->list->allocated > 0) {
             /* Add free list to the list of nodes with allocations open still */
@@ -2408,7 +2408,7 @@ H5FL__fac_term_all(void)
         tmp = H5FL_fac_gc_head.first->next;
 
 #ifdef H5FL_DEBUG
-printf("%s: head->size = %d, head->allocated = %d\n", FUNC, (int)H5FL_fac_gc_head.first->list->size, (int)H5FL_fac_gc_head.first->list->allocated);
+HDprintf("%s: head->size = %d, head->allocated = %d\n", FUNC, (int)H5FL_fac_gc_head.first->list->size, (int)H5FL_fac_gc_head.first->list->allocated);
 #endif /* H5FL_DEBUG */
 
         /* The list cannot have any allocations outstanding */

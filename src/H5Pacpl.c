@@ -33,6 +33,7 @@
 #include "H5private.h"          /* Generic Functions                        */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Ppkg.h"             /* Property lists                           */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 
 /****************/
@@ -82,5 +83,4 @@ const H5P_libclass_t H5P_CLS_ACRT[1] = {{
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 

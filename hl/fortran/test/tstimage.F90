@@ -62,7 +62,7 @@ character(len=4), parameter :: dsetname2 = "img2"    ! dataset name
 character(len=15), parameter :: il ="INTERLACE_PIXEL"! dataset name
 integer(hid_t) :: file_id                            ! file identifier
 integer(hsize_t), parameter :: width  = 500          ! width of image
-integer(hsize_t), parameter :: height = 200          ! height of image
+integer(hsize_t), parameter :: height = 270          ! height of image
 integer, parameter :: pal_entries = 9                ! palette number of entries
 integer, dimension(width*height) :: buf1             ! data buffer
 integer, dimension(width*height) :: bufr1            ! data buffer

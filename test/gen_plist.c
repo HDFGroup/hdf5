@@ -125,6 +125,9 @@ main(void)
     if((ret = H5Pset_fill_value(dcpl1, H5T_STD_I32BE, &fill)) < 0)
         assert(ret > 0);
 
+    if((ret = H5Pset_dset_no_attrs_hint(dcpl1, FALSE)) < 0)
+        assert(ret > 0);
+
     max_size[0] = 100;
     if((ret = H5Pset_external(dcpl1, "ext1.data", (off_t)0, 
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
@@ -363,9 +366,6 @@ main(void)
     if((ret = H5Pset_mdc_image_config(fapl1, &my_cache_image_config)) < 0)
         assert(ret > 0);
 
-    if((ret = H5Pset_core_write_tracking(fapl1, TRUE, (size_t)(1024 * 1024))) < 0)
-        assert(ret > 0);
-
     if((ret = encode_plist(fapl1, little_endian, word_length, "testfiles/plist_files/fapl_")) < 0)
         assert(ret > 0);
 
@@ -466,17 +466,17 @@ encode_plist(hid_t plist_id, int little_endian, int word_length, const char *fil
         HDassert(ret > 0);
 
     /* first call to encode returns only the size of the buffer needed */
-    if((ret = H5Pencode(plist_id, NULL, &temp_size)) < 0)
+    if((ret = H5Pencode2(plist_id, NULL, &temp_size, H5P_DEFAULT)) < 0)
         HDassert(ret > 0);
 
-    temp_buf = (void *)HDmalloc(temp_size);
+    temp_buf = HDcalloc(1, temp_size);
     HDassert(temp_buf);
 
-    if((ret = H5Pencode(plist_id, temp_buf, &temp_size)) < 0)
+    if((ret = H5Pencode2(plist_id, temp_buf, &temp_size, H5P_DEFAULT)) < 0)
         HDassert(ret > 0);
 
     fd = HDopen(filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
-    HDassert(fd > 0);
+    HDassert(fd >= 0);
 
     write_size = HDwrite(fd, temp_buf, temp_size);
     HDassert(write_size == (ssize_t)temp_size);

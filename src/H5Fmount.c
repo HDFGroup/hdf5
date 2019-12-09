@@ -24,6 +24,7 @@
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Pprivate.h"         /* Property lists                           */
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* PRIVATE PROTOTYPES */
 static void H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
@@ -438,8 +439,8 @@ H5F_is_mount(const H5F_t *file)
 herr_t
 H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 {
-    H5G_loc_t	    loc;                        /* Parent location      */
-    H5F_t	       *child = NULL;               /* Child object         */
+    H5VL_object_t  *loc_vol_obj = NULL;         /* Parent object        */
+    H5VL_object_t  *child_vol_obj = NULL;       /* Child object         */
     H5I_type_t      loc_type;                   /* ID type of location  */
     H5I_type_t      child_type;                 /* ID type of child     */
     herr_t          ret_value = SUCCEED;        /* Return value         */
@@ -469,15 +470,19 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Get the location object */
-    if(H5G_loc(loc_id, &loc) < 0)
+    if(NULL == (loc_vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get location object")
 
     /* Get the child object */
-    if(NULL == (child = (H5F_t *)H5I_object_verify(child_id, H5I_FILE)))
+    if(NULL == (child_vol_obj = (H5VL_object_t *)H5I_object(child_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get child object")
 
+    /* Check if both objects are associated with the same VOL connector */
+    if(loc_vol_obj->connector->cls->value != child_vol_obj->connector->cls->value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL connector")
+
     /* Perform the mount operation */
-    if(H5F__mount(&loc, name, child, plist_id) < 0)
+    if(H5VL_file_specific(loc_vol_obj, H5VL_FILE_MOUNT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)loc_type, name, child_vol_obj->data, plist_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
 done:
@@ -504,7 +509,7 @@ done:
 herr_t
 H5Funmount(hid_t loc_id, const char *name)
 {
-    H5G_loc_t	    loc;                        /* Parent location      */
+    H5VL_object_t  *vol_obj = NULL;             /* Parent object        */
     H5I_type_t      loc_type;                   /* ID type of location  */
     herr_t          ret_value = SUCCEED;        /* Return value         */
 
@@ -525,11 +530,11 @@ H5Funmount(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Get the location object */
-    if(H5G_loc(loc_id, &loc) < 0)
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get location object")
 
     /* Perform the unmount operation */
-    if(H5F__unmount(&loc, name) < 0)
+    if(H5VL_file_specific(vol_obj, H5VL_FILE_UNMOUNT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)loc_type, name) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
 done:
@@ -563,7 +568,7 @@ H5F__mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_ob
     HDassert(nopen_objs);
 
     /* If this file is still open, increment number of file IDs open */
-    if(f->file_id > 0)
+    if(H5F_ID_EXISTS(f))
         *nopen_files += 1;
 
     /* Increment number of open objects in file

@@ -12,11 +12,9 @@
 #ifndef _H5FDvfd_swmr_private_H
 #define _H5FDvfd_swmr_private_H
 
-#define SECOND_TO_NANOSECS          1000000000 /* Second to nanoseconds */
-#define TENTH_SEC_TO_NANOSECS       100000000  /* 0.1 second to nanoseconds */
-
 /* Forward declaration */
 struct H5F_t;
+struct H5F_shared_t;
 struct H5FD_vfd_swmr_idx_entry_t;
 
 /* 
@@ -75,10 +73,10 @@ extern H5F_vfd_swmr_eot_queue_entry_t *vfd_swmr_eot_queue_tail_g;
 
 H5_DLL herr_t H5F_vfd_swmr_init(struct H5F_t *f, hbool_t file_create);
 H5_DLL herr_t H5F_vfd_swmr_close_or_flush(struct H5F_t *f, hbool_t closing);
-H5_DLL herr_t H5F_update_vfd_swmr_metadata_file(struct H5F_t *f, uint32_t index_len, 
-    struct H5FD_vfd_swmr_idx_entry_t *index);
-H5_DLL herr_t H5F_vfd_swmr_writer__delay_write(struct H5F_t *f, uint64_t page,
-    uint64_t *delay_write_until_ptr);
+H5_DLL herr_t H5F_update_vfd_swmr_metadata_file(struct H5F_t *f,
+    uint32_t index_len, struct H5FD_vfd_swmr_idx_entry_t *index);
+H5_DLL herr_t H5F_vfd_swmr_writer__delay_write(struct H5F_shared_t *, uint64_t,
+    uint64_t *);
 H5_DLL herr_t H5F_vfd_swmr_writer__prep_for_flush_or_close(struct H5F_t *f);
 H5_DLL herr_t H5F_vfd_swmr_writer_end_of_tick(struct H5F_t *f);
 H5_DLL herr_t H5F_vfd_swmr_writer__dump_index(struct H5F_t * f);

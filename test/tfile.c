@@ -24,6 +24,7 @@
 
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /*
  * This file needs to access private information from the H5F package.
@@ -168,11 +169,20 @@ const char *FILESPACE_NAME[] = {
     NULL
 };
 
+
+/* Declarations for test_libver_bounds_copy():                          */
+/* SRC_FILE: source file created under 1.8 branch with latest format    */
+/* DST_FILE: destination file for copying the dataset in SRC_FILE       */
+/* DSET_DS1: the dataset created in SRC_FILE to be copied to DST_FILE   */
+#define SRC_FILE        "fill18.h5"
+#define DST_FILE        "fill18_copy.h5"
+#define DSET_DS1        "DS1"
+
 /* Local test function declarations for version bounds */
 static void test_libver_bounds_low_high(void);
 static void test_libver_bounds_super(hid_t fapl);
-static void test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr);
-static void test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr);
+static void test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm);
+static void test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm);
 static void test_libver_bounds_obj(hid_t fapl);
 static void test_libver_bounds_dataset(hid_t fapl);
 static void test_libver_bounds_dataspace(hid_t fapl);
@@ -956,7 +966,7 @@ test_file_close(void)
 ****************************************************************/
 static void
 create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
-    hid_t *ret_gid2, hid_t *ret_gid3)
+        hid_t *ret_gid2, hid_t *ret_gid3)
 {
     ssize_t    oid_count;
     herr_t    ret;
@@ -1088,14 +1098,14 @@ test_get_obj_ids(void)
 
     /* creates NGROUPS groups under the root group */
     for(m = 0; m < NGROUPS; m++) {
-        sprintf(gname, "group%d", m);
+        HDsprintf(gname, "group%d", m);
         gid[m] = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(gid[m], FAIL, "H5Gcreate2");
     }
 
     /* create NDSETS datasets under the root group */
     for(n = 0; n < NDSETS; n++) {
-         sprintf(dname, "dataset%d", n);
+         HDsprintf(dname, "dataset%d", n);
          dset[n] = H5Dcreate2(fid, dname, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
          CHECK(dset[n], FAIL, "H5Dcreate2");
     }
@@ -1110,8 +1120,7 @@ test_get_obj_ids(void)
 
     /* Call the public function H5F_get_obj_ids to use H5F__get_objects.  User reported having problem here.
      * that the returned size (ret_count) from H5Fget_obj_ids is one greater than the size passed in
-     * (oid_list_size).
-     */
+     * (oid_list_size) */
     ret_count = H5Fget_obj_ids(fid, H5F_OBJ_ALL, (size_t)oid_list_size, oid_list);
     CHECK(ret_count, FAIL, "H5Fget_obj_ids");
     VERIFY(ret_count, oid_list_size, "H5Fget_obj_count");
@@ -1156,7 +1165,7 @@ test_get_obj_ids(void)
 
     /* Open NDSETS datasets under the root group */
     for(n = 0; n < NDSETS; n++) {
-         sprintf(dname, "dataset%d", n);
+         HDsprintf(dname, "dataset%d", n);
          dset[n] = H5Dopen2(fid, dname, H5P_DEFAULT);
          CHECK(dset[n], FAIL, "H5Dcreate2");
     }
@@ -1424,18 +1433,22 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
                         VERIFY(oid_list[i], did, "H5Fget_obj_ids");
                         break;
 
+                    case H5I_MAP:
+                        /* TODO: Not supported in native VOL connector yet */
+
                     case H5I_UNINIT:
                     case H5I_BADID:
                     case H5I_DATATYPE:
                     case H5I_DATASPACE:
                     case H5I_ATTR:
-                    case H5I_REFERENCE:
                     case H5I_VFL:
+                    case H5I_VOL:
                     case H5I_GENPROP_CLS:
                     case H5I_GENPROP_LST:
                     case H5I_ERROR_CLASS:
                     case H5I_ERROR_MSG:
                     case H5I_ERROR_STACK:
+                    case H5I_SPACE_SEL_ITER:
                     case H5I_NTYPES:
                     default:
                         ERROR("H5Fget_obj_ids");
@@ -1586,6 +1599,143 @@ test_file_perm2(void)
 } /* end test_file_perm2() */
 
 
+/****************************************************************
+**
+**  test_file_is_accessible(): low-level file test routine.
+**      Clone of test_file_ishdf5 but uses the newer VOL-enabled
+**      H5Fis_accessible() API call.
+**
+*****************************************************************/
+#define FILE_IS_ACCESSIBLE  "tfile_is_accessible"
+static void
+test_file_is_accessible(const char *env_h5_drvr)
+{
+    hid_t           fid = H5I_INVALID_HID;          /* File opened with read-write permission */
+    hid_t           fcpl_id = H5I_INVALID_HID;      /* File creation property list */
+    hid_t           fapl_id = H5I_INVALID_HID;      /* File access property list */
+    int             fd;                             /* POSIX file descriptor */
+    char filename[FILENAME_LEN];                    /* Filename to use */
+    char sb_filename[FILENAME_LEN];                 /* Name of file w/ superblock */
+    ssize_t         nbytes;                         /* Number of bytes written */
+    unsigned        u;                              /* Local index variable */
+    unsigned char   buf[1024];                      /* Buffer of data to write */
+    htri_t          is_hdf5;                        /* Whether a file is an HDF5 file */
+    int             posix_ret;                      /* Return value from POSIX calls */
+    herr_t          ret;                            /* Return value from HDF5 calls */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Detection of HDF5 Files\n"));
+
+    /* Get FAPL */
+    fapl_id = h5_fileaccess();
+    CHECK(fapl_id, H5I_INVALID_HID, "H5Pcreate");
+
+    /* Fix up filenames
+     * For VFDs that create multiple files, we also need the name
+     * of the file with the superblock. With single-file VFDs, this
+     * will be equal to the one from h5_fixname().
+     */
+    h5_fixname(FILE_IS_ACCESSIBLE, fapl_id, filename, sizeof(filename));
+    h5_fixname_superblock(FILE_IS_ACCESSIBLE, fapl_id, sb_filename, sizeof(filename));
+
+    /****************/
+    /* Normal usage */
+    /****************/
+
+    /* Create a file */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Verify that the file is an HDF5 file */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
+
+    /*******************************/
+    /* Non-default user block size */
+    /*******************************/
+
+    /* This test is not currently working for the family VFD.
+     * There are failures when creating files with userblocks.
+     */
+    if(0 != HDstrcmp(env_h5_drvr, "family")) {
+        /* Create a file creation property list with a non-default user block size */
+        fcpl_id = H5Pcreate(H5P_FILE_CREATE);
+        CHECK(fcpl_id, H5I_INVALID_HID, "H5Pcreate");
+
+        ret = H5Pset_userblock(fcpl_id, (hsize_t)2048);
+        CHECK(ret, FAIL, "H5Pset_userblock");
+
+        /* Create file with non-default user block */
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+        CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+        /* Release file-creation property list */
+        ret = H5Pclose(fcpl_id);
+        CHECK(ret, FAIL, "H5Pclose");
+
+        /* Close file */
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
+
+        /* Verify that the file is an HDF5 file */
+        is_hdf5 = H5Fis_accessible(filename, fapl_id);
+        VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
+    } /* end if */
+
+    /***********************/
+    /* EMPTY non-HDF5 file */
+    /***********************/
+
+    /* Create non-HDF5 file and check it */
+    fd = HDopen(sb_filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
+    CHECK(fd, (-1), "HDopen");
+
+    /* Close the file */
+    posix_ret = HDclose(fd);
+    CHECK(posix_ret, (-1), "HDclose");
+
+    /* Verify that the file is NOT an HDF5 file */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, FALSE, "H5Fis_accessible (empty non-HDF5 file)");
+
+    /***************************/
+    /* Non-empty non-HDF5 file */
+    /***************************/
+
+    /* Create non-HDF5 file and check it */
+    fd = HDopen(sb_filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
+    CHECK(fd, (-1), "HDopen");
+
+    /* Initialize information to write */
+    for (u = 0; u < 1024; u++)
+        buf[u]=(unsigned char)u;
+
+    /* Write some information */
+    nbytes = HDwrite(fd, buf, (size_t)1024);
+    VERIFY(nbytes, 1024, "HDwrite");
+
+    /* Close the file */
+    posix_ret = HDclose(fd);
+    CHECK(posix_ret, (-1), "HDclose");
+
+    /* Verify that the file is not an HDF5 file */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, FALSE, "H5Fis_accessible (non-HDF5 file)");
+
+
+    /* Clean up files */
+    h5_delete_test_file(filename, fapl_id);
+
+    /* Close property list */
+    ret = H5Pclose(fapl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+
+} /* end test_file_is_accessible() */
+
 
 /****************************************************************
 **
@@ -1594,64 +1744,99 @@ test_file_perm2(void)
 **      correctly in variuous situations.
 **
 *****************************************************************/
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 static void
-test_file_ishdf5(void)
+test_file_ishdf5(const char *env_h5_drvr)
 {
-    hid_t    file;      /* File opened with read-write permission */
-    hid_t    fcpl;      /* File creation property list */
-    int      fd;        /* File Descriptor */
-    ssize_t  nbytes;    /* Number of bytes written */
-    unsigned u;         /* Local index variable */
-    unsigned char buf[1024];    /* Buffer of data to write */
-    htri_t   status;    /* Whether a file is an HDF5 file */
-    herr_t   ret;
+    hid_t           fid = H5I_INVALID_HID;          /* File opened with read-write permission */
+    hid_t           fcpl_id = H5I_INVALID_HID;      /* File creation property list */
+    hid_t           fapl_id = H5I_INVALID_HID;      /* File access property list */
+    int             fd;                             /* POSIX file descriptor */
+    char filename[FILENAME_LEN];                    /* Filename to use */
+    char sb_filename[FILENAME_LEN];                 /* Name of file w/ superblock */
+    ssize_t         nbytes;                         /* Number of bytes written */
+    unsigned        u;                              /* Local index variable */
+    unsigned char   buf[1024];                      /* Buffer of data to write */
+    htri_t          is_hdf5;                        /* Whether a file is an HDF5 file */
+    int             posix_ret;                      /* Return value from POSIX calls */
+    herr_t          ret;                            /* Return value from HDF5 calls */
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Detection of HDF5 Files\n"));
+    MESSAGE(5, ("Testing Detection of HDF5 Files (using deprecated H5Fis_hdf5() call)\n"));
+
+    /* Get FAPL */
+    fapl_id = h5_fileaccess();
+    CHECK(fapl_id, H5I_INVALID_HID, "H5Pcreate");
+
+    /* Fix up filenames
+     * For VFDs that create multiple files, we also need the name
+     * of the file with the superblock. With single-file VFDs, this
+     * will be equal to the one from h5_fixname().
+     */
+    h5_fixname(FILE_IS_ACCESSIBLE, fapl_id, filename, sizeof(filename));
+    h5_fixname_superblock(FILE_IS_ACCESSIBLE, fapl_id, sb_filename, sizeof(filename));
+
+    /****************/
+    /* Normal usage */
+    /****************/
 
     /* Create a file */
-    file = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(file, FAIL, "H5Fcreate");
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Close file */
-    ret = H5Fclose(file);
+    ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is an HDF5 file */
-    status = H5Fis_hdf5(FILE1);
-    VERIFY(status, TRUE, "H5Fis_hdf5");
+    is_hdf5 = H5Fis_hdf5(sb_filename);
+    VERIFY(is_hdf5, TRUE, "H5Fis_hdf5");
 
+    /*******************************/
+    /* Non-default user block size */
+    /*******************************/
 
-    /* Create a file creation property list with a non-default user block size */
-    fcpl = H5Pcreate(H5P_FILE_CREATE);
-    CHECK(fcpl, FAIL, "H5Pcreate");
+    /* This test is not currently working for the family VFD.
+     * There are failures when creating files with userblocks.
+     */
+    if(0 != HDstrcmp(env_h5_drvr, "family")) {
+        /* Create a file creation property list with a non-default user block size */
+        fcpl_id = H5Pcreate(H5P_FILE_CREATE);
+        CHECK(fcpl_id, H5I_INVALID_HID, "H5Pcreate");
 
-    ret = H5Pset_userblock(fcpl, (hsize_t)2048);
-    CHECK(ret, FAIL, "H5Pset_userblock");
+        ret = H5Pset_userblock(fcpl_id, (hsize_t)2048);
+        CHECK(ret, FAIL, "H5Pset_userblock");
 
-    /* Create file with non-default user block */
-    file = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
-    CHECK(file, FAIL, "H5Fcreate");
+        /* Create file with non-default user block */
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+        CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
-    /* Release file-creation property list */
-    ret = H5Pclose(fcpl);
-    CHECK(ret, FAIL, "H5Pclose");
+        /* Release file creation property list */
+        ret = H5Pclose(fcpl_id);
+        CHECK(ret, FAIL, "H5Pclose");
 
-    /* Close file */
-    ret = H5Fclose(file);
-    CHECK(ret, FAIL, "H5Fclose");
+        /* Close file */
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
 
-    /* Verify that the file is an HDF5 file */
-    status = H5Fis_hdf5(FILE1);
-    VERIFY(status, TRUE, "H5Fis_hdf5");
+        /* Verify that the file is an HDF5 file */
+        is_hdf5 = H5Fis_hdf5(sb_filename);
+        VERIFY(is_hdf5, TRUE, "H5Fis_hdf5");
+    } /* end if */
 
+    /***************************/
+    /* Non-empty non-HDF5 file */
+    /***************************/
 
-    /* Create non-HDF5 file and check it */
-    fd = HDopen(FILE1, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW);
-    CHECK(fd, FAIL, "HDopen");
+    /* Create non-HDF5 file. Use the calculated superblock
+     * filename to avoid the format strings that will make
+     * open(2) sad.
+     */
+    fd = HDopen(sb_filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
+    CHECK(fd, (-1), "HDopen");
 
     /* Initialize information to write */
-    for(u=0; u<1024; u++)
+    for(u = 0; u < 1024; u++)
         buf[u]=(unsigned char)u;
 
     /* Write some information */
@@ -1659,14 +1844,119 @@ test_file_ishdf5(void)
     VERIFY(nbytes, 1024, "HDwrite");
 
     /* Close the file */
-    ret = HDclose(fd);
-    CHECK(ret, FAIL, "HDclose");
+    posix_ret = HDclose(fd);
+    CHECK(posix_ret, (-1), "HDclose");
 
     /* Verify that the file is not an HDF5 file */
-    status = H5Fis_hdf5(FILE1);
-    VERIFY(status, FALSE, "H5Fis_hdf5");
+    is_hdf5 = H5Fis_hdf5(sb_filename);
+    VERIFY(is_hdf5, FALSE, "H5Fis_hdf5");
+
+
+    /* Clean up files */
+    h5_delete_test_file(filename, fapl_id);
+
+    /* Close property list */
+    ret = H5Pclose(fapl_id);
+    CHECK(ret, FAIL, "H5Pclose");
 
 } /* end test_file_ishdf5() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+
+/****************************************************************
+**
+**  test_file_delete(): tests H5Fdelete for all VFDs
+**
+*****************************************************************/
+#define FILE_DELETE             "test_file_delete"
+#define FILE_DELETE_NOT_HDF5    "test_file_delete_not_hdf5"
+static void
+test_file_delete(hid_t fapl_id)
+{
+    hid_t       fid = H5I_INVALID_HID;  /* File to be deleted */
+    char        filename[FILENAME_LEN]; /* Filename to use */
+    htri_t      is_hdf5;                /* Whether a file is an HDF5 file */
+    int         fd;                     /* POSIX file descriptor */
+    int         iret;
+    herr_t      ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Deletion of HDF5 Files\n"));
+
+    /*************/
+    /* HDF5 FILE */
+    /*************/
+
+    /* This is just a placeholder until the native VOL connector supports
+     * H5Fdelete().
+     */
+
+    /* Get fapl-dependent filename */
+    h5_fixname(FILE_DELETE, fapl_id, filename, sizeof(filename));
+
+    /* Create a file */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    VERIFY(ret, SUCCEED, "H5Fclose");
+
+    /* Verify that the file is an HDF5 file */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
+
+    /* Attempt to delete the file - should fail */
+    H5E_BEGIN_TRY {
+        ret = H5Fdelete(filename, fapl_id);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fdelete");
+
+    /* Verify that the file still exists */
+    is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
+
+    /* Actually delete the test file */
+    h5_delete_test_file(FILE_DELETE, fapl_id);
+
+    /*****************/
+    /* NON-HDF5 FILE */
+    /*****************/
+
+    /* Get fapl-dependent filename */
+    h5_fixname(FILE_DELETE_NOT_HDF5, fapl_id, filename, sizeof(filename));
+
+    /* Create a non-HDF5 file */
+    fd = HDopen(filename, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW);
+    CHECK_I(fd, "HDopen");
+
+    /* Close the file */
+    ret = HDclose(fd);
+    VERIFY(ret, 0, "HDclose");
+
+    /* Verify that the file is not an HDF5 file */
+    /* Note that you can get a FAIL result when h5_fixname()
+     * perturbs the filename as a file with that exact name
+     * may not have been created since we created it with
+     * open(2) and not the library.
+     */
+    H5E_BEGIN_TRY {
+        is_hdf5 = H5Fis_accessible(filename, fapl_id);
+    } H5E_END_TRY;
+    CHECK(is_hdf5, TRUE, "H5Fis_accessible");
+
+    /* Try to delete it (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5Fdelete(filename, fapl_id);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fdelete");
+
+    /* Delete the file */
+    iret = HDremove(filename);
+    VERIFY(iret, 0, "HDremove");
+
+} /* end test_file_delete() */
+
 
 /****************************************************************
 **
@@ -1807,6 +2097,7 @@ test_file_open_overlap(void)
     hid_t sid;
     ssize_t nobjs;      /* # of open objects */
     unsigned intent;
+    unsigned long fileno1, fileno2;     /* File number */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -1824,6 +2115,19 @@ test_file_open_overlap(void)
     ret = H5Fget_intent(fid1, &intent);
     CHECK(ret, FAIL, "H5Fget_intent");
     VERIFY(intent, H5F_ACC_RDWR, "H5Fget_intent");
+
+    /* Check the file numbers */
+    fileno1 = 0;
+    ret = H5Fget_fileno(fid1, &fileno1);
+    CHECK(ret, FAIL, "H5Fget_fileno");
+    fileno2 = 0;
+    ret = H5Fget_fileno(fid2, &fileno2);
+    CHECK(ret, FAIL, "H5Fget_fileno");
+    VERIFY(fileno1, fileno2, "H5Fget_fileno");
+
+    /* Check that a file number pointer of NULL is ignored */
+    ret = H5Fget_fileno(fid1, NULL);
+    CHECK(ret, FAIL, "H5Fget_fileno");
 
     /* Create a group in file */
     gid = H5Gcreate2(fid1, GROUP1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -2145,6 +2449,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
     hsize_t max_dims2[2] = {H5S_UNLIMITED, H5S_UNLIMITED};    /* Maximum dimension sizes for v2 B-tree index */
     hsize_t chunks[1] = {2}, chunks2[2] = {4, 5};        /* Chunk dimension sizes */
     hsize_t size;                               /* File size */
+    char filename[FILENAME_LEN];    /* Filename to use */
     const char* data[] = {"String 1", "String 2", "String 3", "String 4", "String 5"};    /* Input Data */
     const char* e_data[] = {"String 1", "String 2", "String 3", "String 4", "String 5", "String 6", "String 7"};    /* Input Data */
     char* buffer[5];                /* Output buffer */
@@ -2155,17 +2460,16 @@ test_file_double_file_dataset_open(hbool_t new_format)
     MESSAGE(5, ("Testing double file and dataset open/close\n"));
 
     /* Setting up test file */
-
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    fapl = h5_fileaccess();
     CHECK(fapl, FAIL, "H5Pcreate");
-
     if(new_format) {
         ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
         CHECK(ret, FAIL, "H5Pset_libver_bounds");
     } /* end if */
+    h5_fixname(FILE1, fapl, filename, sizeof filename);
 
     /* Create the test file */
-    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create a chunked dataset with fixed array indexing */
@@ -2247,8 +2551,6 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(ret, FAIL, "H5Sclose");
     ret = H5Pclose(dcpl);
     CHECK(ret, FAIL, "H5Pclose");
-    ret = H5Pclose(fapl);
-    CHECK(ret, FAIL, "H5Pclose");
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
 
@@ -2257,7 +2559,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
      */
 
     /* First file open */
-    fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(filename, H5F_ACC_RDWR, fapl);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* First file's dataset open */
@@ -2272,7 +2574,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Second file open */
-    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl);
     CHECK(fid2, FAIL, "H5Fopen");
 
     /* Second file's dataset open */
@@ -2313,11 +2615,11 @@ test_file_double_file_dataset_open(hbool_t new_format)
      */
 
     /* First file open */
-    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid1 = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Second file open */
-    fid2 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid2 = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
     CHECK(fid2, FAIL, "H5Fopen");
 
     /* Second file's dataset open */
@@ -2338,8 +2640,8 @@ test_file_double_file_dataset_open(hbool_t new_format)
     HDmemset(buffer, 0, sizeof(char*) * 5);
     ret = H5Dread(did2, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     CHECK(ret, FAIL, "H5Dread");
-    ret = H5Dvlen_reclaim(tid2, sid1, H5P_DEFAULT, buffer);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid2, sid1, H5P_DEFAULT, buffer);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Second file's dataset close */
     ret = H5Dclose(did2);
@@ -2353,8 +2655,8 @@ test_file_double_file_dataset_open(hbool_t new_format)
     HDmemset(buffer, 0, sizeof(char*) * 5);
     ret = H5Dread(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     CHECK(ret, FAIL, "H5Dread");
-    ret = H5Dvlen_reclaim(tid2, sid1, H5P_DEFAULT, buffer);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid2, sid1, H5P_DEFAULT, buffer);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* First file's dataset close */
     ret = H5Dclose(did1);
@@ -2378,7 +2680,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
      */
 
     /* First file open */
-    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid1 = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* First file's dataset open */
@@ -2390,7 +2692,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(size, 0, "H5Dget_storage_size");
 
     /* Second file open */
-    fid2 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid2 = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
     CHECK(fid2, FAIL, "H5Fopen");
 
     /* Second file's dataset open */
@@ -2423,7 +2725,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
      *     from second call to H5Dset_extent->...H5D__earray_idx_remove->H5EA_get...H5EA__iblock_protect...H5AC_protect
      */
     /* First file open */
-    fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(filename, H5F_ACC_RDWR, fapl);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* First file's dataset open */
@@ -2442,7 +2744,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Second file open */
-    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl);
     CHECK(fid2, FAIL, "H5Fopen");
 
     /* Second file's dataset open */
@@ -2473,6 +2775,9 @@ test_file_double_file_dataset_open(hbool_t new_format)
     ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");
 
+    /* Close FAPL */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 } /* end test_file_double_dataset_open() */
 
 /****************************************************************
@@ -2537,6 +2842,7 @@ test_userblock_file_size(void)
     hid_t fcpl2_id;
     hsize_t dims[2] = {3, 4};
     hsize_t filesize1, filesize2, filesize;
+    unsigned long fileno1, fileno2;     /* File number */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -2553,6 +2859,15 @@ test_userblock_file_size(void)
     CHECK(file1_id, FAIL, "H5Fcreate");
     file2_id = H5Fcreate(FILE2, H5F_ACC_TRUNC, fcpl2_id, H5P_DEFAULT);
     CHECK(file2_id, FAIL, "H5Fcreate");
+
+    /* Check the file numbers */
+    fileno1 = 0;
+    ret = H5Fget_fileno(file1_id, &fileno1);
+    CHECK(ret, FAIL, "H5Fget_fileno");
+    fileno2 = 0;
+    ret = H5Fget_fileno(file2_id, &fileno2);
+    CHECK(ret, FAIL, "H5Fget_fileno");
+    CHECK(fileno1, fileno2, "H5Fget_fileno");
 
     /* Create groups */
     group1_id = H5Gcreate2(file1_id, GROUP1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -4049,7 +4364,7 @@ test_file_freespace(const char *env_h5_drvr)
 
             /* Create datasets in file */
             for(u = 0; u < 10; u++) {
-                sprintf(name, "Dataset %u", u);
+                HDsprintf(name, "Dataset %u", u);
                 dset = H5Dcreate2(file, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
                 CHECK(dset, FAIL, "H5Dcreate2");
 
@@ -4072,7 +4387,7 @@ test_file_freespace(const char *env_h5_drvr)
 
             /* Delete datasets in file */
             for(k = 9; k >= 0; k--) {
-                sprintf(name, "Dataset %u", (unsigned)k);
+                HDsprintf(name, "Dataset %u", (unsigned)k);
                 ret = H5Ldelete(file, name, H5P_DEFAULT);
                 CHECK(ret, FAIL, "H5Ldelete");
             } /* end for */
@@ -4080,10 +4395,7 @@ test_file_freespace(const char *env_h5_drvr)
             /* Check that there is the right amount of free space in the file */
             free_space = H5Fget_freespace(file);
             CHECK(free_space, FAIL, "H5Fget_freespace");
-            if(new_format)
-                VERIFY(free_space, expected_fs_del, "H5Fget_freespace");
-            else
-                VERIFY(free_space, expected_fs_del, "H5Fget_freespace");
+            VERIFY(free_space, expected_fs_del, "H5Fget_freespace");
 
             /* Close file */
             ret = H5Fclose(file);
@@ -4203,7 +4515,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
 
         /* Create datasets in file */
         for(u = 0; u < 10; u++) {
-            sprintf(name, "Dataset %u", u);
+            HDsprintf(name, "Dataset %u", u);
             dset = H5Dcreate2(file, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
             CHECK(dset, FAIL, "H5Dcreate2");
 
@@ -4221,7 +4533,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
 
         /* Delete odd-numbered datasets in file */
         for(u = 0; u < 10; u++) {
-            sprintf(name, "Dataset %u", u);
+            HDsprintf(name, "Dataset %u", u);
             if(u % 2) {
                 ret = H5Ldelete(file, name, H5P_DEFAULT);
                 CHECK(ret, FAIL, "H5Ldelete");
@@ -4509,7 +4821,7 @@ test_filespace_1_10_0_compatible(void)
     for(j = 0; j < NELMTS(OLD_1_10_0_FILENAME); j++) {
         /* Make a copy of the test file */
         status = h5_make_local_copy(OLD_1_10_0_FILENAME[j], FILE5);
-    CHECK(status, FAIL, "h5_make_local_copy");
+        CHECK(status, FAIL, "h5_make_local_copy");
 
         /* Open the temporary test file */
         fid = H5Fopen(FILE5, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -5036,7 +5348,7 @@ test_libver_bounds_open(void)
     /* Opening VERBFNAME in these combination should succeed.
        For each low bound, verify that it is upgraded properly */
     high = H5F_LIBVER_LATEST;
-    for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++)
+    for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low))
     {
         H5F_libver_t new_low = H5F_LIBVER_EARLIEST;
 
@@ -5055,7 +5367,7 @@ test_libver_bounds_open(void)
         /* Get new low bound and verify that it has been upgraded properly */
         ret = H5Pget_libver_bounds(new_fapl, &new_low, NULL);
         CHECK(ret, FAIL, "H5Pget_libver_bounds");
-        VERIFY(new_low, H5F_LIBVER_LATEST, "Low bound should be upgraded to H5F_LIBVER_LATEST");
+        VERIFY(new_low >= H5F_LIBVER_V110, TRUE, "Low bound should be upgraded to at least H5F_LIBVER_V110");
 
         ret = H5Pclose(new_fapl);
         CHECK(ret, FAIL, "H5Pclose");
@@ -5072,6 +5384,79 @@ test_libver_bounds_open(void)
     CHECK(ret, FAIL, "H5Pclose");
 } /* end test_libver_bounds_open() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_libver_bounds_copy
+ *
+ * Purpose:     Test to verify HDFFV-10800 is fixed:
+ *              This test is copied from the user test program: copy10.c.
+ *              (See attached programs in the jira issue.)
+ *
+ *              The source file used in the test is generated by the user test
+ *              program "fill18.c" with the 1.8 library.  The file is created
+ *              with the latest format and the dataset created in the file
+ *              has version 3 fill value message (latest).
+ *
+ *              The test creates the destination file with (v18, v18) version bounds.
+ *              H5Ocopy() should succeed in copying the dataset in the source file
+ *              to the destination file.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+test_libver_bounds_copy(void)
+{
+    hid_t src_fid = -1;     /* File ID */
+    hid_t dst_fid = -1;     /* File ID */
+    hid_t fapl = -1;        /* File access property list ID */
+    const char *src_fname;  /* Source file name */
+    herr_t ret;             /* Generic return value */
+
+    /* Output message about the test being performed */
+    MESSAGE(5, ("Testing H5Ocopy a dataset in a 1.8 library file to a 1.10 library file\n"));
+
+    /* Get the test file name */
+    src_fname = H5_get_srcdir_filename(SRC_FILE);
+
+    /* Open the source test file */
+    src_fid = H5Fopen(src_fname, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(src_fid, FAIL, "H5Fopen");
+
+    /* Create file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Set library version bounds to (v18, v18) */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_V18);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create the destination file with the fapl */
+    dst_fid = H5Fcreate(DST_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(dst_fid, FAIL, "H5Pcreate");
+
+    /* Close the fapl */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Copy the dataset in the source file to the destination file */
+    ret = H5Ocopy(src_fid, DSET_DS1, dst_fid, DSET_DS1, H5P_DEFAULT, H5P_DEFAULT);
+    VERIFY(ret, SUCCEED, "H5Ocopy");
+
+    /* Close the source file */
+    ret = H5Fclose(src_fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close the destination file */
+    ret = H5Fclose(dst_fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Remove the destination file */
+    HDremove(DST_FILE);
+
+} /* end test_libver_bounds_copy() */
 
 /****************************************************************
 **
@@ -5091,6 +5476,7 @@ test_libver_bounds(void)
     test_libver_bounds_real(H5F_LIBVER_EARLIEST, 1, H5F_LIBVER_LATEST, 2);
     test_libver_bounds_real(H5F_LIBVER_LATEST, 2, H5F_LIBVER_EARLIEST, 2);
     test_libver_bounds_open();
+    test_libver_bounds_copy();
 } /* end test_libver_bounds() */
 
 /**************************************************************************************
@@ -5117,20 +5503,20 @@ test_libver_bounds(void)
 static void
 test_libver_bounds_low_high(void)
 {
-    hid_t fapl = -1;        /* File access property list */
-    H5F_libver_t low, high; /* Low and high bounds */
-    herr_t ret;             /* The return value */
+    hid_t fapl = H5I_INVALID_HID;  /* File access property list */
+    H5F_libver_t low, high;         /* Low and high bounds */
+    herr_t ret;                     /* The return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing setting (low, high) format version bounds\n"));
 
     /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
-    CHECK(fapl, FAIL, "H5Pcreate");
+    CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Loop through all the combinations of low/high version bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++)
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low))
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
 
             H5E_BEGIN_TRY {
                 /* Set the low/high version bounds */
@@ -5189,23 +5575,23 @@ test_libver_bounds_low_high(void)
 static void
 test_libver_bounds_super(hid_t fapl)
 {
-    hid_t fcpl = -1;    /* File creation property list */
-    herr_t ret;         /* The return value */
+    hid_t fcpl = H5I_INVALID_HID;   /* File creation property list */
+    herr_t ret;                     /* The return value */
 
     /* Create a default fcpl: #A */
     /* This will result in superblock version 0 */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    CHECK(fcpl, FAIL, "H5Pcreate");
+    CHECK(fcpl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #A and with/without SWMR access */
-    test_libver_bounds_super_create(fapl, fcpl, TRUE);
-    test_libver_bounds_super_create(fapl, fcpl, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, FALSE, FALSE);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #A and with/without SWMR access */
-    test_libver_bounds_super_open(fapl, fcpl, TRUE);
-    test_libver_bounds_super_open(fapl, fcpl, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, FALSE, FALSE);
 
     /* Close the fcpl */
     ret = H5Pclose(fcpl);
@@ -5214,19 +5600,19 @@ test_libver_bounds_super(hid_t fapl)
     /* Create a fcpl with v1-btree K value enabled: #B */
     /* This will result in superblock version 1 */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    CHECK(fcpl, FAIL, "H5Pcreate");
+    CHECK(fcpl, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Pset_istore_k(fcpl, 64);
     CHECK(ret, FAIL, "H5Pset_istore_k");
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #B and with/without SWMR access */
-    test_libver_bounds_super_create(fapl, fcpl, TRUE);
-    test_libver_bounds_super_create(fapl, fcpl, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, FALSE, FALSE);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #B and with/without SWMR access */
-    test_libver_bounds_super_open(fapl, fcpl, TRUE);
-    test_libver_bounds_super_open(fapl, fcpl, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, FALSE, FALSE);
 
     /* Close the fcpl */
     ret = H5Pclose(fcpl);
@@ -5235,7 +5621,7 @@ test_libver_bounds_super(hid_t fapl)
     /* Create a fcpl with shared messages enabled: #C */
     /* This will result in superblock version 2 */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    CHECK(fcpl, FAIL, "H5Pcreate");
+    CHECK(fcpl, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Pset_shared_mesg_nindexes(fcpl, 1);
     CHECK(ret, FAIL, "H5Pset_shared_mesg_nindexes");
     ret = H5Pset_shared_mesg_index(fcpl, 0, H5O_SHMESG_ATTR_FLAG, 2);
@@ -5243,13 +5629,13 @@ test_libver_bounds_super(hid_t fapl)
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #C and with/without SWMR access */
-    test_libver_bounds_super_create(fapl, fcpl, TRUE);
-    test_libver_bounds_super_create(fapl, fcpl, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, FALSE, FALSE);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #C and with/without SWMR access */
-    test_libver_bounds_super_open(fapl, fcpl, TRUE);
-    test_libver_bounds_super_open(fapl, fcpl, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, TRUE, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, FALSE, FALSE);
 
     /* Close the fcpl */
     ret = H5Pclose(fcpl);
@@ -5258,19 +5644,19 @@ test_libver_bounds_super(hid_t fapl)
     /* Create a fcpl with persistent free-space manager enabled: #D */
     /* This will result in superblock version 2 */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    CHECK(fcpl, FAIL, "H5Pcreate");
+    CHECK(fcpl, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, 1, (hsize_t)1);
     CHECK(ret, FAIL, "H5Pset_file_space");
 
     /* Verify superblock version when creating a file with input fapl,
        fcpl #D and with/without SWMR access */
-    test_libver_bounds_super_create(fapl, fcpl, TRUE);
-    test_libver_bounds_super_create(fapl, fcpl, FALSE);
+    test_libver_bounds_super_create(fapl, fcpl, TRUE, TRUE);
+    test_libver_bounds_super_create(fapl, fcpl, FALSE, TRUE);
 
     /* Verify superblock version when opening a file which is created
        with input fapl, fcpl #D and with/without SWMR access */
-    test_libver_bounds_super_open(fapl, fcpl, TRUE);
-    test_libver_bounds_super_open(fapl, fcpl, FALSE);
+    test_libver_bounds_super_open(fapl, fcpl, TRUE, TRUE);
+    test_libver_bounds_super_open(fapl, fcpl, FALSE, TRUE);
 
     /* Close the fcpl */
     ret = H5Pclose(fcpl);
@@ -5282,8 +5668,8 @@ test_libver_bounds_super(hid_t fapl)
 /**************************************************************************************************
 **
 **  test_libver_bounds_super_create():
-**      Verify the following when the file is created with the input fapl, fcpl, and
-**      with/without SWMR access:
+**      Verify the following when the file is created with the input fapl, fcpl,
+**      and with/without SWMR access:
 **          (a) the superblock version #
 **          (b) the file's low bound setting
 **          (c) fail or succeed in creating the file
@@ -5295,7 +5681,10 @@ test_libver_bounds_super(hid_t fapl)
 **      in the input fapl. The next three rows list the expected results for #a to #c.
 **      "-->" indicates "upgrade to"
 **
-**                                          Creating a file with write access
+**      The last table lists the expected results in creating the file when non-default
+**      free-space info (fsinfo) is enabled in fcpl.
+**
+**                                  Creating a file with write access
 **                    --------------------------------------------------------------------------------
 **                    | (earliest, v18) | (earliest, v110) | (v18, v18) | (v18, v110) | (v110, v110) |
 **                    |______________________________________________________________________________|
@@ -5306,7 +5695,7 @@ test_libver_bounds_super(hid_t fapl)
 ** File creation      |                             succeed                                          |
 **                    |______________________________________________________________________________|
 **
-**                                          Creating a file with SWMR-write access
+**                                  Creating a file with SWMR-write access
 **                    --------------------------------------------------------------------------------
 **                    | (earliest, v18) | (earliest, v110) | (v18, v18) | (v18, v110) | (v110, v110) |
 **                    |______________________________________________________________________________|
@@ -5314,18 +5703,25 @@ test_libver_bounds_super(hid_t fapl)
 **                    |------------------------------------------------------------------------------|
 ** File's low bound   | --              | ->v110           | --         | ->v110      | no change    |
 **                    |------------------------------------------------------------------------------|
-** File creation      | fail            | succeed          | fail       | succeed     | succed       |
+** File creation      | fail            | succeed          | fail       | succeed     | succeed      |
+**                    |______________________________________________________________________________|
+**
+**                                  Creating a file with write/SWMR-write access + non-default fsinfo
+**                    --------------------------------------------------------------------------------
+**                    | (earliest, v18) | (earliest, v110) | (v18, v18) | (v18, v110) | (v110, v110) |
+**                    |______________________________________________________________________________|
+** File creation      |  fail            | succeed         | fail       | succeed      | succeed     |
 **                    |______________________________________________________________________________|
 **
 ******************************************************************************************************/
 static void
-test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
+test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm)
 {
-    hid_t fid = -1;            /* File ID */
-    H5F_t *f = NULL;        /* Internal file pointer */
-    H5F_libver_t low, high; /* Low and high bounds */
-    hbool_t ok;                /* The result is ok or not */
-    herr_t ret;                /* The return value */
+    hid_t fid = H5I_INVALID_HID;    /* File ID */
+    H5F_t *f = NULL;                /* Internal file pointer */
+    H5F_libver_t low, high;         /* Low and high bounds */
+    hbool_t ok;                     /* The result is ok or not */
+    herr_t ret;                 /* The return value */
 
     /* Try to create the file */
     H5E_BEGIN_TRY {
@@ -5333,57 +5729,61 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
     } H5E_END_TRY;
 
     /* Get the internal file pointer if the create succeeds */
-    if((ok = fid >= 0)) {
-        f = (H5F_t *)H5I_object(fid);
-        CHECK(f, NULL, "H5I_object");
+    if(fid >= 0) {
+        f = (H5F_t *)H5VL_object(fid);
+        CHECK(f, NULL, "H5VL_object");
     }
 
     /* Retrieve the low/high bounds */
     ret = H5Pget_libver_bounds(fapl, &low, &high);
     CHECK(ret, FAIL, "H5Pget_libver_bounds");
 
-    if(is_swmr) { /* SWMR is enabled */
+    if(non_def_fsm && high < H5F_LIBVER_V110)
+        VERIFY(fid, H5I_INVALID_HID, "H5Fcreate");
 
-        if(high == H5F_LIBVER_LATEST) { /* Should succeed */
-            VERIFY(ok, TRUE, "H5Fcreate");
+    else if(is_swmr) { /* SWMR is enabled */
+        if(high >= H5F_LIBVER_V110) { /* Should succeed */
+            VERIFY(fid >= 0, TRUE, "H5Fcreate");
             VERIFY(HDF5_SUPERBLOCK_VERSION_3, f->shared->sblock->super_vers, "HDF5_superblock_ver_bounds");
-            VERIFY(H5F_LIBVER_V110, f->shared->low_bound, "HDF5_superblock_ver_bounds");
+            VERIFY(f->shared->low_bound >= H5F_LIBVER_V110, TRUE, "HDF5_superblock_ver_bounds");
 
         } else /* Should fail */
-            VERIFY(ok, FALSE, "H5Fcreate");
+            VERIFY(fid >= 0, FALSE, "H5Fcreate");
 
-    }
-    else { /* Should succeed */
-        VERIFY(ok, TRUE, "H5Fcreate");
+    } else { /* Should succeed */
+        VERIFY(fid >= 0, TRUE, "H5Fcreate");
         VERIFY(low, f->shared->low_bound, "HDF5_superblock_ver_bounds");
 
         switch(low) {
             case H5F_LIBVER_EARLIEST:
-                ok = (f->shared->sblock->super_vers == 0 ||
-                      f->shared->sblock->super_vers == 1 ||
-                      f->shared->sblock->super_vers == 2);
-                VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
-                break;
+               ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_DEF  ||
+                     f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_1 ||
+                     f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_2);
+               VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
+               break;
 
             case H5F_LIBVER_V18:
-                ok = (f->shared->sblock->super_vers == 2);
-                VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
-                break;
+               ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_2);
+               VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
+               break;
 
             case H5F_LIBVER_V110:
-                ok = (f->shared->sblock->super_vers == 3);
-                VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
-                break;
+            case H5F_LIBVER_V112:
+            case H5F_LIBVER_V114:
+               ok = (f->shared->sblock->super_vers == HDF5_SUPERBLOCK_VERSION_3);
+               VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
+               break;
 
             case H5F_LIBVER_ERROR:
             case H5F_LIBVER_NBOUNDS:
             default:
-               ERROR("H5Pget_libver_bounds");
+                ERROR("H5Pget_libver_bounds");
 
         } /* end switch */
-    }
 
-    if(ok) { /* Close the file */
+    } /* end else */
+
+    if(fid >= 0) { /* Close the file */
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
     }
@@ -5408,11 +5808,14 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
 **      For file open, the file's superblock version, the low/high bounds setting in fapl,
 **      and with/without SWMR file access will determine the results for #a and #b.
 **
-**      The first row for the following tables is the 5 pairs of low/high bounds setting
+**      The first row for the following tables (#A - #B) is the 5 pairs of low/high bounds setting
 **      in the input fapl. The next two rows list the expected results for #a and #b.
 **      "-->" indicates "upgrade to"
 **
-**                                        Opening a file with write access
+**      The last table (#C) lists the expected results in opening the file when non-default
+**      free-space info (fsinfo) is enabled in fcpl.
+**
+**                      (A) Opening a file with write access
 **
 **                                              Superblock version 0, 1
 **                  --------------------------------------------------------------------------------
@@ -5444,7 +5847,7 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
 **
 **
 **
-**                                        Opening a file with SWMR-write access
+**                     (B) Opening a file with SWMR-write access
 **
 **                                              Superblock version 0, 1, 2
 **                  -------------------------------------------------------------------------------
@@ -5466,111 +5869,133 @@ test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr)
 **                  |_____________________________________________________________________________|
 **
 **
+**                      (C) Opening a file with write/SWMR-write access + non-default fsinfo
+**                  -------------------------------------------------------------------------------
+**                  | (earliest, v18) | (earliest, v10) | (v18, v18) | (v18, v110) | (v110, v110) |
+**                  |_____________________________________________________________________________|
+** File open        | fail            | succeed         | fail       | succeed     | succeed      |
+**                  |_____________________________________________________________________________|
+**
+**
 ******************************************************************************************************/
 static void
-test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr)
+test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm)
 {
-    hid_t fid = -1;            /* File ID */
-    H5F_t *f = NULL;        /* Internal file pointer */
-    hid_t new_fapl = -1;    /* File access property list */
+    hid_t fid = H5I_INVALID_HID;        /* File ID */
+    H5F_t *f = NULL;                    /* Internal file pointer */
+    hid_t new_fapl = H5I_INVALID_HID;   /* File access property list */
     unsigned super_vers;    /* Superblock version */
     H5F_libver_t low, high; /* Low and high bounds */
-    hbool_t ok;                /* The result is ok or not */
     herr_t ret;                /* Return value */
 
     /* Create the file with the input fcpl and fapl */
-    fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    H5E_BEGIN_TRY {
+        fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, fcpl, fapl);
+    } H5E_END_TRY;
 
-    /* Get the internal file pointer */
-    f = (H5F_t *)H5I_object(fid);
-    CHECK(f, NULL, "H5I_object");
+    /* Retrieve the low/high bounds */
+    ret = H5Pget_libver_bounds(fapl, &low, &high);
+    CHECK(ret, FAIL, "H5Pget_libver_bounds");
 
-    /* The file's superblock version */
-    super_vers = f->shared->sblock->super_vers;
+    if(non_def_fsm && high < H5F_LIBVER_V110) {
+        VERIFY(fid, H5I_INVALID_HID, "H5Fcreate");
 
-    /* Close the file */
-    ret = H5Fclose(fid);
-    CHECK(ret, FAIL, "H5Fclose");
+    } else {
+        VERIFY(fid >= 0, TRUE, "H5Fcreate");
 
-    /* Create a default file access property list */
-    new_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    CHECK(new_fapl, FAIL, "H5Pcreate");
+        /* Get the internal file pointer */
+        f = (H5F_t *)H5VL_object(fid);
+        CHECK(f, NULL, "H5VL_object");
 
-    /* Loop through all the combinations of low/high bounds in new_fapl */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
-            H5E_BEGIN_TRY {
-                ret = H5Pset_libver_bounds(new_fapl, low, high);
-            } H5E_END_TRY;
+        /* The file's superblock version */
+        super_vers = f->shared->sblock->super_vers;
 
-            /* Invalid combinations */
-            if (ret < 0)
-                continue;
+        /* Close the file */
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
 
-            /* Open the file with or without SWMR access */
-            H5E_BEGIN_TRY {
-                fid = H5Fopen(FILE8, H5F_ACC_RDWR | (is_swmr ? H5F_ACC_SWMR_WRITE : 0), new_fapl);
-            } H5E_END_TRY;
+        /* Create a default file access property list */
+        new_fapl = H5Pcreate(H5P_FILE_ACCESS);
+        CHECK(new_fapl, FAIL, "H5Pcreate");
 
-            /* Get the internal file pointer if the open succeeds */
-            if((ok = fid >= 0)) {
-                f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
-            }
+        /* Loop through all the combinations of low/high bounds in new_fapl */
+        for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+            for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+                H5E_BEGIN_TRY {
+                    ret = H5Pset_libver_bounds(new_fapl, low, high);
+                } H5E_END_TRY;
 
-            /* Verify the file open succeeds or fails */
-            switch(super_vers) {
-                case 3:
-                    if(high == H5F_LIBVER_LATEST) {
-                        /* Should succeed */
-                        VERIFY(ok, TRUE, "H5Fopen");
-                        VERIFY(H5F_LIBVER_V110, f->shared->low_bound, "HDF5_superblock_ver_bounds");
+                /* Invalid combinations */
+                if (ret < 0)
+                    continue;
 
-                        /* Close the file */
-                        ret = H5Fclose(fid);
-                        CHECK(ret, FAIL, "H5Fclose");
-                    } else /* Should fail */
-                        VERIFY(ok, FALSE, "H5Fopen");
-                    break;
+                /* Open the file with or without SWMR access */
+                H5E_BEGIN_TRY {
+                    fid = H5Fopen(FILE8, H5F_ACC_RDWR | (is_swmr ? H5F_ACC_SWMR_WRITE : 0), new_fapl);
+                } H5E_END_TRY;
 
-                case 2:
-                    if(is_swmr)  /* Should fail */
-                        VERIFY(ok, FALSE, "H5Fopen");
-                    else { /* Should succeed */
-                        VERIFY(ok, TRUE, "H5Fopen");
+                if(non_def_fsm && high < H5F_LIBVER_V110) {
+                    VERIFY(fid, H5I_INVALID_HID, "H5Fopen");
+                    continue;
+                }
 
-                        ok = f->shared->low_bound >= H5F_LIBVER_V18;
-                        VERIFY(ok, TRUE, "HDF5_superblock_ver_bounds");
+                /* Get the internal file pointer if the open succeeds */
+                if(fid >= 0) {
+                    f = (H5F_t *)H5VL_object(fid);
+                    CHECK(f, NULL, "H5VL_object");
+                }
 
-                        /* Close the file */
-                        ret = H5Fclose(fid);
-                        CHECK(ret, FAIL, "H5Fclose");
-                    }
-                    break;
+                /* Verify the file open succeeds or fails */
+                switch(super_vers) {
+                    case 3:
+                        if(high >= H5F_LIBVER_V110) {
+                            /* Should succeed */
+                            VERIFY(fid >= 0, TRUE, "H5Fopen");
+                            VERIFY(f->shared->low_bound >= H5F_LIBVER_V110, TRUE, "HDF5_superblock_ver_bounds");
 
-                case 1:
-                case 0:
-                    if(is_swmr)  /* Should fail */
-                        VERIFY(ok, FALSE, "H5Fopen");
-                    else { /* Should succeed */
-                        VERIFY(ok, TRUE, "H5Fopen");
-                        VERIFY(low, f->shared->low_bound, "HDF5_superblock_ver_bounds");
+                            /* Close the file */
+                            ret = H5Fclose(fid);
+                            CHECK(ret, FAIL, "H5Fclose");
+                        } else /* Should fail */
+                            VERIFY(fid >= 0, FALSE, "H5Fopen");
+                        break;
 
-                        ret = H5Fclose(fid);
-                        CHECK(ret, FAIL, "H5Fclose");
-                    }
-                    break;
+                    case 2:
+                        if(is_swmr)  /* Should fail */
+                            VERIFY(fid >= 0, FALSE, "H5Fopen");
+                        else { /* Should succeed */
+                            VERIFY(fid >= 0, TRUE, "H5Fopen");
+                            VERIFY(f->shared->low_bound >= H5F_LIBVER_V18, TRUE, "HDF5_superblock_ver_bounds");
 
-                default:
-                    break;
-            } /* end switch */
+                            /* Close the file */
+                            ret = H5Fclose(fid);
+                            CHECK(ret, FAIL, "H5Fclose");
+                        }
+                        break;
+
+                    case 1:
+                    case 0:
+                        if(is_swmr)  /* Should fail */
+                            VERIFY(fid >= 0, FALSE, "H5Fopen");
+                        else { /* Should succeed */
+                            VERIFY(fid >= 0, TRUE, "H5Fopen");
+                            VERIFY(f->shared->low_bound, low, "HDF5_superblock_ver_bounds");
+
+                            ret = H5Fclose(fid);
+                            CHECK(ret, FAIL, "H5Fclose");
+                        }
+                        break;
+
+                    default:
+                        break;
+                } /* end switch */
+            } /* end for */
         } /* end for */
-    } /* end for */
 
-    /* Close the file access property list */
-    ret = H5Pclose(new_fapl);
-    CHECK(ret, FAIL, "H5Pclose");
+        /* Close the file access property list */
+        ret = H5Pclose(new_fapl);
+        CHECK(ret, FAIL, "H5Pclose");
+    } /* end else */
 
 } /* end test_libver_bounds_super_open() */
 
@@ -5603,10 +6028,10 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr)
 static void
 test_libver_bounds_obj(hid_t fapl)
 {
-    hid_t fid = -1;         /* File ID */
-    hid_t gid = -1;         /* Group ID */
-    hid_t fcpl = -1;        /* File creation property list */
-    hid_t new_fapl = -1;    /* File access property list */
+    hid_t fid = H5I_INVALID_HID;        /* File ID */
+    hid_t gid = H5I_INVALID_HID;        /* Group ID */
+    hid_t fcpl = H5I_INVALID_HID;       /* File creation property list */
+    hid_t new_fapl = H5I_INVALID_HID;   /* File access property list */
     H5F_t *f = NULL;        /* Internal file pointer */
     H5F_libver_t low, high; /* Low and high bounds */
     H5O_info_t  oinfo;      /* Object info */
@@ -5619,7 +6044,7 @@ test_libver_bounds_obj(hid_t fapl)
 
     /* Create a default file creation property list */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    CHECK(fcpl, FAIL, "H5Pcreate");
+    CHECK(fcpl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Enable shared message in the fcpl */
     /* This will result in a version 2 object header */
@@ -5630,7 +6055,7 @@ test_libver_bounds_obj(hid_t fapl)
 
     /* Create the file with the fcpl and the input fapl */
     fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Get root group's object info */
     ret = H5Oget_info_by_name2(fid, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
@@ -5649,7 +6074,7 @@ test_libver_bounds_obj(hid_t fapl)
 
     /* Create a file with the default fcpl and input fapl */
     fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Get root group's object info */
     ret = H5Oget_info_by_name2(fid, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
@@ -5665,13 +6090,13 @@ test_libver_bounds_obj(hid_t fapl)
     /* Create a new default file access property list which
        is used to open the file in the "for" loop */
     new_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    CHECK(new_fapl, FAIL, "H5Pcreate");
+    CHECK(new_fapl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Loop through all the combinations of low/high bounds in new_fapl */
     /* Open the file with the fapl; create a group and verify the
        object header version, then delete the group and close the file.*/
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -5687,8 +6112,8 @@ test_libver_bounds_obj(hid_t fapl)
             if(fid >=0 ) { /* The file open succeeds */
 
                 /* Get the internal file pointer */
-                f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
+                f = (H5F_t *)H5VL_object(fid);
+                CHECK(f, NULL, "H5VL_object");
 
                 /* Create a group in the file */
                 gid = H5Gcreate2(fid, GRP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -5763,11 +6188,11 @@ test_libver_bounds_obj(hid_t fapl)
 static void
 test_libver_bounds_dataset(hid_t fapl)
 {
-    hid_t fid = -1;         /* File ID */
-    hid_t new_fapl = -1;    /* File access property list */
-    hid_t did = -1;         /* Dataset ID */
-    hid_t sid = -1;         /* Dataspace ID */
-    hid_t dcpl = -1;        /* Dataset creation property list */
+    hid_t fid = H5I_INVALID_HID;        /* File ID */
+    hid_t new_fapl = H5I_INVALID_HID;   /* File access property list */
+    hid_t did = H5I_INVALID_HID;         /* Dataset ID */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t dcpl = H5I_INVALID_HID;        /* Dataset creation property list */
     H5D_t *dset = NULL;     /* Internal dataset pointer */
     H5F_t *f = NULL;        /* Internal file pointer */
     H5F_libver_t low, high;             /* Low and high bounds */
@@ -5784,19 +6209,19 @@ test_libver_bounds_dataset(hid_t fapl)
 
     /* Create the file with the input fapl */
     fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Create the dataspace */
     sid = H5Screate(H5S_SCALAR);
-    CHECK(sid, FAIL, "H5Screate");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate");
 
     /* Create a contiguous dataset */
     did = H5Dcreate2(fid, DSETA, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(did, FAIL, "H5Dcreate");
+    CHECK(did, H5I_INVALID_HID, "H5Dcreate");
 
     /* Get the internal dataset pointer */
-    dset = (H5D_t *)H5I_object(did);
-    CHECK(dset, NULL, "H5I_object");
+    dset = (H5D_t *)H5VL_object(did);
+    CHECK(dset, NULL, "H5VL_object");
 
     /* Verify version for layout and fill value messages */
     if(low == H5F_LIBVER_EARLIEST) {
@@ -5824,9 +6249,9 @@ test_libver_bounds_dataset(hid_t fapl)
        with "no filter edge chunks" enabled.
        This will result in a version 4 layout message */
     sid = H5Screate_simple(2, fix_dims2, NULL);
-    CHECK(sid, FAIL, "H5Screate_simple");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate_simple");
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl, FAIL, "H5Pcreate");
+    CHECK(dcpl, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Pset_chunk(dcpl, 2, fix_chunks2);
     CHECK(ret, FAIL, "H5Pset_chunk");
     ret = H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
@@ -5840,8 +6265,8 @@ test_libver_bounds_dataset(hid_t fapl)
     if(did >= 0) {
 
         /* Get the internal dataset pointer */
-        dset = (H5D_t *)H5I_object(did);
-        CHECK(dset, NULL, "H5I_object");
+        dset = (H5D_t *)H5VL_object(did);
+        CHECK(dset, NULL, "H5VL_object");
 
         /* Verify layout message version and chunk indexing type */
         VERIFY(dset->shared->layout.version, H5O_LAYOUT_VERSION_4, "H5O_layout_ver_bounds");
@@ -5867,22 +6292,22 @@ test_libver_bounds_dataset(hid_t fapl)
     /* Create a default file access property list which is used
        to open the file in the 'for' loop */
     new_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    CHECK(new_fapl, FAIL, "H5Pcreate");
+    CHECK(new_fapl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Set up dataspace and dcpl for creating a chunked dataset with
        2 unlimited dimensions in the 'for' loop */
     sid = H5Screate_simple(2, dims2, max_dims2);
-    CHECK(sid, FAIL, "H5Screate_simple");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate_simple");
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl, FAIL, "H5Pcreate");
+    CHECK(dcpl, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Pset_chunk(dcpl, 2, chunks2);
     CHECK(ret, FAIL, "H5Pset_chunk");
 
     /* Loop through all the combinations of low/high bounds in new_fapl */
     /* Open the file with the fapl and create the chunked dataset */
     /* Verify the dataset's layout, fill value and filter pipleline message versions */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -5898,16 +6323,16 @@ test_libver_bounds_dataset(hid_t fapl)
             if(fid >=0 ) { /* The file open succeeds */
 
                 /* Get the internal file pointer */
-                f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
+                f = (H5F_t *)H5VL_object(fid);
+                CHECK(f, NULL, "H5VL_object");
 
                 /* Create the chunked dataset */
                 did = H5Dcreate2(fid, DSETC, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-                CHECK(did, FAIL, "H5Dcreate2");
+                CHECK(did, H5I_INVALID_HID, "H5Dcreate2");
 
                 /* Get the internal file pointer */
-                dset = (H5D_t *)H5I_object(did);
-                CHECK(dset, NULL, "H5I_object");
+                dset = (H5D_t *)H5VL_object(did);
+                CHECK(dset, NULL, "H5VL_object");
 
                 /* Verify the dataset's layout, fill value and filter pipeline message versions */
                 /* Also verify the chunk indexing type */
@@ -5987,14 +6412,14 @@ test_libver_bounds_dataset(hid_t fapl)
 static void
 test_libver_bounds_dataspace(hid_t fapl)
 {
-    hid_t fid = -1;                             /* File ID */
-    hid_t new_fapl = -1;                        /* File access property list */
-    hid_t did = -1, did_null = -1;              /* Dataset IDs */
-    hid_t did_compact = -1, did_contig = -1;    /* Dataset IDs */
-    hid_t sid = -1, sid_null = -1;              /* Dataspace IDs */
-    hid_t sid_compact = -1, sid_contig = -1;    /* Dataspace IDs */
-    hid_t dcpl = -1;                            /* Dataset creation property list */
-    hid_t dcpl_compact = -1, dcpl_contig = -1;  /* Dataset creation property lists */
+    hid_t fid = H5I_INVALID_HID;        /* File ID */
+    hid_t new_fapl = H5I_INVALID_HID;   /* File access property list */
+    hid_t did = H5I_INVALID_HID, did_null = H5I_INVALID_HID;            /* Dataset IDs */
+    hid_t did_compact = H5I_INVALID_HID, did_contig = H5I_INVALID_HID;  /* Dataset IDs */
+    hid_t sid = H5I_INVALID_HID, sid_null = H5I_INVALID_HID;            /* Dataspace IDs */
+    hid_t sid_compact = H5I_INVALID_HID, sid_contig = H5I_INVALID_HID;  /* Dataspace IDs */
+    hid_t dcpl = H5I_INVALID_HID;      /* Dataset creation property list */
+    hid_t dcpl_compact = H5I_INVALID_HID, dcpl_contig = H5I_INVALID_HID;  /* Dataset creation property lists */
     H5S_t *space = NULL, *space_null = NULL;    /* Internal dataspace pointers */
     H5F_t *f = NULL;                            /* Internal file pointer */
     H5F_libver_t low, high;                     /* Low and high bounds */
@@ -6010,19 +6435,19 @@ test_libver_bounds_dataspace(hid_t fapl)
 
     /* Create the file with the input fapl */
     fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Create scalar dataspace */
     sid = H5Screate(H5S_SCALAR);
-    CHECK(sid, FAIL, "H5Screate");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate");
 
     /* Create a dataset with the scalar dataspace */
     did = H5Dcreate2(fid, DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(did, FAIL, "H5Dcreate");
+    CHECK(did, H5I_INVALID_HID, "H5Dcreate");
 
     /* Get the internal dataspace pointer */
     sid = H5Dget_space(did);
-    CHECK(sid, FAIL, "H5Dget_space");
+    CHECK(sid, H5I_INVALID_HID, "H5Dget_space");
     space = (H5S_t *)H5I_object(sid);
     CHECK(space, NULL, "H5I_object");
 
@@ -6031,15 +6456,15 @@ test_libver_bounds_dataspace(hid_t fapl)
 
     /* Create null dataspace */
     sid_null = H5Screate(H5S_NULL);
-    CHECK(sid_null, FAIL, "H5Screate");
+    CHECK(sid_null, H5I_INVALID_HID, "H5Screate");
 
     /* Create a dataset with the null dataspace */
     did_null = H5Dcreate2(fid, DSET_NULL, H5T_NATIVE_INT, sid_null, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(did_null, FAIL, "H5Dcreate");
+    CHECK(did_null, H5I_INVALID_HID, "H5Dcreate");
 
     /* Get the internal dataspace pointer */
     sid_null = H5Dget_space(did_null);
-    CHECK(sid_null, FAIL, "H5Dget_space");
+    CHECK(sid_null, H5I_INVALID_HID, "H5Dget_space");
     space_null = (H5S_t *)H5I_object(sid_null);
     CHECK(space_null, NULL, "H5I_object");
 
@@ -6065,37 +6490,37 @@ test_libver_bounds_dataspace(hid_t fapl)
     /* Create a default file access property list which is used
        to open the file in the 'for' loop */
     new_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    CHECK(new_fapl, FAIL, "H5Pcreate");
+    CHECK(new_fapl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Set up dataspace and dcpl for creating a chunked dataset */
     sid = H5Screate_simple(1, dims, max_dims);
-    CHECK(sid, FAIL, "H5Screate_simple");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate_simple");
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl, FAIL, "H5Pcreate");
+    CHECK(dcpl, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Pset_chunk(dcpl, 1, chunks);
     CHECK(ret, FAIL, "H5Pset_chunk");
 
     /* Set up dataspace and dcpl for creating a compact dataset */
     sid_compact = H5Screate_simple(1, dims, NULL);
-    CHECK(sid_compact, FAIL, "H5Screate_simple");
+    CHECK(sid_compact, H5I_INVALID_HID, "H5Screate_simple");
     dcpl_compact = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl_compact, FAIL, "H5Pcreate");
+    CHECK(dcpl_compact, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Pset_layout(dcpl_compact, H5D_COMPACT);
     CHECK(ret, FAIL, "H5Pset_layout");
 
     /* Set up dataspace and dcpl for creating a contiguous dataset */
     sid_contig = H5Screate_simple(2, dims2, NULL);
-    CHECK(sid_contig, FAIL, "H5Screate_simple");
+    CHECK(sid_contig, H5I_INVALID_HID, "H5Screate_simple");
     dcpl_contig = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl_contig, FAIL, "H5Pcreate");
+    CHECK(dcpl_contig, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Pset_layout(dcpl_contig, H5D_CONTIGUOUS);
     CHECK(ret, FAIL, "H5Pset_layout");
 
     /* Loop through all the combinations of low/high bounds in new_fapl */
     /* Open the file and create the chunked/compact/contiguous datasets */
     /* Verify the dataspace message version for the three datasets */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
             hid_t tmp_sid, tmp_sid_compact, tmp_sid_contig;             /* Dataspace IDs */
             H5S_t *tmp_space, *tmp_space_compact, *tmp_space_contig;    /* Internal dataspace pointers */
 
@@ -6114,36 +6539,36 @@ test_libver_bounds_dataspace(hid_t fapl)
             if(fid >=0 ) { /* The file open succeeds */
 
                 /* Get the internal file pointer */
-                f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
+                f = (H5F_t *)H5VL_object(fid);
+                CHECK(f, NULL, "H5VL_object");
 
                 /* Create the chunked dataset */
                 did = H5Dcreate2(fid, DSETA, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-                CHECK(did, FAIL, "H5Dcreate2");
+                CHECK(did, H5I_INVALID_HID, "H5Dcreate2");
 
                 /* Get the internal dataspace pointer for the chunked dataset */
                 tmp_sid = H5Dget_space(did);
-                CHECK(tmp_sid, FAIL, "H5Dget_space");
+                CHECK(tmp_sid, H5I_INVALID_HID, "H5Dget_space");
                 tmp_space = (H5S_t *)H5I_object(tmp_sid);
                 CHECK(tmp_space, NULL, "H5I_object");
 
                 /* Create the compact dataset */
                 did_compact = H5Dcreate2(fid, DSETB, H5T_NATIVE_INT, sid_compact, H5P_DEFAULT, dcpl_compact, H5P_DEFAULT);
-                CHECK(did_compact, FAIL, "H5Dcreate2");
+                CHECK(did_compact, H5I_INVALID_HID, "H5Dcreate2");
 
                 /* Get the internal dataspace pointer for the compact dataset */
                 tmp_sid_compact = H5Dget_space(did_compact);
-                CHECK(tmp_sid_compact, FAIL, "H5Dget_space");
+                CHECK(tmp_sid_compact, H5I_INVALID_HID, "H5Dget_space");
                 tmp_space_compact = (H5S_t *)H5I_object(tmp_sid_compact);
                 CHECK(tmp_space_compact, NULL, "H5I_object");
 
                 /* Create the contiguous dataset */
                 did_contig = H5Dcreate2(fid, DSETC, H5T_NATIVE_INT, sid_contig, H5P_DEFAULT, dcpl_contig, H5P_DEFAULT);
-                CHECK(did_contig, FAIL, "H5Dcreate2");
+                CHECK(did_contig, H5I_INVALID_HID, "H5Dcreate2");
 
                 /* Get the internal dataspace pointer for the contiguous dataset */
                 tmp_sid_contig = H5Dget_space(did_contig);
-                CHECK(tmp_sid_contig, FAIL, "H5Dget_space");
+                CHECK(tmp_sid_contig, H5I_INVALID_HID, "H5Dget_space");
                 tmp_space_contig = (H5S_t *)H5I_object(tmp_sid_contig);
                 CHECK(tmp_space_contig, NULL, "H5I_object");
 
@@ -6225,8 +6650,8 @@ test_libver_bounds_dataspace(hid_t fapl)
 static void
 test_libver_bounds_datatype(hid_t fapl)
 {
-    hid_t tid = -1, tid_enum = -1, tid_array = -1;  /* Datatype IDs */
-    hid_t tid_compound = -1, tid_vlen = -1;            /* Datatype IDs */
+    hid_t tid = H5I_INVALID_HID, tid_enum = H5I_INVALID_HID, tid_array = H5I_INVALID_HID;  /* Datatype IDs */
+    hid_t tid_compound = H5I_INVALID_HID, tid_vlen = H5I_INVALID_HID;                       /* Datatype IDs */
     int enum_value;                                 /* Value for enum datatype */
     typedef struct s1 { /* Data structure for compound datatype */
         char c;
@@ -6317,13 +6742,13 @@ test_libver_bounds_datatype(hid_t fapl)
 static void
 test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
 {
-    hid_t fid = -1;                /* File ID */
-    hid_t new_fapl = -1;        /* File acess property list */
-    hid_t dcpl = -1;            /* Dataset creation property list */
-    hid_t dtid = -1;            /* Datatype ID for the dataset */
-    hid_t str_tid = -1;         /* String datatype ID */
-    hid_t did = -1;                /* Dataset ID */
-    hid_t sid = -1;                /* Dataspace ID */
+    hid_t fid = H5I_INVALID_HID;        /* File ID */
+    hid_t new_fapl = H5I_INVALID_HID;   /* File acess property list */
+    hid_t dcpl = H5I_INVALID_HID;       /* Dataset creation property list */
+    hid_t dtid = H5I_INVALID_HID;       /* Datatype ID for the dataset */
+    hid_t str_tid = H5I_INVALID_HID;    /* String datatype ID */
+    hid_t did = H5I_INVALID_HID;        /* Dataset ID */
+    hid_t sid = H5I_INVALID_HID;        /* Dataspace ID */
     hsize_t dims[1] = {1};      /* Dimension sizes */
     hsize_t dims2[2] = {5, 4};  /* Dimension sizes */
     hsize_t max_dims2[2] = {H5S_UNLIMITED, H5S_UNLIMITED};  /* Maximum dimension sizes */
@@ -6340,12 +6765,12 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
 
     /* Create the file with the input fapl */
     fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Create a committed datatype of string which will be used
        later inside the 'for' loop */
     str_tid = H5Tcopy(H5T_C_S1);
-    CHECK(str_tid, FAIL, "H5Tcopy");
+    CHECK(str_tid, H5I_INVALID_HID, "H5Tcopy");
     ret = H5Tset_size(str_tid, (size_t)10);
     CHECK(ret, FAIL, "H5Tset_size");
     ret = H5Tcommit2(fid, "datatype", str_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -6355,15 +6780,15 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
 
     /* Create dataspace */
     sid = H5Screate_simple(1, dims, NULL);
-    CHECK(sid, FAIL, "H5Screate_simple");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate_simple");
 
     /* Create a dataset with the input tid */
     did = H5Dcreate2(fid, DSET1, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(did, FAIL, "H5Dcreate2");
+    CHECK(did, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Get the dataset's datatype */
     dtid = H5Dget_type(did);
-    CHECK(dtid, FAIL, "H5Dget_type");
+    CHECK(dtid, H5I_INVALID_HID, "H5Dget_type");
 
     /* Get the internal datatype pointer */
     dtype = (H5T_t *)H5I_object(dtid);
@@ -6405,13 +6830,13 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
 
     /* Create a default file access property list */
     new_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    CHECK(new_fapl, FAIL, "H5Pcreate");
+    CHECK(new_fapl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Set up dataspace and dcpl for creating a chunked dataset */
     sid = H5Screate_simple(2, dims2, max_dims2);
-    CHECK(sid, FAIL, "H5Screate_simple");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate_simple");
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    CHECK(dcpl, FAIL, "H5Pcreate");
+    CHECK(dcpl, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Pset_chunk(dcpl, 2, chunks);
     CHECK(ret, FAIL, "H5Pset_chunk");
 
@@ -6419,8 +6844,8 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
     /* Open the file and create the chunked dataset with the input tid */
     /* Verify the dataset's datatype message version */
     /* Also verify the committed atatype message version */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -6436,14 +6861,14 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
             if(fid >= 0 ) {  /* The file open succeeds */
 
                 /* Get the internal file pointer */
-                f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
+                f = (H5F_t *)H5VL_object(fid);
+                CHECK(f, NULL, "H5VL_object");
 
                 /* Open the committed datatype */
                 str_tid = H5Topen2(fid, "datatype", H5P_DEFAULT);
                 CHECK(str_tid, FAIL, "H5Topen2");
-                str_dtype = (H5T_t *)H5I_object(str_tid);
-                CHECK(str_dtype, NULL, "H5I_object");
+                str_dtype = (H5T_t *)H5VL_object(str_tid);
+                CHECK(str_dtype, NULL, "H5VL_object");
 
                 /* Verify the committed datatype message version */
                 VERIFY(str_dtype->shared->version, H5O_dtype_ver_bounds[H5F_LIBVER_EARLIEST], "H5O_dtype_ver_bounds");
@@ -6455,11 +6880,11 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
 
                 /* Create the chunked dataset */
                 did = H5Dcreate2(fid, DSETNAME, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-                CHECK(did, FAIL, "H5Dcreate2");
+                CHECK(did, H5I_INVALID_HID, "H5Dcreate2");
 
                 /* Get the dataset's datatype */
                 dtid = H5Dget_type(did);
-                CHECK(dtid, FAIL, "H5Dget_type");
+                CHECK(dtid, H5I_INVALID_HID, "H5Dget_type");
 
                 /* Get the internal datatype pointer */
                 dtype = (H5T_t *)H5I_object(dtid);
@@ -6552,14 +6977,14 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
 static void
 test_libver_bounds_attributes(hid_t fapl)
 {
-    hid_t fid = -1;         /* File ID */
-    hid_t fcpl = -1;        /* File creation property list */
-    hid_t new_fapl = -1;    /* File access property list */
-    hid_t tid = -1;         /* Datatype ID */
-    hid_t gid = -1;         /* Group ID */
-    hid_t sid = -1;         /* Dataspace ID */
-    hid_t aid = -1;         /* Attribute ID */
-    hid_t attr_cpl = -1;    /* Attribute creation property list */
+    hid_t fid = H5I_INVALID_HID;         /* File ID */
+    hid_t fcpl = H5I_INVALID_HID;        /* File creation property list */
+    hid_t new_fapl = H5I_INVALID_HID;    /* File access property list */
+    hid_t tid = H5I_INVALID_HID;         /* Datatype ID */
+    hid_t gid = H5I_INVALID_HID;         /* Group ID */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t aid = H5I_INVALID_HID;         /* Attribute ID */
+    hid_t attr_cpl = H5I_INVALID_HID;    /* Attribute creation property list */
     H5A_t *attr = NULL;     /* Internal attribute pointer */
     H5F_t *f = NULL;        /* Internal file pointer */
     H5F_libver_t low, high; /* Low and high bounds */
@@ -6571,11 +6996,11 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Create the file */
     fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Integer datatpye */
     tid = H5Tcopy(H5T_NATIVE_INT);
-    CHECK(tid, FAIL, "H5Tcopy");
+    CHECK(tid, H5I_INVALID_HID, "H5Tcopy");
 
     /* Create a committed datatype */
     ret = H5Tcommit2(fid, "datatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -6583,19 +7008,19 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Create dataspace */
     sid = H5Screate(H5S_SCALAR);
-    CHECK(sid, FAIL, "H5Screate");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate");
 
     /* Create a group */
     gid = H5Gcreate2(fid, GRP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(gid, FAIL, "H5Gcreate2");
+    CHECK(gid, H5I_INVALID_HID, "H5Gcreate2");
 
     /* Attach an attribute to the group with the committed datatype */
     aid = H5Acreate2(gid, "attr1", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate2");
+    CHECK(aid, H5I_INVALID_HID, "H5Acreate2");
 
     /* Get the internal attribute pointer */
-    attr = (H5A_t *)H5I_object(aid);
-    CHECK(attr, NULL, "H5I_object");
+    attr = (H5A_t *)H5VL_object(aid);
+    CHECK(attr, NULL, "H5VL_object");
 
     /* Verify the attribute version */
     if(low == H5F_LIBVER_EARLIEST)
@@ -6613,8 +7038,8 @@ test_libver_bounds_attributes(hid_t fapl)
     CHECK(aid, FAIL, "H5Acreate2");
 
     /* Get the internal attribute pointer */
-    attr = (H5A_t *)H5I_object(aid);
-    CHECK(attr, NULL, "H5I_object");
+    attr = (H5A_t *)H5VL_object(aid);
+    CHECK(attr, NULL, "H5VL_object");
 
     /* Verify attribute version */
     VERIFY(attr->shared->version, H5O_attr_ver_bounds[low], "H5O_attr_ver_bounds");
@@ -6625,17 +7050,17 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Enable character encoding in attribute creation property list */
     attr_cpl = H5Pcreate(H5P_ATTRIBUTE_CREATE);
-    CHECK(attr_cpl, FAIL, "H5Pcreate");
+    CHECK(attr_cpl, H5I_INVALID_HID, "H5Pcreate");
     ret = H5Pset_char_encoding(attr_cpl, H5T_CSET_UTF8);
     CHECK(ret, FAIL, "H5Pset_char_encoding");
 
     /* Attach an attribute to the group with character encoding set */
     aid = H5Acreate2(gid, "attr3", H5T_NATIVE_INT, sid, attr_cpl, H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate2");
+    CHECK(aid, H5I_INVALID_HID, "H5Acreate2");
 
     /* Get internal attribute pointer */
-    attr = (H5A_t *)H5I_object(aid);
-    CHECK(attr, NULL, "H5I_object");
+    attr = (H5A_t *)H5VL_object(aid);
+    CHECK(attr, NULL, "H5VL_object");
 
     /* Verify attribute version */
     if(low == H5F_LIBVER_EARLIEST)
@@ -6670,7 +7095,7 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Create a copy of the file creation property list */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    CHECK(fcpl, FAIL, "H5Pcreate");
+    CHECK(fcpl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Enable shared datatype message */
     ret = H5Pset_shared_mesg_nindexes(fcpl, 1);
@@ -6680,27 +7105,27 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Create the file with shared datatype message enabled */
     fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Create an integer datatye */
     tid = H5Tcopy(H5T_NATIVE_INT);
-    CHECK(tid, FAIL, "H5Tcopy");
+    CHECK(tid, H5I_INVALID_HID, "H5Tcopy");
 
     /* Create dataspace */
     sid = H5Screate(H5S_SCALAR);
-    CHECK(sid, FAIL, "H5Screate");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate");
 
     /* Create a group */
     gid = H5Gcreate2(fid, GRP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(gid, FAIL, "H5Gcreate2");
+    CHECK(gid, H5I_INVALID_HID, "H5Gcreate2");
 
     /* Attach an attribute to the group with shared integer datatype */
     aid = H5Acreate2(gid, ATTR_NAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate2");
+    CHECK(aid, H5I_INVALID_HID, "H5Acreate2");
 
     /* Get the internal attribute pointer */
-    attr = (H5A_t *)H5I_object(aid);
-    CHECK(attr, NULL, "H5I_object");
+    attr = (H5A_t *)H5VL_object(aid);
+    CHECK(attr, NULL, "H5VL_object");
 
     /* Verify the attribute version */
     if(low == H5F_LIBVER_EARLIEST)
@@ -6735,13 +7160,13 @@ test_libver_bounds_attributes(hid_t fapl)
 
     /* Create a scalar dataspace to be used later for the attribute */
     sid = H5Screate(H5S_SCALAR);
-    CHECK(sid, FAIL, "H5Screate");
+    CHECK(sid, H5I_INVALID_HID, "H5Screate");
 
     /* Loop through all the combinations of low/high bounds */
     /* Open the file and group and attach an attribute to the group */
     /* Verify the attribute version */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -6757,8 +7182,8 @@ test_libver_bounds_attributes(hid_t fapl)
             if(fid >=0 ) { /* The file open succeeds */
 
                 /* Get the internal file pointer */
-                f = (H5F_t *)H5I_object(fid);
-                CHECK(f, NULL, "H5I_object");
+                f = (H5F_t *)H5VL_object(fid);
+                CHECK(f, NULL, "H5VL_object");
 
                 /* Open the group */
                 gid = H5Gopen2(fid, GRP_NAME, H5P_DEFAULT);
@@ -6769,8 +7194,8 @@ test_libver_bounds_attributes(hid_t fapl)
                 CHECK(aid, FAIL, "H5Acreate2");
 
                 /* Get the internal attribute pointer */
-                attr = (H5A_t *)H5I_object(aid);
-                CHECK(attr, NULL, "H5I_object");
+                attr = (H5A_t *)H5VL_object(aid);
+                CHECK(attr, NULL, "H5VL_object");
 
                 /* Verify the attribute message version */
                 VERIFY(attr->shared->version, H5O_attr_ver_bounds[f->shared->low_bound], "H5O_attr_ver_bounds");
@@ -6984,7 +7409,7 @@ test_incr_filesize(void)
 
         /* Create datasets in file */
         for(u = 0; u < 10; u++) {
-            sprintf(name, "Dataset %u", u);
+            HDsprintf(name, "Dataset %u", u);
             dset = H5Dcreate2(fid, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
             CHECK(dset, FAIL, "H5Dcreate2");
 
@@ -7014,7 +7439,7 @@ test_incr_filesize(void)
         /* Get the stored EOA */
         ret = H5Fget_eoa(fid, &stored_eoa);
         CHECK(ret, FAIL, "H5Fget_eoa");
-        
+
         /* Verify the stored EOA is the same as filesize */
         VERIFY(filesize, stored_eoa, "file size");
 
@@ -7041,6 +7466,132 @@ test_incr_filesize(void)
         CHECK(ret, FAIL, "H5Pclose");
     }
 } /* end test_incr_filesize() */
+
+/****************************************************************
+**
+**  test_min_dset_ohdr():
+**    Test API calls to toggle dataset object header minimization.
+**
+**  TODO (as separate function?):
+**    + setting persists between close and (re)open?
+**    + dataset header sizes created while changing value of toggle
+**
+****************************************************************/
+static void
+test_min_dset_ohdr(void)
+{
+    const char basename[]       = "min_dset_ohdr_testfile";
+    char filename[FILENAME_LEN] = "";
+    hid_t      file_id          = -1;
+    hid_t      file2_id         = -1;
+    hbool_t    minimize;
+    herr_t     ret;
+
+    MESSAGE(5, ("Testing dataset object header minimization\n"));
+
+    /*********/
+    /* SETUP */
+    /*********/
+
+    h5_fixname(basename, H5P_DEFAULT, filename, sizeof(filename));
+
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(file_id, "H5Fcreate");
+
+    /*********/
+    /* TESTS */
+    /*********/
+
+    /*----------------------------------------
+     * TEST default value
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, FALSE, "minimize flag");
+
+    /*----------------------------------------
+     * TEST set to TRUE
+     */
+    ret = H5Fset_dset_no_attrs_hint(file_id, TRUE);
+    CHECK(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
+
+    /*----------------------------------------
+     * TEST second file open on same filename
+     */
+    file2_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK_I(file2_id, "H5Fopen");
+
+    /* verify TRUE setting on second open
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
+
+    /* re-set to FALSE on first open
+     */
+    ret = H5Fset_dset_no_attrs_hint(file_id, FALSE);
+    CHECK(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    /* verify FALSE set on both opens
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, FALSE, "minimize flag");
+
+    ret = H5Fget_dset_no_attrs_hint(file2_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, FALSE, "minimize flag");
+
+    /* re-set to TRUE on second open
+     */
+    ret = H5Fset_dset_no_attrs_hint(file2_id, TRUE);
+    CHECK(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    /* verify TRUE set on both opens
+     */
+    ret = H5Fget_dset_no_attrs_hint(file_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
+
+    ret = H5Fget_dset_no_attrs_hint(file2_id, &minimize);
+    CHECK(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+    VERIFY(minimize, TRUE, "minimize flag");
+
+    /*----------------------------------------
+     * TEST error cases
+     */
+
+    /* trying to set with invalid file ID */
+    H5E_BEGIN_TRY {
+        ret = H5Fset_dset_no_attrs_hint(-1, TRUE);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fset_dset_no_attrs_hint");
+
+    /* trying to get with invalid file ID */
+    H5E_BEGIN_TRY {
+        ret = H5Fget_dset_no_attrs_hint(-1, &minimize);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+
+    /* trying to get with invalid pointer */
+    H5E_BEGIN_TRY {
+        ret = H5Fget_dset_no_attrs_hint(file_id, NULL);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fget_dset_no_attrs_hint");
+
+    /************/
+    /* TEARDOWN */
+    /************/
+
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(file2_id);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_min_dset_ohdr() */
 
 /****************************************************************
 **
@@ -7278,6 +7829,8 @@ void
 test_file(void)
 {
     const char  *env_h5_drvr;         /* File Driver value from environment */
+    hid_t fapl_id = H5I_INVALID_HID;    /* VFD-dependent fapl ID */
+    herr_t   ret;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File I/O\n"));
@@ -7287,6 +7840,10 @@ test_file(void)
     if(env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
+    /* Improved version of VFD-dependent checks */
+    fapl_id = h5_fileaccess();
+    CHECK(fapl_id, H5I_INVALID_HID, "h5_fileaccess");
+
     test_file_create();                         /* Test file creation(also creation templates)*/
     test_file_open();                           /* Test file opening */
     test_file_reopen();                         /* Test file reopening */
@@ -7295,7 +7852,8 @@ test_file(void)
     test_get_obj_ids();                         /* Test H5Fget_obj_ids for Jira Issue 8528 */
     test_file_perm();                           /* Test file access permissions */
     test_file_perm2();                          /* Test file access permission again */
-    test_file_ishdf5();                         /* Test detecting HDF5 files correctly */
+    test_file_is_accessible(env_h5_drvr);       /* Test detecting HDF5 files correctly */
+    test_file_delete(fapl_id);                  /* Test H5Fdelete */
     test_file_open_dot();                       /* Test opening objects with "." for a name */
     test_file_open_overlap();                   /* Test opening files in an overlapping manner */
     test_file_getname();                        /* Test basic H5Fget_name() functionality */
@@ -7329,12 +7887,18 @@ test_file(void)
     test_libver_macros();                       /* Test the macros for library version comparison */
     test_libver_macros2();                      /* Test the macros for library version comparison */
     test_incr_filesize();                       /* Test H5Fincrement_filesize() and H5Fget_eoa() */
+    test_min_dset_ohdr();                       /* Test datset object header minimization */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
+    test_file_ishdf5(env_h5_drvr);              /* Test detecting HDF5 files correctly */
     test_deprec();                              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+    ret = H5Pclose(fapl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+
 } /* test_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_file
  *
@@ -7360,5 +7924,6 @@ cleanup_file(void)
     HDremove(FILE5);
     HDremove(FILE6);
     HDremove(FILE7);
+    HDremove(DST_FILE);
 }
 

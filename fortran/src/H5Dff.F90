@@ -90,6 +90,15 @@ MODULE H5D
   USE, INTRINSIC :: ISO_C_BINDING
   USE H5GLOBAL
 
+  PRIVATE h5dread_vl_integer, h5dread_vl_real, h5dread_vl_string
+  PRIVATE h5dwrite_vl_integer, h5dwrite_vl_real, h5dwrite_vl_string
+  PRIVATE h5dwrite_reference_obj, h5dwrite_reference_dsetreg, h5dwrite_char_scalar, h5dwrite_ptr
+  PRIVATE h5dread_reference_obj, h5dread_reference_dsetreg, h5dread_char_scalar, h5dread_ptr
+  PRIVATE h5dfill_integer, h5dfill_c_float, h5dfill_c_double, h5dfill_char
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+  PRIVATE h5dfill_c_long_double
+#endif
+
   INTERFACE h5dextend_f
      MODULE PROCEDURE h5dset_extent_f
   END INTERFACE

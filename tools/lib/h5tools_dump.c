@@ -94,7 +94,7 @@ h5tool_format_t h5tools_dataformat = {
 
 const h5tools_dump_header_t h5tools_standardformat = {
 "standardformat", /*name */
-"HDF5", /*fileebgin */
+"HDF5", /*filebegin */
 "", /*fileend */
 SUPER_BLOCK, /*bootblockbegin */
 "", /*bootblockend */
@@ -1256,7 +1256,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
 
             /* Reclaim any VL memory, if necessary */
             if (vl_data)
-                H5Dvlen_reclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
+                H5Treclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
 
             if(H5Sclose(sm_space) < 0)
                 H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
@@ -1645,7 +1645,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
 
         /* Reclaim any VL memory, if necessary */
         if (vl_data)
-            H5Dvlen_reclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
+            H5Treclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
 
         /* Calculate the next hyperslab offset */
         for (i = ctx->ndims, carry = 1; i > 0 && carry; --i) {
@@ -2277,18 +2277,26 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
         ctx->indent_level++;
         {
-           char *ttag;
+            char *ttag;
 
-           if(NULL == (ttag = H5Tget_tag(type)))
-              H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_tag failed");
+            if(NULL == (ttag = H5Tget_tag(type)))
+                H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_tag failed");
 
-           ctx->need_prefix = TRUE;
+            ctx->need_prefix = TRUE;
 
-           h5tools_str_reset(buffer);
-           h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";", ttag);
-           h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+            h5tools_str_reset(buffer);
+            h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";", ttag);
+            h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
-           H5free_memory(ttag);
+            H5free_memory(ttag);
+
+            if((size = H5Tget_size(type)) <= 0) {
+                ctx->need_prefix = TRUE;
+
+                h5tools_str_reset(buffer);
+                h5tools_str_append(buffer, "OPAQUE_SIZE \"%s\";", size);
+                h5tools_render_element(stream, info, ctx, buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+            }
         }
         ctx->indent_level--;
 
@@ -2337,9 +2345,13 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         if (H5Tequal(type, H5T_STD_REF_DSETREG) == TRUE) {
             h5tools_str_append(buffer, " { H5T_STD_REF_DSETREG }");
         }
-        else {
+        else if (H5Tequal(type, H5T_STD_REF_OBJ) == TRUE) {
             h5tools_str_append(buffer, " { H5T_STD_REF_OBJECT }");
         }
+        else if (H5Tequal(type, H5T_STD_REF) == TRUE) {
+            h5tools_str_append(buffer, " { H5T_STD_REF }");
+        } else
+            h5tools_str_append(buffer, " { UNDEFINED }");
         break;
 
     case H5T_ENUM:
@@ -3215,7 +3227,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     *-------------------------------------------------------------------------
     */
     if (H5D_VIRTUAL != stl) {
-    ctx->need_prefix = TRUE;
+        ctx->need_prefix = TRUE;
 
         h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, "%s %s", FILTERS, BEGIN);
@@ -3971,7 +3983,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info,
 
                 /* Reclaim any VL memory, if necessary */
                 if (vl_data)
-                    H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
+                    H5Treclaim(p_type, space, H5P_DEFAULT, buf);
 
                 HDfree(buf);
             }

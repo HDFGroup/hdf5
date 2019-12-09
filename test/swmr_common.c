@@ -73,7 +73,7 @@ unsigned symbol_count[NLEVELS] = {100, 200, 400, 800, 1600};
 /* Array of dataset information entries (1 per dataset) */
 symbol_info_t *symbol_info[NLEVELS];
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    choose_dataset
  *
@@ -87,8 +87,9 @@ symbol_info_t *symbol_info[NLEVELS];
  *-------------------------------------------------------------------------
  */
 symbol_info_t *
-choose_dataset(void)
+choose_dataset(unsigned *levelp, unsigned *offsetp)
 {
+    static unsigned ncalls = 0;
     unsigned level;             /* The level of the dataset */
     unsigned offset;            /* The "offset" of the dataset at that level */
 
@@ -98,6 +99,15 @@ choose_dataset(void)
     /* Determine the offset of the level */
     offset = (unsigned)(HDrandom() % (int)symbol_count[level]);
 
+    ++ncalls;
+    if ((ncalls % 1000) == 0) {
+        fprintf(stderr, "%s: call %u chose level %u offset %u\n", __func__,
+            ncalls, level, offset);
+    }
+    if (levelp != NULL)
+        *levelp = level;
+    if (offsetp != NULL)
+        *offsetp = offset;
     return &symbol_info[level][offset];
 } /* end choose_dataset() */
 
@@ -142,7 +152,7 @@ create_symbol_datatype(void)
     return sym_type_id;
 } /* end create_symbol_datatype() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    generate_name
  *
@@ -161,7 +171,7 @@ create_symbol_datatype(void)
  *              The dataset's count
  *
  * Return:      Success:    0
- *                          
+ *
  *              Failure:    Can't fail
  *
  *-------------------------------------------------------------------------
@@ -170,13 +180,13 @@ int
 generate_name(char *name_buf, unsigned level, unsigned count)
 {
     HDassert(name_buf);
-    
-    sprintf(name_buf, "%u-%04u", level, count);
+
+    HDsprintf(name_buf, "%u-%04u", level, count);
 
     return 0;
 } /* end generate_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    generate_symbols
  *
@@ -195,13 +205,12 @@ generate_symbols(void)
     unsigned u, v;      /* Local index variables */
 
     for(u = 0; u < NLEVELS; u++) {
-        symbol_info[u] = (symbol_info_t *)HDmalloc(symbol_count[u] * sizeof(symbol_info_t));
+        symbol_info[u] = HDmalloc(symbol_count[u] * sizeof(symbol_info_t));
         for(v = 0; v < symbol_count[u]; v++) {
             char name_buf[64];
 
             generate_name(name_buf, u, v);
-            symbol_info[u][v].name = (char *)HDmalloc(HDstrlen(name_buf) + 1);
-            HDstrcpy(symbol_info[u][v].name, name_buf);
+            symbol_info[u][v].name = HDstrdup(name_buf);
             symbol_info[u][v].dsid = -1;
             symbol_info[u][v].nrecords = 0;
         } /* end for */
@@ -210,7 +219,7 @@ generate_symbols(void)
     return 0;
 } /* end generate_symbols() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    shutdown_symbols
  *
@@ -238,7 +247,7 @@ shutdown_symbols(void)
     return 0;
 } /* end shutdown_symbols() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    print_metadata_retries_info
  *
@@ -273,7 +282,7 @@ print_metadata_retries_info(hid_t fid)
         power = 1;
         for(j = 0; j < info.nbins; j++) {
             if(info.retries[i][j])
-            HDfprintf(stderr, "\t# of retries for %u - %u retries: %u\n", 
+            HDfprintf(stderr, "\t# of retries for %u - %u retries: %u\n",
                 power, (power * 10) - 1, info.retries[i][j]);
             power *= 10;
         } /* end for */

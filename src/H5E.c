@@ -866,7 +866,7 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
     H5E_msg_t   *msg;           /* Pointer to error message */
     ssize_t      ret_value = -1;     /* Return value */
 
-    FUNC_ENTER_API((-1))
+    FUNC_ENTER_API_NOCLEAR((-1))
     H5TRACE4("Zs", "i*Et*sz", msg_id, type, msg_str, size);
 
     /* Get the message object */
@@ -1386,7 +1386,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
  */
 
     /* Format the description */
-    va_start(ap, fmt);
+    HDva_start(ap, fmt);
     va_started = TRUE;
 
 #ifdef H5_HAVE_VASPRINTF
@@ -1402,8 +1402,8 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
     /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
     while((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap)) > (tmp_len - 1)) {
         /* shutdown & restart the va_list */
-        va_end(ap);
-        va_start(ap, fmt);
+        HDva_end(ap);
+        HDva_start(ap, fmt);
 
         /* Release the previous description, it's too small */
         H5MM_xfree(tmp);
@@ -1421,7 +1421,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
 
 done:
     if(va_started)
-        va_end(ap);
+        HDva_end(ap);
 #ifdef H5_HAVE_VASPRINTF
     /* Memory was allocated with HDvasprintf so it needs to be freed
      * with HDfree
@@ -1484,7 +1484,7 @@ done:
  *
  * Purpose:     Prints the error stack in some default way. This is just a
  *              convenience function for H5Ewalk() with a function that
- *              prints error messages. Users are encouraged to write there
+ *              prints error messages. Users are encouraged to write their
  *              own more specific error handlers.
  *
  * Return:      SUCCEED/FAIL
@@ -1566,8 +1566,8 @@ H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t stack_func, voi
     /* Walk the error stack */
     op.vers = 2;
     op.u.func2 = stack_func;
-    if(H5E__walk(estack, direction, &op, client_data) < 0)
-        HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
+    if((ret_value = H5E__walk(estack, direction, &op, client_data)) < 0)
+        HERROR(H5E_ERROR, H5E_CANTLIST, "can't walk error stack");
 
 done:
     FUNC_LEAVE_API(ret_value)

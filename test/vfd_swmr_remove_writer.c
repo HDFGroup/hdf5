@@ -71,7 +71,8 @@ static void usage(void);
  *-------------------------------------------------------------------------
  */
 static hid_t
-open_skeleton(const char *filename, unsigned verbose, unsigned old)
+open_skeleton(const char *filename, unsigned verbose,
+    unsigned old H5_ATTR_UNUSED)
 {
     hid_t fid = -1;     /* File ID for new HDF5 file */
     hid_t fapl = -1;    /* File access property list */
@@ -119,7 +120,7 @@ open_skeleton(const char *filename, unsigned verbose, unsigned old)
         goto error;
 
      /* Allocate memory for the configuration structure */
-     if((config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+     if((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         goto error;
 
     config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
@@ -224,7 +225,7 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
         hsize_t remove_size;    /* Size to reduce dataset dimension by */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset();
+        symbol = choose_dataset(NULL, NULL);
 
         /* Shrink the dataset's dataspace */
         remove_size = (hsize_t)HDrandom() % MAX_REMOVE_SIZE + 1;
@@ -298,6 +299,7 @@ usage(void)
 
 int main(int argc, const char *argv[])
 {
+    sigset_t oldset;
     hid_t fid;                  /* File ID for file opened */
     long nshrinks = 0;          /* # of times to shrink the dataset */
     long flush_count = 1000;    /* # of records to write between flushing file */
@@ -307,6 +309,8 @@ int main(int argc, const char *argv[])
     unsigned random_seed = 0;   /* Random # seed */
     unsigned u;                 /* Local index variable */
     int temp;
+
+    block_signals(&oldset);
 
     /* Parse command line options */
     if(argc < 2)
@@ -421,6 +425,10 @@ int main(int argc, const char *argv[])
         HDfprintf(stderr, "WRITER: Error releasing symbols!\n");
         HDexit(1);
     } /* end if */
+
+    await_signal(fid);
+
+    restore_signals(&oldset);
 
     /* Emit informational message */
     if(verbose)

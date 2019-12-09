@@ -324,6 +324,34 @@ IV. Further considerations
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
+   6. CMake uses a toolchain of utilities to compile, link libraries and
+      create archives, and other tasks to drive the build. The toolchain
+      utilities available are determined by the languages enabled. In normal
+      builds, CMake automatically determines the toolchain for host builds
+      based on system introspection and defaults. In cross-compiling
+      scenarios, a toolchain file may be specified with information about
+      compiler and utility paths.
+                Variables and Properties
+      Several variables relate to the language components of a toolchain which
+      are enabled. CMAKE_<LANG>_COMPILER is the full path to the compiler used
+      for <LANG>. CMAKE_<LANG>_COMPILER_ID is the identifier used by CMake for
+      the compiler and CMAKE_<LANG>_COMPILER_VERSION is the version of the compiler.
+
+      The CMAKE_<LANG>_FLAGS variables and the configuration-specific equivalents
+      contain flags that will be added to the compile command when compiling a
+      file of a particular language.
+
+      As the linker is invoked by the compiler driver, CMake needs a way to
+      determine which compiler to use to invoke the linker. This is calculated
+      by the LANGUAGE of source files in the target, and in the case of static
+      libraries, the language of the dependent libraries. The choice CMake makes
+      may be overridden with the LINKER_LANGUAGE target property.
+
+      See the CMake help for more information on using toolchain files.
+
+      To use a toolchain file with the supplied cmake scripts, see the
+      HDF5options.cmake file under the toolchain section.
+
 Notes: CMake and HDF5
 
    1. Using CMake for building and using HDF5 is under active development.
@@ -607,13 +635,13 @@ HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"       
 HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                          ON
 HDF5_ENABLE_HSIZET             "Enable datasets larger than memory"                           ON
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
+HDF5_ENABLE_PREADWRITE         "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" ON
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
 HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      ON
 HDF5_BUILD_GENERATORS          "Build Test Generators"                                        OFF
 HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                            OFF
 HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF
-HDF5_METADATA_TRACE_FILE       "Enable metadata trace file collection"                        OFF
 HDF5_NO_PACKAGES               "Do not include CPack Packaging"                               OFF
 HDF5_PACK_EXAMPLES             "Package the HDF5 Library Examples Compressed File"            OFF
 HDF5_PACK_MACOSX_FRAMEWORK     "Package the HDF5 Library in a Frameworks"                     OFF
@@ -623,10 +651,8 @@ HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"             
 HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                 OFF
 HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "0"
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
-HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
-HDF5_USE_18_API_DEFAULT        "Use the HDF5 1.8.x API by default"                            OFF
-HDF5_USE_110_API_DEFAULT       "Use the HDF5 1.10.x API by default"                           OFF
-HDF5_USE_112_API_DEFAULT       "Use the HDF5 1.12.x API by default"                           ON
+HDF5_TEST_PASSTHROUGH_VOL      "Execute tests with different passthrough VOL connectors"      OFF
+DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112)"                    "v112"
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  ON
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
@@ -639,13 +665,13 @@ if (HDF5_TEST_VFD)
     HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"      ON
 
 ---------------- External Library Options ---------------------
-HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building"        "NO"
-HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                        OFF
-HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                    OFF
-ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB" 0
-SZIP_USE_EXTERNAL           "Use External Library Building for SZIP" 0
+HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"
+HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     OFF
+HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 OFF
+ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"              0
+SZIP_USE_EXTERNAL           "Use External Library Building for SZIP"              0
 if (HDF5_ENABLE_SZIP_SUPPORT)
-    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"      OFF
+    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                                 OFF
 if (WINDOWS)
     H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 else ()

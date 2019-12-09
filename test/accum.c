@@ -23,12 +23,16 @@
 
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5Iprivate.h"
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* Filename */
-#define FILENAME "accum.h5"
+/* (The file names are the same as the define in accum_swmr_reader.c) */
+const char *FILENAME[] = {
+    "accum",
+    "accum_swmr_big",
+    NULL
+};
 
-/* The file name is the same as the define in accum_swmr_reader.c */
-#define SWMR_FILENAME "accum_swmr_big.h5"
 /* The reader forked by test_swmr_write_big() */
 #define SWMR_READER "accum_swmr_reader"
 
@@ -62,9 +66,9 @@ void accum_printf(const H5F_t *f);
 /* Private Test H5Faccum Function Wrappers */
 #define accum_write(a,s,b) H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), (b))
 #define accum_read(a,s,b)  H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), (b))
-#define accum_free(f,a,s)  H5F__accum_free(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (hsize_t)(s))
-#define accum_flush(f)   H5F__accum_flush(f)
-#define accum_reset(f)   H5F__accum_reset(f, TRUE)
+#define accum_free(f,a,s)  H5F__accum_free(f->shared, H5FD_MEM_DEFAULT, (haddr_t)(a), (hsize_t)(s))
+#define accum_flush(f)   H5F__accum_flush(f->shared)
+#define accum_reset(f)   H5F__accum_reset(f->shared, TRUE)
 
 /* ================= */
 /* Main Test Routine */
@@ -90,21 +94,29 @@ main(void)
     unsigned nerrors = 0;        /* track errors */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     hid_t fid = -1;
+    hid_t fapl = -1;			/* File access property list */
+    char  filename[1024];
     H5F_t * f = NULL;           /* File for all tests */
 
 
     /* Test Setup */
-    puts("Testing the metadata accumulator");
+    HDputs("Testing the metadata accumulator");
+
+    /* File access property list */
+    h5_reset();
+    if((fapl = h5_fileaccess()) < 0)
+        FAIL_STACK_ERROR
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create a test file */
-    if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Push API context */
     if(H5CX_push() < 0) FAIL_STACK_ERROR
     api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
-    if(NULL == (f = (H5F_t *)H5I_object(fid))) FAIL_STACK_ERROR
+    if(NULL == (f = (H5F_t *)H5VL_object(fid))) FAIL_STACK_ERROR
 
     /* We'll be writing lots of garbage data, so extend the
         file a ways. 10MB should do. */
@@ -133,7 +145,6 @@ main(void)
 
     /* End of test code, close and delete file */
     if(H5Fclose(fid) < 0) TEST_ERROR
-    HDremove(FILENAME);
 
     /* This test uses a different file */
     nerrors += test_swmr_write_big(TRUE);
@@ -141,14 +152,15 @@ main(void)
 
     if(nerrors)
         goto error;
-    puts("All metadata accumulator tests passed.");
+    HDputs("All metadata accumulator tests passed.");
+    h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error: 
     if(api_ctx_pushed) H5CX_pop();
 
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     return 1;
 } /* end main() */
 
@@ -1818,6 +1830,7 @@ test_swmr_write_big(hbool_t newest_format)
     hid_t fid = -1;			    /* File ID */
     hid_t fapl = -1;			/* File access property list */
     H5F_t *rf = NULL;			/* File pointer */
+    char  filename[1024];
     uint8_t *wbuf2 = NULL, *rbuf = NULL;      /* Buffers for reading & writing */
     uint8_t wbuf[1024];			/* Buffer for reading & writing */
     unsigned u;                 /* Local index variable */
@@ -1854,17 +1867,18 @@ test_swmr_write_big(hbool_t newest_format)
     /* File access property list */
     if((fapl = h5_fileaccess()) < 0)
         FAIL_STACK_ERROR
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
     /* Both cases will result in v3 superblock and version 2 object header for SWMR */
     if(newest_format) { /* latest format */
         if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             FAIL_STACK_ERROR
 
-	if((fid = H5Fcreate(SWMR_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	    FAIL_STACK_ERROR
     }
     else { /* non-latest-format */
-        if((fid = H5Fcreate(SWMR_FILENAME, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
             FAIL_STACK_ERROR
     } /* end if */
 
@@ -1873,7 +1887,7 @@ test_swmr_write_big(hbool_t newest_format)
         FAIL_STACK_ERROR
 
     /* Open the file with SWMR_WRITE */
-    if((fid = H5Fopen(SWMR_FILENAME, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
         FAIL_STACK_ERROR
 
     /* Push API context */
@@ -1881,7 +1895,7 @@ test_swmr_write_big(hbool_t newest_format)
     api_ctx_pushed = TRUE;
 
     /* Get H5F_t * to internal file structure */
-    if(NULL == (rf = (H5F_t *)H5I_object(fid))) FAIL_STACK_ERROR
+    if(NULL == (rf = (H5F_t *)H5VL_object(fid))) FAIL_STACK_ERROR
 
     /* We'll be writing lots of garbage data, so extend the
         file a ways. 10MB should do. */
@@ -1975,19 +1989,18 @@ test_swmr_write_big(hbool_t newest_format)
         /* Flush the accumulator */
         if(accum_reset(rf) < 0)
             FAIL_STACK_ERROR;
-        /* Close the property list */
-        if(H5Pclose(fapl) < 0) 
-            FAIL_STACK_ERROR;
 
         /* Close and remove the file */
         if(H5Fclose(fid) < 0) 
             FAIL_STACK_ERROR;
 
+        /* Close the property list */
+        if(H5Pclose(fapl) < 0) 
+            FAIL_STACK_ERROR;
+
         /* Pop API context */
         if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
         api_ctx_pushed = FALSE;
-
-        HDremove(SWMR_FILENAME);
 
         /* Release memory */
         if(wbuf2)
@@ -2000,12 +2013,11 @@ test_swmr_write_big(hbool_t newest_format)
 
 error:
     /* Closing and remove the file */
-    H5Pclose(fapl);
     H5Fclose(fid);
 
     if(api_ctx_pushed) H5CX_pop();
 
-    HDremove(SWMR_FILENAME);
+    H5Pclose(fapl);
 
     /* Release memory */
     if(wbuf2)

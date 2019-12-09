@@ -242,6 +242,7 @@ H5PL__create_path_table(void)
                                          * environment variable or the default.
                                          */
     char        *next_path = NULL;      /* A path tokenized from the paths string */
+    char        *lasts = NULL;          /* Context pointer for strtok_r() call */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -265,8 +266,7 @@ H5PL__create_path_table(void)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path copy")
 
     /* Separate the paths and store them */
-    /* XXX: strtok() is not thread-safe */
-    next_path = HDstrtok(paths, H5PL_PATH_SEPARATOR);
+    next_path = HDstrtok_r(paths, H5PL_PATH_SEPARATOR, &lasts);
     while (next_path) {
 
         /* Insert the path into the table */
@@ -274,7 +274,7 @@ H5PL__create_path_table(void)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't insert path: %s", next_path)
 
         /* Get the next path from the environment string */
-        next_path = HDstrtok(NULL, H5PL_PATH_SEPARATOR);
+        next_path = HDstrtok_r(NULL, H5PL_PATH_SEPARATOR, &lasts);
     } /* end while */
 
 done:
@@ -673,7 +673,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
             size_t      len;
 
             /* Allocate & initialize the path name */
-            len = HDstrlen(dir) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(dp->d_name) + 1 /*\0*/;
+            len = HDstrlen(dir) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(dp->d_name) + 1 /*\0*/ + 4; /* Extra "+4" to quiet GCC warning - 2019/07/05, QAK */
 
             if (NULL == (path = (char *)H5MM_calloc(len)))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")

@@ -130,9 +130,10 @@ DISPLAYUSAGE()
     set -
     cat <<EOF
 Usage: $PROGNAME [all] [checkout] [ftp <URL> [diff] [test] [srcdir] [release] [help]
-	[clean] [distclean] [echo] [deploy <dir>] [deploydir <dir>]
-	[zlib <zlib_path>] [releasedir <dir>] [srcdirname <dir>] [check-vfd]
-	[exec <command>] [module-load <module-list>] [op-configure <option>] 
+        [clean] [distclean] [echo] [deploy <dir>] [deploydir <dir>]
+        [zlib <zlib_path>] [releasedir <dir>] [srcdirname <dir>] [check-vfd]
+        [check-passthrough-vol]
+        [exec <command>] [module-load <module-list>] [op-configure <option>]
         [--<option>]
     all:      Run all commands (checkout, test & release)
               [Default is all]
@@ -149,8 +150,8 @@ Usage: $PROGNAME [all] [checkout] [ftp <URL> [diff] [test] [srcdir] [release] [h
     setenv <name> <value>:
               Set environment variable <name> to <value>.
     setenvN <N> <name> <value> ...:
-	      Set environment variable with <N> values.
-	      E.g., setenvN 3 x a b c is same as setenv x="a b c".
+              Set environment variable with <N> values.
+              E.g., setenvN 3 x a b c is same as setenv x="a b c".
     srcdir:   Use srcdir option (does not imply other commands)
               "snapshot srcdir" is equivalent to "snapshot srcdir all"
               "snapshot srcdir checkout" is equivalent to "snapshot checkout"
@@ -168,7 +169,12 @@ Usage: $PROGNAME [all] [checkout] [ftp <URL> [diff] [test] [srcdir] [release] [h
               Use <dir> as the release directory
               [Default is $ReleaseDir_default]
     check-vfd:
-	      Run make check-vfd instead of just make check.
+              Run make check-vfd instead of just make check.
+    check-passthrough-vol:
+              Run make check-passthrough-vol instead of just make check.
+              NOTE: Will only succeed with passthrough VOL connectors
+              that use the native VOL connector as the terminal
+              connector.
     exttest <testscript>;
               Run testscript;
     exec <command>:
@@ -421,6 +427,9 @@ while [ $# -gt 0 ] ; do
             ;;
 	check-vfd)
 	    CHECKVAL=check-vfd
+	    ;;
+	check-passthrough-vol)
+	    CHECKVAL=check-passthrough-vol
 	    ;;
         module-load)
             shift
