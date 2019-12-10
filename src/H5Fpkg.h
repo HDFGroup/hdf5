@@ -444,7 +444,7 @@ struct H5F_shared_t {
     /* Old VFD SWMMR metadata file index.  These fields are used only
      * by the VFD SWMR reader to store the previous version of the 
      * metadata file index so that it can be compared with the current 
-     * versoin to identify page buffer and metadata cache entries that 
+     * version to identify page buffer and metadata cache entries that 
      * must be evicted or refreshed to avoid message from the past bugs.
      */
     H5FD_vfd_swmr_idx_entry_t * old_mdf_idx;
