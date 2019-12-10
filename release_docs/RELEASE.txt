@@ -182,6 +182,18 @@ Bug Fixes since HDF5-1.10.5 release
 
     Library
     -------
+    - Fixed user-created data access properties not existing in the property list
+      returned by H5Dget_access_plist. Thanks to Steven Varga for submitting a
+      reproducer and a patch.
+
+      (CJH - 2019/12/9, HDFFV-10934)
+
+    - Improved peformance when creating a large number of small datasets by
+      retrieving default property values from the API context instead of doing
+      skip list searches.
+
+      (CJH - 2019/12/10, HDFFV-10658)
+
     - Inappropriate linking with deprecated MPI C++ libraries
 
       HDF5 does not define *_SKIP_MPICXX in the public headers, so applications
