@@ -19,6 +19,7 @@
 *
 *************************************************************/
 
+#include "bsdqueue.h"
 #include "h5test.h"
 
 /*
@@ -1765,7 +1766,7 @@ test_multiple_file_opens(void)
     H5F_t *f1, *f2, *f;     /* File pointer */
     H5F_vfd_swmr_config_t *config1 = NULL;      /* Configuration for VFD SWMR */
     H5F_vfd_swmr_config_t *config2 = NULL;      /* Configuration for VFD SWMR */
-    H5F_vfd_swmr_eot_queue_entry_t *curr;
+    eot_queue_entry_t *curr;
 
     TESTING("EOT queue entries when opening files with/without VFD SWMR");
 
@@ -1837,7 +1838,7 @@ test_multiple_file_opens(void)
     if(vfd_swmr_writer_g)
         TEST_ERROR;
     /* The EOT queue should be empty */
-    if(vfd_swmr_eot_queue_head_g != NULL)
+    if(!TAILQ_EMPTY(&eot_queue_g))
         TEST_ERROR;
 
     /* Create a file with VFD SWMR writer */
@@ -1852,8 +1853,7 @@ test_multiple_file_opens(void)
     if(!vfd_swmr_writer_g)
         TEST_ERROR;
     /* The EOT queue should be initialized with the first entry equals to f1 */
-    if(vfd_swmr_eot_queue_head_g == NULL ||
-       vfd_swmr_eot_queue_head_g->vfd_swmr_file != f1)
+    if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || curr->vfd_swmr_file != f1)
         TEST_ERROR;
 
     /* Create another file with VFD SWMR writer */
@@ -1868,16 +1868,13 @@ test_multiple_file_opens(void)
     if(!vfd_swmr_writer_g)
         TEST_ERROR;
     /* The EOT queue's first entry should be f1 */
-    if(vfd_swmr_eot_queue_head_g == NULL ||
-       vfd_swmr_eot_queue_head_g->vfd_swmr_file != f1)
+    if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || curr->vfd_swmr_file != f1)
         TEST_ERROR;
 
     /* The file without VFD SWMR should not exist on the EOT queue */
-    curr = vfd_swmr_eot_queue_head_g;
-    while(curr != NULL) {
+    TAILQ_FOREACH(curr, &eot_queue_g, link) {
         if(curr->vfd_swmr_file == f)
             TEST_ERROR
-        curr = curr->next;
     }
 
     /* Close the first file with VFD SWMR */
@@ -1888,8 +1885,7 @@ test_multiple_file_opens(void)
     if(!vfd_swmr_writer_g)
         TEST_ERROR;
     /* The EOT queue's first entry should be f2 */
-    if(vfd_swmr_eot_queue_head_g == NULL ||
-       vfd_swmr_eot_queue_head_g->vfd_swmr_file != f2)
+    if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || curr->vfd_swmr_file != f2)
         TEST_ERROR;
 
     /* Close the second file with VFD SWMR */
@@ -1900,7 +1896,7 @@ test_multiple_file_opens(void)
     if(vfd_swmr_writer_g)
         TEST_ERROR;
     /* The EOT queue should be empty */
-    if(vfd_swmr_eot_queue_head_g != NULL)
+    if(!TAILQ_EMPTY(&eot_queue_g))
         TEST_ERROR;
 
     /* Closing */
@@ -1969,6 +1965,7 @@ test_multiple_concur_file_opens(void)
     H5F_vfd_swmr_config_t *config1 = NULL;    /* VFD SWMR configuration */
     H5F_vfd_swmr_config_t *config2 = NULL;    /* VFD SWMR configuration */
     H5F_t *f1, *f2;             /* File pointer */
+    eot_queue_entry_t *curr;
 
     TESTING("EOT queue entries when opening files concurrently with VFD SWMR");
 
@@ -2157,8 +2154,7 @@ test_multiple_concur_file_opens(void)
         TEST_ERROR;
 
     /* The EOT queue's first entry should be f1 */
-    if(vfd_swmr_eot_queue_head_g == NULL ||
-       vfd_swmr_eot_queue_head_g->vfd_swmr_file != f1)
+    if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || curr->vfd_swmr_file != f1)
         TEST_ERROR;
 
 
@@ -2214,8 +2210,7 @@ test_multiple_concur_file_opens(void)
         TEST_ERROR;
 
     /* The EOT queue's first entry should be f2 */
-    if(vfd_swmr_eot_queue_head_g == NULL ||
-       vfd_swmr_eot_queue_head_g->vfd_swmr_file != f2)
+    if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || curr->vfd_swmr_file != f2)
         TEST_ERROR;
 
     /* Send notification 3 to child to close file B */

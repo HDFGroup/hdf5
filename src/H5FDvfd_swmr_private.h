@@ -12,13 +12,15 @@
 #ifndef _H5FDvfd_swmr_private_H
 #define _H5FDvfd_swmr_private_H
 
+#include "bsdqueue.h"   /* for TAILQ_* */
+
 /* Forward declaration */
 struct H5F_t;
 struct H5F_shared_t;
 struct H5FD_vfd_swmr_idx_entry_t;
 
 /* 
- *  struct H5F_vfd_eot_queue_entry_t
+ *  struct eot_queue_entry_t
  * 
  *  This is the structure for an entry on the end-of-tick queue (EOT queue) of files
  *  opened in either VFD SWMR write or VFD SWMR read mode.  This queue is maintained
@@ -27,7 +29,7 @@ struct H5FD_vfd_swmr_idx_entry_t;
  *  of tick has arrived for the specified file, and to initiate end of tick processing
  *  if it has.
  *
- *  The fields of H5F_vfd_eot_queue_entry_t are discussed below:
+ *  The fields of eot_queue_entry_t are discussed below:
  *
  *  vfd_swmr_file: Pointer to the instance of H5F_file_t containing the shared
  *      fields of the associated file that has been opened in VFD SWMR mode
@@ -41,31 +43,27 @@ struct H5FD_vfd_swmr_idx_entry_t;
  *
  *  end_of_tick: Expiration time of the current tick of the target file.
  *
- *  next: Pointer to the next element in the end of tick queue, or NULL if there
- *      is no next entry.  Note that if next is not NULL, next->end_of_tick 
- *      must be greater than or equal to end_of_tick.
- *
- *  prev: Pointer to the previous element in the end of tick queue, or NULL if 
- *      there is no previous entry.  Note that if prev is not NULL, 
- *      prev->end_of_tick must be less than or equal to end_of_tick.
- *
+ *  link: Forward and backward linkage between the next element and the previous
+ *  element (or the queue head).  Note that if there is a following entry,
+ *  `next`, then `next->end_of_tick` must be greater than or equal to
+ *  `end_of_tick`.
  */
-typedef struct H5F_vfd_swmr_eot_queue_entry_t {
+typedef struct eot_queue_entry {
     hbool_t     vfd_swmr_writer;
     uint64_t    tick_num;
     struct timespec end_of_tick;
     struct H5F_t  *vfd_swmr_file; /* NOTE: for the time being use H5F_t instead H5F_file_t */
-    struct H5F_vfd_swmr_eot_queue_entry_t *next;
-    struct H5F_vfd_swmr_eot_queue_entry_t *prev;
-} H5F_vfd_swmr_eot_queue_entry_t;
+    TAILQ_ENTRY(eot_queue_entry) link;
+} eot_queue_entry_t;
 
 extern unsigned int vfd_swmr_api_entries_g;
 extern hbool_t vfd_swmr_writer_g;
 extern struct timespec end_of_tick_g;
 
-/* The head and tail pointers of the EOT queue */
-extern H5F_vfd_swmr_eot_queue_entry_t *vfd_swmr_eot_queue_head_g;
-extern H5F_vfd_swmr_eot_queue_entry_t *vfd_swmr_eot_queue_tail_g;
+/* The head of the EOT queue */
+typedef TAILQ_HEAD(eot_queue, eot_queue_entry) eot_queue_t;
+
+extern eot_queue_t eot_queue_g;
 
 /***************************************/
 /* Library-private Function Prototypes */

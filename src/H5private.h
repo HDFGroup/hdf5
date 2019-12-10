@@ -2116,10 +2116,10 @@ H5_DLL herr_t H5CX_pop(void);
         ;   /* Do nothing: we are *re-*entering the API. */                   \
     } else if(err_occurred) {                                                 \
         ;   /* Do nothing: an error occurred. */                              \
-    } else if(vfd_swmr_eot_queue_head_g != NULL) {                            \
+    } else if(TAILQ_FIRST(&eot_queue_g) != NULL) {                            \
         const bool swmr_reader_exit = _swmr_reader_exit;                      \
         struct timespec curr_time;                                            \
-        struct H5F_vfd_swmr_eot_queue_entry_t *init_eot_queue_head = vfd_swmr_eot_queue_head_g; \
+        eot_queue_entry_t *init_eot_queue_head = TAILQ_FIRST(&eot_queue_g);   \
         do {                                                                  \
             if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0) {            \
                 HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err,                       \
@@ -2136,8 +2136,8 @@ H5_DLL herr_t H5CX_pop(void);
                                 "end of tick error for VFD SWMR reader")      \
             } else                                                            \
                 break;                                                        \
-        } while ((vfd_swmr_eot_queue_head_g != NULL) &&                       \
-                 (vfd_swmr_eot_queue_head_g != init_eot_queue_head));         \
+        } while (TAILQ_FIRST(&eot_queue_g) != NULL &&                         \
+                 TAILQ_FIRST(&eot_queue_g) != init_eot_queue_head);           \
     }                                                                         \
 
 /* Use this macro for all "normal" API functions */

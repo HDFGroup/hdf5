@@ -76,20 +76,6 @@
     entry_ptr->prev = NULL;                                         \
 } /* H5F__LL_REMOVE() */
 
-/* Append an entry to the doubly linked list */
-#define H5F__LL_APPEND(entry_ptr, head_ptr, tail_ptr)               \
-{                                                                   \
-    if((head_ptr) == NULL ) {                                       \
-       (head_ptr) = (entry_ptr);                                    \
-       (tail_ptr) = (entry_ptr);                                    \
-    }                                                               \
-    else {                                                          \
-       (tail_ptr)->next = (entry_ptr);                              \
-       (entry_ptr)->prev = (tail_ptr);                              \
-       (tail_ptr) = (entry_ptr);                                    \
-    }                                                               \
-} /* H5F__LL_APPEND() */
-
 /* Prepend an entry to the doubly linked list */ 
 #define H5F__LL_PREPEND(entry_ptr, head_ptr, tail_ptr)              \
 {                                                                   \
@@ -102,27 +88,6 @@
        (head_ptr) = (entry_ptr);                                    \
     }                                                               \
 } /* H5F__LL_PREPEND() */
-
-/* Insert an entry after the predecessor entry "prec_ptr" on the EOT queue */
-#define H5F_EOT_INSERT_AFTER(entry_ptr, prec_ptr, head_ptr, tail_ptr)       \
-{                                                                           \
-    /* The list is empty or has no predecessor -- prepend */                \
-    if(prec_ptr == NULL)                                                    \
-        H5F__LL_PREPEND(entry_ptr, head_ptr, tail_ptr)                      \
-                                                                            \
-    /* The predecessor entry is at head of list -- append */                \
-    else if(prec_ptr->prev == NULL)                                         \
-        H5F__LL_APPEND(entry_ptr, head_ptr, tail_ptr)                       \
-                                                                            \
-    /* The predecessor entry is in the body of list -- insert after it */   \
-    else                                                                    \
-    {                                                                       \
-        entry_ptr->prev = prec_ptr;                                         \
-        entry_ptr->next = prec_ptr->next;                                   \
-        prec_ptr->next->prev = entry_ptr;                                   \
-        prec_ptr->next = entry_ptr;                                         \
-    }                                                                       \
-} /* H5F_EOT_INSERT_AFTER() */
 
 /********************/
 /* Local Prototypes */
@@ -154,11 +119,10 @@ unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          * transitions.
                                          */
 /*
- *  The head and tail of the end of tick queue (EOT queue) for files opened in either
+ *  The head of the end of tick queue (EOT queue) for files opened in either
  *  VFD SWMR write or VFD SWMR read mode
  */
-H5F_vfd_swmr_eot_queue_entry_t *vfd_swmr_eot_queue_head_g = NULL;
-H5F_vfd_swmr_eot_queue_entry_t *vfd_swmr_eot_queue_tail_g = NULL;
+eot_queue_t eot_queue_g = TAILQ_HEAD_INITIALIZER(eot_queue_g);
 
 /*******************/
 /* Local Variables */
@@ -167,8 +131,8 @@ H5F_vfd_swmr_eot_queue_entry_t *vfd_swmr_eot_queue_tail_g = NULL;
 /* Declare a free list to manage the H5F_vfd_swmr_dl_entry_t struct */
 H5FL_DEFINE(H5F_vfd_swmr_dl_entry_t);
 
-/* Declare a free list to manage the H5F_vfd_swmr_eot_queue_entry_t struct */
-H5FL_DEFINE(H5F_vfd_swmr_eot_queue_entry_t);
+/* Declare a free list to manage the eot_queue_entry_t struct */
+H5FL_DEFINE(eot_queue_entry_t);
 
 
 /*-------------------------------------------------------------------------
@@ -839,7 +803,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
 
     /* When called from FUNC ENTER/EXIT, get the first entry on the EOT queue */
     if(f == NULL)
-        f = vfd_swmr_eot_queue_head_g->vfd_swmr_file;
+        f = TAILQ_FIRST(&eot_queue_g)->vfd_swmr_file;
 
     HDassert(f);
     HDassert(f->shared);
@@ -1116,7 +1080,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
 
     /* When called from FUNC ENTER/EXIT, get the first entry on the EOT queue */
     if(f == NULL)
-        f = vfd_swmr_eot_queue_head_g->vfd_swmr_file;
+        f = TAILQ_FIRST(&eot_queue_g)->vfd_swmr_file;
 
     HDassert(f);
     HDassert(f->shared);
@@ -1421,26 +1385,25 @@ done:
 herr_t
 H5F_vfd_swmr_remove_entry_eot(H5F_t *f)
 {
-    H5F_vfd_swmr_eot_queue_entry_t *curr;
+    eot_queue_entry_t *curr;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Free the entry on the EOT queue that corresponds to f */
     
-    for (curr = vfd_swmr_eot_queue_head_g; curr != NULL; curr = curr->next) {
+    TAILQ_FOREACH(curr, &eot_queue_g, link) {
         if (curr->vfd_swmr_file == f)
             break;
     }
 
     if (curr != NULL) {
-        H5F__LL_REMOVE(curr, vfd_swmr_eot_queue_head_g,
-            vfd_swmr_eot_queue_tail_g)
-        curr = H5FL_FREE(H5F_vfd_swmr_eot_queue_entry_t, curr);
+        TAILQ_REMOVE(&eot_queue_g, curr, link);
+        curr = H5FL_FREE(eot_queue_entry_t, curr);
     }
 
-    if(vfd_swmr_eot_queue_head_g) {
-        vfd_swmr_writer_g = vfd_swmr_eot_queue_head_g->vfd_swmr_writer;
-        end_of_tick_g = vfd_swmr_eot_queue_head_g->end_of_tick;
+    if(!TAILQ_EMPTY(&eot_queue_g)) {
+        vfd_swmr_writer_g = TAILQ_FIRST(&eot_queue_g)->vfd_swmr_writer;
+        end_of_tick_g = TAILQ_FIRST(&eot_queue_g)->end_of_tick;
     } else
         vfd_swmr_writer_g = FALSE;
 
@@ -1464,14 +1427,14 @@ H5F_vfd_swmr_remove_entry_eot(H5F_t *f)
 herr_t
 H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
 {
-    H5F_vfd_swmr_eot_queue_entry_t *entry_ptr;    /* An entry on the EOT end of tick queue */
-    H5F_vfd_swmr_eot_queue_entry_t *prec_ptr;     /* The predecessor entry on the EOT end of tick queue */
+    eot_queue_entry_t *entry_ptr;    /* An entry on the EOT end of tick queue */
+    eot_queue_entry_t *prec_ptr;     /* The predecessor entry on the EOT end of tick queue */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Allocate an entry to be inserted onto the EOT queue */
-    if (NULL == (entry_ptr = H5FL_CALLOC(H5F_vfd_swmr_eot_queue_entry_t)))
+    if (NULL == (entry_ptr = H5FL_CALLOC(eot_queue_entry_t)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate the end of tick queue entry")
 
     /* Initialize the entry */
@@ -1479,24 +1442,23 @@ H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
     entry_ptr->tick_num = f->shared->tick_num;
     entry_ptr->end_of_tick = f->shared->end_of_tick;
     entry_ptr->vfd_swmr_file = f;
-    entry_ptr->next = NULL;
-    entry_ptr->prev = NULL;
 
     /* Found the position to insert the entry on the EOT queue */
-    for (prec_ptr = vfd_swmr_eot_queue_tail_g;
-         prec_ptr != NULL;
-         prec_ptr = prec_ptr->prev) {
+    TAILQ_FOREACH_REVERSE(prec_ptr, &eot_queue_g, eot_queue, link) {
         if (timespeccmp(&prec_ptr->end_of_tick, &entry_ptr->end_of_tick, <=))
             break;
     }
 
     /* Insert the entry onto the EOT queue */
-    H5F_EOT_INSERT_AFTER(entry_ptr, prec_ptr, vfd_swmr_eot_queue_head_g, vfd_swmr_eot_queue_tail_g);
+    if (prec_ptr != NULL)
+        TAILQ_INSERT_AFTER(&eot_queue_g, prec_ptr, entry_ptr, link);
+    else
+        TAILQ_INSERT_HEAD(&eot_queue_g, entry_ptr, link);
 
     /* Set up globals accordinly */
-    if(vfd_swmr_eot_queue_head_g) {
-        vfd_swmr_writer_g = vfd_swmr_eot_queue_head_g->vfd_swmr_writer;
-        end_of_tick_g = vfd_swmr_eot_queue_head_g->end_of_tick;
+    if(!TAILQ_EMPTY(&eot_queue_g)) {
+        vfd_swmr_writer_g = TAILQ_FIRST(&eot_queue_g)->vfd_swmr_writer;
+        end_of_tick_g = TAILQ_FIRST(&eot_queue_g)->end_of_tick;
     } else
         vfd_swmr_writer_g = FALSE;
 
@@ -1523,13 +1485,13 @@ herr_t
 H5F_dump_eot_queue(void)
 {
     int i;
-    H5F_vfd_swmr_eot_queue_entry_t *curr;
+    eot_queue_entry_t *curr;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    for (i = 0, curr = vfd_swmr_eot_queue_head_g;
+    for (curr = TAILQ_FIRST(&eot_queue_g), i = 0;
          curr != NULL;
-         curr = curr->next, i++) {
+         curr = TAILQ_NEXT(curr, link), i++) {
         HDfprintf(stderr, "%d: %s tick_num %" PRIu64
             ", end_of_tick %jd.%09ld, vfd_swmr_file %p\n", 
                   i, curr->vfd_swmr_writer ? "writer" : "not writer",
