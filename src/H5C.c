@@ -4440,7 +4440,7 @@ H5C__unpin_entry_real(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
 {
     herr_t ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checking */
     HDassert(cache_ptr);
@@ -4457,7 +4457,6 @@ H5C__unpin_entry_real(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
     /* Update the stats for an unpin operation */
     H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__unpin_entry_real() */
 

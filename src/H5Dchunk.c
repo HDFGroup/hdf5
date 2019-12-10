@@ -2167,7 +2167,7 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
         /* Iterate over each chunk in the chunk list */
         curr_node = H5SL_first(fm->sel_chunks);
         while(curr_node) {
-            hssize_t    schunk_points;          /* Number of elements in chunk selection */
+            hsize_t     schunk_points;          /* Number of elements in chunk selection */
             hsize_t     tmp_count = 1;
 
             /* Get pointer to chunk's information */
@@ -2178,7 +2178,7 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
             if((chunk_info->mspace = H5S_copy(fm->mem_space, TRUE, FALSE)) == NULL)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
-            schunk_points = (hsize_t)H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
+            schunk_points = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
 
             if(H5S_select_hyperslab(chunk_info->mspace, H5S_SELECT_SET, mem_sel_start, NULL, &tmp_count, &schunk_points) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "can't create chunk memory selection")
