@@ -428,6 +428,12 @@ Bug Fixes since HDF5-1.10.3 release
 
       (CJH - 2019/12/9, HDFFV-10934)
 
+    - Improved peformance when creating a large number of small datasets by
+      retrieving default property values from the API context instead of doing
+      skip list searches.
+
+      (CJH - 2019/12/10, HDFFV-10658)
+
     - Fixed the iteration error in test_versionbounds() in test/dtypes.c
 
       The test was supposed to loop through all valid combinations of
