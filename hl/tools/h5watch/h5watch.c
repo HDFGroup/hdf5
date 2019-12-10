@@ -147,7 +147,7 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
     } /* end for */
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.sset = subset;
+    ctx.sset = &subset;
 
     /* Set to all default values and then override */
     HDmemset(&info, 0, sizeof info);
