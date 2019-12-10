@@ -132,21 +132,22 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
     int i;            /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-
     /* Subsetting information for the tools library printing routines */
-    ctx.sset->start.data = ss_start;
-    ctx.sset->stride.data = ss_stride;
-    ctx.sset->block.data = ss_block;
-    ctx.sset->count.data = ss_count;
+    subset.start.data = ss_start;
+    subset.stride.data = ss_stride;
+    subset.block.data = ss_block;
+    subset.count.data = ss_count;
 
     /* Initialize subsetting information */
     for(i = 0; i < rank; i++) {
-        ctx.sset->stride.data[i] = 1;
-        ctx.sset->count.data[i] = 1;
-        ctx.sset->start.data[i] = start[i];
-        ctx.sset->block.data[i] = block[i];
+        subset.stride.data[i] = 1;
+        subset.count.data[i] = 1;
+        subset.start.data[i] = start[i];
+        subset.block.data[i] = block[i];
     } /* end for */
+
+    HDmemset(&ctx, 0, sizeof(ctx));
+    ctx.sset = subset;
 
     /* Set to all default values and then override */
     HDmemset(&info, 0, sizeof info);
