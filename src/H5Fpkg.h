@@ -217,12 +217,13 @@ typedef struct H5F_mtab_t {
 /* 
  *  VFD SWMR: Entry for the delayed free space release doubly linked list 
  *
- *  md_file_page_offset:    Unsigned 64-bit value containing the base address of the
- *                          metadata page, or multi page metadata entry in the metadata
- *                          file IN PAGES.
- *                          To obtain byte offset, multiply this value by the page size.
- *  length:                 The length of the metadata page or multi page metadata entry
- *                          in BYTES.
+ *  md_file_page_offset:    Unsigned 64-bit value containing the base address
+ *                          of the metadata page, or multi page metadata entry
+ *                          in the metadata file IN PAGES.
+ *                          To obtain byte offset, multiply this value by the
+ *                          page size.
+ *  length:                 The length of the metadata page or multi page
+ *                          metadata entry in BYTES.
  *  tick_num:               Sequence # of the current tick
  *  next:                   Pointer to the next entry in the the list
  *  prev:                   Pointer to the previous entry in the list
