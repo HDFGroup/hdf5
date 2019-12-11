@@ -504,6 +504,19 @@ typedef struct h5tool_format_t {
 
 } h5tool_format_t;
 
+typedef struct subset_d {
+    hsize_t     *data;
+    unsigned int len;
+} subset_d;
+
+/* a structure to hold the subsetting particulars for a dataset */
+struct subset_t {
+    subset_d start;
+    subset_d stride;
+    subset_d count;
+    subset_d block;
+};
+
 typedef struct h5tools_context_t {
     size_t cur_column;                /* current column for output */
     size_t cur_elmt;                  /* current element/output line */
@@ -523,21 +536,8 @@ typedef struct h5tools_context_t {
     const struct H5LD_memb_t * const *cmpd_listv;  /* h5watch: vector containing info about the list of compound fields to be printed */
     struct subset_t *sset;            /* subsetting parameters */
     int display_index;                /* */
-    int display_char;                  /* */
+    int display_char;                 /* */
 } h5tools_context_t;
-
-typedef struct subset_d {
-    hsize_t     *data;
-    unsigned int len;
-} subset_d;
-
-/* a structure to hold the subsetting particulars for a dataset */
-struct subset_t {
-    subset_d start;
-    subset_d stride;
-    subset_d count;
-    subset_d block;
-};
 
 /* The following include, h5tools_str.h, must be after the
  * above stucts are defined. There is a dependency in the following
