@@ -1304,7 +1304,7 @@ H5AwriteVL_asstr
 {
     const char *utf8 = NULL;
     hsize_t     dims[H5S_MAX_RANK];
-    jstring     jstr;
+    jstring     jstr = NULL;
     size_t      typeSize;
     size_t      i;
     hid_t       sid = H5I_INVALID_HID;
@@ -1390,7 +1390,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref
     (JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
 {
-    hdset_reg_ref_t *ref_data = NULL;
+    H5R_ref_t       *ref_data = NULL;
     h5str_t          h5str;
     jstring          jstr;
     jsize            i, n;
@@ -1405,7 +1405,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread_reg_ref: buf length < 0");
     }
 
-    if (NULL == (ref_data = (hdset_reg_ref_t *) HDcalloc(1, (size_t)n * sizeof(hdset_reg_ref_t))))
+    if (NULL == (ref_data = (H5R_ref_t *) HDcalloc(1, (size_t)n * sizeof(H5R_ref_t))))
         H5_JNI_FATAL_ERROR(ENVONLY, "H5Aread_reg_ref: failed to allocate read buffer");
 
     if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, ref_data)) < 0)
@@ -1419,7 +1419,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref
     for (i = 0; i < n; i++) {
         h5str.s[0] = '\0';
 
-        if (!h5str_sprintf(ENVONLY, &h5str, (hid_t)attr_id, (hid_t)mem_type_id, ref_data[i], 0, 0))
+        if (!h5str_sprintf(ENVONLY, &h5str, (hid_t)attr_id, (hid_t)mem_type_id, (void*)&ref_data[i], 0, 0))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
         if (NULL == (jstr = ENVPTR->NewStringUTF(ENVONLY, h5str.s)))

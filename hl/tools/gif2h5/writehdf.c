@@ -62,9 +62,9 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName)
     /* get some data from gifHead */
     ImageCount = gifHead.ImageCount;
 #ifdef UNUSED
-    CommentCount = (WORD)gifHead.CommentCount;
-    ApplicationCount = (WORD)gifHead.ApplicationCount;
-    PlainTextCount = (WORD)gifHead.PlainTextCount;
+    CommentCount = (GIFWORD)gifHead.CommentCount;
+    ApplicationCount = (GIFWORD)gifHead.ApplicationCount;
+    PlainTextCount = (GIFWORD)gifHead.PlainTextCount;
 #endif /* UNUSED */
 
     if ((file_id = H5Fcreate(HDFName , H5F_ACC_TRUNC , H5P_DEFAULT , H5P_DEFAULT)) < 0) {
