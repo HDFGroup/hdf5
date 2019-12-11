@@ -3836,14 +3836,12 @@ check_invalid_tag_application(void)
 
     return 0;
 
-#if 0
 error:
 #if H5C_DO_TAGGING_SANITY_CHECKS
     if(api_ctx_pushed) H5CX_pop();
 #endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     return 1;
-#endif
 } /* check_invalid_tag_application */
 
 

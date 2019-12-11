@@ -238,7 +238,7 @@ H5_DLL herr_t H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *spac
 H5_DLL herr_t H5S_select_fill(const void *fill, size_t fill_size,
     const H5S_t *space, void *buf);
 H5_DLL htri_t H5S_select_valid(const H5S_t *space);
-H5_DLL hssize_t H5S_get_select_npoints(const H5S_t *space);
+H5_DLL hsize_t H5S_get_select_npoints(const H5S_t *space);
 H5_DLL herr_t H5S_get_select_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 H5_DLL herr_t H5S_get_select_offset(const H5S_t *space, hsize_t *offset);
 H5_DLL int H5S_get_select_unlim_dim(const H5S_t *space);

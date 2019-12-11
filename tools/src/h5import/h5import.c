@@ -4714,7 +4714,7 @@ uint16_t swap_uint16(uint16_t val)
 
 int16_t swap_int16(int16_t val)
 {
-    return (uint16_t)((val << 8) | ((val >> 8) & 0xFF));
+    return (int16_t)((val << 8) | ((val >> 8) & 0xFF));
 }
 
 uint32_t swap_uint32(uint32_t val)
