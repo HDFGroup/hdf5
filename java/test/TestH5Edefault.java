@@ -366,7 +366,7 @@ public class TestH5Edefault {
         }
         assertTrue("H5.H5Eset_current_stack: get_num #:" + num_msg, num_msg == saved_num_msg);
 
-        // Se the current stack to be the default and try that again
+        // Set the current stack to be the default and try that again
         try {
             H5.H5Eset_current_stack(stack_id);
             num_msg = H5.H5Eget_num(HDF5Constants.H5E_DEFAULT);
