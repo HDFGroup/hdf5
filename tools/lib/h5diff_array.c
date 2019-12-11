@@ -472,7 +472,7 @@ static hsize_t diff_datum(
     case H5T_TIME:
     case H5T_NCLASSES:
     default:
-        HGOTO_ERROR(1, H5E_tools_min_id_g, "Invalid type class");
+        H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Invalid type class");
         break;
 
     /*-------------------------------------------------------------------------
@@ -735,7 +735,12 @@ static hsize_t diff_datum(
             hid_t obj1_id = -1;
             hid_t obj2_id = -1;
 
-            if (type_size == H5R_DSET_REG_REF_BUF_SIZE) {
+            if (H5Tequal(m_type, H5T_STD_REF)) {
+                /* if (type_size == H5R_STD_REF_SIZE) */
+                H5TOOLS_INFO(H5E_tools_min_info_id_g, "NEW reference type");
+            }
+            else if (H5Tequal(m_type, H5T_STD_REF_DSETREG)) {
+                /* if (type_size == H5R_DSET_REG_REF_BUF_SIZE) */
                 hid_t region1_id = -1;
                 hid_t region2_id = -1;
 
@@ -769,7 +774,8 @@ static hsize_t diff_datum(
              * Object references. get the type and OID of the referenced object
              *-------------------------------------------------------------------------
              */
-            else if (type_size == H5R_OBJ_REF_BUF_SIZE) {
+            else if (H5Tequal(m_type, H5T_STD_REF_OBJ)) {
+                /* if (type_size == H5R_OBJ_REF_BUF_SIZE) */
                 H5O_type_t obj1_type;
                 H5O_type_t obj2_type;
 
@@ -853,7 +859,7 @@ static hsize_t diff_datum(
             char temp2_char;
 
             if(type_size != sizeof(char))
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not char size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not char size");
             HDmemcpy(&temp1_char, mem1, sizeof(char));
             HDmemcpy(&temp2_char, mem2, sizeof(char));
             /* -d and !-p */
@@ -928,7 +934,7 @@ static hsize_t diff_datum(
             unsigned char temp2_uchar;
 
             if(type_size != sizeof(unsigned char))
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned char size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned char size");
 
             HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
             HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
@@ -1004,7 +1010,7 @@ static hsize_t diff_datum(
             short temp2_short;
 
             if(type_size != sizeof(short))
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not short size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not short size");
 
             HDmemcpy(&temp1_short, mem1, sizeof(short));
             HDmemcpy(&temp2_short, mem2, sizeof(short));
@@ -1080,7 +1086,7 @@ static hsize_t diff_datum(
             unsigned short temp2_ushort;
 
             if(type_size != sizeof(unsigned short))
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned short size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned short size");
 
             HDmemcpy(&temp1_ushort, mem1, sizeof(unsigned short));
             HDmemcpy(&temp2_ushort, mem2, sizeof(unsigned short));
@@ -1156,7 +1162,7 @@ static hsize_t diff_datum(
             int temp2_int;
 
             if(type_size != sizeof(int))
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not int size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not int size");
 
             HDmemcpy(&temp1_int, mem1, sizeof(int));
             HDmemcpy(&temp2_int, mem2, sizeof(int));
@@ -1232,7 +1238,7 @@ static hsize_t diff_datum(
             unsigned int temp2_uint;
 
             if(type_size != sizeof(unsigned int))
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned int size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned int size");
 
             HDmemcpy(&temp1_uint, mem1, sizeof(unsigned int));
             HDmemcpy(&temp2_uint, mem2, sizeof(unsigned int));
@@ -1308,7 +1314,7 @@ static hsize_t diff_datum(
             long temp2_long;
 
             if(type_size != sizeof(long))
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not long size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not long size");
 
             HDmemcpy(&temp1_long, mem1, sizeof(long));
             HDmemcpy(&temp2_long, mem2, sizeof(long));
@@ -1384,7 +1390,7 @@ static hsize_t diff_datum(
             unsigned long temp2_ulong;
 
             if(type_size != sizeof(unsigned long))
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned long size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not unsigned long size");
 
             HDmemcpy(&temp1_ulong, mem1, sizeof(unsigned long));
             HDmemcpy(&temp2_ulong, mem2, sizeof(unsigned long));
@@ -1468,7 +1474,7 @@ static hsize_t diff_datum(
             hbool_t isnan2 = FALSE;
 
             if(type_size != sizeof(float))
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not float size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not float size");
 
             HDmemcpy(&temp1_float, mem1, sizeof(float));
             HDmemcpy(&temp2_float, mem2, sizeof(float));
@@ -1627,7 +1633,7 @@ static hsize_t diff_datum(
             hbool_t isnan2 = FALSE;
 
             if(type_size != sizeof(double))
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not double size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not double size");
 
             HDmemcpy(&temp1_double, mem1, sizeof(double));
             HDmemcpy(&temp2_double, mem2, sizeof(double));
@@ -1786,7 +1792,7 @@ static hsize_t diff_datum(
             hbool_t     isnan2 = FALSE;
 
             if(type_size != sizeof(long double)) {
-                HGOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not long double size");
+                H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "Type size is not long double size");
             }
 
             HDmemcpy(&temp1_double, mem1, sizeof(long double));
@@ -4242,18 +4248,18 @@ int ull2float(unsigned long long ull_value, float *f_value)
 
     h5difftrace("ull2float start\n");
     if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
 
     src_size = H5Tget_size(H5T_NATIVE_ULLONG);
     dst_size = H5Tget_size(H5T_NATIVE_FLOAT);
     if((buf = (unsigned char*) HDcalloc((size_t )1, MAX(src_size, dst_size))) == NULL)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not allocate buffer for dims");
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not allocate buffer for dims");
 
     HDmemcpy(buf, &ull_value, src_size);
 
     /* do conversion */
     if (H5Tconvert(H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, (size_t) 1, buf, NULL, dxpl_id) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tconvert failed");
+        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tconvert failed");
 
     HDmemcpy(f_value, buf, dst_size);
 

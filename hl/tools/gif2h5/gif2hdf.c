@@ -31,8 +31,8 @@ main(int argv , char *argc[])
     long i, ImageCount;
     long filesize;
 
-    BYTE *MemGif;
-    BYTE *StartPos;
+    GIFBYTE *MemGif;
+    GIFBYTE *StartPos;
 
     char *GIFFileName;
     char *HDFFileName;
@@ -81,7 +81,7 @@ main(int argv , char *argc[])
     if (filesize == 0)
         printf("File Size Zero");
 
-    if (!(MemGif = StartPos = (BYTE *)malloc((size_t)filesize))) {
+    if (!(MemGif = StartPos = (GIFBYTE *)malloc((size_t)filesize))) {
         printf("Out of memory");
         exit(EXIT_FAILURE);
     }

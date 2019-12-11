@@ -634,8 +634,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
 /*-------------------------------------------------------------------------
  * Function:    parse_subset_params
  *
- * Purpose:     Parse the so-called "terse" syntax for specifying subsetting
- *              parameters.
+ * Purpose:     Parse the so-called "terse" syntax for specifying subsetting parameters.
  *
  * Return:      Success:    struct subset_t object
  *              Failure:    NULL
@@ -1703,6 +1702,8 @@ main(int argc, const char *argv[])
         free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
+
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     leave(h5tools_getstatus());
 

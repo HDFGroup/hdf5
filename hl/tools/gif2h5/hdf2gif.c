@@ -45,20 +45,20 @@ usage(void)
 FILE *fpGif = NULL;
 int main(int argc , char **argv)
 {
-    BYTE *Image;
+    GIFBYTE *Image;
     void *edata;
     H5E_auto2_t func;
 
     /* compression structs */
-    CHAR *HDFName = NULL;
-    CHAR *GIFName = NULL;
+    GIFCHAR *HDFName = NULL;
+    GIFCHAR *GIFName = NULL;
 
-    BYTE* b;
+    GIFBYTE* b;
 
-    BYTE  GlobalPalette[256][3];
-    BYTE  Red[256];
-    BYTE  Green[256];
-    BYTE  Blue[256];
+    GIFBYTE  GlobalPalette[256][3];
+    GIFBYTE  Red[256];
+    GIFBYTE  Green[256];
+    GIFBYTE  Blue[256];
 
     int   RWidth, RHeight;
     int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
@@ -66,7 +66,7 @@ int main(int argc , char **argv)
     int   i;
     int   numcols = 0;
 
-    BYTE pc2nc[256] , r1[256] , g1[256] , b1[256];
+    GIFBYTE pc2nc[256] , r1[256] , g1[256] , b1[256];
 
     int arg_index = 2;
     int bool_is_image = 0; /* 0 = false , 1 = true */
@@ -110,7 +110,7 @@ int main(int argc , char **argv)
         {
             /* allocate space to store the image name */
             size_t len = strlen(argv[arg_index]);
-            image_name = (CHAR*) malloc( len + 1);
+            image_name = (GIFCHAR*) malloc( len + 1);
             strcpy(image_name , argv[arg_index]);
 
             bool_is_image = 0;
@@ -125,7 +125,7 @@ int main(int argc , char **argv)
 
    /* Do Endian Order testing and set Endian Order */
     idx = 0x0001;
-    b = (BYTE *) &idx;
+    b = (GIFBYTE *) &idx;
     EndianOrder = (b[0] ? 1:0);
 
     if (!(fpGif = fopen(GIFName , "wb")))
@@ -164,7 +164,7 @@ int main(int argc , char **argv)
 	    goto out;
 	}
 
-        Image = (BYTE*) malloc( (size_t) width * (size_t) height );
+        Image = (GIFBYTE*) malloc( (size_t) width * (size_t) height );
 
         if ( H5IMread_image( fid, image_name, Image ) < 0 )
             goto out;
@@ -174,7 +174,7 @@ int main(int argc , char **argv)
             if ( H5IMget_palette_info( fid, image_name, 0, pal_dims ) < 0 )
                 goto out;
 
-            pal = (BYTE*) malloc( (size_t) pal_dims[0] * (size_t) pal_dims[1] );
+            pal = (GIFBYTE*) malloc( (size_t) pal_dims[0] * (size_t) pal_dims[1] );
 
             if ( H5IMget_palette( fid, image_name, 0, pal ) < 0 )
                 goto out;
@@ -211,9 +211,9 @@ int main(int argc , char **argv)
             numcols = 256;
             for (i = 0 ; i < numcols ; i++)
             {
-	      Red[i] = (BYTE)(255 - i);
-	      Green[i] = (BYTE)(255 - i);
-	      Blue[i] = (BYTE)(255 - i);
+	      Red[i] = (GIFBYTE)(255 - i);
+	      Green[i] = (GIFBYTE)(255 - i);
+	      Blue[i] = (GIFBYTE)(255 - i);
             }
         }
         else
@@ -246,7 +246,7 @@ int main(int argc , char **argv)
             if (j==i)
             {
                 /* wasn't found */
-	      pc2nc[i] = (BYTE)nc;
+	      pc2nc[i] = (GIFBYTE)nc;
                 r1[nc] = Red[i];
                 g1[nc] = Green[i];
                 b1[nc] = Blue[i];
