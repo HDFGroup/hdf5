@@ -202,6 +202,7 @@ else ()
 endif()
 if (LOCAL_MEMCHECK_TEST)
   if(LOCAL_USE_VALGRIND)
+    set (CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
     find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
   endif()
   set (CTEST_CONFIGURE_COMMAND
