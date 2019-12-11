@@ -4440,7 +4440,7 @@ H5C__unpin_entry_real(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
 {
     herr_t ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_STATIC
 
     /* Sanity checking */
     HDassert(cache_ptr);

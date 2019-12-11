@@ -4709,12 +4709,12 @@ static int process(struct Options *opt)
 
 uint16_t swap_uint16(uint16_t val)
 {
-    return (uint16_t)(((val & 0xff) << 8) | ((val & 0xff00) >> 8));
+    return (uint16_t)((val << 8) | (val >> 8));
 }
 
 int16_t swap_int16(int16_t val)
 {
-    return (uint16_t)(((val & 0xff) << 8) | ((val & 0xff00) >> 8));
+    return (uint16_t)((val << 8) | ((val >> 8) & 0xFF));
 }
 
 uint32_t swap_uint32(uint32_t val)

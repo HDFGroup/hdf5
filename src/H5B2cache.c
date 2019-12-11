@@ -401,6 +401,7 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     *image++ = H5B2_HDR_VERSION;
 
     /* B-tree type */
+    HDassert(hdr->cls->id <= 255);
     *image++ = (uint8_t)hdr->cls->id;
 
     /* Node size (in bytes) */
@@ -821,6 +822,7 @@ H5B2__cache_int_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     *image++ = H5B2_INT_VERSION;
 
     /* B-tree type */
+    HDassert(internal->hdr->cls->id <= 255);
     *image++ = (uint8_t)internal->hdr->cls->id;
     HDassert((size_t)(image - (uint8_t *)_image) == (H5B2_INT_PREFIX_SIZE - H5B2_SIZEOF_CHKSUM));
 
@@ -1222,6 +1224,7 @@ H5B2__cache_leaf_serialize(const H5F_t H5_ATTR_UNUSED *f, void *_image, size_t H
     *image++ = H5B2_LEAF_VERSION;
 
     /* B-tree type */
+    HDassert(leaf->hdr->cls->id <= 255);
     *image++ = (uint8_t)leaf->hdr->cls->id;
     HDassert((size_t)(image - (uint8_t *)_image) == (H5B2_LEAF_PREFIX_SIZE - H5B2_SIZEOF_CHKSUM));
 

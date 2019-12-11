@@ -420,6 +420,7 @@ H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     *image++ = H5FA_HDR_VERSION;
 
     /* Fixed array type */
+    HDassert(hdr->cparam.cls->id <= 255);
     *image++ = (uint8_t)hdr->cparam.cls->id;
 
     /* General array creation/configuration information */
@@ -808,6 +809,7 @@ H5FA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     *image++ = H5FA_DBLOCK_VERSION;
 
     /* Fixed array type */
+    HDassert(dblock->hdr->cparam.cls->id <= 255);
     *image++ = (uint8_t)dblock->hdr->cparam.cls->id;
 
     /* Address of array header for array which owns this block */
