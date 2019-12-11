@@ -24,6 +24,12 @@
 
 /* global variable declarations: */
 
+const char *FILENAME[] = {
+    "cache_test",
+    "cache_api_test",
+    NULL
+};
+
 /* macro definitions */
 
 /* private function declarations: */
