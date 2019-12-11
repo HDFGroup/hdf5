@@ -1583,7 +1583,7 @@ test_h5s_encode1(void)
 ****************************************************************/
 static herr_t
 test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, 
-    uint32_t expected_version, uint32_t expected_enc_size, hbool_t expected_to_fail)
+    uint32_t expected_version, uint8_t expected_enc_size, hbool_t expected_to_fail)
 {
     char *buf = NULL;       /* Pointer to the encoded buffer */
     size_t buf_size;        /* Size of the encoded buffer */
@@ -1697,7 +1697,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
     unsigned unlim;                    /* H5S_UNLIMITED setting or not */
     herr_t ret;                        /* Generic return value */
     uint32_t expected_version = 0;     /* Expected version for selection info */
-    uint32_t expected_enc_size = 0;    /* Expected encoded size for selection info */
+    uint8_t expected_enc_size = 0;     /* Expected encoded size for selection info */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace encoding of regular hyperslabs\n"));
@@ -1739,12 +1739,12 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
                 case CONFIG_16:
                     stride = POWER16 - 1;
                     block = 4;
-                    expected_enc_size = expected_version == 3 ? 2 : 4;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 2 : 4);
                     break;
                 case CONFIG_32:
                     stride = POWER32 - 1;
                     block = 4;
-                    expected_enc_size = expected_version == 3 ? 4 : 8;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 4 : 8);
                     
                     break;
                 default:
@@ -1765,12 +1765,12 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
                 case CONFIG_16:
                     stride = POWER16 - 1;
                     block = POWER16 - 2;
-                    expected_enc_size = expected_version == 3 ? 2 : 4;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 2 : 4);
                     break;
                 case CONFIG_32:
                     stride = POWER32 - 1;
                     block = POWER32 - 2;
-                    expected_enc_size = expected_version == 3 ? 4 : 8;
+                    expected_enc_size = (uint8_t)(expected_version == 3 ? 4 : 8);
                     break;
                 default:
                     HDassert(0);
@@ -1984,7 +1984,8 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
         VERIFY(is_regular, FALSE, "H5Sis_regular_hyperslab");
 
         /* Verify the version and encoded size expected for the configuration */
-        ret = test_h5s_check_encoding(fapl, sid, expected_version, expected_enc_size, expected_to_fail);
+        HDassert(expected_enc_size <= 255);
+        ret = test_h5s_check_encoding(fapl, sid, expected_version, (uint8_t)expected_enc_size, expected_to_fail);
         CHECK(ret, FAIL, "test_h5s_check_encoding");
 
     } /* for config */
