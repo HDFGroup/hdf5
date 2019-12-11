@@ -620,10 +620,10 @@ int MpioTest2G( MPI_Comm comm )
     /*
      * Create the dataset with default properties and close filespace.
      */
-    dset_id = H5Dcreate(file_id, DATASETNAME,
+    dset_id = H5Dcreate2(file_id, DATASETNAME,
                         H5T_NATIVE_INT, filespace,
                         H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "H5Dcreate succeeded");
+    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
     H5Sclose(filespace);
 
     /*
