@@ -477,6 +477,9 @@ done:
  *              iteration routine callbacks (i.e. the callbacks from H5Aiterate*,
  *              H5Literate* / H5Lvisit*, and H5Ovisit* ).
  *
+ *              type must be a VOL-managed object class (H5I_FILE,
+ *              H5I_GROUP, H5I_DATATYPE, H5I_DATASET, H5I_MAP, or H5I_ATTR).
+ *
  * Return:      Success:    Non-negative hid_t for the object.
  *              Failure:    Negative (H5I_INVALID_HID)
  *
@@ -492,8 +495,34 @@ H5VLwrap_register(void *obj, H5I_type_t type)
     H5TRACE2("i", "*xIt", obj, type);
 
     /* Check args */
-    if(type <= H5I_BADID || type >= H5I_NTYPES)
-        HGOTO_ERROR(H5E_VOL, H5E_BADRANGE, H5I_INVALID_HID, "invalid type number")
+    /* Use a switch here for (hopefully) better performance than a series of
+     * equality checks.  We could also group these types together in H5I_type_t,
+     * make some assertions here to guarantee that, then just check the range.
+     */
+    switch(type) {
+        case H5I_FILE:
+        case H5I_GROUP:
+        case H5I_DATATYPE:
+        case H5I_DATASET:
+        case H5I_MAP:
+        case H5I_ATTR:
+            /* VOL-managed objects, call is valid */
+            break;
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_SPACE_SEL_ITER:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_BADRANGE, H5I_INVALID_HID, "invalid type number")
+    } /* end switch */
     if(NULL == obj)
         HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, H5I_INVALID_HID, "obj is NULL")
 

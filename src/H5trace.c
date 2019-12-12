@@ -2841,6 +2841,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                             H5VL_file_specific_t specific = (H5VL_file_specific_t)HDva_arg(ap, int);
 
                             switch(specific) {
+                                case H5VL_FILE_POST_OPEN:
+                                    HDfprintf(out, "H5VL_FILE_POST_OPEN");
+                                    break;
                                 case H5VL_FILE_FLUSH:
                                     HDfprintf(out, "H5VL_FILE_FLUSH");
                                     break;
@@ -2858,6 +2861,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_FILE_DELETE:
                                     HDfprintf(out, "H5VL_FILE_DELETE");
+                                    break;
+                                case H5VL_FILE_IS_EQUAL:
+                                    HDfprintf(out, "H5VL_FILE_IS_EQUAL");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)specific);
