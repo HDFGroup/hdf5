@@ -44,7 +44,6 @@ hbool_t core_file_driver_failed = FALSE;
 
 const char *FILENAME[] = {
     "cache_test",
-    "cache_api_test",
     NULL
 };
 

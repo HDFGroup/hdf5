@@ -25,7 +25,6 @@
 /* global variable declarations: */
 
 const char *FILENAME[] = {
-    "cache_test",
     "cache_api_test",
     NULL
 };
@@ -213,7 +212,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -361,7 +360,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -694,7 +693,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -1040,7 +1039,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -1969,7 +1968,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
             HDfprintf(stdout, "%s: calling h5_fixname().\n", FUNC);
         }
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
