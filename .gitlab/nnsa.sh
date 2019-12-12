@@ -334,8 +334,8 @@ for i in `seq 1 $num_CC`; do # loop over compiler versions
 
   module list
 
-  echo "timeout 3h ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX=\"$HDF5_VER-$cc_ver\",${CTEST_OPTS}BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC -C Release -VV -O hdf5.log"
-  timeout 3h ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="$HDF5_VER-$cc_ver",${CTEST_OPTS}BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC -C Release -VV -O hdf5.log
+  echo "cest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX=\"$HDF5_VER-$cc_ver\",${CTEST_OPTS}BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC -C Release -VV -O hdf5.log"
+  ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="$HDF5_VER-$cc_ver",${CTEST_OPTS}BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC -C Release -VV -O hdf5.log
 
   module unload $cc_ver  # unload the compiler with version
 
