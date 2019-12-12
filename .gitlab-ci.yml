@@ -62,7 +62,8 @@ build:
     only: 
        - web
     variables:
-        NMC_FE1_SLURM_PARAMETERS: "-N1 -p ecp-p9-4v100 -t 1:30:00"
+        NMC_FE1_SLURM_PARAMETERS: " --nodes=1 --cpus-per-task=1 --partition=ecp-p9-4v100 -t 6:00:00"
+#NMC_FE1_SLURM_PARAMETERS: "-N1 -p ecp-p9-4v100 -t 1:30:00"
 #    tags: ['nmc', 'slurm', 'xx-testing', 'dosequis']
     tags: ['nmc-xxfe1-sched-001']
 
