@@ -149,7 +149,7 @@ static unsigned smoke_check_7(void);
 static unsigned smoke_check_8(void);
 static unsigned smoke_check_9(void);
 static unsigned smoke_check_10(void);
-static unsigned check_write_permitted(void);
+static unsigned write_permitted_check(void);
 static unsigned check_insert_entry(void);
 static unsigned check_flush_cache(void);
 static void check_flush_cache__empty_cache(H5F_t * file_ptr);
@@ -234,6 +234,11 @@ static unsigned check_auto_cache_resize_input_errs(void);
 static unsigned check_auto_cache_resize_aux_fcns(void);
 static unsigned check_metadata_blizzard_absence(hbool_t fill_via_insertion);
 
+/* call back function declarations: */
+
+herr_t check_write_permitted(const H5F_t * f,
+                             hid_t dxpl_id,
+                             hbool_t * write_permitted_ptr);
 
 H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size);
 
@@ -2517,7 +2522,7 @@ smoke_check_10(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    check_write_permitted()
+ * Function:	write_permitted_check()
  *
  * Purpose:    A basic test of the write permitted function.  In essence,
  *        we load the cache up with dirty entryies, set
@@ -2536,12 +2541,12 @@ smoke_check_10(void)
  */
 
 static unsigned
-check_write_permitted(void)
+write_permitted_check(void)
 {
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-    const char * fcn_name = "check_write_permitted";
+    const char * fcn_name = "write_permitted_check";
     hbool_t show_progress = FALSE;
     hbool_t display_stats = FALSE;
     int32_t lag = 10;
@@ -2699,7 +2704,7 @@ check_write_permitted(void)
 
     return (unsigned)!pass;
 
-} /* check_write_permitted() */
+} /* write_permitted_check() */
 
 
 /*-------------------------------------------------------------------------
@@ -29875,7 +29880,7 @@ main(void)
     nerrs += smoke_check_9();
     nerrs += smoke_check_10();
 
-    nerrs += check_write_permitted();
+    nerrs += write_permitted_check();
     nerrs += check_insert_entry();
     nerrs += check_flush_cache();
     nerrs += check_get_entry_status();

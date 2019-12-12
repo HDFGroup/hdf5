@@ -19,7 +19,6 @@
  */
 #include "H5private.h"          /* Put this first, so H5open() isn't invoked in public macros */
 #include "H5MFprivate.h"
-
 #include "cache_common.h"
 
 hbool_t write_permitted = TRUE;
