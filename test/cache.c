@@ -14,89 +14,129 @@
 /* Programmer:  John Mainzer
  *              6/9/04
  *
- *		This file contains tests for the cache implemented in
- *		H5C.c
+ *        This file contains tests for the cache implemented in
+ *        H5C.c
  */
 #include "cache_common.h"
 
-
+
+H5C_t * saved_cache = NULL; /* store the pointer to the instance of
+                             * of H5C_t created by H5Fcreate()
+                             * here between test cache setup and
+                             * shutdown.
+                             */
+
+haddr_t saved_actual_base_addr = HADDR_UNDEF;   /* Store the address of the
+                                                 * space allocated for cache items in the file between
+                                                 * cache setup & takedown
+                                                 */
+
+hid_t saved_fapl_id = H5P_DEFAULT; /* store the fapl id here between
+                                    * cache setup and takedown.  Note
+                                    * that if saved_fapl_id == H5P_DEFAULT,
+                                    * we assume that there is no fapl to
+                                    * close.
+                                    */
+
+hid_t saved_fcpl_id = H5P_DEFAULT; /* store the fcpl id here between
+                                    * cache setup and takedown.  Note
+                                    * that if saved_fcpl_id == H5P_DEFAULT,
+                                    * we assume that there is no fcpl to
+                                    * close.
+                                    */
+hid_t saved_fid = -1;  /* store the file id here between cache setup
+                        * and takedown.
+                        */
+hbool_t try_core_file_driver = FALSE;
+hbool_t core_file_driver_failed = FALSE;
+hbool_t skip_long_tests;
+hbool_t run_full_test;
+
+
+/* global variable declarations: */
+
+const char *FILENAME[] = {
+    "cache_test",
+    NULL
+};
+
 /* private typedef declarations: */
 
 struct flush_cache_test_spec
 {
-    int			entry_num;
-    int			entry_type;
-    int			entry_index;
-    hbool_t		insert_flag;
-    unsigned int	flags;
-    hbool_t		expected_loaded;
-    hbool_t		expected_cleared;
-    hbool_t		expected_flushed;
-    hbool_t		expected_destroyed;
+    int            entry_num;
+    int            entry_type;
+    int            entry_index;
+    hbool_t        insert_flag;
+    unsigned int    flags;
+    hbool_t        expected_loaded;
+    hbool_t        expected_cleared;
+    hbool_t        expected_flushed;
+    hbool_t        expected_destroyed;
 };
 
 struct pe_flush_cache_test_spec
 {
-    int			entry_num;
-    int			entry_type;
-    int			entry_index;
-    hbool_t		insert_flag;
-    unsigned int	flags;
-    int			num_pins;
-    int			pin_type[MAX_PINS];
-    int			pin_idx[MAX_PINS];
-    hbool_t		expected_loaded;
-    hbool_t		expected_cleared;
-    hbool_t		expected_flushed;
-    hbool_t		expected_destroyed;
+    int            entry_num;
+    int            entry_type;
+    int            entry_index;
+    hbool_t        insert_flag;
+    unsigned int    flags;
+    int            num_pins;
+    int            pin_type[MAX_PINS];
+    int            pin_idx[MAX_PINS];
+    hbool_t        expected_loaded;
+    hbool_t        expected_cleared;
+    hbool_t        expected_flushed;
+    hbool_t        expected_destroyed;
 };
 
 struct fo_flush_entry_check
 {
-    int			entry_num;
-    int			entry_type;
-    int			entry_index;
-    size_t		expected_size;
-    hbool_t		in_cache;
-    hbool_t		at_main_addr;
-    hbool_t		is_dirty;
-    hbool_t		is_protected;
-    hbool_t		is_pinned;
-    hbool_t		expected_loaded;
-    hbool_t		expected_cleared;
-    hbool_t		expected_flushed;
-    hbool_t		expected_destroyed;
+    int            entry_num;
+    int            entry_type;
+    int            entry_index;
+    size_t        expected_size;
+    hbool_t        in_cache;
+    hbool_t        at_main_addr;
+    hbool_t        is_dirty;
+    hbool_t        is_protected;
+    hbool_t        is_pinned;
+    hbool_t        expected_loaded;
+    hbool_t        expected_cleared;
+    hbool_t        expected_flushed;
+    hbool_t        expected_destroyed;
 };
 
 struct fo_flush_cache_test_spec
 {
-    int				entry_num;
-    int				entry_type;
-    int				entry_index;
-    hbool_t			insert_flag;
-    unsigned int		flags;
-    hbool_t			resize_flag;
-    size_t			new_size;
-    int				num_pins;
-    int				pin_type[MAX_PINS];
-    int				pin_idx[MAX_PINS];
-    int				num_flush_ops;
-    struct flush_op		flush_ops[MAX_FLUSH_OPS];
-    hbool_t			expected_loaded;
-    hbool_t			expected_cleared;
-    hbool_t			expected_flushed;
-    hbool_t			expected_destroyed;
+    int                entry_num;
+    int                entry_type;
+    int                entry_index;
+    hbool_t            insert_flag;
+    unsigned int        flags;
+    hbool_t            resize_flag;
+    size_t            new_size;
+    int                num_pins;
+    int                pin_type[MAX_PINS];
+    int                pin_idx[MAX_PINS];
+    int                num_flush_ops;
+    struct flush_op        flush_ops[MAX_FLUSH_OPS];
+    hbool_t            expected_loaded;
+    hbool_t            expected_cleared;
+    hbool_t            expected_flushed;
+    hbool_t            expected_destroyed;
 };
 
 struct move_entry_test_spec
 {
-    int			entry_type;
-    int			entry_index;
-    hbool_t		is_dirty;
-    hbool_t		is_pinned;
+    int            entry_type;
+    int            entry_index;
+    hbool_t        is_dirty;
+    hbool_t        is_pinned;
 };
 
-
+
 /* private function declarations: */
 
 static unsigned smoke_check_1(void);
@@ -109,7 +149,7 @@ static unsigned smoke_check_7(void);
 static unsigned smoke_check_8(void);
 static unsigned smoke_check_9(void);
 static unsigned smoke_check_10(void);
-static unsigned write_permitted_check(void);
+static unsigned check_write_permitted(void);
 static unsigned check_insert_entry(void);
 static unsigned check_flush_cache(void);
 static void check_flush_cache__empty_cache(H5F_t * file_ptr);
@@ -140,7 +180,7 @@ static void check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
                                                  int test_num,
                                                  int entry_type,
                                                  int entry_idx,
-					         hbool_t mark_dirty,
+                            hbool_t mark_dirty,
                                                  hbool_t pop_mark_dirty_prot,
                                                  hbool_t pop_mark_dirty_pinned,
                                                  hbool_t unprotect_unpin,
@@ -155,11 +195,11 @@ static void check_flush_cache__flush_op_test(H5F_t * file_ptr,
                                         unsigned int flush_flags,
                                         int spec_size,
                                         struct fo_flush_cache_test_spec spec[],
-				        int init_expected_index_len,
-				        size_t init_expected_index_size,
-				        int expected_index_len,
-				        size_t expected_index_size,
-					int check_size,
+                        int init_expected_index_len,
+                        size_t init_expected_index_size,
+                        int expected_index_len,
+                        size_t expected_index_size,
+                    int check_size,
                                         struct fo_flush_entry_check check[]);
 static void check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr);
 static unsigned check_flush_protected_err(void);
@@ -194,7 +234,13 @@ static unsigned check_auto_cache_resize_input_errs(void);
 static unsigned check_auto_cache_resize_aux_fcns(void);
 static unsigned check_metadata_blizzard_absence(hbool_t fill_via_insertion);
 
-
+
+H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size);
+
+static void takedown_cache(H5F_t * file_ptr,
+                    hbool_t dump_stats,
+                    hbool_t dump_detailed_stats);
+
 /**************************************************************************/
 /**************************************************************************/
 /********************************* tests: *********************************/
@@ -202,22 +248,22 @@ static unsigned check_metadata_blizzard_absence(hbool_t fill_via_insertion);
 /**************************************************************************/
 
 /*-------------------------------------------------------------------------
- * Function:	smoke_check_1()
+ * Function:    smoke_check_1()
  *
- * Purpose:	A basic functional test, inserts, destroys, and moves in
+ * Purpose:    A basic functional test, inserts, destroys, and moves in
  *              the mix, along with repeated protects and unprotects.
- *		All entries are marked as clean.
+ *        All entries are marked as clean.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/16/04
  *
  * Modifications:
  *
- *		JRM -- 1/18/05
- *		Added code to skip this test if the skip_long_tests global
- *		is true.
+ *        JRM -- 1/18/05
+ *        Added code to skip this test if the skip_long_tests global
+ *        is true.
  *
  *-------------------------------------------------------------------------
  */
@@ -238,7 +284,7 @@ smoke_check_1(void)
 
     if ( skip_long_tests ) {
         SKIPPED();
-        HDfprintf(stdout, "	Long tests disabled.\n");
+        HDfprintf(stdout, "    Long tests disabled.\n");
         return 0;  /* <========== note return */
     }
 
@@ -271,7 +317,7 @@ smoke_check_1(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -289,7 +335,7 @@ smoke_check_1(void)
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
-			    /* do_mult_ro_protects    */ TRUE,
+                /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
                             /* dirty_unprotects       */ dirty_unprotects);
 
@@ -307,7 +353,7 @@ smoke_check_1(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -384,25 +430,25 @@ smoke_check_1(void)
 
 } /* smoke_check_1() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	smoke_check_2()
+ * Function:    smoke_check_2()
  *
- * Purpose:	A basic functional test, with inserts, destroys, and
- *		moves in the mix, along with some repeated protects
- *		and unprotects.  About half the entries are marked as
- *		dirty.
+ * Purpose:    A basic functional test, with inserts, destroys, and
+ *        moves in the mix, along with some repeated protects
+ *        and unprotects.  About half the entries are marked as
+ *        dirty.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/24/04
  *
  * Modifications:
  *
- *		JRM -- 1/18/05
- *		Added code to skip this test if the skip_long_tests global
- *		is true.
+ *        JRM -- 1/18/05
+ *        Added code to skip this test if the skip_long_tests global
+ *        is true.
  *
  *-------------------------------------------------------------------------
  */
@@ -423,7 +469,7 @@ smoke_check_2(void)
 
     if ( skip_long_tests ) {
         SKIPPED();
-        HDfprintf(stdout, "	Long tests disabled.\n");
+        HDfprintf(stdout, "    Long tests disabled.\n");
         return 0;  /* <========== note return */
     }
 
@@ -456,7 +502,7 @@ smoke_check_2(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -474,7 +520,7 @@ smoke_check_2(void)
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
-			    /* do_mult_ro_protects    */ TRUE,
+                /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
                             /* dirty_unprotects       */ dirty_unprotects);
 
@@ -492,7 +538,7 @@ smoke_check_2(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -569,24 +615,24 @@ smoke_check_2(void)
 
 } /* smoke_check_2() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	smoke_check_3()
+ * Function:    smoke_check_3()
  *
- * Purpose:	A basic functional test on a tiny cache, with inserts,
- *		destroys, and moves in the mix, along with repeated
- *		protects and unprotects.  All entries are marked as clean.
+ * Purpose:    A basic functional test on a tiny cache, with inserts,
+ *        destroys, and moves in the mix, along with repeated
+ *        protects and unprotects.  All entries are marked as clean.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/16/04
  *
  * Modifications:
  *
- *		JRM -- 1/18/05
- *		Added code to skip this test if the skip_long_tests global
- *		is true.
+ *        JRM -- 1/18/05
+ *        Added code to skip this test if the skip_long_tests global
+ *        is true.
  *
  *-------------------------------------------------------------------------
  */
@@ -607,7 +653,7 @@ smoke_check_3(void)
 
     if ( skip_long_tests ) {
         SKIPPED();
-        HDfprintf(stdout, "	Long tests disabled.\n");
+        HDfprintf(stdout, "    Long tests disabled.\n");
         return 0;  /* <========== note return */
     }
 
@@ -640,7 +686,7 @@ smoke_check_3(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -658,7 +704,7 @@ smoke_check_3(void)
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
-			    /* do_mult_ro_protects    */ TRUE,
+                /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
                             /* dirty_unprotects       */ dirty_unprotects);
 
@@ -676,7 +722,7 @@ smoke_check_3(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -753,25 +799,25 @@ smoke_check_3(void)
 
 } /* smoke_check_3() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	smoke_check_4()
+ * Function:    smoke_check_4()
  *
- * Purpose:	A basic functional test on a tiny cache, with inserts,
- *	 	destroys, and moves in the mix, along with repeated
- *		protects and unprotects.  About half the entries are
- *		marked as dirty.
+ * Purpose:    A basic functional test on a tiny cache, with inserts,
+ *         destroys, and moves in the mix, along with repeated
+ *        protects and unprotects.  About half the entries are
+ *        marked as dirty.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/24/04
  *
  * Modifications:
  *
- *		JRM -- 1/18/05
- *		Added code to skip this test if the skip_long_tests global
- *		is true.
+ *        JRM -- 1/18/05
+ *        Added code to skip this test if the skip_long_tests global
+ *        is true.
  *
  *-------------------------------------------------------------------------
  */
@@ -792,7 +838,7 @@ smoke_check_4(void)
 
     if ( skip_long_tests ) {
         SKIPPED();
-        HDfprintf(stdout, "	Long tests disabled.\n");
+        HDfprintf(stdout, "    Long tests disabled.\n");
         return 0;  /* <========== note return */
     }
 
@@ -825,7 +871,7 @@ smoke_check_4(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -843,7 +889,7 @@ smoke_check_4(void)
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
-			    /* do_mult_ro_protects    */ TRUE,
+                /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
                             /* dirty_unprotects       */ dirty_unprotects);
 
@@ -861,7 +907,7 @@ smoke_check_4(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -938,25 +984,25 @@ smoke_check_4(void)
 
 } /* smoke_check_4() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	smoke_check_5()
+ * Function:    smoke_check_5()
  *
- * Purpose:	A basic functional test on a cache with automatic cache
- *		resizing enabled, with inserts in the mix, along with
- *		repeated protects and unprotects.  All entries are marked
- *		as clean.
+ * Purpose:    A basic functional test on a cache with automatic cache
+ *        resizing enabled, with inserts in the mix, along with
+ *        repeated protects and unprotects.  All entries are marked
+ *        as clean.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              10/14/04
  *
  * Modifications:
  *
- *		JRM -- 1/18/05
- *		Added code to skip this test if the skip_long_tests global
- *		is true.
+ *        JRM -- 1/18/05
+ *        Added code to skip this test if the skip_long_tests global
+ *        is true.
  *
  *-------------------------------------------------------------------------
  */
@@ -1002,9 +1048,9 @@ smoke_check_5(void)
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
-	/*                    flash_incr_mode = */ H5C_flash_incr__off,
-	/* double      flash_multiple         = */ 2.0f,
-	/* double      flash_threshold        = */ 0.5f,
+    /*                    flash_incr_mode = */ H5C_flash_incr__off,
+    /* double      flash_multiple         = */ 2.0f,
+    /* double      flash_threshold        = */ 0.5f,
 
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
@@ -1028,7 +1074,7 @@ smoke_check_5(void)
 
         SKIPPED();
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+        HDfprintf(stdout, "    Long tests disabled.\n");
 
         return 0;  /* <========== note return */
     }
@@ -1174,25 +1220,25 @@ smoke_check_5(void)
 
 } /* smoke_check_5() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	smoke_check_6()
+ * Function:    smoke_check_6()
  *
- * Purpose:	A basic functional test on a cache with automatic cache
- *		resizing enabled, with inserts in the mix, along with
+ * Purpose:    A basic functional test on a cache with automatic cache
+ *        resizing enabled, with inserts in the mix, along with
  *              repeated protects and unprotects.  About one half of all
- *		entries are marked as dirty.
+ *        entries are marked as dirty.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              10/25/04
  *
  * Modifications:
  *
- *		JRM -- 1/18/05
- *		Added code to skip this test if the skip_long_tests global
- *		is true.
+ *        JRM -- 1/18/05
+ *        Added code to skip this test if the skip_long_tests global
+ *        is true.
  *
  *-------------------------------------------------------------------------
  */
@@ -1238,9 +1284,9 @@ smoke_check_6(void)
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
-	/*                    flash_incr_mode = */ H5C_flash_incr__off,
-	/* double      flash_multiple         = */ 2.0f,
-	/* double      flash_threshold        = */ 0.5f,
+    /*                    flash_incr_mode = */ H5C_flash_incr__off,
+    /* double      flash_multiple         = */ 2.0f,
+    /* double      flash_threshold        = */ 0.5f,
 
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
@@ -1264,7 +1310,7 @@ smoke_check_6(void)
 
     if ( skip_long_tests ) {
         SKIPPED();
-        HDfprintf(stdout, "	Long tests disabled.\n");
+        HDfprintf(stdout, "    Long tests disabled.\n");
         return 0;  /* <========== note return */
     }
 
@@ -1407,25 +1453,25 @@ smoke_check_6(void)
 
 } /* smoke_check_6() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	smoke_check_7()
+ * Function:    smoke_check_7()
  *
- * Purpose:	A basic functional test on a cache with automatic cache
- *		resizing enabled, with inserts in the mix, along with
- *		repeated protects and unprotects.  All entries are marked
- *		as clean.
+ * Purpose:    A basic functional test on a cache with automatic cache
+ *        resizing enabled, with inserts in the mix, along with
+ *        repeated protects and unprotects.  All entries are marked
+ *        as clean.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              12/2/04
  *
  * Modifications:
  *
- *		JRM -- 1/18/05
- *		Added code to skip this test if the skip_long_tests global
- *		is true.
+ *        JRM -- 1/18/05
+ *        Added code to skip this test if the skip_long_tests global
+ *        is true.
  *
  *-------------------------------------------------------------------------
  */
@@ -1471,9 +1517,9 @@ smoke_check_7(void)
         /* size_t      max_increment          = */ (8 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
-	/*                    flash_incr_mode = */ H5C_flash_incr__off,
-	/* double      flash_multiple         = */ 2.0f,
-	/* double      flash_threshold        = */ 0.5f,
+    /*                    flash_incr_mode = */ H5C_flash_incr__off,
+    /* double      flash_multiple         = */ 2.0f,
+    /* double      flash_threshold        = */ 0.5f,
 
 
         /* enum H5C_cache_decr_mode decr_mode = */
@@ -1496,7 +1542,7 @@ smoke_check_7(void)
 
     if ( skip_long_tests ) {
         SKIPPED();
-        HDfprintf(stdout, "	Long tests disabled.\n");
+        HDfprintf(stdout, "    Long tests disabled.\n");
         return 0;  /* <========== note return */
     }
 
@@ -1641,25 +1687,25 @@ smoke_check_7(void)
 
 } /* smoke_check_7() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	smoke_check_8()
+ * Function:    smoke_check_8()
  *
- * Purpose:	A basic functional test on a cache with automatic cache
- *		resizing enabled, with inserts in the mix, along with
+ * Purpose:    A basic functional test on a cache with automatic cache
+ *        resizing enabled, with inserts in the mix, along with
  *              repeated protects and unprotects.  About one half of all
- *		entries are marked as dirty.
+ *        entries are marked as dirty.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              10/25/04
  *
  * Modifications:
  *
- *		JRM -- 1/18/05
- *		Added code to skip this test if the skip_long_tests global
- *		is true.
+ *        JRM -- 1/18/05
+ *        Added code to skip this test if the skip_long_tests global
+ *        is true.
  *
  *-------------------------------------------------------------------------
  */
@@ -1705,9 +1751,9 @@ smoke_check_8(void)
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
-	/*                    flash_incr_mode = */ H5C_flash_incr__off,
-	/* double      flash_multiple         = */ 2.0f,
-	/* double      flash_threshold        = */ 0.5f,
+    /*                    flash_incr_mode = */ H5C_flash_incr__off,
+    /* double      flash_multiple         = */ 2.0f,
+    /* double      flash_threshold        = */ 0.5f,
 
 
         /* enum H5C_cache_decr_mode decr_mode = */
@@ -1730,7 +1776,7 @@ smoke_check_8(void)
 
     if ( skip_long_tests ) {
         SKIPPED();
-        HDfprintf(stdout, "	Long tests disabled.\n");
+        HDfprintf(stdout, "    Long tests disabled.\n");
         return 0;  /* <========== note return */
     }
 
@@ -1874,26 +1920,26 @@ smoke_check_8(void)
 
 } /* smoke_check_8() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	smoke_check_9()
+ * Function:    smoke_check_9()
  *
- * Purpose:	A repeat of smoke check 1, only with the cache corked
- * 		part of the time.
+ * Purpose:    A repeat of smoke check 1, only with the cache corked
+ *         part of the time.
  *
- * 		Recall that smoke check 1 is a basic functional test,
- * 		with inserts, destroys, and moves in the mix, along
- * 		with repeated protects and unprotects.  All entries are
- * 		marked as clean.
+ *         Recall that smoke check 1 is a basic functional test,
+ *         with inserts, destroys, and moves in the mix, along
+ *         with repeated protects and unprotects.  All entries are
+ *         marked as clean.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              8/1/07
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1917,7 +1963,7 @@ smoke_check_9(void)
 
     if ( skip_long_tests ) {
         SKIPPED();
-        HDfprintf(stdout, "	Long tests disabled.\n");
+        HDfprintf(stdout, "    Long tests disabled.\n");
         return 0;  /* <========== note return */
     }
 
@@ -1950,8 +1996,8 @@ smoke_check_9(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't disable evictions 1.\n";
-	}
+        failure_mssg = "can't disable evictions 1.\n";
+    }
     }
 
     if ( show_progress ) /* 4 */
@@ -1968,7 +2014,7 @@ smoke_check_9(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -1985,8 +2031,8 @@ smoke_check_9(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't enable evictions 1.\n";
-	}
+        failure_mssg = "can't enable evictions 1.\n";
+    }
     }
 
     if ( show_progress ) /* 6 */
@@ -2003,7 +2049,7 @@ smoke_check_9(void)
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
-			    /* do_mult_ro_protects    */ TRUE,
+                /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
                             /* dirty_unprotects       */ dirty_unprotects);
 
@@ -2018,8 +2064,8 @@ smoke_check_9(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't disable evictions 2.\n";
-	}
+        failure_mssg = "can't disable evictions 2.\n";
+    }
     }
 
     if ( show_progress ) /* 8 */
@@ -2036,7 +2082,7 @@ smoke_check_9(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -2051,8 +2097,8 @@ smoke_check_9(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't enable evictions 2.\n";
-	}
+        failure_mssg = "can't enable evictions 2.\n";
+    }
     }
 
     if ( show_progress ) /* 10 */
@@ -2077,8 +2123,8 @@ smoke_check_9(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't disable evictions 3.\n";
-	}
+        failure_mssg = "can't disable evictions 3.\n";
+    }
     }
 
     if ( show_progress ) /* 12 */
@@ -2116,8 +2162,8 @@ smoke_check_9(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't enable evictions 3.\n";
-	}
+        failure_mssg = "can't enable evictions 3.\n";
+    }
     }
 
     if ( show_progress ) /* 15 */
@@ -2144,8 +2190,8 @@ smoke_check_9(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't disable evictions 4.\n";
-	}
+        failure_mssg = "can't disable evictions 4.\n";
+    }
     }
 
 
@@ -2174,26 +2220,26 @@ smoke_check_9(void)
 
 } /* smoke_check_9() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	smoke_check_10()
+ * Function:    smoke_check_10()
  *
- * Purpose:	A repeat of smoke check 2, only with the cache corked
- * 		part of the time.
+ * Purpose:    A repeat of smoke check 2, only with the cache corked
+ *         part of the time.
  *
- * 		Recall that smoke check 2 is a basic functional test,
- * 		with inserts, destroys, and moves in the mix, along
- * 		with some repeated protects and unprotects.  About half
- * 		the entries are marked as dirty.
+ *         Recall that smoke check 2 is a basic functional test,
+ *         with inserts, destroys, and moves in the mix, along
+ *         with some repeated protects and unprotects.  About half
+ *         the entries are marked as dirty.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              8/1/07
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2217,7 +2263,7 @@ smoke_check_10(void)
 
     if ( skip_long_tests ) {
         SKIPPED();
-        HDfprintf(stdout, "	Long tests disabled.\n");
+        HDfprintf(stdout, "    Long tests disabled.\n");
         return 0;  /* <========== note return */
     }
 
@@ -2251,7 +2297,7 @@ smoke_check_10(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -2266,8 +2312,8 @@ smoke_check_10(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't disable evictions 1.\n";
-	}
+        failure_mssg = "can't disable evictions 1.\n";
+    }
     }
 
     if ( show_progress ) /* 5 */
@@ -2284,7 +2330,7 @@ smoke_check_10(void)
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
-			    /* do_mult_ro_protects    */ TRUE,
+                /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
                             /* dirty_unprotects       */ dirty_unprotects);
 
@@ -2299,8 +2345,8 @@ smoke_check_10(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't enable evictions 1.\n";
-	}
+        failure_mssg = "can't enable evictions 1.\n";
+    }
     }
 
     if ( show_progress ) /* 7 */
@@ -2317,7 +2363,7 @@ smoke_check_10(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -2332,8 +2378,8 @@ smoke_check_10(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't disable evictions 2.\n";
-	}
+        failure_mssg = "can't disable evictions 2.\n";
+    }
     }
 
     if ( show_progress ) /* 9 */
@@ -2358,8 +2404,8 @@ smoke_check_10(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't enable evictions 2.\n";
-	}
+        failure_mssg = "can't enable evictions 2.\n";
+    }
     }
 
     if ( show_progress ) /* 11 */
@@ -2386,8 +2432,8 @@ smoke_check_10(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't disable evictions 3.\n";
-	}
+        failure_mssg = "can't disable evictions 3.\n";
+    }
     }
 
     if ( show_progress ) /* 13 */
@@ -2412,8 +2458,8 @@ smoke_check_10(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't enable evictions 3.\n";
-	}
+        failure_mssg = "can't enable evictions 3.\n";
+    }
     }
 
     if ( show_progress ) /* 15 */
@@ -2440,8 +2486,8 @@ smoke_check_10(void)
         if ( result < 0 ) {
 
              pass = FALSE;
-	     failure_mssg = "can't disable evictions 4.\n";
-	}
+        failure_mssg = "can't disable evictions 4.\n";
+    }
     }
 
     if ( show_progress ) /* 17 */
@@ -2469,19 +2515,19 @@ smoke_check_10(void)
 
 } /* smoke_check_10() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	write_permitted_check()
+ * Function:    check_write_permitted()
  *
- * Purpose:	A basic test of the write permitted function.  In essence,
- *		we load the cache up with dirty entryies, set
- *		write_permitted to FALSE, and then protect a bunch of
- *		entries.  If there are any writes while write_permitted is
- *		FALSE, the test will fail.
+ * Purpose:    A basic test of the write permitted function.  In essence,
+ *        we load the cache up with dirty entryies, set
+ *        write_permitted to FALSE, and then protect a bunch of
+ *        entries.  If there are any writes while write_permitted is
+ *        FALSE, the test will fail.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/24/04
  *
  * Modifications:
@@ -2490,12 +2536,12 @@ smoke_check_10(void)
  */
 
 static unsigned
-write_permitted_check(void)
+check_write_permitted(void)
 {
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-    const char * fcn_name = "write_permitted_check";
+    const char * fcn_name = "check_write_permitted";
     hbool_t show_progress = FALSE;
     hbool_t display_stats = FALSE;
     int32_t lag = 10;
@@ -2537,7 +2583,7 @@ write_permitted_check(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ TRUE,
                            /* dirty_unprotects       */ TRUE);
 
@@ -2557,7 +2603,7 @@ write_permitted_check(void)
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
-			    /* do_mult_ro_protects    */ TRUE,
+                /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ FALSE,
                             /* dirty_unprotects       */ NO_CHANGE);
 
@@ -2577,7 +2623,7 @@ write_permitted_check(void)
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
-			   /* do_mult_ro_protects    */ TRUE,
+            /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ TRUE,
                            /* dirty_unprotects       */ TRUE);
 
@@ -2647,29 +2693,29 @@ write_permitted_check(void)
 
     SKIPPED();
 
-    HDfprintf(stdout, "	Clean and dirty LRU lists disabled.\n");
+    HDfprintf(stdout, "    Clean and dirty LRU lists disabled.\n");
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     return (unsigned)!pass;
 
-} /* write_permitted_check() */
+} /* check_write_permitted() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_insert_entry()
+ * Function:    check_insert_entry()
  *
- * Purpose:	Verify that H5C_insert_entry behaves as expected.
- *		Test the behaviour with different flags.
+ * Purpose:    Verify that H5C_insert_entry behaves as expected.
+ *        Test the behaviour with different flags.
  *
- *		This test was added primarily to test basic insert
- *		pinned entry functionallity, but I through in explicit
- *		tests for other functionallity that is tested implicitly
- *		elsewhere.
+ *        This test was added primarily to test basic insert
+ *        pinned entry functionallity, but I through in explicit
+ *        tests for other functionallity that is tested implicitly
+ *        elsewhere.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              8/10/06
  *
  * Modifications:
@@ -2733,13 +2779,13 @@ check_insert_entry(void)
     base_addr = entries[0];
     while ( ( pass ) && ( i < 4 ) )
     {
-	entry_ptr = &(base_addr[i]);
+    entry_ptr = &(base_addr[i]);
 
-	/* Start by checking everything we can via H5C_get_entry_status() */
+    /* Start by checking everything we can via H5C_get_entry_status() */
 
-	result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
-			              &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+    result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
+                        &in_cache, &is_dirty, &is_protected,
+                    &is_pinned);
 
         if ( result < 0 ) {
 
@@ -2747,129 +2793,129 @@ check_insert_entry(void)
             failure_mssg = "H5C_get_entry_status() reports failure.";
         }
 
-	if ( pass ) {
+    if ( pass ) {
 
-	    /* check the universals */
-	    if ( ( ! in_cache ) || ( ! is_dirty ) || ( is_protected ) ||
+        /* check the universals */
+        if ( ( ! in_cache ) || ( ! is_dirty ) || ( is_protected ) ||
                  ( entry_size != entry_sizes[entry_type] ) ) {
 
                 pass = FALSE;
                 failure_mssg = "Unexpected insert results 1.";
             }
-	}
+    }
 
-	if ( pass ) {
+    if ( pass ) {
 
             /* verify that the pinned flag got set correctly */
-	    if ( ( i == 2 ) || ( i == 3 ) ) {
+        if ( ( i == 2 ) || ( i == 3 ) ) {
 
-		if ( ! is_pinned ) {
+        if ( ! is_pinned ) {
 
                     pass = FALSE;
                     failure_mssg = "Unexpected insert results 2.";
-		}
-	    } else if ( is_pinned ) {
+        }
+        } else if ( is_pinned ) {
 
                 pass = FALSE;
                 failure_mssg = "Unexpected insert results 3.";
 
-	    } else if ( is_pinned != ((entry_ptr->header).is_pinned) ) {
+        } else if ( is_pinned != ((entry_ptr->header).is_pinned) ) {
 
                 pass = FALSE;
                 failure_mssg = "Unexpected insert results 4.";
             }
-	}
+    }
 
-	/* Thats all we can get from H5C_get_entry_status().
-	 * Now start looking at the cache data structures directly.
-	 */
+    /* Thats all we can get from H5C_get_entry_status().
+    * Now start looking at the cache data structures directly.
+    */
 
-	if ( pass ) {
+    if ( pass ) {
 
             /* Verify that the flush marker got set correctly */
-	    if ( ( i == 1 ) || ( i == 3 ) ) {
+        if ( ( i == 1 ) || ( i == 3 ) ) {
 
-		if ( ! ((entry_ptr->header).flush_marker) ) {
+        if ( ! ((entry_ptr->header).flush_marker) ) {
 
                     pass = FALSE;
                     failure_mssg = "Unexpected insert results 5.";
-		}
-	    } else if ( (entry_ptr->header).flush_marker ) {
+        }
+        } else if ( (entry_ptr->header).flush_marker ) {
 
                 pass = FALSE;
                 failure_mssg = "Unexpected insert results 6.";
-	    }
-	}
+        }
+    }
 
-	if ( pass ) {
+    if ( pass ) {
 
-	    /* Verify that pinned entries are in the pinned entry list */
-	    if ( (entry_ptr->header).is_pinned ) {
+        /* Verify that pinned entries are in the pinned entry list */
+        if ( (entry_ptr->header).is_pinned ) {
 
-		search_ptr = cache_ptr->pel_head_ptr;
+        search_ptr = cache_ptr->pel_head_ptr;
 
-		while ( ( search_ptr != NULL ) &&
-			( search_ptr !=
-			  (struct H5C_cache_entry_t *)entry_ptr ) )
-		{
-		    search_ptr = search_ptr->next;
-		}
+        while ( ( search_ptr != NULL ) &&
+            ( search_ptr !=
+            (struct H5C_cache_entry_t *)entry_ptr ) )
+        {
+            search_ptr = search_ptr->next;
+        }
 
-		if ( search_ptr == NULL ) {
+        if ( search_ptr == NULL ) {
 
                     pass = FALSE;
                     failure_mssg = "Unexpected insert results 7.";
-		}
-	    }
-	}
+        }
+        }
+    }
 
-	if ( pass ) {
+    if ( pass ) {
 
-	    /* Verify that unpinned entries are in the LRU list */
-	    if ( ! ((entry_ptr->header).is_pinned) ) {
+        /* Verify that unpinned entries are in the LRU list */
+        if ( ! ((entry_ptr->header).is_pinned) ) {
 
-		search_ptr = cache_ptr->LRU_head_ptr;
+        search_ptr = cache_ptr->LRU_head_ptr;
 
-		while ( ( search_ptr != NULL ) &&
-			( search_ptr !=
-			  (struct H5C_cache_entry_t *)entry_ptr ) )
-		{
-		    search_ptr = search_ptr->next;
-		}
+        while ( ( search_ptr != NULL ) &&
+            ( search_ptr !=
+            (struct H5C_cache_entry_t *)entry_ptr ) )
+        {
+            search_ptr = search_ptr->next;
+        }
 
-		if ( search_ptr == NULL ) {
+        if ( search_ptr == NULL ) {
 
                     pass = FALSE;
                     failure_mssg = "Unexpected insert results 8.";
-		}
-	    }
-	}
+        }
+        }
+    }
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
-	if ( pass ) {
+    if ( pass ) {
 
-	    /* Verify that unpinned entries are in the dirty LRU list */
-	    if ( ! ((entry_ptr->header).is_pinned) ) {
+        /* Verify that unpinned entries are in the dirty LRU list */
+        if ( ! ((entry_ptr->header).is_pinned) ) {
 
-		search_ptr = cache_ptr->dLRU_head_ptr;
+        search_ptr = cache_ptr->dLRU_head_ptr;
 
-		while ( ( search_ptr != NULL ) &&
-			( search_ptr !=
-			  (struct H5C_cache_entry_t *)entry_ptr ) )
-		{
-		    search_ptr = search_ptr->aux_next;
-		}
+        while ( ( search_ptr != NULL ) &&
+            ( search_ptr !=
+            (struct H5C_cache_entry_t *)entry_ptr ) )
+        {
+            search_ptr = search_ptr->aux_next;
+        }
 
-		if ( search_ptr == NULL ) {
+        if ( search_ptr == NULL ) {
 
                     pass = FALSE;
                     failure_mssg = "Unexpected insert results 9.";
-		}
-	    }
-	}
+        }
+        }
+    }
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-	i++;
+    i++;
 
     } /* while */
 
@@ -2880,26 +2926,26 @@ check_insert_entry(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 4 ) ||
-	     ( cache_ptr->index_size != 4 * entry_sizes[entry_type] ) ||
-	     ( cache_ptr->slist_len != 4 ) ||
-	     ( cache_ptr->slist_size != 4 * entry_sizes[entry_type] ) ||
-	     ( cache_ptr->pl_len != 0 ) ||
-	     ( cache_ptr->pl_size != (size_t)0 ) ||
-	     ( cache_ptr->pel_len != 2 ) ||
-	     ( cache_ptr->pel_size != 2 * entry_sizes[entry_type] ) ||
-	     ( cache_ptr->LRU_list_len != 2 ) ||
-	     ( cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type] ) ||
+    if ( ( cache_ptr->index_len != 4 ) ||
+        ( cache_ptr->index_size != 4 * entry_sizes[entry_type] ) ||
+        ( cache_ptr->slist_len != 4 ) ||
+        ( cache_ptr->slist_size != 4 * entry_sizes[entry_type] ) ||
+        ( cache_ptr->pl_len != 0 ) ||
+        ( cache_ptr->pl_size != (size_t)0 ) ||
+        ( cache_ptr->pel_len != 2 ) ||
+        ( cache_ptr->pel_size != 2 * entry_sizes[entry_type] ) ||
+        ( cache_ptr->LRU_list_len != 2 ) ||
+        ( cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type] ) ||
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
-	     ( cache_ptr->dLRU_list_len != 2 ) ||
-	     ( cache_ptr->dLRU_list_size != 2 * entry_sizes[entry_type] ) ||
+        ( cache_ptr->dLRU_list_len != 2 ) ||
+        ( cache_ptr->dLRU_list_size != 2 * entry_sizes[entry_type] ) ||
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
-	     ( cache_ptr->cLRU_list_len != 0 ) ||
-	     ( cache_ptr->cLRU_list_size != (size_t)0 ) ) {
+        ( cache_ptr->cLRU_list_len != 0 ) ||
+        ( cache_ptr->cLRU_list_size != (size_t)0 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected insert results 10.";
-	}
+    }
     }
 
     /* Finally, if stats collection is enabled, verify that the expected
@@ -2908,23 +2954,23 @@ check_insert_entry(void)
 #if H5C_COLLECT_CACHE_STATS
     if ( pass ) {
 
-	if ( ( cache_ptr->insertions[entry_type] != 4 ) ||
-	     ( cache_ptr->pinned_insertions[entry_type] != 2 ) ||
-	     ( cache_ptr->pins[entry_type] != 2 ) ||
-	     ( cache_ptr->unpins[entry_type] != 0 ) ||
+    if ( ( cache_ptr->insertions[entry_type] != 4 ) ||
+        ( cache_ptr->pinned_insertions[entry_type] != 2 ) ||
+        ( cache_ptr->pins[entry_type] != 2 ) ||
+        ( cache_ptr->unpins[entry_type] != 0 ) ||
              ( cache_ptr->dirty_pins[entry_type] != 0 ) ||
-	     ( cache_ptr->max_index_len != 4 ) ||
-	     ( cache_ptr->max_index_size != 4 * entry_sizes[entry_type] ) ||
-	     ( cache_ptr->max_slist_len != 4 ) ||
-	     ( cache_ptr->max_slist_size != 4 * entry_sizes[entry_type] ) ||
-	     ( cache_ptr->max_pl_len != 0 ) ||
-	     ( cache_ptr->max_pl_size != (size_t)0 ) ||
-	     ( cache_ptr->max_pel_len != 2 ) ||
-	     ( cache_ptr->max_pel_size != 2 * entry_sizes[entry_type] ) ) {
+        ( cache_ptr->max_index_len != 4 ) ||
+        ( cache_ptr->max_index_size != 4 * entry_sizes[entry_type] ) ||
+        ( cache_ptr->max_slist_len != 4 ) ||
+        ( cache_ptr->max_slist_size != 4 * entry_sizes[entry_type] ) ||
+        ( cache_ptr->max_pl_len != 0 ) ||
+        ( cache_ptr->max_pl_size != (size_t)0 ) ||
+        ( cache_ptr->max_pel_len != 2 ) ||
+        ( cache_ptr->max_pel_size != 2 * entry_sizes[entry_type] ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected insert results 11.";
-	}
+    }
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -2933,7 +2979,7 @@ check_insert_entry(void)
     if ( pass ) {
 
         unpin_entry(entry_type, 2);
-	unpin_entry(entry_type, 3);
+    unpin_entry(entry_type, 3);
     }
 
     if ( pass ) {
@@ -2953,16 +2999,16 @@ check_insert_entry(void)
 
 } /* check_insert_entry() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache()
+ * Function:    check_flush_cache()
  *
- * Purpose:	Verify that flush_cache behaves as expected.  In particular,
- *		test the behaviour with different flags.
+ * Purpose:    Verify that flush_cache behaves as expected.  In particular,
+ *        test the behaviour with different flags.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              1/10/05
  *
  * Modifications:
@@ -2988,10 +3034,10 @@ check_flush_cache(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: reseting entries.\n", fcn_name);
-	}
+        HDfprintf(stdout, "%s: reseting entries.\n", fcn_name);
+    }
 
         reset_entries();
 
@@ -3005,11 +3051,11 @@ check_flush_cache(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: calling check_flush_cache__empty_cache().\n",
-		      fcn_name);
-	}
+        HDfprintf(stdout, "%s: calling check_flush_cache__empty_cache().\n",
+            fcn_name);
+    }
 
         check_flush_cache__empty_cache(file_ptr);
     }
@@ -3020,44 +3066,44 @@ check_flush_cache(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: calling check_flush_cache__single_entry().\n",
-		      fcn_name);
-	}
+        HDfprintf(stdout, "%s: calling check_flush_cache__single_entry().\n",
+            fcn_name);
+    }
 
         check_flush_cache__single_entry(file_ptr);
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: calling check_flush_cache__multi_entry().\n",
-		      fcn_name);
-	}
+        HDfprintf(stdout, "%s: calling check_flush_cache__multi_entry().\n",
+            fcn_name);
+    }
 
         check_flush_cache__multi_entry(file_ptr);
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: calling check_flush_cache__flush_ops().\n",
-		      fcn_name);
-	}
+        HDfprintf(stdout, "%s: calling check_flush_cache__flush_ops().\n",
+            fcn_name);
+    }
 
-	check_flush_cache__flush_ops(file_ptr);
+    check_flush_cache__flush_ops(file_ptr);
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: calling takedown_cache().\n",
-		      fcn_name);
-	}
+        HDfprintf(stdout, "%s: calling takedown_cache().\n",
+            fcn_name);
+    }
 
         takedown_cache(file_ptr, FALSE, FALSE);
     }
@@ -3074,16 +3120,16 @@ check_flush_cache(void)
 
 } /* check_flush_cache() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache__empty_cache()
+ * Function:    check_flush_cache__empty_cache()
  *
- * Purpose:	Verify that flush_cache behaves as expected with an empty
+ * Purpose:    Verify that flush_cache behaves as expected with an empty
  *              cache.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              1/12/05
  *
  * Modifications:
@@ -3096,7 +3142,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 {
     /* const char * fcn_name = "check_flush_cache__empty_cache"; */
     H5C_t * cache_ptr = file_ptr->shared->cache;
-    herr_t	 result;
+    herr_t     result;
 
     if ( cache_ptr == NULL ) {
 
@@ -3166,22 +3212,22 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
 } /* check_flush_cache__empty_cache() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache__multi_entry()
+ * Function:    check_flush_cache__multi_entry()
  *
- * Purpose:	Verify that flush_cache behaves as expected when the cache
- *		contains multiple elements.
+ * Purpose:    Verify that flush_cache behaves as expected when the cache
+ *        contains multiple elements.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              1/14/05
  *
  * Modifications:
  *
- * 		JRM -- 4/5/06
- * 		Added pinned entry tests.
+ *         JRM -- 4/5/06
+ *         Added pinned entry tests.
  *
  *-------------------------------------------------------------------------
  */
@@ -4149,9 +4195,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ FALSE,
@@ -4163,10 +4209,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__DIRTIED_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4178,11 +4224,11 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
-	    /* num_pins           = */ 2,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, 75, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 2,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, 75, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4194,12 +4240,12 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__DIRTIED_FLAG,
-	    /* num_pins           = */ 3,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        PICO_ENTRY_TYPE,
-					PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, 75, 25, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 3,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                PICO_ENTRY_TYPE,
+                    PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, 75, 25, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4211,13 +4257,13 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 4,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+        /* num_pins           = */ 4,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
-					PICO_ENTRY_TYPE,
-					-1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, -1, -1, -1, -1},
+                    PICO_ENTRY_TYPE,
+                    -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ FALSE,
@@ -4229,14 +4275,14 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 5,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+        /* num_pins           = */ 5,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
-					PICO_ENTRY_TYPE,
-					MONSTER_ENTRY_TYPE,
-					-1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, 10, -1, -1, -1},
+                    PICO_ENTRY_TYPE,
+                    MONSTER_ENTRY_TYPE,
+                    -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, 10, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4248,15 +4294,15 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 6,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+        /* num_pins           = */ 6,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
-					PICO_ENTRY_TYPE,
-					MONSTER_ENTRY_TYPE,
-					MONSTER_ENTRY_TYPE,
-					-1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, 10, 20, -1, -1},
+                    PICO_ENTRY_TYPE,
+                    MONSTER_ENTRY_TYPE,
+                    MONSTER_ENTRY_TYPE,
+                    -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, 10, 20, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4268,16 +4314,16 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 7,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+        /* num_pins           = */ 7,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
-					PICO_ENTRY_TYPE,
-					MONSTER_ENTRY_TYPE,
-					MONSTER_ENTRY_TYPE,
-					MONSTER_ENTRY_TYPE,
-					-1},
-	    /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, 10, 20, 30, -1},
+                    PICO_ENTRY_TYPE,
+                    MONSTER_ENTRY_TYPE,
+                    MONSTER_ENTRY_TYPE,
+                    MONSTER_ENTRY_TYPE,
+                    -1},
+        /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, 10, 20, 30, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4303,9 +4349,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4317,10 +4363,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__DIRTIED_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4332,11 +4378,11 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
-	    /* num_pins           = */ 2,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, 75, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 2,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, 75, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4348,12 +4394,12 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__DIRTIED_FLAG,
-	    /* num_pins           = */ 3,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        PICO_ENTRY_TYPE,
-					PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, 75, 25, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 3,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                PICO_ENTRY_TYPE,
+                    PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, 75, 25, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4365,9 +4411,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4379,10 +4425,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {MONSTER_ENTRY_TYPE,
-					-1, -1, -1, -1 -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {10, -1, -1, -1 -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {MONSTER_ENTRY_TYPE,
+                    -1, -1, -1, -1 -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {10, -1, -1, -1 -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4394,11 +4440,11 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 2,
-	    /* pin_type[MAX_PINS] = */ {MONSTER_ENTRY_TYPE,
-					MONSTER_ENTRY_TYPE,
-					-1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {10, 20, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 2,
+        /* pin_type[MAX_PINS] = */ {MONSTER_ENTRY_TYPE,
+                    MONSTER_ENTRY_TYPE,
+                    -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {10, 20, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4410,12 +4456,12 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 3,
-	    /* pin_type[MAX_PINS] = */ {MONSTER_ENTRY_TYPE,
-					MONSTER_ENTRY_TYPE,
-					MONSTER_ENTRY_TYPE,
-					-1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {10, 20, 30, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 3,
+        /* pin_type[MAX_PINS] = */ {MONSTER_ENTRY_TYPE,
+                    MONSTER_ENTRY_TYPE,
+                    MONSTER_ENTRY_TYPE,
+                    -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {10, 20, 30, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4441,9 +4487,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4455,10 +4501,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__DIRTIED_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4470,10 +4516,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4485,10 +4531,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__DIRTIED_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4500,9 +4546,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4514,9 +4560,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4528,9 +4574,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4542,9 +4588,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4571,9 +4617,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4585,10 +4631,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__DIRTIED_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4600,10 +4646,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4615,10 +4661,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__DIRTIED_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4630,9 +4676,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4644,13 +4690,13 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 4,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+        /* num_pins           = */ 4,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
-					PICO_ENTRY_TYPE,
-					-1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, -1, -1, -1, -1},
+                    PICO_ENTRY_TYPE,
+                    -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4662,13 +4708,13 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 4,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+        /* num_pins           = */ 4,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
-					PICO_ENTRY_TYPE,
-					-1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, -1, -1, -1, -1},
+                    PICO_ENTRY_TYPE,
+                    -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, 75, 25, 50, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4680,9 +4726,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4710,9 +4756,9 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
-	    /* num_pins           = */ 0,
-	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 0,
+        /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4724,10 +4770,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__DIRTIED_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4739,10 +4785,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__NO_FLAGS_SET,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4754,10 +4800,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__DIRTIED_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4769,10 +4815,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4784,10 +4830,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
             /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4799,10 +4845,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4814,10 +4860,10 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
             /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* num_pins           = */ 1,
-	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
-		                        -1, -1, -1, -1, -1, -1, -1},
-	    /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
+        /* num_pins           = */ 1,
+        /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
+                                -1, -1, -1, -1, -1, -1, -1},
+        /* pin_idx[MAX_PINS]  = */ {100, -1, -1, -1, -1, -1, -1, -1},
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4833,15 +4879,15 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
 
 } /* check_flush_cache__multi_entry() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache__multi_entry_test()
+ * Function:    check_flush_cache__multi_entry_test()
  *
- * Purpose:	Run a multi entry flush cache test.
+ * Purpose:    Run a multi entry flush cache test.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              1/13/05
  *
  * Modifications:
@@ -4859,9 +4905,9 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
     /* const char *   fcn_name = "check_flush_cache__multi_entry_test"; */
     H5C_t * cache_ptr = file_ptr->shared->cache;
     static char    msg[128];
-    herr_t	   result;
+    herr_t       result;
     int            i;
-    size_t	   total_entry_size = 0;
+    size_t       total_entry_size = 0;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
@@ -4869,7 +4915,7 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
     /* This gets used a lot, so lets leave it in. */
 
     HDfprintf(stdout, "check_flush_cache__multi_entry_test: test %d\n",
-	      test_num);
+        test_num);
 #endif /* JRM */
 
     if ( cache_ptr == NULL ) {
@@ -5058,15 +5104,15 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
 
 } /* check_flush_cache__multi_entry_test() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache__pe_multi_entry_test()
+ * Function:    check_flush_cache__pe_multi_entry_test()
  *
- * Purpose:	Run a multi entry flush cache test.
+ * Purpose:    Run a multi entry flush cache test.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/5/06
  *
  * Modifications:
@@ -5084,10 +5130,10 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
     /* const char *   fcn_name = "check_flush_cache__pe_multi_entry_test"; */
     H5C_t *cache_ptr = file_ptr->shared->cache;
     static char    msg[128];
-    herr_t	   result;
+    herr_t       result;
     int            i;
     int            j;
-    size_t	   total_entry_size = 0;
+    size_t       total_entry_size = 0;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
@@ -5095,7 +5141,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
     /* This is useful debugging code.  Leave it in for now. */
 
     HDfprintf(stdout, "check_flush_cache__pe_multi_entry_test: test %d\n",
-	      test_num);
+        test_num);
 #endif /* JRM */
 
     if ( cache_ptr == NULL ) {
@@ -5133,8 +5179,8 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
              ( spec[i].entry_type >= NUMBER_OF_ENTRY_TYPES ) ||
              ( spec[i].entry_index < 0 ) ||
              ( spec[i].entry_index > max_indices[spec[i].entry_type] ) ||
-	     ( spec[i].num_pins < 0 ) ||
-	     ( spec[i].num_pins > MAX_PINS ) ) {
+        ( spec[i].num_pins < 0 ) ||
+        ( spec[i].num_pins > MAX_PINS ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
@@ -5163,14 +5209,14 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
 
         total_entry_size += entry_sizes[spec[i].entry_type];
 
-	for ( j = 0; j < spec[i].num_pins; j++ )
-	{
+    for ( j = 0; j < spec[i].num_pins; j++ )
+    {
             create_pinned_entry_dependency(file_ptr,
-		                           spec[i].entry_type,
-					   spec[i].entry_index,
-					   spec[i].pin_type[j],
-					   spec[i].pin_idx[j]);
-	}
+                                spec[i].entry_type,
+                    spec[i].entry_index,
+                    spec[i].pin_type[j],
+                    spec[i].pin_idx[j]);
+    }
 
         i++;
     }
@@ -5296,21 +5342,21 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
 
 } /* check_flush_cache__pe_multi_entry_test() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache__flush_ops()
+ * Function:    check_flush_cache__flush_ops()
  *
- * Purpose:	Run the flush ops cache tests.
+ * Purpose:    Run the flush ops cache tests.
  *
- * 		These are tests that test the cache's ability to handle
- * 		the case in which the flush callback dirties, resizes,
- * 		and/or moves entries.
+ *         These are tests that test the cache's ability to handle
+ *         the case in which the flush callback dirties, resizes,
+ *         and/or moves entries.
  *
- * 		Do nothing if pass is FALSE on entry.
+ *         Do nothing if pass is FALSE on entry.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              9/3/06
  *
  * Modifications:
@@ -5338,474 +5384,474 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 
     if ( pass ) /* test #1 */
     {
-	/* start with a very simple test, in which there are two entries
-	 * resident in cache, and the second entry dirties the first in
-	 * the flush callback.  No size changes, and no flush flags.
-	 */
-        int test_num			= 1;
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 2;
-	int init_expected_index_len	= 2;
-	size_t init_expected_index_size	= 2 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 2;
-	size_t expected_index_size	= 2 * PICO_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[2] =
-	{
+    /* start with a very simple test, in which there are two entries
+    * resident in cache, and the second entry dirties the first in
+    * the flush callback.  No size changes, and no flush flags.
+    */
+        int test_num            = 1;
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 2;
+    int init_expected_index_len    = 2;
+    size_t init_expected_index_size    = 2 * PICO_ENTRY_SIZE;
+    int expected_index_len        = 2;
+    size_t expected_index_size    = 2 * PICO_ENTRY_SIZE;
+    struct fo_flush_cache_test_spec spec[2] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  },
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    },
           {
             /* entry_num          = */ 1,
             /* entry_type         = */ 0,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ (size_t)0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ (size_t)0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
     }
 
     if ( pass ) /* test #2 */
     {
-	/* Same as test 1, only this time set the flush invalidate flag.
-	 * Note that we must repeat all tests with the flush invalidate flag
-	 * as this triggers a different set of code to execute the flush.
-	 *
-	 * Create two entries resident in cache, and have the second entry
-	 * dirty the first in the flush callback.
-	 */
-        int test_num			= 2;
-	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
-	int spec_size			= 2;
-	int init_expected_index_len	= 2;
-	size_t init_expected_index_size	= 2 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 0;
-	size_t expected_index_size	= 0;
-	struct fo_flush_cache_test_spec spec[2] =
-	{
+    /* Same as test 1, only this time set the flush invalidate flag.
+    * Note that we must repeat all tests with the flush invalidate flag
+    * as this triggers a different set of code to execute the flush.
+    *
+    * Create two entries resident in cache, and have the second entry
+    * dirty the first in the flush callback.
+    */
+        int test_num            = 2;
+    unsigned int flush_flags    = H5C__FLUSH_INVALIDATE_FLAG;
+    int spec_size            = 2;
+    int init_expected_index_len    = 2;
+    size_t init_expected_index_size    = 2 * PICO_ENTRY_SIZE;
+    int expected_index_len        = 0;
+    size_t expected_index_size    = 0;
+    struct fo_flush_cache_test_spec spec[2] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  },
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    },
           {
             /* entry_num          = */ 1,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:		idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:        idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    PICO_ENTRY_TYPE,0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,        0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,        0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,        0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,        0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,        0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,        0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,        0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,        0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,        0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ (size_t)0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ (size_t)0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
     }
 
     if ( pass ) /* test #3 */
     {
-	/* Single entry test verifying that the cache can handle the case in
-	 * which the call back function resizes the entry for which it has
-	 * been called.
-	 */
-        int test_num			= 3;
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
-	int expected_index_len		= 1;
-	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Single entry test verifying that the cache can handle the case in
+    * which the call back function resizes the entry for which it has
+    * been called.
+    */
+        int test_num            = 3;
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = VARIABLE_ENTRY_SIZE / 4;
+    int expected_index_len        = 1;
+    size_t expected_index_size    = VARIABLE_ENTRY_SIZE / 2;
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ TRUE,
-	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ TRUE,
+        /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:            idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ (size_t)0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ (size_t)0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
     }
 
     if ( pass ) /* test #4 */
     {
-	/* Repeat test #4 with the flush invalidate flag.
-	 *
-	 * Single entry test verifying that the cache can handle the case in
-	 * which the call back function resizes the entry for which it has
-	 * been called.
-	 */
-        int test_num			= 4;
-	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
-	int expected_index_len		= 0;
-	size_t expected_index_size	= 0;
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Repeat test #4 with the flush invalidate flag.
+    *
+    * Single entry test verifying that the cache can handle the case in
+    * which the call back function resizes the entry for which it has
+    * been called.
+    */
+        int test_num            = 4;
+    unsigned int flush_flags    = H5C__FLUSH_INVALIDATE_FLAG;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = VARIABLE_ENTRY_SIZE / 4;
+    int expected_index_len        = 0;
+    size_t expected_index_size    = 0;
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ TRUE,
-	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ TRUE,
+        /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:            idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ (size_t)0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ (size_t)0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
     }
 
     if ( pass ) /* test #5 & #6 */
     {
-	/* Single entry test verifying that the cache can handle the case in
-	 * which the call back function moves the entry for which it has
-	 * been called.
-	 *
-	 * Run this entry twice, as the first run moves the entry to its
-	 * alternate address, and the second moves it back.
-	 */
-        int test_num			= 5; /* and 6 */
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 1;
-	size_t expected_index_size	= VARIABLE_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Single entry test verifying that the cache can handle the case in
+    * which the call back function moves the entry for which it has
+    * been called.
+    *
+    * Run this entry twice, as the first run moves the entry to its
+    * alternate address, and the second moves it back.
+    */
+        int test_num            = 5; /* and 6 */
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = VARIABLE_ENTRY_SIZE;
+    int expected_index_len        = 1;
+    size_t expected_index_size    = VARIABLE_ENTRY_SIZE;
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:            idx:    flag:    size: */
+        { { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ (size_t)0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ (size_t)0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
 
-	/* this change forces the move to move the target entry back to its
-	 * main address.  The first test moved it to its alternate address.
-	 *
-	 * Note that these two tests are not the same, as in the first test,
-	 * the moved entry is moved forward in the slist.  In the second
-	 * it is moved backwards.
-	 *
-	 * Since there is only one entry in the cache, this doesn't really
-	 * matter in this case.  But we will do similar tests later with
-	 * other entries in the cache.
-	 */
-	if ( pass ) {
+    /* this change forces the move to move the target entry back to its
+    * main address.  The first test moved it to its alternate address.
+    *
+    * Note that these two tests are not the same, as in the first test,
+    * the moved entry is moved forward in the slist.  In the second
+    * it is moved backwards.
+    *
+    * Since there is only one entry in the cache, this doesn't really
+    * matter in this case.  But we will do similar tests later with
+    * other entries in the cache.
+    */
+    if ( pass ) {
 
-	    spec[0].flush_ops[0].flag = TRUE;
-	    test_num = 6;
+        spec[0].flush_ops[0].flag = TRUE;
+        test_num = 6;
 
             check_flush_cache__flush_op_test(file_ptr,
                                              test_num,
@@ -5816,114 +5862,114 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
                                              init_expected_index_size,
                                              expected_index_len,
                                              expected_index_size,
-					     check_size,
-					     checks);
-	}
+                        check_size,
+                        checks);
+    }
     }
 
     if ( pass ) /* test #7 & #8 */
     {
-	/* Run tests 5 & 6 again, using the flush invalidate flag on the
-	 * second test.
-	 *
-	 * Single entry test verifying that the cache can handle the case in
-	 * which the call back function moves the entry for which it has
-	 * been called.
-	 *
-	 * Run this entry twice, as the first run moves the entry to its
-	 * alternate address, and the second moves it back.
-	 */
-        int test_num			= 7; /* and 8 */
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 1;
-	size_t expected_index_size	= VARIABLE_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Run tests 5 & 6 again, using the flush invalidate flag on the
+    * second test.
+    *
+    * Single entry test verifying that the cache can handle the case in
+    * which the call back function moves the entry for which it has
+    * been called.
+    *
+    * Run this entry twice, as the first run moves the entry to its
+    * alternate address, and the second moves it back.
+    */
+        int test_num            = 7; /* and 8 */
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = VARIABLE_ENTRY_SIZE;
+    int expected_index_len        = 1;
+    size_t expected_index_size    = VARIABLE_ENTRY_SIZE;
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:            idx:    flag:    size: */
+        { { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ (size_t)0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ (size_t)0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
 
-	/* this change forces the move to move the target entry back to its
-	 * main address.  The first test moved it to its alternate address.
-	 *
-	 * Note that these two tests are not the same, as in the first test,
-	 * the moved entry is moved forward in the slist.  In the second
-	 * it is moved backwards.
-	 *
-	 * Since there is only one entry in the cache, this doesn't really
-	 * matter in this case.  But we will do similar tests later with
-	 * other entries in the cache.
-	 */
+    /* this change forces the move to move the target entry back to its
+    * main address.  The first test moved it to its alternate address.
+    *
+    * Note that these two tests are not the same, as in the first test,
+    * the moved entry is moved forward in the slist.  In the second
+    * it is moved backwards.
+    *
+    * Since there is only one entry in the cache, this doesn't really
+    * matter in this case.  But we will do similar tests later with
+    * other entries in the cache.
+    */
 
-	if ( pass ) {
+    if ( pass ) {
 
             test_num = 8;
-	    flush_flags = H5C__FLUSH_INVALIDATE_FLAG;
-	    expected_index_len = 0;
-	    expected_index_size	= 0;
-	    spec[0].flush_ops[0].flag = TRUE;
-	    spec[0].expected_destroyed = TRUE;
+        flush_flags = H5C__FLUSH_INVALIDATE_FLAG;
+        expected_index_len = 0;
+        expected_index_size    = 0;
+        spec[0].flush_ops[0].flag = TRUE;
+        spec[0].expected_destroyed = TRUE;
 
             check_flush_cache__flush_op_test(file_ptr,
                                              test_num,
@@ -5934,106 +5980,106 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
                                              init_expected_index_size,
                                              expected_index_len,
                                              expected_index_size,
-					     check_size,
-					     checks);
-	}
+                        check_size,
+                        checks);
+    }
     }
 
     if ( pass ) /* test #9 & #10 */
     {
-	/* Single entry test verifying that the cache can handle the case in
-	 * which the call back function both resizes and moves the entry
-	 * for which it has been called.
-	 *
-	 * Again, we run this entry twice, as the first run moves the entry
+    /* Single entry test verifying that the cache can handle the case in
+    * which the call back function both resizes and moves the entry
+    * for which it has been called.
+    *
+    * Again, we run this entry twice, as the first run moves the entry
          * to its alternate address, and the second moves it back.
-	 */
-        int test_num			= 9; /* and 10 */
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
-	int expected_index_len		= 1;
-	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    */
+        int test_num            = 9; /* and 10 */
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = VARIABLE_ENTRY_SIZE / 2;
+    int expected_index_len        = 1;
+    size_t expected_index_size    = VARIABLE_ENTRY_SIZE / 4;
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ TRUE,
-	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 2,
-	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ TRUE,
+        /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 2,
+        /* flush_ops          = */
+        /*    op_code:        type:            idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ (size_t)0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ (size_t)0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
 
-	/* this change forces the move to move the target entry back to its
-	 * main address.  The first test moved it to its alternate address.
-	 *
-	 * Note that these two tests are not the same, as in the first test,
-	 * the moved entry is moved forward in the slist.  In the second
-	 * it is moved backwards.
-	 *
-	 * Since there is only one entry in the cache, this doesn't really
-	 * matter in this case.  But we will do similar tests later with
-	 * other entries in the cache.
-	 */
-	if ( pass ) {
+    /* this change forces the move to move the target entry back to its
+    * main address.  The first test moved it to its alternate address.
+    *
+    * Note that these two tests are not the same, as in the first test,
+    * the moved entry is moved forward in the slist.  In the second
+    * it is moved backwards.
+    *
+    * Since there is only one entry in the cache, this doesn't really
+    * matter in this case.  But we will do similar tests later with
+    * other entries in the cache.
+    */
+    if ( pass ) {
 
-	    spec[0].flush_ops[1].flag = TRUE;
-	    test_num = 10;
+        spec[0].flush_ops[1].flag = TRUE;
+        test_num = 10;
 
             check_flush_cache__flush_op_test(file_ptr,
                                              test_num,
@@ -6044,113 +6090,113 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
                                              init_expected_index_size,
                                              expected_index_len,
                                              expected_index_size,
-					     check_size,
-					     checks);
-	}
+                        check_size,
+                        checks);
+    }
     }
 
     if ( pass ) /* test #11 & #12 */
     {
-	/* Repeat the previous test with the flush invalidate flag on the
-	 * second test.
-	 *
-	 * Single entry test verifying that the cache can handle the case in
-	 * which the call back function both resizes and moves the entry
-	 * for which it has been called.
-	 *
-	 * Again, we run this entry twice, as the first run moves the entry to its
-	 * alternate address, and the second moves it back.
-	 */
-        int test_num			= 11; /* and 12 */
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
-	int expected_index_len		= 1;
-	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Repeat the previous test with the flush invalidate flag on the
+    * second test.
+    *
+    * Single entry test verifying that the cache can handle the case in
+    * which the call back function both resizes and moves the entry
+    * for which it has been called.
+    *
+    * Again, we run this entry twice, as the first run moves the entry to its
+    * alternate address, and the second moves it back.
+    */
+        int test_num            = 11; /* and 12 */
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = VARIABLE_ENTRY_SIZE / 2;
+    int expected_index_len        = 1;
+    size_t expected_index_size    = VARIABLE_ENTRY_SIZE / 4;
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ TRUE,
-	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 2,
-	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ TRUE,
+        /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 2,
+        /* flush_ops          = */
+        /*    op_code:        type:            idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,            0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ (size_t)0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ (size_t)0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
 
-	/* this change forces the move to move the target entry back to its
-	 * main address.  The first test moved it to its alternate address.
-	 *
-	 * Note that these two tests are not the same, as in the first test,
-	 * the moved entry is moved forward in the slist.  In the second
-	 * it is moved backwards.
-	 *
-	 * Since there is only one entry in the cache, this doesn't really
-	 * matter in this case.  But we will do similar tests later with
-	 * other entries in the cache.
-	 */
-	if ( pass ) {
+    /* this change forces the move to move the target entry back to its
+    * main address.  The first test moved it to its alternate address.
+    *
+    * Note that these two tests are not the same, as in the first test,
+    * the moved entry is moved forward in the slist.  In the second
+    * it is moved backwards.
+    *
+    * Since there is only one entry in the cache, this doesn't really
+    * matter in this case.  But we will do similar tests later with
+    * other entries in the cache.
+    */
+    if ( pass ) {
 
             test_num = 12;
-	    flush_flags = H5C__FLUSH_INVALIDATE_FLAG;
-	    expected_index_len = 0;
-	    expected_index_size	= 0;
-	    spec[0].flush_ops[1].flag = TRUE;
-	    spec[0].expected_destroyed = TRUE;
+        flush_flags = H5C__FLUSH_INVALIDATE_FLAG;
+        expected_index_len = 0;
+        expected_index_size    = 0;
+        spec[0].flush_ops[1].flag = TRUE;
+        spec[0].expected_destroyed = TRUE;
 
 
             check_flush_cache__flush_op_test(file_ptr,
@@ -6162,515 +6208,515 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
                                              init_expected_index_size,
                                              expected_index_len,
                                              expected_index_size,
-					     check_size,
-					     checks);
-	}
+                        check_size,
+                        checks);
+    }
     }
 
     if ( pass ) /* test #13 */
     {
-	/* Test the ability of the cache to handle the case in which
-	 * the flush function of an entry that is resident in cache
-	 * dirties two entries that are not in cache.  No size
-	 * changes.
-	 *
-	 * At present, I am assured that this case will never occur, but
-	 * lets make sure we can handle it regardless.
-	 */
-        int test_num			= 13;
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= 1 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 3;
-	size_t expected_index_size	= 3 * PICO_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Test the ability of the cache to handle the case in which
+    * the flush function of an entry that is resident in cache
+    * dirties two entries that are not in cache.  No size
+    * changes.
+    *
+    * At present, I am assured that this case will never occur, but
+    * lets make sure we can handle it regardless.
+    */
+        int test_num            = 13;
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = 1 * PICO_ENTRY_SIZE;
+    int expected_index_len        = 3;
+    size_t expected_index_size    = 3 * PICO_ENTRY_SIZE;
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ 0,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 2,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	0,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 2,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    0,    2,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 2;
-	struct fo_flush_entry_check checks[2] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ PICO_ENTRY_SIZE,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 2,
-	    /* expected_size      = */ PICO_ENTRY_SIZE,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 2;
+    struct fo_flush_entry_check checks[2] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ PICO_ENTRY_TYPE,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ PICO_ENTRY_SIZE,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ PICO_ENTRY_TYPE,
+        /* entry_index        = */ 2,
+        /* expected_size      = */ PICO_ENTRY_SIZE,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
     }
 
     if ( pass ) /* test #14 */
     {
-	/* Repeat previous test with the flush invalidate flag.
-	 *
-	 * Test the ability of the cache to handle the case in which
-	 * the flush function of an entry that is resident in cache
-	 * dirties two entries that are not in cache.  No size
-	 * changes.
-	 *
-	 * At present, I am assured that this case will never occur, but
-	 * lets make sure we can handle it regardless.
-	 */
-        int test_num			= 14;
-	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= 1 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 0;
-	size_t expected_index_size	= (size_t)0;
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Repeat previous test with the flush invalidate flag.
+    *
+    * Test the ability of the cache to handle the case in which
+    * the flush function of an entry that is resident in cache
+    * dirties two entries that are not in cache.  No size
+    * changes.
+    *
+    * At present, I am assured that this case will never occur, but
+    * lets make sure we can handle it regardless.
+    */
+        int test_num            = 14;
+    unsigned int flush_flags    = H5C__FLUSH_INVALIDATE_FLAG;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = 1 * PICO_ENTRY_SIZE;
+    int expected_index_len        = 0;
+    size_t expected_index_size    = (size_t)0;
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ 0,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 2,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	0,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 2,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    0,    2,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           }
-	};
-	int check_size = 2;
-	struct fo_flush_entry_check checks[2] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ PICO_ENTRY_SIZE,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 2,
-	    /* expected_size      = */ PICO_ENTRY_SIZE,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  }
-	};
+    };
+    int check_size = 2;
+    struct fo_flush_entry_check checks[2] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ PICO_ENTRY_TYPE,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ PICO_ENTRY_SIZE,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ PICO_ENTRY_TYPE,
+        /* entry_index        = */ 2,
+        /* expected_size      = */ PICO_ENTRY_SIZE,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
     }
 
     if ( pass ) /* test #15 */
     {
-	/* Test the ability of the cache to handle the case in which
-	 * the flush function of an entry that is resident in cache
-	 * resizes and dirties two entries that are not in cache.
-	 *
-	 * At present, I am assured that this case will never occur, but
-	 * lets make sure we can handle it regardless.
-	 */
-        int test_num			= 15;
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 3;
-	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
-		                          (VARIABLE_ENTRY_SIZE / 4) +
-					  (VARIABLE_ENTRY_SIZE / 2);
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Test the ability of the cache to handle the case in which
+    * the flush function of an entry that is resident in cache
+    * resizes and dirties two entries that are not in cache.
+    *
+    * At present, I am assured that this case will never occur, but
+    * lets make sure we can handle it regardless.
+    */
+        int test_num            = 15;
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = 1 * VARIABLE_ENTRY_SIZE;
+    int expected_index_len        = 3;
+    size_t expected_index_size    = VARIABLE_ENTRY_SIZE +
+                                (VARIABLE_ENTRY_SIZE / 4) +
+                    (VARIABLE_ENTRY_SIZE / 2);
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 4,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 4,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 2;
-	struct fo_flush_entry_check checks[2] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 2;
+    struct fo_flush_entry_check checks[2] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 2,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
     }
 
     if ( pass ) /* test #16 */
     {
-	/* Repeat previous test with the flush invalidate flag.
-	 *
-	 * Test the ability of the cache to handle the case in which
-	 * the flush function of an entry that is resident in cache
-	 * resizes and dirties two entries that are not in cache.
-	 *
-	 * At present, I am assured that this case will never occur, but
-	 * lets make sure we can handle it regardless.
-	 */
-        int test_num			= 16;
-	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 0;
-	size_t expected_index_size	= (size_t)0;
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Repeat previous test with the flush invalidate flag.
+    *
+    * Test the ability of the cache to handle the case in which
+    * the flush function of an entry that is resident in cache
+    * resizes and dirties two entries that are not in cache.
+    *
+    * At present, I am assured that this case will never occur, but
+    * lets make sure we can handle it regardless.
+    */
+        int test_num            = 16;
+    unsigned int flush_flags    = H5C__FLUSH_INVALIDATE_FLAG;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = 1 * VARIABLE_ENTRY_SIZE;
+    int expected_index_len        = 0;
+    size_t expected_index_size    = (size_t)0;
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 4,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 4,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           }
-	};
-	int check_size = 2;
-	struct fo_flush_entry_check checks[2] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  }
-	};
+    };
+    int check_size = 2;
+    struct fo_flush_entry_check checks[2] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 2,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
     }
 
     if ( pass ) /* test #17 & #18 */
     {
-	/* Test the ability of the cache to handle the case in which
-	 * the flush function of an entry that is resident in cache
-	 * resizes, dirties, and moves two entries that are not in cache.
-	 *
-	 * At present, I am assured that this case will never occur, but
-	 * lets make sure we can handle it regardless.
-	 */
-        int test_num			= 17; /* and 18 */
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 3;
-	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
-		                          (VARIABLE_ENTRY_SIZE / 4) +
-					  (VARIABLE_ENTRY_SIZE / 2);
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Test the ability of the cache to handle the case in which
+    * the flush function of an entry that is resident in cache
+    * resizes, dirties, and moves two entries that are not in cache.
+    *
+    * At present, I am assured that this case will never occur, but
+    * lets make sure we can handle it regardless.
+    */
+        int test_num            = 17; /* and 18 */
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = 1 * VARIABLE_ENTRY_SIZE;
+    int expected_index_len        = 3;
+    size_t expected_index_size    = VARIABLE_ENTRY_SIZE +
+                                (VARIABLE_ENTRY_SIZE / 4) +
+                    (VARIABLE_ENTRY_SIZE / 2);
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 6,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 6,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 2;
-	struct fo_flush_entry_check checks[2] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 2;
+    struct fo_flush_entry_check checks[2] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 2,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
 
-	/* this change forces the moves to move the target entries back to
-	 * their main address.  The first test moved them to their alternate
-	 * address.
-	 *
-	 * Note that these two tests are not the same, as in the first test,
-	 * the moved entries are moved forward in the slist.  In the second
-	 * they are moved backwards.
-	 */
-	if ( pass ) {
+    /* this change forces the moves to move the target entries back to
+    * their main address.  The first test moved them to their alternate
+    * address.
+    *
+    * Note that these two tests are not the same, as in the first test,
+    * the moved entries are moved forward in the slist.  In the second
+    * they are moved backwards.
+    */
+    if ( pass ) {
 
-	    test_num = 18;
-	    spec[0].flush_ops[2].flag = TRUE;
-	    spec[0].flush_ops[5].flag = TRUE;
-	    checks[0].at_main_addr = TRUE;
-	    checks[1].at_main_addr = TRUE;
+        test_num = 18;
+        spec[0].flush_ops[2].flag = TRUE;
+        spec[0].flush_ops[5].flag = TRUE;
+        checks[0].at_main_addr = TRUE;
+        checks[1].at_main_addr = TRUE;
 
             check_flush_cache__flush_op_test(file_ptr,
                                              test_num,
@@ -6681,134 +6727,134 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
                                              init_expected_index_size,
                                              expected_index_len,
                                              expected_index_size,
-					     check_size,
-					     checks);
-	}
+                        check_size,
+                        checks);
+    }
     }
 
     if ( pass ) /* test #19 & #20 */
     {
-	/* Repeat the above test with the flush invalidate flag on the
-	 * second test.
-	 *
-	 * Test the ability of the cache to handle the case in which
-	 * the flush function of an entry that is resident in cache
-	 * resizes, dirties, and moves two entries that are not in cache.
-	 *
-	 * At present, I am assured that this case will never occur, but
-	 * lets make sure we can handle it regardless.
-	 */
-        int test_num			= 19; /* and 20 */
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 1;
-	int init_expected_index_len	= 1;
-	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 3;
-	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
-		                          (VARIABLE_ENTRY_SIZE / 4) +
-					  (VARIABLE_ENTRY_SIZE / 2);
-	struct fo_flush_cache_test_spec spec[1] =
-	{
+    /* Repeat the above test with the flush invalidate flag on the
+    * second test.
+    *
+    * Test the ability of the cache to handle the case in which
+    * the flush function of an entry that is resident in cache
+    * resizes, dirties, and moves two entries that are not in cache.
+    *
+    * At present, I am assured that this case will never occur, but
+    * lets make sure we can handle it regardless.
+    */
+        int test_num            = 19; /* and 20 */
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 1;
+    int init_expected_index_len    = 1;
+    size_t init_expected_index_size    = 1 * VARIABLE_ENTRY_SIZE;
+    int expected_index_len        = 3;
+    size_t expected_index_size    = VARIABLE_ENTRY_SIZE +
+                                (VARIABLE_ENTRY_SIZE / 4) +
+                    (VARIABLE_ENTRY_SIZE / 2);
+    struct fo_flush_cache_test_spec spec[1] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 6,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 6,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 2;
-	struct fo_flush_entry_check checks[2] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 2;
+    struct fo_flush_entry_check checks[2] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 2,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
 
-	/* this change forces the moves to move the target entries back to
-	 * their main address.  The first test moved them to their alternate
-	 * address.
-	 *
-	 * Note that these two tests are not the same, as in the first test,
-	 * the moved entries are moved forward in the slist.  In the second
-	 * they are moved backwards.
-	 */
-	if ( pass ) {
+    /* this change forces the moves to move the target entries back to
+    * their main address.  The first test moved them to their alternate
+    * address.
+    *
+    * Note that these two tests are not the same, as in the first test,
+    * the moved entries are moved forward in the slist.  In the second
+    * they are moved backwards.
+    */
+    if ( pass ) {
 
-	    test_num = 20;
-	    flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
-	    expected_index_len = 0;
-	    expected_index_size	= (size_t)0;
+        test_num = 20;
+        flush_flags    = H5C__FLUSH_INVALIDATE_FLAG;
+        expected_index_len = 0;
+        expected_index_size    = (size_t)0;
             spec[0].expected_destroyed = TRUE;
-	    spec[0].flush_ops[2].flag = TRUE;
-	    spec[0].flush_ops[5].flag = TRUE;
-	    checks[0].at_main_addr = TRUE;
-	    checks[0].in_cache = FALSE;
-	    checks[0].expected_destroyed = TRUE;
-	    checks[1].at_main_addr = TRUE;
-	    checks[1].in_cache = FALSE;
-	    checks[1].expected_destroyed = TRUE;
+        spec[0].flush_ops[2].flag = TRUE;
+        spec[0].flush_ops[5].flag = TRUE;
+        checks[0].at_main_addr = TRUE;
+        checks[0].in_cache = FALSE;
+        checks[0].expected_destroyed = TRUE;
+        checks[1].at_main_addr = TRUE;
+        checks[1].in_cache = FALSE;
+        checks[1].expected_destroyed = TRUE;
 
             check_flush_cache__flush_op_test(file_ptr,
                                              test_num,
@@ -6819,785 +6865,785 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
                                              init_expected_index_size,
                                              expected_index_len,
                                              expected_index_size,
-					     check_size,
-					     checks);
-	}
+                        check_size,
+                        checks);
+    }
     }
 
     if ( pass ) /* test #21 */
     {
-	/* Now mix things up a bit.
-	 *
-	 * Load several entries, two of which have flush functions that
-	 * resize, dirty, and move two entries that are not in the
-	 * cache.  Mark only one of these entries, and then flush the
-	 * cache with the flush marked entries flag.
-	 *
-	 * This is the only test in which we test the
-	 * H5C__FLUSH_MARKED_ENTRIES_FLAG.  The hope is that since
-	 * we test the two features extensively by themselves, so
-	 * it should be sufficient to verify that they play together
-	 * as expected.
-	 */
-        int test_num			= 21;
-	unsigned int flush_flags	= H5C__FLUSH_MARKED_ENTRIES_FLAG;
-	int spec_size			= 4;
-	int init_expected_index_len	= 4;
-	size_t init_expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) + (2 * PICO_ENTRY_SIZE);
-	int expected_index_len		= 6;
-	size_t expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) +
-		                          (VARIABLE_ENTRY_SIZE / 4) +
-					  (VARIABLE_ENTRY_SIZE / 2) +
-					  (2 * PICO_ENTRY_SIZE);
-	struct fo_flush_cache_test_spec spec[4] =
-	{
+    /* Now mix things up a bit.
+    *
+    * Load several entries, two of which have flush functions that
+    * resize, dirty, and move two entries that are not in the
+    * cache.  Mark only one of these entries, and then flush the
+    * cache with the flush marked entries flag.
+    *
+    * This is the only test in which we test the
+    * H5C__FLUSH_MARKED_ENTRIES_FLAG.  The hope is that since
+    * we test the two features extensively by themselves, so
+    * it should be sufficient to verify that they play together
+    * as expected.
+    */
+        int test_num            = 21;
+    unsigned int flush_flags    = H5C__FLUSH_MARKED_ENTRIES_FLAG;
+    int spec_size            = 4;
+    int init_expected_index_len    = 4;
+    size_t init_expected_index_size    = (2 * VARIABLE_ENTRY_SIZE) + (2 * PICO_ENTRY_SIZE);
+    int expected_index_len        = 6;
+    size_t expected_index_size    = (2 * VARIABLE_ENTRY_SIZE) +
+                                (VARIABLE_ENTRY_SIZE / 4) +
+                    (VARIABLE_ENTRY_SIZE / 2) +
+                    (2 * PICO_ENTRY_SIZE);
+    struct fo_flush_cache_test_spec spec[4] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 6,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 6,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
           {
             /* entry_num          = */ 1,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 11,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 6,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 11,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 6,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    10,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    10,    FALSE,    0 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    10,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    12,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    12,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    12,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
           },
           {
             /* entry_num          = */ 2,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
           {
             /* entry_num          = */ 3,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 4;
-	struct fo_flush_entry_check checks[4] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ TRUE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ TRUE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 2,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 10,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 3,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 12,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 4;
+    struct fo_flush_entry_check checks[4] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ TRUE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 2,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ TRUE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 2,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 10,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 3,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 12,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
-	reset_entries();
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
+    reset_entries();
     }
 
     if ( pass ) /* test #22 */
     {
-	/* Mix things up some more.
-	 *
-	 * Load lots of entries, some of which have flush functions that
-	 * resize, dirty, and move two entries that are not in the
-	 * cache.
-	 *
-	 * Also load entries that have flush ops on entries that are in
-	 * cache.
-	 */
-        int test_num			= 22;
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 6;
-	int init_expected_index_len	= 6;
-	size_t init_expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
-	int expected_index_len		= 10;
-	size_t expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) +
-		                          (2 * (VARIABLE_ENTRY_SIZE / 4)) +
-					  (2 * (VARIABLE_ENTRY_SIZE / 2)) +
-					  (4 * PICO_ENTRY_SIZE);
-	struct fo_flush_cache_test_spec spec[6] =
-	{
+    /* Mix things up some more.
+    *
+    * Load lots of entries, some of which have flush functions that
+    * resize, dirty, and move two entries that are not in the
+    * cache.
+    *
+    * Also load entries that have flush ops on entries that are in
+    * cache.
+    */
+        int test_num            = 22;
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 6;
+    int init_expected_index_len    = 6;
+    size_t init_expected_index_size    = (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
+    int expected_index_len        = 10;
+    size_t expected_index_size    = (2 * VARIABLE_ENTRY_SIZE) +
+                                (2 * (VARIABLE_ENTRY_SIZE / 4)) +
+                    (2 * (VARIABLE_ENTRY_SIZE / 2)) +
+                    (4 * PICO_ENTRY_SIZE);
+    struct fo_flush_cache_test_spec spec[6] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 6,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 6,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
           {
             /* entry_num          = */ 1,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 11,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 6,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 11,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 6,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    10,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    10,    FALSE,    0 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    10,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    12,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    12,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    12,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
           {
             /* entry_num          = */ 2,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
           {
             /* entry_num          = */ 3,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
           },
           {
             /* entry_num          = */ 4,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 10,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 10,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    PICO_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
           {
             /* entry_num          = */ 5,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 20,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 20,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    PICO_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 4;
-	struct fo_flush_entry_check checks[4] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 2,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 10,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 3,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 12,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 4;
+    struct fo_flush_entry_check checks[4] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 2,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 2,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 10,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 3,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 12,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
-	reset_entries();
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
+    reset_entries();
     }
 
     if ( pass ) /* test #23 */
     {
-	/* Repeat test #23 with the flush invalidate flag set.
-	 *
-	 * Mix things up some more.
-	 *
-	 * Load lots of entries, some of which have flush functions that
-	 * resize, dirty, and move two entries that are not in the
-	 * cache.
-	 *
-	 * Also load entries that have flush ops on entries that are in
-	 * cache.
-	 */
-        int test_num			= 23;
-	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
-	int spec_size			= 6;
-	int init_expected_index_len	= 6;
-	size_t init_expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
-	int expected_index_len		= 0;
-	size_t expected_index_size	= 0;
-	struct fo_flush_cache_test_spec spec[6] =
-	{
+    /* Repeat test #23 with the flush invalidate flag set.
+    *
+    * Mix things up some more.
+    *
+    * Load lots of entries, some of which have flush functions that
+    * resize, dirty, and move two entries that are not in the
+    * cache.
+    *
+    * Also load entries that have flush ops on entries that are in
+    * cache.
+    */
+        int test_num            = 23;
+    unsigned int flush_flags    = H5C__FLUSH_INVALIDATE_FLAG;
+    int spec_size            = 6;
+    int init_expected_index_len    = 6;
+    size_t init_expected_index_size    = (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
+    int expected_index_len        = 0;
+    size_t expected_index_size    = 0;
+    struct fo_flush_cache_test_spec spec[6] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 6,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 6,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    2,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    2,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
           {
             /* entry_num          = */ 1,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 11,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 6,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 11,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 6,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    10,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    10,    FALSE,    0 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    10,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    12,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    12,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    12,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
           {
             /* entry_num          = */ 2,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 0,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
           {
             /* entry_num          = */ 3,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 1,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 1,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
           {
             /* entry_num          = */ 4,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 10,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 10,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    PICO_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
           {
             /* entry_num          = */ 5,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 20,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 20,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    PICO_ENTRY_TYPE,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           }
-	};
-	int check_size = 4;
-	struct fo_flush_entry_check checks[4] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  },
-	  {
-	    /* entry_num          = */ 2,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 10,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  },
-	  {
-	    /* entry_num          = */ 3,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 12,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  }
-	};
+    };
+    int check_size = 4;
+    struct fo_flush_entry_check checks[4] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 2,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    },
+    {
+        /* entry_num          = */ 2,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 10,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    },
+    {
+        /* entry_num          = */ 3,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 12,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
-	reset_entries();
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
+    reset_entries();
     }
 
     /* So much for tests involving only flush operations.
@@ -7606,1558 +7652,1558 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
      */
     if ( pass ) /* test #24 */
     {
-	/* Pico entries 50 and 150 pin pico entry 100, and also dirty
-	 * pico entry 100 on flush.
-	 */
-        int test_num			= 24;
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 3;
-	int init_expected_index_len	= 3;
-	size_t init_expected_index_size	= 3 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 3;
-	size_t expected_index_size	= 3 * PICO_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[3] =
-	{
+    /* Pico entries 50 and 150 pin pico entry 100, and also dirty
+    * pico entry 100 on flush.
+    */
+        int test_num            = 24;
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 3;
+    int init_expected_index_len    = 3;
+    size_t init_expected_index_size    = 3 * PICO_ENTRY_SIZE;
+    int expected_index_len        = 3;
+    size_t expected_index_size    = 3 * PICO_ENTRY_SIZE;
+    struct fo_flush_cache_test_spec spec[3] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 100,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 100,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 1,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 50,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 1,
-	    /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 50,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 1,
+        /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    PICO_ENTRY_TYPE,    100,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 2,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 150,
-	    /* insert_flag        = */ TRUE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 1,
-	    /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 150,
+        /* insert_flag        = */ TRUE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 1,
+        /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    PICO_ENTRY_TYPE,    100,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ (size_t)0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ (size_t)0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
     }
 
     if ( pass ) /* test #25 */
     {
-	/* Repeat the previous test with the flush invalidate flag.
-	 *
-	 * Pico entries 50 and 150 pin pico entry 100, and also dirty
-	 * pico entry 100 on flush.
-	 */
-        int test_num			= 25;
-	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
-	int spec_size			= 3;
-	int init_expected_index_len	= 3;
-	size_t init_expected_index_size	= 3 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 0;
-	size_t expected_index_size	= (size_t)0;
-	struct fo_flush_cache_test_spec spec[3] =
-	{
+    /* Repeat the previous test with the flush invalidate flag.
+    *
+    * Pico entries 50 and 150 pin pico entry 100, and also dirty
+    * pico entry 100 on flush.
+    */
+        int test_num            = 25;
+    unsigned int flush_flags    = H5C__FLUSH_INVALIDATE_FLAG;
+    int spec_size            = 3;
+    int init_expected_index_len    = 3;
+    size_t init_expected_index_size    = 3 * PICO_ENTRY_SIZE;
+    int expected_index_len        = 0;
+    size_t expected_index_size    = (size_t)0;
+    struct fo_flush_cache_test_spec spec[3] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 100,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 100,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 1,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 50,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 1,
-	    /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 50,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 1,
+        /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    PICO_ENTRY_TYPE,    100,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 2,
             /* entry_type         = */ PICO_ENTRY_TYPE,
-	    /* entry_index        = */ 150,
-	    /* insert_flag        = */ TRUE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 1,
-	    /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 1,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 150,
+        /* insert_flag        = */ TRUE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 1,
+        /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 1,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    PICO_ENTRY_TYPE,    100,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ (size_t)0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ (size_t)0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
     }
 
     if ( pass ) /* test #26 */
     {
-	/* This one is complex.
-	 *
-	 * In the following overvies table, VET stands for
-	 * VARIABLE_ENTRY_TYPE.
-	 *
-	 * In trying to follow what happens when we flush the
-	 * set of entries constructed below, recall that each
-	 * flush operation is executed the first time the
-	 * entry is flushed, and then not executed again.
-	 * This may be a weakness in the tests, but that
-	 * is the way it is for now.
-	 *
-	 * After thinking about it for a while, I'm not sure that
-	 * the interaction between pins and flush operations needs
-	 * all that much testing, as the two are essentially
-	 * orthoginal.  Thus this is a bit of a smoke check to
-	 * verify that we get the expected results.
-	 *
-	 * (VET, 100)	initially not resident in cache
-	 *
-	 * (VET, 200)	initially clean and resident in cache
-	 *
-	 * (VET, 300)	initially not resident in cache
-	 *
-	 * (VET, 2100)	initially clean and resident in cache
-	 *
-	 * (VET, 2200)	initially not resident in cache
-	 *
-	 * (VET, 2300)	initially clean and resident in cache
-	 *
-	 * (VET, 1000)	initially clean, and in cache
-	 * 		dirties (VET, 100)
-	 * 		resizes (VET, 200)
-	 * 		dirty	(VET, 300) -- dirty first to bring into cache.
-	 * 		moves (VET, 300)
-	 *
-	 * (VET, 2000)	initially clean, and in cache
-	 * 		dirties (VET, 2100)
-	 * 		resizes (VET, 2200)
-	 * 		moves (VET, 2300)
-	 *
-	 * (VET, 350)	initially clean, and in cache
-	 * 		pins	(VET, 1000)
-	 * 		dirties (VET, 1000)
-	 * 		resizes (VET, 350)
-	 * 		pins	(VET, 2000)
-	 * 		dirties (VET, 2000)
-	 *
-	 * (VET, 450)	initially dirty, and in cache
-	 * 		pins	(VET, 1000)
-	 * 		dirties	(VET, 1000)
-	 * 		moves (VET, 450)
-	 * 		pins	(VET, 2000)
-	 * 		dirties (VET, 2000)
-	 *
-	 * (VET, 650)	initially clean, and in cache
-	 * 		pins	(VET, 1000)
-	 * 		dirties (VET, 1000)
-	 * 		resizes (VET, 650)
-	 * 		pins	(VET, 2000)
-	 * 		dirties (VET, 2000)
-	 *
-	 * (VET, 750)	initially dirty, and in cache
-	 * 		pins	(VET, 1000)
-	 * 		dirties (VET, 1000)
-	 * 		resizes (VET, 750)
-	 * 		pins	(VET, 2000)
-	 * 		dirties	(VET, 2000)
-	 *
-	 * (VET, 500)	initially dirty, and in cache
-	 * 		dirties	(VET, 350)
-	 * 		dirties	(VET, 450)
-	 * 		dirties	(VET, 650)
-	 * 		dirties (VET, 750)
-	 */
-        int test_num			= 26;
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 10;
-	int init_expected_index_len	= 10;
-	size_t init_expected_index_size	= 10 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 13;
-	size_t expected_index_size	= 9 * VARIABLE_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[10] =
-	{
+    /* This one is complex.
+    *
+    * In the following overvies table, VET stands for
+    * VARIABLE_ENTRY_TYPE.
+    *
+    * In trying to follow what happens when we flush the
+    * set of entries constructed below, recall that each
+    * flush operation is executed the first time the
+    * entry is flushed, and then not executed again.
+    * This may be a weakness in the tests, but that
+    * is the way it is for now.
+    *
+    * After thinking about it for a while, I'm not sure that
+    * the interaction between pins and flush operations needs
+    * all that much testing, as the two are essentially
+    * orthoginal.  Thus this is a bit of a smoke check to
+    * verify that we get the expected results.
+    *
+    * (VET, 100)    initially not resident in cache
+    *
+    * (VET, 200)    initially clean and resident in cache
+    *
+    * (VET, 300)    initially not resident in cache
+    *
+    * (VET, 2100)    initially clean and resident in cache
+    *
+    * (VET, 2200)    initially not resident in cache
+    *
+    * (VET, 2300)    initially clean and resident in cache
+    *
+    * (VET, 1000)    initially clean, and in cache
+    *         dirties (VET, 100)
+    *         resizes (VET, 200)
+    *         dirty    (VET, 300) -- dirty first to bring into cache.
+    *         moves (VET, 300)
+    *
+    * (VET, 2000)    initially clean, and in cache
+    *         dirties (VET, 2100)
+    *         resizes (VET, 2200)
+    *         moves (VET, 2300)
+    *
+    * (VET, 350)    initially clean, and in cache
+    *         pins    (VET, 1000)
+    *         dirties (VET, 1000)
+    *         resizes (VET, 350)
+    *         pins    (VET, 2000)
+    *         dirties (VET, 2000)
+    *
+    * (VET, 450)    initially dirty, and in cache
+    *         pins    (VET, 1000)
+    *         dirties    (VET, 1000)
+    *         moves (VET, 450)
+    *         pins    (VET, 2000)
+    *         dirties (VET, 2000)
+    *
+    * (VET, 650)    initially clean, and in cache
+    *         pins    (VET, 1000)
+    *         dirties (VET, 1000)
+    *         resizes (VET, 650)
+    *         pins    (VET, 2000)
+    *         dirties (VET, 2000)
+    *
+    * (VET, 750)    initially dirty, and in cache
+    *         pins    (VET, 1000)
+    *         dirties (VET, 1000)
+    *         resizes (VET, 750)
+    *         pins    (VET, 2000)
+    *         dirties    (VET, 2000)
+    *
+    * (VET, 500)    initially dirty, and in cache
+    *         dirties    (VET, 350)
+    *         dirties    (VET, 450)
+    *         dirties    (VET, 650)
+    *         dirties (VET, 750)
+    */
+        int test_num            = 26;
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 10;
+    int init_expected_index_len    = 10;
+    size_t init_expected_index_size    = 10 * VARIABLE_ENTRY_SIZE;
+    int expected_index_len        = 13;
+    size_t expected_index_size    = 9 * VARIABLE_ENTRY_SIZE;
+    struct fo_flush_cache_test_spec spec[10] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 200,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 200,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 1,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2100,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 2100,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 2,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2300,
-	    /* insert_flag        = */ TRUE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 2300,
+        /* insert_flag        = */ TRUE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 3,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 1000,
-	    /* insert_flag        = */ TRUE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 4,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 1000,
+        /* insert_flag        = */ TRUE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 4,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    100,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    200,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    300,    FALSE,    0 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    300,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 4,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2000,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 2000,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2100,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    2200,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    2300,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 5,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 350,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 2,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 350,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 2,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    1000,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2000,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    350,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 6,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 450,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 2,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 450,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 2,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    1000,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2000,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    450,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 7,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 650,
-	    /* insert_flag        = */ TRUE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 2,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 650,
+        /* insert_flag        = */ TRUE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 2,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    1000,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2000,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    650,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 8,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 750,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 2,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 750,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 2,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    1000,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2000,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    750,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 9,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 500,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 4,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 500,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 4,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    350,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    450,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    650,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    750,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 3;
-	struct fo_flush_entry_check checks[3] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 100,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 300,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  },
-	  {
-	    /* entry_num          = */ 2,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2200,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ TRUE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
-	  }
+    };
+    int check_size = 3;
+    struct fo_flush_entry_check checks[3] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 100,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 300,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    },
+    {
+        /* entry_num          = */ 2,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 2200,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ TRUE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
+    }
 
-	};
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
 
-	reset_entries();
+    reset_entries();
     }
 
     if ( pass ) /* test #27 */
     {
-	/* Repeat test #26 with the flush invalidate flag.
-	 *
-	 * In the following overview table, VET stands for
-	 * VARIABLE_ENTRY_TYPE.
-	 *
-	 * In trying to follow what happens when we flush the
-	 * set of entries constructed below, recall that each
-	 * flush operation is executed the first time the
-	 * entry is flushed, and then not executed again.
-	 * This may be a weakness in the tests, but that
-	 * is the way it is for now.
-	 *
-	 * After thinking about it for a while, I'm not sure that
-	 * the interaction between pins and flush operations needs
-	 * all that much testing, as the two are essentially
-	 * orthoginal.  The big thing is to verify that flushes of
-	 * pinned entries with flush ops result in the expected
-	 * updates of the cache.
-	 *
-	 * Thus this is a bit of a smoke check to * verify that we
-	 * get the expected results.
-	 *
-	 * (VET, 100)	initially not resident in cache
-	 *
-	 * (VET, 200)	initially clean and resident in cache
-	 *
-	 * (VET, 300)	initially not resident in cache
-	 *
-	 * (VET, 2100)	initially clean and resident in cache
-	 *
-	 * (VET, 2200)	initially not resident in cache
-	 *
-	 * (VET, 2300)	initially clean and resident in cache
-	 *
-	 * (VET, 1000)	initially clean, and in cache
-	 * 		dirties (VET, 100)
-	 * 		resizes (VET, 200)
-	 * 		dirty	(VET, 300) -- dirty first to bring into cache.
-	 * 		moves (VET, 300)
-	 *
-	 * (VET, 2000)	initially clean, and in cache
-	 * 		dirties (VET, 2100)
-	 * 		resizes (VET, 2200)
-	 * 		moves (VET, 2300)
-	 *
-	 * (VET, 350)	initially clean, and in cache
-	 * 		pins	(VET, 1000)
-	 * 		dirties (VET, 1000)
-	 * 		resizes (VET, 350)
-	 * 		pins	(VET, 2000)
-	 * 		dirties (VET, 2000)
-	 *
-	 * (VET, 450)	initially dirty, and in cache
-	 * 		pins	(VET, 1000)
-	 * 		dirties	(VET, 1000)
-	 * 		moves (VET, 450)
-	 * 		pins	(VET, 2000)
-	 * 		dirties (VET, 2000)
-	 *
-	 * (VET, 650)	initially clean, and in cache
-	 * 		pins	(VET, 1000)
-	 * 		dirties (VET, 1000)
-	 * 		resizes (VET, 650)
-	 * 		pins	(VET, 2000)
-	 * 		dirties (VET, 2000)
-	 *
-	 * (VET, 750)	initially dirty, and in cache
-	 * 		pins	(VET, 1000)
-	 * 		dirties (VET, 1000)
-	 * 		resizes (VET, 750)
-	 * 		pins	(VET, 2000)
-	 * 		dirties	(VET, 2000)
-	 *
-	 * (VET, 500)	initially dirty, and in cache
-	 * 		dirties	(VET, 350)
-	 * 		dirties	(VET, 450)
-	 * 		dirties	(VET, 650)
-	 * 		dirties (VET, 750)
-	 */
-        int test_num			= 27;
-	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
-	int spec_size			= 10;
-	int init_expected_index_len	= 10;
-	size_t init_expected_index_size	= 10 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 0;
-	size_t expected_index_size	= (size_t)0;
-	struct fo_flush_cache_test_spec spec[10] =
-	{
+    /* Repeat test #26 with the flush invalidate flag.
+    *
+    * In the following overview table, VET stands for
+    * VARIABLE_ENTRY_TYPE.
+    *
+    * In trying to follow what happens when we flush the
+    * set of entries constructed below, recall that each
+    * flush operation is executed the first time the
+    * entry is flushed, and then not executed again.
+    * This may be a weakness in the tests, but that
+    * is the way it is for now.
+    *
+    * After thinking about it for a while, I'm not sure that
+    * the interaction between pins and flush operations needs
+    * all that much testing, as the two are essentially
+    * orthoginal.  The big thing is to verify that flushes of
+    * pinned entries with flush ops result in the expected
+    * updates of the cache.
+    *
+    * Thus this is a bit of a smoke check to * verify that we
+    * get the expected results.
+    *
+    * (VET, 100)    initially not resident in cache
+    *
+    * (VET, 200)    initially clean and resident in cache
+    *
+    * (VET, 300)    initially not resident in cache
+    *
+    * (VET, 2100)    initially clean and resident in cache
+    *
+    * (VET, 2200)    initially not resident in cache
+    *
+    * (VET, 2300)    initially clean and resident in cache
+    *
+    * (VET, 1000)    initially clean, and in cache
+    *         dirties (VET, 100)
+    *         resizes (VET, 200)
+    *         dirty    (VET, 300) -- dirty first to bring into cache.
+    *         moves (VET, 300)
+    *
+    * (VET, 2000)    initially clean, and in cache
+    *         dirties (VET, 2100)
+    *         resizes (VET, 2200)
+    *         moves (VET, 2300)
+    *
+    * (VET, 350)    initially clean, and in cache
+    *         pins    (VET, 1000)
+    *         dirties (VET, 1000)
+    *         resizes (VET, 350)
+    *         pins    (VET, 2000)
+    *         dirties (VET, 2000)
+    *
+    * (VET, 450)    initially dirty, and in cache
+    *         pins    (VET, 1000)
+    *         dirties    (VET, 1000)
+    *         moves (VET, 450)
+    *         pins    (VET, 2000)
+    *         dirties (VET, 2000)
+    *
+    * (VET, 650)    initially clean, and in cache
+    *         pins    (VET, 1000)
+    *         dirties (VET, 1000)
+    *         resizes (VET, 650)
+    *         pins    (VET, 2000)
+    *         dirties (VET, 2000)
+    *
+    * (VET, 750)    initially dirty, and in cache
+    *         pins    (VET, 1000)
+    *         dirties (VET, 1000)
+    *         resizes (VET, 750)
+    *         pins    (VET, 2000)
+    *         dirties    (VET, 2000)
+    *
+    * (VET, 500)    initially dirty, and in cache
+    *         dirties    (VET, 350)
+    *         dirties    (VET, 450)
+    *         dirties    (VET, 650)
+    *         dirties (VET, 750)
+    */
+        int test_num            = 27;
+    unsigned int flush_flags    = H5C__FLUSH_INVALIDATE_FLAG;
+    int spec_size            = 10;
+    int init_expected_index_len    = 10;
+    size_t init_expected_index_size    = 10 * VARIABLE_ENTRY_SIZE;
+    int expected_index_len        = 0;
+    size_t expected_index_size    = (size_t)0;
+    struct fo_flush_cache_test_spec spec[10] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 200,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 200,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 1,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2100,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 2100,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 2,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2300,
-	    /* insert_flag        = */ TRUE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 2300,
+        /* insert_flag        = */ TRUE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 3,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 1000,
-	    /* insert_flag        = */ TRUE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 4,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 1000,
+        /* insert_flag        = */ TRUE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 4,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    100,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    200,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    300,    FALSE,    0 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    300,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 4,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2000,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 2000,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2100,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    2200,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    2300,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 5,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 350,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 2,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 350,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 2,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    1000,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2000,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    350,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 6,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 450,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 2,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 450,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 2,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    1000,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2000,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    450,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 7,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 650,
-	    /* insert_flag        = */ TRUE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 2,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 650,
+        /* insert_flag        = */ TRUE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 2,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    1000,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2000,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    650,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 8,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 750,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 2,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 750,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 2,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    1000,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    2000,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    750,    FALSE,    VARIABLE_ENTRY_SIZE / 4 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 9,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 500,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 4,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 500,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 4,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    350,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    450,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    650,    FALSE,    0 },
+        { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    750,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           }
-	};
-	int check_size = 3;
-	struct fo_flush_entry_check checks[3] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 100,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  },
-	  {
-	    /* entry_num          = */ 1,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 300,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  },
-	  {
-	    /* entry_num          = */ 2,
-	    /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 2200,
-	    /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ TRUE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
-	  }
+    };
+    int check_size = 3;
+    struct fo_flush_entry_check checks[3] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 100,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    },
+    {
+        /* entry_num          = */ 1,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 300,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    },
+    {
+        /* entry_num          = */ 2,
+        /* entry_type         = */ VARIABLE_ENTRY_TYPE,
+        /* entry_index        = */ 2200,
+        /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ TRUE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
+    }
 
-	};
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
 
-	reset_entries();
+    reset_entries();
     }
 
     if ( pass ) /* test #28 */
     {
-	/* Test the expected fheap case, in which an entry dirties
-	 * and resizes itself, and dirties an entry which it has
-	 * pinned.
-	 */
-        int test_num			= 28;
-	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
-	int spec_size			= 5;
-	int init_expected_index_len	= 5;
-	size_t init_expected_index_size	= 3 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 5;
-	size_t expected_index_size	= 4 * VARIABLE_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[5] =
-	{
+    /* Test the expected fheap case, in which an entry dirties
+    * and resizes itself, and dirties an entry which it has
+    * pinned.
+    */
+        int test_num            = 28;
+    unsigned int flush_flags    = H5C__NO_FLAGS_SET;
+    int spec_size            = 5;
+    int init_expected_index_len    = 5;
+    size_t init_expected_index_size    = 3 * VARIABLE_ENTRY_SIZE;
+    int expected_index_len        = 5;
+    size_t expected_index_size    = 4 * VARIABLE_ENTRY_SIZE;
+    struct fo_flush_cache_test_spec spec[5] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 100,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 100,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 1,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 200,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ TRUE,
-	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* num_pins           = */ 1,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	200,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 200,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ TRUE,
+        /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
+        /* num_pins           = */ 1,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    100,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    200,    FALSE,    VARIABLE_ENTRY_SIZE },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    200,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 2,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 300,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ TRUE,
-	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* num_pins           = */ 1,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {400, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	400,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 300,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ TRUE,
+        /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
+        /* num_pins           = */ 1,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {400, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    400,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    300,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    300,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 3,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 400,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 400,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           },
-	  {
+    {
             /* entry_num          = */ 4,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 500,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ TRUE,
-	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* num_pins           = */ 1,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	500,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ FALSE
+        /* entry_index        = */ 500,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ TRUE,
+        /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
+        /* num_pins           = */ 1,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    100,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    500,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    500,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ FALSE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ 0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ 0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
 
-	reset_entries();
+    reset_entries();
     }
 
     if ( pass ) /* test #29 */
     {
-	/* Repeat test #28 with the flush invalidate flag.
-	 *
-	 * Test the expected fheap case, in which an entry dirties
-	 * and resizes itself, and dirties an entry which it has
-	 * pinned.
-	 */
-        int test_num			= 29;
-	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
-	int spec_size			= 5;
-	int init_expected_index_len	= 5;
-	size_t init_expected_index_size	= 3 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 0;
-	size_t expected_index_size	= 0;
-	struct fo_flush_cache_test_spec spec[5] =
-	{
+    /* Repeat test #28 with the flush invalidate flag.
+    *
+    * Test the expected fheap case, in which an entry dirties
+    * and resizes itself, and dirties an entry which it has
+    * pinned.
+    */
+        int test_num            = 29;
+    unsigned int flush_flags    = H5C__FLUSH_INVALIDATE_FLAG;
+    int spec_size            = 5;
+    int init_expected_index_len    = 5;
+    size_t init_expected_index_size    = 3 * VARIABLE_ENTRY_SIZE;
+    int expected_index_len        = 0;
+    size_t expected_index_size    = 0;
+    struct fo_flush_cache_test_spec spec[5] =
+    {
           {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 100,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 100,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 1,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 200,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ TRUE,
-	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
-	    /* num_pins           = */ 1,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	200,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 200,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ TRUE,
+        /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
+        /* num_pins           = */ 1,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    100,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    200,    FALSE,    VARIABLE_ENTRY_SIZE },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    200,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 2,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 300,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ TRUE,
-	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* num_pins           = */ 1,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {400, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	400,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 300,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ TRUE,
+        /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
+        /* num_pins           = */ 1,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {400, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    400,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    300,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    300,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 3,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 400,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__NO_FLAGS_SET,
-	    /* resize_flag        = */ FALSE,
-	    /* new_size           = */ 0,
-	    /* num_pins           = */ 0,
-	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 0,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 400,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__NO_FLAGS_SET,
+        /* resize_flag        = */ FALSE,
+        /* new_size           = */ 0,
+        /* num_pins           = */ 0,
+        /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 0,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           },
-	  {
+    {
             /* entry_num          = */ 4,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-	    /* entry_index        = */ 500,
-	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG,
-	    /* resize_flag        = */ TRUE,
-	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
-	    /* num_pins           = */ 1,
-	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
-	    /* num_flush_ops      = */ 3,
-	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	500,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
-	    /* expected_loaded    = */ TRUE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ TRUE,
-	    /* expected_destroyed = */ TRUE
+        /* entry_index        = */ 500,
+        /* insert_flag        = */ FALSE,
+        /* flags          = */ H5C__DIRTIED_FLAG,
+        /* resize_flag        = */ TRUE,
+        /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
+        /* num_pins           = */ 1,
+        /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
+        /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
+        /* num_flush_ops      = */ 3,
+        /* flush_ops          = */
+        /*    op_code:        type:    idx:    flag:    size: */
+        { { FLUSH_OP__DIRTY,    VARIABLE_ENTRY_TYPE,    100,    FALSE,    0 },
+        { FLUSH_OP__RESIZE,    VARIABLE_ENTRY_TYPE,    500,    FALSE,    VARIABLE_ENTRY_SIZE / 2 },
+        { FLUSH_OP__MOVE,        VARIABLE_ENTRY_TYPE,    500,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 },
+        { FLUSH_OP__NO_OP,    0,    0,    FALSE,    0 } },
+        /* expected_loaded    = */ TRUE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ TRUE,
+        /* expected_destroyed = */ TRUE
           }
-	};
-	int check_size = 0;
-	struct fo_flush_entry_check checks[1] =
-	{
-	  {
-	    /* entry_num          = */ 0,
-	    /* entry_type         = */ 0,
-	    /* entry_index        = */ 0,
-	    /* expected_size      = */ 0,
-	    /* in_cache           = */ FALSE,
-	    /* at_main_addr       = */ FALSE,
-	    /* is_dirty	          = */ FALSE,
-	    /* is_protected       = */ FALSE,
-	    /* is_pinned          = */ FALSE,
-	    /* expected_loaded    = */ FALSE,
-	    /* expected_cleared   = */ FALSE,
-	    /* expected_flushed   = */ FALSE,
-	    /* expected_destroyed = */ FALSE
-	  }
-	};
+    };
+    int check_size = 0;
+    struct fo_flush_entry_check checks[1] =
+    {
+    {
+        /* entry_num          = */ 0,
+        /* entry_type         = */ 0,
+        /* entry_index        = */ 0,
+        /* expected_size      = */ 0,
+        /* in_cache           = */ FALSE,
+        /* at_main_addr       = */ FALSE,
+        /* is_dirty              = */ FALSE,
+        /* is_protected       = */ FALSE,
+        /* is_pinned          = */ FALSE,
+        /* expected_loaded    = */ FALSE,
+        /* expected_cleared   = */ FALSE,
+        /* expected_flushed   = */ FALSE,
+        /* expected_destroyed = */ FALSE
+    }
+    };
 
         check_flush_cache__flush_op_test(file_ptr,
                                          test_num,
                                          flush_flags,
                                          spec_size,
                                          spec,
-				         init_expected_index_len,
-				         init_expected_index_size,
-				         expected_index_len,
-				         expected_index_size,
-					 check_size,
-					 checks);
+                        init_expected_index_len,
+                        init_expected_index_size,
+                        expected_index_len,
+                        expected_index_size,
+                    check_size,
+                    checks);
 
-	reset_entries();
+    reset_entries();
     }
 
     /* finally finish up with the flush ops eviction test */
@@ -9167,16 +9213,16 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 
 } /* check_flush_cache__flush_ops() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache__flush_op_test()
+ * Function:    check_flush_cache__flush_op_test()
  *
- * Purpose:	Run a flush op flush cache test.  Of the nature of
- * 		flush operations, this is a multi-entry test.
+ * Purpose:    Run a flush op flush cache test.  Of the nature of
+ *         flush operations, this is a multi-entry test.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              9/3/06
  *
  * Modifications:
@@ -9190,19 +9236,19 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
                                  unsigned int flush_flags,
                                  int spec_size,
                                  struct fo_flush_cache_test_spec spec[],
-				 int init_expected_index_len,
-				 size_t init_expected_index_size,
-				 int expected_index_len,
-				 size_t expected_index_size,
-				 int check_size,
-				 struct fo_flush_entry_check check[])
+                int init_expected_index_len,
+                size_t init_expected_index_size,
+                int expected_index_len,
+                size_t expected_index_size,
+                int check_size,
+                struct fo_flush_entry_check check[])
 {
     const char *   fcn_name = "check_flush_cache__flush_op_test";
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char    msg[128];
-    hbool_t	   show_progress = FALSE;
-    hbool_t	   verbose = FALSE;
-    herr_t	   result;
+    hbool_t       show_progress = FALSE;
+    hbool_t       verbose = FALSE;
+    herr_t       result;
     int            i;
     int            j;
     test_entry_t * base_addr;
@@ -9210,13 +9256,13 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
 #if 0 /* This is useful debugging code -- lets keep it around. */
     HDfprintf(stdout, "check_flush_cache__flush_op_test: test %d\n",
-	      test_num);
+        test_num);
 #endif
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(1).\n",
-	          fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(1).\n",
+            fcn_name, test_num, (int)pass);
     }
 
     if ( cache_ptr == NULL ) {
@@ -9248,8 +9294,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(2).\n",
-	          fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(2).\n",
+            fcn_name, test_num, (int)pass);
     }
 
     i = 0;
@@ -9260,10 +9306,10 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
              ( spec[i].entry_type >= NUMBER_OF_ENTRY_TYPES ) ||
              ( spec[i].entry_index < 0 ) ||
              ( spec[i].entry_index > max_indices[spec[i].entry_type] ) ||
-	     ( spec[i].num_pins < 0 ) ||
-	     ( spec[i].num_pins > MAX_PINS ) ||
-	     ( spec[i].num_flush_ops < 0 ) ||
-	     ( spec[i].num_flush_ops > MAX_FLUSH_OPS ) ) {
+        ( spec[i].num_pins < 0 ) ||
+        ( spec[i].num_pins > MAX_PINS ) ||
+        ( spec[i].num_flush_ops < 0 ) ||
+        ( spec[i].num_flush_ops > MAX_FLUSH_OPS ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
@@ -9276,8 +9322,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(3).\n",
-	          fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(3).\n",
+            fcn_name, test_num, (int)pass);
     }
 
     i = 0;
@@ -9289,24 +9335,24 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
              ( check[i].entry_index < 0 ) ||
              ( check[i].entry_index > max_indices[check[i].entry_type] ) ||
              ( check[i].expected_size <= (size_t)0 ) ||
-	     ( ( check[i].in_cache != TRUE ) &&
-	       ( check[i].in_cache != FALSE ) ) ||
-	     ( ( check[i].at_main_addr != TRUE ) &&
-	       ( check[i].at_main_addr != FALSE ) ) ||
-	     ( ( check[i].is_dirty != TRUE ) &&
-	       ( check[i].is_dirty != FALSE ) ) ||
-	     ( ( check[i].is_protected != TRUE ) &&
-	       ( check[i].is_protected != FALSE ) ) ||
-	     ( ( check[i].is_pinned != TRUE ) &&
-	       ( check[i].is_pinned != FALSE ) ) ||
-	     ( ( check[i].expected_loaded != TRUE ) &&
-	       ( check[i].expected_loaded != FALSE ) ) ||
-	     ( ( check[i].expected_cleared != TRUE ) &&
-	       ( check[i].expected_cleared != FALSE ) ) ||
-	     ( ( check[i].expected_flushed != TRUE ) &&
-	       ( check[i].expected_flushed != FALSE ) ) ||
-	     ( ( check[i].expected_destroyed != TRUE ) &&
-	       ( check[i].expected_destroyed != FALSE ) ) ) {
+        ( ( check[i].in_cache != TRUE ) &&
+        ( check[i].in_cache != FALSE ) ) ||
+        ( ( check[i].at_main_addr != TRUE ) &&
+        ( check[i].at_main_addr != FALSE ) ) ||
+        ( ( check[i].is_dirty != TRUE ) &&
+        ( check[i].is_dirty != FALSE ) ) ||
+        ( ( check[i].is_protected != TRUE ) &&
+        ( check[i].is_protected != FALSE ) ) ||
+        ( ( check[i].is_pinned != TRUE ) &&
+        ( check[i].is_pinned != FALSE ) ) ||
+        ( ( check[i].expected_loaded != TRUE ) &&
+        ( check[i].expected_loaded != FALSE ) ) ||
+        ( ( check[i].expected_cleared != TRUE ) &&
+        ( check[i].expected_cleared != FALSE ) ) ||
+        ( ( check[i].expected_flushed != TRUE ) &&
+        ( check[i].expected_flushed != FALSE ) ) ||
+        ( ( check[i].expected_destroyed != TRUE ) &&
+        ( check[i].expected_destroyed != FALSE ) ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
@@ -9319,8 +9365,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Setting up the test.\n",
-	          fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: Setting up the test.\n",
+            fcn_name, test_num, (int)pass);
     }
 
     i = 0;
@@ -9328,70 +9374,70 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
     {
         if ( spec[i].insert_flag ) {
 
-	    if ( show_progress ) {
+        if ( show_progress ) {
 
-	        HDfprintf(stdout,
-			  "%s:%d: Inserting entry(%d,%d) with flags 0x%x.\n",
-			  fcn_name, test_num,
-			  (int)(spec[i].entry_type),
-			  (int)(spec[i].entry_index),
-			  (unsigned)spec[i].flags);
-	    }
+            HDfprintf(stdout,
+            "%s:%d: Inserting entry(%d,%d) with flags 0x%x.\n",
+            fcn_name, test_num,
+            (int)(spec[i].entry_type),
+            (int)(spec[i].entry_index),
+            (unsigned)spec[i].flags);
+        }
 
             insert_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
                          spec[i].flags);
 
         } else {
 
-	    if ( show_progress ) {
+        if ( show_progress ) {
 
-	        HDfprintf(stdout,
-			  "%s:%d: Protecting entry(%d,%d).\n",
-			  fcn_name, test_num,
-			  (int)(spec[i].entry_type),
-			  (int)(spec[i].entry_index));
-	    }
+            HDfprintf(stdout,
+            "%s:%d: Protecting entry(%d,%d).\n",
+            fcn_name, test_num,
+            (int)(spec[i].entry_type),
+            (int)(spec[i].entry_index));
+        }
 
             protect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index);
 
-	    if ( show_progress ) {
+        if ( show_progress ) {
 
-	        HDfprintf(stdout,
-		    "%s:%d: Unprotecting entry(%d,%d) with flags 0x%x ns = %d.\n",
-		    fcn_name, test_num,
-		    (int)(spec[i].entry_type),
-		    (int)(spec[i].entry_index),
-		    (unsigned)spec[i].flags,
-		    (int)(spec[i].new_size));
-	    }
+            HDfprintf(stdout,
+            "%s:%d: Unprotecting entry(%d,%d) with flags 0x%x ns = %d.\n",
+            fcn_name, test_num,
+            (int)(spec[i].entry_type),
+            (int)(spec[i].entry_index),
+            (unsigned)spec[i].flags,
+            (int)(spec[i].new_size));
+        }
 
             if(spec[i].resize_flag)
                 resize_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-					     spec[i].new_size, TRUE);
+                        spec[i].new_size, TRUE);
 
             unprotect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-					     spec[i].flags);
+                        spec[i].flags);
         }
 
-	for ( j = 0; j < spec[i].num_pins; j++ )
-	{
+    for ( j = 0; j < spec[i].num_pins; j++ )
+    {
             create_pinned_entry_dependency(file_ptr,
-		                           spec[i].entry_type,
-					   spec[i].entry_index,
-					   spec[i].pin_type[j],
-					   spec[i].pin_idx[j]);
-	}
+                                spec[i].entry_type,
+                    spec[i].entry_index,
+                    spec[i].pin_type[j],
+                    spec[i].pin_idx[j]);
+    }
 
-	for ( j = 0; j < spec[i].num_flush_ops; j++ )
-	{
-	    add_flush_op(spec[i].entry_type,
-			 spec[i].entry_index,
-			 spec[i].flush_ops[j].op_code,
-			 spec[i].flush_ops[j].type,
-			 spec[i].flush_ops[j].idx,
-			 spec[i].flush_ops[j].flag,
-			 spec[i].flush_ops[j].size);
-	}
+    for ( j = 0; j < spec[i].num_flush_ops; j++ )
+    {
+        add_flush_op(spec[i].entry_type,
+            spec[i].entry_index,
+            spec[i].flush_ops[j].op_code,
+            spec[i].flush_ops[j].type,
+            spec[i].flush_ops[j].idx,
+            spec[i].flush_ops[j].flag,
+            spec[i].flush_ops[j].size);
+    }
 
         i++;
     }
@@ -9411,8 +9457,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Running the test.\n",
-		  fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: Running the test.\n",
+        fcn_name, test_num, (int)pass);
     }
 
     if ( pass ) {
@@ -9432,8 +9478,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Checking test results(1).\n",
-		  fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: Checking test results(1).\n",
+        fcn_name, test_num, (int)pass);
     }
 
     i = 0;
@@ -9460,8 +9506,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
               (int)(entry_ptr->destroyed),
               (int)(spec[i].expected_destroyed));
 
-	    HDfprintf(stdout, "entry_ptr->header.is_dirty = %d\n",
-		      (int)(entry_ptr->header.is_dirty));
+        HDfprintf(stdout, "entry_ptr->header.is_dirty = %d\n",
+            (int)(entry_ptr->header.is_dirty));
 #endif
 
             pass = FALSE;
@@ -9475,8 +9521,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Checking test results(2).\n",
-		  fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: Checking test results(2).\n",
+        fcn_name, test_num, (int)pass);
     }
 
     if ( pass ) {
@@ -9484,123 +9530,123 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
         i = 0;
         while ( ( pass ) && ( i < check_size ) )
         {
-	    if ( check[i].in_cache != entry_in_cache(cache_ptr,
-				                     check[i].entry_type,
-						     check[i].entry_index) ) {
+        if ( check[i].in_cache != entry_in_cache(cache_ptr,
+                                    check[i].entry_type,
+                            check[i].entry_index) ) {
 
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128,
                            "Check1 failed on entry %d after flush op test #%d.",
                            i, test_num);
                 failure_mssg = msg;
-	    }
+        }
 
             base_addr = entries[check[i].entry_type];
             entry_ptr = &(base_addr[check[i].entry_index]);
 
-	    if ( ( entry_ptr->size != check[i].expected_size ) ||
-		 ( ( ! entry_ptr->header.destroy_in_progress ) &&
-		   ( check[i].in_cache ) &&
-		   ( entry_ptr->header.size != check[i].expected_size ) ) ||
-		 ( entry_ptr->at_main_addr != check[i].at_main_addr ) ||
-		 ( entry_ptr->is_dirty != check[i].is_dirty ) ||
-		 ( entry_ptr->header.is_dirty != check[i].is_dirty ) ||
-		 ( entry_ptr->is_protected != check[i].is_protected ) ||
-		 ( entry_ptr->header.is_protected != check[i].is_protected ) ||
+        if ( ( entry_ptr->size != check[i].expected_size ) ||
+        ( ( ! entry_ptr->header.destroy_in_progress ) &&
+        ( check[i].in_cache ) &&
+        ( entry_ptr->header.size != check[i].expected_size ) ) ||
+        ( entry_ptr->at_main_addr != check[i].at_main_addr ) ||
+        ( entry_ptr->is_dirty != check[i].is_dirty ) ||
+        ( entry_ptr->header.is_dirty != check[i].is_dirty ) ||
+        ( entry_ptr->is_protected != check[i].is_protected ) ||
+        ( entry_ptr->header.is_protected != check[i].is_protected ) ||
                  ( entry_ptr->is_pinned != check[i].is_pinned ) ||
                  ( entry_ptr->header.is_pinned != check[i].is_pinned ) ||
-		 ( entry_ptr->loaded != check[i].expected_loaded ) ||
-		 ( entry_ptr->cleared != check[i].expected_cleared ) ||
-		 ( entry_ptr->flushed != check[i].expected_flushed ) ||
-		 ( entry_ptr->destroyed != check[i].expected_destroyed ) ) {
+        ( entry_ptr->loaded != check[i].expected_loaded ) ||
+        ( entry_ptr->cleared != check[i].expected_cleared ) ||
+        ( entry_ptr->flushed != check[i].expected_flushed ) ||
+        ( entry_ptr->destroyed != check[i].expected_destroyed ) ) {
 
 #if 0 /* This is useful debugging code.  Lets keep it around for a while. */
 
-		if ( entry_ptr->size != check[i].expected_size ) {
-		    HDfprintf(stdout, "entry_ptr->size (expected) = %d (%d).\n",
-			      (int)(entry_ptr->size),
-			      (int)(check[i].expected_size));
-		}
-		if ( ( ! entry_ptr->header.destroy_in_progress ) &&
-		     ( check[i].in_cache ) &&
+        if ( entry_ptr->size != check[i].expected_size ) {
+            HDfprintf(stdout, "entry_ptr->size (expected) = %d (%d).\n",
+                (int)(entry_ptr->size),
+                (int)(check[i].expected_size));
+        }
+        if ( ( ! entry_ptr->header.destroy_in_progress ) &&
+            ( check[i].in_cache ) &&
                      ( entry_ptr->header.size != check[i].expected_size ) ) {
                     HDfprintf(stdout,
                               "(!destroy in progress and in cache and size (expected) = %d (%d).\n",
                               (int)(entry_ptr->header.size),
-			      (int)(check[i].expected_size));
-		}
-		if ( entry_ptr->at_main_addr != check[i].at_main_addr ) {
-		    HDfprintf(stdout, "(%d,%d) at main addr (expected) = %d (%d).\n",
-			      (int)(check[i].entry_type),
-			      (int)(check[i].entry_index),
+                (int)(check[i].expected_size));
+        }
+        if ( entry_ptr->at_main_addr != check[i].at_main_addr ) {
+            HDfprintf(stdout, "(%d,%d) at main addr (expected) = %d (%d).\n",
+                (int)(check[i].entry_type),
+                (int)(check[i].entry_index),
                               (int)(entry_ptr->at_main_addr),
-			      (int)(check[i].at_main_addr));
+                (int)(check[i].at_main_addr));
                 }
-		if ( entry_ptr->is_dirty != check[i].is_dirty ) {
-		    HDfprintf(stdout, "entry_ptr->is_dirty (expected) = %d (%d).\n",
-		              (int)(entry_ptr->is_dirty),
-			      (int)(check[i].is_dirty));
-		}
-		if ( entry_ptr->header.is_dirty != check[i].is_dirty ) {
-		    HDfprintf(stdout, "entry_ptr->header.is_dirty (expected) = %d (%d).\n",
-		              (int)(entry_ptr->header.is_dirty),
-			      (int)(check[i].is_dirty));
-		}
-	        if ( entry_ptr->is_protected != check[i].is_protected ) {
+        if ( entry_ptr->is_dirty != check[i].is_dirty ) {
+            HDfprintf(stdout, "entry_ptr->is_dirty (expected) = %d (%d).\n",
+                    (int)(entry_ptr->is_dirty),
+                (int)(check[i].is_dirty));
+        }
+        if ( entry_ptr->header.is_dirty != check[i].is_dirty ) {
+            HDfprintf(stdout, "entry_ptr->header.is_dirty (expected) = %d (%d).\n",
+                    (int)(entry_ptr->header.is_dirty),
+                (int)(check[i].is_dirty));
+        }
+            if ( entry_ptr->is_protected != check[i].is_protected ) {
                     HDfprintf(stdout, "entry_ptr->is_protected (expected) = %d (%d).\n",
-			      (int)(entry_ptr->is_protected),
-			      (int)(check[i].is_protected));
-		}
-	        if ( entry_ptr->header.is_protected != check[i].is_protected ) {
+                (int)(entry_ptr->is_protected),
+                (int)(check[i].is_protected));
+        }
+            if ( entry_ptr->header.is_protected != check[i].is_protected ) {
                     HDfprintf(stdout, "entry_ptr->header.is_protected (expected) = %d (%d).\n",
-			      (int)(entry_ptr->is_protected),
-			      (int)(check[i].is_protected));
-		}
-		if ( entry_ptr->is_pinned != check[i].is_pinned ) {
-		    HDfprintf(stdout, "entry_ptr->is_pinned (expected) = %d (%d).\n",
-			      (int)(entry_ptr->is_pinned),
-			      (int)(check[i].is_pinned));
-		}
-		if ( entry_ptr->header.is_pinned != check[i].is_pinned ) {
-		    HDfprintf(stdout, "entry_ptr->header.is_pinned (expected) = %d (%d).\n",
-			      (int)(entry_ptr->header.is_pinned),
-			      (int)(check[i].is_pinned));
-		}
-		if ( entry_ptr->loaded != check[i].expected_loaded ) {
-		    HDfprintf(stdout, "entry_ptr->loaded (expected) = %d (%d).\n",
-			      (int)(entry_ptr->loaded),
-			      (int)(check[i].expected_loaded));
-		}
-		if ( entry_ptr->cleared != check[i].expected_cleared ) {
-		    HDfprintf(stdout, "entry_ptr->cleared (expected) = %d (%d).\n",
-			      (int)(entry_ptr->cleared),
-			      (int)(check[i].expected_cleared));
-		}
-		if ( entry_ptr->flushed != check[i].expected_flushed ) {
-		    HDfprintf(stdout, "entry_ptr->flushed (expected) = %d (%d).\n",
-			      (int)(entry_ptr->flushed),
-			      (int)(check[i].expected_flushed));
-		}
-		if ( entry_ptr->destroyed != check[i].expected_destroyed ) {
-		    HDfprintf(stdout, "entry_ptr->destroyed (expected) = %d (%d).\n",
-			      (int)(entry_ptr->destroyed),
-			      (int)(check[i].expected_destroyed));
-		}
+                (int)(entry_ptr->is_protected),
+                (int)(check[i].is_protected));
+        }
+        if ( entry_ptr->is_pinned != check[i].is_pinned ) {
+            HDfprintf(stdout, "entry_ptr->is_pinned (expected) = %d (%d).\n",
+                (int)(entry_ptr->is_pinned),
+                (int)(check[i].is_pinned));
+        }
+        if ( entry_ptr->header.is_pinned != check[i].is_pinned ) {
+            HDfprintf(stdout, "entry_ptr->header.is_pinned (expected) = %d (%d).\n",
+                (int)(entry_ptr->header.is_pinned),
+                (int)(check[i].is_pinned));
+        }
+        if ( entry_ptr->loaded != check[i].expected_loaded ) {
+            HDfprintf(stdout, "entry_ptr->loaded (expected) = %d (%d).\n",
+                (int)(entry_ptr->loaded),
+                (int)(check[i].expected_loaded));
+        }
+        if ( entry_ptr->cleared != check[i].expected_cleared ) {
+            HDfprintf(stdout, "entry_ptr->cleared (expected) = %d (%d).\n",
+                (int)(entry_ptr->cleared),
+                (int)(check[i].expected_cleared));
+        }
+        if ( entry_ptr->flushed != check[i].expected_flushed ) {
+            HDfprintf(stdout, "entry_ptr->flushed (expected) = %d (%d).\n",
+                (int)(entry_ptr->flushed),
+                (int)(check[i].expected_flushed));
+        }
+        if ( entry_ptr->destroyed != check[i].expected_destroyed ) {
+            HDfprintf(stdout, "entry_ptr->destroyed (expected) = %d (%d).\n",
+                (int)(entry_ptr->destroyed),
+                (int)(check[i].expected_destroyed));
+        }
 #endif
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128,
                            "Check2 failed on entry %d after flush op test #%d.",
                            i, test_num);
                 failure_mssg = msg;
-	    }
-	    i++;
+        }
+        i++;
         }
     }
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Checking test results(3).\n",
-		  fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: Checking test results(3).\n",
+        fcn_name, test_num, (int)pass);
     }
 
     if ( pass ) {
@@ -9634,8 +9680,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(1).\n",
-		  fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(1).\n",
+        fcn_name, test_num, (int)pass);
     }
 
     if ( pass ) {
@@ -9653,20 +9699,20 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
         }
         else if ( ( cache_ptr->index_len != 0 ) ||
                   ( cache_ptr->index_size != 0 ) ||
-		  ( cache_ptr->clean_index_size != 0 ) ||
-		  ( cache_ptr->dirty_index_size != 0 ) ) {
+        ( cache_ptr->clean_index_size != 0 ) ||
+        ( cache_ptr->dirty_index_size != 0 ) ) {
 
             pass = FALSE;
 
-	    if ( verbose ) {
+        if ( verbose ) {
 
-	        HDfprintf(stdout, "%s:%d: il/is/cis/dis = %lld/%lld/%lld/%lld.\n",
-			  fcn_name, test_num,
-			  (long long)(cache_ptr->index_len),
-			  (long long)(cache_ptr->index_size),
-			  (long long)(cache_ptr->clean_index_size),
-			  (long long)(cache_ptr->dirty_index_size));
-	    }
+            HDfprintf(stdout, "%s:%d: il/is/cis/dis = %lld/%lld/%lld/%lld.\n",
+            fcn_name, test_num,
+            (long long)(cache_ptr->index_len),
+            (long long)(cache_ptr->index_size),
+            (long long)(cache_ptr->clean_index_size),
+            (long long)(cache_ptr->dirty_index_size));
+        }
             HDsnprintf(msg, (size_t)128,
             "Unexpected cache len/size/cs/ds after cleanup in flush op test #%d.",
             test_num);
@@ -9677,8 +9723,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(2).\n",
-		  fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(2).\n",
+        fcn_name, test_num, (int)pass);
     }
 
     i = 0;
@@ -9687,7 +9733,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
         base_addr = entries[spec[i].entry_type];
         entry_ptr = &(base_addr[spec[i].entry_index]);
 
-	entry_ptr->size      = entry_sizes[spec[i].entry_type];
+    entry_ptr->size      = entry_sizes[spec[i].entry_type];
 
         entry_ptr->loaded    = FALSE;
         entry_ptr->cleared   = FALSE;
@@ -9699,8 +9745,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(3).\n",
-		  fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(3).\n",
+        fcn_name, test_num, (int)pass);
     }
 
     i = 0;
@@ -9709,7 +9755,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
         base_addr = entries[check[i].entry_type];
         entry_ptr = &(base_addr[check[i].entry_index]);
 
-	entry_ptr->size      = entry_sizes[check[i].entry_type];
+    entry_ptr->size      = entry_sizes[check[i].entry_type];
 
         entry_ptr->loaded    = FALSE;
         entry_ptr->cleared   = FALSE;
@@ -9721,25 +9767,25 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Done.\n", fcn_name, test_num, (int)pass);
+    HDfprintf(stdout, "%s:%d:%d: Done.\n", fcn_name, test_num, (int)pass);
     }
 
     return;
 
 } /* check_flush_cache__flush_op_test() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache__flush_op_eviction_test()
+ * Function:    check_flush_cache__flush_op_eviction_test()
  *
- * Purpose:	Verify that flush operations work as expected when an
+ * Purpose:    Verify that flush operations work as expected when an
  *              entry is evicted.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              10/3/06
  *
  * Modifications:
@@ -9752,11 +9798,11 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 {
     /* const char *   fcn_name = "check_flush_cache__flush_op_eviction_test"; */
     H5C_t *        cache_ptr = file_ptr->shared->cache;
-    int		   i;
-    int		   num_variable_entries = 8;
-    int		   num_monster_entries = 31;
-    int		   num_large_entries = 0;
-    herr_t	   result;
+    int           i;
+    int           num_variable_entries = 8;
+    int           num_monster_entries = 31;
+    int           num_large_entries = 0;
+    herr_t       result;
     test_entry_t * entry_ptr;
     test_entry_t * base_addr;
     struct expected_entry_status expected[8 + 31 + 14] =
@@ -9766,61 +9812,61 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
        * array only processes as much of it as it is told to, we don't have to
        * worry about maintaining the status of entries that we haven't used yet.
        */
-      /* entry			entry				in	at main                                                       */
-      /* type:			index:	size:			cache:	addr:	dirty:	prot:	pinned:	loaded:	clrd:	flshd:	dest: */
-      { VARIABLE_ENTRY_TYPE,	0,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { VARIABLE_ENTRY_TYPE,	1,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { VARIABLE_ENTRY_TYPE,	2,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { VARIABLE_ENTRY_TYPE,	3,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { VARIABLE_ENTRY_TYPE,	4,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { VARIABLE_ENTRY_TYPE,	5,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { VARIABLE_ENTRY_TYPE,	6,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { VARIABLE_ENTRY_TYPE,	7,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	0,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	1,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	2,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	3,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	4,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	5,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	6,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	7,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	8,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	9,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	10,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	11,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	12,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	13,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	14,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	15,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	16,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	17,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	18,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	19,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	20,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	21,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	22,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	23,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	24,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	25,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	26,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	27,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	28,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	29,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { MONSTER_ENTRY_TYPE,	30,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	0,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	1,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	2,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	3,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	4,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	5,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	6,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	7,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	8,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	9,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	10,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	11,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	12,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE },
-      { LARGE_ENTRY_TYPE,	13,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE }
+      /* entry            entry                in    at main                                                       */
+      /* type:            index:    size:            cache:    addr:    dirty:    prot:    pinned:    loaded:    clrd:    flshd:    dest: */
+      { VARIABLE_ENTRY_TYPE,    0,    VARIABLE_ENTRY_SIZE/2,    TRUE,    TRUE,    TRUE,    FALSE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { VARIABLE_ENTRY_TYPE,    1,    VARIABLE_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { VARIABLE_ENTRY_TYPE,    2,    VARIABLE_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { VARIABLE_ENTRY_TYPE,    3,    VARIABLE_ENTRY_SIZE/2,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { VARIABLE_ENTRY_TYPE,    4,    VARIABLE_ENTRY_SIZE/2,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { VARIABLE_ENTRY_TYPE,    5,    VARIABLE_ENTRY_SIZE/2,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { VARIABLE_ENTRY_TYPE,    6,    VARIABLE_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { VARIABLE_ENTRY_TYPE,    7,    VARIABLE_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    0,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    1,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    2,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    3,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    4,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    5,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    6,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    7,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    8,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    9,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    10,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    11,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    12,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    13,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    14,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    15,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    16,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    17,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    18,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    19,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    20,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    21,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    22,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    23,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    24,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    25,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    26,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    27,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    28,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    29,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { MONSTER_ENTRY_TYPE,    30,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    0,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    1,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    2,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    3,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    4,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    5,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    6,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    7,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    8,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    9,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    10,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    11,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    12,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE },
+      { LARGE_ENTRY_TYPE,    13,    LARGE_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,    FALSE }
     };
 
     if ( pass ) {
@@ -9839,15 +9885,15 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
         else if ( ( cache_ptr->max_cache_size != (2 * 1024 * 1024 ) ) ||
                   ( cache_ptr->min_clean_size != (1 * 1024 * 1024 ) ) ) {
 
-	    pass = FALSE;
-	    failure_mssg =
-	        "unexpected cache config at start of flush op eviction test.";
+        pass = FALSE;
+        failure_mssg =
+            "unexpected cache config at start of flush op eviction test.";
 
         } else {
 
             /* set min clean size to zero for this test as it simplifies
-	     * computing the expected cache size after each operation.
-	     */
+        * computing the expected cache size after each operation.
+        */
 
             cache_ptr->min_clean_size = 0;
         }
@@ -9860,99 +9906,99 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
          * other entries into the cache until the cache is full.  At
          * that point, load yet more entries into the cache, and see
          * if the flush operations are performed as expected.
-	 *
-	 * To make things a bit more interesting, we also include a
-	 * couple of pins.
+    *
+    * To make things a bit more interesting, we also include a
+    * couple of pins.
          */
 
-	/* reset the stats before we start.  If stats are enabled, we will
-	 * check to see if they are as expected at the end.
-	 */
-	H5C_stats__reset(cache_ptr);
+    /* reset the stats before we start.  If stats are enabled, we will
+    * check to see if they are as expected at the end.
+    */
+    H5C_stats__reset(cache_ptr);
 
 
-	/* load a few entries with pin relationships and flush ops.
-	 * Start by just loading the entries.
-	 */
+    /* load a few entries with pin relationships and flush ops.
+    * Start by just loading the entries.
+    */
 
-	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0,
                 (VARIABLE_ENTRY_SIZE / 2), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, H5C__DIRTIED_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, H5C__DIRTIED_FLAG);
 
-	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
 
-	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
 
-	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3,
                 (VARIABLE_ENTRY_SIZE / 2), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
 
-	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4,
                 (VARIABLE_ENTRY_SIZE / 2), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, H5C__DIRTIED_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, H5C__DIRTIED_FLAG);
 
-	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5,
                 (VARIABLE_ENTRY_SIZE / 2), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, H5C__DIRTIED_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, H5C__DIRTIED_FLAG);
 
-	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6, H5C__NO_FLAGS_SET);
 
-	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7, H5C__NO_FLAGS_SET);
 
-	if ( ( cache_ptr->index_len != 8 ) ||
+    if ( ( cache_ptr->index_len != 8 ) ||
              ( cache_ptr->index_size != (4 * (VARIABLE_ENTRY_SIZE / 2)) +
-	                                (4 * VARIABLE_ENTRY_SIZE) ) ) {
+                                    (4 * VARIABLE_ENTRY_SIZE) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 1.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 1.";
+    }
     }
 
     if ( pass ) {
 
-	/* Now set up the pinning relationships:
-	 *
-	 * Briefly, (VET, 0) is pinned by (VET, 1), (VET, 2), and (VET, 3)
-	 *          (VET, 7) is pinned by (VET, 3), and (VET, 5)
-	 */
-	create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 1,
-			               VARIABLE_ENTRY_TYPE, 0);
-	create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 2,
-			               VARIABLE_ENTRY_TYPE, 0);
-	create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 3,
-			               VARIABLE_ENTRY_TYPE, 0);
-	create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 3,
-			               VARIABLE_ENTRY_TYPE, 7);
-	create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 5,
-			               VARIABLE_ENTRY_TYPE, 7);
+    /* Now set up the pinning relationships:
+    *
+    * Briefly, (VET, 0) is pinned by (VET, 1), (VET, 2), and (VET, 3)
+    *          (VET, 7) is pinned by (VET, 3), and (VET, 5)
+    */
+    create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 1,
+                        VARIABLE_ENTRY_TYPE, 0);
+    create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 2,
+                        VARIABLE_ENTRY_TYPE, 0);
+    create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 3,
+                        VARIABLE_ENTRY_TYPE, 0);
+    create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 3,
+                        VARIABLE_ENTRY_TYPE, 7);
+    create_pinned_entry_dependency(file_ptr, VARIABLE_ENTRY_TYPE, 5,
+                        VARIABLE_ENTRY_TYPE, 7);
 
-	/* Next, set up the flush operations:
-	 *
-	 * Briefly, (VET, 1) dirties (VET, 0)
-	 *                   resizes (VET, 0) to 3/4 VARIABLE_ENTRY_SIZE
-	 *
-	 *          (VET, 2) dirties (VET, 0)
-	 *                   resizes (VET, 0) to VARIABLE_ENTRY_SIZE
-	 *                   moves (VET, 0) to its alternate address
-	 *
-	 *          (VET, 3) dirties (VET, 0)
-	 *                   resizes itself to VARIABLE_ENTRY_SIZE
-	 *
-	 *          (VET, 7) dirties (VET, 6)
-	 */
+    /* Next, set up the flush operations:
+    *
+    * Briefly, (VET, 1) dirties (VET, 0)
+    *                   resizes (VET, 0) to 3/4 VARIABLE_ENTRY_SIZE
+    *
+    *          (VET, 2) dirties (VET, 0)
+    *                   resizes (VET, 0) to VARIABLE_ENTRY_SIZE
+    *                   moves (VET, 0) to its alternate address
+    *
+    *          (VET, 3) dirties (VET, 0)
+    *                   resizes itself to VARIABLE_ENTRY_SIZE
+    *
+    *          (VET, 7) dirties (VET, 6)
+    */
         add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
         add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__RESIZE,
                      VARIABLE_ENTRY_TYPE, 0, TRUE,
-		     3 * VARIABLE_ENTRY_SIZE / 4);
+            3 * VARIABLE_ENTRY_SIZE / 4);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
@@ -9972,768 +10018,768 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 
     if ( pass ) {
 
-	/* to summarize, at present the following variable size entries
-	 * are in cache with the following characteristics:
-	 *
-	 * 		in
-	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 *
-	 * (VET, 0) 	Y	 5 KB	Y	Y	-	-
-	 *
-	 * (VET, 1)	Y	10 KB	N	N	0	dirty (VET, 0),
-	 * 							resize (VET, 0) to 7.5 KB
-	 *
-	 * (VET, 2)	Y	10 KB	N	N	0	dirty (VET, 0)
-	 * 							resize (VET, 0) to 10 KB
-	 * 							move (VET, 0) to its alternate address
-	 *
-	 * (VET, 3)	Y	 5 KB	Y	N	0, 7	dirty (VET, 0)
-	 * 							resize (VET, 3) to 10 KB
-	 *
-	 * (VET, 4)	Y	 5 KB	Y	N	-	-
-	 *
-	 * (VET, 5)	Y	 5 KB	Y	N	7	-
-	 *
-	 * (VET, 6)	Y	10 KB	N	N	-	-
-	 *
-	 * (VET, 7)	Y	10 KB	N	Y	-	dirty (VET, 6)
-	 *
-	 * Recall that in this test bed, flush operations are excuted the
-	 * first time the associated entry is flushed, and are then
-	 * deleted.
-	 */
+    /* to summarize, at present the following variable size entries
+    * are in cache with the following characteristics:
+    *
+    *         in
+    * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+    *
+    * (VET, 0)     Y     5 KB    Y    Y    -    -
+    *
+    * (VET, 1)    Y    10 KB    N    N    0    dirty (VET, 0),
+    *                             resize (VET, 0) to 7.5 KB
+    *
+    * (VET, 2)    Y    10 KB    N    N    0    dirty (VET, 0)
+    *                             resize (VET, 0) to 10 KB
+    *                             move (VET, 0) to its alternate address
+    *
+    * (VET, 3)    Y     5 KB    Y    N    0, 7    dirty (VET, 0)
+    *                             resize (VET, 3) to 10 KB
+    *
+    * (VET, 4)    Y     5 KB    Y    N    -    -
+    *
+    * (VET, 5)    Y     5 KB    Y    N    7    -
+    *
+    * (VET, 6)    Y    10 KB    N    N    -    -
+    *
+    * (VET, 7)    Y    10 KB    N    Y    -    dirty (VET, 6)
+    *
+    * Recall that in this test bed, flush operations are excuted the
+    * first time the associated entry is flushed, and are then
+    * deleted.
+    */
 
         /* Now fill up the cache with other, unrelated entries */
-	for ( i = 0; i < 31; i++ )
-	{
-	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
+    for ( i = 0; i < 31; i++ )
+    {
+        protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
-	for ( i = 0; i < 1; i++ )
-	{
-	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
+    for ( i = 0; i < 1; i++ )
+    {
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
-	/* The cache should now be exactly full */
-	if ( ( cache_ptr->index_len != 40 ) ||
+    /* The cache should now be exactly full */
+    if ( ( cache_ptr->index_len != 40 ) ||
              ( cache_ptr->index_size != 2 * 1024 * 1024 ) ||
-	     ( cache_ptr->index_size != ((4 * VARIABLE_ENTRY_SIZE / 2) +
-	                                 (4 * VARIABLE_ENTRY_SIZE) +
-	                                 (31 * MONSTER_ENTRY_SIZE) +
-					 (1 * LARGE_ENTRY_SIZE)) ) ) {
+        ( cache_ptr->index_size != ((4 * VARIABLE_ENTRY_SIZE / 2) +
+                                    (4 * VARIABLE_ENTRY_SIZE) +
+                                    (31 * MONSTER_ENTRY_SIZE) +
+                    (1 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 2.";
+        failure_mssg = "unexpected size/len in flush op eviction test 2.";
 
-	} else {
+    } else {
 
-	    /* verify the expected status of all entries we have loaded to date: */
+        /* verify the expected status of all entries we have loaded to date: */
             num_large_entries = 1;
-	    verify_entry_status(cache_ptr,
-			        0,
-			        (num_variable_entries + num_monster_entries + num_large_entries),
-				expected);
-	}
+        verify_entry_status(cache_ptr,
+                    0,
+                    (num_variable_entries + num_monster_entries + num_large_entries),
+                expected);
+    }
     }
 
 
     if ( pass ) {
 
-	/* Now load a large entry.  This should result in the eviction
-	 * of (VET,1), and the increase in the size of (VET, 0) from .5
-	 * VARIABLE_ENTRY_SIZE to .75 VARIABLE_ENTRY_SIZE.
-	 *
-	 * The following table illustrates the intended state of affairs
-	 * after the eviction:
-	 *
-	 * 		in
-	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 *
-	 * (VET, 0) 	Y	7.5 KB	Y	Y	-	-
-	 *
-	 * (VET, 1)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 2)	Y	10 KB	N	N	0	dirty (VET, 0)
-	 * 							resize (VET, 0) to 10 KB
-	 * 							move (VET, 0) to its alternate address
-	 *
-	 * (VET, 3)	Y	 5 KB	Y	N	0, 7	dirty (VET, 0)
-	 * 							resize (VET, 3) to 10 KB
-	 *
-	 * (VET, 4)	Y	 5 KB	Y	N	-	-
-	 *
-	 * (VET, 5)	Y	 5 KB	Y	N	7	-
-	 *
-	 * (VET, 6)	Y	10 KB	N	N	-	-
-	 *
-	 * (VET, 7)	Y	10 KB	Y	Y	-	dirty (VET, 6)
-	 *
-	 * Start by updating the expected table for the expected changes in entry status:
-	 */
-	expected[0].size      = 3 * VARIABLE_ENTRY_SIZE / 4;
-	expected[1].in_cache  = FALSE;
-	expected[1].flushed   = TRUE;
-	expected[1].destroyed = TRUE;
+    /* Now load a large entry.  This should result in the eviction
+    * of (VET,1), and the increase in the size of (VET, 0) from .5
+    * VARIABLE_ENTRY_SIZE to .75 VARIABLE_ENTRY_SIZE.
+    *
+    * The following table illustrates the intended state of affairs
+    * after the eviction:
+    *
+    *         in
+    * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+    *
+    * (VET, 0)     Y    7.5 KB    Y    Y    -    -
+    *
+    * (VET, 1)    N    10 KB    N    N    -    -
+    *
+    * (VET, 2)    Y    10 KB    N    N    0    dirty (VET, 0)
+    *                             resize (VET, 0) to 10 KB
+    *                             move (VET, 0) to its alternate address
+    *
+    * (VET, 3)    Y     5 KB    Y    N    0, 7    dirty (VET, 0)
+    *                             resize (VET, 3) to 10 KB
+    *
+    * (VET, 4)    Y     5 KB    Y    N    -    -
+    *
+    * (VET, 5)    Y     5 KB    Y    N    7    -
+    *
+    * (VET, 6)    Y    10 KB    N    N    -    -
+    *
+    * (VET, 7)    Y    10 KB    Y    Y    -    dirty (VET, 6)
+    *
+    * Start by updating the expected table for the expected changes in entry status:
+    */
+    expected[0].size      = 3 * VARIABLE_ENTRY_SIZE / 4;
+    expected[1].in_cache  = FALSE;
+    expected[1].flushed   = TRUE;
+    expected[1].destroyed = TRUE;
 
         num_large_entries = 2;
 
-	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
-	unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
+    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
+    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
 
-	if ( ( cache_ptr->index_len != 40 ) ||
+    if ( ( cache_ptr->index_len != 40 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (VARIABLE_ENTRY_SIZE) +
-	                                (VARIABLE_ENTRY_SIZE / 4) +
-	                                (LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->index_size != ((1 * 3 * VARIABLE_ENTRY_SIZE / 4 ) +
-					 (3 * VARIABLE_ENTRY_SIZE / 2 ) +
-					 (3 * VARIABLE_ENTRY_SIZE) +
-					 (31 * MONSTER_ENTRY_SIZE) +
-					 (2 * LARGE_ENTRY_SIZE)) ) ) {
+                                    (VARIABLE_ENTRY_SIZE) +
+                                    (VARIABLE_ENTRY_SIZE / 4) +
+                                    (LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->index_size != ((1 * 3 * VARIABLE_ENTRY_SIZE / 4 ) +
+                    (3 * VARIABLE_ENTRY_SIZE / 2 ) +
+                    (3 * VARIABLE_ENTRY_SIZE) +
+                    (31 * MONSTER_ENTRY_SIZE) +
+                    (2 * LARGE_ENTRY_SIZE)) ) ) {
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 3.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 3.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    1,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                1,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     if ( pass ) {
 
-	/* Now load another large entry.  This should result in the eviction
-	 * of (VET, 2), the increase in the size of (VET, 0) from .75
-	 * VARIABLE_ENTRY_SIZE to 1.0 VARIABLE_ENTRY_SIZE, and the moving
-	 * of (VET, 0) to its alternate address.
-	 *
-	 * The following table shows the expected states of the variable
-	 * size entries after the test.
-	 *
-	 * 		in
-	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 *
-	 * (VET, 0) 	Y	10 KB	Y	Y	-	-
-	 *
-	 * (VET, 1)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 2)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 3)	Y	 5 KB	Y	N	0, 7	dirty (VET, 0)
-	 * 							resize (VET, 3) to 10 KB
-	 *
-	 * (VET, 4)	Y	 5 KB	Y	N	-	-
-	 *
-	 * (VET, 5)	Y	 5 KB	Y	N	7	-
-	 *
-	 * (VET, 6)	Y	10 KB	N	N	-	-
-	 *
-	 * (VET, 7)	Y	10 KB	Y	Y	-	dirty (VET, 6)
-	 *
-	 * Start by updating the expected table for the expected changes in entry status:
-	 */
-	expected[0].size         = VARIABLE_ENTRY_SIZE;
-	expected[0].at_main_addr = FALSE;
-	expected[2].in_cache     = FALSE;
-	expected[2].flushed      = TRUE;
-	expected[2].destroyed    = TRUE;
+    /* Now load another large entry.  This should result in the eviction
+    * of (VET, 2), the increase in the size of (VET, 0) from .75
+    * VARIABLE_ENTRY_SIZE to 1.0 VARIABLE_ENTRY_SIZE, and the moving
+    * of (VET, 0) to its alternate address.
+    *
+    * The following table shows the expected states of the variable
+    * size entries after the test.
+    *
+    *         in
+    * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+    *
+    * (VET, 0)     Y    10 KB    Y    Y    -    -
+    *
+    * (VET, 1)    N    10 KB    N    N    -    -
+    *
+    * (VET, 2)    N    10 KB    N    N    -    -
+    *
+    * (VET, 3)    Y     5 KB    Y    N    0, 7    dirty (VET, 0)
+    *                             resize (VET, 3) to 10 KB
+    *
+    * (VET, 4)    Y     5 KB    Y    N    -    -
+    *
+    * (VET, 5)    Y     5 KB    Y    N    7    -
+    *
+    * (VET, 6)    Y    10 KB    N    N    -    -
+    *
+    * (VET, 7)    Y    10 KB    Y    Y    -    dirty (VET, 6)
+    *
+    * Start by updating the expected table for the expected changes in entry status:
+    */
+    expected[0].size         = VARIABLE_ENTRY_SIZE;
+    expected[0].at_main_addr = FALSE;
+    expected[2].in_cache     = FALSE;
+    expected[2].flushed      = TRUE;
+    expected[2].destroyed    = TRUE;
 
         num_large_entries = 3;
 
-	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
-	unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, H5C__DIRTIED_FLAG);
+    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
+    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, H5C__DIRTIED_FLAG);
 
-	if ( ( cache_ptr->index_len != 40 ) ||
+    if ( ( cache_ptr->index_len != 40 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (2 * VARIABLE_ENTRY_SIZE) +
-	                                (VARIABLE_ENTRY_SIZE / 2) +
-	                                (2 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->index_size != ((3 * VARIABLE_ENTRY_SIZE / 2) +
-				         (3 * VARIABLE_ENTRY_SIZE) +
-				         (31 * MONSTER_ENTRY_SIZE) +
-				         (3 * LARGE_ENTRY_SIZE)) ) ) {
+                                    (2 * VARIABLE_ENTRY_SIZE) +
+                                    (VARIABLE_ENTRY_SIZE / 2) +
+                                    (2 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->index_size != ((3 * VARIABLE_ENTRY_SIZE / 2) +
+                        (3 * VARIABLE_ENTRY_SIZE) +
+                        (31 * MONSTER_ENTRY_SIZE) +
+                        (3 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 4.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 4.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    2,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                2,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     if ( pass ) {
 
-	/* load two more large entries.  This should result in (VET, 3) being
-	 * flushed, and increasing its size from 1/2 VARIABLE_ENTRY_SIZE to
-	 * VARIABLE_ENTRY_SIZE.
-	 *
-	 * As a result of this size increase, the cache will have to look
-	 * for another entry to evict.  After flushing (VET, 4) and (VET, 5),
-	 * it should evict (VET, 6), yielding the needed memory.
-	 *
-	 * The following table shows the expected states of the variable
-	 * size entries after the test.
-	 *
-	 * 		in
-	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 *
-	 * (VET, 0) 	Y	10 KB	Y	Y	-	-
-	 *
-	 * (VET, 1)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 2)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 3)	Y	10 KB	N	N	0, 7	-
-	 *
-	 * (VET, 4)	Y	 5 KB	N	N	-	-
-	 *
-	 * (VET, 5)	Y	 5 KB	N	N	7	-
-	 *
-	 * (VET, 6)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 7)	Y	10 KB	Y	Y	-	dirty (VET, 6)
-	 *
-	 * Start by updating the expected table for the expected changes in entry status:
-	 */
+    /* load two more large entries.  This should result in (VET, 3) being
+    * flushed, and increasing its size from 1/2 VARIABLE_ENTRY_SIZE to
+    * VARIABLE_ENTRY_SIZE.
+    *
+    * As a result of this size increase, the cache will have to look
+    * for another entry to evict.  After flushing (VET, 4) and (VET, 5),
+    * it should evict (VET, 6), yielding the needed memory.
+    *
+    * The following table shows the expected states of the variable
+    * size entries after the test.
+    *
+    *         in
+    * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+    *
+    * (VET, 0)     Y    10 KB    Y    Y    -    -
+    *
+    * (VET, 1)    N    10 KB    N    N    -    -
+    *
+    * (VET, 2)    N    10 KB    N    N    -    -
+    *
+    * (VET, 3)    Y    10 KB    N    N    0, 7    -
+    *
+    * (VET, 4)    Y     5 KB    N    N    -    -
+    *
+    * (VET, 5)    Y     5 KB    N    N    7    -
+    *
+    * (VET, 6)    N    10 KB    N    N    -    -
+    *
+    * (VET, 7)    Y    10 KB    Y    Y    -    dirty (VET, 6)
+    *
+    * Start by updating the expected table for the expected changes in entry status:
+    */
 
-	expected[3].size         = VARIABLE_ENTRY_SIZE;
-	expected[3].is_dirty	 = FALSE;
-	expected[3].flushed      = TRUE;
-	expected[4].is_dirty	 = FALSE;
-	expected[4].flushed	 = TRUE;
-	expected[5].is_dirty	 = FALSE;
-	expected[5].flushed	 = TRUE;
-	expected[6].in_cache	 = FALSE;
-        expected[6].flushed	 = TRUE;
-        expected[6].destroyed	 = TRUE;
+    expected[3].size         = VARIABLE_ENTRY_SIZE;
+    expected[3].is_dirty     = FALSE;
+    expected[3].flushed      = TRUE;
+    expected[4].is_dirty     = FALSE;
+    expected[4].flushed     = TRUE;
+    expected[5].is_dirty     = FALSE;
+    expected[5].flushed     = TRUE;
+    expected[6].in_cache     = FALSE;
+        expected[6].flushed     = TRUE;
+        expected[6].destroyed     = TRUE;
 
         num_large_entries = 5;
 
-	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
-	unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
+    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
+    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
 
-	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 4);
-	unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 4, H5C__DIRTIED_FLAG);
+    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 4);
+    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 4, H5C__DIRTIED_FLAG);
 
         /* verify cache size */
-	if ( ( cache_ptr->index_len != 41 ) ||
+    if ( ( cache_ptr->index_len != 41 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (3 * VARIABLE_ENTRY_SIZE) +
-					(1 * VARIABLE_ENTRY_SIZE ) + /* size increases of (VET, 0) & (VET, 3) */
-	                                (4 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->index_size != ((2 * VARIABLE_ENTRY_SIZE / 2) +
-				         (3 * VARIABLE_ENTRY_SIZE) +
-				         (31 * MONSTER_ENTRY_SIZE) +
-				         (5 * LARGE_ENTRY_SIZE)) ) ) {
+                                    (3 * VARIABLE_ENTRY_SIZE) +
+                    (1 * VARIABLE_ENTRY_SIZE ) + /* size increases of (VET, 0) & (VET, 3) */
+                                    (4 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->index_size != ((2 * VARIABLE_ENTRY_SIZE / 2) +
+                        (3 * VARIABLE_ENTRY_SIZE) +
+                        (31 * MONSTER_ENTRY_SIZE) +
+                        (5 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 5.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 5.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    3,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                3,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     if ( pass ) {
 
         /* now touch all the non VARIABLE_ENTRY_TYPE entries in the
-	 * cache to bring all the VARIABLE_ENTRY_TYPE entries to the
-	 * end of the LRU list.
-	 *
-	 * Note that we don't have to worry about (VET, 0) and (VET, 7)
-	 * as they are pinned and thus not in the LRU list to begin with.
-	 */
-	for ( i = 0; i < 31; i++ )
-	{
-	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
+    * cache to bring all the VARIABLE_ENTRY_TYPE entries to the
+    * end of the LRU list.
+    *
+    * Note that we don't have to worry about (VET, 0) and (VET, 7)
+    * as they are pinned and thus not in the LRU list to begin with.
+    */
+    for ( i = 0; i < 31; i++ )
+    {
+        protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
-	for ( i = 0; i < 5; i++ )
-	{
-	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
+    for ( i = 0; i < 5; i++ )
+    {
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
         /* verify cache size */
-	if ( ( cache_ptr->index_len != 41 ) ||
+    if ( ( cache_ptr->index_len != 41 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (2 * VARIABLE_ENTRY_SIZE) +
-	                                (4 * LARGE_ENTRY_SIZE) ) ) {
+                                    (2 * VARIABLE_ENTRY_SIZE) +
+                                    (4 * LARGE_ENTRY_SIZE) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 6.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 6.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    4,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                4,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     if ( pass ) {
 
-	/* Now load three more large entries.  This should result
-	 * in the eviction of (VET, 3), and the unpinning of (VET, 0)
-	 *
-	 * The following table shows the expected states of the variable
-	 * size entries after the test.
-	 *
-	 * 		in
-	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 *
-	 * (VET, 0) 	Y	10 KB	Y	N	-	-
-	 *
-	 * (VET, 1)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 2)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 3)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 4)	Y	 5 KB	N	N	-	-
-	 *
-	 * (VET, 5)	Y	 5 KB	N	N	7	-
-	 *
-	 * (VET, 6)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 7)	Y	10 KB	Y	Y	-	dirty (VET, 6)
-	 *
-	 * Start by updating the expected table for the expected changes in entry status:
-	 */
+    /* Now load three more large entries.  This should result
+    * in the eviction of (VET, 3), and the unpinning of (VET, 0)
+    *
+    * The following table shows the expected states of the variable
+    * size entries after the test.
+    *
+    *         in
+    * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+    *
+    * (VET, 0)     Y    10 KB    Y    N    -    -
+    *
+    * (VET, 1)    N    10 KB    N    N    -    -
+    *
+    * (VET, 2)    N    10 KB    N    N    -    -
+    *
+    * (VET, 3)    N    10 KB    N    N    -    -
+    *
+    * (VET, 4)    Y     5 KB    N    N    -    -
+    *
+    * (VET, 5)    Y     5 KB    N    N    7    -
+    *
+    * (VET, 6)    N    10 KB    N    N    -    -
+    *
+    * (VET, 7)    Y    10 KB    Y    Y    -    dirty (VET, 6)
+    *
+    * Start by updating the expected table for the expected changes in entry status:
+    */
 
-	expected[0].is_pinned    = FALSE;
-	expected[3].in_cache     = FALSE;
-	expected[3].destroyed    = TRUE;
+    expected[0].is_pinned    = FALSE;
+    expected[3].in_cache     = FALSE;
+    expected[3].destroyed    = TRUE;
 
         num_large_entries = 8;
 
-	for ( i = 5; i < 8; i++ )
-	{
-	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
+    for ( i = 5; i < 8; i++ )
+    {
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
         /* verify cache size */
-	if ( ( cache_ptr->index_len != 43 ) ||
+    if ( ( cache_ptr->index_len != 43 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (3 * VARIABLE_ENTRY_SIZE) +
-	                                (7 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->index_size != ((2 * VARIABLE_ENTRY_SIZE / 2) +
-					 (2 * VARIABLE_ENTRY_SIZE) +
-					 (31 * MONSTER_ENTRY_SIZE) +
-					 (8 * LARGE_ENTRY_SIZE)) ) ) {
+                                    (3 * VARIABLE_ENTRY_SIZE) +
+                                    (7 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->index_size != ((2 * VARIABLE_ENTRY_SIZE / 2) +
+                    (2 * VARIABLE_ENTRY_SIZE) +
+                    (31 * MONSTER_ENTRY_SIZE) +
+                    (8 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 7.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 7.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    5,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                5,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     if ( pass ) {
 
-	/* load another large entry.  (VET, 4) should be evicted.
-	 *
-	 * The following table shows the expected states of the variable
-	 * size entries after the test.
-	 *
-	 * 		in
-	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 *
-	 * (VET, 0) 	Y	10 KB	Y	N	-	-
-	 *
-	 * (VET, 1)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 2)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 3)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 4)	N	 5 KB	N	N	-	-
-	 *
-	 * (VET, 5)	Y	 5 KB	N	N	7	-
-	 *
-	 * (VET, 6)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 7)	Y	10 KB	Y	Y	-	dirty (VET, 6)
-	 *
-	 * Start by updating the expected table for the expected changes in entry status:
-	 */
+    /* load another large entry.  (VET, 4) should be evicted.
+    *
+    * The following table shows the expected states of the variable
+    * size entries after the test.
+    *
+    *         in
+    * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+    *
+    * (VET, 0)     Y    10 KB    Y    N    -    -
+    *
+    * (VET, 1)    N    10 KB    N    N    -    -
+    *
+    * (VET, 2)    N    10 KB    N    N    -    -
+    *
+    * (VET, 3)    N    10 KB    N    N    -    -
+    *
+    * (VET, 4)    N     5 KB    N    N    -    -
+    *
+    * (VET, 5)    Y     5 KB    N    N    7    -
+    *
+    * (VET, 6)    N    10 KB    N    N    -    -
+    *
+    * (VET, 7)    Y    10 KB    Y    Y    -    dirty (VET, 6)
+    *
+    * Start by updating the expected table for the expected changes in entry status:
+    */
 
-	expected[4].in_cache     = FALSE;
-	expected[4].destroyed    = TRUE;
+    expected[4].in_cache     = FALSE;
+    expected[4].destroyed    = TRUE;
 
         num_large_entries = 9;
 
-	for ( i = 8; i < 9; i++ )
-	{
-	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
+    for ( i = 8; i < 9; i++ )
+    {
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
         /* verify cache size */
-	if ( ( cache_ptr->index_len != 43 ) ||
+    if ( ( cache_ptr->index_len != 43 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (3 * VARIABLE_ENTRY_SIZE) -
-					(VARIABLE_ENTRY_SIZE / 2) +
-	                                (8 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->index_size != ((1 * VARIABLE_ENTRY_SIZE / 2) +
-				         (2 * VARIABLE_ENTRY_SIZE) +
-				         (31 * MONSTER_ENTRY_SIZE) +
-				         (9 * LARGE_ENTRY_SIZE)) ) ) {
+                                    (3 * VARIABLE_ENTRY_SIZE) -
+                    (VARIABLE_ENTRY_SIZE / 2) +
+                                    (8 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->index_size != ((1 * VARIABLE_ENTRY_SIZE / 2) +
+                        (2 * VARIABLE_ENTRY_SIZE) +
+                        (31 * MONSTER_ENTRY_SIZE) +
+                        (9 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 8.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 8.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    6,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                6,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     if ( pass ) {
 
-	/* Load another large entry.
-	 *
-	 * (VET, 5) should be evicted, and (VET, 7) should be unpinned.
-	 *
-	 * The following table shows the expected states of the variable
-	 * size entries after the test.
-	 *
-	 * 		in
-	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 *
-	 * (VET, 0) 	Y	10 KB	Y	N	-	-
-	 *
-	 * (VET, 1)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 2)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 3)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 4)	N	 5 KB	N	N	-	-
-	 *
-	 * (VET, 5)	N	 5 KB	N	N	-	-
-	 *
-	 * (VET, 6)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 7)	Y	10 KB	Y	N	-	dirty (VET, 6)
-	 *
-	 * Start by updating the expected table for the expected changes in entry status:
-	 */
+    /* Load another large entry.
+    *
+    * (VET, 5) should be evicted, and (VET, 7) should be unpinned.
+    *
+    * The following table shows the expected states of the variable
+    * size entries after the test.
+    *
+    *         in
+    * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+    *
+    * (VET, 0)     Y    10 KB    Y    N    -    -
+    *
+    * (VET, 1)    N    10 KB    N    N    -    -
+    *
+    * (VET, 2)    N    10 KB    N    N    -    -
+    *
+    * (VET, 3)    N    10 KB    N    N    -    -
+    *
+    * (VET, 4)    N     5 KB    N    N    -    -
+    *
+    * (VET, 5)    N     5 KB    N    N    -    -
+    *
+    * (VET, 6)    N    10 KB    N    N    -    -
+    *
+    * (VET, 7)    Y    10 KB    Y    N    -    dirty (VET, 6)
+    *
+    * Start by updating the expected table for the expected changes in entry status:
+    */
 
-	expected[5].in_cache     = FALSE;
-	expected[5].destroyed    = TRUE;
-	expected[7].is_pinned    = FALSE;
+    expected[5].in_cache     = FALSE;
+    expected[5].destroyed    = TRUE;
+    expected[7].is_pinned    = FALSE;
 
         num_large_entries = 10;
 
-	for ( i = 9; i < 10; i++ )
-	{
-	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
+    for ( i = 9; i < 10; i++ )
+    {
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
         /* verify cache size */
-	if ( ( cache_ptr->index_len != 43 ) ||
+    if ( ( cache_ptr->index_len != 43 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (4 * VARIABLE_ENTRY_SIZE) +
-	                                (9 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->index_size != ((2 * VARIABLE_ENTRY_SIZE) +
-				         (31 * MONSTER_ENTRY_SIZE) +
-				         (10 * LARGE_ENTRY_SIZE)) ) ) {
+                                    (4 * VARIABLE_ENTRY_SIZE) +
+                                    (9 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->index_size != ((2 * VARIABLE_ENTRY_SIZE) +
+                        (31 * MONSTER_ENTRY_SIZE) +
+                        (10 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 9.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 9.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    7,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                7,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     if ( pass ) {
 
         /* Again, touch all the non VARIABLE_ENTRY_TYPE entries in the
-	 * cache to bring all the VARIABLE_ENTRY_TYPE entries to the
-	 * end of the LRU list.
-	 *
-	 * Both (VET, 0) and (VET, 7) have been unpinned, so they are
-	 * now in the LRU list.
-	 */
-	for ( i = 0; i < 31; i++ )
-	{
-	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
+    * cache to bring all the VARIABLE_ENTRY_TYPE entries to the
+    * end of the LRU list.
+    *
+    * Both (VET, 0) and (VET, 7) have been unpinned, so they are
+    * now in the LRU list.
+    */
+    for ( i = 0; i < 31; i++ )
+    {
+        protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
-	for ( i = 0; i < 10; i++ )
-	{
-	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
+    for ( i = 0; i < 10; i++ )
+    {
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
         /* verify cache size */
-	if ( ( cache_ptr->index_len != 43 ) ||
+    if ( ( cache_ptr->index_len != 43 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (4 * VARIABLE_ENTRY_SIZE) +
-	                                (9 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->index_size != ((2 * VARIABLE_ENTRY_SIZE) +
-				         (31 * MONSTER_ENTRY_SIZE) +
-				         (10 * LARGE_ENTRY_SIZE)) ) ) {
+                                    (4 * VARIABLE_ENTRY_SIZE) +
+                                    (9 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->index_size != ((2 * VARIABLE_ENTRY_SIZE) +
+                        (31 * MONSTER_ENTRY_SIZE) +
+                        (10 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 10.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 10.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    8,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                8,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     if ( pass ) {
 
-	/* load two more large entries.
-	 *
-	 * (VET, 0) should be flushed, but not evicted initially since it is dirty.
-	 *
-	 * (VET, 7) should be evicted, but (VET, 7) has an eviction operation that
-	 * dirties (VET, 6).  Since (VET, 6) is not in the cache, it will be loaded.
-	 * Since this results in no net increase in free space, the cache will
-	 * continue to attempt to create free space.
-	 *
-	 * The cache will then flush all the monster and large entries, but since they
-	 * are all dirty, they will not be evicted.
-	 *
-	 * Finally, it will reach (VET, 0) again, and evict it on the second pass.
-	 * This finally makes the necessary space.
-	 *
-	 * The following table shows the expected states of the variable
-	 * size entries after the test.
-	 *
-	 * 		in
-	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 *
-	 * (VET, 0) 	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 1)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 2)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 3)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 4)	N	 5 KB	N	N	-	-
-	 *
-	 * (VET, 5)	N	 5 KB	N	N	-	-
-	 *
-	 * (VET, 6)	Y	10 KB	Y	N	-	-
-	 *
-	 * (VET, 7)	N	10 KB	N	N	-	-
-	 *
-	 * Start by updating the expected table for the expected changes in entry status:
-	 *
-	 * Note that we reset the loaded, cleared, flushed, and destroyed fields of
-	 * (VET,6) so we can track what is happening.
-	 */
-	base_addr = entries[VARIABLE_ENTRY_TYPE];
-	entry_ptr = &(base_addr[6]);
-	entry_ptr->loaded = FALSE;
-	entry_ptr->cleared = FALSE;
-	entry_ptr->flushed = FALSE;
-	entry_ptr->destroyed = FALSE;
+    /* load two more large entries.
+    *
+    * (VET, 0) should be flushed, but not evicted initially since it is dirty.
+    *
+    * (VET, 7) should be evicted, but (VET, 7) has an eviction operation that
+    * dirties (VET, 6).  Since (VET, 6) is not in the cache, it will be loaded.
+    * Since this results in no net increase in free space, the cache will
+    * continue to attempt to create free space.
+    *
+    * The cache will then flush all the monster and large entries, but since they
+    * are all dirty, they will not be evicted.
+    *
+    * Finally, it will reach (VET, 0) again, and evict it on the second pass.
+    * This finally makes the necessary space.
+    *
+    * The following table shows the expected states of the variable
+    * size entries after the test.
+    *
+    *         in
+    * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+    *
+    * (VET, 0)     N    10 KB    N    N    -    -
+    *
+    * (VET, 1)    N    10 KB    N    N    -    -
+    *
+    * (VET, 2)    N    10 KB    N    N    -    -
+    *
+    * (VET, 3)    N    10 KB    N    N    -    -
+    *
+    * (VET, 4)    N     5 KB    N    N    -    -
+    *
+    * (VET, 5)    N     5 KB    N    N    -    -
+    *
+    * (VET, 6)    Y    10 KB    Y    N    -    -
+    *
+    * (VET, 7)    N    10 KB    N    N    -    -
+    *
+    * Start by updating the expected table for the expected changes in entry status:
+    *
+    * Note that we reset the loaded, cleared, flushed, and destroyed fields of
+    * (VET,6) so we can track what is happening.
+    */
+    base_addr = entries[VARIABLE_ENTRY_TYPE];
+    entry_ptr = &(base_addr[6]);
+    entry_ptr->loaded = FALSE;
+    entry_ptr->cleared = FALSE;
+    entry_ptr->flushed = FALSE;
+    entry_ptr->destroyed = FALSE;
 
-	expected[0].in_cache     = FALSE;
-	expected[0].is_dirty     = FALSE;
-	expected[0].flushed      = TRUE;
-	expected[0].destroyed    = TRUE;
-	expected[6].in_cache	 = TRUE;
-	expected[6].is_dirty     = TRUE;
-	expected[6].loaded       = TRUE;
-	expected[6].flushed      = FALSE;
-	expected[6].destroyed    = FALSE;
-	expected[7].in_cache     = FALSE;
-	expected[7].flushed      = TRUE;
-	expected[7].destroyed    = TRUE;
+    expected[0].in_cache     = FALSE;
+    expected[0].is_dirty     = FALSE;
+    expected[0].flushed      = TRUE;
+    expected[0].destroyed    = TRUE;
+    expected[6].in_cache     = TRUE;
+    expected[6].is_dirty     = TRUE;
+    expected[6].loaded       = TRUE;
+    expected[6].flushed      = FALSE;
+    expected[6].destroyed    = FALSE;
+    expected[7].in_cache     = FALSE;
+    expected[7].flushed      = TRUE;
+    expected[7].destroyed    = TRUE;
 
         num_large_entries = 12;
 
-	/* a newly loaded entry is not inserted in the cache until after
-	 * space has been made for it.  Thus (LET, 11) will not be flushed.
-	 */
-	for ( i = num_variable_entries;
-	      i < num_variable_entries + num_monster_entries + num_large_entries - 1;
-	      i++ )
-	{
+    /* a newly loaded entry is not inserted in the cache until after
+    * space has been made for it.  Thus (LET, 11) will not be flushed.
+    */
+    for ( i = num_variable_entries;
+        i < num_variable_entries + num_monster_entries + num_large_entries - 1;
+        i++ )
+    {
             expected[i].is_dirty = FALSE;
-	    expected[i].flushed  = TRUE;
-	}
+        expected[i].flushed  = TRUE;
+    }
 
-	for ( i = 10; i < 12; i++ )
-	{
-	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
+    for ( i = 10; i < 12; i++ )
+    {
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
         /* verify cache size  */
-	if ( ( cache_ptr->index_len != 44 ) ||
+    if ( ( cache_ptr->index_len != 44 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (5 * VARIABLE_ENTRY_SIZE) +
-	                                (11 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->index_size != ((1 * VARIABLE_ENTRY_SIZE) +
-					 (31 * MONSTER_ENTRY_SIZE) +
-					 (12 * LARGE_ENTRY_SIZE)) ) ) {
+                                    (5 * VARIABLE_ENTRY_SIZE) +
+                                    (11 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->index_size != ((1 * VARIABLE_ENTRY_SIZE) +
+                    (31 * MONSTER_ENTRY_SIZE) +
+                    (12 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 11.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 11.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    9,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                9,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     if ( pass ) {
 
         /* Again, touch all the non VARIABLE_ENTRY_TYPE entries in the
-	 * cache to bring the last remaining VARIABLE_ENTRY_TYPE entry to the
-	 * end of the LRU list.
-	 */
-	for ( i = 0; i < num_monster_entries; i++ )
-	{
-	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
+    * cache to bring the last remaining VARIABLE_ENTRY_TYPE entry to the
+    * end of the LRU list.
+    */
+    for ( i = 0; i < num_monster_entries; i++ )
+    {
+        protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
-	for ( i = 0; i < num_large_entries; i++ )
-	{
-	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
+    for ( i = 0; i < num_large_entries; i++ )
+    {
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
-	/* update the expected array to mark all these entries dirty again. */
-	for ( i = num_variable_entries;
-	      i < num_variable_entries + num_monster_entries + num_large_entries - 1;
-	      i++ )
-	{
+    /* update the expected array to mark all these entries dirty again. */
+    for ( i = num_variable_entries;
+        i < num_variable_entries + num_monster_entries + num_large_entries - 1;
+        i++ )
+    {
             expected[i].is_dirty = TRUE;
-	}
+    }
 
         /* verify cache size */
-	if ( ( cache_ptr->index_len != 44 ) ||
+    if ( ( cache_ptr->index_len != 44 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (5 * VARIABLE_ENTRY_SIZE) +
-	                                (11 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->index_size != ((1 * VARIABLE_ENTRY_SIZE) +
-					 (31 * MONSTER_ENTRY_SIZE) +
-					 (12 * LARGE_ENTRY_SIZE)) ) ) {
+                                    (5 * VARIABLE_ENTRY_SIZE) +
+                                    (11 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->index_size != ((1 * VARIABLE_ENTRY_SIZE) +
+                    (31 * MONSTER_ENTRY_SIZE) +
+                    (12 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 12.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 12.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    10,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                10,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     if ( pass ) {
 
         /* Load two more large entries.
-	 *
-	 * Since (VET, 6) is dirty, at first this will just cause (VET, 6) to be flushed.
-	 *
-	 * But all other entries in the cache are dirty, so the cache will flush them all,
-	 * and then evict (VET, 6) on the second pass.
-	 *
-	 * The following table shows the expected states of the variable
-	 * size entries after the test.
-	 *
-	 * 		in
-	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 *
-	 * (VET, 0) 	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 1)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 2)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 3)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 4)	N	 5 KB	N	N	-	-
-	 *
-	 * (VET, 5)	N	 5 KB	N	N	-	-
-	 *
-	 * (VET, 6)	N	10 KB	N	N	-	-
-	 *
-	 * (VET, 7)	N	10 KB	N	N	-	-
-	 *
-	 * Start by updating the expected table for the expected changes in entry status:
-	 */
+    *
+    * Since (VET, 6) is dirty, at first this will just cause (VET, 6) to be flushed.
+    *
+    * But all other entries in the cache are dirty, so the cache will flush them all,
+    * and then evict (VET, 6) on the second pass.
+    *
+    * The following table shows the expected states of the variable
+    * size entries after the test.
+    *
+    *         in
+    * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+    *
+    * (VET, 0)     N    10 KB    N    N    -    -
+    *
+    * (VET, 1)    N    10 KB    N    N    -    -
+    *
+    * (VET, 2)    N    10 KB    N    N    -    -
+    *
+    * (VET, 3)    N    10 KB    N    N    -    -
+    *
+    * (VET, 4)    N     5 KB    N    N    -    -
+    *
+    * (VET, 5)    N     5 KB    N    N    -    -
+    *
+    * (VET, 6)    N    10 KB    N    N    -    -
+    *
+    * (VET, 7)    N    10 KB    N    N    -    -
+    *
+    * Start by updating the expected table for the expected changes in entry status:
+    */
 
-	expected[6].in_cache	 = FALSE;
-	expected[6].is_dirty     = FALSE;
-	expected[6].flushed      = TRUE;
-	expected[6].destroyed    = TRUE;
+    expected[6].in_cache     = FALSE;
+    expected[6].is_dirty     = FALSE;
+    expected[6].flushed      = TRUE;
+    expected[6].destroyed    = TRUE;
 
         num_large_entries = 14;
 
-	/* a newly loaded entry is not inserted in the cache until after
-	 * space has been made for it.  Thus (LET, 13) will not be flushed.
-	 */
-	for ( i = num_variable_entries;
-	      i < num_variable_entries + num_monster_entries + num_large_entries - 1;
-	      i++ )
-	{
+    /* a newly loaded entry is not inserted in the cache until after
+    * space has been made for it.  Thus (LET, 13) will not be flushed.
+    */
+    for ( i = num_variable_entries;
+        i < num_variable_entries + num_monster_entries + num_large_entries - 1;
+        i++ )
+    {
             expected[i].is_dirty = FALSE;
-	    expected[i].flushed  = TRUE;
-	}
+        expected[i].flushed  = TRUE;
+    }
 
-	for ( i = 12; i < 14; i++ )
-	{
-	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
+    for ( i = 12; i < 14; i++ )
+    {
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
             unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
-	}
+    }
 
         /* verify cache size  */
-	if ( ( cache_ptr->index_len != 45 ) ||
+    if ( ( cache_ptr->index_len != 45 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
-	                                (6 * VARIABLE_ENTRY_SIZE) +
-	                                (13 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->index_size != ((31 * MONSTER_ENTRY_SIZE) +
-					 (14 * LARGE_ENTRY_SIZE)) ) ) {
+                                    (6 * VARIABLE_ENTRY_SIZE) +
+                                    (13 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->index_size != ((31 * MONSTER_ENTRY_SIZE) +
+                    (14 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
-	    failure_mssg = "unexpected size/len in flush op eviction test 13.";
-	}
+        failure_mssg = "unexpected size/len in flush op eviction test 13.";
+    }
 
-	/* verify entry status */
-	verify_entry_status(cache_ptr,
-			    11,
+    /* verify entry status */
+    verify_entry_status(cache_ptr,
+                11,
                             (num_variable_entries + num_monster_entries + num_large_entries),
-			    expected);
+                expected);
     }
 
     /* at this point we have cycled all the variable size entries through
@@ -10772,7 +10818,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
      */
     if ( pass ) {
 
-	if ( ( cache_ptr->insertions[VARIABLE_ENTRY_TYPE] != 0 ) ||
+    if ( ( cache_ptr->insertions[VARIABLE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->pinned_insertions[VARIABLE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->clears[VARIABLE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->flushes[VARIABLE_ENTRY_TYPE] != 14 ) ||
@@ -10797,7 +10843,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->insertions[LARGE_ENTRY_TYPE] != 0 ) ||
+    if ( ( cache_ptr->insertions[LARGE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->pinned_insertions[LARGE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->clears[LARGE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->flushes[LARGE_ENTRY_TYPE] != 38 ) ||
@@ -10822,7 +10868,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->insertions[MONSTER_ENTRY_TYPE] != 0 ) ||
+    if ( ( cache_ptr->insertions[MONSTER_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->pinned_insertions[MONSTER_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->clears[MONSTER_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->flushes[MONSTER_ENTRY_TYPE] != 93 ) ||
@@ -10848,33 +10894,33 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 
     if ( pass ) {
 
-	reset_entries();
+    reset_entries();
     }
 
     return;
 
 } /* check_flush_cache__flush_op_eviction_test() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache__single_entry()
+ * Function:    check_flush_cache__single_entry()
  *
- * Purpose:	Verify that flush_cache behaves as expected when the cache
- *		contains only one element.
+ * Purpose:    Verify that flush_cache behaves as expected when the cache
+ *        contains only one element.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              1/12/05
  *
  * Modifications:
  *
- * 		JRM -- 3/29/06
- * 		Added tests for pinned entries.
+ *         JRM -- 3/29/06
+ *         Added tests for pinned entries.
  *
- * 		JRM -- 5/17/06
- * 		Complete reqrite of pinned entry tests to accomodate
- * 		the new H5C_mark_entry_dirty() call.
+ *         JRM -- 5/17/06
+ *         Complete reqrite of pinned entry tests to accomodate
+ *         the new H5C_mark_entry_dirty() call.
  *
  *-------------------------------------------------------------------------
  */
@@ -10900,8 +10946,8 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 1);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 1);
         }
 
         check_flush_cache__single_entry_test
@@ -10919,15 +10965,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 2);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 2);
         }
 
         check_flush_cache__single_entry_test
@@ -10945,15 +10991,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 3);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 3);
         }
 
         check_flush_cache__single_entry_test
@@ -10971,15 +11017,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 4);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 4);
         }
 
         check_flush_cache__single_entry_test
@@ -10997,15 +11043,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 5);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 5);
         }
 
         check_flush_cache__single_entry_test
@@ -11023,15 +11069,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 6);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 6);
         }
 
         check_flush_cache__single_entry_test
@@ -11049,15 +11095,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 7);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 7);
         }
 
         check_flush_cache__single_entry_test
@@ -11075,15 +11121,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 8);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 8);
         }
 
         check_flush_cache__single_entry_test
@@ -11101,15 +11147,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 9);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 9);
         }
 
         check_flush_cache__single_entry_test
@@ -11128,15 +11174,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 10);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 10);
         }
 
         check_flush_cache__single_entry_test
@@ -11155,15 +11201,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 11);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 11);
         }
 
         check_flush_cache__single_entry_test
@@ -11182,15 +11228,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 12);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 12);
         }
 
         check_flush_cache__single_entry_test
@@ -11209,15 +11255,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 13);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 13);
         }
 
         check_flush_cache__single_entry_test
@@ -11236,15 +11282,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 14);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 14);
         }
 
         check_flush_cache__single_entry_test
@@ -11263,15 +11309,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 15);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 15);
         }
 
         check_flush_cache__single_entry_test
@@ -11291,15 +11337,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 16);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 16);
         }
 
         check_flush_cache__single_entry_test
@@ -11319,15 +11365,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 17);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 17);
         }
 
         check_flush_cache__single_entry_test
@@ -11345,15 +11391,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 18);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 18);
         }
 
         check_flush_cache__single_entry_test
@@ -11371,15 +11417,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 19);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 19);
         }
 
         check_flush_cache__single_entry_test
@@ -11397,15 +11443,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 20);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 20);
         }
 
         check_flush_cache__single_entry_test
@@ -11423,15 +11469,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 21);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 21);
         }
 
         check_flush_cache__single_entry_test
@@ -11449,15 +11495,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 22);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 22);
         }
 
         check_flush_cache__single_entry_test
@@ -11475,15 +11521,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 23);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 23);
         }
 
         check_flush_cache__single_entry_test
@@ -11501,15 +11547,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 24);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 24);
         }
 
         check_flush_cache__single_entry_test
@@ -11527,15 +11573,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 25);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 25);
         }
 
         check_flush_cache__single_entry_test
@@ -11554,15 +11600,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 26);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 26);
         }
 
         check_flush_cache__single_entry_test
@@ -11581,15 +11627,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 27);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 27);
         }
 
         check_flush_cache__single_entry_test
@@ -11608,15 +11654,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 28);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 28);
         }
 
         check_flush_cache__single_entry_test
@@ -11635,15 +11681,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 29);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 29);
         }
 
         check_flush_cache__single_entry_test
@@ -11662,15 +11708,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 30);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 30);
         }
 
         check_flush_cache__single_entry_test
@@ -11689,15 +11735,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 31);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 31);
         }
 
         check_flush_cache__single_entry_test
@@ -11717,15 +11763,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 32);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 32);
         }
 
         check_flush_cache__single_entry_test
@@ -11745,15 +11791,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 33);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 33);
         }
 
         check_flush_cache__single_entry_test
@@ -11771,15 +11817,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 34);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 34);
         }
 
         check_flush_cache__single_entry_test
@@ -11797,15 +11843,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 35);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 35);
         }
 
         check_flush_cache__single_entry_test
@@ -11823,15 +11869,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 36);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 36);
         }
 
         check_flush_cache__single_entry_test
@@ -11849,15 +11895,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 37);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 37);
         }
 
         check_flush_cache__single_entry_test
@@ -11875,15 +11921,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 38);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 38);
         }
 
         check_flush_cache__single_entry_test
@@ -11901,15 +11947,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 39);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 39);
         }
 
         check_flush_cache__single_entry_test
@@ -11927,15 +11973,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 40);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 40);
         }
 
         check_flush_cache__single_entry_test
@@ -11953,15 +11999,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 41);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 41);
         }
 
         check_flush_cache__single_entry_test
@@ -11980,15 +12026,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 42);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 42);
         }
 
         check_flush_cache__single_entry_test
@@ -12007,15 +12053,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 43);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 43);
         }
 
         check_flush_cache__single_entry_test
@@ -12034,15 +12080,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 44);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 44);
         }
 
         check_flush_cache__single_entry_test
@@ -12061,15 +12107,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 45);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 45);
         }
 
         check_flush_cache__single_entry_test
@@ -12088,15 +12134,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 46);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 46);
         }
 
         check_flush_cache__single_entry_test
@@ -12115,15 +12161,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 47);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 47);
         }
 
         check_flush_cache__single_entry_test
@@ -12143,15 +12189,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 48);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 48);
         }
 
         check_flush_cache__single_entry_test
@@ -12171,15 +12217,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 49);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 49);
         }
 
         check_flush_cache__single_entry_test
@@ -12197,15 +12243,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 50);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 50);
         }
 
         check_flush_cache__single_entry_test
@@ -12223,15 +12269,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 51);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 51);
         }
 
         check_flush_cache__single_entry_test
@@ -12249,15 +12295,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 52);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 52);
         }
 
         check_flush_cache__single_entry_test
@@ -12275,15 +12321,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 53);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 53);
         }
 
         check_flush_cache__single_entry_test
@@ -12301,15 +12347,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 54);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 54);
         }
 
         check_flush_cache__single_entry_test
@@ -12327,15 +12373,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 55);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 55);
         }
 
         check_flush_cache__single_entry_test
@@ -12353,15 +12399,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 56);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 56);
         }
 
         check_flush_cache__single_entry_test
@@ -12379,15 +12425,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 57);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 57);
         }
 
         check_flush_cache__single_entry_test
@@ -12406,15 +12452,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 58);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 58);
         }
 
         check_flush_cache__single_entry_test
@@ -12433,15 +12479,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 59);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 59);
         }
 
         check_flush_cache__single_entry_test
@@ -12460,15 +12506,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 60);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 60);
         }
 
         check_flush_cache__single_entry_test
@@ -12487,15 +12533,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ FALSE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 61);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 61);
         }
 
         check_flush_cache__single_entry_test
@@ -12514,15 +12560,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 62);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 62);
         }
 
         check_flush_cache__single_entry_test
@@ -12541,15 +12587,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 63);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 63);
         }
 
         check_flush_cache__single_entry_test
@@ -12569,15 +12615,15 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
     if ( pass ) {
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 64);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 64);
         }
 
         check_flush_cache__single_entry_test
@@ -12597,8 +12643,8 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* expected_destroyed   */ TRUE
         );
 
-	if ( show_progress ) {
-	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+    if ( show_progress ) {
+        HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
         }
     }
 
@@ -12606,22 +12652,22 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
     /* Now run single entry tests for pinned entries.  Test all combinations
      * of:
      *
-     * 	1) Unpin by unprotect vs. unpin by call to H5C_unpin_entry().
+     *     1) Unpin by unprotect vs. unpin by call to H5C_unpin_entry().
      *
-     * 	2) Marked dirty by unprotect or not.
+     *     2) Marked dirty by unprotect or not.
      *
-     * 	3) Marked dirty by call to H5C_mark_entry_dirty() or not.
+     *     3) Marked dirty by call to H5C_mark_entry_dirty() or not.
      *
      *  4) Marked dirty by call to H5C_mark_entry_dirty() while protected
      *     or not.
      *
      *  5) Marked dirty by call to H5C_mark_entry_dirty() while pinned or not.
      *
-     * 	6) Entry marked for flush or not.
+     *     6) Entry marked for flush or not.
      *
-     * 	7) Call flush with H5C__FLUSH_MARKED_ENTRIES_FLAG or not.
+     *     7) Call flush with H5C__FLUSH_MARKED_ENTRIES_FLAG or not.
      *
-     * 	8) Call flush with H5C__FLUSH_CLEAR_ONLY_FLAG or not.
+     *     8) Call flush with H5C__FLUSH_CLEAR_ONLY_FLAG or not.
      *
      * This yields a total of 256 tests.
      *
@@ -12665,325 +12711,325 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
 
     if ( pass ) {
 
-	int i;
-	struct pinned_single_entry_test_spec
-	{
-            int 		test_num;
-            int			entry_type;
-            int			entry_idx;
-            hbool_t		mark_dirty;
-            hbool_t		pop_mark_dirty_prot;
-            hbool_t		pop_mark_dirty_pinned;
-            hbool_t		unprotect_unpin;
-            unsigned int	flags;
-            unsigned int	flush_flags;
-            hbool_t		expected_cleared;
-            hbool_t		expected_flushed;
-            hbool_t		expected_destroyed;
-	} spec[256] =
-	/*                                    pop    pop
-	 *                         ent        mark   mark
-	 *  test  entry            -ry mark   dirty  dirty  unprot                             flush                                                        expect  expect expect
+    int i;
+    struct pinned_single_entry_test_spec
+    {
+            int         test_num;
+            int            entry_type;
+            int            entry_idx;
+            hbool_t        mark_dirty;
+            hbool_t        pop_mark_dirty_prot;
+            hbool_t        pop_mark_dirty_pinned;
+            hbool_t        unprotect_unpin;
+            unsigned int    flags;
+            unsigned int    flush_flags;
+            hbool_t        expected_cleared;
+            hbool_t        expected_flushed;
+            hbool_t        expected_destroyed;
+    } spec[256] =
+    /*                                    pop    pop
+    *                         ent        mark   mark
+    *  test  entry            -ry mark   dirty  dirty  unprot                             flush                                                        expect  expect expect
          *  num   type             idx dirty  prot   pinned unpin  flags                       flags                                                        clear   flush  destroy
-	 */
-	{ {   1,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
-	  {   2,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
-	  {   3,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   4,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   5,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   6,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   7,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   8,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   9,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  10,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  11,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  12,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  13,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  14,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  15,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  16,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  17,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  18,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  19,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  20,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  21,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  22,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  23,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  24,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  25,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  26,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  27,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  28,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  29,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  30,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  31,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  32,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  33,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
-	  {  34,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
-	  {  35,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  36,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  37,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  38,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  39,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  40,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  41,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  42,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  43,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  44,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  45,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  46,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  47,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  48,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  49,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  50,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  51,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  52,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  53,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  54,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  55,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  56,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  57,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  58,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  59,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  60,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  61,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  62,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  63,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  64,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  65,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  66,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  67,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  68,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  69,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  70,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  71,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  72,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  73,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  74,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  75,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  76,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  77,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  78,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  79,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  80,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  81,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  82,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  83,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  84,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  85,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  86,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  87,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  88,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  89,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  90,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  91,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  92,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  93,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  94,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  95,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  96,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  97,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  98,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  99,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 100,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 101,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 102,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 103,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 104,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 105,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 106,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 107,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 108,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 109,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 110,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 111,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 112,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 113,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 114,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 115,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 116,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 117,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 118,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 119,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 120,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 121,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 122,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 123,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 124,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 125,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 126,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 127,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 128,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 129,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
-	  { 130,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
-	  { 131,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 132,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 133,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 134,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 135,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 136,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 137,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 138,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 139,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 140,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 141,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 142,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 143,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 144,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 145,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 146,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 147,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 148,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 149,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 150,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 151,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 152,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 153,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 154,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 155,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 156,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 157,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 158,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 159,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 160,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 161,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
-	  { 162,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
-	  { 163,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 164,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 165,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 166,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 167,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 168,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 169,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 170,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 171,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 172,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 173,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 174,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 175,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 176,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 177,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 178,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 179,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 180,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 181,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 182,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 183,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 184,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 185,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 186,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 187,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 188,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 189,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 190,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 191,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 192,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 193,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 194,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 195,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 196,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 197,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 198,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 199,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 200,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 201,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 202,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 203,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 204,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 205,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 206,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 207,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 208,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 209,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 210,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 211,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 212,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 213,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 214,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 215,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 216,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 217,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 218,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 219,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 220,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 221,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 222,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 223,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 224,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 225,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 226,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 227,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 228,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 229,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 230,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 231,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 232,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 233,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 234,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 235,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 236,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 237,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 238,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 239,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 240,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 241,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 242,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 243,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 244,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 245,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 246,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 247,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 248,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 249,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 250,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 251,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 252,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 253,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 254,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 255,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 256,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE } };
+    */
+    { {   1,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
+    {   2,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
+    {   3,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {   4,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {   5,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {   6,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {   7,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {   8,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {   9,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  10,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  11,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  12,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  13,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  14,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  15,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  16,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  17,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  18,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  19,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  20,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  21,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  22,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  23,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  24,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  25,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  26,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  27,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  28,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  29,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  30,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  31,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  32,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  33,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
+    {  34,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
+    {  35,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  36,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  37,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  38,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  39,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  40,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  41,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  42,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  43,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  44,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  45,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  46,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  47,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  48,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  49,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  50,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  51,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  52,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  53,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  54,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  55,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  56,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  57,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  58,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  59,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  60,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  61,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  62,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  63,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  64,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+    {  65,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  66,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  67,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  68,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  69,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  70,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  71,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  72,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  73,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  74,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  75,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  76,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  77,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  78,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  79,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  80,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  81,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  82,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  83,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  84,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  85,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  86,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  87,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  88,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  89,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  90,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  91,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  92,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  93,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  94,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  95,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  96,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  97,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  98,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    {  99,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    { 100,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    { 101,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 102,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 103,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 104,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 105,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    { 106,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    { 107,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    { 108,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+    { 109,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 110,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 111,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 112,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 113,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 114,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 115,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 116,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 117,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 118,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 119,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 120,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 121,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 122,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 123,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 124,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 125,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 126,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 127,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 128,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+    { 129,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
+    { 130,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
+    { 131,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 132,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 133,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 134,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 135,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 136,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 137,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 138,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 139,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 140,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 141,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 142,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 143,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 144,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 145,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 146,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 147,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 148,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 149,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 150,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 151,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 152,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 153,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 154,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 155,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 156,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 157,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 158,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 159,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 160,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 161,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
+    { 162,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
+    { 163,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 164,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 165,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 166,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 167,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 168,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 169,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 170,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 171,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 172,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 173,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 174,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 175,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 176,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 177,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 178,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 179,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 180,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 181,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 182,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 183,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 184,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 185,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 186,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 187,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 188,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 189,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 190,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 191,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 192,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+    { 193,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 194,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 195,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 196,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 197,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 198,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 199,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 200,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 201,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 202,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 203,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 204,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 205,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 206,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 207,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 208,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 209,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 210,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 211,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 212,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 213,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 214,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 215,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 216,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 217,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 218,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 219,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 220,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 221,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 222,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 223,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 224,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 225,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 226,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 227,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 228,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 229,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 230,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 231,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 232,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 233,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 234,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 235,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 236,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+    { 237,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 238,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 239,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 240,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 241,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 242,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 243,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 244,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 245,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 246,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 247,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 248,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 249,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 250,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 251,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 252,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 253,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 254,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 255,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+    { 256,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE } };
 
-	i = 0;
-	while ( ( pass ) && ( i < 256 ) )
-	{
+    i = 0;
+    while ( ( pass ) && ( i < 256 ) )
+    {
 
-	    if ( show_progress ) {
-	        HDfprintf(stdout, "%s: running pinned test %d.\n", fcn_name, i);
+        if ( show_progress ) {
+            HDfprintf(stdout, "%s: running pinned test %d.\n", fcn_name, i);
             }
 
-	    check_flush_cache__pinned_single_entry_test
-	    (
+        check_flush_cache__pinned_single_entry_test
+        (
                 /* file_ptr             */ file_ptr,
                 /* test_num              */ spec[i].test_num,
                 /* entry_type            */ spec[i].entry_type,
                 /* entry_idx             */ spec[i].entry_idx,
-	        /* mark_dirty            */ spec[i].mark_dirty,
+            /* mark_dirty            */ spec[i].mark_dirty,
                 /* pop_mark_dirty_prot   */ spec[i].pop_mark_dirty_prot,
                 /* pop_mark_dirty_pinned */ spec[i].pop_mark_dirty_pinned,
-	        /* unprotect_unpin       */ spec[i].unprotect_unpin,
+            /* unprotect_unpin       */ spec[i].unprotect_unpin,
                 /* flags                 */ spec[i].flags,
                 /* flush_flags           */ spec[i].flush_flags,
                 /* expected_cleared      */ spec[i].expected_cleared,
                 /* expected_flushed      */ spec[i].expected_flushed,
                 /* expected_destroyed    */ spec[i].expected_destroyed
             );
-	    i++;
-	}
+        i++;
+    }
     }
 
     return;
 
 } /* check_flush_cache__single_entry() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache__single_entry_test()
+ * Function:    check_flush_cache__single_entry_test()
  *
- * Purpose:	Run a single entry flush cache test.
+ * Purpose:    Run a single entry flush cache test.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              1/12/05
  *
  * Modifications:
@@ -13007,7 +13053,7 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
     /* const char *   fcn_name = "check_flush_cache__single_entry_test"; */
     H5C_t *        cache_ptr = file_ptr->shared->cache;
     static char    msg[128];
-    herr_t	   result;
+    herr_t       result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
@@ -13153,26 +13199,26 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
 
 } /* check_flush_cache__single_entry_test() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_cache__pinned_single_entry_test()
+ * Function:    check_flush_cache__pinned_single_entry_test()
  *
- * Purpose:	Run a pinned single entry flush cache test.
+ * Purpose:    Run a pinned single entry flush cache test.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              3/28/06
  *
  * Modifications:
  *
- * 		JRM -- 5/17/06
- * 		Added the pop_mark_dirty_prot and pop_mark_dirty_pinned
- * 		flags and supporting code to allow us to test the
- * 		H5C_mark_entry_dirty() call.  Use the
- * 		call to mark the entry dirty while the entry is protected
- * 		if pop_mark_dirty_prot is TRUE, and to mark the entry
- * 		dirty while it is pinned if pop_mark_dirty_pinned is TRUE.
+ *         JRM -- 5/17/06
+ *         Added the pop_mark_dirty_prot and pop_mark_dirty_pinned
+ *         flags and supporting code to allow us to test the
+ *         H5C_mark_entry_dirty() call.  Use the
+ *         call to mark the entry dirty while the entry is protected
+ *         if pop_mark_dirty_prot is TRUE, and to mark the entry
+ *         dirty while it is pinned if pop_mark_dirty_pinned is TRUE.
  *
  *-------------------------------------------------------------------------
  */
@@ -13182,10 +13228,10 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
                                             int test_num,
                                             int entry_type,
                                             int entry_idx,
-					    hbool_t mark_dirty,
-					    hbool_t pop_mark_dirty_prot,
-					    hbool_t pop_mark_dirty_pinned,
-					    hbool_t unprotect_unpin,
+                        hbool_t mark_dirty,
+                        hbool_t pop_mark_dirty_prot,
+                        hbool_t pop_mark_dirty_pinned,
+                        hbool_t unprotect_unpin,
                                             unsigned int flags,
                                             unsigned int flush_flags,
                                             hbool_t expected_cleared,
@@ -13196,7 +13242,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char    msg[128];
     hbool_t        expected_loaded = TRUE;
-    herr_t	   result;
+    herr_t       result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
@@ -13234,22 +13280,22 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 
         protect_entry(file_ptr, entry_type, entry_idx);
 
-	if ( pop_mark_dirty_prot ) {
+    if ( pop_mark_dirty_prot ) {
 
-	    mark_entry_dirty(entry_type, entry_idx);
-	}
+        mark_entry_dirty(entry_type, entry_idx);
+    }
 
         unprotect_entry(file_ptr, entry_type, entry_idx, (flags | H5C__PIN_ENTRY_FLAG));
 
-	if ( mark_dirty ) {
+    if ( mark_dirty ) {
 
             mark_entry_dirty(entry_type, entry_idx);
-	}
+    }
 
-	if ( pop_mark_dirty_pinned ) {
+    if ( pop_mark_dirty_pinned ) {
 
-	    mark_entry_dirty(entry_type, entry_idx);
-	}
+        mark_entry_dirty(entry_type, entry_idx);
+    }
     }
 
     if ( pass ) {
@@ -13365,15 +13411,15 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 
 } /* check_flush_cache__pinned_single_entry_test() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_get_entry_status()
+ * Function:    check_get_entry_status()
  *
- * Purpose:	Verify that H5C_get_entry_status() behaves as expected.
+ * Purpose:    Verify that H5C_get_entry_status() behaves as expected.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/28/06
  *
  * Modifications:
@@ -13387,11 +13433,11 @@ check_get_entry_status(void)
     const char *  fcn_name = "check_get_entry_status";
     static char   msg[128];
     herr_t        result;
-    hbool_t	  in_cache;
-    hbool_t	  is_dirty;
-    hbool_t	  is_protected;
-    hbool_t	  is_pinned;
-    size_t	  entry_size;
+    hbool_t      in_cache;
+    hbool_t      is_dirty;
+    hbool_t      is_protected;
+    hbool_t      is_pinned;
+    size_t      entry_size;
     H5F_t *       file_ptr = NULL;
     test_entry_t * base_addr = NULL;
     test_entry_t * entry_ptr = NULL;
@@ -13430,14 +13476,14 @@ check_get_entry_status(void)
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                 &in_cache, &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 1.");
             failure_mssg = msg;
 
-	} else if ( in_cache ) {
+    } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
@@ -13458,14 +13504,14 @@ check_get_entry_status(void)
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                 &in_cache, &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 2.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || is_dirty || is_protected || is_pinned ) {
+    } else if ( !in_cache || is_dirty || is_protected || is_pinned ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
@@ -13484,14 +13530,14 @@ check_get_entry_status(void)
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                 &in_cache, &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 3.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
+    } else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
@@ -13510,14 +13556,14 @@ check_get_entry_status(void)
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                 &in_cache, &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 4.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || is_dirty || is_protected || !is_pinned ) {
+    } else if ( !in_cache || is_dirty || is_protected || !is_pinned ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
@@ -13536,14 +13582,14 @@ check_get_entry_status(void)
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                 &in_cache, &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 5.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || !is_pinned ) {
+    } else if ( !in_cache || !is_dirty || is_protected || !is_pinned ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
@@ -13562,14 +13608,14 @@ check_get_entry_status(void)
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                 &in_cache, &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 6.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ) {
+    } else if ( !in_cache || !is_dirty || is_protected || is_pinned ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 6.");
@@ -13594,20 +13640,20 @@ check_get_entry_status(void)
 
 } /* check_get_entry_status() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_expunge_entry()
+ * Function:    check_expunge_entry()
  *
- * Purpose:	Verify that H5C_expunge_entry() behaves as expected.
+ * Purpose:    Verify that H5C_expunge_entry() behaves as expected.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              7/5/06
  *
  * Modifications:
  *
- * 		None.
+ *         None.
  *
  *-------------------------------------------------------------------------
  */
@@ -13618,11 +13664,11 @@ check_expunge_entry(void)
     const char *  fcn_name = "check_expunge_entry";
     static char   msg[128];
     herr_t        result;
-    hbool_t	  in_cache;
-    hbool_t	  is_dirty;
-    hbool_t	  is_protected;
-    hbool_t	  is_pinned;
-    size_t	  entry_size;
+    hbool_t      in_cache;
+    hbool_t      is_dirty;
+    hbool_t      is_protected;
+    hbool_t      is_pinned;
+    size_t      entry_size;
     H5F_t *       file_ptr = NULL;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -13650,16 +13696,16 @@ check_expunge_entry(void)
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+                    &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 1.");
             failure_mssg = msg;
 
-	} else if ( in_cache ) {
+    } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
@@ -13667,14 +13713,14 @@ check_expunge_entry(void)
 
         } else if ( ( entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 1.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     /* protect an entry to force the cache to load it, and then unprotect
@@ -13732,7 +13778,7 @@ check_expunge_entry(void)
     if ( pass ) {
 
         /* entry shouldn't be in cache -- only in_cache should be touched
-	 * by the status call.  Thus, only check that boolean.
+    * by the status call.  Thus, only check that boolean.
          */
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
@@ -13778,7 +13824,7 @@ check_expunge_entry(void)
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+                    &is_pinned);
 
         if ( result < 0 ) {
 
@@ -13795,8 +13841,8 @@ check_expunge_entry(void)
 
         } else if ( ( entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 4.");
@@ -13821,7 +13867,7 @@ check_expunge_entry(void)
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+                    &is_pinned);
 
         if ( result < 0 ) {
 
@@ -13838,8 +13884,8 @@ check_expunge_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 5.");
@@ -13861,12 +13907,12 @@ check_expunge_entry(void)
     if ( pass ) {
 
         /* entry shouldn't be in cache -- only in_cache should be touched
-	 * by the status call.  Thus, only check that boolean.
+    * by the status call.  Thus, only check that boolean.
          */
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+                    &is_pinned);
 
         if ( result < 0 ) {
 
@@ -13883,8 +13929,8 @@ check_expunge_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( ! entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( ! entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( ! entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 6.");
@@ -13910,21 +13956,21 @@ check_expunge_entry(void)
 
 } /* check_expunge_entry() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_multiple_read_protect()
+ * Function:    check_multiple_read_protect()
  *
- * Purpose:	Verify that multiple, simultaneous read protects of a
- * 		single entry perform as expectd.
+ * Purpose:    Verify that multiple, simultaneous read protects of a
+ *         single entry perform as expectd.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/1/07
  *
  * Modifications:
  *
- * 		None.
+ *         None.
  *
  *-------------------------------------------------------------------------
  */
@@ -13976,8 +14022,8 @@ check_multiple_read_protect(void)
         entry_ptr = &((entries[0])[0]);
 
         if ( ( entry_ptr->header.is_protected ) ||
- 	     ( entry_ptr->header.is_read_only ) ||
-	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
+        ( entry_ptr->header.is_read_only ) ||
+        ( entry_ptr->header.ro_ref_count != 0 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 1.\n";
@@ -13986,11 +14032,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 0 ) ||
-	 ( cache_ptr->read_protects[0] != 0 ) ||
-	 ( cache_ptr->max_read_protects[0] != 0 ) ) {
+    ( cache_ptr->read_protects[0] != 0 ) ||
+    ( cache_ptr->max_read_protects[0] != 0 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 1.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 1.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -13999,8 +14045,8 @@ check_multiple_read_protect(void)
         protect_entry_ro(file_ptr, 0, 0);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
- 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
-	     ( entry_ptr->header.ro_ref_count != 1 ) ) {
+        ( ! ( entry_ptr->header.is_read_only ) ) ||
+        ( entry_ptr->header.ro_ref_count != 1 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 2.\n";
@@ -14009,11 +14055,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 0 ) ||
-	 ( cache_ptr->read_protects[0] != 1 ) ||
-	 ( cache_ptr->max_read_protects[0] != 1 ) ) {
+    ( cache_ptr->read_protects[0] != 1 ) ||
+    ( cache_ptr->max_read_protects[0] != 1 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 2.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 2.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14022,8 +14068,8 @@ check_multiple_read_protect(void)
         protect_entry_ro(file_ptr, 0, 0);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
- 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
-	     ( entry_ptr->header.ro_ref_count != 2 ) ) {
+        ( ! ( entry_ptr->header.is_read_only ) ) ||
+        ( entry_ptr->header.ro_ref_count != 2 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 3.\n";
@@ -14032,11 +14078,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 0 ) ||
-	 ( cache_ptr->read_protects[0] != 2 ) ||
-	 ( cache_ptr->max_read_protects[0] != 2 ) ) {
+    ( cache_ptr->read_protects[0] != 2 ) ||
+    ( cache_ptr->max_read_protects[0] != 2 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 3.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 3.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14045,8 +14091,8 @@ check_multiple_read_protect(void)
         unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
- 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
-	     ( entry_ptr->header.ro_ref_count != 1 ) ) {
+        ( ! ( entry_ptr->header.is_read_only ) ) ||
+        ( entry_ptr->header.ro_ref_count != 1 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 4.\n";
@@ -14055,11 +14101,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 0 ) ||
-	 ( cache_ptr->read_protects[0] != 2 ) ||
-	 ( cache_ptr->max_read_protects[0] != 2 ) ) {
+    ( cache_ptr->read_protects[0] != 2 ) ||
+    ( cache_ptr->max_read_protects[0] != 2 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 4.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 4.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14068,8 +14114,8 @@ check_multiple_read_protect(void)
         protect_entry_ro(file_ptr, 0, 0);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
- 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
-	     ( entry_ptr->header.ro_ref_count != 2 ) ) {
+        ( ! ( entry_ptr->header.is_read_only ) ) ||
+        ( entry_ptr->header.ro_ref_count != 2 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 5.\n";
@@ -14078,11 +14124,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 0 ) ||
-	 ( cache_ptr->read_protects[0] != 3 ) ||
-	 ( cache_ptr->max_read_protects[0] != 2 ) ) {
+    ( cache_ptr->read_protects[0] != 3 ) ||
+    ( cache_ptr->max_read_protects[0] != 2 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 5.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 5.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14091,8 +14137,8 @@ check_multiple_read_protect(void)
         protect_entry_ro(file_ptr, 0, 0);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
- 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
-	     ( entry_ptr->header.ro_ref_count != 3 ) ) {
+        ( ! ( entry_ptr->header.is_read_only ) ) ||
+        ( entry_ptr->header.ro_ref_count != 3 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 6.\n";
@@ -14101,11 +14147,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 0 ) ||
-	 ( cache_ptr->read_protects[0] != 4 ) ||
-	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+    ( cache_ptr->read_protects[0] != 4 ) ||
+    ( cache_ptr->max_read_protects[0] != 3 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 6.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 6.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14114,8 +14160,8 @@ check_multiple_read_protect(void)
         unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
- 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
-	     ( entry_ptr->header.ro_ref_count != 2 ) ) {
+        ( ! ( entry_ptr->header.is_read_only ) ) ||
+        ( entry_ptr->header.ro_ref_count != 2 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 7.\n";
@@ -14124,11 +14170,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 0 ) ||
-	 ( cache_ptr->read_protects[0] != 4 ) ||
-	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+    ( cache_ptr->read_protects[0] != 4 ) ||
+    ( cache_ptr->max_read_protects[0] != 3 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 7.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 7.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14137,8 +14183,8 @@ check_multiple_read_protect(void)
         unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
- 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
-	     ( entry_ptr->header.ro_ref_count != 1 ) ) {
+        ( ! ( entry_ptr->header.is_read_only ) ) ||
+        ( entry_ptr->header.ro_ref_count != 1 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 8.\n";
@@ -14147,11 +14193,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 0 ) ||
-	 ( cache_ptr->read_protects[0] != 4 ) ||
-	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+    ( cache_ptr->read_protects[0] != 4 ) ||
+    ( cache_ptr->max_read_protects[0] != 3 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 8.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 8.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14160,8 +14206,8 @@ check_multiple_read_protect(void)
         unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         if ( ( entry_ptr->header.is_protected ) ||
- 	     ( entry_ptr->header.is_read_only ) ||
-	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
+        ( entry_ptr->header.is_read_only ) ||
+        ( entry_ptr->header.ro_ref_count != 0 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 9.\n";
@@ -14170,11 +14216,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 0 ) ||
-	 ( cache_ptr->read_protects[0] != 4 ) ||
-	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+    ( cache_ptr->read_protects[0] != 4 ) ||
+    ( cache_ptr->max_read_protects[0] != 3 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 9.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 9.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14188,8 +14234,8 @@ check_multiple_read_protect(void)
         protect_entry(file_ptr, 0, 0);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
- 	     ( entry_ptr->header.is_read_only ) ||
-	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
+        ( entry_ptr->header.is_read_only ) ||
+        ( entry_ptr->header.ro_ref_count != 0 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 10.\n";
@@ -14198,11 +14244,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 1 ) ||
-	 ( cache_ptr->read_protects[0] != 4 ) ||
-	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+    ( cache_ptr->read_protects[0] != 4 ) ||
+    ( cache_ptr->max_read_protects[0] != 3 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 10.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 10.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14211,8 +14257,8 @@ check_multiple_read_protect(void)
         unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         if ( ( entry_ptr->header.is_protected ) ||
- 	     ( entry_ptr->header.is_read_only ) ||
-	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
+        ( entry_ptr->header.is_read_only ) ||
+        ( entry_ptr->header.ro_ref_count != 0 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected ro protected status 11.\n";
@@ -14221,11 +14267,11 @@ check_multiple_read_protect(void)
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 1 ) ||
-	 ( cache_ptr->read_protects[0] != 4 ) ||
-	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+    ( cache_ptr->read_protects[0] != 4 ) ||
+    ( cache_ptr->max_read_protects[0] != 3 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 11.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 11.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14240,80 +14286,80 @@ check_multiple_read_protect(void)
 
     if ( pass ) {
 
-        protect_entry(file_ptr, 0, 2);		/* (0,2) write */
+        protect_entry(file_ptr, 0, 2);        /* (0,2) write */
         protect_entry_ro(file_ptr, 0, 4);      /* (0,4) read only (1) */
-	protect_entry(file_ptr, 0, 6);		/* (0,6) write */
+    protect_entry(file_ptr, 0, 6);        /* (0,6) write */
 
         unprotect_entry(file_ptr, 0, 2,         /* (0,2) unprotect */
-			H5C__NO_FLAGS_SET);
+            H5C__NO_FLAGS_SET);
 
-        protect_entry_ro(file_ptr, 0, 2);	/* (0,2) read only (1) */
-	protect_entry(file_ptr, 0, 1);         /* (0,1) write */
-        protect_entry_ro(file_ptr, 0, 4);	/* (0,4) read only (2) */
-	protect_entry(file_ptr, 0, 0);		/* (0,0) write */
-        protect_entry_ro(file_ptr, 0, 2);	/* (0,2) read only (2) */
+        protect_entry_ro(file_ptr, 0, 2);    /* (0,2) read only (1) */
+    protect_entry(file_ptr, 0, 1);         /* (0,1) write */
+        protect_entry_ro(file_ptr, 0, 4);    /* (0,4) read only (2) */
+    protect_entry(file_ptr, 0, 0);        /* (0,0) write */
+        protect_entry_ro(file_ptr, 0, 2);    /* (0,2) read only (2) */
 
         unprotect_entry(file_ptr, 0, 2,         /* (0,2) read only (1) pin */
-			H5C__PIN_ENTRY_FLAG);
+            H5C__PIN_ENTRY_FLAG);
         unprotect_entry(file_ptr, 0, 6,         /* (0,6) unprotect */
-			H5C__NO_FLAGS_SET);
+            H5C__NO_FLAGS_SET);
 
-        protect_entry_ro(file_ptr, 0, 4);	/* (0,4) read only (3) */
+        protect_entry_ro(file_ptr, 0, 4);    /* (0,4) read only (3) */
 
         unprotect_entry(file_ptr, 0, 2,         /* (0,2) unprotect */
-			H5C__NO_FLAGS_SET);
+            H5C__NO_FLAGS_SET);
         unprotect_entry(file_ptr, 0, 1,         /* (0,1) unprotect */
-			H5C__NO_FLAGS_SET);
+            H5C__NO_FLAGS_SET);
 
-	if ( pass ) {
+    if ( pass ) {
 
-	    entry_ptr = &((entries[0])[4]);
+        entry_ptr = &((entries[0])[4]);
 
-	    if ( H5C_pin_protected_entry((void *)entry_ptr) < 0 ) {
+        if ( H5C_pin_protected_entry((void *)entry_ptr) < 0 ) {
 
-	        pass = FALSE;
-	        failure_mssg = "H5C_pin_protected_entry() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5C_pin_protected_entry() failed.\n";
 
-	    } else if ( ! (entry_ptr->header.is_pinned) ) {
+        } else if ( ! (entry_ptr->header.is_pinned) ) {
 
-	        pass = FALSE;
-	        failure_mssg = "entry (0,4) not pinned.\n";
+            pass = FALSE;
+            failure_mssg = "entry (0,4) not pinned.\n";
 
-	    } else {
+        } else {
 
-		/* keep test bed sanity checks happy */
-		entry_ptr->is_pinned = TRUE;
+        /* keep test bed sanity checks happy */
+        entry_ptr->is_pinned = TRUE;
 
-	    }
-	}
+        }
+    }
 
         unprotect_entry(file_ptr, 0, 4,         /* (0,4) read only (2) */
-			H5C__NO_FLAGS_SET);
+            H5C__NO_FLAGS_SET);
         unprotect_entry(file_ptr, 0, 4,         /* (0,4) read only (1) */
-			H5C__UNPIN_ENTRY_FLAG);
+            H5C__UNPIN_ENTRY_FLAG);
 
         if ( ( pass ) && ( entry_ptr->header.is_pinned ) ) {
 
             pass = FALSE;
             failure_mssg = "enty (0,4) still pinned.\n";
 
-	}
+    }
 
         unprotect_entry(file_ptr, 0, 4,         /* (0,4) unprotect */
-			H5C__NO_FLAGS_SET);
+            H5C__NO_FLAGS_SET);
         unprotect_entry(file_ptr, 0, 0,         /* (0,0) unprotect */
-			H5C__NO_FLAGS_SET);
+            H5C__NO_FLAGS_SET);
 
-	unpin_entry(0, 2);
+    unpin_entry(0, 2);
     }
 
 #if H5C_COLLECT_CACHE_STATS
     if ( ( cache_ptr->write_protects[0] != 5 ) ||
-	 ( cache_ptr->read_protects[0] != 9 ) ||
-	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+    ( cache_ptr->read_protects[0] != 9 ) ||
+    ( cache_ptr->max_read_protects[0] != 3 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "Unexpected protect stats 11.\n";
+    pass = FALSE;
+    failure_mssg = "Unexpected protect stats 11.\n";
     }
 #endif /* H5C_COLLECT_CACHE_STATS */
 
@@ -14335,17 +14381,17 @@ check_multiple_read_protect(void)
 
 } /* check_multiple_read_protect() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_move_entry()
+ * Function:    check_move_entry()
  *
- * Purpose:	Verify that H5C_move_entry behaves as expected.  In
- * 		particular, verify that it works correctly with pinned
- * 		entries.
+ * Purpose:    Verify that H5C_move_entry behaves as expected.  In
+ *         particular, verify that it works correctly with pinned
+ *         entries.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/26/06
  *
  * Modifications:
@@ -14364,26 +14410,26 @@ check_move_entry(void)
       {
         /* int     entry_type  = */ PICO_ENTRY_TYPE,
         /* int     entry_index = */ 10,
-	/* hbool_t is_dirty    = */ FALSE,
-	/* hbool_t is_pinned   = */ FALSE
+    /* hbool_t is_dirty    = */ FALSE,
+    /* hbool_t is_pinned   = */ FALSE
       },
       {
         /* int     entry_type  = */ PICO_ENTRY_TYPE,
         /* int     entry_index = */ 20,
-	/* hbool_t is_dirty    = */ TRUE,
-	/* hbool_t is_pinned   = */ FALSE
+    /* hbool_t is_dirty    = */ TRUE,
+    /* hbool_t is_pinned   = */ FALSE
       },
       {
         /* int     entry_type  = */ PICO_ENTRY_TYPE,
         /* int     entry_index = */ 30,
-	/* hbool_t is_dirty    = */ FALSE,
-	/* hbool_t is_pinned   = */ TRUE
+    /* hbool_t is_dirty    = */ FALSE,
+    /* hbool_t is_pinned   = */ TRUE
       },
       {
         /* int     entry_type  = */ PICO_ENTRY_TYPE,
         /* int     entry_index = */ 40,
-	/* hbool_t is_dirty    = */ TRUE,
-	/* hbool_t is_pinned   = */ TRUE
+    /* hbool_t is_dirty    = */ TRUE,
+    /* hbool_t is_pinned   = */ TRUE
       }
     };
 
@@ -14428,7 +14474,7 @@ check_move_entry(void)
     while ( ( pass ) && ( i < 4 ) )
     {
         check_move_entry__run_test(file_ptr, i, &(test_specs[i]));
-	i++;
+    i++;
     }
 
     if ( pass ) {
@@ -14448,13 +14494,13 @@ check_move_entry(void)
 
 } /* check_move_entry() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_move_entry__run_test()
  *
  * Purpose:     Run a move entry test.
  *
- *		Do nothing if pass is FALSE on entry.
+ *        Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -14463,7 +14509,7 @@ check_move_entry(void)
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -14590,15 +14636,15 @@ check_move_entry__run_test(H5F_t * file_ptr,
 
 } /* check_move_entry__run_test() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_pin_protected_entry()
+ * Function:    check_pin_protected_entry()
  *
- * Purpose:	Verify that H5C_pin_protected_entry behaves as expected.
+ * Purpose:    Verify that H5C_pin_protected_entry behaves as expected.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/28/06
  *
  * Modifications:
@@ -14651,25 +14697,25 @@ check_pin_protected_entry(void)
         base_addr = entries[0];
         entry_ptr = &(base_addr[0]);
 
-	result = H5C_pin_protected_entry((void *)entry_ptr);
+    result = H5C_pin_protected_entry((void *)entry_ptr);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_pin_protected_entry() reports failure.");
             failure_mssg = msg;
 
-	} else if ( ! ( entry_ptr->header.is_pinned ) ) {
+    } else if ( ! ( entry_ptr->header.is_pinned ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "entry not pinned when it should be.");
             failure_mssg = msg;
 
-	} else {
+    } else {
 
-	    entry_ptr->is_pinned = TRUE;
-	}
+        entry_ptr->is_pinned = TRUE;
+    }
     }
 
     unprotect_entry(file_ptr, 0, 0, H5C__UNPIN_ENTRY_FLAG);
@@ -14691,16 +14737,16 @@ check_pin_protected_entry(void)
 
 } /* check_pin_protected_entry() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_resize_entry()
+ * Function:    check_resize_entry()
  *
- * Purpose:	Verify that H5C_resize_entry() and H5C_unprotect() resize
- * 		entries as expected.
+ * Purpose:    Verify that H5C_resize_entry() and H5C_unprotect() resize
+ *         entries as expected.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              7/7/06
  *
  *-------------------------------------------------------------------------
@@ -14712,12 +14758,12 @@ check_resize_entry(void)
     const char *   fcn_name = "check_resize_entry";
     static char    msg[128];
     herr_t         result;
-    hbool_t	   in_cache;
-    hbool_t	   is_dirty;
-    hbool_t	   is_protected;
-    hbool_t	   is_pinned;
-    size_t	   entry_size;
-    size_t	   reported_entry_size;
+    hbool_t       in_cache;
+    hbool_t       is_dirty;
+    hbool_t       is_protected;
+    hbool_t       is_pinned;
+    size_t       entry_size;
+    size_t       reported_entry_size;
     H5F_t *        file_ptr = NULL;
     H5C_t *        cache_ptr = NULL;
     test_entry_t * base_addr;
@@ -14769,29 +14815,29 @@ check_resize_entry(void)
             pass = FALSE;
             failure_mssg = "file_ptr NULL from setup_cache.";
 
-        } 
-        else  
+        }
+        else
         {
             cache_ptr = file_ptr->shared->cache;
 
             base_addr = entries[LARGE_ENTRY_TYPE];
             entry_ptr = &(base_addr[0]);
-	    entry_size = LARGE_ENTRY_SIZE;
+        entry_size = LARGE_ENTRY_SIZE;
         }
     }
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 0 ) ||
-	     ( cache_ptr->index_size != 0 ) ||
-	     ( cache_ptr->slist_len != 0 ) ||
-	     ( cache_ptr->slist_size != 0 ) ) {
+    if ( ( cache_ptr->index_len != 0 ) ||
+        ( cache_ptr->index_size != 0 ) ||
+        ( cache_ptr->slist_len != 0 ) ||
+        ( cache_ptr->slist_size != 0 ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 1.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -14802,33 +14848,33 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 1 ) ||
-	     ( cache_ptr->index_size != LARGE_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 0 ) ||
-	     ( cache_ptr->slist_size != 0 ) ) {
+    if ( ( cache_ptr->index_len != 1 ) ||
+        ( cache_ptr->index_size != LARGE_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 0 ) ||
+        ( cache_ptr->slist_size != 0 ) ) {
 
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 2.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+                        &reported_entry_size, &in_cache,
+                    &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 1.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
+    } else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
@@ -14836,14 +14882,14 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 1.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -14882,33 +14928,33 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 1 ) ||
-	     ( cache_ptr->index_size != (LARGE_ENTRY_SIZE / 2) ) ||
-	     ( cache_ptr->slist_len != 1 ) ||
-	     ( cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 2) ) ) {
+    if ( ( cache_ptr->index_len != 1 ) ||
+        ( cache_ptr->index_size != (LARGE_ENTRY_SIZE / 2) ) ||
+        ( cache_ptr->slist_len != 1 ) ||
+        ( cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 2) ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 3.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+                        &reported_entry_size, &in_cache,
+                    &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 2.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
-		    ( reported_entry_size != (LARGE_ENTRY_SIZE / 2) ) ) {
+    } else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
+            ( reported_entry_size != (LARGE_ENTRY_SIZE / 2) ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
@@ -14916,14 +14962,14 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 2.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -14968,33 +15014,33 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 1 ) ||
-	     ( cache_ptr->index_size != LARGE_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 1 ) ||
-	     ( cache_ptr->slist_size != LARGE_ENTRY_SIZE ) ) {
+    if ( ( cache_ptr->index_len != 1 ) ||
+        ( cache_ptr->index_size != LARGE_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 1 ) ||
+        ( cache_ptr->slist_size != LARGE_ENTRY_SIZE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 4.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+                        &reported_entry_size, &in_cache,
+                    &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 3.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
-		    ( reported_entry_size != LARGE_ENTRY_SIZE ) ) {
+    } else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
+            ( reported_entry_size != LARGE_ENTRY_SIZE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
@@ -15002,14 +15048,14 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 3.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -15024,45 +15070,45 @@ check_resize_entry(void)
 
         result = H5C_resize_entry((void *)entry_ptr, (LARGE_ENTRY_SIZE / 4));
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-		       "H5C_resize_entry() reports failure 1.");
+            "H5C_resize_entry() reports failure 1.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 1 ) ||
-	     ( cache_ptr->index_size != (LARGE_ENTRY_SIZE / 4) ) ||
-	     ( cache_ptr->slist_len != 1 ) ||
-	     ( cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 4) ) ) {
+    if ( ( cache_ptr->index_len != 1 ) ||
+        ( cache_ptr->index_size != (LARGE_ENTRY_SIZE / 4) ) ||
+        ( cache_ptr->slist_len != 1 ) ||
+        ( cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 4) ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 5.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+                        &reported_entry_size, &in_cache,
+                    &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 4.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
-		    ( reported_entry_size != (LARGE_ENTRY_SIZE / 4) ) ) {
+    } else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
+            ( reported_entry_size != (LARGE_ENTRY_SIZE / 4) ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
@@ -15070,59 +15116,59 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 4.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_resize_entry((void *)entry_ptr, LARGE_ENTRY_SIZE);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-		       "H5C_resize_entry() reports failure 2.");
+            "H5C_resize_entry() reports failure 2.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 1 ) ||
-	     ( cache_ptr->index_size != LARGE_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 1 ) ||
-	     ( cache_ptr->slist_size != LARGE_ENTRY_SIZE ) ) {
+    if ( ( cache_ptr->index_len != 1 ) ||
+        ( cache_ptr->index_size != LARGE_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 1 ) ||
+        ( cache_ptr->slist_size != LARGE_ENTRY_SIZE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 6.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+                        &reported_entry_size, &in_cache,
+                    &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 5.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
-		    ( reported_entry_size != LARGE_ENTRY_SIZE ) ) {
+    } else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
+            ( reported_entry_size != LARGE_ENTRY_SIZE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
@@ -15130,14 +15176,14 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 5.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -15153,16 +15199,16 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+                    &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 6.");
             failure_mssg = msg;
 
-	} else if ( in_cache ) {
+    } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 6.");
@@ -15170,28 +15216,28 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( ! entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( ! entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( ! entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 6.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 0 ) ||
-	     ( cache_ptr->index_size != 0 ) ||
-	     ( cache_ptr->slist_len != 0 ) ||
-	     ( cache_ptr->slist_size != 0 ) ) {
+    if ( ( cache_ptr->index_len != 0 ) ||
+        ( cache_ptr->index_size != 0 ) ||
+        ( cache_ptr->slist_len != 0 ) ||
+        ( cache_ptr->slist_size != 0 ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 7.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
 
@@ -15199,19 +15245,19 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 0 ) ||
-	     ( cache_ptr->index_size != 0 ) ||
-	     ( cache_ptr->slist_len != 0 ) ||
-	     ( cache_ptr->slist_size != 0 ) ) {
+    if ( ( cache_ptr->index_len != 0 ) ||
+        ( cache_ptr->index_size != 0 ) ||
+        ( cache_ptr->slist_len != 0 ) ||
+        ( cache_ptr->slist_size != 0 ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 8.");
             failure_mssg = msg;
 
-	}
+    }
         base_addr = entries[LARGE_ENTRY_TYPE];
         entry_ptr = &(base_addr[3]);
-	entry_size = LARGE_ENTRY_SIZE;
+    entry_size = LARGE_ENTRY_SIZE;
     }
 
     if ( pass ) {
@@ -15229,17 +15275,17 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 3 ) ||
-	     ( cache_ptr->index_size != 3 * LARGE_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 1 ) ||
-	     ( cache_ptr->slist_size != LARGE_ENTRY_SIZE ) ) {
+    if ( ( cache_ptr->index_len != 3 ) ||
+        ( cache_ptr->index_size != 3 * LARGE_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 1 ) ||
+        ( cache_ptr->slist_size != LARGE_ENTRY_SIZE ) ) {
 
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 9.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -15250,33 +15296,33 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 4 ) ||
-	     ( cache_ptr->index_size != 4 * LARGE_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 1 ) ||
-	     ( cache_ptr->slist_size != LARGE_ENTRY_SIZE ) ) {
+    if ( ( cache_ptr->index_len != 4 ) ||
+        ( cache_ptr->index_size != 4 * LARGE_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 1 ) ||
+        ( cache_ptr->slist_size != LARGE_ENTRY_SIZE ) ) {
 
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 10.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+                        &reported_entry_size, &in_cache,
+                    &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 7.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
+    } else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 7.");
@@ -15284,14 +15330,14 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 7.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -15330,35 +15376,35 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 4 ) ||
-	     ( cache_ptr->index_size !=
-	       ((3 * LARGE_ENTRY_SIZE) + (LARGE_ENTRY_SIZE / 2)) ) ||
-	     ( cache_ptr->slist_len != 2 ) ||
-	     ( cache_ptr->slist_size !=
-	       (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 2)) ) ) {
+    if ( ( cache_ptr->index_len != 4 ) ||
+        ( cache_ptr->index_size !=
+        ((3 * LARGE_ENTRY_SIZE) + (LARGE_ENTRY_SIZE / 2)) ) ||
+        ( cache_ptr->slist_len != 2 ) ||
+        ( cache_ptr->slist_size !=
+        (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 2)) ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 11.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+                        &reported_entry_size, &in_cache,
+                    &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 8.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
-		    ( reported_entry_size != (LARGE_ENTRY_SIZE / 2) ) ) {
+    } else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
+            ( reported_entry_size != (LARGE_ENTRY_SIZE / 2) ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 8.");
@@ -15366,14 +15412,14 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 8.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -15418,33 +15464,33 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 4 ) ||
-	     ( cache_ptr->index_size != 4 * LARGE_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 2 ) ||
-	     ( cache_ptr->slist_size != 2 * LARGE_ENTRY_SIZE ) ) {
+    if ( ( cache_ptr->index_len != 4 ) ||
+        ( cache_ptr->index_size != 4 * LARGE_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 2 ) ||
+        ( cache_ptr->slist_size != 2 * LARGE_ENTRY_SIZE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 12.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+                        &reported_entry_size, &in_cache,
+                    &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 9.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
-		    ( reported_entry_size != LARGE_ENTRY_SIZE ) ) {
+    } else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
+            ( reported_entry_size != LARGE_ENTRY_SIZE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 9.");
@@ -15452,14 +15498,14 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 9.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -15474,47 +15520,47 @@ check_resize_entry(void)
 
         result = H5C_resize_entry((void *)entry_ptr, (LARGE_ENTRY_SIZE / 4));
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-		       "H5C_resize_entry() reports failure 3.");
+            "H5C_resize_entry() reports failure 3.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 4 ) ||
-	     ( cache_ptr->index_size !=
-	       ((3 * LARGE_ENTRY_SIZE) + (LARGE_ENTRY_SIZE / 4)) ) ||
-	     ( cache_ptr->slist_len != 2 ) ||
-	     ( cache_ptr->slist_size !=
-	       (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 4)) ) ) {
+    if ( ( cache_ptr->index_len != 4 ) ||
+        ( cache_ptr->index_size !=
+        ((3 * LARGE_ENTRY_SIZE) + (LARGE_ENTRY_SIZE / 4)) ) ||
+        ( cache_ptr->slist_len != 2 ) ||
+        ( cache_ptr->slist_size !=
+        (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 4)) ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 13.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+                        &reported_entry_size, &in_cache,
+                    &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 10.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
-		    ( reported_entry_size != (LARGE_ENTRY_SIZE / 4) ) ) {
+    } else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
+            ( reported_entry_size != (LARGE_ENTRY_SIZE / 4) ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 10.");
@@ -15522,59 +15568,59 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 10.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_resize_entry((void *)entry_ptr, LARGE_ENTRY_SIZE);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-		       "H5C_resize_entry() reports failure 4.");
+            "H5C_resize_entry() reports failure 4.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 4 ) ||
-	     ( cache_ptr->index_size != (4 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->slist_len != 2 ) ||
-	     ( cache_ptr->slist_size != (2 * LARGE_ENTRY_SIZE) ) ) {
+    if ( ( cache_ptr->index_len != 4 ) ||
+        ( cache_ptr->index_size != (4 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->slist_len != 2 ) ||
+        ( cache_ptr->slist_size != (2 * LARGE_ENTRY_SIZE) ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 14.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+                        &reported_entry_size, &in_cache,
+                    &is_dirty, &is_protected, &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 11.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
-		    ( reported_entry_size != LARGE_ENTRY_SIZE ) ) {
+    } else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
+            ( reported_entry_size != LARGE_ENTRY_SIZE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 11.");
@@ -15582,21 +15628,21 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 11.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
 
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, 
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3,
                         H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
 
     }
@@ -15605,16 +15651,16 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+                    &is_pinned);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 12.");
             failure_mssg = msg;
 
-	} else if ( in_cache ) {
+    } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 12.");
@@ -15622,28 +15668,28 @@ check_resize_entry(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( ! entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( ! entry_ptr->destroyed ) ) {
+            ( entry_ptr->flushed ) ||
+            ( ! entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 12.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 3 ) ||
-	     ( cache_ptr->index_size != (3 * LARGE_ENTRY_SIZE) ) ||
-	     ( cache_ptr->slist_len != 1 ) ||
-	     ( cache_ptr->slist_size != LARGE_ENTRY_SIZE ) ) {
+    if ( ( cache_ptr->index_len != 3 ) ||
+        ( cache_ptr->index_size != (3 * LARGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->slist_len != 1 ) ||
+        ( cache_ptr->slist_size != LARGE_ENTRY_SIZE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 15.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -15660,16 +15706,16 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 0 ) ||
-	     ( cache_ptr->index_size != 0 ) ||
-	     ( cache_ptr->slist_len != 0 ) ||
-	     ( cache_ptr->slist_size != 0 ) ) {
+    if ( ( cache_ptr->index_len != 0 ) ||
+        ( cache_ptr->index_size != 0 ) ||
+        ( cache_ptr->slist_len != 0 ) ||
+        ( cache_ptr->slist_size != 0 ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 16.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -15689,21 +15735,21 @@ check_resize_entry(void)
 
 } /* check_resize_entry() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_evictions_enabled()
+ * Function:    check_evictions_enabled()
  *
- * Purpose:	Verify that H5C_get_evictions_enabled() and
- * 		H5C_set_evictions_enabled() functions perform as expected.
+ * Purpose:    Verify that H5C_get_evictions_enabled() and
+ *         H5C_set_evictions_enabled() functions perform as expected.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              8/2/07
  *
  * Modifications:
  *
- * 		None.
+ *         None.
  *
  *-------------------------------------------------------------------------
  */
@@ -15714,11 +15760,11 @@ check_evictions_enabled(void)
     const char *   fcn_name = "check_evictions_enabled";
     static char    msg[128];
     herr_t         result;
-    hbool_t	   show_progress = FALSE;
-    hbool_t	   evictions_enabled;
-    hbool_t	   in_cache;
-    int 	   i;
-    int		   mile_stone = 1;
+    hbool_t       show_progress = FALSE;
+    hbool_t       evictions_enabled;
+    hbool_t       in_cache;
+    int        i;
+    int           mile_stone = 1;
     H5F_t *        file_ptr = NULL;
     H5C_t *        cache_ptr = NULL;
     test_entry_t * base_addr = NULL;
@@ -15779,8 +15825,8 @@ check_evictions_enabled(void)
             pass = FALSE;
             failure_mssg = "file_ptr NULL from setup_cache.";
 
-        } 
-        else  
+        }
+        else
         {
             cache_ptr = file_ptr->shared->cache;
 
@@ -15795,17 +15841,17 @@ check_evictions_enabled(void)
     /* verify that it is empty */
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 0 ) ||
-	     ( cache_ptr->index_size != 0 ) ||
-	     ( cache_ptr->slist_len != 0 ) ||
-	     ( cache_ptr->slist_size != 0 ) ||
-	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+    if ( ( cache_ptr->index_len != 0 ) ||
+        ( cache_ptr->index_size != 0 ) ||
+        ( cache_ptr->slist_len != 0 ) ||
+        ( cache_ptr->slist_size != 0 ) ||
+        ( cache_ptr->evictions_enabled != TRUE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 1.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 3 */
@@ -15817,12 +15863,12 @@ check_evictions_enabled(void)
 
         result = H5C_get_evictions_enabled(cache_ptr, &evictions_enabled);
 
-	if ( ( result != SUCCEED ) || ( evictions_enabled != TRUE ) ) {
+    if ( ( result != SUCCEED ) || ( evictions_enabled != TRUE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected evictions enabled 1.");
             failure_mssg = msg;
-	}
+    }
     }
 
     if ( show_progress ) /* 4 */
@@ -15847,18 +15893,18 @@ check_evictions_enabled(void)
     /* verify that the cache is full */
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 16 ) ||
-	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 0 ) ||
-	     ( cache_ptr->slist_size != 0 ) ||
-	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+    if ( ( cache_ptr->index_len != 16 ) ||
+        ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 0 ) ||
+        ( cache_ptr->slist_size != 0 ) ||
+        ( cache_ptr->evictions_enabled != TRUE ) ) {
 
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 2.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 6 */
@@ -15880,17 +15926,17 @@ check_evictions_enabled(void)
     /* verify that an entry has been evicted */
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 16 ) ||
-	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 0 ) ||
-	     ( cache_ptr->slist_size != 0 ) ||
-	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+    if ( ( cache_ptr->index_len != 16 ) ||
+        ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 0 ) ||
+        ( cache_ptr->slist_size != 0 ) ||
+        ( cache_ptr->evictions_enabled != TRUE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 3.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 8 */
@@ -15902,16 +15948,16 @@ check_evictions_enabled(void)
         entry_ptr = &(base_addr[0]);
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              NULL, &in_cache, NULL, NULL, NULL);
+                        NULL, &in_cache, NULL, NULL, NULL);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 1.");
             failure_mssg = msg;
 
-	} else if ( in_cache ) {
+    } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
@@ -15919,14 +15965,14 @@ check_evictions_enabled(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( ! entry_ptr->flushed ) ||
-		    ( ! entry_ptr->destroyed ) ) {
+            ( ! entry_ptr->flushed ) ||
+            ( ! entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 1.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 9 */
@@ -15947,17 +15993,17 @@ check_evictions_enabled(void)
     /* verify that another entry has been evicted */
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 16 ) ||
-	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 1 ) ||
-	     ( cache_ptr->slist_size != MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+    if ( ( cache_ptr->index_len != 16 ) ||
+        ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 1 ) ||
+        ( cache_ptr->slist_size != MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->evictions_enabled != TRUE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 4.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 11 */
@@ -15969,16 +16015,16 @@ check_evictions_enabled(void)
         entry_ptr = &(base_addr[1]);
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              NULL, &in_cache, NULL, NULL, NULL);
+                        NULL, &in_cache, NULL, NULL, NULL);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 2.");
             failure_mssg = msg;
 
-	} else if ( in_cache ) {
+    } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
@@ -15986,14 +16032,14 @@ check_evictions_enabled(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( ! entry_ptr->flushed ) ||
-		    ( ! entry_ptr->destroyed ) ) {
+            ( ! entry_ptr->flushed ) ||
+            ( ! entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 2.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 12 */
@@ -16005,12 +16051,12 @@ check_evictions_enabled(void)
 
         result = H5C_set_evictions_enabled(cache_ptr, FALSE);
 
-	if ( result != SUCCEED ) {
+    if ( result != SUCCEED ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "can't disable evictions 1.");
             failure_mssg = msg;
-	}
+    }
     }
 
     if ( show_progress ) /* 13 */
@@ -16020,17 +16066,17 @@ check_evictions_enabled(void)
     /* verify that evictions are disabled */
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 16 ) ||
-	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 1 ) ||
-	     ( cache_ptr->slist_size != MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->evictions_enabled != FALSE ) ) {
+    if ( ( cache_ptr->index_len != 16 ) ||
+        ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 1 ) ||
+        ( cache_ptr->slist_size != MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->evictions_enabled != FALSE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 5.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 14 */
@@ -16052,17 +16098,17 @@ check_evictions_enabled(void)
     /* verify that no entry has been evicted */
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 17 ) ||
-	     ( cache_ptr->index_size != 17 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 1 ) ||
-	     ( cache_ptr->slist_size != MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->evictions_enabled != FALSE ) ) {
+    if ( ( cache_ptr->index_len != 17 ) ||
+        ( cache_ptr->index_size != 17 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 1 ) ||
+        ( cache_ptr->slist_size != MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->evictions_enabled != FALSE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 6.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 16 */
@@ -16083,17 +16129,17 @@ check_evictions_enabled(void)
     /* verify that no entry has been evicted */
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 18 ) ||
-	     ( cache_ptr->index_size != 18 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 2 ) ||
-	     ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->evictions_enabled != FALSE ) ) {
+    if ( ( cache_ptr->index_len != 18 ) ||
+        ( cache_ptr->index_size != 18 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 2 ) ||
+        ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->evictions_enabled != FALSE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 7.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 18 */
@@ -16105,12 +16151,12 @@ check_evictions_enabled(void)
 
         result = H5C_set_evictions_enabled(cache_ptr, TRUE);
 
-	if ( result != SUCCEED ) {
+    if ( result != SUCCEED ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "can't enable evictions 1.");
             failure_mssg = msg;
-	}
+    }
     }
 
     if ( show_progress ) /* 19 */
@@ -16132,17 +16178,17 @@ check_evictions_enabled(void)
     /* verify that no entries have been evicted */
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 18 ) ||
-	     ( cache_ptr->index_size != 18 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 2 ) ||
-	     ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+    if ( ( cache_ptr->index_len != 18 ) ||
+        ( cache_ptr->index_size != 18 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 2 ) ||
+        ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->evictions_enabled != TRUE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 8.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 21 */
@@ -16167,17 +16213,17 @@ check_evictions_enabled(void)
 
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 16 ) ||
-	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 2 ) ||
-	     ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+    if ( ( cache_ptr->index_len != 16 ) ||
+        ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 2 ) ||
+        ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->evictions_enabled != TRUE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 9.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 23 */
@@ -16189,16 +16235,16 @@ check_evictions_enabled(void)
         entry_ptr = &(base_addr[2]);
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              NULL, &in_cache, NULL, NULL, NULL);
+                        NULL, &in_cache, NULL, NULL, NULL);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 3.");
             failure_mssg = msg;
 
-	} else if ( in_cache ) {
+    } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
@@ -16206,14 +16252,14 @@ check_evictions_enabled(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( ! entry_ptr->flushed ) ||
-		    ( ! entry_ptr->destroyed ) ) {
+            ( ! entry_ptr->flushed ) ||
+            ( ! entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 3.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 24 */
@@ -16225,16 +16271,16 @@ check_evictions_enabled(void)
         entry_ptr = &(base_addr[3]);
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              NULL, &in_cache, NULL, NULL, NULL);
+                        NULL, &in_cache, NULL, NULL, NULL);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 4.");
             failure_mssg = msg;
 
-	} else if ( in_cache ) {
+    } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
@@ -16242,14 +16288,14 @@ check_evictions_enabled(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( ! entry_ptr->flushed ) ||
-		    ( ! entry_ptr->destroyed ) ) {
+            ( ! entry_ptr->flushed ) ||
+            ( ! entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 4.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 25 */
@@ -16261,12 +16307,12 @@ check_evictions_enabled(void)
 
         result = H5C_set_evictions_enabled(cache_ptr, FALSE);
 
-	if ( result != SUCCEED ) {
+    if ( result != SUCCEED ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "can't disable evictions 2.");
             failure_mssg = msg;
-	}
+    }
     }
 
     if ( show_progress ) /* 26 */
@@ -16290,17 +16336,17 @@ check_evictions_enabled(void)
     /* verify that the cache has grown */
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 17 ) ||
-	     ( cache_ptr->index_size != 17 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 2 ) ||
-	     ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->evictions_enabled != FALSE ) ) {
+    if ( ( cache_ptr->index_len != 17 ) ||
+        ( cache_ptr->index_size != 17 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 2 ) ||
+        ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->evictions_enabled != FALSE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 10.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 28 */
@@ -16312,12 +16358,12 @@ check_evictions_enabled(void)
 
         result = H5C_set_evictions_enabled(cache_ptr, TRUE);
 
-	if ( result != SUCCEED ) {
+    if ( result != SUCCEED ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "can't enable evictions 2.");
             failure_mssg = msg;
-	}
+    }
     }
 
     if ( show_progress ) /* 29 */
@@ -16338,17 +16384,17 @@ check_evictions_enabled(void)
     /* verify that the cache has returned to its maximum size */
     if ( pass ) {
 
-	if ( ( cache_ptr->index_len != 16 ) ||
-	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->slist_len != 3 ) ||
-	     ( cache_ptr->slist_size != 3 * MONSTER_ENTRY_SIZE ) ||
-	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+    if ( ( cache_ptr->index_len != 16 ) ||
+        ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->slist_len != 3 ) ||
+        ( cache_ptr->slist_size != 3 * MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->evictions_enabled != TRUE ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 11.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 31 */
@@ -16360,16 +16406,16 @@ check_evictions_enabled(void)
         entry_ptr = &(base_addr[4]);
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
-			              NULL, &in_cache, NULL, NULL, NULL);
+                        NULL, &in_cache, NULL, NULL, NULL);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5C_get_entry_status() reports failure 5.");
             failure_mssg = msg;
 
-	} else if ( in_cache ) {
+    } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
@@ -16377,14 +16423,14 @@ check_evictions_enabled(void)
 
         } else if ( ( ! entry_ptr->loaded ) ||
                     ( entry_ptr->cleared ) ||
-		    ( ! entry_ptr->flushed ) ||
-		    ( ! entry_ptr->destroyed ) ) {
+            ( ! entry_ptr->flushed ) ||
+            ( ! entry_ptr->destroyed ) ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 5.");
             failure_mssg = msg;
 
-	}
+    }
     }
 
     if ( show_progress ) /* 32 */
@@ -16396,12 +16442,12 @@ check_evictions_enabled(void)
 
         result = H5C_set_evictions_enabled(cache_ptr, FALSE);
 
-	if ( result != SUCCEED ) {
+    if ( result != SUCCEED ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "can't disable evictions 3.");
             failure_mssg = msg;
-	}
+    }
     }
 
     if ( show_progress ) /* 33 */
@@ -16429,16 +16475,16 @@ check_evictions_enabled(void)
 
 } /* check_evictions_enabled() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_flush_protected_err()
+ * Function:    check_flush_protected_err()
  *
- * Purpose:	Verify that an attempt to flush the cache when it contains
- *		a protected entry will generate an error.
+ * Purpose:    Verify that an attempt to flush the cache when it contains
+ *        a protected entry will generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/24/04
  *
  * Modifications:
@@ -16505,25 +16551,23 @@ check_flush_protected_err(void)
 
 } /* check_flush_protected_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_destroy_pinned_err()
+ * Function:    check_destroy_pinned_err()
  *
- * Purpose:	Verify that an attempt to destroy the cache when it contains
- *		a pinned entry that can't be unpined during the flush destroy
- *		will generate an error.
+ * Purpose:    Verify that an attempt to destroy the cache when it contains
+ *        a pinned entry that can't be unpined during the flush destroy
+ *        will generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/7/06
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-
-extern H5C_t * saved_cache;
 
 static unsigned
 check_destroy_pinned_err(void)
@@ -16548,7 +16592,7 @@ check_destroy_pinned_err(void)
                                 (size_t)(1 * 1024));
 
         protect_entry(file_ptr, 0, 0);
-	unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
         if ( H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT) >= 0 ) {
 
@@ -16557,7 +16601,7 @@ check_destroy_pinned_err(void)
 
         } else {
 
-	    unpin_entry(0, 0);
+        unpin_entry(0, 0);
 
             if ( H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT) < 0 ) {
 
@@ -16566,7 +16610,7 @@ check_destroy_pinned_err(void)
 
             } else {
                 file_ptr->shared->cache = NULL;
-	    }
+        }
         }
 
         if ( saved_cache != NULL ) {
@@ -16576,11 +16620,11 @@ check_destroy_pinned_err(void)
 
         }
 
-	/* call takedown_cache() with a NULL file_ptr parameter.
-	 * This causes the function to close and delete the file,
-	 * while skipping the call to H5C_dest().
-	 */
-	takedown_cache(NULL, FALSE, FALSE);
+    /* call takedown_cache() with a NULL file_ptr parameter.
+    * This causes the function to close and delete the file,
+    * while skipping the call to H5C_dest().
+    */
+    takedown_cache(NULL, FALSE, FALSE);
 
     }
 
@@ -16596,16 +16640,16 @@ check_destroy_pinned_err(void)
 
 } /* check_destroy_pinned_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_destroy_protected_err()
+ * Function:    check_destroy_protected_err()
  *
- * Purpose:	Verify that an attempt to destroy the cache when it contains
- *		a protected entry will generate an error.
+ * Purpose:    Verify that an attempt to destroy the cache when it contains
+ *        a protected entry will generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/24/04
  *
  * Modifications:
@@ -16653,7 +16697,7 @@ check_destroy_protected_err(void)
 
             } else {
                 file_ptr->shared->cache = NULL;
-	    }
+        }
         }
 
         if ( saved_cache != NULL ) {
@@ -16663,11 +16707,11 @@ check_destroy_protected_err(void)
 
         }
 
-	/* call takedown_cache() with a NULL file_ptr parameter.
-	 * This causes the function to close and delete the file,
-	 * while skipping the call to H5C_dest().
-	 */
-	takedown_cache(NULL, FALSE, FALSE);
+    /* call takedown_cache() with a NULL file_ptr parameter.
+    * This causes the function to close and delete the file,
+    * while skipping the call to H5C_dest().
+    */
+    takedown_cache(NULL, FALSE, FALSE);
     }
 
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
@@ -16682,16 +16726,16 @@ check_destroy_protected_err(void)
 
 } /* check_destroy_protected_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_duplicate_insert_err()
+ * Function:    check_duplicate_insert_err()
  *
- * Purpose:	Verify that an attempt to insert and entry that is
- *		alread in the cache will generate an error.
+ * Purpose:    Verify that an attempt to insert and entry that is
+ *        alread in the cache will generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/24/04
  *
  * Modifications:
@@ -16760,16 +16804,16 @@ check_duplicate_insert_err(void)
 
 } /* check_duplicate_insert_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_move_err()
+ * Function:    check_move_err()
  *
- * Purpose:	Verify that an attempt to move an entry to the address
- *		of an existing entry will generate an error.
+ * Purpose:    Verify that an attempt to move an entry to the address
+ *        of an existing entry will generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/24/04
  *
  * Modifications:
@@ -16855,21 +16899,21 @@ check_move_err(void)
 
 } /* check_move_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_double_pin_err()
+ * Function:    check_double_pin_err()
  *
- * Purpose:	Verify that an attempt to pin an entry that is already
- *		pinned will generate an error.
+ * Purpose:    Verify that an attempt to pin an entry that is already
+ *        pinned will generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/24/06
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -16922,8 +16966,8 @@ check_double_pin_err(void)
 
         } else {
 
-	    unprotect_entry(file_ptr, 0, 0, H5C__UNPIN_ENTRY_FLAG);
-	}
+        unprotect_entry(file_ptr, 0, 0, H5C__UNPIN_ENTRY_FLAG);
+    }
     }
 
     if ( pass ) {
@@ -16943,21 +16987,21 @@ check_double_pin_err(void)
 
 } /* check_double_pin_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_double_unpin_err()
+ * Function:    check_double_unpin_err()
  *
- * Purpose:	Verify that an attempt to unpin an unpinned entry will
- * 		generate an error.
+ * Purpose:    Verify that an attempt to unpin an unpinned entry will
+ *         generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/24/06
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -17008,13 +17052,13 @@ check_double_unpin_err(void)
 
         } else {
 
-	    unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
-	}
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+    }
     }
 
     if ( pass ) {
 
-	result =  H5C_unpin_entry((void *)entry_ptr);
+    result =  H5C_unpin_entry((void *)entry_ptr);
 
         if ( result > 0 ) {
 
@@ -17042,21 +17086,21 @@ check_double_unpin_err(void)
 
 } /* check_double_unpin_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_pin_entry_errs()
+ * Function:    check_pin_entry_errs()
  *
- * Purpose:	Verify that invalid calls to H5C_pin_protected_entry()
- * 		generate errors as expected.
+ * Purpose:    Verify that invalid calls to H5C_pin_protected_entry()
+ *         generate errors as expected.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/24/06
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -17094,7 +17138,7 @@ check_pin_entry_errs(void)
 
         protect_entry(file_ptr, 0, 0);
 
-	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         entry_ptr = &((entries[0])[0]);
     }
@@ -17113,10 +17157,10 @@ check_pin_entry_errs(void)
 
             protect_entry(file_ptr, 0, 0);
 
-	    unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
             protect_entry(file_ptr, 0, 0);
-	}
+    }
     }
 
     if ( pass ) {
@@ -17131,9 +17175,9 @@ check_pin_entry_errs(void)
 
         } else {
 
-	    unprotect_entry(file_ptr, 0, 0, H5C__UNPIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, 0, 0, H5C__UNPIN_ENTRY_FLAG);
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -17153,16 +17197,16 @@ check_pin_entry_errs(void)
 
 } /* check_pin_entry_errs() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_double_protect_err()
+ * Function:    check_double_protect_err()
  *
- * Purpose:	Verify that an attempt to protect an entry that is already
- *		protected will generate an error.
+ * Purpose:    Verify that an attempt to protect an entry that is already
+ *        protected will generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/24/04
  *
  *-------------------------------------------------------------------------
@@ -17231,16 +17275,16 @@ check_double_protect_err(void)
 
 } /* check_double_protect_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_double_unprotect_err()
+ * Function:    check_double_unprotect_err()
  *
- * Purpose:	Verify that an attempt to unprotect an entry that is already
- *		unprotected will generate an error.
+ * Purpose:    Verify that an attempt to unprotect an entry that is already
+ *        unprotected will generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/24/04
  *
  *-------------------------------------------------------------------------
@@ -17308,19 +17352,19 @@ check_double_unprotect_err(void)
 
 } /* check_double_unprotect_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_mark_entry_dirty_errs()
+ * Function:    check_mark_entry_dirty_errs()
  *
- * Purpose:	Verify that:
+ * Purpose:    Verify that:
  *
- *		1) a call to H5C_mark_entry_dirty with
- *		   and unpinned and unprotected entry will generate an
- *		   error.
+ *        1) a call to H5C_mark_entry_dirty with
+ *           and unpinned and unprotected entry will generate an
+ *           error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              5/17/06
  *
  *-------------------------------------------------------------------------
@@ -17353,14 +17397,14 @@ check_mark_entry_dirty_errs(void)
 
         protect_entry(file_ptr, 0, 0);
 
-	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         entry_ptr = &((entries[0])[0]);
     }
 
     if ( pass ) {
 
-	result = H5C_mark_entry_dirty((void *)entry_ptr);
+    result = H5C_mark_entry_dirty((void *)entry_ptr);
 
 
         if ( result > 0 ) {
@@ -17388,21 +17432,21 @@ check_mark_entry_dirty_errs(void)
 
 } /* check_mark_entry_dirty_errs() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_expunge_entry_errs()
+ * Function:    check_expunge_entry_errs()
  *
- * Purpose:	Verify that invalid calls to H5C_expunge_entry()
- * 		generate errors as expected.
+ * Purpose:    Verify that invalid calls to H5C_expunge_entry()
+ *         generate errors as expected.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              7/6/06
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -17446,7 +17490,7 @@ check_expunge_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+    result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                 &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( result > 0 ) {
@@ -17457,14 +17501,14 @@ check_expunge_entry_errs(void)
 
         } else {
 
-	    unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
-	}
+    }
     }
 
     if ( pass ) {
 
-	result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+    result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                 &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( result > 0 ) {
@@ -17475,14 +17519,14 @@ check_expunge_entry_errs(void)
 
         } else {
 
-	    unpin_entry(0, 0);
+        unpin_entry(0, 0);
 
-	}
+    }
     }
 
     if ( pass ) {
 
-	result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+    result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                 &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( result < 0 ) {
@@ -17491,7 +17535,7 @@ check_expunge_entry_errs(void)
             failure_mssg =
               "attempt to expunge an unpinned and unprotected entry failed.\n";
 
-	}
+    }
     }
 
 
@@ -17512,16 +17556,16 @@ check_expunge_entry_errs(void)
 
 } /* check_expunge_entry_errs() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_resize_entry_errs()
+ * Function:    check_resize_entry_errs()
  *
- * Purpose:	Verify that invalid calls to H5C_resize_entry()
- * 		generates errors as expected.
+ * Purpose:    Verify that invalid calls to H5C_resize_entry()
+ *         generates errors as expected.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              7/7/06
  *
  *-------------------------------------------------------------------------
@@ -17565,7 +17609,7 @@ check_resize_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_resize_entry((void *)entry_ptr, (size_t)1);
+    result = H5C_resize_entry((void *)entry_ptr, (size_t)1);
 
         if ( result < 0 ) {
 
@@ -17575,14 +17619,14 @@ check_resize_entry_errs(void)
 
         } else {
 
-	    unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
-	}
+    }
     }
 
     if ( pass ) {
 
-	result = H5C_resize_entry((void *)entry_ptr, (size_t)0);
+    result = H5C_resize_entry((void *)entry_ptr, (size_t)0);
 
         if ( result >= 0 ) {
 
@@ -17592,9 +17636,9 @@ check_resize_entry_errs(void)
 
         } else {
 
-	    unpin_entry(0, 0);
+        unpin_entry(0, 0);
 
-	}
+    }
     }
 
     if ( pass ) {
@@ -17614,16 +17658,16 @@ check_resize_entry_errs(void)
 
 } /* check_resize_entry_errs() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_unprotect_ro_dirty_err()
+ * Function:    check_unprotect_ro_dirty_err()
  *
- * Purpose:	If an entry is protected read only, verify that unprotecting
- * 		it dirty will generate an error.
+ * Purpose:    If an entry is protected read only, verify that unprotecting
+ *         it dirty will generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/3/07
  *
  *-------------------------------------------------------------------------
@@ -17674,7 +17718,7 @@ check_unprotect_ro_dirty_err(void)
 
     if ( pass ) {
 
-	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
     }
 
@@ -17718,8 +17762,8 @@ check_unprotect_ro_dirty_err(void)
 
     if ( pass ) {
 
-	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
-	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
     }
 
@@ -17740,21 +17784,21 @@ check_unprotect_ro_dirty_err(void)
 
 } /* check_unprotect_ro_dirty_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_protect_ro_rw_err()
+ * Function:    check_protect_ro_rw_err()
  *
- * Purpose:	If an entry is protected read only, verify that protecting
- * 		it rw will generate an error.
+ * Purpose:    If an entry is protected read only, verify that protecting
+ *         it rw will generate an error.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/9/07
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -17803,7 +17847,7 @@ check_protect_ro_rw_err(void)
 
     if ( pass ) {
 
-	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
     }
 
     if ( pass ) {
@@ -17823,21 +17867,21 @@ check_protect_ro_rw_err(void)
 
 } /* check_protect_ro_rw_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_evictions_enabled_err()
+ * Function:    check_evictions_enabled_err()
  *
- * Purpose:	Verify that H5C_get_evictions_enabled() and
+ * Purpose:    Verify that H5C_get_evictions_enabled() and
  *              H5C_set_evictions_enabled() generate errors as expected.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              8/3/07
  *
  * Modifications:
  *
- *		None.
+ *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -17879,9 +17923,9 @@ check_check_evictions_enabled_err(void)
 
     if ( pass ) {
 
-	result = H5C_get_evictions_enabled(NULL, &evictions_enabled);
+    result = H5C_get_evictions_enabled(NULL, &evictions_enabled);
 
-	if ( result == SUCCEED ) {
+    if ( result == SUCCEED ) {
 
             pass = FALSE;
             failure_mssg = "H5C_get_evictions_enabled succeeded() 1.\n";
@@ -17890,9 +17934,9 @@ check_check_evictions_enabled_err(void)
 
     if ( pass ) {
 
-	result = H5C_get_evictions_enabled(cache_ptr, NULL);
+    result = H5C_get_evictions_enabled(cache_ptr, NULL);
 
-	if ( result == SUCCEED ) {
+    if ( result == SUCCEED ) {
 
             pass = FALSE;
             failure_mssg = "H5C_get_evictions_enabled succeeded() 2.\n";
@@ -17901,30 +17945,30 @@ check_check_evictions_enabled_err(void)
 
     if ( pass ) {
 
-	result = H5C_set_evictions_enabled(cache_ptr, TRUE);
+    result = H5C_set_evictions_enabled(cache_ptr, TRUE);
 
-	if ( result != SUCCEED ) {
+    if ( result != SUCCEED ) {
 
             pass = FALSE;
             failure_mssg = "H5C_set_evictions_enabled failed().\n";
 
-	}
+    }
     }
 
     if ( pass ) {
 
         (cache_ptr->resize_ctl).incr_mode = H5C_incr__threshold;
 
-	result = H5C_get_evictions_enabled(cache_ptr, FALSE);
+    result = H5C_get_evictions_enabled(cache_ptr, FALSE);
 
-	if ( result == SUCCEED ) {
+    if ( result == SUCCEED ) {
 
             pass = FALSE;
             failure_mssg = "H5C_get_evictions_enabled succeeded() 1.\n";
 
         } else if ( cache_ptr->evictions_enabled == TRUE ) {
 
-	}
+    }
 
         (cache_ptr->resize_ctl).incr_mode = H5C_incr__off;
     }
@@ -17933,9 +17977,9 @@ check_check_evictions_enabled_err(void)
 
         (cache_ptr->resize_ctl).decr_mode = H5C_decr__threshold;
 
-	result = H5C_get_evictions_enabled(cache_ptr, FALSE);
+    result = H5C_get_evictions_enabled(cache_ptr, FALSE);
 
-	if ( result == SUCCEED ) {
+    if ( result == SUCCEED ) {
 
             pass = FALSE;
             failure_mssg = "H5C_get_evictions_enabled succeeded() 2.\n";
@@ -17962,18 +18006,18 @@ check_check_evictions_enabled_err(void)
 
 } /* check_evictions_enabled_err() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_auto_cache_resize()
+ * Function:    check_auto_cache_resize()
  *
- * Purpose:	Exercise the automatic cache resizing functionality.
- *		The objective is to operate the auto-resize code in
- *		all possible modes.  Unfortunately, there are quite
- *		a few of them.
+ * Purpose:    Exercise the automatic cache resizing functionality.
+ *        The objective is to operate the auto-resize code in
+ *        all possible modes.  Unfortunately, there are quite
+ *        a few of them.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              10/29/04
  *
  * Modifications:
@@ -18037,9 +18081,9 @@ check_auto_cache_resize(void)
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
-	/*                    flash_incr_mode = */ H5C_flash_incr__off,
-	/* double      flash_multiple         = */ 2.0f,
-	/* double      flash_threshold        = */ 0.5f,
+    /*                    flash_incr_mode = */ H5C_flash_incr__off,
+    /* double      flash_multiple         = */ 2.0f,
+    /* double      flash_threshold        = */ 0.5f,
 
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
@@ -18422,9 +18466,9 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1000 * 1000);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
 
@@ -18765,9 +18809,9 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_max_increment    = FALSE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
 
@@ -18952,9 +18996,9 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out;
@@ -19367,9 +19411,9 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out;
@@ -19895,9 +19939,9 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out;
@@ -20311,9 +20355,9 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out_with_threshold;
@@ -20577,9 +20621,9 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out_with_threshold;
@@ -21159,9 +21203,9 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (32 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__add_space;
-	auto_size_ctl.flash_multiple         = 1.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__add_space;
+    auto_size_ctl.flash_multiple         = 1.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out_with_threshold;
@@ -21191,9 +21235,9 @@ check_auto_cache_resize(void)
 
         if ( ( cache_ptr->max_cache_size != (64 * 1024) ) ||
              ( cache_ptr->min_clean_size != (32 * 1024) ) ||
-	     ( cache_ptr->index_len != 0 ) ||
-	     ( cache_ptr->index_size != 0 ) ||
-	     ( cache_ptr->cache_accesses != 0 ) ) {
+        ( cache_ptr->index_len != 0 ) ||
+        ( cache_ptr->index_size != 0 ) ||
+        ( cache_ptr->cache_accesses != 0 ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (0).\n";
@@ -21211,16 +21255,16 @@ check_auto_cache_resize(void)
             unprotect_entry(file_ptr, HUGE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
         }
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (64 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (32 * 1024) ) ||
-		 ( cache_ptr->index_len != 1 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (64 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (32 * 1024) ) ||
+        ( cache_ptr->index_len != 1 ) ||
                  ( cache_ptr->index_size != HUGE_ENTRY_SIZE ) ||
-		 ( cache_ptr->cache_accesses != 1 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 1 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (1).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21238,17 +21282,17 @@ check_auto_cache_resize(void)
             unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
         }
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (80 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (40 * 1024) ) ||
-		 ( cache_ptr->index_len != 2 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (80 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (40 * 1024) ) ||
+        ( cache_ptr->index_len != 2 ) ||
                  ( cache_ptr->index_size != (HUGE_ENTRY_SIZE +
-		                             MONSTER_ENTRY_SIZE) ) ||
-		 ( cache_ptr->cache_accesses != 1 ) ) ) ) {
+                                    MONSTER_ENTRY_SIZE) ) ||
+        ( cache_ptr->cache_accesses != 1 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (2).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21264,17 +21308,17 @@ check_auto_cache_resize(void)
 
         unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != ( 72 * 1024) ) ||
-		 ( cache_ptr->index_len != 3 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
+        ( cache_ptr->min_clean_size != ( 72 * 1024) ) ||
+        ( cache_ptr->index_len != 3 ) ||
                  ( cache_ptr->index_size != ((2 * MONSTER_ENTRY_SIZE) +
-					     HUGE_ENTRY_SIZE) ) ||
-		 ( cache_ptr->cache_accesses != 1 ) ) ) ) {
+                        HUGE_ENTRY_SIZE) ) ||
+        ( cache_ptr->cache_accesses != 1 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (3).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21288,16 +21332,16 @@ check_auto_cache_resize(void)
 
         unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != ( 72 * 1024) ) ||
-		 ( cache_ptr->index_len != 2 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
+        ( cache_ptr->min_clean_size != ( 72 * 1024) ) ||
+        ( cache_ptr->index_len != 2 ) ||
                  ( cache_ptr->index_size != (2 * MONSTER_ENTRY_SIZE) ) ||
-		 ( cache_ptr->cache_accesses != 2 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 2 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (4).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21307,8 +21351,8 @@ check_auto_cache_resize(void)
      */
     if ( pass ) {
 
-	expunge_entry(file_ptr, MONSTER_ENTRY_TYPE, 1);
-	expunge_entry(file_ptr, MONSTER_ENTRY_TYPE, 2);
+    expunge_entry(file_ptr, MONSTER_ENTRY_TYPE, 1);
+    expunge_entry(file_ptr, MONSTER_ENTRY_TYPE, 2);
 
         if ( pass ) {
 
@@ -21318,19 +21362,19 @@ check_auto_cache_resize(void)
 
                 pass = FALSE;
                 failure_mssg = "H5C_set_cache_auto_resize_config failed 13.\n";
-	    }
+        }
         }
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (64 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (32 * 1024) ) ||
-		 ( cache_ptr->index_len != 0 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (64 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (32 * 1024) ) ||
+        ( cache_ptr->index_len != 0 ) ||
                  ( cache_ptr->index_size != 0 ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (5).\n";
-	}
+    }
     }
 
     /* repeat the above basic test, only this time, use inserts to add
@@ -21344,22 +21388,22 @@ check_auto_cache_resize(void)
 
         insert_entry(file_ptr, HUGE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
 
-	/* protect and unprotect a couple times to increment cache_accesses */
+    /* protect and unprotect a couple times to increment cache_accesses */
         protect_entry(file_ptr, HUGE_ENTRY_TYPE, 1);
         unprotect_entry(file_ptr, HUGE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
         protect_entry(file_ptr, HUGE_ENTRY_TYPE, 1);
         unprotect_entry(file_ptr, HUGE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (64 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (32 * 1024) ) ||
-		 ( cache_ptr->index_len != 1 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (64 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (32 * 1024) ) ||
+        ( cache_ptr->index_len != 1 ) ||
                  ( cache_ptr->index_size != HUGE_ENTRY_SIZE ) ||
-		 ( cache_ptr->cache_accesses != 2 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 2 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (6).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21373,17 +21417,17 @@ check_auto_cache_resize(void)
 
         insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 4, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (80 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (40 * 1024) ) ||
-		 ( cache_ptr->index_len != 2 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (80 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (40 * 1024) ) ||
+        ( cache_ptr->index_len != 2 ) ||
                  ( cache_ptr->index_size !=
-		   HUGE_ENTRY_SIZE + MONSTER_ENTRY_SIZE ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        HUGE_ENTRY_SIZE + MONSTER_ENTRY_SIZE ) ||
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (7).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21394,17 +21438,17 @@ check_auto_cache_resize(void)
 
         insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 5, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != ( 72 * 1024) ) ||
-		 ( cache_ptr->index_len != 3 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
+        ( cache_ptr->min_clean_size != ( 72 * 1024) ) ||
+        ( cache_ptr->index_len != 3 ) ||
                  ( cache_ptr->index_size !=
-		   2 * MONSTER_ENTRY_SIZE + HUGE_ENTRY_SIZE ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        2 * MONSTER_ENTRY_SIZE + HUGE_ENTRY_SIZE ) ||
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (8).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21418,16 +21462,16 @@ check_auto_cache_resize(void)
 
         unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 6, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != ( 72 * 1024) ) ||
-		 ( cache_ptr->index_len != 2 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
+        ( cache_ptr->min_clean_size != ( 72 * 1024) ) ||
+        ( cache_ptr->index_len != 2 ) ||
                  ( cache_ptr->index_size != (2 * MONSTER_ENTRY_SIZE) ) ||
-		 ( cache_ptr->cache_accesses != 1 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 1 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (9).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21439,26 +21483,26 @@ check_auto_cache_resize(void)
      */
     if ( pass ) {
 
-	expunge_entry(file_ptr, MONSTER_ENTRY_TYPE, 5);
-	expunge_entry(file_ptr, MONSTER_ENTRY_TYPE, 6);
+    expunge_entry(file_ptr, MONSTER_ENTRY_TYPE, 5);
+    expunge_entry(file_ptr, MONSTER_ENTRY_TYPE, 6);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 1024, TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 1024, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 1024, TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 1024, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 1024, TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 1024, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13, 1024, TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13, 1024, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13, H5C__DIRTIED_FLAG);
 
-	flush_cache(file_ptr, TRUE, FALSE, FALSE);
+    flush_cache(file_ptr, TRUE, FALSE, FALSE);
 
 
         if ( pass ) {
@@ -21470,19 +21514,19 @@ check_auto_cache_resize(void)
 
                 pass = FALSE;
                 failure_mssg = "H5C_set_cache_auto_resize_config failed 13.\n";
-	    }
+        }
         }
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (3 * 1024) ) ||
-		 ( cache_ptr->index_len != 0 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (3 * 1024) ) ||
+        ( cache_ptr->index_len != 0 ) ||
                  ( cache_ptr->index_size != 0 ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (10).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21502,16 +21546,16 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13);
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (3 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (3 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 4 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 4 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 4 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (11).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21522,20 +21566,20 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, (3 * 1024), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, (3 * 1024), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
 
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (3 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (3 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 6 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 5 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 5 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (12).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21547,20 +21591,20 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, (10 * 1024), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, (10 * 1024), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
 
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (13 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (13 * 512) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (13 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (13 * 512) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 13 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (13).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21571,20 +21615,20 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, (10 * 1024), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, (10 * 1024), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
 
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (11 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (11 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 22 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (14).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21595,20 +21639,20 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, (10 * 1024), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, (10 * 1024), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
 
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (11 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (11 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 31 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 1 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 1 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (15).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21620,16 +21664,16 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, (1 * 1024), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, (1 * 1024), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, (1 * 1024), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, (1 * 1024), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, (1 * 1024), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, (1 * 1024), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
 
         if ( pass ) {
 
@@ -21640,19 +21684,19 @@ check_auto_cache_resize(void)
 
                 pass = FALSE;
                 failure_mssg = "H5C_set_cache_auto_resize_config failed 14.\n";
-	    }
+        }
         }
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (3 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (3 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 4 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (16).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21665,16 +21709,16 @@ check_auto_cache_resize(void)
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 2 * 1024, TRUE);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (6 * 512) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (6 * 512) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 5 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 1 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 1 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (17).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21683,16 +21727,16 @@ check_auto_cache_resize(void)
 
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 10 * 1024, TRUE);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (13 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (13 * 512) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (13 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (13 * 512) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 13 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (18).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21703,16 +21747,16 @@ check_auto_cache_resize(void)
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024, TRUE);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (11 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (11 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 22 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (19).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21723,16 +21767,16 @@ check_auto_cache_resize(void)
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024, TRUE);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (11 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (11 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 31 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 1 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 1 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (20).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21751,16 +21795,16 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__UNPIN_ENTRY_FLAG);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (11 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (11 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 31 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 4 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 4 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (21).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21772,16 +21816,16 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, (1 * 1024), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, (1 * 1024), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, (1 * 1024), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, (1 * 1024), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, (1 * 1024), TRUE);
-	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, (1 * 1024), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
 
         if ( pass ) {
 
@@ -21792,19 +21836,19 @@ check_auto_cache_resize(void)
 
                 pass = FALSE;
                 failure_mssg = "H5C_set_cache_auto_resize_config failed 15.\n";
-	    }
+        }
         }
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (3 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (3 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 4 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (22).\n";
-	}
+    }
     }
 
     if ( pass ) {
@@ -21813,16 +21857,16 @@ check_auto_cache_resize(void)
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 2 * 1024, TRUE);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (6 * 512) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (6 * 512) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 5 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 1 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 1 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (23).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21831,16 +21875,16 @@ check_auto_cache_resize(void)
 
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 10 * 1024, TRUE);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (13 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (13 * 512) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (13 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (13 * 512) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 13 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (24).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21851,16 +21895,16 @@ check_auto_cache_resize(void)
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024, TRUE);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (11 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (11 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 22 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (25).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21871,16 +21915,16 @@ check_auto_cache_resize(void)
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024, TRUE);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (11 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (11 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 31 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 1 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 1 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (26).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21899,16 +21943,16 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__UNPIN_ENTRY_FLAG);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (11 * 1024) ) ||
-		 ( cache_ptr->index_len != 4 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (11 * 1024) ) ||
+        ( cache_ptr->index_len != 4 ) ||
                  ( cache_ptr->index_size != 31 * 1024 ) ||
-		 ( cache_ptr->cache_accesses != 4 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 4 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (27).\n";
-	}
+    }
     }
 
     /* We have finished a basic check of the flash cache size increment
@@ -21916,21 +21960,21 @@ check_auto_cache_resize(void)
      */
     if ( pass ) {
 
-	expunge_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-	expunge_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-	expunge_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-	expunge_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13);
+    expunge_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
+    expunge_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
+    expunge_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
+    expunge_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (11 * 1024) ) ||
-		 ( cache_ptr->index_len != 0 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (11 * 1024) ) ||
+        ( cache_ptr->index_len != 0 ) ||
                  ( cache_ptr->index_size != 0 ) ||
-		 ( cache_ptr->cache_accesses != 4 ) ) ) ) {
+        ( cache_ptr->cache_accesses != 4 ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (28).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -21964,9 +22008,9 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__add_space;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.4f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__add_space;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.4f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out_with_threshold;
@@ -21998,9 +22042,9 @@ check_auto_cache_resize(void)
 
         if ( ( cache_ptr->max_cache_size != (4 * 1024) ) ||
              ( cache_ptr->min_clean_size != (4 * 512) ) ||
-	     ( cache_ptr->index_len != 0 ) ||
-	     ( cache_ptr->index_size != 0 ) ||
-	     ( cache_ptr->cache_accesses != 0 ) ) {
+        ( cache_ptr->index_len != 0 ) ||
+        ( cache_ptr->index_size != 0 ) ||
+        ( cache_ptr->cache_accesses != 0 ) ) {
 
             pass = FALSE;
             failure_mssg = "bad cache after initialization 15.\n";
@@ -22019,17 +22063,17 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
         unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (4 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (4 * 512) ) ||
-		 ( cache_ptr->index_len != 1 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (4 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (4 * 512) ) ||
+        ( cache_ptr->index_len != 1 ) ||
                  ( cache_ptr->index_size != LARGE_ENTRY_SIZE ) ||
-		 ( cache_ptr->cache_accesses != 1 )  ||
-		 ( rpt_fcn_called == TRUE ) ) ) ) {
+        ( cache_ptr->cache_accesses != 1 )  ||
+        ( rpt_fcn_called == TRUE ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (29).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -22045,17 +22089,17 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
         unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (12 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (12 * 512) ) ||
-		 ( cache_ptr->index_len != 2 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (12 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (12 * 512) ) ||
+        ( cache_ptr->index_len != 2 ) ||
                  ( cache_ptr->index_size != 2 * LARGE_ENTRY_SIZE ) ||
-		 ( cache_ptr->cache_accesses != 1 )  ||
-		 ( rpt_fcn_called != TRUE ) ) ) ) {
+        ( cache_ptr->cache_accesses != 1 )  ||
+        ( rpt_fcn_called != TRUE ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (30).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -22072,17 +22116,17 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
         unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (12 * 1024) ) ||
-		 ( cache_ptr->min_clean_size != (12 * 512) ) ||
-		 ( cache_ptr->index_len != 3 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (12 * 1024) ) ||
+        ( cache_ptr->min_clean_size != (12 * 512) ) ||
+        ( cache_ptr->index_len != 3 ) ||
                  ( cache_ptr->index_size != 3 * LARGE_ENTRY_SIZE ) ||
-		 ( cache_ptr->cache_accesses != 3 )  ||
-		 ( rpt_fcn_called != FALSE ) ) ) ) {
+        ( cache_ptr->cache_accesses != 3 )  ||
+        ( rpt_fcn_called != FALSE ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (31).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -22124,19 +22168,19 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
         unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
 
-	if ( ( pass ) &&
-	     ( ( ( cache_ptr->max_cache_size != (4 * 1024 + 128) ) ||
-		 ( cache_ptr->min_clean_size != (2 * 1024 + 64) ) ||
-		 ( cache_ptr->index_len != 2 ) ||
+    if ( ( pass ) &&
+        ( ( ( cache_ptr->max_cache_size != (4 * 1024 + 128) ) ||
+        ( cache_ptr->min_clean_size != (2 * 1024 + 64) ) ||
+        ( cache_ptr->index_len != 2 ) ||
                  ( cache_ptr->index_size !=
-		   LARGE_ENTRY_SIZE + TINY_ENTRY_SIZE ) ||
-		 ( cache_ptr->cache_accesses != 1 )  ||
-		 ( rpt_fcn_called == FALSE ) ||
+        LARGE_ENTRY_SIZE + TINY_ENTRY_SIZE ) ||
+        ( cache_ptr->cache_accesses != 1 )  ||
+        ( rpt_fcn_called == FALSE ) ||
                  ( rpt_status != flash_increase ) ) ) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache config (33).\n";
-	}
+    }
     }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
@@ -22158,7 +22202,7 @@ check_auto_cache_resize(void)
 
         if ( ( cache_ptr->max_cache_size != (20 * 1024) ) ||
              ( cache_ptr->min_clean_size != (10 * 1024) ) ||
-	     ( rpt_fcn_called == FALSE ) ||
+        ( rpt_fcn_called == FALSE ) ||
              ( rpt_status != at_max_size ) ) {
 
             pass = FALSE;
@@ -22188,16 +22232,16 @@ check_auto_cache_resize(void)
 
 } /* check_auto_cache_resize() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_auto_cache_resize_disable()
+ * Function:    check_auto_cache_resize_disable()
  *
- * Purpose:	Test the various ways in which the resize code can
- *		be disabled.  Unfortunately, there are quite a few of them.
+ * Purpose:    Test the various ways in which the resize code can
+ *        be disabled.  Unfortunately, there are quite a few of them.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              12/16/04
  *
  * Modifications:
@@ -22245,7 +22289,7 @@ check_auto_cache_resize_disable(void)
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
-	/*                    flash_incr_mode = */ H5C_flash_incr__off,
+    /*                    flash_incr_mode = */ H5C_flash_incr__off,
         /* double      flash_multiple         = */ 1.0f,
         /* double      flash_threshold        = */ 0.25f,
 
@@ -22288,7 +22332,7 @@ check_auto_cache_resize_disable(void)
             pass = FALSE;
             failure_mssg = "file_ptr NULL from setup_cache.";
 
-        } 
+        }
         else {
 
             cache_ptr = file_ptr->shared->cache;
@@ -22351,9 +22395,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = FALSE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -22509,9 +22553,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = FALSE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -22666,9 +22710,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = FALSE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -22823,9 +22867,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -22980,9 +23024,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -23136,9 +23180,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__off;
@@ -23294,9 +23338,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out;
@@ -23520,9 +23564,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out;
@@ -23753,9 +23797,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out_with_threshold;
@@ -23990,9 +24034,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -24117,9 +24161,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -24244,9 +24288,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -24371,9 +24415,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -24498,9 +24542,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -24626,9 +24670,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__off;
@@ -24782,9 +24826,9 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (2 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 1.0f;
-	auto_size_ctl.flash_threshold        = 0.25f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 1.0f;
+    auto_size_ctl.flash_threshold        = 0.25f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out_with_threshold;
@@ -24839,16 +24883,16 @@ check_auto_cache_resize_disable(void)
                  ( cache_ptr->index_size != LARGE_ENTRY_SIZE ) ||
                  ( rpt_fcn_called != FALSE ) ) ) ) {
 
-	    HDfprintf(stdout, "\nmax_cache_size = %ld.\n",
-		      (long)(cache_ptr->max_cache_size));
-	    HDfprintf(stdout, "min_clean_size = %ld.\n",
-		      (long)(cache_ptr->min_clean_size));
-	    HDfprintf(stdout, "index_len = %ld.\n",
-		      (long)(cache_ptr->index_len));
-	    HDfprintf(stdout, "index_size = %ld.\n",
-		      (long)(cache_ptr->index_size));
-	    HDfprintf(stdout, "rpt_fcn_called = %ld.\n",
-		      (long)(rpt_fcn_called));
+        HDfprintf(stdout, "\nmax_cache_size = %ld.\n",
+            (long)(cache_ptr->max_cache_size));
+        HDfprintf(stdout, "min_clean_size = %ld.\n",
+            (long)(cache_ptr->min_clean_size));
+        HDfprintf(stdout, "index_len = %ld.\n",
+            (long)(cache_ptr->index_len));
+        HDfprintf(stdout, "index_size = %ld.\n",
+            (long)(cache_ptr->index_size));
+        HDfprintf(stdout, "rpt_fcn_called = %ld.\n",
+            (long)(rpt_fcn_called));
 
             pass = FALSE;
             failure_mssg = "Unexpected cache size change results 46.\n";
@@ -24878,16 +24922,16 @@ check_auto_cache_resize_disable(void)
                  ( cache_ptr->index_size != MONSTER_ENTRY_SIZE ) ||
                  ( rpt_fcn_called != FALSE ) ) ) ) {
 
-	    HDfprintf(stdout, "\nmax_cache_size = %ld.\n",
-		      (long)(cache_ptr->max_cache_size));
-	    HDfprintf(stdout, "min_clean_size = %ld.\n",
-		      (long)(cache_ptr->min_clean_size));
-	    HDfprintf(stdout, "index_len = %ld.\n",
-		      (long)(cache_ptr->index_len));
-	    HDfprintf(stdout, "index_size = %ld.\n",
-		      (long)(cache_ptr->index_size));
-	    HDfprintf(stdout, "rpt_fcn_called = %ld.\n",
-		      (long)(rpt_fcn_called));
+        HDfprintf(stdout, "\nmax_cache_size = %ld.\n",
+            (long)(cache_ptr->max_cache_size));
+        HDfprintf(stdout, "min_clean_size = %ld.\n",
+            (long)(cache_ptr->min_clean_size));
+        HDfprintf(stdout, "index_len = %ld.\n",
+            (long)(cache_ptr->index_len));
+        HDfprintf(stdout, "index_size = %ld.\n",
+            (long)(cache_ptr->index_size));
+        HDfprintf(stdout, "rpt_fcn_called = %ld.\n",
+            (long)(rpt_fcn_called));
 
             pass = FALSE;
             failure_mssg = "Unexpected cache size change results 47.\n";
@@ -24915,16 +24959,16 @@ check_auto_cache_resize_disable(void)
 
 } /* check_auto_cache_resize_disable() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_auto_cache_resize_epoch_markers()
+ * Function:    check_auto_cache_resize_epoch_markers()
  *
- * Purpose:	Verify that the auto-resize code manages epoch markers
- *		correctly.
+ * Purpose:    Verify that the auto-resize code manages epoch markers
+ *        correctly.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              12/16/04
  *
  * Modifications:
@@ -24969,9 +25013,9 @@ check_auto_cache_resize_epoch_markers(void)
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
-	/*                    flash_incr_mode = */ H5C_flash_incr__off,
-	/* double      flash_multiple         = */ 2.0f,
-	/* double      flash_threshold        = */ 0.5f,
+    /*                    flash_incr_mode = */ H5C_flash_incr__off,
+    /* double      flash_multiple         = */ 2.0f,
+    /* double      flash_threshold        = */ 0.5f,
 
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
@@ -25056,9 +25100,9 @@ check_auto_cache_resize_epoch_markers(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out;
@@ -25230,9 +25274,9 @@ check_auto_cache_resize_epoch_markers(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out;
@@ -25351,9 +25395,9 @@ check_auto_cache_resize_epoch_markers(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -25430,9 +25474,9 @@ check_auto_cache_resize_epoch_markers(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out_with_threshold;
@@ -25543,9 +25587,9 @@ check_auto_cache_resize_epoch_markers(void)
         auto_size_ctl.apply_max_increment    = TRUE;
         auto_size_ctl.max_increment          = (4 * 1024 * 1024);
 
-	auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	auto_size_ctl.flash_multiple         = 2.0f;
-	auto_size_ctl.flash_threshold        = 0.5f;
+    auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    auto_size_ctl.flash_multiple         = 2.0f;
+    auto_size_ctl.flash_threshold        = 0.5f;
 
 
         auto_size_ctl.decr_mode              = H5C_decr__off;
@@ -25620,21 +25664,21 @@ check_auto_cache_resize_epoch_markers(void)
 
 } /* check_auto_cache_resize_epoch_markers() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_auto_cache_resize_input_errs()
+ * Function:    check_auto_cache_resize_input_errs()
  *
- * Purpose:	Verify that H5C_set_cache_auto_resize_config() detects
- *		and rejects invalid input.
+ * Purpose:    Verify that H5C_set_cache_auto_resize_config() detects
+ *        and rejects invalid input.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              10/29/04
  *
  * Modifications:
  *
- * 		Added code to verify that errors in the flash cache size
+ *         Added code to verify that errors in the flash cache size
  *              increment related fields are caught as well.
  *
  *                                              JRM -- 1/17/08
@@ -25675,9 +25719,9 @@ check_auto_cache_resize_input_errs(void)
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
-	/*                    flash_incr_mode = */ H5C_flash_incr__off,
-	/* double      flash_multiple         = */ 2.0f,
-	/* double      flash_threshold        = */ 0.5f,
+    /*                    flash_incr_mode = */ H5C_flash_incr__off,
+    /* double      flash_multiple         = */ 2.0f,
+    /* double      flash_threshold        = */ 0.5f,
 
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
@@ -25781,9 +25825,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -25856,9 +25900,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -25932,9 +25976,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26005,9 +26049,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26080,9 +26124,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26152,9 +26196,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26228,9 +26272,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26300,9 +26344,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26372,9 +26416,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26447,9 +26491,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26519,9 +26563,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26586,7 +26630,7 @@ check_auto_cache_resize_input_errs(void)
 
 
         invalid_auto_size_ctl.incr_mode              =
-        			(enum H5C_cache_incr_mode) -1; /* INVALID */
+                    (enum H5C_cache_incr_mode) -1; /* INVALID */
 
         invalid_auto_size_ctl.lower_hr_threshold     = 0.75f;
 
@@ -26595,9 +26639,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26659,7 +26703,7 @@ check_auto_cache_resize_input_errs(void)
 
 
         invalid_auto_size_ctl.incr_mode              =
-        			(enum H5C_cache_incr_mode) 2; /* INVALID */
+                    (enum H5C_cache_incr_mode) 2; /* INVALID */
 
         invalid_auto_size_ctl.lower_hr_threshold     = 0.75f;
 
@@ -26668,9 +26712,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26743,9 +26787,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26815,9 +26859,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26887,9 +26931,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -26962,9 +27006,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -27037,10 +27081,10 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        =
-       			(enum H5C_cache_flash_incr_mode) -1; /* INVALID */
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        =
+                (enum H5C_cache_flash_incr_mode) -1; /* INVALID */
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -27112,10 +27156,10 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        =
-						H5C_flash_incr__add_space;
-	invalid_auto_size_ctl.flash_multiple         = 0.09f; /* INVALID */
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        =
+                        H5C_flash_incr__add_space;
+    invalid_auto_size_ctl.flash_multiple         = 0.09f; /* INVALID */
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -27185,10 +27229,10 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        =
-						H5C_flash_incr__add_space;
-	invalid_auto_size_ctl.flash_multiple         = 10.01f; /* INVALID */
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        =
+                        H5C_flash_incr__add_space;
+    invalid_auto_size_ctl.flash_multiple         = 10.01f; /* INVALID */
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -27260,10 +27304,10 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        =
-						H5C_flash_incr__add_space;
-	invalid_auto_size_ctl.flash_multiple         = 1.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.09f; /* INVALID */
+    invalid_auto_size_ctl.flash_incr_mode        =
+                        H5C_flash_incr__add_space;
+    invalid_auto_size_ctl.flash_multiple         = 1.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.09f; /* INVALID */
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -27333,10 +27377,10 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        =
-						H5C_flash_incr__add_space;
-	invalid_auto_size_ctl.flash_multiple         = 1.0f;
-	invalid_auto_size_ctl.flash_threshold        = 1.001f; /* INVALID */
+    invalid_auto_size_ctl.flash_incr_mode        =
+                        H5C_flash_incr__add_space;
+    invalid_auto_size_ctl.flash_multiple         = 1.0f;
+    invalid_auto_size_ctl.flash_threshold        = 1.001f; /* INVALID */
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -27409,13 +27453,13 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              =
-        			(enum H5C_cache_decr_mode) -1; /* INVALID */
+                    (enum H5C_cache_decr_mode) -1; /* INVALID */
 
         invalid_auto_size_ctl.upper_hr_threshold     = 0.999f;
 
@@ -27482,13 +27526,13 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              =
-        			(enum H5C_cache_decr_mode) 4; /* INVALID */
+                    (enum H5C_cache_decr_mode) 4; /* INVALID */
 
         invalid_auto_size_ctl.upper_hr_threshold     = 0.999f;
 
@@ -27558,9 +27602,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -27630,9 +27674,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__threshold;
@@ -27705,9 +27749,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__age_out;
@@ -27776,9 +27820,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode      = H5C_decr__age_out_with_threshold;
@@ -27851,9 +27895,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode              = H5C_decr__age_out;
@@ -27922,9 +27966,9 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
-	invalid_auto_size_ctl.flash_multiple         = 2.0f;
-	invalid_auto_size_ctl.flash_threshold        = 0.5f;
+    invalid_auto_size_ctl.flash_incr_mode        = H5C_flash_incr__off;
+    invalid_auto_size_ctl.flash_multiple         = 2.0f;
+    invalid_auto_size_ctl.flash_threshold        = 0.5f;
 
 
         invalid_auto_size_ctl.decr_mode      = H5C_decr__age_out_with_threshold;
@@ -28028,21 +28072,21 @@ check_auto_cache_resize_input_errs(void)
 
 } /* check_auto_cache_resize_input_errs() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_auto_cache_resize_aux_fcns()
+ * Function:    check_auto_cache_resize_aux_fcns()
  *
- * Purpose:	Verify that the auxilary functions associated with
- *		the automatic cache resize capability are operating
- *		correctly.  These functions are:
+ * Purpose:    Verify that the auxilary functions associated with
+ *        the automatic cache resize capability are operating
+ *        correctly.  These functions are:
  *
- *			H5C_get_cache_size()
- *			H5C_get_cache_hit_rate()
- *			H5C_reset_cache_hit_rate_stats()
+ *            H5C_get_cache_size()
+ *            H5C_get_cache_hit_rate()
+ *            H5C_reset_cache_hit_rate_stats()
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              11/4/04
  *
  * Modifications:
@@ -28092,9 +28136,9 @@ check_auto_cache_resize_aux_fcns(void)
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
-	/*                    flash_incr_mode = */ H5C_flash_incr__off,
-	/* double      flash_multiple         = */ 2.0f,
-	/* double      flash_threshold        = */ 0.5f,
+    /*                    flash_incr_mode = */ H5C_flash_incr__off,
+    /* double      flash_multiple         = */ 2.0f,
+    /* double      flash_threshold        = */ 0.5f,
 
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
@@ -28567,11 +28611,11 @@ check_auto_cache_resize_aux_fcns(void)
 
 } /* check_auto_cache_resize_aux_fcns() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	check_metadata_blizzard_absence()
+ * Function:    check_metadata_blizzard_absence()
  *
- * Purpose:	Test to verify that a 'metadata blizzard' can not occur
+ * Purpose:    Test to verify that a 'metadata blizzard' can not occur
  *              upon insertion into the cache.
  *
  *              A 'metadata blizzard' in this context occurs when the cache
@@ -28585,9 +28629,9 @@ check_auto_cache_resize_aux_fcns(void)
  *              flushing the entire cache is what constitutes a 'metadata
  *              blizzard'.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	Mike McGreevy
+ * Programmer:    Mike McGreevy
  *              <mamcgree@hdfgroup.org>
  *              12/16/08
  *
@@ -28619,158 +28663,158 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
      */
     struct expected_entry_status expected[150] =
     {
-      /* entry		entry			in	at main                                                       */
-      /* type:		index:	size:		cache:	addr:	dirty:	prot:	pinned:	loaded: clrd:	flshd:	dest: */
-      { HUGE_ENTRY_TYPE, 0,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 1,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 2,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 3,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 4,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 5,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 6,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 7,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 8,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 9,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 10,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 11,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 12,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 13,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 14,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 15,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 16,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 17,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 18,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 19,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 20,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 21,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 22,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 23,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 24,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 25,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 26,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 27,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 28,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 29,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 30,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 31,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 32,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 33,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 34,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 35,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 36,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 37,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 38,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 39,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 40,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 41,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 42,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 43,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 44,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 45,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 46,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 47,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 48,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 49,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 50,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 51,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 52,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 53,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 54,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 55,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 56,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 57,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 58,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 59,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 60,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 61,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 62,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 63,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 64,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 65,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 66,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 67,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 68,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 69,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 70,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 71,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 72,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 73,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 74,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 75,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 76,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 77,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 78,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 79,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 80,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 81,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 82,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 83,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 84,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 85,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 86,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 87,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 88,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 89,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 90,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 91,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 92,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 93,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 94,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 95,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 96,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 97,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 98,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 99,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 100,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 101,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 102,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 103,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 104,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 105,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 106,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 107,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 108,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 109,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 110,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 111,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 112,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 113,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 114,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 115,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 116,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 117,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 118,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 119,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 120,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 121,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 122,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 123,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 124,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 125,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 126,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 127,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 128,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 129,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 130,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 131,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 132,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 133,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 134,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 135,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 136,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 137,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 138,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 139,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 140,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 141,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 142,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 143,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 144,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 145,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 146,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 147,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 148,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
-      { HUGE_ENTRY_TYPE, 149,	HUGE_ENTRY_SIZE, FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE }
+      /* entry        entry            in    at main                                                       */
+      /* type:        index:    size:        cache:    addr:    dirty:    prot:    pinned:    loaded: clrd:    flshd:    dest: */
+      { HUGE_ENTRY_TYPE, 0,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 1,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 2,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 3,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 4,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 5,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 6,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 7,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 8,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 9,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 10,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 11,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 12,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 13,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 14,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 15,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 16,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 17,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 18,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 19,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 20,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 21,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 22,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 23,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 24,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 25,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 26,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 27,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 28,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 29,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 30,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 31,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 32,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 33,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 34,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 35,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 36,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 37,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 38,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 39,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 40,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 41,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 42,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 43,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 44,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 45,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 46,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 47,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 48,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 49,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 50,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 51,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 52,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 53,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 54,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 55,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 56,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 57,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 58,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 59,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 60,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 61,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 62,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 63,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 64,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 65,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 66,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 67,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 68,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 69,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 70,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 71,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 72,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 73,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 74,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 75,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 76,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 77,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 78,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 79,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 80,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 81,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 82,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 83,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 84,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 85,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 86,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 87,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 88,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 89,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 90,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 91,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 92,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 93,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 94,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 95,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 96,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 97,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 98,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 99,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 100,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 101,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 102,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 103,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 104,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 105,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 106,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 107,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 108,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 109,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 110,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 111,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 112,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 113,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 114,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 115,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 116,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 117,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 118,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 119,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 120,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 121,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 122,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 123,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 124,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 125,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 126,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 127,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 128,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 129,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 130,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 131,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 132,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 133,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 134,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 135,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 136,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 137,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 138,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 139,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 140,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 141,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 142,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 143,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 144,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 145,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 146,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 147,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 148,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE },
+      { HUGE_ENTRY_TYPE, 149,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE }
     };
 
     pass = TRUE;
@@ -28927,13 +28971,13 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
          */
 
         /* entry w/ index 0 has now been flushed and is now clean. */
-	expected[0].flushed   = TRUE;
-	expected[0].is_dirty  = FALSE;
+    expected[0].flushed   = TRUE;
+    expected[0].is_dirty  = FALSE;
 
         /* entry w/ index 26 is now in the cache and dirty. */
-	expected[26].in_cache = TRUE;
-	expected[26].is_dirty = TRUE;
-	expected[26].loaded   = (unsigned char)loaded;
+    expected[26].in_cache = TRUE;
+    expected[26].is_dirty = TRUE;
+    expected[26].loaded   = (unsigned char)loaded;
 
         /* verify the status */
         verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
@@ -28981,13 +29025,13 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
          */
 
         /* entry w/ index 1 has now been flushed and is now clean. */
-	expected[1].flushed   = TRUE;
-	expected[1].is_dirty  = FALSE;
+    expected[1].flushed   = TRUE;
+    expected[1].is_dirty  = FALSE;
 
         /* entry w/ index 27 is now in the cache and dirty. */
-	expected[27].in_cache = TRUE;
-	expected[27].is_dirty = TRUE;
-	expected[27].loaded   = (unsigned char)loaded;
+    expected[27].in_cache = TRUE;
+    expected[27].is_dirty = TRUE;
+    expected[27].loaded   = (unsigned char)loaded;
 
         /* verify the status */
         verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
@@ -29030,9 +29074,9 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             expected[entry_idx - 26].flushed = TRUE;
             expected[entry_idx - 26].is_dirty = FALSE;
 
-	    expected[entry_idx].in_cache = TRUE;
-    	    expected[entry_idx].is_dirty = TRUE;
-	    expected[entry_idx].loaded   = (unsigned char)loaded;
+        expected[entry_idx].in_cache = TRUE;
+            expected[entry_idx].is_dirty = TRUE;
+        expected[entry_idx].loaded   = (unsigned char)loaded;
 
             /* verify the status */
             verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
@@ -29103,19 +29147,19 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
          */
 
         /* entry w/ index 0 has been evicted. */
-	expected[0].in_cache  = FALSE;
-	expected[0].destroyed = TRUE;
+    expected[0].in_cache  = FALSE;
+    expected[0].destroyed = TRUE;
 
         /* entries w/ indices 24,25 have now been flushed and are clean. */
-	expected[24].flushed  = TRUE;
-	expected[24].is_dirty = FALSE;
-	expected[25].flushed  = TRUE;
-	expected[25].is_dirty = FALSE;
+    expected[24].flushed  = TRUE;
+    expected[24].is_dirty = FALSE;
+    expected[25].flushed  = TRUE;
+    expected[25].is_dirty = FALSE;
 
         /* entry w/ index 50 is now in the cache and dirty */
-	expected[50].in_cache = TRUE;
-	expected[50].is_dirty = TRUE;
-	expected[50].loaded   = (unsigned char)loaded;
+    expected[50].in_cache = TRUE;
+    expected[50].is_dirty = TRUE;
+    expected[50].loaded   = (unsigned char)loaded;
 
         /* verify the status */
         verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
@@ -29158,13 +29202,13 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             }
 
             /* This past inserted entry is now in the cache and dirty */
-	    expected[entry_idx].in_cache = TRUE;
-    	    expected[entry_idx].is_dirty = TRUE;
-	    expected[entry_idx].loaded   = (unsigned char)loaded;
+        expected[entry_idx].in_cache = TRUE;
+            expected[entry_idx].is_dirty = TRUE;
+        expected[entry_idx].loaded   = (unsigned char)loaded;
 
             /* The entry inserted 50 insertions ago has been evicted */
-	    expected[entry_idx - 50].in_cache  = FALSE;
-	    expected[entry_idx - 50].destroyed = TRUE;
+        expected[entry_idx - 50].in_cache  = FALSE;
+        expected[entry_idx - 50].destroyed = TRUE;
 
             /* If the newly inserted entry is among the first 24
              * insertions in this loop, then the insertion will
@@ -29289,13 +29333,13 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             }
 
             /* This past inserted entry is now in the cache and dirty */
-	    expected[entry_idx].in_cache = TRUE;
-    	    expected[entry_idx].is_dirty = TRUE;
-	    expected[entry_idx].loaded   = (unsigned char)loaded;
+        expected[entry_idx].in_cache = TRUE;
+            expected[entry_idx].is_dirty = TRUE;
+        expected[entry_idx].loaded   = (unsigned char)loaded;
 
             /* The entry with ID minus 50 will have been evicted */
-	    expected[entry_idx - 50].in_cache  = FALSE;
-	    expected[entry_idx - 50].destroyed = TRUE;
+        expected[entry_idx - 50].in_cache  = FALSE;
+        expected[entry_idx - 50].destroyed = TRUE;
 
             /* verify the status */
             verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
@@ -29337,17 +29381,17 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
          */
 
         /* entry w/ index 76 has been evicted. */
-	expected[76].in_cache  = FALSE;
-	expected[76].destroyed = TRUE;
+    expected[76].in_cache  = FALSE;
+    expected[76].destroyed = TRUE;
 
         /* entry w/ index 100 has now been flushed and is now clean. */
-	expected[100].flushed   = TRUE;
-	expected[100].is_dirty  = FALSE;
+    expected[100].flushed   = TRUE;
+    expected[100].is_dirty  = FALSE;
 
         /* entry w/ index 26 is now in the cache and dirty. */
-	expected[126].in_cache = TRUE;
-	expected[126].is_dirty = TRUE;
-	expected[126].loaded   = (unsigned char)loaded;
+    expected[126].in_cache = TRUE;
+    expected[126].is_dirty = TRUE;
+    expected[126].loaded   = (unsigned char)loaded;
 
         /* verify the status */
         verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
@@ -29383,13 +29427,13 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             }
 
             /* This past inserted entry is now in the cache and dirty */
-	    expected[entry_idx].in_cache = TRUE;
-    	    expected[entry_idx].is_dirty = TRUE;
-	    expected[entry_idx].loaded   = (unsigned char)loaded;
+        expected[entry_idx].in_cache = TRUE;
+            expected[entry_idx].is_dirty = TRUE;
+        expected[entry_idx].loaded   = (unsigned char)loaded;
 
             /* The entry with ID minus 50 will have been evicted */
-	    expected[entry_idx - 50].in_cache  = FALSE;
-	    expected[entry_idx - 50].destroyed = TRUE;
+        expected[entry_idx - 50].in_cache  = FALSE;
+        expected[entry_idx - 50].destroyed = TRUE;
 
             /* The entry with ID minus 26 will now be clean */
             expected[entry_idx - 26].flushed = TRUE;
@@ -29425,20 +29469,382 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
 
 } /* check_metadata_blizzard_absence() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    setup_cache()
  *
- * Purpose:	Run tests on the cache code contained in H5C.c
+ * Purpose:    Allocate a cache of the desired size and configure it for
+ *        use in the test bed.  Return a pointer to the new cache
+ *        structure.
  *
- * Return:	Success:
+ * Return:    Pointer to new cache, or NULL on failure.
  *
- *		Failure:
+ * Programmer:    John Mainzer
+ *              6/11/04
  *
- * Programmer:	John Mainzer
+ *-------------------------------------------------------------------------
+ */
+
+H5F_t *
+setup_cache(size_t max_cache_size,
+            size_t min_clean_size)
+{
+    const char * fcn_name = "setup_cache()";
+    char filename[512];
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = TRUE;
+    int mile_stone = 1;
+    hid_t fid = -1;
+    H5F_t * file_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
+    H5F_t * ret_val = NULL;
+    haddr_t actual_base_addr;
+    hid_t fapl_id = H5P_DEFAULT;
+
+    if ( show_progress ) /* 1 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    saved_fid = -1;
+
+    /* setup the file name */
+    if ( pass ) {
+
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+            == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed.\n";
+        }
+    }
+
+    if ( show_progress ) /* 2 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( ( pass ) && ( try_core_file_driver ) ) {
+
+    if ( (fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == FAIL ) {
+
+        pass = FALSE;
+        failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
+        }
+    else if ( H5Pset_fapl_core(fapl_id, MAX_ADDR, FALSE) < 0 ) {
+
+        H5Pclose(fapl_id);
+        fapl_id = H5P_DEFAULT;
+        pass = FALSE;
+        failure_mssg = "H5P_set_fapl_core() failed.\n";
+        }
+    else if ( (fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id))
+            < 0 ) {
+
+        core_file_driver_failed = TRUE;
+
+            if ( verbose ) {
+                HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", fcn_name);
+            }
+
+        } else {
+
+        saved_fapl_id = fapl_id;
+    }
+    }
+
+    if ( show_progress ) /* 3 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* if we either aren't using the core file driver, or a create
+     * with the core file driver failed, try again with a regular file.
+     * If this fails, we are cooked.
+     */
+    if ( ( pass ) && ( fid < 0 ) ) {
+
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+
+    saved_fid = fid;
+
+        if ( fid < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fcreate() failed.";
+
+            if ( verbose ) {
+                HDfprintf(stdout, "%s: H5Fcreate() failed.\n", fcn_name);
+            }
+        }
+    }
+
+    if ( show_progress ) /* 4 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+    HDassert( fid >= 0 );
+
+    saved_fid = fid;
+
+        if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fflush() failed.";
+
+            if ( verbose ) {
+                HDfprintf(stdout, "%s: H5Fflush() failed.\n", fcn_name);
+            }
+
+        } else {
+
+            file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE);
+
+        if ( file_ptr == NULL ) {
+
+                pass = FALSE;
+                failure_mssg = "Can't get file_ptr.";
+
+                if ( verbose ) {
+                    HDfprintf(stdout, "%s: H5Fflush() failed.\n", fcn_name);
+                }
+        }
+        }
+    }
+
+    if ( show_progress ) /* 5 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        /* A bit of fancy footwork here:
+    *
+    * The call to H5Fcreate() allocates an instance of H5C_t,
+    * initializes it, and stores its address in f->shared->cache.
+    *
+    * We don't want to use this cache, as it has a bunch of extra
+    * initialization that may change over time, and in any case
+    * it will not in general be configured the way we want it.
+    *
+    * We used to deal with this problem by storing the file pointer
+    * in another instance of H5C_t, and then ignoring the original
+    * version.  However, this strategy doesn't work any more, as
+    * we can't store the file pointer in the instance of H5C_t,
+    * and we have modified many cache routines to use a file
+    * pointer to look up the target cache.
+    *
+    * Thus we now make note of the address of the instance of
+    * H5C_t created by the call to H5Fcreate(), set
+    * file_ptr->shared->cache to NULL, call H5C_create()
+    * to allocate a new instance of H5C_t for test purposes,
+    * and store than new instance's address in
+    * file_ptr->shared->cache.
+    *
+    * On shut down, we call H5C_dest on our instance of H5C_t,
+    * set file_ptr->shared->cache to point to the original
+    * instance, and then close the file normally.
+    */
+
+        HDassert( saved_cache == NULL );
+
+    saved_cache = file_ptr->shared->cache;
+
+    file_ptr->shared->cache = NULL;
+
+        cache_ptr = H5C_create(max_cache_size,
+                               min_clean_size,
+                               (NUMBER_OF_ENTRY_TYPES - 1),
+                (const char **)entry_type_names,
+                               check_write_permitted,
+                               TRUE,
+                               NULL,
+                               NULL);
+
+        file_ptr->shared->cache = cache_ptr;
+    }
+
+    if ( show_progress ) /* 6 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+    if ( cache_ptr == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "H5C_create() failed.";
+
+            if ( verbose ) {
+                 HDfprintf(stdout, "%s: H5C_create() failed.\n", fcn_name);
+            }
+
+        } else if ( cache_ptr->magic != H5C__H5C_T_MAGIC ) {
+
+            pass = FALSE;
+        failure_mssg = "Bad cache_ptr magic.";
+
+            if ( verbose ) {
+                HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", fcn_name);
+            }
+    }
+    }
+
+    if ( show_progress ) /* 7 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) { /* allocate space for test entries */
+
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT,
+                        (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
+
+    if ( actual_base_addr == HADDR_UNDEF ) {
+
+            pass = FALSE;
+        failure_mssg = "H5MF_alloc() failed.";
+
+        if ( verbose ) {
+                HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", fcn_name);
+            }
+
+    } else if ( actual_base_addr > BASE_ADDR ) {
+
+        /* If this happens, must increase BASE_ADDR so that the
+        * actual_base_addr is <= BASE_ADDR.  This should only happen
+        * if the size of the superblock is increase.
+        */
+            pass = FALSE;
+        failure_mssg = "actual_base_addr > BASE_ADDR";
+
+        if ( verbose ) {
+                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n",
+            fcn_name);
+            }
+        }
+
+        saved_actual_base_addr = actual_base_addr;
+    }
+
+    if ( show_progress ) /* 8 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        H5C_stats__reset(cache_ptr);
+
+        ret_val = file_ptr;
+    }
+
+    if ( show_progress ) /* 9 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    return(ret_val);
+} /* setup_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    takedown_cache()
+ *
+ * Purpose:    Flush the specified cache and disable it.  If requested,
+ *        dump stats first.  If pass is FALSE, do nothing.
+ *
+ * Return:    void
+ *
+ * Programmer:    John Mainzer
+ *              9/14/07
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+takedown_cache(H5F_t * file_ptr,
+               hbool_t dump_stats,
+               hbool_t dump_detailed_stats)
+{
+    char filename[512];
+
+    if ( file_ptr != NULL ) {
+        H5C_t * cache_ptr = file_ptr->shared->cache;
+
+        if ( dump_stats ) {
+
+            H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
+        }
+
+        flush_cache(file_ptr, TRUE, FALSE, FALSE);
+
+        H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT);
+
+    if ( saved_cache != NULL ) {
+
+        file_ptr->shared->cache = saved_cache;
+        saved_cache = NULL;
+    }
+
+    }
+
+    if ( saved_fapl_id != H5P_DEFAULT ) {
+
+        H5Pclose(saved_fapl_id);
+    saved_fapl_id = H5P_DEFAULT;
+    }
+
+    if ( saved_fid != -1 ) {
+
+        if ( H5F_addr_defined(saved_actual_base_addr) ) {
+
+            if ( NULL == file_ptr )  {
+                file_ptr = (H5F_t *)H5I_object_verify(saved_fid, H5I_FILE);
+                HDassert ( file_ptr );
+            }
+
+            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, saved_actual_base_addr,
+                                          (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
+            saved_actual_base_addr = HADDR_UNDEF;
+        }
+
+    if ( H5Fclose(saved_fid) < 0  ) {
+
+            pass = FALSE;
+        failure_mssg = "couldn't close test file.";
+
+    } else {
+
+        saved_fid = -1;
+
+        }
+
+    if ( ( ! try_core_file_driver ) || ( core_file_driver_failed ) ) {
+
+            if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+                 == NULL ) {
+
+                pass = FALSE;
+                failure_mssg = "h5_fixname() failed.\n";
+            }
+
+            if ( HDremove(filename) < 0 ) {
+
+                pass = FALSE;
+            failure_mssg = "couldn't delete test file.";
+
+        }
+    }
+    }
+
+    return;
+
+} /* takedown_cache() */
+
+/*-------------------------------------------------------------------------
+ * Function:    main
+ *
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
+ *
+ * Programmer:  John Mainzer
  *              6/24/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -29469,7 +29875,7 @@ main(void)
     nerrs += smoke_check_9();
     nerrs += smoke_check_10();
 
-    nerrs += write_permitted_check();
+    nerrs += check_write_permitted();
     nerrs += check_insert_entry();
     nerrs += check_flush_cache();
     nerrs += check_get_entry_status();
