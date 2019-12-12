@@ -29474,6 +29474,41 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
 
 } /* check_metadata_blizzard_absence() */
 
+/*-------------------------------------------------------------------------
+ *
+ * Function:    check_if_write_permitted
+ *
+ * Purpose:     Determine if a write is permitted under the current
+ *              circumstances, and set *write_permitted_ptr accordingly.
+ *              As a general rule it is, but when we are running in parallel
+ *              mode with collective I/O, we must ensure that a read cannot
+ *              cause a write.
+ *
+ *              In the event of failure, the value of *write_permitted_ptr
+ *              is undefined.
+ *
+ * Return:      Non-negative on success/Negative on failure.
+ *
+ * Programmer:  John Mainzer, 5/15/04
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+check_write_permitted(const H5F_t H5_ATTR_UNUSED *f,
+                     hid_t H5_ATTR_UNUSED dxpl_id,
+                     hbool_t *write_permitted_ptr)
+{
+
+   HDassert( write_permitted_ptr );
+   *write_permitted_ptr = write_permitted;
+
+   return(SUCCEED);
+
+} /* check_write_permitted() */
+
+
+/*-------------------------------------------------------------------------
 
 /*-------------------------------------------------------------------------
  * Function:    setup_cache()
@@ -29660,7 +29695,7 @@ setup_cache(size_t max_cache_size,
                                min_clean_size,
                                (NUMBER_OF_ENTRY_TYPES - 1),
                 (const char **)entry_type_names,
-                               write_permitted_check,
+                               check_write_permitted,
                                TRUE,
                                NULL,
                                NULL);
