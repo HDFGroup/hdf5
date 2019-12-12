@@ -113,6 +113,30 @@ static const H5I_class_t H5I_FILE_CLS[1] = {{
     (H5I_free_t)H5F__close_cb   /* Callback routine for closing objects of this class */
 }};
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_init
+ *
+ * Purpose:  Initialize the interface from some other layer.
+ *
+ * Return:   Success:    non-negative
+ *
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_init(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_init() */
+
 
 /*--------------------------------------------------------------------------
 NAME
