@@ -2522,7 +2522,7 @@ smoke_check_10(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	write_permitted_check()
+ * Function:    write_permitted_check()
  *
  * Purpose:    A basic test of the write permitted function.  In essence,
  *        we load the cache up with dirty entryies, set
@@ -29660,7 +29660,7 @@ setup_cache(size_t max_cache_size,
                                min_clean_size,
                                (NUMBER_OF_ENTRY_TYPES - 1),
                 (const char **)entry_type_names,
-                               check_write_permitted,
+                               write_permitted_check,
                                TRUE,
                                NULL,
                                NULL);
