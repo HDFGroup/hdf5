@@ -41,9 +41,10 @@
 #define H5S_SELECT_FLAG_BITS    (H5S_HYPER_REGULAR)
 
 /* Versions for H5S_SEL_HYPER selection info */
-#define H5S_HYPER_VERSION_1     1
-#define H5S_HYPER_VERSION_2     2
-#define H5S_HYPER_VERSION_3     3
+#define H5S_HYPER_VERSION_1         1
+#define H5S_HYPER_VERSION_2         2
+#define H5S_HYPER_VERSION_3         3
+#define H5S_HYPER_VERSION_LATEST    H5S_HYPER_VERSION_3
 
 /* Versions for H5S_SEL_POINTS selection info */
 #define H5S_POINT_VERSION_1     1
@@ -261,6 +262,8 @@ typedef htri_t (*H5S_sel_shape_same_func_t)(const H5S_t *space1, const H5S_t *sp
 typedef htri_t (*H5S_sel_intersect_block_func_t)(const H5S_t *space, const hsize_t *start, const hsize_t *end);
 /* Method to adjust a selection by an offset */
 typedef herr_t (*H5S_sel_adjust_u_func_t)(H5S_t *space, const hsize_t *offset);
+/* Method to adjust a selection by an offset (signed) */
+typedef herr_t (*H5S_sel_adjust_s_func_t)(H5S_t *space, const hssize_t *offset);
 /* Method to construct single element projection onto scalar dataspace */
 typedef herr_t (*H5S_sel_project_scalar)(const H5S_t *space, hsize_t *offset);
 /* Method to construct selection projection onto/into simple dataspace */
@@ -289,6 +292,7 @@ typedef struct {
     H5S_sel_shape_same_func_t shape_same;       /* Method to determine if two dataspaces' selections are the same shape */
     H5S_sel_intersect_block_func_t intersect_block; /* Method to determine if a dataspaces' selection intersects a block */
     H5S_sel_adjust_u_func_t adjust_u;           /* Method to adjust a selection by an offset */
+    H5S_sel_adjust_s_func_t adjust_s;           /* Method to adjust a selection by an offset (signed) */
     H5S_sel_project_scalar project_scalar;      /* Method to construct scalar dataspace projection */
     H5S_sel_project_simple project_simple;      /* Method to construct simple dataspace projection */
     H5S_sel_iter_init_func_t iter_init;         /* Method to initialize iterator for current selection */
