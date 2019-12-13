@@ -3983,6 +3983,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     h5tool_format_t    string_dataformat;
     h5tool_format_t    outputformat;
     H5R_ref_t         *ref_buf = NULL;
+    h5tools_context_t  datactx = *ctx;            /* print context  */
 
     H5TOOLS_PUSH_STACK();
     H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter file=%p", (void*)stream);
@@ -4030,7 +4031,6 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
     if (H5Tget_class(f_type) == H5T_REFERENCE) {
         ctx->indent_level++;
-        h5tools_context_t datactx = *ctx;            /* print context  */
         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "reference class type");
         if (!H5Tequal(f_type, H5T_STD_REF) && !H5Tequal(f_type, H5T_STD_REF_DSETREG) && !H5Tequal(f_type, H5T_STD_REF_OBJ)) {
             HGOTO_DONE(SUCCEED);

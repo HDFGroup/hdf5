@@ -29,6 +29,8 @@ function(append value)
 endfunction()
 
 if(USE_SANITIZER)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
   append("-fno-omit-frame-pointer" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
 
   if(UNIX)
