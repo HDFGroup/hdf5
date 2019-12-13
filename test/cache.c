@@ -36640,7 +36640,7 @@ setup_cache(size_t max_cache_size,
                 HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
         }
         else {
-            file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE);
+            file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE);
             if(file_ptr == NULL) {
                 pass = FALSE;
                 failure_mssg = "Can't get file_ptr.";
@@ -36836,7 +36836,7 @@ takedown_cache(H5F_t * file_ptr,
         if ( H5F_addr_defined(saved_actual_base_addr) ) {
 
             if ( NULL == file_ptr )  {
-                file_ptr = (H5F_t *)H5VL_object_verify(saved_fid, H5I_FILE);
+                file_ptr = (H5F_t *)H5I_object_verify(saved_fid, H5I_FILE);
                 HDassert ( file_ptr );
             }
 
@@ -36880,6 +36880,7 @@ takedown_cache(H5F_t * file_ptr,
     return;
 
 } /* takedown_cache() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    main
