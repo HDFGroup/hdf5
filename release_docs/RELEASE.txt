@@ -4,8 +4,8 @@ HDF5 version 1.12.0-alpha1 currently under development
 
 INTRODUCTION
 
-This document describes the new features introduced in the HDF5 1.12.0 release. 
-It contains information on the platforms tested and known problems in this 
+This document describes the new features introduced in the HDF5 1.12.0 release.
+It contains information on the platforms tested and known problems in this
 release. For more details check the HISTORY*.txt files in the HDF5 source.
 
 Note that documentation in the links below will be updated at the time of the
@@ -45,6 +45,12 @@ New Features
 
     Configuration:
     -------------
+    - Added Clang sanitizers to CMake for analyzer support
+
+      Added CMake code and files to execute the Clang sanitizers.
+
+      (ADB - 2019/12/12, TRILAB-135)
+
     - Update CMake for VS2019 support
 
       CMake added support for VS2019 in version 3.15. Changes to the CMake
@@ -58,12 +64,12 @@ New Features
     --------
     - Virtual Object Layer (VOL)
 
-      In this major HDF5 release we introduce HDF5 Virtual Object Layer (VOL). 
-      VOL is an abstraction layer within the HDF5 library that enables different 
-      methods for accessing data and objects that conform to the HDF5 data model. 
-      The VOL layer intercepts all HDF5 API calls that potentially modify data 
-      on disk and forwards those calls to a plugin "object driver". The data on 
-      disk can be a different format than the HDF5 format. For more information 
+      In this major HDF5 release we introduce HDF5 Virtual Object Layer (VOL).
+      VOL is an abstraction layer within the HDF5 library that enables different
+      methods for accessing data and objects that conform to the HDF5 data model.
+      The VOL layer intercepts all HDF5 API calls that potentially modify data
+      on disk and forwards those calls to a plugin "object driver". The data on
+      disk can be a different format than the HDF5 format. For more information
       about VOL we refer the reader to the following documents (under review):
 
           VOL HDF5 APIs
@@ -76,14 +82,14 @@ New Features
           https://bitbucket.hdfgroup.org/projects/HDF5VOL
 
     - Enhancements to HDF5 References
-        
-      HDF5 references were extended to support attributes, and object and dataset 
-      selections that reside in another HDF5 file. For more information including 
-      a list of new APIs, see 
-      
+
+      HDF5 references were extended to support attributes, and object and dataset
+      selections that reside in another HDF5 file. For more information including
+      a list of new APIs, see
+
           https://portal.hdfgroup.org/display/HDF5/Update+to+References
 
-      Current known limitations for references in this release: 
+      Current known limitations for references in this release:
       • h5dump will fail to display references on big-endian machines.
 
     - Add new public function H5Sselect_adjust.
@@ -113,11 +119,11 @@ New Features
 
     - New S3 and HDFS Virtual File Drivers (VFDs)
 
-      This release has two new VFDs. The S3 VFD allows accessing HDF5 files on 
-      AWS S3 buckets. HDFS VFD allows accessing HDF5 files stored on Apache HDFS. 
+      This release has two new VFDs. The S3 VFD allows accessing HDF5 files on
+      AWS S3 buckets. HDFS VFD allows accessing HDF5 files stored on Apache HDFS.
       See https://portal.hdfgroup.org/display/HDF5/Virtual+File+Drivers+-+S3+and+HDFS
-      for information on enabling those drivers and using those APIs. 
-      
+      for information on enabling those drivers and using those APIs.
+
       Below are specific instructions for enabling S3 VFD on Windows:
 
       Fix windows requirements and java tests. Windows requires CMake 3.13.
@@ -137,14 +143,14 @@ New Features
           - set ENV variable CURL_ROOT to C:\curl (installation dir)
           - update PATH ENV variable to %CURL_ROOT%\bin (installation bin dir).
           - the aws credentials file should be in %USERPROFILE%\.aws folder
-          - set the ENV variable HDF5_ROS3_TEST_BUCKET_URL to the s3 url for the 
+          - set the ENV variable HDF5_ROS3_TEST_BUCKET_URL to the s3 url for the
                 s3 bucket containing the HDF5 files to be accessed.
 
     Other improvements and changes:
 
-    - Hyperslab selection code was reworked to improve performance, getting more 
-      than 10x speedup in some cases. 
-     
+    - Hyperslab selection code was reworked to improve performance, getting more
+      than 10x speedup in some cases.
+
     - The HDF5 Library was enhanced to open files with Unicode names on Windows.
 
     - Deprecated H5Dvlen_reclaim() and replaced it with H5Treclaim().
@@ -162,7 +168,7 @@ Support for new platforms, languages and compilers.
     - Added OpenMPI 3.1 and 4.0 with clang, gcc and Intel compilers on Linux 3.10.0
     - Added cray-mpich/PrgEnv with gcc and Intel compilers on Linux 4.14.180
     - Added spectrum mpi with clang, gcc and xl compilers on Linux 4.14.0
-    
+
 
 Major Bug Fixes since HDF5-1.10.0 release
 ==================================
@@ -182,11 +188,11 @@ Supported Platforms
     Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (kituo/moohan)                Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-                                    Version 4.9.3, 5.2.0, 7.1.0 
+                                    Version 4.9.3, 5.2.0, 7.1.0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 17.0.0.098 Build 20160721
-                                  MPICH 3.1.4 
+                                  MPICH 3.1.4
 
     Linux-3.10.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
     862.14.4.1chaos.ch6.ppc64le   clang/3.9,8.0
@@ -206,7 +212,7 @@ Supported Platforms
     Linux 4.4.180-94.100-default  cray-mpich/7.7.6 with PrgEnv-*/6.0.5, cmake>3.10 and
     #1 SMP x86_64 GNU/Linux       gcc/7.2.0,8.2.0
     (mutrino)                     intel/17.0,18.0
- 
+
     Linux 4.14.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
     49.18.1.bl6.ppc64le           clang/6.0,8.0
     #1 SMP ppc64le GNU/Linux      gcc/7.3
@@ -332,7 +338,7 @@ The following platforms are not supported but have been tested for this release.
                                   compilers:
                                      Version 18.4, 19.4
                                   MPICH 3.3
-                                  OpenMPI 2.1.5, 3.1.3, 4.0.0 
+                                  OpenMPI 2.1.5, 3.1.3, 4.0.0
 
    Fedora30 5.3.11-200.fc30.x86_64
    #1 SMP x86_64  GNU/Linux       GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
