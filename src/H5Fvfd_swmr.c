@@ -891,7 +891,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
      *    to the HDF5 file more than max_lag ticks ago, and haven't
      *    been modified since. 
      *
-     *    (This is an optimization -- adress it later)
+     *    (This is an optimization -- address it later)
      */
 
 

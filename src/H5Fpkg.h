@@ -422,7 +422,7 @@ struct H5F_shared_t {
                                              * track changes in the index.
                                              * With one brief exception during
                                              * writer end of tick processing,
-                                             * this index will alwasy be sorted
+                                             * this index will always be sorted
                                              * in increasing HDF5 file page 
                                              * offset order.
                                              *
