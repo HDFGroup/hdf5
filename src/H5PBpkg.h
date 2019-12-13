@@ -1218,32 +1218,6 @@ if ( ( (pb_ptr)->index_size !=                                        \
     H5PB__UPDATE_STATS_FOR_HT_SEARCH(pb_ptr, (entry_ptr != NULL), depth)       \
 }
 
-#define H5PB__SEARCH_INDEX_NO_STATS(pb_ptr, Page, entry_ptr, fail_val)         \
-{                                                                              \
-    int k;                                                                     \
-    H5PB__PRE_HT_SEARCH_SC(pb_ptr, Page, fail_val)                             \
-    k = H5PB__HASH_FCN(Page);                                                  \
-    entry_ptr = ((pb_ptr)->ht)[k];                                             \
-    while(entry_ptr) {                                                         \
-        if ( (Page), (entry_ptr)->page) ) {                                    \
-            H5PB__POST_SUC_HT_SEARCH_SC(pb_ptr, entry_ptr, k, fail_val)        \
-            if ( entry_ptr != ((pb_ptr)->ht)[k] ) {                            \
-                if( (entry_ptr)->ht_next )                                     \
-                    (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;      \
-                HDassert((entry_ptr)->ht_prev != NULL);                        \
-                (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;          \
-                ((pb_ptr)->ht)[k]->ht_prev = (entry_ptr);                      \
-                (entry_ptr)->ht_next = ((pb_ptr)->ht)[k];                      \
-                (entry_ptr)->ht_prev = NULL;                                   \
-                ((pb_ptr)->ht)[k] = (entry_ptr);                               \
-                H5PB__POST_HT_SHIFT_TO_FRONT_SC(pb_ptr, entry_ptr, k, fail_val)\
-            }                                                                  \
-            break;                                                             \
-        }                                                                      \
-        (entry_ptr) = (entry_ptr)->ht_next;                                    \
-    }                                                                          \
-}
-
 #define H5PB__UPDATE_INDEX_FOR_ENTRY_CLEAN(pb_ptr, entry_ptr)   \
 {                                                               \
     H5PB__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(pb_ptr, entry_ptr);  \
