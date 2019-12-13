@@ -3674,40 +3674,6 @@ done:
 } /* H5F__format_convert() */
 
 
-/*-------------------------------------------------------------------------
- * Function: H5F__idx_entry_cmp()
- *
- * Purpose:  Callback used by HDqsort to sort entries in the index
- *
- * Return:   0 if the entries are the same
- *           -1 if entry1's offset is less than that of entry2
- *           1 if entry1's offset is greater than that of entry2
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
-{
-    const H5FD_vfd_swmr_idx_entry_t *entry1 = (const H5FD_vfd_swmr_idx_entry_t *)_entry1;
-    const H5FD_vfd_swmr_idx_entry_t *entry2 = (const H5FD_vfd_swmr_idx_entry_t *)_entry2;
-
-    int ret_value = 0;          /* Return value */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Sanity checks */
-    HDassert(entry1);
-    HDassert(entry2);
-
-    if(entry1->hdf5_page_offset < entry2->hdf5_page_offset)
-        ret_value = -1;
-    else if(entry1->hdf5_page_offset > entry2->hdf5_page_offset)
-        ret_value = 1;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__idx_entry_cmp() */
-
-
 /*---------------------------------------------------------------------------
  * Function:    H5F__get_file
  *
