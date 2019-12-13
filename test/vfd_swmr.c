@@ -874,11 +874,12 @@ test_writer_md(void)
 
     /* Allocate num_entries for the data buffer */
     num_entries = 10;
-    if((buf = (uint8_t *)HDmalloc((num_entries * FS_PAGE_SIZE * sizeof(uint8_t)))) == NULL)
+    if((buf = HDcalloc(num_entries, FS_PAGE_SIZE)) == NULL)
         FAIL_STACK_ERROR;
 
     /* Allocate memory for num_entries index */
-    if(NULL == (index = (H5FD_vfd_swmr_idx_entry_t *)HDcalloc(num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))))
+    index = HDcalloc(num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t));
+    if(NULL == index)
         FAIL_STACK_ERROR;
 
     /* (A) Construct index for updating the metadata file */
@@ -1489,13 +1490,12 @@ test_reader_md_concur(void)
     num_entries = 12;
 
     /* Allocate num_entries for the data buffer */
-    if((buf = (uint8_t *)HDmalloc((num_entries * FS_PAGE_SIZE * 
-                                   sizeof(uint8_t)))) == NULL)
+    if((buf = HDcalloc(num_entries, FS_PAGE_SIZE)) == NULL)
         FAIL_STACK_ERROR;
 
     /* Allocate memory for num_entries index */
-    if(NULL == (index = (H5FD_vfd_swmr_idx_entry_t *)
-                    HDcalloc(num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t))))
+    index = HDcalloc(num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t));
+    if(NULL == index)
         FAIL_STACK_ERROR;
 
     /* Construct index for updating the metadata file */
