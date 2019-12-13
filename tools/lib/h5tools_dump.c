@@ -3977,13 +3977,13 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     hsize_t     total_size[H5S_MAX_RANK];
     hsize_t     elmt_counter = 0;  /*counts the # elements printed. */
     int         status = -1;
+    h5tools_context_t  datactx;            /* print context  */
     h5tools_str_t      buffer;          /* string into which to render   */
     hsize_t            curr_pos = 0;    /* total data element position   */
     size_t             ncols = 80;      /* available output width        */
     h5tool_format_t    string_dataformat;
     h5tool_format_t    outputformat;
     H5R_ref_t         *ref_buf = NULL;
-    h5tools_context_t  datactx = *ctx;            /* print context  */
 
     H5TOOLS_PUSH_STACK();
     H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter file=%p", (void*)stream);
@@ -4030,7 +4030,8 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     h5tools_render_element(stream, &outputformat, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
     if (H5Tget_class(f_type) == H5T_REFERENCE) {
-        datactx.indent_level++;
+        ctx->indent_level++;
+        datactx = *ctx;
         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "reference class type");
         if (!H5Tequal(f_type, H5T_STD_REF) && !H5Tequal(f_type, H5T_STD_REF_DSETREG) && !H5Tequal(f_type, H5T_STD_REF_OBJ)) {
             HGOTO_DONE(SUCCEED);
@@ -4263,10 +4264,11 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             } /* end for(i = 0; i < ndims; i++, datactx->cur_elmt++, elmt_counter++) */
             HDfree(ref_buf);
         }
-        datactx.indent_level--;
+        ctx->indent_level--;
     }
     else {
         H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print all the values");
+        datactx = *ctx;
         string_dataformat = *info;
         if((datactx.display_char && H5Tget_size(f_type) == 1) && (H5Tget_class(f_type) == H5T_INTEGER)) {
             H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Print 1-byte integer data as an ASCII character string");
