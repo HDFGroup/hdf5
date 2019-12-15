@@ -30,10 +30,15 @@
 /***********/
 
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5Aprivate.h"         /* Attributes                           */
 #include "H5CXprivate.h"        /* API Contexts                         */
+#include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Eprivate.h"         /* Error handling                       */
+#include "H5Fprivate.h"         /* Files                                */
 #include "H5FLprivate.h"        /* Free lists                           */
+#include "H5Gprivate.h"         /* Groups                               */
 #include "H5Iprivate.h"         /* IDs                                  */
+#include "H5Mprivate.h"         /* Maps                                 */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5PLprivate.h"        /* Plugins                              */
 #include "H5Tprivate.h"         /* Datatypes                            */
@@ -188,6 +193,20 @@ H5VL_init_phase2(void)
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    /* Initialize all packages for VOL-managed objects */
+    if(H5T_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize datatype interface")
+    if(H5D_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize dataset interface")
+    if(H5F_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize file interface")
+    if(H5G_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize group interface")
+    if(H5A_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize attribute interface")
+    if(H5M_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize map interface")
 
     /* Set up the default VOL connector in the default FAPL */
     if(H5VL__set_def_conn() < 0)
