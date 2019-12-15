@@ -28,7 +28,7 @@ build:
         - ml list
         - ml avail openmpi
 #        - df -T
-        - ls /run/use
+        - ls /run/user
 #
 #
         - CI_PROJ_DIR=${PWD}
