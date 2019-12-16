@@ -540,7 +540,7 @@ int MpioTest2G( MPI_Comm comm, int mpi_rank )
     int     *data;               /* pointer to data buffer to write */
 
     hsize_t shape[3] = {1024, 1024, 1152};
-    size_t  slice_per_process, data_size, data_size_bytes;
+    size_t  data_size, data_size_bytes, slice_per_process = shape[0]/2;
     size_t  tot_size_bytes = sizeof(int);
     hsize_t chunk[3] = {4, shape[1], shape[2]};
     hsize_t h5_counts[3] = { slice_per_process, shape[1], shape[2] };
@@ -613,7 +613,6 @@ int MpioTest2G( MPI_Comm comm, int mpi_rank )
     status = H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
     VRFY((status >= 0), "");
 
-    slice_per_process = (shape[0] + mpi_size - 1) / mpi_size;
     data_size = slice_per_process * shape[1] * shape[2];
     data_size_bytes = sizeof(int) * data_size;
     data = HDmalloc(data_size_bytes);
@@ -653,6 +652,7 @@ int MpioTest2G( MPI_Comm comm, int mpi_rank )
 
     free(data);
     HDprintf("Proc %d - MpioTest2G test succeeded\n", mpi_rank, data_size_bytes);
+    HDfflush(stdout);
 
     if (mpi_rank == 0)
 	HDremove(FILENAME[1]);
