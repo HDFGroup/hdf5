@@ -2580,7 +2580,7 @@ H5VL_pass_through_request_notify(void *obj, H5VL_request_notify_t cb, void *ctx)
     herr_t ret_value;
 
 #ifdef ENABLE_PASSTHRU_LOGGING 
-    printf("------- PASS THROUGH VOL REQUEST Wait\n");
+    printf("------- PASS THROUGH VOL REQUEST Notify\n");
 #endif
 
     ret_value = H5VLrequest_notify(o->under_object, o->under_vol_id, cb, ctx);
