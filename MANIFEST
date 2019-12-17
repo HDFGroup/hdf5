@@ -1320,6 +1320,7 @@
 
 ./testpar/COPYING
 ./testpar/Makefile.am
+./testpar/t_2Gio.c
 ./testpar/t_bigio.c
 ./testpar/t_cache.c
 ./testpar/t_cache_image.c
