@@ -249,6 +249,7 @@ int
 main(int argc, char *argv[])
 {
     hid_t  fid, fapl;
+    H5VL_object_t *vol_obj;
     H5F_t       *f;
     haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
@@ -297,7 +298,12 @@ main(int argc, char *argv[])
     }
     api_ctx_pushed = TRUE;
 
-    if(NULL == (f = (H5F_t *)H5VL_object(fid))) {
+    if(NULL == (vol_obj = (H5VL_object_t *)H5VL_vol_object(fid))) {
+        HDfprintf(stderr, "cannot obtain vol_obj pointer\n");
+        HDexit(2);
+    } /* end if */
+
+    if(NULL == (f = (H5F_t *)H5VL_object_data(vol_obj))) {
         HDfprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
     } /* end if */
