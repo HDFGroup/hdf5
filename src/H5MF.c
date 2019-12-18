@@ -840,7 +840,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
-HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_type, size);
+HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu, tick = %" PRIu64 "\n", FUNC, (unsigned)alloc_type, size, f->shared->vfd_swmr_writer ? f->shared->tick_num : 0);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check arguments */
@@ -1148,7 +1148,8 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
-HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)alloc_type, addr, size);
+HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu, tick = %" PRIu64 "\n", FUNC, (unsigned)alloc_type, addr, size,
+    f->shared->vfd_swmr_writer ? f->shared->tick_num : 0);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check arguments */
