@@ -597,8 +597,8 @@ H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
 
 /* VFD SWMR testing routines */
 H5_DLL herr_t H5F__vfd_swmr_writer_create_open_flush_test(hid_t file_id, hbool_t create);
-H5_DLL herr_t H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries, struct H5FD_vfd_swmr_idx_entry_t *index, 
-    unsigned num_dl_entries);
+H5_DLL herr_t H5F__vfd_swmr_writer_md_test(hid_t, unsigned,
+    struct H5FD_vfd_swmr_idx_entry_t *, unsigned);
 
 H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 #endif /* H5F_TESTING */
