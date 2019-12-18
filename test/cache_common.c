@@ -22,18 +22,6 @@
 
 #include "cache_common.h"
 
-
-H5C_t * saved_cache = NULL; /* store the pointer to the instance of
-                    * of H5C_t created by H5Fcreate()
-                * here between test cache setup and
-                * shutdown.
-                */
-
-haddr_t saved_actual_base_addr = HADDR_UNDEF;   /* Store the address of the
-                            space allocated for cache items in the file between
-                            cache setup & takedown */
-
-hbool_t write_permitted = TRUE;
 hbool_t pass = TRUE; /* set to false on error */
 const char *failure_mssg = NULL;
 

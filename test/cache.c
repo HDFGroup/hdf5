@@ -21,22 +21,35 @@
 #include "H5MFprivate.h"
 
 
+H5C_t * saved_cache = NULL; /* store the pointer to the instance of
+                             * of H5C_t created by H5Fcreate()
+                             * here between test cache setup and
+                             * shutdown.
+                             */
+
+haddr_t saved_actual_base_addr = HADDR_UNDEF;   /* Store the address of the
+                                                 * space allocated for cache items in the file between
+                                                 * cache setup & takedown
+                                                 */
+
 hid_t saved_fapl_id = H5P_DEFAULT; /* store the fapl id here between
-                    * cache setup and takedown.  Note
-                    * that if saved_fapl_id == H5P_DEFAULT,
-                    * we assume that there is no fapl to
-                    * close.
-                    */
+                                    * cache setup and takedown.  Note
+                                    * that if saved_fapl_id == H5P_DEFAULT,
+                                    * we assume that there is no fapl to
+                                    * close.
+                                    */
 
 hid_t saved_fcpl_id = H5P_DEFAULT; /* store the fcpl id here between
-                    * cache setup and takedown.  Note
-                    * that if saved_fcpl_id == H5P_DEFAULT,
-                    * we assume that there is no fcpl to
-                    * close.
-                    */
-hid_t saved_fid = -1; /* store the file id here between cache setup
-            * and takedown.
-            */
+                                    * cache setup and takedown.  Note
+                                    * that if saved_fcpl_id == H5P_DEFAULT,
+                                    * we assume that there is no fcpl to
+                                    * close.
+                                    */
+
+hid_t saved_fid = -1;  /* store the file id here between cache setup
+                        * and takedown.
+                        */
+hbool_t write_permitted = TRUE;
 hbool_t try_core_file_driver = FALSE;
 hbool_t core_file_driver_failed = FALSE;
 
