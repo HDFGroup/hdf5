@@ -834,9 +834,8 @@ test_writer_md(void)
     TESTING("Verify the metadata file for VFD SWMR writer");
 
     /* Allocate memory for the configuration structure */
-    if((my_config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((my_config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
-    HDmemset(my_config, 0, sizeof(H5F_vfd_swmr_config_t));
 
     /* Create a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
