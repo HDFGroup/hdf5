@@ -125,7 +125,7 @@ H5MV__create(H5F_t *f)
     fs_create.max_sect_addr = 1 + H5VM_log2_gen((uint64_t)f->shared->maxaddr);
     fs_create.max_sect_size = f->shared->maxaddr;
 
-    if(NULL == (f->shared->fs_man_md = H5FS_create(f, NULL, &fs_create, NELMTS(classes), classes, f, H5MV_FSPACE_ALIGN_DEF, H5MV_FSPACE_THRHD_DEF)))
+    if(NULL == (f->shared->fs_man_md = H5FS_create(f, NULL, &fs_create, NELMTS(classes), classes, f, f->shared->fs_page_size, f->shared->fs_page_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
 
     /* Set the state for the free space manager to "open", if it is now */
