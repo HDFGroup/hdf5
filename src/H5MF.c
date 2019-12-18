@@ -89,7 +89,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5MF_xfree_impl(H5F_t *, H5FD_mem_t, haddr_t, hsize_t);
+static herr_t H5MF__xfree_impl(H5F_t *, H5FD_mem_t, haddr_t, hsize_t);
 /* Allocator routines */
 static haddr_t H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size);
 
@@ -163,12 +163,12 @@ process_deferred_frees(H5F_t *f)
         if (tick_num <= df->free_after_tick)
             break;
         /* Have to remove the item before processing it because we
-         * could re-enter this routine through H5MF_xfree_impl.  If
+         * could re-enter this routine through H5MF__xfree_impl.  If
          * the item was still on the queue, it would be processed
          * a second time, and that's not good.
          */ 
         SIMPLEQ_REMOVE_HEAD(&shared->deferred_frees, link);
-        if (H5MF_xfree_impl(f, df->alloc_type, df->addr, df->size) < 0)
+        if (H5MF__xfree_impl(f, df->alloc_type, df->addr, df->size) < 0)
             err = FAIL;
         free(df);
     }
@@ -1159,7 +1159,7 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
 
     if (!f->shared->vfd_swmr_writer) {
         // not a VFD SWMR writer, do not defer or process deferrals
-        ret_value = H5MF_xfree_impl(f, alloc_type, addr, size);
+        ret_value = H5MF__xfree_impl(f, alloc_type, addr, size);
     } else if (defer_free(f->shared, alloc_type, addr, size) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "could not defer")
     else if (process_deferred_frees(f) < 0) {
@@ -1172,7 +1172,7 @@ done:
 }
 
 static herr_t
-H5MF_xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
+H5MF__xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 {
     H5F_mem_page_t  fs_type;            /* Free space type (mapped from allocation type) */
     H5MF_free_section_t *node = NULL;   /* Free space section pointer */
