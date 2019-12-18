@@ -883,8 +883,8 @@ test_writer_md(void)
 
     /* (A) Construct index for updating the metadata file */
     for(i = 0; i < num_entries; i++) {
-        index[i].hdf5_page_offset = (uint64_t)my_config->md_pages_reserved;
-        index[i].md_file_page_offset = 0;
+        index[i].hdf5_page_offset = 3 + 7 * i;
+        index[i].md_file_page_offset = 1 + (num_entries - i) * 5;
         index[i].length = (uint32_t)FS_PAGE_SIZE;
         index[i].entry_ptr = (void *)&buf[i];
     }
@@ -1499,8 +1499,8 @@ test_reader_md_concur(void)
 
     /* Construct index for updating the metadata file */
     for(i = 0; i < num_entries; i++) {
-        index[i].hdf5_page_offset = (uint64_t)config_writer->md_pages_reserved;
-        index[i].md_file_page_offset = 0;
+        index[i].hdf5_page_offset = 3 + 7 * i;
+        index[i].md_file_page_offset = 1 + (num_entries - i) * 5;
         index[i].length = (uint32_t)FS_PAGE_SIZE;
         index[i].entry_ptr = (void *)&buf[i];
     }
