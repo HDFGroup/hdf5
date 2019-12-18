@@ -7065,7 +7065,7 @@ static void
 make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
 {
     long inc;
-    const long maxinc;
+    long maxinc;
 
     HDassert(0 < nelts);
 
