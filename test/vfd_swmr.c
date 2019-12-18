@@ -886,7 +886,7 @@ test_writer_md(void)
         index[i].hdf5_page_offset = 3 + 7 * i;
         index[i].md_file_page_offset = 1 + (num_entries - i) * 5;
         index[i].length = (uint32_t)FS_PAGE_SIZE;
-        index[i].entry_ptr = (void *)&buf[i];
+        index[i].entry_ptr = &buf[i * FS_PAGE_SIZE];
     }
 
     /* Update with index and verify info in the metadata file */
@@ -925,7 +925,7 @@ test_writer_md(void)
 
     /* (B) Update every other entry in the index */
     for(i = 0; i < num_entries; i+= 2)
-        index[i].entry_ptr = (void *)&buf[i];
+        index[i].entry_ptr = &buf[i * FS_PAGE_SIZE];
 
     /* Update with index and verify info in the metadata file */
     /* Also verify that 5 entries will be on the delayed list */
@@ -960,7 +960,7 @@ test_writer_md(void)
 
     /* (C) Update every 3 entry in the index */
     for(i = 0; i < num_entries; i+= 3)
-        index[i].entry_ptr = (void *)&buf[i];
+        index[i].entry_ptr = &buf[i * FS_PAGE_SIZE];
 
     /* Update with index and verify info in the metadata file */
     /* Also verify that 4 entries will be on the delayed list */
@@ -991,8 +991,8 @@ test_writer_md(void)
     }
 
     /* (D) Update two entries in the index */
-    index[1].entry_ptr = (void *)&buf[1];
-    index[5].entry_ptr = (void *)&buf[5];
+    index[1].entry_ptr = &buf[1 * FS_PAGE_SIZE];
+    index[5].entry_ptr = &buf[5 * FS_PAGE_SIZE];
 
     /* Update with index and verify info in the metadata file */
     /* Also verify that 2 entries will be on the delayed list */
@@ -1502,7 +1502,7 @@ test_reader_md_concur(void)
         index[i].hdf5_page_offset = 3 + 7 * i;
         index[i].md_file_page_offset = 1 + (num_entries - i) * 5;
         index[i].length = (uint32_t)FS_PAGE_SIZE;
-        index[i].entry_ptr = (void *)&buf[i];
+        index[i].entry_ptr = &buf[i * FS_PAGE_SIZE];
     }
 
     /* Get the file pointer */
@@ -1565,7 +1565,7 @@ test_reader_md_concur(void)
     /* Update 3 entries in the index */
     num_entries = 3;
     for(i = 0; i < num_entries; i++)
-        index[i].entry_ptr = (void *)&buf[i];
+        index[i].entry_ptr = &buf[i * FS_PAGE_SIZE];
     
     /* Update the metadata file with the index */
     if(H5F_update_vfd_swmr_metadata_file(file_writer, num_entries, index) < 0)
@@ -1618,7 +1618,7 @@ test_reader_md_concur(void)
     /* Update 5 entries in the index */
     num_entries = 5;
     for(i = 0; i < num_entries; i++)
-        index[i].entry_ptr = (void *)&buf[i];
+        index[i].entry_ptr = &buf[i * FS_PAGE_SIZE];
     
     /* Update the metadata file with the index */
     if(H5F_update_vfd_swmr_metadata_file(file_writer, num_entries, index) < 0)
