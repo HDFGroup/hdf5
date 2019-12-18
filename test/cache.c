@@ -18,6 +18,7 @@
  *        H5C.c
  */
 #include "cache_common.h"
+#include "H5MFprivate.h"
 
 
 hid_t saved_fapl_id = H5P_DEFAULT; /* store the fapl id here between
