@@ -18,7 +18,6 @@
  *        implemented in H5C.c
  */
 #include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5MFprivate.h"
 #include "H5MMprivate.h"
 
 #include "cache_common.h"
