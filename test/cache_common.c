@@ -18,10 +18,8 @@
  *        implemented in H5C.c
  */
 #include "H5private.h"          /* Put this first, so H5open() isn't invoked in public macros */
-#include "H5MFprivate.h"
 #include "cache_common.h"
 
-hbool_t write_permitted = TRUE;
 hbool_t pass = TRUE; /* set to false on error */
 const char *failure_mssg = NULL;
 

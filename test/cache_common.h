@@ -163,7 +163,7 @@ typedef struct flush_op
     hbool_t        flag;        /* boolean flag passed into the
                     * function implementing the flush
                     * operation.  The meaning of the
-                    * flag is dependant upon the flush
+                    * flag is dependent upon the flush
                     * operation:
                     *
                     * FLUSH_OP__DIRTY: TRUE iff the
@@ -476,7 +476,6 @@ struct expected_entry_status
 
 /* global variable externs: */
 
-extern hbool_t write_permitted;
 extern hbool_t pass; /* set to false on error */
 extern const char *failure_mssg;
 
