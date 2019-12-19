@@ -476,6 +476,7 @@ struct expected_entry_status
 
 /* global variable externs: */
 
+extern hbool_t write_permitted;
 extern hbool_t pass; /* set to false on error */
 extern const char *failure_mssg;
 

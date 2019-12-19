@@ -49,7 +49,6 @@ hid_t saved_fcpl_id = H5P_DEFAULT; /* store the fcpl id here between
 hid_t saved_fid = -1;  /* store the file id here between cache setup
                         * and takedown.
                         */
-hbool_t write_permitted = TRUE;
 hbool_t try_core_file_driver = FALSE;
 hbool_t core_file_driver_failed = FALSE;
 hbool_t skip_long_tests;
