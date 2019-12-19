@@ -55,6 +55,18 @@ New Features
 
       (ADB - 2019/11/18, HDFFV-10962)
 
+    - Update CMake options to match new autotools options
+
+      Add configure options (autotools - CMake):
+            enable-asserts       HDF5_ENABLE_ASSERTS
+            enable-symbols       HDF5_ENABLE_SYMBOLS
+            enable-profiling     HDF5_ENABLE_PROFILING
+            enable-optimization  HDF5_ENABLE_OPTIMIZATION
+      In addition NDEBUG is no longer forced defined and relies on the CMake
+      process.
+
+      (ADB - 2019/10/07, HDFFV-100901, HDFFV-10637, TRILAB-97)
+
     - Update CMake tests to use FIXTURES
 
       CMake test fixtures allow setup/cleanup tests and other dependency
@@ -372,7 +384,7 @@ Supported Platforms
     16.6.0, x86_64                gfortran GNU Fortran (GCC) 7.1.0
     (kite)                        Intel icc/icpc/ifort version 17.0.2
 
-    macOS 10.13.6, Darwin,        Apple clang LLVM version 10.0.0 
+    macOS 10.13.6, Darwin,        Apple clang LLVM version 10.0.0
     17.7.0, x86_64                gfortran GNU Fortran (GCC) 6.3.0
     (bear)                        Intel icc/icpc/ifort version 19.0.4
 
