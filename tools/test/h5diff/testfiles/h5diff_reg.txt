@@ -1,0 +1,15 @@
+
+dataset: </Dataset3> and </Dataset3>
+attribute: <Attr1> and <Attr1>
+0 differences found
+Warning: Cannot open referenced attribute: attribute 1
+Warning: Cannot open referenced attribute: attribute 2
+attribute: <Attr2> and <Attr2>
+0 differences found
+attribute: <Attr3> and <Attr3>
+0 differences found
+0 differences found
+   obj1   obj2
+ --------------------------------------
+Attributes status:  0 common, 0 only in obj1, 0 only in obj2
+EXIT CODE: 0

@@ -339,8 +339,9 @@ herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
                          hid_t *m_tid1, hid_t *m_tid2,
                          size_t *m_size1, size_t  *m_size2)
 {
-    herr_t ret_value = SUCCEED;
+    H5TOOLS_ERR_INIT(herr_t, SUCCEED)
 
+    H5TOOLS_PUSH_STACK();
     if((*m_size1) != (*m_size2)) {
         if((*m_size1) < (*m_size2)) {
             H5Tclose(*m_tid1);
@@ -363,6 +364,8 @@ herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
         H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "native type sizes do not compare");
 
 done:
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 

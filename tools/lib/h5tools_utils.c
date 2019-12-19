@@ -788,7 +788,7 @@ herr_t
 init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     table_t **dset_table, table_t **type_table)
 {
-    herr_t ret_value = SUCCEED;
+    H5TOOLS_ERR_INIT(herr_t, SUCCEED)
 
     /* Initialize the tables */
     init_table(group_table);
@@ -1047,9 +1047,9 @@ h5tools_getstatus(void)
 int
 h5tools_getenv_update_hyperslab_bufsize(void)
 {
+    H5TOOLS_ERR_INIT(int, 1)
     const char *env_str = NULL;
     long hyperslab_bufsize_mb;
-    int ret_value = 1;
 
     /* check if environment variable is set for the hyperslab buffer size */
     if (NULL != (env_str = HDgetenv ("H5TOOLS_BUFSIZE"))) {

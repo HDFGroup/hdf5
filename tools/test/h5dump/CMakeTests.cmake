@@ -198,6 +198,16 @@
       ${HDF5_TOOLS_DIR}/testfiles/h5dump-help.txt
       ${HDF5_TOOLS_DIR}/testfiles/out3.h5import
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.ddl
+      #STD_REF_OBJ files
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_attrR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_compatR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_extR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_grpR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj_delR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_objR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_paramR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg_1dR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_regR.ddl
   )
   set (HDF5_N_REFERENCE_FILES
       tall-3
@@ -322,6 +332,18 @@
       ${HDF5_TOOLS_DIR}/testfiles/tvms.h5
       ${HDF5_TOOLS_DIR}/testfiles/t128bit_float.h5
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.h5
+      #STD_REF_OBJ files
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_attr.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_compat.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_ext1.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_ext2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_grp.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj_del.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_param.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg_1d.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg.h5
+
   )
   set (HDF5_ERROR_REFERENCE_TEST_FILES
       ${PROJECT_SOURCE_DIR}/errfiles/filter_fail.err
@@ -1107,6 +1129,17 @@
   ADD_H5_TEST (tattrreg 0 --enable-error-stack tattrreg.h5)
   ADD_H5ERR_MASK_TEST (tattrregR 0 "NULL token size" -R --enable-error-stack tattrreg.h5)
   ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 --enable-error-stack -d /Dataset1 -s 0 -R -y -o)
+
+  # test for 1.12 region references
+  ADD_H5_TEST (trefer_attrR 0 --enable-error-stack -R trefer_attr.h5)
+  ADD_H5_TEST (trefer_compatR 0 --enable-error-stack -R trefer_compat.h5)
+  ADD_H5_TEST (trefer_extR 0 --enable-error-stack -R trefer_ext2.h5)
+  ADD_H5_TEST (trefer_grpR 0 --enable-error-stack -R trefer_grp.h5)
+  ADD_H5_TEST (trefer_obj_delR 0 --enable-error-stack -R trefer_obj_del.h5)
+  ADD_H5_TEST (trefer_objR 0 --enable-error-stack -R trefer_obj.h5)
+  ADD_H5_TEST (trefer_paramR 0 --enable-error-stack -R trefer_param.h5)
+  ADD_H5_TEST (trefer_regR 0 --enable-error-stack -R trefer_reg.h5)
+  ADD_H5_TEST (trefer_reg_1dR 0 --enable-error-stack -R trefer_reg_1d.h5)
 
   # tests for group creation order
   # "1" tracked, "2" name, root tracked

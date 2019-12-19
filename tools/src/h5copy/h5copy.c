@@ -207,7 +207,7 @@ static int parse_flag(const char* s_flag, unsigned *flag)
 int
 main (int argc, const char *argv[])
 {
-    int            ret_value = 0; /*no need to LEAVE() on ERROR: H5TOOLS_ERR_INIT(int, SUCCEED) */
+    H5TOOLS_ERR_INIT(int, 0)
     H5E_auto2_t         func;
     H5E_auto2_t         tools_func;
     void               *edata;

@@ -2190,6 +2190,28 @@
 ./tools/testfiles/zerodim.ddl
 ./tools/testfiles/zerodim.h5
 
+# h5dump new reference validation
+./tools/testfiles/trefer_attrR.ddl
+./tools/testfiles/trefer_compatR.ddl
+./tools/testfiles/trefer_extR.ddl
+./tools/testfiles/trefer_grpR.ddl
+./tools/testfiles/trefer_obj_delR.ddl
+./tools/testfiles/trefer_objR.ddl
+./tools/testfiles/trefer_paramR.ddl
+./tools/testfiles/trefer_reg_1dR.ddl
+./tools/testfiles/trefer_regR.ddl
+# h5dump and h5diff new reference files
+./tools/testfiles/trefer_attr.h5
+./tools/testfiles/trefer_compat.h5
+./tools/testfiles/trefer_ext1.h5
+./tools/testfiles/trefer_ext2.h5
+./tools/testfiles/trefer_grp.h5
+./tools/testfiles/trefer_obj_del.h5
+./tools/testfiles/trefer_obj.h5
+./tools/testfiles/trefer_param.h5
+./tools/testfiles/trefer_reg_1d.h5
+./tools/testfiles/trefer_reg.h5
+
 # Expected output from h5ls tests
 ./tools/testfiles/nosuchfile.ls
 ./tools/testfiles/help-1.ls

@@ -36,7 +36,7 @@ static int aux_copy_obj(hid_t dcpl_id, /* dataset creation property list */
         const char* name,              /* object name from traverse list */
         pack_info_t *objout /*OUT*/)   /* info about object to filter */
 {
-    int          ret_value = 0;  /*no need to LEAVE() on ERROR: H5TOOLS_ERR_INIT(int, SUCCEED) */
+    H5TOOLS_ERR_INIT(int, 0)
     int          nfilters;       /* number of filters in DCPL */
     char         f_objname[256]; /* filter objname */
     H5D_layout_t layout;
@@ -238,7 +238,7 @@ int apply_filters(const char* name, /* object name from traverse list */
         pack_opt_t *options,        /* repack options */
         int *has_filter)            /* (OUT) object NAME has a filter */
 {
-    int         ret_value = 0; /*no need to LEAVE() on ERROR: H5TOOLS_ERR_INIT(int, SUCCEED) */
+    H5TOOLS_ERR_INIT(int, 0)
     int         nfilters;      /* number of filters in DCPL */
     hsize_t     chsize[64];    /* chunk size in elements */
     H5D_layout_t layout;

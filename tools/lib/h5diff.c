@@ -262,6 +262,7 @@ static void
 build_match_list (const char *objname1, trav_info_t *info1, const char *objname2, trav_info_t *info2,
         trav_table_t ** table_out, diff_opt_t *opts)
 {
+    H5TOOLS_ERR_INIT(int, 0)
     size_t   curr1 = 0;
     size_t   curr2 = 0;
     unsigned infile[2];
@@ -274,9 +275,9 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
     int      cmp;
     trav_table_t *table = NULL;
     size_t   idx;
-    int      ret_value = 0;
 
-    h5difftrace("build_match_list start\n");
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "build_match_list start - errstat:%d", opts->err_stat);
     /* init */
     trav_table_init(&table);
     if (table == NULL) {
@@ -372,7 +373,11 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
 
 done:
     *table_out = table;
-    h5difftrace("build_match_list finish\n");
+
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
+
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "build_match_list finish");
 }
 
 
@@ -399,7 +404,7 @@ trav_grp_objs(const char *path, const H5O_info_t *oinfo,
 static herr_t
 trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
 {
-    herr_t         ret_value = 0;
+    H5TOOLS_ERR_INIT(herr_t, 0)
     trav_info_t   *tinfo = (trav_info_t *)udata;
     diff_opt_t    *opts = (diff_opt_t *)tinfo->opts;
     h5tool_link_info_t lnk_info;
@@ -409,6 +414,7 @@ trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
     /* init linkinfo struct */
     HDmemset(&lnk_info, 0, sizeof(h5tool_link_info_t));
 
+    H5TOOLS_PUSH_STACK();
     if (!opts->follow_links) {
         trav_info_visit_lnk(path, linfo, tinfo);
         HGOTO_DONE(0);
@@ -489,6 +495,8 @@ trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
 done:
     if (lnk_info.trg_path)
         HDfree(lnk_info.trg_path);
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -509,7 +517,7 @@ h5diff(const char *fname1,
                const char *objname2,
                diff_opt_t *opts)
 {
-    int           ret_value = 0;
+    H5TOOLS_ERR_INIT(int, 0)
     hid_t         file1_id = -1;
     hid_t         file2_id = -1;
     char          filenames[2][MAX_FILENAME];
@@ -541,7 +549,8 @@ h5diff(const char *fname1,
     /* list for common objects */
     trav_table_t *match_list = NULL;
 
-    h5difftrace("h5diff start\n");
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff start");
     /* init filenames */
     HDmemset(filenames, 0, MAX_FILENAME * 2);
     /* init link info struct */
@@ -566,13 +575,14 @@ h5diff(const char *fname1,
         parallel_print("h5diff: <%s>: unable to open file\n", fname1);
         H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "<%s>: unable to open file\n", fname1);
     } /* end if */
-
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "file1_id = %s", fname1);
 
     /* open file 2 */
     if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname2);
         H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "<%s>: unable to open file\n", fname2);
     } /* end if */
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "file2_id = %s", fname2);
 
     /*-------------------------------------------------------------------------
     * Initialize the info structs
@@ -581,7 +591,7 @@ h5diff(const char *fname1,
     trav_info_init(fname1, file1_id, &info1_obj);
     trav_info_init(fname2, file2_id, &info2_obj);
 
-    h5difftrace("trav_info_init initialized\n");
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "trav_info_init initialized");
     /* if any object is specified */
     if (objname1) {
         /* make the given object1 fullpath, start with "/"  */
@@ -622,7 +632,7 @@ h5diff(const char *fname1,
         /*----------------------------------------------------------
          * check if obj1 is root, group, single object or symlink
          */
-        h5difftrace("h5diff check if obj1 is root, group, single object or symlink\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff check if obj1=%s is root, group, single object or symlink", obj1fullname);
         if(!HDstrcmp(obj1fullname, "/")) {
             obj1type = H5TRAV_TYPE_GROUP;
         }
@@ -672,7 +682,7 @@ h5diff(const char *fname1,
         /*----------------------------------------------------------
          * check if obj2 is root, group, single object or symlink
          */
-        h5difftrace("h5diff check if obj2 is root, group, single object or symlink\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff check if obj2=%s is root, group, single object or symlink", obj2fullname);
         if(!HDstrcmp(obj2fullname, "/")) {
             obj2type = H5TRAV_TYPE_GROUP;
         }
@@ -721,7 +731,7 @@ h5diff(const char *fname1,
     }
     /* if no object specified */
     else {
-        h5difftrace("h5diff no object specified\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff no object specified");
         /* set root group */
         obj1fullname = (char*)HDstrdup("/");
         obj1type = H5TRAV_TYPE_GROUP;
@@ -729,7 +739,7 @@ h5diff(const char *fname1,
         obj2type = H5TRAV_TYPE_GROUP;
     }
 
-    h5diffdebug2("get any symbolic links info - errstat:%d\n", opts->err_stat);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "get any symbolic links info - errstat:%d", opts->err_stat);
     /* get any symbolic links info */
     l_ret1 = H5tools_get_symlink_info(file1_id, obj1fullname, &trg_linfo1, opts->follow_links);
     l_ret2 = H5tools_get_symlink_info(file2_id, obj2fullname, &trg_linfo2, opts->follow_links);
@@ -745,10 +755,10 @@ h5diff(const char *fname1,
         /*-------------------------------
          * check symbolic link (object1)
          */
-        h5difftrace("h5diff check symbolic link (object1)\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff check symbolic link (object1)");
         /* dangling link */
         if (l_ret1 == 0) {
-            h5difftrace("h5diff ... dangling link\n");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff ... dangling link");
             if (opts->no_dangle_links) {
                 /* treat dangling link as error */
                 if(opts->m_verbose)
@@ -771,25 +781,25 @@ h5diff(const char *fname1,
         }
         else if(l_ret1 != 2) { /* symbolic link */
             obj1type = (h5trav_type_t)trg_linfo1.trg_type;
-            h5difftrace("h5diff ... ... trg_linfo1.trg_type == H5L_TYPE_HARD\n");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff ... ... trg_linfo1.trg_type == H5L_TYPE_HARD");
             if (info1_lp != NULL) {
                 size_t idx = info1_lp->nused - 1;
 
-                h5difftrace("h5diff ... ... ... info1_obj not null\n");
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff ... ... ... info1_obj not null");
                 info1_lp->paths[idx].type = (h5trav_type_t)trg_linfo1.trg_type;
                 info1_lp->paths[idx].objno = trg_linfo1.objno;
                 info1_lp->paths[idx].fileno = trg_linfo1.fileno;
             }
-            h5difftrace("h5diff check symbolic link (object1) finished\n");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff check symbolic link (object1) finished");
         }
 
         /*-------------------------------
          * check symbolic link (object2)
          */
-        h5difftrace("h5diff check symbolic link (object2)\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff check symbolic link (object2)");
         /* dangling link */
         if (l_ret2 == 0) {
-            h5difftrace("h5diff ... dangling link\n");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff ... dangling link");
             if (opts->no_dangle_links) {
                 /* treat dangling link as error */
                 if(opts->m_verbose)
@@ -815,12 +825,12 @@ h5diff(const char *fname1,
             if (info2_lp != NULL) {
                 size_t idx = info2_lp->nused - 1;
 
-                h5difftrace("h5diff ... ... ... info2_obj not null\n");
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff ... ... ... info2_obj not null");
                 info2_lp->paths[idx].type = (h5trav_type_t)trg_linfo2.trg_type;
                 info2_lp->paths[idx].objno = trg_linfo2.objno;
                 info2_lp->paths[idx].fileno = trg_linfo2.fileno;
             }
-            h5difftrace("h5diff check symbolic link (object1) finished\n");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff check symbolic link (object1) finished");
         }
     } /* end of if follow symlinks */
 
@@ -832,7 +842,7 @@ h5diff(const char *fname1,
     */
 
     if(!(opts->m_verbose || opts->m_report)) {
-        h5difftrace("h5diff NOT (opts->m_verbose || opts->m_report)\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff NOT (opts->m_verbose || opts->m_report)");
         /* if no danglink links */
         if (l_ret1 > 0 && l_ret2 > 0)
             if (h5tools_is_obj_same(file1_id, obj1fullname, file2_id, obj2fullname) != 0)
@@ -841,7 +851,7 @@ h5diff(const char *fname1,
 
     both_objs_grp = (obj1type == H5TRAV_TYPE_GROUP && obj2type == H5TRAV_TYPE_GROUP);
     if (both_objs_grp) {
-        h5difftrace("h5diff both_objs_grp TRUE\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff both_objs_grp TRUE");
         /*
          * traverse group1
          */
@@ -870,7 +880,7 @@ h5diff(const char *fname1,
        } /* end if */
         info2_lp = info2_grp;
     }
-    h5diffdebug2("groups traversed - errstat:%d\n", opts->err_stat);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "groups traversed - errstat:%d", opts->err_stat);
 
 #ifdef H5_HAVE_PARALLEL
     if(g_Parallel) {
@@ -890,8 +900,10 @@ h5diff(const char *fname1,
     } /* end if */
 #endif
 
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "build_match_list next - errstat:%d", opts->err_stat);
     /* process the objects */
     build_match_list (obj1fullname, info1_lp, obj2fullname, info2_lp, &match_list, opts);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "build_match_list finished - errstat:%d", opts->err_stat);
     if (both_objs_grp) {
         /*------------------------------------------------------
          * print the list
@@ -915,6 +927,7 @@ h5diff(const char *fname1,
              parallel_print ("\n");
          } /* end if */
     }
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_match next - errstat:%d", opts->err_stat);
     nfound = diff_match(file1_id, obj1fullname, info1_lp,
                         file2_id, obj2fullname, info2_lp,
                         match_list, opts);
@@ -957,8 +970,10 @@ done:
         H5Fclose(file2_id);
     } H5E_END_TRY;
 
-    h5difftrace("h5diff finish\n");
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5diff finish - errstat:%d", opts->err_stat);
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return nfound;
 }
 
@@ -985,9 +1000,9 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                    hid_t file2_id, const char *grp2, trav_info_t *info2,
                    trav_table_t *table, diff_opt_t *opts)
 {
+    H5TOOLS_ERR_INIT(int, opts->err_stat)
     hsize_t      nfound = 0;
     unsigned     i;
-    int          ret_value = opts->err_stat;
     const char  *grp1_path = "";
     const char  *grp2_path = "";
     char        *obj1_fullpath = NULL;
@@ -996,7 +1011,8 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
     size_t       idx1 = 0;
     size_t       idx2 = 0;
 
-    h5difftrace("diff_match start\n");
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_match start - errstat:%d", opts->err_stat);
     /*
      * if not root, prepare object name to be pre-appended to group path to
      * make full path
@@ -1049,7 +1065,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 #endif
 
     for(i = 0; i < table->nobjs; i++) {
-        h5diffdebug3("diff for common objects[%d] - errstat:%d\n", i, opts->err_stat);
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff for common objects[%d] - errstat:%d", i, opts->err_stat);
         if(table->objs[i].flags[0] && table->objs[i].flags[1]) {
             /* make full path for obj1 */
 #ifdef H5_HAVE_ASPRINTF
@@ -1066,7 +1082,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 HDstrcat(obj1_fullpath, table->objs[i].name);
             }
 #endif /* H5_HAVE_ASPRINTF */
-            h5diffdebug2("diff_match path1 - %s\n", obj1_fullpath);
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_match path1 - %s", obj1_fullpath);
 
             /* make full path for obj2 */
 #ifdef H5_HAVE_ASPRINTF
@@ -1083,7 +1099,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 HDstrcat(obj2_fullpath, table->objs[i].name);
             }
 #endif /* H5_HAVE_ASPRINTF */
-            h5diffdebug2("diff_match path2 - %s\n", obj2_fullpath);
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_match path2 - %s", obj2_fullpath);
 
             /* get index to figure out type of the object in file1 */
             while(info1->paths[idx1].path && (HDstrcmp(obj1_fullpath, info1->paths[idx1].path) != 0))
@@ -1099,6 +1115,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 
             opts->cmn_objs = 1;
             if(!g_Parallel) {
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff paths - errstat:%d", opts->err_stat);
                 nfound += diff(file1_id, obj1_fullpath,
                                file2_id, obj2_fullpath,
                             opts, &argdata);
@@ -1107,7 +1124,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             else {
                 int workerFound = 0;
 
-                h5difftrace("Beginning of big else block\n");
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Beginning of big else block");
                 /* We're in parallel mode */
                 /* Since the data type of diff value is hsize_t which can
                 * be arbitary large such that there is no MPI type that
@@ -1261,7 +1278,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 HDfree(obj2_fullpath);
         } /* end if */
     } /* end for */
-    h5diffdebug2("done with for loop - errstat:%d\n", opts->err_stat);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "done with for loop - errstat:%d", opts->err_stat);
 
 #ifdef H5_HAVE_PARALLEL
     if(g_Parallel) {
@@ -1338,7 +1355,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
         /* Print any final data waiting in our queue */
         print_incoming_data();
     } /* end if */
-    h5difftrace("done with if block\n");
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "done with if block");
 
     HDfree(workerTasks);
     }
@@ -1349,8 +1366,11 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
 /* free table */
     if (table)
         trav_table_free(table);
-    h5diffdebug2("diff_match finish:%d\n", nfound);
 
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_match finish diffs=%d - errstat:%d", nfound, opts->err_stat);
+
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return nfound;
 }
 
@@ -1376,14 +1396,14 @@ diff(hid_t file1_id,
               diff_opt_t * opts,
               diff_args_t *argdata)
 {
-    int           ret_value = opts->err_stat;
+    H5TOOLS_ERR_INIT(int, opts->err_stat)
     int           status = -1;
-    hid_t         dset1_id = -1;
-    hid_t         dset2_id = -1;
-    hid_t         type1_id = -1;
-    hid_t         type2_id = -1;
-    hid_t         grp1_id = -1;
-    hid_t         grp2_id = -1;
+    hid_t         dset1_id = H5I_INVALID_HID;
+    hid_t         dset2_id = H5I_INVALID_HID;
+    hid_t         type1_id = H5I_INVALID_HID;
+    hid_t         type2_id = H5I_INVALID_HID;
+    hid_t         grp1_id = H5I_INVALID_HID;
+    hid_t         grp2_id = H5I_INVALID_HID;
     hbool_t       is_dangle_link1 = FALSE;
     hbool_t       is_dangle_link2 = FALSE;
     hbool_t       is_hard_link = FALSE;
@@ -1394,7 +1414,8 @@ diff(hid_t file1_id,
     h5tool_link_info_t linkinfo1;
     h5tool_link_info_t linkinfo2;
 
-    h5difftrace("diff start\n");
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff start - errstat:%d", opts->err_stat);
 
     /*init link info struct */
     HDmemset(&linkinfo1, 0, sizeof(h5tool_link_info_t));
@@ -1414,6 +1435,7 @@ diff(hid_t file1_id,
          * check dangling links for path1 and path2
          */
 
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff links");
         /* target object1 - get type and name */
         if ((status = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, opts->follow_links)) < 0)
             H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5tools_get_symlink_info failed");
@@ -1462,6 +1484,7 @@ diff(hid_t file1_id,
     }
     /* if objects are not the same type */
     if (argdata->type[0] != argdata->type[1]) {
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff objects are not the same");
         if (opts->m_verbose||opts->m_list_not_cmp) {
             parallel_print("Not comparable: <%s> is of type %s and <%s> is of type %s\n",
             path1, get_type(argdata->type[0]),
@@ -1485,7 +1508,7 @@ diff(hid_t file1_id,
      * Perform this to match the outputs as bypassing.
      */
      if (argdata->is_same_trgobj) {
-        h5difftrace("argdata->is_same_trgobj\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "argdata->is_same_trgobj");
         is_hard_link = (object_type == H5TRAV_TYPE_DATASET ||
                         object_type == H5TRAV_TYPE_NAMED_DATATYPE ||
                         object_type == H5TRAV_TYPE_GROUP);
@@ -1533,6 +1556,7 @@ diff(hid_t file1_id,
         *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_DATASET:
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff object type H5TRAV_TYPE_DATASET - errstat:%d", opts->err_stat);
             if((dset1_id = H5Dopen2(file1_id, path1, H5P_DEFAULT)) < 0)
                 H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Dopen2 failed");
             if((dset2_id = H5Dopen2(file2_id, path2, H5P_DEFAULT)) < 0)
@@ -1540,6 +1564,7 @@ diff(hid_t file1_id,
             /* verbose (-v) and report (-r) mode */
             if(opts->m_verbose || opts->m_report) {
                 do_print_objname("dataset", path1, path2, opts);
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "call diff_dataset 1:%s  2:%s ", path1, path2);
                 nfound = diff_dataset(file1_id, file2_id, path1, path2, opts);
                 print_found(nfound);
             }
@@ -1556,7 +1581,7 @@ diff(hid_t file1_id,
                     print_found(nfound);
                 }
             }
-            h5diffdebug2("diff after dataset:%d\n", nfound);
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff after dataset:%d - errstat:%d", nfound, opts->err_stat);
 
             /*---------------------------------------------------------
              * compare attributes
@@ -1564,9 +1589,10 @@ diff(hid_t file1_id,
              * referenced object
              *---------------------------------------------------------
              */
-            if(path1)
+            if(path1) {
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "call diff_attr 1:%s  2:%s ", path1, path2);
                 nfound += diff_attr(dset1_id, dset2_id, path1, path2, opts);
-
+            }
 
             if(H5Dclose(dset1_id) < 0)
                 H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Dclose failed");
@@ -1579,6 +1605,7 @@ diff(hid_t file1_id,
         *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_NAMED_DATATYPE:
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5TRAV_TYPE_NAMED_DATATYPE 1:%s  2:%s ", path1, path2);
             if((type1_id = H5Topen2(file1_id, path1, H5P_DEFAULT)) < 0)
                 H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Topen2 failed");
             if((type2_id = H5Topen2(file2_id, path2, H5P_DEFAULT)) < 0)
@@ -1603,8 +1630,10 @@ diff(hid_t file1_id,
              * referenced object
              *-----------------------------------------------------------------
              */
-            if(path1)
+            if(path1) {
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "call diff_attr 1:%s  2:%s ", path1, path2);
                 nfound += diff_attr(type1_id, type2_id, path1, path2, opts);
+            }
 
             if(H5Tclose(type1_id) < 0)
                 H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Tclose failed");
@@ -1617,6 +1646,7 @@ diff(hid_t file1_id,
         *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_GROUP:
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5TRAV_TYPE_GROUP 1:%s  2:%s ", path1, path2);
             if(print_objname(opts, nfound))
                 do_print_objname("group", path1, path2, opts);
 
@@ -1635,8 +1665,10 @@ diff(hid_t file1_id,
              * referenced object
              *-----------------------------------------------------------------
              */
-            if(path1)
+            if(path1) {
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "call diff_attr 1:%s  2:%s ", path1, path2);
                 nfound += diff_attr(grp1_id, grp2_id, path1, path2, opts);
+            }
 
             if(H5Gclose(grp1_id) < 0)
                 H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Gclose failed");
@@ -1651,6 +1683,7 @@ diff(hid_t file1_id,
         */
         case H5TRAV_TYPE_LINK:
             {
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5TRAV_TYPE_LINK 1:%s  2:%s ", path1, path2);
                 status = HDstrcmp(linkinfo1.trg_path, linkinfo2.trg_path);
 
                 /* if the target link name is not same then the links are "different" */
@@ -1672,6 +1705,7 @@ diff(hid_t file1_id,
         */
         case H5TRAV_TYPE_UDLINK:
             {
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5TRAV_TYPE_UDLINK 1:%s  2:%s ", path1, path2);
                 /* Only external links will have a query function registered */
                 if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL && linkinfo2.linfo.type == H5L_TYPE_EXTERNAL) {
                     /* If the buffers are the same size, compare them */
@@ -1772,8 +1806,10 @@ done:
         /* enable error reporting */
     } H5E_END_TRY;
 
-    h5diffdebug3("diff finish:%d - errstat:%d\n", nfound, opts->err_stat);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff finish:%d - errstat:%d", nfound, opts->err_stat);
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return nfound;
 }
 
