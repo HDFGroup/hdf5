@@ -402,7 +402,7 @@ H5F__vfd_swmr_decode_md_idx(int md_fd, H5FD_vfd_swmr_md_header *md_hdr, H5FD_vfd
     FUNC_ENTER_PACKAGE
 
     /* Allocate buffer for the index image */
-    if(NULL == (image = (uint8_t *)H5MM_malloc(md_hdr->index_length)))
+    if(NULL == (image = H5MM_malloc(md_hdr->index_length)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed for index on disk buffer")
 
     p = image;
@@ -416,7 +416,7 @@ H5F__vfd_swmr_decode_md_idx(int md_fd, H5FD_vfd_swmr_md_header *md_hdr, H5FD_vfd
         HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "error in reading the header in metadata file")
 
     /* Verify magic for index */
-    if(HDmemcmp(p, H5FD_MD_INDEX_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if(HDmemcmp(p, H5FD_MD_INDEX_MAGIC, H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no header magic in the metadata file")
 
     p += H5_SIZEOF_MAGIC;
@@ -427,9 +427,10 @@ H5F__vfd_swmr_decode_md_idx(int md_fd, H5FD_vfd_swmr_md_header *md_hdr, H5FD_vfd
 
     /* Deserialize index entries */
     if(md_idx->num_entries) {
-
+        md_idx->entries =
+            H5MM_calloc(md_idx->num_entries * sizeof(md_idx->entries[0]));
         /* Allocate memory for the index entries */
-        if(NULL == (md_idx->entries = (H5FD_vfd_swmr_idx_entry_t *)H5MM_calloc(md_idx->num_entries * sizeof(H5FD_vfd_swmr_idx_entry_t))))
+        if(NULL == md_idx->entries)
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "memory allocation failed for index entries")
 
          /* Decode index entries */
