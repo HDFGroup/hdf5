@@ -72,8 +72,7 @@ static herr_t H5PB__create_new_page(H5PB_t *pb_ptr, haddr_t addr, size_t size,
 
 static void H5PB__deallocate_page(H5PB_entry_t *entry_ptr);
 
-static herr_t H5PB__evict_entry(H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr, 
-    hbool_t force);
+static herr_t H5PB__evict_entry(H5F_shared_t *, H5PB_entry_t *, hbool_t);
 
 static herr_t H5PB__flush_entry(H5F_shared_t *, H5PB_t *, H5PB_entry_t *);
 
@@ -723,7 +722,7 @@ H5PB_dest(H5F_shared_t *shared)
                                     "Can't flush entry")
                 }
 
-                if ( H5PB__evict_entry(pb_ptr, evict_ptr, TRUE) < 0 )
+                if ( H5PB__evict_entry(shared, evict_ptr, TRUE) < 0 )
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                 "forced eviction failed")
@@ -1236,7 +1235,7 @@ H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "mark entry clean failed")
 
-        if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+        if ( H5PB__evict_entry(shared, entry_ptr, TRUE) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
 
@@ -1421,7 +1420,7 @@ H5PB_vfd_swmr__release_delayed_writes(H5F_shared_t *shared)
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "flush of mpmde failed")
 
-            if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+            if ( H5PB__evict_entry(shared, entry_ptr, TRUE) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                             "eviction of mpmde failed")
@@ -1500,7 +1499,7 @@ H5PB_vfd_swmr__release_tick_list(H5F_shared_t *shared)
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                                 "flush of mpmde failed")
 
-                if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+                if ( H5PB__evict_entry(shared, entry_ptr, TRUE) < 0 )
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                 "eviction of mpmde failed")
@@ -2305,8 +2304,9 @@ H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__evict_entry(H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr, hbool_t force)
+H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force)
 {
+    H5PB_t *pb_ptr = shared->pb_ptr;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2777,7 +2777,7 @@ H5PB__make_space(H5F_shared_t *shared, H5PB_t *pb_ptr, H5FD_mem_t inserted_type)
 
             evict_ptr = search_ptr;
             search_ptr = search_ptr->prev;
-            if ( H5PB__evict_entry(pb_ptr, evict_ptr, FALSE) < 0 )
+            if ( H5PB__evict_entry(shared, evict_ptr, FALSE) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "Can't evict entry")
@@ -3227,7 +3227,7 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
 
                         HDassert( ! ( entry_ptr->is_dirty ) );
 
-                        if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+                        if ( H5PB__evict_entry(shared, entry_ptr, TRUE) < 0 )
 
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                         "forced eviction failed (1)")
@@ -4026,7 +4026,7 @@ H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "mark entry clean failed")
 
-                    if ( H5PB__evict_entry(pb_ptr, entry_ptr, TRUE) < 0 )
+                    if ( H5PB__evict_entry(shared, entry_ptr, TRUE) < 0 )
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "forced eviction failed (1)")
