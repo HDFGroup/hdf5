@@ -1146,7 +1146,7 @@ vfd_swmr_mdf_idx_entry_remove(H5F_shared_t *shared, uint64_t page)
         return 0;
 
     if (shared->vfd_swmr_writer && idx_entry->md_file_page_offset != 0 &&
-        vfd_swmr_idx_entry_defer_free(shared, idx_entry) != 0)
+        shadow_image_defer_free(shared, idx_entry) != 0)
         return -1;
 
     idx_idx = idx_entry - shared->mdf_idx;

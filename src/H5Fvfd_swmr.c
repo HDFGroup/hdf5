@@ -367,7 +367,7 @@ done:
 } /* H5F_vfd_swmr_close_or_flush() */
 
 int
-vfd_swmr_idx_entry_defer_free(H5F_shared_t *shared,
+shadow_image_defer_free(H5F_shared_t *shared,
     const H5FD_vfd_swmr_idx_entry_t *entry)
 {
     old_image_t *old_image;
@@ -470,7 +470,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
         
         /* Prepend previous image of the entry to the delayed list */
         if ( index[i].md_file_page_offset ) {
-            if (vfd_swmr_idx_entry_defer_free(f->shared, &index[i]) == -1) {
+            if (shadow_image_defer_free(f->shared, &index[i]) == -1) {
                 HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, \
                             "unable to allocate the delayed entry")
             }
