@@ -1117,9 +1117,7 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
 
         f->shared->vfd_swmr_md_fd           = -1;
         f->shared->fs_man_md                = NULL;
-        f->shared->dl_head_ptr              = NULL;
-        f->shared->dl_tail_ptr              = NULL;
-        f->shared->dl_len                   = 0;
+        TAILQ_INIT(&f->shared->old_images);
 
         /* Get the VOL connector info */
         if(H5F__set_vol_conn(f) < 0)

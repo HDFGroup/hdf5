@@ -526,6 +526,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__vfd_swmr_verify_md_hdr_and_idx() */
 
+static unsigned
+count_old_images(old_image_queue_t *old_images)
+{
+    old_image_t *old_image;
+    unsigned count = 0;
+
+    TAILQ_FOREACH(old_image, old_images, link)
+        count++;
+
+    return count;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -536,15 +547,15 @@ done:
  *          --info read from the metadata file is as indicated by
  *          the input: num_entries, index
  *          --# of entries on the delayed list is as indicated by 
- *          the input: num_dl_entries
+ *          the input: nold_images
  *
  * Return:  SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries, H5FD_vfd_swmr_idx_entry_t *index,
-    unsigned num_dl_entries)
+H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries,
+    H5FD_vfd_swmr_idx_entry_t *index, unsigned nold_images)
 {
     H5F_t *f;                       /* File pointer */
     int md_fd = -1;                 /* The metadata file descriptor */
@@ -566,7 +577,7 @@ H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries, H5FD_vfd_swmr_
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "error updating the md file with the index")
 
     /* Verify the number of entries in the delayed list is as expected */
-    if(f->shared->dl_len < num_dl_entries)
+    if(count_old_images(&f->shared->old_images) < nold_images)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect # of entries in the delayed list")
 
     /* Open the metadata file */

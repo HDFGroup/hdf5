@@ -57,38 +57,6 @@
 #define nanosecs_per_second          1000000000 /* nanoseconds per second */
 #define nanosecs_per_tenth_sec       100000000  /* nanoseconds per 0.1 second */
 
-/* Remove an entry from the doubly linked list */
-#define H5F__LL_REMOVE(entry_ptr, head_ptr, tail_ptr)               \
-{                                                                   \
-    if((head_ptr) == (entry_ptr)) {                                 \
-          (head_ptr) = (entry_ptr)->next;                           \
-          if((head_ptr) != NULL )                                   \
-             (head_ptr)->prev = NULL;                               \
-    } else                                                          \
-        (entry_ptr)->prev->next = (entry_ptr)->next;                \
-    if((tail_ptr) == (entry_ptr)) {                                 \
-        (tail_ptr) = (entry_ptr)->prev;                             \
-        if((tail_ptr) != NULL)                                      \
-            (tail_ptr)->next = NULL;                                \
-    } else                                                          \
-        (entry_ptr)->next->prev = (entry_ptr)->prev;                \
-    entry_ptr->next = NULL;                                         \
-    entry_ptr->prev = NULL;                                         \
-} /* H5F__LL_REMOVE() */
-
-/* Prepend an entry to the doubly linked list */ 
-#define H5F__LL_PREPEND(entry_ptr, head_ptr, tail_ptr)              \
-{                                                                   \
-    if((head_ptr) == NULL) {                                        \
-       (head_ptr) = (entry_ptr);                                    \
-       (tail_ptr) = (entry_ptr);                                    \
-    } else {                                                        \
-       (head_ptr)->prev = (entry_ptr);                              \
-       (entry_ptr)->next = (head_ptr);                              \
-       (head_ptr) = (entry_ptr);                                    \
-    }                                                               \
-} /* H5F__LL_PREPEND() */
-
 /********************/
 /* Local Prototypes */
 /********************/
@@ -118,6 +86,23 @@ unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          * on the 0->1 and 1->0
                                          * transitions.
                                          */
+static const bool ldbg_enabled = false;
+
+static void
+ldbgf(const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+
+    if (!ldbg_enabled)
+        return;
+
+    (void)vprintf(fmt, ap);
+
+    va_end(ap);
+}
+
 /*
  *  The head of the end of tick queue (EOT queue) for files opened in either
  *  VFD SWMR write or VFD SWMR read mode
@@ -128,8 +113,8 @@ eot_queue_t eot_queue_g = TAILQ_HEAD_INITIALIZER(eot_queue_g);
 /* Local Variables */
 /*******************/
 
-/* Declare a free list to manage the H5F_vfd_swmr_dl_entry_t struct */
-H5FL_DEFINE(H5F_vfd_swmr_dl_entry_t);
+/* Declare a free list to manage the old_image_t struct */
+H5FL_DEFINE(old_image_t);
 
 /* Declare a free list to manage the eot_queue_entry_t struct */
 H5FL_DEFINE(eot_queue_entry_t);
@@ -316,7 +301,7 @@ done:
 herr_t
 H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 {
-    H5F_vfd_swmr_dl_entry_t *curr, *next;
+    old_image_t *curr;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -360,14 +345,12 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
                 "unable to close the free-space manager for the metadata file")
 
         /* Free the delayed list */ 
-        for (curr = f->shared->dl_head_ptr;
-             curr != NULL && (next = curr->next, true);
-             curr = next) {
-            H5FL_FREE(H5F_vfd_swmr_dl_entry_t, curr);
+        while ((curr = TAILQ_FIRST(&f->shared->old_images)) != NULL) {
+            TAILQ_REMOVE(&f->shared->old_images, curr, link);
+            H5FL_FREE(old_image_t, curr);
         }
 
-        f->shared->dl_head_ptr = f->shared->dl_tail_ptr = NULL;
-
+        assert(TAILQ_EMPTY(&f->shared->old_images));
     } else { /* For file flush */
 
         /* Update end_of_tick */
@@ -383,6 +366,26 @@ done:
 
 } /* H5F_vfd_swmr_close_or_flush() */
 
+int
+vfd_swmr_idx_entry_defer_free(H5F_shared_t *shared,
+    const H5FD_vfd_swmr_idx_entry_t *entry)
+{
+    old_image_t *old_image;
+
+    if (NULL == (old_image = H5FL_CALLOC(old_image_t)))
+        return -1;
+
+    old_image->hdf5_page_offset = entry->hdf5_page_offset;
+    old_image->md_file_page_offset = entry->md_file_page_offset;
+    old_image->length = entry->length;
+    old_image->tick_num = shared->tick_num;
+
+    if (TAILQ_EMPTY(&shared->old_images))
+        ldbgf("Adding to the old images list.\n"); 
+
+    TAILQ_INSERT_HEAD(&shared->old_images, old_image, link);
+    return 0;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -421,14 +424,14 @@ done:
  */
 herr_t
 H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries, 
-    H5FD_vfd_swmr_idx_entry_t index[])
+    H5FD_vfd_swmr_idx_entry_t *index)
 {
-    H5F_vfd_swmr_dl_entry_t *prev;          /* Points to the previous entry 
-                                             * in the delayed list 
-                                             */
-    H5F_vfd_swmr_dl_entry_t *dl_entry;      /* Points to an entry in the 
-                                             * delayed list 
-                                             */
+    old_image_t *prev;          /* Points to the previous entry 
+                                 * in the delayed list 
+                                 */
+    old_image_t *old_image;      /* Points to an entry in the 
+                                  * delayed list 
+                                  */
     haddr_t md_addr;                        /* Address in the metadata file */
     unsigned i;                             /* Local index variable */
     herr_t ret_value = SUCCEED;             /* Return value */
@@ -436,10 +439,16 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sort index entries by increasing offset in the HDF5 file */
-    if ( num_entries ) {
-
-        HDqsort(index, num_entries, sizeof(H5FD_vfd_swmr_idx_entry_t), 
-                H5F__idx_entry_cmp);
+    if (num_entries > 0) {
+        HDqsort(index, num_entries, sizeof(*index), H5F__idx_entry_cmp);
+#if 0
+        /* Assert that there are not any HDF5 page offsets duplicated in
+         * here.
+         */
+        for (i = 1; i < num_entries; i++) {
+            assert(index[i].hdf5_page_offset != index[i - 1].hdf5_page_offset);
+        }
+#endif
     }
 
     /* For each non-null entry_ptr in the index:
@@ -456,69 +465,60 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
      */
     for ( i = 0; i < num_entries; i++ ) {
 
-        if ( index[i].entry_ptr != NULL ) {
-
-            /* Prepend previous image of the entry to the delayed list */
-            if ( index[i].md_file_page_offset ) {
-
-                if ( NULL == (dl_entry = H5FL_CALLOC(H5F_vfd_swmr_dl_entry_t)))
-
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, \
-                                "unable to allocate the delayed entry")
-
-                dl_entry->hdf5_page_offset = index[i].hdf5_page_offset;
-                dl_entry->md_file_page_offset = index[i].md_file_page_offset;
-                dl_entry->length = index[i].length;
-                dl_entry->tick_num = f->shared->tick_num;
-
-                H5F__LL_PREPEND(dl_entry, f->shared->dl_head_ptr, f->shared->dl_tail_ptr);
-                f->shared->dl_len++;
+        if (index[i].entry_ptr == NULL)
+            continue;
+        
+        /* Prepend previous image of the entry to the delayed list */
+        if ( index[i].md_file_page_offset ) {
+            if (vfd_swmr_idx_entry_defer_free(f->shared, &index[i]) == -1) {
+                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, \
+                            "unable to allocate the delayed entry")
             }
+        }
 
-            /* Allocate space for the entry in the metadata file */
-            if((md_addr = H5MV_alloc(f, index[i].length)) == HADDR_UNDEF)
+        /* Allocate space for the entry in the metadata file */
+        if((md_addr = H5MV_alloc(f, index[i].length)) == HADDR_UNDEF)
 
-                HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
-                            "error in allocating space from the metadata file")
+            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
+                        "error in allocating space from the metadata file")
 
-            /* Compute checksum and update the index entry */
-            index[i].md_file_page_offset = md_addr/f->shared->fs_page_size;
-            index[i].chksum = H5_checksum_metadata(index[i].entry_ptr, 
-                                                 (size_t)(index[i].length), 0);
+        /* Compute checksum and update the index entry */
+        index[i].md_file_page_offset = md_addr/f->shared->fs_page_size;
+        index[i].chksum = H5_checksum_metadata(index[i].entry_ptr,
+            index[i].length, 0);
 
 #if 0 /* JRM */
-            HDfprintf(stderr, 
-       "writing index[%d] fo/mdfo/l/chksum/fc/lc = %lld/%lld/%ld/%lx/%lx/%lx\n",
-                    i,
-                      index[i].hdf5_page_offset,
-                      index[i].md_file_page_offset,
-                      index[i].length,
-                      index[i].chksum,
-                      (((char*)(index[i].entry_ptr))[0]),
-                      (((char*)(index[i].entry_ptr))[4095]));
+        HDfprintf(stderr, 
+   "writing index[%d] fo/mdfo/l/chksum/fc/lc = %lld/%lld/%ld/%lx/%lx/%lx\n",
+                i,
+                  index[i].hdf5_page_offset,
+                  index[i].md_file_page_offset,
+                  index[i].length,
+                  index[i].chksum,
+                  (((char*)(index[i].entry_ptr))[0]),
+                  (((char*)(index[i].entry_ptr))[4095]));
 
-            HDassert(md_addr == index[i].md_file_page_offset * 
-                                f->shared->fs_page_size);
-            HDassert(f->shared->fs_page_size == 4096);
+        HDassert(md_addr == index[i].md_file_page_offset * 
+                            f->shared->fs_page_size);
+        HDassert(f->shared->fs_page_size == 4096);
 #endif /* JRM */
 
-            /* Seek and write the entry to the metadata file */
-            if ( HDlseek(f->shared->vfd_swmr_md_fd, (HDoff_t)md_addr, 
-                         SEEK_SET) < 0)
+        /* Seek and write the entry to the metadata file */
+        if ( HDlseek(f->shared->vfd_swmr_md_fd, (HDoff_t)md_addr, 
+                     SEEK_SET) < 0)
 
-                HGOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL, \
-                            "unable to seek in the metadata file")
+            HGOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL, \
+                        "unable to seek in the metadata file")
 
-            if ( HDwrite(f->shared->vfd_swmr_md_fd, index[i].entry_ptr, 
-                         index[i].length) != (ssize_t)index[i].length )
+        if ( HDwrite(f->shared->vfd_swmr_md_fd, index[i].entry_ptr, 
+                     index[i].length) != (ssize_t)index[i].length )
 
-                HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
-                 "error in writing the page/multi-page entry to metadata file")
+            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
+             "error in writing the page/multi-page entry to metadata file")
 
-            /* Set entry_ptr to NULL */
-            index[i].entry_ptr = NULL;
+        /* Set entry_ptr to NULL */
+        index[i].entry_ptr = NULL;
 
-        } /* end if */
     } /* end for */
 
     /* Construct and write index to the metadata file */
@@ -544,33 +544,34 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
      *      --remove the associated entries from the list
      */
      
-     for (dl_entry = f->shared->dl_tail_ptr;
-          dl_entry != NULL && (prev = dl_entry->prev, true);
-          dl_entry = prev) {
+     TAILQ_FOREACH_REVERSE_SAFE(old_image, &f->shared->old_images,
+         old_image_queue, link, prev) {
 
         /* max_lag is at least 3 */
         if ( ( f->shared->tick_num > f->shared->vfd_swmr_config.max_lag ) &&
-             ( dl_entry->tick_num <= 
+             ( old_image->tick_num <=
                f->shared->tick_num - f->shared->vfd_swmr_config.max_lag ) ) {
 
-            if ( H5MV_free(f, dl_entry->md_file_page_offset * 
-                           f->shared->fs_page_size, dl_entry->length) < 0 )
+            if ( H5MV_free(f, old_image->md_file_page_offset *
+                           f->shared->fs_page_size, old_image->length) < 0 )
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                             "unable to flush clean entry")
 
             /* Remove the entry from the delayed list */
-            H5F__LL_REMOVE(dl_entry, f->shared->dl_head_ptr, f->shared->dl_tail_ptr)
-            f->shared->dl_len--;
+            TAILQ_REMOVE(&f->shared->old_images, old_image, link);
 
             /* Free the delayed entry struct */
-            H5FL_FREE(H5F_vfd_swmr_dl_entry_t, dl_entry);
+            H5FL_FREE(old_image_t, old_image);
 
         } else {
 
             break;
         }
     }
+
+    if (TAILQ_EMPTY(&f->shared->old_images))
+        ldbgf("Emptied the old images list.\n");
 
 done:
 

@@ -225,17 +225,15 @@ typedef struct H5F_mtab_t {
  *  length:                 The length of the metadata page or multi page
  *                          metadata entry in BYTES.
  *  tick_num:               Sequence # of the current tick
- *  next:                   Pointer to the next entry in the the list
- *  prev:                   Pointer to the previous entry in the list
+ *  link:                   tailqueue linkage
  */
-typedef struct H5F_vfd_swmr_dl_entry_t {
+typedef struct old_image {
     uint64_t hdf5_page_offset;
     uint64_t md_file_page_offset;
     uint32_t length;
     uint64_t tick_num;                     
-    struct H5F_vfd_swmr_dl_entry_t *next;
-    struct H5F_vfd_swmr_dl_entry_t *prev; 
-} H5F_vfd_swmr_dl_entry_t;
+    TAILQ_ENTRY(old_image) link;
+} old_image_t;
 
 /* Structure specifically to store superblock. This was originally
  * maintained entirely within H5F_shared_t, but is now extracted
@@ -266,7 +264,9 @@ typedef struct deferred_free {
     uint64_t free_after_tick;
 } deferred_free_t;
 
-typedef SIMPLEQ_HEAD(deferred_free_head, deferred_free) deferred_free_head_t;
+typedef SIMPLEQ_HEAD(deferred_free_queue, deferred_free) deferred_free_queue_t;
+
+typedef TAILQ_HEAD(old_image_queue, old_image) old_image_queue_t;
 
 /*
  * Define the structure to store the file information for HDF5 files. One of
@@ -410,7 +410,7 @@ struct H5F_shared_t {
                                              */
     uint64_t tick_num;                      /* Number of the current tick */
     struct timespec end_of_tick;            /* End time of the current tick */
-    deferred_free_head_t deferred_frees;    /* For use by VFD SWMR writers. */
+    deferred_free_queue_t deferred_frees;    /* For use by VFD SWMR writers. */
     /* VFD SWMR metadata file index */
     H5FD_vfd_swmr_idx_entry_t * mdf_idx;    /* pointer to an array of instance
                                              * of H5FD_vfd_swmr_idx_entry_t of 
@@ -467,12 +467,7 @@ struct H5F_shared_t {
                                              */
 
     /* Delayed free space release doubly linked list */
-    uint32_t dl_len;                        /* # of entries in the list */
-    H5F_vfd_swmr_dl_entry_t *dl_head_ptr;   /* Points to the beginning of 
-                                             * the list 
-                                             */
-    H5F_vfd_swmr_dl_entry_t *dl_tail_ptr;   /* Points to the end of the list */
-
+    old_image_queue_t old_images;
     char               *extpath;        /* Path for searching target external link file                 */
 
 #ifdef H5_HAVE_PARALLEL

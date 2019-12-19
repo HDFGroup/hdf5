@@ -347,6 +347,8 @@ H5_DLL herr_t H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 H5_DLL herr_t H5FD_get_driver_name(const H5FD_t *file, char **driver_name);
 
 /* Function prototypes for VFD SWMR */
+H5_DLL int vfd_swmr_idx_entry_defer_free(struct H5F_shared_t *,
+    const H5FD_vfd_swmr_idx_entry_t *);
 H5_DLL herr_t H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t read_index,
     uint64_t *tick_ptr, uint32_t *num_entries_ptr, 
     H5FD_vfd_swmr_idx_entry_t index[]);
