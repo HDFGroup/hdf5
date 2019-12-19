@@ -62,6 +62,18 @@ New Features
 
       (ADB - 2019/11/18, HDFFV-10962)
 
+    - Update CMake options to match new autotools options
+
+      Add configure options (autotools - CMake):
+            enable-asserts       HDF5_ENABLE_ASSERTS
+            enable-symbols       HDF5_ENABLE_SYMBOLS
+            enable-profiling     HDF5_ENABLE_PROFILING
+            enable-optimization  HDF5_ENABLE_OPTIMIZATION
+      In addition NDEBUG is no longer forced defined and relies on the CMake
+      process.
+
+      (ADB - 2019/10/07, HDFFV-100901, HDFFV-10637, TRILAB-97)
+
     - Update CMake tests to use FIXTURES
 
       CMake test fixtures allow setup/cleanup tests and other dependency
