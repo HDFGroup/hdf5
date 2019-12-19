@@ -436,8 +436,8 @@ h5tools_set_error_file(const char *fname, int is_bin)
 static hid_t
 h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 {
+    H5TOOLS_ERR_INIT(int, SUCCEED)
     hid_t       new_fapl = -1; /* Copy of file access property list passed in, or new property list */
-    int         ret_value = SUCCEED;
 
     /* Make a copy of the FAPL, for the file open call to use, eventually */
     if (fapl == H5P_DEFAULT) {
@@ -1534,6 +1534,7 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
     hsize_t      blkndx;
     hid_t        sid1 = -1;
 
+    H5TOOLS_PUSH_STACK();
     /* Get the dataspace of the dataset */
     if((sid1 = H5Dget_space(region_id)) < 0)
         H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
@@ -1600,6 +1601,8 @@ CATCH
     if(H5Sclose(sid1) < 0)
         H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -1627,6 +1630,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     hid_t        dtype = -1;
     hid_t        type_id = -1;
 
+    H5TOOLS_PUSH_STACK();
     if((snblocks = H5Sget_select_hyper_nblocks(region_space)) <= 0)
         H5TOOLS_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_hyper_nblocks failed");
     nblocks = (hsize_t)snblocks;
@@ -1650,7 +1654,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
 
     render_bin_output_region_data_blocks(region_id, stream, container, ndims, type_id, nblocks, ptdata);
 
- done:
+done:
     HDfree(ptdata);
 
     if(type_id > 0 && H5Tclose(type_id) < 0)
@@ -1661,7 +1665,9 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
 
     H5_LEAVE(TRUE)
 
- CATCH
+CATCH
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -1693,6 +1699,7 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
     hid_t    mem_space = -1;
     void    *region_buf = NULL;
 
+    H5TOOLS_PUSH_STACK();
     if((type_size = H5Tget_size(type_id)) == 0)
         H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
 
@@ -1715,13 +1722,15 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
     if(render_bin_output(stream, container, type_id, (char*)region_buf, npoints) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "render_bin_output of data points failed");
 
- done:
+done:
     HDfree(region_buf);
     HDfree(dims1);
 
     if(H5Sclose(mem_space) < 0)
         H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -1747,6 +1756,7 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
     hid_t    dtype = -1;
     hid_t    type_id = -1;
 
+    H5TOOLS_PUSH_STACK();
     if((snpoints = H5Sget_select_elem_npoints(region_space)) <= 0)
         H5TOOLS_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_elem_npoints failed");
     npoints = (hsize_t)snpoints;
@@ -1764,7 +1774,7 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
 
     render_bin_output_region_data_points(region_space, region_id, stream, container, ndims, type_id, npoints);
 
- done:
+done:
     if(type_id > 0 && H5Tclose(type_id) < 0)
         H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
 
@@ -1773,6 +1783,8 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
 
     H5_LEAVE(ret_value)
 CATCH
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 

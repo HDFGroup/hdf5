@@ -24,7 +24,8 @@
   *-------------------------------------------------------------------------
  */
 
-void init_packobject(pack_info_t *obj) {
+void init_packobject(pack_info_t *obj)
+{
     int j, k;
 
     HDstrcpy(obj->path, "\0");
@@ -49,7 +50,9 @@ void init_packobject(pack_info_t *obj) {
  *-------------------------------------------------------------------------
  */
 
-static void aux_tblinsert_filter(pack_opttbl_t *table, unsigned int I, filter_info_t filt) {
+static void aux_tblinsert_filter(pack_opttbl_t *table, unsigned int I, filter_info_t filt)
+{
+    H5TOOLS_ERR_INIT(int, 0)
     if (table->objs[I].nfilters < H5_REPACK_MAX_NFILTERS)
         table->objs[I].filter[table->objs[I].nfilters++] = filt;
     else
@@ -64,7 +67,8 @@ static void aux_tblinsert_filter(pack_opttbl_t *table, unsigned int I, filter_in
  * Return: void
  *-------------------------------------------------------------------------
  */
-static void aux_tblinsert_layout(pack_opttbl_t *table, unsigned int I, pack_info_t *pack) {
+static void aux_tblinsert_layout(pack_opttbl_t *table, unsigned int I, pack_info_t *pack)
+{
     int k;
 
     table->objs[I].layout = pack->layout;
@@ -96,19 +100,21 @@ static void aux_tblinsert_layout(pack_opttbl_t *table, unsigned int I, pack_info
 static int
 aux_inctable(pack_opttbl_t *table, unsigned n_objs)
 {
+    H5TOOLS_ERR_INIT(int, 0)
     unsigned u;
 
     table->size += n_objs;
     table->objs = (pack_info_t*) HDrealloc(table->objs, table->size * sizeof(pack_info_t));
     if (table->objs == NULL) {
         H5TOOLS_INFO(H5E_tools_min_id_g, "not enough memory for options table");
-        return -1;
+        ret_value = -1;
+    }
+    else {
+        for (u = table->nelems; u < table->size; u++)
+            init_packobject(&table->objs[u]);
     }
 
-    for (u = table->nelems; u < table->size; u++)
-        init_packobject(&table->objs[u]);
-
-    return 0;
+    return ret_value;
 }
 
 
@@ -121,27 +127,27 @@ aux_inctable(pack_opttbl_t *table, unsigned n_objs)
   *-------------------------------------------------------------------------
  */
 int options_table_init(pack_opttbl_t **tbl) {
+    H5TOOLS_ERR_INIT(int, 0)
     unsigned int i;
     pack_opttbl_t *table;
 
     if (NULL == (table = (pack_opttbl_t *) HDmalloc(sizeof(pack_opttbl_t)))) {
-        H5TOOLS_INFO(H5E_tools_min_id_g, "not enough memory for options table");
-        return -1;
+        H5TOOLS_GOTO_ERROR(-1, H5E_tools_min_id_g, "not enough memory for options table");
     }
 
     table->size = 30;
     table->nelems = 0;
     if (NULL == (table->objs = (pack_info_t*) HDmalloc(table->size * sizeof(pack_info_t)))) {
-        H5TOOLS_INFO(H5E_tools_min_id_g, "not enough memory for options table");
         HDfree(table);
-        return -1;
+        H5TOOLS_GOTO_ERROR(-1, H5E_tools_min_id_g, "not enough memory for options table");
     }
 
     for (i = 0; i < table->size; i++)
         init_packobject(&table->objs[i]);
 
     *tbl = table;
-    return 0;
+done:
+    return ret_value;
 }
 
 
@@ -171,6 +177,7 @@ int options_table_free(pack_opttbl_t *table) {
 int
 options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack, pack_opttbl_t *table)
 {
+    H5TOOLS_ERR_INIT(herr_t, 0)
     unsigned i, j, I;
     unsigned added = 0;
     hbool_t found = FALSE;
@@ -237,7 +244,7 @@ options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack, pa
 
     table->nelems += added;
 
-    return 0;
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------

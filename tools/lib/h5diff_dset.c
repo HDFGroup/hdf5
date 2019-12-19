@@ -33,7 +33,7 @@ hsize_t diff_dataset(hid_t file1_id,
                      const char *obj2_name,
                      diff_opt_t *opts)
 {
-    int     ret_value = opts->err_stat;
+    H5TOOLS_ERR_INIT(int, opts->err_stat)
     int     status = -1;
     hid_t   did1 = -1;
     hid_t   did2 = -1;
@@ -41,7 +41,8 @@ hsize_t diff_dataset(hid_t file1_id,
     hid_t   dcpl2 = -1;
     hsize_t nfound = 0;
 
-    h5difftrace("diff_dataset start\n");
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_dataset start - errstat:%d", opts->err_stat);
     /*-------------------------------------------------------------------------
      * open the handles
      *-------------------------------------------------------------------------
@@ -68,6 +69,7 @@ hsize_t diff_dataset(hid_t file1_id,
      * 2) the internal filters might be turned off
      *-------------------------------------------------------------------------
      */
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_dataset h5tools_canreadf then diff_datasetid");
     if ((status = h5tools_canreadf((opts->m_verbose ? obj1_name : NULL), dcpl1) == 1) &&
             (status = h5tools_canreadf((opts->m_verbose ? obj2_name : NULL), dcpl2) == 1))
         nfound = diff_datasetid(did1, did2, obj1_name, obj2_name, opts);
@@ -91,7 +93,9 @@ done:
         /* enable error reporting */
     } H5E_END_TRY;
 
-    h5diffdebug3("diff_dataset finish:%d - errstat:%d\n", nfound, opts->err_stat);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_dataset finish:%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return nfound;
 }
 
@@ -152,16 +156,16 @@ hsize_t diff_datasetid(hid_t did1,
                        const char *obj2_name,
                        diff_opt_t *opts)
 {
-    int        ret_value = opts->err_stat;
-    hid_t      sid1 = -1;
-    hid_t      sid2 = -1;
-    hid_t      f_tid1 = -1;
-    hid_t      f_tid2 = -1;
-    hid_t      dam_tid = -1;             /* m_tid for diff_array function */
-    hid_t      m_tid1 = -1;
-    hid_t      m_tid2 = -1;
-    hid_t      dcpl1 = -1;
-    hid_t      dcpl2 = -1;
+    H5TOOLS_ERR_INIT(int, opts->err_stat)
+    hid_t      sid1 = H5I_INVALID_HID;
+    hid_t      sid2 = H5I_INVALID_HID;
+    hid_t      f_tid1 = H5I_INVALID_HID;
+    hid_t      f_tid2 = H5I_INVALID_HID;
+    hid_t      dam_tid = H5I_INVALID_HID;             /* m_tid for diff_array function */
+    hid_t      m_tid1 = H5I_INVALID_HID;
+    hid_t      m_tid2 = H5I_INVALID_HID;
+    hid_t      dcpl1 = H5I_INVALID_HID;
+    hid_t      dcpl2 = H5I_INVALID_HID;
     H5D_layout_t     stl1 = -1;
     H5D_layout_t     stl2 = -1;
     size_t     dam_size;                /* m_size for diff_array function */
@@ -189,13 +193,14 @@ hsize_t diff_datasetid(hid_t did1,
     void       *buf2 = NULL;
     void       *sm_buf1 = NULL;
     void       *sm_buf2 = NULL;
-    hid_t      sm_space = -1;           /*stripmine data space */
+    hid_t      sm_space = H5I_INVALID_HID;           /*stripmine data space */
     size_t     need;                    /* bytes needed for malloc */
     int        i;
     unsigned int  vl_data1 = 0;          /*contains VL datatypes */
     unsigned int  vl_data2 = 0;          /*contains VL datatypes */
 
-    h5difftrace("diff_datasetid start\n");
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datasetid start - errstat:%d", opts->err_stat);
     /* Get the dataspace handle */
     if((sid1 = H5Dget_space(did1)) < 0)
         H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Dget_space failed");
@@ -219,7 +224,7 @@ hsize_t diff_datasetid(hid_t did1,
     /* Get dimensions */
     if(H5Sget_simple_extent_dims(sid2, dims2, maxdim2) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
-    h5diffdebug3("rank: %ld - %ld\n", rank1, rank2);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "rank: %ld - %ld", rank1, rank2);
 
     /*-------------------------------------------------------------------------
      * get the file data type
@@ -252,11 +257,11 @@ hsize_t diff_datasetid(hid_t did1,
      * check for empty datasets
      *-------------------------------------------------------------------------
      */
-    h5difftrace("check for empty datasets\n");
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "check for empty datasets");
 
     storage_size1 = H5Dget_storage_size(did1);
     storage_size2 = H5Dget_storage_size(did2);
-    h5diffdebug3("storage size: %ld - %ld\n", storage_size1, storage_size2);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "storage size: %ld - %ld", storage_size1, storage_size2);
 
     if(storage_size1 == 0 || storage_size2 == 0) {
         if(stl1 == H5D_VIRTUAL || stl2 == H5D_VIRTUAL) {
@@ -280,33 +285,45 @@ hsize_t diff_datasetid(hid_t did1,
             obj1_name, obj2_name,
             opts, 0) != 1)
         can_compare = 0;
-    h5diffdebug2("diff_can_type - errstat:%d\n", opts->err_stat);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_can_type - errstat:%d", opts->err_stat);
 
     /*-------------------------------------------------------------------------
      * memory type and sizes
      *-------------------------------------------------------------------------
      */
-    h5difftrace("check for memory type and sizes\n");
-    if((m_tid1 = H5Tget_native_type(f_tid1, H5T_DIR_DEFAULT)) < 0)
-        H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Tget_native_type failed");
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "check for memory type and sizes");
+    if (H5Tget_class(f_tid1) == H5T_REFERENCE) {
+        if((m_tid1 = H5Tcopy(H5T_STD_REF)) < 0)
+            H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Tcopy(H5T_STD_REF) first ftype failed");
+    }
+    else {
+        if((m_tid1 = H5Tget_native_type(f_tid1, H5T_DIR_DEFAULT)) < 0)
+            H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Tget_native_type first ftype failed");
+    }
 
-    if((m_tid2 = H5Tget_native_type(f_tid2, H5T_DIR_DEFAULT)) < 0)
-        H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Tget_native_type failed");
+    if (H5Tget_class(f_tid2) == H5T_REFERENCE) {
+        if((m_tid2 = H5Tcopy(H5T_STD_REF)) < 0)
+            H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Tcopy(H5T_STD_REF) second ftype failed");
+    }
+    else {
+        if((m_tid2 = H5Tget_native_type(f_tid2, H5T_DIR_DEFAULT)) < 0)
+            H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Tget_native_type second ftype failed");
+    }
 
     m_size1 = H5Tget_size(m_tid1);
     m_size2 = H5Tget_size(m_tid2);
-    h5diffdebug3("type size: %ld - %ld\n", m_size1, m_size2);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "type size: %ld - %ld", m_size1, m_size2);
 
     /*-------------------------------------------------------------------------
      * check for different signed/unsigned types
      *-------------------------------------------------------------------------
      */
     if(can_compare) {
-        h5difftrace("can_compare for sign\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "can_compare for sign");
         sign1 = H5Tget_sign(m_tid1);
         sign2 = H5Tget_sign(m_tid2);
         if(sign1 != sign2) {
-            h5difftrace("sign1 != sign2\n");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "sign1 != sign2");
             if((opts->m_verbose || opts->m_list_not_cmp) && obj1_name && obj2_name) {
                 parallel_print("Not comparable: <%s> has sign %s ", obj1_name, get_sign(sign1));
                 parallel_print("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
@@ -315,6 +332,7 @@ hsize_t diff_datasetid(hid_t did1,
             can_compare = 0;
             opts->not_cmp = 1;
         }
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "can_compare for sign - can_compare=%d opts->not_cmp=%d", can_compare, opts->not_cmp);
     }
 
     /* Check if type is either VLEN-data or VLEN-string to reclaim any
@@ -324,7 +342,7 @@ hsize_t diff_datasetid(hid_t did1,
         vl_data1 = TRUE;
     if(TRUE == h5tools_detect_vlen(m_tid2))
         vl_data2 = TRUE;
-    h5diffdebug2("h5tools_detect_vlen - errstat:%d\n", opts->err_stat);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "h5tools_detect_vlen %d:%d - errstat:%d", vl_data1, vl_data2, opts->err_stat);
 
     /*------------------------------------------------------------------------
      * only attempt to compare if possible
@@ -332,7 +350,7 @@ hsize_t diff_datasetid(hid_t did1,
      */
     if(can_compare) { /* it is possible to compare */
         H5T_class_t  tclass = H5Tget_class(f_tid1);
-        h5difftrace("can_compare attempt\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "can_compare attempt");
 
         /*-----------------------------------------------------------------
         * get number of elements
@@ -346,19 +364,19 @@ hsize_t diff_datasetid(hid_t did1,
         for(i = 0; i < rank2; i++)
             nelmts2 *= dims2[i];
 
-        h5diffdebug3("nelmts: %ld - %ld\n", nelmts1, nelmts2);
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "nelmts: %ld - %ld", nelmts1, nelmts2);
 
         if(tclass != H5T_ARRAY) {
             /*-----------------------------------------------------------------
              * "upgrade" the smaller memory size
              *------------------------------------------------------------------
              */
-            h5difftrace("upgrade the smaller memory size?\n");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "NOT H5T_ARRAY, upgrade the smaller memory size?");
             if (FAIL == match_up_memsize (f_tid1, f_tid2,
                                         &m_tid1, &m_tid2,
                                         &m_size1, &m_size2))
                 H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "match_up_memsize failed");
-            h5diffdebug3("m_size: %ld - %ld\n", m_size1, m_size2);
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "m_size: %ld - %ld", m_size1, m_size2);
             dadims = dims1;
             dam_size = m_size1;
             dam_tid = m_tid1;
@@ -366,7 +384,7 @@ hsize_t diff_datasetid(hid_t did1,
             need = (size_t)(nelmts1 * m_size1);  /* bytes needed */
         }
         else {
-            h5diffdebug3("Array dims: %d - %d\n", dims1[0], dims2[0]);
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "Array dims: %d - %d", dims1[0], dims2[0]);
             /* Compare the smallest array, but create the largest buffer */
             if(m_size1 <= m_size2) {
                 dadims = dims1;
@@ -388,9 +406,10 @@ hsize_t diff_datasetid(hid_t did1,
             name1 = diff_basename(obj1_name);
         if(obj2_name)
             name2 = diff_basename(obj2_name);
-        h5diffdebug3("obj_names: %s - %s\n", name1, name2);
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "obj_names: %s - %s", name1, name2);
 
 
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "read/compare");
         /*----------------------------------------------------------------
          * read/compare
          *-----------------------------------------------------------------
@@ -401,23 +420,24 @@ hsize_t diff_datasetid(hid_t did1,
         } /* end if */
 
         if(buf1 != NULL && buf2 != NULL) {
-            h5difftrace("buf1 != NULL && buf2 != NULL\n");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "buf1 != NULL && buf2 != NULL");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5Dread did1");
             if(H5Dread(did1, m_tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf1) < 0)
                 H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Dread failed");
-            h5difftrace("H5Dread did2\n");
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5Dread did2");
             if(H5Dread(did2, m_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2) < 0)
                 H5TOOLS_GOTO_ERROR(1, H5E_tools_min_id_g, "H5Dread failed");
 
             /* array diff */
             nfound = diff_array(buf1, buf2, danelmts, (hsize_t)0, rank1, dadims,
                 opts, name1, name2, dam_tid, did1, did2);
-            h5diffdebug2("diff_array nfound:%d\n", nfound);
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_array nfound:%d - errstat:%d", nfound, opts->err_stat);
 
             /* reclaim any VL memory, if necessary */
-            h5diffdebug2("check vl_data1:%d\n", vl_data1);
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "check vl_data1:%d", vl_data1);
             if(vl_data1)
                 H5Treclaim(m_tid1, sid1, H5P_DEFAULT, buf1);
-            h5diffdebug2("check vl_data2:%d\n", vl_data2);
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "check vl_data2:%d", vl_data2);
             if(vl_data2)
                 H5Treclaim(m_tid2, sid2, H5P_DEFAULT, buf2);
             if(buf1 != NULL) {
@@ -459,7 +479,7 @@ hsize_t diff_datasetid(hid_t did1,
                     size = 1;
                 sm_size[i - 1] = MIN(dadims[i - 1], size);
                 sm_nbytes *= sm_size[i - 1];
-                h5diffdebug2("sm_nbytes: %ld\n", sm_nbytes);
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "sm_nbytes: %ld", sm_nbytes);
             } /* end for */
 
             /* malloc return code should be verified.
@@ -534,6 +554,7 @@ hsize_t diff_datasetid(hid_t did1,
 
             H5Sclose(sm_space);
         } /* hyperslab read */
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "can_compare complete");
     } /*can_compare*/
 
 
@@ -541,7 +562,7 @@ hsize_t diff_datasetid(hid_t did1,
      * close
      *-------------------------------------------------------------------------
      */
-    h5diffdebug2("reclaim any VL memory - errstat:%d\n", opts->err_stat);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "reclaim any VL memory - errstat:%d", opts->err_stat);
 
 done:
     opts->err_stat = opts->err_stat | ret_value;
@@ -588,7 +609,9 @@ done:
         /* enable error reporting */
     } H5E_END_TRY;
 
-    h5diffdebug3("diff_datasetid return:%d with nfound:%d\n", ret_value, nfound);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datasetid return:%d with nfound:%d", ret_value, nfound);
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return nfound;
 }
 
@@ -617,14 +640,15 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
                   diff_opt_t  *opts,
                   int         is_compound)
 {
-    int          ret_value = 1;            /* can_compare value */
+    H5TOOLS_ERR_INIT(int, 1)               /* can_compare value */
     H5T_class_t  tclass1;
     H5T_class_t  tclass2;
     int          maxdim_diff = 0;          /* maximum dimensions are different */
     int          dim_diff = 0;             /* current dimensions are different */
     int          i;
 
-    h5difftrace("diff_can_type start\n");
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_can_type start");
     /*-------------------------------------------------------------------------
      * check for the same class
      *-------------------------------------------------------------------------
@@ -677,7 +701,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
-            h5diffdebug2("diff_can_type class - %s\n", get_class(tclass1));
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_can_type class - %s", get_class(tclass1));
             break;
     } /* end switch */
 
@@ -775,7 +799,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
     if(tclass1 == H5T_STRING) {
         htri_t vstrtype1 = -1;
         htri_t vstrtype2 = -1;
-        h5difftrace("diff_can_type end - H5T_STRING\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_can_type end - H5T_STRING");
 
         vstrtype1 = H5Tis_variable_str(f_tid1);
         vstrtype2 = H5Tis_variable_str(f_tid2);
@@ -796,7 +820,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
         int   j;
         hid_t memb_type1 = -1;
         hid_t memb_type2 = -1;
-        h5difftrace("diff_can_type end - H5T_COMPOUND\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_can_type end - H5T_COMPOUND");
 
         nmembs1 = H5Tget_nmembers(f_tid1);
         nmembs2 = H5Tget_nmembers(f_tid2);
@@ -831,7 +855,9 @@ done:
     if (ret_value < 0)
         opts->err_stat = 1;
 
-    h5diffdebug2("diff_can_type end - %d\n", ret_value);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_can_type end - %d", ret_value);
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
