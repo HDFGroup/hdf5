@@ -669,7 +669,7 @@ H5_DLL herr_t H5PB_add_new_page(H5F_shared_t *, H5FD_mem_t, haddr_t);
 
 H5_DLL herr_t H5PB_update_entry(H5PB_t *, haddr_t, size_t, const void *);
 
-H5_DLL herr_t H5PB_remove_entry(const H5F_shared_t *, haddr_t);
+H5_DLL herr_t H5PB_remove_entry(H5F_shared_t *, haddr_t);
 
 H5_DLL herr_t H5PB_read(H5F_shared_t *, H5FD_mem_t, haddr_t,
     size_t, void * /*out*/);

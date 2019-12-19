@@ -1177,7 +1177,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_remove_entry(const H5F_shared_t *shared, haddr_t addr)
+H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
 {
     uint64_t page;
     H5PB_t *pb_ptr = NULL;
