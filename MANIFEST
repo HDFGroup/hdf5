@@ -1344,6 +1344,7 @@
 ./testpar/t_prestart.c
 ./testpar/t_span_tree.c
 ./testpar/t_init_term.c
+./testpar/t_2Gio.c
 ./testpar/testpar.h
 ./testpar/testpflush.sh.in
 ./testpar/testphdf5.c
@@ -2650,6 +2651,8 @@
 ./tools/test/h5repack/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl
 ./tools/test/h5repack/testfiles/4_vds.h5-vds_conti-v.ddl
 ./tools/test/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
+./tools/test/h5repack/testfiles/attrregion.tattrreg.h5.ddl
+./tools/test/h5repack/testfiles/dataregion.tdatareg.h5.ddl
 
 # jam utility and tests
 ./tools/src/h5jam/Makefile.am
@@ -3468,6 +3471,13 @@
 ./config/cmake/scripts/CTestScript.cmake
 ./config/cmake/scripts/HDF5config.cmake
 ./config/cmake/scripts/HDF5options.cmake
+
+# CMake-specific Sanitizer Scripts
+./config/sanitizer/code-coverage.cmake
+./config/sanitizer/sanitizers.cmake
+./config/sanitizer/tools.cmake
+./config/sanitizer/LICENSE
+./config/sanitizer/README.md
 
 # CMake-specific HPC Scripts
 ./config/cmake/scripts/HPC/sbatch-HDF5options.cmake

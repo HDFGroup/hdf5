@@ -278,7 +278,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(loc_id, vol_obj_type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, vol_obj_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file or file object")
 
     /* Retrieve VOL object */
@@ -290,11 +290,11 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid VOL object")
 
     /* This is a native specific routine that requires serialization of the token */
-    p = obj_token;
+    p = (uint8_t *)&obj_token;
     H5F_addr_encode(f, &p, addr);
 
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Open the object */
@@ -360,9 +360,12 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
-    /* Check the group access property list */
+    /* Get the link creation property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, obj_id, TRUE) < 0)

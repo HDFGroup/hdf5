@@ -443,6 +443,7 @@ struct H5D_shared_t {
     H5T_t              *type;           /* Datatype for this dataset     */
     H5S_t              *space;          /* Dataspace of this dataset    */
     hid_t               dcpl_id;        /* Dataset creation property id */
+    hid_t               dapl_id;        /* Dataset access property id */
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5O_layout_t        layout;         /* Data layout                  */
     hbool_t             checked_filters;/* TRUE if dataset passes can_apply check */
@@ -523,6 +524,7 @@ typedef struct {
     void *fl_tbuf;                  /* Ptr to the temporary buffer we are using for fixed-length data */
     void *vl_tbuf;                  /* Ptr to the temporary buffer we are using for VL data */
     hsize_t size;                   /* Accumulated number of bytes for the selection */
+    hid_t dxpl_id;                  /* Dataset transfer property list to pass to dataset read */
 } H5D_vlen_bufsize_t;
 
 

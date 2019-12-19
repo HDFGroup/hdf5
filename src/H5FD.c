@@ -241,7 +241,7 @@ H5FDregister(const H5FD_class_t *cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "'get_eof' method is not defined")
     if(!cls->read || !cls->write)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "'read' and/or 'write' method is not defined")
-    for (type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,type))
+    for (type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; type++)
         if(cls->fl_map[type] < H5FD_MEM_NOLIST || cls->fl_map[type] >= H5FD_MEM_NTYPES)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid free-list mapping")
 
@@ -286,7 +286,7 @@ H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
     HDassert(cls->get_eoa && cls->set_eoa);
     HDassert(cls->get_eof);
     HDassert(cls->read && cls->write);
-    for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+    for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; type++) {
         HDassert(cls->fl_map[type] >= H5FD_MEM_NOLIST && cls->fl_map[type] < H5FD_MEM_NTYPES);
     }
 

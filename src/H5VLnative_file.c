@@ -368,14 +368,14 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 H5I_type_t  type       = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
                 const char *name       = HDva_arg(arguments, const char *);
                 H5F_t      *child      = HDva_arg(arguments, H5F_t *);
-                hid_t       plist_id   = HDva_arg(arguments, hid_t);
+                hid_t       fmpl_id    = HDva_arg(arguments, hid_t);
                 H5G_loc_t   loc;
 
                 if(H5G_loc_real(obj, type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Do the mount */
-                if(H5F__mount(&loc, name, child, plist_id) < 0)
+                if(H5F__mount(&loc, name, child, fmpl_id) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
                 break;
@@ -403,10 +403,10 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
             {
                 hid_t       fapl_id = HDva_arg(arguments, hid_t);
                 const char *name    = HDva_arg(arguments, const char *);
-                htri_t     *ret     = HDva_arg(arguments, htri_t *);
+                htri_t     *result  = HDva_arg(arguments, htri_t *);
 
                 /* Call private routine */
-                if((*ret = H5F__is_hdf5(name, fapl_id)) < 0)
+                if((*result = H5F__is_hdf5(name, fapl_id)) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "error in HDF5 file check")
                 break;
             }
@@ -415,6 +415,19 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
         case H5VL_FILE_DELETE:
             {
                 HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "H5Fdelete() is currently not supported in the native VOL connector")
+                break;
+            }
+
+        /* Check if two files are the same */
+        case H5VL_FILE_IS_EQUAL:
+            {
+                H5F_t *file2 = (H5F_t *)HDva_arg(arguments, void *);
+                hbool_t *is_equal = HDva_arg(arguments, hbool_t *);
+
+                if(!obj || !file2)
+                    *is_equal = FALSE;
+                else
+                    *is_equal = (((H5F_t *)obj)->shared == file2->shared);
                 break;
             }
 
@@ -575,20 +588,6 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 /* Retrieve the VFD handle for the file */
                 if(H5F_get_vfd_handle(f, fapl_id, file_handle) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
-                break;
-            }
-
-        /* H5Iget_file_id */
-        case H5VL_NATIVE_FILE_GET_FILE_ID:
-            {
-                H5I_type_t  type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
-                hbool_t     app_ref = (hbool_t)HDva_arg(arguments, int);
-                hid_t      *file_id = HDva_arg(arguments, hid_t *);
-
-                if(NULL == (f = H5F__get_file(obj, type)))
-                    HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file or file object")
-                if((*file_id = H5F__get_file_id(f, app_ref)) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file ID")
                 break;
             }
 

@@ -254,6 +254,7 @@
     dt->shared->u.atomic.u.r.rtype = H5R_OBJECT2;           \
     dt->shared->u.atomic.u.r.opaque = TRUE;                 \
     dt->shared->u.atomic.u.r.version = H5R_ENCODE_VERSION;  \
+    dt->shared->version = H5O_DTYPE_VERSION_4;              \
 }
 
 /* Define the code templates for the "SIZE_TMPL" in the H5T_INIT_TYPE macro */
@@ -532,7 +533,7 @@ const unsigned H5O_dtype_ver_bounds[] = {
     H5O_DTYPE_VERSION_1,        /* H5F_LIBVER_EARLIEST */
     H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V18 */
     H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V110 */
-    H5O_DTYPE_VERSION_3,        /* H5F_LIBVER_V112 */
+    H5O_DTYPE_VERSION_4,        /* H5F_LIBVER_V112 */
     H5O_DTYPE_VERSION_LATEST    /* H5F_LIBVER_LATEST */
 };
 

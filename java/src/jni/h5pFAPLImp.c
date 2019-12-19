@@ -425,6 +425,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1hdfs
 
     CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5FD_hdfs_fapl_t", "(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;I)V", args, ret_obj);
 #else
+    UNUSED(fapl_id);
+
     H5_UNIMPLEMENTED(ENVONLY, "H5Pget_fapl_hdfs: not implemented");
 #endif /* H5_HAVE_LIBHDFS */
 
@@ -532,6 +534,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs
     if (H5Pset_fapl_hdfs((hid_t)fapl_id, &instance) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 #else
+    UNUSED(fapl_id);
+    UNUSED(fapl_config);
+
     H5_UNIMPLEMENTED(ENVONLY, "H5Pset_fapl_hdfs: not implemented");
 #endif /* H5_HAVE_LIBHDFS */
 
@@ -841,6 +846,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3
 
     CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5FD_ros3_fapl_t", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", args, ret_obj);
 #else
+    UNUSED(fapl_id);
+
     H5_UNIMPLEMENTED(ENVONLY, "H5Pget_fapl_ros3: not implemented");
 #endif /* H5_HAVE_ROS3_VFD */
 
@@ -939,6 +946,9 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3
     if (H5Pset_fapl_ros3((hid_t)fapl_id, &instance) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 #else
+    UNUSED(fapl_id);
+    UNUSED(fapl_config);
+
     H5_UNIMPLEMENTED(ENVONLY, "H5Pset_fapl_ros3: not implemented");
 #endif /* H5_HAVE_ROS3_VFD */
 

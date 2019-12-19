@@ -113,6 +113,30 @@ static const H5I_class_t H5I_FILE_CLS[1] = {{
     (H5I_free_t)H5F__close_cb   /* Callback routine for closing objects of this class */
 }};
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_init
+ *
+ * Purpose:  Initialize the interface from some other layer.
+ *
+ * Return:   Success:    non-negative
+ *
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_init(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_init() */
+
 
 /*--------------------------------------------------------------------------
 NAME
@@ -937,7 +961,7 @@ hid_t
 H5Freopen(hid_t file_id)
 {
     H5VL_object_t   *vol_obj = NULL;
-    H5F_t           *file = NULL;                   /* File struct for new file */
+    void            *file = NULL;                   /* File struct for new file */
     hid_t           ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)

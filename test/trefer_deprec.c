@@ -517,7 +517,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hsize_t high[SPACE2_RANK];  /* Selection bounds */
     hdset_reg_ref_t *wbuf,      /* buffer to write to disk */
                     *rbuf;      /* buffer read from disk */
-    hdset_reg_ref_t  nvrbuf[3]={{0},{101},{255}}; /* buffer with non-valid refs */
+    hdset_reg_ref_t  nvrbuf[3]={{{0}},{{101}},{{255}}}; /* buffer with non-valid refs */
     uint8_t *dwbuf,             /* Buffer for writing numeric data to disk */
             *drbuf;             /* Buffer for reading numeric data from disk */
     uint8_t *tu8;               /* Temporary pointer to uint8 data */
@@ -1781,8 +1781,8 @@ test_reference_deprec(void)
     test_reference_obj();       /* Test basic H5R object reference code */
 
     /* Loop through all the combinations of low/high version bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Invalid combinations, just continue */
             if(high == H5F_LIBVER_EARLIEST || high < low)

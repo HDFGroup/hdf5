@@ -20,13 +20,13 @@
  */
 #define PROGRAMNAME     "h5watch"       /* Name of tool */
 #define FIELD_SEP       ","             /* nested field separator */
-#define DEFAULT_RETRY   50	            /* number of times to try opening the file */
+#define DEFAULT_RETRY   50                /* number of times to try opening the file */
 
 
 /*
  * Note:(see comments in hl/src/H5LDprivate.h)
  *  This tool uses private routines H5LD_construct_vector()and H5LD_clean_vector()
- *	This tool uses H5LD_memb_t data structure declared in H5LDprivate.h
+ *    This tool uses H5LD_memb_t data structure declared in H5LDprivate.h
  */
 
 const char  *progname = "h5watch";          /* tool name */
@@ -35,7 +35,7 @@ static char *g_dup_fields = NULL;           /* copy of "list_of_fields" */
 static H5LD_memb_t **g_listv = NULL;        /* vector info for "list_of_fields" */
 
 static hbool_t g_monitor_size_only = FALSE; /* monitor changes in dataset dimension sizes */
-static unsigned g_polling_interval = 1;	    /* polling interval to check appended data */
+static unsigned g_polling_interval = 1;        /* polling interval to check appended data */
 
 static hbool_t g_label = FALSE;             /* label compound values */
 static int g_display_width = 80;            /* output width in characters */
@@ -109,7 +109,7 @@ static struct long_options l_opts[] = {
  *
  * Purpose: Prepare to print the dataset's appended data.
  *          Call the tools library routine h5tools_dump_dset() to do the printing.
- *          (This routine is mostly copied from dump_dataset_values() in tools/h5ls/h5ls.c 
+ *          (This routine is mostly copied from dump_dataset_values() in tools/h5ls/h5ls.c
  *          and modified accordingly).
  *
  * Return: 0 on success; negative on failure
@@ -121,15 +121,15 @@ static struct long_options l_opts[] = {
 static herr_t
 doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
 {
-    h5tools_context_t   ctx;  	/* print context  */
-    h5tool_format_t  info;	/* Format info for the tools library */
-    static char fmt_double[16], fmt_float[16];	/* Format info */
-    struct subset_t subset;	/* Subsetting info */
-    hsize_t ss_start[H5S_MAX_RANK];	/* Info for hyperslab */
-    hsize_t ss_stride[H5S_MAX_RANK];	/* Info for hyperslab */
-    hsize_t ss_block[H5S_MAX_RANK];	/* Info for hyperslab */
-    hsize_t ss_count[H5S_MAX_RANK];	/* Info for hyperslab */
-    int i;			/* Local index variable */
+    h5tools_context_t   ctx;      /* print context  */
+    h5tool_format_t  info;    /* Format info for the tools library */
+    static char fmt_double[16], fmt_float[16];    /* Format info */
+    struct subset_t subset;    /* Subsetting info */
+    hsize_t ss_start[H5S_MAX_RANK];    /* Info for hyperslab */
+    hsize_t ss_stride[H5S_MAX_RANK];    /* Info for hyperslab */
+    hsize_t ss_block[H5S_MAX_RANK];    /* Info for hyperslab */
+    hsize_t ss_count[H5S_MAX_RANK];    /* Info for hyperslab */
+    int i;            /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Subsetting information for the tools library printing routines */
@@ -147,6 +147,7 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
     } /* end for */
 
     HDmemset(&ctx, 0, sizeof(ctx));
+    ctx.sset = &subset;
 
     /* Set to all default values and then override */
     HDmemset(&info, 0, sizeof info);
@@ -220,7 +221,7 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
     } /* end if */
 
     /* Print the values. */
-    if((ret_value = h5tools_dump_dset(stdout, &info, &ctx, did, &subset)) < 0)
+    if((ret_value = h5tools_dump_dset(stdout, &info, &ctx, did)) < 0)
         error_msg("unable to print data\n");
 
     HDfprintf(stdout, "\n");
@@ -255,7 +256,7 @@ slicendump(hid_t did, hsize_t *prev_dims, hsize_t *cur_dims, hsize_t *start, hsi
     int i;                      /* Local index variable */
     int ind;                    /* Index for the current rank */
     herr_t ret_value = SUCCEED; /* Return value */
-    
+
     ind = rank - subrank;
 
     if((subrank - 1) > 0) {
@@ -288,7 +289,7 @@ done:
     return ret_value;
 } /* end slicendump() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    monitor_dataset
  *
@@ -305,16 +306,16 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
+static herr_t
 monitor_dataset(hid_t fid, char *dsetname)
 {
-    hid_t did;		/* dataset id */
-    hid_t sid;		/* dataspace id */
-    int	ndims;		/* # of dimensions in the dataspace */
-    int i, u;		/* local index variable */
-    hsize_t prev_dims[H5S_MAX_RANK];	/* current dataspace dimensions */
-    hsize_t cur_dims[H5S_MAX_RANK];	/* previous dataspace dimensions */
-    herr_t ret_value = SUCCEED;	/* return value */
+    hid_t did;        /* dataset id */
+    hid_t sid;        /* dataspace id */
+    int    ndims;        /* # of dimensions in the dataspace */
+    int i, u;        /* local index variable */
+    hsize_t prev_dims[H5S_MAX_RANK];    /* current dataspace dimensions */
+    hsize_t cur_dims[H5S_MAX_RANK];    /* previous dataspace dimensions */
+    herr_t ret_value = SUCCEED;    /* return value */
 
     HDfprintf(stdout, "Monitoring dataset %s...\n", dsetname);
 
@@ -323,7 +324,7 @@ monitor_dataset(hid_t fid, char *dsetname)
         error_msg("error in opening dataset \"%s\"\n", dsetname);
         ret_value = FAIL;
         goto done;
-    }				
+    }
     if((sid = H5Dget_space(did)) < 0) {
         error_msg("error in getting dataspace id for dataset \"%s\"\n", dsetname);
         ret_value = FAIL;
@@ -398,7 +399,7 @@ monitor_dataset(hid_t fid, char *dsetname)
             }
             HDfflush(stdout);
         }
-	    
+
         /* Save the current dimension sizes */
         HDmemcpy(prev_dims, cur_dims, (size_t)ndims * sizeof(hsize_t));
 
@@ -438,7 +439,7 @@ process_cmpd_fields(hid_t fid, char *dsetname)
     herr_t ret_value = SUCCEED; /* Return value */
 
     HDassert(g_list_of_fields && *g_list_of_fields);
-    
+
     /* Open the dataset */
     if((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0) {
         error_msg("error in opening dataset \"%s\"\n", dsetname);
@@ -457,14 +458,14 @@ process_cmpd_fields(hid_t fid, char *dsetname)
     if(H5Tget_class(dtid) != H5T_COMPOUND) {
         error_msg("dataset should be compound type for <list_of_fields>\n");
         ret_value = FAIL;
-        goto done;		
+        goto done;
     }
 
     /* Make a copy of "g_list_of_fields" */
     if((g_dup_fields = HDstrdup(g_list_of_fields)) == NULL) {
         error_msg("error in duplicating g_list_of_fields\n");
         ret_value = FAIL;
-        goto done;		
+        goto done;
     }
 
     /* Estimate the number of comma-separated fields in "g_list of_fields" */
@@ -474,7 +475,7 @@ process_cmpd_fields(hid_t fid, char *dsetname)
     if((g_listv = (H5LD_memb_t **)HDcalloc(len, sizeof(H5LD_memb_t *))) == NULL) {
         error_msg("error in allocating memory for H5LD_memb_t\n");
         ret_value = FAIL;
-        goto done;		
+        goto done;
     }
 
     /* Process and store info for "g_listv" */
@@ -495,7 +496,7 @@ done:
     return(ret_value);
 } /* process_cmpd_fields() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    check_dataset
  *
@@ -512,18 +513,18 @@ done:
 static herr_t
 check_dataset(hid_t fid, char *dsetname)
 {
-    hid_t did=-1;	/* Dataset id */
-    hid_t dcp=-1;	/* Dataset creation property */
-    hid_t sid=-1;	/* Dataset's dataspace id */
-    int	  ndims;	/* # of dimensions in the dataspace */
-    unsigned u;		/* Local index variable */
-    hsize_t cur_dims[H5S_MAX_RANK];	/* size of dataspace dimensions */
-    hsize_t max_dims[H5S_MAX_RANK];	/* maximum size of dataspace dimensions */
-    hbool_t unlim_max_dims = FALSE;	/* whether dataset has unlimited or max. dimension setting */
+    hid_t did=-1;    /* Dataset id */
+    hid_t dcp=-1;    /* Dataset creation property */
+    hid_t sid=-1;    /* Dataset's dataspace id */
+    int      ndims;    /* # of dimensions in the dataspace */
+    unsigned u;        /* Local index variable */
+    hsize_t cur_dims[H5S_MAX_RANK];    /* size of dataspace dimensions */
+    hsize_t max_dims[H5S_MAX_RANK];    /* maximum size of dataspace dimensions */
+    hbool_t unlim_max_dims = FALSE;    /* whether dataset has unlimited or max. dimension setting */
     void               *edata;
     H5E_auto2_t         func;
     H5D_layout_t        layout;
-    herr_t ret_value = SUCCEED;	/* Return value */
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     /* Disable error reporting */
     H5Eget_auto2(H5E_DEFAULT, &func, &edata);
@@ -574,17 +575,17 @@ check_dataset(hid_t fid, char *dsetname)
 
     /* Check whether dataset has unlimited dimension or max. dimension setting */
     for(u = 0; u < (unsigned)ndims; u++)
-	if(max_dims[u] == H5S_UNLIMITED || cur_dims[u] != max_dims[u]) {
+    if(max_dims[u] == H5S_UNLIMITED || cur_dims[u] != max_dims[u]) {
         unlim_max_dims = TRUE;
-	    break;
-	}
+        break;
+    }
 
     if(!unlim_max_dims) {
         error_msg("\"%s\" should have unlimited or max. dimension setting\n", dsetname);
         ret_value = FAIL;
     }
 
-done: 
+done:
     H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     /* Closing */
@@ -597,7 +598,7 @@ done:
     return(ret_value);
 } /* check_dataset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    leave
  *
@@ -618,7 +619,7 @@ leave(int ret)
     exit(ret);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -630,7 +631,7 @@ leave(int ret)
  *
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 usage(const char *prog)
 {
     HDfflush(stdout);
@@ -653,7 +654,7 @@ usage(const char *prog)
     HDfprintf(stdout, "                              for a compound data type.  <list_of_fields> can be\n");
     HDfprintf(stdout, "                              specified as follows:\n");
     HDfprintf(stdout, "                                   1) A comma-separated list of field names in a\n");
-    HDfprintf(stdout, "                                   compound data type.  \",\" is the separator\n"); 
+    HDfprintf(stdout, "                                   compound data type.  \",\" is the separator\n");
     HDfprintf(stdout, "                                   for field names while \".\" is the separator\n");
     HDfprintf(stdout, "                                   for a nested field.\n");
     HDfprintf(stdout, "                                   2) A single field name in a compound data type.\n");
@@ -672,7 +673,7 @@ usage(const char *prog)
 
 } /* usage() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    parse_command_line
  *
@@ -688,7 +689,7 @@ usage(const char *prog)
 static void
 parse_command_line(int argc, const char *argv[])
 {
-    int	opt;	/* Command line option */
+    int    opt;    /* Command line option */
     int tmp;
 
      /* no arguments */
@@ -726,7 +727,7 @@ parse_command_line(int argc, const char *argv[])
         case 'S': /* --simple */
             g_simple_output = TRUE;
             break;
-	
+
         case 'l': /* --label */
             g_label = TRUE;
             break;
@@ -772,7 +773,7 @@ parse_command_line(int argc, const char *argv[])
             leave(EXIT_FAILURE);
         }
     }
-    
+
 
     /* check for object to be processed */
     if (argc <= opt_ind) {
@@ -782,7 +783,7 @@ parse_command_line(int argc, const char *argv[])
     }
 } /* parse_command_line() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    catch_signal
  *
@@ -859,9 +860,9 @@ main(int argc, const char *argv[])
     }
 
     /* Mostly copied from tools/h5ls coding & modified accordingly */
-    /* 
-     * [OBJECT] is specified as 
-     *		[<filename>/<path_to_dataset>/<dsetname>]
+    /*
+     * [OBJECT] is specified as
+     *        [<filename>/<path_to_dataset>/<dsetname>]
      *
      * Example: ../dir1/foo/bar/dset
      *          \_________/\______/
@@ -871,7 +872,7 @@ main(int argc, const char *argv[])
      * succeeds. The first call uses the entire name and each subsequent call
      * chops off the last component. If we reach the beginning of the name
      * then there must have been something wrong with the file (perhaps it
-     * doesn't exist). 
+     * doesn't exist).
      */
     if((fname = HDstrdup(argv[opt_ind])) == NULL) {
         error_msg("memory allocation failed (file %s:line %d)\n",
@@ -913,7 +914,7 @@ main(int argc, const char *argv[])
         if(fname) HDfree(fname);
         if(fapl >= 0) H5Pclose(fapl);
         leave(EXIT_FAILURE);
-    } 
+    }
 
     if(!dname) {
         error_msg("no dataset specified\n");
@@ -935,13 +936,13 @@ main(int argc, const char *argv[])
                 if(process_cmpd_fields(fid, dname) < 0)
                     h5tools_setstatus(EXIT_FAILURE);
         }
-    } 
+    }
 
     /* If everything is fine, start monitoring the datset */
     if(h5tools_getstatus() != EXIT_FAILURE)
         if(monitor_dataset(fid, dname) < 0)
             h5tools_setstatus(EXIT_FAILURE);
-     	    
+
     /* Free spaces */
     if(fname) HDfree(fname);
     if(dname) HDfree(dname);

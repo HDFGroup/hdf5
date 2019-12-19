@@ -521,13 +521,6 @@
 #   define H5_POSIX_CREATE_MODE_RW      0666
 #endif
 
-/*
- * A macro to portably increment enumerated types.
- */
-#ifndef H5_INC_ENUM
-#  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
-#endif
-
 /* Represents an empty asynchronous request handle.
  * Used in the VOL code.
  */
@@ -1197,13 +1190,23 @@ typedef off_t               h5_stat_size_t;
         #define HDrandom()    HDrand()
     #endif /* HDrandom */
     H5_DLL int HDrand(void);
-#elif H5_HAVE_RANDOM
+    #ifndef HDsrandom
+        #define HDsrandom(S)    HDsrand(S)
+    #endif /* HDsrandom */
+    H5_DLL void HDsrand(unsigned int seed);
+#elif defined(H5_HAVE_RANDOM)
     #ifndef HDrand
         #define HDrand()    random()
     #endif /* HDrand */
     #ifndef HDrandom
         #define HDrandom()    random()
     #endif /* HDrandom */
+    #ifndef HDsrand
+        #define HDsrand(S)    srandom(S)
+    #endif /* HDsrand */
+    #ifndef HDsrandom
+        #define HDsrandom(S)    srandom(S)
+    #endif /* HDsrandom */
 #else /* H5_HAVE_RANDOM */
     #ifndef HDrand
         #define HDrand()    rand()
@@ -1211,6 +1214,12 @@ typedef off_t               h5_stat_size_t;
     #ifndef HDrandom
         #define HDrandom()    rand()
     #endif /* HDrandom */
+    #ifndef HDsrand
+        #define HDsrand(S)    srand(S)
+    #endif /* HDsrand */
+    #ifndef HDsrandom
+        #define HDsrandom(S)    srand(S)
+    #endif /* HDsrandom */
 #endif /* H5_HAVE_RANDOM */
 
 #ifndef HDread
@@ -1331,26 +1340,6 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsqrt
     #define HDsqrt(X)    sqrt(X)
 #endif /* HDsqrt */
-#ifdef H5_HAVE_RAND_R
-    H5_DLL void HDsrand(unsigned int seed);
-    #ifndef HDsrandom
-        #define HDsrandom(S)    HDsrand(S)
-    #endif /* HDsrandom */
-#elif H5_HAVE_RANDOM
-    #ifndef HDsrand
-        #define HDsrand(S)    srandom(S)
-    #endif /* HDsrand */
-    #ifndef HDsrandom
-        #define HDsrandom(S)    srandom(S)
-    #endif /* HDsrandom */
-#else /* H5_HAVE_RAND_R */
-    #ifndef HDsrand
-        #define HDsrand(S)    srand(S)
-    #endif /* HDsrand */
-    #ifndef HDsrandom
-        #define HDsrandom(S)    srand(S)
-    #endif /* HDsrandom */
-#endif /* H5_HAVE_RAND_R */
 #ifndef HDsscanf
     #define HDsscanf(S,FMT,...)   sscanf(S,FMT,__VA_ARGS__)
 #endif /* HDsscanf */
@@ -2688,7 +2677,7 @@ H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **ful
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */
 H5_DLL hsize_t  H5_mpi_set_bigio_count(hsize_t new_count);
-H5_DLL hsize_t  H5_mpi_get_bigio_count();
+H5_DLL hsize_t  H5_mpi_get_bigio_count(void);
 H5_DLL herr_t   H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new);
 H5_DLL herr_t   H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new);
 H5_DLL herr_t   H5_mpi_comm_free(MPI_Comm *comm);
