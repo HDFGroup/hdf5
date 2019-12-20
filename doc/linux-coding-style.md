@@ -1,7 +1,4 @@
-<!-- ::: {.version}
-4.10.0
-:::
--->
+<!-- Linux kernel coding style version 4.10.0 -->
 
 [Linux kernel coding style](#)
 [Indentation](#indentation)
@@ -63,71 +60,70 @@ and NOT read it. Burn them, it's a great symbolic gesture.
 
 Anyway, here goes:
 
-1) Indentation
+## Indentation
 
-   Tabs are 8 characters, and thus indentations are also 8 characters.
-   There are heretic movements that try to make indentations 4 (or even 2!)
-   characters deep, and that is akin to trying to define the value of PI to
-   be 3.
-     
-   Rationale: The whole idea behind indentation is to clearly define where
-   a block of control starts and ends. Especially when you've been looking
-   at your screen for 20 straight hours, you'll find it a lot easier to see
-   how the indentation works if you have large indentations.
-  
-   Now, some people will claim that having 8-character indentations makes
-   the code move too far to the right, and makes it hard to read on a
-   80-character terminal screen. The answer to that is that if you need
-   more than 3 levels of indentation, you're screwed anyway, and should fix
-   your program.
-   
-   In short, 8-char indents make things easier to read, and have the added
-   benefit of warning you when you're nesting your functions too deep. Heed
-   that warning.
-   
-   The preferred way to ease multiple indentation levels in a switch
-   statement is to align the `switch`{.docutils .literal} and its
-   subordinate `case`{.docutils .literal} labels in the same column instead
-   of `double-indenting`{.docutils .literal} the `case`{.docutils .literal}
-   labels. E.g.:
-   
-   ```
-       switch (suffix) {
-       case 'G':
-       case 'g':
-               mem <<= 30;
-               break;
-       case 'M':
-       case 'm':
-               mem <<= 20;
-               break;
-       case 'K':
-       case 'k':
-               mem <<= 10;
-               /* fall through */
-       default:
-               break;
-       }
-   ```
-   
-   Don't put multiple statements on a single line unless you have something
-   to hide:
-   
-   ```
-       if (condition) do_this;
-         do_something_everytime;
-   ```
-   
-   Don't put multiple assignments on a single line either. Kernel coding
-   style is super simple. Avoid tricky expressions.
-   
-   Outside of comments, documentation and except in Kconfig, spaces are
-   never used for indentation, and the above example is deliberately
-   broken.
-   
-   Get a decent editor and don't leave whitespace at the end of lines.
+Tabs are 8 characters, and thus indentations are also 8 characters.
+There are heretic movements that try to make indentations 4 (or even 2!)
+characters deep, and that is akin to trying to define the value of PI to
+be 3.
 
-2) <a name="breaking-long-lines-and-strings">Breaking long lines and strings</a>
+Rationale: The whole idea behind indentation is to clearly define where
+a block of control starts and ends. Especially when you've been looking
+at your screen for 20 straight hours, you'll find it a lot easier to see
+how the indentation works if you have large indentations.
+
+Now, some people will claim that having 8-character indentations makes
+the code move too far to the right, and makes it hard to read on a
+80-character terminal screen. The answer to that is that if you need
+more than 3 levels of indentation, you're screwed anyway, and should fix
+your program.
+
+In short, 8-char indents make things easier to read, and have the added
+benefit of warning you when you're nesting your functions too deep. Heed
+that warning.
+
+The preferred way to ease multiple indentation levels in a switch
+statement is to align the `switch`{.docutils .literal} and its
+subordinate `case`{.docutils .literal} labels in the same column instead
+of `double-indenting`{.docutils .literal} the `case`{.docutils .literal}
+labels. E.g.:
+
+```
+switch (suffix) {
+case 'G':
+case 'g':
+	mem <<= 30;
+	break;
+case 'M':
+case 'm':
+	mem <<= 20;
+	break;
+case 'K':
+case 'k':
+	mem <<= 10;
+	/* fall through */
+default:
+	break;
+}
+```
+
+Don't put multiple statements on a single line unless you have something
+to hide:
+
+```
+if (condition) do_this; do_something_everytime;
+```
+
+Don't put multiple assignments on a single line either. Kernel coding
+style is super simple. Avoid tricky expressions.
+
+Outside of comments, documentation and except in Kconfig, spaces are
+never used for indentation, and the above example is deliberately
+broken.
+
+Get a decent editor and don't leave whitespace at the end of lines.
+
+## <a name="breaking-long-lines-and-strings">Breaking long lines and strings</a>
 
 Coding style is all about readability and maintainability using commonly
 available tools.
@@ -142,10 +138,8 @@ the parent and are placed substantially to the right. The same applies
 to function headers with a long argument list. However, never break
 user-visible strings such as printk messages, because that breaks the
 ability to grep for them.
-:::
 
-::: {#placing-braces-and-spaces .section}
-3) Placing Braces and Spaces[¶](#placing-braces-and-spaces "Permalink to this headline"){.headerlink}
+## Placing Braces and Spaces[¶](#placing-braces-and-spaces "Permalink to this headline"){.headerlink}
 
 The other issue that always comes up in C styling is the placement of
 braces. Unlike the indent size, there are few technical reasons to
@@ -230,14 +224,12 @@ Do not unnecessarily use braces where a single statement will do.
 
 and
 
-::: {.highlight-none}
-::: {.highlight}
+```
     if (condition)
             do_this();
     else
             do_that();
-:::
-:::
+```
 
 This does not apply if only one branch of a conditional statement is a
 single statement; in the latter case use braces in both branches:
@@ -251,7 +243,6 @@ single statement; in the latter case use braces in both branches:
     }
 ```
 
-::: {#spaces .section}
 ### 3.1) Spaces[¶](#spaces "Permalink to this headline"){.headerlink}
 
 Linux kernel style for use of spaces depends (mostly) on
@@ -332,7 +323,7 @@ can optionally strip the trailing whitespace for you; however, if
 applying a series of patches, this may make later patches in the series
 fail by changing their context lines.
 
-4) <a name="naming">Naming</a>
+## <a name="naming">Naming</a>
 
 C is a Spartan language, and so should your naming be. Unlike Modula-2
 and Pascal programmers, C programmers do not use cute names like
@@ -365,27 +356,21 @@ variable that is used to hold a temporary value.
 If you are afraid to mix up your local variable names, you have another
 problem, which is called the function-growth-hormone-imbalance syndrome.
 See chapter 6 (Functions).
-:::
 
-::: {#typedefs .section}
-5) Typedefs[¶](#typedefs "Permalink to this headline"){.headerlink}
+## Typedefs[¶](#typedefs "Permalink to this headline"){.headerlink}
 
 Please don't use things like `vps_t`{.docutils .literal}. It's a
 **mistake** to use typedef for structures and pointers. When you see a
 
-::: {.highlight-c}
-::: {.highlight}
+```
     vps_t a;
-:::
-:::
+```
 
 in the source, what does it mean? In contrast, if it says
 
-::: {.highlight-c}
-::: {.highlight}
+```
     struct virtual_container *a;
-:::
-:::
+```
 
 you can actually tell what `a`{.docutils .literal} is.
 
@@ -468,10 +453,8 @@ rules.
 
 In general, a pointer, or a struct that has elements that can reasonably
 be directly accessed should **never** be a typedef.
-:::
 
-::: {#functions .section}
-6) Functions[¶](#functions "Permalink to this headline"){.headerlink}
+## Functions[¶](#functions "Permalink to this headline"){.headerlink}
 
 Functions should be short and sweet, and do just one thing. They should
 fit on one or two screenfuls of text (the ISO/ANSI screen size is 80x24,
@@ -502,24 +485,20 @@ In source files, separate functions with one blank line. If the function
 is exported, the **EXPORT** macro for it should follow immediately after
 the closing function brace line. E.g.:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     int system_is_up(void)
     {
             return system_state == SYSTEM_RUNNING;
     }
     EXPORT_SYMBOL(system_is_up);
-:::
-:::
+```
 
 In function prototypes, include parameter names with their data types.
 Although this is not required by the C language, it is preferred in
 Linux because it is a simple way to add valuable information for the
 reader.
-:::
 
-::: {#centralized-exiting-of-functions .section}
-7) Centralized exiting of functions[¶](#centralized-exiting-of-functions "Permalink to this headline"){.headerlink}
+## Centralized exiting of functions[¶](#centralized-exiting-of-functions "Permalink to this headline"){.headerlink}
 
 Albeit deprecated by some people, the equivalent of the goto statement
 is used frequently by compilers in form of the unconditional jump
@@ -544,8 +523,7 @@ The rationale for using gotos is:
     modifications are prevented
 -   saves the compiler work to optimize redundant code away ;)
 
-::: {.highlight-c}
-::: {.highlight}
+```
     int fun(int a)
     {
             int result = 0;
@@ -567,41 +545,34 @@ The rationale for using gotos is:
             kfree(buffer);
             return result;
     }
-:::
-:::
+```
 
 A common type of bug to be aware of is `one err bugs`{.docutils
 .literal} which look like this:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     err:
             kfree(foo->bar);
             kfree(foo);
             return ret;
-:::
-:::
+```
 
 The bug in this code is that on some exit paths `foo`{.docutils
 .literal} is NULL. Normally the fix for this is to split it up into two
 error labels `err_free_bar:`{.docutils .literal} and
 `err_free_foo:`{.docutils .literal}:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     err_free_bar:
            kfree(foo->bar);
     err_free_foo:
            kfree(foo);
            return ret;
-:::
-:::
+```
 
 Ideally you should simulate errors to test all exit paths.
-:::
 
-::: {#commenting .section}
-8) Commenting[¶](#commenting "Permalink to this headline"){.headerlink}
+## Commenting[¶](#commenting "Permalink to this headline"){.headerlink}
 
 Comments are good, but there is also a danger of over-commenting. NEVER
 try to explain HOW your code works in a comment: it's much better to
@@ -623,8 +594,7 @@ format. See the files at [[Documentation/doc-guide/]{.std
 
 The preferred style for long (multi-line) comments is:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     /*
      * This is the preferred style for multi-line
      * comments in the Linux kernel source code.
@@ -633,31 +603,26 @@ The preferred style for long (multi-line) comments is:
      * Description:  A column of asterisks on the left side,
      * with beginning and ending almost-blank lines.
      */
-:::
-:::
+```
 
 For files in net/ and drivers/net/ the preferred style for long
 (multi-line) comments is a little different.
 
-::: {.highlight-c}
-::: {.highlight}
+```
     /* The preferred comment style for files in net/ and drivers/net
      * looks like this.
      *
      * It is nearly the same as the generally preferred comment style,
      * but there is no initial almost-blank line.
      */
-:::
-:::
+```
 
 It's also important to comment data, whether they are basic types or
 derived types. To this end, use just one data declaration per line (no
 commas for multiple data declarations). This leaves you room for a small
 comment on each item, explaining its use.
-:::
 
-::: {#you-ve-made-a-mess-of-it .section}
-9) You've made a mess of it[¶](#you-ve-made-a-mess-of-it "Permalink to this headline"){.headerlink}
+## You've made a mess of it[¶](#you-ve-made-a-mess-of-it "Permalink to this headline"){.headerlink}
 
 That's OK, we all do. You've probably been told by your long-time Unix
 user helper that `GNU emacs`{.docutils .literal} automatically formats
@@ -670,8 +635,7 @@ So, you can either get rid of GNU emacs, or change it to use saner
 values. To do the latter, you can stick the following in your .emacs
 file:
 
-::: {.highlight-none}
-::: {.highlight}
+```
     (defun c-lineup-arglist-tabs-only (ignored)
       "Line up argument lists by tabs, not spaces"
       (let* ((anchor (c-langelem-pos c-syntactic-element))
@@ -701,8 +665,7 @@ file:
                     (setq indent-tabs-mode t)
                     (setq show-trailing-whitespace t)
                     (c-set-style "linux-tabs-only")))))
-:::
-:::
+```
 
 This will make emacs go better with the kernel coding style for C files
 below `~/src/linux-trees`{.docutils .literal}.
@@ -724,18 +687,15 @@ style.
 it comes to comment re-formatting you may want to take a look at the man
 page. But remember: `indent`{.docutils .literal} is not a fix for bad
 programming.
-:::
 
-::: {#kconfig-configuration-files .section}
-10) Kconfig configuration files[¶](#kconfig-configuration-files "Permalink to this headline"){.headerlink}
+## Kconfig configuration files[¶](#kconfig-configuration-files "Permalink to this headline"){.headerlink}
 
 For all of the Kconfig\* configuration files throughout the source tree,
 the indentation is somewhat different. Lines under a `config`{.docutils
 .literal} definition are indented with one tab, while help text is
 indented an additional two spaces. Example:
 
-::: {.highlight-none}
-::: {.highlight}
+```
     config AUDIT
           bool "Auditing support"
           depends on NET
@@ -744,27 +704,22 @@ indented an additional two spaces. Example:
             kernel subsystem, such as SELinux (which requires this for
             logging of avc messages output).  Does not do system-call
             auditing without CONFIG_AUDITSYSCALL.
-:::
-:::
+```
 
 Seriously dangerous features (such as write support for certain
 filesystems) should advertise this prominently in their prompt string:
 
-::: {.highlight-none}
-::: {.highlight}
+```
     config ADFS_FS_RW
           bool "ADFS write support (DANGEROUS)"
           depends on ADFS_FS
           ...
-:::
-:::
+```
 
 For full documentation on the configuration files, see the file
 Documentation/kbuild/kconfig-language.txt.
-:::
 
-::: {#data-structures .section}
-11) Data structures[¶](#data-structures "Permalink to this headline"){.headerlink}
+## Data structures[¶](#data-structures "Permalink to this headline"){.headerlink}
 
 Data structures that have visibility outside the single-threaded
 environment they are created and destroyed in should always have
@@ -795,18 +750,14 @@ and s\_active).
 
 Remember: if another thread can find your data structure, and you don't
 have a reference count on it, you almost certainly have a bug.
-:::
 
-::: {#macros-enums-and-rtl .section}
-12) Macros, Enums and RTL[¶](#macros-enums-and-rtl "Permalink to this headline"){.headerlink}
+## Macros, Enums and RTL[¶](#macros-enums-and-rtl "Permalink to this headline"){.headerlink}
 
 Names of macros defining constants and labels in enums are capitalized.
 
-::: {.highlight-c}
-::: {.highlight}
+```
     #define CONSTANT 0x12345
-:::
-:::
+```
 
 Enums are preferred when defining several related constants.
 
@@ -819,29 +770,25 @@ functions.
 Macros with multiple statements should be enclosed in a do - while
 block:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     #define macrofun(a, b, c)                       \
             do {                                    \
                     if (a == 5)                     \
                             do_this(b, c);          \
             } while (0)
-:::
-:::
+```
 
 Things to avoid when using macros:
 
 1.  macros that affect control flow:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     #define FOO(x)                                  \
             do {                                    \
                     if (blah(x) < 0)                \
                             return -EBUGGERED;      \
             } while (0)
-:::
-:::
+```
 
 is a **very** bad idea. It looks like a function call but exits the
 `calling`{.docutils .literal} function; don't break the internal parsers
@@ -849,11 +796,9 @@ of those who will read the code.
 
 2.  macros that depend on having a local variable with a magic name:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     #define FOO(val) bar(index, val)
-:::
-:::
+```
 
 might look like a good thing, but it's confusing as hell when one reads
 the code and it's prone to breakage from seemingly innocent changes.
@@ -865,26 +810,22 @@ bite you if somebody e.g. turns FOO into an inline function.
 expressions must enclose the expression in parentheses. Beware of
 similar issues with macros using parameters.
 
-::: {.highlight-c}
-::: {.highlight}
+```
     #define CONSTANT 0x4000
     #define CONSTEXP (CONSTANT | 3)
-:::
-:::
+```
 
 5\) namespace collisions when defining local variables in macros
 resembling functions:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     #define FOO(x)                          \
     ({                                      \
             typeof(x) ret;                  \
             ret = calc_ret(x);              \
             (ret);                          \
     })
-:::
-:::
+```
 
 ret is a common name for a local variable - \_\_foo\_ret is less likely
 to collide with an existing variable.
@@ -892,10 +833,8 @@ to collide with an existing variable.
 The cpp manual deals with macros exhaustively. The gcc internals manual
 also covers RTL which is used frequently with assembly language in the
 kernel.
-:::
 
-::: {#printing-kernel-messages .section}
-13) Printing kernel messages[¶](#printing-kernel-messages "Permalink to this headline"){.headerlink}
+## Printing kernel messages[¶](#printing-kernel-messages "Permalink to this headline"){.headerlink}
 
 Kernel developers like to be seen as literate. Do mind the spelling of
 kernel messages to make a good impression. Do not use crippled words
@@ -929,10 +868,8 @@ corresponding Makefile; in other cases specific files \#define DEBUG.
 And when a debug message should be unconditionally printed, such as if
 it is already inside a debug-related \#ifdef section, printk(KERN\_DEBUG
 \...) can be used.
-:::
 
-::: {#allocating-memory .section}
-14) Allocating memory[¶](#allocating-memory "Permalink to this headline"){.headerlink}
+## Allocating memory[¶](#allocating-memory "Permalink to this headline"){.headerlink}
 
 The kernel provides the following general purpose memory allocators:
 kmalloc(), kzalloc(), kmalloc\_array(), kcalloc(), vmalloc(), and
@@ -941,11 +878,9 @@ about them.
 
 The preferred form for passing a size of a struct is the following:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     p = kmalloc(sizeof(*p), ...);
-:::
-:::
+```
 
 The alternative form where struct name is spelled out hurts readability
 and introduces an opportunity for a bug when the pointer variable type
@@ -958,26 +893,20 @@ the C programming language.
 
 The preferred form for allocating an array is the following:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     p = kmalloc_array(n, sizeof(...), ...);
-:::
-:::
+```
 
 The preferred form for allocating a zeroed array is the following:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     p = kcalloc(n, sizeof(...), ...);
-:::
-:::
+```
 
 Both forms check for overflow on the allocation size n \* sizeof(\...),
 and return NULL if that occurred.
-:::
 
-::: {#the-inline-disease .section}
-15) The inline disease[¶](#the-inline-disease "Permalink to this headline"){.headerlink}
+## The inline disease[¶](#the-inline-disease "Permalink to this headline"){.headerlink}
 
 There appears to be a common misperception that gcc has a magic "make me
 faster" speedup option called `inline`{.docutils .literal}. While the
@@ -1003,10 +932,8 @@ this is technically correct, gcc is capable of inlining these
 automatically without help, and the maintenance issue of removing the
 inline when a second user appears outweighs the potential value of the
 hint that tells gcc to do something it would have done anyway.
-:::
 
-::: {#function-return-values-and-names .section}
-16) Function return values and names[¶](#function-return-values-and-names "Permalink to this headline"){.headerlink}
+## Function return values and names[¶](#function-return-values-and-names "Permalink to this headline"){.headerlink}
 
 Functions can return values of many different kinds, and one of the most
 common is a value indicating whether the function succeeded or failed.
@@ -1020,13 +947,9 @@ between integers and booleans then the compiler would find these
 mistakes for us\... but it doesn't. To help prevent such bugs, always
 follow this convention:
 
-::: {.highlight-none}
-::: {.highlight}
     If the name of a function is an action or an imperative command,
     the function should return an error-code integer.  If the name
     is a predicate, the function should return a "succeeded" boolean.
-:::
-:::
 
 For example, `add work`{.docutils .literal} is a command, and the
 add\_work() function returns 0 for success or -EBUSY for failure. In the
@@ -1043,78 +966,62 @@ rather than an indication of whether the computation succeeded, are not
 subject to this rule. Generally they indicate failure by returning some
 out-of-range result. Typical examples would be functions that return
 pointers; they use NULL or the ERR\_PTR mechanism to report failure.
-:::
 
-::: {#don-t-re-invent-the-kernel-macros .section}
-17) Don't re-invent the kernel macros[¶](#don-t-re-invent-the-kernel-macros "Permalink to this headline"){.headerlink}
+## Don't re-invent the kernel macros[¶](#don-t-re-invent-the-kernel-macros "Permalink to this headline"){.headerlink}
 
 The header file include/linux/kernel.h contains a number of macros that
 you should use, rather than explicitly coding some variant of them
 yourself. For example, if you need to calculate the length of an array,
 take advantage of the macro
 
-::: {.highlight-c}
-::: {.highlight}
+```
     #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-:::
-:::
+```
 
 Similarly, if you need to calculate the size of some structure member,
 use
 
-::: {.highlight-c}
-::: {.highlight}
+```
     #define FIELD_SIZEOF(t, f) (sizeof(((t*)0)->f))
-:::
-:::
+```
 
 There are also min() and max() macros that do strict type checking if
 you need them. Feel free to peruse that header file to see what else is
 already defined that you shouldn't reproduce in your code.
-:::
 
-::: {#editor-modelines-and-other-cruft .section}
-18) Editor modelines and other cruft[¶](#editor-modelines-and-other-cruft "Permalink to this headline"){.headerlink}
+## Editor modelines and other cruft[¶](#editor-modelines-and-other-cruft "Permalink to this headline"){.headerlink}
 
 Some editors can interpret configuration information embedded in source
 files, indicated with special markers. For example, emacs interprets
 lines marked like this:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     -*- mode: c -*-
-:::
-:::
+```
 
 Or like this:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     /*
     Local Variables:
     compile-command: "gcc -DMAGIC_DEBUG_FLAG foo.c"
     End:
     */
-:::
-:::
+```
 
 Vim interprets markers that look like this:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     /* vim:set sw=8 noet */
-:::
-:::
+```
 
 Do not include any of these in source files. People have their own
 personal editor configurations, and your source files should not
 override them. This includes markers for indentation and mode
 configuration. People may use their own custom mode, or may have some
 other magic method for making indentation work correctly.
-:::
 
-::: {#inline-assembly .section}
-19) Inline assembly[¶](#inline-assembly "Permalink to this headline"){.headerlink}
+## Inline assembly[¶](#inline-assembly "Permalink to this headline"){.headerlink}
 
 In architecture-specific code, you may need to use inline assembly to
 interface with CPU or platform functionality. Don't hesitate to do so
@@ -1139,17 +1046,13 @@ instructions, put each instruction on a separate line in a separate
 quoted string, and end each string except the last with nt to properly
 indent the next instruction in the assembly output:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     asm ("magic %reg1, #42\n\t"
          "more_magic %reg2, %reg3"
          : /* outputs */ : /* inputs */ : /* clobbers */);
-:::
-:::
-:::
+```
 
-::: {#conditional-compilation .section}
-20) Conditional Compilation[¶](#conditional-compilation "Permalink to this headline"){.headerlink}
+## Conditional Compilation[¶](#conditional-compilation "Permalink to this headline"){.headerlink}
 
 Wherever possible, don't use preprocessor conditionals (\#if, \#ifdef)
 in .c files; doing so makes code harder to read and logic harder to
@@ -1174,13 +1077,11 @@ Within code, where possible, use the IS\_ENABLED macro to convert a
 Kconfig symbol into a C boolean expression, and use it in a normal C
 conditional:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     if (IS_ENABLED(CONFIG_SOMETHING)) {
             ...
     }
-:::
-:::
+```
 
 The compiler will constant-fold the conditional away, and include or
 exclude the block of code just as with an \#ifdef, so this will not add
@@ -1194,16 +1095,12 @@ At the end of any non-trivial \#if or \#ifdef block (more than a few
 lines), place a comment after the \#endif on the same line, noting the
 conditional expression used. For instance:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     #ifdef CONFIG_SOMETHING
     ...
     #endif /* CONFIG_SOMETHING */
-:::
-:::
-:::
+```
 
-::: {#appendix-i-references .section}
 Appendix I) References[¶](#appendix-i-references "Permalink to this headline"){.headerlink}
 
 The C Programming Language, Second Edition by Brian W. Kernighan and
@@ -1224,21 +1121,7 @@ Kernel process/coding-style.rst, by
 [greg@kroah.com](mailto:greg%40kroah.com){.reference .external} at OLS
 2002:
 <http://www.kroah.com/linux/talks/ols_2002_kernel_codingstyle_talk/html/>
-:::
-:::
-:::
-:::
-
-::: {.rst-footer-buttons role="navigation" aria-label="footer navigation"}
-[Next []{.fa
-.fa-arrow-circle-right}](email-clients.html "Email clients info for Linux"){.btn
-.btn-neutral .float-right} [[]{.fa .fa-arrow-circle-left}
-Previous](submitting-patches.html "Submitting patches: the essential guide to getting your code into the kernel"){.btn
-.btn-neutral}
-:::
 
 ------------------------------------------------------------------------
 
-::: {role="contentinfo"}
 © Copyright 2016, The kernel development community.
-:::
