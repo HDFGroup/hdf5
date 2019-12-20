@@ -1,53 +1,56 @@
 <!-- Linux kernel coding style version 4.10.0 -->
 
-[Linux kernel coding style](#)
-[Indentation](#indentation)
-
-[Breaking long lines and strings](#breaking-long-lines-and-strings)
-
-[Placing Braces and Spaces](#placing-braces-and-spaces)
-	[Spaces](#spaces)
-
-[Naming](#naming)
-
-[Typedefs](#typedefs)
-
-[Functions](#functions)
-
-[Centralized exiting of functions](#centralized-exiting-of-functions)
-
-[Commenting](#commenting)
-
-[You've made a mess of it](#you-ve-made-a-mess-of-it)
-
-[Kconfig configuration files](#kconfig-configuration-files)
-
-[Data structures](#data-structures)
-
-[Macros, Enums and RTL](#macros-enums-and-rtl)
-
-[Printing kernel messages](#printing-kernel-messages)
-
-[Allocating memory](#allocating-memory)
-
-[The inline disease](#the-inline-disease)
-
-[Function return values and names](#function-return-values-and-names)
-
-[Don't re-invent the kernel macros](#don-t-re-invent-the-kernel-macros)
-
-[Editor modelines and other cruft](#editor-modelines-and-other-cruft)
-
-[Inline assembly](#inline-assembly)
-
-[Conditional Compilation](#conditional-compilation)
-
-[Appendix I) References](#appendix-i-references)
-
-------------------------------------------------------------------------
-
 Linux kernel coding style
 ==================================================================================================
+
+[Linux kernel coding style](#)
+
+## Table of Contents
+
+- [Indentation](#indentation)
+
+- [Breaking long lines and strings](#breaking-long-lines-and-strings)
+
+- [Placing Braces and Spaces](#placing-braces-and-spaces)
+	- [Spaces](#spaces)
+
+- [Naming](#naming)
+
+- [Typedefs](#typedefs)
+
+- [Functions](#functions)
+
+- [Centralized exiting of functions](#centralized-exiting-of-functions)
+
+- [Commenting](#commenting)
+
+- [You've made a mess of it](#you-ve-made-a-mess-of-it)
+
+- [Kconfig configuration files](#kconfig-configuration-files)
+
+- [Data structures](#data-structures)
+
+- [Macros, Enums and RTL](#macros-enums-and-rtl)
+
+- [Printing kernel messages](#printing-kernel-messages)
+
+- [Allocating memory](#allocating-memory)
+
+- [The inline disease](#the-inline-disease)
+
+- [Function return values and names](#function-return-values-and-names)
+
+- [Don't re-invent the kernel macros](#don-t-re-invent-the-kernel-macros)
+
+- [Editor modelines and other cruft](#editor-modelines-and-other-cruft)
+
+- [Inline assembly](#inline-assembly)
+
+- [Conditional Compilation](#conditional-compilation)
+
+- [Appendix I) References](#appendix-i-references)
+
+------------------------------------------------------------------------
 
 This is a short document describing the preferred coding style for the
 linux kernel. Coding style is very personal, and I won't **force** my
@@ -148,9 +151,9 @@ shown to us by the prophets Kernighan and Ritchie, is to put the opening
 brace last on the line, and put the closing brace first, thusly:
 
 ```
-    if (x is true) {
-            we do y
-    }
+	if (x is true) {
+		we do y
+	}
 ```
 
 This applies to all non-function statement blocks (if, switch, for,
@@ -173,10 +176,10 @@ However, there is one special case, namely functions: they have the
 opening brace at the beginning of the next line, thus:
 
 ```
-    int function(int x)
-    {
-            body of function
-    }
+	int function(int x)
+	{
+		body of function
+	}
 ```
 
 Heretic people all over the world have claimed that this inconsistency
@@ -190,21 +193,21 @@ ie a `while`{.docutils .literal} in a do-statement or an
 `else`{.docutils .literal} in an if-statement, like this:
 
 ```
-    do {
-            body of do-loop
-    } while (condition);
+	do {
+		body of do-loop
+	} while (condition);
 ```
 
 and
 
 ```
-    if (x == y) {
-            ..
-    } else if (x > y) {
-            ...
-    } else {
-            ....
-    }
+	if (x == y) {
+		..
+	} else if (x > y) {
+		...
+	} else {
+		....
+	}
 ```
 
 Rationale: K&R.
@@ -218,32 +221,32 @@ comments on.
 Do not unnecessarily use braces where a single statement will do.
 
 ```
-    if (condition)
-            action();
+	if (condition)
+		action();
 ```
 
 and
 
 ```
-    if (condition)
-            do_this();
-    else
-            do_that();
+	if (condition)
+		do_this();
+	else
+		do_that();
 ```
 
 This does not apply if only one branch of a conditional statement is a
 single statement; in the latter case use braces in both branches:
 
 ```
-    if (condition) {
-            do_this();
-            do_that();
-    } else {
-            otherwise();
-    }
+	if (condition) {
+		do_this();
+		do_that();
+	} else {
+		otherwise();
+	}
 ```
 
-### 3.1) Spaces[¶](#spaces "Permalink to this headline"){.headerlink}
+### Spaces[¶](#spaces "Permalink to this headline"){.headerlink}
 
 Linux kernel style for use of spaces depends (mostly) on
 function-versus-keyword usage. Use a space after (most) keywords. The
@@ -256,20 +259,20 @@ in: `sizeof info`{.docutils .literal} after
 So use a space after these keywords:
 
 ```
-    if, switch, case, for, do, while
+	if, switch, case, for, do, while
 ```
 
 but not with sizeof, typeof, alignof, or \_\_attribute\_\_. E.g.,
 
 ```
-    s = sizeof(struct file);
+	s = sizeof(struct file);
 ```
 
 Do not add spaces around (inside) parenthesized expressions. This
 example is **bad**:
 
 ```
-    s = sizeof( struct file );
+	s = sizeof( struct file );
 ```
 
 When declaring pointer data or a function that returns a pointer type,
@@ -277,38 +280,37 @@ the preferred use of `*`{.docutils .literal} is adjacent to the data
 name or function name and not adjacent to the type name. Examples:
 
 ```
-    char *linux_banner;
-    unsigned long long memparse(char *ptr, char **retptr);
-    char *match_strdup(substring_t *s);
+	char *linux_banner;
+	unsigned long long memparse(char *ptr, char **retptr);
+	char *match_strdup(substring_t *s);
 ```
 
 Use one space around (on each side of) most binary and ternary
 operators, such as any of these:
 
 ```
-    =  +  -  <  >  *  /  %  |  &  ^  <=  >=  ==  !=  ?  :
+	=  +  -  <  >  *  /  %  |  &  ^  <=  >=  ==  !=  ?  :
 ```
 
 but no space after unary operators:
 
 ```
-    &  *  +  -  ~  !  sizeof  typeof  alignof  __attribute__  defined
+	&  *  +  -  ~  !  sizeof  typeof  alignof  __attribute__  defined
 ```
 
 no space before the postfix increment & decrement unary operators:
 
 ```
-    ++  --
+	++  --
 ```
 
 no space after the prefix increment & decrement unary operators:
 
 ```
-    ++  --
+	++  --
 ```
 
-and no space around the `.`{.docutils .literal} and `->`{.docutils
-.literal} structure member operators.
+and no space around the `.` and `->` structure member operators.
 
 Do not leave trailing whitespace at the ends of lines. Some editors with
 `smart`{.docutils .literal} indentation will insert whitespace at the
@@ -363,13 +365,13 @@ Please don't use things like `vps_t`{.docutils .literal}. It's a
 **mistake** to use typedef for structures and pointers. When you see a
 
 ```
-    vps_t a;
+	vps_t a;
 ```
 
 in the source, what does it mean? In contrast, if it says
 
 ```
-    struct virtual_container *a;
+	struct virtual_container *a;
 ```
 
 you can actually tell what `a`{.docutils .literal} is.
@@ -486,11 +488,11 @@ is exported, the **EXPORT** macro for it should follow immediately after
 the closing function brace line. E.g.:
 
 ```
-    int system_is_up(void)
-    {
-            return system_state == SYSTEM_RUNNING;
-    }
-    EXPORT_SYMBOL(system_is_up);
+	int system_is_up(void)
+	{
+		return system_state == SYSTEM_RUNNING;
+	}
+	EXPORT_SYMBOL(system_is_up);
 ```
 
 In function prototypes, include parameter names with their data types.
@@ -508,12 +510,11 @@ The goto statement comes in handy when a function exits from multiple
 locations and some common work such as cleanup has to be done. If there
 is no cleanup needed then just return directly.
 
-Choose label names which say what the goto does or why the goto exists.
-An example of a good name could be `out_free_buffer:`{.docutils
-.literal} if the goto frees `buffer`{.docutils .literal}. Avoid using
-GW-BASIC names like `err1:`{.docutils .literal} and `err2:`{.docutils
-.literal}, as you would have to renumber them if you ever add or remove
-exit paths, and they make correctness difficult to verify anyway.
+Choose label names which say what the goto does or why the goto exists.  An
+example of a good name could be `out_free_buffer:` if the goto frees `buffer`.
+Avoid using GW-BASIC names like `err1:` and `err2:`, as you would have to
+renumber them if you ever add or remove exit paths, and they make correctness
+difficult to verify anyway.
 
 The rationale for using gotos is:
 
@@ -524,31 +525,30 @@ The rationale for using gotos is:
 -   saves the compiler work to optimize redundant code away ;)
 
 ```
-    int fun(int a)
-    {
-            int result = 0;
-            char *buffer;
-
-            buffer = kmalloc(SIZE, GFP_KERNEL);
-            if (!buffer)
-                    return -ENOMEM;
-
-            if (condition1) {
-                    while (loop1) {
-                            ...
-                    }
-                    result = 1;
-                    goto out_free_buffer;
-            }
-            ...
-    out_free_buffer:
-            kfree(buffer);
-            return result;
-    }
+	int fun(int a)
+	{
+	        int result = 0;
+	        char *buffer;
+	
+	        buffer = kmalloc(SIZE, GFP_KERNEL);
+	        if (!buffer)
+	                return -ENOMEM;
+	
+	        if (condition1) {
+	                while (loop1) {
+	                        ...
+	                }
+	                result = 1;
+	                goto out_free_buffer;
+	        }
+	        ...
+	out_free_buffer:
+	        kfree(buffer);
+	        return result;
+	}
 ```
 
-A common type of bug to be aware of is `one err bugs`{.docutils
-.literal} which look like this:
+A common type of bug to be aware of is `one err bugs` which look like this:
 
 ```
     err:
@@ -557,10 +557,9 @@ A common type of bug to be aware of is `one err bugs`{.docutils
             return ret;
 ```
 
-The bug in this code is that on some exit paths `foo`{.docutils
-.literal} is NULL. Normally the fix for this is to split it up into two
-error labels `err_free_bar:`{.docutils .literal} and
-`err_free_foo:`{.docutils .literal}:
+The bug in this code is that on some exit paths `foo` is NULL. Normally the fix for this is to split it up into two
+error labels `err_free_bar:` and
+`err_free_foo:`:
 
 ```
     err_free_bar:
@@ -572,7 +571,7 @@ error labels `err_free_bar:`{.docutils .literal} and
 
 Ideally you should simulate errors to test all exit paths.
 
-## Commenting[¶](#commenting "Permalink to this headline"){.headerlink}
+## <a name="commenting">Commenting</a>
 
 Comments are good, but there is also a danger of over-commenting. NEVER
 try to explain HOW your code works in a comment: it's much better to
@@ -622,7 +621,7 @@ derived types. To this end, use just one data declaration per line (no
 commas for multiple data declarations). This leaves you room for a small
 comment on each item, explaining its use.
 
-## You've made a mess of it[¶](#you-ve-made-a-mess-of-it "Permalink to this headline"){.headerlink}
+## <a name="you-ve-made-a-mess-of-it">You've made a mess of it</a>
 
 That's OK, we all do. You've probably been told by your long-time Unix
 user helper that `GNU emacs`{.docutils .literal} automatically formats
