@@ -64,7 +64,6 @@ and NOT read it. Burn them, it's a great symbolic gesture.
 Anyway, here goes:
 
 1) Indentation
--------------------------------------------------------------------------
 
 Tabs are 8 characters, and thus indentations are also 8 characters.
 There are heretic movements that try to make indentations 4 (or even 2!)
@@ -131,7 +130,6 @@ Get a decent editor and don't leave whitespace at the end of lines.
 
 ::: {#breaking-long-lines-and-strings .section}
 2) Breaking long lines and strings[¶](#breaking-long-lines-and-strings "Permalink to this headline"){.headerlink}
------------------------------------------------------------------------------------------------------------------
 
 Coding style is all about readability and maintainability using commonly
 available tools.
@@ -150,7 +148,6 @@ ability to grep for them.
 
 ::: {#placing-braces-and-spaces .section}
 3) Placing Braces and Spaces[¶](#placing-braces-and-spaces "Permalink to this headline"){.headerlink}
------------------------------------------------------------------------------------------------------
 
 The other issue that always comes up in C styling is the placement of
 braces. Unlike the indent size, there are few technical reasons to
@@ -338,7 +335,6 @@ applying a series of patches, this may make later patches in the series
 fail by changing their context lines.
 
 4) <a name="naming">Naming</a>
----------------------------------------------------------------
 
 C is a Spartan language, and so should your naming be. Unlike Modula-2
 and Pascal programmers, C programmers do not use cute names like
@@ -375,7 +371,6 @@ See chapter 6 (Functions).
 
 ::: {#typedefs .section}
 5) Typedefs[¶](#typedefs "Permalink to this headline"){.headerlink}
--------------------------------------------------------------------
 
 Please don't use things like `vps_t`{.docutils .literal}. It's a
 **mistake** to use typedef for structures and pointers. When you see a
@@ -479,7 +474,6 @@ be directly accessed should **never** be a typedef.
 
 ::: {#functions .section}
 6) Functions[¶](#functions "Permalink to this headline"){.headerlink}
----------------------------------------------------------------------
 
 Functions should be short and sweet, and do just one thing. They should
 fit on one or two screenfuls of text (the ISO/ANSI screen size is 80x24,
@@ -528,7 +522,6 @@ reader.
 
 ::: {#centralized-exiting-of-functions .section}
 7) Centralized exiting of functions[¶](#centralized-exiting-of-functions "Permalink to this headline"){.headerlink}
--------------------------------------------------------------------------------------------------------------------
 
 Albeit deprecated by some people, the equivalent of the goto statement
 is used frequently by compilers in form of the unconditional jump
@@ -611,7 +604,6 @@ Ideally you should simulate errors to test all exit paths.
 
 ::: {#commenting .section}
 8) Commenting[¶](#commenting "Permalink to this headline"){.headerlink}
------------------------------------------------------------------------
 
 Comments are good, but there is also a danger of over-commenting. NEVER
 try to explain HOW your code works in a comment: it's much better to
@@ -668,7 +660,6 @@ comment on each item, explaining its use.
 
 ::: {#you-ve-made-a-mess-of-it .section}
 9) You've made a mess of it[¶](#you-ve-made-a-mess-of-it "Permalink to this headline"){.headerlink}
----------------------------------------------------------------------------------------------------
 
 That's OK, we all do. You've probably been told by your long-time Unix
 user helper that `GNU emacs`{.docutils .literal} automatically formats
@@ -739,7 +730,6 @@ programming.
 
 ::: {#kconfig-configuration-files .section}
 10) Kconfig configuration files[¶](#kconfig-configuration-files "Permalink to this headline"){.headerlink}
-----------------------------------------------------------------------------------------------------------
 
 For all of the Kconfig\* configuration files throughout the source tree,
 the indentation is somewhat different. Lines under a `config`{.docutils
@@ -777,7 +767,6 @@ Documentation/kbuild/kconfig-language.txt.
 
 ::: {#data-structures .section}
 11) Data structures[¶](#data-structures "Permalink to this headline"){.headerlink}
-----------------------------------------------------------------------------------
 
 Data structures that have visibility outside the single-threaded
 environment they are created and destroyed in should always have
@@ -812,7 +801,6 @@ have a reference count on it, you almost certainly have a bug.
 
 ::: {#macros-enums-and-rtl .section}
 12) Macros, Enums and RTL[¶](#macros-enums-and-rtl "Permalink to this headline"){.headerlink}
----------------------------------------------------------------------------------------------
 
 Names of macros defining constants and labels in enums are capitalized.
 
@@ -910,7 +898,6 @@ kernel.
 
 ::: {#printing-kernel-messages .section}
 13) Printing kernel messages[¶](#printing-kernel-messages "Permalink to this headline"){.headerlink}
-----------------------------------------------------------------------------------------------------
 
 Kernel developers like to be seen as literate. Do mind the spelling of
 kernel messages to make a good impression. Do not use crippled words
@@ -948,7 +935,6 @@ it is already inside a debug-related \#ifdef section, printk(KERN\_DEBUG
 
 ::: {#allocating-memory .section}
 14) Allocating memory[¶](#allocating-memory "Permalink to this headline"){.headerlink}
---------------------------------------------------------------------------------------
 
 The kernel provides the following general purpose memory allocators:
 kmalloc(), kzalloc(), kmalloc\_array(), kcalloc(), vmalloc(), and
@@ -994,7 +980,6 @@ and return NULL if that occurred.
 
 ::: {#the-inline-disease .section}
 15) The inline disease[¶](#the-inline-disease "Permalink to this headline"){.headerlink}
-----------------------------------------------------------------------------------------
 
 There appears to be a common misperception that gcc has a magic "make me
 faster" speedup option called `inline`{.docutils .literal}. While the
@@ -1024,7 +1009,6 @@ hint that tells gcc to do something it would have done anyway.
 
 ::: {#function-return-values-and-names .section}
 16) Function return values and names[¶](#function-return-values-and-names "Permalink to this headline"){.headerlink}
---------------------------------------------------------------------------------------------------------------------
 
 Functions can return values of many different kinds, and one of the most
 common is a value indicating whether the function succeeded or failed.
@@ -1065,7 +1049,6 @@ pointers; they use NULL or the ERR\_PTR mechanism to report failure.
 
 ::: {#don-t-re-invent-the-kernel-macros .section}
 17) Don't re-invent the kernel macros[¶](#don-t-re-invent-the-kernel-macros "Permalink to this headline"){.headerlink}
-----------------------------------------------------------------------------------------------------------------------
 
 The header file include/linux/kernel.h contains a number of macros that
 you should use, rather than explicitly coding some variant of them
@@ -1094,7 +1077,6 @@ already defined that you shouldn't reproduce in your code.
 
 ::: {#editor-modelines-and-other-cruft .section}
 18) Editor modelines and other cruft[¶](#editor-modelines-and-other-cruft "Permalink to this headline"){.headerlink}
---------------------------------------------------------------------------------------------------------------------
 
 Some editors can interpret configuration information embedded in source
 files, indicated with special markers. For example, emacs interprets
@@ -1135,7 +1117,6 @@ other magic method for making indentation work correctly.
 
 ::: {#inline-assembly .section}
 19) Inline assembly[¶](#inline-assembly "Permalink to this headline"){.headerlink}
-----------------------------------------------------------------------------------
 
 In architecture-specific code, you may need to use inline assembly to
 interface with CPU or platform functionality. Don't hesitate to do so
@@ -1171,7 +1152,6 @@ indent the next instruction in the assembly output:
 
 ::: {#conditional-compilation .section}
 20) Conditional Compilation[¶](#conditional-compilation "Permalink to this headline"){.headerlink}
---------------------------------------------------------------------------------------------------
 
 Wherever possible, don't use preprocessor conditionals (\#if, \#ifdef)
 in .c files; doing so makes code harder to read and logic harder to
@@ -1227,7 +1207,6 @@ conditional expression used. For instance:
 
 ::: {#appendix-i-references .section}
 Appendix I) References[¶](#appendix-i-references "Permalink to this headline"){.headerlink}
--------------------------------------------------------------------------------------------
 
 The C Programming Language, Second Edition by Brian W. Kernighan and
 Dennis M. Ritchie. Prentice Hall, Inc., 1988. ISBN 0-13-110362-8
