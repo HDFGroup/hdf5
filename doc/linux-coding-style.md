@@ -6,60 +6,39 @@
 :::
 :::
 
--   [Linux kernel coding style](#){.current .reference .internal}
--   [1) Indentation](#indentation){.reference .internal}
--   [2) Breaking long lines and
-    strings](#breaking-long-lines-and-strings){.reference
-    .internal}
--   [3) Placing Braces and
-    Spaces](#placing-braces-and-spaces){.reference .internal}
-    -   [3.1) Spaces](#spaces){.reference .internal}
--   [4) Naming](#naming){.reference .internal}
--   [5) Typedefs](#typedefs){.reference .internal}
--   [6) Functions](#functions){.reference .internal}
--   [7) Centralized exiting of
-    functions](#centralized-exiting-of-functions){.reference
-    .internal}
--   [8) Commenting](#commenting){.reference .internal}
--   [9) You've made a mess of
-    it](#you-ve-made-a-mess-of-it){.reference .internal}
--   [10) Kconfig configuration
-    files](#kconfig-configuration-files){.reference .internal}
--   [11) Data structures](#data-structures){.reference
-    .internal}
+-   [Linux kernel coding style](#)
+-   [1) Indentation](#indentation)
+-   [2) Breaking long lines and strings](#breaking-long-lines-and-strings)
+-   [3) Placing Braces and Spaces](#placing-braces-and-spaces)
+    -   [3.1) Spaces](#spaces)
+-   [4) Naming](#naming)
+-   [5) Typedefs](#typedefs)
+-   [6) Functions](#functions)
+-   [7) Centralized exiting of functions](#centralized-exiting-of-functions)
+-   [8) Commenting](#commenting)
+-   [9) You've made a mess of it](#you-ve-made-a-mess-of-it)
+-   [10) Kconfig configuration files](#kconfig-configuration-files)
+-   [11) Data structures](#data-structures)
 -   [12) Macros, Enums and
-    RTL](#macros-enums-and-rtl){.reference .internal}
+    RTL](#macros-enums-and-rtl)
 -   [13) Printing kernel
-    messages](#printing-kernel-messages){.reference .internal}
--   [14) Allocating memory](#allocating-memory){.reference
-    .internal}
--   [15) The inline disease](#the-inline-disease){.reference
-    .internal}
+    messages](#printing-kernel-messages)
+-   [14) Allocating memory](#allocating-memory)
+-   [15) The inline disease](#the-inline-disease)
 -   [16) Function return values and
-    names](#function-return-values-and-names){.reference
-    .internal}
+    names](#function-return-values-and-names)
 -   [17) Don't re-invent the kernel
-    macros](#don-t-re-invent-the-kernel-macros){.reference
-    .internal}
+    macros](#don-t-re-invent-the-kernel-macros)
 -   [18) Editor modelines and other
-    cruft](#editor-modelines-and-other-cruft){.reference
-    .internal}
--   [19) Inline assembly](#inline-assembly){.reference
-    .internal}
+    cruft](#editor-modelines-and-other-cruft)
+-   [19) Inline assembly](#inline-assembly)
 -   [20) Conditional
-    Compilation](#conditional-compilation){.reference .internal}
--   [Appendix I) References](#appendix-i-references){.reference
-    .internal}
+    Compilation](#conditional-compilation)
+-   [Appendix I) References](#appendix-i-references)
 
 ------------------------------------------------------------------------
-:::
 
-::: {.document role="main" itemscope="itemscope" itemtype="http://schema.org/Article"}
-::: {itemprop="articleBody"}
-::: {#linux-kernel-coding-style .section}
-[]{#codingstyle}
-
-Linux kernel coding style[¶](#linux-kernel-coding-style "Permalink to this headline"){.headerlink}
+Linux kernel coding style
 ==================================================================================================
 
 This is a short document describing the preferred coding style for the
