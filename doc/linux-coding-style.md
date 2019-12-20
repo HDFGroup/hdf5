@@ -4,27 +4,47 @@
 -->
 
 [Linux kernel coding style](#)
-[1) Indentation](#indentation)
-[2) Breaking long lines and strings](#breaking-long-lines-and-strings)
-[3) Placing Braces and Spaces](#placing-braces-and-spaces)
-	[3.1) Spaces](#spaces)
-[4) Naming](#naming)
-[5) Typedefs](#typedefs)
-[6) Functions](#functions)
-[7) Centralized exiting of functions](#centralized-exiting-of-functions)
-[8) Commenting](#commenting)
-[9) You've made a mess of it](#you-ve-made-a-mess-of-it)
-[10) Kconfig configuration files](#kconfig-configuration-files)
-[11) Data structures](#data-structures)
-[12) Macros, Enums and RTL](#macros-enums-and-rtl)
-[13) Printing kernel messages](#printing-kernel-messages)
-[14) Allocating memory](#allocating-memory)
-[15) The inline disease](#the-inline-disease)
-[16) Function return values and names](#function-return-values-and-names)
-[17) Don't re-invent the kernel macros](#don-t-re-invent-the-kernel-macros)
-[18) Editor modelines and other cruft](#editor-modelines-and-other-cruft)
-[19) Inline assembly](#inline-assembly)
-[20) Conditional Compilation](#conditional-compilation)
+[Indentation](#indentation)
+
+[Breaking long lines and strings](#breaking-long-lines-and-strings)
+
+[Placing Braces and Spaces](#placing-braces-and-spaces)
+	[Spaces](#spaces)
+
+[Naming](#naming)
+
+[Typedefs](#typedefs)
+
+[Functions](#functions)
+
+[Centralized exiting of functions](#centralized-exiting-of-functions)
+
+[Commenting](#commenting)
+
+[You've made a mess of it](#you-ve-made-a-mess-of-it)
+
+[Kconfig configuration files](#kconfig-configuration-files)
+
+[Data structures](#data-structures)
+
+[Macros, Enums and RTL](#macros-enums-and-rtl)
+
+[Printing kernel messages](#printing-kernel-messages)
+
+[Allocating memory](#allocating-memory)
+
+[The inline disease](#the-inline-disease)
+
+[Function return values and names](#function-return-values-and-names)
+
+[Don't re-invent the kernel macros](#don-t-re-invent-the-kernel-macros)
+
+[Editor modelines and other cruft](#editor-modelines-and-other-cruft)
+
+[Inline assembly](#inline-assembly)
+
+[Conditional Compilation](#conditional-compilation)
+
 [Appendix I) References](#appendix-i-references)
 
 ------------------------------------------------------------------------
