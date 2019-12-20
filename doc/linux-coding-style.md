@@ -103,8 +103,7 @@ subordinate `case`{.docutils .literal} labels in the same column instead
 of `double-indenting`{.docutils .literal} the `case`{.docutils .literal}
 labels. E.g.:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     switch (suffix) {
     case 'G':
     case 'g':
@@ -121,18 +120,15 @@ labels. E.g.:
     default:
             break;
     }
-:::
-:::
+```
 
 Don't put multiple statements on a single line unless you have something
 to hide:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     if (condition) do_this;
       do_something_everytime;
-:::
-:::
+```
 
 Don't put multiple assignments on a single line either. Kernel coding
 style is super simple. Avoid tricky expressions.
@@ -173,19 +169,16 @@ choose one placement strategy over the other, but the preferred way, as
 shown to us by the prophets Kernighan and Ritchie, is to put the opening
 brace last on the line, and put the closing brace first, thusly:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     if (x is true) {
             we do y
     }
-:::
-:::
+```
 
 This applies to all non-function statement blocks (if, switch, for,
 while, do). E.g.:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     switch (action) {
     case KOBJ_ADD:
             return "add";
@@ -196,20 +189,17 @@ while, do). E.g.:
     default:
             return NULL;
     }
-:::
-:::
+```
 
 However, there is one special case, namely functions: they have the
 opening brace at the beginning of the next line, thus:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     int function(int x)
     {
             body of function
     }
-:::
-:::
+```
 
 Heretic people all over the world have claimed that this inconsistency
 is \... well \... inconsistent, but all right-thinking people know that
@@ -221,18 +211,15 @@ the cases where it is followed by a continuation of the same statement,
 ie a `while`{.docutils .literal} in a do-statement or an
 `else`{.docutils .literal} in an if-statement, like this:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     do {
             body of do-loop
     } while (condition);
-:::
-:::
+```
 
 and
 
-::: {.highlight-c}
-::: {.highlight}
+```
     if (x == y) {
             ..
     } else if (x > y) {
@@ -240,8 +227,7 @@ and
     } else {
             ....
     }
-:::
-:::
+```
 
 Rationale: K&R.
 
@@ -253,12 +239,10 @@ comments on.
 
 Do not unnecessarily use braces where a single statement will do.
 
-::: {.highlight-c}
-::: {.highlight}
+```
     if (condition)
             action();
-:::
-:::
+```
 
 and
 
@@ -274,16 +258,14 @@ and
 This does not apply if only one branch of a conditional statement is a
 single statement; in the latter case use braces in both branches:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     if (condition) {
             do_this();
             do_that();
     } else {
             otherwise();
     }
-:::
-:::
+```
 
 ::: {#spaces .section}
 ### 3.1) Spaces[¶](#spaces "Permalink to this headline"){.headerlink}
@@ -298,73 +280,57 @@ in: `sizeof info`{.docutils .literal} after
 
 So use a space after these keywords:
 
-::: {.highlight-none}
-::: {.highlight}
+```
     if, switch, case, for, do, while
-:::
-:::
+```
 
 but not with sizeof, typeof, alignof, or \_\_attribute\_\_. E.g.,
 
-::: {.highlight-c}
-::: {.highlight}
+```
     s = sizeof(struct file);
-:::
-:::
+```
 
 Do not add spaces around (inside) parenthesized expressions. This
 example is **bad**:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     s = sizeof( struct file );
-:::
-:::
+```
 
 When declaring pointer data or a function that returns a pointer type,
 the preferred use of `*`{.docutils .literal} is adjacent to the data
 name or function name and not adjacent to the type name. Examples:
 
-::: {.highlight-c}
-::: {.highlight}
+```
     char *linux_banner;
     unsigned long long memparse(char *ptr, char **retptr);
     char *match_strdup(substring_t *s);
-:::
-:::
+```
 
 Use one space around (on each side of) most binary and ternary
 operators, such as any of these:
 
-::: {.highlight-none}
-::: {.highlight}
+```
     =  +  -  <  >  *  /  %  |  &  ^  <=  >=  ==  !=  ?  :
-:::
-:::
+```
 
 but no space after unary operators:
 
-::: {.highlight-none}
-::: {.highlight}
+```
     &  *  +  -  ~  !  sizeof  typeof  alignof  __attribute__  defined
-:::
-:::
+```
 
 no space before the postfix increment & decrement unary operators:
 
-::: {.highlight-none}
-::: {.highlight}
+```
     ++  --
-:::
-:::
+```
 
 no space after the prefix increment & decrement unary operators:
 
-::: {.highlight-none}
-::: {.highlight}
+```
     ++  --
-:::
-:::
+```
 
 and no space around the `.`{.docutils .literal} and `->`{.docutils
 .literal} structure member operators.
@@ -381,11 +347,8 @@ Git will warn you about patches that introduce trailing whitespace, and
 can optionally strip the trailing whitespace for you; however, if
 applying a series of patches, this may make later patches in the series
 fail by changing their context lines.
-:::
-:::
 
-::: {#naming .section}
-4) Naming[¶](#naming "Permalink to this headline"){.headerlink}
+4) Naming{#naming}
 ---------------------------------------------------------------
 
 C is a Spartan language, and so should your naming be. Unlike Modula-2
