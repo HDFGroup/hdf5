@@ -4084,7 +4084,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 }
             }
             for(i = 0; i < ndims; i++, datactx.cur_elmt++, elmt_counter++) {
-                H5O_type_t obj_type;   /* Object type */
+                H5O_type_t obj_type = -1;   /* Object type */
                 H5R_type_t ref_type;   /* Reference type */
 
                 H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "reference loop:%d with curr_pos=%ld", i, curr_pos);

@@ -753,8 +753,8 @@ static hsize_t diff_datum(
                 hid_t region2_id = -1;
                 H5R_ref_t *ref1_buf = (const H5R_ref_t *)_mem1;
                 H5R_ref_t *ref2_buf = (const H5R_ref_t *)_mem2;
-                H5O_type_t obj1_type;   /* Object type */
-                H5O_type_t obj2_type;   /* Object type */
+                H5O_type_t obj1_type = -1;   /* Object type */
+                H5O_type_t obj2_type = -1;   /* Object type */
                 H5R_type_t ref_type;   /* Reference type */
 
                 ref_type = H5Rget_type(ref1_buf);
