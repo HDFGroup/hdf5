@@ -1135,7 +1135,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                     case H5O_TYPE_UNKNOWN:
                                     case H5O_TYPE_NTYPES:
                                     default:
-                                        h5tools_str_append(str, "%u-", (unsigned) oi.type);
+                                        h5tools_str_append(str, "%u-%s", (unsigned) oi.type, H5_TOOLS_UNKNOWN);
                                         break;
                                 } /* end switch */
                                 H5Oclose(obj);
@@ -1172,6 +1172,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                     case H5O_TYPE_UNKNOWN:
                                     case H5O_TYPE_NTYPES:
                                     default:
+                                        h5tools_str_append(str, H5_TOOLS_UNKNOWN);
                                         break;
                                 } /* end switch */
                                 h5tools_str_sprint_reference(str, info, container, ref_vp);
