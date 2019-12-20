@@ -550,9 +550,9 @@ hsize_t diff_attr(hid_t loc1_id, hid_t loc2_id, const char *path1, const char *p
     unsigned   u;                 /* Local index variable */
     hsize_t    nfound = 0;
     hsize_t    nfound_total = 0;
+    table_attrs_t *match_list_attrs = NULL;
 
     H5TOOLS_PUSH_STACK();
-    table_attrs_t *match_list_attrs = NULL;
     H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_attr start - errstat:%d", opts->err_stat);
 
     if(build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, opts) < 0) {
