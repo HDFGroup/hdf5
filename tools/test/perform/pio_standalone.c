@@ -18,6 +18,9 @@
 
 #include "pio_perf.h"
 
+#ifdef STANDALONE
+MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
+#endif
 
 /** From h5tools_utils.c **/
 
