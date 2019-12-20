@@ -196,7 +196,7 @@ Bug Fixes since HDF5-1.10.5 release
     -------
     - Improved peformance when creating a large number of small datasets by
       retrieving default property values from the API context instead of doing
-      skip list searches.
+      skip list searches. More work is required to achieve parity with HDF5 1.8.
 
       (CJH - 2019/12/10, HDFFV-10658)
 
