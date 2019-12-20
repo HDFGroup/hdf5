@@ -481,6 +481,8 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
                         "error in allocating space from the metadata file")
 
+        HDassert(md_addr % f->shared->fs_page_size == 0);
+
         /* Compute checksum and update the index entry */
         index[i].md_file_page_offset = md_addr/f->shared->fs_page_size;
         index[i].chksum = H5_checksum_metadata(index[i].entry_ptr,
