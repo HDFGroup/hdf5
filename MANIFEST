@@ -936,6 +936,7 @@
 ./src/H5VLnative_file.c
 ./src/H5VLnative_group.c
 ./src/H5VLnative_link.c
+./src/H5VLnative_introspect.c
 ./src/H5VLnative_object.c
 ./src/H5VLnative_private.h
 ./src/H5VLpassthru.c
