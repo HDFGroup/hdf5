@@ -108,6 +108,10 @@ static const H5VL_class_t null_vol_g = {
         NULL,                                       /* specific     */
         NULL                                        /* optional     */
     },
+    {   /* introspect_cls */
+        NULL,                                       /* get_conn_cls */
+        NULL,                                       /* opt_query    */
+    },
     {   /* request_cls */
         NULL,                                       /* wait         */
         NULL,                                       /* notify       */
