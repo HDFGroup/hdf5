@@ -2158,7 +2158,6 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
     else {
         hsize_t     mem_sel_start[H5S_MAX_RANK]; /* Offset of low bound of file selection */
         hsize_t     mem_sel_end[H5S_MAX_RANK];  /* Offset of high bound of file selection */
-        HDassert(fm->m_ndims == 1);
 
         HDassert(fm->m_ndims == 1);
 

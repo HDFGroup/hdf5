@@ -1508,16 +1508,16 @@ H5R__decode_token_compat(H5VL_object_t *vol_obj, H5I_type_t type, H5R_type_t ref
     FUNC_ENTER_PACKAGE
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(vol_obj, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(vol_obj, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
 #endif /* NDEBUG */
 
     /* Get the file for the object */
