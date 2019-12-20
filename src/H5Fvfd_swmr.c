@@ -467,7 +467,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
 
         if (index[i].entry_ptr == NULL)
             continue;
-        
+
         /* Prepend previous image of the entry to the delayed list */
         if ( index[i].md_file_page_offset ) {
             if (shadow_image_defer_free(f->shared, &index[i]) == -1) {
@@ -478,7 +478,6 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
 
         /* Allocate space for the entry in the metadata file */
         if((md_addr = H5MV_alloc(f, index[i].length)) == HADDR_UNDEF)
-
             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
                         "error in allocating space from the metadata file")
 
@@ -1795,8 +1794,10 @@ done:
 static herr_t
 H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
 {
-    const H5FD_vfd_swmr_idx_entry_t *entry1 = (const H5FD_vfd_swmr_idx_entry_t *)_entry1;
-    const H5FD_vfd_swmr_idx_entry_t *entry2 = (const H5FD_vfd_swmr_idx_entry_t *)_entry2;
+    const H5FD_vfd_swmr_idx_entry_t *entry1 =
+        (const H5FD_vfd_swmr_idx_entry_t *)_entry1;
+    const H5FD_vfd_swmr_idx_entry_t *entry2 =
+        (const H5FD_vfd_swmr_idx_entry_t *)_entry2;
 
     int ret_value = 0;          /* Return value */
 
