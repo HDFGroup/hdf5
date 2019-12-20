@@ -252,16 +252,16 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(vol_obj, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(vol_obj, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
 #endif /* NDEBUG */
 
     /* Get object type */
@@ -487,16 +487,16 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(vol_obj, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(vol_obj, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
 #endif /* NDEBUG */
 
     /* Get object type */
