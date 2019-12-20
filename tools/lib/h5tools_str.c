@@ -1320,9 +1320,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             case H5T_BITFIELD:
             case H5T_OPAQUE:
                 {
-                    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "OTHER");
                     /* All other types get printed as hexadecimal */
                     size_t i;
+
+                    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "OTHER");
                     if(1 == nsize)
                         h5tools_str_append(str, "0x%02x", ucp_vp[0]);
                     else

@@ -702,11 +702,11 @@ static hsize_t diff_datum(
      */
     case H5T_ARRAY:
         {
-            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_ARRAY");
             hid_t   memb_type = -1;
             hsize_t adims[H5S_MAX_RANK];
             int     ndims;
 
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_ARRAY");
             /* get the array's base datatype for each element */
             memb_type = H5Tget_super(m_type);
             size = H5Tget_size(memb_type);
@@ -747,7 +747,6 @@ static hsize_t diff_datum(
              *-------------------------------------------------------------------------
              */
             if (H5Tequal(m_type, H5T_STD_REF)) {
-                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_REFERENCE - H5T_STD_REF");
                 /* if (type_size == H5R_STD_REF_SIZE) */
                 hid_t region1_id = -1;
                 hid_t region2_id = -1;
@@ -757,6 +756,7 @@ static hsize_t diff_datum(
                 H5O_type_t obj2_type = -1;   /* Object type */
                 H5R_type_t ref_type;   /* Reference type */
 
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_REFERENCE - H5T_STD_REF");
                 ref_type = H5Rget_type(ref1_buf);
                 switch (ref_type) {
                     case H5R_OBJECT1:
