@@ -3,8 +3,6 @@
 Linux kernel coding style
 ==================================================================================================
 
-[Linux kernel coding style](#)
-
 ## Table of Contents
 
 - [Indentation](#indentation)
@@ -63,7 +61,7 @@ and NOT read it. Burn them, it's a great symbolic gesture.
 
 Anyway, here goes:
 
-## Indentation
+## <a name="indentation">Indentation</a>
 
 Tabs are 8 characters, and thus indentations are also 8 characters.
 There are heretic movements that try to make indentations 4 (or even 2!)
@@ -142,7 +140,7 @@ to function headers with a long argument list. However, never break
 user-visible strings such as printk messages, because that breaks the
 ability to grep for them.
 
-## Placing Braces and Spaces[¶](#placing-braces-and-spaces "Permalink to this headline"){.headerlink}
+## <a name="placing-braces-and-spaces">Placing Braces and Spaces</a>
 
 The other issue that always comes up in C styling is the placement of
 braces. Unlike the indent size, there are few technical reasons to
@@ -359,7 +357,7 @@ If you are afraid to mix up your local variable names, you have another
 problem, which is called the function-growth-hormone-imbalance syndrome.
 See chapter 6 (Functions).
 
-## Typedefs[¶](#typedefs "Permalink to this headline"){.headerlink}
+## <a name="typedefs">Typedefs</a>
 
 Please don't use things like `vps_t`{.docutils .literal}. It's a
 **mistake** to use typedef for structures and pointers. When you see a
@@ -456,7 +454,7 @@ rules.
 In general, a pointer, or a struct that has elements that can reasonably
 be directly accessed should **never** be a typedef.
 
-## Functions[¶](#functions "Permalink to this headline"){.headerlink}
+## <a name="functions">Functions</a>
 
 Functions should be short and sweet, and do just one thing. They should
 fit on one or two screenfuls of text (the ISO/ANSI screen size is 80x24,
@@ -500,7 +498,7 @@ Although this is not required by the C language, it is preferred in
 Linux because it is a simple way to add valuable information for the
 reader.
 
-## Centralized exiting of functions[¶](#centralized-exiting-of-functions "Permalink to this headline"){.headerlink}
+## <a name="centralized-exiting-of-functions">Centralized exiting of functions</a>
 
 Albeit deprecated by some people, the equivalent of the goto statement
 is used frequently by compilers in form of the unconditional jump
@@ -687,7 +685,7 @@ it comes to comment re-formatting you may want to take a look at the man
 page. But remember: `indent`{.docutils .literal} is not a fix for bad
 programming.
 
-## Kconfig configuration files[¶](#kconfig-configuration-files "Permalink to this headline"){.headerlink}
+## <a name="kconfig-configuration-files">Kconfig configuration files</a>
 
 For all of the Kconfig\* configuration files throughout the source tree,
 the indentation is somewhat different. Lines under a `config`{.docutils
@@ -718,7 +716,7 @@ filesystems) should advertise this prominently in their prompt string:
 For full documentation on the configuration files, see the file
 Documentation/kbuild/kconfig-language.txt.
 
-## Data structures[¶](#data-structures "Permalink to this headline"){.headerlink}
+## <a name="data-structures">Data structures</a>
 
 Data structures that have visibility outside the single-threaded
 environment they are created and destroyed in should always have
@@ -750,7 +748,7 @@ and s\_active).
 Remember: if another thread can find your data structure, and you don't
 have a reference count on it, you almost certainly have a bug.
 
-## Macros, Enums and RTL[¶](#macros-enums-and-rtl "Permalink to this headline"){.headerlink}
+## <a name="macros-enums-and-rtl">Macros, Enums and RTL</a>
 
 Names of macros defining constants and labels in enums are capitalized.
 
@@ -833,7 +831,7 @@ The cpp manual deals with macros exhaustively. The gcc internals manual
 also covers RTL which is used frequently with assembly language in the
 kernel.
 
-## Printing kernel messages[¶](#printing-kernel-messages "Permalink to this headline"){.headerlink}
+## <a name="printing-kernel-messages">Printing kernel messages</a>
 
 Kernel developers like to be seen as literate. Do mind the spelling of
 kernel messages to make a good impression. Do not use crippled words
@@ -868,7 +866,7 @@ And when a debug message should be unconditionally printed, such as if
 it is already inside a debug-related \#ifdef section, printk(KERN\_DEBUG
 \...) can be used.
 
-## Allocating memory[¶](#allocating-memory "Permalink to this headline"){.headerlink}
+## <a name="allocating-memory">Allocating memory</a>
 
 The kernel provides the following general purpose memory allocators:
 kmalloc(), kzalloc(), kmalloc\_array(), kcalloc(), vmalloc(), and
@@ -905,7 +903,7 @@ The preferred form for allocating a zeroed array is the following:
 Both forms check for overflow on the allocation size n \* sizeof(\...),
 and return NULL if that occurred.
 
-## The inline disease[¶](#the-inline-disease "Permalink to this headline"){.headerlink}
+## <a name="the-inline-disease">The inline disease</a>
 
 There appears to be a common misperception that gcc has a magic "make me
 faster" speedup option called `inline`{.docutils .literal}. While the
@@ -932,7 +930,7 @@ automatically without help, and the maintenance issue of removing the
 inline when a second user appears outweighs the potential value of the
 hint that tells gcc to do something it would have done anyway.
 
-## Function return values and names[¶](#function-return-values-and-names "Permalink to this headline"){.headerlink}
+## <a name="function-return-values-and-names">Function return values and names</a>
 
 Functions can return values of many different kinds, and one of the most
 common is a value indicating whether the function succeeded or failed.
@@ -966,7 +964,7 @@ subject to this rule. Generally they indicate failure by returning some
 out-of-range result. Typical examples would be functions that return
 pointers; they use NULL or the ERR\_PTR mechanism to report failure.
 
-## Don't re-invent the kernel macros[¶](#don-t-re-invent-the-kernel-macros "Permalink to this headline"){.headerlink}
+## <a name="don-t-re-invent-the-kernel-macros">Don't re-invent the kernel macros</a>
 
 The header file include/linux/kernel.h contains a number of macros that
 you should use, rather than explicitly coding some variant of them
@@ -988,7 +986,7 @@ There are also min() and max() macros that do strict type checking if
 you need them. Feel free to peruse that header file to see what else is
 already defined that you shouldn't reproduce in your code.
 
-## Editor modelines and other cruft[¶](#editor-modelines-and-other-cruft "Permalink to this headline"){.headerlink}
+## <a name="editor-modelines-and-other-cruft">Editor modelines and other cruft</a>
 
 Some editors can interpret configuration information embedded in source
 files, indicated with special markers. For example, emacs interprets
@@ -1020,7 +1018,7 @@ override them. This includes markers for indentation and mode
 configuration. People may use their own custom mode, or may have some
 other magic method for making indentation work correctly.
 
-## Inline assembly[¶](#inline-assembly "Permalink to this headline"){.headerlink}
+## <a name="inline-assembly">Inline assembly</a>
 
 In architecture-specific code, you may need to use inline assembly to
 interface with CPU or platform functionality. Don't hesitate to do so
@@ -1051,7 +1049,7 @@ indent the next instruction in the assembly output:
          : /* outputs */ : /* inputs */ : /* clobbers */);
 ```
 
-## Conditional Compilation[¶](#conditional-compilation "Permalink to this headline"){.headerlink}
+## <a name="conditional-compilation">Conditional Compilation</a>
 
 Wherever possible, don't use preprocessor conditionals (\#if, \#ifdef)
 in .c files; doing so makes code harder to read and logic harder to
