@@ -1093,7 +1093,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     h5tools_str_append(str, "NULL");
                 else {
                     if (H5Tequal(type, H5T_STD_REF)) {
-                        H5O_type_t obj_type;   /* Object type */
+                        H5O_type_t obj_type = -1;   /* Object type */
                         H5R_type_t ref_type;   /* Reference type */
                         const H5R_ref_t *ref_vp = (const H5R_ref_t *)vp;
 

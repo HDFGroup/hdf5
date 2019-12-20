@@ -4,7 +4,7 @@ GROUP "/" {
       DATATYPE  H5T_REFERENCE { H5T_STD_REF }
       DATASPACE  SCALAR
       DATA {
-         GROUP "trefer_obj_del.h5"
+         UNKNOWN "trefer_obj_del.h5"
       }
    }
 }
