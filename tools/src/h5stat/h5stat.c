@@ -442,9 +442,9 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
 static herr_t
 group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 {
+    H5TOOLS_ERR_INIT(herr_t, SUCCEED)
     H5G_info_t ginfo;           /* Group information */
     unsigned bin;               /* "bin" the number of objects falls in */
-    herr_t ret_value = SUCCEED; /* Return value */
 
     /* Gather statistics about this type of object */
     iter->uniq_groups++;
@@ -512,6 +512,7 @@ done:
 static herr_t
 dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 {
+    H5TOOLS_ERR_INIT(herr_t, SUCCEED)
     unsigned bin;               /* "bin" the number of objects falls in */
     hid_t did;                  /* Dataset ID */
     hid_t sid;                  /* Dataspace ID */
@@ -527,7 +528,6 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     int num_ext;                /* Number of external files for a dataset */
     int nfltr;                  /* Number of filters for a dataset */
     H5Z_filter_t fltr;          /* Filter identifier */
-    herr_t ret_value = SUCCEED; /* Return value */
 
     /* Gather statistics about this type of object */
     iter->uniq_dsets++;
@@ -704,7 +704,7 @@ done:
 static herr_t
 datatype_stats(iter_t *iter, const H5O_info_t *oi)
 {
-    herr_t ret_value = SUCCEED;
+    H5TOOLS_ERR_INIT(herr_t, SUCCEED)
 
     /* Gather statistics about this type of object */
     iter->uniq_dtypes++;
@@ -738,8 +738,8 @@ static herr_t
 obj_stats(const char *path, const H5O_info_t *oi, const char *already_visited,
     void *_iter)
 {
+    H5TOOLS_ERR_INIT(herr_t, SUCCEED)
     iter_t *iter = (iter_t *)_iter;
-    herr_t ret_value = SUCCEED;
 
     /* If the object has already been seen then just return */
     if(NULL == already_visited) {

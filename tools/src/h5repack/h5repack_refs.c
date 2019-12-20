@@ -42,7 +42,7 @@ int do_copy_refobjs(hid_t fidin,
                     trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
-    int       ret_value = 0;          /*no need to LEAVE() on ERROR: H5TOOLS_ERR_INIT(int, SUCCEED) */
+    H5TOOLS_ERR_INIT(int, 0)
     hid_t     grp_in = -1;            /* read group ID */
     hid_t     grp_out = -1;           /* write group ID */
     hid_t     dset_in = -1;           /* read dataset ID */
@@ -429,7 +429,7 @@ static int copy_refs_attr(hid_t loc_in,
                           trav_table_t *travt,
                           hid_t fidout)         /* for saving references */
 {
-    int         ret_value = 0;     /*no need to LEAVE() on ERROR: H5TOOLS_ERR_INIT(int, SUCCEED) */
+    H5TOOLS_ERR_INIT(int, 0)
     hid_t       attr_id = -1;      /* attr ID */
     hid_t       attr_out = -1;     /* attr ID */
     hid_t       space_id = -1;     /* space ID */
@@ -822,7 +822,7 @@ out:
 static herr_t update_ref_value(hid_t obj_id, H5R_type_t ref_type, void *ref_in,
         hid_t fid_out, void *ref_out, trav_table_t *travt)
 {
-    int         ret_value = 0;   /*no need to LEAVE() on ERROR: H5TOOLS_ERR_INIT(int, SUCCEED) */
+    H5TOOLS_ERR_INIT(int, 0)
     const char *ref_obj_name;
     hid_t       space_id = -1;
     hid_t       ref_obj_id = -1;

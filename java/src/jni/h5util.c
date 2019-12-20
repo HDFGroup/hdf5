@@ -1059,7 +1059,7 @@ h5str_sprintf
             }
 
             if (H5Tequal(tid, H5T_STD_REF)) {
-                H5O_type_t obj_type;   /* Object type */
+                H5O_type_t obj_type = -1;   /* Object type */
                 H5R_type_t ref_type;   /* Reference type */
                 const H5R_ref_t *ref_vp = (H5R_ref_t *)cptr;
 

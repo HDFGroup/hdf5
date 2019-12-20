@@ -61,7 +61,7 @@ static void print_user_block(const char *filename, hid_t fid);
 int
 copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 {
-    int           ret_value = 0;
+    H5TOOLS_ERR_INIT(int, 0)
     hid_t         fidin = -1;
     hid_t         fidout = -1;
     hid_t         fcpl_in = -1;  /* file creation property list ID for input file */
@@ -402,7 +402,7 @@ int
 get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
         size_t size_datum, hsize_t dims_hslab[], hsize_t * hslab_nbytes_p)
 {
-    int     ret_value = 0;
+    H5TOOLS_ERR_INIT(int, 0)
     int     k;
     H5D_layout_t dset_layout;
     int     rank_chunk;
@@ -580,7 +580,7 @@ int
 do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
         pack_opt_t *options) /* repack options */
 {
-    int   ret_value = 0;
+    H5TOOLS_ERR_INIT(int, 0)
     hid_t grp_in = -1;   /* group ID */
     hid_t grp_out = -1;  /* group ID */
     hid_t dset_in = -1;  /* read dataset ID */
@@ -1354,7 +1354,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
 static int
 copy_user_block(const char *infile, const char *outfile, hsize_t size)
 {
-    int ret_value = 0;
+    H5TOOLS_ERR_INIT(int, 0)
     int infid = -1, outfid = -1; /* File descriptors */
 
     /* User block must be any power of 2 equal to 512 or greater (512, 1024, 2048, etc.) */
@@ -1426,7 +1426,7 @@ static
 void
 print_user_block(const char *filename, hid_t fid)
 {
-    int     ret_value = 0;
+    H5TOOLS_ERR_INIT(int, 0)
     int     fh = -1;   /* file handle */
     hsize_t ub_size;   /* user block size */
     hsize_t size;      /* size read */

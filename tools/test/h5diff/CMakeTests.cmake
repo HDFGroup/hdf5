@@ -94,6 +94,17 @@
       ${HDF5_TOOLS_DIR}/testfiles/vds/5_vds.h5
       # tools/testfiles
       ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5
+      #STD_REF_OBJ files
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_attr.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_compat.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_ext1.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_ext2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_grp.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj_del.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_param.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg_1d.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg.h5
   )
 
   set (LIST_OTHER_TEST_FILES
@@ -1044,7 +1055,10 @@ ADD_H5_TEST (h5diff_56 1 -v ${FILE4} ${FILE4} dset6a dset6b)
 ADD_H5_TEST (h5diff_57 0 -v ${FILE4} ${FILE4} dset7a dset7b)
 
 # 5.8 (region reference)
-ADD_H5_TEST (h5diff_58 1 -v ${FILE7} ${FILE8} refreg)
+ADD_H5_TEST (h5diff_58 1 -v2 ${FILE7} ${FILE8} refreg)
+ADD_H5_TEST (h5diff_58_ref 1 -v2 ${FILE7} ${FILE8} /g1/reference2D)
+# STD_REF_OBJ
+ADD_H5_TEST (h5diff_reg 0 -v2 trefer_attr.h5 trefer_ext2.h5 Dataset3 Dataset3)
 
 # test for both dset and attr with same type but with different size
 # ( HDDFV-7942 )
@@ -1484,8 +1498,6 @@ ADD_H5_TEST (h5diff_485 0 -v --exclude-path "/group1" h5diff_exclude3-1.h5 h5dif
 ADD_H5_TEST (h5diff_486 0 -v --exclude-path "/group1" h5diff_exclude3-2.h5 h5diff_exclude3-1.h5)
 ADD_H5_TEST (h5diff_487 1 -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5)
 
-
-
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
@@ -1524,7 +1536,7 @@ ADD_H5_TEST (h5diff_800 1 -v ${FILE7} ${FILE8} /g1/array /g1/array)
 ADD_H5_TEST (h5diff_801 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
 
 # ##############################################################################
-# VDS tests
+# # VDS tests
 # ##############################################################################
 ADD_H5_TEST (h5diff_v1 0 -v ${FILEV1} ${FILEV2})
 ADD_H5_TEST (h5diff_v2 0 -r ${FILEV1} ${FILEV2})
