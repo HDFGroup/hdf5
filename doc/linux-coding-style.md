@@ -348,7 +348,7 @@ can optionally strip the trailing whitespace for you; however, if
 applying a series of patches, this may make later patches in the series
 fail by changing their context lines.
 
-4) Naming{#naming}
+4) <a id="naming">Naming</a>
 ---------------------------------------------------------------
 
 C is a Spartan language, and so should your naming be. Unlike Modula-2
