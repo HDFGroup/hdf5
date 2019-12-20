@@ -84,35 +84,35 @@ benefit of warning you when you're nesting your functions too deep. Heed
 that warning.
 
 The preferred way to ease multiple indentation levels in a switch
-statement is to align the `switch`{.docutils .literal} and its
-subordinate `case`{.docutils .literal} labels in the same column instead
-of `double-indenting`{.docutils .literal} the `case`{.docutils .literal}
+statement is to align the `switch` and its
+subordinate `case` labels in the same column instead
+of `double-indenting` the `case`
 labels. E.g.:
 
 ```
-switch (suffix) {
-case 'G':
-case 'g':
-	mem <<= 30;
-	break;
-case 'M':
-case 'm':
-	mem <<= 20;
-	break;
-case 'K':
-case 'k':
-	mem <<= 10;
-	/* fall through */
-default:
-	break;
-}
+	switch (suffix) {
+	case 'G':
+	case 'g':
+		mem <<= 30;
+		break;
+	case 'M':
+	case 'm':
+		mem <<= 20;
+		break;
+	case 'K':
+	case 'k':
+		mem <<= 10;
+		/* fall through */
+	default:
+		break;
+	}
 ```
 
 Don't put multiple statements on a single line unless you have something
 to hide:
 
 ```
-if (condition) do_this; do_something_everytime;
+	if (condition) do_this; do_something_everytime;
 ```
 
 Don't put multiple assignments on a single line either. Kernel coding
@@ -158,16 +158,16 @@ This applies to all non-function statement blocks (if, switch, for,
 while, do). E.g.:
 
 ```
-    switch (action) {
-    case KOBJ_ADD:
-            return "add";
-    case KOBJ_REMOVE:
-            return "remove";
-    case KOBJ_CHANGE:
-            return "change";
-    default:
-            return NULL;
-    }
+	switch (action) {
+	case KOBJ_ADD:
+	        return "add";
+	case KOBJ_REMOVE:
+	        return "remove";
+	case KOBJ_CHANGE:
+	        return "change";
+	default:
+	        return NULL;
+	}
 ```
 
 However, there is one special case, namely functions: they have the
@@ -187,8 +187,8 @@ special anyway (you can't nest them in C).
 
 Note that the closing brace is empty on a line of its own, **except** in
 the cases where it is followed by a continuation of the same statement,
-ie a `while`{.docutils .literal} in a do-statement or an
-`else`{.docutils .literal} in an if-statement, like this:
+ie a `while` in a do-statement or an
+`else` in an if-statement, like this:
 
 ```
 	do {
@@ -244,15 +244,15 @@ single statement; in the latter case use braces in both branches:
 	}
 ```
 
-### Spaces[¶](#spaces "Permalink to this headline"){.headerlink}
+### <a name="spaces ">Spaces</a>
 
 Linux kernel style for use of spaces depends (mostly) on
 function-versus-keyword usage. Use a space after (most) keywords. The
 notable exceptions are sizeof, typeof, alignof, and \_\_attribute\_\_,
 which look somewhat like functions (and are usually used with
 parentheses in Linux, although they are not required in the language, as
-in: `sizeof info`{.docutils .literal} after
-`struct fileinfo info;`{.docutils .literal} is declared).
+in: `sizeof info` after
+`struct fileinfo info;` is declared).
 
 So use a space after these keywords:
 
@@ -274,7 +274,7 @@ example is **bad**:
 ```
 
 When declaring pointer data or a function that returns a pointer type,
-the preferred use of `*`{.docutils .literal} is adjacent to the data
+the preferred use of `*` is adjacent to the data
 name or function name and not adjacent to the type name. Examples:
 
 ```
@@ -311,7 +311,7 @@ no space after the prefix increment & decrement unary operators:
 and no space around the `.` and `->` structure member operators.
 
 Do not leave trailing whitespace at the ends of lines. Some editors with
-`smart`{.docutils .literal} indentation will insert whitespace at the
+`smart` indentation will insert whitespace at the
 beginning of new lines as appropriate, so you can start typing the next
 line of code right away. However, some such editors do not remove the
 whitespace if you end up not putting a line of code there, such as if
@@ -328,18 +328,17 @@ fail by changing their context lines.
 C is a Spartan language, and so should your naming be. Unlike Modula-2
 and Pascal programmers, C programmers do not use cute names like
 ThisVariableIsATemporaryCounter. A C programmer would call that variable
-`tmp`{.docutils .literal}, which is much easier to write, and not the
+`tmp`, which is much easier to write, and not the
 least more difficult to understand.
 
 HOWEVER, while mixed-case names are frowned upon, descriptive names for
-global variables are a must. To call a global function `foo`{.docutils
-.literal} is a shooting offense.
+global variables are a must. To call a global function `foo` is a shooting offense.
 
 GLOBAL variables (to be used only if you **really** need them) need to
 have descriptive names, as do global functions. If you have a function
 that counts the number of active users, you should call that
-`count_active_users()`{.docutils .literal} or similar, you should
-**not** call it `cntusr()`{.docutils .literal}.
+`count_active_users()` or similar, you should
+**not** call it `cntusr()`.
 
 Encoding the type of a function into the name (so-called Hungarian
 notation) is brain damaged - the compiler knows the types anyway and can
@@ -347,10 +346,9 @@ check those, and it only confuses the programmer. No wonder MicroSoft
 makes buggy programs.
 
 LOCAL variable names should be short, and to the point. If you have some
-random integer loop counter, it should probably be called `i`{.docutils
-.literal}. Calling it `loop_counter`{.docutils .literal} is
+random integer loop counter, it should probably be called `i`. Calling it `loop_counter` is
 non-productive, if there is no chance of it being mis-understood.
-Similarly, `tmp`{.docutils .literal} can be just about any type of
+Similarly, `tmp` can be just about any type of
 variable that is used to hold a temporary value.
 
 If you are afraid to mix up your local variable names, you have another
@@ -359,7 +357,7 @@ See chapter 6 (Functions).
 
 ## <a name="typedefs">Typedefs</a>
 
-Please don't use things like `vps_t`{.docutils .literal}. It's a
+Please don't use things like `vps_t`. It's a
 **mistake** to use typedef for structures and pointers. When you see a
 
 ```
@@ -372,80 +370,69 @@ in the source, what does it mean? In contrast, if it says
 	struct virtual_container *a;
 ```
 
-you can actually tell what `a`{.docutils .literal} is.
+you can actually tell what `a` is.
 
-Lots of people think that typedefs `help readability`{.docutils
-.literal}. Not so. They are useful only for:
+Lots of people think that typedefs `help readability`. Not so. They are useful only for:
 
-> <div>
->
-> 1.  totally opaque objects (where the typedef is actively used to
->     **hide** what the object is).
->
->     Example: `pte_t`{.docutils .literal} etc. opaque objects that you
->     can only access using the proper accessor functions.
->
->     ::: {.admonition .note}
->     Note
->
->     Opaqueness and `accessor functions`{.docutils .literal} are not
->     good in themselves. The reason we have them for things like pte\_t
->     etc. is that there really is absolutely **zero** portably
->     accessible information there.
->     :::
->
-> 2.  Clear integer types, where the abstraction **helps** avoid
->     confusion whether it is `int`{.docutils .literal} or
->     `long`{.docutils .literal}.
->
->     u8/u16/u32 are perfectly fine typedefs, although they fit into
->     category (d) better than here.
->
->     ::: {.admonition .note}
->     Note
->
->     Again - there needs to be a **reason** for this. If something is
->     `unsigned long`{.docutils .literal}, then there's no reason to do
->
->     > <div>
->     >
->     > typedef unsigned long myflags\_t;
->     >
->     > </div>
->     :::
->
->     but if there is a clear reason for why it under certain
->     circumstances might be an `unsigned int`{.docutils .literal} and
->     under other configurations might be `unsigned long`{.docutils
->     .literal}, then by all means go ahead and use a typedef.
->
-> 3.  when you use sparse to literally create a **new** type for
->     type-checking.
->
-> 4.  New types which are identical to standard C99 types, in certain
->     exceptional circumstances.
->
->     Although it would only take a short amount of time for the eyes
->     and brain to become accustomed to the standard types like
->     `uint32_t`{.docutils .literal}, some people object to their use
->     anyway.
->
->     Therefore, the Linux-specific `u8/u16/u32/u64`{.docutils .literal}
->     types and their signed equivalents which are identical to standard
->     types are permitted -- although they are not mandatory in new code
->     of your own.
->
->     When editing existing code which already uses one or the other set
->     of types, you should conform to the existing choices in that code.
->
-> 5.  Types safe for use in userspace.
->
->     In certain structures which are visible to userspace, we cannot
->     require C99 types and cannot use the `u32`{.docutils .literal}
->     form above. Thus, we use \_\_u32 and similar types in all
->     structures which are shared with userspace.
->
-> </div>
+1.  totally opaque objects (where the typedef is actively used to
+    **hide** what the object is).
+
+    Example: `pte_t` etc. opaque objects that you
+    can only access using the proper accessor functions.
+
+    #### Note
+
+    Opaqueness and `accessor functions` are not
+    good in themselves. The reason we have them for things like pte\_t
+    etc. is that there really is absolutely **zero** portably
+    accessible information there.
+    :::
+
+2.  Clear integer types, where the abstraction **helps** avoid
+    confusion whether it is `int` or
+    `long`.
+
+    u8/u16/u32 are perfectly fine typedefs, although they fit into
+    category (d) better than here.
+
+    #### Note
+
+    Again - there needs to be a **reason** for this. If something is
+    `unsigned long`, then there's no reason to do
+
+```
+	typedef unsigned long myflags\_t;
+```
+
+    but if there is a clear reason for why it under certain
+    circumstances might be an `unsigned int` and
+    under other configurations might be `unsigned long`, then by all means go ahead and use a typedef.
+
+3.  when you use sparse to literally create a **new** type for
+    type-checking.
+
+4.  New types which are identical to standard C99 types, in certain
+    exceptional circumstances.
+
+    Although it would only take a short amount of time for the eyes
+    and brain to become accustomed to the standard types like
+    `uint32_t`, some people object to their use
+    anyway.
+
+    Therefore, the Linux-specific `u8/u16/u32/u64`
+    types and their signed equivalents which are identical to standard
+    types are permitted -- although they are not mandatory in new code
+    of your own.
+
+    When editing existing code which already uses one or the other set
+    of types, you should conform to the existing choices in that code.
+
+5.  Types safe for use in userspace.
+
+    In certain structures which are visible to userspace, we cannot
+    require C99 types and cannot use the `u32`
+    form above. Thus, we use \_\_u32 and similar types in all
+    structures which are shared with userspace.
 
 Maybe there are other cases too, but the rule should basically be to
 NEVER EVER use a typedef unless you can clearly match one of those
@@ -549,10 +536,10 @@ The rationale for using gotos is:
 A common type of bug to be aware of is `one err bugs` which look like this:
 
 ```
-    err:
-            kfree(foo->bar);
-            kfree(foo);
-            return ret;
+	err:
+	        kfree(foo->bar);
+	        kfree(foo);
+	        return ret;
 ```
 
 The bug in this code is that on some exit paths `foo` is NULL. Normally the fix for this is to split it up into two
@@ -560,11 +547,11 @@ error labels `err_free_bar:` and
 `err_free_foo:`:
 
 ```
-    err_free_bar:
-           kfree(foo->bar);
-    err_free_foo:
-           kfree(foo);
-           return ret;
+	err_free_bar:
+		kfree(foo->bar);
+	err_free_foo:
+		kfree(foo);
+		return ret;
 ```
 
 Ideally you should simulate errors to test all exit paths.
@@ -585,33 +572,31 @@ but try to avoid excess. Instead, put the comments at the head of the
 function, telling people what it does, and possibly WHY it does it.
 
 When commenting the kernel API functions, please use the kernel-doc
-format. See the files at [[Documentation/doc-guide/]{.std
-.std-ref}](../doc-guide/index.html#doc-guide){.reference .internal} and
-`scripts/kernel-doc`{.docutils .literal} for details.
+format. See the files at [[Documentation/doc-guide/]](../doc-guide/index.html#doc-guide) and `scripts/kernel-doc` for details.
 
 The preferred style for long (multi-line) comments is:
 
 ```
-    /*
-     * This is the preferred style for multi-line
-     * comments in the Linux kernel source code.
-     * Please use it consistently.
-     *
-     * Description:  A column of asterisks on the left side,
-     * with beginning and ending almost-blank lines.
-     */
+	/*
+	 * This is the preferred style for multi-line
+	 * comments in the Linux kernel source code.
+	 * Please use it consistently.
+	 *
+	 * Description:  A column of asterisks on the left side,
+	 * with beginning and ending almost-blank lines.
+	 */
 ```
 
 For files in net/ and drivers/net/ the preferred style for long
 (multi-line) comments is a little different.
 
 ```
-    /* The preferred comment style for files in net/ and drivers/net
-     * looks like this.
-     *
-     * It is nearly the same as the generally preferred comment style,
-     * but there is no initial almost-blank line.
-     */
+	/* The preferred comment style for files in net/ and drivers/net
+	 * looks like this.
+	 *
+	 * It is nearly the same as the generally preferred comment style,
+	 * but there is no initial almost-blank line.
+	 */
 ```
 
 It's also important to comment data, whether they are basic types or
@@ -622,7 +607,7 @@ comment on each item, explaining its use.
 ## <a name="you-ve-made-a-mess-of-it">You've made a mess of it</a>
 
 That's OK, we all do. You've probably been told by your long-time Unix
-user helper that `GNU emacs`{.docutils .literal} automatically formats
+user helper that `GNU emacs` automatically formats
 the C sources for you, and you've noticed that yes, it does do that, but
 the defaults it uses are less than desirable (in fact, they are worse
 than random typing - an infinite number of monkeys typing into GNU emacs
@@ -665,31 +650,30 @@ file:
 ```
 
 This will make emacs go better with the kernel coding style for C files
-below `~/src/linux-trees`{.docutils .literal}.
+below `~/src/linux-trees`.
 
 But even if you fail in getting emacs to do sane formatting, not
-everything is lost: use `indent`{.docutils .literal}.
+everything is lost: use `indent`.
 
 Now, again, GNU indent has the same brain-dead settings that GNU emacs
 has, which is why you need to give it a few command line options.
 However, that's not too bad, because even the makers of GNU indent
 recognize the authority of K&R (the GNU people aren't evil, they are
 just severely misguided in this matter), so you just give indent the
-options `-kr -i8`{.docutils .literal} (stands for
-`K&R, 8 character indents`{.docutils .literal}), or use
-`scripts/Lindent`{.docutils .literal}, which indents in the latest
+options `-kr -i8` (stands for
+`K&R, 8 character indents`), or use
+`scripts/Lindent`, which indents in the latest
 style.
 
-`indent`{.docutils .literal} has a lot of options, and especially when
+`indent` has a lot of options, and especially when
 it comes to comment re-formatting you may want to take a look at the man
-page. But remember: `indent`{.docutils .literal} is not a fix for bad
+page. But remember: `indent` is not a fix for bad
 programming.
 
 ## <a name="kconfig-configuration-files">Kconfig configuration files</a>
 
 For all of the Kconfig\* configuration files throughout the source tree,
-the indentation is somewhat different. Lines under a `config`{.docutils
-.literal} definition are indented with one tab, while help text is
+the indentation is somewhat different. Lines under a `config` definition are indented with one tab, while help text is
 indented an additional two spaces. Example:
 
 ```
@@ -735,14 +719,13 @@ counting is a memory management technique. Usually both are needed, and
 they are not to be confused with each other.
 
 Many data structures can indeed have two levels of reference counting,
-when there are users of different `classes`{.docutils .literal}. The
+when there are users of different `classes`. The
 subclass count counts the number of subclass users, and decrements the
 global count just once when the subclass count goes to zero.
 
-Examples of this kind of `multi-level-reference-counting`{.docutils
-.literal} can be found in memory management
-(`struct mm_struct`{.docutils .literal}: mm\_users and mm\_count), and
-in filesystem code (`struct super_block`{.docutils .literal}: s\_count
+Examples of this kind of `multi-level-reference-counting` can be found in memory management
+(`struct mm_struct`: mm\_users and mm\_count), and
+in filesystem code (`struct super_block`: s\_count
 and s\_active).
 
 Remember: if another thread can find your data structure, and you don't
@@ -753,7 +736,7 @@ have a reference count on it, you almost certainly have a bug.
 Names of macros defining constants and labels in enums are capitalized.
 
 ```
-    #define CONSTANT 0x12345
+#define CONSTANT 0x12345
 ```
 
 Enums are preferred when defining several related constants.
@@ -768,11 +751,11 @@ Macros with multiple statements should be enclosed in a do - while
 block:
 
 ```
-    #define macrofun(a, b, c)                       \
-            do {                                    \
-                    if (a == 5)                     \
-                            do_this(b, c);          \
-            } while (0)
+#define macrofun(a, b, c)                       \
+        do {                                    \
+                if (a == 5)                     \
+                        do_this(b, c);          \
+        } while (0)
 ```
 
 Things to avoid when using macros:
@@ -780,21 +763,21 @@ Things to avoid when using macros:
 1.  macros that affect control flow:
 
 ```
-    #define FOO(x)                                  \
-            do {                                    \
-                    if (blah(x) < 0)                \
-                            return -EBUGGERED;      \
-            } while (0)
+#define FOO(x)                                  \
+        do {                                    \
+                if (blah(x) < 0)                \
+                        return -EBUGGERED;      \
+        } while (0)
 ```
 
 is a **very** bad idea. It looks like a function call but exits the
-`calling`{.docutils .literal} function; don't break the internal parsers
+`calling` function; don't break the internal parsers
 of those who will read the code.
 
 2.  macros that depend on having a local variable with a magic name:
 
 ```
-    #define FOO(val) bar(index, val)
+#define FOO(val) bar(index, val)
 ```
 
 might look like a good thing, but it's confusing as hell when one reads
@@ -808,20 +791,20 @@ expressions must enclose the expression in parentheses. Beware of
 similar issues with macros using parameters.
 
 ```
-    #define CONSTANT 0x4000
-    #define CONSTEXP (CONSTANT | 3)
+#define CONSTANT 0x4000
+#define CONSTEXP (CONSTANT | 3)
 ```
 
 5\) namespace collisions when defining local variables in macros
 resembling functions:
 
 ```
-    #define FOO(x)                          \
-    ({                                      \
-            typeof(x) ret;                  \
-            ret = calc_ret(x);              \
-            (ret);                          \
-    })
+#define FOO(x)                          \
+({                                      \
+        typeof(x) ret;                  \
+        ret = calc_ret(x);              \
+        (ret);                          \
+})
 ```
 
 ret is a common name for a local variable - \_\_foo\_ret is less likely
@@ -835,8 +818,8 @@ kernel.
 
 Kernel developers like to be seen as literate. Do mind the spelling of
 kernel messages to make a good impression. Do not use crippled words
-like `dont`{.docutils .literal}; use `do not`{.docutils .literal} or
-`don't`{.docutils .literal} instead. Make the messages concise, clear,
+like `dont`; use `do not` or
+`don't` instead. Make the messages concise, clear,
 and unambiguous.
 
 Kernel messages do not have to be terminated with a period.
@@ -876,7 +859,7 @@ about them.
 The preferred form for passing a size of a struct is the following:
 
 ```
-    p = kmalloc(sizeof(*p), ...);
+p = kmalloc(sizeof(*p), ...);
 ```
 
 The alternative form where struct name is spelled out hurts readability
@@ -891,13 +874,13 @@ the C programming language.
 The preferred form for allocating an array is the following:
 
 ```
-    p = kmalloc_array(n, sizeof(...), ...);
+p = kmalloc_array(n, sizeof(...), ...);
 ```
 
 The preferred form for allocating a zeroed array is the following:
 
 ```
-    p = kcalloc(n, sizeof(...), ...);
+p = kcalloc(n, sizeof(...), ...);
 ```
 
 Both forms check for overflow on the allocation size n \* sizeof(\...),
@@ -906,7 +889,7 @@ and return NULL if that occurred.
 ## <a name="the-inline-disease">The inline disease</a>
 
 There appears to be a common misperception that gcc has a magic "make me
-faster" speedup option called `inline`{.docutils .literal}. While the
+faster" speedup option called `inline`. While the
 use of inlines can be appropriate (for example as a means of replacing
 macros, see Chapter 12), it very often is not. Abundant use of the
 inline keyword leads to a much bigger kernel, which in turn slows the
@@ -935,7 +918,7 @@ hint that tells gcc to do something it would have done anyway.
 Functions can return values of many different kinds, and one of the most
 common is a value indicating whether the function succeeded or failed.
 Such a value can be represented as an error-code integer (-Exxx =
-failure, 0 = success) or a `succeeded`{.docutils .literal} boolean (0 =
+failure, 0 = success) or a `succeeded` boolean (0 =
 failure, non-zero = success).
 
 Mixing up these two sorts of representations is a fertile source of
@@ -948,9 +931,9 @@ follow this convention:
     the function should return an error-code integer.  If the name
     is a predicate, the function should return a "succeeded" boolean.
 
-For example, `add work`{.docutils .literal} is a command, and the
+For example, `add work` is a command, and the
 add\_work() function returns 0 for success or -EBUSY for failure. In the
-same way, `PCI device present`{.docutils .literal} is a predicate, and
+same way, `PCI device present` is a predicate, and
 the pci\_dev\_present() function returns 1 if it succeeds in finding a
 matching device or 0 if it doesn't.
 
@@ -972,14 +955,14 @@ yourself. For example, if you need to calculate the length of an array,
 take advantage of the macro
 
 ```
-    #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 ```
 
 Similarly, if you need to calculate the size of some structure member,
 use
 
 ```
-    #define FIELD_SIZEOF(t, f) (sizeof(((t*)0)->f))
+#define FIELD_SIZEOF(t, f) (sizeof(((t*)0)->f))
 ```
 
 There are also min() and max() macros that do strict type checking if
@@ -1031,7 +1014,7 @@ Remember that inline assembly can use C parameters.
 
 Large, non-trivial assembly functions should go in .S files, with
 corresponding C prototypes defined in C header files. The C prototypes
-for assembly functions should use `asmlinkage`{.docutils .literal}.
+for assembly functions should use `asmlinkage`.
 
 You may need to mark your asm statement as volatile, to prevent GCC from
 removing it if GCC doesn't notice any side effects. You don't always
@@ -1075,9 +1058,9 @@ Kconfig symbol into a C boolean expression, and use it in a normal C
 conditional:
 
 ```
-    if (IS_ENABLED(CONFIG_SOMETHING)) {
-            ...
-    }
+	if (IS_ENABLED(CONFIG_SOMETHING)) {
+		...
+	}
 ```
 
 The compiler will constant-fold the conditional away, and include or
@@ -1093,12 +1076,12 @@ lines), place a comment after the \#endif on the same line, noting the
 conditional expression used. For instance:
 
 ```
-    #ifdef CONFIG_SOMETHING
-    ...
-    #endif /* CONFIG_SOMETHING */
+#ifdef CONFIG_SOMETHING
+...
+#endif /* CONFIG_SOMETHING */
 ```
 
-Appendix I) References[¶](#appendix-i-references "Permalink to this headline"){.headerlink}
+## <a name="appendix-i-references">Appendix I) References</a>
 
 The C Programming Language, Second Edition by Brian W. Kernighan and
 Dennis M. Ritchie. Prentice Hall, Inc., 1988. ISBN 0-13-110362-8
@@ -1115,8 +1098,7 @@ WG14 is the international standardization working group for the
 programming language C, URL: <http://www.open-std.org/JTC1/SC22/WG14/>
 
 Kernel process/coding-style.rst, by
-[greg@kroah.com](mailto:greg%40kroah.com){.reference .external} at OLS
-2002:
+[greg@kroah.com](mailto:greg%40kroah.com) at OLS 2002:
 <http://www.kroah.com/linux/talks/ols_2002_kernel_codingstyle_talk/html/>
 
 ------------------------------------------------------------------------
