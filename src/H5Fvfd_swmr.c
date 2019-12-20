@@ -1870,12 +1870,12 @@ H5F__vfd_swmr_writer__create_index(H5F_t * f)
     HDassert(entries_in_index > 0);
 
     index_size = sizeof(H5FD_vfd_swmr_idx_entry_t) * entries_in_index;
-    index = (H5FD_vfd_swmr_idx_entry_t *)HDmalloc(index_size);
+    index = HDmalloc(index_size);
 
-    if ( index == NULL ) 
-
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "memory allocation failed for md index")
+    if (index == NULL) {
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+            "memory allocation failed for md index")
+    }
   
     for ( i = 0; i < entries_in_index; i++ ) {
 
