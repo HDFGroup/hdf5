@@ -43,6 +43,17 @@
 /* Local Typedefs */
 /******************/
 
+/* Internal data structure for computing variable-length dataset's total size */
+typedef struct {
+    H5D_t *dset;        /* Dataset for operation */
+    H5S_t *fspace;      /* Dataset's dataspace for operation */
+    H5S_t *mspace;      /* Memory dataspace for operation */
+    void *fl_tbuf;      /* Ptr to the temporary buffer we are using for fixed-length data */
+    void *vl_tbuf;      /* Ptr to the temporary buffer we are using for VL data */
+    size_t vl_tbuf_size; /* Current size of the temp. buffer for VL data */
+    hsize_t size;       /* Accumulated number of bytes for the selection */
+} H5D_vlen_bufsize_t;
+
 
 /********************/
 /* Local Prototypes */
@@ -63,6 +74,9 @@ static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj);
 static herr_t H5D__use_minimized_dset_headers(H5F_t *file, H5D_t *dset, hbool_t *minimize);
 static herr_t H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc);
 static size_t H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr);
+static void *H5D__vlen_get_buf_size_alloc(size_t size, void *info);
+static herr_t H5D__vlen_get_buf_size_cb(void *elem, hid_t type_id, unsigned ndim,
+    const hsize_t *point, void *op_data);
 
 
 /*********************/
@@ -98,8 +112,12 @@ H5FL_EXTERN(H5D_chunk_info_t);
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
 
+/* Disable warning for intentional identical branches here -QAK */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wlarger-than="
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
+#pragma GCC diagnostic pop
 
 /* Dataset ID class */
 static const H5I_class_t H5I_DATASET_CLS[1] = {{
@@ -113,7 +131,7 @@ static const H5I_class_t H5I_DATASET_CLS[1] = {{
 static hbool_t H5D_top_package_initialize_s = FALSE;
 
 /* Prefixes of VDS and external file from the environment variables
- * HDF5_EXTFILE_PREFIX and HDF5_VDS_PREFIX */ 
+ * HDF5_EXTFILE_PREFIX and HDF5_VDS_PREFIX */
 static const char *H5D_prefix_ext_env = NULL;
 static const char *H5D_prefix_vds_env = NULL;
 
@@ -2567,36 +2585,79 @@ done:
  *           this data is not actually usable.
  *
  * Return:   Non-negative on success, negative on failure
+ *
  *-------------------------------------------------------------------------
  */
-void *
+static void *
 H5D__vlen_get_buf_size_alloc(size_t size, void *info)
 {
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)info;
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC
 
-    /* Get a temporary pointer to space for the VL data */
-    if((vlen_bufsize->vl_tbuf = H5FL_BLK_REALLOC(vlen_vl_buf, vlen_bufsize->vl_tbuf, size)) != NULL)
-        vlen_bufsize->size += size;
+    /* Check for increasing the size of the temporary space for VL data */
+    if(size > vlen_bufsize->vl_tbuf_size) {
+        if(NULL == (vlen_bufsize->vl_tbuf = H5FL_BLK_REALLOC(vlen_vl_buf, vlen_bufsize->vl_tbuf, size)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't reallocate temporary VL data buffer")
+        vlen_bufsize->vl_tbuf_size = size;
+    } /* end if */
+
+    /* Increment size of VL data buffer needed */
+    vlen_bufsize->size += size;
 
     /* Set return value */
     ret_value = vlen_bufsize->vl_tbuf;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size_alloc() */
 
 
 /*-------------------------------------------------------------------------
- * Function: H5D__vlen_get_buf_size
+ * Function: H5D__vlen_get_buf_size_cb
  *
- * Purpose:  This routine checks the number of bytes required to store a single
- *           element from a dataset in memory, creating a selection with just the
- *           single element selected to read in the element and using a custom memory
- *           allocator for any VL data encountered.
- *           The *size value is modified according to how many bytes are
- *           required to store the element in memory.
+ * Purpose:  Dataspace selection iteration callback for H5Dvlen_get_buf_size.
+ *
+ * Return:   Non-negative on success, negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id,
+    unsigned H5_ATTR_UNUSED ndim, const hsize_t *point, void *op_data)
+{
+    H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)op_data;
+    herr_t ret_value = H5_ITER_CONT;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
+    HDassert(point);
+    HDassert(op_data);
+
+    /* Select point to read in */
+    if(H5S_select_elements(vlen_bufsize->fspace, H5S_SELECT_SET, (size_t)1, point) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5_ITER_ERROR, "can't select point")
+
+    /* Read in the point (with the custom VL memory allocator) */
+    if(H5D__read(vlen_bufsize->dset, type_id, vlen_bufsize->mspace, vlen_bufsize->fspace, vlen_bufsize->fl_tbuf) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, H5_ITER_ERROR, "can't read point")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__vlen_get_buf_size_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__vlen_get_buf_size
+ *
+ * Purpose: This routine checks the number of bytes required to store the VL
+ *      data from the dataset, using the space_id for the selection in the
+ *      dataset on disk and the type_id for the memory representation of the
+ *      VL data, in memory.  The *size value is modified according to how many
+ *      bytes are required to store the VL data in memory.
  *
  * Implementation: This routine actually performs the read with a custom
  *      memory manager which basically just counts the bytes requested and
@@ -2606,43 +2667,84 @@ H5D__vlen_get_buf_size_alloc(size_t size, void *info)
  *      Kinda kludgy, but easier than the other method of trying to figure out
  *      the sizes without actually reading the data in... - QAK
  *
- * Return:   Non-negative on success, negative on failure
+ * Return:  Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, August 11, 1999
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id,
-    unsigned H5_ATTR_UNUSED ndim, const hsize_t *point, void *op_data)
+H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id,
+        hsize_t *size)
 {
-    H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)op_data;
-    H5VL_object_t *vol_obj = vlen_bufsize->dset_vol_obj;
-    H5T_t *dt;                          /* Datatype for operation */
-    H5S_t *fspace;                      /* File dataspace for operation */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5D_vlen_bufsize_t vlen_bufsize = {NULL, NULL, NULL, NULL, NULL, 0, 0};
+    H5S_t *fspace = NULL;       /* Dataset's dataspace */
+    H5S_t *mspace = NULL;       /* Memory dataspace */
+    char bogus;                 /* bogus value to pass to H5Diterate() */
+    H5S_t *space;               /* Dataspace for iteration */
+    H5T_t *type;                /* Datatype */
+    H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
+    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(op_data);
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
-
     /* Check args */
-    if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a datatype")
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
+    if(!(H5S_has_extent(space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
-    /* Make certain there is enough fixed-length buffer available */
-    if(NULL == (vlen_bufsize->fl_tbuf = H5FL_BLK_REALLOC(vlen_fl_buf, vlen_bufsize->fl_tbuf, H5T_get_size(dt))))
-        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't resize tbuf")
+    /* Save the dataset */
+    vlen_bufsize.dset = dset;
 
-    /* Select point to read in */
-    if(NULL == (fspace = (H5S_t *)H5I_object_verify(vlen_bufsize->fspace_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-    if(H5S_select_elements(fspace, H5S_SELECT_SET, (size_t)1, point) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
+    /* Get a copy of the dataset's dataspace */
+    if(NULL == (fspace = H5S_copy(dset->shared->space, FALSE, TRUE)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to get dataspace")
+    vlen_bufsize.fspace = fspace;
 
-    /* Read in the point (with the custom VL memory allocator) */
-    if(H5VL_dataset_read(vol_obj, type_id, vlen_bufsize->mspace_id, vlen_bufsize->fspace_id, vlen_bufsize->dxpl_id, vlen_bufsize->fl_tbuf, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point")
+    /* Create a scalar for the memory dataspace */
+    if(NULL == (mspace = H5S_create(H5S_SCALAR)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
+    vlen_bufsize.mspace = mspace;
+
+    /* Grab the temporary buffers required */
+    if(NULL == (vlen_bufsize.fl_tbuf = H5FL_BLK_MALLOC(vlen_fl_buf, H5T_get_size(type))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available")
+    if(NULL == (vlen_bufsize.vl_tbuf = H5FL_BLK_MALLOC(vlen_vl_buf, (size_t)1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available")
+    vlen_bufsize.vl_tbuf_size = 1;
+
+    /* Set the memory manager to the special allocation routine */
+    if(H5CX_set_vlen_alloc_info(H5D__vlen_get_buf_size_alloc, &vlen_bufsize, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VL data allocation routine")
+
+    /* Set the initial number of bytes required */
+    vlen_bufsize.size = 0;
+
+    /* Call H5S_select_iterate with args, etc. */
+    dset_op.op_type             = H5S_SEL_ITER_OP_APP;
+    dset_op.u.app_op.op         = H5D__vlen_get_buf_size_cb;
+    dset_op.u.app_op.type_id    = type_id;
+
+    ret_value = H5S_select_iterate(&bogus, type, space, &dset_op, &vlen_bufsize);
+
+    /* Get the size if we succeeded */
+    if(ret_value >= 0)
+        *size = vlen_bufsize.size;
 
 done:
+    if(fspace && H5S_close(fspace) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+    if(mspace && H5S_close(mspace) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+    if(vlen_bufsize.fl_tbuf != NULL)
+        vlen_bufsize.fl_tbuf = H5FL_BLK_FREE(vlen_fl_buf, vlen_bufsize.fl_tbuf);
+    if(vlen_bufsize.vl_tbuf != NULL)
+        vlen_bufsize.vl_tbuf = H5FL_BLK_FREE(vlen_vl_buf, vlen_bufsize.vl_tbuf);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size() */
 

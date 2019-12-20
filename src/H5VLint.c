@@ -724,7 +724,7 @@ H5VL_register(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t app_
     /* (Does not wrap object, since it's from a VOL callback) */
     if(NULL == (vol_obj = H5VL__new_vol_obj(type, object, vol_connector, FALSE)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object")
-    
+
     /* Register VOL object as _object_ type, for future object API calls */
     if((ret_value = H5I_register(type, vol_obj, app_ref)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize handle")
@@ -739,7 +739,7 @@ done:
  *
  * Purpose:     Registers an OBJECT in a TYPE with the supplied ID for it.
  *              This routine will check to ensure the supplied ID is not already
- *              in use, and ensure that it is a valid ID for the given type, 
+ *              in use, and ensure that it is a valid ID for the given type,
  *              but will NOT check to ensure the OBJECT is not already
  *              registered (thus, it is possible to register one object under
  *              multiple IDs).
@@ -991,6 +991,114 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_object_is_native
+ *
+ * Purpose:     Query if an object is (if it's a file object) / is in (if its
+ *              an object) a native connector's file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              December 14, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_object_is_native(const H5VL_object_t *obj, hbool_t *is_native)
+{
+    const H5VL_class_t *cls;            /* VOL connector class structs for object */
+    const H5VL_class_t *native_cls;     /* Native VOL connector class structs */
+    int cmp_value;                      /* Comparison result */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check arguments */
+    HDassert(obj);
+    HDassert(is_native);
+
+    /* Retrieve the terminal connector class for the object */
+    cls = NULL;
+    if(H5VL_introspect_get_conn_cls(obj, H5VL_GET_CONN_LVL_TERM, &cls) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL connector class")
+
+    /* Retrieve the native connector class */
+    if(NULL == (native_cls = (H5VL_class_t *)H5I_object_verify(H5VL_NATIVE, H5I_VOL)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve native VOL connector class")
+
+    /* Compare connector classes */
+    if(H5VL_cmp_connector_cls(&cmp_value, cls, native_cls) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
+
+    /* If classes compare equal, then the object is / is in a native connector's file */
+    *is_native = (cmp_value == 0);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_object_is_native() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_file_is_same
+ *
+ * Purpose:     Query if two files are the same.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              December 14, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_file_is_same(const H5VL_object_t *vol_obj1, const H5VL_object_t *vol_obj2,
+    hbool_t *same_file)
+{
+    const H5VL_class_t *cls1;           /* VOL connector class struct for first object */
+    const H5VL_class_t *cls2;           /* VOL connector class struct for second object */
+    int cmp_value;                      /* Comparison result */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check arguments */
+    HDassert(vol_obj1);
+    HDassert(vol_obj2);
+    HDassert(same_file);
+
+    /* Retrieve the terminal connectors for each object */
+    cls1 = NULL;
+    if(H5VL_introspect_get_conn_cls(vol_obj1, H5VL_GET_CONN_LVL_TERM, &cls1) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL connector class")
+    cls2 = NULL;
+    if(H5VL_introspect_get_conn_cls(vol_obj2, H5VL_GET_CONN_LVL_TERM, &cls2) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL connector class")
+
+    /* Compare connector classes */
+    if(H5VL_cmp_connector_cls(&cmp_value, cls1, cls2) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
+
+    /* If the connector classes are different, the files are different */
+    if(cmp_value)
+        *same_file = FALSE;
+    else {
+        void *obj2;         /* Terminal object for second file */
+
+        /* Get unwrapped (terminal) object for vol_obj2 */
+        if(NULL == (obj2 = H5VL_object_data(vol_obj2)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get unwrapped object")
+
+        /* Make callback */
+        if(H5VL_file_specific(vol_obj1, H5VL_FILE_IS_EQUAL, H5P_DATASET_XFER_DEFAULT, NULL, obj2, same_file) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_file_is_same() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_register_connector
  *
  * Purpose:     Registers a new VOL connector as a member of the virtual object
@@ -999,7 +1107,7 @@ done:
  * Return:      Success:    A VOL connector ID which is good until the
  *                          library is closed or the connector is unregistered.
  *
- *              Failure:    H5I_INVALID_HID 
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  Dana Robinson
  *              June 22, 2017
@@ -1414,7 +1522,7 @@ done:
  *
  * Purpose:     Utility function to return the object pointer associated with
  *              a hid_t. This routine is the same as H5I_object for all types
- *              except for named datatypes, where the vol_obj is returned that 
+ *              except for named datatypes, where the vol_obj is returned that
  *              is attached to the H5T_t struct.
  *
  * Return:      Success:        object pointer
@@ -1432,15 +1540,15 @@ H5VL_vol_object(hid_t id)
     FUNC_ENTER_NOAPI(NULL)
 
     obj_type = H5I_get_type(id);
-    if (H5I_FILE == obj_type || H5I_GROUP == obj_type || H5I_ATTR == obj_type || 
+    if(H5I_FILE == obj_type || H5I_GROUP == obj_type || H5I_ATTR == obj_type ||
             H5I_DATASET == obj_type || H5I_DATATYPE == obj_type) {
         /* Get the object */
-        if (NULL == (obj = H5I_object(id)))
+        if(NULL == (obj = H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
 
-        /* if this is a datatype, get the VOL object attached to the H5T_t struct */
-        if (H5I_DATATYPE == obj_type)
-            if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
+        /* If this is a datatype, get the VOL object attached to the H5T_t struct */
+        if(H5I_DATATYPE == obj_type)
+            if(NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
     } /* end if */
     else
@@ -1521,7 +1629,7 @@ done:
 static void *
 H5VL__object(hid_t id, H5I_type_t obj_type)
 {
-    H5VL_object_t   *vol_obj = NULL;    
+    H5VL_object_t   *vol_obj = NULL;
     void            *ret_value = NULL;
 
     FUNC_ENTER_STATIC
@@ -1530,7 +1638,7 @@ H5VL__object(hid_t id, H5I_type_t obj_type)
     switch(obj_type) {
         case H5I_GROUP:
         case H5I_DATASET:
-        case H5I_FILE:            
+        case H5I_FILE:
         case H5I_ATTR:
         case H5I_MAP:
             /* get the object */
@@ -1910,17 +2018,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_set_vol_wrapper(void *obj, H5VL_t *connector)
+H5VL_set_vol_wrapper(const H5VL_object_t *vol_obj)
 {
     H5VL_wrap_ctx_t *vol_wrap_ctx = NULL;       /* Object wrapping context */
-    void *obj_wrap_ctx = NULL;          /* VOL connector's wrapping context */
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity checks */
-    HDassert(obj);
-    HDassert(connector);
+    /* Sanity check */
+    HDassert(vol_obj);
 
     /* Retrieve the VOL object wrap context */
     if(H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
@@ -1928,13 +2034,19 @@ H5VL_set_vol_wrapper(void *obj, H5VL_t *connector)
 
     /* Check for existing wrapping context */
     if(NULL == vol_wrap_ctx) {
+        void *obj_wrap_ctx = NULL;          /* VOL connector's wrapping context */
+
+        /* Sanity checks */
+        HDassert(vol_obj->data);
+        HDassert(vol_obj->connector);
+
         /* Check if the connector can create a wrap context */
-        if(connector->cls->wrap_cls.get_wrap_ctx) {
+        if(vol_obj->connector->cls->wrap_cls.get_wrap_ctx) {
             /* Sanity check */
-            HDassert(connector->cls->wrap_cls.free_wrap_ctx);
+            HDassert(vol_obj->connector->cls->wrap_cls.free_wrap_ctx);
 
             /* Get the wrap context from the connector */
-            if((connector->cls->wrap_cls.get_wrap_ctx)(obj, &obj_wrap_ctx) < 0)
+            if((vol_obj->connector->cls->wrap_cls.get_wrap_ctx)(vol_obj->data, &obj_wrap_ctx) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve VOL connector's object wrap context")
         } /* end if */
 
@@ -1943,11 +2055,11 @@ H5VL_set_vol_wrapper(void *obj, H5VL_t *connector)
             HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate VOL wrap context")
 
         /* Increment the outstanding objects that are using the connector */
-        H5VL__conn_inc_rc(connector);
+        H5VL__conn_inc_rc(vol_obj->connector);
 
         /* Set up VOL object wrapper context */
         vol_wrap_ctx->rc = 1;
-        vol_wrap_ctx->connector = connector;
+        vol_wrap_ctx->connector = vol_obj->connector;
         vol_wrap_ctx->obj_wrap_ctx = obj_wrap_ctx;
     } /* end if */
     else

@@ -266,15 +266,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_group_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
-    void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_group_optional(void *obj, H5VL_group_optional_t optional_type,
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5VL_native_group_optional_t optional_type;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    optional_type = HDva_arg(arguments, H5VL_native_group_optional_t);
     switch(optional_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         /* H5Giterate (deprecated) */
