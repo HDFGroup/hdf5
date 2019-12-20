@@ -63,8 +63,7 @@ and NOT read it. Burn them, it's a great symbolic gesture.
 
 Anyway, here goes:
 
-::: {#indentation .section}
-1) Indentation[¶](#indentation "Permalink to this headline"){.headerlink}
+1) Indentation
 -------------------------------------------------------------------------
 
 Tabs are 8 characters, and thus indentations are also 8 characters.
@@ -338,7 +337,7 @@ can optionally strip the trailing whitespace for you; however, if
 applying a series of patches, this may make later patches in the series
 fail by changing their context lines.
 
-4) <a id="naming">Naming</a>
+4) <a name="naming">Naming</a>
 ---------------------------------------------------------------
 
 C is a Spartan language, and so should your naming be. Unlike Modula-2
