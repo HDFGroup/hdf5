@@ -65,67 +65,67 @@ Anyway, here goes:
 
 1) Indentation
 
-  Tabs are 8 characters, and thus indentations are also 8 characters.
-  There are heretic movements that try to make indentations 4 (or even 2!)
-  characters deep, and that is akin to trying to define the value of PI to
-  be 3.
+   Tabs are 8 characters, and thus indentations are also 8 characters.
+   There are heretic movements that try to make indentations 4 (or even 2!)
+   characters deep, and that is akin to trying to define the value of PI to
+   be 3.
+     
+   Rationale: The whole idea behind indentation is to clearly define where
+   a block of control starts and ends. Especially when you've been looking
+   at your screen for 20 straight hours, you'll find it a lot easier to see
+   how the indentation works if you have large indentations.
   
-  Rationale: The whole idea behind indentation is to clearly define where
-  a block of control starts and ends. Especially when you've been looking
-  at your screen for 20 straight hours, you'll find it a lot easier to see
-  how the indentation works if you have large indentations.
-  
-  Now, some people will claim that having 8-character indentations makes
-  the code move too far to the right, and makes it hard to read on a
-  80-character terminal screen. The answer to that is that if you need
-  more than 3 levels of indentation, you're screwed anyway, and should fix
-  your program.
-  
-  In short, 8-char indents make things easier to read, and have the added
-  benefit of warning you when you're nesting your functions too deep. Heed
-  that warning.
-  
-  The preferred way to ease multiple indentation levels in a switch
-  statement is to align the `switch`{.docutils .literal} and its
-  subordinate `case`{.docutils .literal} labels in the same column instead
-  of `double-indenting`{.docutils .literal} the `case`{.docutils .literal}
-  labels. E.g.:
-  
-  ```
-      switch (suffix) {
-      case 'G':
-      case 'g':
-              mem <<= 30;
-              break;
-      case 'M':
-      case 'm':
-              mem <<= 20;
-              break;
-      case 'K':
-      case 'k':
-              mem <<= 10;
-              /* fall through */
-      default:
-              break;
-      }
-  ```
-  
-  Don't put multiple statements on a single line unless you have something
-  to hide:
-  
-  ```
-      if (condition) do_this;
-        do_something_everytime;
-  ```
-  
-  Don't put multiple assignments on a single line either. Kernel coding
-  style is super simple. Avoid tricky expressions.
-  
-  Outside of comments, documentation and except in Kconfig, spaces are
-  never used for indentation, and the above example is deliberately
-  broken.
-  
-  Get a decent editor and don't leave whitespace at the end of lines.
+   Now, some people will claim that having 8-character indentations makes
+   the code move too far to the right, and makes it hard to read on a
+   80-character terminal screen. The answer to that is that if you need
+   more than 3 levels of indentation, you're screwed anyway, and should fix
+   your program.
+   
+   In short, 8-char indents make things easier to read, and have the added
+   benefit of warning you when you're nesting your functions too deep. Heed
+   that warning.
+   
+   The preferred way to ease multiple indentation levels in a switch
+   statement is to align the `switch`{.docutils .literal} and its
+   subordinate `case`{.docutils .literal} labels in the same column instead
+   of `double-indenting`{.docutils .literal} the `case`{.docutils .literal}
+   labels. E.g.:
+   
+   ```
+       switch (suffix) {
+       case 'G':
+       case 'g':
+               mem <<= 30;
+               break;
+       case 'M':
+       case 'm':
+               mem <<= 20;
+               break;
+       case 'K':
+       case 'k':
+               mem <<= 10;
+               /* fall through */
+       default:
+               break;
+       }
+   ```
+   
+   Don't put multiple statements on a single line unless you have something
+   to hide:
+   
+   ```
+       if (condition) do_this;
+         do_something_everytime;
+   ```
+   
+   Don't put multiple assignments on a single line either. Kernel coding
+   style is super simple. Avoid tricky expressions.
+   
+   Outside of comments, documentation and except in Kconfig, spaces are
+   never used for indentation, and the above example is deliberately
+   broken.
+   
+   Get a decent editor and don't leave whitespace at the end of lines.
 
 2) <a name="breaking-long-lines-and-strings">Breaking long lines and strings</a>
 
