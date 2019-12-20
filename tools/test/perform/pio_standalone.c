@@ -18,6 +18,9 @@
 
 #include "pio_perf.h"
 
+#ifdef STANDALONE
+MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
+#endif
 
 /** From h5tools_utils.c **/
 
@@ -161,5 +164,3 @@ print_version(const char *progname)
            progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
            H5_VERS_SUBRELEASE[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
-
-
