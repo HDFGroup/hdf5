@@ -193,16 +193,16 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 H5F_t *f;
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the file is using the native VOL connector */
+            {
+                hbool_t is_native = FALSE;  /* Whether the file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(file, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+                /* Check if using native VOL connector */
+                if(H5VL_object_is_native(file, &is_native) < 0)
+                    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+                /* Must use native VOL connector for this operation */
+                HDassert(is_native);
+            }
 #endif /* NDEBUG */
 
                 /* Retrieve file from VOL object */
@@ -220,16 +220,16 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 H5F_t *f;
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the file is using the native VOL connector */
+                {
+                    hbool_t is_native = FALSE;  /* Whether the file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(file, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+                    /* Check if using native VOL connector */
+                    if(H5VL_object_is_native(file, &is_native) < 0)
+                        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+                    /* Must use native VOL connector for this operation */
+                    HDassert(is_native);
+                }
 #endif /* NDEBUG */
 
                 /* Retrieve file from VOL object */
@@ -554,16 +554,16 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     HDassert(dst_size == H5T_REF_MEM_SIZE);
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(src_file, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
 #endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
@@ -904,16 +904,16 @@ static herr_t H5T__ref_obj_disk_isnull(const H5VL_object_t *src_file,
     HDassert(isnull);
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(src_file, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
 #endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
@@ -954,16 +954,16 @@ H5T__ref_obj_disk_getsize(H5VL_object_t *src_file, const void H5_ATTR_UNUSED *sr
     HDassert(src_buf);
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(src_file, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't query if file uses native VOL connector")
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
 #endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
@@ -1002,16 +1002,16 @@ H5T__ref_obj_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t src_
     HDassert(dst_buf);
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(src_file, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
 #endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
@@ -1057,16 +1057,16 @@ H5T__ref_dsetreg_disk_isnull(const H5VL_object_t *src_file, const void *src_buf,
     HDassert(isnull);
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(src_file, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
 #endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
@@ -1105,23 +1105,23 @@ H5T__ref_dsetreg_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file,
     HDassert(src_buf);
 
 #ifndef NDEBUG
-{
-    H5F_t *src_f;
-    hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+    {
+        H5F_t *src_f;
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(src_file, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't query if file uses native VOL connector")
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
 
-    /* Retrieve file from VOL object */
-    if(NULL == (src_f = (H5F_t *)H5VL_object_data(src_file)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid VOL object")
+        /* Retrieve file from VOL object */
+        if(NULL == (src_f = (H5F_t *)H5VL_object_data(src_file)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid VOL object")
 
-    HDassert(src_size == H5T_REF_DSETREG_DISK_SIZE(src_f));
-}
+        HDassert(src_size == H5T_REF_DSETREG_DISK_SIZE(src_f));
+    }
 #endif /* NDEBUG */
 
 done:
@@ -1154,16 +1154,16 @@ H5T__ref_dsetreg_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t 
     HDassert(dst_size == sizeof(struct H5Tref_dsetreg));
 
 #ifndef NDEBUG
-{
-    hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-    /* Check if using native VOL connector */
-    if(H5VL_object_is_native(src_file, &is_native) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
-    /* Must use native VOL connector for this operation */
-    HDassert(is_native);
-}
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
 #endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
