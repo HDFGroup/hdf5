@@ -42,6 +42,7 @@
 #define H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD 5   /* H5Dget_chunk_info_by_coord   */
 #define H5VL_NATIVE_DATASET_CHUNK_READ              6   /* H5Dchunk_read                */
 #define H5VL_NATIVE_DATASET_CHUNK_WRITE             7   /* H5Dchunk_write               */
+#define H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE       8   /* H5Dvlen_get_buf_size         */
 
 /* Values for native VOL connector file optional VOL operations */
 #define H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE             0   /* H5Fclear_elink_file_cache            */
