@@ -2883,10 +2883,6 @@ H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "no temporary buffers available")
     vlen_bufsize.common.vl_tbuf_size = 1;
 
-    /* Set the memory manager to the special allocation routine */
-    if(H5CX_set_vlen_alloc_info(H5D__vlen_get_buf_size_alloc, &vlen_bufsize.common, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VL data allocation routine")
-
     /* Set the VL allocation callbacks on a DXPL */
     if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(H5P_DATASET_XFER_DEFAULT)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get default DXPL")
