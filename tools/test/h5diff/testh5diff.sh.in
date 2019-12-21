@@ -691,7 +691,10 @@ TOOLTEST h5diff_56.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset6a dset6b
 TOOLTEST h5diff_57.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset7a dset7b
 
 # 5.8 (region reference)
-TOOLTEST h5diff_58.txt -v h5diff_dset1.h5 h5diff_dset2.h5 refreg
+TOOLTEST h5diff_58.txt -v2 h5diff_dset1.h5 h5diff_dset2.h5 refreg
+TOOLTEST h5diff_58_ref.txt -v2 h5diff_dset1.h5 h5diff_dset2.h5 refreg
+# STD_REF_OBJ
+TOOLTEST h5diff_reg.txt -v2 trefer_attr.h5 trefer_ext2.h5 Dataset3 Dataset3
 
 # test for both dset and attr with same type but with different size
 # ( HDDFV-7942 )
