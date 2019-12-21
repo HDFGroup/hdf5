@@ -54,12 +54,6 @@
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
 
-/* Declare extern the free list to manage blocks of VL data */
-H5FL_BLK_EXTERN(vlen_vl_buf);
-
-/* Declare extern the free list to manage other blocks of VL data */
-H5FL_BLK_EXTERN(vlen_fl_buf);
-
 
 /*****************************/
 /* Library Private Variables */
@@ -729,6 +723,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     hsize_t *size)
 {
     H5VL_object_t *vol_obj;     /* Dataset for this operation */
+    hbool_t supported;          /* Whether 'get vlen buf size' operation is supported by VOL connector */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -744,9 +739,20 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     if(size == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid 'size' pointer")
 
-    /* Get the buf size for the vlen elements */
-    if(H5VL_dataset_get(vol_obj, H5VL_DATASET_GET_VLEN_BUF_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, type_id, space_id, size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get vlen buf size")
+    /* Check if the 'get_vlen_buf_size' callback is supported */
+    supported = FALSE;
+    if(H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_DATASET, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE, &supported) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'get vlen buf size' operation")
+    if(supported) {
+        /* Make the 'get_vlen_buf_size' callback */
+        if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, type_id, space_id, size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get vlen buf size")
+    } /* end if */
+    else {
+        /* Perform a generic operation that will work with all VOL connectors */
+        if(H5D__vlen_get_buf_size_gen(vol_obj, type_id, space_id, size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get vlen buf size")
+    } /* end else */
 
 done:
     FUNC_LEAVE_API(ret_value)
