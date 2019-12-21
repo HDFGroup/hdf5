@@ -84,7 +84,7 @@ H5VL__native_blob_put(void *obj, const void *buf, size_t size, void *blob_id,
     HDassert(id);
 
     /* Write the VL information to disk (allocates space also) */
-    if(H5HG_insert(f, size, (void *)buf, &hobjid) < 0)
+    if(H5HG_insert(f, size, buf, &hobjid) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "unable to write blob information")
 
     /* Encode the heap information */

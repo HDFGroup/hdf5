@@ -203,7 +203,7 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
 
     /* Write the data */
-    if(H5D__write(dset, mem_type_id, mem_space, file_space, buf) < 0) 
+    if(H5D__write(dset, mem_type_id, mem_space, file_space, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
@@ -388,11 +388,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
-    void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5D_t *dset = NULL;             /* Dataset */
-    H5VL_native_dataset_optional_t optional_type = HDva_arg(arguments, H5VL_native_dataset_optional_t);
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -426,7 +425,7 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
                     case H5D_NLAYOUTS:
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset layout type")
 
-                    default: 
+                    default:
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown dataset layout type")
                 } /* end switch */
 
@@ -606,6 +605,20 @@ H5VL__native_dataset_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id,
 
                 break;
             }
+
+        case H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE:
+            {   /* H5Dvlen_get_buf_size */
+                hid_t type_id = HDva_arg(arguments, hid_t);
+                hid_t space_id = HDva_arg(arguments, hid_t);
+                hsize_t *size = HDva_arg(arguments, hsize_t *);
+
+                dset = (H5D_t *)obj;
+
+                if(H5D__vlen_get_buf_size(dset, type_id, space_id, size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of vlen buf needed")
+                break;
+            }
+
 
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")

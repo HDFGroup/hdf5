@@ -251,6 +251,19 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+#ifndef NDEBUG
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(vol_obj, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
+#endif /* NDEBUG */
+
     /* Get object type */
     if((vol_obj_type = H5I_get_type(loc_id)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
@@ -274,7 +287,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get container info */
-    if(H5VL_file_get(vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &cont_info) < 0)
+    if(H5VL_file_get((const H5VL_object_t *)vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &cont_info) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get container info")
 
     /* Create reference */
@@ -283,7 +296,8 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
 
         if((ret_value = H5R__encode_token_obj_compat((const H5VL_token_t *)&obj_token, cont_info.token_size, buf, &buf_size)) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "unable to encode object reference")
-    } else {
+    } /* end if */
+    else {
         H5F_t *f = NULL;
         H5S_t *space = NULL; /* Pointer to dataspace containing region */
         size_t buf_size = H5R_DSET_REG_REF_BUF_SIZE;
@@ -294,17 +308,14 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
         if(NULL == (space = (struct H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-        /* Currently restrict API usage to native VOL
-         * TODO check for terminal connector or use capability flag */
-
         /* Retrieve file from VOL object */
-        if(NULL == (f = (H5F_t *)H5VL_object_data(vol_obj_file)))
+        if(NULL == (f = (H5F_t *)H5VL_object_data((const H5VL_object_t *)vol_obj_file)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL object")
 
         /* Encode dataset region */
         if((ret_value = H5R__encode_token_region_compat(f, (const H5VL_token_t *)&obj_token, cont_info.token_size, space, buf, &buf_size)) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "unable to encode region reference")
-    }
+    } /* end else */
 
 done:
     if(file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
@@ -475,6 +486,19 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
     if(NULL == (vol_obj = H5VL_vol_object(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
+#ifndef NDEBUG
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(vol_obj, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
+#endif /* NDEBUG */
+
     /* Get object type */
     if((vol_obj_type = H5I_get_type(id)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
@@ -488,11 +512,11 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Get container info */
-    if(H5VL_file_get(vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &cont_info) < 0)
+    if(H5VL_file_get((const H5VL_object_t *)vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &cont_info) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "unable to get container info")
 
     /* Retrieve file from VOL object */
-    if(NULL == (f = (H5F_t *)H5VL_object_data(vol_obj_file)))
+    if(NULL == (f = (H5F_t *)H5VL_object_data((const H5VL_object_t *)vol_obj_file)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid VOL object")
 
     /* Get the dataspace with the correct region selected */
