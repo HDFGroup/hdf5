@@ -309,18 +309,6 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type,
                 break;
             }
 
-        /* H5Dvlen_get_buf_size */
-        case H5VL_DATASET_GET_VLEN_BUF_SIZE:
-            {
-                hid_t type_id = HDva_arg(arguments, hid_t);
-                hid_t space_id = HDva_arg(arguments, hid_t);
-                hsize_t *size = HDva_arg(arguments, hsize_t *);
-
-                if(H5D__vlen_get_buf_size(dset, type_id, space_id, size) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of vlen buf needed")
-                break;
-            }
-
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
     } /* end switch */
@@ -617,6 +605,20 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
 
                 break;
             }
+
+        case H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE:
+            {   /* H5Dvlen_get_buf_size */
+                hid_t type_id = HDva_arg(arguments, hid_t);
+                hid_t space_id = HDva_arg(arguments, hid_t);
+                hsize_t *size = HDva_arg(arguments, hsize_t *);
+
+                dset = (H5D_t *)obj;
+
+                if(H5D__vlen_get_buf_size(dset, type_id, space_id, size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of vlen buf needed")
+                break;
+            }
+
 
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")

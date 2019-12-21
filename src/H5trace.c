@@ -2733,9 +2733,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_DATASET_GET_OFFSET:
                                     HDfprintf(out, "H5VL_DATASET_GET_OFFSET");
                                     break;
-                                case H5VL_DATASET_GET_VLEN_BUF_SIZE:
-                                    HDfprintf(out, "H5VL_DATASET_GET_VLEN_BUF_SIZE");
-                                    break;
                                 default:
                                     HDfprintf(out, "%ld", (long)get);
                                     break;
@@ -3253,6 +3250,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_NATIVE_DATASET_CHUNK_WRITE:
                                     HDfprintf(out, "H5VL_NATIVE_DATASET_CHUNK_WRITE");
+                                    break;
+                                case H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE:
+                                    HDfprintf(out, "H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)optional);
