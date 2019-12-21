@@ -2392,6 +2392,7 @@
 ./tools/test/h5diff/testfiles/h5diff_56.txt
 ./tools/test/h5diff/testfiles/h5diff_57.txt
 ./tools/test/h5diff/testfiles/h5diff_58.txt
+./tools/test/h5diff/testfiles/h5diff_58_ref.txt
 ./tools/test/h5diff/testfiles/h5diff_59.txt
 ./tools/test/h5diff/testfiles/h5diff_60.txt
 ./tools/test/h5diff/testfiles/h5diff_61.txt
@@ -2610,6 +2611,8 @@
 ./tools/test/h5diff/testfiles/h5diff_v1.txt
 ./tools/test/h5diff/testfiles/h5diff_v2.txt
 ./tools/test/h5diff/testfiles/h5diff_v3.txt
+#reg_ref
+./tools/test/h5diff/testfiles/h5diff_reg.txt
 
 #test files for h5repack
 ./tools/test/h5repack/testfiles/README
