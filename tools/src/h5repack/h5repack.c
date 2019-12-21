@@ -222,10 +222,10 @@ h5repack_addlayout(const char *str, pack_opt_t *options)
 hid_t
 copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, trav_table_t *travt, pack_opt_t *options)
 {
+    H5TOOLS_ERR_INIT(hid_t, H5I_INVALID_HID)
     named_dt_t *dt = *named_dt_head_p; /* Stack pointer */
     named_dt_t *dt_ret = NULL;         /* Datatype to return */
     H5O_info_t  oinfo;                 /* Object info of input dtype */
-    hid_t       ret_value = -1;        /* The identifier of the named dtype in the out file */
 
     if (H5Oget_info2(type_in, &oinfo, H5O_INFO_BASIC) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info failed");
@@ -311,8 +311,8 @@ done:
 int
 named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err)
 {
+    H5TOOLS_ERR_INIT(int, -1)
     named_dt_t *dt = *named_dt_head_p;
-    int         ret_value = -1;
 
     while (dt) {
         /* Pop the datatype off the stack and free it */
@@ -343,7 +343,7 @@ done:
 int
 copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_t *travt, pack_opt_t *options)
 {
-    int         ret_value = 0;
+    H5TOOLS_ERR_INIT(int, 0)
     hid_t       attr_id = -1;  /* attr ID */
     hid_t       attr_out = -1; /* attr ID */
     hid_t       space_id = -1; /* space ID */
@@ -546,7 +546,7 @@ done:
 static int
 check_options(pack_opt_t *options)
 {
-    int          ret_value = 0; /*no need to LEAVE() on ERROR: H5TOOLS_ERR_INIT(int, SUCCEED) */
+    H5TOOLS_ERR_INIT(int, 0)
     unsigned int i;
     int          k, j, has_cp = 0, has_ck = 0;
     char         slayout[30];
@@ -724,13 +724,13 @@ done:
 static int
 check_objects(const char* fname, pack_opt_t *options)
 {
+    H5TOOLS_ERR_INIT(int, 0)
     hid_t         fid = -1;
     hid_t         did = -1;
     hid_t         sid = -1;
     unsigned int  i;
     int  ifil;
     trav_table_t *travt = NULL;
-    int           ret_value = 0; /*no need to LEAVE() on ERROR: H5TOOLS_ERR_INIT(int, SUCCEED) */
 
     /* nothing to do */
     if (options->op_tbl->nelems == 0)

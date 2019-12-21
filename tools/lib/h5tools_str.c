@@ -1093,7 +1093,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     h5tools_str_append(str, "NULL");
                 else {
                     if (H5Tequal(type, H5T_STD_REF)) {
-                        H5O_type_t obj_type;   /* Object type */
+                        H5O_type_t obj_type = -1;   /* Object type */
                         H5R_type_t ref_type;   /* Reference type */
                         const H5R_ref_t *ref_vp = (const H5R_ref_t *)vp;
 
@@ -1135,7 +1135,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                     case H5O_TYPE_UNKNOWN:
                                     case H5O_TYPE_NTYPES:
                                     default:
-                                        h5tools_str_append(str, "%u-", (unsigned) oi.type);
+                                        h5tools_str_append(str, "%u-%s", (unsigned) oi.type, H5_TOOLS_UNKNOWN);
                                         break;
                                 } /* end switch */
                                 H5Oclose(obj);
@@ -1172,6 +1172,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                     case H5O_TYPE_UNKNOWN:
                                     case H5O_TYPE_NTYPES:
                                     default:
+                                        h5tools_str_append(str, H5_TOOLS_UNKNOWN);
                                         break;
                                 } /* end switch */
                                 h5tools_str_sprint_reference(str, info, container, ref_vp);
@@ -1319,9 +1320,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             case H5T_BITFIELD:
             case H5T_OPAQUE:
                 {
-                    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "OTHER");
                     /* All other types get printed as hexadecimal */
                     size_t i;
+
+                    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "OTHER");
                     if(1 == nsize)
                         h5tools_str_append(str, "0x%02x", ucp_vp[0]);
                     else

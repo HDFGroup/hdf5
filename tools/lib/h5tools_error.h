@@ -112,7 +112,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
  * H5TOOLS_INFO macro, used to facilitate error reporting .  The arguments are the minor error number, and a description of the error.
  */
 #define H5TOOLS_INFO(min_id, ...) {                                                                        \
-        H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, __VA_ARGS__);     \
+        H5Epush2(estack_id, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, __VA_ARGS__);     \
 }
 
 /*
@@ -120,7 +120,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
  * error number, the minor error number, and a description of the error.
  */
 #define H5TOOLS_ERROR(maj_id, min_id, ...) {                                                                        \
-        H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, maj_id, min_id, __VA_ARGS__);     \
+        H5Epush2(estack_id, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, maj_id, min_id, __VA_ARGS__);     \
         ret_value = FAIL;                                                                                    \
 }
 
@@ -152,7 +152,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
  * to the `catch_except' label, if we're not already past it.
  */
 #define H5TOOLS_THROW(fail_value, min_id, ...) {        \
-    H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, __VA_ARGS__);     \
+    H5Epush2(estack_id, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, __VA_ARGS__);     \
     H5_LEAVE(fail_value)                               \
 }
 

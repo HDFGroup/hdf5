@@ -17,6 +17,8 @@
 #include "h5diff.h"
 #include "ph5diff.h"
 
+#define ATTR_NAME_MAX 255
+
 /*-------------------------------------------------------------------------
  * printf formatting
  *-------------------------------------------------------------------------
@@ -273,6 +275,7 @@ hsize_t diff_array(
         hid_t container1_id,
         hid_t container2_id) /* dataset where the reference came from*/
 {
+    H5TOOLS_ERR_INIT(int, 0)
     hsize_t         nfound = 0; /* number of differences found */
     size_t          size; /* size of datum */
     unsigned char  *mem1 = (unsigned char*) _mem1;
@@ -285,7 +288,8 @@ hsize_t diff_array(
     mcomp_t         members;
     H5T_class_t     type_class;
 
-    h5diffdebug2("diff_array start - errstat:%d\n", opts->err_stat);
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_array start - errstat:%d", opts->err_stat);
     /* get the size. */
     size = H5Tget_size(m_type);
     type_class = H5Tget_class(m_type);
@@ -310,6 +314,7 @@ hsize_t diff_array(
             pos[j] = 0;
     }
 
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_array type_class:%d", type_class);
     switch (type_class) {
     case H5T_NO_CLASS:
     case H5T_TIME:
@@ -370,6 +375,7 @@ hsize_t diff_array(
     case H5T_REFERENCE:
         HDmemset(&members, 0, sizeof(mcomp_t));
         get_member_types(m_type, &members);
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "call diff_datum nelmts:%d - errstat:%d", nelmts, opts->err_stat);
         for (i = 0; i < nelmts; i++) {
             nfound += diff_datum(mem1 + i * size, mem2 + i * size, m_type, i, rank, dims, acc, pos, opts,
                     name1, name2, container1_id, container2_id, &ph, &members);
@@ -378,8 +384,10 @@ hsize_t diff_array(
         } /* i */
         close_member_types(&members);
     } /* switch */
-    h5diffdebug3("diff_array finish:%d - errstat:%d\n", nfound, opts->err_stat);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_array finish:%d - errstat:%d", nfound, opts->err_stat);
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit: %d", nfound);
+    H5TOOLS_POP_STACK();
     return nfound;
 }
 
@@ -433,6 +441,7 @@ static hsize_t diff_datum(
         int *ph,             /*print header */
         mcomp_t *members)    /*compound members */
 {
+    H5TOOLS_ERR_INIT(hsize_t, opts->err_stat)
     unsigned char  *mem1 = (unsigned char*) _mem1;
     unsigned char  *mem2 = (unsigned char*) _mem2;
     size_t          u;
@@ -447,11 +456,11 @@ static hsize_t diff_datum(
     hbool_t         iszero1;
     hbool_t         iszero2;
     hsize_t         nfound = 0;    /* differences found */
-    hsize_t         ret_value = opts->err_stat;
     double          per;
     hbool_t         both_zero;
 
-    h5difftrace("diff_datum start\n");
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum start - errstat:%d", opts->err_stat);
 
     type_size = H5Tget_size(m_type);
     type_class = H5Tget_class(m_type);
@@ -480,7 +489,7 @@ static hsize_t diff_datum(
      *-------------------------------------------------------------------------
      */
     case H5T_COMPOUND:
-        h5difftrace("diff_datum H5T_COMPOUND\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_COMPOUND");
         {
             hid_t memb_type = -1;
             nmembs = members->n;
@@ -500,7 +509,7 @@ static hsize_t diff_datum(
      *-------------------------------------------------------------------------
      */
     case H5T_STRING:
-        h5difftrace("diff_datum H5T_STRING\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_STRING");
         {
             char *s = NULL;
             char *sx = NULL;
@@ -514,7 +523,7 @@ static hsize_t diff_datum(
 
             /* if variable length string */
             if (H5Tis_variable_str(m_type)) {
-                h5difftrace("diff_datum H5T_STRING variable\n");
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_STRING variable");
                 /* Get pointer to first string */
                 s1 = *(char **)((void *)mem1);
                 if (s1)
@@ -530,7 +539,7 @@ static hsize_t diff_datum(
                     size2 = 0;
             }
             else if (H5T_STR_NULLTERM == pad) {
-                h5difftrace("diff_datum H5T_STRING null term\n");
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_STRING null term");
                 /* Get pointer to first string */
                 s1 = (char*) mem1;
                 if (s1)
@@ -567,10 +576,10 @@ static hsize_t diff_datum(
              *       of length of strings.
              *       For now mimic the previous way.
              */
-            h5diffdebug2("diff_datum string size:%d\n", size1);
-            h5diffdebug2("diff_datum string size:%d\n", size2);
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum string size:%d", size1);
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum string size:%d", size2);
             if (size1 != size2) {
-                h5difftrace("diff_datum string sizes\n");
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum string sizes difference");
                 nfound++;
             }
             if (size1 < size2) {
@@ -607,7 +616,7 @@ static hsize_t diff_datum(
      *-------------------------------------------------------------------------
      */
     case H5T_BITFIELD:
-        h5difftrace("diff_datum H5T_BITFIELD\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_BITFIELD");
         /* byte-by-byte comparison */
         for (u = 0; u < type_size; u++)
             nfound += character_compare_opt(mem1 + u, mem2 + u, index, rank, dims, acc, pos, opts, obj1, obj2, ph);
@@ -618,7 +627,7 @@ static hsize_t diff_datum(
      *-------------------------------------------------------------------------
      */
     case H5T_OPAQUE:
-        h5difftrace("diff_datum H5T_OPAQUE\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_OPAQUE");
         /* byte-by-byte comparison */
         for (u = 0; u < type_size; u++)
             nfound += character_compare_opt(mem1 + u, mem2 + u, index, rank, dims, acc, pos, opts, obj1, obj2, ph);
@@ -634,7 +643,7 @@ static hsize_t diff_datum(
          * compared, we convert both bit patterns to their corresponding
          * enumeration constant and do a string comparison
          */
-        h5difftrace("diff_datum H5T_ENUM\n");
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_ENUM");
         {
             char enum_name1[1024];
             char enum_name2[1024];
@@ -697,6 +706,7 @@ static hsize_t diff_datum(
             hsize_t adims[H5S_MAX_RANK];
             int     ndims;
 
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_ARRAY");
             /* get the array's base datatype for each element */
             memb_type = H5Tget_super(m_type);
             size = H5Tget_size(memb_type);
@@ -720,6 +730,7 @@ static hsize_t diff_datum(
      *-------------------------------------------------------------------------
      */
     case H5T_REFERENCE:
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_REFERENCE");
         iszero1 = all_zero(_mem1, H5Tget_size(m_type));
         iszero2 = all_zero(_mem2, H5Tget_size(m_type));
         if (iszero1 != iszero2) {
@@ -727,22 +738,284 @@ static hsize_t diff_datum(
             HGOTO_DONE (opts->err_stat);
         }
         else if (!iszero1 && !iszero2) {
+            hid_t obj1_id = -1;
+            hid_t obj2_id = -1;
+
+            /*-------------------------------------------------------------------------
+             * H5T_STD_REF
+             * Reference
+             *-------------------------------------------------------------------------
+             */
+            if (H5Tequal(m_type, H5T_STD_REF)) {
+                /* if (type_size == H5R_STD_REF_SIZE) */
+                hid_t region1_id = -1;
+                hid_t region2_id = -1;
+                H5R_ref_t *ref1_buf = (const H5R_ref_t *)_mem1;
+                H5R_ref_t *ref2_buf = (const H5R_ref_t *)_mem2;
+                H5O_type_t obj1_type = -1;   /* Object type */
+                H5O_type_t obj2_type = -1;   /* Object type */
+                H5R_type_t ref_type;   /* Reference type */
+
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_REFERENCE - H5T_STD_REF");
+                ref_type = H5Rget_type(ref1_buf);
+                switch (ref_type) {
+                    case H5R_OBJECT1:
+                        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ref_type is H5R_OBJECT1");
+                        if (H5Rget_obj_type3(ref1_buf, H5P_DEFAULT, &obj1_type) < 0) {
+                            opts->err_stat = 1;
+                            H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rget_obj_type3 object 1 failed");
+                        }
+                        if (H5Rget_obj_type3(ref2_buf, H5P_DEFAULT, &obj2_type) < 0) {
+                            opts->err_stat = 1;
+                            H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rget_obj_type3 object 2 failed");
+                        }
+
+                        /* check object type */
+                        if (obj1_type != obj2_type) {
+                            parallel_print("Different object types referenced: <%s> and <%s>", obj1, obj2);
+                            opts->not_cmp = 1;
+                            HGOTO_DONE (opts->err_stat);
+                        }
+
+                        if((obj1_id = H5Ropen_object(ref1_buf, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+                            opts->err_stat = 1;
+                            H5TOOLS_INFO(H5E_tools_min_id_g, "H5Ropen_object object 1 failed");
+                        }
+                        if((obj2_id = H5Ropen_object(ref2_buf, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+                            opts->err_stat = 1;
+                            H5TOOLS_INFO(H5E_tools_min_id_g, "H5Ropen_object object 2 failed");
+                        }
+
+                        switch (obj1_type) {
+                            case H5O_TYPE_DATASET:
+                                nfound = diff_datasetid(obj1_id, obj2_id, NULL, NULL, opts);
+                                break;
+
+                            case H5O_TYPE_GROUP:
+                            case H5O_TYPE_NAMED_DATATYPE:
+                            case H5O_TYPE_MAP:
+                            case H5O_TYPE_UNKNOWN:
+                            case H5O_TYPE_NTYPES:
+                            default:
+                                if (opts->m_verbose)
+                                    parallel_print("Warning: Comparison not possible of object types referenced: <%s> and <%s>\n", obj1, obj2);
+                                opts->not_cmp = 1;
+                                break;
+                        } /* end switch */
+                        if(obj1_id >= 0)
+                            if(H5Oclose(obj1_id) < 0)
+                                H5TOOLS_INFO(H5E_tools_g, H5E_tools_min_id_g, "H5Oclose H5R_OBJECT1 failed");
+                        if(obj2_id >= 0)
+                            if(H5Oclose(obj2_id) < 0)
+                                H5TOOLS_INFO(H5E_tools_g, H5E_tools_min_id_g, "H5Oclose H5R_OBJECT1 failed");
+                        if(H5Rdestroy(ref2_buf) < 0)
+                            H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdestroy H5R_OBJECT1 failed");
+                        if(H5Rdestroy(ref1_buf) < 0)
+                            H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdestroy H5R_OBJECT1 failed");
+                        break;
+                    case H5R_DATASET_REGION1:
+                        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ref_type is H5R_DATASET_REGION1");
+                        if((obj1_id = H5Ropen_object(ref1_buf, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                            if((obj2_id = H5Ropen_object(ref2_buf, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                if((region1_id = H5Ropen_region(ref1_buf, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                    if((region2_id = H5Ropen_region(ref2_buf, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                        nfound = diff_region(obj1_id, obj2_id, region1_id, region2_id, opts);
+                                        if(H5Sclose(region2_id) < 0)
+                                            H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose H5R_DATASET_REGION1 failed");
+                                    }
+                                    if(H5Sclose(region1_id) < 0)
+                                        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose H5R_DATASET_REGION1 failed");
+                                }
+                                if(H5Oclose(obj2_id) < 0)
+                                    H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Oclose H5R_DATASET_REGION1 failed");
+                            }
+                            else {
+                                H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Ropen_object H5R_DATASET_REGION1 failed");
+                            }
+                            if(H5Oclose(obj1_id) < 0)
+                                H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Oclose H5R_DATASET_REGION1 failed");
+                        }
+                        else {
+                            H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Ropen_object H5R_DATASET_REGION1 failed");
+                        }
+                        if(H5Rdestroy(ref2_buf) < 0)
+                            H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdestroy H5R_DATASET_REGION1 failed");
+                        if(H5Rdestroy(ref1_buf) < 0)
+                            H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdestroy H5R_DATASET_REGION1 failed");
+                        break;
+                    case H5R_OBJECT2:
+                        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ref_type is H5R_OBJECT2");
+                        if (H5Rget_obj_type3(ref1_buf, H5P_DEFAULT, &obj1_type) < 0) {
+                            opts->err_stat = 1;
+                            H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rget_obj_type3 object 1 failed");
+                        }
+                        if (H5Rget_obj_type3(ref2_buf, H5P_DEFAULT, &obj2_type) < 0) {
+                            opts->err_stat = 1;
+                            H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rget_obj_type3 object 2 failed");
+                        }
+
+                        /* check object type */
+                        if (obj1_type != obj2_type) {
+                            parallel_print("Different object types referenced: <%s> and <%s>", obj1, obj2);
+                            opts->not_cmp = 1;
+                            HGOTO_DONE (opts->err_stat);
+                        }
+
+                        if((obj1_id = H5Ropen_object(ref1_buf, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+                            opts->err_stat = 1;
+                            H5TOOLS_INFO(H5E_tools_min_id_g, "H5Ropen_object object 1 failed");
+                        }
+                        if((obj2_id = H5Ropen_object(ref2_buf, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+                            opts->err_stat = 1;
+                            H5TOOLS_INFO(H5E_tools_min_id_g, "H5Ropen_object object 2 failed");
+                        }
+
+                        switch (obj1_type) {
+                            case H5O_TYPE_DATASET:
+                                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ref_type is H5R_OBJECT2 : DATASET");
+                                nfound = diff_datasetid(obj1_id, obj2_id, NULL, NULL, opts);
+                                break;
+
+                            case H5O_TYPE_GROUP:
+                                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ref_type is H5R_OBJECT2 : GROUP");
+                                if (opts->m_verbose)
+                                    parallel_print("Warning: Comparison not possible of group object types referenced: <%s> and <%s>\n", obj1, obj2);
+                                opts->not_cmp = 1;
+                                break;
+
+                            case H5O_TYPE_NAMED_DATATYPE:
+                                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ref_type is H5R_OBJECT2 : NAMED");
+                                if (opts->m_verbose)
+                                    parallel_print("Warning: Comparison not possible of named datatypes object types referenced: <%s> and <%s>\n", obj1, obj2);
+                                opts->not_cmp = 1;
+                                break;
+
+                            case H5O_TYPE_MAP:
+                            case H5O_TYPE_UNKNOWN:
+                            case H5O_TYPE_NTYPES:
+                            default:
+                                if (opts->m_verbose)
+                                    parallel_print("Warning: Comparison not possible of object types referenced: <%s> and <%s>\n", obj1, obj2);
+                                opts->not_cmp = 1;
+                                break;
+                        } /* end switch */
+                        if(obj1_id >= 0)
+                            if(H5Oclose(obj1_id) < 0)
+                                H5TOOLS_INFO(H5E_tools_g, H5E_tools_min_id_g, "H5Oclose H5R_OBJECT2 failed");
+                        if(obj2_id >= 0)
+                            if(H5Oclose(obj2_id) < 0)
+                                H5TOOLS_INFO(H5E_tools_g, H5E_tools_min_id_g, "H5Oclose H5R_OBJECT2 failed");
+                        if(H5Rdestroy(ref2_buf) < 0)
+                            H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdestroy H5R_OBJECT2 failed");
+                        if(H5Rdestroy(ref1_buf) < 0)
+                            H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdestroy H5R_OBJECT2 failed");
+                        break;
+                    case H5R_DATASET_REGION2:
+                        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ref_type is H5R_DATASET_REGION2");
+
+                        /* if (obj_id < 0) - could mean that no reference was written do not throw failure */
+                        obj1_id = H5Ropen_object(ref1_buf, H5P_DEFAULT, H5P_DEFAULT);
+                        obj2_id = H5Ropen_object(ref2_buf, H5P_DEFAULT, H5P_DEFAULT);
+                        if((obj1_id  < 0) || (obj1_id  < 0))
+                            H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g,
+                                    "H5Ropen_object H5R_DATASET_REGION2 failed");
+                        else {
+                            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "open_region - H5R_DATASET_REGION2");
+                            if((region1_id = H5Ropen_region(ref1_buf, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                if (h5tools_is_zero(ref1_buf, H5Tget_size(H5T_STD_REF))) {
+                                    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "NULL H5R_DATASET_REGION2");
+                                }
+                                else {
+                                    if((region2_id = H5Ropen_region(ref2_buf, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                        if (h5tools_is_zero(ref2_buf, H5Tget_size(H5T_STD_REF))) {
+                                            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "NULL H5R_DATASET_REGION2");
+                                        }
+                                        else {
+                                            nfound = diff_region(obj1_id, obj2_id, region1_id, region2_id, opts);
+                                        }
+                                        if(H5Sclose(region2_id) < 0)
+                                            H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose H5R_DATASET_REGION2 failed");
+                                    }
+                                    else
+                                        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Ropen_region H5R_DATASET_REGION2 failed");
+                                } /* end else to if (h5tools_is_zero(... */
+                                if(H5Sclose(region1_id) < 0)
+                                    H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose H5R_DATASET_REGION2 failed");
+                            }
+                            else
+                                H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Ropen_region H5R_DATASET_REGION2 failed");
+                            if (obj1_id >= 0)
+                                if(H5Dclose(obj1_id) < 0)
+                                    H5TOOLS_INFO(H5E_tools_g, H5E_tools_min_id_g, "H5Dclose H5R_DATASET_REGION2 failed");
+                            if (obj2_id >= 0)
+                                if(H5Dclose(obj2_id) < 0)
+                                    H5TOOLS_INFO(H5E_tools_g, H5E_tools_min_id_g, "H5Dclose H5R_DATASET_REGION2 failed");
+                            if(H5Rdestroy(ref1_buf) < 0)
+                                H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdestroy H5R_DATASET_REGION2 failed");
+                            if(H5Rdestroy(ref2_buf) < 0)
+                                H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdestroy H5R_DATASET_REGION2 failed");
+                        }
+                        break;
+                    case H5R_ATTR:
+                        {
+                            char       name1[ATTR_NAME_MAX];
+                            char       name2[ATTR_NAME_MAX];
+
+                            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ref_type is H5R_ATTR");
+                            if((obj1_id = H5Ropen_attr(ref1_buf, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+                                parallel_print("Warning: Cannot open referenced attribute: attribute 1\n");
+                                H5TOOLS_INFO(H5E_tools_min_id_g, "H5Ropen_attr object 1 failed");
+                            }
+                            if((obj2_id = H5Ropen_attr(ref2_buf, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+                                parallel_print("Warning: Cannot open referenced attribute: attribute 2\n");
+                                H5TOOLS_INFO(H5E_tools_min_id_g, "H5Ropen_attr object 2 failed");
+                            }
+
+                            if((obj1_id  < 0) || (obj1_id  < 0))
+                                H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g,
+                                        "H5Ropen_attr H5R_ATTR failed");
+                            else {
+                                /* get name */
+                                if(H5Aget_name(obj1_id, (size_t)ATTR_NAME_MAX, name1) < 0)
+                                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aget_name first attribute failed");
+                                /* get name */
+                                if(H5Aget_name(obj2_id, (size_t)ATTR_NAME_MAX, name2) < 0)
+                                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aget_name second attribute failed");
+
+                                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5R_ATTR diff_attr_data - name1=%s, name2=%s", name1, name2);
+                                nfound = diff_attr_data(obj1_id, obj2_id, name1, name2, NULL, NULL, opts);
+                            }
+
+                            if(obj1_id >= 0)
+                                    if(H5Aclose(obj1_id) < 0)
+                                        H5TOOLS_INFO(H5E_tools_g, H5E_tools_min_id_g, "H5Aclose H5R_ATTR failed");
+                            if(obj2_id >= 0)
+                                    if(H5Aclose(obj2_id) < 0)
+                                        H5TOOLS_INFO(H5E_tools_g, H5E_tools_min_id_g, "H5Aclose H5R_ATTR failed");
+                            if(H5Rdestroy(ref2_buf) < 0)
+                                H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdestroy H5R_ATTR failed");
+                            if(H5Rdestroy(ref1_buf) < 0)
+                                H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rdestroy H5R_ATTR failed");
+                        }
+                        break;
+                    case H5R_BADTYPE:
+                    case H5R_MAXTYPE:
+                    default:
+                        break;
+                } /* end switch */
+                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_REFERENCE - H5T_STD_REF complete nfound:%d - errstat:%d", nfound, opts->err_stat);
+            }
             /*-------------------------------------------------------------------------
              * H5T_STD_REF_DSETREG
              * Dataset region reference
              *-------------------------------------------------------------------------
              */
-            hid_t obj1_id = -1;
-            hid_t obj2_id = -1;
-
-            if (H5Tequal(m_type, H5T_STD_REF)) {
-                /* if (type_size == H5R_STD_REF_SIZE) */
-                H5TOOLS_INFO(H5E_tools_min_info_id_g, "NEW reference type");
-            }
             else if (H5Tequal(m_type, H5T_STD_REF_DSETREG)) {
                 /* if (type_size == H5R_DSET_REG_REF_BUF_SIZE) */
                 hid_t region1_id = -1;
                 hid_t region2_id = -1;
+
+                H5TOOLS_INFO(H5E_tools_min_info_id_g, "H5T_STD_REF_DSETREG reference type");
 
                 if ((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem1)) < 0) {
                     opts->err_stat = 1;
@@ -779,6 +1052,8 @@ static hsize_t diff_datum(
                 H5O_type_t obj1_type;
                 H5O_type_t obj2_type;
 
+                H5TOOLS_INFO(H5E_tools_min_info_id_g, "H5T_STD_REF_OBJ reference type");
+
                 if (H5Rget_obj_type2(container1_id, H5R_OBJECT, _mem1, &obj1_type) < 0) {
                     opts->err_stat = 1;
                     H5TOOLS_INFO(H5E_tools_min_id_g, "H5Rget_obj_type2 object 1 failed");
@@ -809,9 +1084,7 @@ static hsize_t diff_datum(
                     nfound = diff_datasetid(obj1_id, obj2_id, NULL, NULL, opts);
                 else {
                     if (opts->m_verbose)
-                        parallel_print(
-                                "Warning: Comparison not possible of object types referenced: <%s> and <%s>\n",
-                                obj1, obj2);
+                        parallel_print("Warning: Comparison not possible of object types referenced: <%s> and <%s>\n", obj1, obj2);
                     opts->not_cmp = 1;
                 }
 
@@ -819,6 +1092,7 @@ static hsize_t diff_datum(
                 H5Oclose(obj2_id);
             }/*object reference*/
         }/*is zero*/
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_REFERENCE complete");
         break;
 
     /*-------------------------------------------------------------------------
@@ -829,6 +1103,7 @@ static hsize_t diff_datum(
         {
             hid_t memb_type = -1;
 
+            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_VLEN");
             /* get the VL sequences's base datatype for each element */
             memb_type = H5Tget_super(m_type);
             size = H5Tget_size(memb_type);
@@ -849,6 +1124,7 @@ static hsize_t diff_datum(
      *-------------------------------------------------------------------------
      */
     case H5T_INTEGER:
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_INTEGER");
         type_sign = H5Tget_sign(m_type);
         /*-------------------------------------------------------------------------
          * H5T_NATIVE_SCHAR
@@ -1467,6 +1743,7 @@ static hsize_t diff_datum(
          * H5T_NATIVE_FLOAT
          *-------------------------------------------------------------------------
          */
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum H5T_FLOAT");
         if (type_size == 4) {
             float temp1_float;
             float temp2_float;
@@ -1947,8 +2224,10 @@ static hsize_t diff_datum(
 done:
     opts->err_stat = opts->err_stat | ret_value;
 
-    h5diffdebug3("diff_datum finish:%d - errstat:%d\n", nfound, opts->err_stat);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_datum finish:%d - errstat:%d", nfound, opts->err_stat);
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return nfound;
 }
 
@@ -2025,7 +2304,7 @@ void print_points(int i, hsize_t *ptdata, int ndims) {
 static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, diff_opt_t *opts)
 
 {
-    hsize_t  ret_value = 0;
+    H5TOOLS_ERR_INIT(hsize_t, 0)
     hssize_t nblocks1, npoints1;
     hssize_t nblocks2, npoints2;
     hsize_t  alloc_size;
@@ -2036,6 +2315,9 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t
     int      i, j;
     hsize_t  nfound_b = 0; /* block differences found */
     hsize_t  nfound_p = 0; /* point differences found */
+
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_region start");
 
     ndims1 = H5Sget_simple_extent_ndims(region1_id);
     ndims2 = H5Sget_simple_extent_ndims(region2_id);
@@ -2052,6 +2334,8 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t
         npoints1 = H5Sget_select_elem_npoints(region1_id);
         npoints2 = H5Sget_select_elem_npoints(region2_id);
     } H5E_END_TRY;
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_region blocks: 1=%ld-2=%ld", nblocks1, nblocks2);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "diff_region points: 1=%ld-2=%ld", npoints1, npoints2);
 
     if (nblocks1 != nblocks2 || npoints1 != npoints2 || ndims1 != ndims2) {
         opts->not_cmp = 1;
@@ -2063,6 +2347,7 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t
      *-------------------------------------------------------------------------
      */
     if (nblocks1 > 0) {
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "region compare blocks");
         HDassert(ndims1 > 0);
         alloc_size = (hsize_t) nblocks1 * (unsigned) ndims1 * 2 * sizeof(ptdata1[0]);
         HDassert(alloc_size == (hsize_t)((size_t )alloc_size)); /*check for overflow*/
@@ -2127,6 +2412,7 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t
      *-------------------------------------------------------------------------
      */
     if (npoints1 > 0) {
+        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "region compare points");
         alloc_size = (hsize_t) npoints1 * (unsigned) ndims1 * sizeof(ptdata1[0]);
         HDassert(alloc_size == (hsize_t)((size_t )alloc_size)); /*check for overflow*/
 
@@ -2191,6 +2477,7 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t
 
                 parallel_print(")");
             }
+            parallel_print("\n");
 #endif
 
             HDfree(ptdata1);
@@ -2203,6 +2490,8 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t
     ret_value = nfound_p + nfound_b;
 
 done:
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit with diffs:%d", ret_value);
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -2218,13 +2507,15 @@ done:
 static hsize_t character_compare(char *mem1, char *mem2, hsize_t i, size_t u,
         int rank, hsize_t *dims, hsize_t *acc, hsize_t *pos, diff_opt_t *opts, const char *obj1, const char *obj2, int *ph)
 {
+    H5TOOLS_ERR_INIT(int, 0)
     hsize_t nfound = 0; /* differences found */
     char    temp1_uchar;
     char    temp2_uchar;
 
+    H5TOOLS_PUSH_STACK();
     HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
     HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
-    h5diffdebug3("character_compare start %d=%d\n",temp1_uchar,temp2_uchar);
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "character_compare start %d=%d",temp1_uchar,temp2_uchar);
 
     if (temp1_uchar != temp2_uchar) {
         if (print_data(opts)) {
@@ -2237,8 +2528,10 @@ static hsize_t character_compare(char *mem1, char *mem2, hsize_t i, size_t u,
         }
         nfound++;
     }
-    h5difftrace("character_compare finish\n");
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "character_compare finish");
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit: %d", nfound);
+    H5TOOLS_POP_STACK();
     return nfound;
 }
 
@@ -2263,7 +2556,6 @@ static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2,
     HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
     HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
 
-    h5difftrace("character_compare_opt start\n");
     /* -d and !-p */
 
     if (opts->d && !opts->p) {
@@ -2307,7 +2599,7 @@ static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2,
             parallel_print(I_FORMAT, temp1_uchar, temp2_uchar, PDIFF(temp1_uchar, temp2_uchar));
         }
         nfound++;
-    } h5difftrace("character_compare_opt finish\n");
+    }
 
     return nfound;
 }
@@ -2334,8 +2626,6 @@ static hsize_t diff_float(unsigned char *mem1, unsigned char *mem2,
     hbool_t both_zero;
     hbool_t isnan1 = FALSE;
     hbool_t isnan2 = FALSE;
-
-    h5difftrace("diff_float start\n");
 
     /*-------------------------------------------------------------------------
      * -d and !-p
@@ -2520,7 +2810,6 @@ static hsize_t diff_float(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_float finish\n");
 
     return nfound;
 }
@@ -2548,7 +2837,6 @@ static hsize_t diff_double(unsigned char *mem1, unsigned char *mem2,
     hbool_t isnan1 = FALSE;
     hbool_t isnan2 = FALSE;
 
-    h5difftrace("diff_double start\n");
     /*-------------------------------------------------------------------------
      * -d and !-p
      *-------------------------------------------------------------------------
@@ -2731,7 +3019,6 @@ static hsize_t diff_double(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_double finish\n");
 
     return nfound;
 }
@@ -2768,8 +3055,6 @@ static hsize_t diff_ldouble(unsigned char *mem1,
     hbool_t     both_zero;
     hbool_t     isnan1 = FALSE;
     hbool_t     isnan2 = FALSE;
-
-    h5difftrace("diff_ldouble start\n");
 
     /*-------------------------------------------------------------------------
      * -d and !-p
@@ -2949,7 +3234,6 @@ static hsize_t diff_ldouble(unsigned char *mem1,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_ldouble finish\n");
 
     return nfound;
 }
@@ -2976,7 +3260,6 @@ static hsize_t diff_schar(unsigned char *mem1, unsigned char *mem2,
     double  per;
     hbool_t both_zero;
 
-    h5difftrace("diff_schar start\n");
     /* -d and !-p */
     if (opts->d && !opts->p) {
         for (i = 0; i < nelmts; i++) {
@@ -3077,7 +3360,6 @@ static hsize_t diff_schar(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_schar finish\n");
 
     return nfound;
 }
@@ -3102,7 +3384,6 @@ static hsize_t diff_uchar(unsigned char *mem1, unsigned char *mem2,
     double        per;
     hbool_t       both_zero;
 
-    h5difftrace("diff_uchar start\n");
     /* -d and !-p */
     if (opts->d && !opts->p) {
         for (i = 0; i < nelmts; i++) {
@@ -3203,7 +3484,6 @@ static hsize_t diff_uchar(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_uchar finish\n");
 
     return nfound;
 }
@@ -3228,7 +3508,6 @@ static hsize_t diff_short(unsigned char *mem1, unsigned char *mem2,
     double  per;
     hbool_t both_zero;
 
-    h5difftrace("diff_short start\n");
     /* -d and !-p */
     if (opts->d && !opts->p) {
         for (i = 0; i < nelmts; i++) {
@@ -3329,7 +3608,6 @@ static hsize_t diff_short(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_short finish\n");
 
     return nfound;
 }
@@ -3355,7 +3633,6 @@ static hsize_t diff_ushort(unsigned char *mem1, unsigned char *mem2,
     double         per;
     hbool_t        both_zero;
 
-    h5difftrace("diff_ushort start\n");
     /* -d and !-p */
     if (opts->d && !opts->p) {
         for (i = 0; i < nelmts; i++) {
@@ -3456,7 +3733,6 @@ static hsize_t diff_ushort(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_ushort finish\n");
 
     return nfound;
 }
@@ -3481,7 +3757,6 @@ static hsize_t diff_int(unsigned char *mem1, unsigned char *mem2,
     double  per;
     hbool_t both_zero;
 
-    h5difftrace("diff_int start\n");
     /* -d and !-p */
     if (opts->d && !opts->p) {
         for (i = 0; i < nelmts; i++) {
@@ -3583,7 +3858,6 @@ static hsize_t diff_int(unsigned char *mem1, unsigned char *mem2,
         } /* nelmts */
 
     }
-    h5difftrace("diff_int finish\n");
     return nfound;
 }
 
@@ -3607,7 +3881,6 @@ static hsize_t diff_uint(unsigned char *mem1, unsigned char *mem2,
     double per;
     hbool_t both_zero;
 
-    h5difftrace("diff_uint start\n");
     /* -d and !-p */
     if (opts->d && !opts->p) {
         for (i = 0; i < nelmts; i++) {
@@ -3709,7 +3982,6 @@ static hsize_t diff_uint(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_uint finish\n");
 
     return nfound;
 }
@@ -3734,7 +4006,6 @@ static hsize_t diff_long(unsigned char *mem1, unsigned char *mem2,
     double per;
     hbool_t both_zero;
 
-    h5difftrace("diff_long start\n");
     /* -d and !-p */
     if (opts->d && !opts->p) {
         for (i = 0; i < nelmts; i++) {
@@ -3837,7 +4108,6 @@ static hsize_t diff_long(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_long finish\n");
 
     return nfound;
 }
@@ -3861,8 +4131,6 @@ static hsize_t diff_ulong(unsigned char *mem1, unsigned char *mem2,
     hsize_t       i;
     double        per;
     hbool_t       both_zero;
-
-    h5difftrace("diff_ulong start\n");
 
     /* -d and !-p */
     if (opts->d && !opts->p) {
@@ -3967,7 +4235,6 @@ static hsize_t diff_ulong(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_ulong finish\n");
 
     return nfound;
 }
@@ -3992,7 +4259,6 @@ static hsize_t diff_llong(unsigned char *mem1, unsigned char *mem2,
     double    per;
     hbool_t   both_zero;
 
-    h5difftrace("diff_llong start\n");
     /* -d and !-p */
     if (opts->d && !opts->p) {
         for (i = 0; i < nelmts; i++) {
@@ -4094,7 +4360,6 @@ static hsize_t diff_llong(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_llong finish\n");
 
     return nfound;
 }
@@ -4120,7 +4385,6 @@ static hsize_t diff_ullong(unsigned char *mem1, unsigned char *mem2,
     double             per;
     hbool_t            both_zero;
 
-    h5difftrace("diff_ullong start\n");
     /* -d and !-p */
     if (opts->d && !opts->p) {
         for (i = 0; i < nelmts; i++) {
@@ -4226,7 +4490,6 @@ static hsize_t diff_ullong(unsigned char *mem1, unsigned char *mem2,
                 return nfound;
         } /* nelmts */
     }
-    h5difftrace("diff_ullong finish\n");
 
     return nfound;
 }
@@ -4240,13 +4503,14 @@ static hsize_t diff_ullong(unsigned char *mem1, unsigned char *mem2,
 static
 int ull2float(unsigned long long ull_value, float *f_value)
 {
-    int            ret_value = SUCCEED;
+    H5TOOLS_ERR_INIT(int, SUCCEED)
     hid_t          dxpl_id = -1;
     unsigned char *buf = NULL;
     size_t         src_size;
     size_t         dst_size;
 
-    h5difftrace("ull2float start\n");
+    H5TOOLS_PUSH_STACK();
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ull2float start");
     if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
 
@@ -4271,8 +4535,10 @@ done:
     if (buf)
         HDfree(buf);
 
-    h5difftrace("ull2float finish\n");
+    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ull2float finish");
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -4283,7 +4549,6 @@ done:
  *-------------------------------------------------------------------------
  */
 static hbool_t equal_double(double value, double expected, diff_opt_t *opts) {
-    h5difftrace("equal_double start\n");
     if (opts->do_nans) {
         /*-------------------------------------------------------------------------
         * detect NaNs
@@ -4314,8 +4579,6 @@ static hbool_t equal_double(double value, double expected, diff_opt_t *opts) {
         if (ABS((value-expected)) < DBL_EPSILON)
             return TRUE;
 
-    h5difftrace("equal_double finish\n");
-
     return FALSE;
 }
 
@@ -4330,7 +4593,6 @@ static hbool_t equal_double(double value, double expected, diff_opt_t *opts) {
 static
 hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *opts)
 {
-    h5difftrace("equal_ldouble start\n");
     if (opts->do_nans) {
         /*-------------------------------------------------------------------------
          * detect NaNs
@@ -4361,8 +4623,6 @@ hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *opts)
         if (ABS((value-expected)) < DBL_EPSILON)
             return TRUE;
 
-    h5difftrace("equal_ldouble finish\n");
-
     return FALSE;
 }
 
@@ -4375,7 +4635,6 @@ hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *opts)
  *-------------------------------------------------------------------------
  */
 static hbool_t equal_float(float value, float expected, diff_opt_t *opts) {
-    h5difftrace("equal_float start\n");
     if (opts->do_nans) {
         /*-------------------------------------------------------------------------
         * detect NaNs
@@ -4406,8 +4665,6 @@ static hbool_t equal_float(float value, float expected, diff_opt_t *opts) {
         if (ABS( (value-expected) ) < FLT_EPSILON)
             return TRUE;
 
-    h5difftrace("equal_float finish\n");
-
     return FALSE;
 }
 
@@ -4423,7 +4680,6 @@ static hbool_t my_isnan(dtype_t type, void *val) {
     hbool_t retval = FALSE;
     char s[256];
 
-    h5difftrace("my_isnan start\n");
     if (FLT_FLOAT == type) {
         float x;
 
@@ -4482,8 +4738,6 @@ static hbool_t my_isnan(dtype_t type, void *val) {
             retval = TRUE;
         }
     }
-
-    h5difftrace("my_isnan finish\n");
 
     return retval;
 }

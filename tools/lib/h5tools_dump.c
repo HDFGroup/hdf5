@@ -628,7 +628,7 @@ h5tools_print_region_data_blocks(hid_t region_id,
 
     } /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
 
- done:
+done:
     HDfree(start);
     HDfree(count);
     HDfree(region_buf);
@@ -1280,6 +1280,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     /* VL data special information */
     unsigned int        vl_data = 0; /* contains VL datatypes */
 
+    H5TOOLS_PUSH_STACK();
     if ((size_t) ctx->ndims > NELMTS(sm_size))
         H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "ndims and sm_size comparision failed");
 
@@ -1400,6 +1401,8 @@ CATCH
     if(sm_buf)
         HDfree(sm_buf);
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -1585,6 +1588,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_co
     size_t            i;                       /* counters  */
     hsize_t           total_size[H5S_MAX_RANK];/* total size of dataset*/
 
+    H5TOOLS_PUSH_STACK();
     if((f_space = H5Dget_space(dset)) < 0)
         H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
 
@@ -1610,6 +1614,8 @@ CATCH
     if(f_space >= 0 && H5Sclose(f_space) < 0)
         H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -1979,6 +1985,8 @@ done:
     if (f_space > 0)
         H5Sclose(f_space);
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -2002,6 +2010,7 @@ h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, h5tools_context_t *c
     hid_t     f_type = H5I_INVALID_HID;
     h5tool_format_t    info_dflt;
 
+    H5TOOLS_PUSH_STACK();
     /* Use default values */
     if (!stream)
         stream = rawoutstream;
@@ -2047,6 +2056,8 @@ done:
     if (f_space > 0)
         H5Sclose(f_space);
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -2088,6 +2099,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
     const char  *sign_s = NULL;  /* sign scheme string */
     const char  *order_s = NULL; /* byte order string */
 
+    H5TOOLS_PUSH_STACK();
     if((type_class = H5Tget_class(type)) < 0)
         H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_class failed");
     if (object_search && H5Tcommitted(type) > 0) {
@@ -2633,6 +2645,8 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
     }
 
 CATCH
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -2657,6 +2671,7 @@ h5tools_print_dataspace(h5tools_str_t *buffer, hid_t space)
     H5S_class_t space_type = -1;
     int         i;
 
+    H5TOOLS_PUSH_STACK();
     if((ndims = H5Sget_simple_extent_dims(space, size, maxsize)) < 0)
         H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
 
@@ -2708,6 +2723,8 @@ h5tools_print_dataspace(h5tools_str_t *buffer, hid_t space)
     } /* end switch */
 
 CATCH
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -2741,6 +2758,7 @@ h5tools_print_enum(FILE *stream, h5tools_str_t *buffer, const h5tool_format_t *i
     size_t         ncols = 80; /*available output width */
     hsize_t        curr_pos = 0;        /* total data element position   */
 
+    H5TOOLS_PUSH_STACK();
     if (info->line_ncols > 0)
         ncols = info->line_ncols;
 
@@ -2852,6 +2870,8 @@ CATCH
     if(0 == nmembs)
         h5tools_str_append(buffer, "\n<empty>");
 
+    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
+    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -4064,7 +4084,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 }
             }
             for(i = 0; i < ndims; i++, datactx.cur_elmt++, elmt_counter++) {
-                H5O_type_t obj_type;   /* Object type */
+                H5O_type_t obj_type = -1;   /* Object type */
                 H5R_type_t ref_type;   /* Reference type */
 
                 H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "reference loop:%d with curr_pos=%ld", i, curr_pos);

@@ -391,6 +391,13 @@ New Features
 
     Tools:
     ------
+    - h5diff was updated to use the new reference APIs.
+
+      h5diff uses the new reference APIs to compare references.
+      Attribute references can also be compared.
+
+      (ADB - 2019/12/19, HDFFV-10980)
+
     - h5dump and h5ls were updated to use the new reference APIs.
 
       The tools library now use the new reference APIs to inspect a

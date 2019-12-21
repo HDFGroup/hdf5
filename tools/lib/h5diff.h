@@ -71,7 +71,7 @@ typedef struct {
     hsize_t  count;                 /* count value */
     hbool_t  follow_links;          /* follow symbolic links */
     int      no_dangle_links;       /* return error when find dangling link */
-    int      err_stat;              /* an error ocurred (1, error, 0, no error) */
+    int      err_stat;              /* an error ocurred (2, error, 1, differences, 0, no error) */
     int      cmn_objs;              /* do we have common objects */
     int      not_cmp;               /* are the objects comparable */
     int      contents;              /* equal contents */
@@ -165,6 +165,13 @@ int diff_can_type( hid_t       f_type1, /* file data type */
                    diff_opt_t  *opts,
                    int         is_compound);
 
+hsize_t diff_attr_data(hid_t attr1_id,
+                  hid_t attr2_id,
+                  const char *attr1_name,
+                  const char *attr2_name,
+                  const char *path1,
+                  const char *path2,
+                  diff_opt_t *opts);
 
 hsize_t diff_attr(hid_t loc1_id,
                   hid_t loc2_id,
