@@ -86,12 +86,12 @@ New Features
 
     - Add mingw CMake support with a toolchain file
 
-      There has been a number of mingw issues that has been linked under
+      There have been a number of mingw issues that have been linked under
       HDFFV-10845. It has been decided to implement the CMake cross-compiling
       technique of toolchain files. We will use a linux platform with the mingw
       compiler stack for testing. Only the C language is fully supported, and
       the error tests are skipped. The C++ language works for static but shared
-      builds has a shared library issue with the mingw Standard Exception Handling
+      builds have a shared library issue with the mingw Standard Exception Handling
       library, which is not available on Windows. Fortran has a common cross-compile
       problem with the fortran configure tests.
 
@@ -123,15 +123,15 @@ New Features
       disabled with either --disable-tests (or tools) or --enable-tests=no
       (or --enable-tools=no).  Build time is reduced ~20% when tools are
       disabled, 35% when tests are disabled, 45% when both are disabled.
-      Reenabling them after the initial build requires running configure
+      Re-enabling them after the initial build requires running configure
       again with the option(s) enabled.
 
       (LRK - 2019/06/12, HDFFV-9976)
 
-    - Change tools test that test the error stack
+    - Change tools tests to search the error stack
 
       There are some use cases which can cause the error stack of tools to be
-      different then the expected output. These tests now use grepTest.cmake,
+      different then the expected output. These tests now use grepTest.cmake;
       this was changed to allow the error file to be searched for an expected string.
 
       (ADB - 2019/04/15, HDFFV-10741)
@@ -139,9 +139,13 @@ New Features
 
     Library:
     --------
-    - Add S3 and HDFS VFDs to HDF5 maintenance
-
-      Fix windows requirements and java tests. Windows requires CMake 3.13.
+    - Added S3 and HDFS Virtual File Drivers (VFDs) to HDF5 
+      
+      These new VFDs have been introduced in HDF5-1.10.6.  Instructions to
+      enable them when configuring HDF5 on Linux and Mac may be found at
+      https://portal.hdfgroup.org/display/HDF5/Virtual+File+Drivers+-+S3+and+HDFS.
+      
+      Installing on Windows requires CMake 3.13 and the following additional setup.
             Install openssl library (with dev files);
             from "Shining Light Productions". msi package preferred.
 
@@ -175,7 +179,7 @@ New Features
 
     Java Library:
     ----------------
-    - Fix a failure in JUnit-TestH5P on 32-bit architectures
+    - Fixed a failure in JUnit-TestH5P on 32-bit architectures
 
       (JTH - 2019/04/30)
 
@@ -194,7 +198,7 @@ Bug Fixes since HDF5-1.10.5 release
 
     Library
     -------
-    - Improved peformance when creating a large number of small datasets by
+    - Improved performance when creating a large number of small datasets by
       retrieving default property values from the API context instead of doing
       skip list searches. More work is required to achieve parity with HDF5 1.8.
 
@@ -239,13 +243,13 @@ Bug Fixes since HDF5-1.10.5 release
 
       (DER - 2019/08/27, HDFFV-10892)
 
-    - Fixed a bug caused by bad tag value when condensing object header
+    - Fixed a bug caused by a bad tag value when condensing object header
       messages
 
-      There was an assertion failure when moving meessages from running a
-      user test program with library release hdf5.1.10.4. It was because
+      There was an assertion failure when moving messages from running a
+      user test program with library release HDF5 1.10.4. It was because
       the tag value (object header's address) was not set up when entering
-      the library routine H5O__chunk_update_idx(), which will eventually
+      the library routine H5O__chunk_update_idx(), which eventually
       verifies the metadata tag value when protecting the object header.
 
       The problem was fixed by replacing FUNC_ENTER_PACKAGE in H5O__chunk_update_idx()
@@ -256,7 +260,7 @@ Bug Fixes since HDF5-1.10.5 release
     - Fixed the test failure from test_metadata_read_retry_info() in
       test/swmr.c
 
-      The test failure is due to the incorrect number of bins returned for
+      The test failure is due to an incorrect number of bins returned for
       retry info (info.nbins).  The # of bins expected for 101 read attempts
       is 3 instead of 2.  The routine H5F_set_retries() in src/H5Fint.c
       calculates the # of bins by first obtaining the log10 value for
@@ -270,19 +274,19 @@ Bug Fixes since HDF5-1.10.5 release
 
       (VC - 2019/8/14, HDFFV-10813)
 
-    - Fixed an issue where creating a file with non-default file space info
+    - Fixed an issue when creating a file with non-default file space info
       together with library high bound setting to H5F_LIBVER_V18.
 
-      When setting non-default file space info in fcpl via
-      H5Pset_file_space_strategy() and then creating a file with
-      both high and low library bounds set to
-      H5F_LIBVER_V18 in fapl, the library succeeds in creating the file.
-      File creation should fail because the feature of setting non-default
-      file space info does not exist in library release 1.8 or earlier.
+      When setting non-default file space info in fcpl via 
+      H5Pset_file_space_strategy() and then creating a file with both high and 
+      low library bounds set to H5F_LIBVER_V18 in fapl, the library succeeds in 
+      creating the file.  File creation should fail because the feature of 
+      setting non-default file space info does not exist in library release 1.8 
+      or earlier.
 
-      This was fixed by setting and checking the proper version in the
-      file space info message based on the library low and high bounds
-      when creating and opening the HDF5 file.
+      This was fixed by setting and checking the proper version in the file 
+      space info message based on the library low and high bounds when creating 
+      and opening the HDF5 file.
 
       (VC - 2019/6/25, HDFFV-10808)
 
@@ -317,7 +321,7 @@ Bug Fixes since HDF5-1.10.5 release
       the datatype's precision, the filter's data buffer was not freed, causing
       the memory usage to grow. In general the buffer was freed correctly.  The
       Minbits are the minimal number of bits to store the data values.  Please
-      see the reference manual for H5Pset_scaleoffset for the detail.
+      see the reference manual for H5Pset_scaleoffset for the details.
 
       (RL - 2019/3/4, HDFFV-10705)
 
@@ -375,14 +379,6 @@ Supported Platforms
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
-
-    Mac OS X 10.11.6, Darwin,     Apple clang version 7.3.0 from Xcode 7.3
-    15.6.0, x86-64                gfortran GNU Fortran (GCC) 5.2.0
-    (osx1011test)                 Intel icc/icpc/ifort version 16.0.2
-
-    macOS 10.12.6, Darwin,        Apple clang LLVM version 8.1.0 from Xcode 8.3
-    16.6.0, x86_64                gfortran GNU Fortran (GCC) 7.1.0
-    (kite)                        Intel icc/icpc/ifort version 17.0.2
 
     macOS 10.13.6, Darwin,        Apple clang LLVM version 10.0.0
     17.7.0, x86_64                gfortran GNU Fortran (GCC) 6.3.0
@@ -487,6 +483,14 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP x86_64  GNU/Linux      GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
                                   GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
                                      (cmake and autotools)
+
+    Mac OS X 10.11.6, Darwin,     Apple clang version 7.3.0 from Xcode 7.3
+    15.6.0, x86-64                gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                 Intel icc/icpc/ifort version 16.0.2
+
+    macOS 10.12.6, Darwin,        Apple clang LLVM version 8.1.0 from Xcode 8.3
+    16.6.0, x86_64                gfortran GNU Fortran (GCC) 7.1.0
+    (kite)                        Intel icc/icpc/ifort version 17.0.2
 
 
 Known Problems
