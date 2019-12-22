@@ -23,18 +23,19 @@ set_target_properties (h5perf_serial PROPERTIES FOLDER perform)
 if (HDF5_BUILD_PERFORM_STANDALONE)
   #-- Adding test for h5perf_serial_alone
   set (h5perf_serial_alone_SOURCES
+      ${HDF5_TOOLS_DIR}/lib/io_timer.c
       ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/sio_perf.c
       ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/sio_engine.c
       ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/sio_standalone.c
   )
   add_executable (h5perf_serial_alone ${h5perf_serial_alone_SOURCES})
-  target_include_directories (h5perf_serial_alone PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5perf_serial_alone PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TOOLS_DIR}/lib;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (h5perf_serial_alone STATIC)
-    target_link_libraries (h5perf_serial_alone PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+    target_link_libraries (h5perf_serial_alone PRIVATE ${HDF5_LIB_TARGET})
   else ()
     TARGET_C_PROPERTIES (h5perf_serial_alone SHARED)
-    target_link_libraries (h5perf_serial_alone PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+    target_link_libraries (h5perf_serial_alone PRIVATE ${HDF5_LIBSH_TARGET})
   endif ()
   set_target_properties (h5perf_serial_alone PROPERTIES FOLDER perform)
   set_property (TARGET h5perf_serial_alone
@@ -169,18 +170,19 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
   if (HDF5_BUILD_PERFORM_STANDALONE)
     #-- Adding test for h5perf
     set (h5perf_alone_SOURCES
+        ${HDF5_TOOLS_DIR}/lib/io_timer.c
         ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/pio_perf.c
         ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/pio_engine.c
         ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/pio_standalone.c
     )
     add_executable (h5perf_alone ${h5perf_alone_SOURCES})
-    target_include_directories (h5perf_alone PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (h5perf_alone PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TOOLS_DIR}/lib;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     if (NOT BUILD_SHARED_LIBS)
       TARGET_C_PROPERTIES (h5perf_alone STATIC)
-      target_link_libraries (h5perf_alone PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+      target_link_libraries (h5perf_alone PRIVATE ${HDF5_LIB_TARGET})
     else ()
       TARGET_C_PROPERTIES (h5perf_alone SHARED)
-      target_link_libraries (h5perf_alone PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+      target_link_libraries (h5perf_alone PRIVATE ${HDF5_LIBSH_TARGET})
     endif ()
     set_target_properties (h5perf_alone PROPERTIES FOLDER perform)
     set_property (TARGET h5perf_alone

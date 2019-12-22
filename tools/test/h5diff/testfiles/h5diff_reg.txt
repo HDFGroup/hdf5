@@ -1,12 +1,12 @@
 
 dataset: </Dataset3> and </Dataset3>
-attribute: <Attr1> and <Attr1>
+attribute: <Attr1 of <(null)>> and <Attr1 of <(null)>>
 0 differences found
 Warning: Cannot open referenced attribute: attribute 1
 Warning: Cannot open referenced attribute: attribute 2
-attribute: <Attr2> and <Attr2>
+attribute: <Attr2 of <(null)>> and <Attr2 of <(null)>>
 0 differences found
-attribute: <Attr3> and <Attr3>
+attribute: <Attr3 of <(null)>> and <Attr3 of <(null)>>
 0 differences found
 0 differences found
    obj1   obj2
