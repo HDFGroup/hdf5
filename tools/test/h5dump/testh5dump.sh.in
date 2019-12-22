@@ -941,6 +941,42 @@ GREPTEST()
     fi
 }
 
+# Call the h5dump tool and grep for a value but disables plugin filter loading
+# txttype ERRTXT greps test error output, otherwise greps test output
+GREPTEST2()
+{
+    txttype=$1
+    expectdata=$2
+    actual=$TESTDIR/$3
+    actual_err="$TESTDIR/`basename $3 .ddl`.oerr"
+    shift
+    shift
+    shift
+
+    # Run test.
+    TESTING $DUMPER -p $@
+    (
+      cd $TESTDIR
+      $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
+    ) >$actual 2>$actual_err
+    if [ "$txttype" = "ERRTXT" ]; then
+        $GREP "$expectdata" $actual_err > /dev/null
+    else
+        $GREP "$expectdata" $actual > /dev/null
+    fi
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+}
+
 # Print a "SKIP" message
 SKIP() {
    TESTING $DUMPER $@
@@ -1390,7 +1426,7 @@ TOOLTEST4 textlinkfar.ddl --enable-error-stack textlinkfar.h5
 TOOLTEST4 textlink.ddl --enable-error-stack textlink.h5
 
 # test for error stack display (BZ2048)
-TOOLTEST5 filter_fail.ddl --enable-error-stack filter_fail.h5
+GREPTEST2 ERRTXT "filter plugins disabled" filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
 TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1 tall.h5
