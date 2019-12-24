@@ -981,13 +981,13 @@ test_misc5(void)
 
     /* Verify the correct information was read in */
     for(i=0; i<(buf.len); i++) {
-        /* printf("[%d]=%d\n",i, ((misc5_struct1 *)(buf.p))[i].st1_el1); */
+        /* HDprintf("[%d]=%d\n",i, ((misc5_struct1 *)(buf.p))[i].st1_el1); */
         VERIFY(((misc5_struct1 *)(buf.p))[i].st1_el1,MISC5_DBGELVAL1,"H5Dread");
         for(j=0; j<(((misc5_struct1 *)(buf.p)) [i].st1_el2.len); j++) {
-            /* printf("   [%d]=%d\n",j, ((misc5_struct2 *)(((misc5_struct1 *) (buf.p))[i].st1_el2.p))[j].st2_el1); */
+            /* HDprintf("   [%d]=%d\n",j, ((misc5_struct2 *)(((misc5_struct1 *) (buf.p))[i].st1_el2.p))[j].st2_el1); */
             VERIFY(((misc5_struct2 *)(((misc5_struct1 *) (buf.p))[i].st1_el2.p))[j].st2_el1, MISC5_DBGELVAL2,"H5Dread");
             for(k=0; k<(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.len); k++) {
-                /* printf("      [%d]=%d\n",k, ((misc5_struct3 *)(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.p))[k].st3_el1); */
+                /* HDprintf("      [%d]=%d\n",k, ((misc5_struct3 *)(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.p))[k].st3_el1); */
                 VERIFY(((misc5_struct3 *)(((misc5_struct2 *) (((misc5_struct1 *)(buf.p))[i].  st1_el2.p))[j].st2_el2.p))[k].st3_el1, MISC5_DBGELVAL3,"H5Dread");
             } /* end for */
         }
@@ -1064,7 +1064,7 @@ test_misc6(void)
     /* Loop through adding attributes to each dataset */
     for(u = 0; u < MISC6_NUMATTR; u++) {
         /* Create name for attribute */
-        sprintf(attr_name, "Attr#%u", u);
+        HDsprintf(attr_name, "Attr#%u", u);
 
         /* Open the file */
         loc_id = H5Fopen(MISC6_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -2713,15 +2713,15 @@ test_misc15(void)
     fapl = H5Fget_access_plist(file);
     CHECK(fapl, FAIL, "H5Fget_access_plist");
 
-    ret = H5Pclose(fapl);
-    CHECK(ret, FAIL, "H5Pclose");
-
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is still OK */
     ret = H5Fis_hdf5(MISC15_FILE);
     CHECK(ret, FAIL, "H5Fis_hdf5");
+
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     file = H5Fopen(MISC15_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
@@ -2953,7 +2953,7 @@ test_misc18(void)
     /* Loop creating attributes on each dataset, flushing them to the file each time */
     for(u = 0; u < 10; u++) {
         /* Set up attribute name */
-        sprintf(attr_name, "Attr %u", u);
+        HDsprintf(attr_name, "Attr %u", u);
 
         /* Create & close attribute on first dataset */
         aid = H5Acreate2(did1, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
@@ -4721,6 +4721,7 @@ test_misc25a(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc25a() */
 
+
 /****************************************************************
 **
 **  test_misc25b(): Exercise null object header message merge bug
@@ -5291,7 +5292,7 @@ test_misc30(void)
                 CHECK(ret, FAIL, "test_misc30_get_info");
             }
 
-            sprintf(gname, "/g0/group%d", i);
+            HDsprintf(gname, "/g0/group%d", i);
             gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(gid, FAIL, "H5Gcreate2");
 
@@ -5647,9 +5648,6 @@ test_misc(void)
  *
  * Programmer:    Albert Cheng
  *              July 2, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

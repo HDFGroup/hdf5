@@ -128,7 +128,6 @@ static hsize_t PLANES[N_SOURCES][RANK] = {
     {1, SM_HEIGHT, WIDTH},
     {1, LG_HEIGHT, WIDTH}
 };
-static hsize_t VDS_PLANE[RANK] = {1, FULL_HEIGHT, WIDTH};
 
 /* File names for source datasets */
 static char FILE_NAMES[N_SOURCES][NAME_LEN] = {

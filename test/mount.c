@@ -192,7 +192,7 @@ test_illegal(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	puts("    Mounting a file on itself should have failed.");
+	HDputs("    Mounting a file on itself should have failed.");
 	TEST_ERROR
     } /* end if */
 
@@ -208,7 +208,7 @@ test_illegal(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	puts("    Mounting two files at one mount point should have failed.");
+	HDputs("    Mounting two files at one mount point should have failed.");
 	TEST_ERROR
     } /* end if */
     if(H5Funmount(mnt, ".") < 0) FAIL_STACK_ERROR
@@ -227,7 +227,7 @@ test_illegal(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	puts("    Mounting same file opened twice at one mount point should have failed.");
+	HDputs("    Mounting same file opened twice at one mount point should have failed.");
 	TEST_ERROR
     } /* end if */
     if(H5Funmount(mnt, ".") < 0) FAIL_STACK_ERROR
@@ -240,7 +240,7 @@ test_illegal(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	puts("    Creating a cycle with mount points should have failed.");
+	HDputs("    Creating a cycle with mount points should have failed.");
 	TEST_ERROR
     } /* end if */
     if(H5Funmount(file1, "/mnt1") < 0) FAIL_STACK_ERROR
@@ -423,7 +423,7 @@ test_hide(hid_t fapl)
     } H5E_END_TRY;
     if(grp >= 0) {
 	H5_FAILED();
-	puts("    Name is still accessible under mount point.");
+	HDputs("    Name is still accessible under mount point.");
 	TEST_ERROR
     } /* end if */
 
@@ -434,7 +434,7 @@ test_hide(hid_t fapl)
     if(H5Oget_info_by_name2(file1, "/file1", &oi2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(oi1.fileno != oi2.fileno || H5F_addr_ne(oi1.addr, oi2.addr)) {
 	H5_FAILED();
-	puts("    Hard link failed for hidden object.");
+	HDputs("    Hard link failed for hidden object.");
 	TEST_ERROR
     } /* end if */
 
@@ -503,7 +503,7 @@ test_assoc(hid_t fapl)
 
     if(oi1.fileno != oi2.fileno || H5F_addr_ne(oi1.addr, oi2.addr)) {
 	H5_FAILED();
-	puts("    Association failed.");
+	HDputs("    Association failed.");
         TEST_ERROR
     } /* end if */
 
@@ -628,7 +628,7 @@ test_move(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	puts("    Moving an object across files should't have been possible");
+	HDputs("    Moving an object across files should't have been possible");
 	TEST_ERROR
     } /* end if */
 
@@ -834,7 +834,7 @@ test_unlink(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	puts("    Incorrect traversal from mount point!");
+	HDputs("    Incorrect traversal from mount point!");
 	TEST_ERROR
     } /* end if */
 
@@ -851,7 +851,7 @@ test_unlink(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	puts("    Traversal through mount point should not have worked!");
+	HDputs("    Traversal through mount point should not have worked!");
 	TEST_ERROR
     } /* end if */
     H5E_BEGIN_TRY {
@@ -859,7 +859,7 @@ test_unlink(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	puts("    Traversal through mount point should not have worked!");
+	HDputs("    Traversal through mount point should not have worked!");
 	TEST_ERROR
     } /* end if */
 
@@ -873,7 +873,7 @@ test_unlink(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	printf("    %d: Unmount by name should not have been allowed!\n",__LINE__);
+	HDprintf("    %d: Unmount by name should not have been allowed!\n",__LINE__);
 	TEST_ERROR
     } /* end if */
     H5E_BEGIN_TRY {
@@ -881,7 +881,7 @@ test_unlink(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	printf("    %d: Unmount by name should not have been allowed!\n",__LINE__);
+	HDprintf("    %d: Unmount by name should not have been allowed!\n",__LINE__);
 	TEST_ERROR
     } /* end if */
     if(H5Funmount(mnt, ".") < 0) FAIL_STACK_ERROR
@@ -1005,7 +1005,7 @@ test_interlink(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	puts("    Interfile hard link should not have been allowed!");
+	HDputs("    Interfile hard link should not have been allowed!");
 	TEST_ERROR
     } /* end if */
 
@@ -1015,7 +1015,7 @@ test_interlink(hid_t fapl)
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
-	puts("    Interfile renaming should not have been allowed!");
+	HDputs("    Interfile renaming should not have been allowed!");
 	TEST_ERROR
     } /* end if */
 
@@ -1033,7 +1033,7 @@ test_interlink(hid_t fapl)
     } H5E_END_TRY;
     if(dset >= 0) {
 	H5_FAILED();
-	puts("    Dataset and shared type must be in the same file!");
+	HDputs("    Dataset and shared type must be in the same file!");
 	TEST_ERROR
     } /* end if */
 
@@ -1172,7 +1172,7 @@ test_close(hid_t fapl)
     if(H5Fclose(file1) < 0) FAIL_STACK_ERROR
     if(H5Oget_info_by_name2(file2, "/mnt1", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
 	H5_FAILED();
-	puts("    File1 contents are not accessible!");
+	HDputs("    File1 contents are not accessible!");
 	TEST_ERROR
     } /* end if */
     if(H5Fclose(file2) < 0) FAIL_STACK_ERROR
@@ -4379,13 +4379,13 @@ main(void)
 
     if (nerrors) goto error;
 
-    puts("All mount tests passed.");
+    HDputs("All mount tests passed.");
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
-    puts("***** MOUNT ERRORS *****");
+    HDputs("***** MOUNT ERRORS *****");
     return 1;
 }
 

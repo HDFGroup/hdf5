@@ -26,21 +26,23 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       testlibinfo.sh:
 #       testcheck_version.sh: tcheck_version
 #       testlinks_env.sh: links_env
+#       testexternal_env.sh: external_env
 #       testflushrefresh.sh: flushrefresh
+#       testvds_env.sh: vds_env
 #       testswmr.sh: swmr*
 #       testvdsswmr.sh: vds_swmr*
 #       testabort_fail.sh: filenotclosed.c and del_many_dense_attrs.c
 #       test_filter_plugin.sh: filter_plugin.c
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh \
-    testswmr.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh testexternal_env.sh \
+    testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
-    filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
+    external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
     swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
     swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
-    vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
+    vds_env$(EXEEXT) vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
   TEST_SCRIPT += test_filter_plugin.sh
   SCRIPT_DEPEND += filter_plugin$(EXEEXT)
@@ -53,15 +55,15 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
 TEST_PROG= testhdf5 \
-           cache cache_api cache_image cache_tagging lheap ohdr stab gheap \
-           evict_on_close farray earray btree2 fheap \
+           cache cache_api cache_image cache_tagging lheap ohdr \
+           stab gheap evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
            dtypes dsets chunk_info cmpd_dset filter_fail extend direct_chunk \
            external efc objcopy links unlink twriteorder big mtime fillval mount \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
-           enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
-           reserved cross_read freespace mf vds file_image unregister \
-           cache_logging cork swmr
+           enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
+           dangle dtransform reserved cross_read freespace mf vds file_image \
+           unregister cache_logging cork swmr
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -69,21 +71,23 @@ TEST_PROG= testhdf5 \
 # accum_swmr_reader is used by accum.c.
 # atomic_writer and atomic_reader are standalone programs.
 # links_env is used by testlinks_env.sh
+# external_env is used by testexternal_env.sh
 # filenotclosed and del_many_dense_attrs are used by testabort_fail.sh
 # flushrefresh is used by testflushrefresh.sh.
 # use_append_chunk, use_append_mchunks and use_disable_mdc_flushes are used by test_usecases.sh
 # swmr_* files (besides swmr.c) are used by testswmr.sh.
 # vds_swmr_* files are used by testvdsswmr.sh
+# vds_env is used by testvds_env.sh
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
-    testmeta accum_swmr_reader atomic_writer atomic_reader \
+    testmeta accum_swmr_reader atomic_writer atomic_reader external_env \
     links_env filenotclosed del_many_dense_attrs flushrefresh \
     use_append_chunk use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-    swmr_check_compat_vfd vds_swmr_gen vds_swmr_reader vds_swmr_writer
+    swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin
 endif
@@ -124,7 +128,7 @@ else
   noinst_LTLIBRARIES=libh5test.la
 endif
 
-libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c
+libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
@@ -167,8 +171,9 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
-    ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5 \
-    dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
+    ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5\
+    dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 \
+    tmp tmp_links tmp2_links tmp_links_env tmp_vds_env \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
@@ -185,8 +190,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 btree2_tmp.h5 objcopy_src.h5 objcopy_dst.h5 \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 farray_tmp.h5 \
-    earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log              \
-    new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
+    earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log log_ros3_out.log    \
+    log_s3comms_out.log new_multi_file_v16-r.h5 new_multi_file_v16-s.h5     \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
     vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5 \
@@ -211,6 +216,6 @@ use_disable_mdc_flushes_SOURCES=use_disable_mdc_flushes.c
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filter_plugin.sh \
-    testswmr.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh testabort_fail.sh
+    testexternal_env.sh testswmr.sh testvds_env.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh testabort_fail.sh
 
 include $(top_srcdir)/config/conclude.am

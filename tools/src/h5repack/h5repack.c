@@ -41,7 +41,9 @@ static int have_request(pack_opt_t *options);
  * Return: 0, ok, -1, fail
  *-------------------------------------------------------------------------
  */
-int h5repack(const char* infile, const char* outfile, pack_opt_t *options) {
+int
+h5repack(const char* infile, const char* outfile, pack_opt_t *options)
+{
     /* check input */
     if (check_options(options) < 0)
         return -1;
@@ -55,7 +57,7 @@ int h5repack(const char* infile, const char* outfile, pack_opt_t *options) {
         return -1;
 
     return 0;
-}
+} /* end h5repack() */
 
 /*-------------------------------------------------------------------------
  * Function: h5repack_init
@@ -86,7 +88,7 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
     }
 
     return (options_table_init(&(options->op_tbl)));
-}
+} /* end h5repack_init() */
 
 /*-------------------------------------------------------------------------
  * Function: h5repack_end
@@ -95,9 +97,11 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
  *-------------------------------------------------------------------------
  */
 
-int h5repack_end(pack_opt_t *options) {
+int
+h5repack_end(pack_opt_t *options)
+{
     return options_table_free(options->op_tbl);
-}
+} /* end h5repack_end() */
 
 /*-------------------------------------------------------------------------
  * Function: h5repack_addfilter
@@ -138,7 +142,7 @@ h5repack_addfilter(const char *str, pack_opt_t *options)
 
     HDfree(obj_list);
     return 0;
-}
+} /* end h5repack_addfilter() */
 
 /*-------------------------------------------------------------------------
  * Function: h5repack_addlayout
@@ -175,7 +179,7 @@ h5repack_addlayout(const char *str, pack_opt_t *options)
             if (pack.layout == H5D_CHUNKED) {
                 /* -2 means the NONE option, remove chunking
                  and set the global layout to contiguous */
-                if (pack.chunk.rank == -2)
+                if (pack.chunk.rank == -2) /* TODO: fix 'magic number' */
                     options->layout_g = H5D_CONTIGUOUS;
                 /* otherwise set the global chunking type */
                 else {
@@ -192,10 +196,10 @@ h5repack_addlayout(const char *str, pack_opt_t *options)
 
         HDfree(obj_list);
         ret_value = 0;
-    }
+    } /* end if obj_list exists */
 
     return ret_value;
-}
+} /* end h5repack_addlayout() */
 
 /* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr()
  * were located in h5repack_copy.c as static prior to bugfix1726.
@@ -215,8 +219,9 @@ h5repack_addlayout(const char *str, pack_opt_t *options)
  *          to free the stack.
  *-------------------------------------------------------------------------
  */
-hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
-        named_dt_t **named_dt_head_p, trav_table_t *travt, pack_opt_t *options) {
+hid_t
+copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, trav_table_t *travt, pack_opt_t *options)
+{
     named_dt_t *dt = *named_dt_head_p; /* Stack pointer */
     named_dt_t *dt_ret = NULL;         /* Datatype to return */
     H5O_info_t  oinfo;                 /* Object info of input dtype */
@@ -250,13 +255,14 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
                 /* Check if this type is the one requested */
                 if (oinfo.addr == dt->addr_in) {
                     dt_ret = dt;
-                } /* end if */
-            } /* end if */
-        } /* end for */
-    } /* end else */
+                }
+            } /* end if named datatype */
+        } /* end for each object in traversal table */
+    } /* end else (create the stack) */
 
     /* Handle the case that the requested datatype was not found.  This is
-    * possible if the datatype was committed anonymously in the input file. */
+     * possible if the datatype was committed anonymously in the input file.
+     */
     if (!dt_ret) {
         /* Push the new datatype onto the stack */
         if (NULL == (dt_ret = (named_dt_t *)HDmalloc(sizeof(named_dt_t))))
@@ -267,10 +273,11 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
         /* Update the address and id */
         dt_ret->addr_in = oinfo.addr;
         dt_ret->id_out = -1;
-    } /* end if */
+    } /* end if requested datatype not found */
 
     /* If the requested datatype does not yet exist in the output file, copy it
-    * anonymously */
+     * anonymously
+     */
     if (dt_ret->id_out < 0) {
         if (options->use_native == 1)
             dt_ret->id_out = H5Tget_native_type(type_in, H5T_DIR_DEFAULT);
@@ -280,18 +287,20 @@ hid_t copy_named_datatype(hid_t type_in, hid_t fidout,
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type-H5Tcopy failed");
         if (H5Tcommit_anon(fidout, dt_ret->id_out, H5P_DEFAULT, H5P_DEFAULT) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tcommit_anon failed");
-    } /* end if */
+    } /* end if named datatype not yet in output file */
 
     /* Set return value */
     ret_value = dt_ret->id_out;
 
-    /* Increment the ref count on id_out, because the calling function will try to close it */
-    if(H5Iinc_ref(ret_value) < 0)
+    /* Increment the ref count on id_out, because the calling function will try
+     * to close it. (TODO: fix scope envy)
+     */
+    if (H5Iinc_ref(ret_value) < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Iinc_ref failed");
 
 done:
     return ret_value;
-} /* end copy_named_datatype */
+} /* end copy_named_datatype() */
 
 /*-------------------------------------------------------------------------
  * Function: named_datatype_free
@@ -299,7 +308,9 @@ done:
  * Purpose: Frees the stack of named datatypes.
  *-------------------------------------------------------------------------
  */
-int named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err) {
+int
+named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err)
+{
     named_dt_t *dt = *named_dt_head_p;
     int         ret_value = -1;
 
@@ -310,13 +321,13 @@ int named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err) {
         dt = dt->next;
         HDfree(*named_dt_head_p);
         *named_dt_head_p = dt;
-    } /* end while */
+    }
 
     ret_value = 0;
 
 done:
     return (ret_value);
-} /* end named_datatype_free */
+} /* end named_datatype_free() */
 
 /*-------------------------------------------------------------------------
  * Function: copy_attr
@@ -330,8 +341,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
-        trav_table_t *travt, pack_opt_t *options)
+copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_t *travt, pack_opt_t *options)
 {
     int         ret_value = 0;
     hid_t       attr_id = -1;  /* attr ID */
@@ -364,7 +374,6 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
         if ((attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t) u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aopen_by_idx failed");
 
-        /* get name */
         if (H5Aget_name(attr_id, (size_t) 255, name) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
 
@@ -386,17 +395,17 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
             if ((wtype_id = copy_named_datatype(ftype_id, fidout, named_dt_head_p, travt, options)) < 0) {
                 H5Fclose(fidout);
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "copy_named_datatype failed");
-            } /* end if */
+            }
 
             if (H5Fclose(fidout) < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fclose failed");
-        } /* end if */
+        } /* end if datatype is committed and we have a traversal table */
         else {
             if (options->use_native == 1)
                 wtype_id = H5Tget_native_type(ftype_id, H5T_DIR_DEFAULT);
             else
                 wtype_id = H5Tcopy(ftype_id);
-        } /* end else */
+        } /* end else: uncommitted datatype and/or no traversal table */
 
         /* get the dataspace handle  */
         if ((space_id = H5Aget_space(attr_id)) < 0)
@@ -413,12 +422,12 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
         if ((msize = H5Tget_size(wtype_id)) == 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
 
-        /*-------------------------------------------------------------------------
-         * object references are a special case. We cannot just copy the buffers,
-         * but instead we recreate the reference.
-         * This is done on a second sweep of the file that just copies the referenced
-         * objects at copy_refs_attr()
-         *-------------------------------------------------------------------------
+        /*---------------------------------------------------------------------
+         * object references are a special case. We cannot just copy the
+         * buffers, but instead we recreate the reference.
+         * This is done on a second sweep of the file that just copies the
+         * referenced objects at copy_refs_attr().
+         *---------------------------------------------------------------------
          */
         type_class = H5Tget_class(wtype_id);
         is_ref = (type_class == H5T_REFERENCE);
@@ -429,7 +438,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
             is_ref = (is_ref || (H5Tget_class(base_type) == H5T_REFERENCE));
             if (H5Tclose(base_type) < 0)
                 H5TOOLS_INFO(H5E_tools_min_id_g, "H5Tclose base_type failed");
-        }
+        } /* end if type_class is variable length or array */
 
         if (type_class == H5T_COMPOUND) {
             int nmembers = H5Tget_nmembers(wtype_id);
@@ -444,13 +453,13 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
                     is_ref = 1;
                     break;
                 }
-            } /* for (j=0; i<nmembers; j++) */
-        } /* if (type_class == H5T_COMPOUND) */
+            } /* end for each member */
+        } /* end if type_class is H5T_COMPOUND */
 
         if (!is_ref) {
-            /*-------------------------------------------------------------------------
+            /*-----------------------------------------------------------------
              * read to memory
-             *-------------------------------------------------------------------------
+             *-----------------------------------------------------------------
              */
 
             buf = (void *)HDmalloc((size_t)(nelmts * msize));
@@ -460,9 +469,9 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
             if (H5Aread(attr_id, wtype_id, buf) < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aread failed");
 
-            /*-------------------------------------------------------------------------
+            /*-----------------------------------------------------------------
              * copy
-             *-------------------------------------------------------------------------
+             *-----------------------------------------------------------------
              */
 
             if ((attr_out = H5Acreate2(loc_out, name, wtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -483,11 +492,11 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
         } /*H5T_REFERENCE*/
 
         if (options->verbose)
-            printf(FORMAT_OBJ_ATTR, "attr", name);
+            HDprintf(FORMAT_OBJ_ATTR, "attr", name);
 
-        /*-------------------------------------------------------------------------
+        /*---------------------------------------------------------------------
          * close
-         *-------------------------------------------------------------------------
+         *---------------------------------------------------------------------
          */
         if (H5Sclose(space_id) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
@@ -501,19 +510,18 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
         if (H5Aclose(attr_id) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Aclose failed");
         attr_id = -1;
-    } /* for u */
+    } /* for u (each attribute) */
 
 done:
     H5E_BEGIN_TRY {
         if (buf) {
-            /* Check if we have VL data and string in the attribute's  datatype that must
-            * be reclaimed */
+            /* Check if we have VL data and string in the attribute's
+             * datatype that must be reclaimed
+             */
             if (TRUE == h5tools_detect_vlen(wtype_id))
                 H5Dvlen_reclaim(wtype_id, space_id, H5P_DEFAULT, buf);
-
-            /* Free buf */
             HDfree(buf);
-        } /* end if */
+        }
 
         H5Aclose(attr_out);
         H5Sclose(space_id);
@@ -525,27 +533,29 @@ done:
     return ret_value;
 } /* end copy_attr() */
 
-/*-------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * Function: check_options
  *
  * Purpose: print options, checks for invalid options
  *
  * Return: void, return -1 on error
- *-------------------------------------------------------------------------
+ *-----------------------------------------------------------------------------
  */
-static int check_options(pack_opt_t *options) {
+static int
+check_options(pack_opt_t *options)
+{
     int          ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     unsigned int i;
     int          k, j, has_cp = 0, has_ck = 0;
     char         slayout[30];
 
     /*-------------------------------------------------------------------------
-    * objects to layout
-    *-------------------------------------------------------------------------
-    */
-    if (options->verbose && have_request(options) /* only print if requested */) {
+     * Objects to layout
+     *-------------------------------------------------------------------------
+     */
+    if (options->verbose && have_request(options)) {
         if (options->all_layout == 1) {
-            printf("All objects to modify layout are...\n");
+            HDprintf("All objects to modify layout are...\n");
             switch (options->layout_g) {
             case H5D_COMPACT:
                 strcpy(slayout, "compact");
@@ -566,76 +576,76 @@ static int check_options(pack_opt_t *options) {
                 strcpy(slayout, "invalid layout\n");
                 HGOTO_DONE(FAIL);
             }
-            printf(" Apply %s layout to all", slayout);
+            HDprintf(" Apply %s layout to all", slayout);
             if (H5D_CHUNKED == options->layout_g) {
-                printf("with dimension [ ");
+                HDprintf("with dimension [ ");
                 for (j = 0; j < options->chunk_g.rank; j++)
-                    printf("%d ", (int) options->chunk_g.chunk_lengths[j]);
-                printf("]");
+                    HDprintf("%d ", (int) options->chunk_g.chunk_lengths[j]);
+                HDprintf("]");
             }
-            printf("\n");
+            HDprintf("\n");
         }
         else
-            printf("No all objects to modify layout\n");
-    }/* verbose */
+            HDprintf("No all objects to modify layout\n");
+    } /* end if verbose */
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
         char* name = options->op_tbl->objs[i].path;
 
         if (options->op_tbl->objs[i].chunk.rank > 0) {
             if (options->verbose) {
-                printf(" <%s> with chunk size ", name);
+                HDprintf(" <%s> with chunk size ", name);
                 for (k = 0; k < options->op_tbl->objs[i].chunk.rank; k++)
-                    printf("%d ", (int) options->op_tbl->objs[i].chunk.chunk_lengths[k]);
-                printf("\n");
+                    HDprintf("%d ", (int) options->op_tbl->objs[i].chunk.chunk_lengths[k]);
+                HDprintf("\n");
             }
             has_ck = 1;
         }
-        else if (options->op_tbl->objs[i].chunk.rank == -2) {
+        else if (options->op_tbl->objs[i].chunk.rank == -2) { /* TODO: replace 'magic number' */
             if (options->verbose)
-                printf(" <%s> %s\n", name, "NONE (contiguous)");
+                HDprintf(" <%s> %s\n", name, "NONE (contiguous)");
             has_ck = 1;
         }
-    }
+    } /* end for each object in options */
 
     if (options->all_layout == 1 && has_ck)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid chunking input: 'all' option is present with other objects");
 
     /*-------------------------------------------------------------------------
-    * objects to filter
-    *-------------------------------------------------------------------------
-    */
+     * Objects to filter
+     *-------------------------------------------------------------------------
+     */
 
-    if (options->verbose && have_request(options) /* only print if requested */) {
+    if (options->verbose && have_request(options)) {
         if (options->all_filter == 1) {
-            printf("All objects to apply filter are...\n");
+            HDprintf("All objects to apply filter are...\n");
             for (k = 0; k < options->n_filter_g; k++) {
                 H5Z_filter_t filtn = options->filter_g[k].filtn;
                 if (filtn < 0) {
-                    printf(" Unknown\n");
+                    HDprintf(" Unknown\n");
                     continue;
                 }
                 switch (filtn) {
                 case H5Z_FILTER_NONE:
-                    printf(" Uncompress all\n");
+                    HDprintf(" Uncompress all\n");
                     break;
                 case H5Z_FILTER_SHUFFLE:
                 case H5Z_FILTER_FLETCHER32:
-                    printf(" All with %s\n", get_sfilter(filtn));
+                    HDprintf(" All with %s\n", get_sfilter(filtn));
                     break;
                 case H5Z_FILTER_SZIP:
                 case H5Z_FILTER_DEFLATE:
-                    printf(" All with %s, parameter %d\n", get_sfilter(filtn), options->filter_g[k].cd_values[0]);
+                    HDprintf(" All with %s, parameter %d\n", get_sfilter(filtn), options->filter_g[k].cd_values[0]);
                     break;
                 default:
-                    printf(" User Defined %d\n", filtn);
+                    HDprintf(" User Defined %d\n", filtn);
                     break;
-                } /* k */
-            };
-        }
+                } /* end switch */
+            } /* end for each filter */
+        } /* end if options->all_filter == 1 (TODO: meaning) */
         else
-            printf("No all objects to apply filter\n");
-    } /* verbose */
+            HDprintf("No all objects to apply filter\n");
+    } /* end if verbose */
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
         pack_info_t pack = options->op_tbl->objs[i];
@@ -643,24 +653,26 @@ static int check_options(pack_opt_t *options) {
 
         for (j = 0; j < pack.nfilters; j++) {
             if (options->verbose) {
-                if(pack.filter[j].filtn >= 0) {
-                    if(pack.filter[j].filtn > H5Z_FILTER_SCALEOFFSET)
-                        printf(" <%s> with %s filter %d\n", name, get_sfilter(pack.filter[j].filtn), pack.filter[j].filtn);
-                    else
-                        printf(" <%s> with %s filter\n", name, get_sfilter(pack.filter[j].filtn));
+                if (pack.filter[j].filtn >= 0) {
+                    if (pack.filter[j].filtn > H5Z_FILTER_SCALEOFFSET) {
+                        HDprintf(" <%s> with %s filter %d\n", name, get_sfilter(pack.filter[j].filtn), pack.filter[j].filtn);
+                    }
+                    else {
+                        HDprintf(" <%s> with %s filter\n", name, get_sfilter(pack.filter[j].filtn));
+                    }
                 }
             }
             has_cp = 1;
-        } /* j */
-    } /* i */
+        } /* end for each filter */
+    } /* end for each object in options table */
 
     if (options->all_filter == 1 && has_cp)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid compression input: 'all' option is present with other objects");
 
     /*-------------------------------------------------------------------------
-    * check options for the latest format
-    *-------------------------------------------------------------------------
-    */
+     * Check options for the latest format
+     *-------------------------------------------------------------------------
+     */
 
     if (options->grp_compact < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid maximum number of links to store as header messages");
@@ -672,13 +684,13 @@ static int check_options(pack_opt_t *options) {
         if (options->msg_size[i] < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid shared message size");
 
-    /*--------------------------------------------------------------------------------
-    * verify new user userblock options; file name must be present
-    *---------------------------------------------------------------------------------
-    */
+    /*------------------------------------------------------------------------
+     * Verify new user userblock options; file name must be present
+     *------------------------------------------------------------------------
+     */
     if (options->ublock_filename != NULL && options->ublock_size == 0) {
         if (options->verbose) {
-            printf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n", options->ublock_filename);
+            HDprintf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n", options->ublock_filename);
             options->ublock_size = 1024;
         }
     }
@@ -686,35 +698,37 @@ static int check_options(pack_opt_t *options) {
     if (options->ublock_filename == NULL && options->ublock_size != 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "file name missing for user block", options->ublock_filename);
 
-    /*--------------------------------------------------------------------------------
-    * verify alignment options; threshold is zero default but alignment not
-    *---------------------------------------------------------------------------------
-    */
+    /*------------------------------------------------------------------------
+     * Verify alignment options; threshold is zero default but alignment not
+     *------------------------------------------------------------------------
+     */
 
     if (options->alignment == 0 && options->threshold != 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "alignment for H5Pset_alignment missing");
 
 done:
     return ret_value;
-}
+} /* end check_options() */
 
 /*-------------------------------------------------------------------------
  * Function: check_objects
  *
- * Purpose: locate all HDF5 objects in the file and compare with user
- *  supplied list
+ * Purpose: Locate all HDF5 objects in the file and compare with user-supplied
+ *          list.
  *
  * Return: 0, ok, -1 no
  *-------------------------------------------------------------------------
  */
-static int check_objects(const char* fname, pack_opt_t *options) {
-    int           ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+static int
+check_objects(const char* fname, pack_opt_t *options)
+{
     hid_t         fid = -1;
     hid_t         did = -1;
     hid_t         sid = -1;
     unsigned int  i;
-    unsigned int  uf;
+    int  ifil;
     trav_table_t *travt = NULL;
+    int           ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
 
     /* nothing to do */
     if (options->op_tbl->nelems == 0)
@@ -747,38 +761,40 @@ static int check_objects(const char* fname, pack_opt_t *options) {
      */
 
     if (options->verbose)
-        printf("Opening file. Searching %d objects to modify ...\n", travt->nobjs);
+        HDprintf("Opening file. Searching %zu objects to modify ...\n", travt->nobjs);
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
-        char* name = options->op_tbl->objs[i].path;
+        pack_info_t obj = options->op_tbl->objs[i];
+        char* name = obj.path;
+
         if (options->verbose)
-            printf(" <%s>", name);
+            HDprintf(" <%s>", name);
 
         /* the input object names are present in the file and are valid */
         if (h5trav_getindext(name, travt) < 0)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "%s Could not find <%s> in file <%s>. Exiting...\n",
                     (options->verbose ? "\n" : ""), name, fname);
         if (options->verbose)
-            printf("...Found\n");
+            HDprintf("...Found\n");
 
-        for (uf = 0; uf < options->op_tbl->objs[i].nfilters; uf++) {
-            if (options->op_tbl->objs[i].filter[uf].filtn < 0)
+        for (ifil = 0; ifil < obj.nfilters; ifil++) {
+            if (obj.filter[ifil].filtn < 0)
                 HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "invalid filter");
             /* check for extra filter conditions */
-            switch (options->op_tbl->objs[i].filter[uf].filtn) {
+            switch (obj.filter[ifil].filtn) {
             /* chunk size must be smaller than pixels per block */
             case H5Z_FILTER_SZIP:
                 {
                     int j;
                     hsize_t csize = 1;
-                    unsigned ppb = options->op_tbl->objs[i].filter[uf].cd_values[0];
+                    unsigned ppb = obj.filter[ifil].cd_values[0];
                     hsize_t dims[H5S_MAX_RANK];
                     int rank;
 
-                    if (options->op_tbl->objs[i].chunk.rank > 0) {
-                        rank = options->op_tbl->objs[i].chunk.rank;
+                    if (obj.chunk.rank > 0) {
+                        rank = obj.chunk.rank;
                         for (j = 0; j < rank; j++)
-                            csize *= options->op_tbl->objs[i].chunk.chunk_lengths[j];
+                            csize *= obj.chunk.chunk_lengths[j];
                     }
                     else {
                         if ((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
@@ -799,16 +815,16 @@ static int check_objects(const char* fname, pack_opt_t *options) {
                     }
 
                     if (csize < ppb) {
-                        printf(" <warning: SZIP settings, chunk size is smaller than pixels per block>\n");
+                        HDprintf(" <warning: SZIP settings, chunk size is smaller than pixels per block>\n");
                         HGOTO_DONE(0);
                     }
-                }
+                } /* end case SZIP */
                 break;
             default:
                 break;
-            }
-        } /* for uf */
-    } /* for i */
+            } /* end switch */
+        } /* for ifil (each user-defined filter) */
+    } /* for i (each object in options traversal table) */
 
 done:
     H5E_BEGIN_TRY {
@@ -819,7 +835,7 @@ done:
     if (travt)
         trav_table_free(travt);
     return ret_value;
-}
+} /* end check_objects() */
 
 /*-------------------------------------------------------------------------
  * Function: have_request
@@ -829,14 +845,15 @@ done:
  * Return: 1 yes, 0 no
  *-------------------------------------------------------------------------
  */
-static int have_request(pack_opt_t *options) {
+static int
+have_request(pack_opt_t *options)
+{
 
     if (options->all_filter || options->all_layout || options->op_tbl->nelems)
         return 1;
 
     return 0;
-
-}
+} /* end have_request() */
 
 /*-------------------------------------------------------------------------
  * Function: get_sfilter
@@ -846,8 +863,9 @@ static int have_request(pack_opt_t *options) {
  * Return: name of filter, exit on error
  *-------------------------------------------------------------------------
  */
-
-static const char* get_sfilter(H5Z_filter_t filtn) {
+static const char *
+get_sfilter(H5Z_filter_t filtn)
+{
     if (filtn < 0)
         return NULL;
     else if (filtn == H5Z_FILTER_NONE)
@@ -866,5 +884,5 @@ static const char* get_sfilter(H5Z_filter_t filtn) {
         return "SOFF";
     else
         return "UD";
-}
+} /* end get_sfilter() */
 

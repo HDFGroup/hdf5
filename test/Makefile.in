@@ -109,15 +109,16 @@ host_triplet = @host@
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
 	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT) \
 	accum_swmr_reader$(EXEEXT) atomic_writer$(EXEEXT) \
-	atomic_reader$(EXEEXT) links_env$(EXEEXT) \
-	filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
-	flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) \
-	use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
-	swmr_generator$(EXEEXT) swmr_start_write$(EXEEXT) \
-	swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
-	swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) \
-	swmr_addrem_writer$(EXEEXT) swmr_sparse_reader$(EXEEXT) \
-	swmr_sparse_writer$(EXEEXT) swmr_check_compat_vfd$(EXEEXT) \
+	atomic_reader$(EXEEXT) external_env$(EXEEXT) \
+	links_env$(EXEEXT) filenotclosed$(EXEEXT) \
+	del_many_dense_attrs$(EXEEXT) flushrefresh$(EXEEXT) \
+	use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) \
+	use_disable_mdc_flushes$(EXEEXT) swmr_generator$(EXEEXT) \
+	swmr_start_write$(EXEEXT) swmr_reader$(EXEEXT) \
+	swmr_writer$(EXEEXT) swmr_remove_reader$(EXEEXT) \
+	swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
+	swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) \
+	swmr_check_compat_vfd$(EXEEXT) vds_env$(EXEEXT) \
 	vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) \
 	vds_swmr_writer$(EXEEXT) $(am__EXEEXT_2)
 @HAVE_SHARED_CONDITIONAL_TRUE@am__append_3 = filter_plugin
@@ -151,8 +152,9 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/H5config.h \
 	$(top_builddir)/fortran/src/H5config_f.inc
 CONFIG_CLEAN_FILES = H5srcdir_str.h testabort_fail.sh \
-	testcheck_version.sh testerror.sh testflushrefresh.sh \
-	testlibinfo.sh testlinks_env.sh testswmr.sh testvdsswmr.sh \
+	testcheck_version.sh testerror.sh testexternal_env.sh \
+	testflushrefresh.sh testlibinfo.sh testlinks_env.sh \
+	testswmr.sh testvds_env.sh testvdsswmr.sh \
 	test_filter_plugin.sh test_usecases.sh
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
@@ -209,7 +211,7 @@ libfilter_plugin4_groups_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libfilter_plugin4_groups_la_rpath =
 libh5test_la_LIBADD =
 am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo \
-	swmr_common.lo
+	swmr_common.lo external_common.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
 @HAVE_SHARED_CONDITIONAL_FALSE@am_libh5test_la_rpath =
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libh5test_la_rpath =
@@ -228,11 +230,12 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) cache$(EXEEXT) cache_api$(EXEEXT) \
 	flush2$(EXEEXT) app_ref$(EXEEXT) enum$(EXEEXT) \
 	set_extent$(EXEEXT) ttsafe$(EXEEXT) enc_dec_plist$(EXEEXT) \
 	enc_dec_plist_cross_platform$(EXEEXT) getname$(EXEEXT) \
-	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
-	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
-	freespace$(EXEEXT) mf$(EXEEXT) vds$(EXEEXT) \
-	file_image$(EXEEXT) unregister$(EXEEXT) cache_logging$(EXEEXT) \
-	cork$(EXEEXT) swmr$(EXEEXT)
+	vfd$(EXEEXT) ros3$(EXEEXT) s3comms$(EXEEXT) hdfs$(EXEEXT) \
+	ntypes$(EXEEXT) dangle$(EXEEXT) dtransform$(EXEEXT) \
+	reserved$(EXEEXT) cross_read$(EXEEXT) freespace$(EXEEXT) \
+	mf$(EXEEXT) vds$(EXEEXT) file_image$(EXEEXT) \
+	unregister$(EXEEXT) cache_logging$(EXEEXT) cork$(EXEEXT) \
+	swmr$(EXEEXT)
 @HAVE_SHARED_CONDITIONAL_TRUE@am__EXEEXT_2 = filter_plugin$(EXEEXT)
 am__EXEEXT_3 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
@@ -382,6 +385,10 @@ external_SOURCES = external.c
 external_OBJECTS = external.$(OBJEXT)
 external_LDADD = $(LDADD)
 external_DEPENDENCIES = libh5test.la $(LIBHDF5)
+external_env_SOURCES = external_env.c
+external_env_OBJECTS = external_env.$(OBJEXT)
+external_env_LDADD = $(LDADD)
+external_env_DEPENDENCIES = libh5test.la $(LIBHDF5)
 farray_SOURCES = farray.c
 farray_OBJECTS = farray.$(OBJEXT)
 farray_LDADD = $(LDADD)
@@ -514,6 +521,10 @@ gheap_SOURCES = gheap.c
 gheap_OBJECTS = gheap.$(OBJEXT)
 gheap_LDADD = $(LDADD)
 gheap_DEPENDENCIES = libh5test.la $(LIBHDF5)
+hdfs_SOURCES = hdfs.c
+hdfs_OBJECTS = hdfs.$(OBJEXT)
+hdfs_LDADD = $(LDADD)
+hdfs_DEPENDENCIES = libh5test.la $(LIBHDF5)
 hyperslab_SOURCES = hyperslab.c
 hyperslab_OBJECTS = hyperslab.$(OBJEXT)
 hyperslab_LDADD = $(LDADD)
@@ -570,6 +581,14 @@ reserved_SOURCES = reserved.c
 reserved_OBJECTS = reserved.$(OBJEXT)
 reserved_LDADD = $(LDADD)
 reserved_DEPENDENCIES = libh5test.la $(LIBHDF5)
+ros3_SOURCES = ros3.c
+ros3_OBJECTS = ros3.$(OBJEXT)
+ros3_LDADD = $(LDADD)
+ros3_DEPENDENCIES = libh5test.la $(LIBHDF5)
+s3comms_SOURCES = s3comms.c
+s3comms_OBJECTS = s3comms.$(OBJEXT)
+s3comms_LDADD = $(LDADD)
+s3comms_DEPENDENCIES = libh5test.la $(LIBHDF5)
 set_extent_SOURCES = set_extent.c
 set_extent_OBJECTS = set_extent.$(OBJEXT)
 set_extent_LDADD = $(LDADD)
@@ -684,6 +703,10 @@ vds_SOURCES = vds.c
 vds_OBJECTS = vds.$(OBJEXT)
 vds_LDADD = $(LDADD)
 vds_DEPENDENCIES = libh5test.la $(LIBHDF5)
+vds_env_SOURCES = vds_env.c
+vds_env_OBJECTS = vds_env.$(OBJEXT)
+vds_env_LDADD = $(LDADD)
+vds_env_DEPENDENCIES = libh5test.la $(LIBHDF5)
 vds_swmr_gen_SOURCES = vds_swmr_gen.c
 vds_swmr_gen_OBJECTS = vds_swmr_gen.$(OBJEXT)
 vds_swmr_gen_LDADD = $(LDADD)
@@ -745,26 +768,27 @@ SOURCES = $(libfilter_plugin1_dsets_la_SOURCES) \
 	del_many_dense_attrs.c direct_chunk.c dsets.c dt_arith.c \
 	dtransform.c dtypes.c earray.c efc.c enc_dec_plist.c \
 	enc_dec_plist_cross_platform.c enum.c err_compat.c \
-	error_test.c evict_on_close.c extend.c external.c farray.c \
-	fheap.c file_image.c filenotclosed.c fillval.c filter_fail.c \
-	filter_plugin.c flush1.c flush2.c flushrefresh.c freespace.c \
-	gen_bad_offset.c gen_bad_ohdr.c gen_bogus.c gen_bounds.c \
-	gen_cross.c gen_deflate.c gen_file_image.c gen_filespace.c \
-	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
-	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
-	gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
-	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
-	ntypes.c objcopy.c ohdr.c page_buffer.c pool.c reserved.c \
-	set_extent.c space_overflow.c stab.c swmr.c \
-	swmr_addrem_writer.c swmr_check_compat_vfd.c swmr_generator.c \
-	swmr_reader.c swmr_remove_reader.c swmr_remove_writer.c \
-	swmr_sparse_reader.c swmr_sparse_writer.c swmr_start_write.c \
-	swmr_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) twriteorder.c unlink.c unregister.c \
-	$(use_append_chunk_SOURCES) $(use_append_mchunks_SOURCES) \
-	$(use_disable_mdc_flushes_SOURCES) vds.c vds_swmr_gen.c \
-	vds_swmr_reader.c vds_swmr_writer.c vfd.c
+	error_test.c evict_on_close.c extend.c external.c \
+	external_env.c farray.c fheap.c file_image.c filenotclosed.c \
+	fillval.c filter_fail.c filter_plugin.c flush1.c flush2.c \
+	flushrefresh.c freespace.c gen_bad_offset.c gen_bad_ohdr.c \
+	gen_bogus.c gen_bounds.c gen_cross.c gen_deflate.c \
+	gen_file_image.c gen_filespace.c gen_filters.c gen_new_array.c \
+	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	gen_noencoder.c gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
+	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hdfs.c \
+	hyperslab.c istore.c lheap.c links.c links_env.c mf.c mount.c \
+	mtime.c ntypes.c objcopy.c ohdr.c page_buffer.c pool.c \
+	reserved.c ros3.c s3comms.c set_extent.c space_overflow.c \
+	stab.c swmr.c swmr_addrem_writer.c swmr_check_compat_vfd.c \
+	swmr_generator.c swmr_reader.c swmr_remove_reader.c \
+	swmr_remove_writer.c swmr_sparse_reader.c swmr_sparse_writer.c \
+	swmr_start_write.c swmr_writer.c tcheck_version.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) twriteorder.c \
+	unlink.c unregister.c $(use_append_chunk_SOURCES) \
+	$(use_append_mchunks_SOURCES) \
+	$(use_disable_mdc_flushes_SOURCES) vds.c vds_env.c \
+	vds_swmr_gen.c vds_swmr_reader.c vds_swmr_writer.c vfd.c
 DIST_SOURCES = $(am__libfilter_plugin1_dsets_la_SOURCES_DIST) \
 	$(am__libfilter_plugin2_dsets_la_SOURCES_DIST) \
 	$(am__libfilter_plugin3_dsets_la_SOURCES_DIST) \
@@ -777,25 +801,26 @@ DIST_SOURCES = $(am__libfilter_plugin1_dsets_la_SOURCES_DIST) \
 	dt_arith.c dtransform.c dtypes.c earray.c efc.c \
 	enc_dec_plist.c enc_dec_plist_cross_platform.c enum.c \
 	err_compat.c error_test.c evict_on_close.c extend.c external.c \
-	farray.c fheap.c file_image.c filenotclosed.c fillval.c \
-	filter_fail.c filter_plugin.c flush1.c flush2.c flushrefresh.c \
-	freespace.c gen_bad_offset.c gen_bad_ohdr.c gen_bogus.c \
-	gen_bounds.c gen_cross.c gen_deflate.c gen_file_image.c \
-	gen_filespace.c gen_filters.c gen_new_array.c gen_new_fill.c \
-	gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	external_env.c farray.c fheap.c file_image.c filenotclosed.c \
+	fillval.c filter_fail.c filter_plugin.c flush1.c flush2.c \
+	flushrefresh.c freespace.c gen_bad_offset.c gen_bad_ohdr.c \
+	gen_bogus.c gen_bounds.c gen_cross.c gen_deflate.c \
+	gen_file_image.c gen_filespace.c gen_filters.c gen_new_array.c \
+	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
 	gen_noencoder.c gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
-	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
-	ntypes.c objcopy.c ohdr.c page_buffer.c pool.c reserved.c \
-	set_extent.c space_overflow.c stab.c swmr.c \
-	swmr_addrem_writer.c swmr_check_compat_vfd.c swmr_generator.c \
-	swmr_reader.c swmr_remove_reader.c swmr_remove_writer.c \
-	swmr_sparse_reader.c swmr_sparse_writer.c swmr_start_write.c \
-	swmr_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) twriteorder.c unlink.c unregister.c \
-	$(use_append_chunk_SOURCES) $(use_append_mchunks_SOURCES) \
-	$(use_disable_mdc_flushes_SOURCES) vds.c vds_swmr_gen.c \
-	vds_swmr_reader.c vds_swmr_writer.c vfd.c
+	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hdfs.c \
+	hyperslab.c istore.c lheap.c links.c links_env.c mf.c mount.c \
+	mtime.c ntypes.c objcopy.c ohdr.c page_buffer.c pool.c \
+	reserved.c ros3.c s3comms.c set_extent.c space_overflow.c \
+	stab.c swmr.c swmr_addrem_writer.c swmr_check_compat_vfd.c \
+	swmr_generator.c swmr_reader.c swmr_remove_reader.c \
+	swmr_remove_writer.c swmr_sparse_reader.c swmr_sparse_writer.c \
+	swmr_start_write.c swmr_writer.c tcheck_version.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) twriteorder.c \
+	unlink.c unregister.c $(use_append_chunk_SOURCES) \
+	$(use_append_mchunks_SOURCES) \
+	$(use_disable_mdc_flushes_SOURCES) vds.c vds_env.c \
+	vds_swmr_gen.c vds_swmr_reader.c vds_swmr_writer.c vfd.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -1026,10 +1051,12 @@ am__DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.in \
 	$(srcdir)/test_filter_plugin.sh.in \
 	$(srcdir)/test_usecases.sh.in $(srcdir)/testabort_fail.sh.in \
 	$(srcdir)/testcheck_version.sh.in $(srcdir)/testerror.sh.in \
+	$(srcdir)/testexternal_env.sh.in \
 	$(srcdir)/testflushrefresh.sh.in $(srcdir)/testlibinfo.sh.in \
 	$(srcdir)/testlinks_env.sh.in $(srcdir)/testswmr.sh.in \
-	$(srcdir)/testvdsswmr.sh.in $(top_srcdir)/bin/depcomp \
-	$(top_srcdir)/bin/test-driver $(top_srcdir)/config/commence.am \
+	$(srcdir)/testvds_env.sh.in $(srcdir)/testvdsswmr.sh.in \
+	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/test-driver \
+	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -1104,7 +1131,6 @@ FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
 FORTRAN_C_LONG_DOUBLE_IS_UNIQUE = @FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
 FORTRAN_HAVE_C_LONG_DOUBLE = @FORTRAN_HAVE_C_LONG_DOUBLE@
-FORTRAN_SIZEOF_LONG_DOUBLE = @FORTRAN_SIZEOF_LONG_DOUBLE@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 Fortran_COMPILER_ID = @Fortran_COMPILER_ID@
 GREP = @GREP@
@@ -1127,9 +1153,12 @@ H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_Fortran_INTEGER_SIZEOF_16 = @HAVE_Fortran_INTEGER_SIZEOF_16@
+HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_JAVA = @HDF_JAVA@
@@ -1156,6 +1185,7 @@ JAVA_JUNIT = @JAVA_JUNIT@
 JAVA_PATH_NAME = @JAVA_PATH_NAME@
 JAVA_VERSION = @JAVA_VERSION@
 JNIFLAGS = @JNIFLAGS@
+JNI_LDFLAGS = @JNI_LDFLAGS@
 JUNIT = @JUNIT@
 LARGE_PARALLEL_IO = @LARGE_PARALLEL_IO@
 LD = @LD@
@@ -1210,6 +1240,7 @@ PREADWRITE = @PREADWRITE@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
+ROS3_VFD = @ROS3_VFD@
 RUNPARALLEL = @RUNPARALLEL@
 RUNSERIAL = @RUNSERIAL@
 R_INTEGER = @R_INTEGER@
@@ -1234,7 +1265,6 @@ UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
-UUDECODE = @UUDECODE@
 VERSION = @VERSION@
 WORDS_BIGENDIAN = @WORDS_BIGENDIAN@
 _ACJNI_JAVAC = @_ACJNI_JAVAC@
@@ -1369,7 +1399,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 accum.h5 \
 	fheap.h5 ohdr.h5 stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw \
 	gheap[0-4].h5 ohdr_min_a.h5 ohdr_min_b.h5 \
 	min_dset_ohdr_testfile.h5 dt_arith[1-2] links.h5 \
-	links[0-6]*.h5 extlinks[0-15].h5 tmp big.data \
+	links[0-6]*.h5 extlinks[0-15].h5 tmp tmp_links tmp2_links \
+	tmp_links_env tmp_vds_env big.data \
 	big[0-9][0-9][0-9][0-9][0-9].h5 stdio.h5 sec2.h5 \
 	dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
 	tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
@@ -1388,13 +1419,14 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 accum.h5 \
 	btree2_tmp.h5 objcopy_src.h5 objcopy_dst.h5 objcopy_ext.dat \
 	trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 farray_tmp.h5 \
 	earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log \
-	new_multi_file_v16-r.h5 new_multi_file_v16-s.h5 \
-	split_get_file_image_test-m.h5 split_get_file_image_test-r.h5 \
-	file_image_core_test.h5.copy unregister_filter_1.h5 \
-	unregister_filter_2.h5 vds_virt.h5 vds_dapl.h5 \
-	vds_src_[0-1].h5 swmr_data.h5 use_use_append_chunk.h5 \
-	use_append_mchunks.h5 use_disable_mdc_flushes.h5 \
-	flushrefresh.h5 flushrefresh_VERIFICATION_START \
+	log_ros3_out.log log_s3comms_out.log new_multi_file_v16-r.h5 \
+	new_multi_file_v16-s.h5 split_get_file_image_test-m.h5 \
+	split_get_file_image_test-r.h5 file_image_core_test.h5.copy \
+	unregister_filter_1.h5 unregister_filter_2.h5 vds_virt.h5 \
+	vds_dapl.h5 vds_src_[0-1].h5 swmr_data.h5 \
+	use_use_append_chunk.h5 use_append_mchunks.h5 \
+	use_disable_mdc_flushes.h5 flushrefresh.h5 \
+	flushrefresh_VERIFICATION_START \
 	flushrefresh_VERIFICATION_CHECKPOINT1 \
 	flushrefresh_VERIFICATION_CHECKPOINT2 \
 	flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 \
@@ -1408,25 +1440,28 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 accum.h5 \
 #       testlibinfo.sh:
 #       testcheck_version.sh: tcheck_version
 #       testlinks_env.sh: links_env
+#       testexternal_env.sh: external_env
 #       testflushrefresh.sh: flushrefresh
+#       testvds_env.sh: vds_env
 #       testswmr.sh: swmr*
 #       testvdsswmr.sh: vds_swmr*
 #       testabort_fail.sh: filenotclosed.c and del_many_dense_attrs.c
 #       test_filter_plugin.sh: filter_plugin.c
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh \
-	testlinks_env.sh testswmr.sh testvdsswmr.sh \
-	testflushrefresh.sh test_usecases.sh testabort_fail.sh \
-	$(am__append_1)
+	testlinks_env.sh testexternal_env.sh testswmr.sh \
+	testvds_env.sh testvdsswmr.sh testflushrefresh.sh \
+	test_usecases.sh testabort_fail.sh $(am__append_1)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) \
-	links_env$(EXEEXT) filenotclosed$(EXEEXT) \
-	del_many_dense_attrs$(EXEEXT) flushrefresh$(EXEEXT) \
-	use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) \
-	use_disable_mdc_flushes$(EXEEXT) swmr_generator$(EXEEXT) \
-	swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
-	swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) \
-	swmr_addrem_writer$(EXEEXT) swmr_sparse_reader$(EXEEXT) \
-	swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
+	links_env$(EXEEXT) external_env$(EXEEXT) \
+	filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
+	flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) \
+	use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
+	swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) \
+	swmr_writer$(EXEEXT) swmr_remove_reader$(EXEEXT) \
+	swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
+	swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) \
+	swmr_start_write$(EXEEXT) vds_env$(EXEEXT) \
 	vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) \
 	vds_swmr_writer$(EXEEXT) $(am__append_2)
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -1436,15 +1471,15 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
 TEST_PROG = testhdf5 \
-           cache cache_api cache_image cache_tagging lheap ohdr stab gheap \
-           evict_on_close farray earray btree2 fheap \
+           cache cache_api cache_image cache_tagging lheap ohdr \
+           stab gheap evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
            dtypes dsets chunk_info cmpd_dset filter_fail extend direct_chunk \
            external efc objcopy links unlink twriteorder big mtime fillval mount \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
-           enc_dec_plist_cross_platform getname vfd ntypes dangle dtransform \
-           reserved cross_read freespace mf vds file_image unregister \
-           cache_logging cork swmr
+           enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
+           dangle dtransform reserved cross_read freespace mf vds file_image \
+           unregister cache_logging cork swmr
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -1471,7 +1506,7 @@ BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_n
 @HAVE_SHARED_CONDITIONAL_TRUE@libfilter_plugin4_groups_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -module -shared -export-dynamic -rpath /nowhere
 @HAVE_SHARED_CONDITIONAL_TRUE@libfilter_plugin3_dsets_la_LIBADD = $(LIBHDF5)
 @HAVE_SHARED_CONDITIONAL_TRUE@libfilter_plugin4_groups_la_LIBADD = $(LIBHDF5)
-libh5test_la_SOURCES = h5test.c testframe.c cache_common.c swmr_common.c
+libh5test_la_SOURCES = h5test.c testframe.c cache_common.c swmr_common.c external_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD = libh5test.la $(LIBHDF5)
@@ -1498,7 +1533,7 @@ use_disable_mdc_flushes_SOURCES = use_disable_mdc_flushes.c
 
 # Temporary files.
 DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filter_plugin.sh \
-    testswmr.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh testabort_fail.sh
+    testexternal_env.sh testswmr.sh testvds_env.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh testabort_fail.sh
 
 
 # Automake needs to be taught how to build lib, progs and tests targets.
@@ -1563,6 +1598,8 @@ testcheck_version.sh: $(top_builddir)/config.status $(srcdir)/testcheck_version.
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testerror.sh: $(top_builddir)/config.status $(srcdir)/testerror.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testexternal_env.sh: $(top_builddir)/config.status $(srcdir)/testexternal_env.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testflushrefresh.sh: $(top_builddir)/config.status $(srcdir)/testflushrefresh.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testlibinfo.sh: $(top_builddir)/config.status $(srcdir)/testlibinfo.sh.in
@@ -1570,6 +1607,8 @@ testlibinfo.sh: $(top_builddir)/config.status $(srcdir)/testlibinfo.sh.in
 testlinks_env.sh: $(top_builddir)/config.status $(srcdir)/testlinks_env.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testswmr.sh: $(top_builddir)/config.status $(srcdir)/testswmr.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testvds_env.sh: $(top_builddir)/config.status $(srcdir)/testvds_env.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testvdsswmr.sh: $(top_builddir)/config.status $(srcdir)/testvdsswmr.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
@@ -1758,6 +1797,10 @@ external$(EXEEXT): $(external_OBJECTS) $(external_DEPENDENCIES) $(EXTRA_external
 	@rm -f external$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(external_OBJECTS) $(external_LDADD) $(LIBS)
 
+external_env$(EXEEXT): $(external_env_OBJECTS) $(external_env_DEPENDENCIES) $(EXTRA_external_env_DEPENDENCIES) 
+	@rm -f external_env$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(external_env_OBJECTS) $(external_env_LDADD) $(LIBS)
+
 farray$(EXEEXT): $(farray_OBJECTS) $(farray_DEPENDENCIES) $(EXTRA_farray_DEPENDENCIES) 
 	@rm -f farray$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(farray_OBJECTS) $(farray_LDADD) $(LIBS)
@@ -1890,6 +1933,10 @@ gheap$(EXEEXT): $(gheap_OBJECTS) $(gheap_DEPENDENCIES) $(EXTRA_gheap_DEPENDENCIE
 	@rm -f gheap$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(gheap_OBJECTS) $(gheap_LDADD) $(LIBS)
 
+hdfs$(EXEEXT): $(hdfs_OBJECTS) $(hdfs_DEPENDENCIES) $(EXTRA_hdfs_DEPENDENCIES) 
+	@rm -f hdfs$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(hdfs_OBJECTS) $(hdfs_LDADD) $(LIBS)
+
 hyperslab$(EXEEXT): $(hyperslab_OBJECTS) $(hyperslab_DEPENDENCIES) $(EXTRA_hyperslab_DEPENDENCIES) 
 	@rm -f hyperslab$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(hyperslab_OBJECTS) $(hyperslab_LDADD) $(LIBS)
@@ -1945,6 +1992,14 @@ pool$(EXEEXT): $(pool_OBJECTS) $(pool_DEPENDENCIES) $(EXTRA_pool_DEPENDENCIES)
 reserved$(EXEEXT): $(reserved_OBJECTS) $(reserved_DEPENDENCIES) $(EXTRA_reserved_DEPENDENCIES) 
 	@rm -f reserved$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(reserved_OBJECTS) $(reserved_LDADD) $(LIBS)
+
+ros3$(EXEEXT): $(ros3_OBJECTS) $(ros3_DEPENDENCIES) $(EXTRA_ros3_DEPENDENCIES) 
+	@rm -f ros3$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(ros3_OBJECTS) $(ros3_LDADD) $(LIBS)
+
+s3comms$(EXEEXT): $(s3comms_OBJECTS) $(s3comms_DEPENDENCIES) $(EXTRA_s3comms_DEPENDENCIES) 
+	@rm -f s3comms$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(s3comms_OBJECTS) $(s3comms_LDADD) $(LIBS)
 
 set_extent$(EXEEXT): $(set_extent_OBJECTS) $(set_extent_DEPENDENCIES) $(EXTRA_set_extent_DEPENDENCIES) 
 	@rm -f set_extent$(EXEEXT)
@@ -2046,6 +2101,10 @@ vds$(EXEEXT): $(vds_OBJECTS) $(vds_DEPENDENCIES) $(EXTRA_vds_DEPENDENCIES)
 	@rm -f vds$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(vds_OBJECTS) $(vds_LDADD) $(LIBS)
 
+vds_env$(EXEEXT): $(vds_env_OBJECTS) $(vds_env_DEPENDENCIES) $(EXTRA_vds_env_DEPENDENCIES) 
+	@rm -f vds_env$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(vds_env_OBJECTS) $(vds_env_LDADD) $(LIBS)
+
 vds_swmr_gen$(EXEEXT): $(vds_swmr_gen_OBJECTS) $(vds_swmr_gen_DEPENDENCIES) $(EXTRA_vds_swmr_gen_DEPENDENCIES) 
 	@rm -f vds_swmr_gen$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(vds_swmr_gen_OBJECTS) $(vds_swmr_gen_LDADD) $(LIBS)
@@ -2103,6 +2162,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evict_on_close.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extend.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/external.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/external_common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/external_env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/farray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file_image.Po@am__quote@
@@ -2142,6 +2203,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getname.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5test.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hdfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hyperslab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/istore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lheap.Po@am__quote@
@@ -2156,6 +2218,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/page_buffer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reserved.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ros3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s3comms.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_extent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/space_overflow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stab.Po@am__quote@
@@ -2212,6 +2276,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/use_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/use_disable_mdc_flushes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vds.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vds_env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vds_swmr_gen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vds_swmr_reader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vds_swmr_writer.Po@am__quote@
@@ -2765,6 +2830,27 @@ vfd.log: vfd$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+ros3.log: ros3$(EXEEXT)
+	@p='ros3$(EXEEXT)'; \
+	b='ros3'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+s3comms.log: s3comms$(EXEEXT)
+	@p='s3comms$(EXEEXT)'; \
+	b='s3comms'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+hdfs.log: hdfs$(EXEEXT)
+	@p='hdfs$(EXEEXT)'; \
+	b='hdfs'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 ntypes.log: ntypes$(EXEEXT)
 	@p='ntypes$(EXEEXT)'; \
 	b='ntypes'; \
@@ -3095,7 +3181,7 @@ all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
 # make install-doc doesn't do anything outside of doc directory, but
 # Makefiles should recognize it.
 # UPDATE: docs no longer reside in this build tree, so this target
-# is depreciated.
+# is deprecated.
 install-doc uninstall-doc:
 	@echo "Nothing to be done."
 

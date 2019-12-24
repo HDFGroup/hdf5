@@ -54,8 +54,8 @@ public class TestH5 {
     /**
      * Test method for {@link hdf.hdf5lib.H5#J2C(int)}.
      * NOTE:
-     * H5F_ACC_DEBUG no longer prints any special debug info. The symbol is
-     * being retained and will be listed as deprecated in HDF5 1.10.0.
+     * H5F_ACC_DEBUG no longer prints any special debug info. Even though the symbol is
+     * being retained hdf java does not access the symbol.
      */
     @Test
     public void testJ2C() {
@@ -63,7 +63,6 @@ public class TestH5 {
         int H5F_ACC_RDWR = 0x0001;
         int H5F_ACC_TRUNC = 0x0002;
         int H5F_ACC_EXCL = 0x0004;
-        int H5F_ACC_DEBUG =  0x0000; // HDFFV-1074 was 0x0008;
         int H5F_ACC_CREAT = 0x0010;
         int H5F_OBJ_FILE = 0x0001;
         int H5F_OBJ_DATASET = 0x0002;
@@ -75,13 +74,13 @@ public class TestH5 {
         int H5F_OBJ_LOCAL = 0x0020;
 
         int definedValues[] = { H5F_ACC_RDONLY, H5F_ACC_RDWR, H5F_ACC_TRUNC,
-                H5F_ACC_EXCL, H5F_ACC_DEBUG, H5F_ACC_CREAT, H5F_OBJ_FILE,
+                H5F_ACC_EXCL, H5F_ACC_CREAT, H5F_OBJ_FILE,
                 H5F_OBJ_DATASET, H5F_OBJ_GROUP, H5F_OBJ_DATATYPE, H5F_OBJ_ATTR,
                 H5F_OBJ_ALL, H5F_OBJ_LOCAL };
 
         int j2cValues[] = { HDF5Constants.H5F_ACC_RDONLY,
                 HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5F_ACC_TRUNC,
-                HDF5Constants.H5F_ACC_EXCL, H5F_ACC_DEBUG,
+                HDF5Constants.H5F_ACC_EXCL,
                 HDF5Constants.H5F_ACC_CREAT, HDF5Constants.H5F_OBJ_FILE,
                 HDF5Constants.H5F_OBJ_DATASET, HDF5Constants.H5F_OBJ_GROUP,
                 HDF5Constants.H5F_OBJ_DATATYPE, HDF5Constants.H5F_OBJ_ATTR,
@@ -162,7 +161,7 @@ public class TestH5 {
      */
     @Test
     public void testH5get_libversion() {
-        int libversion[] = { 1, 10, 5 };
+        int libversion[] = { 1, 10, 6 };
 
         try {
             H5.H5get_libversion(libversion);
@@ -177,7 +176,7 @@ public class TestH5 {
         for (int i = 0; i < 2; i++)
             assertFalse(libversion[i] == 0);
     }
-    
+
     /**
      * Test method for {@link hdf.hdf5lib.H5#H5get_libversion(int[])}
      * to ensure a null libversion parameter causes the function to
@@ -185,14 +184,14 @@ public class TestH5 {
      */
     @Test
     public void testH5get_libversion_null_param() {
-    	try {
-    		H5.H5get_libversion(null);
-    	}
-    	catch (Throwable err) {
-    		return;
-    	}
-    	
-    	fail("H5.H5get_libversion: succeeded with a null libversion parameter!");
+        try {
+            H5.H5get_libversion(null);
+        }
+        catch (Throwable err) {
+            return;
+        }
+
+        fail("H5.H5get_libversion: succeeded with a null libversion parameter!");
     }
 
     /**
@@ -201,7 +200,7 @@ public class TestH5 {
      */
     @Test
     public void testH5check_version() {
-        int majnum = 1, minnum = 10, relnum = 5;
+        int majnum = 1, minnum = 10, relnum = 6;
 
         try {
             H5.H5check_version(majnum, minnum, relnum);

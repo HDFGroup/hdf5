@@ -508,10 +508,10 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx
 
     UNUSED(clss);
 
+    infobuf.type = H5L_TYPE_ERROR;
+
     if (NULL == name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Lget_val_by_idx: group name is NULL");
-
-    infobuf.type = H5L_TYPE_ERROR;
 
     PIN_JAVA_STRING(ENVONLY, name, grpName, NULL, "H5Lget_val_by_idx: group name not pinned");
 

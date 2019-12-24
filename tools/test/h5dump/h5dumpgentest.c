@@ -562,7 +562,7 @@ gent_attribute(void)
     dims[0] = 24;
     space = H5Screate_simple(1, dims, NULL);
     attr = H5Acreate2(root, "/attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    sprintf(buf, "attribute of root group");
+    HDsprintf(buf, "attribute of root group");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1372,7 +1372,7 @@ static void gent_all(void)
     dims[0] = 10;
     space = H5Screate_simple(1, dims, NULL);
     attr = H5Acreate2(group, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    sprintf(buf, "abcdefghi");
+    HDsprintf(buf, "abcdefghi");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1403,7 +1403,7 @@ static void gent_all(void)
     dims[0] = 27;
     space = H5Screate_simple(1, dims, NULL);
     attr = H5Acreate2(dataset, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    sprintf(buf, "1st attribute of dset1.1.1");
+    HDsprintf(buf, "1st attribute of dset1.1.1");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1411,7 +1411,7 @@ static void gent_all(void)
     dims[0] = 27;
     space = H5Screate_simple(1, dims, NULL);
     attr = H5Acreate2(dataset, "attr2", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    sprintf(buf, "2nd attribute of dset1.1.1");
+    HDsprintf(buf, "2nd attribute of dset1.1.1");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1607,7 +1607,7 @@ gent_many(void)
     dims[0] = 10;
     space2 = H5Screate_simple(1, dims, NULL);
     attr = H5Acreate2(dataset, "attr1", H5T_STD_I8BE, space2, H5P_DEFAULT, H5P_DEFAULT);
-    sprintf(buf, "abcdefghi");
+    HDsprintf(buf, "abcdefghi");
     H5Awrite(attr, H5T_NATIVE_CHAR, buf);
     H5Sclose(space2);
     H5Aclose(attr);
@@ -1888,7 +1888,7 @@ static void gent_str2(void)
 
 
     int i;
-    char buf[LENSTR+10];
+    char buf[LENSTR+20];
     char buf2[3*LENSTR2];
     hsize_t sdim;
 
@@ -1926,9 +1926,9 @@ static void gent_str2(void)
     dims[0] = 3;
     space2 = H5Screate_simple(1, dims, NULL);
     attr = H5Acreate2(dataset, "attr1", fxdlenstr2, space2, H5P_DEFAULT, H5P_DEFAULT);
-    sprintf(&(buf2[0*LENSTR2]), "0123456789");
-    sprintf(&(buf2[1*LENSTR2]), "abcdefghij");
-    sprintf(&(buf2[2*LENSTR2]), "ABCDEFGHIJ");
+    HDsprintf(&(buf2[0*LENSTR2]), "0123456789");
+    HDsprintf(&(buf2[1*LENSTR2]), "abcdefghij");
+    HDsprintf(&(buf2[2*LENSTR2]), "ABCDEFGHIJ");
     H5Awrite(attr, fxdlenstr2, buf2);
     H5Sclose(space2);
     H5Tclose(fxdlenstr2);
@@ -1940,7 +1940,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_NULLTERM of", i);
+        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLTERM of", i);
         H5Tset_size(memtype, HDstrlen(buf)+1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -1953,7 +1953,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_NULLTERM of string array", i);
+        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLTERM of string array", i);
         H5Tset_size(memtype, HDstrlen(buf)+1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -1973,7 +1973,7 @@ static void gent_str2(void)
 
     for(i = 0;(hsize_t) i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of", i);
+        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of", i);
         H5Tset_size(memtype, HDstrlen(buf)+1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -1987,7 +1987,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of string array", i);
+        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of string array", i);
         H5Tset_size(memtype, HDstrlen(buf)+1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2006,7 +2006,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_SPACEPAD of", i);
+        HDsprintf(buf, "This is row %1d of type H5T_STR_SPACEPAD of", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2020,7 +2020,7 @@ static void gent_str2(void)
 
     for(i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        sprintf(buf, "This is row %1d of type H5T_STR_SPACEPAD of string array", i);
+        HDsprintf(buf, "This is row %1d of type H5T_STR_SPACEPAD of string array", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2703,14 +2703,14 @@ gent_vldatatypes2(void)
     for(i = 0; i < SPACE1_DIM1; i++) {
         wdata[i].p = (hvl_t *)HDmalloc((i + 1) * sizeof(hvl_t));
         if(wdata[i].p == NULL) {
-            printf("Cannot allocate memory for VL data! i=%u\n", i);
+            HDprintf("Cannot allocate memory for VL data! i=%u\n", i);
             return;
         } /* end if */
         wdata[i].len = i + 1;
         for(t1 = (hvl_t *)wdata[i].p, j = 0; j < (i + 1); j++, t1++) {
             t1->p = (unsigned *)HDmalloc((j + 1) * sizeof(unsigned));
             if(t1->p == NULL) {
-                printf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
+                HDprintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
                 return;
             } /* end if */
             t1->len=j+1;
@@ -3762,9 +3762,9 @@ void gent_multi(void)
     for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
         memb_fapl[mt] = H5P_DEFAULT;
         memb_map[mt] = mt;
-        sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+        HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
         memb_name[mt] = sv[mt];
-        /*printf("memb_name[%d]=%s, memb_map[%d]=%d; ", mt, memb_name[mt], mt, memb_map[mt]);*/
+        /*HDprintf("memb_name[%d]=%s, memb_map[%d]=%d; ", mt, memb_name[mt], mt, memb_map[mt]);*/
         memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
     }
     memb_map[H5FD_MEM_DEFAULT] = H5FD_MEM_SUPER;
@@ -3803,7 +3803,7 @@ static void gent_large_objname(void)
     group = H5Gcreate2(fid, "this_is_a_large_group_name", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     for(i = 0; i < 50; ++i) {
-        sprintf(grp_name, "this_is_a_large_group_name%d", i);
+        HDsprintf(grp_name, "this_is_a_large_group_name%d", i);
         group2 = H5Gcreate2(group, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Gclose(group2);
     }
@@ -6273,8 +6273,8 @@ static int gent_ldouble(void)
 
     return 0;
 
-    error:
-    printf("error !\n");
+error:
+    HDprintf("error !\n");
     return -1;
 
 }
@@ -6437,7 +6437,7 @@ gent_bigdims(void)
     return;
 
     out:
-    printf("Error.....\n");
+    HDprintf("Error.....\n");
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
         H5Sclose(f_sid);
@@ -6629,7 +6629,7 @@ gent_group_creation_order(void)
     return;
 
     out:
-    printf("Error.....\n");
+    HDprintf("Error.....\n");
     H5E_BEGIN_TRY {
         H5Gclose(gid);
         H5Pclose(gcpl_id);
@@ -6898,7 +6898,7 @@ gent_attr_creation_order(void)
     return;
 
     out:
-    printf("Error.....\n");
+    HDprintf("Error.....\n");
     H5E_BEGIN_TRY {
         H5Gclose(gid);
         H5Dclose(did);
@@ -7526,21 +7526,12 @@ gent_attr_intsize(void)
     H5Gclose(root);
     H5Fclose(fid);
 }
+
 static void
 gent_nodata(void)
 {
     hid_t fid, dataset, space;
     hsize_t dims[2];
-    uint8_t  dsetu8[F66_XDIM][F66_YDIM8],   valu8bits;
-    uint16_t dsetu16[F66_XDIM][F66_YDIM16], valu16bits;
-    uint32_t dsetu32[F66_XDIM][F66_YDIM32], valu32bits;
-    uint64_t dsetu64[F66_XDIM][F66_YDIM64], valu64bits;
-    int8_t  dset8[F66_XDIM][F66_YDIM8],   val8bits;
-    int16_t dset16[F66_XDIM][F66_YDIM16], val16bits;
-    int32_t dset32[F66_XDIM][F66_YDIM32], val32bits;
-    int64_t dset64[F66_XDIM][F66_YDIM64], val64bits;
-    double  dsetdbl[F66_XDIM][F66_YDIM8];
-    unsigned int i, j;
 
     fid = H5Fcreate(FILE87, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 

@@ -135,7 +135,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h \
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
-libh5repack_la_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+libh5repack_la_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 am_libh5repack_la_OBJECTS = h5repack.lo h5repack_copy.lo \
 	h5repack_filters.lo h5repack_opttable.lo h5repack_parse.lo \
 	h5repack_refs.lo h5repack_verify.lo
@@ -494,7 +494,6 @@ FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
 FORTRAN_C_LONG_DOUBLE_IS_UNIQUE = @FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
 FORTRAN_HAVE_C_LONG_DOUBLE = @FORTRAN_HAVE_C_LONG_DOUBLE@
-FORTRAN_SIZEOF_LONG_DOUBLE = @FORTRAN_SIZEOF_LONG_DOUBLE@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 Fortran_COMPILER_ID = @Fortran_COMPILER_ID@
 GREP = @GREP@
@@ -517,9 +516,12 @@ H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_Fortran_INTEGER_SIZEOF_16 = @HAVE_Fortran_INTEGER_SIZEOF_16@
+HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_JAVA = @HDF_JAVA@
@@ -546,6 +548,7 @@ JAVA_JUNIT = @JAVA_JUNIT@
 JAVA_PATH_NAME = @JAVA_PATH_NAME@
 JAVA_VERSION = @JAVA_VERSION@
 JNIFLAGS = @JNIFLAGS@
+JNI_LDFLAGS = @JNI_LDFLAGS@
 JUNIT = @JUNIT@
 LARGE_PARALLEL_IO = @LARGE_PARALLEL_IO@
 LD = @LD@
@@ -600,6 +603,7 @@ PREADWRITE = @PREADWRITE@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
+ROS3_VFD = @ROS3_VFD@
 RUNPARALLEL = @RUNPARALLEL@
 RUNSERIAL = @RUNSERIAL@
 R_INTEGER = @R_INTEGER@
@@ -624,7 +628,6 @@ UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
-UUDECODE = @UUDECODE@
 VERSION = @VERSION@
 WORDS_BIGENDIAN = @WORDS_BIGENDIAN@
 _ACJNI_JAVAC = @_ACJNI_JAVAC@
@@ -749,7 +752,7 @@ libh5repack_la_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \
                        h5repack_verify.c
 
 libh5repack_la_LDFLAGS = $(AM_LDFLAGS)
-libh5repack_la_LIBADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+libh5repack_la_LIBADD = $(LIBH5TOOLS) $(LIBHDF5)
 h5repack_SOURCES = h5repack_main.c
 
 # Add h5repack specific linker flags here
@@ -1331,7 +1334,7 @@ all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
 # make install-doc doesn't do anything outside of doc directory, but
 # Makefiles should recognize it.
 # UPDATE: docs no longer reside in this build tree, so this target
-# is depreciated.
+# is deprecated.
 install-doc uninstall-doc:
 	@echo "Nothing to be done."
 

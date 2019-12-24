@@ -123,6 +123,11 @@ H5TOOLS_DLLVAR unsigned h5tools_nCols;               /*max number of columns for
 H5TOOLS_DLL void     indentation(unsigned);
 H5TOOLS_DLL void     print_version(const char *progname);
 H5TOOLS_DLL void     parallel_print(const char* format, ... );
+H5TOOLS_DLL herr_t   parse_tuple(const char   *start,
+                                 int           sep,
+                                 char        **cpy_out,
+                                 unsigned     *nelems,
+                                 char       ***ptrs_out);
 H5TOOLS_DLL void     error_msg(const char *fmt, ...);
 H5TOOLS_DLL void     warn_msg(const char *fmt, ...);
 H5TOOLS_DLL void     help_ref_msg(FILE *output);
@@ -174,6 +179,14 @@ H5TOOLS_DLL void     h5tools_setprogname(const char*progname);
 H5TOOLS_DLL int      h5tools_getstatus(void);
 H5TOOLS_DLL void     h5tools_setstatus(int d_status);
 H5TOOLS_DLL int h5tools_getenv_update_hyperslab_bufsize(void);
+H5TOOLS_DLL int h5tools_set_configured_fapl(hid_t       fapl_id,
+                                            const char  vfd_name[],
+                                            void       *fapl_t_ptr);
+#ifdef H5_HAVE_ROS3_VFD
+H5TOOLS_DLL int h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa, 
+                                           const char       **values);
+#endif /* H5_HAVE_ROS3_VFD */
+
 #ifdef __cplusplus
 }
 #endif

@@ -167,9 +167,9 @@ main(int argc, char *argv[])
             HDprintf("%d: launch reader process\n", mypid);
             if (read_uc_file(send_wait) < 0){
                 HDfprintf(stderr, "read_uc_file encountered error\n");
-                HDexit(1);
+                HDexit(EXIT_FAILURE);
             }
-            HDexit(0);
+            HDexit(EXIT_SUCCESS);
         }
     }
 

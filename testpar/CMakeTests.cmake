@@ -16,19 +16,32 @@
 ##############################################################################
 ##############################################################################
 # Remove any output file left over from previous test run
-add_test (NAME MPI_TEST-clear-testphdf5-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        ParaTest.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_PAR_BINARY_DIR}
+add_test (
+    NAME MPI_TEST-clear-testphdf5-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ParaTest.h5
+    WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
 set_tests_properties (MPI_TEST-clear-testphdf5-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
 
+set (SKIP_tests
+    cchunk1
+    cchunk2
+    cchunk3
+    cchunk4
+    ecdsetw
+    eidsetw2
+    selnone
+    cngrpw-ingrpr
+    cschunkw
+    ccchunkw
+    tldsc
+    actualio
+    MC_coll_MD_read
+)
 set (SKIP_testphdf5 "")
-#if (${HDF5_OPENMPI_VERSION_SKIP})
-#  set (SKIP_testphdf5 "${SKIP_testphdf5};-x;ecdsetw")
-#endif ()
+foreach (skiptest ${SKIP_tests})
+  set (SKIP_testphdf5 "${SKIP_testphdf5};-x;${skiptest}")
+endforeach ()
 
 add_test (NAME MPI_TEST_testphdf5 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:testphdf5> ${MPIEXEC_POSTFLAGS} ${SKIP_testphdf5})
 set_tests_properties (MPI_TEST_testphdf5 PROPERTIES
@@ -36,14 +49,31 @@ set_tests_properties (MPI_TEST_testphdf5 PROPERTIES
     ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_PAR_BINARY_DIR}"
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
-if (NOT "${last_test}" STREQUAL "")
+if (last_test)
   set_tests_properties (MPI_TEST_testphdf5 PROPERTIES DEPENDS ${last_test})
 endif ()
 set (last_test "MPI_TEST_testphdf5")
 
-#if (${HDF5_OPENMPI_VERSION_SKIP})
+#execute the skipped tests
+foreach (skiptest ${SKIP_tests})
+  add_test (NAME MPI_TEST_testphdf5_${skiptest} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:testphdf5> ${MPIEXEC_POSTFLAGS} -o ${skiptest})
+  set_tests_properties (MPI_TEST_testphdf5_${skiptest} PROPERTIES
+      FIXTURES_REQUIRED par_clear_testphdf5
+      ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_PAR_BINARY_DIR}"
+      WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
+  )
+  if (last_test)
+    set_tests_properties (MPI_TEST_testphdf5_${skiptest} PROPERTIES DEPENDS ${last_test})
+  endif ()
+  set (last_test "MPI_TEST_testphdf5_${skiptest}")
+endforeach ()
+
+#if (HDF5_OPENMPI_VERSION_SKIP)
 #  list (REMOVE_ITEM H5P_TESTS t_shapesame)
 #endif ()
+
+# do not test until new version is added
+list (REMOVE_ITEM H5P_TESTS t_cache_image)
 
 set (test_par_CLEANFILES
     t_cache_image_00.h5
@@ -65,26 +95,24 @@ set (test_par_CLEANFILES
 )
 
 # Remove any output file left over from previous test run
-add_test (NAME MPI_TEST-clear-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        ${test_par_CLEANFILES}
-    WORKING_DIRECTORY
-        ${HDF5_TEST_PAR_BINARY_DIR}
+add_test (
+    NAME MPI_TEST-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_par_CLEANFILES}
+    WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
 set_tests_properties (MPI_TEST-clear-objects PROPERTIES FIXTURES_SETUP par_clear_objects)
 
-foreach (testp ${H5P_TESTS})
-  add_test (NAME MPI_TEST_${testp} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${testp}> ${MPIEXEC_POSTFLAGS})
-  set_tests_properties (MPI_TEST_${testp} PROPERTIES
+foreach (h5_testp ${H5P_TESTS})
+  add_test (NAME MPI_TEST_${h5_testp} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${h5_testp}> ${MPIEXEC_POSTFLAGS})
+  set_tests_properties (MPI_TEST_${h5_testp} PROPERTIES
       FIXTURES_REQUIRED par_clear_objects
       ENVIRONMENT "HDF5_ALARM_SECONDS=3600;srcdir=${HDF5_TEST_PAR_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
   )
-  if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (MPI_TEST_${testp} PROPERTIES DEPENDS ${last_test})
+  if (last_test)
+    set_tests_properties (MPI_TEST_${h5_testp} PROPERTIES DEPENDS ${last_test})
   endif ()
-  set (last_test "MPI_TEST_${testp}")
+  set (last_test "MPI_TEST_${h5_testp}")
 endforeach ()
 
 # The t_pflush1 test is hard-coded to fail.

@@ -26,41 +26,39 @@ foreach (h5_file ${HDF5_TEST_FILES})
 endforeach ()
 add_custom_target(hl_ex_ex_ds1_files ALL COMMENT "Copying files needed by hl_ex_ex_ds1 tests" DEPENDS ${hl_ex_ex_ds1_files_list})
 
-  # Remove any output file left over from previous test run
-  add_test (
-      NAME HL_ex-clear-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-    ex_lite1.h5
-    ex_lite2.h5
-    ex_lite3.h5
-    packet_table_FLexample.h5
-    ex_image1.h5
-    ex_image2.h5
-    ex_table_01.h5
-    ex_table_02.h5
-    ex_table_03.h5
-    ex_table_04.h5
-    ex_table_05.h5
-    ex_table_06.h5
-    ex_table_07.h5
-    ex_table_08.h5
-    ex_table_09.h5
-    ex_table_10.h5
-    ex_table_11.h5
-    ex_table_12.h5
-    ex_ds1.h5
-  )
-  if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (HL_ex-clear-objects PROPERTIES DEPENDS ${last_test})
-  endif ()
-  set (last_test "HL_ex-clear-objects")
+# Remove any output file left over from previous test run
+add_test (
+    NAME HL_ex-clear-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+            ex_lite1.h5
+            ex_lite2.h5
+            ex_lite3.h5
+            packet_table_FLexample.h5
+            ex_image1.h5
+            ex_image2.h5
+            ex_table_01.h5
+            ex_table_02.h5
+            ex_table_03.h5
+            ex_table_04.h5
+            ex_table_05.h5
+            ex_table_06.h5
+            ex_table_07.h5
+            ex_table_08.h5
+            ex_table_09.h5
+            ex_table_10.h5
+            ex_table_11.h5
+            ex_table_12.h5
+            ex_ds1.h5
+)
+set_tests_properties (HL_ex-clear-objects PROPERTIES FIXTURES_SETUP clear_HL_ex)
 
 foreach (example ${examples})
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME HL_ex_${example} COMMAND $<TARGET_FILE:hl_ex_${example}>)
+    add_test (NAME HL_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_ex_${example}>)
   else ()
     add_test (NAME HL_ex_${example} COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -D "TEST_PROGRAM=$<TARGET_FILE:hl_ex_${example}>"
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
@@ -71,8 +69,11 @@ foreach (example ${examples})
         -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
     )
   endif ()
-  if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (HL_ex_${example} PROPERTIES DEPENDS ${last_test})
+  if (last_test)
+    set_tests_properties (HL_ex_${example} PROPERTIES
+        DEPENDS ${last_test}
+        FIXTURES_REQUIRED clear_HL_ex
+    )
   endif ()
   set (last_test "HL_ex_${example}")
 endforeach ()

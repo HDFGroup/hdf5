@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.10.5], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.10.6], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -564,7 +564,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([HAVE_Fortran_INTEGER_SIZEOF_16])
   AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
   AC_SUBST([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE])
-  AC_SUBST([FORTRAN_SIZEOF_LONG_DOUBLE])
   AC_SUBST([H5CONFIG_F_NUM_RKIND])
   AC_SUBST([H5CONFIG_F_RKIND])
   AC_SUBST([H5CONFIG_F_RKIND_SIZEOF])
@@ -942,6 +941,48 @@ if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
 fi
 
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building tests 
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_TESTS])
+
+## Default is to build tests
+HDF5_TESTS=yes
+
+AC_MSG_CHECKING([if building tests is disabled])
+
+AC_ARG_ENABLE([tests],
+              [AS_HELP_STRING([--enable-tests],
+                              [Compile the HDF5 tests [default=yes]])],
+              [HDF5_TESTS=$enableval])
+
+if test "X$HDF5_TESTS" = "Xno"; then
+  echo "Building HDF5 tests is disabled"
+fi
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building tools
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_TOOLS])
+
+## Default is to build tests and tools
+HDF5_TOOLS=yes
+
+AC_MSG_CHECKING([if building tools is disabled])
+
+AC_ARG_ENABLE([tools],
+              [AS_HELP_STRING([--enable-tools],
+                              [Compile the HDF5 tools [default=yes]])],
+              [HDF5_TOOLS=$enableval])
+
+if test "X$HDF5_TOOLS" = "Xno"; then
+  echo "Building HDF5 tools is disabled"
+fi
 
 ## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
@@ -2512,8 +2553,10 @@ AC_SUBST([PARALLEL_FILTERED_WRITES])
 AC_SUBST([LARGE_PARALLEL_IO])
 
 if test -n "$PARALLEL"; then
-  ## The 'testpar' directory should participate in the build
-  TESTPARALLEL=testpar
+  if test "X$HDF5_TESTS" = "Xyes"; then
+    ## The 'testpar' directory should participate in the build
+    TESTPARALLEL=testpar
+  fi
 
   ## We are building a parallel library
   AC_DEFINE([HAVE_PARALLEL], [1], [Define if we have parallel support])
@@ -2764,6 +2807,135 @@ fi
 
 ## Direct VFD files are not built if not required.
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Check if Read-Only S3 virtual file driver is enabled by --enable-ros3-vfd
+##
+AC_SUBST([ROS3_VFD])
+
+## Default is no Read-Only S3 VFD
+ROS3_VFD=no
+
+AC_ARG_ENABLE([ros3-vfd],
+              [AS_HELP_STRING([--enable-ros3-vfd],
+                              [Build the Read-Only S3 virtual file driver (VFD).
+                               [default=no]])],
+              [ROS3_VFD=$enableval], [ROS3_VFD=no])
+
+if test "X$ROS3_VFD" = "Xyes"; then
+    AC_CHECK_HEADERS([curl/curl.h],, [unset ROS3_VFD])
+    AC_CHECK_HEADERS([openssl/evp.h],, [unset ROS3_VFD])
+    AC_CHECK_HEADERS([openssl/hmac.h],, [unset ROS3_VFD])
+    AC_CHECK_HEADERS([openssl/sha.h],, [unset ROS3_VFD])
+    if test "X$ROS3_VFD" = "Xyes"; then
+        AC_CHECK_LIB([curl], [curl_global_init],, [unset ROS3_VFD])
+        AC_CHECK_LIB([crypto], [EVP_sha256],, [unset ROS3_VFD])
+    fi
+
+    AC_MSG_CHECKING([if the Read-Only S3 virtual file driver (VFD) is enabled])
+    if test "X$ROS3_VFD" = "Xyes"; then
+        AC_DEFINE([HAVE_ROS3_VFD], [1],
+                [Define whether the Read-Only S3 virtual file driver (VFD) should be compiled])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+        ROS3_VFD=no
+        AC_MSG_ERROR([The Read-Only S3 VFD was requested but cannot be built.
+                      Please check that openssl and cURL are available on your
+                      system, and/or re-configure without option
+                      --enable-ros3-vfd.])
+    fi
+else
+    AC_MSG_CHECKING([if the Read-Only S3 virtual file driver (VFD) is enabled])
+    AC_MSG_RESULT([no])
+    ROS3_VFD=no
+
+fi
+
+## Read-only S3 files are not built if not required.
+AM_CONDITIONAL([ROS3_VFD_CONDITIONAL], [test "X$ROS3_VFD" = "Xyes"])
+
+
+## ----------------------------------------------------------------------
+## Is libhdfs (Hadoop Distributed File System) present?
+## It might be specified with the `--with-libhdfs' command-line switch.
+## If found, enables the HDFS VFD.
+##
+AC_SUBST([HAVE_LIBHDFS])
+AC_ARG_WITH([libhdfs],
+            [AS_HELP_STRING([--with-libhdfs=DIR],
+                            [Provide libhdfs library to enable HDFS virtual file driver (VFD) [default=no]])],,
+            [withval=no])
+
+case $withval in
+  no)
+    HAVE_LIBHDFS="no"
+    AC_MSG_CHECKING([for libhdfs])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_LIBHDFS="yes"
+    case "$withval" in
+      *,*)
+        libhdfs_inc="`echo $withval |cut -f1 -d,`"
+        libhdfs_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      yes)
+        libhdfs_inc="$HADOOP_HOME/include"
+        libhdfs_lib="$HADOOP_HOME/lib"
+        ;;
+      *)
+        if test -n "$withval"; then
+          libhdfs_inc="$withval/include"
+          libhdfs_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    if test -n "$libhdfs_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$libhdfs_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$libhdfs_inc"
+    fi
+    AC_CHECK_HEADERS([hdfs.h],,
+                     [unset HAVE_LIBHDFS])
+
+    if test "x$HAVE_LIBHDFS" = "xyes"; then
+      dnl Check for '-ljvm' needed by libhdfs
+      JNI_LDFLAGS=""
+      if test $JAVA_HOME != ""
+      then
+        JNI_LDFLAGS="-L$JAVA_HOME/jre/lib/$OS_ARCH -L$JAVA_HOME/jre/lib/$OS_ARCH/server"
+      fi
+      ldflags_bak=$LDFLAGS
+      LDFLAGS="$LDFLAGS $JNI_LDFLAGS"
+      AC_CHECK_LIB([jvm], [JNI_GetCreatedJavaVMs])
+      LDFLAGS=$ldflags_bak
+      AC_SUBST([JNI_LDFLAGS])
+      if test -n "$libhdfs_lib"; then
+        ## Hadoop distribution hides libraries down one level in 'lib/native'
+        libhdfs_lib="$libhdfs_lib/native"
+        LDFLAGS="$LDFLAGS -L$libhdfs_lib $JNI_LDFLAGS"
+        AM_LDFLAGS="$AM_LDFLAGS -L$libhdfs_lib $JNI_LDFLAGS"
+      fi
+      AC_CHECK_LIB([hdfs], [hdfsConnect],,
+                   [unset HAVE_LIBHDFS])
+    fi
+
+    if test -z "$HAVE_LIBHDFS"; then
+      AC_MSG_ERROR([Set to use libhdfs library, but could not find or use
+                    libhdfs. Please verify that the path to HADOOP_HOME is
+                    valid, and/or reconfigure without --with-libhdfs.])
+    fi
+    ;;
+esac
+
+if test "x$HAVE_LIBHDFS" = "xyes"; then
+  AC_DEFINE([HAVE_LIBHDFS], [1],
+            [Proceed to build with libhdfs])
+fi
+
+## Checkpoint the cache
+AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
 ## Enable custom plugin default path for library.  It requires SHARED support.
@@ -3357,11 +3529,13 @@ LDFLAGS="$saved_user_LDFLAGS"
 ## need to be compiled
 
 AM_CONDITIONAL([BUILD_CXX_CONDITIONAL], [test "X$HDF_CXX" = "Xyes"])
-AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
+AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test "X$PARALLEL" = "Xyes"])
 AM_CONDITIONAL([BUILD_FORTRAN_CONDITIONAL], [test "X$HDF_FORTRAN" = "Xyes"])
 AM_CONDITIONAL([BUILD_JAVA_CONDITIONAL], [test "X$HDF_JAVA" = "Xyes"])
 AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
-
+AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
+AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
+AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
@@ -3473,10 +3647,12 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testabort_fail.sh
                  test/testcheck_version.sh
                  test/testerror.sh
+                 test/testexternal_env.sh
                  test/testflushrefresh.sh
                  test/testlibinfo.sh
                  test/testlinks_env.sh
                  test/testswmr.sh
+                 test/testvds_env.sh
                  test/testvdsswmr.sh
                  test/test_filter_plugin.sh
                  test/test_usecases.sh
@@ -3484,6 +3660,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  testpar/testpflush.sh
                  tools/Makefile
                  tools/lib/Makefile
+                 tools/libtest/Makefile
                  tools/src/Makefile
                  tools/src/h5dump/Makefile
                  tools/src/h5import/Makefile
@@ -3493,7 +3670,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/src/h5ls/Makefile
                  tools/src/h5copy/Makefile
                  tools/src/misc/Makefile
-                 tools/src/misc/h5cc
                  tools/src/h5stat/Makefile
                  tools/test/Makefile
                  tools/test/h5dump/Makefile
@@ -3533,6 +3709,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  examples/Makefile
                  examples/run-c-ex.sh
                  examples/testh5cc.sh
+                 bin/h5cc
+                 bin/Makefile
                  c++/Makefile
                  c++/src/Makefile
                  c++/src/h5c++
@@ -3595,7 +3773,7 @@ AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
 
 AC_OUTPUT
 
-chmod 755 tools/src/misc/h5cc
+chmod 755 bin/h5cc
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi

@@ -104,7 +104,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = gif2h5$(EXEEXT) h52gif$(EXEEXT)
-noinst_PROGRAMS = h52gifgentst$(EXEEXT)
+@BUILD_TESTS_CONDITIONAL_TRUE@noinst_PROGRAMS = h52gifgentst$(EXEEXT)
 TESTS = $(TEST_SCRIPT)
 subdir = hl/tools/gif2h5
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -155,7 +155,9 @@ h52gif_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
 h52gif_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h52gif_LDFLAGS) $(LDFLAGS) -o $@
-am_h52gifgentst_OBJECTS = h52gifgentst.$(OBJEXT)
+am__h52gifgentst_SOURCES_DIST = h52gifgentst.c
+@BUILD_TESTS_CONDITIONAL_TRUE@am_h52gifgentst_OBJECTS =  \
+@BUILD_TESTS_CONDITIONAL_TRUE@	h52gifgentst.$(OBJEXT)
 h52gifgentst_OBJECTS = $(am_h52gifgentst_OBJECTS)
 h52gifgentst_LDADD = $(LDADD)
 h52gifgentst_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
@@ -195,7 +197,7 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(gif2h5_SOURCES) $(h52gif_SOURCES) $(h52gifgentst_SOURCES)
 DIST_SOURCES = $(gif2h5_SOURCES) $(h52gif_SOURCES) \
-	$(h52gifgentst_SOURCES)
+	$(am__h52gifgentst_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -499,7 +501,6 @@ FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
 FORTRAN_C_LONG_DOUBLE_IS_UNIQUE = @FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
 FORTRAN_HAVE_C_LONG_DOUBLE = @FORTRAN_HAVE_C_LONG_DOUBLE@
-FORTRAN_SIZEOF_LONG_DOUBLE = @FORTRAN_SIZEOF_LONG_DOUBLE@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 Fortran_COMPILER_ID = @Fortran_COMPILER_ID@
 GREP = @GREP@
@@ -522,9 +523,12 @@ H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_Fortran_INTEGER_SIZEOF_16 = @HAVE_Fortran_INTEGER_SIZEOF_16@
+HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_JAVA = @HDF_JAVA@
@@ -551,6 +555,7 @@ JAVA_JUNIT = @JAVA_JUNIT@
 JAVA_PATH_NAME = @JAVA_PATH_NAME@
 JAVA_VERSION = @JAVA_VERSION@
 JNIFLAGS = @JNIFLAGS@
+JNI_LDFLAGS = @JNI_LDFLAGS@
 JUNIT = @JUNIT@
 LARGE_PARALLEL_IO = @LARGE_PARALLEL_IO@
 LD = @LD@
@@ -605,6 +610,7 @@ PREADWRITE = @PREADWRITE@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
+ROS3_VFD = @ROS3_VFD@
 RUNPARALLEL = @RUNPARALLEL@
 RUNSERIAL = @RUNSERIAL@
 R_INTEGER = @R_INTEGER@
@@ -629,7 +635,6 @@ UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
-UUDECODE = @UUDECODE@
 VERSION = @VERSION@
 WORDS_BIGENDIAN = @WORDS_BIGENDIAN@
 _ACJNI_JAVAC = @_ACJNI_JAVAC@
@@ -747,20 +752,18 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 *.gif
 
-# These are our main targets, the tools
-TEST_SCRIPT = h52giftest.sh
-check_SCRIPTS = $(TEST_SCRIPT)
-
 # Add h52gif and gif2h5 specific linker flags here
 h52gif_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 gif2h5_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 gif2h5_SOURCES = gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c 
 h52gif_SOURCES = hdf2gif.c hdfgifwr.c 
-h52gifgentst_SOURCES = h52gifgentst.c 
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.
 LDADD = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+@BUILD_TESTS_CONDITIONAL_TRUE@TEST_SCRIPT = h52giftest.sh
+@BUILD_TESTS_CONDITIONAL_TRUE@check_SCRIPTS = $(TEST_SCRIPT)
+@BUILD_TESTS_CONDITIONAL_TRUE@h52gifgentst_SOURCES = h52gifgentst.c 
 
 # Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -1341,7 +1344,7 @@ all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
 # make install-doc doesn't do anything outside of doc directory, but
 # Makefiles should recognize it.
 # UPDATE: docs no longer reside in this build tree, so this target
-# is depreciated.
+# is deprecated.
 install-doc uninstall-doc:
 	@echo "Nothing to be done."
 

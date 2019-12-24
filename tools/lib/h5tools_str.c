@@ -662,51 +662,10 @@ h5tools_str_indent(h5tools_str_t *str, const h5tool_format_t *info,
 /*-------------------------------------------------------------------------
  * Function:    h5tools_str_sprint
  *
- * Purpose: Renders the value pointed to by VP of type TYPE into variable
- *      length string STR.
+ * Purpose:     Renders the value pointed to by VP of type TYPE into variable
+ *              length string STR.
  *
- * Return:  A pointer to memory containing the result or NULL on error.
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 23, 1998
- *
- * Modifications:
- *      Robb Matzke, 1999-04-26
- *      Made this function safe from overflow problems by allowing it
- *      to reallocate the output string.
- *
- *      Robb Matzke, 1999-06-04
- *      Added support for object references. The new `container'
- *      argument is the dataset where the reference came from.
- *
- *      Robb Matzke, 1999-06-07
- *      Added support for printing raw data. If info->raw is non-zero
- *      then data is printed in hexadecimal format.
- *
- *  Robb Matzke, 2003-01-10
- *  Binary output format is dd:dd:... instead of 0xdddd... so it
- *  doesn't look like a hexadecimal integer, and thus users will
- *  be less likely to complain that HDF5 didn't properly byte
- *  swap their data during type conversion.
- *
- *  Robb Matzke, LLNL, 2003-06-05
- *  If TYPE is a variable length string then the pointer to
- *  the value to pring (VP) is a pointer to a `char*'.
- *
- *  PVN, 28 March 2006
- *  added H5T_NATIVE_LDOUBLE case
- *
- *  Vailin Choi; August 2010
- *    Modified to handle printing of selected compound fields for h5watch.
- *
- *  Raymond Lu, 2011-09-01
- *  CLANG compiler complained about the line (about 800):
- *    tempint = (tempint >> packed_data_offset) & packed_data_mask;
- *  The right shift may cause undefined behavior if PACKED_DATA_OFFSET is
- *  32-bit or more. For every kind of native integers, I changed the code
- *  to make it zero if PACKED_DATA_OFFSET is greater than or equal to the
- *  size of integer.
- *
+ * Return:      A pointer to memory containing the result or NULL on error.
  *-------------------------------------------------------------------------
  */
 char *
@@ -718,8 +677,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     char          *name = NULL;
     unsigned char *ucp_vp = (unsigned char *)vp;
     char          *cp_vp = (char *)vp;
-    hid_t          memb = -1;
-    hid_t          obj = -1;
+    hid_t          memb = H5I_INVALID_HID;
+    hid_t          obj = H5I_INVALID_HID;
     static char    fmt_llong[8], fmt_ullong[8];
     H5T_str_t      pad;
     H5T_class_t    type_class;
@@ -787,7 +746,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     if(H5Tis_variable_str(type)) {
                         /* cp_vp is the pointer into the struct where a `char*' is stored. So we have
                          * to dereference the pointer to get the `char*' to pass to HDstrlen(). */
-                        s = *(char**) cp_vp;
+                        s = *(char **)((void *)cp_vp);
                         if(s != NULL) size = HDstrlen(s);
                     }
                     else {
@@ -1240,7 +1199,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     h5tools_str_append(str, "%s", OPT(info->vlen_pre, "("));
 
                     /* Get the number of sequence elements */
-                    nelmts = ((hvl_t *) cp_vp)->len;
+                    nelmts = ((hvl_t *)((void *)cp_vp))->len;
 
                     for(i = 0; i < nelmts; i++) {
                         if(i) h5tools_str_append(str, "%s", OPT(info->vlen_sep, "," OPTIONAL_LINE_BREAK));
@@ -1264,7 +1223,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         ctx->indent_level++;
 
                         /* Dump the array element */
-                        h5tools_str_sprint(str, info, container, memb, ((char *) (((hvl_t *) cp_vp)->p)) + i * size, ctx);
+                        h5tools_str_sprint(str, info, container, memb, ((char *) (((hvl_t *)((void *)cp_vp))->p)) + i * size, ctx);
 
                         ctx->indent_level--;
                     } /* end for */

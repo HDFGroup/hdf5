@@ -15,7 +15,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, November 24, 1998
  *
- * Purpose:	Test local heaps used by symbol tables (groups).
+ * Purpose:    Test local heaps used by symbol tables (groups).
  */
 #include "h5test.h"
 #include "H5srcdir.h"
@@ -33,7 +33,7 @@ const char *FILENAME[] = {
 
 #define NOBJS   40
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -41,9 +41,7 @@ const char *FILENAME[] = {
  *              heap, close the file, open the file, read data out of the
  *              local heap, close the file.
  *
- * Return:      Success:    zero
- *
- *              Failure:    non-zero
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
@@ -95,13 +93,13 @@ main(void)
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
     }
-    if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__NO_FLAGS_SET))) {
+    if(NULL == (heap = H5HL_protect(f, heap_addr, H5AC__NO_FLAGS_SET))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
     }
     for(i = 0; i < NOBJS; i++) {
-        sprintf(buf, "%03d-", i);
+        HDsprintf(buf, "%03d-", i);
         for(j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if(j > 4)
@@ -141,13 +139,13 @@ main(void)
         goto error;
     }
     for(i = 0; i < NOBJS; i++) {
-        sprintf(buf, "%03d-", i);
+        HDsprintf(buf, "%03d-", i);
         for(j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if(j > 4)
             buf[j] = '\0';
 
-        if (NULL == (heap = H5HL_protect(f, heap_addr, H5AC__READ_ONLY_FLAG))) {
+        if(NULL == (heap = H5HL_protect(f, heap_addr, H5AC__READ_ONLY_FLAG))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -211,7 +209,7 @@ main(void)
     HDputs("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    return EXIT_SUCCESS;
 
  error:
     HDputs("*** TESTS FAILED ***");
@@ -221,6 +219,6 @@ main(void)
 
     if(api_ctx_pushed) H5CX_pop();
 
-    return 1;
+    return EXIT_FAILURE;
 }
 

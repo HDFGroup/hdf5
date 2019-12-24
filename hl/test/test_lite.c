@@ -87,7 +87,7 @@ static int test_dsets( void )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTmake_dataset");
+    HL_TESTING2("H5LTmake_dataset");
 
     /* Make dataset */
     if ( H5LTmake_dataset( file_id, DSET0_NAME, rank, dims, H5T_NATIVE_INT, data_int_in ) < 0 )
@@ -118,7 +118,7 @@ static int test_dsets( void )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTread_dataset");
+    HL_TESTING2("H5LTread_dataset");
 
     if ( H5LTread_dataset( file_id, DSET0_NAME, H5T_NATIVE_INT, data_int_out ) < 0 )
         goto out;
@@ -143,7 +143,7 @@ static int test_dsets( void )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTmake_dataset_char");
+    HL_TESTING2("H5LTmake_dataset_char");
 
     /* Make dataset char */
     if ( H5LTmake_dataset_char( file_id, DSET1_NAME, rank, dims, data_char_in ) < 0 )
@@ -179,7 +179,7 @@ static int test_dsets( void )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTmake_dataset_short");
+    HL_TESTING2("H5LTmake_dataset_short");
 
     /* Make dataset short */
     if ( H5LTmake_dataset_short( file_id, DSET2_NAME, rank, dims, data_short_in ) < 0 )
@@ -214,7 +214,7 @@ static int test_dsets( void )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTmake_dataset_int");
+    HL_TESTING2("H5LTmake_dataset_int");
 
     /* Make dataset int */
     if ( H5LTmake_dataset_int( file_id, DSET3_NAME, rank, dims, data_int_in ) < 0 )
@@ -250,7 +250,7 @@ static int test_dsets( void )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTmake_dataset_long");
+    HL_TESTING2("H5LTmake_dataset_long");
 
     /* Make dataset long */
     if ( H5LTmake_dataset_long( file_id, DSET4_NAME, rank, dims, data_long_in ) < 0 )
@@ -286,7 +286,7 @@ static int test_dsets( void )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTmake_dataset_float");
+    HL_TESTING2("H5LTmake_dataset_float");
 
     /* Make dataset float */
     if ( H5LTmake_dataset_float( file_id, DSET5_NAME, rank, dims, data_float_in ) < 0 )
@@ -322,7 +322,7 @@ static int test_dsets( void )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTmake_dataset_double");
+    HL_TESTING2("H5LTmake_dataset_double");
 
     /* Make dataset double */
     if ( H5LTmake_dataset_double( file_id, DSET6_NAME, rank, dims, data_double_in ) < 0 )
@@ -358,7 +358,7 @@ static int test_dsets( void )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTmake_dataset_string");
+    HL_TESTING2("H5LTmake_dataset_string");
 
     /* Make dataset string */
     if ( H5LTmake_dataset_string(file_id,DSET7_NAME,data_string_in) < 0 )
@@ -517,7 +517,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_string");
+    HL_TESTING2("H5LTset_attribute_string");
 
     /* Set the attribute */
     if ( H5LTset_attribute_string( loc_id, obj_name, ATTR1_NAME, attr_str_in ) < 0 )
@@ -530,7 +530,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_string");
+    HL_TESTING2("H5LTget_attribute_string");
 
 
     /* Get the attribute */
@@ -550,7 +550,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_char");
+    HL_TESTING2("H5LTset_attribute_char");
 
     /* Set the attribute */
     if ( H5LTset_attribute_char( loc_id, obj_name, ATTR2_NAME, attr_char_in, (size_t)5 ) < 0 )
@@ -563,7 +563,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_char");
+    HL_TESTING2("H5LTget_attribute_char");
 
     /* Get the attribute */
     if ( H5LTget_attribute_char( loc_id, obj_name, ATTR2_NAME, attr_char_out ) < 0 )
@@ -594,7 +594,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_short");
+    HL_TESTING2("H5LTset_attribute_short");
 
     /* Set the attribute */
     if ( H5LTset_attribute_short( loc_id, obj_name, ATTR3_NAME, attr_short_in, (size_t)5 ) < 0 )
@@ -608,7 +608,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_short");
+    HL_TESTING2("H5LTget_attribute_short");
 
     /* Get the attribute */
     if ( H5LTget_attribute_short( loc_id, obj_name, ATTR3_NAME, attr_short_out ) < 0 )
@@ -640,7 +640,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_int");
+    HL_TESTING2("H5LTset_attribute_int");
 
     /* Set the attribute */
     if ( H5LTset_attribute_int( loc_id, obj_name, ATTR4_NAME, attr_int_in, (size_t)5 ) < 0 )
@@ -661,7 +661,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_int");
+    HL_TESTING2("H5LTget_attribute_int");
 
     /* Get the attribute */
     if ( H5LTget_attribute_int( loc_id, obj_name, ATTR4_NAME, attr_int_out ) < 0 )
@@ -712,7 +712,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_long");
+    HL_TESTING2("H5LTset_attribute_long");
 
     /* Set the attribute */
     if ( H5LTset_attribute_long( loc_id, obj_name, ATTR5_NAME, attr_long_in, (size_t)5 ) < 0 )
@@ -725,7 +725,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_long");
+    HL_TESTING2("H5LTget_attribute_long");
 
     /* Get the attribute */
     if ( H5LTget_attribute_long( loc_id, obj_name, ATTR5_NAME, attr_long_out ) < 0 )
@@ -756,7 +756,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_uchar");
+    HL_TESTING2("H5LTset_attribute_uchar");
 
     /* Set the attribute */
     if ( H5LTset_attribute_uchar( loc_id, obj_name, ATTR6_NAME, attr_uchar_in, (size_t)5 ) < 0 )
@@ -769,7 +769,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_uchar");
+    HL_TESTING2("H5LTget_attribute_uchar");
 
     /* Get the attribute */
     if ( H5LTget_attribute_uchar( loc_id, obj_name, ATTR6_NAME, attr_uchar_out ) < 0 )
@@ -800,7 +800,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_ushort");
+    HL_TESTING2("H5LTset_attribute_ushort");
 
     /* Set the attribute */
     if ( H5LTset_attribute_ushort( loc_id, obj_name, ATTR7_NAME, attr_ushort_in, (size_t)5 ) < 0 )
@@ -814,7 +814,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_ushort");
+    HL_TESTING2("H5LTget_attribute_ushort");
 
     /* Get the attribute */
     if ( H5LTget_attribute_ushort( loc_id, obj_name, ATTR7_NAME, attr_ushort_out ) < 0 )
@@ -846,7 +846,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_uint");
+    HL_TESTING2("H5LTset_attribute_uint");
 
     /* Set the attribute */
     if ( H5LTset_attribute_uint( loc_id, obj_name, ATTR8_NAME, attr_uint_in, (size_t)5 ) < 0 )
@@ -859,7 +859,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_uint");
+    HL_TESTING2("H5LTget_attribute_uint");
 
     /* Get the attribute */
     if ( H5LTget_attribute_uint( loc_id, obj_name, ATTR8_NAME, attr_uint_out ) < 0 )
@@ -890,7 +890,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_ulong");
+    HL_TESTING2("H5LTset_attribute_ulong");
 
     /* Set the attribute */
     if ( H5LTset_attribute_ulong( loc_id, obj_name, ATTR9_NAME, attr_ulong_in, (size_t)5 ) < 0 )
@@ -903,7 +903,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_ulong");
+    HL_TESTING2("H5LTget_attribute_ulong");
 
     /* Get the attribute */
     if ( H5LTget_attribute_ulong( loc_id, obj_name, ATTR9_NAME, attr_ulong_out ) < 0 )
@@ -935,7 +935,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_float");
+    HL_TESTING2("H5LTset_attribute_float");
 
     /* Set the attribute */
     if ( H5LTset_attribute_float( loc_id, obj_name, ATTR10_NAME, attr_float_in, (size_t)5 ) < 0 )
@@ -948,7 +948,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_float");
+    HL_TESTING2("H5LTget_attribute_float");
 
 
     /* Get the attribute */
@@ -980,7 +980,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTset_attribute_double");
+    HL_TESTING2("H5LTset_attribute_double");
 
     /* Set the attribute */
     if ( H5LTset_attribute_double( loc_id, obj_name, ATTR11_NAME, attr_double_in, (size_t)5 ) < 0 )
@@ -993,7 +993,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_double");
+    HL_TESTING2("H5LTget_attribute_double");
 
     /* Get the attribute */
     if ( H5LTget_attribute_double( loc_id, obj_name, ATTR11_NAME, attr_double_out ) < 0 )
@@ -1026,7 +1026,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     */
 
 
-    TESTING("H5LTget_attribute_ndims");
+    HL_TESTING2("H5LTget_attribute_ndims");
 
     if ( H5LTget_attribute_ndims( loc_id, obj_name, ATTR2_NAME, &rank_out ) < 0 )
         return -1;
@@ -1042,7 +1042,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5LTget_attribute_info");
+    HL_TESTING2("H5LTget_attribute_info");
 
     if(NULL==(dims_out = (hsize_t*) HDmalloc( sizeof(hsize_t) * (size_t)rank_out ))) return -1;
 
@@ -1079,7 +1079,7 @@ static int test_integers(void)
     char*   dt_str;
     size_t  str_len;
 
-    TESTING3("\n        text for integer types");
+    HL_TESTING3("\n        text for integer types");
 
     if((dtype = H5LTtext_to_dtype("H5T_NATIVE_INT\n", H5LT_DDL))<0)
         goto out;
@@ -1136,7 +1136,7 @@ static int test_fps(void)
     char*   dt_str;
     size_t  str_len;
 
-    TESTING3("        text for floating-point types");
+    HL_TESTING3("        text for floating-point types");
 
     if((dtype = H5LTtext_to_dtype("H5T_NATIVE_LDOUBLE\n", H5LT_DDL))<0)
         goto out;
@@ -1197,7 +1197,7 @@ static int test_strings(void)
     char*   dt_str = NULL;
     size_t  str_len;
 
-    TESTING3("        text for string types");
+    HL_TESTING3("        text for string types");
 
     if((dtype = H5LTtext_to_dtype("H5T_STRING { STRSIZE 13; STRPAD H5T_STR_NULLTERM; CSET H5T_CSET_ASCII; CTYPE H5T_C_S1; }", H5LT_DDL))<0)
         goto out;
@@ -1328,7 +1328,7 @@ static int test_opaques(void)
     char*   dt_str;
     size_t  str_len;
 
-    TESTING3("        text for opaque types");
+    HL_TESTING3("        text for opaque types");
 
     if((dtype = H5LTtext_to_dtype("H5T_OPAQUE { OPQ_SIZE 19; OPQ_TAG \"This is a tag for opaque type\"; }", H5LT_DDL))<0)
         goto out;
@@ -1385,7 +1385,7 @@ static int test_enums(void)
     char*   dt_str;
     size_t  str_len;
 
-    TESTING3("        text for enum types");
+    HL_TESTING3("        text for enum types");
 
     if((dtype = H5LTtext_to_dtype("H5T_ENUM { H5T_STD_I32LE; \"RED\" 5; \"GREEN\" 6; \"BLUE\" 7; \"WHITE\" 8; }", H5LT_DDL))<0)
         goto out;
@@ -1457,7 +1457,7 @@ static int test_variables(void)
     char*   dt_str;
     size_t  str_len;
 
-    TESTING3("        text for variable types");
+    HL_TESTING3("        text for variable types");
 
     if((dtype = H5LTtext_to_dtype("H5T_VLEN { H5T_NATIVE_CHAR }\n", H5LT_DDL))<0)
         goto out;
@@ -1518,7 +1518,7 @@ static int test_arrays(void)
     char*   dt_str;
     size_t  str_len;
 
-    TESTING3("        text for array types");
+    HL_TESTING3("        text for array types");
 
     if((dtype = H5LTtext_to_dtype("H5T_ARRAY { [5][7][13] H5T_ARRAY { [17][19] H5T_COMPOUND { H5T_STD_I8BE \"arr_compound_1\"; H5T_STD_I32BE \"arr_compound_2\"; } } }", H5LT_DDL))<0)
         goto out;
@@ -1579,7 +1579,7 @@ static int test_compounds(void)
     char*   dt_str;
     size_t  str_len;
 
-    TESTING3("        text for compound types");
+    HL_TESTING3("        text for compound types");
 
     if((dtype = H5LTtext_to_dtype("H5T_COMPOUND { H5T_STD_I16BE \"one_field\" : 2; H5T_STD_U8LE \"two_field\" : 6; }", H5LT_DDL))<0)
         goto out;
@@ -1673,7 +1673,7 @@ static int test_compound_bug(void)
      "  } } \"sub\" : 8;\n"
      "}\n";
 
-    TESTING3("        text for compound type of bug fix");
+    HL_TESTING3("        text for compound type of bug fix");
 
     if((dtype = H5LTtext_to_dtype(text, H5LT_DDL))<0)
         goto out;
@@ -1765,7 +1765,7 @@ static int test_complicated_compound(void)
     size_t  size = 1024;
     const char *filename = H5_get_srcdir_filename(INPUT_FILE);
 
-    TESTING3("        text for complicated compound types");
+    HL_TESTING3("        text for complicated compound types");
 
     /* Open input file */
     fp = HDfopen(filename, "r");
@@ -1834,7 +1834,7 @@ out:
 */
 static int test_text_dtype(void)
 {
-    TESTING("H5LTtext_to_dtype");
+    HL_TESTING2("H5LTtext_to_dtype");
 
     if(test_integers()<0)
         goto out;
@@ -1882,7 +1882,7 @@ static int test_valid_path(void)
   htri_t path_valid;
   const char *data_string_in = "test";
 
-  TESTING("H5LTpath_valid");
+  HL_TESTING2("H5LTpath_valid");
 
   /* Create a new file using default properties. */
 

@@ -22,6 +22,8 @@ cmake_minimum_required (VERSION 3.10)
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
 #            Unix      * Unix Makefiles
+#            VS2019    * Visual Studio 16 2019
+#            VS201964  * Visual Studio 16 2019
 #            VS2017    * Visual Studio 15 2017
 #            VS201764  * Visual Studio 15 2017 Win64
 #            VS2015    * Visual Studio 14 2015
@@ -34,7 +36,7 @@ cmake_minimum_required (VERSION 3.10)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.10.5")
+set (CTEST_SOURCE_VERSION "1.10.6")
 set (CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
@@ -44,8 +46,8 @@ set (CTEST_SOURCE_VERSEXT "")
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
 #MODEL - CDash group name
-#HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub
-#MPI - enable MPI;
+#HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
+#MPI - enable MPI
 if (DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
@@ -90,7 +92,7 @@ endif ()
 
 set (CTEST_BINARY_NAME "build")
 set (CTEST_DASHBOARD_ROOT "${CTEST_SCRIPT_DIRECTORY}")
-if (WIN32)
+if (WIN32 AND NOT MINGW)
   set (CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_SOURCE_NAME}")
   set (CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_BINARY_NAME}")
 else ()
@@ -104,10 +106,22 @@ if (NOT DEFINED HPC)
   if (NOT DEFINED BUILD_GENERATOR)
     message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
   endif ()
-  if (WIN32)
+  if (WIN32 AND NOT MINGW)
     set (SITE_OS_NAME "Windows")
-    set (SITE_OS_VERSION "WIN7")
-    if (BUILD_GENERATOR STREQUAL "VS201764")
+    set (SITE_OS_VERSION "WIN10")
+    if (BUILD_GENERATOR STREQUAL "VS201964")
+      set (CTEST_CMAKE_GENERATOR "Visual Studio 16 2019")
+      set (CMAKE_GENERATOR_ARCHITECTURE "x64")
+      set (SITE_OS_BITS "64")
+      set (SITE_COMPILER_NAME "vs2019")
+      set (SITE_COMPILER_VERSION "16")
+    elseif (BUILD_GENERATOR STREQUAL "VS2019")
+      set (CTEST_CMAKE_GENERATOR "Visual Studio 16 2019")
+      set (CMAKE_GENERATOR_ARCHITECTURE "Win32")
+      set (SITE_OS_BITS "32")
+      set (SITE_COMPILER_NAME "vs2019")
+      set (SITE_COMPILER_VERSION "16")
+    elseif (BUILD_GENERATOR STREQUAL "VS201764")
       set (CTEST_CMAKE_GENERATOR "Visual Studio 15 2017 Win64")
       set (SITE_OS_BITS "64")
       set (SITE_COMPILER_NAME "vs2017")
@@ -177,8 +191,8 @@ if (NOT DEFINED HPC)
     endif ()
   endif ()
 else ()
+  set (CTEST_SITE "${SITE_OS_NAME}")
   set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
-  include (${CTEST_SOURCE_DIRECTORY}/config/cmake/scripts/HPC/${HPC}-HDF5options.cmake)
 endif ()
 ###################################################################
 
@@ -203,7 +217,7 @@ endif ()
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
 set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
-set (REPOSITORY_BRANCH "hdf5_1_10_5")
+set (REPOSITORY_BRANCH "hdf5_1_10_6")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
@@ -212,7 +226,7 @@ set (REPOSITORY_BRANCH "hdf5_1_10_5")
 
 ###################################################################
 
-if (WIN32)
+if (WIN32 AND NOT MINGW)
   set (BINFILEBASE "HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}")
   include (${CTEST_SCRIPT_DIRECTORY}\\HDF5options.cmake)
   include (${CTEST_SCRIPT_DIRECTORY}\\CTestScript.cmake)
@@ -228,6 +242,9 @@ if (WIN32)
 else ()
   set (BINFILEBASE "HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
   include (${CTEST_SCRIPT_DIRECTORY}/HDF5options.cmake)
+  if (DEFINED HPC)
+    include (${CTEST_SOURCE_DIRECTORY}/config/cmake/scripts/HPC/${HPC}-HDF5options.cmake)
+  endif ()
   include (${CTEST_SCRIPT_DIRECTORY}/CTestScript.cmake)
   if (APPLE)
     if (EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.dmg")

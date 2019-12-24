@@ -58,13 +58,13 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
 /*-------------------------------------------------------------------------
  * Function:    test_create
  *
- * Purpose:     Attempts to create a dataset.
+ * Purpose      Attempts to create a dataset.
  *
- * Return:      Success: 0
+ * Return       Success: 0
  *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler (using C version)
+ * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
  *-------------------------------------------------------------------------
  */
@@ -184,15 +184,15 @@ static herr_t test_create( H5File& file)
 /*-------------------------------------------------------------------------
  * Function:    test_simple_io
  *
- * Purpose:     Tests simple I/O.  That is, reading and writing a complete
+ * Purpose      Tests simple I/O.  That is, reading and writing a complete
  *              multi-dimensional array without data type or data space
  *              conversions, without compression, and stored contiguously.
  *
- * Return:      Success: 0
+ * Return       Success: 0
  *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler (using C version)
+ * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
  *-------------------------------------------------------------------------
  */
@@ -268,13 +268,13 @@ static herr_t test_simple_io( H5File& file)
 /*-------------------------------------------------------------------------
  * Function:    test_datasize
  *
- * Purpose:     Tests DataSet::getInMemDataSize().  
+ * Purpose      Tests DataSet::getInMemDataSize().  
  *
- * Return:      Success: 0
+ * Return       Success: 0
  *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler
+ * Programmer   Binh-Minh Ribler
  *              Thursday, March 22, 2012
  *-------------------------------------------------------------------------
  */
@@ -334,13 +334,13 @@ static herr_t test_datasize(FileAccPropList &fapl)
 /*-------------------------------------------------------------------------
  * Function:    test_tconv
  *
- * Purpose:     Test some simple data type conversion stuff.
+ * Purpose      Test some simple data type conversion stuff.
  *
- * Return:      Success: 0
+ * Return       Success: 0
  *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler (using C version)
+ * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
  *-------------------------------------------------------------------------
  */
@@ -425,13 +425,13 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
 /*-------------------------------------------------------------------------
  * Function:    bogus
  *
- * Purpose:     A bogus compression method that doesn't do anything.
+ * Purpose      A bogus compression method that doesn't do anything.
  *
- * Return:      Success: Data chunk size
+ * Return       Success: Data chunk size
  *
  *              Failure: 0
  *
- * Programmer:  Robb Matzke
+ * Programmer   Robb Matzke
  *              Tuesday, April 21, 1998
  *-------------------------------------------------------------------------
  */
@@ -447,16 +447,16 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
 /*-------------------------------------------------------------------------
  * Function:    test_compression
  *
- * Purpose:     Tests dataset compression. If compression is requested when
+ * Purpose      Tests dataset compression. If compression is requested when
  *              it hasn't been compiled into the library (such as when
  *              updating an existing compressed dataset) then data is sent to
  *              the file uncompressed but no errors are returned.
  *
- * Return:      Success: 0
+ * Return       Success: 0
  *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler (using C version)
+ * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
  *-------------------------------------------------------------------------
  */
@@ -730,13 +730,13 @@ static herr_t test_compression(H5File& file)
 /*-------------------------------------------------------------------------
  * Function:    test_nbit_methods
  *
- * Purpose:     Tests setting nbit compression methods.
+ * Purpose      Tests setting nbit compression methods.
  *
- * Return:      Success: 0
+ * Return       Success: 0
  *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler
+ * Programmer   Binh-Minh Ribler
  *              Friday, April 22, 2016
  *
  *-------------------------------------------------------------------------
@@ -847,16 +847,16 @@ static herr_t test_nbit_compression(H5File& file)
 /*-------------------------------------------------------------------------
  * Function:    test_multiopen
  *
- * Purpose:     Tests that a bug no longer exists.  If a dataset is opened
+ * Purpose      Tests that a bug no longer exists.  If a dataset is opened
  *              twice and one of the handles is used to extend the dataset,
  *              then the other handle should return the new size when
  *              queried.
  *
- * Return:      Success: 0
+ * Return       Success: 0
  *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler (using C version)
+ * Programmer   Binh-Minh Ribler (using C version)
  *              Saturday, February 17, 2001
  *-------------------------------------------------------------------------
  */
@@ -929,13 +929,13 @@ static herr_t test_multiopen (H5File& file)
 /*-------------------------------------------------------------------------
  * Function:    test_types
  *
- * Purpose:     Test various types - should be moved to dtypes.cpp
+ * Purpose      Test various types - should be moved to dtypes.cpp
  *
- * Return:      Success: 0
+ * Return       Success: 0
  *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler (using C version)
+ * Programmer   Binh-Minh Ribler (using C version)
  *              February 17, 2001
  *-------------------------------------------------------------------------
  */
@@ -1118,9 +1118,9 @@ static herr_t test_types(H5File& file)
 /*-------------------------------------------------------------------------
  * Function:    test_getObjinfo
  *
- * Purpose:     Tests getObjinfo()
+ * Purpose      Tests getObjinfo()
  *
- * Return:      Success: 0
+ * Return       Success: 0
  *              Failure: -1
  *
  * July, 2018
@@ -1178,10 +1178,10 @@ static herr_t test_getinfo(H5File& file)
 /*-------------------------------------------------------------------------
  * Function:    test_chunk_cache
  *
- * Purpose:     Tests setting rdcc info on a DAPL, and interaction
+ * Purpose      Tests setting rdcc info on a DAPL, and interaction
  *              with the corresponding properties in the file structure.
  *
- * Return:      Success:        0
+ * Return       Success:        0
  *              Failure:        number of errors
  *
  * July 2018
@@ -1290,13 +1290,13 @@ static herr_t test_chunk_cache(FileAccPropList fapl)
 /*-------------------------------------------------------------------------
  * Function:    test_virtual
  *
- * Purpose:     Tests fixed, unlimited, and printf selections in the same
+ * Purpose      Tests fixed, unlimited, and printf selections in the same
  *              VDS
  *
- * Return:      Success:        0
+ * Return       Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Binh-Minh Ribler
+ * Programmer   Binh-Minh Ribler
  *              Friday, March 10, 2017
  *
  *-------------------------------------------------------------------------
@@ -1368,13 +1368,13 @@ static herr_t test_virtual()
 /*-------------------------------------------------------------------------
  * Function:    test_dset
  *
- * Purpose:     Tests the dataset interface (H5D)
+ * Purpose      Tests the dataset interface (H5D)
  *
- * Return:      Success: 0
+ * Return       Success: 0
  *
  *              Failure: -1
  *
- * Programmer:  Binh-Minh Ribler (using C version)
+ * Programmer   Binh-Minh Ribler (using C version)
  *              Friday, January 5, 2001
  *
  * Modifications:
@@ -1438,11 +1438,11 @@ void test_dset()
 /*-------------------------------------------------------------------------
  * Function:    cleanup_dsets
  *
- * Purpose:     Cleanup temporary test files
+ * Purpose      Cleanup temporary test files
  *
- * Return:      None
+ * Return       None
  *
- * Programmer:  (use C version)
+ * Programmer   (use C version)
  *-------------------------------------------------------------------------
  */
 extern "C"

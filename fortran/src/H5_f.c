@@ -632,7 +632,6 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
       h5s_flags[15] = (int_f)H5S_SEL_POINTS;
       h5s_flags[16] = (int_f)H5S_SEL_HYPERSLABS;
       h5s_flags[17] = (int_f)H5S_SEL_ALL;
-
 /*
  *  H5T flags
  */
@@ -671,7 +670,6 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
       h5t_flags[32] = (int_f)H5T_ARRAY;
       h5t_flags[33] = (int_f)H5T_DIR_ASCEND;
       h5t_flags[34] = (int_f)H5T_DIR_DESCEND;
-
 /*
  *  H5Z flags
  */
@@ -695,10 +693,6 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
       h5z_flags[17] = (int_f)H5Z_SO_FLOAT_ESCALE;
       h5z_flags[18] = (int_f)H5Z_SO_INT;
       h5z_flags[19] = (int_f)H5Z_SO_INT_MINBITS_DEFAULT;
-/*
- *  H5A flags
- */
-
 
 /*
  *  H5 Generic flags introduced in version 1.8

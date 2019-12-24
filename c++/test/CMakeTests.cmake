@@ -32,9 +32,10 @@ add_test (
 )
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  add_test (NAME CPP_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
+  add_test (NAME CPP_testhdf5 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:cpp_testhdf5>)
 else ()
   add_test (NAME CPP_testhdf5 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -D "TEST_PROGRAM=$<TARGET_FILE:cpp_testhdf5>"
       -D "TEST_ARGS:STRING="
       -D "TEST_EXPECT=0"
