@@ -378,7 +378,7 @@ test_h5o_refcount(void)
 {
     hid_t       fid;                        /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
-    H5O_info_t    oinfo;                      /* Object info struct */
+    H5O_info_t  oinfo;                      /* Object info struct */
     hsize_t     dims[RANK];
     herr_t      ret;                        /* Value returned from API calls */
 
@@ -1254,7 +1254,7 @@ test_h5o_getinfo_same_file(void)
 {
     hid_t       fid1, fid2;             /* HDF5 File ID */
     hid_t       gid1, gid2;             /* Group IDs */
-    H5O_info_t    oinfo1, oinfo2;         /* Object info structs */
+    H5O_info_t  oinfo1, oinfo2;         /* Object info structs */
     herr_t      ret;                    /* Value returned from API calls */
 
     /* Create a new HDF5 file */
@@ -1419,7 +1419,7 @@ test_h5o_getinfo_visit(void)
     /* Attach 10 attributes to "group1" */
     for(j = 0; j <10; j++) {
         /* Create the attribute name */
-        sprintf(attrname, "attr%u", j);
+        HDsprintf(attrname, "attr%u", j);
         /* Create the attribute */
         aid = H5Acreate2(gid1, attrname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Acreate2");
@@ -1491,17 +1491,17 @@ test_h5o(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Objects\n"));
 
-    test_h5o_open();        /* Test generic open function */
-    test_h5o_open_by_addr();    /* Test opening objects by address */
-    test_h5o_close();        /* Test generic close function */
-    test_h5o_refcount();        /* Test incrementing and decrementing reference count */
-    test_h5o_plist();           /* Test object creation properties */
-    test_h5o_link();            /* Test object link routine */
-    test_h5o_comment();         /* Test routines for comment */
-    test_h5o_comment_by_name(); /* Test routines for comment by name */
+    test_h5o_open();              /* Test generic open function */
+    test_h5o_open_by_addr();      /* Test opening objects by address */
+    test_h5o_close();             /* Test generic close function */
+    test_h5o_refcount();          /* Test incrementing and decrementing reference count */
+    test_h5o_plist();             /* Test object creation properties */
+    test_h5o_link();              /* Test object link routine */
+    test_h5o_comment();           /* Test routines for comment */
+    test_h5o_comment_by_name();   /* Test routines for comment by name */
     test_h5o_getinfo_same_file(); /* Test info for objects in the same file */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    test_h5o_getinfo_visit();   /* Test object info for H5Oget_info/2 and H5Ovisit */
+    test_h5o_getinfo_visit();     /* Test object info for H5Oget_info/2 and H5Ovisit */
 #endif
 } /* test_h5o() */
 

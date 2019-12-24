@@ -26,14 +26,14 @@
 #define NX              8
 #define CHUNK_NX        4
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_direct_chunk_write
+ * Function:    test_direct_chunk_write
  *
- * Purpose:	    Test the basic functionality of H5DOwrite_chunk
+ * Purpose:        Test the basic functionality of H5DOwrite_chunk
  *
- * Return:	    Success:    An identifer for the dataset used in the tests
- *		        Failure:	H5I_INVALID_HID
+ * Return:        Success:    An identifer for the dataset used in the tests
+ *                Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
@@ -65,7 +65,7 @@ create_dataset(hid_t fid)
 
     /* Initialize the data */
     for (i = 0; i < NX; i++)
-	    data[i] = i;
+        data[i] = i;
 
     /* Write the initialized data */
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
@@ -91,14 +91,14 @@ create_dataset(hid_t fid)
 } /* end create_dataset() */
 
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_direct_chunk_write
+ * Function:    test_direct_chunk_write
  *
- * Purpose:	    Test the basic functionality of H5DOwrite_chunk
+ * Purpose:        Test the basic functionality of H5DOwrite_chunk
  *
- * Return:	    Success:    0
- *		        Failure:    1
+ * Return:        Success:    0
+ *                Failure:    1
  *
  *-------------------------------------------------------------------------
  */
@@ -111,7 +111,7 @@ test_direct_chunk_write(hid_t did)
     size_t      data_size;
     int         i;
 
-    TESTING("H5DOwrite_chunk wrapper");
+    HL_TESTING2("H5DOwrite_chunk wrapper");
 
     /* Set the size of the chunk data */
     data_size = CHUNK_NX * sizeof(int);
@@ -120,9 +120,9 @@ test_direct_chunk_write(hid_t did)
     for (i = 0; i < CHUNK_NX; i++)
         chunk_data[i] = (i * 10) + i;
 
-    /* Write the direct chunk data repeatedly to cover all the chunks in the 
+    /* Write the direct chunk data repeatedly to cover all the chunks in the
      * dataset, using the direct writing function.
-     */ 
+     */
     offset[0] = 0;
     for (i = 0; i < NX/CHUNK_NX; i++) {
         if (H5DOwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, data_size, chunk_data) < 0)
@@ -138,14 +138,14 @@ error:
     return 1;
 } /* test_direct_chunk_write() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	test_direct_chunk_read
+ * Function:    test_direct_chunk_read
  *
- * Purpose:	    Test the basic functionality of H5DOread_chunk
+ * Purpose:        Test the basic functionality of H5DOread_chunk
  *
- * Return:	    Success:    0
- *		        Failure:    1
+ * Return:        Success:    0
+ *                Failure:    1
  *
  *-------------------------------------------------------------------------
  */
@@ -169,7 +169,7 @@ test_direct_chunk_read(hid_t did)
 
     int         i,j;
 
-    TESTING("H5DOread_chunk wrapper");
+    HL_TESTING2("H5DOread_chunk wrapper");
 
     /* Create dataspaces for reading */
     if ((mem_sid = H5Screate_simple(1, chunk_dims, NULL)) < 0)
@@ -232,15 +232,15 @@ error:
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	    Test direct chunk write function H5DOwrite_chunk and
+ * Purpose:        Test direct chunk write function H5DOwrite_chunk and
  *              chunk direct read function H5DOread_chunk
  *
- * Return:	    Success:    0
- *		        Failure:    1
+ * Return:        Success:    0
+ *                Failure:    1
  *
  *-------------------------------------------------------------------------
  */

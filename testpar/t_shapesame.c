@@ -110,10 +110,6 @@ struct hs_dr_pio_test_vars_t
  *
  * Programmer:    JRM -- 8/9/11
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -573,7 +569,7 @@ hs_dr_pio_test__setup(const int test_num,
                               tv_ptr->block);
     VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid_0, set) suceeded");
 
-    /* In passing, setup the process slice data spaces as well */
+    /* In passing, setup the process slice dataspaces as well */
 
     ret = H5Sselect_hyperslab(tv_ptr->mem_large_ds_process_slice_sid,
                               H5S_SELECT_SET,
@@ -684,10 +680,6 @@ hs_dr_pio_test__setup(const int test_num,
  * Return:    void
  *
  * Programmer:    JRM -- 9/18/09
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -803,10 +795,6 @@ hs_dr_pio_test__takedown( struct hs_dr_pio_test_vars_t * tv_ptr)
  *
  * Programmer:    JRM -- 9/10/11
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -831,7 +819,7 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
     mpi_rank = tv_ptr->mpi_rank;
 
 
-    /* We have already done a H5Sselect_all() on the data space
+    /* We have already done a H5Sselect_all() on the dataspace
      * small_ds_slice_sid in the initialization phase, so no need to
      * call H5Sselect_all() again.
      */
@@ -1043,10 +1031,6 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/10/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1328,10 +1312,6 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/10/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1658,10 +1638,6 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/10/11
- *
- * Modifications:
- *
- *        None
  *
  *-------------------------------------------------------------------------
  */
@@ -2395,18 +2371,18 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
 /****************************************************************
 **
 **  ckrbrd_hs_dr_pio_test__slct_ckrbrd():
-**    Given a data space of tgt_rank, and dimensions:
+**    Given a dataspace of tgt_rank, and dimensions:
 **
 **        (mpi_size + 1), edge_size, ... , edge_size
 **
 **    edge_size, and a checker_edge_size, select a checker
 **    board selection of a sel_rank (sel_rank < tgt_rank)
-**    dimensional slice through the data space parallel to the
+**    dimensional slice through the dataspace parallel to the
 **      sel_rank fastest changing indicies, with origin (in the
 **    higher indicies) as indicated by the start array.
 **
 **    Note that this function, like all its relatives, is
-**    hard coded to presume a maximum data space rank of 5.
+**    hard coded to presume a maximum dataspace rank of 5.
 **    While this maximum is declared as a constant, increasing
 **    it will require extensive coding in addition to changing
 **      the value of the constant.
@@ -2707,7 +2683,7 @@ ckrbrd_hs_dr_pio_test__slct_ckrbrd(const int mpi_rank,
               fcnName, mpi_rank, (int)H5Sget_select_npoints(tgt_sid));
 #endif /* CKRBRD_HS_DR_PIO_TEST__SELECT_CHECKER_BOARD__DEBUG */
 
-    /* Clip the selection back to the data space proper. */
+    /* Clip the selection back to the dataspace proper. */
 
     for ( i = 0; i < test_max_rank; i++ ) {
 
@@ -2958,7 +2934,7 @@ ckrbrd_hs_dr_pio_test__verify_data(uint32_t * buf_ptr,
  *        board selections of different rank that
  *              H5S_select_shape_same() views as being of the same shape.
  *
- *              In this function, we test this by reading small_rank - 1
+ *        In this function, we test this by reading small_rank - 1
  *        checker board slices from the on disk large cube, and
  *        verifying that the data read is correct.  Verify that
  *        H5S_select_shape_same() returns true on the memory and
@@ -2967,10 +2943,6 @@ ckrbrd_hs_dr_pio_test__verify_data(uint32_t * buf_ptr,
  * Return:    void
  *
  * Programmer:    JRM -- 9/15/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3242,10 +3214,6 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/15/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3574,10 +3542,6 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/15/11
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3937,10 +3901,6 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
  * Return:    void
  *
  * Programmer:    JRM -- 8/15/11
- *
- * Modifications:
- *
- *        None
  *
  *-------------------------------------------------------------------------
  */
@@ -4755,10 +4715,10 @@ void pause_proc(void)
     if (MAINPROCESS)
     while ((HDstat(greenlight, &statbuf) == -1) && loops < maxloop){
         if (!loops++){
-        printf("Proc %d (%*s, %d): to debug, attach %d\n",
+        HDprintf("Proc %d (%*s, %d): to debug, attach %d\n",
             mpi_rank, mpi_namelen, mpi_name, pid, pid);
         }
-        printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
+        HDprintf("waiting(%ds) for file %s ...\n", time_int, greenlight);
         fflush(stdout);
             HDsleep(time_int);
     }
@@ -4782,18 +4742,18 @@ int MPI_Init(int *argc, char ***argv)
 static void
 usage(void)
 {
-    printf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
+    HDprintf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
     "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
-    printf("\t-m<n_datasets>"
+    HDprintf("\t-m<n_datasets>"
     "\tset number of datasets for the multiple dataset test\n");
-    printf("\t-n<n_groups>"
+    HDprintf("\t-n<n_groups>"
         "\tset number of groups for the multiple group test\n");
-    printf("\t-f <prefix>\tfilename prefix\n");
-    printf("\t-2\t\tuse Split-file together with MPIO\n");
-    printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n",
+    HDprintf("\t-f <prefix>\tfilename prefix\n");
+    HDprintf("\t-2\t\tuse Split-file together with MPIO\n");
+    HDprintf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n",
     ROW_FACTOR, COL_FACTOR);
-    printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
-    printf("\n");
+    HDprintf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
+    HDprintf("\n");
 }
 
 
@@ -4871,7 +4831,7 @@ parse_options(int argc, char **argv)
                 break;
         case 'h':   /* print help message--return with nerrors set */
                 return(1);
-        default:    printf("Illegal option(%s)\n", *argv);
+        default:    HDprintf("Illegal option(%s)\n", *argv);
                 nerrors++;
                 return(1);
         }
@@ -4880,12 +4840,12 @@ parse_options(int argc, char **argv)
 
     /* check validity of dimension and chunk sizes */
     if (dim0 <= 0 || dim1 <= 0){
-    printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
+    HDprintf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
     nerrors++;
     return(1);
     }
     if (chunkdim0 <= 0 || chunkdim1 <= 0){
-    printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
+    HDprintf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
     nerrors++;
     return(1);
     }
@@ -4893,7 +4853,7 @@ parse_options(int argc, char **argv)
     /* Make sure datasets can be divided into equal portions by the processes */
     if ((dim0 % mpi_size) || (dim1 % mpi_size)){
     if (MAINPROCESS)
-        printf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n",
+        HDprintf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n",
             dim0, dim1, mpi_size);
     nerrors++;
     return(1);
@@ -4908,13 +4868,13 @@ parse_options(int argc, char **argv)
     for (i=0; i < n; i++)
         if (h5_fixname(FILENAME[i],fapl,filenames[i],sizeof(filenames[i]))
         == NULL){
-        printf("h5_fixname failed\n");
+        HDprintf("h5_fixname failed\n");
         nerrors++;
         return(1);
         }
-    printf("Test filenames are:\n");
+    HDprintf("Test filenames are:\n");
     for (i=0; i < n; i++)
-        printf("    %s\n", filenames[i]);
+        HDprintf("    %s\n", filenames[i]);
     }
 
     return(0);
@@ -5051,10 +5011,10 @@ int main(int argc, char **argv)
     dim1 = COL_FACTOR*mpi_size;
 
     if (MAINPROCESS){
-    printf("===================================\n");
-    printf("Shape Same Tests Start\n");
-        printf("    express_test = %d.\n", GetTestExpress());
-    printf("===================================\n");
+    HDprintf("===================================\n");
+    HDprintf("Shape Same Tests Start\n");
+        HDprintf("    express_test = %d.\n", GetTestExpress());
+    HDprintf("===================================\n");
     }
 
     /* Attempt to turn off atexit post processing so that in case errors
@@ -5063,7 +5023,7 @@ int main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-    printf("%d: Failed to turn off atexit processing. Continue.\n", mpi_rank);
+    HDprintf("%d: Failed to turn off atexit processing. Continue.\n", mpi_rank);
     };
     H5open();
     h5_show_hostname();
@@ -5102,7 +5062,7 @@ int main(int argc, char **argv)
     TestParseCmdLine(argc, argv);
 
     if (dxfer_coll_type == DXFER_INDEPENDENT_IO && MAINPROCESS){
-    printf("===================================\n"
+    HDprintf("===================================\n"
         "   Using Independent I/O with file set view to replace collective I/O \n"
         "===================================\n");
     }
@@ -5133,12 +5093,12 @@ int main(int argc, char **argv)
     }
 
     if (MAINPROCESS){        /* only process 0 reports */
-    printf("===================================\n");
+    HDprintf("===================================\n");
     if (nerrors)
-        printf("***Shape Same tests detected %d errors***\n", nerrors);
+        HDprintf("***Shape Same tests detected %d errors***\n", nerrors);
     else
-        printf("Shape Same tests finished with no errors\n");
-    printf("===================================\n");
+        HDprintf("Shape Same tests finished with no errors\n");
+    HDprintf("===================================\n");
     }
 
     /* close HDF5 library */

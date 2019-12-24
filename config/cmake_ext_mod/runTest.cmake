@@ -18,7 +18,7 @@ if (NOT TEST_PROGRAM)
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
 endif ()
 if (NOT TEST_FOLDER)
-  message ( FATAL_ERROR "Require TEST_FOLDER to be defined")
+  message (FATAL_ERROR "Require TEST_FOLDER to be defined")
 endif ()
 if (NOT TEST_OUTPUT)
   message (FATAL_ERROR "Require TEST_OUTPUT to be defined")
@@ -27,18 +27,18 @@ if (NOT TEST_EXPECT)
   message (STATUS "Require TEST_EXPECT to be defined")
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
 endif ()
 
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
 
-message (STATUS "COMMAND: ${TEST_PROGRAM} ${TEST_ARGS}")
+message (STATUS "COMMAND: ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}")
 
 if (TEST_LIBRARY_DIRECTORY)
-  if (WIN32 AND NOT MINGW)
+  if (WIN32 OR MINGW)
     set (ENV{PATH} "$ENV{PATH};${TEST_LIBRARY_DIRECTORY}")
   else ()
     set (ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${TEST_LIBRARY_DIRECTORY}")
@@ -53,7 +53,7 @@ endif ()
 if (NOT TEST_INPUT)
   # run the test program, capture the stdout/stderr and the result var
   execute_process (
-      COMMAND ${TEST_PROGRAM} ${TEST_ARGS}
+      COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}
       WORKING_DIRECTORY ${TEST_FOLDER}
       RESULT_VARIABLE TEST_RESULT
       OUTPUT_FILE ${TEST_OUTPUT}
@@ -64,7 +64,7 @@ if (NOT TEST_INPUT)
 else ()
   # run the test program with stdin, capture the stdout/stderr and the result var
   execute_process (
-      COMMAND ${TEST_PROGRAM} ${TEST_ARGS}
+      COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}
       WORKING_DIRECTORY ${TEST_FOLDER}
       RESULT_VARIABLE TEST_RESULT
       INPUT_FILE ${TEST_INPUT}
@@ -88,7 +88,7 @@ endif ()
 message (STATUS "COMMAND Result: ${TEST_RESULT}")
 
 # if the .err file exists and ERRROR_APPEND is enabled
-if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   if (TEST_MASK_FILE)
     STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
@@ -113,7 +113,7 @@ endif ()
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
       file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
       message (STATUS "Output :\n${TEST_STREAM}")
     endif ()
@@ -125,10 +125,29 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # remove special output
 file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-string (FIND TEST_STREAM "_pmi_alps" "${TEST_FIND_RESULT}")
-if (TEST_FIND_RESULT GREATER 0)
+string (FIND "${TEST_STREAM}" "_pmi_alps" TEST_FIND_RESULT)
+if (TEST_FIND_RESULT GREATER -1)
   string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
+endif ()
+
+# remove special error output
+if (NOT TEST_ERRREF)
+  # the error stack has been appended to the output file
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+else ()
+  # the error stack remains in the .err file
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
+endif ()
+string (FIND "${TEST_STREAM}" "no version information available" TEST_FIND_RESULT)
+if (TEST_FIND_RESULT GREATER -1)
+  string (REGEX REPLACE "^.*no version information available[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
+  # write back the changes to the original files
+  if (NOT TEST_ERRREF)
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  else ()
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err "${TEST_STREAM}")
+  endif ()
 endif ()
 
 # if the output file needs Storage text removed
@@ -185,10 +204,14 @@ endif ()
 
 # compare output files to references unless this must be skipped
 if (NOT TEST_SKIP_COMPARE)
-  if (EXISTS ${TEST_FOLDER}/${TEST_REFERENCE})
-    if (WIN32 AND NOT MINGW)
-      file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-      file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
+  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
+    if (WIN32 OR MINGW)
+      configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
+      if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}.tmp")
+        file(RENAME ${TEST_FOLDER}/${TEST_REFERENCE}.tmp ${TEST_FOLDER}/${TEST_REFERENCE})
+      endif ()
+      #file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+      #file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
     endif ()
 
     if (NOT TEST_SORT_COMPARE)
@@ -218,10 +241,10 @@ if (NOT TEST_SKIP_COMPARE)
         foreach (line RANGE 0 ${_FP_LEN})
           list (GET test_act ${line} str_act)
           list (GET test_ref ${line} str_ref)
-          if (NOT ${str_act} STREQUAL ${str_ref})
-            if (NOT str_act STREQUAL "")
+          if (NOT str_act STREQUAL str_ref)
+            if (str_act)
               set (TEST_RESULT 1)
-              message ("line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
+              message (STATUS "line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
             endif ()
           endif ()
         endforeach ()
@@ -248,9 +271,13 @@ if (NOT TEST_SKIP_COMPARE)
 
   # now compare the .err file with the error reference, if supplied
   if (TEST_ERRREF)
-    if (WIN32 AND NOT MINGW)
-      file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
-      file (WRITE ${TEST_FOLDER}/${TEST_ERRREF} "${TEST_STREAM}")
+    if (WIN32 OR MINGW)
+      configure_file(${TEST_FOLDER}/${TEST_ERRREF} ${TEST_FOLDER}/${TEST_ERRREF}.tmp NEWLINE_STYLE CRLF)
+      if (EXISTS "${TEST_FOLDER}/${TEST_ERRREF}.tmp")
+        file(RENAME ${TEST_FOLDER}/${TEST_ERRREF}.tmp ${TEST_FOLDER}/${TEST_ERRREF})
+      endif ()
+      #file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
+      #file (WRITE ${TEST_FOLDER}/${TEST_ERRREF} "${TEST_STREAM}")
     endif ()
 
     # now compare the error output with the error reference
@@ -270,10 +297,10 @@ if (NOT TEST_SKIP_COMPARE)
         foreach (line RANGE 0 ${_FP_LEN})
           list (GET test_act ${line} str_act)
           list (GET test_ref ${line} str_ref)
-          if (NOT ${str_act} STREQUAL ${str_ref})
-            if (NOT ${str_act} STREQUAL "")
+          if (NOT str_act STREQUAL str_ref)
+            if (str_act)
               set (TEST_RESULT 1)
-              message ("line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
+              message (STATUS "line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
             endif ()
           endif ()
         endforeach ()
@@ -320,6 +347,15 @@ if (TEST_GREP_COMPARE)
   endif ()
 endif ()
 
+# dump the output unless nodisplay option is set
+if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY)
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  execute_process (
+      COMMAND ${CMAKE_COMMAND} -E echo ${TEST_STREAM}
+      RESULT_VARIABLE TEST_RESULT
+  )
+endif ()
+
 # everything went fine...
-message ("${TEST_PROGRAM} Passed")
+message (STATUS "${TEST_PROGRAM} Passed")
 

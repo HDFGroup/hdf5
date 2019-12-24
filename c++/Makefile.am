@@ -18,9 +18,15 @@
 
 include $(top_srcdir)/config/commence.am
 
+if BUILD_TESTS_CONDITIONAL
+   TEST_DIR = test
+else
+   TEST_DIR=
+endif
+
 ## Only recurse into subdirectories if C++ interface is enabled.
 if BUILD_CXX_CONDITIONAL
-   SUBDIRS=src test
+   SUBDIRS=src $(TEST_DIR)
 endif
 DIST_SUBDIRS = src test examples
 

@@ -21,6 +21,10 @@
 
 #include "h5test.h"
 
+#include "H5CXprivate.h"        /* API Contexts                         */
+#include "H5Iprivate.h"
+#include "H5PBprivate.h"
+
 /*
  * This file needs to access private information from the H5F package.
  */
@@ -31,12 +35,8 @@
 #define H5F_TESTING
 #include "H5Fpkg.h"
 
-#include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5Iprivate.h"
-#include "H5PBprivate.h"
 
-
-#define FILENAME_LEN		1024
+#define FILENAME_LEN            1024
 #define NUM_DSETS               5
 #define NX                      100
 #define NY                      50
@@ -97,7 +97,7 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
     int         i;
     int         num_elements;
     int         j;
-    char        dset_name[10];
+    char        dset_name[32];
 
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -234,7 +234,7 @@ open_file(char *filename, hid_t fapl, hsize_t page_size,
     int         i;
     int         j;
     int         num_elements;
-    char        dset_name[10];
+    char        dset_name[32];
     H5F_t       *f = NULL;
 
     if((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)

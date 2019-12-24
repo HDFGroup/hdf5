@@ -50,6 +50,8 @@ import hdf.hdf5lib.structs.H5AC_cache_config_t;
 import hdf.hdf5lib.structs.H5A_info_t;
 import hdf.hdf5lib.structs.H5E_error2_t;
 import hdf.hdf5lib.structs.H5F_info2_t;
+import hdf.hdf5lib.structs.H5FD_hdfs_fapl_t;
+import hdf.hdf5lib.structs.H5FD_ros3_fapl_t;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
@@ -212,7 +214,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * exception handlers to print out the HDF-5 error stack.
  * <hr>
  *
- * @version HDF5 1.10.5 <BR>
+ * @version HDF5 1.10.6 <BR>
  *          <b>See also: <a href ="./hdf.hdf5lib.HDFArray.html"> hdf.hdf5lib.HDFArray</a> </b><BR>
  *          <a href ="./hdf.hdf5lib.HDF5Constants.html"> hdf.hdf5lib.HDF5Constants</a><BR>
  *          <a href ="./hdf.hdf5lib.HDF5CDataTypes.html"> hdf.hdf5lib.HDF5CDataTypes</a><BR>
@@ -235,7 +237,7 @@ public class H5 implements java.io.Serializable {
      *
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = { 1, 10, 5 };
+    public final static int LIB_VERSION[] = { 1, 10, 6 };
 
     public final static String H5PATH_PROPERTY_KEY = "hdf.hdf5lib.H5.hdf5lib";
 
@@ -3214,6 +3216,8 @@ public class H5 implements java.io.Serializable {
      * @param file_id
      *            IN: Identifier of the target file.
      *
+     * @return true if the file-level is set to create minimized dataset object headers, false if not.
+     *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
@@ -5004,10 +5008,9 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native void H5Orefresh(long object_id) throws HDF5LibraryException;
 
-    // /////// unimplemented ////////
-    //  herr_t H5Odisable_mdc_flushes(hid_t object_id);
-    //  herr_t H5Oenable_mdc_flushes(hid_t object_id);
-    //  herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled);
+    public synchronized static native void  H5Odisable_mdc_flushes(long object_id);
+    public synchronized static native void  H5Oenable_mdc_flushes(long object_id);
+    public synchronized static native boolean  H5Oare_mdc_flushes_disabled(long object_id);
 
     // ////////////////////////////////////////////////////////////
     // //
@@ -6945,6 +6948,8 @@ public class H5 implements java.io.Serializable {
      * @param dcpl_id
      *            IN: Dataset creation property list
      *
+     * @return true if the given dcpl is set to create minimized dataset object headers, false if not.
+     *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
@@ -7756,6 +7761,10 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_fapl_family(long fapl_id, long memb_size, long memb_fapl_id)
             throws HDF5LibraryException, NullPointerException;
 
+    public synchronized static native int H5Pset_fapl_hdfs(long fapl_id, H5FD_hdfs_fapl_t fapl_conf) throws HDF5LibraryException, NullPointerException;
+
+    public synchronized static native H5FD_hdfs_fapl_t H5Pget_fapl_hdfs(long fapl_id) throws HDF5LibraryException, NullPointerException;
+
     /**
      * H5Pget_fapl_multi Sets up use of the multi I/O driver.
      *
@@ -7839,6 +7848,10 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_fapl_stdio(long fapl_id) throws HDF5LibraryException, NullPointerException;
 
     public synchronized static native int H5Pset_fapl_windows(long fapl_id) throws HDF5LibraryException, NullPointerException;
+
+    public synchronized static native int H5Pset_fapl_ros3(long fapl_id, H5FD_ros3_fapl_t fapl_conf) throws HDF5LibraryException, NullPointerException;
+
+    public synchronized static native H5FD_ros3_fapl_t H5Pget_fapl_ros3(long fapl_id) throws HDF5LibraryException, NullPointerException;
 
     // /////// unimplemented ////////
 

@@ -58,6 +58,7 @@ const char *FILENAME[] = {
     "stdio_file",        /*7*/
     "windows_file",      /*8*/
     "new_multi_file_v16",/*9*/
+    "ro_s3_file",        /*10*/
     NULL
 };
 
@@ -66,7 +67,7 @@ const char *FILENAME[] = {
 #define COMPAT_BASENAME "family_v16_"
 #define MULTI_COMPAT_BASENAME "multi_file_v16"
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_sec2
  *
@@ -178,7 +179,7 @@ error:
     return -1;
 } /* end test_sec2() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_core
  *
@@ -412,8 +413,8 @@ test_core(void)
         for(j = 0; j < CORE_DSET_DIM2; j++)
             if(*pr++ != *pw++) {
                 H5_FAILED();
-                printf("    Read different values than written in data set.\n");
-                printf("    At index %d,%d\n", i, j);
+                HDprintf("    Read different values than written in data set.\n");
+                HDprintf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -480,8 +481,8 @@ test_core(void)
         for(j = 0; j < CORE_DSET_DIM2; j++)
             if(*pw++ != *pr++) {
                 H5_FAILED();
-                printf("    Read different values than written in data set.\n");
-                printf("    At index %d,%d\n", i, j);
+                HDprintf("    Read different values than written in data set.\n");
+                HDprintf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -534,7 +535,7 @@ error:
     return -1;
 } /* end test_core() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_direct
  *
@@ -597,7 +598,7 @@ test_direct(void)
     if(file<0) {
         H5Pclose (fapl);
         SKIPPED();
-        printf("  Probably the file system doesn't support Direct I/O\n");
+        HDprintf("  Probably the file system doesn't support Direct I/O\n");
         return 0;
     }
 
@@ -674,8 +675,8 @@ test_direct(void)
         for(j = 0; j < DSET1_DIM2; j++)
             if(*p1++ != *p2++) {
                 H5_FAILED();
-                printf("    Read different values than written in data set 1.\n");
-                printf("    At index %d,%d\n", i, j);
+                HDprintf("    Read different values than written in data set 1.\n");
+                HDprintf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
               } /* end if */
 
@@ -706,8 +707,8 @@ test_direct(void)
     for(i = 0; i < DSET2_DIM; i++)
         if(wdata2[i] != rdata2[i]) {
             H5_FAILED();
-            printf("    Read different values than written in data set 2.\n");
-            printf("    At index %d\n", i);
+            HDprintf("    Read different values than written in data set 2.\n");
+            HDprintf("    At index %d\n", i);
             TEST_ERROR;
         } /* end if */
 
@@ -754,7 +755,7 @@ error:
 #endif /*H5_HAVE_DIRECT*/
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family_opens
  *
@@ -769,6 +770,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'first_name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_family_opens(char *fname, hid_t fa_pl)
 {
@@ -825,8 +834,9 @@ test_family_opens(char *fname, hid_t fa_pl)
 error:
     return -1;
 } /* end test_family_opens() */
+#pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family
  *
@@ -1008,7 +1018,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_family_compat
  *
@@ -1027,6 +1037,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'newname_individual', etc. in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_family_compat(void)
 {
@@ -1110,26 +1128,34 @@ error:
 
     return -1;
 } /* end test_family_compat() */
+#pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi_opens
  *
  * Purpose:     Private function for test_multi() to tests wrong ways of
  *              reopening multi file.
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Thursday, May 19, 2005
  *
  *-------------------------------------------------------------------------
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'sf_name' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static herr_t
 test_multi_opens(char *fname)
 {
-    hid_t file=-1;
+    hid_t fid = H5I_INVALID_HID;
     char  super_name[1024];     /*name string "%%s-s.h5"*/
     char  sf_name[1024];        /*name string "multi_file-s.h5"*/
 
@@ -1138,20 +1164,20 @@ test_multi_opens(char *fname)
     HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
 
     H5E_BEGIN_TRY {
-        file = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+        fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
 
-    return(file >= 0 ? -1 : 0);
-}
+    return(fid >= 0 ? FAIL : SUCCEED);
+} /* end test_multi_opens() */
+#pragma GCC diagnostic pop
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi
  *
  * Purpose:     Tests the file handle interface for MUTLI driver
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
@@ -1201,19 +1227,19 @@ test_multi(void)
     memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
     memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
 
-    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    sprintf(sv[H5FD_MEM_BTREE],  "%%s-%c.h5", 'b');
+    HDsprintf(sv[H5FD_MEM_BTREE],  "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX/4;
 
-    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
 
-    sprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
+    HDsprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
     memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
     memb_addr[H5FD_MEM_GHEAP] = (HADDR_MAX/4)*3;
 
@@ -1365,7 +1391,7 @@ test_multi(void)
 
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -1374,11 +1400,12 @@ error:
         H5Pclose(fapl);
         H5Pclose(fapl2);
         H5Fclose(file);
+        H5Aclose(attr);
     } H5E_END_TRY;
-    return -1;
-}
+    return FAIL;
+} /* end test_multi() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_multi_compat
  *
@@ -1432,12 +1459,12 @@ test_multi_compat(void)
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 
     memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
-    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
     memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
-    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
 
@@ -1447,17 +1474,19 @@ test_multi_compat(void)
     h5_fixname(FILENAME[9], fapl, newname, sizeof newname);
 
     /* Make copy for the data file in the build directory, to protect the
-     * original file in the source directory */
-    sprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
-    sprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
+     * original file in the source directory
+     */
+    HDsprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
+    HDsprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
     h5_make_local_copy(filename_s, newname_s);
 
-    sprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
-    sprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
+    HDsprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
+    HDsprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
     h5_make_local_copy(filename_r, newname_r);
 
     /* Reopen the file for read only.  Verify 1.8 library can open file
-     * created with 1.6 library. */
+     * created with 1.6 library.
+     */
     if((file=H5Fopen(newname, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
 
@@ -1550,7 +1579,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_log
  *
@@ -1661,7 +1690,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_stdio
  *
@@ -1766,7 +1795,7 @@ error:
 }
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_windows
  *
@@ -1888,7 +1917,104 @@ error:
 } /* end test_windows() */
 
 
-
+/*-------------------------------------------------------------------------
+ * Function:    test_ros3
+ *
+ * Purpose:     Tests the file handle interface for the ROS3 driver
+ *
+ *              As the ROS3 driver is 1) read only, 2) requires access
+ *              to an S3 server (minio for now), this test is quite
+ *              different from the other tests.
+ *
+ *              For now, test only fapl & flags.  Extend as the
+ *              work on the VFD continues.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  John Mainzer
+ *              7/12/17
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_ros3(void)
+{
+#ifdef H5_HAVE_ROS3_VFD
+    hid_t       fid = -1;                   /* file ID                      */
+    hid_t       fapl_id = -1;               /* file access property list ID */
+    hid_t       fapl_id_out = -1;           /* from H5Fget_access_plist     */
+    hid_t       driver_id = -1;             /* ID for this VFD              */
+    unsigned long driver_flags = 0;         /* VFD feature flags            */
+    char        filename[1024];             /* filename                     */
+    void        *os_file_handle = NULL;     /* OS file handle               */
+    hsize_t     file_size;                  /* file size                    */
+    H5FD_ros3_fapl_t test_ros3_fa;
+    H5FD_ros3_fapl_t ros3_fa_0 =
+    {
+        /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,
+        /* authenticate = */ FALSE,
+        /* aws_region   = */ "",
+        /* secret_id    = */ "",
+        /* secret_key   = */ "plugh",
+    };
+#endif /*H5_HAVE_ROS3_VFD */
+
+    TESTING("Read-only S3 file driver");
+
+#ifndef H5_HAVE_ROS3_VFD
+    SKIPPED();
+    return 0;
+#else /* H5_HAVE_ROS3_VFD */
+
+    /* Set property list and file name for ROS3 driver. */
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    if(H5Pset_fapl_ros3(fapl_id, &ros3_fa_0) < 0)
+        TEST_ERROR;
+
+    /* verify that the ROS3 FAPL entry is set as expected */
+    if(H5Pget_fapl_ros3(fapl_id, &test_ros3_fa) < 0)
+        TEST_ERROR;
+
+    /* need a macro to compare instances of H5FD_ros3_fapl_t */
+    if((test_ros3_fa.version != ros3_fa_0.version) ||
+       (test_ros3_fa.authenticate != ros3_fa_0.authenticate) ||
+       (strcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
+       (strcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
+       (strcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[10], fapl_id, filename, sizeof(filename));
+
+    /* Check that the VFD feature flags are correct */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        TEST_ERROR;
+
+    if (H5FDdriver_query(driver_id, &driver_flags) < 0)
+        TEST_ERROR;
+
+    if(!(driver_flags & H5FD_FEAT_DATA_SIEVE))
+        TEST_ERROR
+
+    /* Check for extra flags not accounted for above */
+    if(driver_flags != (H5FD_FEAT_DATA_SIEVE))
+        TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_id);
+        H5Pclose(fapl_id_out);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+#endif /* H5_HAVE_ROS3_VFD */
+} /* end test_ros3() */
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -1921,6 +2047,7 @@ main(void)
     nerrors += test_log() < 0            ? 1 : 0;
     nerrors += test_stdio() < 0          ? 1 : 0;
     nerrors += test_windows() < 0        ? 1 : 0;
+    nerrors += test_ros3() < 0           ? 1 : 0;
 
     if(nerrors) {
         HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n",

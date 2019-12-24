@@ -26,8 +26,8 @@
 #define TESTFILE   "tarrold.h5"
 
 /* 1-D array datatype */
-#define ARRAY1_RANK    1
-#define ARRAY1_DIM1 4
+#define ARRAY1_RANK     1
+#define ARRAY1_DIM1     4
 
 /* 3-D array datatype */
 #define ARRAY2_RANK     3
@@ -1074,7 +1074,7 @@ test_array_free_custom(void *_mem, void *info)
 
     if(_mem != NULL) {
         mem = ((unsigned char *)_mem) - extra;
-        *mem_used -= *(size_t *)mem;
+        *mem_used -= *(size_t *)((void *)mem);
         HDfree(mem);
     } /* end if */
 
@@ -1341,7 +1341,7 @@ test_array_vlen_array(void)
             for(k=0; k<(i+j+1); k++)
                 for(l=0; l<ARRAY1_DIM1; l++)
                     ((unsigned int *)wdata[i][j].p)[k*ARRAY1_DIM1+l] = (unsigned int)(i*1000+j*100+k*10+l);
-        } /* end for */
+        }
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1580,9 +1580,9 @@ test_array_bkg(void)
     unsigned     ndims[3] = {1,1,1};
 
     typedef struct {
-    int      a[ALEN];
-    float    b[ALEN];
-    double   c[ALEN];
+        int      a[ALEN];
+        float    b[ALEN];
+        double   c[ALEN];
     } CmpField;
 
     CmpField     cf[LENGTH];
@@ -2146,7 +2146,7 @@ test_compat(void)
         CHECK_I(ret, "H5Fclose");
     } /* end if */
     else
-        printf("***cannot open the pre-created compound datatype test file (%s)\n",testfile);
+        HDprintf("***cannot open the pre-created compound datatype test file (%s)\n",testfile);
 
 } /* end test_compat() */
 

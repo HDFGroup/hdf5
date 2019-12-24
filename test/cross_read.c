@@ -109,7 +109,7 @@ check_data_i(const char *dsetname, hid_t fid)
             if(data_out[i][j] != data_in[i][j])
                 if(!nerrors++) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %lld but should have been %lld\n",
+                    HDprintf("element [%d][%d] is %lld but should have been %lld\n",
                             (int)i, (int)j, data_out[i][j], data_in[i][j]);
                 } /* end if */
 
@@ -119,7 +119,7 @@ check_data_i(const char *dsetname, hid_t fid)
 
     /* Failure */
     if(nerrors) {
-        printf("total of %d errors out of %d elements\n", nerrors, (int)(NX*NY));
+        HDprintf("total of %d errors out of %d elements\n", nerrors, (int)(NX*NY));
         return 1;
     } /* end if */
 
@@ -182,7 +182,7 @@ check_data_f(const char *dsetname, hid_t fid)
             if(!H5_DBL_REL_EQUAL(data_out[i][j], data_in[i][j], (double)0.001F))
                 if(!nerrors++) {
                     H5_FAILED();
-                    printf("element [%d][%d] is %g but should have been %g\n",
+                    HDprintf("element [%d][%d] is %g but should have been %g\n",
                         (int)i, (int)j, data_out[i][j], data_in[i][j]);
                 } /* end if */
 
@@ -192,7 +192,7 @@ check_data_f(const char *dsetname, hid_t fid)
 
     /* Failure */
     if(nerrors) {
-        printf("total of %d errors out of %d elements\n", nerrors, (int)(NX*NY));
+        HDprintf("total of %d errors out of %d elements\n", nerrors, (int)(NX*NY));
         return 1;
     } /* end if */
 
@@ -369,11 +369,11 @@ main(void)
     nerrors += check_file(filename);
 
     if(nerrors) {
-        printf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
+        HDprintf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
         return EXIT_FAILURE;
     } /* end if */
 
-    printf("All data type tests passed.\n");
+    HDprintf("All data type tests passed.\n");
     return EXIT_SUCCESS;
 } /* end main() */
 

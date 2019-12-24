@@ -29,7 +29,6 @@
 # HDF5 Library Makefile(.in)
 #
 
-
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -133,9 +132,9 @@ DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/H5config.h \
 	$(top_builddir)/fortran/src/H5config_f.inc
-CONFIG_CLEAN_FILES = h5cc
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
+am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 h5clear_SOURCES = h5clear.c
 h5clear_OBJECTS = h5clear.$(OBJEXT)
@@ -169,34 +168,6 @@ h5repart_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 h5repart_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5repart_LDFLAGS) $(LDFLAGS) -o $@
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
-SCRIPTS = $(bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -279,6 +250,33 @@ am__tty_colors = { \
     std='[m'; \
   fi; \
 }
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
 am__recheck_rx = ^[ 	]*:recheck:[ 	]*
 am__global_test_result_rx = ^[ 	]*:global-test-result:[ 	]*
 am__copy_in_global_log_rx = ^[ 	]*:copy-in-global-log:[ 	]*
@@ -430,9 +428,8 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
-am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/h5cc.in \
-	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/test-driver \
-	$(top_srcdir)/config/commence.am \
+am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/bin/depcomp \
+	$(top_srcdir)/bin/test-driver $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -509,7 +506,6 @@ FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
 FORTRAN_C_LONG_DOUBLE_IS_UNIQUE = @FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
 FORTRAN_HAVE_C_LONG_DOUBLE = @FORTRAN_HAVE_C_LONG_DOUBLE@
-FORTRAN_SIZEOF_LONG_DOUBLE = @FORTRAN_SIZEOF_LONG_DOUBLE@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 Fortran_COMPILER_ID = @Fortran_COMPILER_ID@
 GREP = @GREP@
@@ -532,9 +528,12 @@ H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_Fortran_INTEGER_SIZEOF_16 = @HAVE_Fortran_INTEGER_SIZEOF_16@
+HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
+HDF5_TESTS = @HDF5_TESTS@
+HDF5_TOOLS = @HDF5_TOOLS@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_JAVA = @HDF_JAVA@
@@ -561,6 +560,7 @@ JAVA_JUNIT = @JAVA_JUNIT@
 JAVA_PATH_NAME = @JAVA_PATH_NAME@
 JAVA_VERSION = @JAVA_VERSION@
 JNIFLAGS = @JNIFLAGS@
+JNI_LDFLAGS = @JNI_LDFLAGS@
 JUNIT = @JUNIT@
 LARGE_PARALLEL_IO = @LARGE_PARALLEL_IO@
 LD = @LD@
@@ -615,6 +615,7 @@ PREADWRITE = @PREADWRITE@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
+ROS3_VFD = @ROS3_VFD@
 RUNPARALLEL = @RUNPARALLEL@
 RUNSERIAL = @RUNSERIAL@
 R_INTEGER = @R_INTEGER@
@@ -639,7 +640,6 @@ UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
-UUDECODE = @UUDECODE@
 VERSION = @VERSION@
 WORDS_BIGENDIAN = @WORDS_BIGENDIAN@
 _ACJNI_JAVAC = @_ACJNI_JAVAC@
@@ -756,7 +756,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
-bin_SCRIPTS = h5redeploy
 
 # Add h5debug, h5repart, and h5mkgrp specific linker flags here
 h5debug_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
@@ -764,19 +763,8 @@ h5repart_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 h5mkgrp_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 h5clear_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
-# Tell automake to clean h5redeploy script
-CLEANFILES = h5redeploy
-
-# These were generated by configure.  Remove them only when distclean.
-DISTCLEANFILES = h5cc
-
 # All programs rely on hdf5 library and h5tools library
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
-@BUILD_PARALLEL_CONDITIONAL_FALSE@H5CC_NAME = h5cc
-
-# h5cc needs custom install and uninstall rules, since it may be
-# named h5pcc if hdf5 is being built in parallel mode.
-@BUILD_PARALLEL_CONDITIONAL_TRUE@H5CC_NAME = h5pcc
 
 # Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -832,8 +820,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-h5cc: $(top_builddir)/config.status $(srcdir)/h5cc.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -899,41 +885,6 @@ h5mkgrp$(EXEEXT): $(h5mkgrp_OBJECTS) $(h5mkgrp_DEPENDENCIES) $(EXTRA_h5mkgrp_DEP
 h5repart$(EXEEXT): $(h5repart_OBJECTS) $(h5repart_DEPENDENCIES) $(EXTRA_h5repart_DEPENDENCIES) 
 	@rm -f h5repart$(EXEEXT)
 	$(AM_V_CCLD)$(h5repart_LINK) $(h5repart_OBJECTS) $(h5repart_LDADD) $(LIBS)
-install-binSCRIPTS: $(bin_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n' \
-	    -e 'h;s|.*|.|' \
-	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
-	      if (++n[d] == $(am__install_max)) { \
-		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
-	    else { print "f", d "/" $$4, $$1 } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	     test -z "$$files" || { \
-	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
-	     } \
-	; done
-
-uninstall-binSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || exit 0; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	       sed -e 's,.*/,,;$(transform)'`; \
-	dir='$(DESTDIR)$(bindir)'; $(am__uninstall_files_from_dir)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1206,9 +1157,9 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) $(SCRIPTS) all-local
+all-am: Makefile $(PROGRAMS) all-local
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1236,12 +1187,10 @@ mostlyclean-generic:
 	-test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -1274,8 +1223,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS install-binSCRIPTS \
-	install-exec-local
+install-exec-am: install-binPROGRAMS
 
 install-html: install-html-am
 
@@ -1315,8 +1263,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-local
+uninstall-am: uninstall-binPROGRAMS
 
 .MAKE: check-am install-am install-strip
 
@@ -1325,17 +1272,15 @@ uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
 	cscopelist-am ctags ctags-am distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-binSCRIPTS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-exec-local install-html \
+	install-binPROGRAMS install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	mostlyclean-local pdf pdf-am ps ps-am recheck tags tags-am \
-	uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-binSCRIPTS uninstall-local
+	uninstall uninstall-am uninstall-binPROGRAMS
 
 .PRECIOUS: Makefile
 
@@ -1350,15 +1295,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
 
 help:
 	@$(top_srcdir)/bin/makehelp
-
-install-exec-local:
-	@$(INSTALL) h5cc $(DESTDIR)$(bindir)/$(H5CC_NAME)
-uninstall-local:
-	@$(RM) $(DESTDIR)$(bindir)/$(H5CC_NAME)
-
-# How to build h5redeploy script
-h5redeploy: h5redeploy.in
-	@cp $(srcdir)/$@.in $@
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
@@ -1395,7 +1331,7 @@ all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
 # make install-doc doesn't do anything outside of doc directory, but
 # Makefiles should recognize it.
 # UPDATE: docs no longer reside in this build tree, so this target
-# is depreciated.
+# is deprecated.
 install-doc uninstall-doc:
 	@echo "Nothing to be done."
 

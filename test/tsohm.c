@@ -11,13 +11,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/***********************************************************
-*
-* Test program:	 tsohm
-*
-* Test Shared Object Header Messages
-*
-*************************************************************/
+/*
+ * Purpose:     Test Shared Object Header Messages
+ */
 
 #include "testhdf5.h"
 
@@ -25,9 +21,9 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND   /* suppress error about including H5Fpkg      */
 #define H5F_TESTING
-#include "H5Fpkg.h"		/* File access	 			*/
+#include "H5Fpkg.h"  /* File access */
 
 /* Default SOHM values */
 #define DEF_NUM_INDEXES 0
@@ -178,14 +174,11 @@ static void test_sohm_extlink(void);
 
 /****************************************************************
 **
-**  verify_fcpl_values(): Helper function for test_sohm_fcpl.
-**         Verifies that the *_in and *_out parameters are equal.
+**  verify_fcpl_values(): Verifies that FCPL is set as expected.
 **
 ****************************************************************/
 static void
-verify_fcpl_values(hid_t fcpl_id, const unsigned nindexes_expected,
-                const unsigned *flags_expected, const unsigned *minsizes_expected,
-                unsigned l2b, unsigned b2l)
+verify_fcpl_values(hid_t fcpl_id, const unsigned nindexes_expected, const unsigned *flags_expected, const unsigned *minsizes_expected, unsigned l2b, unsigned b2l)
 {
     unsigned  nindexes_actual;
     unsigned  list_size;
@@ -197,6 +190,7 @@ verify_fcpl_values(hid_t fcpl_id, const unsigned nindexes_expected,
     ret = H5Pget_shared_mesg_nindexes(fcpl_id, &nindexes_actual);
     CHECK_I(ret, "H5Pget_shared_mesg_nindexes");
     VERIFY(nindexes_actual, nindexes_expected, "H5Pget_shared_mesg_nindexes");
+
     /* Index flags and minsizes */
     for(x=0; x<nindexes_actual; ++x) {
         unsigned flags_i;
@@ -223,11 +217,11 @@ verify_fcpl_values(hid_t fcpl_id, const unsigned nindexes_expected,
 static void
 test_sohm_fcpl(void)
 {
-    hid_t       fid = -1;
-    hid_t       fcpl_id = -1;
-    hid_t       fcpl2_id = -1;
-    unsigned    x;
-    herr_t	ret;		/* Generic return value	*/
+    hid_t    fid = -1;
+    hid_t    fcpl_id = -1;
+    hid_t    fcpl2_id = -1;
+    unsigned x;
+    herr_t   ret;
 
     MESSAGE(5, ("Testing File Creation Properties for Shared Messages\n"));
 
@@ -320,9 +314,8 @@ test_sohm_fcpl(void)
     CHECK_I(ret, "H5Fclose");
 
     /* Actually, the list max can be exactly 1 greater than the
-     * btree min, but no more.  Also, the errors above shouldn't
-     * have corrupted the fcpl, although we do need to reset the
-     * second index that we changed above.
+     * btree min, but no more.
+     * Reset the second index.
      */
     ret = H5Pset_shared_mesg_index(fcpl_id, 1, test_type_flags[1], 15);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
@@ -333,9 +326,10 @@ test_sohm_fcpl(void)
     ret = H5Fclose(fid);
     CHECK_I(ret, "H5Fclose");
 
-    /* Test edge cases; H5O_SHMESG_MAX_NINDEXES and H5O_SHMESG_MAX_LIST_SIZE should be
-     * valid values.  Also, creating a file with uninitialized indexes
-     * (indexes 3-5) should work.
+    /* Test edge cases:
+     * H5O_SHMESG_MAX_NINDEXES and H5O_SHMESG_MAX_LIST_SIZE should be valid
+     * values.
+     * Creating a file with uninitialized indexes should work. (TODO: not implemented?)
      */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, H5O_SHMESG_MAX_NINDEXES);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
@@ -344,14 +338,12 @@ test_sohm_fcpl(void)
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(fid, "H5Fcreate");
 
-
     /* Clean up */
     ret = H5Pclose(fcpl_id);
     CHECK_I(ret, "H5Pclose");
     ret = H5Fclose(fid);
     CHECK_I(ret, "H5Fclose");
 } /* test_sohm_fcpl */
-
 
 
 /****************************************************************
@@ -385,7 +377,6 @@ test_sohm_fcpl_errors(void)
 
     verify_fcpl_values(fcpl_id, TEST_NUM_INDEXES, test_type_flags, test_minsizes, TEST_L2B, TEST_B2L);
 
-    /* Test giving bogus values to H5P* functions */
     H5E_BEGIN_TRY {
         /* Trying to create too many indexes should fail */
         ret = H5Pset_shared_mesg_nindexes(fcpl_id, H5O_SHMESG_MAX_NINDEXES + 1);
@@ -484,7 +475,7 @@ error:
       H5Tclose(dtype1_id);
     } H5E_END_TRY
     return -1;
-} /* make_dtype_1 */
+} /* make_dtype1 */
 
 
 /*-------------------------------------------------------------------------
@@ -587,12 +578,12 @@ error:
  *
  * Purpose:     Creates object headers that use a large datatype message.
  *
- *              Set test_file_closing to 1 to add file closing and reopening
+ *              Set test_file_closing to TRUE to add file closing and reopening
  *              whenever possible (to test that SOHMs are written correctly
  *              on disk and not just in memory).
  *
- * Return:      Success:        file ID (may not be the same one passed in)
- *              Failure:        Negative
+ * Return:      Success:    file ID (may not be the same one passed in)
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:  James Laird
  *              Monday, April 10, 2006
@@ -600,13 +591,13 @@ error:
  *-------------------------------------------------------------------------
  */
 static hid_t
-size1_helper(hid_t file, const char *filename, hid_t fapl_id, int test_file_closing)
+size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_closing)
 {
     dtype1_struct wdata;
     dtype1_struct rdata;
-    hid_t       dtype1_id = -1;
-    hid_t       space_id = -1;
-    hid_t       dset_id = -1;
+    hid_t       dtype1_id = H5I_INVALID_HID;
+    hid_t       space_id = H5I_INVALID_HID;
+    hid_t       dset_id = H5I_INVALID_HID;
     hsize_t     dim1[1];
     int         x;
 
@@ -626,12 +617,12 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, int test_file_clos
     HDmemset(&rdata, 0, sizeof(rdata));          \
     if (0 > H5Dread((dset_id), (dtype_id), H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata)) { \
         H5_FAILED(); AT();                       \
-        printf("Can't read data\n");             \
+        HDprintf("Can't read data\n");             \
         goto error;                              \
     }                                            \
     if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || HDstrcmp(rdata.str, wdata.str)) { \
         H5_FAILED(); AT();                       \
-        printf("incorrect read data\n");         \
+        HDprintf("incorrect read data\n");         \
         goto error;                              \
     }                                            \
 } /* TSOHM_S1H_VERIFY_DATA() definition */
@@ -640,7 +631,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, int test_file_clos
      * local disks.  Don't close and reopen if express testing is enabled.
      */
     if(GetTestExpress() > 1)
-      test_file_closing = 0;
+      test_file_closing = FALSE;
 
     /* Intialize wdata */
     HDmemset(&wdata, 0, sizeof(wdata));
@@ -658,17 +649,18 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, int test_file_clos
     /* Intialize rdata */
     HDmemset(&rdata, 0, sizeof(rdata));
 
-    if((dtype1_id = make_dtype_1()) < 0) TEST_ERROR
+    dtype1_id = make_dtype_1();
+    if(dtype1_id < 0) TEST_ERROR
 
-    /* Create the dataspace and dataset */
     dim1[0] = 1;
-    if((space_id = H5Screate_simple(1, dim1, NULL)) < 0) TEST_ERROR
+    space_id = H5Screate_simple(1, dim1, NULL);
+    if(space_id < 0) TEST_ERROR
 
-    if((dset_id = H5Dcreate2(file, DSETNAME[0], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    dset_id = H5Dcreate2(file, DSETNAME[0], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if(dset_id < 0) FAIL_STACK_ERROR
 
     /* Test writing and reading */
     if(H5Dwrite(dset_id, dtype1_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0) FAIL_STACK_ERROR
-
     TSOHM_S1H_VERIFY_DATA(dset_id, dtype1_id)
     if(H5Dclose(dset_id) < 0) FAIL_STACK_ERROR
 
@@ -702,7 +694,8 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, int test_file_clos
      * this increases the amount of space saved by sharing the datatype message
      */
     for(x = 0; x < SOHM_HELPER_NUM_EX_DSETS; x++) {
-        if((dset_id = H5Dcreate2(file, EXTRA_DSETNAME[x], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+        dset_id = H5Dcreate2(file, EXTRA_DSETNAME[x], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        if(dset_id < 0) TEST_ERROR
         if(H5Dclose(dset_id) < 0) TEST_ERROR
 
         if(test_file_closing)
@@ -721,6 +714,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, int test_file_clos
 
     if(H5Dclose(dset_id) < 0) TEST_ERROR
     if(H5Tclose(dtype1_id) < 0) TEST_ERROR
+
     return file;
 
  error:
@@ -730,7 +724,8 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, int test_file_clos
         H5Dclose(dset_id);
         H5Fclose(file);
     } H5E_END_TRY
-    return -1;
+
+    return H5I_INVALID_HID;
 #undef TSOHM_S1H_VERIFY_DATA /* macro is exclusive to this function */
 } /* size1_helper */
 
@@ -747,25 +742,30 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, int test_file_clos
  *----------------------------------------------------------------------------
  */
 static h5_stat_size_t
-getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, unsigned open_close, H5O_info_t *oinfo)
+getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id,
+    hbool_t test_file_closing, H5O_info_t *oinfo)
 {
-    hid_t file = -1;
+    hid_t fid = H5I_INVALID_HID;
     herr_t ret;
 
-    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, fapl_id);
-    CHECK_I(file, "H5Fcreate");
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
-    file = size1_helper(file, FILENAME, fapl_id, open_close);
-    CHECK_I(file, "size1_helper");
+    /* If test_file_closing is TRUE, you will get back a different ID,
+     * which will need to be closed. The helper will close your passed-in
+     * ID.
+     */
+    fid = size1_helper(fid, filename, fapl_id, test_file_closing);
+    CHECK(fid, H5I_INVALID_HID, "size1_helper");
 
-    ret = H5Oget_info_by_name2(file, DSETNAME[0], oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK_I(ret, "H5Oget_info_by_name");
+    ret = H5Oget_info_by_name2(fid, DSETNAME[0], oinfo, H5O_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
 
-    ret = H5Fclose(file);
-    CHECK_I(ret, "H5Fclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
 
-    return h5_get_file_size(FILENAME, fapl_id);
-} /* getsize_testsize1 */
+    return h5_get_file_size(filename, fapl_id);
+} /* getsize_testsize1() */
 
 
 /*-------------------------------------------------------------------------
@@ -787,13 +787,14 @@ test_sohm_size1(void)
 
     unsigned       use_shared = 0;
     unsigned       use_btree = 0;
-    unsigned       open_close = 0;
     h5_stat_size_t file_sizes[9];
     unsigned       size_index = 0;
     hsize_t        oh_sizes[3];
     unsigned       oh_size_index = 0;
 
+#if 0 /* TBD: lying comment or bug. See Jira HDFFV-10646 */
     hsize_t        norm_oh_size;
+#endif /* Jira HDFFV-10646 */
     hsize_t        sohm_oh_size;
     hsize_t        sohm_btree_oh_size;
     h5_stat_size_t norm_empty_filesize;
@@ -819,7 +820,6 @@ test_sohm_size1(void)
     /* Create a FAPL with "semi" close degree, to detect dangling IDs */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     CHECK_I(fapl_id, "H5Pcreate");
-
     ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI);
     CHECK_I(ret, "H5Pset_fclose_degree");
 
@@ -829,6 +829,7 @@ test_sohm_size1(void)
 
     for (use_shared = 0; use_shared < 2; use_shared++) {
         for (use_btree = 0; use_btree < 2; use_btree++) {
+            hbool_t test_open_close;
 
             /* cannot use btree indexing without shared messages; skip case */
             if (use_btree && !use_shared)
@@ -864,8 +865,10 @@ test_sohm_size1(void)
             file_sizes[size_index++] = h5_get_file_size(FILENAME, fapl_id);
 
             /* size of populated file, with different populating behaviors */
-            for (open_close = 0; open_close < 2; open_close++)
-                file_sizes[size_index++] = getsize_testsize1(FILENAME, fcpl_id, fapl_id, open_close, &oinfo);
+            test_open_close = TRUE;
+            file_sizes[size_index++] = getsize_testsize1(FILENAME, fcpl_id, fapl_id, test_open_close, &oinfo);
+            test_open_close = FALSE;
+            file_sizes[size_index++] = getsize_testsize1(FILENAME, fcpl_id, fapl_id, test_open_close, &oinfo);
             oh_sizes[oh_size_index++] = oinfo.hdr.space.total;
 
             ret = H5Pclose(fcpl_id);
@@ -890,7 +893,9 @@ test_sohm_size1(void)
     norm_empty_filesize = file_sizes[0];
     norm_final_filesize = file_sizes[1];
     norm_final_filesize2 = file_sizes[2];
+#if 0 /* TBD: lying comment or bug. See Jira HDFFV-10646 */
     norm_oh_size = oh_sizes[0];
+#endif /* Jira HDFFV-10646 */
 
     sohm_empty_filesize = file_sizes[3];
     sohm_final_filesize = file_sizes[4];
@@ -928,16 +933,16 @@ test_sohm_size1(void)
         VERIFY(sohm_btree_empty_filesize, 1, "h5_get_file_size");
 
     /* When full, the sohm btree file should be smaller than the normal file.
-     * The sohm list file should be at least as small, since it doesn't need the
-     * overhead of a B-tree.
+     * The sohm list file should be at least as small, since it doesn't need
+     * the overhead of a B-tree.
      */
     if(sohm_btree_final_filesize >= norm_final_filesize)
         VERIFY(sohm_btree_final_filesize, 1, "h5_get_file_size");
     if(sohm_final_filesize > sohm_btree_final_filesize)
         VERIFY(sohm_final_filesize, 1, "h5_get_file_size");
 
-    /* Comparative sizes shouldn't change even if we open and close the file */
-
+    /* Comparative sizes shouldn't change even if we open and close the file
+     */
     if(sohm_btree_final_filesize2 >= norm_final_filesize2)
         VERIFY(sohm_btree_final_filesize2, 1, "h5_get_file_size");
     if(sohm_final_filesize2 > sohm_btree_final_filesize2)
@@ -946,7 +951,7 @@ test_sohm_size1(void)
 } /* test_sohm_size1 */
 
 
-/*-------------------------------------------------------------------------
+/*---------------------------------------------------------------------------
  * Function:    test_sohm_size_consistency_open_create
  *
  * Purpose:     Tests that header size is different depending on file open
@@ -957,8 +962,9 @@ test_sohm_size1(void)
  * Programmer:  Jacob Smith
  *              2018 November 1
  *
- *-------------------------------------------------------------------------
+ *---------------------------------------------------------------------------
  */
+#if 0 /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
 static void
 test_sohm_size_consistency_open_create(void)
 {
@@ -976,7 +982,8 @@ test_sohm_size_consistency_open_create(void)
     unsigned    btree_min = 10;
     herr_t      ret;
 
-    MESSAGE(5, ("Testing that header size is consistent between H5Fopen and H5Fcreate\n"));
+    MESSAGE(5, \
+    ("Testing that header size is consistent between H5Fopen and H5Fcreate\n"));
 
     /* Create a FAPL with "semi" close degree, to detect dangling IDs */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1013,11 +1020,11 @@ test_sohm_size_consistency_open_create(void)
          * Add messages to previously-created file */
         file = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_id);
         CHECK_I(file, "H5Fopen");
-        file = size1_helper(file, FILENAME, fapl_id, 0);
+        file = size1_helper(file, FILENAME, fapl_id, FALSE);
         CHECK_I(file, "size1_helper");
 
         /* Get the size of a dataset object header */
-	ret = H5Oget_info_by_name2(file, DSETNAME[0], &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
+        ret = H5Oget_info_by_name2(file, DSETNAME[0], &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
         CHECK_I(ret, "H5Oget_info_by_name");
         oh_size_open = oinfo.hdr.space.total;
 
@@ -1028,7 +1035,7 @@ test_sohm_size_consistency_open_create(void)
          * Add messages to a newly-created file */
         file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, fapl_id);
         CHECK_I(file, "H5Fcreate");
-        file = size1_helper(file, FILENAME, fapl_id, 0);
+        file = size1_helper(file, FILENAME, fapl_id, FALSE);
         CHECK_I(file, "size1_helper");
 
         /* Get the size of a dataset object header */
@@ -1048,6 +1055,7 @@ test_sohm_size_consistency_open_create(void)
     ret = H5Pclose(fapl_id);
     CHECK_I(ret, "H5Pclose");
 } /* test_sohm_size_consistency_open_create */
+#endif /* Jira HDFFV-10645 */
 
 
 /*-------------------------------------------------------------------------
@@ -1131,7 +1139,7 @@ sohm_attr_helper(hid_t fcpl_id)
         ret = H5Gclose(group_id);
         CHECK_I(ret, "H5Gclose");
         ret = H5Tclose(type_id);
-        CHECK_I(ret, "H5Tclose")
+        CHECK_I(ret, "H5Tclose");
 
         /* Flush the file to force data to be written */
         ret = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
@@ -1178,7 +1186,8 @@ sohm_attr_helper(hid_t fcpl_id)
 static void
 test_sohm_attrs(void)
 {
-    hid_t fcpl_id;
+    hid_t bad_fid = H5I_INVALID_HID;
+    hid_t fcpl_id = H5I_INVALID_HID;
     unsigned i = 0;
 #define TSOHM_TSA_NFLAGS_1 7
     unsigned flags1[TSOHM_TSA_NFLAGS_1] = {
@@ -1238,7 +1247,8 @@ test_sohm_attrs(void)
 
     MESSAGE(5, ("Testing that shared messages work with attributes\n"));
 
-    /* No shared messages */
+    /* No shared messages
+     */
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     CHECK_I(fcpl_id, "H5Pcreate");
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 0);
@@ -1295,8 +1305,8 @@ test_sohm_attrs(void)
         ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_SHMESG_ATTR_FLAG, 2);
         CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
-        ret = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
-        VERIFY(ret, -1, "H5Fcreate");
+        bad_fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
+        VERIFY(bad_fid, H5I_INVALID_HID, "H5Fcreate");
 
         ret = H5Pclose(fcpl_id);
         CHECK_I(ret, "H5Pclose");
@@ -1327,7 +1337,6 @@ test_sohm_attrs(void)
 #undef TSOHM_TSA_NFLAGS_3
 
 } /* test_sohm_attrs */
-
 
 
 /*-------------------------------------------------------------------------
@@ -1386,7 +1395,7 @@ size2_verify_plist1(hid_t plist)
     ret = H5Pget_fill_value(plist, dtype1_id, &fill1);
     CHECK_I(ret, "H5Pget_fill_value");
 
-    ret = memcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
+    ret = HDmemcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
     VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype1_id);
@@ -1485,15 +1494,15 @@ size2_verify_plist2(hid_t plist)
 static void
 size2_dump_struct(const char *name, size2_helper_struct *sizes)
 {
-  puts(name);
-  printf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
-  printf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset, (unsigned long long)(sizes->first_dset - sizes->empty_size));
-  printf("second dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->second_dset, (unsigned long long)(sizes->second_dset - sizes->first_dset));
-  printf("       dsets 1: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets1, (unsigned long long)(sizes->dsets1 - sizes->second_dset));
-  printf("       dsets 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets2, (unsigned long long)(sizes->dsets2 - sizes->dsets1));
-  printf("   interleaved: %llu \tdelta: %llu\n", (unsigned long long)sizes->interleaved, (unsigned long long)(sizes->interleaved - sizes->dsets2));
-  printf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1, (unsigned long long)(sizes->attrs1 - sizes->interleaved));
-  printf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2, (unsigned long long)(sizes->attrs2 - sizes->attrs1));
+  HDputs(name);
+  HDprintf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
+  HDprintf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset, (unsigned long long)(sizes->first_dset - sizes->empty_size));
+  HDprintf("second dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->second_dset, (unsigned long long)(sizes->second_dset - sizes->first_dset));
+  HDprintf("       dsets 1: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets1, (unsigned long long)(sizes->dsets1 - sizes->second_dset));
+  HDprintf("       dsets 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets2, (unsigned long long)(sizes->dsets2 - sizes->dsets1));
+  HDprintf("   interleaved: %llu \tdelta: %llu\n", (unsigned long long)sizes->interleaved, (unsigned long long)(sizes->interleaved - sizes->dsets2));
+  HDprintf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1, (unsigned long long)(sizes->attrs1 - sizes->interleaved));
+  HDprintf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2, (unsigned long long)(sizes->attrs2 - sizes->attrs1));
 } /* size2_dump_struct */
 #endif /* NOT_NOW */
 
@@ -1715,7 +1724,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
             group_id = H5Gopen2(file_id, "group", H5P_DEFAULT);
             CHECK_I(group_id, "H5Gopen2");
         }
-    } /* for each dataset */
+    }
 
     /* Close file and get its size now */
     ret = H5Gclose(group_id);
@@ -1732,7 +1741,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     CHECK_I(group_id, "H5Gcreate2");
 
     /* Create NUM_DATASETS datasets in the new group */
-    for(x=0; x<NUM_DATASETS; x+=2) {
+    for(x=0; x<NUM_DATASETS; x+=2)
+    {
         dset_id = H5Dcreate2(group_id, DSETNAME[x], dtype1_id, dspace1_id, H5P_DEFAULT, dcpl1_id, H5P_DEFAULT);
         CHECK_I(dset_id, "H5Dcreate2");
 
@@ -1768,7 +1778,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
             group_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
             CHECK_I(group_id, "H5Gopen2");
         }
-    } /* for each even dataset */
+    }
 
     /* Close file and get its size now */
     ret = H5Gclose(group_id);
@@ -1810,7 +1820,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
             group_id = H5Gopen2(file_id, "group", H5P_DEFAULT);
             CHECK_I(group_id, "H5Gopen2");
         }
-    } /* for each attribute */
+    }
 
     /* Close file and get its size now */
     ret = H5Gclose(group_id);
@@ -1826,7 +1836,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     group_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
     CHECK_I(group_id, "H5Gopen2");
 
-    for(x=0; x<NUM_ATTRIBUTES; ++x) {
+    for(x=0; x<NUM_ATTRIBUTES; ++x)
+    {
         /* Create the same name and value for each attribute as before */
         attr_string1[0] = attr_name[0] = (char)((x / 10) + '0');
         attr_string1[1] = attr_name[1] = (char)((x % 10) + '0');
@@ -1849,8 +1860,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
             group_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
             CHECK_I(group_id, "H5Gopen2");
         }
-    } /* for each attribute */
-
+    }
     /* Close file and get its size now */
     ret = H5Gclose(group_id);
     CHECK_I(ret, "H5Gclose");
@@ -2068,7 +2078,7 @@ size2_verify(void)
         CHECK_I(attr1_id, "H5Aclose");
         ret = H5Aclose(attr2_id);
         CHECK_I(attr2_id, "H5Aclose");
-    } /* for each attribute */
+    }
 
     /* Close everything */
     ret = H5Tclose(attr_type_id);
@@ -2697,7 +2707,7 @@ test_sohm_size2(int close_reopen)
         VERIFY(0, 1, "h5_get_file_size");
     if((h5_stat_size_t)((float)share_tiny_index.attrs2 * OVERHEAD_ALLOWED) < type_space_index.attrs2)
         VERIFY(0, 1, "h5_get_file_size");
-} /* end test_sohm_size2() */ 
+} /* test_sohm_size2 */
 
 
 /*-------------------------------------------------------------------------
@@ -2716,21 +2726,19 @@ test_sohm_size2(int close_reopen)
 static void
 delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id, int x)
 {
-    hid_t dset_id = -1;
-    hid_t attr_id = -1;
-    char wdata;
+    hid_t  dset_id = -1;
+    hid_t  attr_id = -1;
+    char   wdata;
     herr_t ret;
 
     dset_id = H5Dcreate2(file_id, DSETNAME[x], H5T_NATIVE_CHAR, dspace_id[x], H5P_DEFAULT, dcpl_id[x], H5P_DEFAULT);
     CHECK_I(dset_id, "H5Dcreate2");
-
     wdata = (char)(x + 'a');
     ret = H5Dwrite(dset_id, H5T_NATIVE_CHAR, dspace_id[x], dspace_id[x], H5P_DEFAULT, &wdata);
     CHECK_I(ret, "H5Dwrite");
 
     attr_id = H5Acreate2(dset_id, "attr_name", H5T_NATIVE_CHAR, dspace_id[x], H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(attr_id, "H5Acreate2");
-
     ret = H5Awrite(attr_id, H5T_NATIVE_CHAR, &wdata);
     CHECK_I(ret, "H5Awrite");
 
@@ -2764,7 +2772,6 @@ delete_helper_read(hid_t file_id, hid_t *dspace_id, int x)
 
     dset_id = H5Dopen2(file_id, DSETNAME[x], H5P_DEFAULT);
     CHECK_I(dset_id, "H5Dopen2");
-
     rdata = '\0';
     ret = H5Dread(dset_id, H5T_NATIVE_CHAR, dspace_id[x], dspace_id[x], H5P_DEFAULT, &rdata);
     CHECK_I(ret, "H5Dread");
@@ -2772,13 +2779,11 @@ delete_helper_read(hid_t file_id, hid_t *dspace_id, int x)
 
     attr_id = H5Aopen(dset_id, "attr_name", H5P_DEFAULT);
     CHECK_I(attr_id, "H5Aopen");
-
     rdata = '\0';
     ret = H5Aread(attr_id, H5T_NATIVE_CHAR, &rdata);
     CHECK_I(ret, "H5Dread");
     VERIFY(rdata, (x + 'a'), "H5Dread");
 
-    /* Cleanup */
     ret = H5Aclose(attr_id);
     CHECK_I(ret, "H5Aclose");
     ret = H5Dclose(dset_id);
@@ -3019,7 +3024,7 @@ test_sohm_delete(void)
         ret = H5Pclose(dcpl_id[x]);
         CHECK_I(ret, "H5Pclose");
     } /* end for */
-} /* end test_sohm_delete() */
+} /* test_sohm_delete */
 
 
 /*-------------------------------------------------------------------------
@@ -3348,7 +3353,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     hsize_t out_dims[2];
     hsize_t out_maxdims[2];
     int x;
-    int old_nerrs;              /* Number of errors when entering this routine */
+    int old_nerrs;           /* Number of errors when entering this routine */
     herr_t ret;
 
     hsize_t *space_dims[3];
@@ -3454,28 +3459,25 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     CHECK_I(orig_space_id, "H5Screate_simple");
     dset1_id = H5Dcreate2(file_id, "dataset", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     CHECK_I(dset1_id, "H5Dcreate2");
-
     if(close_reopen)
         TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(1);
 
     /* Create another dataset starting with the same dataspace */
     dset2_id = H5Dcreate2(file_id, "dataset2", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     CHECK_I(dset2_id, "H5Dcreate2");
-
-    if(close_reopen)
+    if (close_reopen)
         TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(2);
 
     /* Create a third dataset with the same dataspace */
     dset3_id = H5Dcreate2(file_id, "dataset3", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     CHECK_I(dset3_id, "H5Dcreate2");
-
-    if(close_reopen)
+    if (close_reopen)
         TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
     /* Extend the first dataset */
     ret = H5Dset_extent(dset1_id, dims2);
     CHECK_I(ret, "H5Dset_extent");
-    if(close_reopen)
+    if (close_reopen)
         TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
     space_dims[0] = dims2;
@@ -3495,7 +3497,6 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     /* Extend the third dataset */
     ret = H5Dset_extent(dset3_id, dims2);
     CHECK_I(ret, "H5Dset_extent");
-
     if(close_reopen)
         TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
@@ -3550,13 +3551,13 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
      */
     dset3_id = H5Dcreate2(file_id, "dataset3", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     CHECK_I(dset3_id, "H5Dcreate2");
-    if (close_reopen)
+    if(close_reopen)
         TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
     /* Extend the third dataset */
     ret = H5Dset_extent(dset3_id, dims2);
     CHECK_I(ret, "H5Dset_extent");
-    if (close_reopen)
+    if(close_reopen)
         TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(3);
 
     TSOHM_VDE_VERIFY_SPACES(space_dims);
@@ -3577,7 +3578,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
     ret = H5Pclose(dcpl_id);
     CHECK_I(ret, "H5Pclose");
 
-    /* Complaini if this test generated errors */
+    /* Complain if this test generated errors */
     if(old_nerrs == GetTestNumErrs())
         return(0);
     else
@@ -3790,12 +3791,11 @@ test_sohm_external_dtype(void)
     ret = H5Dwrite(dataset2, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig);
     CHECK_I(ret, "H5Dwrite");
 
+    /* Close references to the first file */
     ret = H5Dclose(dataset2);
     CHECK_I(ret, "H5Dclose");
-
     ret = H5Tclose(dset1_tid);
     CHECK_I(ret, "H5Tclose");
-
     ret = H5Fclose(file1);
     CHECK_I(ret, "H5Fclose");
 
@@ -3809,13 +3809,11 @@ test_sohm_external_dtype(void)
     dtype_class = H5Tget_class(dset2_tid);
     VERIFY(dtype_class, H5T_COMPOUND, "H5Tget_class");
 
+    /* Cleanup */
     ret = H5Tclose(dset2_tid);
     CHECK_I(ret, "H5Tclose");
-
     ret = H5Dclose(dataset2);
     CHECK_I(ret, "H5Dclose");
-
-    /* Cleanup */
     ret = H5Sclose(space);
     CHECK_I(ret, "H5Sclose");
     ret = H5Tclose(s1_tid);
@@ -3838,7 +3836,7 @@ test_sohm(void)
 {
     MESSAGE(5, ("Testing Shared Object Header Messages\n"));
 
-    test_sohm_fcpl();		/* Test SOHMs and file creation plists */
+    test_sohm_fcpl();           /* Test SOHMs and file creation plists */
     test_sohm_fcpl_errors();    /* Bogus H5P* calls for SOHMs */
     test_sohm_size1();          /* Tests the sizes of files with one SOHM */
 #if 0 /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
@@ -3856,17 +3854,17 @@ test_sohm(void)
 
     test_sohm_extend_dset();    /* Test extending shared datasets */
     test_sohm_external_dtype(); /* Test using datatype in another file */
-} /* test_sohm() */
+} /* test_sohm */
 
 
 /*-------------------------------------------------------------------------
- * Function:	cleanup_sohm
+ * Function:    cleanup_sohm
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:     Cleanup temporary test files
  *
- * Return:	none
+ * Return:      none
  *
- * Programmer:	James Laird
+ * Programmer:  James Laird
  *              October 9, 2006
  *
  * Modifications:
@@ -3876,8 +3874,8 @@ test_sohm(void)
 void
 cleanup_sohm(void)
 {
-    remove(FILENAME);
-    remove(FILENAME_SRC);
-    remove(FILENAME_DST);
+    HDremove(FILENAME);
+    HDremove(FILENAME_SRC);
+    HDremove(FILENAME_DST);
 } /* cleanup_sohm */
 

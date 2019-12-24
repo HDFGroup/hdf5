@@ -148,11 +148,11 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Gcreate_1anon
-    (JNIEnv *env, jclass cls, jlong loc_id, jlong gcpl_id, jlong gapl_id)
+    (JNIEnv *env, jclass clss, jlong loc_id, jlong gcpl_id, jlong gapl_id)
 {
     hid_t group_id = H5I_INVALID_HID;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if ((group_id = H5Gcreate_anon((hid_t)loc_id, (hid_t)gcpl_id, (hid_t)gapl_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -198,11 +198,11 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Gget_1create_1plist
-    (JNIEnv *env, jclass cls, jlong loc_id)
+    (JNIEnv *env, jclass clss, jlong loc_id)
 {
     hid_t plist_id = H5I_INVALID_HID;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if ((plist_id = H5Gget_create_plist((hid_t)loc_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -218,12 +218,12 @@ done:
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Gget_1info
-    (JNIEnv *env, jclass cls, jlong loc_id)
+    (JNIEnv *env, jclass clss, jlong loc_id)
 {
     H5G_info_t group_info;
     jobject    obj = NULL;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (H5Gget_info((hid_t)loc_id, &group_info) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -242,14 +242,14 @@ done:
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1name
-    (JNIEnv *env, jclass cls, jlong loc_id, jstring name, jlong lapl_id)
+    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong lapl_id)
 {
     H5G_info_t  group_info;
     const char *grpName = NULL;
     jobject     obj = NULL;
     herr_t      ret_val = FAIL;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (NULL == name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_info_by_name: group name is NULL");
@@ -278,7 +278,7 @@ done:
  */
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1idx
-    (JNIEnv *env, jclass cls, jlong loc_id, jstring name, jint index_type,
+    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jint index_type,
           jint order, jlong n, jlong lapl_id)
 {
     H5_iter_order_t  corder = (H5_iter_order_t)order;
@@ -288,7 +288,7 @@ Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1idx
     jobject          obj = NULL;
     herr_t           ret_val = FAIL;
 
-    UNUSED(cls);
+    UNUSED(clss);
 
     if (NULL == name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_info_by_idx: group name is NULL");

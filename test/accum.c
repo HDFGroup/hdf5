@@ -94,7 +94,7 @@ main(void)
 
 
     /* Test Setup */
-    puts("Testing the metadata accumulator");
+    HDputs("Testing the metadata accumulator");
 
     /* Create a test file */
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -141,14 +141,14 @@ main(void)
 
     if(nerrors)
         goto error;
-    puts("All metadata accumulator tests passed.");
+    HDputs("All metadata accumulator tests passed.");
 
     return 0;
 
 error: 
     if(api_ctx_pushed) H5CX_pop();
 
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     return 1;
 } /* end main() */
 
@@ -1846,11 +1846,11 @@ test_swmr_write_big(hbool_t newest_format)
      * by the environment variable.
      */
     driver = HDgetenv("HDF5_DRIVER");
-    if (!H5FD_supports_swmr_test(driver)) {
+    if(!H5FD_supports_swmr_test(driver)) {
         SKIPPED();
         HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
         return 0;
-    } /* end if */
+    }
 
     /* File access property list */
     if((fapl = h5_fileaccess()) < 0)
@@ -1951,10 +1951,11 @@ test_swmr_write_big(hbool_t newest_format)
     if((pid = HDfork()) < 0) {
         HDperror("fork");
         FAIL_STACK_ERROR;
-    } else if(0 == pid) { /* Child process */
+    }
+    else if(0 == pid) { /* Child process */
         /* Run the reader */
         status = HDexecv(SWMR_READER, new_argv);
-        printf("errno from execv = %s\n", strerror(errno));
+        HDprintf("errno from execv = %s\n", strerror(errno));
         FAIL_STACK_ERROR;
     } /* end if */
 
@@ -1967,12 +1968,13 @@ test_swmr_write_big(hbool_t newest_format)
         /* Flush the accumulator */
         if(accum_reset(rf) < 0)
             FAIL_STACK_ERROR;
-        /* Close the property list */
-        if(H5Pclose(fapl) < 0) 
-            FAIL_STACK_ERROR;
 
         /* Close and remove the file */
         if(H5Fclose(fid) < 0) 
+            FAIL_STACK_ERROR;
+
+        /* Close the property list */
+        if(H5Pclose(fapl) < 0) 
             FAIL_STACK_ERROR;
 
         /* Pop API context */
@@ -1992,11 +1994,11 @@ test_swmr_write_big(hbool_t newest_format)
 
 error:
     /* Closing and remove the file */
-    H5Pclose(fapl);
     H5Fclose(fid);
 
     if(api_ctx_pushed) H5CX_pop();
 
+    H5Pclose(fapl);
     HDremove(SWMR_FILENAME);
 
     /* Release memory */
@@ -2030,18 +2032,19 @@ accum_printf(const H5F_t *f)
 {
     H5F_meta_accum_t * accum = &f->shared->accum;
 
-    printf("\n");
-    printf("Current contents of accumulator:\n");
-    if (accum->alloc_size == 0) {
-        printf("=====================================================\n");
-        printf(" No accumulator allocated.\n");
-        printf("=====================================================\n");
-    } else {
-        printf("=====================================================\n");
-        printf(" accumulator allocated size == %zu\n", accum->alloc_size);
-        printf(" accumulated data size      == %zu\n", accum->size);
+    HDprintf("\n");
+    HDprintf("Current contents of accumulator:\n");
+    if(accum->alloc_size == 0) {
+        HDprintf("=====================================================\n");
+        HDprintf(" No accumulator allocated.\n");
+        HDprintf("=====================================================\n");
+    }
+    else {
+        HDprintf("=====================================================\n");
+        HDprintf(" accumulator allocated size == %zu\n", accum->alloc_size);
+        HDprintf(" accumulated data size      == %zu\n", accum->size);
         HDfprintf(stdout, " accumulator dirty?         == %t\n", accum->dirty);
-        printf("=====================================================\n");
+        HDprintf("=====================================================\n");
         HDfprintf(stdout, " start of accumulated data, loc = %a\n", accum->loc);
         if(accum->dirty) {
             HDfprintf(stdout, " start of dirty region, loc = %a\n", (haddr_t)(accum->loc + accum->dirty_off));
@@ -2049,8 +2052,8 @@ accum_printf(const H5F_t *f)
         } /* end if */
         HDfprintf(stdout, " end of accumulated data,   loc = %a\n", (haddr_t)(accum->loc + accum->size));
         HDfprintf(stdout, " end of accumulator allocation,   loc = %a\n", (haddr_t)(accum->loc + accum->alloc_size));
-        printf("=====================================================\n");
+        HDprintf("=====================================================\n");
     }
-    printf("\n\n");
+    HDprintf("\n\n");
 } /* accum_printf() */
 

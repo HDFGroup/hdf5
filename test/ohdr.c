@@ -21,14 +21,14 @@
  * This file needs to access private datatypes from the H5O package.
  * This file also needs to access the object header testing code.
  */
-#define H5O_FRIEND        /*suppress error about including H5Opkg      */
+#define H5O_FRIEND              /* suppress error about including H5Opkg */
 #define H5O_TESTING
 #include "H5Opkg.h"
 
 /*
  * This file needs to access private datatypes from the H5G package.
  */
-#define H5G_FRIEND        /*suppress error about including H5Gpkg      */
+#define H5G_FRIEND              /* suppress error about including H5Gpkg */
 #include "H5Gpkg.h"
 
 #include "H5CXprivate.h"        /* API Contexts                         */
@@ -1189,17 +1189,17 @@ error:
 static herr_t
 test_ohdr_swmr(hbool_t new_format)
 {
-    hid_t fid = -1;                /* File ID */
-    hid_t fapl = -1;            /* File access property list */
-    hid_t did = -1;                /* Dataset ID */
-    hid_t sid = -1;             /* Dataspace ID */
-    hid_t plist = -1;            /* Dataset creation property list */
-    size_t compact_size = 1024;    /* The size of compact dataset */
-    int *wbuf = NULL;            /* Buffer for writing */
-    hsize_t dims[1];            /* Dimension sizes */
-    size_t u;                    /* Iterator */
-    int n;                      /* Data variable */
-    H5O_info_t obj_info;        /* Information for the object */
+    hid_t fid = -1;                 /* File ID */
+    hid_t fapl = -1;                /* File access property list */
+    hid_t did = -1;                 /* Dataset ID */
+    hid_t sid = -1;                 /* Dataspace ID */
+    hid_t plist = -1;               /* Dataset creation property list */
+    size_t compact_size = 1024;     /* The size of compact dataset */
+    int *wbuf = NULL;               /* Buffer for writing */
+    hsize_t dims[1];                /* Dimension sizes */
+    size_t u;                       /* Iterator */
+    int n;                          /* Data variable */
+    H5O_info_t obj_info;            /* Information for the object */
 
     if(new_format) {
         TESTING("exercise the coding for the re-read of the object header for SWMR access: latest-format");
@@ -1628,46 +1628,6 @@ error:
     return FAIL;
 } /* test_unknown() */
 
-#define STR_EARLIEST "earliest"
-#define STR_V18 "v18"
-#define STR_LATEST "latest"
-static char *
-version_string(H5F_libver_t libver)
-{
-    char *str = NULL;
-
-    str = (char *) HDmalloc(20);
-    if (str == NULL) {
-        HDfprintf(stderr, "Allocation failed\n");
-        HDexit(1);
-    }
-
-    switch(libver) {
-      case H5F_LIBVER_EARLIEST:
-          HDstrcpy(str, STR_EARLIEST);
-          break;
-
-      case H5F_LIBVER_V18:
-          HDstrcpy(str, STR_V18);
-          break;
-
-      case H5F_LIBVER_V110:
-          HDassert(H5F_LIBVER_LATEST == H5F_LIBVER_V110);
-          HDstrcpy(str, STR_LATEST);
-          break;
-
-      case H5F_LIBVER_ERROR:
-      case H5F_LIBVER_NBOUNDS:
-      default:
-          HDsprintf(str, "%ld", (long)libver);
-          break;
-    } /* end switch */
-
-    /* Return the formed version bound string */
-    return str;
-} /* end of version_string */
-
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -1676,12 +1636,8 @@ version_string(H5F_libver_t libver)
  * Return:      Success: 0
  *              Failure: 1
  *
- * Programmer:    Robb Matzke
+ * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
- *
- * Modification:
- *              - Added loop of combinations of low/high library format bounds
- *                (BMR, Feb 2018)
  *
  *-------------------------------------------------------------------------
  */
@@ -1696,7 +1652,6 @@ main(void)
     H5O_loc_t      oh_loc;    /* Object header locations */
     H5F_libver_t low, high;   /* File format bounds */
     time_t time_new, ro;
-    char msg[80];             /* Message for file format version */
     int    i;                 /* Local index variable */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
     herr_t ret;               /* Generic return value */
@@ -1713,8 +1668,9 @@ main(void)
     /* Loop through all the combinations of low/high library format bounds */
     for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
       for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
-        char *low_string = NULL;
-        char *high_string = NULL;
+        char *low_string = NULL;    /* Message for library version low bound */
+        char *high_string = NULL;   /* Message for library version high bound */
+        char msg[80];               /* Message for file format version */
 
         /* Set version bounds before opening the file */
         H5E_BEGIN_TRY {
@@ -1725,13 +1681,11 @@ main(void)
             continue;
 
         /* Display info about testing */
-        low_string = version_string(low);
-        high_string = version_string(high);
-        sprintf(msg, "Using file format version: (%s, %s)", low_string,
+        low_string = h5_get_version_string(low);
+        high_string = h5_get_version_string(high);
+        HDsprintf(msg, "Using file format version: (%s, %s)", low_string,
                 high_string);
         HDputs(msg);
-        HDfree(high_string);
-        HDfree(low_string);
 
         /* test on object continuation block */
         if(test_cont(filename, fapl) < 0)
@@ -1963,7 +1917,7 @@ main(void)
     return 0;
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
         H5Fclose(file);
     } H5E_END_TRY;
