@@ -289,11 +289,9 @@ char *
 h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
     hsize_t elmtno, unsigned ndims, h5tools_context_t *ctx)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED)
     size_t    i = 0;
     hsize_t   curr_pos = elmtno;
 
-    H5TOOLS_PUSH_STACK();
     H5TOOLS_DEBUG("enter");
 
     H5TOOLS_DEBUG("elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
@@ -328,7 +326,6 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
     H5TOOLS_DEBUG("str=%s", str->s);
 
     H5TOOLS_ENDDEBUG("exit");
-    H5TOOLS_POP_STACK();
 
     /* Add prefix and suffix to the index */
     return h5tools_str_fmt(str, (size_t)0, OPT(info->idx_fmt, "%s: "));
@@ -684,7 +681,6 @@ char *
 h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t container,
                    hid_t type, void *vp, h5tools_context_t *ctx)
 {
-    H5TOOLS_ERR_INIT(char*, NULL)
     size_t         nsize, offset, size=0, nelmts, start;
     H5T_sign_t     nsign;
     char          *name = NULL;
@@ -695,8 +691,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     static char    fmt_llong[8], fmt_ullong[8];
     H5T_str_t      pad;
     H5T_class_t    type_class;
+    char          *ret_value = NULL;
 
-    H5TOOLS_PUSH_STACK();
     H5TOOLS_DEBUG("enter");
     /* Build default formats for long long types */
     if(!fmt_llong[0]) {
@@ -1110,10 +1106,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                 if((obj = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                     H5Oget_info2(obj, &oi, H5O_INFO_BASIC);
                                     if(H5Oclose(obj) < 0)
-                                        H5TOOLS_GOTO_ERROR(NULL, "H5Oclose H5R_OBJECT1 failed");
+                                        H5TOOLS_ERROR(NULL, "H5Oclose H5R_OBJECT1 failed");
                                 }
                                 else
-                                    H5TOOLS_GOTO_ERROR(NULL, "H5Ropen_object H5R_OBJECT1 failed");
+                                    H5TOOLS_ERROR(NULL, "H5Ropen_object H5R_OBJECT1 failed");
 
                                 /* Print object type and close object */
                                 switch (obj_type) {
@@ -1339,12 +1335,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     }
 
 done:
-
-CATCH
     ret_value = h5tools_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
 
     H5TOOLS_ENDDEBUG("exit with %s", ret_value);
-    H5TOOLS_POP_STACK();
     return ret_value;
 }
 
@@ -1361,10 +1354,8 @@ void
 h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info,
         hid_t container, H5R_ref_t *ref_vp)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED)
-    ssize_t  buf_size;
+    ssize_t buf_size;
 
-    H5TOOLS_PUSH_STACK();
     H5TOOLS_DEBUG("enter");
 
     h5tools_str_append(str, " \"");
@@ -1407,9 +1398,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info,
     }
     h5tools_str_append(str, "\"");
 
-CATCH
     H5TOOLS_ENDDEBUG("exit");
-    H5TOOLS_POP_STACK();
 }
 
 /*-------------------------------------------------------------------------

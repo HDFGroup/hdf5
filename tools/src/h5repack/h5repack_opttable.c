@@ -52,7 +52,6 @@ void init_packobject(pack_info_t *obj)
 
 static void aux_tblinsert_filter(pack_opttbl_t *table, unsigned int I, filter_info_t filt)
 {
-    H5TOOLS_ERR_INIT(int, 0)
     if (table->objs[I].nfilters < H5_REPACK_MAX_NFILTERS)
         table->objs[I].filter[table->objs[I].nfilters++] = filt;
     else
@@ -100,8 +99,8 @@ static void aux_tblinsert_layout(pack_opttbl_t *table, unsigned int I, pack_info
 static int
 aux_inctable(pack_opttbl_t *table, unsigned n_objs)
 {
-    H5TOOLS_ERR_INIT(int, 0)
     unsigned u;
+    int ret_value = 0;
 
     table->size += n_objs;
     table->objs = (pack_info_t*) HDrealloc(table->objs, table->size * sizeof(pack_info_t));
@@ -127,19 +126,19 @@ aux_inctable(pack_opttbl_t *table, unsigned n_objs)
   *-------------------------------------------------------------------------
  */
 int options_table_init(pack_opttbl_t **tbl) {
-    H5TOOLS_ERR_INIT(int, 0)
     unsigned int i;
     pack_opttbl_t *table;
+    int ret_value = 0;
 
     if (NULL == (table = (pack_opttbl_t *) HDmalloc(sizeof(pack_opttbl_t)))) {
-        H5TOOLS_GOTO_ERROR(-1, "not enough memory for options table");
+        H5TOOLS_GOTO_ERROR((-1), "not enough memory for options table");
     }
 
     table->size = 30;
     table->nelems = 0;
     if (NULL == (table->objs = (pack_info_t*) HDmalloc(table->size * sizeof(pack_info_t)))) {
         HDfree(table);
-        H5TOOLS_GOTO_ERROR(-1, "not enough memory for options table");
+        H5TOOLS_GOTO_ERROR((-1), "not enough memory for options table");
     }
 
     for (i = 0; i < table->size; i++)
@@ -177,10 +176,10 @@ int options_table_free(pack_opttbl_t *table) {
 int
 options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack, pack_opttbl_t *table)
 {
-    H5TOOLS_ERR_INIT(herr_t, 0)
     unsigned i, j, I;
     unsigned added = 0;
     hbool_t found = FALSE;
+    int ret_value = 0;
 
     /* increase the size of the collection by N_OBJS if necessary */
     if (table->nelems + n_objs >= table->size)

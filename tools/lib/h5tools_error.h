@@ -22,7 +22,9 @@
 
 /* tools-HDF5 Error variables */
 H5TOOLS_DLLVAR hid_t H5tools_ERR_STACK_g;
+H5TOOLS_DLLVAR hid_t H5tools_DBG_ERR_STACK_g;
 H5TOOLS_DLLVAR hid_t H5tools_ERR_CLS_g;
+H5TOOLS_DLLVAR hid_t H5tools_DBG_ERR_CLS_g;
 H5TOOLS_DLLVAR hid_t H5E_tools_g;
 H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
 H5TOOLS_DLLVAR hid_t H5E_tools_min_info_id_g;
@@ -50,6 +52,9 @@ do {                                                                            
     /* Create new HDF5 error stack for the tools to use */                                              \
     if ((H5tools_ERR_STACK_g = H5Ecreate_stack()) < 0)                                                  \
         HDfprintf(stderr, "Failed to create HDF5 tools error stack\n");                                 \
+                                                                                                        \
+    /* Create new HDF5 error stack for debugging, if tools debugging is enabled */                      \
+    H5TOOLS_CREATE_DEBUG_STACK();                                                                       \
                                                                                                         \
     /* Register errors from the HDF5 tools as a new error class */                                      \
     if ((H5tools_ERR_CLS_g = H5Eregister_class("H5tools", "HDF5:tools", lib_str)) < 0)                  \
@@ -91,39 +96,13 @@ do {                                                                            
     if (H5Eunregister_class(H5tools_ERR_CLS_g) < 0)                                                  \
         HDfprintf(stderr, "Failed to unregister the HDF5 tools error class\n");                      \
                                                                                                      \
+    /* Close the tools debugging error stack, if it was created */                                   \
+    H5TOOLS_CLOSE_DEBUG_STACK();                                                                     \
+                                                                                                     \
     /* Close the tools error stack */                                                                \
     if (H5Eclose_stack(H5tools_ERR_STACK_g) < 0)                                                     \
         HDfprintf(stderr, "Failed to close HDF5 tools error stack\n");                               \
 } while(0)
-
-/*
- * H5TOOLS_ERR_INIT macro, used to facilitate error reporting. Declaration and assignments of error variables.
- * Use at the beginning of a function using error handling macros.
- */
-#define H5TOOLS_ERR_INIT(ret_typ, ret_init)    \
-    hid_t   pstack_id = H5I_INVALID_HID;       \
-    hid_t   estack_id = H5tools_ERR_STACK_g;   \
-    hbool_t past_catch = FALSE;                \
-    ret_typ ret_value = ret_init;
-
-/*
- * H5TOOLS_PUSH_STACK macro, used to create a new error stack.
- */
-#define H5TOOLS_PUSH_STACK() {                \
-        pstack_id = estack_id;                \
-        estack_id = H5Ecreate_stack();        \
-}
-
-/*
- * H5TOOLS_POP_STACK macro, used to release a new error stack.
- */
-#define H5TOOLS_POP_STACK() {                 \
-        if (H5I_INVALID_HID != pstack_id) {   \
-            H5Eclose_stack(estack_id);        \
-            estack_id = pstack_id;            \
-            pstack_id = H5I_INVALID_HID;      \
-        }                                     \
-}
 
 /*
  * H5TOOLS_PUSH_ERROR macro, used to push an error to an error stack. Not meant to
@@ -176,6 +155,15 @@ do {                               \
 } while(0)
 
 /*
+ * H5TOOLS_GOTO_DONE_NO_RET macro, used to facilitate normal return within a function body.
+ * Control simply branches to the `done' label without setting any return value.
+ */
+#define H5TOOLS_GOTO_DONE_NO_RET() \
+do {                               \
+    goto done;                     \
+} while(0)
+
+/*
  * H5TOOLS_INFO macro, used to facilitate error reporting. The arguments are
  * a description of the error.
  */
@@ -184,29 +172,63 @@ do {                                                                            
     H5TOOLS_PUSH_ERROR(H5tools_ERR_STACK_g, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_info_id_g, __VA_ARGS__); \
 } while(0)
 
-/*
- * H5TOOLS_DEBUG macro, used to facilitate error reporting. The arguments are the
- * minor error number, and a description of the error.
- */
 #ifdef H5_TOOLS_DEBUG
-#define H5TOOLS_DEBUG(...)                                                                                        \
-do {                                                                                                              \
-    H5TOOLS_PUSH_ERROR(H5tools_ERR_STACK_g, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_dbg_id_g, __VA_ARGS__); \
+
+#define H5TOOLS_CREATE_DEBUG_STACK()                                                             \
+do {                                                                                             \
+    /* Create new HDF5 error stack for debugging */                                              \
+    if ((H5tools_DBG_ERR_STACK_g = H5Ecreate_stack()) < 0)                                       \
+        HDfprintf(stderr, "Failed to create HDF5 tools debugging error stack\n");                \
+                                                                                                 \
+    /* Register debugging output from the HDF5 tools as a new error class */                     \
+    if ((H5tools_DBG_ERR_CLS_g = H5Eregister_class("H5tools-debug", "HDF5:tools", lib_str)) < 0) \
+        HDfprintf(stderr, "Failed to register HDF5 tools debugging error class\n");              \
 } while(0)
-#define H5TOOLS_ENDDEBUG(...)                                                                                     \
-do {                                                                                                              \
-    H5TOOLS_PUSH_ERROR(H5tools_ERR_STACK_g, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_dbg_id_g, __VA_ARGS__); \
-    H5Eprint2(H5tools_ERR_STACK_g, stderr);                                                                       \
+
+#define H5TOOLS_CLOSE_DEBUG_STACK()                                                       \
+do {                                                                                      \
+    /* Unregister the HDF5 tools debugging error class */                                 \
+    if (H5Eunregister_class(H5tools_DBG_ERR_CLS_g) < 0)                                   \
+        HDfprintf(stderr, "Failed to unregister the HDF5 tools debugging error class\n"); \
+                                                                                          \
+    /* Close the tools debugging error stack */                                           \
+    if (H5Eclose_stack(H5tools_DBG_ERR_STACK_g) < 0)                                      \
+        HDfprintf(stderr, "Failed to close HDF5 tools debugging error stack\n");          \
 } while(0)
+
+#define H5TOOLS_DEBUG(...)                                                                                                \
+do {                                                                                                                      \
+    H5TOOLS_PUSH_ERROR(H5tools_DBG_ERR_STACK_g, H5tools_DBG_ERR_CLS_g, H5E_tools_g, H5E_tools_min_dbg_id_g, __VA_ARGS__); \
+} while(0)
+
+#define H5TOOLS_ENDDEBUG(...)                                                                                             \
+do {                                                                                                                      \
+    H5TOOLS_PUSH_ERROR(H5tools_DBG_ERR_STACK_g, H5tools_DBG_ERR_CLS_g, H5E_tools_g, H5E_tools_min_dbg_id_g, __VA_ARGS__); \
+    H5Eprint2(H5tools_DBG_ERR_STACK_g, stderr);                                                                           \
+} while(0)
+
 #else
+
+#define H5TOOLS_CREATE_DEBUG_STACK() \
+do {                                 \
+    ;                                \
+} while(0)
+
+#define H5TOOLS_CLOSE_DEBUG_STACK() \
+do {                                \
+    ;                               \
+} while(0)
+
 #define H5TOOLS_DEBUG(...) \
 do {                       \
     ;                      \
 } while(0)
+
 #define H5TOOLS_ENDDEBUG(...) \
 do {                          \
     ;                         \
 } while(0)
+
 #endif
 
 
@@ -236,10 +258,11 @@ do {                          \
  * The return value is assigned to a variable `ret_value' and control branches
  * to the `catch_except' label, if we're not already past it.
  */
-#define H5TOOLS_THROW(fail_value, min_id, ...) {        \
-    H5Epush2(estack_id, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, __VA_ARGS__);     \
-    H5_LEAVE(fail_value)                               \
-}
+#define H5TOOLS_THROW(ret_val, ...)                                                                           \
+do {                                                                                                          \
+    H5TOOLS_PUSH_ERROR(H5tools_ERR_STACK_g, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g, __VA_ARGS__); \
+    H5_LEAVE(ret_val)                                                                                         \
+} while(0)
 
 #endif /* H5TOOLS_ERROR_H_ */
 
