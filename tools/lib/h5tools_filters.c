@@ -43,11 +43,11 @@ int
 h5tools_canreadf(const char* name,     /* object name, serves also as boolean print */
                      hid_t dcpl_id)    /* dataset creation property list */
 {
-    H5TOOLS_ERR_INIT(int, 1)
     int nfilters;       /* number of filters */
     H5Z_filter_t filtn; /* filter identification number */
     int i;              /* index */
     int udfilter_avail; /* index */
+    int ret_value = 1;
 
     /* get information about filters */
     if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
@@ -144,7 +144,7 @@ done:
 H5_ATTR_CONST int
 h5tools_can_encode(H5Z_filter_t filtn)
 {
-    H5TOOLS_ERR_INIT(int, 1)
+    int ret_value = 1;
 
     switch (filtn) {
     /* user defined filter     */
