@@ -59,9 +59,9 @@ guide to the syntax.
 
     -   Cleanup EOA hack in H5FD\_read().
 
-    -   Address file open failures in SWMR tests. These appear to be
-        cases in which the writer finishes before the reader opens --
-        causing the reader to fail as the metadata file no longer
+    -   **David, complete** Address file open failures in SWMR tests. These
+        appear to be cases in which the writer finishes before the reader
+        opens -- causing the reader to fail as the metadata file no longer
         exists. If so, handle this more gracefully.
 
 14. Add support for specifying the VFD that sits under the VFD SWMR
