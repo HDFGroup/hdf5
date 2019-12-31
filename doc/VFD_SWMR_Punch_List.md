@@ -36,6 +36,9 @@ guide to the syntax.
 8.  Implement option to flush raw data as part of EOT -- write
     performance test to characterize the performance hit.
 
+    Currently, the raw data is always flushed at EOT.  We need a
+    knob that turns on and off the raw-data flush.
+
 9.  **Vailin, complete** Move VFD SWMR specific H5F code to its own file -- say
     H5Fvfd\_swmr.c.
 
