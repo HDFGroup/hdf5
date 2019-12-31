@@ -44,4 +44,4 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
 H5tools-DIAG: Error detected in HDF5:tools (version (number)) thread (IDs):
   #000: (file name) line (number) in do_copy_objects(): H5Dcreate2 failed
     major: Failure in tools library
-    minor: error in function
+    minor: function info

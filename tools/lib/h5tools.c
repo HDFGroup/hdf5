@@ -91,14 +91,8 @@ typedef enum {
 void
 h5tools_init(void)
 {
-    char lib_str[256];
-
     if (!h5tools_init_g) {
-        /* register the error class */
-        HDsnprintf(lib_str, sizeof(lib_str), "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-
-        H5tools_ERR_STACK_g = H5Ecreate_stack();
-        H5TOOLS_INIT_ERROR()
+        H5TOOLS_INIT_ERROR();
 
         if (!rawattrstream)
             rawattrstream = stdout;
@@ -175,8 +169,8 @@ h5tools_close(void)
         /* Clean up the reference path table, if it's been used */
         term_ref_path_table();
 
-        H5TOOLS_CLOSE_ERROR()
-        H5Eclose_stack(H5tools_ERR_STACK_g);
+        H5TOOLS_CLOSE_ERROR();
+
         /* Shut down the library */
         H5close();
 
@@ -436,17 +430,17 @@ h5tools_set_error_file(const char *fname, int is_bin)
 static hid_t
 h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED)
-    hid_t       new_fapl = -1; /* Copy of file access property list passed in, or new property list */
+    hid_t  new_fapl = -1; /* Copy of file access property list passed in, or new property list */
+    herr_t ret_value = SUCCEED;
 
     /* Make a copy of the FAPL, for the file open call to use, eventually */
     if (fapl == H5P_DEFAULT) {
         if ((new_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pcreate failed");
     } /* end if */
     else {
         if ((new_fapl = H5Pcopy(fapl)) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcopy failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pcopy failed");
     } /* end else */
 
     /* Determine which driver the user wants to open the file with. Try
@@ -454,7 +448,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
     if (!HDstrcmp(driver, drivernames[SEC2_IDX])) {
         /* SEC2 driver */
         if (H5Pset_fapl_sec2(new_fapl) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_sec2 failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_sec2 failed");
 
         if (drivernum)
             *drivernum = SEC2_IDX;
@@ -466,7 +460,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
          * is the member size.
          */
         if (H5Pset_fapl_family(new_fapl, (hsize_t) 0, H5P_DEFAULT) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_family failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_family failed");
 
         if (drivernum)
             *drivernum = FAMILY_IDX;
@@ -474,7 +468,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
     else if (!HDstrcmp(driver, drivernames[SPLIT_IDX])) {
         /* SPLIT Driver */
         if (H5Pset_fapl_split(new_fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_split failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_split failed");
 
         if (drivernum)
             *drivernum = SPLIT_IDX;
@@ -482,10 +476,10 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
     else if (!HDstrcmp(driver, drivernames[MULTI_IDX])) {
         /* MULTI Driver */
         if (H5Pset_fapl_multi(new_fapl, NULL, NULL, NULL, NULL, TRUE) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_multi failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_multi failed");
 
         if(drivernum)
-        *drivernum = MULTI_IDX;
+            *drivernum = MULTI_IDX;
     }
 #ifdef H5_HAVE_PARALLEL
     else if(!HDstrcmp(driver, drivernames[MPIO_IDX])) {
@@ -498,7 +492,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 
         if(mpi_initialized && !mpi_finalized) {
             if(H5Pset_fapl_mpio(new_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_fapl_mpio failed");
+                H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_mpio failed");
             if(drivernum)
                 *drivernum = MPIO_IDX;
         } /* end if */
@@ -736,7 +730,6 @@ void
 h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
                       h5tools_context_t *ctx, hsize_t elmtno, int secnum)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED)
     h5tools_str_t prefix;
     h5tools_str_t str;          /*temporary for indentation */
     size_t templength = 0;
@@ -748,24 +741,23 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     if (!ctx->need_prefix)
         return;
 
-    H5TOOLS_PUSH_STACK();
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter");
+    H5TOOLS_DEBUG("enter");
 
     HDmemset(&prefix, 0, sizeof(h5tools_str_t));
     HDmemset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "before CR elmtno=%ld, ctx->cur_column=%d, info->idx_fmt=%s, info->line_suf=%s", elmtno, ctx->cur_column, info->idx_fmt, info->line_suf);
+    H5TOOLS_DEBUG("before CR elmtno=%ld, ctx->cur_column=%d, info->idx_fmt=%s, info->line_suf=%s", elmtno, ctx->cur_column, info->idx_fmt, info->line_suf);
     if (ctx->cur_column) {
         PUTSTREAM(OPT(info->line_suf, ""), stream);
         HDputc('\n', stream);
         PUTSTREAM(OPT(info->line_sep, ""), stream);
     }
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "after CR elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
+    H5TOOLS_DEBUG("after CR elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
 
     /* Calculate new prefix */
     h5tools_str_prefix(&prefix, info, elmtno, ctx->ndims, ctx);
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "prefix=%s - str=%s", prefix.s, str.s);
+    H5TOOLS_DEBUG("prefix=%s - str=%s", prefix.s, str.s);
 
     /* Write new prefix to output */
     if (ctx->indent_level > 0)
@@ -793,7 +785,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
         PUTSTREAM(h5tools_str_fmt(&prefix, (size_t)0, info->line_pre), stream);
 
     templength = h5tools_str_len(&prefix);
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "prefix=%s - templength=%d", prefix.s, templength);
+    H5TOOLS_DEBUG("prefix=%s - templength=%d", prefix.s, templength);
 
     for (u = 0; u < indentlevel; u++) {
         /*we already made the indent for the array indices case */
@@ -806,19 +798,18 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
             templength += h5tools_str_len(&str);
         }
     }
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "prefix=%s - templength=%d", prefix.s, templength);
+    H5TOOLS_DEBUG("prefix=%s - templength=%d", prefix.s, templength);
 
     ctx->cur_column = ctx->prev_prefix_len = templength;
     ctx->cur_elmt = 0;
     ctx->need_prefix = 0;
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "prefix=%s - str=%s", prefix.s, str.s);
+    H5TOOLS_DEBUG("prefix=%s - str=%s", prefix.s, str.s);
 
     /* Free string */
     h5tools_str_close(&prefix);
     h5tools_str_close(&str);
 
-    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
-    H5TOOLS_POP_STACK();
+    H5TOOLS_ENDDEBUG("exit");
 }
 
 /*-------------------------------------------------------------------------
@@ -934,7 +925,6 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
         h5tools_context_t *ctx, h5tools_str_t *buffer, hsize_t *curr_pos,
         size_t ncols, hsize_t local_elmt_counter, hsize_t elmt_counter)
 {
-    H5TOOLS_ERR_INIT(hbool_t, TRUE)
     hbool_t  dimension_break = TRUE;
     char    *s = NULL;
     char    *section = NULL; /* a section of output */
@@ -944,12 +934,11 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
     if (stream == NULL)
         return dimension_break;
 
-    H5TOOLS_PUSH_STACK();
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter need_prefix=%d", ctx->need_prefix);
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "elmt_counter=%ld - local_elmt_counter=%ld", elmt_counter, local_elmt_counter);
+    H5TOOLS_DEBUG("enter need_prefix=%d", ctx->need_prefix);
+    H5TOOLS_DEBUG("elmt_counter=%ld - local_elmt_counter=%ld", elmt_counter, local_elmt_counter);
 
     s = h5tools_str_fmt(buffer, (size_t)0, "%s");
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "s=%s", s);
+    H5TOOLS_DEBUG("s=%s", s);
 
     /*
      * If the element would split on multiple lines if printed at our
@@ -976,7 +965,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
              */
             ctx->need_prefix = TRUE;
         }
-        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->need_prefix=%d", ctx->need_prefix);
+        H5TOOLS_DEBUG("ctx->need_prefix=%d", ctx->need_prefix);
     }
 
     /*
@@ -992,9 +981,9 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
             ctx->need_prefix = TRUE;
             dimension_break = FALSE;
         }
-        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->need_prefix=%d", ctx->need_prefix);
+        H5TOOLS_DEBUG("ctx->need_prefix=%d", ctx->need_prefix);
     }
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "elmt_counter=%ld - ctx->size_last_dim=%ld info->line_suf=%s", elmt_counter, ctx->size_last_dim, info->line_suf);
+    H5TOOLS_DEBUG("elmt_counter=%ld - ctx->size_last_dim=%ld info->line_suf=%s", elmt_counter, ctx->size_last_dim, info->line_suf);
 
     /*
      * If the previous element occupied multiple lines and this element
@@ -1008,7 +997,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
             HDstrlen(OPT(info->elmt_suf2, " ")) +
             HDstrlen(OPT(info->line_suf, ""))) > ncols)
         ctx->need_prefix = TRUE;
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->need_prefix=%d", ctx->need_prefix);
+    H5TOOLS_DEBUG("ctx->need_prefix=%d", ctx->need_prefix);
 
     /*
      * If too many elements have already been printed then we need to
@@ -1016,7 +1005,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
      */
     if (info->line_per_line > 0 && ctx->cur_elmt >= info->line_per_line)
         ctx->need_prefix = TRUE;
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->need_prefix=%d", ctx->need_prefix);
+    H5TOOLS_DEBUG("ctx->need_prefix=%d", ctx->need_prefix);
 
     /*
      * Each OPTIONAL_LINE_BREAK embedded in the rendered string can cause
@@ -1045,7 +1034,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
          * Print the prefix or separate the beginning of this element
          * from the previous element.
          */
-        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->need_prefix=%d", ctx->need_prefix);
+        H5TOOLS_DEBUG("ctx->need_prefix=%d", ctx->need_prefix);
         if (ctx->need_prefix) {
             if (secnum)
                 multiline++;
@@ -1055,7 +1044,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
              * this is necessary to print the array indices
              */
             *curr_pos = ctx->sm_pos + local_elmt_counter;
-            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "curr_pos=%ld - ctx->sm_pos=%ld - ctx->ndims=%ld", *curr_pos, ctx->sm_pos, ctx->ndims);
+            H5TOOLS_DEBUG("curr_pos=%ld - ctx->sm_pos=%ld - ctx->ndims=%ld", *curr_pos, ctx->sm_pos, ctx->ndims);
 
             h5tools_simple_prefix(stream, info, ctx, *curr_pos, secnum);
         }
@@ -1063,7 +1052,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
             PUTSTREAM(OPT(info->elmt_suf2, " "), stream);
             ctx->cur_column += HDstrlen(OPT(info->elmt_suf2, " "));
         }
-        H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "section=%s", section);
+        H5TOOLS_DEBUG("section=%s", section);
 
         /* Print the section */
         PUTSTREAM(section, stream);
@@ -1072,8 +1061,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
 
     ctx->prev_multiline = multiline;
 
-    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
-    H5TOOLS_POP_STACK();
+    H5TOOLS_ENDDEBUG("exit");
 
     return dimension_break;
 }
@@ -1108,16 +1096,14 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
         h5tools_context_t *ctx, h5tools_str_t *buffer, hsize_t *curr_pos,
         size_t ncols, hsize_t *ptdata, hsize_t local_elmt_counter, hsize_t elmt_counter)
 {
-    H5TOOLS_ERR_INIT(hbool_t, TRUE)
     hbool_t  dimension_break = TRUE;
     char    *s = NULL;
     char    *section = NULL; /* a section of output */
     int      secnum;         /* section sequence number */
     int      multiline;      /* datum was multiline */
 
-    H5TOOLS_PUSH_STACK();
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter");
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "elmt_counter=%ld - local_elmt_counter=%ld", elmt_counter, local_elmt_counter);
+    H5TOOLS_DEBUG("enter");
+    H5TOOLS_DEBUG("elmt_counter=%ld - local_elmt_counter=%ld", elmt_counter, local_elmt_counter);
 
     s = h5tools_str_fmt(buffer, (size_t)0, "%s");
 
@@ -1210,7 +1196,7 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
              * this is necessary to print the array indices
              */
             *curr_pos = ctx->sm_pos + local_elmt_counter;
-            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "curr_pos=%ld - ctx->sm_pos=%ld", *curr_pos, ctx->sm_pos);
+            H5TOOLS_DEBUG("curr_pos=%ld - ctx->sm_pos=%ld", *curr_pos, ctx->sm_pos);
 
             h5tools_region_simple_prefix(stream, info, ctx, local_elmt_counter, ptdata, secnum);
         }
@@ -1226,8 +1212,7 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
 
     ctx->prev_multiline = multiline;
 
-    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
-    H5TOOLS_POP_STACK();
+    H5TOOLS_ENDDEBUG("exit");
 
     return dimension_break;
 }
@@ -1243,25 +1228,22 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
 void
 init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED)
     int i;
     unsigned j;
 
-    H5TOOLS_PUSH_STACK();
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter");
+    H5TOOLS_DEBUG("enter");
 
     if(ctx->ndims > 0) {
         ctx->acc[ctx->ndims - 1] = 1;
         for (i = ((int)ctx->ndims - 2); i >= 0; i--) {
             ctx->acc[i] = ctx->acc[i + 1] * dims[i + 1];
-            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "ctx->acc[%d]=%ld", i, ctx->acc[i]);
+            H5TOOLS_DEBUG("ctx->acc[%d]=%ld", i, ctx->acc[i]);
         }
         for (j = 0; j < ctx->ndims; j++)
             ctx->pos[j] = 0;
     }
 
-    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
-    H5TOOLS_POP_STACK();
+    H5TOOLS_ENDDEBUG("exit");
 }
 
 /*-------------------------------------------------------------------------
@@ -1276,26 +1258,26 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
 int
 render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t block_nelmts)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED)
-    unsigned char     *mem  = (unsigned char*)_mem;
-    size_t             size;   /* datum size */
-    hsize_t            block_index;
-    H5T_class_t        type_class;
+    unsigned char *mem = (unsigned char*)_mem;
+    size_t         size;   /* datum size */
+    hsize_t        block_index;
+    H5T_class_t    type_class;
+    hbool_t        past_catch = FALSE;
+    int            ret_value = 0;
 
-    H5TOOLS_PUSH_STACK();
-    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "enter");
+    H5TOOLS_DEBUG("enter");
     if((size = H5Tget_size(tid)) == 0)
-        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
+        H5TOOLS_THROW((-1), "H5Tget_size failed");
 
     if((type_class = H5Tget_class(tid)) < 0)
-        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_class failed");
+        H5TOOLS_THROW((-1), "H5Tget_class failed");
 
     switch (type_class) {
         case H5T_INTEGER:
         case H5T_FLOAT:
         case H5T_ENUM:
         case H5T_BITFIELD:
-            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "numbers");
+            H5TOOLS_DEBUG("numbers");
             block_index = block_nelmts * size;
             while(block_index > 0) {
                 size_t bytes_in        = 0;    /* # of bytes to write  */
@@ -1309,7 +1291,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 bytes_wrote = HDfwrite(mem, 1, bytes_in, stream);
 
                 if(bytes_wrote != bytes_in || (0 == bytes_wrote && HDferror(stream)))
-                    H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
+                    H5TOOLS_THROW((-1), "fwrite failed");
 
                 block_index -= (hsize_t)bytes_wrote;
                 mem = mem + bytes_wrote;
@@ -1322,7 +1304,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 char           *s = NULL;
                 unsigned char   tempuchar;
 
-                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5T_STRING");
+                H5TOOLS_DEBUG("H5T_STRING");
                 pad = H5Tget_strpad(tid);
 
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
@@ -1333,7 +1315,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                         if (s != NULL)
                             size = HDstrlen(s);
                         else
-                            H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "NULL string");
+                            H5TOOLS_THROW((-1), "NULL string");
                     }
                     else {
                         s = (char *) mem;
@@ -1341,7 +1323,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     for (i = 0; i < size && (s[i] || pad != H5T_STR_NULLTERM); i++) {
                         HDmemcpy(&tempuchar, &s[i], sizeof(unsigned char));
                         if (1 != HDfwrite(&tempuchar, sizeof(unsigned char), 1, stream))
-                            H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
+                            H5TOOLS_THROW((-1), "fwrite failed");
                     } /* i */
                 } /* for (block_index = 0; block_index < block_nelmts; block_index++) */
             }
@@ -1351,9 +1333,9 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 int      snmembs;
                 unsigned nmembs;
 
-                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5T_COMPOUND");
+                H5TOOLS_DEBUG("H5T_COMPOUND");
                 if((snmembs = H5Tget_nmembers(tid)) < 0)
-                    H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_nmembers of compound failed");
+                    H5TOOLS_THROW((-1), "H5Tget_nmembers of compound failed");
                 nmembs = (unsigned)snmembs;
 
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
@@ -1369,7 +1351,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
 
                         if (render_bin_output(stream, container, memb, mem + offset, 1) < 0) {
                             H5Tclose(memb);
-                            H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output of compound member failed");
+                            H5TOOLS_THROW((-1), "render_bin_output of compound member failed");
                         }
 
                         H5Tclose(memb);
@@ -1383,7 +1365,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 hsize_t dims[H5S_MAX_RANK], temp_nelmts, nelmts;
                 hid_t   memb = -1;
 
-                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5T_ARRAY");
+                H5TOOLS_DEBUG("H5T_ARRAY");
                 /* get the array's base datatype for each element */
                 memb = H5Tget_super(tid);
                 ndims = H5Tget_array_ndims(tid);
@@ -1398,7 +1380,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 }
                 else {
                     H5Tclose(memb);
-                    H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "calculate the number of array elements failed");
+                    H5TOOLS_THROW((-1), "calculate the number of array elements failed");
                 }
 
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
@@ -1406,7 +1388,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     /* dump the array element */
                     if (render_bin_output(stream, container, memb, mem, nelmts) < 0) {
                         H5Tclose(memb);
-                        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed");
+                        H5TOOLS_THROW((-1), "render_bin_output failed");
                     }
                 }
                 H5Tclose(memb);
@@ -1417,7 +1399,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 hsize_t      nelmts;
                 hid_t        memb = -1;
 
-                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5T_VLEN");
+                H5TOOLS_DEBUG("H5T_VLEN");
                /* get the VL sequences's base datatype for each element */
                 memb = H5Tget_super(tid);
 
@@ -1429,7 +1411,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     /* dump the array element */
                     if (render_bin_output(stream, container, memb, ((char *) (((hvl_t *)((void *)mem))->p)), nelmts) < 0) {
                         H5Tclose(memb);
-                        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed");
+                        H5TOOLS_THROW((-1), "render_bin_output failed");
                     }
                 }
                 H5Tclose(memb);
@@ -1437,9 +1419,9 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             break;
         case H5T_REFERENCE:
             {
-                H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "reference class type");
+                H5TOOLS_DEBUG("reference class type");
                 if (H5Tequal(tid, H5T_STD_REF)) {
-                    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5T_STD_REF");
+                    H5TOOLS_DEBUG("H5T_STD_REF");
                     if (region_output) {
                         /* region data */
                         hid_t   region_id = H5I_INVALID_HID;
@@ -1449,8 +1431,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                         for (block_index = 0; block_index < block_nelmts; block_index++) {
                             mem = ((unsigned char*)_mem) + block_index * size;
                             if((region_id = H5Ropen_object((const H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-                                H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g,
-                                        "H5Ropen_object H5T_STD_REF failed");
+                                H5TOOLS_INFO("H5Ropen_object H5T_STD_REF failed");
                             else {
                                 if((region_space = H5Ropen_region((const H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                     if (!h5tools_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
@@ -1461,8 +1442,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                                             render_bin_output_region_blocks(region_space, region_id, stream, container);
                                     }
                                     else {
-                                        H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g,
-                                                "H5Ropen_object H5T_STD_REF NULL");
+                                        H5TOOLS_INFO("H5Ropen_object H5T_STD_REF NULL");
                                     }
                                     H5Sclose(region_space);
                                 } /* end if (region_space >= 0) */
@@ -1473,22 +1453,22 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 }
                 else if (H5Tequal(tid, H5T_STD_REF_DSETREG)) {
                     /* if (size == H5R_DSET_REG_REF_BUF_SIZE) */
-                    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5T_STD_REF_DSETREG");
+                    H5TOOLS_DEBUG("H5T_STD_REF_DSETREG");
                 }
                 else if (H5Tequal(tid, H5T_STD_REF_OBJ)) {
                     /* if (size == H5R_OBJ_REF_BUF_SIZE) */
-                    H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5T_STD_REF_OBJ");
+                    H5TOOLS_DEBUG("H5T_STD_REF_OBJ");
                 }
             }
             break;
 
         case H5T_TIME:
         case H5T_OPAQUE:
-            H5TOOLS_DEBUG(H5E_tools_min_dbg_id_g, "H5T_OPAQUE");
+            H5TOOLS_DEBUG("H5T_OPAQUE");
             for (block_index = 0; block_index < block_nelmts; block_index++) {
                 mem = ((unsigned char*)_mem) + block_index * size;
                 if (size != HDfwrite(mem, sizeof(char), size, stream))
-                    H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
+                    H5TOOLS_THROW((-1), "fwrite failed");
             } /* end for */
             break;
 
@@ -1496,13 +1476,14 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
         case H5T_NCLASSES:
         default:
             /* Badness */
-            H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "bad type class");
+            H5TOOLS_THROW((-1), "bad type class");
             break;
     } /* end switch */
 
+done:
+
 CATCH
-    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
-    H5TOOLS_POP_STACK();
+    H5TOOLS_ENDDEBUG("exit");
     return ret_value;
 }
 
@@ -1521,7 +1502,6 @@ int
 render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
     hid_t container, unsigned ndims, hid_t type_id, hsize_t nblocks, hsize_t *ptdata)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED)
     hsize_t     *dims1 = NULL;
     hsize_t     *start = NULL;
     hsize_t     *count = NULL;
@@ -1531,17 +1511,18 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
     size_t       type_size;
     hid_t        mem_space = -1;
     void        *region_buf = NULL;
+    hbool_t      past_catch = FALSE;
     hsize_t      blkndx;
     hid_t        sid1 = -1;
+    int          ret_value = -1;
 
-    H5TOOLS_PUSH_STACK();
     /* Get the dataspace of the dataset */
     if((sid1 = H5Dget_space(region_id)) < 0)
-        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
+        H5TOOLS_THROW((-1), "H5Dget_space failed");
 
     /* Allocate space for the dimension array */
     if((dims1 = (hsize_t *) HDmalloc(sizeof(hsize_t) * ndims)) == NULL)
-        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "Could not allocate buffer for dims");
+        H5TOOLS_THROW((-1), "Could not allocate buffer for dims");
 
     /* find the dimensions of each data space from the block coordinates */
     numelem = 1;
@@ -1552,21 +1533,21 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
 
     /* Create dataspace for reading buffer */
     if((mem_space = H5Screate_simple((int)ndims, dims1, NULL)) < 0)
-        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Screate_simple failed");
+        H5TOOLS_THROW((-1), "H5Screate_simple failed");
 
     if((type_size = H5Tget_size(type_id)) == 0)
-        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
+        H5TOOLS_THROW((-1), "H5Tget_size failed");
 
     if((region_buf = HDmalloc(type_size * (size_t)numelem)) == NULL)
-        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "Could not allocate region buffer");
+        H5TOOLS_THROW((-1), "Could not allocate region buffer");
 
     /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
     /*          1   2        n      1   2        n                                       */
     if((start = (hsize_t *) HDmalloc(sizeof(hsize_t) * ndims)) == NULL)
-        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "Could not allocate buffer for start");
+        H5TOOLS_THROW((-1), "Could not allocate buffer for start");
 
     if((count = (hsize_t *) HDmalloc(sizeof(hsize_t) * ndims)) == NULL)
-        H5TOOLS_THROW(FAIL, H5E_tools_min_id_g, "Could not allocate buffer for count");
+        H5TOOLS_THROW((-1), "Could not allocate buffer for count");
 
     for (blkndx = 0; blkndx < nblocks; blkndx++) {
         for (jndx = 0; jndx < ndims; jndx++) {
@@ -1575,16 +1556,16 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
         }
 
         if(H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
+            H5TOOLS_GOTO_ERROR((-1), "H5Sselect_hyperslab failed");
 
         if(H5Dread(region_id, type_id, mem_space, sid1, H5P_DEFAULT, region_buf) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
+            H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
 
         if(H5Sget_simple_extent_dims(mem_space, total_size, NULL) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
+            H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_dims failed");
 
         if(render_bin_output(stream, container, type_id, (char*)region_buf, numelem) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "render_bin_output of data region failed");
+            H5TOOLS_GOTO_ERROR((-1), "render_bin_output of data region failed");
         /* Render the region data element end */
 done:
         ;
@@ -1597,12 +1578,11 @@ CATCH
     HDfree(dims1);
 
     if(H5Sclose(mem_space) < 0)
-        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
+        H5TOOLS_ERROR((-1), "H5Sclose failed");
     if(H5Sclose(sid1) < 0)
-        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
+        H5TOOLS_ERROR((-1), "H5Sclose failed");
 
-    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
-    H5TOOLS_POP_STACK();
+    H5TOOLS_ENDDEBUG("exit");
     return ret_value;
 }
 
@@ -1620,7 +1600,6 @@ hbool_t
 render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
         FILE *stream, hid_t container)
 {
-    H5TOOLS_ERR_INIT(hbool_t, TRUE)
     hssize_t     snblocks;
     hsize_t      nblocks;
     hsize_t      alloc_size;
@@ -1629,28 +1608,29 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     unsigned     ndims;
     hid_t        dtype = -1;
     hid_t        type_id = -1;
+    hbool_t      past_catch = FALSE;
+    hbool_t      ret_value = TRUE;
 
-    H5TOOLS_PUSH_STACK();
     if((snblocks = H5Sget_select_hyper_nblocks(region_space)) <= 0)
-        H5TOOLS_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_hyper_nblocks failed");
+        H5TOOLS_THROW(FALSE, "H5Sget_select_hyper_nblocks failed");
     nblocks = (hsize_t)snblocks;
 
     /* Print block information */
     if((sndims = H5Sget_simple_extent_ndims(region_space)) < 0)
-        H5TOOLS_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
+        H5TOOLS_THROW(FALSE, "H5Sget_simple_extent_ndims failed");
     ndims = (unsigned)sndims;
 
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
     if((ptdata = (hsize_t*) HDmalloc((size_t) alloc_size)) == NULL)
-        H5TOOLS_GOTO_ERROR(FALSE, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
+        H5TOOLS_GOTO_ERROR(FALSE, "Could not allocate buffer for ptdata");
 
     if(H5Sget_select_hyper_blocklist(region_space, (hsize_t) 0, nblocks, ptdata) < 0)
-        H5TOOLS_GOTO_ERROR(FALSE, H5E_tools_min_id_g, "H5Rget_select_hyper_blocklist failed");
+        H5TOOLS_GOTO_ERROR(FALSE, "H5Rget_select_hyper_blocklist failed");
 
     if((dtype = H5Dget_type(region_id)) < 0)
-        H5TOOLS_GOTO_ERROR(FALSE, H5E_tools_min_id_g, "H5Dget_type failed");
+        H5TOOLS_GOTO_ERROR(FALSE, "H5Dget_type failed");
     if((type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
-        H5TOOLS_GOTO_ERROR(FALSE, H5E_tools_min_id_g, "H5Tget_native_type failed");
+        H5TOOLS_GOTO_ERROR(FALSE, "H5Tget_native_type failed");
 
     render_bin_output_region_data_blocks(region_id, stream, container, ndims, type_id, nblocks, ptdata);
 
@@ -1658,16 +1638,15 @@ done:
     HDfree(ptdata);
 
     if(type_id > 0 && H5Tclose(type_id) < 0)
-        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
+        H5TOOLS_ERROR(FALSE, "H5Tclose failed");
 
     if(dtype > 0 && H5Tclose(dtype) < 0)
-        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
+        H5TOOLS_ERROR(FALSE, "H5Tclose failed");
 
     H5_LEAVE(TRUE)
 
 CATCH
-    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
-    H5TOOLS_POP_STACK();
+    H5TOOLS_ENDDEBUG("exit");
     return ret_value;
 }
 
@@ -1693,44 +1672,42 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
         FILE *stream, hid_t container,
         unsigned ndims, hid_t type_id, hsize_t npoints)
 {
-    H5TOOLS_ERR_INIT(int, SUCCEED)
     hsize_t *dims1 = NULL;
     size_t   type_size;
     hid_t    mem_space = -1;
     void    *region_buf = NULL;
+    int      ret_value = 0;
 
-    H5TOOLS_PUSH_STACK();
     if((type_size = H5Tget_size(type_id)) == 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
+        H5TOOLS_GOTO_ERROR((-1), "H5Tget_size failed");
 
     if((region_buf = HDmalloc(type_size * (size_t)npoints)) == NULL)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not allocate buffer for region");
+        H5TOOLS_GOTO_ERROR((-1), "Could not allocate buffer for region");
 
     /* Allocate space for the dimension array */
     if((dims1 = (hsize_t *) HDmalloc(sizeof(hsize_t) * ndims)) == NULL)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not allocate buffer for dims");
+        H5TOOLS_GOTO_ERROR((-1), "Could not allocate buffer for dims");
 
     dims1[0] = npoints;
     if((mem_space = H5Screate_simple(1, dims1, NULL)) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Screate_simple failed");
+        H5TOOLS_GOTO_ERROR((-1), "H5Screate_simple failed");
 
     if(H5Dread(region_id, type_id, mem_space, region_space, H5P_DEFAULT, region_buf) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
+        H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
     if(H5Sget_simple_extent_dims(region_space, dims1, NULL) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
+        H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_dims failed");
 
     if(render_bin_output(stream, container, type_id, (char*)region_buf, npoints) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "render_bin_output of data points failed");
+        H5TOOLS_GOTO_ERROR((-1), "render_bin_output of data points failed");
 
 done:
     HDfree(region_buf);
     HDfree(dims1);
 
     if(H5Sclose(mem_space) < 0)
-        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
+        H5TOOLS_ERROR((-1), "H5Sclose failed");
 
-    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
-    H5TOOLS_POP_STACK();
+    H5TOOLS_ENDDEBUG("exit");
     return ret_value;
 }
 
@@ -1748,43 +1725,42 @@ hbool_t
 render_bin_output_region_points(hid_t region_space, hid_t region_id,
         FILE *stream, hid_t container)
 {
-    H5TOOLS_ERR_INIT(hbool_t, TRUE)
     hssize_t snpoints;
     hsize_t  npoints;
     int      sndims;
     unsigned ndims;
     hid_t    dtype = -1;
     hid_t    type_id = -1;
+    hbool_t  past_catch = FALSE;
+    hbool_t  ret_value = TRUE;
 
-    H5TOOLS_PUSH_STACK();
     if((snpoints = H5Sget_select_elem_npoints(region_space)) <= 0)
-        H5TOOLS_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_elem_npoints failed");
+        H5TOOLS_THROW(FALSE, "H5Sget_select_elem_npoints failed");
     npoints = (hsize_t)snpoints;
 
     /* Allocate space for the dimension array */
     if((sndims = H5Sget_simple_extent_ndims(region_space)) < 0)
-        H5TOOLS_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
+        H5TOOLS_THROW(FALSE, "H5Sget_simple_extent_ndims failed");
     ndims = (unsigned)sndims;
 
     if((dtype = H5Dget_type(region_id)) < 0)
-        H5TOOLS_GOTO_ERROR(FALSE, H5E_tools_min_id_g, "H5Dget_type failed");
+        H5TOOLS_GOTO_ERROR(FALSE, "H5Dget_type failed");
 
     if((type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
-        H5TOOLS_GOTO_ERROR(FALSE, H5E_tools_min_id_g, "H5Tget_native_type failed");
+        H5TOOLS_GOTO_ERROR(FALSE, "H5Tget_native_type failed");
 
     render_bin_output_region_data_points(region_space, region_id, stream, container, ndims, type_id, npoints);
 
 done:
     if(type_id > 0 && H5Tclose(type_id) < 0)
-        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
+        H5TOOLS_ERROR(FALSE, "H5Tclose failed");
 
     if(dtype > 0 && H5Tclose(dtype) < 0)
-        H5TOOLS_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
+        H5TOOLS_ERROR(FALSE, "H5Tclose failed");
 
     H5_LEAVE(ret_value)
 CATCH
-    H5TOOLS_ENDDEBUG(H5E_tools_min_dbg_id_g, "exit");
-    H5TOOLS_POP_STACK();
+    H5TOOLS_ENDDEBUG("exit");
     return ret_value;
 }
 

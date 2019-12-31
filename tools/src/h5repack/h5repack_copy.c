@@ -61,7 +61,6 @@ static void print_user_block(const char *filename, hid_t fid);
 int
 copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 {
-    H5TOOLS_ERR_INIT(int, 0)
     hid_t         fidin = -1;
     hid_t         fidout = -1;
     hid_t         fcpl_in = -1;  /* file creation property list ID for input file */
@@ -80,65 +79,66 @@ copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
     hsize_t       in_threshold;           /* Free-space section threshold from input file */
     hsize_t       in_pagesize;            /* File space page size from input file */
     unsigned      crt_order_flags;        /* group creation order flag */
+    int           ret_value = 0;
 
     /*-------------------------------------------------------------------------
      * open input file
      *-------------------------------------------------------------------------
      */
     if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t) 0)) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5tools_fopen failed <%s>: %s", fnamein, H5FOPENERROR);
+        H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fnamein, H5FOPENERROR);
 
     /* get user block size and file space strategy/persist/threshold */
     {
         if ((fcpl_in = H5Fget_create_plist(fidin)) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fget_create_plist failed to retrieve file creation property list");
+            H5TOOLS_GOTO_ERROR((-1), "H5Fget_create_plist failed to retrieve file creation property list");
 
         if (H5Pget_userblock(fcpl_in, &ub_size) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_userblock failed to retrieve userblock size");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pget_userblock failed to retrieve userblock size");
 
         /* If the -S option is not set, get "strategy" from the input file */
         if(H5Pget_file_space_strategy(fcpl_in, &in_strategy, &in_persist, &in_threshold) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_file_space_strategy failed to retrieve file space strategy");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pget_file_space_strategy failed to retrieve file space strategy");
 
         /* If the -G option is not set, get "pagesize" from the input file */
         if(H5Pget_file_space_page_size(fcpl_in, &in_pagesize) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_file_space_page_size failed to retrieve file space threshold");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pget_file_space_page_size failed to retrieve file space threshold");
 
         /* open root group */
         if ((grp_in = H5Gopen2(fidin, "/", H5P_DEFAULT)) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gopen2 failed");
+            H5TOOLS_GOTO_ERROR((-1), "H5Gopen2 failed");
 
         /* get root group creation property list */
         if ((gcpl_in = H5Gget_create_plist(grp_in)) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gget_create_plist failed");
+            H5TOOLS_GOTO_ERROR((-1), "H5Gget_create_plist failed");
 
         /* query and set the group creation properties */
         if (H5Pget_link_creation_order(gcpl_in, &crt_order_flags) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_link_creation_order failed");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pget_link_creation_order failed");
 
         if (H5Pclose(fcpl_in) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed to close property list");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed to close property list");
     }
 
     if(options->latest)
         options->low_bound = options->high_bound = H5F_LIBVER_LATEST;
     /* Create file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed to create file access property list");
+        H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create file access property list");
 
     /* It can be default, latest or other settings by users */
     if(H5Pset_libver_bounds(fapl, options->low_bound, options->high_bound) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_libver_bounds failed to set format version bounds");
+        H5TOOLS_GOTO_ERROR((-1), "H5Pset_libver_bounds failed to set format version bounds");
 
     /* Check if we need to create a non-default file creation property list */
     if (options->low_bound >= H5F_LIBVER_V18 || ub_size > 0) {
         /* Create file creation property list */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed to create a file creation property list");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create a file creation property list");
 
         if (ub_size > 0)
             if (H5Pset_userblock(fcpl, ub_size) < 0)
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_userblock failed to set non-default userblock size");
+                H5TOOLS_GOTO_ERROR((-1), "H5Pset_userblock failed to set non-default userblock size");
 
         if (options->low_bound >= H5F_LIBVER_V18) {
             unsigned i = 0, nindex = 0, mesg_type_flags[5], min_mesg_sizes[5];
@@ -146,7 +146,7 @@ copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
             /* Adjust group creation parameters for root group */
             /* (So that it is created in "dense storage" form) */
             if (H5Pset_link_phase_change(fcpl, (unsigned) options->grp_compact, (unsigned) options->grp_indexed) < 0)
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_link_phase_change failed to adjust group creation parameters for root group");
+                H5TOOLS_GOTO_ERROR((-1), "H5Pset_link_phase_change failed to adjust group creation parameters for root group");
 
             for (i = 0; i < 5; i++) {
                 if (options->msg_size[i] > 0) {
@@ -182,12 +182,12 @@ copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 
             if (nindex > 0) {
                 if (H5Pset_shared_mesg_nindexes(fcpl, nindex) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_shared_mesg_nindexes failed to set the number of shared object header message indexes");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Pset_shared_mesg_nindexes failed to set the number of shared object header message indexes");
 
                 /* msg_size[0]=dataspace, 1=datatype, 2=file value, 3=filter pipleline, 4=attribute */
                 for (i = 0; i < (nindex - 1); i++)
                     if (H5Pset_shared_mesg_index(fcpl, i, mesg_type_flags[i], min_mesg_sizes[i]) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_shared_mesg_index failed to configure the specified shared object header message index");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Pset_shared_mesg_index failed to configure the specified shared object header message index");
             } /* if (nindex>0) */
 
         } /* end if */
@@ -205,11 +205,11 @@ print_user_block(fnamein, fidin);
         if (fcpl == H5P_DEFAULT)
             /* create a file creation property list */
             if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed to create a file creation property list");
+                H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create a file creation property list");
 
         /* set user block size */
         if (H5Pset_userblock(fcpl, options->ublock_size) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_userblock failed to set userblock size");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pset_userblock failed to set userblock size");
     }
 
     /*-------------------------------------------------------------------------
@@ -221,10 +221,10 @@ print_user_block(fnamein, fidin);
         if (fapl == H5P_DEFAULT)
             /* create a file access property list */
             if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed to create file access property list");
+                H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create file access property list");
 
         if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_alignment failed to set alignment");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pset_alignment failed to set alignment");
     }
 
     /*-------------------------------------------------------------------------
@@ -236,10 +236,10 @@ print_user_block(fnamein, fidin);
         if (fapl == H5P_DEFAULT)
             /* create a file access property list */
             if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed to create file access property list");
+                H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create file access property list");
 
         if (H5Pset_meta_block_size(fapl, options->meta_block_size) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_meta_block_size failed to set metadata block size");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pset_meta_block_size failed to set metadata block size");
     }
 
     /*-------------------------------------------------------------------------
@@ -251,10 +251,10 @@ print_user_block(fnamein, fidin);
     if (fcpl == H5P_DEFAULT)
         /* create a file creation property list */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed to create a file creation property list");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed to create a file creation property list");
 
     if(H5Pset_link_creation_order(fcpl, crt_order_flags ) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_link_creation_order failed");
+        H5TOOLS_GOTO_ERROR((-1), "H5Pset_link_creation_order failed");
 
     /* Set file space info to those from input file */
     set_strategy = in_strategy;
@@ -279,7 +279,7 @@ print_user_block(fnamein, fidin);
 
     /* Set file space information as specified */
     if(H5Pset_file_space_strategy(fcpl, set_strategy, set_persist, set_threshold) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_file_space_strategy failed to set file space strategy");
+        H5TOOLS_GOTO_ERROR((-1), "H5Pset_file_space_strategy failed to set file space strategy");
 
     if(options->fs_pagesize == -1) /* A "0" file space page size is specified by user */
         set_pagesize = (hsize_t)0;
@@ -288,7 +288,7 @@ print_user_block(fnamein, fidin);
 
     if(set_pagesize != FS_PAGESIZE_DEF) /* Set non-default file space page size as specified */
         if(H5Pset_file_space_page_size(fcpl, set_pagesize) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_file_space_page_size failed to set file space page size");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pset_file_space_page_size failed to set file space page size");
 
     /*-------------------------------------------------------------------------
      * create the output file
@@ -298,7 +298,7 @@ print_user_block(fnamein, fidin);
         HDprintf("Making new file ...\n");
 
     if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fcreate could not create file <%s>:", fnameout);
+        H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
 
     /*-------------------------------------------------------------------------
      * write a new user block if requested
@@ -306,7 +306,7 @@ print_user_block(fnamein, fidin);
      */
     if (options->ublock_size > 0)
         if (copy_user_block(options->ublock_filename, fnameout, options->ublock_size) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not copy user block. Exiting...");
+            H5TOOLS_GOTO_ERROR((-1), "Could not copy user block. Exiting...");
 
     /*-------------------------------------------------------------------------
      * get list of objects
@@ -321,14 +321,14 @@ print_user_block(fnamein, fidin);
     if (travt) {
         /* get the list of objects in the file */
         if (h5trav_gettable(fidin, travt) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "h5trav_gettable failed");
+            H5TOOLS_GOTO_ERROR((-1), "h5trav_gettable failed");
 
         /*-------------------------------------------------------------------------
         * do the copy
         *-------------------------------------------------------------------------
         */
         if (do_copy_objects(fidin, fidout, travt, options) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "do_copy_objects from <%s> could not copy data to <%s>", fnamein, fnameout);
+            H5TOOLS_GOTO_ERROR((-1), "do_copy_objects from <%s> could not copy data to <%s>", fnamein, fnameout);
 
         /*-------------------------------------------------------------------------
         * do the copy of referenced objects
@@ -336,7 +336,7 @@ print_user_block(fnamein, fidin);
         *-------------------------------------------------------------------------
         */
         if (do_copy_refobjs(fidin, fidout, travt, options) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "do_copy_refobjs from <%s> could not copy data to <%s>", fnamein, fnameout);
+            H5TOOLS_GOTO_ERROR((-1), "do_copy_refobjs from <%s> could not copy data to <%s>", fnamein, fnameout);
     }
 
     /*-------------------------------------------------------------------------
@@ -346,7 +346,7 @@ print_user_block(fnamein, fidin);
 
     if (ub_size > 0 && options->ublock_size == 0)
         if (copy_user_block(fnamein, fnameout, ub_size) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not copy user block. Exiting...");
+            H5TOOLS_GOTO_ERROR((-1), "Could not copy user block. Exiting...");
 
 done:
     H5E_BEGIN_TRY {
@@ -402,7 +402,6 @@ int
 get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
         size_t size_datum, hsize_t dims_hslab[], hsize_t * hslab_nbytes_p)
 {
-    H5TOOLS_ERR_INIT(int, 0)
     int     k;
     H5D_layout_t dset_layout;
     int     rank_chunk;
@@ -413,6 +412,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
     hsize_t chunk_dims_map[H5S_MAX_RANK]; /* mapped chunk dimentions */
     hsize_t hs_dims_map[H5S_MAX_RANK];    /* mapped hyperslab dimentions */
     hsize_t hslab_nbytes;                 /* size of hyperslab in byte */
+    int     ret_value = 0;
 
     /* init to set as size of a data element */
     hslab_nbytes = size_datum;
@@ -425,7 +425,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
         /* get chunk dims */
         rank_chunk = H5Pget_chunk(dcpl_id, rank_dset, dims_chunk);
         if (rank_chunk < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_chunk failed");
+            H5TOOLS_GOTO_ERROR((-1), "H5Pget_chunk failed");
 
         for (k = rank_dset; k > 0; --k)
             size_chunk *= dims_chunk[k - 1];
@@ -487,7 +487,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
                 hslab_nbytes *= dims_hslab[k - 1];
 
                 if (hslab_nbytes <= 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "calculate total size for the hyperslab failed");
+                    H5TOOLS_GOTO_ERROR((-1), "calculate total size for the hyperslab failed");
             }
         }
     }
@@ -511,7 +511,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[],
             hslab_nbytes *= dims_hslab[k - 1];
 
             if (hslab_nbytes <= 0)
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "calculate total size for the hyperslab failed");
+                H5TOOLS_GOTO_ERROR((-1), "calculate total size for the hyperslab failed");
         }
     }
 
@@ -580,7 +580,6 @@ int
 do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
         pack_opt_t *options) /* repack options */
 {
-    H5TOOLS_ERR_INIT(int, 0)
     hid_t grp_in = -1;   /* group ID */
     hid_t grp_out = -1;  /* group ID */
     hid_t dset_in = -1;  /* read dataset ID */
@@ -617,6 +616,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
     htri_t is_named;
     hbool_t limit_maxdims;
     hsize_t size_dset;
+    int ret_value = 0;
 
     /*-------------------------------------------------------------------------
      * copy the supplied object list
@@ -649,22 +649,22 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
                 /* open input group */
                 if ((grp_in = H5Gopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gopen2 failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Gopen2 failed");
 
                 /* get input group creation property list */
                 if ((gcpl_in = H5Gget_create_plist(grp_in)) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gget_create_plist failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Gget_create_plist failed");
 
                 /* query and set the group creation properties */
                 if (H5Pget_link_creation_order(gcpl_in, &crt_order_flags) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_link_creation_order failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Pget_link_creation_order failed");
 
                 /* set up group creation property list */
                 if ((gcpl_out = H5Pcreate(H5P_GROUP_CREATE)) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed");
 
                 if (H5Pset_link_creation_order(gcpl_out, crt_order_flags) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_link_creation_order failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Pset_link_creation_order failed");
 
                 /*-------------------------------------------------------------------------
                  * the root is a special case, we get an ID for the root group
@@ -673,15 +673,15 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                  */
                 if (HDstrcmp(travt->objs[i].name, "/") == 0) {
                     if ((grp_out = H5Gopen2(fidout, "/", H5P_DEFAULT)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gopen2 failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Gopen2 failed");
                 }
                 else {
                     if (options->grp_compact > 0 || options->grp_indexed > 0)
                         if (H5Pset_link_phase_change(gcpl_out, (unsigned) options->grp_compact, (unsigned) options->grp_indexed) < 0)
-                            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_link_phase_change failed");
+                            H5TOOLS_GOTO_ERROR((-1), "H5Pset_link_phase_change failed");
 
                     if ((grp_out = H5Gcreate2(fidout, travt->objs[i].name, H5P_DEFAULT, gcpl_out, H5P_DEFAULT)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gcreate2 failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Gcreate2 failed");
                 }
 
                 /*-------------------------------------------------------------------------
@@ -689,16 +689,16 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                  *-------------------------------------------------------------------------
                  */
                 if (copy_attr(grp_in, grp_out, &named_dt_head, travt, options) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "copy_attr failed");
+                    H5TOOLS_GOTO_ERROR((-1), "copy_attr failed");
 
                 if (H5Pclose(gcpl_out) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
                 if (H5Pclose(gcpl_in) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
                 if (H5Gclose(grp_out) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Gclose failed");
                 if (H5Gclose(grp_in) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Gclose failed");
 
                 break;
 
@@ -740,23 +740,23 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
                 /* early detection of references */
                 if ((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed");
                 if ((ftype_id = H5Dget_type(dset_in)) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_type failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Dget_type failed");
                 if (H5T_REFERENCE == H5Tget_class(ftype_id))
                     is_ref = 1;
 
                 /* Check if the datatype is committed */
                 if ((is_named = H5Tcommitted(ftype_id)) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tcommitted failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Tcommitted failed");
                 if (is_named)
                     if ((wtype_id = copy_named_datatype(ftype_id, fidout, &named_dt_head, travt, options)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "copy_named_datatype failed");
+                        H5TOOLS_GOTO_ERROR((-1), "copy_named_datatype failed");
 
                 if (H5Tclose(ftype_id) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
                 if (H5Dclose(dset_in) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
 
                 /*-------------------------------------------------------------------------
                  * check if we should use H5Ocopy or not
@@ -770,20 +770,20 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                     int j;
 
                     if ((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed");
                     if ((f_space_id = H5Dget_space(dset_in)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
                     if ((ftype_id = H5Dget_type(dset_in)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_type failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dget_type failed");
                     if ((dcpl_in = H5Dget_create_plist(dset_in)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dget_create_plist failed");
                     if ((rank = H5Sget_simple_extent_ndims(f_space_id)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_ndims failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_ndims failed");
                     HDmemset(dims, 0, sizeof dims);
                     if (H5Sget_simple_extent_dims(f_space_id, dims, NULL) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_dims failed");
                     if (H5Dget_space_status(dset_in, &space_status) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_space_status failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dget_space_status failed");
 
                     /* If the input dataset has external storage, it must be contiguous.
                      * Accordingly, there would be no filter or chunk properties to preserve,
@@ -792,10 +792,10 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                      */
                     if (H5Pget_external_count(dcpl_in)) {
                         if ((dcpl_out = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-                            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
+                            H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed");
                     }
                     else if ((dcpl_out = H5Pcopy(dcpl_in)) < 0) {
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcopy failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Pcopy failed");
                     }
 
                     nelmts = 1;
@@ -811,7 +811,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                     }
 
                     if ((msize = H5Tget_size(wtype_id)) == 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Tget_size failed");
 
                     /* size of current dset */
                     size_dset = nelmts * msize;
@@ -848,7 +848,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                             /* apply the filter */
                             if (apply_s)
                                 if (apply_filters(travt->objs[i].name, rank, dims, msize, dcpl_out, options, &has_filter) < 0)
-                                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "apply_filters failed");
+                                    H5TOOLS_GOTO_ERROR((-1), "apply_filters failed");
 
                             /* only if layout change requested for entire file or
                              * individual obj */
@@ -888,13 +888,13 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                              *-------------------------------------------------------------------------
                              */
                             dset_out = H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id, H5P_DEFAULT, dcpl_out, H5P_DEFAULT);
-                            if (dset_out == FAIL) {
-                                H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g, "H5Dcreate2 failed");
+                            if (dset_out == H5I_INVALID_HID) {
+                                H5TOOLS_INFO("H5Dcreate2 failed");
                                 if (options->verbose)
                                     HDprintf(" warning: could not create dataset <%s>. Applying original settings\n", travt->objs[i].name);
 
                                 if ((dset_out = H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id, H5P_DEFAULT, dcpl_in, H5P_DEFAULT)) < 0)
-                                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dcreate2 failed");
+                                    H5TOOLS_GOTO_ERROR((-1), "H5Dcreate2 failed");
                                 apply_f = 0;
                             } /* end if retry dataset create */
 
@@ -911,15 +911,15 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
                                 if (buf != NULL) {
                                     if(H5Dread(dset_in, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-                                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
+                                        H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
                                     if(H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-                                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dwrite failed");
+                                        H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                                     /* Check if we have VL data in the dataset's
                                      * datatype that must be reclaimed */
                                     if (TRUE == H5Tdetect_class(wtype_id, H5T_VLEN))
                                         if (H5Treclaim(wtype_id, f_space_id, H5P_DEFAULT, buf) < 0)
-                                            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Treclaim failed");
+                                            H5TOOLS_GOTO_ERROR((-1), "H5Treclaim failed");
 
                                     if (buf != NULL) { /* TODO: is buf potentially released by H5Dvlen_reclaim()? */
                                         HDfree(buf);
@@ -965,11 +965,11 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
                                     /* get hyperslab dims and size in byte */
                                     if (get_hyperslab(dcpl_tmp, rank, dims, p_type_nbytes, hslab_dims, &hslab_nbytes) < 0)
-                                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "get_hyperslab failed");
+                                        H5TOOLS_GOTO_ERROR((-1), "get_hyperslab failed");
 
                                     hslab_buf = HDmalloc((size_t)hslab_nbytes);
                                     if (hslab_buf == NULL)
-                                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "can't allocate space for hyperslab");
+                                        H5TOOLS_GOTO_ERROR((-1), "can't allocate space for hyperslab");
 
                                     hslab_nelmts = hslab_nbytes / p_type_nbytes;
                                     hslab_space = H5Screate_simple(1, &hslab_nelmts, NULL);
@@ -993,9 +993,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                             }
 
                                             if (H5Sselect_hyperslab(f_space_id, H5S_SELECT_SET, hs_sel_offset, NULL, hs_sel_count, NULL) < 0)
-                                                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
+                                                H5TOOLS_GOTO_ERROR((-1), "H5Sselect_hyperslab failed");
                                             if (H5Sselect_hyperslab(hslab_space, H5S_SELECT_SET, zero, NULL, &hs_select_nelmts, NULL) < 0)
-                                                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sselect_hyperslab failed");
+                                                H5TOOLS_GOTO_ERROR((-1), "H5Sselect_hyperslab failed");
                                         } /* end if rank > 0 */
                                         else {
                                             H5Sselect_all(f_space_id);
@@ -1004,9 +1004,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                         } /* end (else) rank  == 0 */
 
                                         if(H5Dread(dset_in, wtype_id, hslab_space, f_space_id, H5P_DEFAULT, hslab_buf) < 0)
-                                            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dread failed");
+                                            H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
                                         if(H5Dwrite(dset_out, wtype_id,  hslab_space, f_space_id, H5P_DEFAULT, hslab_buf) < 0)
-                                            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dwrite failed");
+                                            H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                                         /* reclaim any VL memory, if necessary */
                                         if (vl_data)
@@ -1066,10 +1066,10 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                              *-------------------------------------------------------------------------
                              */
                             if (copy_attr(dset_in, dset_out, &named_dt_head, travt, options) < 0)
-                                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "copy_attr failed");
+                                H5TOOLS_GOTO_ERROR((-1), "copy_attr failed");
 
                             if (H5Dclose(dset_out) < 0)
-                                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+                                H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
                         } /* end if not a reference */
                     } /* end if h5tools_canreadf (filter availability check) */
 
@@ -1078,17 +1078,17 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                      *-------------------------------------------------------------------------
                      */
                     if (H5Tclose(ftype_id) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
                     if (H5Tclose(wtype_id) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
                     if (H5Pclose(dcpl_in) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
                     if (H5Pclose(dcpl_out) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
                     if (H5Sclose(f_space_id) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
                     if (H5Dclose(dset_in) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
                 }
                 /*-------------------------------------------------------------------------
                  * We do not have request for filter/chunking; use H5Ocopy instead
@@ -1099,11 +1099,11 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
                     /* create property to pass copy options */
                     if ((pid = H5Pcreate(H5P_OBJECT_COPY)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed");
 
                     /* set options for object copy */
                     if (H5Pset_copy_object(pid, H5O_COPY_WITHOUT_ATTR_FLAG) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_copy_object failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Pset_copy_object failed");
 
                     if (H5Ocopy(fidin, /* Source file or group identifier */
                             travt->objs[i].name, /* Name of the source object to be copied */
@@ -1111,25 +1111,25 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                             travt->objs[i].name, /* Name of the destination object  */
                             pid, /* Properties which apply to the copy   */
                             H5P_DEFAULT) < 0) /* Properties which apply to the new hard link */
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Ocopy failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Ocopy failed");
 
                     if (H5Pclose(pid) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
 
                     /*-------------------------------------------------------------------------
                      * Copy attrs manually
                      *-------------------------------------------------------------------------
                      */
                     if ((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed");
                     if ((dset_out = H5Dopen2(fidout, travt->objs[i].name, H5P_DEFAULT)) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen2 failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dopen2 failed");
                     if (copy_attr(dset_in, dset_out, &named_dt_head, travt, options) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "copy_attr failed");
+                        H5TOOLS_GOTO_ERROR((-1), "copy_attr failed");
                     if (H5Dclose(dset_in) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
                     if (H5Dclose(dset_out) < 0)
-                        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose failed");
+                        H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
 
                     if (options->verbose)
                         HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
@@ -1146,27 +1146,27 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                     HDprintf(FORMAT_OBJ, "type", travt->objs[i].name);
 
                 if ((type_in = H5Topen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Topen2 failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Topen2 failed");
 
                 /* Copy the datatype anonymously */
                 if ((type_out = copy_named_datatype(type_in, fidout, &named_dt_head, travt, options)) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "copy_named_datatype failed");
+                    H5TOOLS_GOTO_ERROR((-1), "copy_named_datatype failed");
 
                 /* Link in to group structure */
                 if (H5Lcreate_hard(type_out, ".", fidout, travt->objs[i].name, H5P_DEFAULT, H5P_DEFAULT) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lcreate_hard failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Lcreate_hard failed");
 
                 /*-------------------------------------------------------------------------
                  * copy attrs
                  *-------------------------------------------------------------------------
                  */
                 if (copy_attr(type_in, type_out, &named_dt_head, travt, options) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "copy_attr failed");
+                    H5TOOLS_GOTO_ERROR((-1), "copy_attr failed");
 
                 if (H5Tclose(type_in) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
                 if (H5Tclose(type_out) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
                 type_out = -1; /* named datatypes stack, named_dt_head, manages allocation */
 
                 break;
@@ -1185,14 +1185,14 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                     HDprintf(FORMAT_OBJ, "link", travt->objs[i].name);
 
                 if (H5Lcopy(fidin, travt->objs[i].name, fidout, travt->objs[i].name, H5P_DEFAULT, H5P_DEFAULT) < 0)
-                    H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lcopy failed");
+                    H5TOOLS_GOTO_ERROR((-1), "H5Lcopy failed");
 
                 if (options->verbose)
                     HDprintf(FORMAT_OBJ, "link", travt->objs[i].name);
                 break;
 
             default:
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "Object type not found");
+                H5TOOLS_GOTO_ERROR((-1), "Object type not found");
             } /* switch */
         } /* end for each object to traverse */
     } /* end if there are objects */
@@ -1203,7 +1203,7 @@ done:
      * because of reference counting */
     if (0 == ret_value && named_dt_head != NULL) {
         if (named_datatype_free(&named_dt_head, 0) < 0)
-            H5TOOLS_INFO(H5E_tools_min_id_g, "named_datatype_free failed");
+            H5TOOLS_ERROR((-1), "named_datatype_free failed");
     }
     else
         H5E_BEGIN_TRY {
@@ -1354,16 +1354,16 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr)
 static int
 copy_user_block(const char *infile, const char *outfile, hsize_t size)
 {
-    H5TOOLS_ERR_INIT(int, 0)
     int infid = -1, outfid = -1; /* File descriptors */
+    int ret_value = 0;
 
     /* User block must be any power of 2 equal to 512 or greater (512, 1024, 2048, etc.) */
 
     /* Open files */
     if ((infid = HDopen(infile, O_RDONLY)) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDopen failed input file <%s>", infile);
+        H5TOOLS_GOTO_ERROR((-1), "HDopen failed input file <%s>", infile);
     if ((outfid = HDopen(outfile, O_WRONLY)) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDopen failed output file <%s>", outfile);
+        H5TOOLS_GOTO_ERROR((-1), "HDopen failed output file <%s>", outfile);
 
     /* Copy the userblock from the input file to the output file */
     while (size > 0) {
@@ -1377,7 +1377,7 @@ copy_user_block(const char *infile, const char *outfile, hsize_t size)
         else
             nread = HDread(infid, rbuf, (size_t)size);
         if (nread < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDread failed to read userblock");
+            H5TOOLS_GOTO_ERROR((-1), "HDread failed to read userblock");
 
         /* Write buffer to destination file */
         /* (compensating for interrupted writes & checking for errors, etc.) */
@@ -1390,7 +1390,7 @@ copy_user_block(const char *infile, const char *outfile, hsize_t size)
                 nwritten = HDwrite(outfid, wbuf, (size_t)nbytes);
             } while (-1 == nwritten && EINTR == errno);
             if (-1 == nwritten)  /* error */
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "HDwrite failed");
+                H5TOOLS_GOTO_ERROR((-1), "HDwrite failed");
             HDassert(nwritten > 0);
             HDassert(nwritten <= nbytes);
 
@@ -1426,29 +1426,29 @@ static
 void
 print_user_block(const char *filename, hid_t fid)
 {
-    H5TOOLS_ERR_INIT(int, 0)
     int     fh = -1;   /* file handle */
     hsize_t ub_size;   /* user block size */
     hsize_t size;      /* size read */
     hid_t   fcpl = -1; /* file creation property list ID for HDF5 file */
     int     i;
+    int     ret_value = 0;
 
     /* get user block size */
     if ((fcpl = H5Fget_create_plist(fid)) < 0) {
-        H5TOOLS_GOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Fget_create_plist failed to retrieve file creation property list");
+        H5TOOLS_GOTO_ERROR((-1), "H5Fget_create_plist failed to retrieve file creation property list");
     }
 
     if (H5Pget_userblock(fcpl, &ub_size) < 0) {
-        H5TOOLS_GOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Pget_userblock failed to retrieve userblock size");
+        H5TOOLS_GOTO_ERROR((-1), "H5Pget_userblock failed to retrieve userblock size");
     }
 
     if (H5Pclose(fcpl) < 0) {
-        H5TOOLS_GOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Pclose failed to close property list");
+        H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed to close property list");
     }
 
     /* open file */
     if ((fh = HDopen(filename, O_RDONLY)) < 0) {
-        H5TOOLS_GOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "HDopen failed to open file <%s>", filename);
+        H5TOOLS_GOTO_ERROR((-1), "HDopen failed to open file <%s>", filename);
     }
 
     size = ub_size;
@@ -1472,7 +1472,7 @@ print_user_block(const char *filename, hid_t fid)
         HDprintf("\n");
 
         if (nread < 0) {
-            H5TOOLS_GOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "nread < 0");
+            H5TOOLS_GOTO_ERROR((-1), "nread < 0");
         }
 
         /* update size of userblock left to transfer */
