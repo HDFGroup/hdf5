@@ -4092,8 +4092,6 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                         datactx.indent_level--;
                                         if(H5Dclose(new_obj_id) < 0)
                                             H5TOOLS_INFO("H5Dclose H5R_OBJECT1:H5O_TYPE_DATASET failed");
-                                        if(H5Rdestroy(&ref_buf[i]) < 0)
-                                            H5TOOLS_INFO("H5Rdestroy H5R_OBJECT1:H5O_TYPE_DATASET failed");
                                     }
                                     else
                                         H5TOOLS_INFO("H5Ropen_object H5R_OBJECT1:H5O_TYPE_DATASET failed");
@@ -4119,8 +4117,6 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                             datactx.indent_level--;
                             if(H5Dclose(new_obj_id) < 0)
                                 H5TOOLS_INFO("H5Dclose H5R_DATASET_REGION1 failed");
-                            if(H5Rdestroy(&ref_buf[i]) < 0)
-                                H5TOOLS_INFO("H5Rdestroy H5R_DATASET_REGION1 failed");
                         }
                         else
                             H5TOOLS_INFO("H5Ropen_object H5R_DATASET_REGION1 failed");
@@ -4139,8 +4135,6 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                         datactx.indent_level--;
                                         if(H5Oclose(new_obj_id) < 0)
                                             H5TOOLS_INFO("H5Oclose H5R_OBJECT2 failed");
-                                        if(H5Rdestroy(&ref_buf[i]) < 0)
-                                            H5TOOLS_INFO("H5Rdestroy H5R_OBJECT2 failed");
                                     }
                                     else
                                         H5TOOLS_INFO("H5Ropen_object H5R_OBJECT2 failed");
@@ -4217,8 +4211,6 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                 H5TOOLS_INFO("H5Ropen_region H5R_DATASET_REGION2 failed");
                             if(H5Dclose(new_obj_id) < 0)
                                 H5TOOLS_INFO("H5Dclose H5R_DATASET_REGION2 failed");
-                            if(H5Rdestroy(&ref_buf[i]) < 0)
-                                H5TOOLS_INFO("H5Rdestroy H5R_DATASET_REGION2 failed");
                         }
                         break;
                     case H5R_ATTR:
@@ -4228,8 +4220,6 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                 &buffer, &curr_pos, ncols, i, elmt_counter);
                             if(H5Aclose(new_obj_id) < 0)
                                 H5TOOLS_INFO("H5Aclose H5R_ATTR failed");
-                            if(H5Rdestroy(&ref_buf[i]) < 0)
-                                H5TOOLS_INFO("H5Rdestroy H5R_ATTR failed");
                         }
                         else {
                             H5TOOLS_DEBUG("NULL H5R_ATTR");
@@ -4262,6 +4252,9 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     default:
                         break;
                 } /* end switch */
+
+                if(H5Rdestroy(&ref_buf[i]) < 0)
+                    H5TOOLS_INFO("H5Rdestroy failed");
 
                 H5TOOLS_DEBUG("finished reference loop:%d",i);
             } /* end for(i = 0; i < ndims; i++, datactx->cur_elmt++, elmt_counter++) */
