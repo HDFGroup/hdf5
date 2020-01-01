@@ -276,7 +276,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # gcc 7
     if test $cc_vers_major -ge 7; then
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstringop-overflow=2"
-        H5_CFLAGS="$H5_CFLAGS -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=2 -Wimplicit-fallthrough=5 -Wrestrict"
+        H5_CFLAGS="$H5_CFLAGS -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=1 -Wimplicit-fallthrough=5 -Wrestrict"
     fi
 
     # gcc 8
