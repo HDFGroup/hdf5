@@ -107,7 +107,7 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
     if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL connector must provide free callback for object wrapping contexts when a get callback is provided")
 
-   /* Check VOL initialization property list */
+    /* Check VOL initialization property list */
     if(H5P_DEFAULT == vipl_id)
         vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
     else
@@ -154,7 +154,7 @@ H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
     if (0 == HDstrlen(name))
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "zero-length VOL connector name is disallowed")
 
-   /* Check VOL initialization property list */
+    /* Check VOL initialization property list */
     if(H5P_DEFAULT == vipl_id)
         vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
     else
@@ -199,7 +199,7 @@ H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
     if(value < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "negative VOL connector value is disallowed")
 
-   /* Check VOL initialization property list */
+    /* Check VOL initialization property list */
     if(H5P_DEFAULT == vipl_id)
         vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
     else

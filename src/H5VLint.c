@@ -443,7 +443,7 @@ H5VL__set_def_conn(void)
             else {
                 /* Register the VOL connector */
                 /* (NOTE: No provisions for vipl_id currently) */
-                if((connector_id = H5VL__register_connector_by_name(tok, TRUE, H5P_DEFAULT)) < 0)
+                if((connector_id = H5VL__register_connector_by_name(tok, TRUE, H5P_VOL_INITIALIZE_DEFAULT)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register connector")
             } /* end else */
         } /* end else */
