@@ -343,7 +343,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     void               *grp = NULL;                     /* Structure for new group */
     H5VL_object_t      *vol_obj = NULL;                     /* object token of loc_id */
     H5VL_loc_params_t   loc_params;
-    hid_t	            ret_value = H5I_INVALID_HID;    /* Return value */
+    hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE5("i", "i*siii", loc_id, name, lcpl_id, gcpl_id, gapl_id);
@@ -501,7 +501,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
     void               *grp = NULL;                     /* Group opened */
     H5VL_object_t      *vol_obj = NULL;                 /* object token of loc_id */
     H5VL_loc_params_t   loc_params;
-    hid_t	        ret_value = H5I_INVALID_HID;    /* Return value */
+    hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "i*si", loc_id, name, gapl_id);
@@ -557,7 +557,7 @@ hid_t
 H5Gget_create_plist(hid_t group_id)
 {
     H5VL_object_t  *vol_obj = NULL;
-    hid_t		    ret_value = H5I_INVALID_HID;
+    hid_t           ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", group_id);

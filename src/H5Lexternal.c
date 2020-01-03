@@ -371,6 +371,10 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     /* Set the LCPL for the API context */
     H5CX_set_lcpl(lcpl_id);
 
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
+
     /* Get normalized copy of the link target */
     if(NULL == (norm_obj_name = H5G_normalize(obj_name)))
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize object name")
@@ -388,10 +392,6 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     HDstrncpy((char *)p, file_name, buf_size - 1);      /* Name of file containing external link's object */
     p += file_name_len;
     HDstrncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1));       /* External link's object */
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = link_name;

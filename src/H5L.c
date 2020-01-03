@@ -486,6 +486,10 @@ H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name
     /* Set the LCPL for the API context */
     H5CX_set_lcpl(lcpl_id);
 
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
+
     /* Set location fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = link_name;
@@ -495,10 +499,6 @@ H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name
     /* get the location object */
     if(NULL == (vol_obj = (H5VL_object_t *)H5VL_vol_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Create the link */
     if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, &loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, link_target) < 0)
