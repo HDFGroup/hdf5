@@ -306,7 +306,8 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Commit the datatype */
-    if(NULL == (dt = H5VL_datatype_commit(vol_obj, &loc_params, NULL, type_id, H5P_DEFAULT, tcpl_id, tapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (dt = H5VL_datatype_commit(vol_obj, &loc_params, NULL, type_id, H5P_LINK_CREATE_DEFAULT,
+            tcpl_id, tapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* Setup VOL object */
