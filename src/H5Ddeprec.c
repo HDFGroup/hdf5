@@ -116,8 +116,6 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     void           *dset = NULL;                        /* dset object from VOL connector */
     H5VL_object_t  *vol_obj = NULL;                     /* object of loc_id */
     H5VL_loc_params_t loc_params;
-    hid_t           lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    hid_t           dapl_id = H5P_DEFAULT;              /* DAPL used by library */
     hid_t           ret_value = H5I_INVALID_HID;        /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -129,6 +127,10 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(!*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
 
+    /* Set up collective metadata if appropriate */
+    if(H5CX_set_loc(loc_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set collective metadata read")
+
     if(H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     else
@@ -137,10 +139,6 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
     /* Set the DCPL for the API context */
     H5CX_set_dcpl(dcpl_id);
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if(H5CX_set_apl(&dapl_id, H5P_CLS_DACC, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_SELF;
@@ -151,7 +149,8 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Create the dataset through the VOL */
-    if(NULL == (dset = H5VL_dataset_create(vol_obj, &loc_params, name, lcpl_id, type_id, space_id, dcpl_id, H5P_DATASET_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (dset = H5VL_dataset_create(vol_obj, &loc_params, name, H5P_LINK_CREATE_DEFAULT, type_id, space_id, dcpl_id,
+            H5P_DATASET_ACCESS_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
 
     /* Get an atom for the dataset */
