@@ -50,7 +50,8 @@ const char *FILENAME[] = {
  * To get this data file, define H5O_ENABLE_BOGUS in src/H5Oprivate, rebuild
  * the library and simply compile gen_bogus.c with that HDF5 library and run it.
  */
-#define FILE_BOGUS "tbogus.h5"
+#define FILE_BOGUS      "tbogus.h5"
+#define TESTFILE_LEN    256
 
 /*  */
 #define FILE_OHDR_SWMR "ohdr_swmr.h5"
@@ -473,10 +474,14 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     hid_t fid_bogus = -1;    /* bogus file ID */
     hid_t gid_bogus = -1;    /* bogus group ID */
     hid_t loc_bogus = -1;    /* location: bogus file or group ID */
+    char testfile[TESTFILE_LEN];
+
     /* create a different name for a local copy of the data file to be
        opened with rd/wr file permissions in case build and test are
        done in the source directory. */
-    const char testfile[] = FILE_BOGUS ".copy";
+    HDstrncpy(testfile, FILE_BOGUS, TESTFILE_LEN);
+    testfile[TESTFILE_LEN - 1]='\0';
+    HDstrncat(testfile, ".copy", 5);
 
     /* Make a copy of the data file from svn. */
     if(h5_make_local_copy(FILE_BOGUS, testfile) < 0)
@@ -755,7 +760,7 @@ count_attributes(hid_t dset_id)
 {   
     H5O_info_t info;
     
-    if(H5Oget_info2(dset_id, &info, H5O_INFO_ALL) < 0)
+    if(H5Oget_info2(dset_id, &info, H5O_INFO_NUM_ATTRS) < 0)
         return -1;
     else
         return (int)info.num_attrs; /* should never exceed int bounds */

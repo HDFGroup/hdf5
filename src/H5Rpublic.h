@@ -71,7 +71,7 @@ typedef haddr_t hobj_ref_t;
  * Note! This type can only be used with the "native" HDF5 VOL connector.
  */
 typedef struct {
-    char __data[H5R_DSET_REG_REF_BUF_SIZE];
+    uint8_t __data[H5R_DSET_REG_REF_BUF_SIZE];
 } hdset_reg_ref_t;
 
 /**
@@ -80,7 +80,7 @@ typedef struct {
  * should always be used with the current reference API.
  */
 typedef struct {
-    char __data[H5R_REF_BUF_SIZE];
+    uint8_t __data[H5R_REF_BUF_SIZE];
 } H5R_ref_t;
 
 /********************/

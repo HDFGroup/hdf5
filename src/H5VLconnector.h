@@ -459,14 +459,6 @@ typedef struct H5VL_blob_class_t {
     herr_t (*optional)(void *obj, void *blob_id, H5VL_blob_optional_t opt_type, va_list arguments);
 } H5VL_blob_class_t;
 
-/*
- * VOL connector identifiers.  Values 0 through 255 are for connectors defined
- * by the HDF5 library.  Values 256 through 511 are available for testing new
- * filters.  Subsequent values should be obtained from the HDF5 development
- * team at help@hdfgroup.org.
- */
-typedef int H5VL_class_value_t;
-
 /* Class information for each VOL connector */
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
@@ -514,6 +506,7 @@ extern "C" {
 #endif
 
 /* Helper routines for VOL connector authors */
+H5_DLL hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);
 H5_DLL void *H5VLobject(hid_t obj_id);
 H5_DLL hid_t H5VLget_file_type(void *file_obj, hid_t connector_id,
     hid_t dtype_id);

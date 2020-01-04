@@ -982,9 +982,9 @@ herr_t
 H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t       *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t   loc_params;
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
@@ -1018,11 +1018,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Lget_info_by_idx
  *
- * Purpose:	Gets metadata for a link, according to the order within an
+ * Purpose:	    Gets metadata for a link, according to the order within an
  *              index.
  *
- * Return:	Success:	Non-negative with information in LINFO
- * 		Failure:	Negative
+ * Return:	    Success:    Non-negative with information in LINFO
+ * 	            Failure:    Negative
  *
  * Programmer:	Quincey Koziol
  *              Monday, November  6, 2006
@@ -1034,9 +1034,9 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info_t *linfo /*out*/, hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5VL_object_t       *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t   loc_params;
+    herr_t              ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, linfo,
@@ -1346,7 +1346,7 @@ done:
  *                          of the operators.
  *
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, November 16, 2006
  *
  *-------------------------------------------------------------------------
@@ -1490,8 +1490,8 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- * Programmer:	Quincey Koziol
- *		November 3 2007
+ * Programmer:  Quincey Koziol
+ *              November 3 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -3174,7 +3174,7 @@ done:
  *
  * Purpose:	Returns metadata about a link.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	James Laird
  *              Monday, April 17 2006

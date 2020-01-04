@@ -237,7 +237,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id,
 
 done:
     if(file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement refcount on file")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rcreate_region() */
 
@@ -326,7 +326,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name,
 
 done:
     if(file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement refcount on file")
+        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rcreate_attr() */
 
@@ -616,7 +616,7 @@ done:
         HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close object")
     if(H5I_INVALID_HID == ret_value) /* Cleanup on failure */
         if((space_id != H5I_INVALID_HID) && (H5I_dec_ref(space_id) < 0))
-        HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close dataspace")
+            HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close dataspace")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ropen_region() */
@@ -688,7 +688,7 @@ H5Ropen_attr(const H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id)
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_SELF;
@@ -700,18 +700,18 @@ H5Ropen_attr(const H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id)
 
     /* Open the attribute */
     if(NULL == (opened_attr = H5VL_attr_open(opened_obj, &loc_params, H5R_REF_ATTRNAME((const H5R_ref_priv_t *)ref_ptr), aapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute: '%s'", H5R_REF_ATTRNAME((const H5R_ref_priv_t *)ref_ptr))
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute: '%s'", H5R_REF_ATTRNAME((const H5R_ref_priv_t *)ref_ptr))
 
     /* Register the attribute and get an ID for it */
     if((ret_value = H5VL_register(H5I_ATTR, opened_attr, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
 
 done:
     if((opened_obj_id != H5I_INVALID_HID) && (H5I_dec_ref(opened_obj_id) < 0))
         HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close object")
     if(H5I_INVALID_HID == ret_value) /* Cleanup on failure */
         if(opened_attr && H5VL_attr_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
+            HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, H5I_INVALID_HID, "can't close attribute")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ropen_attr() */
@@ -746,7 +746,7 @@ H5Rget_obj_type3(const H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type)
         || H5R__get_type((const H5R_ref_priv_t *)ref_ptr) >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(rapl_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Retrieve loc_id from reference */
     if(H5I_INVALID_HID == (loc_id = H5R__get_loc_id((const H5R_ref_priv_t *)ref_ptr))) {
@@ -770,7 +770,7 @@ H5Rget_obj_type3(const H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type)
 
     /* Retrieve object's type */
     if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_type) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object type")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve object type")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -854,7 +854,7 @@ H5Rget_obj_name(const H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf, size_t size)
         || H5R__get_type((const H5R_ref_priv_t *)ref_ptr) >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference type")
     if(rapl_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a property list")
 
     /* Retrieve loc_id from reference */
     if(H5I_INVALID_HID == (loc_id = H5R__get_loc_id((const H5R_ref_priv_t *)ref_ptr))) {
@@ -878,7 +878,7 @@ H5Rget_obj_name(const H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf, size_t size)
 
     /* Retrieve object's name */
     if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, buf, size) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -915,3 +915,4 @@ H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *buf, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rget_attr_name() */
+

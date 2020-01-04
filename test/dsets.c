@@ -12776,20 +12776,23 @@ error:
 } /* end dls_01_write_data() */
 
 static herr_t
-dls_01_read_stuff( hid_t fid )
+dls_01_read_stuff(hid_t fid)
 {
     int status = 0;
     hid_t did = 0;
     H5O_info_t info;
 
-    did = H5Dopen2( fid, DLS_01_DATASET, H5P_DEFAULT );
-    if ( did <= 0 ) TEST_ERROR
+    did = H5Dopen2(fid, DLS_01_DATASET, H5P_DEFAULT);
+    if(did <= 0)
+        TEST_ERROR
 
-    status = H5Oget_info2( did, &info, H5O_INFO_BASIC );
-    if ( status != 0 ) TEST_ERROR
+    status = H5Oget_info2(did, &info, H5O_INFO_BASIC );
+    if(status != 0)
+        TEST_ERROR
 
-    status = H5Dclose( did );
-    if ( status != 0 ) TEST_ERROR
+    status = H5Dclose(did);
+    if(status != 0)
+        TEST_ERROR
 
     return SUCCEED;
 

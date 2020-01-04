@@ -28,105 +28,105 @@
 
 /* The VOL class struct */
 static const H5VL_class_t null_vol_g = {
-    0,                                              /* version      */
-    NULL_VOL_CONNECTOR_VALUE,                       /* value        */
-    NULL_VOL_CONNECTOR_NAME,                        /* name         */
+    0,                                              /* version          */
+    NULL_VOL_CONNECTOR_VALUE,                       /* value            */
+    NULL_VOL_CONNECTOR_NAME,                        /* name             */
     0,                                              /* capability flags */
-    NULL,                                           /* initialize   */
-    NULL,                                           /* terminate    */
+    NULL,                                           /* initialize       */
+    NULL,                                           /* terminate        */
     {   /* info_cls */
-        (size_t)0,                                  /* size    */
-        NULL,                                       /* copy    */
-        NULL,                                       /* compare */
-        NULL,                                       /* free    */
-        NULL,                                       /* to_str  */
-        NULL,                                       /* from_str */
+        (size_t)0,                                  /* size             */
+        NULL,                                       /* copy             */
+        NULL,                                       /* compare          */
+        NULL,                                       /* free             */
+        NULL,                                       /* to_str           */
+        NULL,                                       /* from_str         */
     },
     {   /* wrap_cls */
-        NULL,                                       /* get_object   */
-        NULL,                                       /* get_wrap_ctx */
-        NULL,                                       /* wrap_object  */
-        NULL,                                       /* unwrap_object */
-        NULL,                                       /* free_wrap_ctx */
+        NULL,                                       /* get_object       */
+        NULL,                                       /* get_wrap_ctx     */
+        NULL,                                       /* wrap_object      */
+        NULL,                                       /* unwrap_object    */
+        NULL,                                       /* free_wrap_ctx    */
     },
     {   /* attribute_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* read         */
-        NULL,                                       /* write        */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+        NULL,                                       /* create           */
+        NULL,                                       /* open             */
+        NULL,                                       /* read             */
+        NULL,                                       /* write            */
+        NULL,                                       /* get              */
+        NULL,                                       /* specific         */
+        NULL,                                       /* optional         */
+        NULL                                        /* close            */
     },
     {   /* dataset_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* read         */
-        NULL,                                       /* write        */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+        NULL,                                       /* create           */
+        NULL,                                       /* open             */
+        NULL,                                       /* read             */
+        NULL,                                       /* write            */
+        NULL,                                       /* get              */
+        NULL,                                       /* specific         */
+        NULL,                                       /* optional         */
+        NULL                                        /* close            */
     },
     {   /* datatype_cls */
-        NULL,                                       /* commit       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get_size     */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+        NULL,                                       /* commit           */
+        NULL,                                       /* open             */
+        NULL,                                       /* get_size         */
+        NULL,                                       /* specific         */
+        NULL,                                       /* optional         */
+        NULL                                        /* close            */
     },
     {   /* file_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+        NULL,                                       /* create           */
+        NULL,                                       /* open             */
+        NULL,                                       /* get              */
+        NULL,                                       /* specific         */
+        NULL,                                       /* optional         */
+        NULL                                        /* close            */
     },
     {   /* group_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* open         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* close        */
+        NULL,                                       /* create           */
+        NULL,                                       /* open             */
+        NULL,                                       /* get              */
+        NULL,                                       /* specific         */
+        NULL,                                       /* optional         */
+        NULL                                        /* close            */
     },
     {   /* link_cls */
-        NULL,                                       /* create       */
-        NULL,                                       /* copy         */
-        NULL,                                       /* move         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL                                        /* optional     */
+        NULL,                                       /* create           */
+        NULL,                                       /* copy             */
+        NULL,                                       /* move             */
+        NULL,                                       /* get              */
+        NULL,                                       /* specific         */
+        NULL                                        /* optional         */
     },
     {   /* object_cls */
-        NULL,                                       /* open         */
-        NULL,                                       /* copy         */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL                                        /* optional     */
+        NULL,                                       /* open             */
+        NULL,                                       /* copy             */
+        NULL,                                       /* get              */
+        NULL,                                       /* specific         */
+        NULL                                        /* optional         */
     },
     {   /* introspect_cls */
-        NULL,                                       /* get_conn_cls */
-        NULL,                                       /* opt_query    */
+        NULL,                                       /* get_conn_cls     */
+        NULL,                                       /* opt_query        */
     },
     {   /* request_cls */
-        NULL,                                       /* wait         */
-        NULL,                                       /* notify       */
-        NULL,                                       /* cancel       */
-        NULL,                                       /* specific     */
-        NULL,                                       /* optional     */
-        NULL                                        /* free         */
+        NULL,                                       /* wait             */
+        NULL,                                       /* notify           */
+        NULL,                                       /* cancel           */
+        NULL,                                       /* specific         */
+        NULL,                                       /* optional         */
+        NULL                                        /* free             */
     },
     {   /* blob_cls */
-        NULL,                                       /* put          */
-        NULL,                                       /* get          */
-        NULL,                                       /* specific     */
-        NULL                                        /* optional     */
+        NULL,                                       /* put              */
+        NULL,                                       /* get              */
+        NULL,                                       /* specific         */
+        NULL                                        /* optional         */
     },
-    NULL                                            /* optional     */
+    NULL                                            /* optional         */
 };
 
 /* These two functions are necessary to load this plugin using

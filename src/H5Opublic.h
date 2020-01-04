@@ -75,7 +75,7 @@
 
 /* Flags for H5Oget_info.
  * Theses flags determine which fields will be filled in in the H5O_info_t
- * struct.  
+ * struct.
  */
 #define H5O_INFO_BASIC          0x0001u         /* Fill in the fileno, addr, type, and rc fields */
 #define H5O_INFO_TIME           0x0002u         /* Fill in the atime, mtime, ctime, and btime fields */

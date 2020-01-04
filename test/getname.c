@@ -2380,7 +2380,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((size = H5Iget_name(dtype, NULL, 0)) != 0) TEST_ERROR
 
     /* Create a link to the object */
-    if( H5Olink(dtype, file2_id, "datatype", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Olink(dtype, file2_id, "datatype", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Commit a second datatype with no links to it and commit it */
     if((dtype_anon = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
@@ -2405,17 +2405,17 @@ test_main(hid_t file_id, hid_t fapl)
     /* Check the H5Iget_name does not return an error for anon committed datatypes */
     if((dtype_anon = H5Oopen_by_addr(file2_id, oinfo.addr)) < 0) TEST_ERROR
 
-    if((size = H5Iget_name(dtype_anon,NULL,0)) != 0) TEST_ERROR
+    if((size = H5Iget_name(dtype_anon, NULL, 0)) != 0) TEST_ERROR
 
     if(H5Tclose(dtype_anon) < 0) TEST_ERROR
     if(H5Fclose(file2_id) < 0) TEST_ERROR
 
     PASSED();
 
-    return(0);
+    return 0;
 
 error:
-    return(1);
+    return 1;
 }
 
 static int
