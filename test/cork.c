@@ -99,8 +99,9 @@ verify_old_dset_cork(void)
     hsize_t dims[2] = {100, 20};        /* Dataset dimension sizes */
     hsize_t max_dims[2] = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t chunk_dims[2] = {2, 5};     /* Dataset chunked dimension sizes */
-    int buf[100][20];               /* Data buffer */
-    int i = 0, j = 0;               /* Local index variable */
+    int **buf = NULL;                   /* Data bufer (pointers to fake 2D array) */
+    int *buf_data = NULL;               /* Data buffer (actual data) */
+    int i = 0, j = 0;                   /* Local index variables */
     H5O_info_t oinfo, oinfo2, oinfo3;       /* Object metadata information */
     hsize_t dims2[2] = {8, 16};         /* Dataset dimension sizes */
 
@@ -137,13 +138,21 @@ verify_old_dset_cork(void)
     if(H5C__verify_cork_tag_test(fid, oinfo.addr, TRUE) < 0)
         TEST_ERROR
 
+    /* Set up data array */
+    if(NULL == (buf_data = (int *)HDcalloc(100 * 20, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (buf = (int **)HDcalloc(100, sizeof(buf_data))))
+        TEST_ERROR;
+    for (i = 0; i < 100; i++)
+        buf[i] = buf_data + (i * 20);
+
     /* Initialize data buffer */
     for(i = 0; i < (int)dims[0]; i++)
         for(j = 0; j < (int)dims[1]; j++)
             buf[i][j] = (i + 1) * (j + 1);
 
     /* Write to the dataset: DSET_BT1 */
-    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0)
         TEST_ERROR
 
     /* Verify the cork status for DSET_BT1 */
@@ -196,11 +205,6 @@ verify_old_dset_cork(void)
     if((fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    /* Initialize data buffer */
-    for(i = 0; i < (int)dims[0]; i++)
-        for(j = 0; j < (int)dims[1]; j++)
-            buf[i][j] = (i + 1) * (j + 1);
-
     /* Open and write to the dataset: DSET_BT1 */
     if((did = H5Dopen2(fid, DSET_BT1, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -249,6 +253,9 @@ verify_old_dset_cork(void)
     if(H5Fclose(fid) < 0)
         TEST_ERROR
 
+    HDfree(buf);
+    HDfree(buf_data);
+
     PASSED();
     return 0;
 
@@ -265,6 +272,10 @@ error:
         H5Pclose(dcpl3);
         H5Fclose(fid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+    HDfree(buf_data);
+
     return 1;
 } /* verify_old_dset_cork */
 
@@ -496,7 +507,9 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     hsize_t dims[2] = {100, 20};        /* Dataset dimension sizes */
     hsize_t max_dims[2] = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t chunk_dims[2] = {2, 5};     /* Dataset chunked dimension sizes */
-    int buf[100][20]; int i = 0, j = 0;         /* Data buffer */
+    int **buf = NULL;                   /* Data bufer (pointers to fake 2D array) */
+    int *buf_data = NULL;               /* Data buffer (actual data) */
+    int i = 0, j = 0;                   /* Local index variables */
     H5O_info_t oinfo, oinfo2, oinfo3;       /* Object metadata information */
     unsigned flags;             /* File access flags */
 
@@ -630,6 +643,14 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     if((fid = H5Fopen(FILENAME, flags, fapl)) < 0)
         TEST_ERROR
 
+    /* Set up data array */
+    if(NULL == (buf_data = (int *)HDcalloc(100 * 20, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (buf = (int **)HDcalloc(100, sizeof(buf_data))))
+        TEST_ERROR;
+    for (i = 0; i < 100; i++)
+        buf[i] = buf_data + (i * 20);
+
     /* Initialize data buffer */
     for(i = 0; i < (int)dims[0]; i++)
         for(j = 0; j < (int)dims[1]; j++)
@@ -638,7 +659,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     /* Open and write to the dataset: DSET_EA */
     if((did = H5Dopen2(fid, DSET_EA, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0)
         TEST_ERROR
 
     /* Verify the cork status for DSET_EA */
@@ -648,7 +669,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     /* Open and write to the dataset: DSET_FA */
     if((did2 = H5Dopen2(fid, DSET_FA, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0)
         TEST_ERROR
 
     /* Cork the dataset: DSET_FA */
@@ -662,7 +683,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     /* Open and write to the dataset: DSET_BT2 */
     if((did3 = H5Dopen2(fid, DSET_BT2, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if(H5Dwrite(did3, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dwrite(did3, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0)
         TEST_ERROR
 
     /* Verify the cork status for DSET_BT2 */
@@ -689,6 +710,9 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     if(H5Fclose(fid) < 0)
         TEST_ERROR
 
+    HDfree(buf);
+    HDfree(buf_data);
+
     PASSED();
     return 0;
 
@@ -704,6 +728,10 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     } H5E_END_TRY;
+
+    HDfree(buf);
+    HDfree(buf_data);
+
     return 1;
 } /* verify_dset_cork */
 
@@ -1826,8 +1854,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     hsize_t     cdims[RANK] = {2,2};                /* Chunk dimensions */
     int     fillval = 0;            /* Fill value */
     int     i, j, k = 0;            /* Local index variables */
-    int     data[DIMS0][DIMS1];     /* Data buffer */
-    int     rbuf[DIMS0][DIMS1];     /* Data buffer */
+    int     **wbuf = NULL;          /* Data buffer for writes (pointers to fake 2D array) */
+    int     *wbuf_data = NULL;      /* Data buffer for writes (real data) */
+    int     *rbuf_data = NULL;      /* Data buffer for reads (real data) */
     hbool_t     corked;             /* Cork status of an object */
     unsigned flags;                 /* File access flags */
 
@@ -1923,13 +1952,21 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     if(corked)
         TEST_ERROR
 
+    /* Set up data array */
+    if(NULL == (wbuf_data = (int *)HDcalloc(DIMS0 * DIMS1, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (wbuf = (int **)HDcalloc(DIMS0, sizeof(wbuf_data))))
+        TEST_ERROR;
+    for (i = 0; i < DIMS0; i++)
+        wbuf[i] = wbuf_data + (i * DIMS1);
+
     /* Initialize the buffer */
     for(i = 0; i < DIMS0;i++)
         for(j = 0;j < DIMS1;j++)
-            data[i][j] = k++;
+            wbuf[i][j] = k++;
 
     /* Write to the dataset */
-    if(H5Dwrite(did1, tid1, sid, sid, H5P_DEFAULT, data) < 0)
+    if(H5Dwrite(did1, tid1, sid, sid, H5P_DEFAULT, wbuf_data) < 0)
         TEST_ERROR
 
     /* Flush the dataset */
@@ -1962,8 +1999,12 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     if(corked)
         TEST_ERROR
 
+    /* Set up data array */
+    if(NULL == (rbuf_data = (int *)HDcalloc(DIMS0 * DIMS1, sizeof(int))))
+        TEST_ERROR;
+
     /* Read from the dataset */
-    if(H5Dread(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+    if(H5Dread(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_data) < 0)
         TEST_ERROR
 
     /* Cork the dataset */
@@ -1993,7 +2034,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Write to the dataset */
-    if(H5Dwrite(did1, tid1, sid, sid, H5P_DEFAULT, data) < 0)
+    if(H5Dwrite(did1, tid1, sid, sid, H5P_DEFAULT, wbuf_data) < 0)
         TEST_ERROR
 
     /* Refresh the dataset */
@@ -2106,6 +2147,10 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     if(H5Pclose(dcpl) < 0)
         TEST_ERROR
 
+    HDfree(wbuf);
+    HDfree(wbuf_data);
+    HDfree(rbuf_data);
+
     PASSED();
     return 0;
 
@@ -2121,6 +2166,11 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     } H5E_END_TRY;
+
+    HDfree(wbuf);
+    HDfree(wbuf_data);
+    HDfree(rbuf_data);
+
     return 1;
 
 } /* test_dset_cork() */

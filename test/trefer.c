@@ -568,7 +568,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hsize_t high[SPACE2_RANK];      /* Selection bounds */
     H5R_ref_t *wbuf,                   /* buffer to write to disk */
            *rbuf;                   /* buffer read from disk */
-    H5R_ref_t  nvrbuf[3]={{{0}},{{101}},{{255}}}; /* buffer with non-valid refs */
+    H5R_ref_t  nvrbuf[3]={{{0}},{{101}},{{-128}}}; /* buffer with non-valid refs */
     uint8_t *dwbuf,                 /* Buffer for writing numeric data to disk */
             *drbuf;                 /* Buffer for reading numeric data from disk */
     uint8_t *tu8;                   /* Temporary pointer to uint8 data */

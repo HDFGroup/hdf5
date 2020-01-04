@@ -529,26 +529,26 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file access property list")
     if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
 
      /* Stash a copy of the "top-level" connector property, before any pass-through
      *  connectors modify or unwrap it.
      */
     if(H5CX_set_vol_connector_prop(&connector_prop) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context")
 
     /* Open the file */
     /* (Must open file read-write to allow for object modifications) */
     if(NULL == (new_file = H5VL_file_open(&connector_prop, H5R_REF_FILENAME(ref), H5F_ACC_RDWR, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* Get an ID for the file */
     if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
 
     /* Get the file object */
     if(NULL == (vol_obj = H5VL_vol_object(ret_value)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "invalid object identifier")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "invalid object identifier")
 
     /* Make the 'post open' callback */
     supported = FALSE;
@@ -1382,7 +1382,7 @@ H5R__encode_heap(H5F_t *f, unsigned char *buf, size_t *nalloc,
 
         /* Write the reference information to disk (allocates space also) */
         if(H5HG_insert(f, data_size, data, &hobjid) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to write reference information")
+            HGOTO_ERROR(H5E_REFERENCE, H5E_WRITEERROR, FAIL, "Unable to write reference information")
 
         /* Encode the heap information */
         H5F_addr_encode(f, &p, hobjid.addr);
@@ -1433,7 +1433,7 @@ H5R__decode_heap(H5F_t *f, const unsigned char *buf, size_t *nbytes,
 
     /* Read the information from disk */
     if(NULL == (*data_ptr = (unsigned char *)H5HG_read(f, &hobjid, (void *)*data_ptr, data_size)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "Unable to read reference data")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read reference data")
 
     *nbytes = buf_size;
 
@@ -1479,7 +1479,7 @@ H5R__free_heap(H5F_t *f, const unsigned char *buf, size_t nbytes)
     if(hobjid.addr > 0) {
         /* Free heap object */
         if(H5HG_remove(f, &hobjid) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object")
+            HGOTO_ERROR(H5E_REFERENCE, H5E_WRITEERROR, FAIL, "Unable to remove heap object")
     } /* end if */
 
 done:
@@ -1677,7 +1677,7 @@ H5R__encode_token_region_compat(H5F_t *f, const H5VL_token_t *obj_token,
         /* Allocate the space to store the serialized information */
         H5_CHECK_OVERFLOW(data_size, hssize_t, size_t);
         if(NULL == (data = (uint8_t *)H5MM_malloc((size_t)data_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_REFERENCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Serialize information for dataset OID into heap buffer */
         p = (uint8_t *)data;
@@ -1748,7 +1748,7 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf,
 
         /* Open and copy the dataset's dataspace */
         if(NULL == (space = H5S_read(&oloc)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, FAIL, "not found")
+            HGOTO_ERROR(H5E_REFERENCE, H5E_NOTFOUND, FAIL, "not found")
 
         /* Unserialize the selection */
         if(H5S_SELECT_DESERIALIZE(&space, &p) < 0)

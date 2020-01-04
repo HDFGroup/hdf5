@@ -133,7 +133,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 
     /* Retrieve object's type */
     if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_type) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5G_UNKNOWN, "can't retrieve object type")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5G_UNKNOWN, "can't retrieve object type")
 
     /* Set return value */
     ret_value = H5G_map_obj_type(obj_type);
@@ -373,7 +373,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
 
     /* Retrieve object's type */
     if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_type) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object type")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve object type")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -492,7 +492,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 
         /* Check if using native VOL connector */
         if(H5VL_object_is_native(vol_obj, &is_native) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "can't query if file uses native VOL connector")
 
         /* Must use native VOL connector for this operation */
         HDassert(is_native);
@@ -525,7 +525,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 
     /* Atomize */
     if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
 
 done:
     if(file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
@@ -583,7 +583,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name,
 
     /* Retrieve object's name */
     if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, name, size) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:
     FUNC_LEAVE_API(ret_value)
