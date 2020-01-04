@@ -255,6 +255,7 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
                 } /* end else-if */
                 else
                     HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
+
                 break;
             }
 
