@@ -1256,7 +1256,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
 
         /* expand soft link */
         if(H5G_CACHED_SLINK == src_ent->type && cpy_info->expand_soft_link) {
-            H5O_info_t  oinfo;          /* Information about object pointed to by soft link */
+            haddr_t obj_addr;           /* Address of object pointed to by soft link */
             H5G_loc_t   grp_loc;        /* Group location holding soft link */
             H5G_name_t  grp_path;       /* Path for group holding soft link */
             char *link_name;            /* Pointer to value of soft link */
@@ -1274,9 +1274,8 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5_ITER_ERROR, "unable to get link name")
 
             /* Check if the object pointed by the soft link exists in the source file */
-            /* Only basic information is needed */
-            if(H5G_loc_info(&grp_loc, link_name, &oinfo, H5O_INFO_BASIC) >= 0) {
-                tmp_src_ent.header = oinfo.addr;
+            if(H5G__loc_addr(&grp_loc, link_name, &obj_addr) >= 0) {
+                tmp_src_ent.header = obj_addr;
                 src_ent = &tmp_src_ent;
             } /* end if */
             else

@@ -21,12 +21,6 @@
 #include "H5public.h"           /* Generic Functions                    */
 #include "H5Ipublic.h"          /* IDs                                  */
 
-/* Semi-public headers mainly for VOL connector authors */
-#include "H5VLconnector.h"              /* VOL connector author routines */
-#include "H5VLconnector_passthru.h"     /* Pass-through VOL connector author routines */
-#include "H5VLnative.h"                 /* Native VOL connector macros, for VOL connector authors */
-
-
 /*****************/
 /* Public Macros */
 /*****************/
@@ -34,7 +28,7 @@
 /* VOL connector identifier values
  * These are H5VL_class_value_t values, NOT hid_t values!
  */
-#define H5_VOL_INVALID  (-1)    /* Invalid ID for VOL connector iD */
+#define H5_VOL_INVALID  (-1)    /* Invalid ID for VOL connector ID */
 #define H5_VOL_NATIVE   0       /* Native HDF5 file format VOL connector */
 #define H5_VOL_RESERVED 256     /* VOL connector IDs below this value are reserved for library use */
 #define H5_VOL_MAX      65535   /* Maximum VOL connector ID */
@@ -43,6 +37,16 @@
 /*******************/
 /* Public Typedefs */
 /*******************/
+
+
+/*
+ * VOL connector identifiers.  Values 0 through 255 are for connectors defined
+ * by the HDF5 library.  Values 256 through 511 are available for testing new
+ * filters.  Subsequent values should be obtained from the HDF5 development
+ * team at help@hdfgroup.org.
+ */
+typedef int H5VL_class_value_t;
+
 
 /********************/
 /* Public Variables */
@@ -59,8 +63,6 @@ extern "C" {
 /* The H5VL types uses in the API calls are not opaque - they are defined in
  * H5VLconnector.h, which is included at the top of this file.
  */
-
-H5_DLL hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);
 H5_DLL hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vipl_id);
 H5_DLL hid_t H5VLregister_connector_by_value(H5VL_class_value_t connector_value, hid_t vipl_id);
 H5_DLL htri_t H5VLis_connector_registered(const char *name);
@@ -73,6 +75,11 @@ H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
 #ifdef __cplusplus
 }
 #endif
+
+/* Semi-public headers mainly for VOL connector authors */
+#include "H5VLconnector.h"              /* VOL connector author routines */
+#include "H5VLconnector_passthru.h"     /* Pass-through VOL connector author routines */
+#include "H5VLnative.h"                 /* Native VOL connector macros, for VOL connector authors */
 
 #endif /* _H5VLpublic_H */
 

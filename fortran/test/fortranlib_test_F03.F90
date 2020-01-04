@@ -153,7 +153,7 @@ PROGRAM fortranlibtest_F03
   
 !     write(*,*)
 !     write(*,*) '========================================='
-!     write(*,*) 'Testing GROUP interface             '
+!     write(*,*) 'Testing OBJECT interface                 '
 !     write(*,*) '========================================='
 
   ret_total_error = 0
@@ -161,11 +161,11 @@ PROGRAM fortranlibtest_F03
   CALL write_test_status(ret_total_error, ' Testing object functions ', total_error)
 
   ret_total_error = 0
-  CALL obj_visit(ret_total_error)
+  CALL test_obj_visit(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing object visiting functions ', total_error)
 
   ret_total_error = 0
-  CALL obj_info(ret_total_error)
+  CALL test_obj_info(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing object info functions ', total_error)
 
   ret_total_error = 0
