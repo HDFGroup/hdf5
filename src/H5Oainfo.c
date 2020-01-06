@@ -194,7 +194,7 @@ H5O_ainfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     *p++ = H5O_AINFO_VERSION;
 
     /* The flags for the attribute indices */
-    flags = ainfo->track_corder ? H5O_AINFO_TRACK_CORDER : 0;
+    flags = (unsigned char)(ainfo->track_corder ? H5O_AINFO_TRACK_CORDER : 0);
     flags = (unsigned char)(flags | (ainfo->index_corder ? H5O_AINFO_INDEX_CORDER : 0));
     *p++ = flags;
 

@@ -5301,7 +5301,7 @@ test_types(hid_t file)
     (space=H5Screate_simple(1, &nelmts, NULL)) < 0 ||
     (dset=H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
-    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)(0xff ^ i); 
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
     goto error;
 
@@ -5315,7 +5315,7 @@ test_types(hid_t file)
     (space=H5Screate_simple(1, &nelmts, NULL)) < 0 ||
     (dset=H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
-    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)(0xff ^ i); 
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
     goto error;
     if(H5Sclose(space) < 0) goto error;
@@ -5330,7 +5330,7 @@ test_types(hid_t file)
             (dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
     for(i = 0; i < sizeof buf; i++)
-        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
     if(H5Sclose(space) < 0) goto error;
     if(H5Tclose(type) < 0) goto error;
@@ -5344,7 +5344,7 @@ test_types(hid_t file)
             (dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
     for(i = 0; i < sizeof buf; i++)
-        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
     if(H5Sclose(space) < 0) goto error;
     if(H5Tclose(type) < 0) goto error;
