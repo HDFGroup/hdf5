@@ -3806,7 +3806,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     uint32_t no_collective_cause_global_expected = 0;
 
     const char  * filename;
-    const char  * test_name;
+    const char  * test_name = "I/O";
     hbool_t     is_chunked=1;
     int         mpi_size = -1;
     int         mpi_rank = -1;

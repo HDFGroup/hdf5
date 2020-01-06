@@ -200,7 +200,7 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
 
     # Append more extra warning flags that only gcc 7.x+ know about
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 7.0)
-      set (H5_CFLAGS4 "${H5_CFLAGS4} -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=2 -Wimplicit-fallthrough=5 -Wrestrict")
+      set (H5_CFLAGS4 "${H5_CFLAGS4} -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=1 -Wimplicit-fallthrough=5 -Wrestrict")
     endif ()
 
     # Append more extra warning flags that only gcc 8.x+ know about

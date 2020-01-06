@@ -203,7 +203,7 @@ H5O_linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     *p++ = H5O_LINFO_VERSION;
 
     /* The flags for the link indices */
-    index_flags = linfo->track_corder ? H5O_LINFO_TRACK_CORDER : 0;
+    index_flags = (uint8_t)(linfo->track_corder ? H5O_LINFO_TRACK_CORDER : 0);
     index_flags = (uint8_t)(index_flags | (linfo->index_corder ? H5O_LINFO_INDEX_CORDER : 0));
     *p++ = index_flags;
 

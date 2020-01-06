@@ -3688,7 +3688,7 @@ H5S__hyper_get_version_enc_size(const H5S_t *space, hsize_t block_count, uint32_
                 /* Determine the encoding size */
                 enc2 = H5S__hyper_get_enc_size_real(max2);
 
-                *enc_size = MAX(enc1, enc2);
+                *enc_size = (uint8_t)MAX(enc1, enc2);
             } /* end if */
             else {
                 hsize_t max_size = block_count;

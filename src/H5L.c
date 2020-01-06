@@ -486,6 +486,10 @@ H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name
     /* Set the LCPL for the API context */
     H5CX_set_lcpl(lcpl_id);
 
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
+
     /* Set location fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = link_name;
@@ -495,10 +499,6 @@ H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name
     /* get the location object */
     if(NULL == (vol_obj = (H5VL_object_t *)H5VL_vol_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Create the link */
     if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, &loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, link_target) < 0)
@@ -982,9 +982,9 @@ herr_t
 H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t       *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t   loc_params;
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
@@ -1018,11 +1018,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Lget_info_by_idx
  *
- * Purpose:	Gets metadata for a link, according to the order within an
+ * Purpose:	    Gets metadata for a link, according to the order within an
  *              index.
  *
- * Return:	Success:	Non-negative with information in LINFO
- * 		Failure:	Negative
+ * Return:	    Success:    Non-negative with information in LINFO
+ * 	            Failure:    Negative
  *
  * Programmer:	Quincey Koziol
  *              Monday, November  6, 2006
@@ -1034,9 +1034,9 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info_t *linfo /*out*/, hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5VL_object_t       *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t   loc_params;
+    herr_t              ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, linfo,
@@ -1346,7 +1346,7 @@ done:
  *                          of the operators.
  *
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, November 16, 2006
  *
  *-------------------------------------------------------------------------
@@ -1490,8 +1490,8 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- * Programmer:	Quincey Koziol
- *		November 3 2007
+ * Programmer:  Quincey Koziol
+ *              November 3 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -3174,7 +3174,7 @@ done:
  *
  * Purpose:	Returns metadata about a link.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	James Laird
  *              Monday, April 17 2006

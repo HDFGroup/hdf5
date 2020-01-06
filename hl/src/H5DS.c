@@ -177,7 +177,7 @@ herr_t H5DSattach_scale(hid_t did,
     if ((it2 = H5Iget_type(dsid)) < 0)
         return FAIL;
 
-    if (H5I_DATASET!=it1 || H5I_DATASET!=it2)
+    if (H5I_DATASET != it1 || H5I_DATASET != it2)
         return FAIL;
 
     /* the DS dataset cannot have dimension scales */
@@ -202,19 +202,19 @@ herr_t H5DSattach_scale(hid_t did,
         return FAIL;
 
     /* get rank */
-    if ((rank=H5Sget_simple_extent_ndims(sid)) < 0)
+    if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
         goto out;
 
     /* scalar rank */
-    if (rank==0)
-        rank=1;
+    if (rank == 0)
+        rank = 1;
 
     /* close dataset space */
     if (H5Sclose(sid) < 0)
         return FAIL;
 
     /* parameter range checking */
-    if (idx>(unsigned)rank-1)
+    if (idx > (unsigned)rank-1)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -508,7 +508,7 @@ herr_t H5DSattach_scale(hid_t did,
     *-------------------------------------------------------------------------
     */
 
-    if((is_ds=H5DSis_scale(dsid)) < 0)
+    if((is_ds = H5DSis_scale(dsid)) < 0)
         return FAIL;
 
     if(is_ds == 0) {
@@ -598,7 +598,7 @@ herr_t H5DSdetach_scale(hid_t did,
 
     /* check for valid types of identifiers */
 
-    if(H5I_DATASET!=H5Iget_type(did) || H5I_DATASET!=H5Iget_type(dsid))
+    if(H5I_DATASET != H5Iget_type(did) || H5I_DATASET != H5Iget_type(dsid))
         return FAIL;
 
     if((is_scale = H5DSis_scale(did)) < 0)
@@ -626,7 +626,7 @@ herr_t H5DSdetach_scale(hid_t did,
     *-------------------------------------------------------------------------
     */
     /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
-    if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST)) < 0)
+    if ((has_dimlist = H5LT_find_attribute(did, DIMENSION_LIST)) < 0)
         return FAIL;
 
     if (has_dimlist == 0)
@@ -637,7 +637,7 @@ herr_t H5DSdetach_scale(hid_t did,
         return FAIL;
 
     /* get rank */
-    if ((rank=H5Sget_simple_extent_ndims(sid)) < 0)
+    if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
         goto out;
 
     /* close dataset space */
@@ -645,7 +645,7 @@ herr_t H5DSdetach_scale(hid_t did,
         return FAIL;
 
     /* parameter range checking */
-    if (idx>(unsigned)rank-1)
+    if (idx > (unsigned)rank-1)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -795,7 +795,7 @@ herr_t H5DSdetach_scale(hid_t did,
     if(H5Aread(aid, ntid, dsbuf) < 0)
         goto out;
 
-    for(ii=0; ii<nelmts; ii++) {
+    for(ii = 0; ii < nelmts; ii++) {
         /* First check if we have the same dimension index */
       if(idx == dsbuf[ii].dim_idx) {
             /* get the reference to the dataset */
@@ -990,7 +990,7 @@ htri_t H5DSis_attached(hid_t did,
     if ((it2 = H5Iget_type(dsid)) < 0)
         return FAIL;
 
-    if (H5I_DATASET!=it1 || H5I_DATASET!=it2)
+    if (H5I_DATASET != it1 || H5I_DATASET != it2)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -1040,7 +1040,7 @@ htri_t H5DSis_attached(hid_t did,
             goto out;
 
         /* read */
-        if (H5Aread(aid,tid,buf) < 0)
+        if (H5Aread(aid, tid, buf) < 0)
             goto out;
 
         /* iterate all the REFs in this dimension IDX */
@@ -1050,7 +1050,7 @@ htri_t H5DSis_attached(hid_t did,
             ref = ((hobj_ref_t *)buf[idx].p)[i];
 
             /* get the scale id for this REF */
-            if ((dsid_j = H5Rdereference2(did,H5P_DEFAULT,H5R_OBJECT,&ref)) < 0)
+            if ((dsid_j = H5Rdereference2(did, H5P_DEFAULT, H5R_OBJECT, &ref)) < 0)
                 goto out;
 
             /* get info for DS in the parameter list */
@@ -1073,7 +1073,7 @@ htri_t H5DSis_attached(hid_t did,
 
 
         /* close */
-        if (H5Treclaim(tid,sid,H5P_DEFAULT,buf) < 0)
+        if (H5Treclaim(tid, sid, H5P_DEFAULT, buf) < 0)
             goto out;
         if (H5Sclose(sid) < 0)
             goto out;
@@ -1123,7 +1123,7 @@ htri_t H5DSis_attached(hid_t did,
         if (dsbuf == NULL)
             goto out;
 
-        if (H5Aread(aid,ntid,dsbuf) < 0)
+        if (H5Aread(aid, ntid, dsbuf) < 0)
             goto out;
 
         /*-------------------------------------------------------------------------
@@ -1131,7 +1131,7 @@ htri_t H5DSis_attached(hid_t did,
         *-------------------------------------------------------------------------
         */
 
-        for(i=0; i<nelmts; i++)
+        for(i = 0; i < nelmts; i++)
         {
             /* get the reference */
             ref = dsbuf[i].ref;
@@ -1140,7 +1140,7 @@ htri_t H5DSis_attached(hid_t did,
             if (ref)
             {
                 /* get the dataset id */
-                if ((did_i = H5Rdereference2(did,H5P_DEFAULT,H5R_OBJECT,&ref)) < 0)
+                if ((did_i = H5Rdereference2(did, H5P_DEFAULT, H5R_OBJECT, &ref)) < 0)
                     goto out;
 
                 /* get info for dataset in the parameter list */

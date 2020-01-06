@@ -31,6 +31,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Fprivate.h"         /* File access                              */
 #include "H5FLprivate.h"        /* Free lists                               */
@@ -55,7 +56,7 @@
 /* User data for recursive traversal over objects from a group */
 typedef struct {
     hid_t       obj_id;         /* The ID for the starting group */
-    H5G_loc_t    *start_loc;     /* Location of starting group */
+    H5G_loc_t    *start_loc;    /* Location of starting group */
     H5SL_t     *visited;        /* Skip list for tracking visited nodes */
     H5O_iterate_t op;           /* Application callback */
     void       *op_data;        /* Application's op data */
@@ -239,7 +240,7 @@ H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx
         version = H5O_VERSION_1;
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    version = MAX(version, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = (uint8_t)MAX(version, (uint8_t)H5O_obj_ver_bounds[H5F_LOW_BOUND(f)]);
 
     /* Version bounds check */
     if(version > H5O_obj_ver_bounds[H5F_HIGH_BOUND(f)])
@@ -2282,63 +2283,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__get_info_by_idx
- *
- * Purpose:     Internal routine to retrieve an object's info according to
- *              an index within a group.
- *
- *
- * Note:        Add a parameter "fields" to indicate selection of object info.
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- * Programmer:  Quincey Koziol
- *              December 28, 2017
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5O__get_info_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, unsigned fields)
-{
-    H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;                /* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;                /* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
-    herr_t ret_value = SUCCEED;        /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Check arguments */
-    HDassert(loc);
-    HDassert(group_name && *group_name);
-    HDassert(oinfo);
-
-    /* Set up opened group location to fill in */
-    obj_loc.oloc = &obj_oloc;
-    obj_loc.path = &obj_path;
-    H5G_loc_reset(&obj_loc);
-
-    /* Find the object's location, according to the order in the index */
-    if(H5G_loc_find_by_idx(loc, group_name, idx_type, order, n, &obj_loc/*out*/) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
-    loc_found = TRUE;
-
-    /* Retrieve the object's information */
-    if(H5O_get_info(obj_loc.oloc, oinfo, fields) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object info")
-
-done:
-    /* Release the object location */
-    if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O__get_info_by_idx() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5O_get_create_plist
  *
  * Purpose:    Retrieve the object creation properties for an object
@@ -2378,7 +2322,7 @@ H5O_get_create_plist(const H5O_loc_t *loc, H5P_genplist_t *oc_plist)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set min. # of dense attributes in property list")
 
         /* Mask off non-"user visible" flags */
-        ohdr_flags = oh->flags & (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_STORE_TIMES);
+        H5_CHECKED_ASSIGN(ohdr_flags, uint8_t, oh->flags & (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_STORE_TIMES), int);
 
         /* Set object header flags */
         if(H5P_set(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
