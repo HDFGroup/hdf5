@@ -206,8 +206,13 @@ while (<>) {
         ($last_c_name, $toss) = split /\:/, $_;
     }
 
+    # Retain C/C++ compile line, which comes with the line of warning
+    if($_ =~ /.*[A-Za-z0-9_]\.[chC]\(.*[0-9]\):.*#.*/) {
+        $last_c_name = $_;
+    }
+
     # Skip lines that don't have the word "warning"
-    next if $_ !~ /[Ww]arning:/;
+    next if $_ !~ /[Ww]arning/;
 
     # Skip warnings from linker
     next if $_ =~ /ld: warning:/;
@@ -257,11 +262,16 @@ while (<>) {
     } elsif($_ =~ /^\".*, line [0-9]+: *[Ww]arning:.*/) {
         ($name, $toss, $warning, $extra, $extra2) = split /\:/, $_;
         ($name, $line) = split /\,/, $name;
-	$name =~ s/^\"//g;
-	$name =~ s/\"$//g;
-	$line =~ s/^\s*line\s*//g;
+	    $name =~ s/^\"//g;
+	    $name =~ s/\"$//g;
+	    $line =~ s/^\s*line\s*//g;
 # print "name:'", $name, "'-'", $line, "'\n";
 # print "warning:'", $warning, "'\n";
+    # Check for Intel icc warning
+    } elsif($_ =~ /.*[A-Za-z0-9_]\.[chC]\(.*[0-9]\):.*#.*/) {
+        ($last_c_name, $toss, $warning) = split /\:/, $last_c_name;
+        ($name, $line) = split /\(/, $last_c_name;
+        $line =~ s/\)//g;
     } else {
         # Check for 'character offset' field appended to file & line #
 	# (This is probably specific to GCC)
@@ -331,6 +341,7 @@ while (<>) {
     # Convert all quotes to '
     $warning =~ s/‘/'/g;
     $warning =~ s/’/'/g;
+    $warning =~ s/"/'/g;
 
 #
 # These skipped messages & "genericizations" may be specific to GCC

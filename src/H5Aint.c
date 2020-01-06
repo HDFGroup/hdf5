@@ -2027,7 +2027,7 @@ H5A__set_version(const H5F_t *f, H5A_t *attr)
         version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    version = MAX(version, (uint8_t)H5O_attr_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = (uint8_t)MAX(version, (uint8_t)H5O_attr_ver_bounds[H5F_LOW_BOUND(f)]);
 
     /* Version bounds check */
     if(version > H5O_attr_ver_bounds[H5F_HIGH_BOUND(f)])

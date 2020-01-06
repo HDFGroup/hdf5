@@ -278,7 +278,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         parallel_print("   obj1   obj2\n");
         parallel_print(" --------------------------------------\n");
         for(i = 0; i < (unsigned int) table_lp->nattrs; i++) {
-            char c1, c2;
+            int c1, c2;
             c1 = (table_lp->attrs[i].exist[0]) ? 'x' : ' ';
             c2 = (table_lp->attrs[i].exist[1]) ? 'x' : ' ';
             parallel_print("%5c %6c    %-15s\n", c1, c2, table_lp->attrs[i].name);

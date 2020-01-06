@@ -2166,7 +2166,7 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
         /* Iterate over each chunk in the chunk list */
         curr_node = H5SL_first(fm->sel_chunks);
         while(curr_node) {
-            hssize_t    schunk_points;          /* Number of elements in chunk selection */
+            hsize_t     chunk_points;          /* Number of elements in chunk selection */
             hsize_t     tmp_count = 1;
 
             /* Get pointer to chunk's information */
@@ -2177,12 +2177,12 @@ H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm)
             if((chunk_info->mspace = H5S_copy(fm->mem_space, TRUE, FALSE)) == NULL)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
-            schunk_points = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
+            chunk_points = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
 
-            if(H5S_select_hyperslab(chunk_info->mspace, H5S_SELECT_SET, mem_sel_start, NULL, &tmp_count, &schunk_points) < 0)
+            if(H5S_select_hyperslab(chunk_info->mspace, H5S_SELECT_SET, mem_sel_start, NULL, &tmp_count, &chunk_points) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "can't create chunk memory selection")
 
-            mem_sel_start[0] += schunk_points;
+            mem_sel_start[0] += chunk_points;
 
             /* Get the next chunk node in the skip list */
             curr_node = H5SL_next(curr_node);
@@ -5651,9 +5651,8 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     H5D_chunk_it_ud2_t    *udata = (H5D_chunk_it_ud2_t *)_udata;  /* User data for callback */
     unsigned       rank = udata->common.layout->ndims - 1;    /* # of dimensions of dataset */
     hsize_t        chunk_index;
-    int            ret_value = H5_ITER_CONT;     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Compute the index for this chunk */
     chunk_index = H5VM_array_offset_pre(rank, udata->common.layout->down_chunks, chunk_rec->scaled);
@@ -5661,8 +5660,7 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* Set it in the userdata to return */
     udata->chunk_addr[chunk_index] = chunk_rec->chunk_addr;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
 } /* H5D__chunk_addrmap_cb() */
 
 

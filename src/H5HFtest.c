@@ -481,7 +481,7 @@ H5HF_get_id_type_test(const void *_id, unsigned char *obj_type)
     HDassert(obj_type);
 
     /* Get the type for a heap ID */
-    *obj_type = *id & H5HF_ID_TYPE_MASK;
+    *obj_type = (uint8_t)(*id & H5HF_ID_TYPE_MASK);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_get_id_type_test() */
