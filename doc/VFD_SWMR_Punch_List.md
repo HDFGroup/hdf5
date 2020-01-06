@@ -22,15 +22,15 @@ guide to the syntax.
     VFD SWMR writer mode. See addition of the EOT queue in section 3.2.2
     of the RFC, and related changes in sections 3.3 and 3.3.2.
 
-5.  **Vailin, complete**Add the pb\_expansion\_threshold field to the
+5.  **Vailin, complete** Add the pb\_expansion\_threshold field to the
     H5F\_vfd\_swmr\_config\_t structure, and update
     H5Pset\_vfd\_swmr\_config()and
     H5Pget\_vfd\_swmr\_config()accordingly.
 
-6.  **Vailin, in progress**Implement end tick now API call. See section 3.1.2 of the RFC for
+6.  **Vailin, in progress** Implement end tick now API call. See section 3.1.2 of the RFC for
     specifications.
 
-7.  **Vailin, in progress**Implement enable / disable EOT call. See section 3.1.3 of the RFC
+7.  **Vailin, in progress** Implement enable / disable EOT call. See section 3.1.3 of the RFC
     for specifications.
 
 8.  Implement option to flush raw data as part of EOT -- write
@@ -45,7 +45,7 @@ guide to the syntax.
 10. Update the new page buffer to support the pb\_expansion\_threshold,
     and trigger an early end of tick if the threshold is exceeded.
 
-11. Modify metadata file write call to allow the location of the index
+11. **David, in progress** Modify metadata file write call to allow the location of the index
     to float and thus be of arbitrary size.
 
 12. Add code to remove entries from the index after they have been
@@ -54,11 +54,11 @@ guide to the syntax.
 
 13. Tidy short cuts in the initial implementation. These include:
 
-    -   **Vailin complete**Odd behavior in the superblock refresh routine (see comments in
+    -   **Vailin complete** Odd behavior in the superblock refresh routine (see comments in
         code). Figure out what is going on, and then either bypass the
         issue or fix it as seems appropriate.
 
-    -   **Vailin complete**Comment H5F\_vfd\_swmr\_config\_t in H5Fpublic.h properly.
+    -   **Vailin complete** Comment H5F\_vfd\_swmr\_config\_t in H5Fpublic.h properly.
 
     -   Cleanup EOA hack in H5FD\_read().
 
@@ -149,5 +149,5 @@ guide to the syntax.
     H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1024 * 1024 * 1024) and
     then run the vfd_swmr_addrem_writer.c.
 
-30. **David, merged, needs more testing** Add a delay to the FSM so that
+30. **David, merged, needs unit test** Add a delay to the FSM so that
     freed regions are not reused before max_lag ticks are up.
