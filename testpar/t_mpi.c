@@ -303,7 +303,7 @@ static int test_mpio_gb_file(char *filename) {
                             mpi_rank, mpi_off, mpi_off);
                 /* set data to some trivial pattern for easy verification */
                 for (j = 0; j < MB; j++)
-                    *(buf + j) = i * mpi_size + mpi_rank;
+                    H5_CHECKED_ASSIGN(*(buf + j), int8_t, i * mpi_size + mpi_rank, int);
                 if (VERBOSE_MED)
                     HDfprintf(stdout,
                             "proc %d: writing %d bytes at offset %lld\n",
@@ -351,7 +351,7 @@ static int test_mpio_gb_file(char *filename) {
                 mrc = MPI_File_read_at(fh, mpi_off, buf, MB, MPI_BYTE,
                         &mpi_stat);
                 INFO((mrc == MPI_SUCCESS), "GB size file read");
-                expected = i * mpi_size + (mpi_size - mpi_rank - 1);
+                H5_CHECKED_ASSIGN(expected, int8_t, i * mpi_size + (mpi_size - mpi_rank - 1), int);
                 vrfyerrs = 0;
                 for (j = 0; j < MB; j++) {
                     if ((*(buf + j) != expected)
@@ -526,7 +526,7 @@ static int test_mpio_1wMr(char *filename, int special_request) {
     * ==================================================*/
     irank = 0;
     for (i = 0; i < DIMSIZE; i++)
-        writedata[i] = irank * DIMSIZE + i;
+        H5_CHECKED_ASSIGN(writedata[i], uint8_t, irank * DIMSIZE + i, int)
     mpi_off = irank * DIMSIZE;
 
     /* Only one process writes */
@@ -597,7 +597,7 @@ static int test_mpio_1wMr(char *filename, int special_request) {
         return 1;
     };
     for (i = 0; i < DIMSIZE; i++) {
-        expect_val = irank * DIMSIZE + i;
+        H5_CHECKED_ASSIGN(expect_val, uint8_t, irank * DIMSIZE + i, int);
         if (readdata[i] != expect_val) {
             PRINTID;
             HDprintf("read data[%d:%d] got %02x, expect %02x\n", irank, i,
@@ -697,7 +697,7 @@ static int test_mpio_derived_dtype(char *filename) {
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     retcode = 0;
     for (i = 0; i < 3; i++)
-        buf[i] = i + 1;
+        H5_CHECKED_ASSIGN(buf[i], int8_t, i + 1, int);
 
     if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename,
             MPI_MODE_RDWR | MPI_MODE_CREATE, MPI_INFO_NULL, &fh))
