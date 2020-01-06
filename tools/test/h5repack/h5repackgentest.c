@@ -266,7 +266,7 @@ generate_uint8be(hbool_t external) {
     for (i = 0, n = 0; i < dims[0]; i++) {
         for (j = 0; j < dims[1]; j++) {
             for (k = 0; k < dims[2]; k++, n++) {
-                wdata[n] = n * ((n & 1) ? (-1) : (1));
+                wdata[n] = (uint8_t)((n & 1) ? -n : n);
             }
         }
     }
@@ -296,7 +296,7 @@ generate_f32le(hbool_t external) {
     /* Generate values */
     for (i = 0, k = 0, n = 0; i < dims[0]; i++) {
         for (j = 0; j < dims[1]; j++, k++, n++) {
-            wdata[k] = n * 801.1 * ((k % 5 == 1) ? (-1) : (1));
+            wdata[k] = (float)(n * 801.1 * ((k % 5 == 1) ? (-1) : (1)));
         }
     }
 

@@ -316,7 +316,7 @@ H5O_link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
 
     /* Store the type of a non-default link */
     if(link_flags & H5O_LINK_STORE_LINK_TYPE)
-        *p++ = lnk->type;
+        *p++ = (uint8_t)lnk->type;
 
     /* Store the link creation order in the file, if its valid */
     if(lnk->corder_valid)

@@ -2565,7 +2565,7 @@ static void gent_bitfields(void)
         goto error;
 
     for(i = 0; i < sizeof buf; i++)
-        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        buf[i] = (uint8_t)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         goto error;
     if(H5Sclose(space) < 0) goto error;
@@ -2579,7 +2579,7 @@ static void gent_bitfields(void)
             (dset = H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
     for(i = 0; i < sizeof buf; i++)
-        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        buf[i] = (uint8_t)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         goto error;
     if(H5Sclose(space) < 0) goto error;
@@ -9814,7 +9814,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf[i] = (uint8_t)0xff ^ (uint8_t)i;
+                        buf[i] = (uint8_t)(0xff ^ i);
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                     H5Dclose(dset);
@@ -9829,7 +9829,7 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for (i = 0; i < nelmts; i++) {
-                        buf2[i] = (uint16_t)0xffff ^ (uint16_t)(i * 16);
+                        buf2[i] = (uint16_t)(0xffff ^ (i * 16));
                     }
                     H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
                     H5Dclose(dset);
@@ -9879,7 +9879,7 @@ static void gent_bitnopaquefields(void)
                 if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                     if ((dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         for(i = 0; i < nelmts; i++)
-                            buf[i] = (uint8_t)0xff ^ (uint8_t)i;
+                            H5_CHECKED_ASSIGN(buf[i], uint8_t, 0xff ^ i, size_t);
                         H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                         H5Dclose(dset);
                     }
@@ -9895,7 +9895,7 @@ static void gent_bitnopaquefields(void)
                 if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                     if ((dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         for(i = 0; i < nelmts; i++)
-                            buf2[i] = (uint16_t)0xffff ^ (uint16_t)(i * 16);
+                            H5_CHECKED_ASSIGN(buf2[i], uint16_t, 0xffff ^ (i * 16), size_t);
 
                         H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
                         H5Dclose(dset);
@@ -9918,8 +9918,8 @@ static void gent_bitnopaquefields(void)
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
                 if ((dset = H5Dcreate2(grp, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     for(i = 0; i < nelmts; i++) {
-                        buf5[i].a = (uint8_t)0xff ^ (uint8_t)i;
-                        buf5[i].b = (uint16_t)0xffff ^ (uint16_t)(i * 16);
+                        H5_CHECKED_ASSIGN(buf5[i].a, uint8_t, 0xff ^ i, size_t);
+                        H5_CHECKED_ASSIGN(buf5[i].b, uint16_t, 0xffff ^ (i * 16), size_t);
                         buf5[i].c = (uint32_t)0xffffffff ^ (uint32_t)(i * 32);
                         buf5[i].d = (uint64_t)0xffffffffffffffff ^ (uint64_t)(i * 64);
                     }
@@ -10488,7 +10488,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
         /* Subtract the original value with MULTIPLIER */
         while(buf_left > 0) {
             char temp = *int_ptr;
-            *int_ptr = temp - MULTIPLIER;
+            H5_CHECKED_ASSIGN(*int_ptr, int8_t, temp - MULTIPLIER, int);
             int_ptr++;
             buf_left -= sizeof(*int_ptr);
         } /* end while */
@@ -10497,7 +10497,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
         /* Add the original value with MULTIPLIER */
         while(buf_left > 0) {
             char temp = *int_ptr;
-            *int_ptr = temp + MULTIPLIER;
+            H5_CHECKED_ASSIGN(*int_ptr, int8_t, temp + MULTIPLIER, int);
             int_ptr++;
             buf_left -= sizeof(*int_ptr);
         } /* end while */
