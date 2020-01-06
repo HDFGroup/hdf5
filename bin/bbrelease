@@ -33,9 +33,9 @@
 #   Added the md5 method.
 #
 #   Larry Knox, 2016-08-30
-#   Added the --revision option to create private releases with the
+#   Added the --revision option to create private releases with the 
 #   code revision hash in the version strings. Currently the version
-#   of this script with the --revision option is named bbrelease. It
+#   of this script with the --revision option is named bbrelease. It 
 #   can probably be merged into the original release script in the
 #   future.
 #   Commands to get the revision hash have now been converted to git
@@ -48,25 +48,25 @@ USAGE()
 {
 cat << EOF
 Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
-   -d DIR    The name of the directory where the releas(es) should be
+   -d DIR	The name of the directory where the releas(es) should be
                 placed.
    --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
                         version of documentation files from the hdf5docs
                         repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
    -h           print the help page.
-   --nocheck    Ignore errors in MANIFEST file.
-   --private    Make a private release with today's date in version information.
-   --revision    Make a private release with the code revision number in version information.
-
+   --nocheck	Ignore errors in MANIFEST file.
+   --private	Make a private release with today's date in version information.
+   --revision	Make a private release with the code revision number in version information.
+         
 This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
 for compressing the resulting tar archive (if none are given then
 "tar" is assumed):
 
-    tar        -- use tar and don't do any compressing.
-    gzip    -- use gzip with "-9" and append ".gz" to the output name.
+    tar		-- use tar and don't do any compressing.
+    gzip	-- use gzip with "-9" and append ".gz" to the output name.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
-    zip        -- convert all text files to DOS style and form a zip file for Windows use.
+    zip		-- convert all text files to DOS style and form a zip file for Windows use.
     doc         -- produce the latest doc tree in addition to the archive.
 
 An md5 checksum is produced for each archive created and stored in the md5 file.
@@ -119,8 +119,8 @@ EOF
 tar2zip()
 {
     if [ $# -ne 3 ]; then
-    echo "usage: tar2zip <tarfilename> <zipfilename>"
-    return 1
+	echo "usage: tar2zip <tarfilename> <zipfilename>"
+	return 1
     fi
     ztmpdir=/tmp/tmpdir$$
     mkdir -p $ztmpdir
@@ -132,23 +132,23 @@ tar2zip()
     (cd $ztmpdir; tar xf -) < $tarfile
     # sanity check
     if [ ! -d $ztmpdir/$version ]; then
-    echo "untar did not create $ztmpdir/$version source dir"
-    # cleanup
-    rm -rf $ztmpdir
-    return 1
+	echo "untar did not create $ztmpdir/$version source dir"
+	# cleanup
+	rm -rf $ztmpdir
+	return 1
     fi
     # step 2: convert text files
     # There maybe a simpler way to do this.
     # options used in unix2dos:
-    # -k   Keep the date stamp
+    # -k   Keep the date stamp 
     # -q   quiet mode
     # grep redirect output to /dev/null because -q or -s are not portable.
     find $ztmpdir/$version | \
-    while read inf; do \
-        if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
-        unix2dos -q -k $inf; \
-        fi\
-    done
+	while read inf; do \
+	    if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
+		unix2dos -q -k $inf; \
+	    fi\
+	done
     # step 3: make zipball
     # -9 maximum compression
     # -y Store symbolic links as such in the zip archive
@@ -167,9 +167,9 @@ tar2zip()
 # testing with source that is not for release, there is not a file named
 # "configure" but there will be one named "configure.ac".  The "configure"
 # file will be created when autogen.sh runs. There probably will always
-# be a bin/release file, but just in case it is removed, we can check for
+# be a bin/release file, but just in case it is removed, we can check for 
 # this script, bbrelease, in the bin directory.  The bin/release script should
-# continue to check for "configure" because it should be present in release
+# continue to check for "configure" because it should be present in release 
 # source.
 if [ ! \( -f configure.ac -a -f bin/bbrelease \) ]; then
     echo "$0 must be run at the top level of the hdf5 source directory"
@@ -187,7 +187,7 @@ release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
 revmode='no'
-tmpdir="../#release_tmp.$$"    # tmp work directory
+tmpdir="../#release_tmp.$$"	# tmp work directory
 DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git
 CPPLUS_RM_NAME=cpplus_RM
 
@@ -195,11 +195,11 @@ CPPLUS_RM_NAME=cpplus_RM
 RESTORE_VERSION()
 {
     if [ X-${VERS_OLD} != X- ]; then
-    echo restoring version information back to $VERS_OLD
-    rm -f config/lt_vers.am
-    cp $tmpdir/lt_vers.am config/lt_vers.am
-    bin/h5vers -s $VERS_OLD
-    VERS_OLD=
+	echo restoring version information back to $VERS_OLD
+	rm -f config/lt_vers.am
+	cp $tmpdir/lt_vers.am config/lt_vers.am
+	bin/h5vers -s $VERS_OLD
+	VERS_OLD=
     fi
 }
 
@@ -209,20 +209,20 @@ while [ -n "$1" ]; do
     arg=$1
     shift
     case "$arg" in
-    -d)
-        DEST=$1
-        shift
-        ;;
-    --nocheck)
-        check=no
-        ;;
-    -h)
-        USAGE
-        exit 0
-        ;;
-    --private)
-        pmode=yes
-        ;;
+	-d)
+	    DEST=$1
+	    shift
+	    ;;
+	--nocheck)
+	    check=no
+	    ;;
+	-h)
+	    USAGE
+	    exit 0
+	    ;;
+	--private)
+	    pmode=yes
+	    ;;
         --revision)
             revmode=yes
             ;;
@@ -230,14 +230,14 @@ while [ -n "$1" ]; do
             DOCVERSION=$1
             shift
             ;;
-    -*)
-        echo "Unknown switch: $arg" 1>&2
-        USAGE
-        exit 1
-        ;;
-    *)
-        methods="$methods $arg"
-        ;;
+	-*)
+	    echo "Unknown switch: $arg" 1>&2
+	    USAGE
+	    exit 1
+	    ;;
+	*)
+	    methods="$methods $arg"
+	    ;;
     esac
 done
 
@@ -300,12 +300,12 @@ if [ ! -d $DEST ]; then
 fi
 
 # Check the validity of the MANIFEST file.
-bin/chkmanifest || fail=no
+bin/chkmanifest || fail=yes
 if [ "X$fail" = "Xyes" ]; then
     if [ $check = yes ]; then
         exit 1
     else
-    echo "Continuing anyway..."
+	echo "Continuing anyway..."
     fi
 fi
 
@@ -340,7 +340,7 @@ test "$verbose" && echo "   Running tar..." 1>&2
 ( \
     cd $tmpdir; \
     tar cf $HDF5_VERS.tar $HDF5_IN_VERS/Makefile \
-    `sed 's/^\.\//'$HDF5_IN_VERS'\//' $MANIFEST` || exit 1 \
+	`sed 's/^\.\//'$HDF5_IN_VERS'\//' $MANIFEST` || exit 1 \
 )
 
 # Compress
@@ -348,46 +348,46 @@ MD5file=$HDF5_VERS.md5
 cp /dev/null $DEST/$MD5file
 for comp in $methods; do
     case $comp in
-    tar)
-        cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
-        (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file)
-        ;;
-    gzip)
-        test "$verbose" && echo "   Running gzip..." 1>&2
-        gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
-        (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file)
-        ;;
-    bzip2)
-        test "$verbose" && echo "   Running bzip2..." 1>&2
-        bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
-        (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file)
-        ;;
-    zip)
-        test "$verbose" && echo "   Creating zip ball..." 1>&2
-        tar2zip $HDF5_IN_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
-        (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file)
-        ;;
-    doc)
+	tar)
+	    cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
+	    (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file) 
+	    ;;
+	gzip)
+	    test "$verbose" && echo "   Running gzip..." 1>&2
+	    gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
+	    (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file) 
+	    ;;
+	bzip2)
+	    test "$verbose" && echo "   Running bzip2..." 1>&2
+	    bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
+	    (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file) 
+	    ;;
+	zip)
+	    test "$verbose" && echo "   Creating zip ball..." 1>&2
+	    tar2zip $HDF5_IN_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
+	    (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file) 
+	    ;;
+	doc)
             if [ "${DOCVERSION}" = "" ]; then
                 DOCVERSION=master
             fi
-        test "$verbose" && echo "   Creating docs..." 1>&2
-        # Check out docs from git repo
-        (cd $tmpdir; git clone $DOC_URL > /dev/null) || exit 1
-        # Create doxygen C++ RM
-        (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
-        # Replace version of C++ RM with just-created version
+	    test "$verbose" && echo "   Creating docs..." 1>&2
+	    # Check out docs from git repo
+	    (cd $tmpdir; git clone $DOC_URL > /dev/null) || exit 1
+	    # Create doxygen C++ RM
+	    (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
+	    # Replace version of C++ RM with just-created version
             rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
             mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
             # Compress the docs and move them to the release area
             mv $tmpdir/$DOCVERSION $tmpdir/${HDF5_VERS}_docs
-        (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
-        mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
-        ;;
-    *)
-        echo "***Error*** Unknown method $comp"
-        exit 1
-        ;;
+	    (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
+	    mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
+	    ;;
+	*)
+	    echo "***Error*** Unknown method $comp"
+	    exit 1
+	    ;;
     esac
 done
 
