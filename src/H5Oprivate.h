@@ -877,6 +877,7 @@ typedef struct {
     void *new_obj;              /* Pointer to new object created */
 } H5O_obj_create_t;
 
+
 /* Forward declarations for prototype arguments */
 struct H5P_genplist_t;
 
