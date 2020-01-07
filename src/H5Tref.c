@@ -622,8 +622,9 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
         if((file_id = H5F_get_file_id(src_file, H5I_FILE, FALSE)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-        /* Attach loc ID to reference and hold reference to it */
-        if(H5R__set_loc_id(dst_ref, file_id, TRUE) < 0)
+        /* Attach loc ID to reference and hold reference to it, this is a
+         * user exposed reference so set app_ref to TRUE. */
+        if(H5R__set_loc_id(dst_ref, file_id, TRUE, TRUE) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "unable to attach location id to reference")
     } /* end if */
 

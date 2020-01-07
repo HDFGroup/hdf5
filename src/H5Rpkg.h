@@ -79,7 +79,7 @@ typedef struct H5R_ref_priv_t {
     uint32_t encode_size;       /* Cached encoding size             */
     int8_t   type;              /* Reference type                   */
     uint8_t  token_size;        /* Cached token size                */
-    char unused[18];            /* Unused                           */
+    hbool_t  app_ref;           /* App ref on loc_id                */
 } H5R_ref_priv_t;
 
 /*****************************/
@@ -95,7 +95,7 @@ H5_DLL herr_t   H5R__create_region(const H5VL_token_t *obj_token, size_t token_s
 H5_DLL herr_t   H5R__create_attr(const H5VL_token_t *obj_token, size_t token_size, const char *attr_name, H5R_ref_priv_t *ref);
 H5_DLL herr_t   H5R__destroy(H5R_ref_priv_t *ref);
 
-H5_DLL herr_t   H5R__set_loc_id(H5R_ref_priv_t *ref, hid_t id, hbool_t inc_ref);
+H5_DLL herr_t   H5R__set_loc_id(H5R_ref_priv_t *ref, hid_t id, hbool_t inc_ref, hbool_t app_ref);
 H5_DLL hid_t    H5R__get_loc_id(const H5R_ref_priv_t *ref);
 H5_DLL hid_t    H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id);
 

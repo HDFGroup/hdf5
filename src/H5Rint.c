@@ -433,8 +433,15 @@ H5R__destroy(H5R_ref_priv_t *ref)
     } /* end switch */
 
     /* Decrement refcount of attached loc_id */
-    if(ref->type && (ref->loc_id != H5I_INVALID_HID) && (H5I_dec_ref(ref->loc_id) < 0))
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "decrementing location ID failed")
+    if(ref->type && (ref->loc_id != H5I_INVALID_HID)) {
+        if(ref->app_ref) {
+            if(H5I_dec_app_ref(ref->loc_id) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "decrementing location ID failed")
+        } else {
+            if(H5I_dec_ref(ref->loc_id) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "decrementing location ID failed")
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -451,7 +458,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R__set_loc_id(H5R_ref_priv_t *ref, hid_t id, hbool_t inc_ref)
+H5R__set_loc_id(H5R_ref_priv_t *ref, hid_t id, hbool_t inc_ref, hbool_t app_ref)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -460,14 +467,26 @@ H5R__set_loc_id(H5R_ref_priv_t *ref, hid_t id, hbool_t inc_ref)
     HDassert(ref != NULL);
     HDassert(id != H5I_INVALID_HID);
 
-    /* If a location ID was previously assigned, decrement refcount and assign new one */
-    if((ref->loc_id != H5I_INVALID_HID) && (H5I_dec_ref(ref->loc_id) < 0))
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "decrementing location ID failed")
+    /* If a location ID was previously assigned, decrement refcount and
+     * assign new one */
+    if((ref->loc_id != H5I_INVALID_HID)) {
+        if(ref->app_ref) {
+            if(H5I_dec_app_ref(ref->loc_id) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "decrementing location ID failed")
+        } else {
+            if(H5I_dec_ref(ref->loc_id) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "decrementing location ID failed")
+        }
+    }
     ref->loc_id = id;
 
-    /* Prevent location ID from being freed until reference is destroyed */
-    if(inc_ref && H5I_inc_ref(ref->loc_id, FALSE) < 0)
+    /* Prevent location ID from being freed until reference is destroyed,
+     * set app_ref if necessary as references are exposed to users and are
+     * expected to be destroyed, this allows the loc_id to be cleanly released
+     * on shutdown if users fail to call H5Rdestroy(). */
+    if(inc_ref && H5I_inc_ref(ref->loc_id, app_ref) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINC, FAIL, "incrementing location ID failed")
+    ref->app_ref = app_ref;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -559,7 +578,7 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5I_INVALID_HID, "unable to make file 'post open' callback")
 
     /* Attach loc_id to reference */
-    if(H5R__set_loc_id((H5R_ref_priv_t *)ref, ret_value, FALSE) < 0)
+    if(H5R__set_loc_id((H5R_ref_priv_t *)ref, ret_value, FALSE, TRUE) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "unable to attach location id to reference")
 
 done:
@@ -711,7 +730,7 @@ H5R__copy(const H5R_ref_priv_t *src_ref, H5R_ref_priv_t *dst_ref)
         dst_ref->ref.obj.filename = NULL;
 
         /* Set location ID and hold reference to it */
-        if(H5R__set_loc_id(dst_ref, src_ref->loc_id, TRUE) < 0)
+        if(H5R__set_loc_id(dst_ref, src_ref->loc_id, TRUE, TRUE) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "cannot set reference location ID")
     }
 
