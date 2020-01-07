@@ -498,6 +498,8 @@ H5_DLL herr_t H5G__name_init(H5G_name_t *name, const char *path);
  */
 H5_DLL herr_t H5G__loc_insert(H5G_loc_t *grp_loc, const char *name,
     H5G_loc_t *obj_loc, H5O_type_t obj_type, const void *crt_info);
+H5_DLL herr_t H5G__loc_addr(const H5G_loc_t *loc, const char *name,
+    haddr_t *addr/*out*/);
 
 /* Testing functions */
 #ifdef H5G_TESTING

@@ -486,11 +486,11 @@ END SUBROUTINE test_h5o_refcount
 
 !****************************************************************
 !**
-!**  test_h5o_refcount(): Test H5O visit functions.
+!**  test_obj_visit(): Test H5O visit functions.
 !**
 !****************************************************************
 
-SUBROUTINE obj_visit(total_error)
+SUBROUTINE test_obj_visit(total_error)
 
   USE HDF5
   USE TH5_MISC
@@ -648,15 +648,15 @@ SUBROUTINE obj_visit(total_error)
   CALL h5fclose_f(fid, error)
   CALL check("h5fclose_f",error, total_error)
 
-END SUBROUTINE obj_visit
+END SUBROUTINE test_obj_visit
 
 !****************************************************************
 !**
-!**  test_h5o_refcount(): Test H5O info functions.
+!**  test_obj_info(): Test H5O info functions.
 !**
 !****************************************************************
 
-SUBROUTINE obj_info(total_error)
+SUBROUTINE test_obj_info(total_error)
 
   USE HDF5
   USE TH5_MISC
@@ -796,7 +796,7 @@ SUBROUTINE obj_info(total_error)
   CALL h5fclose_f(fid, error)
   CALL check("h5fclose_f", error, total_error)
 
-END SUBROUTINE obj_info
+END SUBROUTINE test_obj_info
 
 !-------------------------------------------------------------------------
 ! Function:    build_visit_file

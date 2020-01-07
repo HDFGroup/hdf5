@@ -399,7 +399,7 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
         iter->attr_bins = (unsigned long *)HDrealloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
         HDassert(iter->attr_bins);
 
-  /* Initialize counts for intermediate bins */
+        /* Initialize counts for intermediate bins */
         while(iter->attr_nbins < bin)
             iter->attr_bins[iter->attr_nbins++] = 0;
         iter->attr_nbins++;

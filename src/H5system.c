@@ -86,7 +86,9 @@ static hbool_t H5_ntzset = FALSE;
  *    prints an `hsize_t' value as a hex number right justified and
  *    zero filled in an 18-character field.
  *
- *    The conversion `a' refers to an `haddr_t' type.
+ *    The conversion 'a' refers to an haddr_t type.
+ *
+ *    The conversion 't' refers to an htri_t type.
  *
  * Return:  Success:  Number of characters printed
  *
