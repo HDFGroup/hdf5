@@ -23,6 +23,7 @@ package examples.datatypes;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
