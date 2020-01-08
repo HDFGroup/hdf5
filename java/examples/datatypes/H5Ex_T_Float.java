@@ -173,7 +173,7 @@ public class H5Ex_T_Float {
         }
 
         // Output the data to the screen.
-        DecimalFormat df = new DecimalFormat("#,##0.0000");
+        DecimalFormat df = new DecimalFormat("#,##0.0000", new DecimalFormatSymbols(Locale.US));
         System.out.println(DATASETNAME + ":");
         for (int indx = 0; indx < dims[0]; indx++) {
             System.out.print(" [");
