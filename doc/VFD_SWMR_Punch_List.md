@@ -76,8 +76,9 @@ guide to the syntax.
 
 16. Implement the logging facility (section 3.14 RFC)
 
-17. Test code to expose existing page buffer bugs and fix same. Note
-    that they seem to appear primarily on Jelly.
+17. **David, probably fixed by various changes since September 2019** Test code
+to expose existing page buffer bugs and fix same. Note that they seem to appear
+primarily on Jelly.
 
     -   DLL pre remove sanity check assertion failure
 
@@ -93,20 +94,22 @@ guide to the syntax.
 
     David found that the shadow index was leaked by VFD SWMR readers
     and plugged the leak.  Now the sparse reader tests do not use up
-    all of the memory on `jelly`.  David fixed the bug on his branch
-    `vfd_swmr-merge-attempt-2`, which as of 19 Nov 2019 has not been
-    merged to `feature/vfd_swmr`.
+    all of the memory on `jelly`.
 
 20. **David, complete** Test John's patch that repairs the superblock flags
     mismatch that crashes the reader.
 
-    David found that the patch fixed the demo crashes.  He applied the
-    patch to his branch `vfd_swmr-merge-attempt-2`, which has not yet
-    been merged to `feature/vfd_swmr` as of 19 Nov 2019.
+    David found that the patch fixed the demo crashes.
 
 21. Investigate a potential time-of-check, time-of-use race condition
     involving EOA/EOF and the skip\_read variable in some of the H5PB
     routines.
+
+    This race condition may only affect raw-data access.
+
+    It may be necessary to poll the superblock for the current EOA.
+    The reader's refresh routine for the superblock should propagate the new
+    EOA to the VFDs.
 
 22. Understand use of H5F\_t on branch feature/vfd\_swmr instead of
     H5C\_t as on develop branch.
@@ -151,3 +154,11 @@ guide to the syntax.
 
 30. **David, merged, needs unit test** Add a delay to the FSM so that
     freed regions are not reused before max_lag ticks are up.
+
+31. Create a large dataset with a small chunk size to verify that
+    page management in the extensible array is handled properly by
+    VFD SWMR.
+
+32. Make a fixed-size dataset with a small chunk size to verify ... see #31.
+
+33. Make automated tests out of the `credel` and `gaussians` tests.
