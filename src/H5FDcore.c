@@ -337,6 +337,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
     unsigned char  *ptr         = file->mem + addr;     /* mutable pointer into the
                                                          * buffer (can't change mem)
                                                          */
+    HDoff_t         offset      = (HDoff_t)addr;        /* Offset to write at */
     herr_t          ret_value   = SUCCEED;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -353,7 +354,6 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
         h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
-        HDoff_t             offset          = (HDoff_t)addr;
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -366,7 +366,8 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
         do {
 #ifdef H5_HAVE_PREADWRITE
             bytes_wrote = HDpwrite(file->fd, ptr, bytes_in, offset);
-            offset += bytes_wrote;
+            if(bytes_wrote > 0)
+                offset += bytes_wrote;
 #else
             bytes_wrote = HDwrite(file->fd, ptr, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
@@ -749,12 +750,12 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                  * partial results, and the end of the file.
                  */
                 
-                uint8_t *mem = file->mem; /* memory pointer for writes */
+                uint8_t *mem = file->mem;       /* memory pointer for writes */
+                HDoff_t offset = (HDoff_t)0;    /* offset for reading */
                 
                 while(size > 0) {
                     h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
                     h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
-                    HDoff_t             offset          = (HDoff_t)0;
                     
                     /* Trying to read more bytes than the return type can handle is
                      * undefined behavior in POSIX.
@@ -767,7 +768,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                     do {
 #ifdef H5_HAVE_PREADWRITE
                         bytes_read = HDpread(file->fd, mem, bytes_in, offset);
-                        offset += bytes_read;
+                        if(bytes_read > 0)
+                            offset += bytes_read;
 #else
                         bytes_read = HDread(file->fd, mem, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */

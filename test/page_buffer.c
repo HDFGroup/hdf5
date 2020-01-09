@@ -335,7 +335,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
             memb_addr[H5FD_MEM_DRAW] = ((memb_addr[H5FD_MEM_DRAW] + pagesize - 1) / pagesize) * pagesize;
         } else {
             /* Set memb_addr aligned */
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
                 memb_addr[mt] = ((memb_addr[mt] + pagesize - 1) / pagesize) * pagesize;
         } /* end else */
 
@@ -344,7 +344,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
             TEST_ERROR
 
         /* Free memb_name */
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
             free(memb_name[mt]);
 
     } /* end if */

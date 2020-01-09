@@ -1163,6 +1163,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
 #ifdef H5_HAVE_GETTIMEOFDAY
     struct timeval      timeval_start, timeval_stop;
 #endif /* H5_HAVE_GETTIMEOFDAY */
+    HDoff_t             offset = (HDoff_t)addr;
     herr_t              ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1247,7 +1248,6 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
         h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */ 
-        HDoff_t             offset          = (HDoff_t)addr;
 
         /* Trying to read more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -1260,7 +1260,8 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
         do {
 #ifdef H5_HAVE_PREADWRITE
             bytes_read = HDpread(file->fd, buf, bytes_in, offset);
-            offset += bytes_read;
+            if(bytes_read > 0)
+                offset += bytes_read;
 #else
             bytes_read = HDread(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
@@ -1374,6 +1375,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 #ifdef H5_HAVE_GETTIMEOFDAY
     struct timeval      timeval_start, timeval_stop;
 #endif /* H5_HAVE_GETTIMEOFDAY */
+    HDoff_t             offset = (HDoff_t)addr;
     herr_t              ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1463,7 +1465,6 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
         h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
-        HDoff_t             offset          = (HDoff_t)addr;
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -1476,7 +1477,8 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
         do {
 #ifdef H5_HAVE_PREADWRITE
             bytes_wrote = HDpwrite(file->fd, buf, bytes_in, offset);
-            offset += bytes_wrote;
+            if(bytes_wrote > 0)
+                offset += bytes_wrote;
 #else
             bytes_wrote = HDwrite(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */

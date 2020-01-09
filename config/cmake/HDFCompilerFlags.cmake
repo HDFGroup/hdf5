@@ -107,7 +107,7 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
       endif()
     elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra")
-      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wbad-function-cast -Wc++-compat -Wcast-align")
+      set (H5_CFLAGS0 "${H5_CFLAGS0} -Wbad-function-cast -Wno-c++-compat -Wcast-align")
       set (H5_CFLAGS0 "${H5_CFLAGS0} -Wcast-qual -Wconversion -Wdeclaration-after-statement -Wdisabled-optimization -Wfloat-equal")
       set (H5_CFLAGS0 "${H5_CFLAGS0} -Wformat=2 -Winit-self -Winvalid-pch -Wmissing-declarations -Wmissing-include-dirs")
       set (H5_CFLAGS0 "${H5_CFLAGS0} -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked -Wpointer-arith")
@@ -200,7 +200,7 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
 
     # Append more extra warning flags that only gcc 7.x+ know about
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 7.0)
-      set (H5_CFLAGS4 "${H5_CFLAGS4} -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=2 -Wimplicit-fallthrough=5 -Wrestrict")
+      set (H5_CFLAGS4 "${H5_CFLAGS4} -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=1 -Wimplicit-fallthrough=5 -Wrestrict")
     endif ()
 
     # Append more extra warning flags that only gcc 8.x+ know about
