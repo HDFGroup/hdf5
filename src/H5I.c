@@ -152,13 +152,13 @@ H5I_term_package(void)
         H5I_type_t type;                /* Type of ID */
 
         /* How many types are still being used? */
-        for(type = (H5I_type_t)0; type < H5I_next_type; H5_INC_ENUM(H5I_type_t, type))
+        for(type = (H5I_type_t)0; type < H5I_next_type; type++)
             if((type_ptr = H5I_id_type_list_g[type]) && type_ptr->ids)
                 n++;
 
         /* If no types are used then clean up */
         if(0 == n) {
-            for(type = (H5I_type_t)0; type < H5I_next_type; H5_INC_ENUM(H5I_type_t,type)) {
+            for(type = (H5I_type_t)0; type < H5I_next_type; type++) {
                 type_ptr = H5I_id_type_list_g[type];
                 if(type_ptr) {
                     HDassert(NULL == type_ptr->ids);
@@ -210,7 +210,7 @@ H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free_func)
     /* Increment the number of types*/
     if(H5I_next_type < H5I_MAX_NUM_TYPES) {
         new_type = H5I_next_type;
-        H5_INC_ENUM(H5I_type_t, H5I_next_type);
+        H5I_next_type++;
     } /* end if */
     else {
         hbool_t done;       /* Indicate that search was successful */

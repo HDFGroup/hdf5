@@ -3777,7 +3777,7 @@ test_filespace_info(const char *env_h5_drvr)
             for(fs_threshold = 0; fs_threshold <= TEST_THRESHOLD10; fs_threshold++) {
 
                 /* Test with 4 file space strategies */
-                for(fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_strategy < H5F_FSPACE_STRATEGY_NTYPES; H5_INC_ENUM(H5F_fspace_strategy_t, fs_strategy)) {
+                for(fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_strategy < H5F_FSPACE_STRATEGY_NTYPES; fs_strategy++) {
 
                     if(!contig_addr_vfd && (fs_strategy == H5F_FSPACE_STRATEGY_PAGE || fs_persist))
                         continue;
@@ -3925,7 +3925,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
         memb_addr[H5FD_MEM_DRAW] = ((memb_addr[H5FD_MEM_DRAW] + pagesize - 1) / pagesize) * pagesize;
     } else {
         /* Set memb_addr aligned */
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
             memb_addr[mt] = ((memb_addr[mt] + pagesize - 1) / pagesize) * pagesize;
     } /* end else */
 
@@ -3934,7 +3934,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
         TEST_ERROR
 
     /* Free memb_name */
-    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
         free(memb_name[mt]);
 
     return 0;
@@ -4301,7 +4301,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         if(multi_vfd) {
             hssize_t ntmp;
 
-            for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+            for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++) {
                 if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
                     continue;
                 /* Get the # of free-space sections in the file for metadata */
@@ -5611,8 +5611,8 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non
         CHECK(new_fapl, FAIL, "H5Pcreate");
 
         /* Loop through all the combinations of low/high bounds in new_fapl */
-        for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-            for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+        for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+            for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
                 H5E_BEGIN_TRY {
                     ret = H5Pset_libver_bounds(new_fapl, low, high);
                 } H5E_END_TRY;
