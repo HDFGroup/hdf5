@@ -2543,7 +2543,7 @@ test_vltypes_fill_value(void)
     CHECK(file_id, FAIL, "H5Fcreate");
 
     /* Create datasets with different storage layouts */
-    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; H5_INC_ENUM(H5D_layout_t, layout)) {
+    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
         unsigned compress_loop;         /* # of times to run loop, for testing compressed chunked dataset */
         unsigned test_loop;             /* Loop over datasets */
 
@@ -2659,7 +2659,7 @@ test_vltypes_fill_value(void)
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Read empty datasets with different storage layouts */
-    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; H5_INC_ENUM(H5D_layout_t, layout)) {
+    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
         unsigned compress_loop;         /* # of times to run loop, for testing compressed chunked dataset */
         unsigned test_loop;             /* Loop over datasets */
 
@@ -2860,7 +2860,7 @@ test_vltypes_fill_value(void)
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Write one element & fill values to  datasets with different storage layouts */
-    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; H5_INC_ENUM(H5D_layout_t, layout)) {
+    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
         unsigned compress_loop;         /* # of times to run loop, for testing compressed chunked dataset */
         unsigned test_loop;             /* Loop over datasets */
 
