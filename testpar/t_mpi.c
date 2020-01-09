@@ -303,7 +303,7 @@ static int test_mpio_gb_file(char *filename) {
                             mpi_rank, mpi_off, mpi_off);
                 /* set data to some trivial pattern for easy verification */
                 for (j = 0; j < MB; j++)
-                    H5_CHECKED_ASSIGN(*(buf + j), int8_t, i * mpi_size + mpi_rank, int);
+                    *(buf + j) = (int8_t)(i * mpi_size + mpi_rank);
                 if (VERBOSE_MED)
                     HDfprintf(stdout,
                             "proc %d: writing %d bytes at offset %lld\n",
@@ -351,7 +351,7 @@ static int test_mpio_gb_file(char *filename) {
                 mrc = MPI_File_read_at(fh, mpi_off, buf, MB, MPI_BYTE,
                         &mpi_stat);
                 INFO((mrc == MPI_SUCCESS), "GB size file read");
-                H5_CHECKED_ASSIGN(expected, int8_t, i * mpi_size + (mpi_size - mpi_rank - 1), int);
+                expected = (int8_t)(i * mpi_size + (mpi_size - mpi_rank - 1));
                 vrfyerrs = 0;
                 for (j = 0; j < MB; j++) {
                     if ((*(buf + j) != expected)
