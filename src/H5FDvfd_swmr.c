@@ -1558,6 +1558,8 @@ H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t reload_hdr_and_index,
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file; /* VFD SWMR file struct */
     herr_t ret_value = SUCCEED;                       /* Return value  */
 
+    assert(index == NULL || num_entries_ptr != NULL);
+
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Load and decode the header and index as indicated */
@@ -1571,19 +1573,20 @@ H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t reload_hdr_and_index,
     if(tick_ptr != NULL)
         *tick_ptr = file->md_header.tick_num;
 
-    if(num_entries_ptr != NULL) {
+    if (index != NULL) {
 
-        if(*num_entries_ptr >= file->md_index.num_entries && index != NULL) {
-
-            HDassert(*num_entries_ptr);
-
-            HDmemcpy(index, file->md_index.entries, 
-                     (file->md_index.num_entries * 
-                      sizeof(H5FD_vfd_swmr_idx_entry_t)));
+        if (*num_entries_ptr < file->md_index.num_entries) {
+            HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL,
+                "not enough space to copy index");
         }
 
-        *num_entries_ptr = file->md_index.num_entries;
+        HDmemcpy(index, file->md_index.entries, 
+                 (file->md_index.num_entries *
+                  sizeof(file->md_index.entries[0])));
     }
+
+    if(num_entries_ptr != NULL)
+        *num_entries_ptr = file->md_index.num_entries;
 
 done:
 
