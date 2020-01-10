@@ -1073,7 +1073,9 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
     uint32_t tmp_mdf_idx_len;
     uint32_t tmp_mdf_idx_entries_used;
     uint32_t mdf_idx_entries_used;
-    herr_t ret_value = SUCCEED;              /* Return value */
+    uint64_t *removed_page = NULL;
+    herr_t ret_value = SUCCEED;
+    uint32_t i, j;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1158,6 +1160,20 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
             f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
 #endif /* JRM */
 
+        const H5FD_vfd_swmr_idx_entry_t * const new_mdf_idx =
+            f->shared->mdf_idx;
+        const H5FD_vfd_swmr_idx_entry_t * const old_mdf_idx =
+            f->shared->old_mdf_idx;
+        const uint32_t new_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
+        const uint32_t old_mdf_idx_entries_used = f->shared->old_mdf_idx_entries_used;
+
+        removed_page = malloc(sizeof(removed_page[0]) *
+            MAX(old_mdf_idx_entries_used, new_mdf_idx_entries_used));
+
+        if (removed_page == NULL) {
+           HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
+                       "unable to allocate removed pages list");
+        }
 
         /* if an old metadata file index exists, compare it with the 
          * new index and evict any modified, new, or deleted pages
@@ -1168,158 +1184,104 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
          * cache may attempt to refresh entries rather than evict them,
          * in which case it may access an entry in the page buffer. 
          */
-        pass = 0;
-        while ( pass <= 1 ) {
 
-            haddr_t page_addr;
-            uint32_t i = 0;
-            uint32_t j = 0;
-            H5FD_vfd_swmr_idx_entry_t * new_mdf_idx;
-            H5FD_vfd_swmr_idx_entry_t * old_mdf_idx;
-            uint32_t new_mdf_idx_entries_used;
-            uint32_t old_mdf_idx_entries_used;
+        for (i = j = 0;
+             i < old_mdf_idx_entries_used &&
+             j < new_mdf_idx_entries_used; ) {
 
-            new_mdf_idx              = f->shared->mdf_idx;
-            new_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
+            if ( old_mdf_idx[i].hdf5_page_offset == 
+                 new_mdf_idx[j].hdf5_page_offset ) {
 
-            old_mdf_idx              = f->shared->old_mdf_idx;
-            old_mdf_idx_entries_used = f->shared->old_mdf_idx_entries_used;
+                if ( old_mdf_idx[i].md_file_page_offset !=
+                     new_mdf_idx[j].md_file_page_offset ) {
 
-            while ( ( i < old_mdf_idx_entries_used ) &&
-                    ( j < new_mdf_idx_entries_used ) ) {
-
-                if ( old_mdf_idx[i].hdf5_page_offset == 
-                     new_mdf_idx[j].hdf5_page_offset ) {
-
-                    if ( old_mdf_idx[i].md_file_page_offset != 
-                         new_mdf_idx[j].md_file_page_offset ) {
-
-                        /* the page has been altered -- evict it and 
-                         * any contained metadata cache entries.
-                         */
-                        if ( pass == 0 ) {
-
-                            entries_changed++;
-
-                            page_addr = (haddr_t)
-                                (new_mdf_idx[j].hdf5_page_offset *
-                                 f->shared->pb_ptr->page_size);
-                                    
-                            if ( H5PB_remove_entry(f->shared, page_addr) < 0 )
-
-                                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
-                                            "remove page buffer entry failed")
-                        } else {
-
-                           if ( H5C_evict_or_refresh_all_entries_in_page(f,
-                                               new_mdf_idx[j].hdf5_page_offset, 
-                                               tmp_tick_num) < 0 )
-
-                                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
-                                    "evict or refresh stale MDC entries failed")
-                        }
-                    }
-                    i++;
-                    j++;
-
-                } else if ( old_mdf_idx[i].hdf5_page_offset < 
-                            new_mdf_idx[j].hdf5_page_offset ) {
-
-                   /* the page has been removed from the new version 
-                    * of the index.  Evict it and any contained metadata
-                    * cache entries.  
-                    *
-                    * If we are careful about removing entries from the 
-                    * the index so as to ensure that they haven't changed 
-                    * for several ticks, we can probably omit this.  However,
-                    * lets not worry about this for the first cut.
-                    */
-                    if ( pass == 0 ) {
-
-                        entries_removed++;
-
-                        page_addr = (haddr_t)(old_mdf_idx[i].hdf5_page_offset *
-                                              f->shared->pb_ptr->page_size);
-                                    
-                        if ( H5PB_remove_entry(f->shared, page_addr) < 0 )
-
-                            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
-                                        "remove page buffer entry failed")
-                    } else {
-
-                       if ( H5C_evict_or_refresh_all_entries_in_page(f,
-                                                old_mdf_idx[i].hdf5_page_offset,
-                                                tmp_tick_num) < 0 )
-
-                            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
-                                    "evict or refresh stale MDC entries failed")
-                    }
-
-                    i++;
-
-                } else { /* ( old_mdf_idx[i].hdf5_page_offset > */
-                         /*   new_mdf_idx[j].hdf5_page_offset ) */
-
-                    /* the page has been added to the index.  No action 
-                     * is required.
+                    /* the page has been altered -- evict it and 
+                     * any contained metadata cache entries.
                      */
-                    if ( pass == 0 ) {
+                    removed_page[entries_removed + entries_changed] =
+                        new_mdf_idx[j].hdf5_page_offset;
+                    entries_changed++;
 
-                        entries_added++;
-                    }
-                    j++;
-               
                 }
-
-                /* sanity checks to verify that the old and new indicies
-                 * are sorted as expected.
-                 */
-                HDassert( ( i == 0 ) ||
-                          ( i >= old_mdf_idx_entries_used ) ||
-                          ( old_mdf_idx[i - 1].hdf5_page_offset <
-                            old_mdf_idx[i].hdf5_page_offset ) );
-
-                HDassert( ( j == 0 ) ||
-                          ( j >= new_mdf_idx_entries_used ) ||
-                          ( new_mdf_idx[j - 1].hdf5_page_offset <
-                            new_mdf_idx[j].hdf5_page_offset ) );
-
-            }
-
-            /* cleanup any left overs in the old index */
-            while ( i < old_mdf_idx_entries_used ) {
-
-                /* the page has been removed from the new version of the 
-                 * index.  Evict it from the page buffer and also evict any 
-                 * contained metadata cache entries
-                 */
-                if ( pass == 0 ) {
-
-                    entries_removed++;
-
-                    page_addr = (haddr_t)(old_mdf_idx[i].hdf5_page_offset *
-                                          f->shared->pb_ptr->page_size);
-                                    
-                    if ( H5PB_remove_entry(f->shared, page_addr) < 0 )
-
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
-                                        "remove page buffer entry failed")
-                } else {
-
-                   if ( H5C_evict_or_refresh_all_entries_in_page(f,
-                                               old_mdf_idx[i].hdf5_page_offset,
-                                               tmp_tick_num) < 0 )
-
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
-                                "evict or refresh stale MDC entries failed")
-                }
-
                 i++;
+                j++;
+
+            } else if ( old_mdf_idx[i].hdf5_page_offset < 
+                        new_mdf_idx[j].hdf5_page_offset ) {
+               /* the page has been removed from the new version 
+                * of the index.  Evict it and any contained metadata
+                * cache entries.  
+                *
+                * If we are careful about removing entries from the 
+                * the index so as to ensure that they haven't changed 
+                * for several ticks, we can probably omit this.  However,
+                * lets not worry about this for the first cut.
+                */
+                removed_page[entries_removed + entries_changed] =
+                    old_mdf_idx[i].hdf5_page_offset;
+                entries_removed++;
+                i++;
+
+            } else { /* ( old_mdf_idx[i].hdf5_page_offset > */
+                     /*   new_mdf_idx[j].hdf5_page_offset ) */
+
+                /* the page has been added to the index.  No action 
+                 * is required.
+                 */
+                entries_added++;
+                j++;
+           
             }
 
-            pass++;
+            /* sanity checks to verify that the old and new indicies
+             * are sorted as expected.
+             */
+            HDassert( ( i == 0 ) ||
+                      ( i >= old_mdf_idx_entries_used ) ||
+                      ( old_mdf_idx[i - 1].hdf5_page_offset <
+                        old_mdf_idx[i].hdf5_page_offset ) );
 
-        } /* while ( pass <= 1 ) */
+            HDassert( ( j == 0 ) ||
+                      ( j >= new_mdf_idx_entries_used ) ||
+                      ( new_mdf_idx[j - 1].hdf5_page_offset <
+                        new_mdf_idx[j].hdf5_page_offset ) );
+
+        }
+
+        if (pass == 0)
+            entries_added += new_mdf_idx_entries_used - j;
+
+        /* cleanup any left overs in the old index */
+        for (; i < old_mdf_idx_entries_used; i++) {
+
+            /* the page has been removed from the new version of the 
+             * index.  Evict it from the page buffer and also evict any 
+             * contained metadata cache entries
+             */
+
+            removed_page[entries_removed + entries_changed] =
+                old_mdf_idx[i].hdf5_page_offset;
+
+            entries_removed++;
+        }
+        for (pass = 0; pass <= 1; pass++) {
+            for (i = 0; i < entries_removed + entries_changed; i++) {
+                if ( pass == 0 ) {
+                    haddr_t page_addr =
+                        (haddr_t)(removed_page[i] *
+                                          f->shared->pb_ptr->page_size);
+                    if ( H5PB_remove_entry(f->shared, page_addr) < 0 )
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
+                                    "remove page buffer entry failed")
+                } else {
+                   if ( H5C_evict_or_refresh_all_entries_in_page(f,
+                                       removed_page[i], tmp_tick_num) < 0 )
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
+                            "evict or refresh stale MDC entries failed")
+                }
+            }
+        }
+
 #if 0 /* JRM */
         HDfprintf(stderr, "--- reader EOT pre new tick index "
             "used/len = %" PRIu32 "/ %" PRIu32 " ---\n",
@@ -1362,6 +1324,9 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
 #endif /* JRM */
 
 done:
+
+    if (removed_page != NULL)
+        free(removed_page);
 
     FUNC_LEAVE_NOAPI(ret_value)
 
