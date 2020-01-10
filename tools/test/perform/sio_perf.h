@@ -19,7 +19,6 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 #else
-#undef H5_HAVE_PARALLEL
 #include "io_timer.h"
 #include "sio_standalone.h"
 #endif
