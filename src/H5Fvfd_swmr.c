@@ -1843,10 +1843,8 @@ H5F__idx_entry_cmp(const void *_entry1, const void *_entry2)
 static herr_t
 H5F__vfd_swmr_writer__create_index(H5F_t * f)
 {
-    unsigned int i;
     size_t bytes_available;
     size_t entries_in_index;
-    size_t index_size;
     H5FD_vfd_swmr_idx_entry_t * index = NULL;
     herr_t ret_value = SUCCEED;              /* Return value */
 
@@ -1869,26 +1867,11 @@ H5F__vfd_swmr_writer__create_index(H5F_t * f)
 
     HDassert(entries_in_index > 0);
 
-    index_size = sizeof(H5FD_vfd_swmr_idx_entry_t) * entries_in_index;
-    index = HDmalloc(index_size);
+    index = HDcalloc(entries_in_index, sizeof(index[0]));
 
     if (index == NULL) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
             "memory allocation failed for md index")
-    }
-  
-    for ( i = 0; i < entries_in_index; i++ ) {
-
-        index[i].hdf5_page_offset    = 0;
-        index[i].md_file_page_offset = 0;
-        index[i].length              = 0;
-        index[i].chksum              = 0;
-        index[i].entry_ptr           = NULL;
-        index[i].tick_of_last_change = 0;
-        index[i].clean               = FALSE;
-        index[i].tick_of_last_flush  = 0;
-        index[i].delayed_flush       = 0;
-        index[i].moved_to_hdf5_file  = FALSE;
     }
 
     HDassert(entries_in_index <= UINT32_MAX);
