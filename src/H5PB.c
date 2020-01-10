@@ -1268,34 +1268,7 @@ H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
 
-        /* We need to remove the entry from the shadow file index in 
-         * the VFD SWMR case, so do that next.
-         *
-         * If a multipage metadata entry is deallocated, and a new, single-page
-         * metadata entry is allocated at the same base address, then
-         * the old shadow index entry will still tell the size of the previous
-         * image, which is greater than a page, and a shadow-file flush will
-         * access bytes past the end of the entry's image.
-         *
-         * When we add code to allow entries
-         * to age out of the metadata file index, that may provide
-         * code that we can reuse to perform this invalidation.
-         *
-         * It's also possible (I think) for the index-entry size to be set
-         * to one page, and then for a multipage entry to appear later at that
-         * same index entry. The recorded size will still say the same, but
-         * the image will be bigger.  So the shadow file will never see the
-         * entire image written, just the first page of the image.
-         *
-         * XXX The H5PB__evict_entry() call immediately prior should have called
-         * XXX vfd_swmr_mdf_idx_entry_remove() for this page.  Need to
-         * XXX move this detailed comment and delete the redundant call to
-         * XXX vfd_swmr_mdf_idx_entry_remove(), no? 
-         */
-        if (vfd_swmr_mdf_idx_entry_remove(shared, page) == -1) {
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,
-                "failed to remove shadow index entry")
-        }
+        assert(vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page) == NULL);
     }
 
 done:
@@ -2410,7 +2383,29 @@ H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force)
     /* remove the entry from the hash table */
     H5PB__DELETE_FROM_INDEX(pb_ptr, entry_ptr, FAIL)
 
-    vfd_swmr_mdf_idx_entry_remove(shared, entry_ptr->page);
+    /* We need to remove the entry from the shadow file index in 
+     * the VFD SWMR case.
+     *
+     * If a multipage metadata entry is deallocated, and a new, single-page
+     * metadata entry is allocated at the same base address, then
+     * the old shadow index entry will still tell the size of the previous
+     * image, which is greater than a page, and a shadow-file flush will
+     * access bytes past the end of the entry's image.
+     *
+     * When we add code to allow entries
+     * to age out of the metadata file index, that may provide
+     * code that we can reuse to perform this invalidation.
+     *
+     * It's also possible (I think) for the index-entry size to be set
+     * to one page, and then for a multipage entry to appear later at that
+     * same index entry. The recorded size will still say the same, but
+     * the image will be bigger.  So the shadow file will never see the
+     * entire image written, just the first page of the image.
+     */
+    if (vfd_swmr_mdf_idx_entry_remove(shared, entry_ptr->page) == -1) {
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,
+            "failed to remove shadow index entry")
+    }
 
     /* update stats for eviction */
     H5PB__UPDATE_STATS_FOR_EVICTION(pb_ptr, entry_ptr)
