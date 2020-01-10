@@ -47,8 +47,6 @@
 
 #define H5MV_FSPACE_SHRINK      80              /* Percent of "normal" size to shrink serialized free space size */
 #define H5MV_FSPACE_EXPAND      120             /* Percent of "normal" size to expand serialized free space size */
-#define H5MV_FSPACE_THRHD_DEF   1               /* Default: no alignment threshold */
-#define H5MV_FSPACE_ALIGN_DEF   1               /* Default: no alignment */
 
 /******************/
 /* Local Typedefs */
