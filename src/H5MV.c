@@ -230,7 +230,7 @@ HDfprintf(stderr, "%s: freeing node\n", FUNC);
 #endif
 
             /* Free section node */
-            if(H5MV__sect_free((H5FS_section_info_t *)node) < 0)
+            if(H5MV__sect_free(&node->sect_info) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
         } /* end if */
         else {
@@ -243,7 +243,7 @@ HDfprintf(stderr, "%s: adding node, node->sect_info.addr = %a, node->sect_info.s
 #endif
 
             /* Re-add the section to the free-space manager */
-            if(H5FS_sect_add(f, fspace, (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, f) < 0)
+            if(H5FS_sect_add(f, fspace, &node->sect_info, H5FS_ADD_RETURNED_SPACE, f) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space")
         } /* end else */
     } /* end if */
@@ -319,7 +319,7 @@ HDfprintf(stderr, "%s: size = %Hu\n", FUNC, size);
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize free space section")
 
             /* Add the section */
-            if(H5FS_sect_add(f, f->shared->fs_man_md, (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, f) < 0)
+            if(H5FS_sect_add(f, f->shared->fs_man_md, &node->sect_info, H5FS_ADD_RETURNED_SPACE, f) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF, "can't re-add section to file free space")
 
             node = NULL;
@@ -418,7 +418,7 @@ HDfprintf(stderr, "%s: Before H5FS_sect_add(): addr=%a, size=%Hu\n", FUNC, addr,
 #endif
 
      /* Add the section */
-    if(H5FS_sect_add(f, f->shared->fs_man_md, (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, f) < 0)
+    if(H5FS_sect_add(f, f->shared->fs_man_md, &node->sect_info, H5FS_ADD_RETURNED_SPACE, f) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space")
 
     node = NULL;
@@ -430,7 +430,7 @@ HDfprintf(stderr, "%s: After H5FS_sect_add()\n", FUNC);
 done:
     /* Release section node, if allocated and not added to section list or merged */
     if(node)
-        if(H5MV__sect_free((H5FS_section_info_t *)node) < 0)
+        if(H5MV__sect_free(&node->sect_info) < 0)
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
 
 #ifdef H5MV_VFD_SWMR_DEBUG
@@ -531,7 +531,7 @@ HDfprintf(stderr, "%s: Entering - addr = %a, size = %Hu\n", FUNC, addr, size);
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section")
 
     /* Check if the block can shrink the container */
-    if((ret_value = H5MV__sect_can_shrink((const H5FS_section_info_t *)node, f)) < 0)
+    if((ret_value = H5MV__sect_can_shrink(&node->sect_info, f)) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check if section can shrink container")
     else if(ret_value > 0) {
         /* Shrink or absorb the section */
@@ -541,7 +541,7 @@ HDfprintf(stderr, "%s: Entering - addr = %a, size = %Hu\n", FUNC, addr, size);
 
 done:
     /* Free section node allocated */
-    if(node && H5MV__sect_free((H5FS_section_info_t *)node) < 0)
+    if(node && H5MV__sect_free(&node->sect_info) < 0)
         HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
 
 #ifdef H5MV_VFD_SWMR_DEBUG
