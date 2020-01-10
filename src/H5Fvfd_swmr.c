@@ -441,14 +441,11 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
     /* Sort index entries by increasing offset in the HDF5 file */
     if (num_entries > 0) {
         HDqsort(index, num_entries, sizeof(*index), H5F__idx_entry_cmp);
-#if 0
         /* Assert that there are not any HDF5 page offsets duplicated in
          * here.
          */
-        for (i = 1; i < num_entries; i++) {
-            assert(index[i].hdf5_page_offset != index[i - 1].hdf5_page_offset);
-        }
-#endif
+        for (i = 1; i < num_entries; i++)
+            assert(index[i - 1].hdf5_page_offset < index[i].hdf5_page_offset);
     }
 
     /* For each non-null entry_ptr in the index:
