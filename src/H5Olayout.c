@@ -307,7 +307,7 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     *p++ = (uint8_t)H5O_LAYOUT_VERSION_3;
 
     /* Layout class */
-    *p++ = mesg->type;
+    *p++ = (uint8_t)mesg->type;
 
     /* Write out layout class specific information */
     switch(mesg->type) {

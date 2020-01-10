@@ -315,7 +315,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 
     /* The character encoding for the attribute's name, in later versions */
     if(attr->shared->version >= H5O_ATTR_VERSION_3)
-        *p++ = attr->shared->encoding;
+        *p++ = (uint8_t)attr->shared->encoding;
 
     /* Write the name including null terminator */
     HDmemcpy(p, attr->shared->name, name_len);
