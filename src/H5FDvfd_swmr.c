@@ -1476,24 +1476,22 @@ H5FD__vfd_swmr_index_deserialize(H5FD_t *_file,
 
     /* Read index entries */
     if(md_index->num_entries) {
-
         /* Allocate memory for index entries */
-        if(NULL == (md_index->entries = 
-                    H5FL_SEQ_MALLOC(H5FD_vfd_swmr_idx_entry_t, 
-                                    md_index->num_entries)))
+        md_index->entries = H5FL_SEQ_MALLOC(H5FD_vfd_swmr_idx_entry_t, 
+                                    md_index->num_entries);
+        if (NULL == md_index->entries) {
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
+                "memory allocation failed for index entries");
+        }
 
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, \
-                        "memory allocation failed for index entries")
-
-         /* Decode index entries */
-         for(i = 0; i < md_index->num_entries; i++) {
+        /* Decode index entries */
+        for (i = 0; i < md_index->num_entries; i++) {
             UINT32DECODE(p, md_index->entries[i].hdf5_page_offset);
             UINT32DECODE(p, md_index->entries[i].md_file_page_offset);
             UINT32DECODE(p, md_index->entries[i].length);
             UINT32DECODE(p, md_index->entries[i].chksum);
-         } /* end for */
-
-     } /* end if */
+         }
+     }
 
      /* Checksum is already valid */
      UINT32DECODE(p, stored_chksum);
