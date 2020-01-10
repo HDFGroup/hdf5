@@ -349,6 +349,7 @@ done:
 static herr_t
 H5F__vfd_swmr_decode_md_hdr(int md_fd, H5FD_vfd_swmr_md_header *md_hdr)
 {
+    uint64_t index_length;
     uint8_t image[H5FD_MD_HEADER_SIZE];     /* Buffer for the header image */
     uint8_t *p = NULL;                      /* Points to the image */
     herr_t  ret_value = SUCCEED;            /* Return value */
@@ -375,7 +376,10 @@ H5F__vfd_swmr_decode_md_hdr(int md_fd, H5FD_vfd_swmr_md_header *md_hdr)
     UINT32DECODE(p, md_hdr->fs_page_size);
     UINT64DECODE(p, md_hdr->tick_num);
     UINT64DECODE(p, md_hdr->index_offset);
-    UINT64DECODE(p, md_hdr->index_length);
+    if ((index_length = uint64_decode(&p)) > SIZE_MAX) {
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "index is too long")
+    }
+    md_hdr->index_length = (size_t)index_length;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

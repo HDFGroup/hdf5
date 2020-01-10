@@ -1294,6 +1294,7 @@ H5FD__vfd_swmr_header_deserialize(H5FD_t *_file,
         H5FD_VFD_SWMR_MD_HEADER_RETRY_MAX; 
     uint8_t *p = NULL;                      /* Pointer to buffer */
     herr_t ret_value = SUCCEED;             /* Return value */
+    uint64_t index_length;
 
     FUNC_ENTER_STATIC
 
@@ -1364,7 +1365,12 @@ H5FD__vfd_swmr_header_deserialize(H5FD_t *_file,
     UINT32DECODE(p, md_header->fs_page_size);
     UINT64DECODE(p, md_header->tick_num);
     UINT64DECODE(p, md_header->index_offset);
-    UINT64DECODE(p, md_header->index_length);
+    if ((index_length = uint64_decode(&p)) > SIZE_MAX) {
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                     "index is too large to hold in core");
+    }
+
+    md_header->index_length = (size_t)index_length;
 
     /* Checksum is already valid */
     UINT32DECODE(p, stored_chksum);

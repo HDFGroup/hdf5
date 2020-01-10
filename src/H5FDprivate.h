@@ -200,7 +200,7 @@ typedef struct H5FD_vfd_swmr_md_header {
         uint32_t fs_page_size;
         uint64_t tick_num;
         uint64_t index_offset;
-        uint64_t index_length;
+        size_t index_length;
 } H5FD_vfd_swmr_md_header;
 
 static inline H5FD_vfd_swmr_idx_entry_t *
