@@ -1654,7 +1654,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
         if(TRUE == H5S_hyper_intersect_block((H5S_t *)fm->file_space, coords, end)) {
             H5S_t *tmp_fchunk;                  /* Temporary file dataspace */
             H5D_chunk_info_t *new_chunk_info;   /* chunk information to insert into skip list */
-            hssize_t    schunk_points;          /* Number of elements in chunk selection */
+            hsize_t    chunk_points;            /* Number of elements in chunk selection */
 
             /* Create "temporary" chunk for selection operations (copy file space) */
             if(NULL == (tmp_fchunk = H5S_copy(fm->file_space, TRUE, FALSE)))
@@ -1722,12 +1722,12 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             } /* end if */
 
             /* Get number of elements selected in chunk */
-            if((schunk_points = H5S_GET_SELECT_NPOINTS(tmp_fchunk)) < 0)
+            if((chunk_points = H5S_GET_SELECT_NPOINTS(tmp_fchunk)) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
-            H5_CHECKED_ASSIGN(new_chunk_info->chunk_points, uint32_t, schunk_points, hssize_t);
+            H5_CHECKED_ASSIGN(new_chunk_info->chunk_points, uint32_t, chunk_points, hsize_t);
 
             /* Decrement # of points left in file selection */
-            sel_points -= (hsize_t)schunk_points;
+            sel_points -= chunk_points;
 
             /* Leave if we are done */
             if(sel_points == 0)
@@ -5353,9 +5353,8 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     H5D_chunk_it_ud2_t    *udata = (H5D_chunk_it_ud2_t *)_udata;  /* User data for callback */
     unsigned       rank = udata->common.layout->ndims - 1;    /* # of dimensions of dataset */
     hsize_t        chunk_index;
-    int            ret_value = H5_ITER_CONT;     /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Compute the index for this chunk */
     chunk_index = H5VM_array_offset_pre(rank, udata->common.layout->down_chunks, chunk_rec->scaled);
@@ -5364,7 +5363,7 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     udata->chunk_addr[chunk_index] = chunk_rec->chunk_addr;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
 } /* H5D__chunk_addrmap_cb() */
 
 
