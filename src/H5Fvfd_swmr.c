@@ -1064,7 +1064,6 @@ done:
 herr_t
 H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
 {
-    int pass = 0;
     uint64_t tmp_tick_num = 0;
     H5FD_vfd_swmr_idx_entry_t * tmp_mdf_idx;
     uint32_t entries_added = 0;
@@ -1175,11 +1174,11 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
                        "unable to allocate removed pages list");
         }
 
-        /* if an old metadata file index exists, compare it with the 
+        /* If an old metadata file index exists, compare it with the 
          * new index and evict any modified, new, or deleted pages
          * and any associated metadata cache entries.
          *
-         * Note that we must do this in two passes -- page buffer first,
+         * Note that we must evict in two passes---page buffer first,
          * and then metadata cache.  This is necessary as the metadata 
          * cache may attempt to refresh entries rather than evict them,
          * in which case it may access an entry in the page buffer. 
@@ -1222,8 +1221,9 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
                 entries_removed++;
                 i++;
 
-            } else { /* ( old_mdf_idx[i].hdf5_page_offset > */
-                     /*   new_mdf_idx[j].hdf5_page_offset ) */
+            } else { /* old_mdf_idx[i].hdf5_page_offset >
+                      * new_mdf_idx[j].hdf5_page_offset
+                      */
 
                 /* the page has been added to the index.  No action 
                  * is required.
@@ -1248,8 +1248,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
 
         }
 
-        if (pass == 0)
-            entries_added += new_mdf_idx_entries_used - j;
+        entries_added += new_mdf_idx_entries_used - j;
 
         /* cleanup any left overs in the old index */
         for (; i < old_mdf_idx_entries_used; i++) {
@@ -1264,22 +1263,19 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
 
             entries_removed++;
         }
-        for (pass = 0; pass <= 1; pass++) {
-            for (i = 0; i < entries_removed + entries_changed; i++) {
-                if ( pass == 0 ) {
-                    haddr_t page_addr =
-                        (haddr_t)(removed_page[i] *
-                                          f->shared->pb_ptr->page_size);
-                    if ( H5PB_remove_entry(f->shared, page_addr) < 0 )
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
-                                    "remove page buffer entry failed")
-                } else {
-                   if ( H5C_evict_or_refresh_all_entries_in_page(f,
-                                       removed_page[i], tmp_tick_num) < 0 )
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
-                            "evict or refresh stale MDC entries failed")
-                }
-            }
+        for (i = 0; i < entries_removed + entries_changed; i++) {
+            haddr_t page_addr =
+                (haddr_t)(removed_page[i] *
+                                  f->shared->pb_ptr->page_size);
+            if ( H5PB_remove_entry(f->shared, page_addr) < 0 )
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
+                            "remove page buffer entry failed")
+        }
+        for (i = 0; i < entries_removed + entries_changed; i++) {
+           if ( H5C_evict_or_refresh_all_entries_in_page(f,
+                               removed_page[i], tmp_tick_num) < 0 )
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
+                    "evict or refresh stale MDC entries failed")
         }
 
 #if 0 /* JRM */
