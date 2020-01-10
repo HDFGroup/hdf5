@@ -175,6 +175,8 @@ if test "X-gcc" = "X-$cc_vendor"; then
     H5_CFLAGS="$H5_CFLAGS -Wredundant-decls -Wshadow -Wstrict-prototypes -Wswitch-enum -Wswitch-default"
     H5_CFLAGS="$H5_CFLAGS -Wundef -Wunused-macros -Wunsafe-loop-optimizations -Wwrite-strings"
 
+    H5_CFLAGS="$H5_CFLAGS -Wno-c++-compat"
+
     ######################
     # Developer warnings #
     ######################
