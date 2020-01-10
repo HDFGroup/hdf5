@@ -1177,63 +1177,46 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
         HDassert(md_header.tick_num > file->md_header.tick_num || open);
 
         /* Load and decode the index */
-        if(H5FD__vfd_swmr_index_deserialize(_file, &md_index, 
-                                            &md_header) >= 0) {
+        if (H5FD__vfd_swmr_index_deserialize(_file, &md_index, &md_header) < 0)
+            continue;
 
-            /* tick_num is the same in both header and index */
-            if(md_header.tick_num == md_index.tick_num) {
+        /* tick_num is the same in both header and index */
+        if(md_header.tick_num == md_index.tick_num) {
 
-                /* Copy header to VFD local copy */
-                HDmemcpy(&file->md_header, &md_header, 
-                         sizeof(H5FD_vfd_swmr_md_header));
+            /* Copy header to VFD local copy */
+            file->md_header = md_header;
 
-                /* Free VFD local entries */
-                if(file->md_index.entries) {
+            /* Free VFD local entries */
+            if (file->md_index.entries != NULL) {
 
-                    HDassert(file->md_index.num_entries);
+                HDassert(file->md_index.num_entries);
 
-                    file->md_index.entries = (H5FD_vfd_swmr_idx_entry_t *)
-                         H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, 
-                                       file->md_index.entries);
-                }
-
-                /* Copy index info to VFD local copy */
-                file->md_index.tick_num = md_index.tick_num;
-                file->md_index.num_entries = md_index.num_entries;
-
-                /* Allocate and copy index entries */
-                if(md_index.num_entries) {
-
-                    if(NULL == (file->md_index.entries = 
-                                H5FL_SEQ_MALLOC(H5FD_vfd_swmr_idx_entry_t, 
-                                                md_index.num_entries)))
-
-                        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, \
-                               "memory allocation failed for index entries")
-
-                    HDmemcpy(file->md_index.entries, md_index.entries, 
-                             md_index.num_entries * 
-                             sizeof(H5FD_vfd_swmr_idx_entry_t));
-                }
-                break;
-            }
-            /* Error when tick_num in header is more than one greater 
-             * that in the index 
-             */
-            else if (md_header.tick_num > (md_index.tick_num + 1))
-
-                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, \
-                            "tick number mis-match in header and index")
-
-            if(md_index.entries) {
-
-                HDassert(md_index.num_entries);
-                md_index.entries = (H5FD_vfd_swmr_idx_entry_t *)
-                                   H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t,
-                                                 md_index.entries);
+                file->md_index.entries = (H5FD_vfd_swmr_idx_entry_t *)
+                     H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, 
+                                   file->md_index.entries);
             }
 
-        } /* end if index ok */
+            /* Copy index info to VFD local copy */
+            file->md_index = md_index;
+            md_index.entries = NULL;
+            break;
+        }
+
+        if (md_index.entries != NULL) {
+
+            HDassert(md_index.num_entries);
+            md_index.entries = (H5FD_vfd_swmr_idx_entry_t *)
+                               H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t,
+                                             md_index.entries);
+        }
+
+        /* Error when tick_num in header is more than one greater 
+         * than in the index 
+         */
+        if (md_header.tick_num > (md_index.tick_num + 1)) {
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                "tick number mis-match in header and index");
+        }
     }
 
     /* Exhaust all retries for loading and decoding the md file header 
@@ -1245,15 +1228,6 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
     }
 
 done:
-
-    /* Free index entries obtained from H5FD__vfd_swmr_index_deserialize() */
-    if(md_index.entries) {
-
-        HDassert(md_index.num_entries);
-        md_index.entries = (H5FD_vfd_swmr_idx_entry_t *)
-                               H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, 
-                                             md_index.entries);
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 
