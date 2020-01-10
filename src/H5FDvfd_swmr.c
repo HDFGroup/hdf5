@@ -308,7 +308,7 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
     for (do_try = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_FILE_RETRY_MAX,
                                  H5_RETRY_DEFAULT_MINIVAL,
                                  H5_RETRY_DEFAULT_MAXIVAL);
-         do_try != 0;
+         do_try;
          do_try = h5_retry_next(&retry)) {
         if((file->md_fd = HDopen(file->md_file_path, O_RDONLY)) >= 0)
             break;
@@ -1143,7 +1143,7 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
     FUNC_ENTER_STATIC
 
     for (do_try = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX,
-                      1, H5_RETRY_ONE_HOUR / 3600);
+                      1, H5_RETRY_ONE_SECOND);
          do_try;
          do_try = h5_retry_next(&retry)) {
         HDmemset(&md_header, 0, sizeof(H5FD_vfd_swmr_md_header));
@@ -1376,7 +1376,7 @@ H5FD__vfd_swmr_header_deserialize(H5FD_t *_file,
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(p - (const uint8_t *)&image[0]) <= H5FD_MD_HEADER_SIZE);
+    HDassert((size_t)(p - image) <= H5FD_MD_HEADER_SIZE);
 
 #if 0 /* JRM */
     HDfprintf(stderr, 
@@ -1537,7 +1537,7 @@ H5FD__vfd_swmr_index_deserialize(H5FD_t *_file,
 done:
     if(image) {
 
-        image = (uint8_t *)H5MM_xfree(image);
+        image = H5MM_xfree(image);
     }
 
     if(ret_value < 0) {
