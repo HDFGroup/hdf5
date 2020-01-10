@@ -1136,29 +1136,27 @@ done:
 static int
 vfd_swmr_mdf_idx_entry_remove(H5F_shared_t *shared, uint64_t page)
 {
-    ptrdiff_t idx_idx, last_idx;
-    H5FD_vfd_swmr_idx_entry_t *idx_entry;
+    ptrdiff_t i;
+    H5FD_vfd_swmr_idx_entry_t *entry;
 
-    idx_entry = vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx,
+    entry = vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx,
         shared->mdf_idx_entries_used, page);
 
-    if (idx_entry == NULL)
+    if (entry == NULL)
         return 0;
 
-    if (shared->vfd_swmr_writer && idx_entry->md_file_page_offset != 0 &&
-        shadow_image_defer_free(shared, idx_entry) != 0)
+    if (shared->vfd_swmr_writer && entry->md_file_page_offset != 0 &&
+        shadow_image_defer_free(shared, entry) != 0)
         return -1;
 
-    idx_idx = idx_entry - shared->mdf_idx;
-    last_idx = shared->mdf_idx_entries_used - 1;
+    i = entry - shared->mdf_idx;
 
-    shared->mdf_idx[idx_idx] = shared->mdf_idx[last_idx];
-    if (shared->mdf_idx_entries_used > idx_idx + 1) {
+    if (shared->mdf_idx_entries_used > i + 1) {
         const size_t ntocopy =
-            (size_t)(shared->mdf_idx_entries_used - (idx_idx + 1));
-        memmove(&shared->mdf_idx[idx_idx],
-                &shared->mdf_idx[idx_idx + 1],
-                ntocopy * sizeof(shared->mdf_idx[idx_idx + 1]));
+            (size_t)(shared->mdf_idx_entries_used - (i + 1));
+        memmove(&shared->mdf_idx[i],
+                &shared->mdf_idx[i + 1],
+                ntocopy * sizeof(shared->mdf_idx[i + 1]));
     }
     shared->mdf_idx_entries_used--;
     return 0;
