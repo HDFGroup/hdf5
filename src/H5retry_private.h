@@ -30,7 +30,8 @@ typedef struct h5_retry_t {
 #define H5_RETRY_DEFAULT_MINIVAL   (           100ULL * 1000ULL * 1000ULL)
 #define H5_RETRY_DEFAULT_MAXIVAL   (          1000ULL * 1000ULL * 1000ULL)
 /* One hour: */
-#define H5_RETRY_ONE_HOUR          (3600ULL * 1000ULL * 1000ULL * 1000ULL)
+#define H5_RETRY_ONE_SECOND          (1000ULL * 1000ULL * 1000ULL)
+#define H5_RETRY_ONE_HOUR          (3600ULL * H5_RETRY_ONE_SECOND)
 
 /* If any tries remain, decrease the number of remaining tries and
  * return true.  Otherwise, return false.
