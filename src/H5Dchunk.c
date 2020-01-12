@@ -4562,8 +4562,9 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     H5D_chunk_it_ud2_t    *udata = (H5D_chunk_it_ud2_t *)_udata;  /* User data for callback */
     unsigned       rank = udata->common.layout->ndims - 1;    /* # of dimensions of dataset */
     hsize_t        chunk_index;
+    int            ret_value = H5_ITER_CONT;     /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_STATIC
 
     /* Compute the index for this chunk */
     if(H5VM_chunk_index(rank, chunk_rec->offset, udata->common.layout->dim, udata->common.layout->down_chunks, &chunk_index) < 0)
@@ -4572,7 +4573,8 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     /* Set it in the userdata to return */
     udata->chunk_addr[chunk_index] = chunk_rec->chunk_addr;
 
-    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_addrmap_cb() */
 
 
