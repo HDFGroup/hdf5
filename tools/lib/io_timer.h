@@ -72,8 +72,8 @@ extern "C" {
 #endif  /* __cplusplus */
 H5TOOLS_DLL io_time_t   *io_time_new(clock_type t);
 H5TOOLS_DLL void         io_time_destroy(io_time_t *pt);
-H5TOOLS_DLL io_time_t   *set_time(io_time_t *pt, timer_type t, int start_stop);
-H5TOOLS_DLL double       get_time(io_time_t *pt, timer_type t);
+H5TOOLS_DLL io_time_t   *io_time_set(io_time_t *pt, timer_type t, int start_stop);
+H5TOOLS_DLL double       io_time_get(io_time_t *pt, timer_type t);
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */

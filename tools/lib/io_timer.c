@@ -123,14 +123,14 @@ get_timer_type(io_time_t *pt)
 #endif
 
 /*
- * Function:    set_time
+ * Function:    io_time_set
  * Purpose:     Set the time in a ``io_time_t'' object.
  * Return:      Pointer to the passed in ``io_time_t'' object if SUCCEED; Null otherwise.
  * Programmer:  Bill Wendling, 01. October 2001
  * Modifications:
  */
 io_time_t *
-set_time(io_time_t *pt, timer_type t, int start_stop)
+io_time_set(io_time_t *pt, timer_type t, int start_stop)
 {
     /* sanity check */
     HDassert(pt);
@@ -207,14 +207,14 @@ set_time(io_time_t *pt, timer_type t, int start_stop)
 }
 
 /*
- * Function:    get_time
+ * Function:    io_time_get
  * Purpose:     Get the time from a ``io_time_t'' object.
  * Return:      The number of seconds as a DOUBLE.
  * Programmer:  Bill Wendling, 01. October 2001
  * Modifications:
  */
 H5_ATTR_PURE double
-get_time(io_time_t *pt, timer_type t)
+io_time_get(io_time_t *pt, timer_type t)
 {
     /* sanity check */
     HDassert(pt);

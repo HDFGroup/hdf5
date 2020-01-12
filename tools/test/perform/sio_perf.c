@@ -498,50 +498,50 @@ run_test(iotype iot, parameters parms, struct options *opts)
         do_sio(parms, &res);
 
         /* gather all of the "sys write" times */
-        t = get_time(res.timers, HDF5_MPI_WRITE);
+        t = io_time_get(res.timers, HDF5_MPI_WRITE);
         get_minmax(&write_sys_mm, t);
 
         write_sys_mm_table[i] = write_sys_mm;
 
         /* gather all of the "write" times */
-        t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
+        t = io_time_get(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
         get_minmax(&write_mm, t);
 
         write_mm_table[i] = write_mm;
 
         /* gather all of the "write" times from open to close */
-        t = get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
+        t = io_time_get(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
         get_minmax(&write_gross_mm, t);
 
         write_gross_mm_table[i] = write_gross_mm;
 
         /* gather all of the raw "write" times */
-        t = get_time(res.timers, HDF5_RAW_WRITE_FIXED_DIMS);
+        t = io_time_get(res.timers, HDF5_RAW_WRITE_FIXED_DIMS);
         get_minmax(&write_raw_mm, t);
 
         write_raw_mm_table[i] = write_raw_mm;
 
         if (!parms.h5_write_only) {
             /* gather all of the "mpi read" times */
-            t = get_time(res.timers, HDF5_MPI_READ);
+            t = io_time_get(res.timers, HDF5_MPI_READ);
             get_minmax(&read_sys_mm, t);
 
             read_sys_mm_table[i] = read_sys_mm;
 
             /* gather all of the "read" times */
-            t = get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS);
+            t = io_time_get(res.timers, HDF5_FINE_READ_FIXED_DIMS);
             get_minmax(&read_mm, t);
 
             read_mm_table[i] = read_mm;
 
             /* gather all of the "read" times from open to close */
-            t = get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
+            t = io_time_get(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
             get_minmax(&read_gross_mm, t);
 
             read_gross_mm_table[i] = read_gross_mm;
 
             /* gather all of the raw "read" times */
-            t = get_time(res.timers, HDF5_RAW_READ_FIXED_DIMS);
+            t = io_time_get(res.timers, HDF5_RAW_READ_FIXED_DIMS);
             get_minmax(&read_raw_mm, t);
 
             read_raw_mm_table[i] = read_gross_mm;
