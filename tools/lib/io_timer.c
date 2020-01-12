@@ -213,7 +213,7 @@ io_time_set(io_time_t *pt, timer_type t, int start_stop)
  * Programmer:  Bill Wendling, 01. October 2001
  * Modifications:
  */
-H5_ATTR_PURE double
+double
 io_time_get(io_time_t *pt, timer_type t)
 {
     /* sanity check */
