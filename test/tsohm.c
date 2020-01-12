@@ -3226,11 +3226,11 @@ test_sohm_extlink(void)
 static int
 test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
 {
-    hid_t file_id = -1;
-    hid_t orig_space_id = -1;
+    hid_t file_id = H5I_INVALID_HID;
+    hid_t orig_space_id = H5I_INVALID_HID;
     hid_t space1_id, space2_id, space3_id;
-    hid_t dcpl_id = -1;
-    hid_t dset1_id, dset2_id, dset3_id;
+    hid_t dcpl_id = H5I_INVALID_HID;
+    hid_t dset1_id, dset2_id = H5I_INVALID_HID, dset3_id = H5I_INVALID_HID;
     hsize_t dims1[] = {1, 2};
     hsize_t max_dims[] = {H5S_UNLIMITED, 2};
     hsize_t dims2[] = {5, 2};
