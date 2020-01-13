@@ -923,7 +923,7 @@ GREPTEST()
       cd $TESTDIR
       $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
     ) >$actual 2>$actual_err
-    if [[ "$txttype" = "ERRTXT" ]]; then
+    if [ "$txttype" = "ERRTXT" ]; then
         $GREP "$expectdata" $actual_err > /dev/null
     else
         $GREP "$expectdata" $actual > /dev/null
