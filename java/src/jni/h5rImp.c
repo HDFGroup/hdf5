@@ -452,7 +452,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Rget_1obj_1type3
   (JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id)
 {
-    H5O_type_t  object_info;
+    H5O_type_t  object_info = -1;
     jboolean    isCopy;
     jbyte      *refBuf = NULL;
     int         retVal = -1;

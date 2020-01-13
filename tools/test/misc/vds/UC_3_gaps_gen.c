@@ -29,12 +29,12 @@
 static herr_t
 create_3_1_vds(void)
 {
-    hid_t src_sid       = -1;   /* source dataset's dataspace ID            */
-    hid_t vds_sid       = -1;   /* VDS dataspace ID                         */
-    hid_t vds_dcplid    = -1;   /* VDS dataset property list ID             */
+    hid_t src_sid       = H5I_INVALID_HID;   /* source dataset's dataspace ID            */
+    hid_t vds_sid       = H5I_INVALID_HID;   /* VDS dataspace ID                         */
+    hid_t vds_dcplid    = H5I_INVALID_HID;   /* VDS dataset property list ID             */
 
-    hid_t fid           = -1;   /* HDF5 file ID                             */
-    hid_t did           = -1;   /* dataset ID                               */
+    hid_t fid           = H5I_INVALID_HID;   /* HDF5 file ID                             */
+    hid_t did           = H5I_INVALID_HID;   /* dataset ID                               */
 
     hsize_t start[RANK];        /* source starting point for hyperslab      */
     hsize_t position[RANK];     /* vds mapping positions                    */
@@ -136,12 +136,12 @@ error:
 static herr_t
 create_3_2_vds(void)
 {
-    hid_t src_sid       = -1;   /* source dataset's dataspace ID            */
-    hid_t vds_sid       = -1;   /* VDS dataspace ID                         */
-    hid_t vds_dcplid    = -1;   /* VDS dataset property list ID             */
+    hid_t src_sid       = H5I_INVALID_HID;   /* source dataset's dataspace ID            */
+    hid_t vds_sid       = H5I_INVALID_HID;   /* VDS dataspace ID                         */
+    hid_t vds_dcplid    = H5I_INVALID_HID;   /* VDS dataset property list ID             */
 
-    hid_t fid           = -1;   /* HDF5 file ID                             */
-    hid_t did           = -1;   /* dataset ID                               */
+    hid_t fid           = H5I_INVALID_HID;   /* HDF5 file ID                             */
+    hid_t did           = H5I_INVALID_HID;   /* dataset ID                               */
 
     hsize_t start[RANK];        /* source starting point for hyperslab      */
 

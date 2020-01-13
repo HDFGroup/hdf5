@@ -1086,12 +1086,12 @@ out:
  */
 static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
 {
-    hid_t   group_id    = -1;
-    hid_t   dset_id     = -1;
-    hid_t   space_id    = -1;
-    hid_t   mspace_id   = -1;
-    hid_t   type_id     = -1;
-    hid_t   handle      = -1;
+    hid_t   group_id    = H5I_INVALID_HID;
+    hid_t   dset_id     = H5I_INVALID_HID;
+    hid_t   space_id    = H5I_INVALID_HID;
+    hid_t   mspace_id   = H5I_INVALID_HID;
+    hid_t   type_id     = H5I_INVALID_HID;
+    hid_t   handle      = H5I_INVALID_HID;
     char   *str1        = NULL;
     char   *str2        = NULL;
     char   *str3        = NULL;
@@ -4707,14 +4707,14 @@ static int process(struct Options *opt)
     return (0);
 }
 
-uint16_t swap_uint16( uint16_t val)
+uint16_t swap_uint16(uint16_t val)
 {
-    return (val << 8) | (val >> 8);
+    return (uint16_t)((val << 8) | (val >> 8));
 }
 
 int16_t swap_int16(int16_t val)
 {
-    return (val << 8) | ((val >> 8) & 0xFF);
+    return (int16_t)((val << 8) | ((val >> 8) & 0xFF));
 }
 
 uint32_t swap_uint32(uint32_t val)

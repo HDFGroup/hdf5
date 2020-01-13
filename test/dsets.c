@@ -7065,6 +7065,7 @@ static void
 make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
 {
     long inc;
+    long maxinc;
 
     HDassert(0 < nelts);
 
@@ -7073,7 +7074,7 @@ make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
     /* `maxinc` is chosen so that for any `x` in [0, nelts - 1],
      * `x + maxinc` does not overflow a long.
      */
-    const long maxinc = MIN(nelts - 1, LONG_MAX - nelts);
+    maxinc = MIN(nelts - 1, LONG_MAX - nelts);
 
     /* Choose a random number in [1, nelts - 1].  If its greatest divisor
      * in common with `nelts` is 1, then it will "generate" the additive ring
@@ -13135,7 +13136,7 @@ test_versionbounds(void)
     return FAIL;
 } /* end test_versionbounds() */
 
-
+
 /*-----------------------------------------------------------------------------
  * Function:   test_object_header_minimization_dcpl
  *
