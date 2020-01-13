@@ -13,12 +13,13 @@
 #ifndef PIO_PERF_H__
 #define PIO_PERF_H__
 
-#include "io_timer.h"
 #ifndef STANDALONE
+#include "io_timer.h"
 #include "h5test.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
 #else
+#include "io_timer.h"
 #include "pio_standalone.h"
 #endif
 
