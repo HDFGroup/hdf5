@@ -368,6 +368,14 @@ New Features
 
     Java Library:
     ----------------
+    - Tests fail for non-English locale.
+
+      In the JUnit tests with a non-English locale, only the part before
+      the decimal comma is replaced by XXXX and this leads to a comparison
+      error. Changed the regex for the Time substitution.
+
+      (ADB - 2020/01/09, HDFFV-10995)
+
     - Fix a failure in JUnit-TestH5P on 32-bit architectures
 
       (JTH - 2019/04/30)
