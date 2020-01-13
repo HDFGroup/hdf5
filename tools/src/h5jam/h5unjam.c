@@ -199,8 +199,8 @@ main(int argc, const char *argv[])
 {
     void               *edata;
     H5E_auto2_t         func;
-    hid_t               ifile = -1;
-    hid_t               plist = -1;
+    hid_t               ifile = H5I_INVALID_HID;
+    hid_t               plist = H5I_INVALID_HID;
     off_t               fsize;
     hsize_t             usize;
     htri_t              testval;

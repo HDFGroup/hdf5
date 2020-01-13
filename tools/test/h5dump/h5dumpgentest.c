@@ -638,11 +638,11 @@ static void gent_softlink(void)
 #define NY 2
 static int gent_softlink2(void)
 {
-    hid_t       fileid1 = -1;
-    hid_t       gid1 = -1, gid2 = -1;
-    hid_t       datatype = -1;
-    hid_t       dset1 = -1, dset2 = -1;
-    hid_t       dataspace = -1;
+    hid_t       fileid1 = H5I_INVALID_HID;
+    hid_t       gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;
+    hid_t       datatype = H5I_INVALID_HID;
+    hid_t       dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID;
+    hid_t       dataspace = H5I_INVALID_HID;
     hsize_t     dimsf[2];              /* dataset dimensions */
     int data1[NX][NY] = {{0,0},{1,1},{2,2},{3,3}};
     int data2[NX][NY] = {{0,0},{0,1},{0,2},{3,3}};
@@ -2548,7 +2548,7 @@ static void gent_opaque(void)
 
 static void gent_bitfields(void)
 {
-    hid_t  file, grp=-1, type=-1, space=-1, dset=-1;
+    hid_t  file, grp=H5I_INVALID_HID, type=H5I_INVALID_HID, space=H5I_INVALID_HID, dset=H5I_INVALID_HID;
     size_t  i;
     hsize_t  nelmts;
     unsigned char buf[32];
@@ -3471,10 +3471,10 @@ static void gent_array7(void)
 /* Test the boundary of the display output buffer at the reallocation event */
 static void gent_array8(void)
 {
-    hid_t       file = -1; /* Handles */
-    hid_t       filetype = -1; /* Handles */
-    hid_t       space = -1; /* Handles */
-    hid_t       dset = -1; /* Handles */
+    hid_t       file = H5I_INVALID_HID; /* Handles */
+    hid_t       filetype = H5I_INVALID_HID; /* Handles */
+    hid_t       space = H5I_INVALID_HID; /* Handles */
+    hid_t       dset = H5I_INVALID_HID; /* Handles */
     herr_t      status = -1;
     hsize_t sdims[] = {F64_DIM0};
     hsize_t tdims[] = {F64_DIM1};
@@ -6353,12 +6353,12 @@ gent_binary(void)
 static void
 gent_bigdims(void)
 {
-    hid_t   fid = -1;
-    hid_t   did = -1;
-    hid_t   f_sid = -1;
-    hid_t   m_sid = -1;
-    hid_t   tid = -1;
-    hid_t   dcpl = -1;
+    hid_t   fid = H5I_INVALID_HID;
+    hid_t   did = H5I_INVALID_HID;
+    hid_t   f_sid = H5I_INVALID_HID;
+    hid_t   m_sid = H5I_INVALID_HID;
+    hid_t   tid = H5I_INVALID_HID;
+    hid_t   dcpl = H5I_INVALID_HID;
     hsize_t dims[1]={DIM_4GB};                 /* dataset dimensions */
     hsize_t chunk_dims[1]={1024};              /* chunk dimensions */
     hsize_t hs_start[1];
@@ -6418,19 +6418,19 @@ gent_bigdims(void)
     /* close */
     if(H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
     if(H5Sclose(f_sid) < 0)
         goto out;
-    f_sid = -1;
+    f_sid = H5I_INVALID_HID;
     if(H5Sclose(m_sid) < 0)
         goto out;
-    m_sid = -1;
+    m_sid = H5I_INVALID_HID;
     if(H5Pclose(dcpl) < 0)
         goto out;
-    dcpl = -1;
+    dcpl = H5I_INVALID_HID;
     if(H5Dclose(did) < 0)
         goto out;
-    did = -1;
+    did = H5I_INVALID_HID;
 
     ret = H5Fclose(fid);
     HDassert(ret >= 0);
@@ -6494,10 +6494,10 @@ gent_hyperslab(void)
 static void
 gent_group_creation_order(void)
 {
-    hid_t    fid = -1;      /* file ID */
-    hid_t    gid = -1;      /* group ID */
-    hid_t    gcpl_id = -1;  /* group creation property list ID */
-    hid_t    fcpl_id = -1;  /* file creation property list ID (to set root group order) */
+    hid_t    fid = H5I_INVALID_HID;      /* file ID */
+    hid_t    gid = H5I_INVALID_HID;      /* group ID */
+    hid_t    gcpl_id = H5I_INVALID_HID;  /* group creation property list ID */
+    hid_t    fcpl_id = H5I_INVALID_HID;  /* file creation property list ID (to set root group order) */
 
     if((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0)
         goto out;
@@ -6523,45 +6523,45 @@ gent_group_creation_order(void)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
     if((gid = H5Gcreate2(fid, "2/c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
     if((gid = H5Gcreate2(fid, "2/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
     if((gid = H5Gcreate2(fid, "2/a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
     if((gid = H5Gcreate2(fid, "2/a/a2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
     if((gid = H5Gcreate2(fid, "2/a/a1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
     if((gid = H5Gcreate2(fid, "2/a/a2/a22", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
     if((gid = H5Gcreate2(fid, "2/a/a2/a21", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
 
     /*-------------------------------------------------------------------------
@@ -6576,56 +6576,56 @@ gent_group_creation_order(void)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
     if((gid = H5Gcreate2(fid, "1/c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
     if((gid = H5Gcreate2(fid, "1/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
     if((gid = H5Gcreate2(fid, "1/a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
     if((gid = H5Gcreate2(fid, "1/a/a2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
     if((gid = H5Gcreate2(fid, "1/a/a1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
     if((gid = H5Gcreate2(fid, "1/a/a2/a22", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
     if((gid = H5Gcreate2(fid, "1/a/a2/a21", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
 
     if(H5Pclose(gcpl_id) < 0)
         goto out;
-    gcpl_id = -1;
+    gcpl_id = H5I_INVALID_HID;
     if(H5Pclose(fcpl_id) < 0)
         goto out;
-    fcpl_id = -1;
+    fcpl_id = H5I_INVALID_HID;
     if(H5Fclose(fid) < 0)
         goto out;
-    fid = -1;
+    fid = H5I_INVALID_HID;
 
     return;
 
@@ -6653,15 +6653,15 @@ gent_group_creation_order(void)
 static void
 gent_attr_creation_order(void)
 {
-    hid_t    fid = -1;      /* file id */
-    hid_t    gid = -1;      /* group id */
-    hid_t    did = -1;      /* dataset id */
-    hid_t    sid = -1;      /* space id */
-    hid_t    aid = -1;      /* attribute id */
-    hid_t    tid = -1;      /* datatype id */
-    hid_t    gcpl_id = -1;  /* group creation property list ID */
-    hid_t    dcpl_id = -1;  /* dataset creation property list ID */
-    hid_t    tcpl_id = -1;  /* datatype creation property list ID */
+    hid_t    fid = H5I_INVALID_HID;      /* file id */
+    hid_t    gid = H5I_INVALID_HID;      /* group id */
+    hid_t    did = H5I_INVALID_HID;      /* dataset id */
+    hid_t    sid = H5I_INVALID_HID;      /* space id */
+    hid_t    aid = H5I_INVALID_HID;      /* attribute id */
+    hid_t    tid = H5I_INVALID_HID;      /* datatype id */
+    hid_t    gcpl_id = H5I_INVALID_HID;  /* group creation property list ID */
+    hid_t    dcpl_id = H5I_INVALID_HID;  /* dataset creation property list ID */
+    hid_t    tcpl_id = H5I_INVALID_HID;  /* datatype creation property list ID */
     int      i;
     const char *attr_name[3] = {"c", "b", "a" };
 
@@ -6714,12 +6714,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-        aid = -1;
+        aid = H5I_INVALID_HID;
     } /* end for */
 
     if(H5Dclose(did) < 0)
         goto out;
-    did = -1;
+    did = H5I_INVALID_HID;
 
 
     /*-------------------------------------------------------------------------
@@ -6740,12 +6740,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-        aid = -1;
+        aid = H5I_INVALID_HID;
     } /* end for */
 
     if(H5Dclose(did) < 0)
         goto out;
-    did = -1;
+    did = H5I_INVALID_HID;
 
 
 
@@ -6766,12 +6766,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-        aid = -1;
+        aid = H5I_INVALID_HID;
     } /* end for */
 
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
      * create a group without creation order tracked for attributes and atributes in it
@@ -6790,12 +6790,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-        aid = -1;
+        aid = H5I_INVALID_HID;
     } /* end for */
 
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
      * create a named datatype with creation order tracked for attributes and atributes in it
@@ -6817,12 +6817,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-        aid = -1;
+        aid = H5I_INVALID_HID;
     } /* end for */
 
     if(H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
      * create a named datatype without creation order tracked for attributes and atributes in it
@@ -6844,12 +6844,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-        aid = -1;
+        aid = H5I_INVALID_HID;
     } /* end for */
 
     if(H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
      * add some attributes to the root group
@@ -6867,12 +6867,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-        aid = -1;
+        aid = H5I_INVALID_HID;
     } /* end for */
 
     if(H5Gclose(gid) < 0)
         goto out;
-    gid = -1;
+    gid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
      * close
@@ -6880,19 +6880,19 @@ gent_attr_creation_order(void)
      */
     if(H5Sclose(sid) < 0)
         goto out;
-    sid = -1;
+    sid = H5I_INVALID_HID;
     if(H5Pclose(dcpl_id) < 0)
         goto out;
-    dcpl_id = -1;
+    dcpl_id = H5I_INVALID_HID;
     if(H5Pclose(gcpl_id) < 0)
         goto out;
-    gcpl_id = -1;
+    gcpl_id = H5I_INVALID_HID;
     if(H5Pclose(tcpl_id) < 0)
         goto out;
-    tcpl_id = -1;
+    tcpl_id = H5I_INVALID_HID;
     if(H5Fclose(fid) < 0)
         goto out;
-    fid = -1;
+    fid = H5I_INVALID_HID;
 
 
 
@@ -9797,7 +9797,7 @@ static void gent_bitnopaquefields(void)
         uint64_t    d;
     } s_t;
 
-    hid_t  file, grp=-1, type=-1, space=-1, dset=-1;
+    hid_t  file_id=H5I_INVALID_HID, grp=H5I_INVALID_HID, type=H5I_INVALID_HID, space=H5I_INVALID_HID, dset=H5I_INVALID_HID;
     size_t  i;
     hsize_t  nelmts = F80_DIM32;
     uint8_t buf[F80_DIM32];    /* bitfield, opaque */
@@ -9806,9 +9806,9 @@ static void gent_bitnopaquefields(void)
     uint64_t buf4[F80_DIM32];    /* bitfield, opaque */
     s_t      buf5[F80_DIM32];        /* compound */
 
-    file = H5Fcreate(FILE80, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILE80, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    if ((grp = H5Gcreate2(file, "bittypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+    if ((grp = H5Gcreate2(file_id, "bittypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
         /* bitfield_1 */
         if ((type = H5Tcopy(H5T_STD_B8LE)) >= 0) {
             if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
@@ -9872,7 +9872,7 @@ static void gent_bitnopaquefields(void)
         H5Gclose(grp);
     }
 
-    if ((grp = H5Gcreate2(file, "opaquetypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+    if ((grp = H5Gcreate2(file_id, "opaquetypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
         /* opaque_1 */
         if ((type = H5Tcreate(H5T_OPAQUE, 1)) >= 0) {
             if ((H5Tset_tag(type, "1-byte opaque type")) >= 0) {
@@ -9908,7 +9908,7 @@ static void gent_bitnopaquefields(void)
         H5Gclose(grp);
     }
 
-    if ((grp = H5Gcreate2(file, "cmpdtypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+    if ((grp = H5Gcreate2(file_id, "cmpdtypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
         /* compound_1 */
         if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
             H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
@@ -9934,7 +9934,7 @@ static void gent_bitnopaquefields(void)
         H5Gclose(grp);
     }
 
-    H5Fclose(file);
+    H5Fclose(file_id);
 }
 
 /*-------------------------------------------------------------------------
@@ -10033,9 +10033,9 @@ static void gent_compound_complex2(void)
 
     compound        *buf;        /* compound */
 
-    hid_t file, type=-1, space=-1, dset=-1;
+    hid_t file, type=H5I_INVALID_HID, space=H5I_INVALID_HID, dset=H5I_INVALID_HID;
     hid_t dset_array_a, dset_array_b, dset_array_c;
-    hid_t cmpd_tid1 = -1, cmpd_tid2 = -1, cmpd_tid3 = -1;
+    hid_t cmpd_tid1 = H5I_INVALID_HID, cmpd_tid2 = H5I_INVALID_HID, cmpd_tid3 = H5I_INVALID_HID;
     size_t  i;
     size_t j, k;
     unsigned dset_array_ndims;
@@ -10321,7 +10321,7 @@ static void gent_vlenstr_array(void)
     };
     const char    *buffer[F83_DIM*F83_ARRAYDIM];
 
-    hid_t  file, type=-1, space=-1, dset=-1;
+    hid_t  file, type=H5I_INVALID_HID, space=H5I_INVALID_HID, dset=H5I_INVALID_HID;
     hid_t cmpd_tid1, array_tid;
     int i, j;
 
@@ -10564,10 +10564,10 @@ static void gent_null_space_group(void)
 static void
 gent_err_attr_dspace(void)
 {
-    hid_t fid = -1;         /* File identifier */
-    hid_t fcpl = -1;        /* File access property list */
-    hid_t sid = -1;         /* Dataspace identifier */
-    hid_t aid = -1;         /* Attribute identifier */
+    hid_t fid = H5I_INVALID_HID;         /* File identifier */
+    hid_t fcpl = H5I_INVALID_HID;        /* File access property list */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace identifier */
+    hid_t aid = H5I_INVALID_HID;         /* Attribute identifier */
     hsize_t dims = 2;       /* Dimensino size */
     int wdata[2] = {7, 42}; /* The buffer to write */
     int fd = -1;            /* The file descriptor */

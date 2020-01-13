@@ -1853,7 +1853,7 @@ main(int argc, const char *argv[])
 {
     iter_t              iter;
     const char         *fname = NULL;
-    hid_t               fid = -1;
+    hid_t               fid = H5I_INVALID_HID;
     H5E_auto2_t         func;
     H5E_auto2_t         tools_func;
     void               *edata;

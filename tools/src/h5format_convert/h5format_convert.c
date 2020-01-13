@@ -219,8 +219,8 @@ leave(int ret)
 static int
 convert(hid_t fid, const char *dname)
 {
-    hid_t dcpl = -1;
-    hid_t did = -1;
+    hid_t dcpl = H5I_INVALID_HID;
+    hid_t did = H5I_INVALID_HID;
     H5D_layout_t layout_type;
     H5D_chunk_index_t idx_type;
 
@@ -399,7 +399,7 @@ main(int argc, const char *argv[])
 {
     H5E_auto2_t func;
     void *edata;
-    hid_t fid = -1;
+    hid_t fid = H5I_INVALID_HID;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);

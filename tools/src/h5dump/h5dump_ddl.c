@@ -614,7 +614,7 @@ dump_named_datatype(hid_t tid, const char *name)
 {
     H5O_info_t        oinfo;
     unsigned          attr_crt_order_flags;
-    hid_t             tcpl_id = -1;    /* datatype creation property list ID */
+    hid_t             tcpl_id = H5I_INVALID_HID;    /* datatype creation property list ID */
     hsize_t           curr_pos = 0;    /* total data element position   */
     h5tools_str_t     buffer;          /* string into which to render   */
     h5tools_context_t ctx;             /* print context  */
@@ -1415,7 +1415,7 @@ lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
 void
 handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name)
 {
-    hid_t  gid = -1;
+    hid_t  gid = H5I_INVALID_HID;
 
     if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
         error_msg("unable to open root group\n");
@@ -1469,8 +1469,8 @@ handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H
 void
 handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name)
 {
-    hid_t  oid          = -1;
-    hid_t  attr_id      = -1;
+    hid_t  oid          = H5I_INVALID_HID;
+    hid_t  attr_id      = H5I_INVALID_HID;
     char *obj_name      = NULL;
     char *attr_name     = NULL;
     int j;

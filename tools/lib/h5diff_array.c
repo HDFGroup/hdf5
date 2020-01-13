@@ -487,7 +487,7 @@ static hsize_t diff_datum(
     case H5T_COMPOUND:
         H5TOOLS_DEBUG("diff_datum H5T_COMPOUND");
         {
-            hid_t memb_type = -1;
+            hid_t memb_type = H5I_INVALID_HID;
             nmembs = members->n;
 
             for (j = 0; j < nmembs; j++) {
@@ -698,7 +698,7 @@ static hsize_t diff_datum(
      */
     case H5T_ARRAY:
         {
-            hid_t   memb_type = -1;
+            hid_t   memb_type = H5I_INVALID_HID;
             hsize_t adims[H5S_MAX_RANK];
             int     ndims;
 
@@ -734,8 +734,8 @@ static hsize_t diff_datum(
             H5TOOLS_GOTO_DONE(opts->err_stat);
         }
         else if (!iszero1 && !iszero2) {
-            hid_t obj1_id = -1;
-            hid_t obj2_id = -1;
+            hid_t obj1_id = H5I_INVALID_HID;
+            hid_t obj2_id = H5I_INVALID_HID;
 
             /*-------------------------------------------------------------------------
              * H5T_STD_REF
@@ -744,8 +744,8 @@ static hsize_t diff_datum(
              */
             if (H5Tequal(m_type, H5T_STD_REF)) {
                 /* if (type_size == H5R_STD_REF_SIZE) */
-                hid_t region1_id = -1;
-                hid_t region2_id = -1;
+                hid_t region1_id = H5I_INVALID_HID;
+                hid_t region2_id = H5I_INVALID_HID;
                 H5R_ref_t *ref1_buf = (const H5R_ref_t *)_mem1;
                 H5R_ref_t *ref2_buf = (const H5R_ref_t *)_mem2;
                 H5O_type_t obj1_type = -1;   /* Object type */
@@ -1024,8 +1024,8 @@ static hsize_t diff_datum(
              */
             else if (H5Tequal(m_type, H5T_STD_REF_DSETREG)) {
                 /* if (type_size == H5R_DSET_REG_REF_BUF_SIZE) */
-                hid_t region1_id = -1;
-                hid_t region2_id = -1;
+                hid_t region1_id = H5I_INVALID_HID;
+                hid_t region2_id = H5I_INVALID_HID;
 
                 H5TOOLS_INFO("H5T_STD_REF_DSETREG reference type");
 
@@ -1113,7 +1113,7 @@ static hsize_t diff_datum(
      */
     case H5T_VLEN:
         {
-            hid_t memb_type = -1;
+            hid_t memb_type = H5I_INVALID_HID;
 
             H5TOOLS_DEBUG("diff_datum H5T_VLEN");
             /* get the VL sequences's base datatype for each element */
@@ -4509,7 +4509,7 @@ static hsize_t diff_ullong(unsigned char *mem1, unsigned char *mem2,
 static
 int ull2float(unsigned long long ull_value, float *f_value)
 {
-    hid_t          dxpl_id = -1;
+    hid_t          dxpl_id = H5I_INVALID_HID;
     unsigned char *buf = NULL;
     size_t         src_size;
     size_t         dst_size;

@@ -56,10 +56,10 @@ const char *FILENAME_ENHANCE[] = {
 static int
 gen_cache_image_file(const char *fname)
 {
-    hid_t fid = -1;                 /* File ID */
-    hid_t did = -1, sid = -1;       /* Dataset ID, dataspace ID */
-    hid_t fapl = -1;                /* File access property list */
-    hid_t dcpl = -1;                /* Dataset creation property list */
+    hid_t fid = H5I_INVALID_HID;                 /* File ID */
+    hid_t did = -1, sid = H5I_INVALID_HID;       /* Dataset ID, dataspace ID */
+    hid_t fapl = H5I_INVALID_HID;                /* File access property list */
+    hid_t dcpl = H5I_INVALID_HID;                /* Dataset creation property list */
     hsize_t dims[2];                /* Dimension sizes */
     hsize_t chunks[2];              /* Chunked dimension sizes */
     int buf[50][100];               /* Buffer for data to write */
@@ -164,10 +164,10 @@ error:
 static int
 gen_enhance_files(hbool_t user)
 {
-    hid_t fid = -1;         /* File ID */
-    hid_t fcpl = -1;        /* File creation property list */
-    hid_t sid = -1;         /* Dataspace ID */
-    hid_t did = -1;         /* Dataset ID */
+    hid_t fid = H5I_INVALID_HID;         /* File ID */
+    hid_t fcpl = H5I_INVALID_HID;        /* File creation property list */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t did = H5I_INVALID_HID;         /* Dataset ID */
     hsize_t dim[1];         /* Dimension sizes */
     int data[NUM_ELMTS];    /* Buffer for data */
     int fd = -1;            /* The file descriptor ID */
@@ -361,13 +361,13 @@ error:
 int
 main(void)
 {
-    hid_t fid = -1;            /* File ID */
-    hid_t fcpl = -1;        /* File creation property list */
-    hid_t fapl = -1, new_fapl = -1;    /* File access property lists */
+    hid_t fid = H5I_INVALID_HID;            /* File ID */
+    hid_t fcpl = H5I_INVALID_HID;        /* File creation property list */
+    hid_t fapl = -1, new_fapl = H5I_INVALID_HID;    /* File access property lists */
     char fname[512];        /* File name */
     unsigned new_format;    /* To use latest library format or not */
-    hid_t sid = -1;         /* Dataspace ID */
-    hid_t did = -1;         /* Dataset ID */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t did = H5I_INVALID_HID;         /* Dataset ID */
     hsize_t dim[1];         /* Dimension sizes */
     int data[NUM_ELMTS];    /* Buffer for data */
     int i;                  /* Local index variables */
