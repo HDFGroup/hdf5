@@ -26,11 +26,11 @@
 
 /* global variables */
 hid_t       H5tools_ERR_STACK_g = 0;
-hid_t       H5tools_ERR_CLS_g = -1;
-hid_t       H5E_tools_g = -1;
-hid_t       H5E_tools_min_id_g = -1;
-hid_t       H5E_tools_min_info_id_g = -1;
-hid_t       H5E_tools_min_dbg_id_g = -1;
+hid_t       H5tools_ERR_CLS_g = H5I_INVALID_HID;
+hid_t       H5E_tools_g = H5I_INVALID_HID;
+hid_t       H5E_tools_min_id_g = H5I_INVALID_HID;
+hid_t       H5E_tools_min_info_id_g = H5I_INVALID_HID;
+hid_t       H5E_tools_min_dbg_id_g = H5I_INVALID_HID;
 int         compound_data;
 FILE       *rawattrstream = NULL;      /* should initialize to stdout but gcc moans about it */
 FILE       *rawdatastream = NULL;      /* should initialize to stdout but gcc moans about it */
@@ -490,7 +490,7 @@ static hid_t
 h5tools_get_fapl(hid_t fapl, const char *fname, const char *driver,
     unsigned *drivernum)
 {
-    hid_t  new_fapl = -1; /* Copy of file access property list passed in, or new property list */
+    hid_t  new_fapl = H5I_INVALID_HID; /* Copy of file access property list passed in, or new property list */
     herr_t ret_value = SUCCEED;
 
     /* Make a copy of the FAPL, for the file open call to use, eventually */
@@ -570,7 +570,7 @@ h5tools_get_fapl(hid_t fapl, const char *fname, const char *driver,
 done:
     if((new_fapl != H5P_DEFAULT) && (ret_value < 0)) {
         H5Pclose(new_fapl);
-        new_fapl = -1;
+        new_fapl = H5I_INVALID_HID;
     }
 
     return(new_fapl);
@@ -1391,7 +1391,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
 
                     mem = ((unsigned char*)_mem) + block_index * size;
                     for (j = 0; j < nmembs; j++) {
-                        hid_t    memb = -1;
+                        hid_t    memb = H5I_INVALID_HID;
                         size_t   offset;
 
                         offset = H5Tget_member_offset(tid, j);
@@ -1411,7 +1411,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             {
                 int     k, ndims;
                 hsize_t dims[H5S_MAX_RANK], temp_nelmts, nelmts;
-                hid_t   memb = -1;
+                hid_t   memb = H5I_INVALID_HID;
 
                 H5TOOLS_DEBUG("H5T_ARRAY");
                 /* get the array's base datatype for each element */
@@ -1445,7 +1445,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
         case H5T_VLEN:
             {
                 hsize_t      nelmts;
-                hid_t        memb = -1;
+                hid_t        memb = H5I_INVALID_HID;
 
                 H5TOOLS_DEBUG("H5T_VLEN");
                /* get the VL sequences's base datatype for each element */
@@ -1557,11 +1557,11 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
     hsize_t      total_size[H5S_MAX_RANK];
     unsigned     jndx;
     size_t       type_size;
-    hid_t        mem_space = -1;
+    hid_t        mem_space = H5I_INVALID_HID;
     void        *region_buf = NULL;
     hbool_t      past_catch = FALSE;
     hsize_t      blkndx;
-    hid_t        sid1 = -1;
+    hid_t        sid1 = H5I_INVALID_HID;
     int          ret_value = -1;
 
     /* Get the dataspace of the dataset */
@@ -1654,8 +1654,8 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     hsize_t     *ptdata = NULL;
     int          sndims;
     unsigned     ndims;
-    hid_t        dtype = -1;
-    hid_t        type_id = -1;
+    hid_t        dtype = H5I_INVALID_HID;
+    hid_t        type_id = H5I_INVALID_HID;
     hbool_t      past_catch = FALSE;
     hbool_t      ret_value = TRUE;
 
@@ -1722,7 +1722,7 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
 {
     hsize_t *dims1 = NULL;
     size_t   type_size;
-    hid_t    mem_space = -1;
+    hid_t    mem_space = H5I_INVALID_HID;
     void    *region_buf = NULL;
     int      ret_value = 0;
 
@@ -1777,8 +1777,8 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
     hsize_t  npoints;
     int      sndims;
     unsigned ndims;
-    hid_t    dtype = -1;
-    hid_t    type_id = -1;
+    hid_t    dtype = H5I_INVALID_HID;
+    hid_t    type_id = H5I_INVALID_HID;
     hbool_t  past_catch = FALSE;
     hbool_t  ret_value = TRUE;
 

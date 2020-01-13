@@ -39,17 +39,17 @@ static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *fil
 int
 h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options)
 {
-    hid_t        fidin      = -1;   /* file ID for input file*/
-    hid_t        fidout     = -1;   /* file ID for output file*/
-    hid_t        did        = -1;   /* dataset ID */
-    hid_t        pid        = -1;   /* dataset creation property list ID */
-    hid_t        sid        = -1;   /* space ID */
-    hid_t        tid        = -1;   /* type ID */
+    hid_t        fidin      = H5I_INVALID_HID;   /* file ID for input file*/
+    hid_t        fidout     = H5I_INVALID_HID;   /* file ID for output file*/
+    hid_t        did        = H5I_INVALID_HID;   /* dataset ID */
+    hid_t        pid        = H5I_INVALID_HID;   /* dataset creation property list ID */
+    hid_t        sid        = H5I_INVALID_HID;   /* space ID */
+    hid_t        tid        = H5I_INVALID_HID;   /* type ID */
     int          ok         = 1;    /* step results */
     unsigned int i;
     trav_table_t *travt = NULL;
-    hid_t        fcpl_in     = -1;   /* file creation property for input file */
-    hid_t        fcpl_out    = -1;   /* file creation property for output file */
+    hid_t        fcpl_in     = H5I_INVALID_HID;   /* file creation property for input file */
+    hid_t        fcpl_out    = H5I_INVALID_HID;   /* file creation property for output file */
     H5F_fspace_strategy_t in_strategy, out_strategy;    /* file space handling strategy for in/output file */
     hbool_t      in_persist, out_persist;         /* free-space persist status for in/output file */
     hsize_t      in_threshold, out_threshold;     /* free-space section threshold for in/output file */
@@ -355,14 +355,14 @@ int verify_layout(hid_t pid, pack_info_t *obj)
 
 int h5repack_cmp_pl(const char *fname1, const char *fname2)
 {
-    hid_t         fid1 =-1;         /* file ID */
-    hid_t         fid2 =-1;         /* file ID */
-    hid_t         dset1 =-1;        /* dataset ID */
-    hid_t         dset2 =-1;        /* dataset ID */
-    hid_t         gid =-1;          /* group ID */
-    hid_t         dcpl1 =-1;        /* dataset creation property list ID */
-    hid_t         dcpl2 =-1;        /* dataset creation property list ID */
-    hid_t         gcplid =-1;       /* group creation property list */
+    hid_t         fid1 =H5I_INVALID_HID;         /* file ID */
+    hid_t         fid2 =H5I_INVALID_HID;         /* file ID */
+    hid_t         dset1 =H5I_INVALID_HID;        /* dataset ID */
+    hid_t         dset2 =H5I_INVALID_HID;        /* dataset ID */
+    hid_t         gid =H5I_INVALID_HID;          /* group ID */
+    hid_t         dcpl1 =H5I_INVALID_HID;        /* dataset creation property list ID */
+    hid_t         dcpl2 =H5I_INVALID_HID;        /* dataset creation property list ID */
+    hid_t         gcplid =H5I_INVALID_HID;       /* group creation property list */
     unsigned      crt_order_flag1;  /* group creation order flag */
     unsigned      crt_order_flag2;  /* group creation order flag */
     trav_table_t *trav = NULL;

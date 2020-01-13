@@ -211,8 +211,8 @@ main (int argc, const char *argv[])
     H5E_auto2_t         tools_func;
     void               *edata;
     void               *tools_edata;
-    hid_t        fid_src = -1;
-    hid_t        fid_dst = -1;
+    hid_t        fid_src = H5I_INVALID_HID;
+    hid_t        fid_dst = H5I_INVALID_HID;
     unsigned     flag = 0;
     unsigned     verbose = 0;
     unsigned     parents = 0;
