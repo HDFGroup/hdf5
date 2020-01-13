@@ -215,7 +215,7 @@ H5I_term_package(void)
  *-------------------------------------------------------------------------
  */
 H5I_type_t
-H5Iregister_type(size_t H5_ATTR_SANITY_CHECK hash_size, unsigned reserved, H5I_free_t free_func)
+H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free_func)
 {
     H5I_class_t *cls = NULL;            /* New ID class */
     H5I_type_t new_type;                /* New ID type value */
