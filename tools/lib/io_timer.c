@@ -123,14 +123,14 @@ get_timer_type(io_time_t *pt)
 #endif
 
 /*
- * Function:    set_time
+ * Function:    io_time_set
  * Purpose:     Set the time in a ``io_time_t'' object.
  * Return:      Pointer to the passed in ``io_time_t'' object if SUCCEED; Null otherwise.
  * Programmer:  Bill Wendling, 01. October 2001
  * Modifications:
  */
 io_time_t *
-set_time(io_time_t *pt, timer_type t, int start_stop)
+io_time_set(io_time_t *pt, timer_type t, int start_stop)
 {
     /* sanity check */
     HDassert(pt);
@@ -160,6 +160,10 @@ set_time(io_time_t *pt, timer_type t, int start_stop)
 		pt->total_time[HDF5_FILE_READ_CLOSE] += pt->mpi_timer[t] - pt->mpi_timer[HDF5_FINE_READ_FIXED_DIMS];
 	}
 	break;
+#else
+    case MPI_CLOCK:
+	    HDfprintf(stderr, "MPI clock set in serial library\n");
+	    return NULL;
 #endif /* H5_HAVE_PARALLEL */
     case SYS_CLOCK:
             if (start_stop == TSTART) {
@@ -203,15 +207,18 @@ set_time(io_time_t *pt, timer_type t, int start_stop)
 }
 
 /*
- * Function:    get_time
+ * Function:    io_time_get
  * Purpose:     Get the time from a ``io_time_t'' object.
  * Return:      The number of seconds as a DOUBLE.
  * Programmer:  Bill Wendling, 01. October 2001
  * Modifications:
  */
 double
-get_time(io_time_t *pt, timer_type t)
+io_time_get(io_time_t *pt, timer_type t)
 {
+    /* sanity check */
+    HDassert(pt);
+
     return pt->total_time[t];
 }
 
