@@ -68,16 +68,16 @@ static int UC_2_VDS_FILL_VALUE      = -9;
 int
 main(void)
 {
-    hid_t src_sid       = -1;   /* source dataset's dataspace ID            */
-    hid_t src_dcplid    = -1;   /* source dataset property list ID          */
+    hid_t src_sid       = H5I_INVALID_HID;   /* source dataset's dataspace ID            */
+    hid_t src_dcplid    = H5I_INVALID_HID;   /* source dataset property list ID          */
 
-    hid_t vds_sid       = -1;   /* VDS dataspace ID                         */
-    hid_t vds_dcplid    = -1;   /* VDS dataset property list ID             */
+    hid_t vds_sid       = H5I_INVALID_HID;   /* VDS dataspace ID                         */
+    hid_t vds_dcplid    = H5I_INVALID_HID;   /* VDS dataset property list ID             */
 
-    hid_t fid           = -1;   /* HDF5 file ID                             */
-    hid_t did           = -1;   /* dataset ID                               */
-    hid_t msid          = -1;   /* memory dataspace ID                      */
-    hid_t fsid          = -1;   /* file dataspace ID                        */
+    hid_t fid           = H5I_INVALID_HID;   /* HDF5 file ID                             */
+    hid_t did           = H5I_INVALID_HID;   /* dataset ID                               */
+    hid_t msid          = H5I_INVALID_HID;   /* memory dataspace ID                      */
+    hid_t fsid          = H5I_INVALID_HID;   /* file dataspace ID                        */
 
     hsize_t start[RANK];        /* starting point for hyperslab             */
     hsize_t extent[RANK];       /* dataset extents                          */

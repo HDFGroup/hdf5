@@ -43,24 +43,24 @@ int
 h5tools_canreadf(const char* name,     /* object name, serves also as boolean print */
                      hid_t dcpl_id)    /* dataset creation property list */
 {
-    H5TOOLS_ERR_INIT(int, 1)
     int nfilters;       /* number of filters */
     H5Z_filter_t filtn; /* filter identification number */
     int i;              /* index */
     int udfilter_avail; /* index */
+    int ret_value = 1;
 
     /* get information about filters */
     if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_nfilters failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Pget_nfilters failed");
 
     /* if we do not have filters, we can read the dataset safely */
     if (!nfilters)
-        HGOTO_DONE(1);
+        H5TOOLS_GOTO_DONE(1);
 
     /* check availability of filters */
     for (i = 0; i < nfilters; i++) {
         if ((filtn = H5Pget_filter2(dcpl_id, (unsigned) i, 0, 0, 0, (size_t) 0, 0, NULL)) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_filter2 failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pget_filter2 failed");
 
         switch (filtn) {
         /*-------------------------------------------------------------------------
@@ -69,7 +69,7 @@ h5tools_canreadf(const char* name,     /* object name, serves also as boolean pr
          */
         default:
             if ((udfilter_avail = H5Zfilter_avail(filtn)) < 0) {
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Zfilter_avail failed");
+                H5TOOLS_GOTO_ERROR(FAIL, "H5Zfilter_avail failed");
             }
             else if (!udfilter_avail) {
                 if (name)
@@ -144,46 +144,47 @@ done:
 H5_ATTR_CONST int
 h5tools_can_encode(H5Z_filter_t filtn)
 {
-    H5TOOLS_ERR_INIT(int, 1)
+    int ret_value = 1;
 
     switch (filtn) {
     /* user defined filter     */
     default:
-        HGOTO_DONE(0)
+        H5TOOLS_GOTO_DONE(0);
+        break;
     case H5Z_FILTER_DEFLATE:
 #ifndef H5_HAVE_FILTER_DEFLATE
-        HGOTO_DONE(0)
+        H5TOOLS_GOTO_DONE(0);
 #endif
             break;
 
     case H5Z_FILTER_SZIP:
 #ifndef H5_HAVE_FILTER_SZIP
-        HGOTO_DONE(0)
+        H5TOOLS_GOTO_DONE(0);
 #else
         {
             unsigned int filter_config_flags;
 
             if (H5Zget_filter_info(filtn, &filter_config_flags) < 0)
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Zget_filter_info failed");
+                H5TOOLS_GOTO_ERROR(FAIL, "H5Zget_filter_info failed");
             if ((filter_config_flags
                     & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 0) {
                 /* filter present but neither encode nor decode is supported (???) */
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "neither encode nor decode is supported");
+                H5TOOLS_GOTO_ERROR(FAIL, "neither encode nor decode is supported");
             }
             else if ((filter_config_flags
                         & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == H5Z_FILTER_CONFIG_DECODE_ENABLED) {
                 /* decoder only: read but not write */
-                HGOTO_DONE(0)
+                H5TOOLS_GOTO_DONE(0);
             }
             else if ((filter_config_flags
                         & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == H5Z_FILTER_CONFIG_ENCODE_ENABLED) {
                 /* encoder only: write but not read (???) */
-                H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "encoder only: write but not read");
+                H5TOOLS_GOTO_ERROR(FAIL, "encoder only: write but not read");
             }
             else if ((filter_config_flags
                         & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED))
                         == (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
-                HGOTO_DONE(1)
+                H5TOOLS_GOTO_DONE(1);
             }
         }
 #endif

@@ -721,7 +721,7 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
 
         case H5O_TYPE_DATASET:
             if(NULL == already_seen) {
-                hid_t dset = -1;
+                hid_t dset = H5I_INVALID_HID;
 
                 /* Add the dataset to the list of objects */
                 add_obj(info->dset_table, oinfo->addr, name, TRUE);
@@ -788,7 +788,7 @@ herr_t
 init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     table_t **dset_table, table_t **type_table)
 {
-    H5TOOLS_ERR_INIT(herr_t, SUCCEED)
+    herr_t ret_value = SUCCEED;
 
     /* Initialize the tables */
     init_table(group_table);
@@ -803,7 +803,7 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
 
     /* Find all shared objects */
     if((ret_value = h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info, H5O_INFO_BASIC)) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "finding shared objects failed")
+        H5TOOLS_GOTO_ERROR(FAIL, "finding shared objects failed");
 
 done:
     /* Release resources */
@@ -904,39 +904,39 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
     /* if path is root, return group type */
     if(!HDstrcmp(linkpath,"/")) {
         link_info->trg_type = H5O_TYPE_GROUP;
-        HGOTO_DONE(2);
+        H5TOOLS_GOTO_DONE(2);
     }
 
     /* check if link itself exist */
     if(H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: link <%s> doesn't exist \n",linkpath);
-        HGOTO_DONE(FAIL);
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* get info from link */
     if(H5Lget_info(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link info from <%s>\n",linkpath);
-        HGOTO_DONE(FAIL);
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* given path is hard link (object) */
     if(link_info->linfo.type == H5L_TYPE_HARD)
-        HGOTO_DONE(2);
+        H5TOOLS_GOTO_DONE(2);
 
     /* trg_path must be freed out of this function when finished using */
     if((link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char))) == NULL) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to allocate buffer for <%s>\n",linkpath);
-        HGOTO_DONE(FAIL);
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* get link value */
     if(H5Lget_val(file_id, linkpath, (void *)link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link value from <%s>\n",linkpath);
-        HGOTO_DONE(FAIL);
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /*-----------------------------------------------------
@@ -945,13 +945,13 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
      */
     if(link_info->linfo.type == H5L_TYPE_EXTERNAL) {
         if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         if(H5Pset_fapl_sec2(fapl) < 0)
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         if((lapl = H5Pcreate(H5P_LINK_ACCESS)) < 0)
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         if(H5Pset_elink_fapl(lapl, fapl) < 0)
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* Check for retrieving object info */
@@ -964,24 +964,24 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
 
         /* detect dangling link */
         if(l_ret == FALSE) {
-            HGOTO_DONE(0);
+            H5TOOLS_GOTO_DONE(0);
         }
         else if(l_ret < 0) {       /* function failed */
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         }
 
         /* get target object info */
         if(H5Oget_info_by_name2(file_id, linkpath, &trg_oinfo, H5O_INFO_BASIC, lapl) < 0) {
             if(link_info->opt.msg_mode == 1)
                 parallel_print("Warning: unable to get object information for <%s>\n", linkpath);
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         } /* end if */
 
         /* check unknown type */
         if(trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES) {
             if(link_info->opt.msg_mode == 1)
                 parallel_print("Warning: target object of <%s> is unknown type\n", linkpath);
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         }  /* end if */
 
         /* set target obj type to return */
@@ -1047,16 +1047,16 @@ h5tools_getstatus(void)
 int
 h5tools_getenv_update_hyperslab_bufsize(void)
 {
-    H5TOOLS_ERR_INIT(int, 1)
     const char *env_str = NULL;
     long hyperslab_bufsize_mb;
+    int  ret_value = 1;
 
     /* check if environment variable is set for the hyperslab buffer size */
     if (NULL != (env_str = HDgetenv ("H5TOOLS_BUFSIZE"))) {
         errno = 0;
         hyperslab_bufsize_mb = HDstrtol(env_str, (char**)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
-            H5TOOLS_GOTO_ERROR(FAIL, H5E_tools_min_id_g, "hyperslab buffer size failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "hyperslab buffer size failed");
 
         /* convert MB to byte */
         H5TOOLS_BUFSIZE = (hsize_t)hyperslab_bufsize_mb * 1024 * 1024;

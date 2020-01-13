@@ -57,28 +57,35 @@ struct exclude_path_list {
     struct exclude_path_list * next;
 };
 
+/* Enumeration value for keeping track of whether an error occurred or differences were found */
+typedef enum {
+    H5DIFF_NO_ERR,   /* No error occurred */
+    H5DIFF_ERR_DIFF, /* Differences were found */
+    H5DIFF_ERR       /* An error occurred */
+} diff_err_t;
+
 typedef struct {
-    int      m_quiet;               /* quiet mide: no output at all */
-    int      m_report;              /* report mode: print the data */
-    int      m_verbose;             /* verbose mode: print the data, list of objcets, warnings */
-    int      m_verbose_level;       /* control verbose details */
-    int      d;                     /* delta, absolute value to compare */
-    double   delta;                 /* delta value */
-    int      p;                     /* relative error to compare*/
-    int      use_system_epsilon;    /* flag to use system epsilon (1 or 0) */
-    double   percent;               /* relative error value */
-    int      n;                     /* count, compare up to count */
-    hsize_t  count;                 /* count value */
-    hbool_t  follow_links;          /* follow symbolic links */
-    int      no_dangle_links;       /* return error when find dangling link */
-    int      err_stat;              /* an error ocurred (2, error, 1, differences, 0, no error) */
-    int      cmn_objs;              /* do we have common objects */
-    int      not_cmp;               /* are the objects comparable */
-    int      contents;              /* equal contents */
-    int      do_nans;               /* consider Nans while diffing floats */
-    int      m_list_not_cmp;        /* list not comparable messages */
-    int      exclude_path;          /* exclude path to an object */
-    struct   exclude_path_list * exclude; /* keep exclude path list */
+    int        m_quiet;               /* quiet mode: no output at all */
+    int        m_report;              /* report mode: print the data */
+    int        m_verbose;             /* verbose mode: print the data, list of objcets, warnings */
+    int        m_verbose_level;       /* control verbose details */
+    int        d;                     /* delta, absolute value to compare */
+    double     delta;                 /* delta value */
+    int        p;                     /* relative error to compare*/
+    int        use_system_epsilon;    /* flag to use system epsilon (1 or 0) */
+    double     percent;               /* relative error value */
+    int        n;                     /* count, compare up to count */
+    hsize_t    count;                 /* count value */
+    hbool_t    follow_links;          /* follow symbolic links */
+    int        no_dangle_links;       /* return error when find dangling link */
+    diff_err_t err_stat;              /* an error ocurred (2, error, 1, differences, 0, no error) */
+    int        cmn_objs;              /* do we have common objects */
+    int        not_cmp;               /* are the objects comparable */
+    int        contents;              /* equal contents */
+    int        do_nans;               /* consider Nans while diffing floats */
+    int        m_list_not_cmp;        /* list not comparable messages */
+    int        exclude_path;          /* exclude path to an object */
+    struct     exclude_path_list * exclude; /* keep exclude path list */
 } diff_opt_t;
 
 
