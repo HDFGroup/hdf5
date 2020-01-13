@@ -737,7 +737,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__use_minimized_dset_headers(H5F_t *file, H5D_t *dset, hbool_t *minimize)
+H5D__use_minimized_dset_headers(H5F_t *file, H5D_t H5_ATTR_SANITY_CHECK *dset, hbool_t *minimize)
 {
     herr_t          ret_value = SUCCEED;
 

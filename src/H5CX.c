@@ -105,7 +105,7 @@
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
-#ifdef H5_HAVE_PARALLEL
+#if defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY)
 /* Macro for the duplicated code to test and set properties for a property list */
 #define H5CX_TEST_SET_PROP(PROP_NAME, PROP_FIELD)                             \
 {                                                                             \
@@ -127,7 +127,9 @@
         (*head)->ctx.H5_GLUE(PROP_FIELD,_set) = TRUE;                         \
     } /* end if */                                                            \
 }
+#endif
 
+#ifdef H5_HAVE_PARALLEL
 /* Macro for the duplicated code to test and set properties for a property list */
 #define H5CX_SET_PROP(PROP_NAME, PROP_FIELD)                                  \
     if((*head)->ctx.H5_GLUE(PROP_FIELD,_set)) {                               \

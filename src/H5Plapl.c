@@ -567,7 +567,7 @@ H5P__lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t H5_ATTR_
     if(obj1 == NULL && obj2 != NULL) HGOTO_DONE(1);
     if(obj1 != NULL && obj2 == NULL) HGOTO_DONE(-1);
     if(obj1 && obj2) {
-        herr_t status;
+        herr_t H5_ATTR_SANITY_CHECK status;
 
         status = H5P__cmp_plist(obj1, obj2, &ret_value);
         HDassert(status >= 0);

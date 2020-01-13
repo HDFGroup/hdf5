@@ -25,6 +25,7 @@
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5private.h"
 
 /*
  * This file needs to access private information from the H5F package.
@@ -4208,7 +4209,8 @@ test_filespace_info(const char *env_h5_drvr)
 **
 *****************************************************************/
 static int
-set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
+set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t H5_ATTR_SANITY_CHECK multi, 
+    hbool_t split)
 {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t memb_fapl_arr[H5FD_MEM_NTYPES];

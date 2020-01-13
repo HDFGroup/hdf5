@@ -215,6 +215,9 @@ test_filter_read(void)
     unsigned    disable_partial_chunk_filters; /* Whether filters are disabled on partial chunks */
     herr_t      hrc;
     const char *filename;
+#ifdef H5_HAVE_FILTER_FLETCHER32
+    hsize_t     fletcher32_size;       /* Size of dataset with Fletcher32 checksum */
+#endif
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     hsize_t     deflate_size;       /* Size of dataset with deflate filter */

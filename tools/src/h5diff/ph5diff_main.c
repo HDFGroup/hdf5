@@ -305,7 +305,7 @@ void print_manager_output(void)
  *
  *-------------------------------------------------------------------------
  */
-void h5diff_exit(int H5_ATTR_UNUSED status)
+void h5diff_exit(int status)
 {
     /* if in parallel mode, dismiss workers, close down MPI, then exit */
     if(g_Parallel) {

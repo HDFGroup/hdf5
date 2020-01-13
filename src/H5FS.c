@@ -665,7 +665,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size)
+H5FS_size(const H5F_t H5_ATTR_SANITY_CHECK *f, const H5FS_t *fspace, hsize_t *meta_size)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
