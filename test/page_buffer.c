@@ -39,6 +39,12 @@
 
 #define FILENAME_LEN            1024
 
+#ifndef H5_HAVE_PARALLEL
+#define NUM_DSETS               5
+#define NX                      100
+#define NY                      50
+#endif
+
 /* helper routines */
 #ifndef H5_HAVE_PARALLEL
 static unsigned create_file(char *filename, hid_t fcpl, hid_t fapl);

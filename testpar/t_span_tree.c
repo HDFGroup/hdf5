@@ -37,7 +37,7 @@
 
 
 static void coll_write_test(int chunk_factor);
-static void coll_read_test(int chunk_factor);
+static void coll_read_test(void);
 
 
 /*-------------------------------------------------------------------------
@@ -84,7 +84,7 @@ void
 coll_irregular_cont_read(void)
 {
 
-  coll_read_test(0);
+  coll_read_test();
 
 }
 
@@ -133,7 +133,7 @@ void
 coll_irregular_simple_chunk_read(void)
 {
 
-  coll_read_test(1);
+  coll_read_test();
 
 }
 
@@ -181,7 +181,7 @@ void
 coll_irregular_complex_chunk_read(void)
 {
 
-  coll_read_test(4);
+  coll_read_test();
 
 }
 
@@ -662,7 +662,7 @@ void coll_write_test(int chunk_factor)
  *-------------------------------------------------------------------------
  */
 static void
-coll_read_test(int H5_ATTR_UNUSED chunk_factor)
+coll_read_test(void)
 {
 
   const   char *filename;

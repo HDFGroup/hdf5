@@ -27,6 +27,7 @@
 #include "testhdf5.h"
 #include "hdf5.h"
 #include "H5Spkg.h"        /* Dataspaces                */
+#include "H5private.h"
 
 #define FILENAME   "tselect.h5"
 
@@ -1613,7 +1614,7 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
 ****************************************************************/
 static void
 verify_select_hyper_contig_dr__run_test(const uint16_t *cube_buf,
-    size_t cube_size, unsigned edge_size, unsigned cube_rank)
+    size_t H5_ATTR_SANITY_CHECK cube_size, unsigned edge_size, unsigned cube_rank)
 {
     const uint16_t     *cube_ptr;           /* Pointer into the cube buffer */
     uint16_t        expected_value;     /* Expected value in dataset */

@@ -334,7 +334,7 @@ H5O__ainfo_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__ainfo_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
+H5O__ainfo_delete(H5F_t *f, H5O_t H5_ATTR_SANITY_CHECK *open_oh, void *_mesg)
 {
     H5O_ainfo_t *ainfo = (H5O_ainfo_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -405,9 +405,9 @@ H5O_ainfo_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSE
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
+H5O__ainfo_copy_file(H5F_t H5_ATTR_SANITY_CHECK *file_src, void *mesg_src, H5F_t *file_dst,
     hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
-    H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
+    H5O_copy_t H5_ATTR_SANITY_CHECK *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;
     H5O_ainfo_t *ainfo_dst = NULL;

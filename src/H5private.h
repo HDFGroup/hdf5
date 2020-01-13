@@ -306,6 +306,7 @@
 #ifdef __cplusplus
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
 #   define H5_ATTR_UNUSED       /*void*/
+#   define H5_ATTR_SANITY_CHECK /*void*/
 #   define H5_ATTR_NORETURN     /*void*/
 #   define H5_ATTR_CONST        /*void*/
 #   define H5_ATTR_PURE         /*void*/
@@ -314,6 +315,11 @@
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED       __attribute__((unused))
+#ifndef NDEBUG
+#define H5_ATTR_SANITY_CHECK       /*void*/
+#else /* NDEBUG */
+#define H5_ATTR_SANITY_CHECK       H5_ATTR_UNUSED
+#endif /* NDEBUG */
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
@@ -325,6 +331,7 @@
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
 #   define H5_ATTR_UNUSED       /*void*/
+#   define H5_ATTR_SANITY_CHECK /*void*/
 #   define H5_ATTR_NORETURN     /*void*/
 #   define H5_ATTR_CONST        /*void*/
 #   define H5_ATTR_PURE         /*void*/
@@ -2047,7 +2054,7 @@ H5_DLL herr_t H5CX_pop(void);
 
 
 #define FUNC_ENTER_COMMON(asrt)                                               \
-    hbool_t err_occurred = FALSE;                                             \
+    hbool_t H5_ATTR_SANITY_CHECK err_occurred = FALSE;                        \
                                                                               \
     FUNC_ENTER_CHECK_NAME(asrt);
 
