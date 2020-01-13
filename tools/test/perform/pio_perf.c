@@ -587,74 +587,74 @@ run_test(iotype iot, parameters parms, struct options *opts)
         res = do_pio(parms);
 
         /* gather all of the "mpi write" times */
-        t = get_time(res.timers, HDF5_MPI_WRITE);
+        t = io_time_get(res.timers, HDF5_MPI_WRITE);
         get_minmax(&write_mpi_mm, t);
 
         write_mpi_mm_table[i] = write_mpi_mm;
 
         /* gather all of the "write" times */
-        t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
+        t = io_time_get(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
         get_minmax(&write_mm, t);
 
         write_mm_table[i] = write_mm;
 
         /* gather all of the "write" times from open to close */
-        t = get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
+        t = io_time_get(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
         get_minmax(&write_gross_mm, t);
 
         write_gross_mm_table[i] = write_gross_mm;
 
         /* gather all of the raw "write" times */
-        t = get_time(res.timers, HDF5_RAW_WRITE_FIXED_DIMS);
+        t = io_time_get(res.timers, HDF5_RAW_WRITE_FIXED_DIMS);
         get_minmax(&write_raw_mm, t);
 
         write_raw_mm_table[i] = write_raw_mm;
 
         /* gather all of the file open times (time from open to first write) */
-        t = get_time(res.timers, HDF5_FILE_WRITE_OPEN);
+        t = io_time_get(res.timers, HDF5_FILE_WRITE_OPEN);
         get_minmax(&write_open_mm, t);
 
         write_open_mm_table[i] = write_open_mm;
 
         /* gather all of the file close times (time from last write to close) */
-        t = get_time(res.timers, HDF5_FILE_WRITE_CLOSE);
+        t = io_time_get(res.timers, HDF5_FILE_WRITE_CLOSE);
         get_minmax(&write_close_mm, t);
 
         write_close_mm_table[i] = write_close_mm;
 
         if (!parms.h5_write_only) {
             /* gather all of the "mpi read" times */
-            t = get_time(res.timers, HDF5_MPI_READ);
+            t = io_time_get(res.timers, HDF5_MPI_READ);
             get_minmax(&read_mpi_mm, t);
 
             read_mpi_mm_table[i] = read_mpi_mm;
 
             /* gather all of the "read" times */
-            t = get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS);
+            t = io_time_get(res.timers, HDF5_FINE_READ_FIXED_DIMS);
             get_minmax(&read_mm, t);
 
             read_mm_table[i] = read_mm;
 
             /* gather all of the "read" times from open to close */
-            t = get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
+            t = io_time_get(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
             get_minmax(&read_gross_mm, t);
 
             read_gross_mm_table[i] = read_gross_mm;
 
             /* gather all of the raw "read" times */
-            t = get_time(res.timers, HDF5_RAW_READ_FIXED_DIMS);
+            t = io_time_get(res.timers, HDF5_RAW_READ_FIXED_DIMS);
             get_minmax(&read_raw_mm, t);
 
             read_raw_mm_table[i] = read_raw_mm;
 
             /* gather all of the file open times (time from open to first read) */
-            t = get_time(res.timers, HDF5_FILE_READ_OPEN);
+            t = io_time_get(res.timers, HDF5_FILE_READ_OPEN);
             get_minmax(&read_open_mm, t);
 
             read_open_mm_table[i] = read_open_mm;
 
             /* gather all of the file close times (time from last read to close) */
-            t = get_time(res.timers, HDF5_FILE_READ_CLOSE);
+            t = io_time_get(res.timers, HDF5_FILE_READ_CLOSE);
             get_minmax(&read_close_mm, t);
 
             read_close_mm_table[i] = read_close_mm;

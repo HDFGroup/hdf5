@@ -212,18 +212,18 @@ do_sio(parameters param, results *res)
         HDfprintf(output, "data filename=%s\n",
              fname);
 
-    set_time(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
     hrc = do_fopen(&param, fname, &fd, SIO_CREATE | SIO_WRITE);
     VRFY((hrc == SUCCESS), "do_fopen failed");
 
-    set_time(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
     hrc = do_write(res, &fd, &param, buffer);
-    set_time(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_write failed");
 
     /* Close file for write */
     hrc = do_fclose(iot, &fd);
-    set_time(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_fclose failed");
 
     if (!param.h5_write_only) {
@@ -232,19 +232,19 @@ do_sio(parameters param, results *res)
          */
 
         /* Open file for read */
-        set_time(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
+        io_time_set(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
         hrc = do_fopen(&param, fname, &fd, SIO_READ);
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-        set_time(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
+        io_time_set(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
         hrc = do_read(res, &fd, &param, buffer);
-        set_time(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
+        io_time_set(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
         hrc = do_fclose(iot, &fd);
 
-        set_time(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
+        io_time_set(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_fclose failed");
     }
 
@@ -550,7 +550,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
     }
 
     /* Start "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTART);
 
     /* Perform write */
     hrc = dset_write(rank-1, fd, parms, buffer);
@@ -562,7 +562,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
 
 
     /* Stop "raw data" write timer */
-    set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, TSTOP);
 
     /* Calculate write time */
 
@@ -872,7 +872,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
     } /* end switch */
 
     /* Start "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTART);
     hrc = dset_read(rank-1, fd, parms, buffer, buffer2);
 
     if (hrc < 0) {
@@ -881,7 +881,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
     }
 
     /* Stop "raw data" read timer */
-    set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_RAW_READ_FIXED_DIMS, TSTOP);
 
     /* Calculate read time */
 
