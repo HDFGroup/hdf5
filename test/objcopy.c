@@ -157,6 +157,7 @@ const char *FILENAME[] = {
 #define NUM_SUB_GROUPS  20
 #define NUM_WIDE_LOOP_GROUPS  10
 #define NUM_DATASETS  10
+#define ATTR_CMPD_STRING    "ThisIsAString"
 
 char src_obj_full_name[215];  /* the full path + name of the object to be copied */
 
@@ -194,9 +195,9 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2);
  *
  * Purpose: Add an address to the table.
  *
- * Return: void
+ * Return:      void
  *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
@@ -228,11 +229,10 @@ addr_insert(H5O_info_t *oi)
  *
  * Purpose: Check if address has already been encountered
  *
- * Return: Success: TRUE/FALSE
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    (can't fail)
  *
- * Failure: (can't fail)
- *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
@@ -257,9 +257,9 @@ addr_lookup(H5O_info_t *oi)
  *
  * Purpose: Reset the address tracking data structures
  *
- * Return: void
+ * Return:      void
  *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
@@ -5784,7 +5784,8 @@ attach_attribute_compound_vlstr(hid_t loc_id)
         int i;
         char *v;
     } s1;
-    s1 buf;                     /* Buffer */
+    size_t len;
+    s1 buf = {0, NULL};         /* Buffer */
     int ret_value = -1;        /* Return value */
 
     /* Create dataspace */
@@ -5814,8 +5815,11 @@ attach_attribute_compound_vlstr(hid_t loc_id)
         goto done;
 
     /* Write to the attribute */
+    len = HDstrlen(ATTR_CMPD_STRING) + 1;
     buf.i = 9;
-    buf.v = "ThisIsAString";
+    if(NULL == (buf.v = (char *)HDcalloc(len, sizeof(char))))
+        goto done;
+    HDstrncpy(buf.v, ATTR_CMPD_STRING, len);
     if(H5Awrite(aid, cmpd_tid, &buf) < 0)
         goto done;
 
@@ -5832,6 +5836,9 @@ done:
         H5Tclose(cmpd_tid);
     if(aid > 0)
         H5Aclose(aid);
+
+    HDfree(buf.v);
+
     return ret_value;
 } /* attach_attribute_compound_vlstr */
 
@@ -11464,8 +11471,8 @@ error:
         H5Tclose(f_tid);
         H5Tclose(g_tid);
         H5Tclose(anon_tid);
-    H5Pclose(ocpypl_id);
-    H5Aclose(aid);
+        H5Pclose(ocpypl_id);
+        H5Aclose(aid);
         H5Dclose(did);
         H5Sclose(sid);
         H5Gclose(gid);
@@ -11704,14 +11711,14 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
 
 error:
     H5E_BEGIN_TRY {
-    H5Pclose(ocpypl_id);
-    H5Tclose(tid);
-    H5Tclose(tid1);
-    H5Tclose(tid2);
-    H5Tclose(tid3);
-    H5Tclose(tid4);
-    H5Tclose(tid5);
-    H5Aclose(aid);
+        H5Pclose(ocpypl_id);
+        H5Tclose(tid);
+        H5Tclose(tid1);
+        H5Tclose(tid2);
+        H5Tclose(tid3);
+        H5Tclose(tid4);
+        H5Tclose(tid5);
+        H5Aclose(aid);
         H5Sclose(sid);
         H5Fclose(fid_dst);
         H5Fclose(fid_src);

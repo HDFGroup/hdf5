@@ -48,6 +48,12 @@ New Features
 
     Configuration:
     -------------
+    - Added Clang sanitizers to CMake for analyzer support
+
+      Added CMake code and files to execute the Clang sanitizers.
+
+      (ADB - 2019/12/12, TRILAB-135)
+
     - Update CMake for VS2019 support
 
       CMake added support for VS2019 in version 3.15. Changes to the CMake
@@ -55,6 +61,18 @@ New Features
       references in CMake files as necessary.
 
       (ADB - 2019/11/18, HDFFV-10962)
+
+    - Update CMake options to match new autotools options
+
+      Add configure options (autotools - CMake):
+            enable-asserts       HDF5_ENABLE_ASSERTS
+            enable-symbols       HDF5_ENABLE_SYMBOLS
+            enable-profiling     HDF5_ENABLE_PROFILING
+            enable-optimization  HDF5_ENABLE_OPTIMIZATION
+      In addition NDEBUG is no longer forced defined and relies on the CMake
+      process.
+
+      (ADB - 2019/10/07, HDFFV-100901, HDFFV-10637, TRILAB-97)
 
     - Update CMake tests to use FIXTURES
 
@@ -199,6 +217,31 @@ New Features
 
     Library:
     --------
+    - Add new public function H5Sselect_adjust.
+
+      This function shifts a dataspace selection by a specified logical offset
+      within the dataspace extent.  This can be useful for VOL developers to
+      implement chunked datasets.
+
+      (NAF - 2019/11/18)
+
+    - Add new public function H5Sselect_project_intersection.
+
+      This function computes the intersection between two dataspace selections
+      and projects that intersection into a third selection.  This can be useful
+      for VOL developers to implement chunked or virtual datasets.
+
+      (NAF - 2019/11/13, ID-148)
+
+    - Add new public function H5VLget_file_type.
+
+      This function returns a datatype equivalent to the supplied datatype but
+      with the location set to be in the file.  This datatype can then be used
+      with H5Tconvert to convert data between file and in-memory representation.
+      This funcition is intended for use only by VOL connector developers.
+
+      (NAF - 2019/11/08, ID-127)
+
     - Add S3 and HDFS VFDs to HDF5 maintenance
 
       Fix windows requirements and java tests. Windows requires CMake 3.13.
@@ -325,6 +368,14 @@ New Features
 
     Java Library:
     ----------------
+    - Tests fail for non-English locale.
+
+      In the JUnit tests with a non-English locale, only the part before
+      the decimal comma is replaced by XXXX and this leads to a comparison
+      error. Changed the regex for the Time substitution.
+
+      (ADB - 2020/01/09, HDFFV-10995)
+
     - Fix a failure in JUnit-TestH5P on 32-bit architectures
 
       (JTH - 2019/04/30)
@@ -348,6 +399,22 @@ New Features
 
     Tools:
     ------
+    - h5diff was updated to use the new reference APIs.
+
+      h5diff uses the new reference APIs to compare references.
+      Attribute references can also be compared.
+
+      (ADB - 2019/12/19, HDFFV-10980)
+
+    - h5dump and h5ls were updated to use the new reference APIs.
+
+      The tools library now use the new reference APIs to inspect a
+      file. Also the DDL spec was updated to reflect the format
+      changes produced with the new APIs. The export API and support
+      functions in the JNI were updated to match.
+
+      (ADB - 2019/12/06, HDFFV-10876 and HDFFV-10877)
+
     - h5repack was fixed to repack datasets with external storage
       to other types of storage.
 
@@ -388,6 +455,18 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Improved peformance when creating a large number of small datasets by
+      retrieving default property values from the API context instead of doing
+      skip list searches.
+
+      (CJH - 2019/12/10, HDFFV-10658)
+
+    - Fixed user-created data access properties not existing in the property list
+      returned by H5Dget_access_plist. Thanks to Steven Varga for submitting a
+      reproducer and a patch.
+
+      (CJH - 2019/12/9, HDFFV-10934)
+
     - Fixed the iteration error in test_versionbounds() in test/dtypes.c
 
       The test was supposed to loop through all valid combinations of
@@ -608,6 +687,21 @@ Bug Fixes since HDF5-1.10.3 release
       fcntl(2)-based file locking now correctly passes the struct pointer.
 
       (DER - 2019/08/27, HDFFV-10892)
+
+    - Torn pread/pwrite I/O would result in read and write corruption.
+
+      In the sec2, log, and core (with backing store) virtual file drivers
+      (VFDs), the read and write calls incorrectly reset the offset parameter
+      on torn pread and pwrite operations (i.e., I/O operations which fail to
+      be written atomically by the OS). For this bug to occur, pread/pwrite
+      have to be configured (this is the default if they are present on the
+      system) and the pread/pwrite operation has to fail to transfer all
+      the bytes, resulting in a multiple pread/pwrite calls.
+
+      This feature was initially enabled in HDF5 1.10.5 so the bug is
+      limited to that version.
+
+      (DER - 2019/12/09, HDFFV-10945)
 
 
     Java Library:

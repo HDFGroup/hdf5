@@ -305,15 +305,6 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
     FUNC_ENTER_PACKAGE
 
     switch(specific_type) {
-        /* Finalize H5Fopen */
-        case H5VL_FILE_POST_OPEN:
-            {
-                /* Call package routine */
-                if(H5F__post_open((H5F_t *)obj) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't finish opening file")
-                break;
-            }
-
         /* H5Fflush */
         case H5VL_FILE_FLUSH:
             {
@@ -368,14 +359,14 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 H5I_type_t  type       = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
                 const char *name       = HDva_arg(arguments, const char *);
                 H5F_t      *child      = HDva_arg(arguments, H5F_t *);
-                hid_t       plist_id   = HDva_arg(arguments, hid_t);
+                hid_t       fmpl_id    = HDva_arg(arguments, hid_t);
                 H5G_loc_t   loc;
 
                 if(H5G_loc_real(obj, type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Do the mount */
-                if(H5F__mount(&loc, name, child, plist_id) < 0)
+                if(H5F__mount(&loc, name, child, fmpl_id) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
                 break;
@@ -403,10 +394,10 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
             {
                 hid_t       fapl_id = HDva_arg(arguments, hid_t);
                 const char *name    = HDva_arg(arguments, const char *);
-                htri_t     *ret     = HDva_arg(arguments, htri_t *);
+                htri_t     *result  = HDva_arg(arguments, htri_t *);
 
                 /* Call private routine */
-                if((*ret = H5F__is_hdf5(name, fapl_id)) < 0)
+                if((*result = H5F__is_hdf5(name, fapl_id)) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "error in HDF5 file check")
                 break;
             }
@@ -450,10 +441,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type,
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5F_t *f = NULL;           /* File */
-    H5VL_native_file_optional_t optional_type = HDva_arg(arguments, H5VL_native_file_optional_t);
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -565,8 +556,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             {
                 size_t *max_size_ptr        = HDva_arg(arguments, size_t *);
                 size_t *min_clean_size_ptr  = HDva_arg(arguments, size_t *);
-                size_t *cur_size_ptr        = HDva_arg(arguments, size_t *); 
-                int    *cur_num_entries_ptr = HDva_arg(arguments, int *); 
+                size_t *cur_size_ptr        = HDva_arg(arguments, size_t *);
+                int    *cur_num_entries_ptr = HDva_arg(arguments, int *);
                 uint32_t cur_num_entries;
 
                 /* Go get the size data */
@@ -706,7 +697,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 unsigned *misses        = HDva_arg(arguments, unsigned *);
                 unsigned *evictions     = HDva_arg(arguments, unsigned *);
                 unsigned *bypasses      = HDva_arg(arguments, unsigned *);
-                
+
                 /* Sanity check */
                 if(NULL == f->shared->page_buf)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
@@ -827,6 +818,15 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 #endif /* H5_HAVE_PARALLEL */
+
+        /* Finalize H5Fopen */
+        case H5VL_NATIVE_FILE_POST_OPEN:
+            {
+                /* Call package routine */
+                if(H5F__post_open((H5F_t *)obj) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't finish opening file")
+                break;
+            }
 
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")

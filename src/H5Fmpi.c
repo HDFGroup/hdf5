@@ -291,11 +291,11 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     H5TRACE2("e", "ib", file_id, flag);
 
     /* Get the file object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
     /* Set atomicity value */
-    if (H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_SET_MPI_ATOMICITY, va_flag) < 0)
+    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_SET_MPI_ATOMICITY, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, va_flag) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set MPI atomicity");
 
 done:
@@ -359,11 +359,11 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag)
     H5TRACE2("e", "i*b", file_id, flag);
 
     /* Get the file object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
     /* Get atomicity value */
-    if (H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_MPI_ATOMICITY, flag) < 0)
+    if(H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MPI_ATOMICITY, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, flag) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get MPI atomicity");
 
 done:
@@ -374,8 +374,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F_mpi_retrieve_comm
  *
- * Purpose:     Retrieves an MPI communicator from the file the location ID 
- *              is in. If the loc_id is invalid, the fapl_id is used to 
+ * Purpose:     Retrieves an MPI communicator from the file the location ID
+ *              is in. If the loc_id is invalid, the fapl_id is used to
  *              retrieve the communicator.
  *
  * Return:      Success:    Non-negative

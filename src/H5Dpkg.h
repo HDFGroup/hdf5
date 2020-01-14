@@ -516,17 +516,6 @@ typedef struct H5D_fill_buf_info_t {
     hbool_t     has_vlen_fill_type;     /* Whether the datatype for the fill value has a variable-length component */
 } H5D_fill_buf_info_t;
 
-/* Internal data structure for computing variable-length dataset's total size */
-typedef struct {
-    H5VL_object_t *dset_vol_obj;    /* VOL object for the dataset */
-    hid_t fspace_id;                /* File dataspace ID of the dataset we are working on */
-    hid_t mspace_id;                /* Memory dataspace ID of the dataset we are working on */
-    void *fl_tbuf;                  /* Ptr to the temporary buffer we are using for fixed-length data */
-    void *vl_tbuf;                  /* Ptr to the temporary buffer we are using for VL data */
-    hsize_t size;                   /* Accumulated number of bytes for the selection */
-    hid_t dxpl_id;                  /* Dataset transfer property list to pass to dataset read */
-} H5D_vlen_bufsize_t;
-
 
 /*****************************/
 /* Package Private Variables */
@@ -575,8 +564,8 @@ H5_DLL herr_t H5D__get_num_chunks(const H5D_t *dset, const H5S_t *space, hsize_t
 H5_DLL herr_t H5D__get_chunk_info(const H5D_t *dset, const H5S_t *space, hsize_t chk_idx, hsize_t *coord, unsigned *filter_mask, haddr_t *offset, hsize_t *size);
 H5_DLL herr_t H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *coord, unsigned *filter_mask, haddr_t *addr, hsize_t *size);
 H5_DLL haddr_t H5D__get_offset(const H5D_t *dset);
-H5_DLL void *H5D__vlen_get_buf_size_alloc(size_t size, void *info);
-H5_DLL herr_t H5D__vlen_get_buf_size(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point, void *op_data);
+H5_DLL herr_t H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size);
+H5_DLL herr_t H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id, hsize_t *size);
 H5_DLL herr_t H5D__check_filters(H5D_t *dataset);
 H5_DLL herr_t H5D__set_extent(H5D_t *dataset, const hsize_t *size);
 H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset);

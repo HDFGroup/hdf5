@@ -1195,11 +1195,11 @@ done:
  * Purpose:     Callback for retrieving object's name by address
  *
  * Return:      Positive if path is for object desired
- * 		0 if not correct object
- * 		negative on failure.
+ * 	            0 if not correct object
+ * 	            negative on failure.
  *
  * Programmer:	Quincey Koziol
- *		November 4 2007
+ *              November 4 2007
  *
  *-------------------------------------------------------------------------
  */

@@ -3609,23 +3609,22 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 for(elmtno = 0; elmtno < safe; elmtno++) {
                     size_t buf_size;
                     hbool_t dst_copy = FALSE;
-                    hbool_t is_nil; /* Whether sequence is "nil" */
+                    hbool_t is_nil;     /* Whether reference is "nil" */
 
-                    /* Check for "nil" source sequence */
+                    /* Check for "nil" source reference */
                     if((*(src->shared->u.atomic.u.r.cls->isnull))(src->shared->u.atomic.u.r.file, s, &is_nil) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check if reference data is 'nil'")
 
                     if(is_nil) {
-
-                        /* Write "nil" sequence to destination location */
+                        /* Write "nil" reference to destination location */
                         if((*(dst->shared->u.atomic.u.r.cls->setnull))(dst->shared->u.atomic.u.r.file, d, b) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't set reference data to 'nil'")
                     } /* end else-if */
                     else {
                         /* Get size of references */
                         if(0 == (buf_size = src->shared->u.atomic.u.r.cls->getsize(
-                            src->shared->u.atomic.u.r.file, s, src->shared->size,
-                            dst->shared->u.atomic.u.r.file, &dst_copy)))
+                                src->shared->u.atomic.u.r.file, s, src->shared->size,
+                                dst->shared->u.atomic.u.r.file, &dst_copy)))
                             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect size")
 
                         /* Check if conversion buffer is large enough, resize if necessary. */
@@ -3636,26 +3635,26 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             HDmemset(conv_buf, 0, conv_buf_size);
                         } /* end if */
 
-                        if(dst_copy && (src->shared->u.atomic.u.r.loc == H5T_LOC_DISK)) {
+                        if(dst_copy && (src->shared->u.atomic.u.r.loc == H5T_LOC_DISK))
                             H5MM_memcpy(conv_buf, s, buf_size);
-                        } else {
+                        else {
                             /* Read reference */
                             if(src->shared->u.atomic.u.r.cls->read(
-                                src->shared->u.atomic.u.r.file, s, src->shared->size,
-                                dst->shared->u.atomic.u.r.file, conv_buf, buf_size) < 0)
+                                    src->shared->u.atomic.u.r.file, s, src->shared->size,
+                                    dst->shared->u.atomic.u.r.file, conv_buf, buf_size) < 0)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read reference data")
-                        }
+                        } /* end else */
 
-                        if(dst_copy && (dst->shared->u.atomic.u.r.loc == H5T_LOC_DISK)) {
+                        if(dst_copy && (dst->shared->u.atomic.u.r.loc == H5T_LOC_DISK))
                             H5MM_memcpy(d, conv_buf, buf_size);
-                        } else {
+                        else {
                             /* Write reference to destination location */
                             if(dst->shared->u.atomic.u.r.cls->write(
-                                src->shared->u.atomic.u.r.file, conv_buf, buf_size, src->shared->u.atomic.u.r.rtype,
-                                dst->shared->u.atomic.u.r.file, d, dst->shared->size, b) < 0)
+                                    src->shared->u.atomic.u.r.file, conv_buf, buf_size, src->shared->u.atomic.u.r.rtype,
+                                    dst->shared->u.atomic.u.r.file, d, dst->shared->size, b) < 0)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write reference data")
-                        }
-                    }
+                        } /* end else */
+                    } /* end else */
 
                     /* Advance pointers */
                     s += s_stride;

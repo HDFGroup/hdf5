@@ -181,8 +181,9 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type,
     if(NULL == (attr->shared = H5FL_CALLOC(H5A_shared_t)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "can't allocate shared attr structure")
 
-    /* If the creation property list is H5P_DEFAULT, use the default character encoding */
-    if(acpl_id == H5P_DEFAULT)
+    /* If the creation property list is H5P_ATTRIBUTE_CREATE_DEFAULT, use the default character encoding */
+    HDassert(acpl_id != H5P_DEFAULT);
+    if(acpl_id == H5P_ATTRIBUTE_CREATE_DEFAULT)
         attr->shared->encoding = H5F_DEFAULT_CSET;
     else {
         H5P_genplist_t  *ac_plist;      /* ACPL Property list */
@@ -2026,7 +2027,7 @@ H5A__set_version(const H5F_t *f, H5A_t *attr)
         version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    version = MAX(version, (uint8_t)H5O_attr_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = (uint8_t)MAX(version, (uint8_t)H5O_attr_ver_bounds[H5F_LOW_BOUND(f)]);
 
     /* Version bounds check */
     if(version > H5O_attr_ver_bounds[H5F_HIGH_BOUND(f)])

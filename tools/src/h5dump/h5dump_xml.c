@@ -610,7 +610,7 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
 
     HDsprintf(outstr, "xid_"H5_PRINTF_HADDR_FMT, objno);
 
-    return(0);
+    return 0;
 }
 
 static const char      *quote = "&quot;";
@@ -1778,12 +1778,10 @@ xml_dump_dataspace(hid_t space)
  *              the h5tools library.
  *
  * Return:      void
- *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 void
-xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset, int H5_ATTR_UNUSED pindex)
+xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED *sset, int H5_ATTR_UNUSED pindex)
 {
     hid_t               space = -1;
     hid_t               type = -1;
@@ -1862,7 +1860,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
             datactx.need_prefix = TRUE;
             datactx.indent_level = ctx.indent_level;
             datactx.cur_column = ctx.cur_column;
-            status = h5tools_dump_dset(rawoutstream, outputformat, &datactx, obj_id, NULL);
+            status = h5tools_dump_dset(rawoutstream, outputformat, &datactx, obj_id);
         }
     }
     else {
@@ -1882,47 +1880,17 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
             status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
         }
         else {  /* all other data */
-            /* VL data special information */
-            unsigned int vl_data = 0; /* contains VL datatypes */
-
-            p_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
-
-            /* Check if we have VL data in the dataset's datatype */
-            if (h5tools_detect_vlen(p_type) == TRUE)
-                vl_data = TRUE;
-
-            H5Tclose(type);
-
             space = H5Aget_space(obj_id);
             if(space == H5S_NULL || space == H5S_NO_CLASS) {
                 status = SUCCEED;
             }
             else {
-                ndims = H5Sget_simple_extent_dims(space, size, NULL);
-
-                for (i = 0; i < ndims; i++)
-                    nelmts *= size[i];
-
-                if((buf = HDmalloc((size_t)(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type))))) == NULL)  {
-                    error_msg("unable to allocate buffer\n");
-                    h5tools_setstatus(EXIT_FAILURE);
-                    status = FAIL;
-                }
-                else {
-                    if (H5Aread(obj_id, p_type, buf) >= 0) {
-                        h5tools_context_t datactx;
-                        HDmemset(&datactx, 0, sizeof(datactx));
-                        datactx.need_prefix = TRUE;
-                        datactx.indent_level = ctx.indent_level;
-                        datactx.cur_column = ctx.cur_column;
-                        status = h5tools_dump_mem(rawoutstream, outputformat, &datactx, obj_id, p_type, space, buf);
-                    }
-                    /* Reclaim any VL memory, if necessary */
-                    if (vl_data)
-                        H5Treclaim(p_type, space, H5P_DEFAULT, buf);
-
-                    HDfree(buf);
-                }
+                h5tools_context_t datactx;
+                HDmemset(&datactx, 0, sizeof(datactx));
+                datactx.need_prefix = TRUE;
+                datactx.indent_level = ctx.indent_level;
+                datactx.cur_column = ctx.cur_column;
+                status = h5tools_dump_mem(rawoutstream, outputformat, &datactx, obj_id);
             }
             H5Tclose(p_type);
             H5Sclose(space);
@@ -3579,12 +3547,10 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
  * Purpose:     Dump a description of an HDF5 dataset in XML.
  *
  * Return:      void
- *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 void
-xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * sset)
+xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *sset)
 {
     hid_t               type;
     hid_t               space;

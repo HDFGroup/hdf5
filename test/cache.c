@@ -18,7 +18,48 @@
  *        H5C.c
  */
 #include "cache_common.h"
+#include "H5MFprivate.h"
 
+
+H5C_t * saved_cache = NULL; /* store the pointer to the instance of
+                             * of H5C_t created by H5Fcreate()
+                             * here between test cache setup and
+                             * shutdown.
+                             */
+
+haddr_t saved_actual_base_addr = HADDR_UNDEF;   /* Store the address of the
+                                                 * space allocated for cache items in the file between
+                                                 * cache setup & takedown
+                                                 */
+
+hid_t saved_fapl_id = H5P_DEFAULT; /* store the fapl id here between
+                                    * cache setup and takedown.  Note
+                                    * that if saved_fapl_id == H5P_DEFAULT,
+                                    * we assume that there is no fapl to
+                                    * close.
+                                    */
+
+hid_t saved_fcpl_id = H5P_DEFAULT; /* store the fcpl id here between
+                                    * cache setup and takedown.  Note
+                                    * that if saved_fcpl_id == H5P_DEFAULT,
+                                    * we assume that there is no fcpl to
+                                    * close.
+                                    */
+
+hid_t saved_fid = -1;  /* store the file id here between cache setup
+                        * and takedown.
+                        */
+hbool_t write_permitted = TRUE;
+hbool_t try_core_file_driver = FALSE;
+hbool_t core_file_driver_failed = FALSE;
+
+
+/* global variable declarations: */
+
+const char *FILENAME[] = {
+    "cache_test",
+    NULL
+};
 
 /* private typedef declarations: */
 
@@ -204,6 +245,12 @@ static unsigned check_stats(unsigned paged);
 static void check_stats__smoke_check_1(H5F_t * file_ptr);
 #endif /* H5C_COLLECT_CACHE_STATS */
 
+
+static H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged);
+
+static void takedown_cache(H5F_t * file_ptr,
+                    hbool_t dump_stats,
+                    hbool_t dump_detailed_stats);
 
 /**************************************************************************/
 /**************************************************************************/
@@ -36416,6 +36463,437 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
 #endif /* H5C_COLLECT_CACHE_STATS */
 
+
+/* Call back functions: */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    check_if_write_permitted
+ *
+ * Purpose:     Determine if a write is permitted under the current
+ *              circumstances, and set *write_permitted_ptr accordingly.
+ *              As a general rule it is, but when we are running in parallel
+ *              mode with collective I/O, we must ensure that a read cannot
+ *              cause a write.
+ *
+ *              In the event of failure, the value of *write_permitted_ptr
+ *              is undefined.
+ *
+ * Return:      Non-negative on success/Negative on failure.
+ *
+ * Programmer:  John Mainzer, 5/15/04
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+check_write_permitted(const H5F_t H5_ATTR_UNUSED *f, hbool_t *write_permitted_ptr)
+{
+    HDassert( write_permitted_ptr );
+
+    *write_permitted_ptr = write_permitted;
+
+    return(SUCCEED);
+} /* check_write_permitted() */
+
+
+/*****************************************************************************
+ *
+ * Function:    setup_cache()
+ *
+ * Purpose:     Open an HDF file.  This will allocate an instance and
+ *         initialize an associated instance of H5C_t.  However,
+ *         we want to test an instance of H5C_t, so allocate and
+ *         initialize one with the file ID returned by the call to
+ *         H5Fcreate().  Return a pointer to this instance of H5C_t.
+ *
+ *        Observe that we open a HDF file because the cache now
+ *        writes directly to file, and we need the file I/O facilities
+ *        associated with the file.
+ *
+ *        To avoid tripping on error check code, must allocate enough
+ *        space in the file to hold all the test entries and their
+ *        alternates.  This is a little sticky, as the addresses of
+ *        all the test entries are determined at compile time.
+ *
+ *        Deal with this by choosing BASE_ADDR large enough that
+ *        the base address of the allocate space will be less than
+ *        or equal to BASE_ADDR, and then requesting an extra BASE_ADDR
+ *        bytes, so we don't have to wory about exceeding the allocation.
+ *
+ * Return:      Success:        Ptr to H5C_t
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  JRM -- 9/13/07
+ *
+ *****************************************************************************/
+
+H5F_t *
+setup_cache(size_t max_cache_size,
+            size_t min_clean_size,
+            unsigned paged)
+{
+    char filename[512];
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = TRUE;
+    int mile_stone = 1;
+    hid_t fid = -1;
+    H5F_t * file_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
+    H5F_t * ret_val = NULL;
+    haddr_t actual_base_addr;
+    hid_t fapl_id = H5P_DEFAULT;
+    hid_t fcpl_id = H5P_DEFAULT;
+
+    if(show_progress) /* 1 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  FUNC, mile_stone++, (int)pass);
+
+    saved_fid = -1;
+
+    if(pass) {
+        if((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) == FAIL) {
+            pass = FALSE;
+            failure_mssg = "H5Pcreate(H5P_FILE_CREATE) failed.\n";
+        }
+    }
+
+    if(pass && paged) {
+        /* Set up paged aggregation strategy */
+        if(H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, 1, (hsize_t)1) == FAIL) {
+            pass = FALSE;
+            failure_mssg = "H5Pset_file_space_strategy() failed.\n";
+            H5Pclose(fcpl_id);
+        fcpl_id = H5P_DEFAULT;
+        }
+    }
+
+    if(pass && paged) {
+        /* Set up file space page size to BASE_ADDR */
+        if(H5Pset_file_space_page_size(fcpl_id, (hsize_t)BASE_ADDR) == FAIL) {
+            pass = FALSE;
+            failure_mssg = "H5Pset_file_space_page_size() failed.\n";
+            H5Pclose(fcpl_id);
+        fcpl_id = H5P_DEFAULT;
+        }
+    }
+
+    if(pass)
+        saved_fcpl_id = fcpl_id;
+
+    /* setup the file name */
+    if(pass) {
+        if(NULL == h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))) {
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed.\n";
+        }
+    }
+
+    if(show_progress) /* 2 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  FUNC, mile_stone++, (int)pass);
+
+    if(pass && try_core_file_driver) {
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == FAIL) {
+        pass = FALSE;
+        failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
+        }
+    else if(H5Pset_fapl_core(fapl_id, MAX_ADDR, FALSE) < 0) {
+        H5Pclose(fapl_id);
+        fapl_id = H5P_DEFAULT;
+        pass = FALSE;
+        failure_mssg = "H5P_set_fapl_core() failed.\n";
+        }
+    else if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id)) < 0) {
+        core_file_driver_failed = TRUE;
+
+            if(verbose)
+                HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", FUNC);
+        } else {
+        saved_fapl_id = fapl_id;
+    }
+    }
+
+    if(show_progress) /* 3 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  FUNC, mile_stone++, (int)pass);
+
+    /* if we either aren't using the core file driver, or a create
+     * with the core file driver failed, try again with a regular file.
+     * If this fails, we are cooked.
+     */
+    if(pass && fid < 0) {
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+        saved_fid = fid;
+
+        if(fid < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Fcreate() failed.";
+
+            if(verbose)
+                HDfprintf(stdout, "%s: H5Fcreate() failed.\n", FUNC);
+        } /* end if */
+    } /* end if */
+
+    /* Push API context */
+    H5CX_push();
+
+    if(show_progress) /* 4 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  FUNC, mile_stone++, (int)pass);
+
+    if(pass) {
+        HDassert(fid >= 0);
+        saved_fid = fid;
+        if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) {
+            pass = FALSE;
+            failure_mssg = "H5Fflush() failed.";
+
+            if(verbose)
+                HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
+        }
+        else {
+            file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE);
+            if(file_ptr == NULL) {
+                pass = FALSE;
+                failure_mssg = "Can't get file_ptr.";
+
+                if(verbose)
+                    HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
+            }
+        }
+    }
+
+    if(show_progress) /* 5 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  FUNC, mile_stone++, (int)pass);
+
+    if(pass) {
+
+        /* A bit of fancy footwork here:
+         *
+         * The call to H5Fcreate() allocates an instance of H5C_t,
+         * initializes it, and stores its address in f->shared->cache.
+         *
+         * We don't want to use this cache, as it has a bunch of extra
+         * initialization that may change over time, and in any case
+         * it will not in general be configured the way we want it.
+         *
+         * We used to deal with this problem by storing the file pointer
+         * in another instance of H5C_t, and then ignoring the original
+         * version.  However, this strategy doesn't work any more, as
+         * we can't store the file pointer in the instance of H5C_t,
+         * and we have modified many cache routines to use a file
+         * pointer to look up the target cache.
+         *
+         * Thus we now make note of the address of the instance of
+         * H5C_t created by the call to H5Fcreate(), set
+         * file_ptr->shared->cache to NULL, call H5C_create()
+         * to allocate a new instance of H5C_t for test purposes,
+         * and store than new instance's address in
+         * file_ptr->shared->cache.
+         *
+         * On shut down, we call H5C_dest on our instance of H5C_t,
+         * set file_ptr->shared->cache to point to the original
+         * instance, and then close the file normally.
+         */
+
+        HDassert(saved_cache == NULL);
+        saved_cache = file_ptr->shared->cache;
+        file_ptr->shared->cache = NULL;
+
+        cache_ptr = H5C_create(max_cache_size,
+                               min_clean_size,
+                               (NUMBER_OF_ENTRY_TYPES - 1),
+                               types,
+                               check_write_permitted,
+                               TRUE,
+                               NULL,
+                               NULL);
+
+        file_ptr->shared->cache = cache_ptr;
+    }
+
+    if(show_progress) /* 6 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  FUNC, mile_stone++, (int)pass);
+
+    if(pass) {
+        if(cache_ptr == NULL) {
+            pass = FALSE;
+            failure_mssg = "H5C_create() failed.";
+
+            if(verbose)
+                 HDfprintf(stdout, "%s: H5C_create() failed.\n", FUNC);
+        }
+        else if(cache_ptr->magic != H5C__H5C_T_MAGIC) {
+            pass = FALSE;
+            failure_mssg = "Bad cache_ptr magic.";
+
+            if(verbose)
+                HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", FUNC);
+        }
+    }
+
+    if(show_progress) /* 7 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  FUNC, mile_stone++, (int)pass);
+
+    if(pass) { /* allocate space for test entries */
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
+
+    if(actual_base_addr == HADDR_UNDEF) {
+            pass = FALSE;
+        failure_mssg = "H5MF_alloc() failed.";
+
+        if(verbose)
+                HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", FUNC);
+    } else if(actual_base_addr > BASE_ADDR) {
+        /* If this happens, must increase BASE_ADDR so that the
+        * actual_base_addr is <= BASE_ADDR.  This should only happen
+        * if the size of the superblock is increase.
+        */
+            pass = FALSE;
+        failure_mssg = "actual_base_addr > BASE_ADDR";
+
+        if(verbose)
+                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", FUNC);
+        }
+
+        saved_actual_base_addr = actual_base_addr;
+    }
+
+    if(show_progress) /* 8 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  FUNC, mile_stone++, (int)pass);
+
+    if(pass) {
+        /* Need to set this else all cache tests will fail */
+        cache_ptr->ignore_tags = TRUE;
+
+        H5C_stats__reset(cache_ptr);
+        ret_val = file_ptr;
+    }
+
+    if(show_progress) /* 9 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  FUNC, mile_stone++, (int)pass);
+
+    return(ret_val);
+} /* setup_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    takedown_cache()
+ *
+ * Purpose:    Flush the specified cache and destroy it.  If requested,
+ *        dump stats first.  Then close and delete the associate
+ *        file.
+ *
+ *        If pass is FALSE, do nothing.
+ *
+ * Return:    void
+ *
+ * Programmer:    John Mainzer
+ *              9/14/07
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+takedown_cache(H5F_t * file_ptr,
+               hbool_t dump_stats,
+               hbool_t dump_detailed_stats)
+{
+    char filename[512];
+
+    if ( file_ptr != NULL ) {
+        H5C_t * cache_ptr = file_ptr->shared->cache;
+
+        if ( dump_stats ) {
+
+            H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
+        }
+
+        if ( H5C_prep_for_file_close(file_ptr) < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpected failure of prep for file close.\n";
+        }
+
+        flush_cache(file_ptr, TRUE, FALSE, FALSE);
+
+        H5C_dest(file_ptr);
+
+        if ( saved_cache != NULL ) {
+
+            file_ptr->shared->cache = saved_cache;
+            saved_cache = NULL;
+        }
+
+    }
+
+    if ( saved_fapl_id != H5P_DEFAULT ) {
+
+        H5Pclose(saved_fapl_id);
+        saved_fapl_id = H5P_DEFAULT;
+    }
+
+    if ( saved_fcpl_id != H5P_DEFAULT ) {
+        H5Pclose(saved_fcpl_id);
+        saved_fcpl_id = H5P_DEFAULT;
+    }
+
+    if ( saved_fid != -1 ) {
+
+        if ( H5F_addr_defined(saved_actual_base_addr) ) {
+
+            if ( NULL == file_ptr )  {
+                file_ptr = (H5F_t *)H5VL_object_verify(saved_fid, H5I_FILE);
+                HDassert ( file_ptr );
+            }
+
+            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, saved_actual_base_addr,
+                                          (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
+            saved_actual_base_addr = HADDR_UNDEF;
+        }
+
+        if ( H5Fclose(saved_fid) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "couldn't close test file.";
+
+        } else {
+
+            saved_fid = -1;
+
+        }
+
+        /* Pop API context */
+        H5CX_pop();
+
+        if ( ( ! try_core_file_driver ) || ( core_file_driver_failed ) ) {
+
+            if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+                 == NULL ) {
+
+                pass = FALSE;
+                failure_mssg = "h5_fixname() failed.\n";
+            }
+
+            if ( HDremove(filename) < 0 ) {
+
+                pass = FALSE;
+                failure_mssg = "couldn't delete test file.";
+
+            }
+        }
+    }
+
+    return;
+
+} /* takedown_cache() */
 
 /*-------------------------------------------------------------------------
  * Function:    main

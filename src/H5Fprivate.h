@@ -93,7 +93,7 @@ typedef struct H5F_t H5F_t;
    for (_i = 0; _i < sizeof(int64_t); _i++, _n >>= 8)                  \
       *_p++ = (uint8_t)(_n & 0xff);                          \
    for (/*void*/; _i < 8; _i++)                              \
-      *_p++ = (n) < 0 ? 0xff : 0;                          \
+      *_p++ = (uint8_t)((n) < 0 ? 0xff : 0);                          \
    (p) = (uint8_t*)(p)+8;                              \
 }
 
@@ -247,29 +247,29 @@ typedef struct H5F_t H5F_t;
 }
 
 /* Address-related macros */
-#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                  \
-                HADDR_UNDEF==(X)+(haddr_t)(Z) ||          \
+#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                      \
+                HADDR_UNDEF==(X)+(haddr_t)(Z) ||                            \
                 (X)+(haddr_t)(Z)<(X))
 #define H5F_addr_defined(X)    ((X)!=HADDR_UNDEF)
 /* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
  * certain that X is not HADDR_UNDEF and then checking that X equals Y
  */
-#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                  \
+#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                            \
                 (X)==(Y))
 #define H5F_addr_ne(X,Y)    (!H5F_addr_eq((X),(Y)))
-#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                           \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)<(Y))
-#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)<=(Y))
-#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)>(Y))
-#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)>=(Y))
-#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :              \
+#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :                   \
                 (H5F_addr_lt((X), (Y)) ? -1 : 1))
 #define H5F_addr_pow2(N)    ((haddr_t)1<<(N))
 #define H5F_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
@@ -730,6 +730,7 @@ typedef enum H5F_prefix_open_t {
 /***************************************/
 
 /* Private functions */
+H5_DLL herr_t H5F_init(void);
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
 H5_DLL hid_t H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref);

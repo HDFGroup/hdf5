@@ -5293,7 +5293,7 @@ test_types(hid_t file)
     (space=H5Screate_simple(1, &nelmts, NULL)) < 0 ||
     (dset=H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
-    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)(0xff ^ i); 
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
     goto error;
 
@@ -5307,7 +5307,7 @@ test_types(hid_t file)
     (space=H5Screate_simple(1, &nelmts, NULL)) < 0 ||
     (dset=H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
-    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    for(i=0; i<sizeof buf; i++) buf[i] = (unsigned char)(0xff ^ i); 
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
     goto error;
     if(H5Sclose(space) < 0) goto error;
@@ -5322,7 +5322,7 @@ test_types(hid_t file)
             (dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
     for(i = 0; i < sizeof buf; i++)
-        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
     if(H5Sclose(space) < 0) goto error;
     if(H5Tclose(type) < 0) goto error;
@@ -5336,7 +5336,7 @@ test_types(hid_t file)
             (dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
     for(i = 0; i < sizeof buf; i++)
-        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+        buf[i] = (unsigned char)(0xff ^ i);
     if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
     if(H5Sclose(space) < 0) goto error;
     if(H5Tclose(type) < 0) goto error;
@@ -7065,6 +7065,7 @@ static void
 make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
 {
     long inc;
+    long maxinc;
 
     HDassert(0 < nelts);
 
@@ -7073,7 +7074,7 @@ make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
     /* `maxinc` is chosen so that for any `x` in [0, nelts - 1],
      * `x + maxinc` does not overflow a long.
      */
-    const long maxinc = MIN(nelts - 1, LONG_MAX - nelts);
+    maxinc = MIN(nelts - 1, LONG_MAX - nelts);
 
     /* Choose a random number in [1, nelts - 1].  If its greatest divisor
      * in common with `nelts` is 1, then it will "generate" the additive ring
@@ -12775,20 +12776,23 @@ error:
 } /* end dls_01_write_data() */
 
 static herr_t
-dls_01_read_stuff( hid_t fid )
+dls_01_read_stuff(hid_t fid)
 {
     int status = 0;
     hid_t did = 0;
     H5O_info_t info;
 
-    did = H5Dopen2( fid, DLS_01_DATASET, H5P_DEFAULT );
-    if ( did <= 0 ) TEST_ERROR
+    did = H5Dopen2(fid, DLS_01_DATASET, H5P_DEFAULT);
+    if(did <= 0)
+        TEST_ERROR
 
-    status = H5Oget_info2( did, &info, H5O_INFO_BASIC );
-    if ( status != 0 ) TEST_ERROR
+    status = H5Oget_info2(did, &info, H5O_INFO_BASIC );
+    if(status != 0)
+        TEST_ERROR
 
-    status = H5Dclose( did );
-    if ( status != 0 ) TEST_ERROR
+    status = H5Dclose(did);
+    if(status != 0)
+        TEST_ERROR
 
     return SUCCEED;
 
@@ -13132,7 +13136,7 @@ test_versionbounds(void)
     return FAIL;
 } /* end test_versionbounds() */
 
-
+
 /*-----------------------------------------------------------------------------
  * Function:   test_object_header_minimization_dcpl
  *

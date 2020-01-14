@@ -199,7 +199,7 @@ do_pio(parameters param)
         bsize = buf_size;   /* Actual buffer size       */
     }
     else {
-        snbytes = (off_t)sqrt(nbytes);  /* General dataset size     */
+        snbytes = (off_t)sqrt((double)nbytes);  /* General dataset size     */
         bsize = buf_size * blk_size;    /* Actual buffer size       */
     }
 
@@ -592,7 +592,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* nbytes is always the number of bytes per dataset (1D or 2D). If the
            dataspace is 2D, snbytes is the size of a side of the dataset square.
          */
-        snbytes = (off_t)sqrt(nbytes);
+        snbytes = (off_t)sqrt((double)nbytes);
 
         /* Contiguous Pattern: */
         if (!parms->interleaved) {
@@ -1568,7 +1568,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* nbytes is always the number of bytes per dataset (1D or 2D). If the
            dataspace is 2D, snbytes is the size of a side of the 'dataset square'.
          */
-        snbytes = (off_t)sqrt(nbytes);
+        snbytes = (off_t)sqrt((double)nbytes);
 
         bsize = buf_size * blk_size;
 

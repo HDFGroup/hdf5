@@ -91,9 +91,9 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
  *
  * Purpose: Add an address to the table.
  *
- * Return: void
+ * Return:      void
  *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
@@ -125,11 +125,10 @@ addr_insert(H5O_info_t *oi)
  *
  * Purpose: Check if address has already been encountered
  *
- * Return: Success: TRUE/FALSE
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    (can't fail)
  *
- * Failure: (can't fail)
- *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
@@ -154,9 +153,9 @@ addr_lookup(H5O_info_t *oi)
  *
  * Purpose: Reset the address tracking data structures
  *
- * Return: void
+ * Return:      void
  *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
