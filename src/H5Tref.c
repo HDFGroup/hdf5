@@ -159,24 +159,25 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
                 /* Set up the function pointers to access the reference in memory */
                 dt->shared->u.atomic.u.r.cls = &H5T_ref_mem_g;
-
-            } else if(dt->shared->u.atomic.u.r.rtype == H5R_OBJECT1) {
+            } /* end if */
+            else if(dt->shared->u.atomic.u.r.rtype == H5R_OBJECT1) {
                 /* Size in memory, disk size is different */
                 dt->shared->size = H5T_REF_OBJ_MEM_SIZE;
                 dt->shared->u.atomic.prec = 8 * dt->shared->size;
 
                 /* Unused for now */
                 dt->shared->u.atomic.u.r.cls = NULL;
-
-            } else if(dt->shared->u.atomic.u.r.rtype == H5R_DATASET_REGION1) {
+            } /* end else-if */
+            else if(dt->shared->u.atomic.u.r.rtype == H5R_DATASET_REGION1) {
                 /* Size in memory, disk size is different */
                 dt->shared->size = H5T_REF_DSETREG_MEM_SIZE;
                 dt->shared->u.atomic.prec = 8 * dt->shared->size;
 
                 /* Unused for now */
                 dt->shared->u.atomic.u.r.cls = NULL;
-
-            }
+            } /* end else-if */
+            else
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid location")
             break;
 
         case H5T_LOC_DISK: /* Disk based reference datatype */
@@ -191,8 +192,18 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
             if(dt->shared->u.atomic.u.r.rtype == H5R_OBJECT1) {
                 H5F_t *f;
 
-                /* We should assert here that the terminal connector is H5VL_NATIVE once
-                 * there is a facility to do so -NAF 2019/10/30 */
+#ifndef NDEBUG
+            {
+                hbool_t is_native = FALSE;  /* Whether the file is using the native VOL connector */
+
+                /* Check if using native VOL connector */
+                if(H5VL_object_is_native(file, &is_native) < 0)
+                    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+
+                /* Must use native VOL connector for this operation */
+                HDassert(is_native);
+            }
+#endif /* NDEBUG */
 
                 /* Retrieve file from VOL object */
                 if(NULL == (f = (H5F_t *)H5VL_object_data(file)))
@@ -204,12 +215,22 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
                 /* Set up the function pointers to access the reference in memory */
                 dt->shared->u.atomic.u.r.cls = &H5T_ref_obj_disk_g;
-
-            } else if(dt->shared->u.atomic.u.r.rtype == H5R_DATASET_REGION1) {
+            } /* end if */
+            else if(dt->shared->u.atomic.u.r.rtype == H5R_DATASET_REGION1) {
                 H5F_t *f;
 
-                /* We should assert here that the terminal connector is H5VL_NATIVE once
-                 * there is a facility to do so -NAF 2019/10/30 */
+#ifndef NDEBUG
+                {
+                    hbool_t is_native = FALSE;  /* Whether the file is using the native VOL connector */
+
+                    /* Check if using native VOL connector */
+                    if(H5VL_object_is_native(file, &is_native) < 0)
+                        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+
+                    /* Must use native VOL connector for this operation */
+                    HDassert(is_native);
+                }
+#endif /* NDEBUG */
 
                 /* Retrieve file from VOL object */
                 if(NULL == (f = (H5F_t *)H5VL_object_data(file)))
@@ -221,8 +242,8 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
                 /* Set up the function pointers to access the reference in memory */
                 dt->shared->u.atomic.u.r.cls = &H5T_ref_dsetreg_disk_g;
-
-            } else {
+            } /* end else-if */
+            else {
                 H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
                 size_t ref_encode_size;
                 H5R_ref_priv_t fixed_ref;
@@ -249,7 +270,6 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                  * on disk, so use the same functions.
                  */
                 dt->shared->u.atomic.u.r.cls = &H5T_ref_disk_g;
-
             }
             break;
 
@@ -267,8 +287,7 @@ H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
             break;
 
-        case H5T_LOC_MAXLOC:
-            /* MAXLOC is invalid */
+        case H5T_LOC_MAXLOC:    /* MAXLOC is invalid */
         default:
             HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid reference datatype location")
     } /* end switch */
@@ -345,17 +364,16 @@ static size_t
 H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     size_t H5_ATTR_UNUSED src_size, H5VL_object_t *dst_file, hbool_t *dst_copy)
 {
-    H5VL_object_t *vol_obj = NULL;
+    H5VL_object_t *vol_obj;             /* VOL object for src ref's location */
     const H5R_ref_priv_t *src_ref = (const H5R_ref_priv_t *)src_buf;
-    hbool_t files_equal = FALSE;
-    char file_name_buf_static[256];
-    char *file_name_buf_dyn = NULL;
-    ssize_t file_name_len;
-    unsigned flags = 0;
-    size_t ret_value = 0;
+    hbool_t files_equal = FALSE;        /* Whether src & dst references are in same file */
+    char *file_name_buf_dyn = NULL;     /* Pointer to dynamically allocated buffer for file name, if static buffer is too small */
+    unsigned flags = 0;                 /* References flags */
+    size_t ret_value = 0;               /* Return value */
 
     FUNC_ENTER_STATIC
 
+    /* Sanity check */
     HDassert(src_buf);
     HDassert(src_size == H5T_REF_MEM_SIZE);
 
@@ -364,21 +382,27 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid location identifier")
 
     /* Set external flag if referenced file is not destination file */
-    if(H5VL_file_specific(vol_obj, H5VL_FILE_IS_EQUAL, H5P_DATASET_XFER_DEFAULT, NULL, dst_file, &files_equal) < 0)
+    if(H5VL_file_is_same(vol_obj, dst_file, &files_equal) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOMPARE, 0, "can't check if files are equal")
     flags |= !files_equal ? H5R_IS_EXTERNAL : 0;
 
     /* Force re-calculating encoding size if any flags are set */
     if(flags || !src_ref->encode_size) {
+        char file_name_buf_static[256];         /* File name */
+        ssize_t file_name_len;                  /* Size of file name buffer */
+
         /* Pass the correct encoding version for the selection depending on the
          * file libver bounds, this is later retrieved in H5S hyper encode */
         if(src_ref->type == (int8_t)H5R_DATASET_REGION2) {
-            /* Temporary hack to check if this is the native connector.  We need to
-             * add a way to check if the terminal connector is native.  For now this
-             * will break passthroughs, but it's needed for other VOL connectors to
-             * work.  -NAF */
-            if(dst_file->connector->cls->value == H5VL_NATIVE_VALUE) {
-                H5F_t *dst_f;
+            hbool_t is_native = FALSE;  /* Whether the dest. file is using the native VOL connector */
+
+            /* Check if using native VOL connector */
+            if(H5VL_object_is_native(dst_file, &is_native) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't query if file uses native VOL connector")
+
+            /* Set the file's libver bounds if using the native VOL connector */
+            if(is_native) {
+                H5F_t *dst_f;   /* Native file struct */
 
                 if(NULL == (dst_f = (H5F_t *)H5VL_object_data(dst_file)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid VOL object")
@@ -401,14 +425,15 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
         /* Determine encoding size */
         if(H5R__encode(file_name_buf_dyn ? file_name_buf_dyn : file_name_buf_static, src_ref, NULL, &ret_value, flags) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, 0, "unable to determine encoding size")
-    } else {
+    } /* end if */
+    else {
         /* Can do a direct copy and skip blob decoding */
         if(src_ref->type == (int8_t)H5R_OBJECT2)
             *dst_copy = TRUE;
 
         /* Get cached encoding size */
         ret_value = src_ref->encode_size;
-    }
+    } /* end else */
 
 done:
     H5MM_xfree(file_name_buf_dyn);
@@ -431,17 +456,18 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     size_t H5_ATTR_UNUSED src_size, H5VL_object_t *dst_file, void *dst_buf,
     size_t dst_size)
 {
-    H5VL_object_t *vol_obj = NULL;
+    H5VL_object_t *vol_obj;             /* VOL object for src ref's location */
     const H5R_ref_priv_t *src_ref = (const H5R_ref_priv_t *)src_buf;
-    hbool_t files_equal = FALSE;
-    char file_name_buf_static[256];
-    char *file_name_buf_dyn = NULL;
-    ssize_t file_name_len;
-    unsigned flags = 0;
-    herr_t ret_value = SUCCEED;
+    hbool_t files_equal = FALSE;        /* Whether src & dst references are in same file */
+    char file_name_buf_static[256];     /* File name */
+    char *file_name_buf_dyn = NULL;     /* Pointer to dynamically allocated buffer for file name, if static buffer is too small */
+    ssize_t file_name_len;              /* Size of file name buffer */
+    unsigned flags = 0;                 /* References flags */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
+    /* Sanity check */
     HDassert(src_buf);
     HDassert(src_size == H5T_REF_MEM_SIZE);
     HDassert(dst_file);
@@ -453,18 +479,21 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid location identifier")
 
     /* Set external flag if referenced file is not destination file */
-    if(H5VL_file_specific(vol_obj, H5VL_FILE_IS_EQUAL, H5P_DATASET_XFER_DEFAULT, NULL, dst_file, &files_equal) < 0)
+    if(H5VL_file_is_same(vol_obj, dst_file, &files_equal) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOMPARE, FAIL, "can't check if files are equal")
     flags |= !files_equal ? H5R_IS_EXTERNAL : 0;
 
     /* Pass the correct encoding version for the selection depending on the
      * file libver bounds, this is later retrieved in H5S hyper encode */
     if(src_ref->type == (int8_t)H5R_DATASET_REGION2) {
-        /* Temporary hack to check if this is the native connector.  We need to
-         * add a way to check if the terminal connector is native.  For now this
-         * will break passthroughs, but it's needed for other VOL connectors to
-         * work.  -NAF */
-        if(dst_file->connector->cls->value == H5VL_NATIVE_VALUE) {
+        hbool_t is_native = FALSE;  /* Whether the dest. file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(dst_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't query if file uses native VOL connector")
+
+        /* Set the file's libver bounds if using the native VOL connector */
+        if(is_native) {
             H5F_t *dst_f;
 
             if(NULL == (dst_f = (H5F_t *)H5VL_object_data(dst_file)))
@@ -517,14 +546,25 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
 
     FUNC_ENTER_STATIC
 
+    /* Sanity check */
     HDassert(src_file);
     HDassert(src_buf);
     HDassert(src_size);
     HDassert(dst_buf);
     HDassert(dst_size == H5T_REF_MEM_SIZE);
 
-    /* We should assert here that the terminal connector is H5VL_NATIVE once
-     * there is a facility to do so -NAF 2019/10/30 */
+#ifndef NDEBUG
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
+#endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
     if(NULL == (src_f = (H5F_t *)H5VL_object_data(src_file)))
@@ -534,24 +574,29 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     HDmemset(dst_buf, 0, dst_size);
 
     switch(src_type) {
-        case H5R_OBJECT1: {
-            size_t token_size = H5F_SIZEOF_ADDR(src_f);
+        case H5R_OBJECT1:
+            {
+                size_t token_size = H5F_SIZEOF_ADDR(src_f);
 
-            if(H5R__create_object((const H5VL_token_t *)src_buf, token_size, dst_ref) < 0)
-                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create object reference")
-        }
+                if(H5R__create_object((const H5VL_token_t *)src_buf, token_size, dst_ref) < 0)
+                    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create object reference")
+            }
             break;
-        case H5R_DATASET_REGION1: {
-            const struct H5Tref_dsetreg *src_reg = (const struct H5Tref_dsetreg *)src_buf;
-            size_t token_size = H5F_SIZEOF_ADDR(src_f);
 
-            if(H5R__create_region(&src_reg->token, token_size, src_reg->space, dst_ref) < 0)
-                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create region reference")
-            /* create_region creates its internal copy of the space */
-            if(H5S_close(src_reg->space) < 0)
-                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTFREE, FAIL, "Cannot close dataspace")
-        }
+        case H5R_DATASET_REGION1:
+            {
+                const struct H5Tref_dsetreg *src_reg = (const struct H5Tref_dsetreg *)src_buf;
+                size_t token_size = H5F_SIZEOF_ADDR(src_f);
+
+                if(H5R__create_region(&src_reg->token, token_size, src_reg->space, dst_ref) < 0)
+                    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create region reference")
+
+                /* create_region creates its internal copy of the space */
+                if(H5S_close(src_reg->space) < 0)
+                    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTFREE, FAIL, "Cannot close dataspace")
+            }
             break;
+
         case H5R_DATASET_REGION2:
             /* Pass the correct encoding version for the selection depending on the
              * file libver bounds, this is later retrieved in H5S hyper decode */
@@ -563,12 +608,13 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
             if(H5R__decode((const unsigned char *)src_buf, &src_size, dst_ref) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Cannot decode reference")
             break;
+
         case H5R_BADTYPE:
         case H5R_MAXTYPE:
         default:
             HDassert("unknown reference type" && 0);
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
-    }
+    } /* end switch */
 
     /* If no filename set, this is not an external reference */
     if(NULL == H5R_REF_FILENAME(dst_ref)) {
@@ -579,7 +625,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
         /* Attach loc ID to reference and hold reference to it */
         if(H5R__set_loc_id(dst_ref, file_id, TRUE) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "unable to attach location id to reference")
-    }
+    } /* end if */
 
 done:
     if((file_id != H5I_INVALID_HID) && (H5I_dec_ref(file_id) < 0))
@@ -713,13 +759,14 @@ H5T__ref_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_bu
         *dst_copy = TRUE;
 
         ret_value = src_size;
-    } else {
+    } /* end if */
+    else {
         /* Retrieve encoded data size */
         UINT32DECODE(p, ret_value);
 
         /* Add size of the header */
         ret_value += H5R_ENCODE_HEADER_SIZE;
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -856,8 +903,18 @@ static herr_t H5T__ref_obj_disk_isnull(const H5VL_object_t *src_file,
     HDassert(src_buf);
     HDassert(isnull);
 
-    /* We should assert here that the terminal connector is H5VL_NATIVE once
-     * there is a facility to do so -NAF 2019/10/30 */
+#ifndef NDEBUG
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
+#endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
     if(NULL == (src_f = (H5F_t *)H5VL_object_data(src_file)))
@@ -896,8 +953,18 @@ H5T__ref_obj_disk_getsize(H5VL_object_t *src_file, const void H5_ATTR_UNUSED *sr
     HDassert(src_file);
     HDassert(src_buf);
 
-    /* We should assert here that the terminal connector is H5VL_NATIVE once
-     * there is a facility to do so -NAF 2019/10/30 */
+#ifndef NDEBUG
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
+#endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
     if(NULL == (src_f = (H5F_t *)H5VL_object_data(src_file)))
@@ -934,8 +1001,18 @@ H5T__ref_obj_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t src_
     HDassert(src_buf);
     HDassert(dst_buf);
 
-    /* We should assert here that the terminal connector is H5VL_NATIVE once
-     * there is a facility to do so -NAF 2019/10/30 */
+#ifndef NDEBUG
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
+#endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
     if(NULL == (src_f = (H5F_t *)H5VL_object_data(src_file)))
@@ -946,7 +1023,7 @@ H5T__ref_obj_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t src_
 
     /* Get object address */
     if(H5R__decode_token_obj_compat((const unsigned char *)src_buf, &src_size,
-        (H5VL_token_t *)dst_buf, H5F_SIZEOF_ADDR(src_f)) < 0)
+            (H5VL_token_t *)dst_buf, H5F_SIZEOF_ADDR(src_f)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object address")
 
 done:
@@ -979,8 +1056,18 @@ H5T__ref_dsetreg_disk_isnull(const H5VL_object_t *src_file, const void *src_buf,
     HDassert(src_buf);
     HDassert(isnull);
 
-    /* We should assert here that the terminal connector is H5VL_NATIVE once
-     * there is a facility to do so -NAF 2019/10/30 */
+#ifndef NDEBUG
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
+#endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
     if(NULL == (src_f = (H5F_t *)H5VL_object_data(src_file)))
@@ -1020,16 +1107,21 @@ H5T__ref_dsetreg_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file,
 #ifndef NDEBUG
     {
         H5F_t *src_f;
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
 
-        /* We should assert here that the terminal connector is H5VL_NATIVE once
-         * there is a facility to do so -NAF 2019/10/30 */
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, 0, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
 
         /* Retrieve file from VOL object */
         if(NULL == (src_f = (H5F_t *)H5VL_object_data(src_file)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid VOL object")
 
         HDassert(src_size == H5T_REF_DSETREG_DISK_SIZE(src_f));
-    } /* end block */
+    }
 #endif /* NDEBUG */
 
 done:
@@ -1061,8 +1153,18 @@ H5T__ref_dsetreg_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t 
     HDassert(dst_buf);
     HDassert(dst_size == sizeof(struct H5Tref_dsetreg));
 
-    /* We should assert here that the terminal connector is H5VL_NATIVE once
-     * there is a facility to do so -NAF 2019/10/30 */
+#ifndef NDEBUG
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(src_file, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
+#endif /* NDEBUG */
 
     /* Retrieve file from VOL object */
     if(NULL == (src_f = (H5F_t *)H5VL_object_data(src_file)))
@@ -1072,7 +1174,7 @@ H5T__ref_dsetreg_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t 
 
     /* Retrieve object address and space */
     if(H5R__decode_token_region_compat(src_f, (const unsigned char *)src_buf,
-        &src_size, &dst_reg->token, H5F_SIZEOF_ADDR(src_f), &dst_reg->space) < 0)
+            &src_size, &dst_reg->token, H5F_SIZEOF_ADDR(src_f), &dst_reg->space) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object address")
 
 done:
@@ -1100,8 +1202,7 @@ H5T_ref_reclaim(void *elem, const H5T_t *dt)
     HDassert(elem);
     HDassert(dt && (dt->shared->type == H5T_REFERENCE));
 
-    if(dt->shared->u.atomic.u.r.opaque
-        && (H5R__destroy((H5R_ref_priv_t *)elem) < 0))
+    if(dt->shared->u.atomic.u.r.opaque && H5R__destroy((H5R_ref_priv_t *)elem) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTFREE, FAIL, "cannot free reference")
 
 done:

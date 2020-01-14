@@ -505,7 +505,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HG_insert(H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
+H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj/*out*/)
 {
     size_t	need;		/*total space needed for object		*/
     size_t	idx;

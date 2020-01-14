@@ -610,7 +610,7 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
 
     HDsprintf(outstr, "xid_"H5_PRINTF_HADDR_FMT, objno);
 
-    return(0);
+    return 0;
 }
 
 static const char      *quote = "&quot;";

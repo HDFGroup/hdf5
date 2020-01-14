@@ -31,10 +31,10 @@
 
 #include "h5test.h"
 #include "H5srcdir.h"
-#include "H5FDpkg.h"           /* File drivers                         */
-#include "H5Gpkg.h"            /* Groups                 */
-#include "H5Iprivate.h"        /* IDs                      */
-#include "H5Lprivate.h"        /* Links                                */
+#include "H5FDpkg.h"            /* File drivers                         */
+#include "H5Gpkg.h"             /* Groups                 */
+#include "H5Iprivate.h"         /* IDs                      */
+#include "H5Lprivate.h"         /* Links                                */
 
 /* File for external link test.  Created with gen_udlinks.c */
 #define LINKED_FILE  "be_extlink2.h5"
@@ -537,9 +537,9 @@ cklinks(hid_t fapl, hbool_t new_format)
         status = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT);
     } H5E_END_TRY;
     if(status >= 0) {
-    H5_FAILED();
-    HDputs("    H5Lexists() should have failed for a path with missing components.");
-    TEST_ERROR
+        H5_FAILED();
+        HDputs("    H5Lexists() should have failed for a path with missing components.");
+        TEST_ERROR
     } /* end if */
     H5E_BEGIN_TRY {
         status = H5Lexists(file, "/no_grp1/hard", H5P_DEFAULT);
@@ -635,7 +635,7 @@ cklinks(hid_t fapl, hbool_t new_format)
 
 error:
     return FAIL;
-}
+} /* end cklinks() */
 
 
 /*-------------------------------------------------------------------------
@@ -686,11 +686,11 @@ ck_new_links(hid_t fapl, hbool_t new_format)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
-    return FAIL;
-}
+    return -1;
+} /* end ck_new_links() */
 
 
 /*-------------------------------------------------------------------------
@@ -3456,25 +3456,50 @@ error:
 static int
 external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
 {
-    hid_t    fid = (-1);             /* File ID */
-    hid_t    gid = (-1);             /* Group IDs */
-    hid_t    core_fapl = -1, space = -1, dset = -1, did = -1, dapl_id = -1, dcpl = -1;
-    char     filename1[NAME_BUF_SIZE],
-             filename2[NAME_BUF_SIZE],
-             tmpname[NAME_BUF_SIZE],
-             cwdpath[NAME_BUF_SIZE];
-    hsize_t  dims[2];
-    int      points[NUM40][NUM40];
-    int      i, j, n;
-    h5_stat_size_t    filesize, new_filesize;
+    hid_t   fid         = H5I_INVALID_HID;
+    hid_t   gid         = H5I_INVALID_HID;
+    hid_t   core_fapl   = H5I_INVALID_HID;
+    hid_t   space       = H5I_INVALID_HID;
+    hid_t   dset        = H5I_INVALID_HID;
+    hid_t   did         = H5I_INVALID_HID;
+    hid_t   dapl_id     = H5I_INVALID_HID;
+    hid_t   dcpl        = H5I_INVALID_HID;
+    char    *filename1  = NULL;
+    char    *filename2  = NULL;
+    char    *tmpname    = NULL;
+    char    *cwdpath    = NULL;
+    hsize_t dims[2];
+    int     **points = NULL;
+    int     *points_data = NULL;
+    int     i, j, n;
+    h5_stat_size_t      filesize;
+    h5_stat_size_t      new_filesize;
 
     if(new_format)
         TESTING("H5Pset/get_elink_fapl() with same physical layout (w/new group format)")
     else
         TESTING("H5Pset/get_elink_fapl() with same physical layout")
 
+    /* Set up file names and paths */
+    if(NULL == (filename1 = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (filename2 = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (tmpname = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (cwdpath = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+
     if((HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) || (NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE)))
         TEST_ERROR
+
+    /* Set up data array */
+    if(NULL == (points_data = (int *)HDcalloc(NUM40 * NUM40, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (points = (int **)HDcalloc(NUM40, sizeof(points_data))))
+        TEST_ERROR;
+    for (i = 0; i < NUM40; i++)
+        points[i] = points_data + (i * NUM40);
 
     /*
      * set up name for main file:
@@ -3482,7 +3507,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
      *   Windows: "<cur drive>:/CWD/tmp_links/extlinks0"
      */
     fix_ext_filename(tmpname, cwdpath, FILENAME[13]);
-    h5_fixname(tmpname, fapl, filename1, sizeof filename1);
+    h5_fixname(tmpname, fapl, filename1, NAME_BUF_SIZE);
 
     /* create fapl for the target file to be a "core" file */
     core_fapl = h5_fileaccess();
@@ -3490,7 +3515,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
 
     /* set up name for external linked target file: "extlinks17"  */
     /* set up name for target file: "extlinks17" */
-    h5_fixname(FILENAME[39], core_fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[39], core_fapl, filename2, NAME_BUF_SIZE);
 
     /* Create the target file to be a "core" file */
     if((fid = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, core_fapl)) < 0) TEST_ERROR
@@ -3505,7 +3530,8 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
         dcpl = H5Pcreate(H5P_DATASET_CREATE);
     else
         dcpl = H5Pcopy(dcpl_g);
-    if (0 > dcpl) TEST_ERROR;
+    if (0 > dcpl)
+        TEST_ERROR;
     if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0) TEST_ERROR;
 
     /* create "Dataset" in group "A" of target file */
@@ -3548,7 +3574,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
             points[i][j] = n++;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0) TEST_ERROR
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points_data) < 0) TEST_ERROR
 
     if(H5Pclose(dapl_id) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
@@ -3560,6 +3586,14 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     if(new_filesize != filesize) TEST_ERROR
 
     if(H5Pclose(core_fapl) < 0) TEST_ERROR
+
+    HDfree(points);
+    HDfree(points_data);
+
+    HDfree(filename1);
+    HDfree(filename2);
+    HDfree(tmpname);
+    HDfree(cwdpath);
 
     PASSED();
     return SUCCEED;
@@ -3575,6 +3609,15 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     } H5E_END_TRY;
+
+    HDfree(points);
+    HDfree(points_data);
+
+    HDfree(filename1);
+    HDfree(filename2);
+    HDfree(tmpname);
+    HDfree(cwdpath);
+
     return FAIL;
 } /* end external_set_elink_fapl2() */
 
@@ -6059,19 +6102,26 @@ static int
 external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
 {
 #ifdef H5_HAVE_SYMLINK
-    hid_t       file1 = -1, file2 = -1, file3 = -1, file4 = -1, file5 = -1;
-    hid_t       group2 = -1, group3 = -1, group4 = -1, group5 = -1;
-    char        filename1[NAME_BUF_SIZE],
-                filename2a[NAME_BUF_SIZE],
-                filename2b[NAME_BUF_SIZE],
-                filename3a[NAME_BUF_SIZE],
-                filename3b[NAME_BUF_SIZE],
-                filename4a[NAME_BUF_SIZE],
-                filename4b[NAME_BUF_SIZE],
-                filename5a[NAME_BUF_SIZE],
-                filename5b[NAME_BUF_SIZE],
-                tmpname[NAME_BUF_SIZE],
-                cwdpath[NAME_BUF_SIZE];
+    hid_t       file1 = H5I_INVALID_HID;
+    hid_t       file2 = H5I_INVALID_HID;
+    hid_t       file3 = H5I_INVALID_HID;
+    hid_t       file4 = H5I_INVALID_HID;
+    hid_t       file5 = H5I_INVALID_HID;
+    hid_t       group2 = H5I_INVALID_HID;
+    hid_t       group3 = H5I_INVALID_HID;
+    hid_t       group4 = H5I_INVALID_HID;
+    hid_t       group5 = H5I_INVALID_HID;
+    char        *filename1 = NULL;
+    char        *filename2a = NULL;
+    char        *filename2b = NULL;
+    char        *filename3a = NULL;
+    char        *filename3b = NULL;
+    char        *filename4a = NULL;
+    char        *filename4b = NULL;
+    char        *filename5a = NULL;
+    char        *filename5b = NULL;
+    char        *tmpname = NULL;
+    char        *cwdpath = NULL;
     hbool_t     have_posix_compat_vfd;   /* Whether VFD used is compatible w/POSIX I/O calls */
 #endif /* H5_HAVE_SYMLINK */
 
@@ -6087,144 +6137,179 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     have_posix_compat_vfd = (hbool_t)(!HDstrcmp(env_h5_drvr, "sec2")
             || !HDstrcmp(env_h5_drvr, "core")
             || !HDstrcmp(env_h5_drvr, "nomatch"));
-    if(have_posix_compat_vfd) {
-        /* set up name for main file: "extlinks21A" */
-        h5_fixname(FILENAME[45], fapl, filename1, sizeof(filename1));
-
-        /* create tmp_links directory and get current working directory path */
-        if(HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
-            TEST_ERROR
-        if(HDmkdir(TMPDIR2, (mode_t)0755) < 0 && errno != EEXIST)
-            TEST_ERROR
-        if(NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE))
-            TEST_ERROR
-
-        /* Set up names for files in the subdirectories */
-
-        /* set up names for file #2 in temporary directory #2: "tmp2_links/extlinks21B" */
-        h5_fixname(FILENAME[46], fapl, filename2a, sizeof(filename2a));
-        fix_ext_filename(tmpname, cwdpath, FILENAME[46]);
-        h5_fixname(tmpname, fapl, filename2b, sizeof(filename2b));
-
-        /* Create symbolic link #1 in temporary directory #1 to file #2 in temporary directory #2 */
-        /* (i.e. tmp_links/sym1.h5 -> <full path to>/tmp2_links/extlinks21B.h5) */
-        if(HDsymlink(filename2b, SYMLINK1) < 0 && errno != EEXIST) TEST_ERROR
-
-        /* set up name for file #3 in temporary directory #2: "tmp2_links/extlinks21C" */
-        h5_fixname(FILENAME[47], fapl, filename3a, sizeof(filename3a));
-        h5_fixname(FILENAME[48], fapl, filename3b, sizeof(filename3b));
-
-        /* set up name for file #4 in temporary directory #1: "tmp_links/extlinks21D" */
-        h5_fixname(FILENAME[49], fapl, filename4a, sizeof(filename4a));
-        fix_ext_filename(tmpname, cwdpath, FILENAME[49]);
-        h5_fixname(tmpname, fapl, filename4b, sizeof(filename4b));
-
-        /* Create symbolic link #2 in temporary directory #2 to file #4 in temporary directory #1 */
-        /* (i.e. tmp2_links/sym2.h5 -> <full path to>/tmp_links/extlinks21D.h5) */
-        if(HDsymlink(filename4b, SYMLINK2) < 0 && errno != EEXIST) TEST_ERROR
-
-        /* set up name for file #5 in temporary directory #1: "tmp_links/extlinks21E" */
-        h5_fixname(FILENAME[50], fapl, filename5a, sizeof(filename5a));
-        h5_fixname(FILENAME[51], fapl, filename5b, sizeof(filename5b));
-
-        /* Create file #1 in current directory */
-        if((file1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
-
-        /* Create external link to file & object in temporary directory #2, using symlink #1 name */
-        if(H5Lcreate_external(SYMLINK1, "group2", file1, "extlink2-sym", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-
-        /* Close file #1 */
-        if(H5Fclose(file1) < 0) TEST_ERROR
-
-        /* Create file #2 in tmp_links directory #2 */
-        if((file2 = H5Fcreate(filename2a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
-        if(H5Fclose(file2) < 0) TEST_ERROR
-
-        /* Re-open file #2 in tmp_links directory through symlink */
-        if((file2 = H5Fopen(SYMLINK1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
-
-        /* Create group in file #2 in temporary directory */
-        if((group2 = H5Gcreate2(file2, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-
-        /* Create external link to file #3 & object in temporary directory #2 */
-        if(H5Lcreate_external(filename3b, "group3", group2, "extlink3", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-
-        /* Close group in file #2 */
-        if(H5Gclose(group2) < 0) TEST_ERROR
-
-        /* Close file #2 */
-        if(H5Fclose(file2) < 0) TEST_ERROR
-
-        /* Create file #3 in temp. directory #2 */
-        if((file3 = H5Fcreate(filename3a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
-
-        /* Create group in file #3 */
-        if((group3 = H5Gcreate2(file3, "group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-
-        /* Create external link to file & object in temporary directory #1, using symlink #2 name */
-        if(H5Lcreate_external(SYMLINK2, "group4", group3, "extlink4-sym", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-
-        /* Close group in file #3 */
-        if(H5Gclose(group3) < 0) TEST_ERROR
-
-        /* Close file #3 */
-        if(H5Fclose(file3) < 0) TEST_ERROR
-
-        /* Create file #4 in temporary directory #1 */
-        if((file4 = H5Fcreate(filename4b, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
-
-        /* Create group in file #4 in 'temporary' directory */
-        if((group4 = H5Gcreate2(file4, "group4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-
-        /* Create external link to file #5 & object in temporary directory #1 */
-        if(H5Lcreate_external(filename5b, "group5", group4, "extlink5", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-
-        /* Close group in file #4 */
-        if(H5Gclose(group4) < 0) TEST_ERROR
-
-        /* Close file #4 */
-        if(H5Fclose(file4) < 0) TEST_ERROR
-
-        /* Create file #5 in temporary directory #1 */
-        if((file5 = H5Fcreate(filename5a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
-
-        /* Create group in file #5 in 'temporary' directory #1 */
-        if((group5 = H5Gcreate2(file5, "group5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Gclose(group5) < 0) TEST_ERROR
-
-        /* Close file #5 */
-        if(H5Fclose(file5) < 0) TEST_ERROR
-
-        /* Actual tests... */
-
-        /* Reopen file #1 */
-        if((file1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
-
-        /* Open group in file #2, through external link w/symlink */
-        if((group2 = H5Gopen2(file1, "extlink2-sym", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Gclose(group2) < 0) TEST_ERROR
-
-        /* Open group in file #3, through external link w/symlink to external link */
-        if((group3 = H5Gopen2(file1, "extlink2-sym/extlink3", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Gclose(group3) < 0) TEST_ERROR
-
-        /* Open group in file #4, through external link w/symlink to external link w/symlink */
-        if((group4 = H5Gopen2(file1, "extlink2-sym/extlink3/extlink4-sym", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Gclose(group4) < 0) TEST_ERROR
-
-        /* Open group in file #5, through external link w/symlink to external link w/symlink to external link */
-        if((group5 = H5Gopen2(file1, "extlink2-sym/extlink3/extlink4-sym/extlink5", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Gclose(group5) < 0) TEST_ERROR
-
-        /* Close file #1 */
-        if(H5Fclose(file1) < 0) TEST_ERROR
-
-        PASSED();
-    } /* end if */
-    else {
+    if(!have_posix_compat_vfd) {
         SKIPPED();
         HDputs("    Current VFD doesn't support POSIX I/O calls");
-    } /* end else */
+        return SUCCEED;
+    }
+
+    if(NULL == (filename1 = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (filename2a = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (filename2b = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (filename3a = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (filename3b = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (filename4a = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (filename4b = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (filename5a = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (filename5b = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (tmpname = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+    if(NULL == (cwdpath = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+        TEST_ERROR;
+
+    /* set up name for main file: "extlinks21A" */
+    h5_fixname(FILENAME[45], fapl, filename1, NAME_BUF_SIZE);
+
+    /* create tmp_links directory and get current working directory path */
+    if(HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
+        TEST_ERROR
+    if(HDmkdir(TMPDIR2, (mode_t)0755) < 0 && errno != EEXIST)
+        TEST_ERROR
+    if(NULL == HDgetcwd(cwdpath, (size_t)NAME_BUF_SIZE))
+        TEST_ERROR
+
+    /* Set up names for files in the subdirectories */
+
+    /* set up names for file #2 in temporary directory #2: "tmp2_links/extlinks21B" */
+    h5_fixname(FILENAME[46], fapl, filename2a, NAME_BUF_SIZE);
+    fix_ext_filename(tmpname, cwdpath, FILENAME[46]);
+    h5_fixname(tmpname, fapl, filename2b, NAME_BUF_SIZE);
+
+    /* Create symbolic link #1 in temporary directory #1 to file #2 in temporary directory #2 */
+    /* (i.e. tmp_links/sym1.h5 -> <full path to>/tmp2_links/extlinks21B.h5) */
+    if(HDsymlink(filename2b, SYMLINK1) < 0 && errno != EEXIST) TEST_ERROR
+
+    /* set up name for file #3 in temporary directory #2: "tmp2_links/extlinks21C" */
+    h5_fixname(FILENAME[47], fapl, filename3a, NAME_BUF_SIZE);
+    h5_fixname(FILENAME[48], fapl, filename3b, NAME_BUF_SIZE);
+
+    /* set up name for file #4 in temporary directory #1: "tmp_links/extlinks21D" */
+    h5_fixname(FILENAME[49], fapl, filename4a, NAME_BUF_SIZE);
+    fix_ext_filename(tmpname, cwdpath, FILENAME[49]);
+    h5_fixname(tmpname, fapl, filename4b, NAME_BUF_SIZE);
+
+    /* Create symbolic link #2 in temporary directory #2 to file #4 in temporary directory #1 */
+    /* (i.e. tmp2_links/sym2.h5 -> <full path to>/tmp_links/extlinks21D.h5) */
+    if(HDsymlink(filename4b, SYMLINK2) < 0 && errno != EEXIST) TEST_ERROR
+
+    /* set up name for file #5 in temporary directory #1: "tmp_links/extlinks21E" */
+    h5_fixname(FILENAME[50], fapl, filename5a, NAME_BUF_SIZE);
+    h5_fixname(FILENAME[51], fapl, filename5b, NAME_BUF_SIZE);
+
+    /* Create file #1 in current directory */
+    if((file1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create external link to file & object in temporary directory #2, using symlink #1 name */
+    if(H5Lcreate_external(SYMLINK1, "group2", file1, "extlink2-sym", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(file1) < 0) TEST_ERROR
+
+    /* Create file #2 in tmp_links directory #2 */
+    if((file2 = H5Fcreate(filename2a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if(H5Fclose(file2) < 0) TEST_ERROR
+
+    /* Re-open file #2 in tmp_links directory through symlink */
+    if((file2 = H5Fopen(SYMLINK1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+
+    /* Create group in file #2 in temporary directory */
+    if((group2 = H5Gcreate2(file2, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create external link to file #3 & object in temporary directory #2 */
+    if(H5Lcreate_external(filename3b, "group3", group2, "extlink3", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close group in file #2 */
+    if(H5Gclose(group2) < 0) TEST_ERROR
+
+    /* Close file #2 */
+    if(H5Fclose(file2) < 0) TEST_ERROR
+
+    /* Create file #3 in temp. directory #2 */
+    if((file3 = H5Fcreate(filename3a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create group in file #3 */
+    if((group3 = H5Gcreate2(file3, "group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create external link to file & object in temporary directory #1, using symlink #2 name */
+    if(H5Lcreate_external(SYMLINK2, "group4", group3, "extlink4-sym", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close group in file #3 */
+    if(H5Gclose(group3) < 0) TEST_ERROR
+
+    /* Close file #3 */
+    if(H5Fclose(file3) < 0) TEST_ERROR
+
+    /* Create file #4 in temporary directory #1 */
+    if((file4 = H5Fcreate(filename4b, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create group in file #4 in 'temporary' directory */
+    if((group4 = H5Gcreate2(file4, "group4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create external link to file #5 & object in temporary directory #1 */
+    if(H5Lcreate_external(filename5b, "group5", group4, "extlink5", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close group in file #4 */
+    if(H5Gclose(group4) < 0) TEST_ERROR
+
+    /* Close file #4 */
+    if(H5Fclose(file4) < 0) TEST_ERROR
+
+    /* Create file #5 in temporary directory #1 */
+    if((file5 = H5Fcreate(filename5a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create group in file #5 in 'temporary' directory #1 */
+    if((group5 = H5Gcreate2(file5, "group5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Gclose(group5) < 0) TEST_ERROR
+
+    /* Close file #5 */
+    if(H5Fclose(file5) < 0) TEST_ERROR
+
+    /* Actual tests... */
+
+    /* Reopen file #1 */
+    if((file1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+
+    /* Open group in file #2, through external link w/symlink */
+    if((group2 = H5Gopen2(file1, "extlink2-sym", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2) < 0) TEST_ERROR
+
+    /* Open group in file #3, through external link w/symlink to external link */
+    if((group3 = H5Gopen2(file1, "extlink2-sym/extlink3", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3) < 0) TEST_ERROR
+
+    /* Open group in file #4, through external link w/symlink to external link w/symlink */
+    if((group4 = H5Gopen2(file1, "extlink2-sym/extlink3/extlink4-sym", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group4) < 0) TEST_ERROR
+
+    /* Open group in file #5, through external link w/symlink to external link w/symlink to external link */
+    if((group5 = H5Gopen2(file1, "extlink2-sym/extlink3/extlink4-sym/extlink5", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group5) < 0) TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(file1) < 0) TEST_ERROR
+
+    HDfree(filename1);
+    HDfree(filename2a);
+    HDfree(filename2b);
+    HDfree(filename3a);
+    HDfree(filename3b);
+    HDfree(filename4a);
+    HDfree(filename4b);
+    HDfree(filename5a);
+    HDfree(filename5b);
+    HDfree(tmpname);
+    HDfree(cwdpath);
+
+    PASSED();
 
     return SUCCEED;
 
@@ -6240,7 +6325,21 @@ error:
         H5Fclose(file2);
         H5Fclose(file1);
     } H5E_END_TRY;
+
+    HDfree(filename1);
+    HDfree(filename2a);
+    HDfree(filename2b);
+    HDfree(filename3a);
+    HDfree(filename3b);
+    HDfree(filename4a);
+    HDfree(filename4b);
+    HDfree(filename5a);
+    HDfree(filename5b);
+    HDfree(tmpname);
+    HDfree(cwdpath);
+
     return FAIL;
+
 #else /* H5_HAVE_SYMLINK */
     SKIPPED();
     HDputs("    Current file system or operating system doesn't support symbolic links");
@@ -7081,7 +7180,7 @@ UD_hard_create(const char H5_ATTR_UNUSED * link_name, hid_t loc_group, const voi
     addr = *((const haddr_t *)udata);
 
     /* Open the object this link points to */
-    target_obj= H5Oopen_by_addr(loc_group, addr);
+    target_obj = H5Oopen_by_addr(loc_group, addr);
     if(target_obj < 0) {
         ret_value = -1;
         goto done;
@@ -7173,7 +7272,7 @@ UD_hard_delete(const char H5_ATTR_UNUSED * link_name, hid_t file, const void *ud
     addr = *((const haddr_t *) udata);
 
     /* Open the object this link points to */
-    target_obj= H5Oopen_by_addr(file, addr);
+    target_obj = H5Oopen_by_addr(file, addr);
     if(target_obj < 0) {
         ret_value = -1;
         goto done;
@@ -7371,7 +7470,7 @@ error:
  *              Failure:        -1
  *-------------------------------------------------------------------------
  */
- /* A traversal function that ignores any udata and simply opens an object
+/* A traversal function that ignores any udata and simply opens an object
  * in the current group named REREG_TARGET_NAME
  */
 static hid_t
@@ -7723,7 +7822,7 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
     if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* Query the link to test its query callback */
-    if (H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.u.val_size != 16) TEST_ERROR
     if (UD_CB_TYPE != li.type) {
         H5_FAILED();

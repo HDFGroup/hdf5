@@ -408,10 +408,10 @@ H5O_fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 
     if(fill->version < H5O_FILL_VERSION_3) {
         /* Space allocation time */
-        *p++ = fill->alloc_time;
+        *p++ = (uint8_t)fill->alloc_time;
 
         /* Fill value writing time */
-        *p++ = fill->fill_time;
+        *p++ = (uint8_t)fill->fill_time;
 
         /* Whether fill value is defined */
         *p++ = (uint8_t)fill->fill_defined;

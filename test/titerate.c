@@ -1045,10 +1045,10 @@ test_iterate(void)
     /* These next tests use the same file */
     for(new_format = FALSE; new_format <= TRUE; new_format++) {
         test_iter_group(new_format ? fapl2 : fapl, new_format); /* Test group iteration */
-        test_iter_group_large(new_format ? fapl2 : fapl);   /* Test group iteration for large # of objects */
+        test_iter_group_large(new_format ? fapl2 : fapl);       /* Test group iteration for large # of objects */
         test_iter_attr(new_format ? fapl2 : fapl, new_format);  /* Test attribute iteration */
-        test_grp_memb_funcs(new_format ? fapl2 : fapl);     /* Test group member information functions */
-        test_links(new_format ? fapl2 : fapl);              /* Test soft and hard link iteration */
+        test_grp_memb_funcs(new_format ? fapl2 : fapl);         /* Test group member information functions */
+        test_links(new_format ? fapl2 : fapl);                  /* Test soft and hard link iteration */
     } /* end for */
 
     /* Test the fix for issue HDFFV-10588 */

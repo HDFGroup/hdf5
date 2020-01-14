@@ -63,7 +63,7 @@ typedef struct {
 /* User data for path traversal routine for getting link info by index */
 typedef struct {
     /* In */
-    H5_index_t idx_type;               /* Index to use */
+    H5_index_t idx_type;                /* Index to use */
     H5_iter_order_t order;              /* Order to iterate in index */
     hsize_t n;                          /* Offset of link within index */
 

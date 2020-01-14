@@ -100,6 +100,29 @@ static hbool_t H5A_top_package_initialize_s = FALSE;
 
 
 
+/*-------------------------------------------------------------------------
+ * Function: H5A_init
+ *
+ * Purpose:  Initialize the interface from some other layer.
+ *
+ * Return:   Success:    non-negative
+ *
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5A_init(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_init() */
+
+
 /*--------------------------------------------------------------------------
 NAME
    H5A__init_package -- Initialize interface-specific information
@@ -360,13 +383,9 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
-
-    if(H5P_DEFAULT != lapl_id) {
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not link access property list ID")
-        H5CX_set_lapl(lapl_id);
-    }
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info")
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set link access property list info")
 
     /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -507,16 +526,9 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
-
-    /* Set lapl_id and add to context */
-    if(H5P_DEFAULT != lapl_id) {
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not link access property list ID")
-        H5CX_set_lapl(lapl_id);
-    }
-    else 
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info")
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set link access property list info")
 
     /* Fill in location struct fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -595,16 +607,9 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
-
-    /* Set lapl_id and add to context */
-    if(H5P_DEFAULT != lapl_id) {
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not link access property list ID")
-        H5CX_set_lapl(lapl_id);
-    }
-    else 
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info")
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set link access property list info")
 
     /* Fill in location struct parameters */
     loc_params.type                         = H5VL_OBJECT_BY_IDX;

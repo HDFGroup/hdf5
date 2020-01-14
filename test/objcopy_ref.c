@@ -44,53 +44,15 @@ const char *FILENAME[] = {
 #define CONFIG_DENSE 16
 #define MAX_CONFIGURATION 31
 
-#define NAME_DATATYPE_SIMPLE     "H5T_NATIVE_INT"
-#define NAME_DATATYPE_SIMPLE2     "H5T_NATIVE_INT-2"
-#define NAME_DATATYPE_VL     "vlen of int"
-#define NAME_DATATYPE_VL_VL     "vlen of vlen of int"
 #define NAME_DATASET_SIMPLE     "dataset_simple"
-#define NAME_DATASET_SIMPLE2    "dataset_simple_copy"
-#define NAME_DATASET_SIMPLE3    "dataset_simple_another_copy"
-#define NAME_DATASET_COMPOUND     "dataset_compound"
-#define NAME_DATASET_CHUNKED     "dataset_chunked"
-#define NAME_DATASET_CHUNKED_SINGLE     "dataset_chunked_single"
-#define NAME_DATASET_CHUNKED2     "dataset_chunked2"
-#define NAME_DATASET_CHUNKED2_SINGLE     "dataset_chunked2_single"
-#define NAME_DATASET_CHUNKED3     "dataset_chunked3"
-#define NAME_DATASET_CHUNKED3_SINGLE     "dataset_chunked3_single"
-#define NAME_DATASET_CHUNKED4     "dataset_chunked4"
-#define NAME_DATASET_CHUNKED4_SINGLE     "dataset_chunked4_single"
-#define NAME_DATASET_COMPACT     "dataset_compact"
-#define NAME_DATASET_EXTERNAL     "dataset_ext"
-#define NAME_DATASET_NAMED_DTYPE     "dataset_named_dtype"
-#define NAME_DATASET_NAMED_DTYPE2     "dataset_named_dtype2"
-#define NAME_DATASET_MULTI_OHDR     "dataset_multi_ohdr"
-#define NAME_DATASET_MULTI_OHDR2     "dataset_multi_ohdr2"
-#define NAME_DATASET_VL     "dataset_vl"
-#define NAME_DATASET_VL2     "dataset_vl2"
-#define NAME_DATASET_VL_VL     "dataset_vl_vl"
-#define NAME_DATASET_VL_VL2     "dataset_vl_vl2"
-#define NAME_DATASET_CMPD_VL     "dataset_cmpd_vl"
 #define NAME_DATASET_SUB_SUB     "/g0/g00/g000/dataset_simple"
 #define NAME_GROUP_UNCOPIED     "/uncopied"
-#define NAME_GROUP_EMPTY     "/empty"
 #define NAME_GROUP_TOP         "/g0"
-#define NAME_GROUP_TOP2         "/g1"
-#define NAME_GROUP_TOP3         "/g2"
-#define NAME_GROUP_TOP4         "/g3"
 #define NAME_GROUP_SUB         "/g0/g00"
-#define NAME_GROUP_SUB_2    "/g0/g01"
-#define NAME_GROUP_SUB_SUB     "/g0/g00/g000"
 #define NAME_GROUP_SUB_SUB2     "g000"
-#define NAME_GROUP_DATASET     "/g0/dataset_simple"
 #define NAME_GROUP_LINK        "/g_links"
 #define NAME_GROUP_LINK2    "/g_links2"
-#define NAME_GROUP_LOOP        "g_loop"
-#define NAME_GROUP_LOOP2    "g_loop2"
-#define NAME_GROUP_LOOP3    "g_loop3"
 #define NAME_GROUP_REF            "ref_grp"
-#define NAME_LINK_DATASET    "/g_links/dataset_simple"
-#define NAME_LINK_HARD        "/g_links/hard_link_to_dataset_simple"
 #define NAME_LINK_SOFT        "/g_links/soft_link_to_dataset_simple"
 #define NAME_LINK_SOFT2        "/g_links2/soft_link_to_dataset_simple"
 #define NAME_LINK_EXTERN    "/g_links/external_link_to_dataset_simple"
@@ -99,19 +61,11 @@ const char *FILENAME[] = {
 #define NAME_LINK_SOFT_DANGLE2    "/g_links2/soft_link_to_nowhere"
 #define NAME_LINK_EXTERN_DANGLE "/g_links/external_link_to_nowhere"
 #define NAME_LINK_EXTERN_DANGLE2        "/g_links2/external_link_to_nowhere"
-#define NAME_OLD_FORMAT        "/dset1"
 
 #define NAME_BUF_SIZE   1024
 #define ATTR_NAME_LEN 80
 #define DIM_SIZE_1 12
 #define DIM_SIZE_2  6
-#define MAX_DIM_SIZE_1    100
-#define MAX_DIM_SIZE_2    80
-#define CHUNK_SIZE_1 5          /* Not an even fraction of dimension sizes, so we test copying partial chunks */
-#define CHUNK_SIZE_2 5
-#define NUM_SUB_GROUPS  20
-#define NUM_WIDE_LOOP_GROUPS  10
-#define NUM_DATASETS  10
 
 unsigned num_attributes_g;         /* Number of attributes created */
 
@@ -137,9 +91,9 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
  *
  * Purpose: Add an address to the table.
  *
- * Return: void
+ * Return:      void
  *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
@@ -171,11 +125,10 @@ addr_insert(H5O_info_t *oi)
  *
  * Purpose: Check if address has already been encountered
  *
- * Return: Success: TRUE/FALSE
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    (can't fail)
  *
- * Failure: (can't fail)
- *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
@@ -200,9 +153,9 @@ addr_lookup(H5O_info_t *oi)
  *
  * Purpose: Reset the address tracking data structures
  *
- * Return: void
+ * Return:      void
  *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------

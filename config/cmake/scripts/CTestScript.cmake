@@ -50,6 +50,17 @@ if (SITE_BUILDNAME_SUFFIX)
 endif ()
 set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
 
+# Launchers work only with Makefile and Ninja generators.
+if(NOT "${CTEST_CMAKE_GENERATOR}" MATCHES "Make|Ninja")
+  set(CTEST_USE_LAUNCHERS 0)
+  set(ENV{CTEST_USE_LAUNCHERS_DEFAULT} 0)
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=OFF")
+else()
+  set(CTEST_USE_LAUNCHERS 1)
+  set(ENV{CTEST_USE_LAUNCHERS_DEFAULT} 1)
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON")
+endif()
+
 #-----------------------------------------------------------------------------
 # MAC machines need special option
 #-----------------------------------------------------------------------------
@@ -218,9 +229,6 @@ else ()
       "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_CONFIGURATION_TYPE} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_CONFIGURE_ARCHITECTURE}\" \"${CTEST_CONFIGURE_TOOLSET}\" \"${CTEST_SOURCE_DIRECTORY}\""
   )
 endif ()
-
-set(CTEST_USE_LAUNCHERS 1)
-set(ENV{CTEST_USE_LAUNCHERS_DEFAULT} 1)
 
 #-----------------------------------------------------------------------------
 ## -- set output to english
