@@ -517,6 +517,6 @@ else ()
   add_dependencies (vol_connector ${HDF5_F90_TEST_LIBSH_TARGET})
 endif ()
 
-if (HDF5_TEST_FORTRAN)
+if (HDF5_TEST_FORTRAN AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()
