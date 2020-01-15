@@ -7614,7 +7614,8 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
-    unsigned char heap_id[100][MAX_HEAP_ID_LEN]; /* Heap ID for object inserted */
+    unsigned char **heap_id = NULL;
+    unsigned char *heap_id_data = NULL;
     struct a_type_t1 {
         char a[10];
         char b[40];
@@ -7625,6 +7626,14 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Set up data array */
+    if(NULL == (heap_id_data = (unsigned char *)HDcalloc(100 * MAX_HEAP_ID_LEN, sizeof(unsigned char))))
+        TEST_ERROR;
+    if(NULL == (heap_id = (unsigned char **)HDcalloc(100, sizeof(heap_id_data))))
+        TEST_ERROR;
+    for (i = 0; i < 100; i++)
+        heap_id[i] = heap_id_data + (i * MAX_HEAP_ID_LEN);
 
     /* Create the file to work on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, tparam->my_fcpl, fapl)) < 0)
@@ -7692,7 +7701,10 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     /* All tests passed */
     PASSED();
 
-    return(0);
+    HDfree(heap_id);
+    HDfree(heap_id_data);
+
+    return 0;
 
 error:
     H5E_BEGIN_TRY {
@@ -7700,7 +7712,11 @@ error:
             H5HF_close(fh);
 	H5Fclose(file);
     } H5E_END_TRY;
-    return(1);
+
+    HDfree(heap_id);
+    HDfree(heap_id_data);
+
+    return 1;
 } /* test_man_incr_insert_remove() */
 #endif /* QAK */
 
