@@ -36,4 +36,6 @@ else ()
 endif ()
 set_target_properties (tellub PROPERTIES FOLDER tools)
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_TOOLS)
+  include (CMakeTests.cmake)
+endif ()

@@ -16,6 +16,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Testing
 #-----------------------------------------------------------------------------
-if (BUILD_TESTING)
-  add_subdirectory (test)
+if (BUILD_TESTING AND HDF5_TEST_SERIAL)
+    add_subdirectory (test)
+  endif ()
 endif ()

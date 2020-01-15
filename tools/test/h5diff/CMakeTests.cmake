@@ -404,7 +404,7 @@
         set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     endif ()
-    if (H5_HAVE_PARALLEL)
+    if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
       ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
     endif ()
   endmacro ()
