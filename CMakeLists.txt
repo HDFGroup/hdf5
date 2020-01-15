@@ -435,17 +435,29 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to Build Shared and Static libs, default is both
 #-----------------------------------------------------------------------------
+option (BUILD_STATIC_LIBS "Build Static Libraries" ON)
+set (H5_ENABLE_STATIC_LIB NO)
+option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+set (H5_ENABLE_SHARED_LIB NO)
 option (ONLY_SHARED_LIBS "Only Build Shared Libraries" OFF)
-set (H5_ENABLE_STATIC_LIB YES)
+
+if (BUILD_STATIC_LIBS)
+  set (H5_ENABLE_STATIC_LIB YES)
+endif ()
+if (BUILD_SHARED_LIBS)
+  set (H5_ENABLE_SHARED_LIB YES)
+endif ()
+
+# Force only shared libraries if all OFF
+if (NOT BUILD_STATIC_LIBS AND NOT BUILD_SHARED_LIBS)
+  set (ONLY_SHARED_LIBS ON CACHE BOOL "Only Build Shared Libraries" FORCE)
+endif ()
+
 if (ONLY_SHARED_LIBS)
   set (H5_ENABLE_STATIC_LIB NO)
   set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
 endif ()
-option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-set (H5_ENABLE_SHARED_LIB NO)
-if (BUILD_SHARED_LIBS)
-  set (H5_ENABLE_SHARED_LIB YES)
-endif ()
+
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 #-----------------------------------------------------------------------------
@@ -859,6 +871,30 @@ if (BUILD_TESTING)
 
   include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
   configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
+
+  option (HDF5_TEST_SERIAL "Execute non-parallel tests" ON)
+  mark_as_advanced (HDF5_TEST_SERIAL)
+
+  option (HDF5_TEST_TOOLS "Execute tools tests" ON)
+  mark_as_advanced (HDF5_TEST_TOOLS)
+
+  option (HDF5_TEST_EXAMPLES "Execute tests on examples" ON)
+  mark_as_advanced (HDF5_TEST_EXAMPLES)
+
+  option (HDF5_TEST_SWMR "Execute SWMR tests" ON)
+  mark_as_advanced (HDF5_TEST_SWMR)
+
+  option (HDF5_TEST_PARALLEL "Execute parallel tests" ON)
+  mark_as_advanced (HDF5_TEST_PARALLEL)
+
+  option (HDF5_TEST_FORTRAN "Execute fortran tests" ON)
+  mark_as_advanced (HDF5_TEST_FORTRAN)
+
+  option (HDF5_TEST_CPP "Execute cpp tests" ON)
+  mark_as_advanced (HDF5_TEST_CPP)
+
+  option (HDF5_TEST_JAVA "Execute java tests" ON)
+  mark_as_advanced (HDF5_TEST_JAVA)
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")

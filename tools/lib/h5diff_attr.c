@@ -218,9 +218,9 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
         /* close for next turn */
         H5Aclose(attr1_id);
-        attr1_id = -1;
+        attr1_id = H5I_INVALID_HID;
         H5Aclose(attr2_id);
-        attr2_id = -1;
+        attr2_id = H5I_INVALID_HID;
     } /* end while */
 
     /* list1 did not end */
@@ -244,7 +244,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
         /* close for next turn */
         H5Aclose(attr1_id);
-        attr1_id = -1;
+        attr1_id = H5I_INVALID_HID;
     }
 
     /* list2 did not end */
@@ -267,7 +267,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
         /* close for next turn */
         H5Aclose(attr2_id);
-        attr2_id = -1;
+        attr2_id = H5I_INVALID_HID;
     }
 
     /*------------------------------------------------------

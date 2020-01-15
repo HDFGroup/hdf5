@@ -67,6 +67,6 @@ if (H5_HAVE_PARALLEL)
   set_target_properties (ph5example PROPERTIES FOLDER examples)
 endif ()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_EXAMPLES)
   include (CMakeTests.cmake)
 endif ()

@@ -79,4 +79,6 @@ foreach (h5_testp ${H5P_TESTS})
   ADD_H5P_EXE(${h5_testp})
 endforeach ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_PARALLEL)
+  include (CMakeTests.cmake)
+endif ()
