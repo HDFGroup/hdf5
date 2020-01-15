@@ -133,7 +133,7 @@ else ()
 endif ()
 set_target_properties (zip_perf PROPERTIES FOLDER perform)
 
-if (H5_HAVE_PARALLEL AND BUILD_TESTING AND HDF5_TEST_PARALLEL)
+if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
   if (UNIX)
       #-- Adding test for perf - only on unix systems
       set (perf_SOURCES

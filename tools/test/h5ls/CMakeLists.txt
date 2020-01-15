@@ -30,7 +30,7 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
-if (HDF5_TEST_TOOLS)
+if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 
   include (CMakeTestsVDS.cmake)

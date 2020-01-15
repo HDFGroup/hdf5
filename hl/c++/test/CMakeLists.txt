@@ -24,6 +24,6 @@ else ()
 endif ()
 set_target_properties (hl_ptableTest PROPERTIES FOLDER test/hl/cpp)
 
-if (HDF5_TEST_CPP)
+if (HDF5_TEST_CPP AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()

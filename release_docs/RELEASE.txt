@@ -51,14 +51,14 @@ New Features
     - Added new options to CMake for control of testing
 
       Added CMake options (default ON);
-          HDF5_TEST_SERIAL
-          HDF5_TEST_TOOLS
-          HDF5_TEST_EXAMPLES
-          HDF5_TEST_SWMR
-          HDF5_TEST_PARALLEL
-          HDF5_TEST_FORTRAN
-          HDF5_TEST_CPP
-          HDF5_TEST_JAVA
+          HDF5_TEST_SERIAL AND/OR HDF5_TEST_PARALLEL
+          combined with:
+            HDF5_TEST_TOOLS
+            HDF5_TEST_EXAMPLES
+            HDF5_TEST_SWMR
+            HDF5_TEST_FORTRAN
+            HDF5_TEST_CPP
+            HDF5_TEST_JAVA
 
       (ADB - 2020/01/15, HDFFV-11001)
 

@@ -56,6 +56,6 @@ else ()
 endif ()
 set_target_properties (cpp_testhdf5 PROPERTIES FOLDER test/cpp)
 
-if (HDF5_TEST_CPP)
+if (HDF5_TEST_CPP AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()
