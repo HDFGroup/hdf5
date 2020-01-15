@@ -15,4 +15,6 @@ else ()
 endif ()
 set_target_properties (h5importtest PROPERTIES FOLDER tools)
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_TOOLS)
+  include (CMakeTests.cmake)
+endif ()

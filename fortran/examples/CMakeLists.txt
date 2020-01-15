@@ -173,6 +173,6 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   endif ()
 endif ()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_FORTRAN AND HDF5_TEST_EXAMPLES)
   include (CMakeTests.cmake)
 endif ()

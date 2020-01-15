@@ -61,4 +61,6 @@ foreach (h5_test ${H5_TESTS})
   ADD_H5_FORTRAN_EXE(${h5_test})
 endforeach ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_FORTRAN)
+  include (CMakeTests.cmake)
+endif ()

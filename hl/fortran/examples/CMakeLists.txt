@@ -52,6 +52,6 @@ foreach (example ${examples})
   endif ()
 endforeach ()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_FORTRAN AND HDF5_TEST_EXAMPLES)
   include (CMakeTests.cmake)
 endif ()
