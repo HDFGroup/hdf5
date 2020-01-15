@@ -25,7 +25,8 @@
 #define FAMILY_SIZE     1024
 #define FILENAME        "family_file%05d.h5"
 
-static int buf[FAMILY_NUMBER][FAMILY_SIZE];
+int     **buf       = NULL;
+int     *buf_data   = NULL;
 
 int main(void)
 {
@@ -34,66 +35,82 @@ int main(void)
     int         i, j;
     hsize_t     dims[2]={FAMILY_NUMBER, FAMILY_SIZE};
 
+    /* Set up data array */
+    if(NULL == (buf_data = (int *)HDcalloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int)))) {
+        HDperror("HDcalloc");
+        HDexit(EXIT_FAILURE);
+    }
+    if(NULL == (buf = (int **)HDcalloc(FAMILY_NUMBER, sizeof(buf_data)))) {
+        HDperror("HDcalloc");
+        HDexit(EXIT_FAILURE);
+    }
+    for (i = 0; i < FAMILY_NUMBER; i++)
+        buf[i] = buf_data + (i * FAMILY_SIZE);
+
     /* Set property list and file name for FAMILY driver */
-    if ((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-        perror ("H5Pcreate");
-        exit (EXIT_FAILURE);
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+        HDperror("H5Pcreate");
+        HDexit(EXIT_FAILURE);
     }
 
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0) {
-        perror ("H5Pset_fapl_family");
-        exit (EXIT_FAILURE);
+        HDperror("H5Pset_fapl_family");
+        HDexit(EXIT_FAILURE);
     }
 
     if((file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
-        perror("H5Fcreate");
-        exit(EXIT_FAILURE);
+        HDperror("H5Fcreate");
+        HDexit(EXIT_FAILURE);
     }
 
     /* Create and write dataset */
     if((space = H5Screate_simple(2, dims, NULL)) < 0) {
-        perror("H5Screate_simple");
-        exit(EXIT_FAILURE);
+        HDperror("H5Screate_simple");
+        HDexit(EXIT_FAILURE);
     }
 
 
     if((dset = H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        perror("H5Dcreate2");
-        exit(EXIT_FAILURE);
+        HDperror("H5Dcreate2");
+        HDexit(EXIT_FAILURE);
     }
 
 
-    for(i = 0; i<FAMILY_NUMBER; i++)
-        for(j = 0; j<FAMILY_SIZE; j++)
+    for(i = 0; i < FAMILY_NUMBER; i++)
+        for(j = 0; j < FAMILY_SIZE; j++)
             buf[i][j] = i * 10000 + j;
 
-    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
-        perror("H5Dwrite");
-        exit(EXIT_FAILURE);
+    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0) {
+        HDperror("H5Dwrite");
+        HDexit(EXIT_FAILURE);
     }
 
 
     if(H5Sclose(space) < 0) {
-        perror ("H5Sclose");
-        exit (EXIT_FAILURE);
+        HDperror("H5Sclose");
+        HDexit(EXIT_FAILURE);
     }
 
     if(H5Dclose(dset) < 0) {
-        perror ("H5Dclose");
-        exit (EXIT_FAILURE);
+        HDperror("H5Dclose");
+        HDexit(EXIT_FAILURE);
     }
 
     if(H5Pclose(fapl) < 0) {
-        perror ("H5Pclose");
-        exit (EXIT_FAILURE);
+        HDperror("H5Pclose");
+        HDexit(EXIT_FAILURE);
     }
 
     if(H5Fclose(file) < 0) {
-        perror ("H5Fclose");
-        exit (EXIT_FAILURE);
+        HDperror("H5Fclose");
+        HDexit(EXIT_FAILURE);
     }
 
-    puts(" PASSED"); fflush(stdout);
+    HDfree(buf);
+    HDfree(buf_data);
 
-    return 0;
+    HDputs(" PASSED");
+    HDfflush(stdout);
+
+    return EXIT_SUCCESS;
 }
