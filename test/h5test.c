@@ -1321,8 +1321,7 @@ h5_dump_info_object(MPI_Info info)
     int    flag;
     int    i, nkeys;
 
-    HDprintf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", (int)info,
-  MPI_MAX_INFO_VAL);
+    HDprintf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
     if (info==MPI_INFO_NULL){
   HDprintf("object is MPI_INFO_NULL\n");
     }

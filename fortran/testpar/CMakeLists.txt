@@ -45,4 +45,6 @@ set_target_properties (parallel_test PROPERTIES
 )
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_FORTRAN AND HDF5_TEST_PARALLEL)
+  include (CMakeTests.cmake)
+endif ()

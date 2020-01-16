@@ -1235,8 +1235,7 @@ H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
     if(NULL == (curr_id = (H5I_id_info_t *)H5SL_remove(type_ptr->ids, &id)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, NULL, "can't remove ID node from skip list")
 
-    /* (Casting away const OK -QAK) */
-    ret_value = (void *)curr_id->obj_ptr;
+    ret_value = (void *)curr_id->obj_ptr;       /* (Casting away const OK -QAK) */
     curr_id = H5FL_FREE(H5I_id_info_t, curr_id);
 
     /* Decrement the number of IDs in the type */
@@ -2259,8 +2258,8 @@ done:
 hid_t
 H5Iget_file_id(hid_t obj_id)
 {
-    H5I_type_t      type;                           /* ID type */
-    hid_t           ret_value   = H5I_INVALID_HID;  /* Return value */
+    H5I_type_t  type;                           /* ID type */
+    hid_t       ret_value   = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", obj_id);
@@ -2269,15 +2268,15 @@ H5Iget_file_id(hid_t obj_id)
     type = H5I_TYPE(obj_id);
 
     /* Call internal function */
-    if (H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
-        H5VL_object_t *vol_obj = NULL; /* Object token of obj_id */
+    if(H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
+        H5VL_object_t *vol_obj;         /* Object token of obj_id */
 
         /* Get the VOL object */
         if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+            HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
         /* Get the file ID */
-        if ((ret_value = H5F_get_file_id(vol_obj, type, TRUE)) < 0)
+        if((ret_value = H5F_get_file_id(vol_obj, type, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file ID")
     } /* end if */
     else

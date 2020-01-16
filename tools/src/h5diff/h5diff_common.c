@@ -302,30 +302,29 @@ void parse_command_line(int argc,
  *
  *-------------------------------------------------------------------------
  */
+void print_info(diff_opt_t* opts)
+{
+    if (opts->m_quiet || opts->err_stat)
+        return;
 
- void  print_info(diff_opt_t* opts)
- {
-     if (opts->m_quiet || opts->err_stat)
-         return;
+    if (opts->cmn_objs == 0) {
+        HDprintf("No common objects found. Files are not comparable.\n");
+        if (!opts->m_verbose)
+            HDprintf("Use -v for a list of objects.\n");
+    }
 
-     if (opts->cmn_objs == 0) {
-         HDprintf("No common objects found. Files are not comparable.\n");
-         if (!opts->m_verbose)
-             HDprintf("Use -v for a list of objects.\n");
-     }
-
-     if (opts->not_cmp == 1) {
-         if (opts->m_list_not_cmp == 0) {
-             HDprintf("--------------------------------\n");
-             HDprintf("Some objects are not comparable\n");
-             HDprintf("--------------------------------\n");
-             if (opts->m_verbose)
-                 HDprintf("Use -c for a list of objects without details of differences.\n");
-             else
-                 HDprintf("Use -c for a list of objects.\n");
-         }
-     }
- }
+    if (opts->not_cmp == 1) {
+        if (opts->m_list_not_cmp == 0) {
+            HDprintf("--------------------------------\n");
+            HDprintf("Some objects are not comparable\n");
+            HDprintf("--------------------------------\n");
+            if (opts->m_verbose)
+                HDprintf("Use -c for a list of objects without details of differences.\n");
+            else
+                HDprintf("Use -c for a list of objects.\n");
+        }
+    }
+}
 
 /*-------------------------------------------------------------------------
  * Function: check_n_input

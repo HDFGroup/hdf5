@@ -465,14 +465,14 @@ test_vltypes_vlen_atomic(void)
     ret = H5Dvlen_get_buf_size(dataset, tid1, sid1, &size);
     CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
 
+    /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
+    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(unsigned int),"H5Dvlen_get_buf_size");
+
     /* Try to call H5Dvlen_get_buf with bad dataspace */
     H5E_BEGIN_TRY {
         ret = H5Dvlen_get_buf_size(dataset, tid1, sid2, &size);
     } H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dvlen_get_buf_size");
-
-    /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
-    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(unsigned int),"H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
     ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,xfer_pid,rdata);

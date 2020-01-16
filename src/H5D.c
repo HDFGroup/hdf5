@@ -54,12 +54,6 @@
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
 
-/* Declare extern the free list to manage blocks of VL data */
-H5FL_BLK_EXTERN(vlen_vl_buf);
-
-/* Declare extern the free list to manage other blocks of VL data */
-H5FL_BLK_EXTERN(vlen_fl_buf);
-
 
 /*****************************/
 /* Library Private Variables */
@@ -717,14 +711,6 @@ done:
  *      VL data, in memory.  The *size value is modified according to how many
  *      bytes are required to store the VL data in memory.
  *
- * Implementation: This routine actually performs the read with a custom
- *      memory manager which basically just counts the bytes requested and
- *      uses a temporary memory buffer (through the H5FL API) to make certain
- *      enough space is available to perform the read.  Then the temporary
- *      buffer is released and the number of bytes allocated is returned.
- *      Kinda kludgy, but easier than the other method of trying to figure out
- *      the sizes without actually reading the data in... - QAK
- *
  * Return:  Non-negative on success, negative on failure
  *
  * Programmer:  Quincey Koziol
@@ -734,105 +720,43 @@ done:
  */
 herr_t
 H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
-        hsize_t *size)
+    hsize_t *size)
 {
-    H5D_vlen_bufsize_t vlen_bufsize = {NULL, H5I_INVALID_HID, H5I_INVALID_HID, NULL, NULL, 0, H5P_DATASET_XFER_DEFAULT};
-    H5VL_object_t  *vol_obj;       /* Dataset for this operation */
-    H5S_t *mspace = NULL;       /* Memory dataspace */
-    char bogus;                 /* bogus value to pass to H5Diterate() */
-    H5S_t *space;               /* Dataspace for iteration */
-    H5T_t *type;                /* Datatype */
-    H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
-    herr_t ret_value;           /* Return value */
+    H5VL_object_t *vol_obj;     /* Dataset for this operation */
+    hbool_t supported;          /* Whether 'get vlen buf size' operation is supported by VOL connector */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iii*h", dataset_id, type_id, space_id, size);
 
     /* Check args */
-    if(H5I_DATASET != H5I_get_type(dataset_id) ||
-            H5I_DATATYPE != H5I_get_type(type_id) || size == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object(dataset_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
-    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
-    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
-    if(!(H5S_has_extent(space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
+    if(H5I_DATATYPE != H5I_get_type(type_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype identifier")
+    if(H5I_DATASPACE != H5I_get_type(space_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace identifier")
+    if(size == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid 'size' pointer")
 
-    /* Save the dataset */
-    vlen_bufsize.dset_vol_obj = vol_obj;
-
-    /* Get a copy of the dataset's dataspace */
-    if(H5VL_dataset_get(vol_obj, H5VL_DATASET_GET_SPACE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &vlen_bufsize.fspace_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataspace")
-
-    /* Create a scalar for the memory dataspace */
-    if(NULL == (mspace = H5S_create(H5S_SCALAR)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
-    if((vlen_bufsize.mspace_id = H5I_register(H5I_DATASPACE, mspace, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
-
-    /* Grab the temporary buffers required */
-    if(NULL == (vlen_bufsize.fl_tbuf = H5FL_BLK_MALLOC(vlen_fl_buf, (size_t)1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available")
-    if(NULL == (vlen_bufsize.vl_tbuf = H5FL_BLK_MALLOC(vlen_vl_buf, (size_t)1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available")
-
-    /* Set the memory manager to the special allocation routine */
-    if(H5CX_set_vlen_alloc_info(H5D__vlen_get_buf_size_alloc, &vlen_bufsize, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VL data allocation routine")
-
-    /* If we are not using the native VOL connector we must also set this
-     * property on the DXPL since the context is not visible to the connector
-     * and will be ignored if the connector re-enters the library */
-    if(vol_obj->connector->cls->value != H5VL_NATIVE_VALUE) {
-        H5P_genplist_t *dxpl;
-
-        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(H5P_DATASET_XFER_DEFAULT)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get default DXPL")
-        if((vlen_bufsize.dxpl_id = H5P_copy_plist(dxpl, TRUE)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, H5I_INVALID_HID, "can't copy property list");
-        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(vlen_bufsize.dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get copied DXPL")
-        if(H5P_set_vlen_mem_manager(dxpl, H5D__vlen_get_buf_size_alloc, &vlen_bufsize, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VL data allocation routine on DXPL")
+    /* Check if the 'get_vlen_buf_size' callback is supported */
+    supported = FALSE;
+    if(H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_DATASET, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE, &supported) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'get vlen buf size' operation")
+    if(supported) {
+        /* Make the 'get_vlen_buf_size' callback */
+        if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, type_id, space_id, size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get vlen buf size")
     } /* end if */
-
-    /* Set the initial number of bytes required */
-    vlen_bufsize.size = 0;
-
-    /* Call H5S_select_iterate with args, etc. */
-    dset_op.op_type             = H5S_SEL_ITER_OP_APP;
-    dset_op.u.app_op.op         = H5D__vlen_get_buf_size;
-    dset_op.u.app_op.type_id    = type_id;
-
-    ret_value = H5S_select_iterate(&bogus, type, space, &dset_op, &vlen_bufsize);
-
-    /* Get the size if we succeeded */
-    if(ret_value >= 0)
-        *size = vlen_bufsize.size;
+    else {
+        /* Perform a generic operation that will work with all VOL connectors */
+        if(H5D__vlen_get_buf_size_gen(vol_obj, type_id, space_id, size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get vlen buf size")
+    } /* end else */
 
 done:
-    if(ret_value < 0)
-        if(mspace && H5S_close(mspace) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
-
-    if(vlen_bufsize.fspace_id >= 0 && H5I_dec_app_ref(vlen_bufsize.fspace_id) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "problem freeing id")
-    if(vlen_bufsize.mspace_id >= 0 && H5I_dec_app_ref(vlen_bufsize.mspace_id) < 0)
-        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "problem freeing id")
-    if(vlen_bufsize.fl_tbuf != NULL)
-        vlen_bufsize.fl_tbuf = H5FL_BLK_FREE(vlen_fl_buf, vlen_bufsize.fl_tbuf);
-    if(vlen_bufsize.vl_tbuf != NULL)
-        vlen_bufsize.vl_tbuf = H5FL_BLK_FREE(vlen_vl_buf, vlen_bufsize.vl_tbuf);
-    if(vlen_bufsize.dxpl_id != H5P_DATASET_XFER_DEFAULT)
-        if(H5I_dec_app_ref(vlen_bufsize.dxpl_id) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close property list")
-
     FUNC_LEAVE_API(ret_value)
-}   /* end H5Dvlen_get_buf_size() */
+} /* end H5Dvlen_get_buf_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -981,7 +905,7 @@ H5Dformat_convert(hid_t dset_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
     /* Convert the dataset */
-    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_FORMAT_CONVERT) < 0)
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_FORMAT_CONVERT, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_INTERNAL, FAIL, "can't convert dataset format")
 
 done:
@@ -1017,7 +941,7 @@ H5Dget_chunk_index_type(hid_t dset_id, H5D_chunk_index_t *idx_type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "idx_type parameter cannot be NULL")
 
     /* Get the chunk indexing type */
-    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE, idx_type) < 0)
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_CHUNK_INDEX_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, idx_type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk index type")
 
 done:
@@ -1058,7 +982,7 @@ H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_n
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "chunk_nbytes parameter cannot be NULL")
 
     /* Get the dataset creation property list */
-    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE, offset, chunk_nbytes) < 0)
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, offset, chunk_nbytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get storage size of chunk")
 
 done:
@@ -1103,13 +1027,13 @@ H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)")
 
     /* Get the number of written chunks */
-    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_NUM_CHUNKS, fspace_id, nchunks) < 0)
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_NUM_CHUNKS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fspace_id, nchunks) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get number of chunks")
 
 done:
     FUNC_LEAVE_API(ret_value);
 } /* H5Dget_num_chunks() */
- 
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Dget_chunk_info
@@ -1151,7 +1075,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *of
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* Get the number of written chunks to check range */
-    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_NUM_CHUNKS, fspace_id, &nchunks) < 0)
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_NUM_CHUNKS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fspace_id, &nchunks) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get number of chunks")
 
     /* Check range for chunk index */
@@ -1159,7 +1083,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *of
         HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk index is out of range")
 
     /* Call private function to get the chunk info given the chunk's index */
-    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX, fspace_id, chk_index, offset, filter_mask, addr, size) < 0)
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fspace_id, chk_index, offset, filter_mask, addr, size) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get chunk info by index")
 
 done:
@@ -1206,7 +1130,7 @@ H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filte
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument (null)")
 
     /* Call private function to get the chunk info given the chunk's index */
-    if(H5VL_dataset_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD, offset, filter_mask, addr, size) < 0)
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, offset, filter_mask, addr, size) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't get chunk info by its logical coordinates")
 
 done:

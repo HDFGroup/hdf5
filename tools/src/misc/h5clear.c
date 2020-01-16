@@ -252,8 +252,8 @@ int
 main (int argc, const char *argv[])
 {
     char *fname = NULL;             /* File name */
-    hid_t fapl = -1;                /* File access property list */
-    hid_t fid = -1;                 /* File ID */
+    hid_t fapl = H5I_INVALID_HID;                /* File access property list */
+    hid_t fid = H5I_INVALID_HID;                 /* File ID */
     haddr_t image_addr;
     hsize_t image_len;
     unsigned flags = H5F_ACC_RDWR;    /* file access flags */

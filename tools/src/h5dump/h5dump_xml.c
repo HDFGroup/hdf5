@@ -610,7 +610,7 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
 
     HDsprintf(outstr, "xid_"H5_PRINTF_HADDR_FMT, objno);
 
-    return(0);
+    return 0;
 }
 
 static const char      *quote = "&quot;";
@@ -1783,9 +1783,9 @@ xml_dump_dataspace(hid_t space)
 void
 xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED *sset, int H5_ATTR_UNUSED pindex)
 {
-    hid_t               space = -1;
-    hid_t               type = -1;
-    hid_t               p_type = -1;
+    hid_t               space = H5I_INVALID_HID;
+    hid_t               type = H5I_INVALID_HID;
+    hid_t               p_type = H5I_INVALID_HID;
     hsize_t             size[64];
     hsize_t             nelmts = 1;
     int                 ndims;
@@ -1950,9 +1950,9 @@ herr_t
 xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *info,
     void H5_ATTR_UNUSED * op_data)
 {
-    hid_t             attr_id = -1;
-    hid_t             type = -1;
-    hid_t             space = -1;
+    hid_t             attr_id = H5I_INVALID_HID;
+    hid_t             type = H5I_INVALID_HID;
+    hid_t             space = H5I_INVALID_HID;
     H5S_class_t       space_type;
     hsize_t           curr_pos = 0;        /* total data element position   */
     h5tools_str_t     buffer;              /* string into which to render   */
@@ -2787,8 +2787,8 @@ static int
 xml_print_refs(hid_t did, int source)
 {
     herr_t            e;
-    hid_t             type    = -1;
-    hid_t             space   = -1;
+    hid_t             type    = H5I_INVALID_HID;
+    hid_t             space   = H5I_INVALID_HID;
     hssize_t          ssiz    = -1;
     hsize_t           i;
     size_t            tsiz;
@@ -2936,8 +2936,8 @@ static int
 xml_print_strs(hid_t did, int source)
 {
     herr_t            e;
-    hid_t             type    = -1;
-    hid_t             space   = -1;
+    hid_t             type    = H5I_INVALID_HID;
+    hid_t             space   = H5I_INVALID_HID;
     hssize_t          ssiz    = -1;
     htri_t            is_vlstr = FALSE;
     size_t            tsiz    = 0;
@@ -4121,7 +4121,7 @@ xml_print_enum(hid_t type)
     unsigned char      *value = NULL;   /*value array                    */
     unsigned            nmembs;         /*number of members              */
     hid_t               super;          /*enum base integer type         */
-    hid_t               native = -1;    /*native integer datatype        */
+    hid_t               native = H5I_INVALID_HID;    /*native integer datatype        */
     size_t              dst_size;       /*destination value type size    */
     unsigned            i;              /*miscellaneous counters         */
     size_t              j;

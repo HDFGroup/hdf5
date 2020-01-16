@@ -569,11 +569,7 @@ done:
  * Return:      Success:    The driver ID for the hdfs driver.
  *              Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
- * Changes:     Rename as appropriate for hdfs vfd.
- *              Jacob Smith 2018
+ * Programmer:  Jacob Smith, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -581,7 +577,9 @@ hid_t
 H5FD_hdfs_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
+#if HDFS_STATS
     unsigned int bin_i;
+#endif
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -589,28 +587,24 @@ H5FD_hdfs_init(void)
     HDfprintf(stdout, "H5FD_hdfs_init() called.\n");
 #endif
 
-    if (H5I_VFL != H5I_get_type(H5FD_HDFS_g)) {
-        H5FD_HDFS_g = H5FD_register(
-                &H5FD_hdfs_g,
-                sizeof(H5FD_class_t),
-                FALSE);
-    }
+    if(H5I_VFL != H5I_get_type(H5FD_HDFS_g))
+        H5FD_HDFS_g = H5FD_register( &H5FD_hdfs_g, sizeof(H5FD_class_t), FALSE);
 
 #if HDFS_STATS
     /* pre-compute statsbin boundaries
      */
-    for (bin_i = 0; bin_i < HDFS_STATS_BIN_COUNT; bin_i++) {
+    for(bin_i = 0; bin_i < HDFS_STATS_BIN_COUNT; bin_i++) {
         unsigned long long value = 0;
+
         HDFS_STATS_POW(bin_i, &value)
         hdfs_stats_boundaries[bin_i] = value;
-    }
+    } /* end for */
 #endif
 
     ret_value = H5FD_HDFS_g;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD_hdfs_init() */
 
 

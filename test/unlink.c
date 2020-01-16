@@ -441,7 +441,7 @@ check_new_move(hid_t fapl)
     TESTING("check new move function");
 
     /* Open file */
-    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
     if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
         FAIL_STACK_ERROR
 
@@ -458,7 +458,7 @@ check_new_move(hid_t fapl)
         FAIL_PUTS_ERROR("    Hard link test failed.  Link seems not to point to the expected file location.")
 
     /* Check soft links */
-    if(H5Lget_val(file, "group2/soft", linkval, sizeof linkval, H5P_DEFAULT) < 0)
+    if(H5Lget_val(file, "group2/soft", linkval, sizeof(linkval), H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
     if(HDstrcmp(linkval, "/group1/group_move"))
         FAIL_PUTS_ERROR("    Soft link test failed. Wrong link value")

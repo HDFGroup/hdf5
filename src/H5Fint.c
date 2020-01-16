@@ -3669,8 +3669,9 @@ H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
 {
     void *vol_obj_file = NULL;                  /* File object pointer */
     H5VL_loc_params_t loc_params;               /* Location parameters */
-    hid_t           file_id = H5I_INVALID_HID;  /* File ID for object */
-    hid_t           ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t       file_id = H5I_INVALID_HID;      /* File ID for object */
+    hbool_t     vol_wrapper_set = FALSE;        /* Whether the VOL object wrapping context was set up */
+    hid_t       ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -3680,7 +3681,7 @@ H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
 
     /* Retrieve VOL file from object */
     if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_FILE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &vol_obj_file) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file from object")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file from object")
 
     /* Check if the file's ID already exists */
     if(H5I_find_id(vol_obj_file, H5I_FILE, &file_id) < 0)
@@ -3688,7 +3689,12 @@ H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
 
     /* If the ID does not exist, register it with the VOL connector */
     if(H5I_INVALID_HID == file_id) {
-        if((file_id = H5VL_register(H5I_FILE, vol_obj_file, vol_obj->connector, app_ref)) < 0)
+        /* Set wrapper info in API context */
+        if(H5VL_set_vol_wrapper(vol_obj) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
+        vol_wrapper_set = TRUE;
+
+        if((file_id = H5VL_wrap_register(H5I_FILE, vol_obj_file, app_ref)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
     } /* end if */
     else {
@@ -3701,6 +3707,10 @@ H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
     ret_value = file_id;
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_file_id() */
 
