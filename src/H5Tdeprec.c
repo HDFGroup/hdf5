@@ -110,7 +110,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     void *data = NULL;                  /* VOL-managed datatype data */
     H5VL_object_t *new_obj = NULL;      /* VOL object that holds the datatype object and the VOL info */
     H5T_t *dt = NULL;                   /* High level datatype object that wraps the VOL object */
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -175,8 +175,8 @@ done:
 hid_t
 H5Topen1(hid_t loc_id, const char *name)
 {
-    void *dt = NULL;                    /* Datatype token created by VOL connector */
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    void *dt = NULL;                    /* Datatype object created by VOL connector */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t       ret_value = H5I_INVALID_HID;    /* Return value */
 

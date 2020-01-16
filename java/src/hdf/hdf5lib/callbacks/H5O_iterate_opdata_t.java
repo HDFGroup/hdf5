@@ -11,30 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+package hdf.hdf5lib.callbacks;
 
-#ifndef _H5f90i_H
-#define _H5f90i_H
+public interface H5O_iterate_opdata_t {
 
-/*
- * Include generated header.  This header defines integer types,
- * so this file only needs to define _fcd.
- */
-#include "H5f90i_gen.h"
-
-/* Define _fcd.  These are the same on every system but UNICOS.
- */
-#define _fcdtocp(desc) (desc)
-
-#if (defined (UNICOS) || defined (_UNICOS)) && !defined(__crayx1)
-
-#include <fortran.h>
-
-/*typedef char*              _fcd;*/
-
-#else
-
-typedef char              *_fcd;
-
-#endif
-
-#endif /* _H5f90i_H */
+}

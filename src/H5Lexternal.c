@@ -341,7 +341,7 @@ herr_t
 H5Lcreate_external(const char *file_name, const char *obj_name,
     hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;   /* Object token of loc_id */
+    H5VL_object_t    *vol_obj = NULL;   /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     char       *norm_obj_name = NULL;   /* Pointer to normalized current name */
     void       *ext_link_buf = NULL;    /* Buffer to contain external link */

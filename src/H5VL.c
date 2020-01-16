@@ -249,6 +249,38 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VLget_connector_id
  *
+ * Purpose:     Retrieves the VOL connector ID for a given object ID.
+ *
+ * Return:      A valid VOL connector ID. This ID will need to be closed
+ *              using H5VLclose().
+ *
+ *              H5I_INVALID_HID on error.
+ *
+ * Programmer:  Dana Robinson
+ *              June 17, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VLget_connector_id(hid_t obj_id)
+{
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE1("i", "i", obj_id);
+
+    /* Get connector ID */
+    if((ret_value = H5VL__get_connector_id(obj_id, TRUE)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLget_connector_id() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLget_connector_id_by_name
+ *
  * Purpose:     Retrieves the ID for a registered VOL connector.
  *
  * Return:      A valid VOL connector ID if a connector by that name has
@@ -264,7 +296,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VLget_connector_id(const char *name)
+H5VLget_connector_id_by_name(const char *name)
 {
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
@@ -272,12 +304,12 @@ H5VLget_connector_id(const char *name)
     H5TRACE1("i", "*s", name);
 
     /* Get connector ID with this name */
-    if((ret_value = H5VL__get_connector_id(name, TRUE)) < 0)
+    if((ret_value = H5VL__get_connector_id_by_name(name, TRUE)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLget_connector_id() */
+} /* end H5VLget_connector_id_by_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -411,7 +443,7 @@ H5VLunregister_connector(hid_t vol_id)
         HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* For the time being, we disallow unregistering the native VOL connector */
-    if(H5I_INVALID_HID == (native_id = H5VL__get_connector_id(H5VL_NATIVE_NAME, FALSE)))
+    if(H5I_INVALID_HID == (native_id = H5VL__get_connector_id_by_name(H5VL_NATIVE_NAME, FALSE)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to find the native VOL connector ID")
     if(vol_id == native_id)
         HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "unregistering the native VOL connector is not allowed")

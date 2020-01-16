@@ -746,8 +746,8 @@ static hsize_t diff_datum(
                 /* if (type_size == H5R_STD_REF_SIZE) */
                 hid_t region1_id = H5I_INVALID_HID;
                 hid_t region2_id = H5I_INVALID_HID;
-                H5R_ref_t *ref1_buf = (const H5R_ref_t *)_mem1;
-                H5R_ref_t *ref2_buf = (const H5R_ref_t *)_mem2;
+                H5R_ref_t *ref1_buf = (H5R_ref_t *)_mem1;
+                H5R_ref_t *ref2_buf = (H5R_ref_t *)_mem2;
                 H5O_type_t obj1_type = -1;   /* Object type */
                 H5O_type_t obj2_type = -1;   /* Object type */
                 H5R_type_t ref_type;   /* Reference type */
@@ -920,7 +920,7 @@ static hsize_t diff_datum(
                         /* if (obj_id < 0) - could mean that no reference was written do not throw failure */
                         obj1_id = H5Ropen_object(ref1_buf, H5P_DEFAULT, H5P_DEFAULT);
                         obj2_id = H5Ropen_object(ref2_buf, H5P_DEFAULT, H5P_DEFAULT);
-                        if((obj1_id  < 0) || (obj1_id  < 0)) {
+                        if((obj1_id  < 0) || (obj2_id  < 0)) {
                             H5TOOLS_INFO("H5Ropen_object H5R_DATASET_REGION2 failed");
                         }
                         else {
@@ -979,7 +979,7 @@ static hsize_t diff_datum(
                                 H5TOOLS_INFO("H5Ropen_attr object 2 failed");
                             }
 
-                            if((obj1_id  < 0) || (obj1_id  < 0)) {
+                            if((obj1_id < 0) || (obj2_id < 0)) {
                                 H5TOOLS_INFO("H5Ropen_attr H5R_ATTR failed");
                             }
                             else {
@@ -2394,13 +2394,21 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t
 
                 /* print differences if found */
                 if (nfound_b && opts->m_verbose) {
-                    H5O_info_t oi1, oi2;
+                    H5O_info2_t oi1, oi2;
+                    char *obj1_str = NULL, *obj2_str = NULL;
 
-                    H5Oget_info2(obj1_id, &oi1, H5O_INFO_BASIC);
-                    H5Oget_info2(obj2_id, &oi2, H5O_INFO_BASIC);
+                    H5Oget_info3(obj1_id, &oi1, H5O_INFO_BASIC);
+                    H5Oget_info3(obj2_id, &oi2, H5O_INFO_BASIC);
 
-                    parallel_print("Referenced dataset      %lu            %lu\n", (unsigned long) oi1.addr, (unsigned long) oi2.addr);
+                    /* Convert object tokens into printable output */
+                    H5Otoken_to_str(obj1_id, &oi1.token, &obj1_str);
+                    H5Otoken_to_str(obj2_id, &oi2.token, &obj2_str);
+
+                    parallel_print("Referenced dataset      %s            %s\n", obj1_str, obj2_str);
                     parallel_print( "------------------------------------------------------------\n");
+
+                    H5free_memory(obj1_str);
+                    H5free_memory(obj2_str);
 
                     parallel_print("Region blocks\n");
                     for (i = 0; i < nblocks1; i++) {

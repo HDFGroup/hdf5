@@ -843,13 +843,13 @@ herr_t flush_verification(const char * obj_pathname, const char * expected)
     /* Variables */
     hid_t oid = -1, fid = -1;
     herr_t status = 0;
-    H5O_info_t oinfo;
+    H5O_info2_t oinfo;
 
     /* Try to open the testfile and then obj_pathname within the file */
     H5E_BEGIN_TRY {
         fid = H5Fopen(FILENAME, H5F_ACC_SWMR_READ, H5P_DEFAULT);
         oid = H5Oopen(fid, obj_pathname, H5P_DEFAULT);
-        status = H5Oget_info2(oid, &oinfo, H5O_INFO_BASIC);
+        status = H5Oget_info3(oid, &oinfo, H5O_INFO_BASIC);
     } H5E_END_TRY;
 
     /* Compare to expected result */
@@ -978,9 +978,12 @@ herr_t refresh_verification(const char * obj_pathname)
 {
     /* Variables */
     hid_t oid,fid,status = 0;
-    H5O_info_t flushed_oinfo;
-    H5O_info_t refreshed_oinfo;
+    H5O_info2_t flushed_oinfo;
+    H5O_info2_t refreshed_oinfo;
+    H5O_native_info_t flushed_ninfo;
+    H5O_native_info_t refreshed_ninfo;
     int tries = 800, sleep_tries = 400;
+    int token_cmp;
     hbool_t ok = FALSE;
     
     HDremove(SIGNAL_BETWEEN_PROCESSES_2);
@@ -990,8 +993,9 @@ herr_t refresh_verification(const char * obj_pathname)
     if((oid = H5Oopen(fid, obj_pathname, H5P_DEFAULT)) < 0) PROCESS_ERROR;
 
     /* Get Object info */
-    if((status = H5Oget_info2(oid, &flushed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR)) < 0) PROCESS_ERROR;
-    
+    if((status = H5Oget_info3(oid, &flushed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS)) < 0) PROCESS_ERROR;
+    if((status = H5Oget_native_info(oid, &flushed_ninfo, H5O_NATIVE_INFO_HDR)) < 0) PROCESS_ERROR;
+
     /* Make sure there are no attributes on the object. This is just a sanity
         check to ensure we didn't erroneously flush the attribute before
         starting the verification. */
@@ -1009,18 +1013,20 @@ herr_t refresh_verification(const char * obj_pathname)
     /* Get object info again. This will NOT reflect what's on disk, only what's 
        in the cache. Thus, all values will be unchanged from above, despite 
        newer information being on disk. */
-    if((status = H5Oget_info2(oid, &refreshed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR)) < 0) PROCESS_ERROR;
+    if((status = H5Oget_info3(oid, &refreshed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS)) < 0) PROCESS_ERROR;
+    if((status = H5Oget_native_info(oid, &refreshed_ninfo, H5O_NATIVE_INFO_HDR)) < 0) PROCESS_ERROR;
 
     /* Verify that before doing a refresh, getting the object info returns stale
        information. (i.e., unchanged from above, despite new info on disk). */
-    if(flushed_oinfo.addr != refreshed_oinfo.addr) PROCESS_ERROR;
-    if(flushed_oinfo.type != refreshed_oinfo.type) PROCESS_ERROR;
-    if(flushed_oinfo.hdr.version != refreshed_oinfo.hdr.version) PROCESS_ERROR;
-    if(flushed_oinfo.hdr.flags != refreshed_oinfo.hdr.flags) PROCESS_ERROR;
-    if(flushed_oinfo.num_attrs != refreshed_oinfo.num_attrs) PROCESS_ERROR;
-    if(flushed_oinfo.hdr.nmesgs != refreshed_oinfo.hdr.nmesgs) PROCESS_ERROR;
-    if(flushed_oinfo.hdr.nchunks != refreshed_oinfo.hdr.nchunks) PROCESS_ERROR;
-    if(flushed_oinfo.hdr.space.total != refreshed_oinfo.hdr.space.total) PROCESS_ERROR;
+    if(H5Otoken_cmp(oid, &flushed_oinfo.token, &refreshed_oinfo.token, &token_cmp) < 0) PROCESS_ERROR;
+    if(token_cmp) PROCESS_ERROR;
+    if(flushed_oinfo.type               != refreshed_oinfo.type) PROCESS_ERROR;
+    if(flushed_oinfo.num_attrs          != refreshed_oinfo.num_attrs) PROCESS_ERROR;
+    if(flushed_ninfo.hdr.version        != refreshed_ninfo.hdr.version) PROCESS_ERROR;
+    if(flushed_ninfo.hdr.flags          != refreshed_ninfo.hdr.flags) PROCESS_ERROR;
+    if(flushed_ninfo.hdr.nmesgs         != refreshed_ninfo.hdr.nmesgs) PROCESS_ERROR;
+    if(flushed_ninfo.hdr.nchunks        != refreshed_ninfo.hdr.nchunks) PROCESS_ERROR;
+    if(flushed_ninfo.hdr.space.total    != refreshed_ninfo.hdr.space.total) PROCESS_ERROR;
 
     /* Refresh object */
     /* The H5*refresh function called depends on which object we are trying
@@ -1047,19 +1053,20 @@ herr_t refresh_verification(const char * obj_pathname)
         } /* end else */
 
         /* Get object info. This should now accurately reflect the refreshed object on disk. */
-        if((status = H5Oget_info2(oid, &refreshed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR)) < 0)
-            PROCESS_ERROR;
+        if((status = H5Oget_info3(oid, &refreshed_oinfo, H5O_INFO_BASIC|H5O_INFO_NUM_ATTRS)) < 0) PROCESS_ERROR;
+        if((status = H5Oget_native_info(oid, &refreshed_ninfo, H5O_NATIVE_INFO_HDR)) < 0) PROCESS_ERROR;
+        if(H5Otoken_cmp(oid, &flushed_oinfo.token, &refreshed_oinfo.token, &token_cmp) < 0) PROCESS_ERROR;
 
         /* Confirm following (first 4) attributes are the same: */
         /* Confirm following (last 4) attributes are different */
-        if( (flushed_oinfo.addr == refreshed_oinfo.addr) &&
-            (flushed_oinfo.type == refreshed_oinfo.type) &&
-            (flushed_oinfo.hdr.version == refreshed_oinfo.hdr.version) &&
-            (flushed_oinfo.hdr.flags == refreshed_oinfo.hdr.flags) &&
-            (flushed_oinfo.num_attrs != refreshed_oinfo.num_attrs) &&
-            (flushed_oinfo.hdr.nmesgs != refreshed_oinfo.hdr.nmesgs) &&
-            (flushed_oinfo.hdr.nchunks != refreshed_oinfo.hdr.nchunks) &&
-            (flushed_oinfo.hdr.space.total != refreshed_oinfo.hdr.space.total) ) {
+        if( (!token_cmp) &&
+            (flushed_oinfo.type             == refreshed_oinfo.type) &&
+            (flushed_oinfo.num_attrs        != refreshed_oinfo.num_attrs) &&
+            (flushed_ninfo.hdr.version      == refreshed_ninfo.hdr.version) &&
+            (flushed_ninfo.hdr.flags        == refreshed_ninfo.hdr.flags) &&
+            (flushed_ninfo.hdr.nmesgs       != refreshed_ninfo.hdr.nmesgs) &&
+            (flushed_ninfo.hdr.nchunks      != refreshed_ninfo.hdr.nchunks) &&
+            (flushed_ninfo.hdr.space.total  != refreshed_ninfo.hdr.space.total) ) {
             ok = TRUE;
             break;
         }
@@ -1071,11 +1078,11 @@ herr_t refresh_verification(const char * obj_pathname)
 
     if(!ok) {
         HDprintf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n",
-            (int)flushed_oinfo.num_attrs, (int)flushed_oinfo.hdr.nmesgs,
-            (int)flushed_oinfo.hdr.nchunks, (int)flushed_oinfo.hdr.space.total);
+            (int)flushed_oinfo.num_attrs, (int)flushed_ninfo.hdr.nmesgs,
+            (int)flushed_ninfo.hdr.nchunks, (int)flushed_ninfo.hdr.space.total);
         HDprintf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n",
-            (int)refreshed_oinfo.num_attrs, (int)refreshed_oinfo.hdr.nmesgs,
-            (int)refreshed_oinfo.hdr.nchunks, (int)refreshed_oinfo.hdr.space.total);
+            (int)refreshed_oinfo.num_attrs, (int)refreshed_ninfo.hdr.nmesgs,
+            (int)refreshed_ninfo.hdr.nchunks, (int)refreshed_ninfo.hdr.space.total);
         PROCESS_ERROR;
     }
 
