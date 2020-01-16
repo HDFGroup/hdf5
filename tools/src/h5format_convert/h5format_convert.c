@@ -362,7 +362,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-convert_dsets_cb(const char *path, const H5O_info_t *oi, const char *already_visited, void *_fid)
+convert_dsets_cb(const char *path, const H5O_info2_t *oi, const char *already_visited, void *_fid)
 {
     hid_t fid = *(hid_t *)_fid;
 

@@ -50,10 +50,19 @@ Java_hdf_hdf5lib_H5_H5VLis_1connector_1registered
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5VLget_connector_id
- * Signature: (Ljava/lang/String;)J
+ * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5VLget_1connector_1id
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5VLget_connector_id_by_name
+ * Signature: (Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5VLget_1connector_1id_1by_1name
   (JNIEnv *, jclass, jobject);
 
 /*
