@@ -116,8 +116,8 @@ hid_t
 H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t acpl_id)
 {
-    void    *attr = NULL;       /* attr token from VOL connector */
-    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
+    void    *attr = NULL;       /* attr object from VOL connector */
+    H5VL_object_t  *vol_obj = NULL;     /* Object of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t		ret_value = H5I_INVALID_HID;              /* Return value */
 
@@ -189,8 +189,8 @@ done:
 hid_t
 H5Aopen_name(hid_t loc_id, const char *name)
 {
-    void    *attr = NULL;       /* attr token from VOL connector */
-    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
+    void    *attr = NULL;       /* attr object from VOL connector */
+    H5VL_object_t  *vol_obj = NULL;     /* Object of loc_id */
     H5VL_loc_params_t loc_params; 
     hid_t		ret_value = H5I_INVALID_HID;              /* Return value */
 
@@ -254,8 +254,8 @@ done:
 hid_t
 H5Aopen_idx(hid_t loc_id, unsigned idx)
 {
-    void    *attr = NULL;       /* attr token from VOL connector */
-    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
+    void    *attr = NULL;       /* attr object from VOL connector */
+    H5VL_object_t  *vol_obj = NULL;     /* Object of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t		ret_value = H5I_INVALID_HID;              /* Return value */
 
@@ -318,9 +318,9 @@ done:
 int
 H5Aget_num_attrs(hid_t loc_id)
 {
-    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
+    H5VL_object_t  *vol_obj = NULL;     /* Object of loc_id */
     H5VL_loc_params_t   loc_params;
-    H5O_info_t          oinfo;
+    H5O_info2_t         oinfo;
     int                 ret_value = -1;
 
     FUNC_ENTER_API((-1))
@@ -334,7 +334,7 @@ H5Aget_num_attrs(hid_t loc_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
     /* Get the number of attributes for the object */
-    if(H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, &oinfo, H5O_INFO_ALL) < 0)
+    if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &oinfo, H5O_INFO_NUM_ATTRS) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, (-1), "unable to get attribute count for object")
 
     H5_CHECKED_ASSIGN(ret_value, int, oinfo.num_attrs, hsize_t);
@@ -384,7 +384,7 @@ done:
 herr_t
 H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
 {
-    H5VL_object_t  *vol_obj = NULL;     /* Object token of loc_id */
+    H5VL_object_t  *vol_obj = NULL;     /* Object of loc_id */
     herr_t	    ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5_ITER_ERROR)

@@ -113,8 +113,8 @@ hid_t
 H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t dcpl_id)
 {
-    void           *dset = NULL;                        /* dset token from VOL connector */
-    H5VL_object_t  *vol_obj = NULL;                     /* object token of loc_id */
+    void           *dset = NULL;                        /* dset object from VOL connector */
+    H5VL_object_t  *vol_obj = NULL;                     /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t           lcpl_id = H5P_LINK_CREATE_DEFAULT;
     hid_t           dapl_id = H5P_DEFAULT;              /* DAPL used by library */
@@ -187,8 +187,8 @@ done:
 hid_t
 H5Dopen1(hid_t loc_id, const char *name)
 {
-    void         *dset = NULL;      /* dset token from VOL connector */
-    H5VL_object_t *vol_obj = NULL;      /* object token of loc_id */
+    void         *dset = NULL;          /* dset object from VOL connector */
+    H5VL_object_t *vol_obj = NULL;      /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t        ret_value = H5I_INVALID_HID;         /* Return value */
 

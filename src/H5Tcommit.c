@@ -106,7 +106,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     void *data = NULL;                  /* VOL-managed datatype data */
     H5VL_object_t *new_obj = NULL;      /* VOL object that holds the datatype object and the VOL info */
     H5T_t *dt = NULL;                   /* High level datatype object that wraps the VOL object */
-    H5VL_object_t *vol_obj = NULL;          /* object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -273,7 +273,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     void *dt = NULL;                    /* datatype object created by VOL connector */
     H5VL_object_t *new_obj = NULL;      /* VOL object that holds the datatype object and the VOL info */
     H5T_t       *type = NULL;           /* Datatype created */
-    H5VL_object_t *vol_obj = NULL;          /* object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -567,8 +567,8 @@ done:
 hid_t
 H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 {
-    void *dt = NULL;           /* datatype token created by VOL connector */
-    H5VL_object_t *vol_obj = NULL;     /* object token of loc_id */
+    void *dt = NULL;           /* datatype object created by VOL connector */
+    H5VL_object_t *vol_obj = NULL;     /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t        ret_value = H5I_INVALID_HID;      /* Return value */
 
@@ -1095,7 +1095,7 @@ H5T_construct_datatype(H5VL_object_t *vol_obj)
 {
     ssize_t        nalloc;
     void          *buf = NULL;
-    H5T_t         *dt = NULL;       /* datatype token from VOL connector */
+    H5T_t         *dt = NULL;       /* datatype object from VOL connector */
     H5T_t         *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)

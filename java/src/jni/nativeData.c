@@ -327,7 +327,7 @@ Java_hdf_hdf5lib_HDFNativeData_byteToInt__II_3B
     }
 
     if ((start < 0) || ((int)(start + (len * (int)sizeof(jint))) > blen))
-        H5_JNI_FATAL_ERROR(ENVONLY, "byteToInt: start < 0 or len exceeded buffer length");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "byteToInt: start < 0 or len exceeded buffer length");
 
     bp = (char *)barr + start;
 
@@ -379,7 +379,7 @@ Java_hdf_hdf5lib_HDFNativeData_byteToShort__II_3B
     }
 
     if ((start < 0) || ((int)(start + (len * (int)sizeof(jshort))) > blen))
-        H5_JNI_FATAL_ERROR(ENVONLY, "byteToShort: start < 0 or len exceeded buffer length");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "byteToShort: start < 0 or len exceeded buffer length");
 
     bp = (char *)barr + start;
 
@@ -431,7 +431,7 @@ Java_hdf_hdf5lib_HDFNativeData_byteToFloat__II_3B
     }
 
     if ((start < 0) || ((int)(start + (len * (int)sizeof(jfloat))) > blen))
-        H5_JNI_FATAL_ERROR(ENVONLY, "byteToFloat: start < 0 or len exceeded buffer length");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "byteToFloat: start < 0 or len exceeded buffer length");
 
     bp = (char *)barr + start;
 
@@ -483,7 +483,7 @@ Java_hdf_hdf5lib_HDFNativeData_byteToLong__II_3B
     }
 
     if ((start < 0) || ((int)(start + (len * (int)sizeof(jlong))) > blen))
-        H5_JNI_FATAL_ERROR(ENVONLY, "byteToLong: start < 0 or len exceeded buffer length");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "byteToLong: start < 0 or len exceeded buffer length");
 
     bp = (char *)barr + start;
 
@@ -535,7 +535,7 @@ Java_hdf_hdf5lib_HDFNativeData_byteToDouble__II_3B
     }
 
     if ((start < 0) || ((int)(start + (len * (int)sizeof(jdouble))) > blen))
-        H5_JNI_FATAL_ERROR(ENVONLY, "byteToDouble: start < 0 or len exceeded buffer length");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "byteToDouble: start < 0 or len exceeded buffer length");
 
     bp = (char *)barr + start;
 
@@ -593,7 +593,7 @@ Java_hdf_hdf5lib_HDFNativeData_intToByte__II_3I
     }
 
     if ((start < 0) || (((start + len)) > ilen))
-        H5_JNI_FATAL_ERROR(ENVONLY, "intToByte: start < 0 or len exceeded buffer length");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "intToByte: start < 0 or len exceeded buffer length");
 
     ip = iarr + start;
 
@@ -655,7 +655,7 @@ Java_hdf_hdf5lib_HDFNativeData_shortToByte__II_3S
     }
 
     if ((start < 0) || (((start + len)) > ilen))
-        H5_JNI_FATAL_ERROR(ENVONLY, "shortToByte: start < 0 or len exceeded buffer length");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "shortToByte: start < 0 or len exceeded buffer length");
 
     ip = sarr + start;
 
@@ -717,7 +717,7 @@ Java_hdf_hdf5lib_HDFNativeData_floatToByte__II_3F
     }
 
     if ((start < 0) || (((start + len)) > ilen))
-        H5_JNI_FATAL_ERROR(ENVONLY, "floatToByte: start < 0 or len exceeded buffer length");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "floatToByte: start < 0 or len exceeded buffer length");
 
     ip = farr + start;
 
@@ -779,7 +779,7 @@ Java_hdf_hdf5lib_HDFNativeData_doubleToByte__II_3D
     }
 
     if ((start < 0) || (((start + len)) > ilen))
-        H5_JNI_FATAL_ERROR(ENVONLY, "doubleToByte: start < 0 or len exceeded buffer length");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "doubleToByte: start < 0 or len exceeded buffer length");
 
     ip = darr + start;
 
@@ -841,7 +841,7 @@ Java_hdf_hdf5lib_HDFNativeData_longToByte__II_3J
     }
 
     if ((start < 0) || (((start + len)) > ilen))
-        H5_JNI_FATAL_ERROR(ENVONLY, "longToByte: start < 0 or len exceeded buffer length");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "longToByte: start < 0 or len exceeded buffer length");
 
     ip = larr + start;
 

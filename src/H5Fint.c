@@ -3581,78 +3581,6 @@ done:
 } /* H5F__format_convert() */
 
 
-/*---------------------------------------------------------------------------
- * Function:    H5F__get_file
- *
- * Purpose:     Utility routine to get file struct for an object
- *
- * Returns:     SUCCESS:    A pointer to the H5F_t struct for the file
- *                          associated with the object.
- *              FAILURE:    NULL
- *
- *---------------------------------------------------------------------------
- */
-H5F_t *
-H5F__get_file(void *obj, H5I_type_t type)
-{
-    H5F_t      *ret_value  = NULL;         /* File pointer             */
-    H5O_loc_t  *oloc       = NULL;         /* Object location for ID   */
-
-    FUNC_ENTER_PACKAGE
-
-    switch(type) {
-        case H5I_FILE:
-            ret_value = (H5F_t *)obj;
-            break;
-
-        case H5I_GROUP:
-            oloc = H5G_oloc((H5G_t *)obj);
-            break;
-
-        case H5I_DATATYPE:
-            oloc = H5T_oloc((H5T_t *)obj);
-            break;
-
-        case H5I_DATASET:
-            oloc = H5D_oloc((H5D_t *)obj);
-            break;
-
-        case H5I_ATTR:
-            oloc = H5A_oloc((H5A_t *)obj);
-            break;
-
-        case H5I_MAP:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "maps not supported in native VOL connector")
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_DATASPACE:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_SPACE_SEL_ITER:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
-    } /* end switch */
-
-    /* Set return value for objects (not files) */
-    if(oloc)
-        ret_value = oloc->file;
-
-    /* Couldn't find a file struct */
-    if(!ret_value)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "object is not associated with a file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__get_file */
-
-
 /*-------------------------------------------------------------------------
  * Function:    H5F_get_file_id
  *
