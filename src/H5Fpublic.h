@@ -303,8 +303,8 @@ typedef struct H5F_vfd_swmr_config_t {
     uint32_t    max_lag;
     hbool_t     writer;
     hbool_t     flush_raw_data;
-    int32_t     md_pages_reserved;
-    int32_t     pb_expansion_threshold;
+    uint32_t    md_pages_reserved;
+    uint32_t    pb_expansion_threshold;
     char        md_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
     char        log_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
 } H5F_vfd_swmr_config_t;

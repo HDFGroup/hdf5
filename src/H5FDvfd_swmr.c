@@ -44,7 +44,7 @@ typedef struct H5FD_vfd_swmr_t {
     /* Metadata file */
     int md_fd;                                  /* File descriptor for the    */
                                                 /* metadata file              */
-    int32_t md_pages_reserved;                  /* # of pages reserved at the */
+    uint32_t md_pages_reserved;                 /* # of pages reserved at the */
                                                 /* head of the metadata file  */
     char md_file_path[H5FD_MAX_FILENAME_LEN];   /* Name of the metadate file  */
     H5FD_vfd_swmr_md_header md_header;          /* Metadata file header       */
