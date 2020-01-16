@@ -9610,9 +9610,6 @@ test_fixed_array(hid_t fapl)
 
     const hsize_t     chunk_dim2[2] = {4, 3}; /* Chunk dimensions */
 
-//    int         chunks[12][6];          /* # of chunks for dataset dimensions */
-//    int         chunks_big[125][20];    /* # of chunks for big dataset dimensions */
-
     int         **chunks            = NULL;    /* # of chunks for dataset dimensions */ 
     int         **chunks_big        = NULL;    /* # of chunks for big dataset dimensions */ 
     int         *chunks_bytes       = NULL;
@@ -9620,9 +9617,6 @@ test_fixed_array(hid_t fapl)
 
     int         chunk_row;              /* chunk row index */
     int         chunk_col;              /* chunk column index */
-
-//    hsize_t     coord[POINTS][2];           /* datdaset coordinates */
-//    hsize_t     coord_big[POINTS_BIG][2];       /* big dataset coordinates */
 
     hsize_t     **coord             = NULL;         /* datdaset coordinates */ 
     hsize_t     **coord_big         = NULL;         /* big datdaset coordinates */
@@ -13749,9 +13743,29 @@ main(void)
 #endif /* H5_HAVE_FILTER_SZIP */
     h5_cleanup(FILENAME, fapl);
 
+    HDfree(points);
+    HDfree(check);
+    HDfree(points_dbl);
+    HDfree(check_dbl);
+
+    HDfree(points_data);
+    HDfree(check_data);
+    HDfree(points_dbl_data);
+    HDfree(check_dbl_data);
+
     HDexit(EXIT_SUCCESS);
 
 error:
+    HDfree(points);
+    HDfree(check);
+    HDfree(points_dbl);
+    HDfree(check_dbl);
+
+    HDfree(points_data);
+    HDfree(check_data);
+    HDfree(points_dbl_data);
+    HDfree(check_dbl_data);
+
     nerrors = MAX(1, nerrors);
     HDprintf("***** %d DATASET TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
