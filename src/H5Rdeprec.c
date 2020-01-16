@@ -87,20 +87,20 @@
 /*-------------------------------------------------------------------------
  * Function:    H5Rget_obj_type1
  *
- * Purpose: Retrieves the type of the object that a reference points to.
+ * Purpose:     Retrieves the type of the object that a reference points to.
  *
- * Return: Object type (as defined in H5Gpublic.h) on success
- *         H5G_UNKNOWN on failure
+ * Return:      Success:    Object type (as defined in H5Gpublic.h)
+ *              Failure:    H5G_UNKNOWN
  *
  *-------------------------------------------------------------------------
  */
 H5G_obj_t
 H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     H5O_type_t obj_type;                /* Object type */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference buffer */
     H5G_obj_t ret_value;                /* Return value */
@@ -146,20 +146,21 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rdereference1
  *
- * Purpose: Given a reference to some object, open that object and return an
- * ID for that object.
+ * Purpose:     Given a reference to some object, open that object and return
+ *              an ID for that object.
  *
- * Return:  Valid ID on success/Negative on failure
+ * Return:      Success:    Valid ID
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     H5I_type_t opened_type;             /* Opened object type */
     void *opened_obj = NULL;            /* Opened object */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference buffer */
@@ -209,12 +210,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rcreate
  *
- * Purpose: Creates a particular type of reference specified with REF_TYPE,
- * in the space pointed to by REF. The LOC_ID and NAME are used to locate the
- * object pointed to and the SPACE_ID is used to choose the region pointed to
- * (for Dataset Region references).
+ * Purpose:     Creates a particular type of reference specified with REF_TYPE,
+ *              in the space pointed to by REF. The LOC_ID and NAME are used to
+ *              locate the object pointed to and the SPACE_ID is used to choose
+ *              the region pointed to (for Dataset Region references).
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:      Non-negative on success / negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -222,10 +223,10 @@ herr_t
 H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
     hid_t space_id)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
     hid_t file_id = H5I_INVALID_HID;    /* File ID for region reference */
     void *vol_obj_file = NULL;
@@ -294,7 +295,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
     if(ref_type == H5R_OBJECT1) {
         size_t buf_size = H5R_OBJ_REF_BUF_SIZE;
 
-        if((ret_value = H5R__encode_token_obj_compat((const H5VL_token_t *)&obj_token, cont_info.token_size, buf, &buf_size)) < 0)
+        if((ret_value = H5R__encode_token_obj_compat((const H5O_token_t *)&obj_token, cont_info.token_size, buf, &buf_size)) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "unable to encode object reference")
     } /* end if */
     else {
@@ -313,7 +314,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL object")
 
         /* Encode dataset region */
-        if((ret_value = H5R__encode_token_region_compat(f, (const H5VL_token_t *)&obj_token, cont_info.token_size, space, buf, &buf_size)) < 0)
+        if((ret_value = H5R__encode_token_region_compat(f, (const H5O_token_t *)&obj_token, cont_info.token_size, space, buf, &buf_size)) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "unable to encode region reference")
     } /* end else */
 
@@ -327,10 +328,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rget_obj_type2
  *
- * Purpose: Given a reference to some object, this function returns the type
- * of object pointed to.
+ * Purpose:     Given a reference to some object, this function returns the
+ *              type of object pointed to.
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:      Non-negative on success / negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -338,10 +339,10 @@ herr_t
 H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
     H5O_type_t *obj_type)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -383,10 +384,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rdereference2
  *
- * Purpose: Given a reference to some object, open that object and return an
- * ID for that object.
+ * Purpose:     Given a reference to some object, open that object and return
+ *              an ID for that object.
  *
- * Return:  Valid ID on success/Negative on failure
+ * Return:      Success:    Valid ID
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
@@ -394,10 +396,10 @@ hid_t
 H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type,
     const void *ref)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     H5I_type_t opened_type;             /* Opened object type */
     void *opened_obj = NULL;            /* Opened object */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference pointer */
@@ -451,18 +453,19 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rget_region
  *
- * Purpose: Given a reference to some object, creates a copy of the dataset
- * pointed to's dataspace and defines a selection in the copy which is the
- * region pointed to.
+ * Purpose:     Given a reference to some object, creates a copy of the dataset
+ *              pointed to's dataspace and defines a selection in the copy
+ *              which is the region pointed to.
  *
- * Return:  Valid ID on success/Negative on failure
+ * Return:      Success:    Valid ID
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     void *vol_obj_file = NULL;          /* VOL file */
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
@@ -537,10 +540,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rget_name
  *
- * Purpose: Given a reference to some object, determine a path to the object
- * referenced in the file.
+ * Purpose:     Given a reference to some object, determine a path to the
+ *              object referenced in the file.
  *
- * Return:  Non-negative length of the path on success/Negative on failure
+ * Return:      Success:    Non-negative length of the path
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
@@ -548,10 +552,10 @@ ssize_t
 H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name,
     size_t size)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference pointer */
     ssize_t ret_value = -1;  /* Return value */
 
@@ -588,3 +592,4 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name,
 done:
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rget_name() */
+

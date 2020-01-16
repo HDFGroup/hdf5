@@ -349,6 +349,18 @@ htri_to_string(htri_t v)
         return "true";
 }
 
+/* Tokens are unique and permanent identifiers that are
+ * used to reference HDF5 objects in a container. */
+
+/* The maximum size allowed for tokens */
+#define H5O_MAX_TOKEN_SIZE      (16)    /* Allows for 128-bit tokens */
+
+/* Type for object tokens */
+/* (Hoisted here, since it's used by both the H5Lpublic.h and H5Opublic.h headers) */
+typedef struct H5O_token_t {
+    uint8_t __data[H5O_MAX_TOKEN_SIZE];
+} H5O_token_t;
+
 /* Functions in H5.c */
 H5_DLL herr_t H5open(void);
 H5_DLL herr_t H5close(void);

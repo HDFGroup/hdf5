@@ -95,7 +95,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
         * close
         *-------------------------------------------------------------------------
         */
-        if(H5Pclose(pid) < 0)
+        if (H5Pclose(pid) < 0)
             H5TOOLS_GOTO_ERROR((-1), "H5Pclose failed");
         if (H5Sclose(sid) < 0)
             H5TOOLS_GOTO_ERROR((-1), "H5Sclose failed");
@@ -114,7 +114,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
         /* Initialize indexing options */
         h5trav_set_index(sort_by, sort_order);
         /* init table */
-        trav_table_init(&travt);
+        trav_table_init(fidout, &travt);
 
         /* get the list of objects in the file */
         if(h5trav_gettable(fidout, travt) < 0)
@@ -386,7 +386,7 @@ int h5repack_cmp_pl(const char *fname1, const char *fname2)
     /* Initialize indexing options */
     h5trav_set_index(sort_by, sort_order);
     /* init table */
-    trav_table_init(&trav);
+    trav_table_init(fid1, &trav);
     if(h5trav_gettable(fid1, trav) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5trav_gettable failed");
 

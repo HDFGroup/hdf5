@@ -542,7 +542,7 @@ const H5std_string GROUP1NAME("group1");
 const H5std_string GROUP2NAME("group2");
 static void test_getobjectinfo_same_file()
 {
-    H5O_info_t	oinfo1, oinfo2;         /* Object info structs */
+    H5O_info2_t	oinfo1, oinfo2;         /* Object info structs */
 
     // Output message about test being performed
     SUBTEST("Group::getObjinfo");

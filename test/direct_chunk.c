@@ -661,20 +661,20 @@ filter_bogus1(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
       size_t *buf_size, void **buf)
 {
     int *int_ptr=(int *)*buf;          /* Pointer to the data values */
-    ssize_t buf_left=(ssize_t)*buf_size;  /* Amount of data buffer left to process */
+    size_t buf_left=*buf_size;  /* Amount of data buffer left to process */
 
     if(flags & H5Z_FLAG_REVERSE) { /* read */
         /* Substract the "add on" value to all the data values */
         while(buf_left>0) {
             *int_ptr++ -= (int)ADD_ON;
-            buf_left -= (ssize_t)sizeof(int);
+            buf_left -= sizeof(int);
         } /* end while */
     } /* end if */
     else { /* write */
         /* Add the "add on" value to all the data values */
         while(buf_left>0) {
             *int_ptr++ += (int)ADD_ON;
-            buf_left -= (ssize_t)sizeof(int);
+            buf_left -= sizeof(int);
         } /* end while */
     } /* end else */
 
@@ -698,20 +698,20 @@ filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
       size_t *buf_size, void **buf)
 {
     int *int_ptr=(int *)*buf;          /* Pointer to the data values */
-    ssize_t buf_left=(ssize_t)*buf_size;  /* Amount of data buffer left to process */
+    size_t buf_left=*buf_size;  /* Amount of data buffer left to process */
 
     if(flags & H5Z_FLAG_REVERSE) { /* read */
         /* Substract the "add on" value to all the data values */
         while(buf_left>0) {
             *int_ptr++ /= (int)FACTOR;
-            buf_left -= (ssize_t)sizeof(int);
+            buf_left -= sizeof(int);
         } /* end while */
     } /* end if */
     else { /* write */
         /* Add the "add on" value to all the data values */
         while(buf_left>0) {
             *int_ptr++ *= (int)FACTOR;
-            buf_left -= (ssize_t)sizeof(int);
+            buf_left -= sizeof(int);
         } /* end while */
     } /* end else */
 

@@ -276,7 +276,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     hid_t acpl_id, hid_t aapl_id)
 {
     void           *attr = NULL;                        /* Attribute created            */
-    H5VL_object_t  *vol_obj = NULL;                         /* Object token of loc_id       */
+    H5VL_object_t  *vol_obj = NULL;                     /* Object of loc_id             */
     H5VL_loc_params_t   loc_params;
     hid_t           ret_value = H5I_INVALID_HID;        /* Return value                 */
 
@@ -360,8 +360,8 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
     hid_t lapl_id)
 {
-    void               *attr = NULL;                /* attr token from VOL connector */
-    H5VL_object_t      *vol_obj = NULL;        /* object token of loc_id */
+    void               *attr = NULL;                /* attr object from VOL connector */
+    H5VL_object_t      *vol_obj = NULL;             /* object of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
 
@@ -437,8 +437,8 @@ done:
 hid_t
 H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 {
-    void *attr = NULL;                /* attr token from VOL connector */
-    H5VL_object_t *vol_obj = NULL;        /* object token of loc_id */
+    void *attr = NULL;                    /* attr object from VOL connector */
+    H5VL_object_t *vol_obj = NULL;        /* object of loc_id */
     H5VL_loc_params_t loc_params; 
     hid_t ret_value = H5I_INVALID_HID;
 
@@ -508,8 +508,8 @@ hid_t
 H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t aapl_id, hid_t lapl_id)
 {
-    void *attr = NULL;               /* attr token from VOL connector */
-    H5VL_object_t *vol_obj = NULL;       /* object token of loc_id */
+    void *attr = NULL;                   /* attr object from VOL connector */
+    H5VL_object_t *vol_obj = NULL;       /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t ret_value = H5I_INVALID_HID;
 
@@ -587,7 +587,7 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t aapl_id, hid_t lapl_id)
 {
     void *attr = NULL;   /* Attribute opened */
-    H5VL_object_t *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;        /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t ret_value = H5I_INVALID_HID;                  /* Return value */
 
@@ -1328,7 +1328,7 @@ herr_t
 H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t *idx, H5A_operator2_t op, void *op_data)
 {
-    H5VL_object_t *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;        /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t	ret_value;      /* Return value */
 
@@ -1407,7 +1407,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data,
     hid_t lapl_id)
 {
-    H5VL_object_t *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;        /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t   ret_value = SUCCEED;      /* Return value */
 

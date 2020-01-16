@@ -465,9 +465,8 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
         return false;
     }
 
-    
     for (u = 0; u < nlinks; u++) {
-        H5L_info_t lnk_info;
+        H5L_info2_t lnk_info;
         char linkname[16];
         htri_t link_exists;
 
@@ -480,7 +479,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
         }
 
         HDmemset(&lnk_info, 0, sizeof(grp_info));
-        ret = H5Lget_info(gid, linkname, &lnk_info, H5P_DEFAULT);
+        ret = H5Lget_info2(gid, linkname, &lnk_info, H5P_DEFAULT);
 
         if (ret < 0) {
             failure_mssg = "vrfy_ns_grp_c: H5Lget_info() failed";
@@ -529,7 +528,8 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
 
             HDfree(slinkval);
         } else if (1 == (u % 3)) {
-            H5O_info_t root_oinfo;
+            H5O_info2_t root_oinfo;
+            int token_cmp = 0;
 
             if (H5L_TYPE_HARD != lnk_info.type) {
                 failure_mssg = "vrfy_ns_grp_c: H5L_TYPE_HARD != lnk_info.type";
@@ -537,13 +537,16 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
             }
 
             HDmemset(&root_oinfo, 0, sizeof(root_oinfo));
-            ret = H5Oget_info2(fid, &root_oinfo, H5O_INFO_BASIC);
+            ret = H5Oget_info3(fid, &root_oinfo, H5O_INFO_BASIC);
 
             if (ret < 0) {
                 failure_mssg = "vrfy_ns_grp_c: H5Oget_info() failed.";
                 return false;
-            } else if (root_oinfo.addr != lnk_info.u.address) {
-                failure_mssg = "vrfy_ns_grp_c: root_oinfo.addr != lnk_info.u.address";
+            } else if(H5Otoken_cmp(fid, &root_oinfo.token, &lnk_info.u.token, &token_cmp) < 0) {
+                failure_mssg = "vrfy_ns_grp_c: H5Otoken_cmp() failed.";
+                return false;
+            } else if (token_cmp) {
+                failure_mssg = "vrfy_ns_grp_c: root_oinfo.token != lnk_info.u.token";
                 return false;
             }
         } else {
@@ -809,7 +812,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
     }
 
     for (u = 0; u < nlinks; u++) {
-        H5L_info_t lnk_info;
+        H5L_info2_t lnk_info;
         char linkname[16];
         htri_t link_exists;
 
@@ -822,7 +825,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
         }
 
         HDmemset(&lnk_info, 0, sizeof(grp_info));
-        ret = H5Lget_info(gid, linkname, &lnk_info, H5P_DEFAULT);
+        ret = H5Lget_info2(gid, linkname, &lnk_info, H5P_DEFAULT);
 
         if (ret < 0) {
             failure_mssg = "vrfy_ns_grp_d: H5Lget_info() failed.";
@@ -870,7 +873,8 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             }
             HDfree(slinkval);
         } else if (1 == (u % 3)) {
-            H5O_info_t root_oinfo;
+            H5O_info2_t root_oinfo;
+            int token_cmp = 0;
 
             if (H5L_TYPE_HARD != lnk_info.type) {
                 failure_mssg = "vrfy_ns_grp_d: H5L_TYPE_HARD != lnk_info.type";
@@ -878,12 +882,15 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             }
 
             HDmemset(&root_oinfo, 0, sizeof(root_oinfo));
-            ret = H5Oget_info2(fid, &root_oinfo, H5O_INFO_BASIC);
+            ret = H5Oget_info3(fid, &root_oinfo, H5O_INFO_BASIC);
             if (ret < 0) {
                 failure_mssg = "vrfy_ns_grp_d: H5Oget_info() failed.";
                 return false;
-            } else if (root_oinfo.addr != lnk_info.u.address) {
-                failure_mssg = "vrfy_ns_grp_d: root_oinfo.addr != lnk_info.u.address";
+            } else if(H5Otoken_cmp(fid, &root_oinfo.token, &lnk_info.u.token, &token_cmp) < 0) {
+                failure_mssg = "vrfy_ns_grp_d: H5Otoken_cmp() failed.";
+                return false;
+            } else if (token_cmp) {
+                failure_mssg = "vrfy_ns_grp_d: root_oinfo.token != lnk_info.u.token";
                 return false;
             }
         } else {
@@ -1309,9 +1316,8 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         return false;
     }
 
-    
     for (u = 0; u < nlinks; u++) {
-        H5L_info_t lnk_info;
+        H5L_info2_t lnk_info;
         char linkname[32];
         htri_t link_exists;
 
@@ -1325,7 +1331,7 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         HDassert(link_exists >= 0);
 
         HDmemset(&lnk_info, 0, sizeof(grp_info));
-        ret = H5Lget_info(gid, linkname, &lnk_info, H5P_DEFAULT);
+        ret = H5Lget_info2(gid, linkname, &lnk_info, H5P_DEFAULT);
 
         if (ret < 0) {
             failure_mssg = "vrfy_os_grp_n: H5Lget_info() failed";
@@ -1372,7 +1378,8 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
             }
             HDfree(slinkval);
         } else {
-            H5O_info_t root_oinfo;
+            H5O_info2_t root_oinfo;
+            int token_cmp = 0;
 
             HDassert(1 == (u % 2));
 
@@ -1382,13 +1389,16 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
             }
 
             HDmemset(&root_oinfo, 0, sizeof(root_oinfo));
-            ret = H5Oget_info2(fid, &root_oinfo, H5O_INFO_BASIC);
+            ret = H5Oget_info3(fid, &root_oinfo, H5O_INFO_BASIC);
 
             if (ret < 0) {
                 failure_mssg = "vrfy_os_grp_n: H5Oget_info() failed.";
                 return false;
-            } else if (root_oinfo.addr != lnk_info.u.address) {
-                failure_mssg = "vrfy_os_grp_n: root_oinfo.addr != lnk_info.u.address";
+            } else if(H5Otoken_cmp(fid, &root_oinfo.token, &lnk_info.u.token, &token_cmp) < 0) {
+                failure_mssg = "vrfy_os_grp_n: H5Otoken_cmp() failed.";
+                return false;
+            } else if (token_cmp) {
+                failure_mssg = "vrfy_os_grp_n: root_oinfo.token != lnk_info.u.token";
                 return false;
             }
         }

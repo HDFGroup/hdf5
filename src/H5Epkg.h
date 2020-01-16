@@ -77,7 +77,7 @@ typedef struct {
 } H5E_auto_op_t;
 #else /* H5_NO_DEPRECATED_SYMBOLS */
 typedef struct {
-    H5E_auto_t  func2;      /* Only the new style callback function is available. */
+    H5E_auto2_t func2;      /* Only the new style callback function is available. */
 } H5E_auto_op_t;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */ 
 

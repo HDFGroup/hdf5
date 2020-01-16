@@ -1116,9 +1116,9 @@ static herr_t test_types(H5File& file)
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_getObjinfo
+ * Function:    test_getNativeObjinfo
  *
- * Purpose      Tests getObjinfo()
+ * Purpose      Tests getNativeObjinfo()
  *
  * Return       Success: 0
  *              Failure: -1
@@ -1126,7 +1126,7 @@ static herr_t test_types(H5File& file)
  * July, 2018
  *-------------------------------------------------------------------------
  */
-static herr_t test_getinfo(H5File& file)
+static herr_t test_getnativeinfo(H5File& file)
 {
     SUBTEST("Getting object information");
 
@@ -1142,18 +1142,18 @@ static herr_t test_getinfo(H5File& file)
         DataSet dataset(file.openDataSet(DSET_CHUNKED_NAME));
 
         // Get dataset header info
-        H5O_info_t oinfo;
-        HDmemset(&oinfo, 0, sizeof(oinfo));
-        dataset.getObjinfo(oinfo, H5O_INFO_HDR);
-        verify_val(oinfo.hdr.nchunks, 1, "DataSet::getObjinfo", __LINE__, __FILE__);
+        H5O_native_info_t ninfo;
+        HDmemset(&ninfo, 0, sizeof(ninfo));
+        dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
+        verify_val(ninfo.hdr.nchunks, 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
 
         // Open the dataset we created above and then close it.  This is one
         // way to open an existing dataset for accessing.
         dataset = file.openDataSet(DSET_DEFAULT_NAME);
-        HDmemset(&oinfo, 0, sizeof(oinfo));
-        dataset.getObjinfo(oinfo, H5O_INFO_ALL);
-        verify_val(oinfo.hdr.nchunks, 1, "DataSet::getObjinfo", __LINE__, __FILE__);
+        HDmemset(&ninfo, 0, sizeof(ninfo));
+        dataset.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_ALL);
+        verify_val(ninfo.hdr.nchunks, 1, "DataSet::getNativeObjinfo", __LINE__, __FILE__);
         dataset.close();
 
         PASSED();
@@ -1169,10 +1169,10 @@ static herr_t test_getinfo(H5File& file)
     // catch all other exceptions
     catch (Exception& E)
     {
-        issue_fail_msg("test_getinfo", __LINE__, __FILE__);
+        issue_fail_msg("test_getnativeinfo", __LINE__, __FILE__);
         return -1;
     }
-}   // test_getinfo
+}   // test_getnativeinfo
 
 
 /*-------------------------------------------------------------------------
@@ -1408,7 +1408,7 @@ void test_dset()
 
         nerrors += test_create(file) < 0 ? 1:0;
         nerrors += test_simple_io(file) < 0 ? 1:0;
-        nerrors += test_getinfo(file) < 0 ? 1:0;
+        nerrors += test_getnativeinfo(file) < 0 ? 1:0;
         nerrors += test_tconv(file) < 0 ? 1:0;
         nerrors += test_compression(file) < 0 ? 1:0;
         nerrors += test_nbit_compression(file) < 0 ? 1:0;

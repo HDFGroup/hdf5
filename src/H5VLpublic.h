@@ -66,7 +66,8 @@ extern "C" {
 H5_DLL hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vipl_id);
 H5_DLL hid_t H5VLregister_connector_by_value(H5VL_class_value_t connector_value, hid_t vipl_id);
 H5_DLL htri_t H5VLis_connector_registered(const char *name);
-H5_DLL hid_t H5VLget_connector_id(const char *name);
+H5_DLL hid_t H5VLget_connector_id(hid_t obj_id);
+H5_DLL hid_t H5VLget_connector_id_by_name(const char *name);
 H5_DLL ssize_t H5VLget_connector_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL herr_t H5VLclose(hid_t connector_id);
 H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);

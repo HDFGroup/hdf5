@@ -209,6 +209,14 @@ H5_DLL herr_t H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, v
 H5_DLL herr_t H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specific_t specific_type, ...);
 H5_DLL herr_t H5VL_blob_optional(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_optional_t opt_type, ...);
 
+/* Token functions */
+H5_DLL herr_t H5VL_token_cmp(const H5VL_object_t *vol_obj, const H5O_token_t *token1,
+    const H5O_token_t *token2, int *cmp_value);
+H5_DLL herr_t H5VL_token_to_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type,
+    const H5O_token_t *token, char **token_str);
+H5_DLL herr_t H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type,
+    const char *token_str, H5O_token_t *token);
+
 /* Generic functions */
 H5_DLL herr_t H5VL_optional(const H5VL_object_t *vol_obj, int op_type, hid_t dxpl_id, void **req, ...);
 

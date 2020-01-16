@@ -20,6 +20,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5G_info_t;
+import hdf.hdf5lib.structs.H5O_token_t;
 
 import org.junit.After;
 import org.junit.Before;
@@ -93,12 +94,12 @@ public class TestH5Giterate {
         String objNames[] = new String[(int) info.nlinks];
         int objTypes[] = new int[(int) info.nlinks];
         int lnkTypes[] = new int[(int) info.nlinks];
-        long objRefs[] = new long[(int) info.nlinks];
+        H5O_token_t objTokens[] = new H5O_token_t[(int) info.nlinks];
 
         int names_found = 0;
         try {
             names_found = H5.H5Gget_obj_info_all(H5fid, "/", objNames,
-                    objTypes, lnkTypes, objRefs, HDF5Constants.H5_INDEX_NAME);
+                    objTypes, lnkTypes, objTokens, HDF5Constants.H5_INDEX_NAME);
         }
         catch (Throwable err) {
             err.printStackTrace();
