@@ -132,6 +132,7 @@
 ./config/intel-flags
 ./config/linux-gnu
 ./config/linux-gnuaout
+./config/linux-gnueabihf
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/lt_vers.am
