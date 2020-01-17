@@ -514,8 +514,8 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #endif
 
 #ifdef H5_HAVE_PARALLEL
-H5TEST_DLL int h5_set_info_object(void);
-H5TEST_DLL void h5_dump_info_object(MPI_Info info);
+int h5_set_info_object(void);
+void h5_dump_info_object(MPI_Info info);
 #endif
 
 
@@ -543,4 +543,10 @@ typedef struct long_options {
 
 extern int    get_option(int argc, const char **argv, const char *opt,
                          const struct long_options *l_opt);
+
+extern int     nCols;               /*max number of columns for outputting  */
+
+/* Definitions of useful routines */
+extern void     print_version(const char *progname);
+
 #endif
