@@ -189,6 +189,12 @@ static herr_t H5VL__blob_specific(void *obj, const H5VL_class_t *cls,
     void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
 static herr_t H5VL__blob_optional(void *obj, const H5VL_class_t *cls,
     void *blob_id, H5VL_blob_optional_t opt_type, va_list arguments);
+static herr_t H5VL__token_cmp(void *obj, const H5VL_class_t *cls,
+    const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value);
+static herr_t H5VL__token_to_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls,
+    const H5O_token_t *token, char **token_str);
+static herr_t H5VL__token_from_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls,
+    const char *token_str, H5O_token_t *token);
 static herr_t H5VL__optional(void *obj, const H5VL_class_t *cls, int op_type,
     hid_t dxpl_id, void **req, va_list arguments);
 
@@ -4713,7 +4719,7 @@ H5VL_link_create(H5VL_link_create_type_t create_type, const H5VL_object_t *vol_o
     const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
     void **req, ...)
 {
-    H5VL_object_t tmp_vol_obj;          /* Temporary object token of */
+    H5VL_object_t tmp_vol_obj;          /* Temporary object */
     va_list arguments;                  /* Argument list passed from the API call */
     hbool_t arg_started = FALSE;        /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
@@ -7277,6 +7283,383 @@ H5VLblob_optional(void *obj, hid_t connector_id, void *blob_id,
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLblob_optional() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__token_cmp
+ *
+ * Purpose:     Compares two VOL connector object tokens. Sets *cmp_value
+ *              to positive if token1 is greater than token2, negative if
+ *              token2 is greater than token1 and zero if token1 and
+ *              token2 are equal.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__token_cmp(void *obj, const H5VL_class_t *cls,
+    const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(obj);
+    HDassert(cls);
+    HDassert(cmp_value);
+
+    /* Take care of cases where one or both pointers is NULL */
+    if(token1 == NULL && token2 != NULL)
+        *cmp_value = -1;
+    else if(token1 != NULL && token2 == NULL)
+        *cmp_value = 1;
+    else if(token1 == NULL && token2 == NULL)
+        *cmp_value = 0;
+    else {
+        /* Use the class's token comparison routine to compare the tokens,
+         * if there is a callback, otherwise just compare the tokens as
+         * memory buffers.
+         */
+        if(cls->token_cls.cmp) {
+            if((cls->token_cls.cmp)(obj, token1, token2, cmp_value) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare object tokens")
+        } /* end if */
+        else
+            *cmp_value = HDmemcmp(token1, token2, sizeof(H5O_token_t));
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__token_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_token_cmp
+ *
+ * Purpose:     Compares two VOL connector object tokens. Sets *cmp_value
+ *              to positive if token1 is greater than token2, negative if
+ *              token2 is greater than token1 and zero if token1 and
+ *              token2 are equal.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_token_cmp(const H5VL_object_t *vol_obj, const H5O_token_t *token1,
+    const H5O_token_t *token2, int *cmp_value)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(vol_obj);
+    HDassert(cmp_value);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    if((ret_value = H5VL__token_cmp(vol_obj->data, vol_obj->connector->cls, token1, token2, cmp_value)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "token compare failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_token_cmp() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLtoken_cmp
+ *
+ * Purpose:     Compares two VOL connector object tokens
+ *
+ * Note:        Both object tokens must be from the same VOL connector class
+ *
+ * Return:      Success:    Non-negative, with *cmp_value set to positive if
+ *                          token1 is greater than token2, negative if token2
+ *                          is greater than token1 and zero if token1 and
+ *                          token2 are equal.
+ *              Failure:    Negative
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLtoken_cmp(void *obj, hid_t connector_id, const H5O_token_t *token1,
+    const H5O_token_t *token2, int *cmp_value)
+{
+    H5VL_class_t *cls;           /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xi*k*k*Is", obj, connector_id, token1, token2, cmp_value);
+
+    /* Check args and get class pointer */
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+    if(NULL == cmp_value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid cmp_value pointer")
+
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__token_cmp(obj, cls, token1, token2, cmp_value) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "object token comparison failed")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLtoken_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__token_to_str
+ *
+ * Purpose:     Serialize a connector's object token into a string
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__token_to_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls,
+    const H5O_token_t *token, char **token_str)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(obj);
+    HDassert(cls);
+    HDassert(token);
+    HDassert(token_str);
+
+    /* Use the class's token serialization routine on the token if there is a
+     *  callback, otherwise just set the token_str to NULL.
+     */
+    if(cls->token_cls.to_str) {
+        if((cls->token_cls.to_str)(obj, obj_type, token, token_str) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "can't serialize object token")
+    } /* end if */
+    else
+        *token_str = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__token_to_str() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_token_to_str
+ *
+ * Purpose:     Serialize a connector's object token into a string
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_token_to_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type,
+    const H5O_token_t *token, char **token_str)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(vol_obj);
+    HDassert(token);
+    HDassert(token_str);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    if((ret_value = H5VL__token_to_str(vol_obj->data, obj_type, vol_obj->connector->cls, token, token_str)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "token serialization failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_token_to_str() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLtoken_to_str
+ *
+ * Purpose:     Serialize a connector's object token into a string
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLtoken_to_str(void *obj, H5I_type_t obj_type, hid_t connector_id,
+    const H5O_token_t *token, char **token_str)
+{
+    H5VL_class_t *cls;                  /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xIti*k**s", obj, obj_type, connector_id, token, token_str);
+
+    /* Check args and get class pointer */
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+    if(NULL == token)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid token pointer")
+    if(NULL == token_str)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid token_str pointer")
+
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__token_to_str(obj, obj_type, cls, token, token_str) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "object token to string failed")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLtoken_to_str() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__token_from_str
+ *
+ * Purpose:     Deserialize a string into a connector object token
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__token_from_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls,
+    const char *token_str, H5O_token_t *token)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(obj);
+    HDassert(cls);
+    HDassert(token_str);
+    HDassert(token);
+
+    /* Use the class's token deserialization routine on the token if there is a
+     *  callback, otherwise just set the token to H5_TOKEN_UNDEF.
+     */
+    if(cls->token_cls.from_str) {
+        if((cls->token_cls.from_str)(obj, obj_type, token_str, token) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token string")
+    } /* end if */
+    else
+        *token = H5O_TOKEN_UNDEF;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__token_from_str() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_token_from_str
+ *
+ * Purpose:     Deserialize a string into a connector object token
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type,
+    const char *token_str, H5O_token_t *token)
+{
+    hbool_t vol_wrapper_set = FALSE;    /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(vol_obj);
+    HDassert(token);
+    HDassert(token_str);
+
+    /* Set wrapper info in API context */
+    if(H5VL_set_vol_wrapper(vol_obj) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    if((ret_value = H5VL__token_from_str(vol_obj->data, obj_type, vol_obj->connector->cls, token_str, token)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "token deserialization failed")
+
+done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_token_from_str() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLtoken_from_str
+ *
+ * Purpose:     Deserialize a string into a connector object token
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLtoken_from_str(void *obj, H5I_type_t obj_type, hid_t connector_id,
+    const char *token_str, H5O_token_t *token)
+{
+    H5VL_class_t *cls;                  /* VOL connector's class struct */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE5("e", "*xIti*s*k", obj, obj_type, connector_id, token_str, token);
+
+    /* Check args and get class pointer */
+    if(NULL == obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object")
+    if(NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+    if(NULL == token)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid token pointer")
+    if(NULL == token_str)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid token_str pointer")
+
+    /* Call the corresponding internal VOL routine */
+    if(H5VL__token_from_str(obj, obj_type, cls, token_str, token) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "object token from string failed")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* end H5VLtoken_from_str() */
 
 
 /*-------------------------------------------------------------------------

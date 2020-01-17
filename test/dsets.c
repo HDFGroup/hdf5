@@ -147,10 +147,12 @@ const char *FILENAME[] = {
 #define DSET_COPY_DCPL_NAME_1          "copy_dcpl_1"
 #define DSET_COPY_DCPL_NAME_2          "copy_dcpl_2"
 #define COPY_DCPL_EXTFILE_NAME         "ext_file"
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 #define DSET_DEPREC_NAME               "deprecated"
 #define DSET_DEPREC_NAME_CHUNKED       "deprecated_chunked"
 #define DSET_DEPREC_NAME_COMPACT       "deprecated_compact"
 #define DSET_DEPREC_NAME_FILTER        "deprecated_filter"
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Dataset names for testing Fixed Array Indexing */
 #define DSET_FIXED_MAX     "DSET_FIXED_MAX"
@@ -176,7 +178,9 @@ const char *FILENAME[] = {
 #define H5Z_FILTER_CORRUPT           306
 #define H5Z_FILTER_CAN_APPLY_TEST    307
 #define H5Z_FILTER_SET_LOCAL_TEST    308
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 #define H5Z_FILTER_DEPREC            309
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 #define H5Z_FILTER_EXPAND            310
 #define H5Z_FILTER_CAN_APPLY_TEST2   311
 #define H5Z_FILTER_COUNT             312
@@ -7265,8 +7269,8 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i=0; i<NPOINTS; i++){
-        chunk_row = ofs / cols;
-        chunk_col = ofs % cols;
+        chunk_row = (int)(ofs / cols);
+        chunk_col = (int)(ofs % cols);
         ofs = (ofs + inc) % (rows * cols);
         HDassert(!check2[chunk_row][chunk_col]);
 
@@ -7386,14 +7390,14 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j = 0; j < nsize[1] / csize[1]; j++)
             check2[i][j] = 0;
 
-    rows = nsize[0] / csize[0];
-    cols = nsize[1] / csize[1];
+    rows = (long)(nsize[0] / csize[0]);
+    cols = (long)(nsize[1] / csize[1]);
     make_random_offset_and_increment(rows * cols, &ofs, &inc);
 
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        chunk_row = ofs / cols;
-        chunk_col = ofs % cols;
+        chunk_row = (int)(ofs / cols);
+        chunk_col = (int)(ofs % cols);
         ofs = (ofs + inc) % (rows * cols);
         HDassert(!check2[chunk_row][chunk_col]);
 
@@ -7502,8 +7506,8 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        chunk_row = ofs / cols;
-        chunk_col = ofs % cols;
+        chunk_row = (int)(ofs / cols);
+        chunk_col = (int)(ofs % cols);
         ofs = (ofs + inc) % (rows * cols);
         HDassert(!check2[chunk_row][chunk_col]);
 
@@ -9728,8 +9732,8 @@ test_fixed_array(hid_t fapl)
 
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS; i++){
-            chunk_row = ofs / cols;
-            chunk_col = ofs % cols;
+            chunk_row = (int)(ofs / cols);
+            chunk_col = (int)(ofs % cols);
             ofs = (ofs + inc) % (rows * cols);
             HDassert(!chunks[chunk_row][chunk_col]);
 
@@ -9857,8 +9861,8 @@ test_fixed_array(hid_t fapl)
 
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS_BIG; i++){
-            chunk_row = ofs / cols;
-            chunk_col = ofs % cols;
+            chunk_row = (int)(ofs / cols);
+            chunk_col = (int)(ofs % cols);
             ofs = (ofs + inc) % (rows * cols);
             HDassert(!chunks_big[chunk_row][chunk_col]);
 
@@ -10988,7 +10992,7 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     const hsize_t maxshape[1] = { H5S_UNLIMITED };
     const hsize_t chunk[1] = { 8 };
     const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-    H5O_info_t info;
+    H5O_info2_t info;
 
     TESTING("Extensible array chunk index header flush dependencies handled correctly");
 
@@ -11053,9 +11057,9 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name2(fid, DSET_EARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_EARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name2(fid, DSET_EARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_EARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -11108,7 +11112,7 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     const hsize_t maxshape[1] = { 64 };
     const hsize_t chunk[1] = { 8 };
     const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-    H5O_info_t info;
+    H5O_info2_t info;
 
     TESTING("Fixed array chunk index header flush dependencies handled correctly");
 
@@ -11173,9 +11177,9 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name2(fid, DSET_FARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_FARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name2(fid, DSET_FARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_FARRAY_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -11228,7 +11232,7 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
     const hsize_t maxshape[2] = { H5S_UNLIMITED, H5S_UNLIMITED };
     const hsize_t chunk[2] = { 8, 8 };
     const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-    H5O_info_t info;
+    H5O_info2_t info;
 
     TESTING("Version 2 B-tree chunk index header flush dependencies handled correctly");
 
@@ -11293,9 +11297,9 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
-    if(H5Oget_info_by_name2(fid, DSET_BT2_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_BT2_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if(H5Oget_info_by_name2(fid, DSET_BT2_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name3(fid, DSET_BT2_HDR_FD, &info, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
@@ -13005,13 +13009,13 @@ dls_01_read_stuff(hid_t fid)
 {
     int status = 0;
     hid_t did = 0;
-    H5O_info_t info;
+    H5O_info2_t info;
 
     did = H5Dopen2(fid, DLS_01_DATASET, H5P_DEFAULT);
     if(did <= 0)
         TEST_ERROR
 
-    status = H5Oget_info2(did, &info, H5O_INFO_BASIC );
+    status = H5Oget_info3(did, &info, H5O_INFO_BASIC);
     if(status != 0)
         TEST_ERROR
 

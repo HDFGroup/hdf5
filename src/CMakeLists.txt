@@ -386,6 +386,7 @@ IDE_GENERATED_PROPERTIES ("H5I" "${H5I_HDRS}" "${H5I_SOURCES}" )
 
 set (H5L_SOURCES
     ${HDF5_SRC_DIR}/H5L.c
+    ${HDF5_SRC_DIR}/H5Ldeprec.c
     ${HDF5_SRC_DIR}/H5Lexternal.c
 )
 set (H5L_HDRS
@@ -659,6 +660,7 @@ set (H5VL_SOURCES
     ${HDF5_SRC_DIR}/H5VLnative_link.c
     ${HDF5_SRC_DIR}/H5VLnative_introspect.c
     ${HDF5_SRC_DIR}/H5VLnative_object.c
+    ${HDF5_SRC_DIR}/H5VLnative_token.c
     ${HDF5_SRC_DIR}/H5VLpassthru.c
 )
 set (H5VL_HDRS

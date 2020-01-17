@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,11 +10,36 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package hdf.hdf5lib.callbacks;
+package hdf.hdf5lib.structs;
 
-import hdf.hdf5lib.structs.H5O_info_t;
+import java.io.Serializable;
+import java.util.Arrays;
 
-//Information class for link callback(for H5Ovisit/H5Ovisit_by_name)
-public interface H5O_iterate_cb extends Callbacks {
-    int callback(long group, String name, H5O_info_t info, H5O_iterate_t op_data);
+import hdf.hdf5lib.HDF5Constants;
+
+// Object token, which is a unique and permanent identifier, for an HDF5 object within a container.
+public class H5O_token_t implements Serializable {
+    private static final long serialVersionUID = -4754320605310155032L;
+    public byte[] data;
+
+    H5O_token_t (byte[] data) {
+        this.data = data;
+    }
+
+    public boolean isUndefined() {
+        return this.equals(HDF5Constants.H5O_TOKEN_UNDEF);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+
+        if (!(o instanceof H5O_token_t))
+            return false;
+
+        H5O_token_t token = (H5O_token_t) o;
+
+        return Arrays.equals(this.data, token.data);
+    }
 }

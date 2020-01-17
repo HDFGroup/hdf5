@@ -52,9 +52,9 @@ extern "C" herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
 }
 
 // userVisitOpWrpr interfaces between the user's function and the
-// C library function H5Ovisit2
+// C library function H5Ovisit3
 extern "C" herr_t userVisitOpWrpr(hid_t obj_id, const char *attr_name,
-    const H5O_info_t *obj_info, void *op_data)
+    const H5O_info2_t *obj_info, void *op_data)
 {
     H5std_string s_attr_name = H5std_string(attr_name);
     UserData4Visit* myData = reinterpret_cast<UserData4Visit *> (op_data);
@@ -250,13 +250,11 @@ int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_dat
 ///\param       *op_data - IN: User-defined pointer to data required by the
 ///                            application for its processing of the object
 ///\param       fields   - IN: Flags specifying the fields to be retrieved
-///                            to the callback op via the H5O_info_t argument.
+///                            to the callback op via the H5O_info2_t argument.
 ///             \li \c H5O_INFO_BASIC      fileno, addr, type, and rc fields
 ///             \li \c H5O_INFO_TIME       atime, mtime, ctime, and btime fields
 ///             \li \c H5O_INFO_NUM_ATTRS  num_attrs field
-///             \li \c H5O_INFO_HDR        hdr field
-///             \li \c H5O_INFO_META_SIZE  meta_size field
-///             \li \c H5O_INFO_ALL        H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS | H5O_INFO_HDR | H5O_INFO_META_SIZE
+///             \li \c H5O_INFO_ALL        H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS
 ///\return
 ///             \li On success:
 ///                 \li the return value of the first operator that returns a positive value
@@ -266,7 +264,7 @@ int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_dat
 ///                     wrong within the library or the operator failed
 ///\exception   H5::Exception
 ///\par Description
-///             For information, please refer to the H5Ovisit2 API in the HDF5
+///             For information, please refer to the H5Ovisit3 API in the HDF5
 ///             C Reference Manual.
 // Programmer   Binh-Minh Ribler - Feb, 2019
 //--------------------------------------------------------------------------
@@ -279,15 +277,15 @@ void H5Object::visit(H5_index_t idx_type, H5_iter_order_t order, visit_operator_
     userData->obj = this;
 
     // Call the C API passing in op wrapper and info
-    herr_t ret_value = H5Ovisit2(getId(), idx_type, order, userVisitOpWrpr, static_cast<void *>(userData), fields);
+    herr_t ret_value = H5Ovisit3(getId(), idx_type, order, userVisitOpWrpr, static_cast<void *>(userData), fields);
 
     // Release memory
     delete userData;
 
-    // Throw exception if H5Ovisit2 failed, which could be a failure in
+    // Throw exception if H5Ovisit3 failed, which could be a failure in
     // the library or in the call back operator
     if (ret_value < 0)
-        throw Exception(inMemFunc("visit"), "H5Ovisit2 failed");
+        throw Exception(inMemFunc("visit"), "H5Ovisit3 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -304,15 +302,15 @@ void H5Object::visit(H5_index_t idx_type, H5_iter_order_t order, visit_operator_
 //--------------------------------------------------------------------------
 unsigned H5Object::objVersion() const
 {
-    H5O_info_t objinfo;
+    H5O_native_info_t objinfo;
     unsigned version = 0;
 
     // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info2(getId(), &objinfo, H5O_INFO_HDR);
+    herr_t ret_value = H5Oget_native_info(getId(), &objinfo, H5O_NATIVE_INFO_HDR);
 
     // Throw exception if C API returns failure
     if (ret_value < 0)
-        throw Exception(inMemFunc("objVersion"), "H5Oget_info failed");
+        throw Exception(inMemFunc("objVersion"), "H5Oget_native_info failed");
     // Return a valid version or throw an exception for invalid value
     else
     {
@@ -332,9 +330,9 @@ unsigned H5Object::objVersion() const
 //--------------------------------------------------------------------------
 int H5Object::getNumAttrs() const
 {
-    H5O_info_t oinfo;    /* Object info */
+    H5O_info2_t oinfo;    /* Object info */
 
-    if(H5Oget_info2(getId(), &oinfo, H5O_INFO_NUM_ATTRS) < 0)
+    if(H5Oget_info3(getId(), &oinfo, H5O_INFO_NUM_ATTRS) < 0)
         throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
     else
         return(static_cast<int>(oinfo.num_attrs));

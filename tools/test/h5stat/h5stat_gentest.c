@@ -54,14 +54,14 @@
 static void
 gen_newgrat_file(const char *fname)
 {
-    hid_t fcpl          = -1;   /* File creation property */
-    hid_t fapl          = -1;   /* File access property */
-    hid_t fid           = -1;   /* File id */
-    hid_t gid           = -1;   /* Group id */
-    hid_t tid           = -1;   /* Datatype id */
-    hid_t sid           = -1;   /* Dataspace id */
-    hid_t attr_id       = -1;   /* Attribute id */
-    hid_t did           = -1;   /* Dataset id */
+    hid_t fcpl          = H5I_INVALID_HID;   /* File creation property */
+    hid_t fapl          = H5I_INVALID_HID;   /* File access property */
+    hid_t fid           = H5I_INVALID_HID;   /* File id */
+    hid_t gid           = H5I_INVALID_HID;   /* Group id */
+    hid_t tid           = H5I_INVALID_HID;   /* Datatype id */
+    hid_t sid           = H5I_INVALID_HID;   /* Dataspace id */
+    hid_t attr_id       = H5I_INVALID_HID;   /* Attribute id */
+    hid_t did           = H5I_INVALID_HID;   /* Dataset id */
     char name[30];    /* Group name */
     char attrname[30];    /* Attribute name */
     int  i;        /* Local index variable */
@@ -139,15 +139,15 @@ error:
 static void
 gen_threshold_file(const char *fname)
 {
-    hid_t fid  = -1;                /* File ID */
-    hid_t sid0 = -1;                /* Dataspace IDs */
-    hid_t sid1 = -1;                /* Dataspace IDs */
-    hid_t sid2 = -1;                /* Dataspace IDs */
-    hid_t sid3 = -1;                /* Dataspace IDs */
-    hid_t sid4 = -1;                /* Dataspace IDs */
-    hid_t did  = -1;                /* Dataset ID */
-    hid_t attr_id = -1;             /* Attribute ID */
-    hid_t gid = -1;                 /* Group ID */
+    hid_t fid  = H5I_INVALID_HID;                /* File ID */
+    hid_t sid0 = H5I_INVALID_HID;                /* Dataspace IDs */
+    hid_t sid1 = H5I_INVALID_HID;                /* Dataspace IDs */
+    hid_t sid2 = H5I_INVALID_HID;                /* Dataspace IDs */
+    hid_t sid3 = H5I_INVALID_HID;                /* Dataspace IDs */
+    hid_t sid4 = H5I_INVALID_HID;                /* Dataspace IDs */
+    hid_t did  = H5I_INVALID_HID;                /* Dataset ID */
+    hid_t attr_id = H5I_INVALID_HID;             /* Attribute ID */
+    hid_t gid = H5I_INVALID_HID;                 /* Group ID */
     hsize_t two_dims[] = {2, 5};    /* Dimension array */
     hsize_t one_dims[] = {6};       /* Dimension array */
     hsize_t zero_dims[] = {0};      /* Dimension array */
@@ -323,11 +323,11 @@ error:
 static void
 gen_idx_file(const char *fname)
 {
-    hid_t    fapl = -1;            /* file access property id */
-    hid_t    fid = -1;                /* file id */
-    hid_t    sid = -1;                /* space id */
-    hid_t    dcpl = -1;                /* dataset creation property id */
-    hid_t    did = -1, did2 = -1;        /* dataset id */
+    hid_t    fapl = H5I_INVALID_HID;            /* file access property id */
+    hid_t    fid = H5I_INVALID_HID;                /* file id */
+    hid_t    sid = H5I_INVALID_HID;                /* space id */
+    hid_t    dcpl = H5I_INVALID_HID;                /* dataset creation property id */
+    hid_t    did = -1, did2 = H5I_INVALID_HID;        /* dataset id */
     hsize_t  dims[1] = {10};     /* dataset dimension */
     hsize_t  c_dims[1] = {2};    /* chunk dimension */
     int      i;            /* local index variable */
@@ -413,12 +413,12 @@ error:
 static void
 gen_err_refcount(const char *fname)
 {
-    hid_t fid = -1;     /* File identifier */
-    hid_t sid = -1;     /* Dataspace message */
-    hid_t did = -1;     /* Dataset identifier */
-    hid_t gid = -1;     /* Group identifier */
-    hid_t aid1 = -1, aid2 = -1;     /* Attribute identifier */
-    hid_t tid = -1;     /* Datatype identifier */
+    hid_t fid = H5I_INVALID_HID;     /* File identifier */
+    hid_t sid = H5I_INVALID_HID;     /* Dataspace message */
+    hid_t did = H5I_INVALID_HID;     /* Dataset identifier */
+    hid_t gid = H5I_INVALID_HID;     /* Group identifier */
+    hid_t aid1 = -1, aid2 = H5I_INVALID_HID;     /* Attribute identifier */
+    hid_t tid = H5I_INVALID_HID;     /* Datatype identifier */
     int i, n;           /* Local index variables */
     int buf[10];        /* Data buffer */
     hsize_t dims[1];    /* Dimension size */

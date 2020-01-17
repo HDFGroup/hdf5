@@ -276,7 +276,7 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
 
     H5TOOLS_DEBUG("build_match_list start - errstat:%d", opts->err_stat);
     /* init */
-    trav_table_init(&table);
+    trav_table_init(info1->fid, &table);
     if (table == NULL) {
         H5TOOLS_INFO("Cannot create traverse table");
         H5TOOLS_GOTO_DONE_NO_RET();
@@ -314,10 +314,20 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
                 trav_table_addflags(infile, path1_lp, info1->paths[curr1].type, table);
                 /* if the two point to the same target object,
                  * mark that in table */
-                if (info1->paths[curr1].fileno == info2->paths[curr2].fileno &&
-                    info1->paths[curr1].objno == info2->paths[curr2].objno) {
-                    idx = table->nobjs - 1;
-                    table->objs[idx].is_same_trgobj = 1;
+                if(info1->paths[curr1].fileno == info2->paths[curr2].fileno) {
+                    int token_cmp;
+
+                    if(H5Otoken_cmp(info1->fid, &info1->paths[curr1].obj_token,
+                            &info2->paths[curr2].obj_token, &token_cmp) < 0) {
+                        H5TOOLS_INFO("Failed to compare object tokens");
+                        opts->err_stat = H5DIFF_ERR;
+                        H5TOOLS_GOTO_DONE_NO_RET();
+                    }
+
+                    if(!token_cmp) {
+                        idx = table->nobjs - 1;
+                        table->objs[idx].is_same_trgobj = 1;
+                    }
                 }
             }
             curr1++;
@@ -382,7 +392,7 @@ done:
  * Purpose:  Call back function from h5trav_visit().
  *------------------------------------------------------------------------*/
 static herr_t
-trav_grp_objs(const char *path, const H5O_info_t *oinfo,
+trav_grp_objs(const char *path, const H5O_info2_t *oinfo,
         const char *already_visited, void *udata)
 {
     trav_info_visit_obj(path, oinfo, already_visited, udata);
@@ -397,7 +407,7 @@ trav_grp_objs(const char *path, const H5O_info_t *oinfo,
  *           Track and extra checkings while visiting all symbolic-links.
  *------------------------------------------------------------------------*/
 static herr_t
-trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
+trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata)
 {
     trav_info_t   *tinfo = (trav_info_t *)udata;
     diff_opt_t    *opts = (diff_opt_t *)tinfo->opts;
@@ -510,8 +520,8 @@ h5diff(const char *fname1,
                const char *objname2,
                diff_opt_t *opts)
 {
-    hid_t         file1_id = -1;
-    hid_t         file2_id = -1;
+    hid_t         file1_id = H5I_INVALID_HID;
+    hid_t         file2_id = H5I_INVALID_HID;
     char          filenames[2][MAX_FILENAME];
     hsize_t       nfound = 0;
     int           l_ret1 = -1;
@@ -523,7 +533,7 @@ h5diff(const char *fname1,
     h5trav_type_t obj1type = H5TRAV_TYPE_GROUP;
     h5trav_type_t obj2type = H5TRAV_TYPE_GROUP;
     /* for single object */
-    H5O_info_t    oinfo1, oinfo2; /* object info */
+    H5O_info2_t   oinfo1, oinfo2; /* object info */
     trav_info_t  *info1_obj = NULL;
     trav_info_t  *info2_obj = NULL;
     /* for group object */
@@ -533,8 +543,8 @@ h5diff(const char *fname1,
     trav_info_t  *info1_lp = NULL;
     trav_info_t  *info2_lp = NULL;
     /* link info from specified object */
-    H5L_info_t    src_linfo1;
-    H5L_info_t    src_linfo2;
+    H5L_info2_t   src_linfo1;
+    H5L_info2_t   src_linfo2;
     /* link info from member object */
     h5tool_link_info_t trg_linfo1;
     h5tool_link_info_t trg_linfo2;
@@ -635,7 +645,7 @@ h5diff(const char *fname1,
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Error: Object could not be found");
             }
             /* get info from link */
-            if(H5Lget_info(file1_id, obj1fullname, &src_linfo1, H5P_DEFAULT) < 0) {
+            if(H5Lget_info2(file1_id, obj1fullname, &src_linfo1, H5P_DEFAULT) < 0) {
                 parallel_print("Unable to get link info from <%s>\n", obj1fullname);
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Lget_info failed");
             }
@@ -651,14 +661,14 @@ h5diff(const char *fname1,
                 /* optional data pass */
                 info1_obj->opts = (diff_opt_t*)opts;
 
-                if(H5Oget_info_by_name2(file1_id, obj1fullname, &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
+                if(H5Oget_info_by_name3(file1_id, obj1fullname, &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
                     parallel_print("Error: Could not get file contents\n");
                     H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Error: Could not get file contents");
                 }
                 obj1type = (h5trav_type_t)oinfo1.type;
                 trav_info_add(info1_obj, obj1fullname, obj1type);
                 idx = info1_obj->nused - 1;
-                info1_obj->paths[idx].objno = oinfo1.addr;
+                HDmemcpy(&info1_obj->paths[idx].obj_token, &oinfo1.token, sizeof(H5O_token_t));
                 info1_obj->paths[idx].fileno = oinfo1.fileno;
             }
             else if (src_linfo1.type == H5L_TYPE_SOFT) {
@@ -685,7 +695,7 @@ h5diff(const char *fname1,
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Error: Object could not be found");
             }
             /* get info from link */
-            if(H5Lget_info(file2_id, obj2fullname, &src_linfo2, H5P_DEFAULT) < 0) {
+            if(H5Lget_info2(file2_id, obj2fullname, &src_linfo2, H5P_DEFAULT) < 0) {
                 parallel_print("Unable to get link info from <%s>\n", obj2fullname);
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Lget_info failed");
             }
@@ -701,14 +711,14 @@ h5diff(const char *fname1,
                 /* optional data pass */
                 info2_obj->opts = (diff_opt_t*)opts;
 
-                if(H5Oget_info_by_name2(file2_id, obj2fullname, &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
+                if(H5Oget_info_by_name3(file2_id, obj2fullname, &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
                     parallel_print("Error: Could not get file contents\n");
                     H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Error: Could not get file contents");
                 }
                 obj2type = (h5trav_type_t)oinfo2.type;
                 trav_info_add(info2_obj, obj2fullname, obj2type);
                 idx = info2_obj->nused - 1;
-                info2_obj->paths[idx].objno = oinfo2.addr;
+                HDmemcpy(&info2_obj->paths[idx].obj_token, &oinfo2.token, sizeof(H5O_token_t));
                 info2_obj->paths[idx].fileno = oinfo2.fileno;
             }
             else if (src_linfo2.type == H5L_TYPE_SOFT) {
@@ -778,8 +788,8 @@ h5diff(const char *fname1,
                 size_t idx = info1_lp->nused - 1;
 
                 H5TOOLS_DEBUG("h5diff ... ... ... info1_obj not null");
+                HDmemcpy(&info1_lp->paths[idx].obj_token, &trg_linfo1.obj_token, sizeof(H5O_token_t));
                 info1_lp->paths[idx].type = (h5trav_type_t)trg_linfo1.trg_type;
-                info1_lp->paths[idx].objno = trg_linfo1.objno;
                 info1_lp->paths[idx].fileno = trg_linfo1.fileno;
             }
             H5TOOLS_DEBUG("h5diff check symbolic link (object1) finished");
@@ -818,8 +828,8 @@ h5diff(const char *fname1,
                 size_t idx = info2_lp->nused - 1;
 
                 H5TOOLS_DEBUG("h5diff ... ... ... info2_obj not null");
+                HDmemcpy(&info2_lp->paths[idx].obj_token, &trg_linfo2.obj_token, sizeof(H5O_token_t));
                 info2_lp->paths[idx].type = (h5trav_type_t)trg_linfo2.trg_type;
-                info2_lp->paths[idx].objno = trg_linfo2.objno;
                 info2_lp->paths[idx].fileno = trg_linfo2.fileno;
             }
             H5TOOLS_DEBUG("h5diff check symbolic link (object1) finished");

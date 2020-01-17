@@ -2219,7 +2219,7 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
-    H5VL_object_t *vol_obj;     /* Object token of loc_id */
+    H5VL_object_t *vol_obj;     /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     ssize_t       ret_value;    /* Return value */
 
@@ -2269,7 +2269,7 @@ H5Iget_file_id(hid_t obj_id)
 
     /* Call internal function */
     if(H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || H5I_DATASET == type || H5I_ATTR == type) {
-        H5VL_object_t *vol_obj;         /* Object token of obj_id */
+        H5VL_object_t *vol_obj;         /* Object of obj_id */
 
         /* Get the VOL object */
         if(NULL == (vol_obj = H5VL_vol_object(obj_id)))

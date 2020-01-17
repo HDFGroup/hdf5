@@ -63,27 +63,33 @@ MODULE visit_cb
 
 CONTAINS
 
-! Compares the field values of a C h5O_info_t and a Fortran H5O_info_t. 
+! Compares the field values of a C H5O_info_t and a Fortran H5O_info_t.
 
-  INTEGER FUNCTION compare_h5o_info_t( oinfo_f, oinfo_c, field, full_f_field ) RESULT(status)
-    
+  INTEGER FUNCTION compare_h5o_info_t( loc_id, oinfo_f, oinfo_c, field, full_f_field ) RESULT(status)
+
     IMPLICIT NONE
+    INTEGER(HID_T)     :: loc_id
     TYPE(h5o_info_t)   :: oinfo_f
     TYPE(c_h5o_info_t) :: oinfo_c
+    TYPE(H5O_TOKEN_T_F) :: token_c
     INTEGER :: field
-    LOGICAL :: full_f_field ! All the fields of Fortran H5O_info_t where filled 
+    LOGICAL :: full_f_field ! All the fields of Fortran H5O_info_t where filled
 !   local
     INTEGER(C_INT), DIMENSION(1:8) :: atime, btime, ctime, mtime
+    INTEGER :: cmp_value
     INTEGER :: i
+    INTEGER :: ierr
 
     status = 0
-    
+
     IF( (field .EQ. H5O_INFO_BASIC_F).OR.(field .EQ. H5O_INFO_ALL_F) )THEN
        IF( (oinfo_f%fileno.LE.0) .OR. (oinfo_c%fileno .NE. oinfo_f%fileno) )THEN
           status = -1
           RETURN
        ENDIF
-       IF( (oinfo_f%addr.LE.0) .OR. (oinfo_c%addr .NE. oinfo_f%addr) )THEN
+       token_c%token = oinfo_c%token%token
+       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr);
+       IF( (ierr .EQ. -1) .OR. (cmp_value .NE. 0) ) THEN
           status = -1
           RETURN
        ENDIF
@@ -131,7 +137,12 @@ CONTAINS
        ! check other field values are not filled (using only a small subset to check)
        status = 0
        IF( oinfo_c%fileno .NE. oinfo_f%fileno) status = status + 1
-       IF( oinfo_c%addr .NE. oinfo_f%addr) status = status + 1
+       token_c%token = oinfo_c%token%token
+       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr);
+       IF( (ierr .EQ. -1) .OR. (cmp_value .NE. 0) ) THEN
+          status = -1
+          RETURN
+       ENDIF
        IF( oinfo_c%type .NE. oinfo_f%type) status = status + 1
        IF( oinfo_c%rc .NE. oinfo_f%rc) status = status + 1
        IF(status.EQ.0) THEN ! There was no difference found, which is only possible if the field was filled.
@@ -150,93 +161,12 @@ CONTAINS
        ! check other field values are not filled (using only a small subset to check)
        status = 0
        IF( oinfo_c%fileno .NE. oinfo_f%fileno) status = status + 1
-       IF( oinfo_c%addr .NE. oinfo_f%addr) status = status + 1
-       IF( oinfo_c%type .NE. oinfo_f%type) status = status + 1
-       IF( oinfo_c%rc .NE. oinfo_f%rc) status = status + 1
-       IF(status.EQ.0) THEN ! There was no difference found, which is only possible if the field was filled.
+       token_c%token = oinfo_c%token%token
+       CALL H5Otoken_cmp_f(loc_id, oinfo_f%token, token_c, cmp_value, ierr);
+       IF( (ierr .EQ. -1) .OR. (cmp_value .NE. 0) ) THEN
           status = -1
           RETURN
        ENDIF
-       status = 0 ! reset
-       
-    ENDIF
-
-    IF((field).EQ.H5O_INFO_HDR_F.OR.(field .EQ. H5O_INFO_ALL_F))THEN
-       IF( (oinfo_f%hdr%version.LT.0) .OR. (oinfo_c%hdr%version .NE. oinfo_f%hdr%version) )THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF( (oinfo_f%hdr%nmesgs.LT.0) .OR. (oinfo_c%hdr%nmesgs .NE. oinfo_f%hdr%nmesgs) )THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF( (oinfo_f%hdr%nchunks.LT.0) .OR. (oinfo_c%hdr%nchunks .NE. oinfo_f%hdr%nchunks) )THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF( (oinfo_f%hdr%flags.LT.0) .OR. (oinfo_c%hdr%flags .NE. oinfo_f%hdr%flags) )THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF( (oinfo_f%hdr%space%total.LT.0) .OR. (oinfo_c%hdr%space%total .NE. oinfo_f%hdr%space%total) )THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF( (oinfo_f%hdr%space%meta.LT.0) .OR. (oinfo_c%hdr%space%meta .NE. oinfo_f%hdr%space%meta) )THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF( (oinfo_f%hdr%space%mesg.LT.0) .OR. (oinfo_c%hdr%space%mesg .NE. oinfo_f%hdr%space%mesg) )THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF( (oinfo_f%hdr%space%free.LT.0) .OR. (oinfo_c%hdr%space%free .NE. oinfo_f%hdr%space%free) )THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF( (oinfo_f%hdr%mesg%present.LT.0) .OR. (oinfo_c%hdr%mesg%present .NE. oinfo_f%hdr%mesg%present) )THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF( (oinfo_f%hdr%mesg%shared.LT.0) .OR. (oinfo_c%hdr%mesg%shared .NE. oinfo_f%hdr%mesg%shared) )THEN
-          status = -1
-          RETURN
-       ENDIF
-    ELSE IF( field .EQ. H5O_INFO_HDR_F.AND.full_f_field)THEN
-       ! check other field values are not filled (using only a small subset to check)
-       status = 0
-       IF( oinfo_c%fileno .NE. oinfo_f%fileno) status = status + 1
-       IF( oinfo_c%addr .NE. oinfo_f%addr) status = status + 1
-       IF( oinfo_c%type .NE. oinfo_f%type) status = status + 1
-       IF( oinfo_c%rc .NE. oinfo_f%rc) status = status + 1
-       IF(status.EQ.0) THEN ! There was no difference found, which is only possible if the field was filled.
-          status = -1
-          RETURN
-       ENDIF
-       status = 0 ! reset
-    ENDIF
-    IF((field).EQ.H5O_INFO_META_SIZE_F.OR.(field .EQ. H5O_INFO_ALL_F))THEN
-       IF((oinfo_f%meta_size%obj%index_size.LT.0).OR.(oinfo_c%meta_size%obj%index_size.NE.oinfo_f%meta_size%obj%index_size))THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF((oinfo_f%meta_size%obj%heap_size.LT.0).OR.(oinfo_c%meta_size%obj%heap_size.NE.oinfo_f%meta_size%obj%heap_size))THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF((oinfo_f%meta_size%attr%index_size.LT.0).OR.(oinfo_c%meta_size%attr%index_size.NE.oinfo_f%meta_size%attr%index_size))THEN
-          status = -1
-          RETURN
-       ENDIF
-       IF((oinfo_f%meta_size%attr%heap_size.LT.0).OR.(oinfo_c%meta_size%attr%heap_size.NE.oinfo_f%meta_size%attr%heap_size))THEN
-          status = -1
-          RETURN
-       ENDIF
-    ELSE IF( field .EQ. H5O_INFO_META_SIZE_F.AND.full_f_field)THEN
-       ! check other field values are not filled (using only a small subset to check)
-       status = 0
-       IF( oinfo_c%fileno .NE. oinfo_f%fileno) status = status + 1
-       IF( oinfo_c%addr .NE. oinfo_f%addr) status = status + 1
        IF( oinfo_c%type .NE. oinfo_f%type) status = status + 1
        IF( oinfo_c%rc .NE. oinfo_f%rc) status = status + 1
        IF(status.EQ.0) THEN ! There was no difference found, which is only possible if the field was filled.
@@ -295,13 +225,13 @@ CONTAINS
     IF(op_data%field .EQ. H5O_INFO_ALL_F)THEN
 
        idx = op_data%idx
-     
+
        DO i = 1, len
           IF(op_data%info(idx)%path(i)(1:1) .NE. name(i)(1:1))THEN
              visit_obj_cb = -1
              RETURN
           ENDIF
-          
+
           IF(op_data%info(idx)%type_obj .NE. oinfo_c%type)THEN
              visit_obj_cb = -1
              RETURN
@@ -310,14 +240,14 @@ CONTAINS
 
     ENDIF
 
-    ! Check H5Oget_info_by_name_f; if partial field values where filled correctly
+    ! Check H5Oget_info_by_name_f; if partial field values were filled correctly
     CALL H5Oget_info_by_name_f(group_id, name2, oinfo_f, ierr);
-    visit_obj_cb =  compare_h5o_info_t( oinfo_f, oinfo_c, op_data%field, .TRUE. )
+    visit_obj_cb =  compare_h5o_info_t( group_id, oinfo_f, oinfo_c, op_data%field, .TRUE. )
     IF(visit_obj_cb.EQ.-1) RETURN
 
     ! Check H5Oget_info_by_name_f, only check field values
     CALL H5Oget_info_by_name_f(group_id, name2, oinfo_f, ierr, fields = op_data%field);
-    visit_obj_cb =  compare_h5o_info_t( oinfo_f, oinfo_c, op_data%field, .FALSE. )
+    visit_obj_cb =  compare_h5o_info_t(group_id, oinfo_f, oinfo_c, op_data%field, .FALSE. )
     IF(visit_obj_cb.EQ.-1) RETURN
 
 
@@ -325,12 +255,12 @@ CONTAINS
 
        ! Check H5Oget_info_f, only check field values
        CALL H5Oget_info_f(group_id, oinfo_f, ierr, fields = op_data%field);
-       visit_obj_cb =  compare_h5o_info_t( oinfo_f, oinfo_c, op_data%field, .FALSE.  )
+       visit_obj_cb =  compare_h5o_info_t(group_id, oinfo_f, oinfo_c, op_data%field, .FALSE.  )
        IF(visit_obj_cb.EQ.-1) RETURN
 
        ! Check H5Oget_info_f; if partial field values where filled correctly
        CALL H5Oget_info_f(group_id, oinfo_f, ierr);
-       visit_obj_cb =  compare_h5o_info_t( oinfo_f, oinfo_c, op_data%field, .TRUE.  )
+       visit_obj_cb =  compare_h5o_info_t(group_id, oinfo_f, oinfo_c, op_data%field, .TRUE.  )
        IF(visit_obj_cb.EQ.-1) RETURN
 
     ENDIF
@@ -583,20 +513,6 @@ SUBROUTINE test_obj_visit(total_error)
   IF(ret_val.LT.0)THEN
      CALL check("h5ovisit_f", -1, total_error)
   ENDIF
-  udata%field = H5O_INFO_HDR_F
-  udata%idx = 1
-  CALL h5ovisit_f(fid, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
-  CALL check("h5ovisit_f", error, total_error)
-  IF(ret_val.LT.0)THEN
-     CALL check("h5ovisit_f", -1, total_error)
-  ENDIF
-  udata%field = H5O_INFO_META_SIZE_F
-  udata%idx = 1
-  CALL h5ovisit_f(fid, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
-  CALL check("h5ovisit_f", error, total_error)
-  IF(ret_val.LT.0)THEN
-     CALL check("h5ovisit_f", -1, total_error)
-  ENDIF
 
   ! Test h5ovisit_by_name_f
   object_name = "/"
@@ -630,21 +546,7 @@ SUBROUTINE test_obj_visit(total_error)
   IF(ret_val.LT.0)THEN
      CALL check("h5ovisit_by_name_f", -1, total_error)
   ENDIF
-  udata%idx = 1
-  udata%field = H5O_INFO_HDR_F
-  CALL h5ovisit_by_name_f(fid, object_name, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
-  CALL check("h5ovisit_by_name_f", error, total_error)
-  IF(ret_val.LT.0)THEN
-     CALL check("h5ovisit_by_name_f", -1, total_error)
-  ENDIF
-  udata%idx = 1
-  udata%field = H5O_INFO_META_SIZE_F
-  CALL h5ovisit_by_name_f(fid, object_name, H5_INDEX_NAME_F, H5_ITER_INC_F, fun_ptr, f_ptr, ret_val, error, fields=udata%field)
-  CALL check("h5ovisit_by_name_f", error, total_error)
-  IF(ret_val.LT.0)THEN
-     CALL check("h5ovisit_by_name_f", -1, total_error)
-  ENDIF
-  
+
   CALL h5fclose_f(fid, error)
   CALL check("h5fclose_f",error, total_error)
 

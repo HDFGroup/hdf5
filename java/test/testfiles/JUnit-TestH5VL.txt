@@ -1,4 +1,5 @@
 JUnit version 4.11
+.testH5VLget_connector_id_by_name
 .testH5VLget_connector_id
 .testH5VLnative_init
 .testH5VLget_connector_name
@@ -7,5 +8,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (5 tests)
+OK (6 tests)
 

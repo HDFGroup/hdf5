@@ -504,8 +504,8 @@ h5tools_print_region_data_blocks(hid_t region_id,
     unsigned     jndx;
     hbool_t      past_catch = FALSE;
     size_t       type_size;
-    hid_t        mem_space = -1;
-    hid_t        sid1 = -1;
+    hid_t        mem_space = H5I_INVALID_HID;
+    hid_t        sid1 = H5I_INVALID_HID;
     h5tools_context_t ctx;
     void        *region_buf = NULL;
     int          ret_value = 0;
@@ -2062,10 +2062,10 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         h5tools_context_t *ctx, hid_t type, int object_search)
 {
     char        *mname;
-    hid_t        mtype = -1;
-    hid_t        str_type = -1;
-    hid_t        super = -1;
-    hid_t        tmp_type = -1;
+    hid_t        mtype = H5I_INVALID_HID;
+    hid_t        str_type = H5I_INVALID_HID;
+    hid_t        super = H5I_INVALID_HID;
+    hid_t        tmp_type = H5I_INVALID_HID;
     int          snmembers;
     int          sndims;
     unsigned     nmembers;
@@ -2088,15 +2088,20 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
     if((type_class = H5Tget_class(type)) < 0)
         H5TOOLS_THROW((-1), "H5Tget_class failed");
     if (object_search && H5Tcommitted(type) > 0) {
-        H5O_info_t  oinfo;
-        obj_t      *obj = NULL;    /* Found object */
+        H5O_info2_t  oinfo;
+        obj_t       *obj = NULL;    /* Found object */
 
-        H5Oget_info2(type, &oinfo, H5O_INFO_BASIC);
-        obj = search_obj(h5dump_type_table, oinfo.addr);
+        H5Oget_info3(type, &oinfo, H5O_INFO_BASIC);
+        obj = search_obj(h5dump_type_table, &oinfo.token);
 
         if(obj) {
-            if(!obj->recorded)
-                h5tools_str_append(buffer,"\"/#"H5_PRINTF_HADDR_FMT"\"", obj->objno);
+            if(!obj->recorded) {
+                char *obj_addr_str = NULL;
+
+                H5Otoken_to_str(type, &oinfo.token, &obj_addr_str);
+                h5tools_str_append(buffer,"\"/#%s\"", obj_addr_str);
+                H5free_memory(obj_addr_str);
+            }
             else
                 h5tools_str_append(buffer, "\"%s\"", obj->objname);
         }
@@ -2629,8 +2634,6 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         break;
     }
 
-done:
-
 CATCH
     H5TOOLS_ENDDEBUG("exit");
     return ret_value;
@@ -2734,8 +2737,8 @@ h5tools_print_enum(FILE *stream, h5tools_str_t *buffer, const h5tool_format_t *i
     unsigned       i;
     unsigned       nmembs = 0;   /*number of members              */
     int            snmembs;
-    hid_t          super = -1;   /*enum base integer type         */
-    hid_t          native = -1;  /*native integer datatype        */
+    hid_t          super = H5I_INVALID_HID;   /*enum base integer type         */
+    hid_t          native = H5I_INVALID_HID;  /*native integer datatype        */
     H5T_sign_t     sign_type;    /*sign of value type             */
     size_t         type_size;    /*value type size                */
     size_t         dst_size;     /*destination value type size    */
@@ -3074,7 +3077,7 @@ h5tools_print_fill_value(h5tools_str_t *buffer/*in,out*/, const h5tool_format_t 
         h5tools_context_t *ctx/*in,out*/, hid_t dcpl, hid_t type_id, hid_t obj_id)
 {
     size_t            size;
-    hid_t             n_type = -1;
+    hid_t             n_type = H5I_INVALID_HID;
     void             *buf = NULL;
 
     n_type = H5Tget_native_type(type_id, H5T_DIR_DEFAULT);
@@ -3776,8 +3779,8 @@ h5tools_dump_attribute(FILE *stream, const h5tool_format_t *info, h5tools_contex
         error_msg("unable to open attribute \"%s\"\n", attr_name);
     }
     else {
-        hid_t type = -1;
-        hid_t space = -1;
+        hid_t type = H5I_INVALID_HID;
+        hid_t space = H5I_INVALID_HID;
 
         ctx->indent_level++;
 
@@ -4052,7 +4055,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             init_acc_pos(&datactx, total_size);
         datactx.need_prefix = TRUE;
 
-        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), ndims))) {
+        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             if(obj_data) {
                 if(H5Dread(obj_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf) < 0) {
                     HDfree(ref_buf);
@@ -4067,7 +4070,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     H5TOOLS_GOTO_DONE_NO_RET();
                 }
             }
-            for(i = 0; i < ndims; i++, datactx.cur_elmt++, elmt_counter++) {
+            for(i = 0; i < (size_t)ndims; i++, datactx.cur_elmt++, elmt_counter++) {
                 H5O_type_t obj_type = -1;   /* Object type */
                 H5R_type_t ref_type;   /* Reference type */
 
