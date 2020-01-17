@@ -226,7 +226,7 @@ Java_hdf_hdf5lib_H5_H5PLget
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (aName = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5PLget: failed to allocate plugin name buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5PLget: failed to allocate plugin name buffer");
 
     if ((H5PLget((unsigned) index, aName, (size_t)buf_size + 1)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);

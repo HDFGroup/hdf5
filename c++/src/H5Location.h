@@ -118,8 +118,8 @@ class H5_DLLCPP H5Location : public IdComponent {
         DataSet openDataSet(const char* name, const DSetAccPropList& dapl = DSetAccPropList::DEFAULT) const;
         DataSet openDataSet(const H5std_string& name, const DSetAccPropList& dapl = DSetAccPropList::DEFAULT) const;
 
-        H5L_info_t getLinkInfo(const char* link_name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-        H5L_info_t getLinkInfo(const H5std_string& link_name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        H5L_info2_t getLinkInfo(const char* link_name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        H5L_info2_t getLinkInfo(const H5std_string& link_name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
 
         // Returns the value of a symbolic link.
         H5std_string getLinkval(const char* link_name, size_t size=0) const;
@@ -147,24 +147,45 @@ class H5_DLLCPP H5Location : public IdComponent {
         unsigned childObjVersion(const H5std_string& objname) const;
 
         // Retrieves information about an HDF5 object.
-        void getObjinfo(H5O_info_t& objinfo, unsigned fields = H5O_INFO_BASIC) const;
+        void getObjinfo(H5O_info2_t& objinfo, unsigned fields = H5O_INFO_BASIC) const;
 
         // Retrieves information about an HDF5 object, given its name.
-        void getObjinfo(const char* name, H5O_info_t& objinfo,
+        void getObjinfo(const char* name, H5O_info2_t& objinfo,
                 unsigned fields = H5O_INFO_BASIC,
                 const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
-        void getObjinfo(const H5std_string& name, H5O_info_t& objinfo,
+        void getObjinfo(const H5std_string& name, H5O_info2_t& objinfo,
                 unsigned fields = H5O_INFO_BASIC,
                 const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
 
         // Retrieves information about an HDF5 object, given its index.
         void getObjinfo(const char* grp_name, H5_index_t idx_type,
-                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
+                H5_iter_order_t order, hsize_t idx, H5O_info2_t& objinfo,
                 unsigned fields = H5O_INFO_BASIC,
                 const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
         void getObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
-                H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo,
+                H5_iter_order_t order, hsize_t idx, H5O_info2_t& objinfo,
                 unsigned fields = H5O_INFO_BASIC,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Retrieves native native information about an HDF5 object.
+        void getNativeObjinfo(H5O_native_info_t& objinfo, unsigned fields = H5O_NATIVE_INFO_HDR) const;
+
+        // Retrieves native information about an HDF5 object, given its name.
+        void getNativeObjinfo(const char* name, H5O_native_info_t& objinfo,
+                unsigned fields = H5O_NATIVE_INFO_HDR,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getNativeObjinfo(const H5std_string& name, H5O_native_info_t& objinfo,
+                unsigned fields = H5O_NATIVE_INFO_HDR,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+
+        // Retrieves native information about an HDF5 object, given its index.
+        void getNativeObjinfo(const char* grp_name, H5_index_t idx_type,
+                H5_iter_order_t order, hsize_t idx, H5O_native_info_t& objinfo,
+                unsigned fields = H5O_NATIVE_INFO_HDR,
+                const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+        void getNativeObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
+                H5_iter_order_t order, hsize_t idx, H5O_native_info_t& objinfo,
+                unsigned fields = H5O_NATIVE_INFO_HDR,
                 const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS

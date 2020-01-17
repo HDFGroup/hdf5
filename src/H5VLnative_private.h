@@ -18,7 +18,8 @@
 #define _H5VLnative_private_H
 
 /* Private headers needed by this file */
-#include "H5VLnative.h"             /* Native VOL connector                 */
+#include "H5Fprivate.h"         /* Files                                    */
+#include "H5VLnative.h"         /* Native VOL connector                     */
 
 
 /**************************/
@@ -109,6 +110,18 @@ H5_DLL herr_t H5VL__native_introspect_opt_query(void *obj, H5VL_subclass_t cls, 
 H5_DLL herr_t H5VL__native_blob_put(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
 H5_DLL herr_t H5VL__native_blob_get(void *obj, const void *blob_id, void *buf, size_t size, void *ctx);
 H5_DLL herr_t H5VL__native_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
+
+/* Token callbacks */
+H5_DLL herr_t H5VL__native_token_cmp(void *obj, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value);
+H5_DLL herr_t H5VL__native_token_to_str(void *obj, H5I_type_t obj_type, const H5O_token_t *token, char **token_str);
+H5_DLL herr_t H5VL__native_str_to_token(void *obj, H5I_type_t obj_type, const char *token_str, H5O_token_t *token);
+
+/* Helper functions */
+H5_DLL herr_t H5VL_native_get_file_addr_len(hid_t loc_id, size_t *addr_len);
+H5_DLL herr_t H5VL__native_get_file_addr_len(void *obj, H5I_type_t obj_type, size_t *addr_len);
+H5_DLL herr_t H5VL_native_addr_to_token(void *obj, H5I_type_t obj_type, haddr_t addr, H5O_token_t *token);
+H5_DLL herr_t H5VL_native_token_to_addr(void *obj, H5I_type_t obj_type, H5O_token_t token, haddr_t *addr);
+H5_DLL herr_t H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **file);
 
 #ifdef __cplusplus
 }

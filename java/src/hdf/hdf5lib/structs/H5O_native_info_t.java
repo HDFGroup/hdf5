@@ -15,16 +15,21 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-//Information struct for group (for H5Gget_info/H5Gget_info_by_name/H5Gget_info_by_idx)
-public class H5_ih_info_t implements Serializable {
-    private static final long serialVersionUID = -142238015615462707L;
-    public long     index_size;     /* btree and/or list */
-    public long     heap_size;
+// Information struct for native HDF5 object info, such as object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx).
+public class H5O_native_info_t implements Serializable {
+    private static final long serialVersionUID = 7883826382952577189L;
 
-    H5_ih_info_t (long index_size, long heap_size)
+    public H5O_hdr_info_t hdr_info; /* Object header information */
+
+    /* Extra metadata storage for obj & attributes */
+    public H5_ih_info_t obj_info;   /* v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */ 
+    public H5_ih_info_t attr_info;  /* v2 B-tree & heap for attributes */
+
+    H5O_native_info_t (H5O_hdr_info_t oheader_info, H5_ih_info_t obj_info, H5_ih_info_t attr_info)
     {
-        this.index_size = index_size;
-        this.heap_size = heap_size;
+        this.hdr_info = oheader_info;
+        this.obj_info = obj_info;
+        this.attr_info = attr_info;
     }
 
     @Override
@@ -32,14 +37,14 @@ public class H5_ih_info_t implements Serializable {
         if (this == o)
             return true;
 
-        if (!(o instanceof H5_ih_info_t))
+        if (!(o instanceof H5O_native_info_t))
             return false;
 
-        H5_ih_info_t info = (H5_ih_info_t) o;
+        H5O_native_info_t info = (H5O_native_info_t) o;
 
-        if (this.index_size != info.index_size)
-        	return false;
-        if (this.heap_size != info.heap_size)
+        if (!this.hdr_info.equals(info.hdr_info)
+         || !this.obj_info.equals(info.obj_info)
+         || !this.attr_info.equals(info.attr_info))
         	return false;
 
         return true;

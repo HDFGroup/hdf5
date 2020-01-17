@@ -126,6 +126,11 @@ static const H5VL_class_t null_vol_g = {
         NULL,                                       /* specific         */
         NULL                                        /* optional         */
     },
+    {   /* token_cls */
+        NULL,                                       /* cmp              */
+        NULL,                                       /* to_str           */
+        NULL                                        /* from_str         */
+    },
     NULL                                            /* optional         */
 };
 

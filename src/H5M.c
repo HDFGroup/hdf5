@@ -256,7 +256,7 @@ H5Mcreate(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id,
     hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id)
 {
     void               *map = NULL;                         /* New map's info */
-    H5VL_object_t      *vol_obj = NULL;                     /* object token of loc_id */
+    H5VL_object_t      *vol_obj = NULL;                     /* object of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t               ret_value = H5I_INVALID_HID;        /* Return value */
 
@@ -343,8 +343,8 @@ hid_t
 H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id,
     hid_t mcpl_id, hid_t mapl_id)
 {
-    void                *map = NULL;                    /* map token from VOL connector */
-    H5VL_object_t       *vol_obj = NULL;                /* object token of loc_id */
+    void                *map = NULL;                    /* map object from VOL connector */
+    H5VL_object_t       *vol_obj = NULL;                /* object of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t               ret_value   = H5I_INVALID_HID;  /* Return value */
 
@@ -407,8 +407,8 @@ done:
 hid_t
 H5Mopen(hid_t loc_id, const char *name, hid_t mapl_id)
 {
-    void               *map = NULL;             /* map token from VOL connector */
-    H5VL_object_t      *vol_obj = NULL;         /* object token of loc_id */
+    void               *map = NULL;             /* map object from VOL connector */
+    H5VL_object_t      *vol_obj = NULL;         /* object of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t               ret_value   = H5I_INVALID_HID;  /* Return value */
 

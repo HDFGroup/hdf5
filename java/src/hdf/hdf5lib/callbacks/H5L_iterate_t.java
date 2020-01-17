@@ -13,8 +13,9 @@
 
 package hdf.hdf5lib.callbacks;
 
-public interface H5L_iterate_t {
-/**    public ArrayList iterdata = new ArrayList();
-  * Any derived interfaces must define the single public variable as above.
-  */
+import hdf.hdf5lib.structs.H5L_info_t;
+
+// Information class for link callback (for H5Lvisit/H5Lvisit_by_name).
+public interface H5L_iterate_t extends Callbacks {
+    int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data);
 }

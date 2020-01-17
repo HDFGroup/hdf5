@@ -25,22 +25,22 @@ package examples.groups;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
-import hdf.hdf5lib.callbacks.H5L_iterate_cb;
 import hdf.hdf5lib.callbacks.H5L_iterate_t;
+import hdf.hdf5lib.callbacks.H5L_iterate_opdata_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
 import examples.groups.H5Ex_G_Iterate.H5O_type;
 
-class opdata implements H5L_iterate_t {
+class opdata implements H5L_iterate_opdata_t {
     int recurs;
     opdata prev;
-    long addr;
+    H5O_token_t obj_token;
 }
 
 public class H5Ex_G_Traverse {
 
     private static String FILE = "h5ex_g_traverse.h5";
-    public static H5L_iterate_cb iter_cb = new H5L_iter_callbackT();
+    public static H5L_iterate_t iter_cb = new H5L_iter_callbackT();
 
     private static void OpenGroup() {
         long file_id = -1;
@@ -54,7 +54,7 @@ public class H5Ex_G_Traverse {
                 infobuf = H5.H5Oget_info(file_id);
                 od.recurs = 0;
                 od.prev = null;
-                od.addr = infobuf.addr;
+                od.obj_token = infobuf.token;
             }
         }
         catch (Exception e) {
@@ -64,7 +64,7 @@ public class H5Ex_G_Traverse {
         // Print the root group and formatting, begin iteration.
         try {
             System.out.println("/ {");
-            // H5L_iterate_cb iter_cb = new H5L_iter_callbackT();
+            // H5L_iterate_t iter_cb = new H5L_iter_callbackT();
             H5.H5Literate(file_id, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_NATIVE, 0L, iter_cb, od);
             System.out.println("}");
         }
@@ -87,8 +87,8 @@ public class H5Ex_G_Traverse {
     }
 }
 
-class H5L_iter_callbackT implements H5L_iterate_cb {
-    public int callback(long group, String name, H5L_info_t info, H5L_iterate_t op_data) {
+class H5L_iter_callbackT implements H5L_iterate_t {
+    public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data) {
 
         H5O_info_t infobuf;
         int return_val = 0;
@@ -105,7 +105,7 @@ class H5L_iter_callbackT implements H5L_iterate_cb {
             switch (H5O_type.get(infobuf.type)) {
             case H5O_TYPE_GROUP:
                 System.out.println("Group: " + name + " { ");
-                // Check group address against linked list of operator
+                // Check group object token against linked list of operator
                 // data structures. We will always run the check, as the
                 // reference count cannot be relied upon if there are
                 // symbolic links, and H5Oget_info_by_name always follows
@@ -114,7 +114,7 @@ class H5L_iter_callbackT implements H5L_iterate_cb {
                 // links, however it could still fail if an object's
                 // reference count was manually manipulated with
                 // H5Odecr_refcount.
-                if (group_check(od, infobuf.addr)) {
+                if (group_check(od, infobuf.token)) {
                     for (int i = 0; i < spaces; i++)
                         System.out.print(" ");
                     System.out.println("  Warning: Loop detected!");
@@ -127,8 +127,8 @@ class H5L_iter_callbackT implements H5L_iterate_cb {
                     opdata nextod = new opdata();
                     nextod.recurs = od.recurs + 1;
                     nextod.prev = od;
-                    nextod.addr = infobuf.addr;
-                    H5L_iterate_cb iter_cb2 = new H5L_iter_callbackT();
+                    nextod.obj_token = infobuf.token;
+                    H5L_iterate_t iter_cb2 = new H5L_iter_callbackT();
                     return_val = H5.H5Literate_by_name(group, name, HDF5Constants.H5_INDEX_NAME,
                             HDF5Constants.H5_ITER_NATIVE, 0L, iter_cb2, nextod, HDF5Constants.H5P_DEFAULT);
                 }
@@ -153,13 +153,13 @@ class H5L_iter_callbackT implements H5L_iterate_cb {
         return return_val;
     }
 
-    public boolean group_check(opdata od, long target_addr) {
-        if (od.addr == target_addr)
-            return true; // Addresses match
+    public boolean group_check(opdata od, H5O_token_t target_token) {
+        if (od.obj_token.equals(target_token))
+            return true; // Object tokens match
         else if (od.recurs == 0)
             return false; // Root group reached with no matches
         else
-            return group_check(od.prev, target_addr); // Recursively examine the next node
+            return group_check(od.prev, target_token); // Recursively examine the next node
     }
 
 }

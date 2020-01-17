@@ -425,7 +425,7 @@ H5VL__set_def_conn(void)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't check if VOL connector already registered")
         else if(connector_is_registered) {
             /* Retrieve the ID of the already-registered VOL connector */
-            if((connector_id = H5VL__get_connector_id(tok, FALSE)) < 0)
+            if((connector_id = H5VL__get_connector_id_by_name(tok, FALSE)) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL connector ID")
         } /* end else-if */
         else {
@@ -1366,6 +1366,41 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__get_connector_id
  *
+ * Purpose:     Retrieves the VOL connector ID for a given object ID.
+ *
+ * Return:      Positive if the VOL class has been registered
+ *              Negative on error (if the class is not a valid class or not registered)
+ *
+ * Programmer:  Dana Robinson
+ *              June 17, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VL__get_connector_id(hid_t obj_id, hbool_t is_api)
+{
+    H5VL_object_t *vol_obj = NULL;
+    hid_t ret_value = H5I_INVALID_HID;      /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Get the underlying VOL object for the object ID */
+    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+
+    /* Return the VOL object's VOL class ID */
+    ret_value = vol_obj->connector->id;
+    if(H5I_inc_ref(ret_value, is_api) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL connector")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__get_connector_id() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__get_connector_id_by_name
+ *
  * Purpose:     Retrieves the ID for a registered VOL connector.
  *
  * Return:      Positive if the VOL class has been registered
@@ -1377,7 +1412,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL__get_connector_id(const char *name, hbool_t is_api)
+H5VL__get_connector_id_by_name(const char *name, hbool_t is_api)
 {
     hid_t ret_value = H5I_INVALID_HID;      /* Return value */
 
@@ -1393,7 +1428,7 @@ H5VL__get_connector_id(const char *name, hbool_t is_api)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__get_connector_id() */
+} /* end H5VL__get_connector_id_by_name() */
 
 
 /*-------------------------------------------------------------------------

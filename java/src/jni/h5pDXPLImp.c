@@ -310,7 +310,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1data_1transform
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (express = (char *) HDmalloc(sizeof(char) * (size_t)express_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_data_transform: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_data_transform: memory allocation failed");
 
     if (H5Pget_data_transform((hid_t)plist_id, express, (size_t)express_size + 1) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -318,7 +318,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1data_1transform
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, express))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_data_transform: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_data_transform: out of memory - unable to construct string from UTF characters");
     }
 
     ENVPTR->SetObjectArrayElement(ENVONLY, expression, 0, str);

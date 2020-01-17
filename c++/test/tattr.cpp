@@ -519,7 +519,7 @@ static void test_attr_basic_read()
         verify_val(num_attrs, 3, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
         // Verify the correct number of attributes another way
-        H5O_info_t oinfo;
+        H5O_info2_t oinfo;
         HDmemset(&oinfo, 0, sizeof(oinfo));
         dataset.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
         verify_val(oinfo.num_attrs, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
@@ -670,7 +670,7 @@ static void test_attr_compound_read()
         verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
         // Verify the correct number of attributes another way
-        H5O_info_t oinfo;
+        H5O_info2_t oinfo;
         HDmemset(&oinfo, 0, sizeof(oinfo));
         dataset.getObjinfo(oinfo, H5O_INFO_NUM_ATTRS);
         verify_val(oinfo.num_attrs, 1, "DataSet::getObjinfo", __LINE__, __FILE__);

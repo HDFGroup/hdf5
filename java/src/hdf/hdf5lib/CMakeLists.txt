@@ -18,10 +18,10 @@ set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES
     callbacks/H5D_iterate_t.java
     callbacks/H5E_walk_cb.java
     callbacks/H5E_walk_t.java
-    callbacks/H5L_iterate_cb.java
     callbacks/H5L_iterate_t.java
-    callbacks/H5O_iterate_cb.java
+    callbacks/H5L_iterate_opdata_t.java
     callbacks/H5O_iterate_t.java
+    callbacks/H5O_iterate_opdata_t.java
     callbacks/H5P_cls_close_func_cb.java
     callbacks/H5P_cls_close_func_t.java
     callbacks/H5P_cls_copy_func_cb.java
@@ -79,6 +79,8 @@ set (HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES
     structs/H5L_info_t.java
     structs/H5O_hdr_info_t.java
     structs/H5O_info_t.java
+    structs/H5O_native_info_t.java
+    structs/H5O_token_t.java
 )
 
 set (HDF5_JAVA_HDF_HDF5_SOURCES
