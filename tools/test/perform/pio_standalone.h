@@ -483,8 +483,8 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #endif
 
 #ifdef H5_HAVE_PARALLEL
-H5TEST_DLL int h5_set_info_object(void);
-H5TEST_DLL void h5_dump_info_object(MPI_Info info);
+int h5_set_info_object(void);
+void h5_dump_info_object(MPI_Info info);
 #endif
 
 
