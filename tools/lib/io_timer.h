@@ -28,6 +28,11 @@
 #ifdef H5_HAVE_WINSOCK2_H
 #  include <winsock2.h>
 #endif /* H5_HAVE_WINSOCK2_H */
+
+#ifdef STANDALONE
+  #define H5TOOLS_DLL
+#endif
+
 /* The different types of timers we can have */
 typedef enum timer_type_ {
     HDF5_FILE_OPENCLOSE,
