@@ -105,39 +105,41 @@ endif ()
 get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
 set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
 
-foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
-  set (CMAKE_JAVA_CLASSPATH ".")
-  foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
-    set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
-  endforeach ()
-  set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${HDF5_JAVA_TEST_LIB_TARGET}_${test_file}_JAR_FILE}")
+if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
+  foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
+    set (CMAKE_JAVA_CLASSPATH ".")
+    foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
+      set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
+    endforeach ()
+    set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${HDF5_JAVA_TEST_LIB_TARGET}_${test_file}_JAR_FILE}")
 
-  add_test (
-    NAME JUnit-${test_file}-clearall-objects
-    COMMAND ${CMAKE_COMMAND} -E remove
-        JUnit-${test_file}.out
-        JUnit-${test_file}.out.err
-  )
-  add_test (
-      NAME JUnit-${test_file}
-      COMMAND "${CMAKE_COMMAND}"
-          -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
-          -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}"
-          -D "TEST_ARGS:STRING=${CMD_ARGS}-ea;org.junit.runner.JUnitCore"
-          -D "TEST_PROGRAM=test.${test_file}"
-          -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-          -D "TEST_FOLDER=${HDF5_BINARY_DIR}/java/test"
-          -D "TEST_OUTPUT=JUnit-${test_file}.out"
-#          -D "TEST_LOG_LEVEL=trace"
-          -D "TEST_EXPECT=0"
-          -D "SKIP_APPEND=1"
-          -D "TEST_MASK_ERROR=TRUE"
-#          -D "TEST_FILTER:STRING=${testfilter}"
-          -D "TEST_REFERENCE=JUnit-${test_file}.txt"
-          -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
-  )
-  set_tests_properties (JUnit-${test_file} PROPERTIES
-      ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
-      DEPENDS "JUnit-${test_file}-clearall-objects"
-  )
-endforeach ()
+    add_test (
+      NAME JUnit-${test_file}-clearall-objects
+      COMMAND ${CMAKE_COMMAND} -E remove
+          JUnit-${test_file}.out
+          JUnit-${test_file}.out.err
+    )
+    add_test (
+        NAME JUnit-${test_file}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
+            -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}"
+            -D "TEST_ARGS:STRING=${CMD_ARGS}-ea;org.junit.runner.JUnitCore"
+            -D "TEST_PROGRAM=test.${test_file}"
+            -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+            -D "TEST_FOLDER=${HDF5_BINARY_DIR}/java/test"
+            -D "TEST_OUTPUT=JUnit-${test_file}.out"
+#            -D "TEST_LOG_LEVEL=trace"
+            -D "TEST_EXPECT=0"
+            -D "SKIP_APPEND=1"
+            -D "TEST_MASK_ERROR=TRUE"
+#            -D "TEST_FILTER:STRING=${testfilter}"
+            -D "TEST_REFERENCE=JUnit-${test_file}.txt"
+            -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
+    )
+    set_tests_properties (JUnit-${test_file} PROPERTIES
+        ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
+        DEPENDS "JUnit-${test_file}-clearall-objects"
+    )
+  endforeach ()
+endif ()

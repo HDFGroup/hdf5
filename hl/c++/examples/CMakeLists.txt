@@ -23,6 +23,6 @@ else ()
 endif ()
 set_target_properties (ptExampleFL PROPERTIES FOLDER examples/hl/cpp)
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_CPP AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()

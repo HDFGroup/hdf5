@@ -61,11 +61,11 @@ static void print_user_block(const char *filename, hid_t fid);
 int
 copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 {
-    hid_t         fidin = -1;
-    hid_t         fidout = -1;
-    hid_t         fcpl_in = -1;  /* file creation property list ID for input file */
-    hid_t         grp_in = -1;   /* group ID */
-    hid_t         gcpl_in = -1;  /* group creation property list */
+    hid_t         fidin = H5I_INVALID_HID;
+    hid_t         fidout = H5I_INVALID_HID;
+    hid_t         fcpl_in = H5I_INVALID_HID;  /* file creation property list ID for input file */
+    hid_t         grp_in = H5I_INVALID_HID;   /* group ID */
+    hid_t         gcpl_in = H5I_INVALID_HID;  /* group creation property list */
     hid_t         fcpl = H5P_DEFAULT;     /* file creation property list ID */
     hid_t         fapl = H5P_DEFAULT;     /* file access property list ID */
     trav_table_t *travt = NULL;
@@ -580,19 +580,19 @@ int
 do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
         pack_opt_t *options) /* repack options */
 {
-    hid_t grp_in = -1;   /* group ID */
-    hid_t grp_out = -1;  /* group ID */
-    hid_t dset_in = -1;  /* read dataset ID */
-    hid_t dset_out = -1; /* write dataset ID */
-    hid_t gcpl_in = -1;  /* group creation property list */
-    hid_t gcpl_out = -1; /* group creation property list */
-    hid_t type_in = -1;  /* named type ID */
-    hid_t type_out = -1; /* named type ID */
-    hid_t dcpl_in = -1;  /* dataset creation property list ID */
-    hid_t dcpl_out = -1; /* dataset creation property list ID */
-    hid_t f_space_id = -1; /* file space ID */
-    hid_t ftype_id = -1; /* file type ID */
-    hid_t wtype_id = -1; /* read/write type ID */
+    hid_t grp_in = H5I_INVALID_HID;   /* group ID */
+    hid_t grp_out = H5I_INVALID_HID;  /* group ID */
+    hid_t dset_in = H5I_INVALID_HID;  /* read dataset ID */
+    hid_t dset_out = H5I_INVALID_HID; /* write dataset ID */
+    hid_t gcpl_in = H5I_INVALID_HID;  /* group creation property list */
+    hid_t gcpl_out = H5I_INVALID_HID; /* group creation property list */
+    hid_t type_in = H5I_INVALID_HID;  /* named type ID */
+    hid_t type_out = H5I_INVALID_HID; /* named type ID */
+    hid_t dcpl_in = H5I_INVALID_HID;  /* dataset creation property list ID */
+    hid_t dcpl_out = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t f_space_id = H5I_INVALID_HID; /* file space ID */
+    hid_t ftype_id = H5I_INVALID_HID; /* file type ID */
+    hid_t wtype_id = H5I_INVALID_HID; /* read/write type ID */
     named_dt_t *named_dt_head = NULL; /* Pointer to the stack of named datatypes copied */
     size_t msize;        /* size of type */
     hsize_t nelmts;      /* number of elements in dataset */
@@ -946,7 +946,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                                     hsize_t zero[8]; /*vector of zeros */
                                     int k;
                                     H5D_layout_t dset_layout;
-                                    hid_t dcpl_tmp = -1; /* dataset creation property list ID */
+                                    hid_t dcpl_tmp = H5I_INVALID_HID; /* dataset creation property list ID */
 
                                     /* check if we have VL data in the dataset's datatype */
                                     if (H5Tdetect_class(wtype_id, H5T_VLEN) == TRUE)
@@ -1095,7 +1095,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                  *-------------------------------------------------------------------------
                  */
                 else {
-                    hid_t pid = -1;
+                    hid_t pid = H5I_INVALID_HID;
 
                     /* create property to pass copy options */
                     if ((pid = H5Pcreate(H5P_OBJECT_COPY)) < 0)
@@ -1167,7 +1167,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                     H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
                 if (H5Tclose(type_out) < 0)
                     H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
-                type_out = -1; /* named datatypes stack, named_dt_head, manages allocation */
+                type_out = H5I_INVALID_HID; /* named datatypes stack, named_dt_head, manages allocation */
 
                 break;
 
@@ -1429,7 +1429,7 @@ print_user_block(const char *filename, hid_t fid)
     int     fh = -1;   /* file handle */
     hsize_t ub_size;   /* user block size */
     hsize_t size;      /* size read */
-    hid_t   fcpl = -1; /* file creation property list ID for HDF5 file */
+    hid_t   fcpl = H5I_INVALID_HID; /* file creation property list ID for HDF5 file */
     int     i;
     int     ret_value = 0;
 

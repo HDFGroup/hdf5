@@ -834,8 +834,8 @@ trav_attr(hid_t
 #ifdef H5TRAV_PRINT_SPACE
     }
     else {
-        hid_t               attr = -1;
-        hid_t               space = -1;
+        hid_t               attr = H5I_INVALID_HID;
+        hid_t               space = H5I_INVALID_HID;
         hsize_t             size[H5S_MAX_RANK];
         int                 ndims;
         int                 i;
