@@ -463,9 +463,22 @@ gent_dataset(void)
 {
     hid_t fid, dataset, space;
     hsize_t dims[2];
-    int dset1[10][20];
-    double dset2[30][20];
+    int     **dset1         = NULL;
+    int     *dset1_data     = NULL;
+    double  **dset2         = NULL;
+    double  *dset2_data     = NULL;
     int i, j;
+
+    /* Set up data arrays */
+    dset1_data = (int *)HDcalloc(10 * 20, sizeof(int));
+    dset1 = (int **)HDcalloc(10, sizeof(dset1_data));
+    for (i = 0; i < 10; i++)
+        dset1[i] = dset1_data + (i * 20);
+
+    dset2_data = (double *)HDcalloc(30 * 20, sizeof(double));
+    dset2 = (double **)HDcalloc(30, sizeof(dset2_data));
+    for (i = 0; i < 30; i++)
+        dset2[i] = dset2_data + (i * 20);
 
     fid = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -478,7 +491,7 @@ gent_dataset(void)
         for(j = 0; j < 20; j++)
             dset1[i][j] = j + i;
 
-    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1_data);
     H5Sclose(space);
     H5Dclose(dataset);
 
@@ -491,11 +504,16 @@ gent_dataset(void)
         for(j = 0; j < 20; j++)
             dset2[i][j] = 0.0001F * (float)j + (float)i;
 
-    H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+    H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_data);
 
     H5Sclose(space);
     H5Dclose(dataset);
     H5Fclose(fid);
+
+    HDfree(dset1);
+    HDfree(dset1_data);
+    HDfree(dset2);
+    HDfree(dset2_data);
 }
 
 static void
@@ -1773,8 +1791,16 @@ static void gent_str(void) {
             int a[8][10];
             char s[12][33];
     } compound_t;
-    compound_t comp1[3][6];
+
+    compound_t  **comp1     = NULL;
+    compound_t  *comp1_data = NULL;
     hsize_t mdims[2];
+
+    /* Set up data array */
+    comp1_data = (compound_t *)HDcalloc(3 * 6, sizeof(compound_t));
+    comp1 = (compound_t **)HDcalloc(3, sizeof(comp1_data));
+    for (i = 0; i < 3; i++)
+        comp1[i] = comp1_data + (i * 6);
 
     fid = H5Fcreate(FILE13, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -1861,7 +1887,7 @@ static void gent_str(void) {
         }
 
     dataset = H5Dcreate2(fid, "/comp1", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Dwrite(dataset, f_type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, comp1);
+    H5Dwrite(dataset, f_type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, comp1_data);
 
     H5Tclose(f_type);
     H5Tclose(f_type2);
@@ -1869,6 +1895,9 @@ static void gent_str(void) {
     H5Dclose(dataset);
 
     H5Fclose(fid);
+
+    HDfree(comp1);
+    HDfree(comp1_data);
 }
 
 /*
@@ -3748,8 +3777,14 @@ void gent_multi(void)
     H5FD_mem_t mt, memb_map[H5FD_MEM_NTYPES];
     hid_t memb_fapl[H5FD_MEM_NTYPES];
     const char *memb_name[H5FD_MEM_NTYPES];
-    char sv[H5FD_MEM_NTYPES][1024];
+    char **sv = NULL;
+    char *sv_data = NULL;
     haddr_t memb_addr[H5FD_MEM_NTYPES];
+
+    sv_data = (char *)HDcalloc(H5FD_MEM_NTYPES * 1024, sizeof(char));                          
+    sv = (char **)HDcalloc(H5FD_MEM_NTYPES, sizeof(sv_data));                            
+    for (i = 0; i < H5FD_MEM_NTYPES; i++)                                                     
+        sv[i] = sv_data + (i * 1024);
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
 
@@ -3791,6 +3826,9 @@ void gent_multi(void)
     H5Dclose(dataset);
     H5Fclose(fid);
     H5Pclose(fapl);
+
+    HDfree(sv);
+    HDfree(sv_data);
 }
 
 static void gent_large_objname(void)
@@ -7959,13 +7997,15 @@ static void gent_compound_attr_intsizes(void) {
             int64_t dset64[F70_XDIM][F70_YDIM64];
             double  dsetdbl[F70_XDIM][F70_YDIM8];
     } Array1Struct;
-    Array1Struct Array1[F70_LENGTH];
+    Array1Struct *Array1 = NULL;
 
     hid_t Array1Structid; /* File datatype identifier */
     herr_t status; /* Error checking variable */
     hsize_t dim[] = { F70_LENGTH }; /* Dataspace dimensions     */
 
     int m, n, o; /* Array init loop vars     */
+
+    Array1 = (Array1Struct *)HDcalloc(F70_LENGTH, sizeof(Array1Struct));
 
     /* Initialize the data in the arrays/datastructure                */
     for (m = 0; m < F70_LENGTH; m++) {
@@ -8198,6 +8238,8 @@ static void gent_compound_attr_intsizes(void) {
 
     status = H5Fclose(fid);
     HDassert(status >= 0);
+
+    HDfree(Array1);
 }
 
 static void gent_nested_compound_dt(void) {       /* test nested data type */
