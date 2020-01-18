@@ -139,7 +139,7 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create object reference")
 
     /* Attach loc_id to reference and hold reference to it */
-    if(H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, TRUE) < 0)
+    if(H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, TRUE, TRUE) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "unable to attach location id to reference")
 
 done:
@@ -232,7 +232,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id,
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create region reference")
 
     /* Attach loc_id to reference and hold reference to it */
-    if(H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, TRUE) < 0)
+    if(H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, TRUE, TRUE) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "unable to attach location id to reference")
 
 done:
@@ -321,7 +321,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name,
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create attribute reference")
 
     /* Attach loc_id to reference and hold reference to it */
-    if(H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, TRUE) < 0)
+    if(H5R__set_loc_id((H5R_ref_priv_t *)ref_ptr, file_id, TRUE, TRUE) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "unable to attach location id to reference")
 
 done:
