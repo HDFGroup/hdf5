@@ -363,35 +363,37 @@
 ##############################################################################
 
   macro (ADD_H5_TEST resultfile resultcode)
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> ${ARGN})
-      set_tests_properties (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (${resultcode})
-        set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-      if (last_test)
-        set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
-    else ()
-      add_test (
-          NAME H5DIFF-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_ext}>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.txt"
-              -D "TEST_APPEND=EXIT CODE:"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
-      if (last_test)
-        set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+    if (HDF5_TEST_SERIAL)
+      # If using memchecker add tests without using scripts
+      if (HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> ${ARGN})
+        set_tests_properties (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+       if (${resultcode})
+          set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+        endif ()
+        if (last_test)
+          set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+        endif ()
+      else ()
+        add_test (
+            NAME H5DIFF-${resultfile}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_ext}>"
+                -D "TEST_ARGS:STRING=${ARGN}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${resultfile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}.txt"
+                -D "TEST_APPEND=EXIT CODE:"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+        if (last_test)
+          set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+        endif ()
       endif ()
     endif ()
-    if (H5_HAVE_PARALLEL)
+    if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
       ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
     endif ()
   endmacro ()
@@ -1484,8 +1486,6 @@ ADD_H5_TEST (h5diff_485 0 -v --exclude-path "/group1" h5diff_exclude3-1.h5 h5dif
 ADD_H5_TEST (h5diff_486 0 -v --exclude-path "/group1" h5diff_exclude3-2.h5 h5diff_exclude3-1.h5)
 ADD_H5_TEST (h5diff_487 1 -v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5)
 
-
-
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
@@ -1524,7 +1524,7 @@ ADD_H5_TEST (h5diff_800 1 -v ${FILE7} ${FILE8} /g1/array /g1/array)
 ADD_H5_TEST (h5diff_801 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
 
 # ##############################################################################
-# VDS tests
+# # VDS tests
 # ##############################################################################
 ADD_H5_TEST (h5diff_v1 0 -v ${FILEV1} ${FILEV2})
 ADD_H5_TEST (h5diff_v2 0 -r ${FILEV1} ${FILEV2})
@@ -1533,7 +1533,7 @@ ADD_H5_TEST (h5diff_v3 0 -c ${FILEV1} ${FILEV2})
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND HDF5_TEST_SERIAL)
   ADD_H5_UD_TEST (h5diff_plugin_test 0 h5diff_ud -v tudfilter.h5 tudfilter2.h5)
   ADD_H5_UD_TEST (h5diff_plugin_fail 2 h5diff_udfail -v tudfilter.h5 tudfilter2.h5)
 endif ()
