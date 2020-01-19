@@ -33,7 +33,7 @@ const char *FILENAME[] = {
 };
 
 /* Global patched filename buffer */
-static char filename[6][1024];
+static char filename[6][128];
 
 /* Global property lists - just copies of the defaults (necessary to use
  * internal functions */

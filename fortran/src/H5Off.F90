@@ -44,7 +44,43 @@ MODULE H5O
   USE H5GLOBAL
   IMPLICIT NONE
 
-!****t* H5T (F03)/h5o_info_t
+!****t* H5O (F03)/h5o_info_t
+!
+! Fortran2003 Derived Type:
+!
+  TYPE, BIND(C) :: h5o_info_t
+     INTEGER(C_LONG)     :: fileno     ! File number that object is located in
+     TYPE(H5O_TOKEN_T_F) :: token      ! Token for object in file
+     INTEGER(C_INT)      :: type       ! Basic object type (group, dataset, etc.)
+     INTEGER             :: rc         ! Reference count of object
+
+     INTEGER, DIMENSION(8) :: atime ! Access time         !    -- NOTE --
+     INTEGER, DIMENSION(8) :: mtime ! Modification time   ! Returns an integer array
+     INTEGER, DIMENSION(8) :: ctime ! Change time         ! as specified in the Fortran
+     INTEGER, DIMENSION(8) :: btime ! Birth time          ! intrinsic DATE_AND_TIME(VALUES)
+
+     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
+  END TYPE h5o_info_t
+
+! C interoperable structure for h5o_info_t. The Fortran derived type returns the time
+! values as an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
+! Whereas, this derived type does not.
+
+  TYPE, BIND(C) :: c_h5o_info_t
+     INTEGER(C_LONG)  :: fileno     ! File number that object is located in
+     TYPE(H5O_TOKEN_T_F) :: token   ! Token for object in file
+     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.)
+     INTEGER(C_INT)   :: rc         ! Reference count of object
+
+     INTEGER(KIND=TIME_T) :: atime ! Access time
+     INTEGER(KIND=TIME_T) :: mtime ! Modify time
+     INTEGER(KIND=TIME_T) :: ctime ! Create time
+     INTEGER(KIND=TIME_T) :: btime ! Birth time
+
+     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
+  END TYPE c_h5o_info_t
+
+!****t* H5O (F03)/h5o_native_info_t
 !
 ! Fortran2003 Derived Type:
 !
@@ -59,13 +95,13 @@ MODULE H5O
      INTEGER(c_int64_t) :: present ! Flags to indicate presence of message type in header 
      INTEGER(c_int64_t) :: shared  ! Flags to indicate message type is shared in header
   END TYPE mesg_t
-  
+
   TYPE, BIND(C) :: hdr_t
      INTEGER :: version ! Version number of header format in file
      INTEGER :: nmesgs  ! Number of object header messages
      INTEGER :: nchunks ! Number of object header chunks
      INTEGER :: flags   ! Object header status flags
-     TYPE(space_t)  :: space   
+     TYPE(space_t)  :: space
      TYPE(mesg_t)   :: mesg
   END TYPE hdr_t
 
@@ -74,7 +110,7 @@ MODULE H5O
      INTEGER(C_INT) :: nmesgs  ! Number of object header messages
      INTEGER(C_INT) :: nchunks ! Number of object header chunks
      INTEGER(C_INT) :: flags   ! Object header status flags
-     TYPE(space_t)  :: space   
+     TYPE(space_t)  :: space
      TYPE(mesg_t)   :: mesg
   END TYPE c_hdr_t
 
@@ -88,46 +124,17 @@ MODULE H5O
      TYPE(H5_ih_info_t) :: obj  ! v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets
      TYPE(H5_ih_info_t) :: attr ! v2 B-tree & heap for attributes
   ENDTYPE meta_size_t
-  
-  TYPE, BIND(C) :: h5o_info_t
-     INTEGER(C_LONG)  :: fileno     ! File number that object is located in
-     INTEGER(haddr_t) :: addr       ! Object address in file  
-     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.)
-     INTEGER          :: rc         ! Reference count of object
 
-     INTEGER, DIMENSION(8) :: atime ! Access time         !    -- NOTE --
-     INTEGER, DIMENSION(8) :: mtime ! Modification time   ! Returns an integer array    
-     INTEGER, DIMENSION(8) :: ctime ! Change time         ! as specified in the Fortran 
-     INTEGER, DIMENSION(8) :: btime ! Birth time          ! intrinsic DATE_AND_TIME(VALUES)
-
-     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
-
+  TYPE, BIND(C) :: h5o_native_info_t
      TYPE(hdr_t) :: hdr
-
      TYPE(meta_size_t) :: meta_size
-  END TYPE h5o_info_t
+  END TYPE h5o_native_info_t
 
-! C interoperable structure for h5o_info_t. The Fortran derived type returns the time
-! values as an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
-! Whereas, this derived type does not.
-
-  TYPE, BIND(C) :: c_h5o_info_t
-     INTEGER(C_LONG)  :: fileno     ! File number that object is located in
-     INTEGER(haddr_t) :: addr       ! Object address in file  
-     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.)
-     INTEGER(C_INT)   :: rc         ! Reference count of object
-
-     INTEGER(KIND=TIME_T) :: atime ! Access time
-     INTEGER(KIND=TIME_T) :: mtime ! modify time
-     INTEGER(KIND=TIME_T) :: ctime ! create time
-     INTEGER(KIND=TIME_T) :: btime ! Access time
-
-     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
-
+! C interoperable structure for h5o_native_info_t.
+  TYPE, BIND(C) :: c_h5o_native_info_t
      TYPE(c_hdr_t) :: hdr
-
      TYPE(meta_size_t) :: meta_size
-  END TYPE c_h5o_info_t
+  END TYPE c_h5o_native_info_t
 
 !*****
 
@@ -292,46 +299,46 @@ CONTAINS
   END SUBROUTINE h5oclose_f
 
 !
-!****s* H5O/h5open_by_addr_f
-! NAME		
-!  h5oopen_by_addr_f 
+!****s* H5O/h5oopen_by_token_f
+! NAME
+!  h5oopen_by_token_f
 !
 ! PURPOSE
-!  Opens an object using its address within an HDF5 file. 
+!  Opens an object using its token within an HDF5 file.
 !
-! Inputs:  
+! Inputs:
 !  loc_id - File or group identifier.
-!  addr   - Object’s address in the file.
+!  token  - Object’s token in the file.
 !
 ! Outputs:
 !  obj_id - Object identifier for the opened object.
 !  hdferr - Returns 0 if successful and -1 if fails.
 !
-! AUTHOR	
+! AUTHOR
 !  M. Scot Breitenfeld
 !  September 14, 2009
-! 
+!
 ! Fortran90 Interface:
-  SUBROUTINE h5oopen_by_addr_f(loc_id, addr, obj_id, hdferr)
+  SUBROUTINE h5oopen_by_token_f(loc_id, token, obj_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T)  , INTENT(IN)  :: loc_id
-    INTEGER(HADDR_T), INTENT(IN)  :: addr
-    INTEGER(HID_T)  , INTENT(OUT) :: obj_id
-    INTEGER         , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN)        :: loc_id
+    TYPE(H5O_TOKEN_T_F), INTENT(IN)     :: token
+    INTEGER(HID_T)  , INTENT(OUT)       :: obj_id
+    INTEGER         , INTENT(OUT)       :: hdferr
 !*****
     INTERFACE
-       INTEGER FUNCTION h5oopen_by_addr_c(loc_id, addr, obj_id) BIND(C,NAME='h5oopen_by_addr_c')
-         IMPORT :: HID_T, HADDR_T
+       INTEGER FUNCTION h5oopen_by_token_c(loc_id, token, obj_id) BIND(C,NAME='h5oopen_by_token_c')
+         IMPORT :: HID_T, H5O_TOKEN_T_F
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         INTEGER(HADDR_T), INTENT(IN) :: addr
+         TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token
          INTEGER(HID_T), INTENT(OUT) :: obj_id
-       END FUNCTION h5oopen_by_addr_c
+       END FUNCTION h5oopen_by_token_c
     END INTERFACE
 
-    hdferr = h5oopen_by_addr_c(loc_id, addr, obj_id)
+    hdferr = h5oopen_by_token_c(loc_id, token, obj_id)
 
-  END SUBROUTINE h5oopen_by_addr_f
+  END SUBROUTINE h5oopen_by_token_f
 !
 !****s* H5O/h5ocopy_f
 ! NAME		
@@ -966,7 +973,7 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T) , INTENT(IN)  :: namelen
          INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
-         TYPE(C_PTR),VALUE             :: object_info
+         TYPE(C_PTR), VALUE            :: object_info
          INTEGER         , INTENT(IN)  :: fields
        END FUNCTION h5oget_info_by_name_c
     END INTERFACE
@@ -1211,6 +1218,51 @@ CONTAINS
     END IF
 
   END SUBROUTINE h5ovisit_by_name_f
+
+!****s* H5O/h5otoken_cmp_f
+! NAME
+!  h5otoken_cmp_f
+!
+! PURPOSE
+!  Compare two tokens, which must be from the same file / containers.
+!
+! Inputs:
+!  loc_id   - Identifier of an object in the file / container.
+!  token1   - The first token to compare.
+!  token2   - The second token to compare.
+!
+! Outputs:
+!  cmp_value - Returns 0 if tokens are equal, non-zero for unequal tokens.
+!  hdferr    - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  Quincey Koziol
+!  January 10, 2019
+!
+! Fortran90 Interface:
+  SUBROUTINE h5otoken_cmp_f(loc_id, token1, token2, cmp_value, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: loc_id
+    TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token1 ! First token
+    TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token2 ! First token
+    INTEGER         , INTENT(OUT) :: cmp_value
+    INTEGER         , INTENT(OUT) :: hdferr
+!*****
+    INTERFACE
+       INTEGER FUNCTION h5otoken_cmp_c(loc_id, token1, token2, cmp_value) BIND(C,NAME='h5otoken_cmp_c')
+         IMPORT :: HID_T, C_PTR, H5O_TOKEN_T_F
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN)     :: loc_id
+         TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token1 ! First token
+         TYPE(H5O_TOKEN_T_F), INTENT(IN) :: token2 ! First token
+         INTEGER, INTENT(OUT)           :: cmp_value
+
+       END FUNCTION h5otoken_cmp_c
+    END INTERFACE
+
+    hdferr = h5otoken_cmp_c(loc_id, token1, token2, cmp_value)
+
+  END SUBROUTINE h5otoken_cmp_f
 
 END MODULE H5O
 

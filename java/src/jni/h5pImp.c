@@ -503,7 +503,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1class_1name
 
     if (NULL == (j_str = ENVPTR->NewStringUTF(ENVONLY, c_str))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_class_name: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_class_name: out of memory - unable to construct string from UTF characters");
     }
 
 done:

@@ -749,6 +749,7 @@
 ./src/H5Ipublic.h
 ./src/H5Itest.c
 ./src/H5L.c
+./src/H5Ldeprec.c
 ./src/H5Lexternal.c
 ./src/H5Lmodule.h
 ./src/H5Lpkg.h
@@ -939,6 +940,7 @@
 ./src/H5VLnative_link.c
 ./src/H5VLnative_introspect.c
 ./src/H5VLnative_object.c
+./src/H5VLnative_token.c
 ./src/H5VLnative_private.h
 ./src/H5VLpassthru.c
 ./src/H5VLpassthru.h
@@ -1185,6 +1187,7 @@
 ./test/ttime.c
 ./test/trefer.c
 ./test/trefer_deprec.c
+./test/trefer_shutdown.c
 ./test/trefstr.c
 ./test/tselect.c
 ./test/tsizeslheap.h5
@@ -3044,10 +3047,10 @@
 ./java/src/hdf/hdf5lib/callbacks/H5D_append_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5E_walk_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5E_walk_t.java
-./java/src/hdf/hdf5lib/callbacks/H5L_iterate_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5L_iterate_t.java
-./java/src/hdf/hdf5lib/callbacks/H5O_iterate_cb.java
+./java/src/hdf/hdf5lib/callbacks/H5L_iterate_opdata_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5O_iterate_t.java
+./java/src/hdf/hdf5lib/callbacks/H5O_iterate_opdata_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_cls_close_func_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_cls_close_func_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_cls_copy_func_cb.java
@@ -3100,6 +3103,8 @@
 ./java/src/hdf/hdf5lib/structs/H5L_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_hdr_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_info_t.java
+./java/src/hdf/hdf5lib/structs/H5O_native_info_t.java
+./java/src/hdf/hdf5lib/structs/H5O_token_t.java
 
 ./java/src/hdf/hdf5lib/H5.java
 ./java/src/hdf/hdf5lib/HDF5Constants.java

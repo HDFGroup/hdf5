@@ -411,7 +411,6 @@ H5_DLL herr_t H5F__format_convert(H5F_t *f);
 H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
-H5_DLL H5F_t *H5F__get_file(void *obj, H5I_type_t type);
 H5_DLL herr_t H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
 
 /* File mount related routines */

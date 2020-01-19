@@ -341,7 +341,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     hid_t gapl_id)
 {
     void               *grp = NULL;                     /* Structure for new group */
-    H5VL_object_t      *vol_obj = NULL;                     /* object token of loc_id */
+    H5VL_object_t      *vol_obj = NULL;                 /* object of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t	            ret_value = H5I_INVALID_HID;    /* Return value */
 
@@ -436,7 +436,7 @@ hid_t
 H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 {
     void               *grp = NULL;                     /* Structure for new group */
-    H5VL_object_t      *vol_obj = NULL;                     /* Object token for loc_id */
+    H5VL_object_t      *vol_obj = NULL;                 /* Object for loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
 
@@ -498,8 +498,8 @@ done:
 hid_t
 H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 {
-    void               *grp = NULL;                     /* Group opened */
-    H5VL_object_t      *vol_obj = NULL;                 /* object token of loc_id */
+    void               *grp = NULL;                 /* Group opened */
+    H5VL_object_t      *vol_obj = NULL;             /* object of loc_id */
     H5VL_loc_params_t   loc_params;
     hid_t	        ret_value = H5I_INVALID_HID;    /* Return value */
 

@@ -88,11 +88,23 @@
 
 /* Values for native VOL connector object optional VOL operations */
 #define H5VL_NATIVE_OBJECT_GET_COMMENT                 0   /* H5G|H5Oget_comment, H5Oget_comment_by_name   */
-#define H5VL_NATIVE_OBJECT_GET_INFO                    1   /* H5Oget_info(_by_idx, _by_name)(2)            */
-#define H5VL_NATIVE_OBJECT_SET_COMMENT                 2   /* H5G|H5Oset_comment, H5Oset_comment_by_name   */
-#define H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES         3   /* H5Odisable_mdc_flushes                       */
-#define H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES          4   /* H5Oenable_mdc_flushes                        */
-#define H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED    5   /* H5Oare_mdc_flushes_disabled                  */
+#define H5VL_NATIVE_OBJECT_SET_COMMENT                 1   /* H5G|H5Oset_comment, H5Oset_comment_by_name   */
+#define H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES         2   /* H5Odisable_mdc_flushes                       */
+#define H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES          3   /* H5Oenable_mdc_flushes                        */
+#define H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED    4   /* H5Oare_mdc_flushes_disabled                  */
+#define H5VL_NATIVE_OBJECT_GET_NATIVE_INFO             5   /* H5Oget_native_info(_by_idx, _by_name)        */
+
+/*******************/
+/* Public Typedefs */
+/*******************/
+
+/********************/
+/* Public Variables */
+/********************/
+
+/*********************/
+/* Public Prototypes */
+/*********************/
 
 /*******************/
 /* Public Typedefs */
@@ -110,7 +122,11 @@
 extern "C" {
 #endif
 
-/* Private functions */
+/* Token <--> address converters */
+H5_DLL herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token);
+H5_DLL herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr);
+
+/* Not really public but must be included here */
 H5_DLL hid_t H5VL_native_register(void);
 
 #ifdef __cplusplus

@@ -41,7 +41,7 @@ H5TOOLS_DLL char    *h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_
 H5TOOLS_DLL void     h5tools_str_dump_space_slabs(h5tools_str_t *, hid_t, const h5tool_format_t *, h5tools_context_t *ctx);
 H5TOOLS_DLL void     h5tools_str_dump_space_blocks(h5tools_str_t *, hid_t, const h5tool_format_t *);
 H5TOOLS_DLL void     h5tools_str_dump_space_points(h5tools_str_t *, hid_t, const h5tool_format_t *);
-H5TOOLS_DLL void     h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info, hid_t container, H5R_ref_t *vp);
+H5TOOLS_DLL void     h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *vp);
 H5TOOLS_DLL char    *h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info,
                                    hid_t container, hid_t type, void *vp,
                                    h5tools_context_t *ctx);

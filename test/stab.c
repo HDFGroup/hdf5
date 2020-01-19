@@ -70,8 +70,10 @@ const char *FILENAME[] = {
 #define GCPL_ON_ROOT_MAX_COMPACT   4
 #define GCPL_ON_ROOT_MIN_DENSE     2
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 /* Definitions for 'old_api' test */
 #define OLD_API_GROUP           "/old_api"
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Definitions for 'corrupt_stab_msg' test */
 #define CORRUPT_STAB_FILE           "corrupt_stab_msg.h5"
@@ -328,7 +330,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     unsigned    est_num_entries;    /* Estimated # of entries in group */
     unsigned    est_name_len;        /* Estimated length of entry name */
     unsigned    nmsgs;                /* Number of messages in group's header */
-    H5O_info_t  oinfo;                  /* Object info */
+    H5O_native_info_t  ninfo;                  /* Object info */
     char        objname[NAME_BUF_SIZE];         /* Object name */
     char    filename[NAME_BUF_SIZE];
     h5_stat_size_t       empty_size;             /* Size of an empty file */
@@ -419,11 +421,11 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     if(H5G__is_new_dense_test(gid) != FALSE) TEST_ERROR
 
     /* Check that the object header is only one chunk and the space has been allocated correctly */
-    if(H5Oget_info2(gid, &oinfo, H5O_INFO_HDR) < 0) TEST_ERROR
-    if(oinfo.hdr.space.total != 151) TEST_ERROR
-    if(oinfo.hdr.space.free != 0) TEST_ERROR
-    if(oinfo.hdr.nmesgs != 6) TEST_ERROR
-    if(oinfo.hdr.nchunks != 1) TEST_ERROR
+    if(H5Oget_native_info(gid, &ninfo, H5O_NATIVE_INFO_HDR) < 0) TEST_ERROR
+    if(ninfo.hdr.space.total != 151) TEST_ERROR
+    if(ninfo.hdr.space.free != 0) TEST_ERROR
+    if(ninfo.hdr.nmesgs != 6) TEST_ERROR
+    if(ninfo.hdr.nchunks != 1) TEST_ERROR
 
     /* Create one more "bottom" group, which should push top group into using a symbol table */
     HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
@@ -441,11 +443,11 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     if(H5G__is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Check that the object header is still one chunk and the space has been allocated correctly */
-    if(H5Oget_info2(gid, &oinfo, H5O_INFO_HDR) < 0) TEST_ERROR
-    if(oinfo.hdr.space.total != 151) TEST_ERROR
-    if(oinfo.hdr.space.free != 92) TEST_ERROR
-    if(oinfo.hdr.nmesgs != 3) TEST_ERROR
-    if(oinfo.hdr.nchunks != 1) TEST_ERROR
+    if(H5Oget_native_info(gid, &ninfo, H5O_NATIVE_INFO_HDR) < 0) TEST_ERROR
+    if(ninfo.hdr.space.total != 151) TEST_ERROR
+    if(ninfo.hdr.space.free != 92) TEST_ERROR
+    if(ninfo.hdr.nmesgs != 3) TEST_ERROR
+    if(ninfo.hdr.nchunks != 1) TEST_ERROR
 
     /* Unlink objects from top group */
     while(u >= LIFECYCLE_MIN_DENSE) {

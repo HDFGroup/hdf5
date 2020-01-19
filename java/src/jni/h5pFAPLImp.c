@@ -308,7 +308,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1family
     }
 
     if (NULL == (sa = (hsize_t *) HDmalloc((size_t) rank * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_family: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_family: memory allocation failed");
 
     PIN_LONG_ARRAY(ENVONLY, memb_plist, plistArray, &isCopy, "H5Pget_family: plistArray not pinned");
 
@@ -398,7 +398,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1hdfs
     if (NULL != fa.namenode_name) {
         if (NULL == (j_namenode_name = ENVPTR->NewStringUTF(ENVONLY, fa.namenode_name))) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create namenode_name string");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create namenode_name string");
         }
     }
     args[0].l = j_namenode_name;
@@ -408,7 +408,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1hdfs
     if (NULL != fa.user_name) {
         if (NULL == (j_user_name = ENVPTR->NewStringUTF(ENVONLY, fa.user_name))) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create user_name string");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create user_name string");
         }
     }
     args[2].l = j_user_name;
@@ -416,7 +416,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1hdfs
     if (NULL != fa.kerberos_ticket_cache) {
         if (NULL == (j_kerb_cache_path = ENVPTR->NewStringUTF(ENVONLY, fa.kerberos_ticket_cache))) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create kerberos_ticket_cache string");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create kerberos_ticket_cache string");
         }
     }
     args[3].l = j_kerb_cache_path;
@@ -651,7 +651,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi
             str_len = HDstrlen(utf8);
 
             if (NULL == (member_name[i] = (char *) HDmalloc(str_len + 1)))
-                H5_JNI_FATAL_ERROR(ENVONLY, "H5Pset_fapl_multi: memory allocation failed");
+                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pset_fapl_multi: memory allocation failed");
 
             HDstrncpy(member_name[i], utf8, str_len + 1);
             (member_name[i])[str_len] = '\0';
@@ -678,7 +678,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi
 
             if (NULL == (rstring = ENVPTR->NewStringUTF(ENVONLY, member_name[i]))) {
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-                H5_JNI_FATAL_ERROR(ENVONLY, "H5Pset_fapl_multi: out of memory - unable to construct string from UTF characters");
+                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pset_fapl_multi: out of memory - unable to construct string from UTF characters");
             }
 
             if (NULL == (o = ENVPTR->GetObjectArrayElement(ENVONLY, memb_name, (jsize) i))) {
@@ -750,7 +750,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1multi
         PIN_LONG_ARRAY(ENVONLY, memb_addr, theaddrArray, &isCopy, "H5Pget_fapl_multi: memb_addr not pinned");
     if (memb_name)
         if (NULL == (mName = (char **) HDcalloc(H5FD_MEM_NTYPES, sizeof(*mName))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_multi: memory allocation failed");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_multi: memory allocation failed");
 
     if ((status = H5Pget_fapl_multi((hid_t)tid, (H5FD_mem_t *)themapArray, (hid_t *)thefaplArray,
             mName, (haddr_t *)theaddrArray, (hbool_t *)&relax)) < 0)
@@ -761,7 +761,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1multi
             if (mName[i]) {
                 if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, mName[i]))) {
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-                    H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_multi: out of memory - unable to construct string from UTF characters");
+                    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_multi: out of memory - unable to construct string from UTF characters");
                 }
 
                 ENVPTR->SetObjectArrayElement(ENVONLY, memb_name, (jsize) i, (jobject)str);
@@ -823,7 +823,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3
     if (NULL != fa.aws_region) {
         if (NULL == (j_aws = ENVPTR->NewStringUTF(ENVONLY, fa.aws_region))) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create aws_region string");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create aws_region string");
         }
     }
     args[0].l = j_aws;
@@ -831,7 +831,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3
     if (NULL != fa.secret_id) {
         if (NULL == (j_id = ENVPTR->NewStringUTF(ENVONLY, fa.secret_id))) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_id string");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_id string");
         }
     }
     args[1].l = j_id;
@@ -839,7 +839,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3
     if (NULL != fa.secret_key) {
         if (NULL == (j_key = ENVPTR->NewStringUTF(ENVONLY, fa.secret_key))) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_key string");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_key string");
         }
     }
     args[2].l = j_key;
@@ -1688,7 +1688,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1mdc_1config
     if (NULL != cacheinfo.trace_file_name) {
         if (NULL == (j_str = ENVPTR->NewStringUTF(ENVONLY, cacheinfo.trace_file_name))) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_mdc_config: out of memory - unable to construct string from UTF characters");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_mdc_config: out of memory - unable to construct string from UTF characters");
         }
     }
 
@@ -1802,7 +1802,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1mdc_1log_1options
 
     location_size++; /* add extra space for the null terminator */
     if (NULL == (lname = (char *) HDmalloc(sizeof(char) * location_size)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_mdc_log_options: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_mdc_log_options: memory allocation failed");
 
     if ((status = H5Pget_mdc_log_options((hid_t)fapl_id, &is_enabled, lname, &location_size, &start_on_access)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1810,7 +1810,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1mdc_1log_1options
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, lname))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_mdc_log_options: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_mdc_log_options: out of memory - unable to construct string from UTF characters");
     }
 
     mdc_log_options_ptr[0] = (jboolean)is_enabled;

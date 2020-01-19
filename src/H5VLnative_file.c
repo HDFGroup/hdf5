@@ -226,7 +226,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                 ssize_t    *ret  = HDva_arg(arguments, ssize_t *);
                 size_t      len;
 
-                if(NULL == (f = H5F__get_file(obj, type)))
+                if(H5VL_native_get_file_struct(obj, type, &f) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 len = HDstrlen(H5F_OPEN_NAME(f));
@@ -313,7 +313,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 H5F_t           *f = NULL;              /* File to flush */
 
                 /* Get the file for the object */
-                if(NULL == (f = H5F__get_file(obj, type)))
+                if(H5VL_native_get_file_struct(obj, type, &f) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Nothing to do if the file is read only. This determination is
@@ -519,7 +519,7 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type,
                 /* Get the file struct. This call is careful to not return the file pointer
                  * for the top file in a mount hierarchy.
                  */
-                if(NULL == (f = H5F__get_file(obj, type)))
+                if(H5VL_native_get_file_struct(obj, type, &f) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get a file struct")
 
                 /* Get the file info */

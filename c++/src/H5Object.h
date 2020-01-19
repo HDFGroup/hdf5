@@ -44,10 +44,10 @@ typedef void (*attr_operator_t)(H5Object& loc,
                                  const H5std_string attr_name,
                                  void *operator_data);
 
-// Define the operator function pointer for H5Ovisit2().
+// Define the operator function pointer for H5Ovisit3().
 typedef int (*visit_operator_t)(H5Object& obj,
                                  const H5std_string attr_name,
-                                 const H5O_info_t *oinfo,
+                                 const H5O_info2_t *oinfo,
                                  void *operator_data);
 
 // User data for attribute iteration
