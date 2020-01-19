@@ -62,11 +62,11 @@ FUNCTION: H5Literate; H5L_iterate; v18, v112
 FUNCTION: H5Literate_by_name; H5L_iterate; v18, v112
 FUNCTION: H5Lvisit; H5L_iterate; v18, v112
 FUNCTION: H5Lvisit_by_name; H5L_iterate; v18, v112
-FUNCTION: H5Oget_info; ; v18, v10, v112
-FUNCTION: H5Oget_info_by_name; ; v18, v10, v112
-FUNCTION: H5Oget_info_by_idx; ; v18, v10, v112
-FUNCTION: H5Ovisit; ; v18, v10, v112
-FUNCTION: H5Ovisit_by_name; ; v18, v10, v112
+FUNCTION: H5Oget_info; ; v18, v110, v112
+FUNCTION: H5Oget_info_by_name; ; v18, v110, v112
+FUNCTION: H5Oget_info_by_idx; ; v18, v110, v112
+FUNCTION: H5Ovisit; ; v18, v110, v112
+FUNCTION: H5Ovisit_by_name; ; v18, v110, v112
 FUNCTION: H5Pencode; ; v110, v112
 FUNCTION: H5Pget_filter; ; v10, v18
 FUNCTION: H5Pget_filter_by_id; ; v16, v18
@@ -84,7 +84,7 @@ FUNCTION: H5Topen; ; v10, v18
 # (although not required, it's easier to compare this file with the headers
 #       generated if the list below is in alphanumeric sort order - QAK)
 TYPEDEF: H5E_auto; v10, v18
-TYPEDEF: H5O_info; v18, v112
-TYPEDEF: H5O_iterate; v18, v112
+TYPEDEF: H5O_info; v18, v110, v112
+TYPEDEF: H5O_iterate; v18, v110, v112
 TYPEDEF: H5Z_class; v16, v18
 
