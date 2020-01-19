@@ -14,4 +14,6 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   #add_test (NAME h5stat_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat_gentest>)
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()

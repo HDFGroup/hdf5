@@ -133,7 +133,7 @@ else ()
 endif ()
 set_target_properties (zip_perf PROPERTIES FOLDER perform)
 
-if (H5_HAVE_PARALLEL AND BUILD_TESTING)
+if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
   if (UNIX)
       #-- Adding test for perf - only on unix systems
       set (perf_SOURCES
@@ -191,4 +191,6 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
   endif ()
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_TOOLS)
+  include (CMakeTests.cmake)
+endif ()

@@ -26,7 +26,7 @@ if (BUILD_SHARED_LIBS)
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5watch-shared)
 endif ()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND HDF5_TEST_SWMR AND HDF5_TEST_SERIAL)
   #-- Add swmr_check_compat_vfd program
   set (hl_swmr_check_compat_vfd_SOURCES
       ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/swmr_check_compat_vfd.c
@@ -68,7 +68,9 @@ if (BUILD_TESTING)
   endif ()
   set_target_properties (h5watchgentest PROPERTIES FOLDER generator/tools/hl)
 
-  include (CMakeTests.cmake)
+  if (HDF5_TEST_TOOLS)
+    include (CMakeTests.cmake)
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
