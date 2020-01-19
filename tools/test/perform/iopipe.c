@@ -133,7 +133,7 @@ synchronize (void)
 #if defined(H5_HAVE_WIN32_API) && ! defined(__CYGWIN__)
     _flushall();
 #else
-    int H5_ATTR_SANITY_CHECK status;
+    int H5_ATTR_NDEBUG_UNUSED status;
 
     status = HDsystem("sync");
     HDassert(status >= 0);
@@ -168,8 +168,7 @@ main (void)
     static unsigned  nread = NREAD_REQUESTS, nwrite = NWRITE_REQUESTS;
 
     unsigned char  *the_data = NULL;
-    hid_t    file, dset, file_space = -1;
-    herr_t   H5_ATTR_SANITY_CHECK status;
+    hid_t    file, dset, file_space = H5I_INVALID_HID;
 #ifdef H5_HAVE_GETRUSAGE
     struct rusage  r_start, r_stop;
 #else
@@ -178,8 +177,9 @@ main (void)
     struct timeval  t_start, t_stop;
     int      fd;
     unsigned    u;
-    hssize_t    H5_ATTR_SANITY_CHECK n;
-    off_t       H5_ATTR_SANITY_CHECK offset;
+    herr_t      H5_ATTR_NDEBUG_UNUSED status;
+    hssize_t    H5_ATTR_NDEBUG_UNUSED n;
+    off_t       H5_ATTR_NDEBUG_UNUSED offset;
     hsize_t    start[2];
     hsize_t    count[2];
 

@@ -762,7 +762,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5G_node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_SANITY_CHECK *_lt_key/*in,out*/,
+H5G_node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key/*in,out*/,
     hbool_t H5_ATTR_UNUSED *lt_key_changed/*out*/,
     void *_udata/*in,out*/, void *_rt_key/*in,out*/,
     hbool_t *rt_key_changed/*out*/)

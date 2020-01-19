@@ -510,8 +510,8 @@ h5diff(const char *fname1,
                const char *objname2,
                diff_opt_t *opts)
 {
-    hid_t         file1_id = -1;
-    hid_t         file2_id = -1;
+    hid_t         file1_id = H5I_INVALID_HID;
+    hid_t         file2_id = H5I_INVALID_HID;
     char          filenames[2][MAX_FILENAME];
     hsize_t       nfound = 0;
     int           l_ret1 = -1;

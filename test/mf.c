@@ -7529,8 +7529,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t H5_ATTR_SANITY_CHECK multi, 
-    hbool_t split)
+set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
 {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t memb_fapl_arr[H5FD_MEM_NTYPES];
@@ -7539,7 +7538,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t H5_ATTR_SANITY_CHECK multi
     hbool_t relax;
     H5FD_mem_t  mt;
 
-    HDassert(multi || split);
+    HDassert(split);
 
     HDmemset(memb_name, 0, sizeof memb_name);
 
@@ -7616,7 +7615,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
         if((fapl_new = H5Pcopy(fapl)) < 0) TEST_ERROR
 
         if(multi || split)
-            if(set_multi_split(fapl_new, 4096, multi, split) <  0)
+            if(set_multi_split(fapl_new, 4096, split) <  0)
                 TEST_ERROR;
 
         /* Test with TRUE or FALSE for persisting free-space */

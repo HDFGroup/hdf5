@@ -126,7 +126,8 @@ int main(int argc, const char *argv[])
 static void
 ph5diff_worker(int nID)
 {
-    hid_t file1_id = -1, file2_id = -1;
+    hid_t file1_id = H5I_INVALID_HID;
+    hid_t file2_id = H5I_INVALID_HID;
 
     while(1)
     {

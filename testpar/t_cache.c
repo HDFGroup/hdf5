@@ -2379,7 +2379,7 @@ datum_get_initial_load_size(void *udata_ptr, size_t *image_len_ptr)
  *-------------------------------------------------------------------------
  */
 static void *
-datum_deserialize(const void H5_ATTR_SANITY_CHECK *image_ptr,
+datum_deserialize(const void H5_ATTR_NDEBUG_UNUSED *image_ptr,
                   H5_ATTR_UNUSED size_t len,
                   void * udata_ptr,
                   hbool_t * dirty_ptr)
@@ -2492,7 +2492,7 @@ datum_image_len(const void *thing, size_t *image_len)
  */
 static herr_t
 datum_serialize(const H5F_t *f,
-                void H5_ATTR_SANITY_CHECK *image_ptr,
+                void H5_ATTR_NDEBUG_UNUSED *image_ptr,
                 size_t len,
                 void *thing_ptr)
 {

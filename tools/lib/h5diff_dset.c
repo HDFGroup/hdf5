@@ -34,10 +34,10 @@ hsize_t diff_dataset(hid_t file1_id,
                      diff_opt_t *opts)
 {
     int        status = -1;
-    hid_t      did1 = -1;
-    hid_t      did2 = -1;
-    hid_t      dcpl1 = -1;
-    hid_t      dcpl2 = -1;
+    hid_t      did1 = H5I_INVALID_HID;
+    hid_t      did2 = H5I_INVALID_HID;
+    hid_t      dcpl1 = H5I_INVALID_HID;
+    hid_t      dcpl2 = H5I_INVALID_HID;
     hsize_t    nfound = 0;
     diff_err_t ret_value = opts->err_stat;
 
@@ -814,8 +814,8 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
         int   nmembs1;
         int   nmembs2;
         int   j;
-        hid_t memb_type1 = -1;
-        hid_t memb_type2 = -1;
+        hid_t memb_type1 = H5I_INVALID_HID;
+        hid_t memb_type2 = H5I_INVALID_HID;
         H5TOOLS_DEBUG("diff_can_type end - H5T_COMPOUND");
 
         nmembs1 = H5Tget_nmembers(f_tid1);

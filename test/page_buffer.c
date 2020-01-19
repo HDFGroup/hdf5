@@ -39,28 +39,24 @@
 
 #define FILENAME_LEN            1024
 
-#ifndef H5_HAVE_PARALLEL
-#define NUM_DSETS               5
-#define NX                      100
-#define NY                      50
-#endif
-
-/* helper routines */
-#ifndef H5_HAVE_PARALLEL
-static unsigned create_file(char *filename, hid_t fcpl, hid_t fapl);
-static unsigned open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size);
-#endif /* H5_HAVE_PARALLEL */
-
 /* test routines */
 #ifdef H5_HAVE_PARALLEL
 static unsigned verify_page_buffering_disabled(hid_t orig_fapl, 
     const char *env_h5_drvr);
 #else
+#define NUM_DSETS               5
+#define NX                      100
+#define NY                      50
+
 static unsigned test_args(hid_t fapl, const char *env_h5_drvr);
 static unsigned test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr);
 static unsigned test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr);
 static unsigned test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr);
 static unsigned test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr);
+
+/* helper routines */
+static unsigned create_file(char *filename, hid_t fcpl, hid_t fapl);
+static unsigned open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size);
 #endif /* H5_HAVE_PARALLEL */
 
 const char *FILENAME[] = {

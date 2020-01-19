@@ -1393,8 +1393,8 @@ error:
 int
 main(int argc, const char *argv[])
 {
-    hid_t               fid = -1;
-    hid_t               gid = -1;
+    hid_t               fid = H5I_INVALID_HID;
+    hid_t               gid = H5I_INVALID_HID;
     hid_t               fapl_id = H5P_DEFAULT;
     H5E_auto2_t         func;
     H5E_auto2_t         tools_func;

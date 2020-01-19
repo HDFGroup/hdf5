@@ -383,7 +383,8 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, H5T_t *dt_src,
         H5F_addr_encode(dst_oloc->file, &p, dst_oloc->addr);
         if(H5R__set_obj_token(ref, (const H5VL_token_t *)&tmp_token, token_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set object token")
-        if(H5R__set_loc_id(ref, dst_loc_id, TRUE) < 0)
+        /* Do not set app_ref since references are released once the copy is done */
+        if(H5R__set_loc_id(ref, dst_loc_id, TRUE, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set destination loc id")
     } /* end for */
 

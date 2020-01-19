@@ -218,9 +218,9 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
         /* close for next turn */
         H5Aclose(attr1_id);
-        attr1_id = -1;
+        attr1_id = H5I_INVALID_HID;
         H5Aclose(attr2_id);
-        attr2_id = -1;
+        attr2_id = H5I_INVALID_HID;
     } /* end while */
 
     /* list1 did not end */
@@ -244,7 +244,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
         /* close for next turn */
         H5Aclose(attr1_id);
-        attr1_id = -1;
+        attr1_id = H5I_INVALID_HID;
     }
 
     /* list2 did not end */
@@ -267,7 +267,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
         /* close for next turn */
         H5Aclose(attr2_id);
-        attr2_id = -1;
+        attr2_id = H5I_INVALID_HID;
     }
 
     /*------------------------------------------------------
@@ -336,7 +336,6 @@ hsize_t diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const 
     hsize_t    dims2[H5S_MAX_RANK];    /* dimensions of dataset */
     char       np1[512];
     char       np2[512];
-    unsigned   u;                 /* Local index variable */
     hsize_t    nfound = 0;
     int        j;
     diff_err_t ret_value = opts->err_stat;

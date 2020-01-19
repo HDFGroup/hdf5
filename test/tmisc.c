@@ -135,7 +135,6 @@ typedef struct
 #ifndef H5_HAVE_PARALLEL
 #define MISC8_DSETNAME2         "Dataset2"
 #define MISC8_DSETNAME3         "Dataset3"
-#define MISC8_DSETNAME4         "Dataset4"
 #define MISC8_DSETNAME6         "Dataset6"
 #define MISC8_DSETNAME7         "Dataset7"
 #define MISC8_DSETNAME9         "Dataset9"

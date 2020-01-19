@@ -1686,7 +1686,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_msg_reset_share(unsigned H5_ATTR_SANITY_CHECK type_id, void *mesg)
+H5O_msg_reset_share(unsigned H5_ATTR_NDEBUG_UNUSED type_id, void *mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

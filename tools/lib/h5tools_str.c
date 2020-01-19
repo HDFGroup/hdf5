@@ -1133,7 +1133,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                         break;
                                 } /* end switch */
                                 H5Oclose(obj);
-                                h5tools_str_sprint_reference(str, info, container, ref_vp);
+                                h5tools_str_sprint_reference(str, ref_vp);
 
                                 /* Print OID */
                                 if(info->obj_hidefileno)
@@ -1145,7 +1145,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             case H5R_DATASET_REGION1:
                                 H5TOOLS_DEBUG("ref_type is H5R_DATASET_REGION1");
                                 h5tools_str_append(str, H5_TOOLS_DATASET);
-                                h5tools_str_sprint_reference(str, info, container, ref_vp);
+                                h5tools_str_sprint_reference(str, ref_vp);
                                 break;
                             case H5R_OBJECT2:
                                 H5TOOLS_DEBUG("ref_type is H5R_OBJECT2");
@@ -1169,17 +1169,17 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                         h5tools_str_append(str, H5_TOOLS_UNKNOWN);
                                         break;
                                 } /* end switch */
-                                h5tools_str_sprint_reference(str, info, container, ref_vp);
+                                h5tools_str_sprint_reference(str, ref_vp);
                                 break;
                             case H5R_DATASET_REGION2:
                                 H5TOOLS_DEBUG("ref_type is H5R_DATASET_REGION2");
                                 h5tools_str_append(str, H5_TOOLS_DATASET);
-                                h5tools_str_sprint_reference(str, info, container, ref_vp);
+                                h5tools_str_sprint_reference(str, ref_vp);
                                 break;
                             case H5R_ATTR:
                                 H5TOOLS_DEBUG("ref_type is H5R_ATTR");
                                 h5tools_str_append(str, H5_TOOLS_ATTRIBUTE);
-                                h5tools_str_sprint_reference(str, info, container, ref_vp);
+                                h5tools_str_sprint_reference(str, ref_vp);
                                 break;
                             case H5R_BADTYPE:
                             case H5R_MAXTYPE:
@@ -1334,7 +1334,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         } /* end switch */
     }
 
-done:
     ret_value = h5tools_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
 
     H5TOOLS_ENDDEBUG("exit with %s", ret_value);
@@ -1351,8 +1350,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-h5tools_str_sprint_reference(h5tools_str_t *str, const h5tool_format_t *info,
-        hid_t container, H5R_ref_t *ref_vp)
+h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
 {
     ssize_t buf_size;
 

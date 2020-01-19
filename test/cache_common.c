@@ -554,7 +554,7 @@ addr_to_type_and_index(haddr_t addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-get_initial_load_size(void *udata, size_t *image_length, int32_t H5_ATTR_SANITY_CHECK entry_type)
+get_initial_load_size(void *udata, size_t *image_length, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;
     test_entry_t *base_addr;
@@ -664,7 +664,7 @@ notify_get_initial_load_size(void *udata, size_t *image_length)
  */
 static herr_t
 get_final_load_size(const void H5_ATTR_UNUSED *image, size_t H5_ATTR_UNUSED image_len,
-    void *udata, size_t *actual_len, int32_t H5_ATTR_SANITY_CHECK entry_type)
+    void *udata, size_t *actual_len, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;
     test_entry_t *base_addr;
@@ -725,7 +725,7 @@ variable_get_final_load_size(const void *image, size_t image_len,
 
 static htri_t
 verify_chksum(const void H5_ATTR_UNUSED *image, size_t H5_ATTR_UNUSED len, void *udata, 
-    int32_t H5_ATTR_SANITY_CHECK entry_type)
+    int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;
     test_entry_t *base_addr;
@@ -778,8 +778,8 @@ variable_verify_chksum(const void *image, size_t len, void *udata)
  *-------------------------------------------------------------------------
  */
 static void *
-deserialize(const void *image, size_t H5_ATTR_SANITY_CHECK len, void *udata, hbool_t *dirty,
-    int32_t H5_ATTR_SANITY_CHECK entry_type)
+deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *udata, hbool_t *dirty,
+    int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;
     test_entry_t *base_addr;
@@ -935,7 +935,7 @@ notify_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
  *-------------------------------------------------------------------------
  */
 herr_t
-image_len(const void *thing, size_t *image_length, int32_t H5_ATTR_SANITY_CHECK entry_type)
+image_len(const void *thing, size_t *image_length, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     const test_entry_t *entry;
     int32_t type;
@@ -1053,10 +1053,10 @@ notify_image_len(const void *thing, size_t *image_length)
  *-------------------------------------------------------------------------
  */
 herr_t
-pre_serialize(H5F_t H5_ATTR_SANITY_CHECK *f,
+pre_serialize(H5F_t H5_ATTR_NDEBUG_UNUSED *f,
               void *thing,
-              haddr_t H5_ATTR_SANITY_CHECK addr,
-              size_t H5_ATTR_SANITY_CHECK len,
+              haddr_t H5_ATTR_NDEBUG_UNUSED addr,
+              size_t H5_ATTR_NDEBUG_UNUSED len,
               haddr_t *new_addr_ptr,
               size_t *new_len_ptr,
               unsigned *flags_ptr)
@@ -1444,7 +1444,7 @@ notify_serialize(const H5F_t H5_ATTR_UNUSED *f, void *image_ptr, size_t len,
  *-------------------------------------------------------------------------
  */
 static herr_t
-notify(H5C_notify_action_t action, void *thing, int32_t H5_ATTR_SANITY_CHECK entry_type)
+notify(H5C_notify_action_t action, void *thing, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;
 
@@ -1521,7 +1521,7 @@ notify_notify(H5C_notify_action_t action, void *thing)
  *-------------------------------------------------------------------------
  */
 herr_t
-free_icr(test_entry_t *entry, int32_t H5_ATTR_SANITY_CHECK entry_type)
+free_icr(test_entry_t *entry, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     HDassert(entry);
 

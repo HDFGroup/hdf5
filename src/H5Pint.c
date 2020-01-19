@@ -2780,7 +2780,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P__poke_plist_cb(H5P_genplist_t H5_ATTR_SANITY_CHECK *plist, const char H5_ATTR_SANITY_CHECK *name, 
+H5P__poke_plist_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_ATTR_NDEBUG_UNUSED *name, 
     H5P_genprop_t *prop, void *_udata)
 {
     H5P_prop_set_ud_t *udata = (H5P_prop_set_ud_t *)_udata;    /* User data for callback */
@@ -2827,7 +2827,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P__poke_pclass_cb(H5P_genplist_t *plist, const char H5_ATTR_SANITY_CHECK *name, H5P_genprop_t *prop,
+H5P__poke_pclass_cb(H5P_genplist_t *plist, const char H5_ATTR_NDEBUG_UNUSED *name, H5P_genprop_t *prop,
     void *_udata)
 {
     H5P_prop_set_ud_t *udata = (H5P_prop_set_ud_t *)_udata;    /* User data for callback */
@@ -4260,7 +4260,7 @@ property list class.
  REVISION LOG
 --------------------------------------------------------------------------*/
 static int
-H5P__iterate_pclass_cb(void *_item, void H5_ATTR_SANITY_CHECK *_key, void *_udata)
+H5P__iterate_pclass_cb(void *_item, void H5_ATTR_NDEBUG_UNUSED *_key, void *_udata)
 {
     H5P_genprop_t *item = (H5P_genprop_t *)_item;       /* Pointer to the property */
     H5P_iter_pclass_ud_t *udata = (H5P_iter_pclass_ud_t *)_udata;     /* Pointer to user data */
@@ -4396,7 +4396,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P__peek_cb(H5P_genplist_t H5_ATTR_SANITY_CHECK *plist, const char H5_ATTR_SANITY_CHECK *name, 
+H5P__peek_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_ATTR_NDEBUG_UNUSED *name, 
     H5P_genprop_t *prop, void *_udata)
 {
     H5P_prop_get_ud_t *udata = (H5P_prop_get_ud_t *)_udata;    /* User data for callback */

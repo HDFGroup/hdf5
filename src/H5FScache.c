@@ -241,7 +241,7 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *-------------------------------------------------------------------------
  */
 static void *
-H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_SANITY_CHECK len, void *_udata, 
+H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata, 
     hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5FS_t		*fspace = NULL; /* Free space header info */
@@ -404,8 +404,8 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len)
  */
 static herr_t 
 H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing,
-    haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t H5_ATTR_SANITY_CHECK *new_addr, 
-    size_t H5_ATTR_SANITY_CHECK *new_len, unsigned *flags)
+    haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t H5_ATTR_NDEBUG_UNUSED *new_addr, 
+    size_t H5_ATTR_NDEBUG_UNUSED *new_len, unsigned *flags)
 {
     H5FS_t 	*fspace = (H5FS_t *)_thing;     /* Pointer to the object */
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
@@ -694,7 +694,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_SANITY_CHECK len,
+H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_thing)
 {
     H5FS_t     *fspace = (H5FS_t *)_thing;      /* Pointer to the object */
@@ -979,8 +979,8 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
  *-------------------------------------------------------------------------
  */
 static void *
-H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_SANITY_CHECK len, void *_udata,
-    hbool_t H5_ATTR_SANITY_CHECK *dirty)
+H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
+    hbool_t H5_ATTR_NDEBUG_UNUSED *dirty)
 {
     H5FS_sinfo_cache_ud_t  *udata = (H5FS_sinfo_cache_ud_t *)_udata;    /* User data for callback */
     H5FS_t                 *fspace;         /* free space manager */
@@ -1026,9 +1026,9 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_SANITY_CHECK le
     /* Check for any serialized sections */
     if(fspace->serial_sect_count > 0) {
         hsize_t old_tot_sect_count;                         /* Total section count from header */
-        hsize_t H5_ATTR_SANITY_CHECK old_serial_sect_count; /* Total serializable section count from header */
-        hsize_t H5_ATTR_SANITY_CHECK old_ghost_sect_count;  /* Total ghost section count from header */
-        hsize_t H5_ATTR_SANITY_CHECK old_tot_space;         /* Total space managed from header */
+        hsize_t H5_ATTR_NDEBUG_UNUSED old_serial_sect_count; /* Total serializable section count from header */
+        hsize_t H5_ATTR_NDEBUG_UNUSED old_ghost_sect_count;  /* Total ghost section count from header */
+        hsize_t H5_ATTR_NDEBUG_UNUSED old_tot_space;         /* Total space managed from header */
         unsigned sect_cnt_size;                             /* The size of the section size counts */
 
         /* Compute the size of the section counts */
@@ -1178,7 +1178,7 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
  */
 static herr_t 
 H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr,
-    size_t H5_ATTR_SANITY_CHECK len, haddr_t *new_addr, size_t H5_ATTR_SANITY_CHECK *new_len, 
+    size_t H5_ATTR_NDEBUG_UNUSED len, haddr_t *new_addr, size_t H5_ATTR_NDEBUG_UNUSED *new_len, 
     unsigned *flags)
 {
     H5FS_sinfo_t 	*sinfo = (H5FS_sinfo_t *)_thing;        /* Pointer to the object */

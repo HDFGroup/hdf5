@@ -212,7 +212,7 @@ H5SM__cache_table_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
  *-------------------------------------------------------------------------
  */
 static void *
-H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_SANITY_CHECK len, 
+H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, 
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5F_t		   *f;                  /* File pointer -- from user data */
@@ -364,7 +364,7 @@ H5SM__cache_table_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_SANITY_CHECK len,
+H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_thing)
 {
     H5SM_master_table_t *table = (H5SM_master_table_t *)_thing; /* Shared message table to encode */
@@ -568,7 +568,7 @@ H5SM__cache_list_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
  *-------------------------------------------------------------------------
  */
 static void *
-H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_SANITY_CHECK len, 
+H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, 
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5SM_list_t          *list = NULL;     /* The SOHM list being read in */
@@ -687,7 +687,7 @@ H5SM__cache_list_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_SANITY_CHECK len,
+H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_thing)
 {
     H5SM_list_t *list = (H5SM_list_t *)_thing ;   /* Instance being serialized */
