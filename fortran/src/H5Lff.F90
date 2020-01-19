@@ -46,7 +46,7 @@ MODULE H5L
 ! Fortran2003 Derived Type:
 !
   TYPE, bind(c) :: union_t
-     INTEGER(haddr_t) :: address
+     TYPE(H5O_TOKEN_T_F) :: token
      INTEGER(size_t)  :: val_size
   END TYPE union_t
 
@@ -604,7 +604,7 @@ CONTAINS
 !                    H5L_TYPE_SOFT_F 	 - Soft link
 !                    H5L_TYPE_EXTERNAL_F - External link
 !                    H5L_TYPE_ERROR_ F   - Error
-!  address 	 - If the link is a hard link, address specifies the file address that the link points to
+!  token 	 - If the link is a hard link, token specifies the object token that the link points to
 !  val_size 	 - If the link is a symbolic link, val_size will be the length of the link value, e.g., 
 !                  the length of the name of the pointed-to object with a null terminator. 
 !  hdferr 	 - Returns 0 if successful and -1 if fails
@@ -625,7 +625,7 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE h5lget_info_f(link_loc_id, link_name, &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        hdferr, lapl_id)
     IMPLICIT NONE
 
@@ -641,7 +641,7 @@ CONTAINS
      	                              !  H5L_TYPE_SOFT_F      - Soft link
      	                              !  H5L_TYPE_EXTERNAL_F  - External link
      	                              !  H5L_TYPE_ERROR _F    - Error
-    INTEGER(HADDR_T), INTENT(OUT) :: address ! If the link is a hard link, address specifies the file address that the link points to
+    TYPE(H5O_TOKEN_T_F), INTENT(OUT), TARGET :: token ! If the link is a hard link, token specifies the object token that the link points to
     INTEGER(SIZE_T), INTENT(OUT) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value, e.g., 
                                              ! the length of the name of the pointed-to object with a null terminator. 
     INTEGER, INTENT(OUT) :: hdferr       ! Error code:
@@ -654,17 +654,17 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5lget_info_c(link_loc_id, link_name, link_namelen, &
-            cset, corder, corder_valid, link_type, address, val_size, &
+            cset, corder, corder_valid, link_type, token, val_size, &
             lapl_id_default) BIND(C,NAME='h5lget_info_c')
          IMPORT :: c_char
-         IMPORT :: HID_T, SIZE_T, HADDR_T
+         IMPORT :: HID_T, SIZE_T, H5O_TOKEN_T_F
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name
          INTEGER, INTENT(OUT) :: cset
          INTEGER, INTENT(OUT) :: corder
          INTEGER, INTENT(OUT) :: link_type
-         INTEGER(HADDR_T), INTENT(OUT) :: address
+         TYPE(H5O_TOKEN_T_F), INTENT(OUT) :: token
          INTEGER(SIZE_T), INTENT(OUT) :: val_size
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(SIZE_T) :: link_namelen
@@ -677,10 +677,8 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5lget_info_c(link_loc_id, link_name, link_namelen, &
-         cset, corder, corder_valid, link_type, &
-         address, val_size, &
-         lapl_id_default)
+    hdferr = h5lget_info_c(link_loc_id, link_name, link_namelen, cset, &
+         corder, corder_valid, link_type, token, val_size, lapl_id_default)
 
     f_corder_valid =.FALSE.
     IF(corder_valid .EQ. 1) f_corder_valid =.TRUE.
@@ -708,8 +706,8 @@ CONTAINS
 !  corder_valid  - Indicates whether the creation order data is valid for this attribute
 !  corder 	 - Is a positive integer containing the creation order of the attribute
 !  cset 	 - Indicates the character set used for the attribute’s name 
-! address        - If the link is a hard link, address specifies the file address that the link points to
-! val_size       - If the link is a symbolic link, val_size will be the length of the link value, e.g., 
+!  token         - If the link is a hard link, token specifies the object token that the link points to
+!  val_size      - If the link is a symbolic link, val_size will be the length of the link value, e.g., 
 !                  the length of the name of the pointed-to object with a null terminator.
 ! hdferr 	 - Returns 0 if successful and -1 if fails
 !
@@ -729,7 +727,7 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE h5lget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
-       link_type, f_corder_valid, corder, cset, address, val_size, hdferr, lapl_id)
+       link_type, f_corder_valid, corder, cset, token, val_size, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id       ! File or group identifier specifying location of subject group  
     CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of subject group
@@ -752,7 +750,7 @@ CONTAINS
     LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute 
     INTEGER, INTENT(OUT) :: corder         ! Is a positive integer containing the creation order of the attribute
     INTEGER, INTENT(OUT) :: cset           ! Indicates the character set used for the attribute’s name
-    INTEGER(HADDR_T), INTENT(OUT) :: address  ! If the link is a hard link, address specifies the file address that the link points to
+    TYPE(H5O_TOKEN_T_F), INTENT(OUT), TARGET :: token  ! If the link is a hard link, token specifies the object token that the link points to
     INTEGER(SIZE_T), INTENT(OUT) :: val_size  ! If the link is a symbolic link, val_size will be the length of the link value, e.g., 
                                               ! the length of the name of the pointed-to object with a null terminator. 
     INTEGER, INTENT(OUT) :: hdferr       ! Error code:
@@ -767,10 +765,10 @@ CONTAINS
 !
     INTERFACE
        INTEGER FUNCTION h5lget_info_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
-            link_type, corder_valid, corder, cset, address, val_size, lapl_id_default) &
+            link_type, corder_valid, corder, cset, token, val_size, lapl_id_default) &
             BIND(C,NAME='h5lget_info_by_idx_c')
          IMPORT :: c_char
-         IMPORT :: HID_T, SIZE_T, HSIZE_T, HADDR_T
+         IMPORT :: HID_T, SIZE_T, HSIZE_T, H5O_TOKEN_T_F
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
@@ -779,10 +777,10 @@ CONTAINS
          INTEGER, INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(IN) :: n
          INTEGER, INTENT(OUT) :: link_type
-         INTEGER :: corder_valid 
+         INTEGER :: corder_valid
          INTEGER, INTENT(OUT) :: corder
          INTEGER, INTENT(OUT) :: cset
-         INTEGER(HADDR_T), INTENT(OUT) :: address
+         TYPE(H5O_TOKEN_T_F), INTENT(OUT) :: token
          INTEGER(SIZE_T), INTENT(OUT) :: val_size
          INTEGER(HID_T) :: lapl_id_default
        END FUNCTION h5lget_info_by_idx_c
@@ -794,7 +792,7 @@ CONTAINS
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
     hdferr = h5lget_info_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
-         link_type, corder_valid, corder, cset, address, val_size, lapl_id_default)
+         link_type, corder_valid, corder, cset, token, val_size, lapl_id_default)
 
     f_corder_valid =.FALSE.
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.

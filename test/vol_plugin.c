@@ -233,7 +233,7 @@ test_getters(void)
         TEST_ERROR;
 
     /* Get the connector's ID */
-    if((vol_id_out = H5VLget_connector_id(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((vol_id_out = H5VLget_connector_id_by_name(NULL_VOL_CONNECTOR_NAME)) < 0)
         TEST_ERROR;
     if(vol_id != vol_id_out)
         FAIL_PUTS_ERROR("VOL connector IDs don't match");

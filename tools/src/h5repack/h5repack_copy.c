@@ -316,7 +316,7 @@ print_user_block(fnamein, fidin);
     /* Initialize indexing options */
     h5trav_set_index(sort_by, sort_order);
     /* init table */
-    trav_table_init(&travt);
+    trav_table_init(fidin, &travt);
 
     if (travt) {
         /* get the list of objects in the file */

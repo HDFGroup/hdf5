@@ -308,8 +308,8 @@ echo "***"Version compatibility tests.
 # If H5_NO_DEPRECATED_SYMBOLS;
 # then only v18main works.
 # else if H5_USE_16_API_DEFAULT;
-#      then v16main works and -DH5_NO_DEPRECATED_SYMBOLS v18main also works.
-#      else v18main works and -DH5_USE_16_API_DEFAULT v16main also works.
+#      then v16main works.
+# else v18main works and -DH5_USE_16_API_DEFAULT v16main also works.
 #
 if [ -n "$H5_USE_16_API_DEFAULT" ]; then
     echo "H5_USE_16_API_DEFAULT is defined."
@@ -326,7 +326,6 @@ if [ -n "$H5_NO_DEPRECATED_SYMBOLS" ]; then
     TOOLTEST $v18main
 elif [ -n "$H5_USE_16_API_DEFAULT" ]; then
     TOOLTEST $v16main
-    TOOLTEST -DH5_NO_DEPRECATED_SYMBOLS $v18main
 else
     TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
     TOOLTEST $v18main

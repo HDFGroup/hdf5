@@ -27,7 +27,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Symbol table
     minor: Object not found
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Lget_info(): unable to get link info
+  #000: (file name) line (number) in H5Lget_info2(): unable to get link info
     major: Links
     minor: Can't get value
   #001: (file name) line (number) in H5VL_link_get(): link get failed

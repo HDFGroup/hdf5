@@ -96,7 +96,7 @@ Java_hdf_hdf5lib_H5_H5Dcopy
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full
-  (JNIEnv*, jclass, jlong, jstring, jobjectArray, jintArray, jintArray, jlongArray, jlongArray, jint, jint, jint);
+  (JNIEnv*, jclass, jlong, jstring, jobjectArray, jintArray, jintArray, jlongArray, jobjectArray, jint, jint, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5

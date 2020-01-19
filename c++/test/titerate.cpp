@@ -96,7 +96,7 @@ int iter_strcmp(const void *s1, const void *s2)
  * Purpose      Custom link iteration callback routine
  *-------------------------------------------------------------------------
  */
-static herr_t liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_UNUSED *link_info, void *op_data)
+static herr_t liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link_info, void *op_data)
 {
     iter_info *info = (iter_info *)op_data;
     static int count = 0;
@@ -158,7 +158,7 @@ static void test_iter_group(FileAccPropList& fapl)
         /* Test iterating over empty group */
         info.command = RET_ZERO;
         idx = 0;
-        ret = H5Literate(file.getId(), H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
+        ret = H5Literate2(file.getId(), H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
         verify_val(ret, SUCCEED, "H5Literate", __LINE__, __FILE__);
 
         DataType datatype(PredType::NATIVE_INT);
@@ -207,7 +207,7 @@ static void test_iter_group(FileAccPropList& fapl)
         H5std_string obj_name;
         for (i = 0; i < nobjs; i++)
         {
-            //H5O_info_t oinfo;                /* Object info */
+            //H5O_info2_t oinfo;                /* Object info */
 
             obj_name = root_group.getObjnameByIdx(i);
         //ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
@@ -287,7 +287,7 @@ static void test_iter_group(FileAccPropList& fapl)
     /* Test all objects in group, when callback always returns 0 */
     info.command = RET_ZERO;
     idx = 0;
-    if((ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) > 0)
+    if((ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) > 0)
         TestErrPrintf("Group iteration function didn't return zero correctly!\n");
 
     /* Test all objects in group, when callback always returns 1 */
@@ -295,7 +295,7 @@ static void test_iter_group(FileAccPropList& fapl)
     info.command = RET_TWO;
     i = 0;
     idx = 0;
-    while((ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) > 0) {
+    while((ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
         verify_val(ret, 2, "H5Literate", __LINE__, __FILE__);
 
@@ -321,7 +321,7 @@ static void test_iter_group(FileAccPropList& fapl)
     info.command = new_format ? RET_CHANGE2 : RET_CHANGE;
     i = 0;
     idx = 0;
-    while((ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) >= 0) {
+    while((ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) >= 0) {
         /* Verify return value from iterator gets propagated correctly */
         verify_val(ret, 1, "H5Literate", __LINE__, __FILE__);
 

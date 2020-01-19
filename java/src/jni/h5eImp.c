@@ -309,7 +309,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1class_1name
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_class_name: no class name");
 
     if (NULL == (namePtr = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Eget_class_name: malloc failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Eget_class_name: malloc failed");
 
     if ((H5Eget_class_name((hid_t)cls_id, (char *)namePtr, (size_t)buf_size + 1)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -464,10 +464,10 @@ Java_hdf_hdf5lib_H5_H5Eget_1msg
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (!buf_size)
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Eget_msg: invalid message");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Eget_msg: invalid message");
 
     if (NULL == (namePtr = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Eget_msg: malloc failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Eget_msg: malloc failed");
 
     PIN_INT_ARRAY(ENVONLY, error_msg_type_list, theArray, NULL, "H5Eget_msg: error_msg_type_list not pinned");
 
@@ -517,7 +517,6 @@ H5E_walk_cb
     (int nindx, const H5E_error2_t *info, void *cb_data)
 {
     cb_wrapper *wrapper = (cb_wrapper *)cb_data;
-    jmethodID   constructor;
     jmethodID   mid;
     jobject     visit_callback = wrapper->visit_callback;
     jstring     str1, str2, str3;
@@ -559,16 +558,7 @@ H5E_walk_cb
 
     args[6].l = str3;
 
-    /* Get a reference to your class if you don't have it already */
-    if (NULL == (cls = CBENVPTR->FindClass(CBENVONLY, "hdf/hdf5lib/structs/H5E_error2_t")))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    /* get a reference to the constructor; the name is <init> */
-    if (NULL == (constructor = CBENVPTR->GetMethodID(CBENVONLY, cls, "<init>", "(JJJILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V")))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    if (NULL == (cb_info_t = CBENVPTR->NewObjectA(CBENVONLY, cls, constructor, args)))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
+    CALL_CONSTRUCTOR(CBENVONLY, "hdf/hdf5lib/structs/H5E_error2_t", "(JJJILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", args, cb_info_t);
 
     status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, nindx, cb_info_t, op_data);
     CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
