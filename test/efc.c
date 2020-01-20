@@ -32,6 +32,11 @@ const char *FILENAME[] = {
     NULL
 };
 
+/* Windows doesn't have PATH_MAX */
+#ifndef PATH_MAX
+#define PATH_MAX    4096
+#endif  /* !PATH_MAX */
+
 /* Global patched filename buffer */
 #define N_FILENAMES     6
 static char *filename[N_FILENAMES];
