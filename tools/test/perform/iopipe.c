@@ -168,7 +168,7 @@ main (void)
     static unsigned  nread = NREAD_REQUESTS, nwrite = NWRITE_REQUESTS;
 
     unsigned char  *the_data = NULL;
-    hid_t    file, dset, file_space = -1;
+    hid_t    file, dset, file_space = H5I_INVALID_HID;
     herr_t    status;
 #ifdef H5_HAVE_GETRUSAGE
     struct rusage  r_start, r_stop;
