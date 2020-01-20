@@ -1,0 +1,14 @@
+# (suggestions from gcc, not code problems)
+# NOTE: -Wformat-nonliteral added back in here (from being disabled in
+# H5_CFLAGS)
+-Waggregate-return
+-Wformat-nonliteral
+-Winline
+-Wmissing-format-attribute
+-Wmissing-noreturn
+# suggested dev warnings from general section
+# -Wdisabled-optimization
+# -Wswitch-default
+# -Wswitch-enum
+# -Wunsafe-loop-optimizations
+# -Wunused-macros
