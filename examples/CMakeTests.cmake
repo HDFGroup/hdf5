@@ -64,38 +64,40 @@ set (test_ex_CLEANFILES
     vds-eiger.h5
 )
 
-# Remove any output file left over from previous test run
-add_test (
-    NAME EXAMPLES-clear-objects
-    COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
-)
-set_tests_properties (EXAMPLES-clear-objects PROPERTIES FIXTURES_SETUP clear_EXAMPLES)
+if (HDF5_TEST_SERIAL)
+  # Remove any output file left over from previous test run
+  add_test (
+      NAME EXAMPLES-clear-objects
+      COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
+  )
+  set_tests_properties (EXAMPLES-clear-objects PROPERTIES FIXTURES_SETUP clear_EXAMPLES)
 
-foreach (example ${examples})
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME EXAMPLES-${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${example}>)
-  else ()
-    add_test (NAME EXAMPLES-${example} COMMAND "${CMAKE_COMMAND}"
-        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-        -D "TEST_PROGRAM=$<TARGET_FILE:${example}>"
-        -D "TEST_ARGS:STRING="
-        -D "TEST_EXPECT=0"
-        -D "TEST_SKIP_COMPARE=TRUE"
-        -D "TEST_OUTPUT=${example}.txt"
-        #-D "TEST_REFERENCE=${example}.out"
-        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (EXAMPLES-${example} PROPERTIES FIXTURES_REQUIRED clear_EXAMPLES)
-  if (last_test)
-    set_tests_properties (EXAMPLES-${example} PROPERTIES DEPENDS ${last_test})
-  endif ()
-  set (last_test "EXAMPLES-${example}")
-endforeach ()
+  foreach (example ${examples})
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME EXAMPLES-${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${example}>)
+    else ()
+      add_test (NAME EXAMPLES-${example} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:${example}>"
+          -D "TEST_ARGS:STRING="
+          -D "TEST_EXPECT=0"
+          -D "TEST_SKIP_COMPARE=TRUE"
+          -D "TEST_OUTPUT=${example}.txt"
+          #-D "TEST_REFERENCE=${example}.out"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+    endif ()
+    set_tests_properties (EXAMPLES-${example} PROPERTIES FIXTURES_REQUIRED clear_EXAMPLES)
+    if (last_test)
+      set_tests_properties (EXAMPLES-${example} PROPERTIES DEPENDS ${last_test})
+    endif ()
+    set (last_test "EXAMPLES-${example}")
+  endforeach ()
+endif ()
 
 ### Windows pops up a modal permission dialog on this test
-if (H5_HAVE_PARALLEL AND NOT WIN32)
+if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME MPI_TEST_EXAMPLES-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example> ${MPIEXEC_POSTFLAGS})
   else ()
