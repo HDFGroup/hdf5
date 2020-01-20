@@ -84,7 +84,7 @@ FUNCTION: H5Topen; ; v10, v18
 # (although not required, it's easier to compare this file with the headers
 #       generated if the list below is in alphanumeric sort order - QAK)
 TYPEDEF: H5E_auto; v10, v18
-TYPEDEF: H5O_info; v18, v110, v112
-TYPEDEF: H5O_iterate; v18, v110, v112
+TYPEDEF: H5O_info; v18, v112
+TYPEDEF: H5O_iterate; v18, v112
 TYPEDEF: H5Z_class; v16, v18
 
