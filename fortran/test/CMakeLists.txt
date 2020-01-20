@@ -470,4 +470,6 @@ else ()
   add_dependencies (fflush2 ${HDF5_F90_TEST_LIBSH_TARGET})
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_FORTRAN AND HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()

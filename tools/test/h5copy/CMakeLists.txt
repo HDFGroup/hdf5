@@ -43,4 +43,6 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()
