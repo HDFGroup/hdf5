@@ -103,4 +103,6 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   set_target_properties (hl_gen_test_ds PROPERTIES FOLDER test/hl/gen)
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()

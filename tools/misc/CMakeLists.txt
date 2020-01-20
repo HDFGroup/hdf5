@@ -72,7 +72,7 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5repart_gentest STATIC)
     target_link_libraries (h5repart_gentest PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
-    #add_test (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
+    #add_test (NAME h5repart_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart_gentest>)
   endif ()
 
   add_executable (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)
@@ -86,8 +86,10 @@ if (BUILD_TESTING)
   endif ()
   set_target_properties (h5repart_test PROPERTIES FOLDER tools)
 
-  include (CMakeTestsRepart.cmake)
-  include (CMakeTestsMkgrp.cmake)
+  if (HDF5_TEST_SERIAL)
+    include (CMakeTestsRepart.cmake)
+    include (CMakeTestsMkgrp.cmake)
+  endif ()
 endif ()
 
 ##############################################################################

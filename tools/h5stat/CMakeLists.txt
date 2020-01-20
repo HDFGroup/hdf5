@@ -40,7 +40,9 @@ if (BUILD_TESTING)
     #add_test (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
   endif ()
 
-  include (CMakeTests.cmake)
+  if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
+    include (CMakeTests.cmake)
+  endif ()
 endif ()
 
 ##############################################################################

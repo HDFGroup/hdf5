@@ -56,6 +56,24 @@ New Features
 
     Configuration
     -------------
+    - Added new options to CMake for control of testing
+
+      Added CMake options (default ON);
+          HDF5_TEST_SERIAL AND/OR HDF5_TEST_PARALLEL
+          combined with:
+            HDF5_TEST_TOOLS
+            HDF5_TEST_EXAMPLES
+            HDF5_TEST_FORTRAN
+            HDF5_TEST_CPP
+
+      (ADB - 2020/01/15, HDFFV-11001)
+
+    - Added Clang sanitizers to CMake for analyzer support
+
+      Added CMake code and files to execute the Clang sanitizers.
+
+      (ADB - 2019/12/12, TRILAB-135)
+
     - Update CMake for VS2019 support
 
       CMake added support for VS2019 in version 3.15. Changes to the CMake

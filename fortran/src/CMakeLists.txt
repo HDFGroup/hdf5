@@ -116,7 +116,7 @@ add_executable (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
 )
-target_include_directories(H5match_types PRIVATE "${HDF5_BINARY_DIR};${HDF5_SRC_DIR};${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (H5match_types PRIVATE "${HDF5_BINARY_DIR};${HDF5_SRC_DIR};${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT ONLY_SHARED_LIBS)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
