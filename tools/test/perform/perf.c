@@ -110,8 +110,6 @@ const char *FILENAME[] = {
 /* function prototypes */
 static int parse_args(int argc, char **argv);
 
-extern int errno;
-
 /* globals needed for getopt */
 extern char *optarg;
 
