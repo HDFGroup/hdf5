@@ -1562,8 +1562,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
     size_t              page_buf_size;
-    unsigned            page_buf_min_meta_perc;
-    unsigned            page_buf_min_raw_perc;
+    unsigned            page_buf_min_meta_perc = 0;
+    unsigned            page_buf_min_raw_perc = 0;
     hbool_t             set_flag = FALSE;   /*set the status_flags in the superblock */
     hbool_t             clear = FALSE;      /*clear the status_flags         */
     hbool_t             evict_on_close;     /* evict on close value from plist  */
