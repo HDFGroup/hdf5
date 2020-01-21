@@ -557,16 +557,16 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     /* HDF5 variables */
     herr_t      hrc;                    /*HDF5 return code              */
     hsize_t     h5dims[2];              /*dataset dim sizes             */
-    hid_t       h5dset_space_id = -1;   /*dataset space ID              */
-    hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
-    hid_t       h5ds_id = -1;           /*dataset handle                */
+    hid_t       h5dset_space_id = H5I_INVALID_HID;   /*dataset space ID              */
+    hid_t       h5mem_space_id = H5I_INVALID_HID;    /*memory dataspace ID           */
+    hid_t       h5ds_id = H5I_INVALID_HID;           /*dataset handle                */
     hsize_t     h5block[2];     /*dataspace selection           */
     hsize_t     h5stride[2];
     hsize_t     h5count[2];
     hsize_t     h5start[2];
     hssize_t    h5offset[2];            /* Selection offset within dataspace */
-    hid_t       h5dcpl = -1;            /* Dataset creation property list */
-    hid_t       h5dxpl = -1;            /* Dataset transfer property list */
+    hid_t       h5dcpl = H5I_INVALID_HID;            /* Dataset creation property list */
+    hid_t       h5dxpl = H5I_INVALID_HID;            /* Dataset transfer property list */
 
     /* Get the parameters from the parameter block */
     blk_size=parms->blk_size;
@@ -1402,7 +1402,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         GOTOERROR(FAIL);
         }
 
-        h5ds_id = -1;
+        h5ds_id = H5I_INVALID_HID;
     } /* end if */
     } /* end for */
 
@@ -1458,7 +1458,7 @@ done:
         HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dset_space_id = -1;
+        h5dset_space_id = H5I_INVALID_HID;
     }
     }
 
@@ -1468,7 +1468,7 @@ done:
         HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5mem_space_id = -1;
+        h5mem_space_id = H5I_INVALID_HID;
     }
     }
 
@@ -1478,7 +1478,7 @@ done:
         HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dxpl = -1;
+        h5dxpl = H5I_INVALID_HID;
     }
     }
 
@@ -1537,15 +1537,15 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     /* HDF5 variables */
     herr_t      hrc;                    /*HDF5 return code              */
     hsize_t     h5dims[2];              /*dataset dim sizes             */
-    hid_t       h5dset_space_id = -1;   /*dataset space ID              */
-    hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
-    hid_t       h5ds_id = -1;           /*dataset handle                */
+    hid_t       h5dset_space_id = H5I_INVALID_HID;   /*dataset space ID              */
+    hid_t       h5mem_space_id = H5I_INVALID_HID;    /*memory dataspace ID           */
+    hid_t       h5ds_id = H5I_INVALID_HID;           /*dataset handle                */
     hsize_t h5block[2];     /*dataspace selection           */
     hsize_t h5stride[2];
     hsize_t h5count[2];
     hsize_t h5start[2];
     hssize_t    h5offset[2];            /* Selection offset within dataspace */
-    hid_t       h5dxpl = -1;            /* Dataset transfer property list */
+    hid_t       h5dxpl = H5I_INVALID_HID;            /* Dataset transfer property list */
 
     /* Get the parameters from the parameter block */
     blk_size=parms->blk_size;
@@ -2357,7 +2357,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         GOTOERROR(FAIL);
         }
 
-        h5ds_id = -1;
+        h5ds_id = H5I_INVALID_HID;
     } /* end if */
     } /* end for */
 
@@ -2413,7 +2413,7 @@ done:
         HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dset_space_id = -1;
+        h5dset_space_id = H5I_INVALID_HID;
     }
     }
 
@@ -2423,7 +2423,7 @@ done:
         HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5mem_space_id = -1;
+        h5mem_space_id = H5I_INVALID_HID;
     }
     }
 
@@ -2433,7 +2433,7 @@ done:
         HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dxpl = -1;
+        h5dxpl = H5I_INVALID_HID;
     }
     }
 
@@ -2451,7 +2451,7 @@ done:
 do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 {
     int ret_code = SUCCESS, mrc;
-    hid_t acc_tpl = -1;         /* file access templates */
+    hid_t acc_tpl = H5I_INVALID_HID;         /* file access templates */
 
     switch (param->io_type) {
         case POSIXIO:
