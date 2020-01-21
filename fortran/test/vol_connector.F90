@@ -74,8 +74,8 @@ CONTAINS
     CALL check("H5VLis_connector_registered_f",error,total_error)
     CALL VERIFY("H5VLis_connector_registered_f", is_registered, .TRUE., total_error)
 
-    CALL H5VLget_connector_id_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
-    CALL check("H5VLget_connector_id_f",error,total_error)
+    CALL H5VLget_connector_id_by_name_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
+    CALL check("H5VLget_connector_id_by_name_f",error,total_error)
 
     CALL H5Fcreate_f("voltest.h5",H5F_ACC_TRUNC_F, file_id, error)
     CALL check("H5F_create_f",error,total_error)
@@ -201,9 +201,9 @@ CONTAINS
        CALL VERIFY("H5Pget_vol_id_f", vol_id_out, vol_id, total_error)
     ENDIF
 
-    CALL H5VLget_connector_id_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
-    CALL check("H5VLget_connector_id_f",error,total_error)
-    CALL VERIFY("H5VLget_connector_id_f", vol_id_out, vol_id, total_error)
+    CALL H5VLget_connector_id_by_name_f(NATIVE_VOL_CONNECTOR_NAME, vol_id_out, error)
+    CALL check("H5VLget_connector_id_by_name_f",error,total_error)
+    CALL VERIFY("H5VLget_connector_id_by_name_f", vol_id_out, vol_id, total_error)
     CALL H5Fcreate_f("voltest.h5",H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl_id)
 
     CALL check("H5F_create_f",error,total_error)

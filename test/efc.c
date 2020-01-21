@@ -32,8 +32,14 @@ const char *FILENAME[] = {
     NULL
 };
 
+/* Windows doesn't have PATH_MAX */
+#ifndef PATH_MAX
+#define PATH_MAX    4096
+#endif  /* !PATH_MAX */
+
 /* Global patched filename buffer */
-static char filename[6][1024];
+#define N_FILENAMES     6
+static char *filename[N_FILENAMES];
 
 /* Global property lists - just copies of the defaults (necessary to use
  * internal functions */
@@ -2896,10 +2902,11 @@ error:
 int
 main(void)
 {
-    unsigned nerrors = 0;        /* track errors */
-    H5P_genplist_t *plist;      /* Property list pointer for FAPL */
-    H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info        */
-    hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
+    unsigned nerrors = 0;                   /* track errors */
+    H5P_genplist_t *plist;                  /* Property list pointer for FAPL */
+    H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info */
+    hbool_t     api_ctx_pushed = FALSE;     /* Whether API context pushed */
+    int i;                                  /* iterator */
 
     /* Test Setup */
     HDputs("Testing the external file cache");
@@ -2907,6 +2914,11 @@ main(void)
     /* Create property lists */
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     fapl_id = h5_fileaccess();
+
+    /* Allocate memory for filenames */
+    for(i = 0; i < N_FILENAMES; i++) {
+        filename[i] = (char *)HDcalloc(PATH_MAX, sizeof(char));
+    }
 
     /* Patch filenames */
     h5_fixname(FILENAME[0], fapl_id, filename[0], sizeof(filename[0]));
@@ -2942,7 +2954,8 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);
 
     /* Pop API context */
-    if(api_ctx_pushed && H5CX_pop() < 0) FAIL_STACK_ERROR
+    if(api_ctx_pushed && H5CX_pop() < 0)
+        FAIL_STACK_ERROR
     api_ctx_pushed = FALSE;
 
     if(nerrors)
@@ -2951,6 +2964,10 @@ main(void)
     HDputs("All external file cache tests passed.");
 
     h5_clean_files(FILENAME, fapl_id);
+
+    for(i = 0; i < N_FILENAMES; i++) {
+        HDfree(filename[i]);
+    }
 
     return EXIT_SUCCESS;
 
@@ -2961,7 +2978,12 @@ error:
         H5Pclose(fapl_id);
     } H5E_END_TRY
 
-    if(api_ctx_pushed) H5CX_pop();
+    if(api_ctx_pushed)
+        H5CX_pop();
+
+    for(i = 0; i < N_FILENAMES; i++) {
+        HDfree(filename[i]);
+    }
 
     return EXIT_FAILURE;
 } /* end main() */

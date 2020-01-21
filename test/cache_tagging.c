@@ -24,6 +24,7 @@
 
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5HLprivate.h"
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 /* ============ */
 /* Test Defines */
@@ -374,14 +375,15 @@ error:
 static int
 get_object_header_tag(hid_t loc_id, haddr_t *tag)
 {
-    H5O_info_t oinfo;           /* Object info */
+    H5O_info2_t oinfo;           /* Object info */
 
     /* Retrieve the info for the object */
-    if(H5Oget_info2(loc_id, &oinfo, H5O_INFO_ALL) < 0)
+    if(H5Oget_info3(loc_id, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
 
     /* Set the tag to return */
-    *tag = oinfo.addr;
+    if(H5VLnative_token_to_addr(loc_id, oinfo.token, tag) < 0)
+        TEST_ERROR;
 
     return 0;
 
@@ -441,7 +443,7 @@ check_file_creation_tags(hid_t fcpl_id, int type)
     hid_t fid = -1;             /* File Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;        /* verbose test outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t sbe_tag = 0;
@@ -530,7 +532,7 @@ check_file_open_tags(hid_t fcpl, int type)
     hid_t fid = -1;          /* File Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag;       /* Root Group Tag */
     haddr_t sbe_tag;        /* Sblock Extension Tag */
@@ -645,7 +647,7 @@ check_group_creation_tags(void)
     hid_t gid = -1;          /* Group Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;   /* Root Group Tag */
     haddr_t g_tag;          /* Group Tag */
@@ -748,7 +750,7 @@ check_multi_group_creation_tags(void)
     hid_t gid = -1;          /* Group Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     char gname[16];          /* group name buffer */
     int i = 0;               /* iterator */
     hid_t fapl = -1;         /* File access prop list */
@@ -879,7 +881,7 @@ check_link_iteration_tags(void)
     hid_t did = -1;          /* Group Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     int i = 0;               /* iterator */
     haddr_t root_tag = 0;   /* Root Group Tag Value */
     char dsetname[500];      /* Name of dataset */
@@ -1001,7 +1003,7 @@ check_dense_attribute_tags(void)
     hid_t dcpl = -1;         /* Group Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     int i = 0;               /* iterator */
     hid_t fapl = -1;         /* File access property list */
     haddr_t d_tag = 0;       /* Dataset tag value */
@@ -1185,7 +1187,7 @@ check_group_open_tags(void)
     hid_t gid = -1;          /* Group Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file output */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;
     haddr_t g_tag;
@@ -1296,7 +1298,7 @@ check_attribute_creation_tags(hid_t fcpl, int type)
     hid_t sid = -1;          /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;   /* Root group tag */
     haddr_t g_tag = 0;
@@ -1432,7 +1434,7 @@ check_attribute_open_tags(hid_t fcpl, int type)
     hid_t sid = -1;          /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t g_tag = 0;
@@ -1571,7 +1573,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     hid_t sid = -1;                         /* Dataset Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     int *data = NULL;                       /* data buffer */
     int i,j,k = 0;                          /* iterators */
     hid_t fapl = -1;         /* File access prop list */
@@ -1748,7 +1750,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     hid_t sid = -1;                         /* Dataset Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     int *data = NULL;                       /* data buffer */
     int i,j,k = 0;                          /* iterators */
     hid_t fapl = -1;         /* File access prop list */
@@ -1916,7 +1918,7 @@ check_dataset_creation_tags(hid_t fcpl, int type)
     hid_t sid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
@@ -2051,7 +2053,7 @@ check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
     hid_t sid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
@@ -2190,7 +2192,7 @@ check_dataset_open_tags(void)
     hid_t sid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
@@ -2318,7 +2320,7 @@ check_dataset_write_tags(void)
     hid_t sid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
@@ -2462,7 +2464,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
     hid_t sid = -1;                         /* Dataset Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     int *data = NULL;                       /* data buffer */
     int i,j,k = 0;                          /* iterators */
     hid_t fapl = -1;         /* File access prop list */
@@ -2617,7 +2619,7 @@ check_dataset_read_tags(void)
     hid_t sid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
@@ -2756,7 +2758,7 @@ check_dataset_size_retrieval(void)
     hid_t sid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
@@ -2897,7 +2899,7 @@ check_dataset_extend_tags(void)
     hid_t sid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
@@ -3036,11 +3038,11 @@ check_object_info_tags(void)
     hid_t gid = -1;          /* Group Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file output */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;
     haddr_t g_tag;
-    H5O_info_t oinfo;                       /* Object info struct */
+    H5O_native_info_t ninfo;                /* Native object info struct */
 
     /* Testing Macro */
     TESTING("tag application during object info retrieval");
@@ -3080,7 +3082,10 @@ check_object_info_tags(void)
     /* Get information on an object by name  */
     /* ===================================== */
 
-    if ( H5Oget_info_by_name2(fid, GROUPNAME, &oinfo, H5O_INFO_ALL, H5P_DEFAULT) < 0 ) TEST_ERROR;
+    /* Even though we do nothing with this, touching the internal
+     * data structures is needed for the test to pass.
+     */
+    if ( H5Oget_native_info_by_name(fid, GROUPNAME, &ninfo, H5O_NATIVE_INFO_ALL, H5P_DEFAULT) < 0 ) TEST_ERROR;
 
     /* =================================== */
     /* Verification of Metadata Tag Values */
@@ -3147,7 +3152,7 @@ check_object_copy_tags(void)
     hid_t gid = -1;                         /* Group Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file output */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;
     haddr_t g_tag;
@@ -3270,7 +3275,7 @@ check_link_removal_tags(hid_t fcpl, int type)
     hid_t gid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
@@ -3431,7 +3436,7 @@ check_link_getname_tags(void)
     hid_t gid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t dcpl = -1;                        /* dataset creation pl */
     hsize_t cdims[2] = {1,1};               /* chunk dimensions */
     int fillval = 0;
@@ -3582,7 +3587,7 @@ check_external_link_creation_tags(void)
     hid_t gid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
 
@@ -3690,7 +3695,8 @@ check_external_link_open_tags(void)
     hid_t xid = -1;                         /* Dataspace Identifier */
 #ifndef NDEBUG
     int verbose = FALSE;                    /* verbose file outout */
-#endif
+#endif /* NDEBUG */ /* end debugging functions */
+    H5O_native_info_t ninfo;                /* Native object info struct */
     hid_t fapl = -1;         /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t root2_tag = 0;
@@ -3743,6 +3749,11 @@ check_external_link_open_tags(void)
     if ( (xid = H5Gopen2(fid, LINKNAME, H5P_DEFAULT)) < 0 ) TEST_ERROR;
     if ( (fid2 = H5Iget_file_id(xid)) < 0) TEST_ERROR;
     if ( get_object_header_tag(xid, &link_tag) < 0 ) TEST_ERROR;
+
+    /* Even though we do nothing with this, touching the internal
+     * data structures is needed for the test to pass.
+     */
+    if ( H5Oget_native_info(xid, &ninfo, H5O_NATIVE_INFO_ALL) < 0 ) TEST_ERROR;
 
     /* =================================== */
     /* Verification of Metadata Tag Values */

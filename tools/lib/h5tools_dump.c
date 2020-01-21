@@ -2088,15 +2088,20 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
     if((type_class = H5Tget_class(type)) < 0)
         H5TOOLS_THROW((-1), "H5Tget_class failed");
     if (object_search && H5Tcommitted(type) > 0) {
-        H5O_info_t  oinfo;
-        obj_t      *obj = NULL;    /* Found object */
+        H5O_info2_t  oinfo;
+        obj_t       *obj = NULL;    /* Found object */
 
-        H5Oget_info2(type, &oinfo, H5O_INFO_BASIC);
-        obj = search_obj(h5dump_type_table, oinfo.addr);
+        H5Oget_info3(type, &oinfo, H5O_INFO_BASIC);
+        obj = search_obj(h5dump_type_table, &oinfo.token);
 
         if(obj) {
-            if(!obj->recorded)
-                h5tools_str_append(buffer,"\"/#"H5_PRINTF_HADDR_FMT"\"", obj->objno);
+            if(!obj->recorded) {
+                char *obj_addr_str = NULL;
+
+                H5Otoken_to_str(type, &oinfo.token, &obj_addr_str);
+                h5tools_str_append(buffer,"\"/#%s\"", obj_addr_str);
+                H5free_memory(obj_addr_str);
+            }
             else
                 h5tools_str_append(buffer, "\"%s\"", obj->objname);
         }
@@ -4050,7 +4055,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             init_acc_pos(&datactx, total_size);
         datactx.need_prefix = TRUE;
 
-        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), ndims))) {
+        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             if(obj_data) {
                 if(H5Dread(obj_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf) < 0) {
                     HDfree(ref_buf);
@@ -4065,7 +4070,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     H5TOOLS_GOTO_DONE_NO_RET();
                 }
             }
-            for(i = 0; i < ndims; i++, datactx.cur_elmt++, elmt_counter++) {
+            for(i = 0; i < (size_t)ndims; i++, datactx.cur_elmt++, elmt_counter++) {
                 H5O_type_t obj_type = -1;   /* Object type */
                 H5R_type_t ref_type;   /* Reference type */
 

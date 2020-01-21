@@ -46,7 +46,7 @@
 
 /* For region compatibility support */
 struct H5Tref_dsetreg {
-    H5VL_token_t token; /* Object token */
+    H5O_token_t token;  /* Object token */
     H5S_t *space;       /* Dataspace */
 };
 
@@ -578,7 +578,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
             {
                 size_t token_size = H5F_SIZEOF_ADDR(src_f);
 
-                if(H5R__create_object((const H5VL_token_t *)src_buf, token_size, dst_ref) < 0)
+                if(H5R__create_object((const H5O_token_t *)src_buf, token_size, dst_ref) < 0)
                     HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create object reference")
             }
             break;
@@ -1024,7 +1024,7 @@ H5T__ref_obj_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t src_
 
     /* Get object address */
     if(H5R__decode_token_obj_compat((const unsigned char *)src_buf, &src_size,
-            (H5VL_token_t *)dst_buf, H5F_SIZEOF_ADDR(src_f)) < 0)
+            (H5O_token_t *)dst_buf, H5F_SIZEOF_ADDR(src_f)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object address")
 
 done:

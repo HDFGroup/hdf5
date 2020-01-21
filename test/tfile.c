@@ -5178,7 +5178,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
 {
     hid_t       file, group;            /* Handles */
     hid_t       fapl;                   /* File access property list */
-    H5O_info_t  oinfo;                  /* Object info */
+    H5O_native_info_t  ninfo;           /* Object info */
     herr_t      ret;                    /* Return value */
 
     /*
@@ -5196,9 +5196,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     /*
      * Make sure the root group has the correct object header version
      */
-    ret = H5Oget_info_by_name2(file, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
+    ret = H5Oget_native_info_by_name(file, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_native_info_by_name");
+    VERIFY(ninfo.hdr.version, oh_vers_create, "H5Oget_native_info_by_name");
 
     /*
      * Reopen the file and make sure the root group still has the correct version
@@ -5212,9 +5212,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     file = H5Fopen("tfile5.h5", H5F_ACC_RDWR, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
-    ret = H5Oget_info_by_name2(file, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
+    ret = H5Oget_native_info_by_name(file, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_native_info_by_name");
+    VERIFY(ninfo.hdr.version, oh_vers_create, "H5Oget_native_info_by_name");
 
     /*
      * Create a group named "G1" in the file, and make sure it has the correct
@@ -5223,9 +5223,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     group = H5Gcreate2(file, "/G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
-    ret = H5Oget_info2(group, &oinfo, H5O_INFO_HDR);
-    CHECK(ret, FAIL, "H5Oget_info");
-    VERIFY(oinfo.hdr.version, oh_vers_mod, "H5Oget_info");
+    ret = H5Oget_native_info(group, &ninfo, H5O_NATIVE_INFO_HDR);
+    CHECK(ret, FAIL, "H5Oget_native)info");
+    VERIFY(ninfo.hdr.version, oh_vers_mod, "H5Oget_native_info");
 
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
@@ -5237,9 +5237,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     group = H5Gcreate2(file, "/G1/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
-    ret = H5Oget_info2(group, &oinfo, H5O_INFO_HDR);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, oh_vers_mod, "H5Oget_info_by_name");
+    ret = H5Oget_native_info(group, &ninfo, H5O_NATIVE_INFO_HDR);
+    CHECK(ret, FAIL, "H5Oget_native_info");
+    VERIFY(ninfo.hdr.version, oh_vers_mod, "H5Oget_native_info");
 
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
@@ -5247,9 +5247,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     /*
      * Make sure the root group still has the correct object header version
      */
-    ret = H5Oget_info_by_name2(file, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
+    ret = H5Oget_native_info_by_name(file, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_native_info_by_name");
+    VERIFY(ninfo.hdr.version, oh_vers_create, "H5Oget_native_info_by_name");
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
@@ -6035,7 +6035,7 @@ test_libver_bounds_obj(hid_t fapl)
     hid_t new_fapl = H5I_INVALID_HID;   /* File access property list */
     H5F_t *f = NULL;        /* Internal file pointer */
     H5F_libver_t low, high; /* Low and high bounds */
-    H5O_info_t  oinfo;      /* Object info */
+    H5O_native_info_t  ninfo;      /* Object info */
     H5G_info_t ginfo;       /* Group info */
     herr_t ret;             /* Return value */
 
@@ -6059,11 +6059,11 @@ test_libver_bounds_obj(hid_t fapl)
     CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Get root group's object info */
-    ret = H5Oget_info_by_name2(fid, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    ret = H5Oget_native_info_by_name(fid, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_native_info_by_name");
 
     /* Verify object header version is 2 because shared message is enabled */
-    VERIFY(oinfo.hdr.version, H5O_VERSION_2, "H5O_obj_ver_bounds");
+    VERIFY(ninfo.hdr.version, H5O_VERSION_2, "H5O_obj_ver_bounds");
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -6078,11 +6078,11 @@ test_libver_bounds_obj(hid_t fapl)
     CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Get root group's object info */
-    ret = H5Oget_info_by_name2(fid, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    ret = H5Oget_native_info_by_name(fid, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_native_info_by_name");
 
     /* Verify object header version is as indicated by low_bound */
-    VERIFY(oinfo.hdr.version, H5O_obj_ver_bounds[low], "H5O_obj_ver_bounds");
+    VERIFY(ninfo.hdr.version, H5O_obj_ver_bounds[low], "H5O_obj_ver_bounds");
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -6133,11 +6133,11 @@ test_libver_bounds_obj(hid_t fapl)
                     VERIFY(ginfo.storage_type, H5G_STORAGE_TYPE_SYMBOL_TABLE, "H5Gget_info");
 
                 /* Get object header information */
-                ret = H5Oget_info_by_name2(gid, GRP_NAME, &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-                CHECK(ret, FAIL, "H5Oget_info_by_name");
+                ret = H5Oget_native_info_by_name(gid, GRP_NAME, &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+                CHECK(ret, FAIL, "H5Oget_native_info_by_name");
 
                 /* Verify object header version as indicated by low_bound */
-                VERIFY(oinfo.hdr.version, H5O_obj_ver_bounds[f->shared->low_bound], "H5O_obj_ver_bounds");
+                VERIFY(ninfo.hdr.version, H5O_obj_ver_bounds[f->shared->low_bound], "H5O_obj_ver_bounds");
 
                 /* Close the group */
                 ret = H5Gclose(gid);

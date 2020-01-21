@@ -1091,7 +1091,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     if (H5Tequal(type, H5T_STD_REF)) {
                         H5O_type_t obj_type = -1;   /* Object type */
                         H5R_type_t ref_type;   /* Reference type */
-                        const H5R_ref_t *ref_vp = (const H5R_ref_t *)vp;
+                        H5R_ref_t *ref_vp = (H5R_ref_t *)vp;
 
                         H5TOOLS_DEBUG("H5T_REFERENCE:H5T_STD_REF");
                         ref_type = H5Rget_type(ref_vp);
@@ -1100,13 +1100,13 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             case H5R_OBJECT1:
                                 {
                                 /* Object references -- show the type and OID of the referenced object. */
-                                H5O_info_t  oi;
+                                H5O_info2_t oi;
+                                char *obj_addr_str = NULL;
 
                                 H5TOOLS_DEBUG("ref_type is H5R_OBJECT1");
                                 if((obj = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                                    H5Oget_info2(obj, &oi, H5O_INFO_BASIC);
-                                    if(H5Oclose(obj) < 0)
-                                        H5TOOLS_ERROR(NULL, "H5Oclose H5R_OBJECT1 failed");
+                                    H5Oget_info3(obj, &oi, H5O_INFO_BASIC);
+                                    H5Otoken_to_str(obj, &oi.token, &obj_addr_str);
                                 }
                                 else
                                     H5TOOLS_ERROR(NULL, "H5Ropen_object H5R_OBJECT1 failed");
@@ -1132,15 +1132,25 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                         h5tools_str_append(str, "%u-%s", (unsigned) oi.type, H5_TOOLS_UNKNOWN);
                                         break;
                                 } /* end switch */
-                                H5Oclose(obj);
+
                                 h5tools_str_sprint_reference(str, ref_vp);
 
                                 /* Print OID */
                                 if(info->obj_hidefileno)
-                                    h5tools_str_append(str, info->obj_format, oi.addr);
+                                    h5tools_str_append(str, info->obj_format, obj_addr_str);
                                 else
-                                    h5tools_str_append(str, info->obj_format, oi.fileno, oi.addr);
+                                    h5tools_str_append(str, info->obj_format, oi.fileno, obj_addr_str);
+
+                                if(obj_addr_str) {
+                                    H5free_memory(obj_addr_str);
+                                    obj_addr_str = NULL;
                                 }
+
+                                if(obj >= 0)
+                                    if(H5Oclose(obj) < 0)
+                                        H5TOOLS_ERROR(NULL, "H5Oclose H5R_OBJECT1 failed");
+                                }
+
                                 break;
                             case H5R_DATASET_REGION1:
                                 H5TOOLS_DEBUG("ref_type is H5R_DATASET_REGION1");
@@ -1361,7 +1371,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
     H5TOOLS_DEBUG("buf_size=%ld", buf_size);
     if (buf_size) {
         char *file_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
-        if (H5Rget_file_name(ref_vp, file_name, buf_size + 1) >= 0) {
+        if (H5Rget_file_name(ref_vp, file_name, (size_t)buf_size + 1) >= 0) {
             file_name[buf_size] = '\0';
             H5TOOLS_DEBUG("name=%s", file_name);
             h5tools_str_append(str, "%s", file_name);
@@ -1373,7 +1383,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
     H5TOOLS_DEBUG("buf_size=%ld", buf_size);
     if (buf_size) {
         char *obj_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
-        if (H5Rget_obj_name(ref_vp, H5P_DEFAULT, obj_name, buf_size + 1) >= 0) {
+        if (H5Rget_obj_name(ref_vp, H5P_DEFAULT, obj_name, (size_t)buf_size + 1) >= 0) {
             obj_name[buf_size] = '\0';
             H5TOOLS_DEBUG("name=%s", obj_name);
             h5tools_str_append(str, "%s", obj_name);
@@ -1386,7 +1396,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
         H5TOOLS_DEBUG("buf_size=%ld", buf_size);
         if (buf_size) {
             char *attr_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
-            if (H5Rget_attr_name(ref_vp, attr_name, buf_size + 1) >= 0) {
+            if (H5Rget_attr_name(ref_vp, attr_name, (size_t)buf_size + 1) >= 0) {
                 attr_name[buf_size] = '\0';
                 H5TOOLS_DEBUG("name=%s", attr_name);
                 h5tools_str_append(str, "/%s", attr_name);

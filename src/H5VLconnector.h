@@ -43,8 +43,6 @@
 /* The maximum size allowed for blobs */
 #define H5VL_MAX_BLOB_ID_SIZE           (16)    /* Allow for 128-bits blob IDs */
 
-/* The maximum size allowed for tokens */
-#define H5VL_MAX_TOKEN_SIZE             (16)    /* Allow for 128-bits tokens */
 
 /*******************/
 /* Public Typedefs */
@@ -64,14 +62,9 @@ typedef enum H5VL_subclass_t {
     H5VL_SUBCLS_LINK,                   /* 'Link' subclass */
     H5VL_SUBCLS_OBJECT,                 /* 'Object' subclass */
     H5VL_SUBCLS_REQUEST,                /* 'Request' subclass */
-    H5VL_SUBCLS_BLOB                    /* 'Blob' subclass */
+    H5VL_SUBCLS_BLOB,                   /* 'Blob' subclass */
+    H5VL_SUBCLS_TOKEN                   /* 'Token' subclass */
 } H5VL_subclass_t;
-
-/* type for tokens. Token are unique and permanent identifiers that are
- * used to reference HDF5 objects. */
-typedef struct {
-    char __data[H5VL_MAX_TOKEN_SIZE];
-} H5VL_token_t;
 
 /* types for attribute GET callback */
 typedef enum H5VL_attr_get_t {
@@ -201,7 +194,8 @@ typedef int H5VL_link_optional_t;
 typedef enum H5VL_object_get_t {
     H5VL_OBJECT_GET_FILE,              /* object file                       */
     H5VL_OBJECT_GET_NAME,              /* object name                       */
-    H5VL_OBJECT_GET_TYPE               /* object type                       */
+    H5VL_OBJECT_GET_TYPE,              /* object type                       */
+    H5VL_OBJECT_GET_INFO               /* H5Oget_info(_by_idx|name)3        */
 } H5VL_object_get_t;
 
 /* types for object SPECIFIC callback */
@@ -262,7 +256,7 @@ typedef struct H5VL_loc_by_idx {
 } H5VL_loc_by_idx_t;
 
 typedef struct H5VL_loc_by_token {
-    H5VL_token_t *token;
+    H5O_token_t *token;
 } H5VL_loc_by_token_t;
 
 /* Structure to hold parameters for object locations.
@@ -459,6 +453,13 @@ typedef struct H5VL_blob_class_t {
     herr_t (*optional)(void *obj, void *blob_id, H5VL_blob_optional_t opt_type, va_list arguments);
 } H5VL_blob_class_t;
 
+/* Object token routines */
+typedef struct H5VL_token_class_t {
+    herr_t (*cmp)(void *obj, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value);
+    herr_t (*to_str)(void *obj, H5I_type_t obj_type, const H5O_token_t *token, char **token_str);
+    herr_t (*from_str)(void *obj, H5I_type_t obj_type, const char *token_str, H5O_token_t *token);
+} H5VL_token_class_t;
+
 /* Class information for each VOL connector */
 typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
@@ -486,6 +487,7 @@ typedef struct H5VL_class_t {
     H5VL_introspect_class_t introspect_cls; /* Container/connector introspection class callbacks */
     H5VL_request_class_t    request_cls;    /* Asynchronous request class callbacks */
     H5VL_blob_class_t       blob_cls;       /* 'Blob' class callbacks */
+    H5VL_token_class_t      token_cls;      /* VOL connector object token class callbacks */
 
     /* Catch-all */
     herr_t (*optional)(void *obj, int op_type, hid_t dxpl_id, void **req, va_list arguments); /* Optional callback */

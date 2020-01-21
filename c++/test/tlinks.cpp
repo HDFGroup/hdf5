@@ -190,7 +190,7 @@ const H5std_string GROUP2NAME("Second_group");
 static void
 test_lcpl(hid_t fapl_id, hbool_t new_format)
 {
-    H5L_info_t linfo;
+    H5L_info2_t linfo;
     char filename[1024];
     hsize_t dims[2];
 
@@ -604,7 +604,7 @@ const int RANK = 2;
 const int DIM1 = 2;
 
 // Operator function
-static int visit_obj_cb(H5Object& obj, const H5std_string name, const H5O_info_t *oinfo, void *_op_data)
+static int visit_obj_cb(H5Object& obj, const H5std_string name, const H5O_info2_t *oinfo, void *_op_data)
 {
     ovisit_ud_t *op_data = static_cast <ovisit_ud_t *>(_op_data);
 

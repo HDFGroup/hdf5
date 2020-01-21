@@ -409,7 +409,7 @@ h5libraryError
 
     if (msg_size > 0) {
         if (NULL == (msg_str = (char *) HDcalloc((size_t)msg_size + 1, sizeof(char))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "h5libraryerror: failed to allocate buffer for error message");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5libraryerror: failed to allocate buffer for error message");
 
         if ((msg_size = H5Eget_msg(min_num, &error_msg_type, msg_str, (size_t)msg_size + 1)) < 0)
             goto done;

@@ -58,6 +58,7 @@ typedef struct {
 /* User data for application-style iteration over links in a group */
 typedef struct {
     hid_t       gid;            /* The group ID for the application callback */
+    H5O_loc_t  *link_loc;       /* The object location for the link */
     H5G_link_iterate_t lnk_op;  /* Application callback */
     void *op_data;              /* Application's op data */
 } H5G_iter_appcall_ud_t;
@@ -72,7 +73,7 @@ typedef struct {
     char       *path;           /* Path name of the link */
     size_t      curr_path_len;  /* Current length of the path in the buffer */
     size_t      path_buf_size;  /* Size of path buffer */
-    H5L_iterate_t op;           /* Application callback */
+    H5L_iterate2_t op;          /* Application callback */
     void       *op_data;        /* Application's op data */
 } H5G_iter_visit_ud_t;
 
@@ -752,10 +753,10 @@ H5G_iterate_cb(const H5O_link_t *lnk, void *_udata)
 
         case H5G_LINK_OP_NEW:
             {
-                H5L_info_t info;    /* Link info */
+                H5L_info2_t info;    /* Link info */
 
                 /* Retrieve the info for the link */
-                if(H5G_link_to_info(lnk, &info) < 0)
+                if(H5G_link_to_info(udata->link_loc, lnk, &info) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for link")
 
                 /* Make the application callback */
@@ -812,6 +813,7 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name,
 
     /* Set up user data for callback */
     udata.gid = gid;
+    udata.link_loc = &grp->oloc;
     udata.lnk_op = *lnk_op;
     udata.op_data = op_data;
 
@@ -872,7 +874,7 @@ static herr_t
 H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
 {
     H5G_iter_visit_ud_t *udata = (H5G_iter_visit_ud_t *)_udata;     /* User data for callback */
-    H5L_info_t info;                    /* Link info */
+    H5L_info2_t info;                   /* Link info */
     H5G_loc_t   obj_loc;                /* Location of object */
     H5G_name_t  obj_path;            	/* Object's group hier. path */
     H5O_loc_t   obj_oloc;            	/* Object's object location */
@@ -908,7 +910,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
     udata->curr_path_len += link_name_len;
 
     /* Construct the link info from the link message */
-    if(H5G_link_to_info(lnk, &info) < 0)
+    if(H5G_link_to_info(udata->curr_loc->oloc, lnk, &info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for link")
 
     /* Make the application callback */
@@ -1044,7 +1046,7 @@ done:
  */
 herr_t
 H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
-    H5_iter_order_t order, H5L_iterate_t op, void *op_data)
+    H5_iter_order_t order, H5L_iterate2_t op, void *op_data)
 {
     H5G_iter_visit_ud_t udata;      /* User data for callback */
     H5O_linfo_t	linfo;		    /* Link info message */
