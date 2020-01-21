@@ -96,7 +96,7 @@
 
   macro (ADD_H5_CMP resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${ARGN})
+      add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp${tgt_ext}> ${ARGN})
     else ()
       add_test (
           NAME H5MKGRP_CMP-${resultfile}-clear-objects

@@ -2512,6 +2512,13 @@
 ./config/cmake/scripts/HDF5config.cmake
 ./config/cmake/scripts/HDF5options.cmake
 
+# CMake-specific Sanitizer Scripts
+./config/sanitizer/code-coverage.cmake
+./config/sanitizer/sanitizers.cmake
+./config/sanitizer/tools.cmake
+./config/sanitizer/LICENSE
+./config/sanitizer/README.md
+
 # CMake-specific HPC Scripts
 ./config/cmake/scripts/HPC/sbatch-HDF5options.cmake
 ./config/cmake/scripts/HPC/bsub-HDF5options.cmake

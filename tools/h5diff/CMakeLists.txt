@@ -97,7 +97,9 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_TOOLS)
+  include (CMakeTests.cmake)
+endif ()
 
 ##############################################################################
 ##############################################################################

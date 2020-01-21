@@ -347,4 +347,6 @@ if (BUILD_SHARED_LIBS)
   set_target_properties (filter_plugin PROPERTIES FOLDER test)
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()

@@ -20,7 +20,7 @@ else ()
 endif ()
 set_target_properties (h5perf_serial PROPERTIES FOLDER perform)
 
-if (HDF5_BUILD_PERFORM_STANDALONE AND BUILD_TESTING)
+if (HDF5_BUILD_PERFORM_STANDALONE)
   #-- Adding test for h5perf_serial_alone - io_timer.c includes
   set (h5perf_serial_alone_SOURCES
       ${HDF5_TOOLS_SRC_DIR}/lib/io_timer.c
@@ -120,7 +120,7 @@ else ()
 endif ()
 set_target_properties (zip_perf PROPERTIES FOLDER perform)
 
-if (H5_HAVE_PARALLEL AND BUILD_TESTING)
+if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
   if (UNIX)
       #-- Adding test for perf - only on unix systems
       set (perf_SOURCES
@@ -178,6 +178,6 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
   endif ()
 endif ()
 
-if (BUILD_TESTING)
+if (HDF5_TEST_TOOLS)
   include (CMakeTests.cmake)
 endif ()

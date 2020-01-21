@@ -125,7 +125,9 @@ if (BUILD_TESTING)
     #add_test (NAME h5repackgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repackgentest>)
   endif ()
 
-  include (CMakeTests.cmake)
+  if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
+    include (CMakeTests.cmake)
+  endif ()
 
 endif ()
 
