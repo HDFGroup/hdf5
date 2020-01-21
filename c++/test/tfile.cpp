@@ -716,10 +716,10 @@ static void test_libver_bounds_real(
     verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__);
 
     // Verify object header version another way
-    H5O_info_t oinfo;
-    HDmemset(&oinfo, 0, sizeof(oinfo));
-    file.getObjinfo(oinfo, H5O_INFO_HDR);
-    verify_val(oinfo.hdr.version, oh_vers_create, "H5File::getObjinfo", __LINE__, __FILE__);
+    H5O_native_info_t ninfo;
+    HDmemset(&ninfo, 0, sizeof(ninfo));
+    file.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
+    verify_val(ninfo.hdr.version, oh_vers_create, "H5File::getNativeObjinfo", __LINE__, __FILE__);
 
     /*
      * Reopen the file and make sure the root group still has the correct
@@ -744,9 +744,9 @@ static void test_libver_bounds_real(
     verify_val(obj_version, oh_vers_mod, "Group::objVersion", __LINE__, __FILE__);
 
     // Verify object header version another way
-    HDmemset(&oinfo, 0, sizeof(oinfo));
-    group.getObjinfo(oinfo, H5O_INFO_HDR);
-    verify_val(oinfo.hdr.version, oh_vers_mod, "Group::getObjinfo", __LINE__, __FILE__);
+    HDmemset(&ninfo, 0, sizeof(ninfo));
+    group.getNativeObjinfo(ninfo, H5O_NATIVE_INFO_HDR);
+    verify_val(ninfo.hdr.version, oh_vers_mod, "Group::getNativeObjinfo", __LINE__, __FILE__);
 
     group.close(); // close "/G1"
 

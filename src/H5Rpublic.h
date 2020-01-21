@@ -80,7 +80,10 @@ typedef struct {
  * should always be used with the current reference API.
  */
 typedef struct {
-    uint8_t __data[H5R_REF_BUF_SIZE];
+    union {
+        uint8_t __data[H5R_REF_BUF_SIZE];       /* opaque data */
+        int64_t align;                          /* ensures alignment */
+    } u;
 } H5R_ref_t;
 
 /********************/
@@ -108,16 +111,16 @@ H5_DLL htri_t   H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
 H5_DLL herr_t   H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr);
 
 /* Dereference */
-H5_DLL hid_t    H5Ropen_object(const H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
-H5_DLL hid_t    H5Ropen_region(const H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
-H5_DLL hid_t    H5Ropen_attr(const H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
+H5_DLL hid_t    H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
+H5_DLL hid_t    H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
+H5_DLL hid_t    H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
 
 /* Get type */
-H5_DLL herr_t   H5Rget_obj_type3(const H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
+H5_DLL herr_t   H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
 
 /* Get name */
 H5_DLL ssize_t  H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf, size_t size);
-H5_DLL ssize_t  H5Rget_obj_name(const H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf, size_t size);
+H5_DLL ssize_t  H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf, size_t size);
 H5_DLL ssize_t  H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *buf, size_t size);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.

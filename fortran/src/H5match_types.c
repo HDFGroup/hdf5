@@ -414,12 +414,18 @@ int main(void)
     return -1;
   }
 
-  /* Need the buffer size for the fortran derive type 'hdset_reg_ref_t_f03'
+  /* Need the buffer size for the fortran derived type 'hdset_reg_ref_t_f03'
    * in order to be interoperable with C's structure, the C buffer size
    * H5R_DSET_REG_REF_BUF_SIZE is (sizeof(haddr_t)+4)
    */
-    
+
     fprintf(fort_header, "        INTEGER, PARAMETER :: H5R_DSET_REG_REF_BUF_SIZE_F = %u\n", H5_SIZEOF_HADDR_T + 4 );
+
+  /* Need the buffer size for the fortran derived type 'h5o_token_t'
+   * in order to be interoperable with C's structure.
+   */
+
+    fprintf(fort_header, "        INTEGER, PARAMETER :: H5O_MAX_TOKEN_SIZE_F = %u\n", H5O_MAX_TOKEN_SIZE);
 
   /* Close files */
   endCfile();

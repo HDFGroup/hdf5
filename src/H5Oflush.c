@@ -72,7 +72,7 @@ static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc,
 herr_t
 H5Oflush(hid_t obj_id)
 {
-    H5VL_object_t      *vol_obj     = NULL;     /* Object token     */
+    H5VL_object_t      *vol_obj     = NULL;     /* Object of obj_id     */
     H5VL_loc_params_t   loc_params;
     herr_t              ret_value   = SUCCEED;  /* Return value     */
 
@@ -236,7 +236,7 @@ done:
 herr_t
 H5Orefresh(hid_t oid)
 {
-    H5VL_object_t      *vol_obj     = NULL;     /* Object token     */
+    H5VL_object_t      *vol_obj     = NULL;     /* Object of oid     */
     H5VL_loc_params_t   loc_params;
     herr_t              ret_value   = SUCCEED;  /* Return value     */
 

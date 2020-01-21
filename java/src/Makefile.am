@@ -51,10 +51,10 @@ hdf5_java_JAVA =  \
 	${pkgpath}/callbacks/H5D_iterate_t.java \
 	${pkgpath}/callbacks/H5E_walk_cb.java \
 	${pkgpath}/callbacks/H5E_walk_t.java \
-	${pkgpath}/callbacks/H5L_iterate_cb.java \
 	${pkgpath}/callbacks/H5L_iterate_t.java \
-	${pkgpath}/callbacks/H5O_iterate_cb.java \
+	${pkgpath}/callbacks/H5L_iterate_opdata_t.java \
 	${pkgpath}/callbacks/H5O_iterate_t.java \
+	${pkgpath}/callbacks/H5O_iterate_opdata_t.java \
     ${pkgpath}/callbacks/H5P_cls_close_func_cb.java \
     ${pkgpath}/callbacks/H5P_cls_close_func_t.java \
     ${pkgpath}/callbacks/H5P_cls_copy_func_cb.java \
@@ -103,6 +103,8 @@ hdf5_java_JAVA =  \
 	${pkgpath}/structs/H5G_info_t.java \
 	${pkgpath}/structs/H5L_info_t.java \
 	${pkgpath}/structs/H5O_info_t.java \
+	${pkgpath}/structs/H5O_native_info_t.java \
+	${pkgpath}/structs/H5O_token_t.java \
 	${pkgpath}/structs/H5O_hdr_info_t.java \
 	${pkgpath}/structs/H5AC_cache_config_t.java \
 	${pkgpath}/H5.java  \

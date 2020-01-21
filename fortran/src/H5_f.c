@@ -56,7 +56,6 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
 {
     int ret_value = -1;
     hid_t c_type_id;
-    size_t tmp_val;
     int i;
 
     /* Fortran INTEGER may not be the same as C; do all checking to find
@@ -133,8 +132,7 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
 #endif
 
     if ((c_type_id = H5Tcopy(H5T_FORTRAN_S1)) < 0) return ret_value;
-    tmp_val = 1;
-    if(H5Tset_size(c_type_id, tmp_val) < 0) return ret_value;
+    if(H5Tset_size(c_type_id, 1) < 0) return ret_value;
     if(H5Tset_strpad(c_type_id, H5T_STR_SPACEPAD) < 0) return ret_value;
     types[8] = (hid_t_f)c_type_id;
 
@@ -313,6 +311,7 @@ h5close_types_c( hid_t_f * types, int_f *lentypes,
     ret_value = 0;
     return ret_value;
 }
+
 /****if* H5_f/h5init_flags_c
  * NAME
  *  h5init_flags_c
@@ -370,7 +369,6 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
                 haddr_t_f *h5_haddr_generic_flags)
 /******/
 {
-    int ret_value = -1;
 /*
  *  H5D flags
  */
@@ -538,196 +536,201 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
  *  but we need to assign each kind of message to a different bit so that
  *  one index can hold multiple types.)
  */
-      h5o_flags[7] = (int_f)H5O_SHMESG_NONE_FLAG;  /* No shared messages */
-      h5o_flags[8] = (int_f)H5O_SHMESG_SDSPACE_FLAG; /* Simple Dataspace Message.  */
-      h5o_flags[9] = (int_f)H5O_SHMESG_DTYPE_FLAG; /* Datatype Message.  */
-      h5o_flags[10] = (int_f)H5O_SHMESG_FILL_FLAG; /* Fill Value Message. */
-      h5o_flags[11] = (int_f)H5O_SHMESG_PLINE_FLAG; /* Filter pipeline message.  */
-      h5o_flags[12] = (int_f)H5O_SHMESG_ATTR_FLAG; /* Attribute Message.  */
-      h5o_flags[13] = (int_f)H5O_SHMESG_ALL_FLAG;
+    h5o_flags[7] = (int_f)H5O_SHMESG_NONE_FLAG;  /* No shared messages */
+    h5o_flags[8] = (int_f)H5O_SHMESG_SDSPACE_FLAG; /* Simple Dataspace Message.  */
+    h5o_flags[9] = (int_f)H5O_SHMESG_DTYPE_FLAG; /* Datatype Message.  */
+    h5o_flags[10] = (int_f)H5O_SHMESG_FILL_FLAG; /* Fill Value Message. */
+    h5o_flags[11] = (int_f)H5O_SHMESG_PLINE_FLAG; /* Filter pipeline message.  */
+    h5o_flags[12] = (int_f)H5O_SHMESG_ATTR_FLAG; /* Attribute Message.  */
+    h5o_flags[13] = (int_f)H5O_SHMESG_ALL_FLAG;
 
 /* Object header status flag definitions */
-      h5o_flags[14] = (int_f)H5O_HDR_CHUNK0_SIZE; /* 2-bit field indicating # of bytes to store the size of chunk 0's data */
-      h5o_flags[15] = (int_f)H5O_HDR_ATTR_CRT_ORDER_TRACKED; /* Attribute creation order is tracked */
-      h5o_flags[16] = (int_f)H5O_HDR_ATTR_CRT_ORDER_INDEXED; /* Attribute creation order has index */
-      h5o_flags[17] = (int_f)H5O_HDR_ATTR_STORE_PHASE_CHANGE; /* Non-default attribute storage phase change values stored */
-      h5o_flags[18] = (int_f)H5O_HDR_STORE_TIMES; /* Store access, modification, change & birth times for object */
-      h5o_flags[19] = (int_f)H5O_HDR_ALL_FLAGS;
+    h5o_flags[14] = (int_f)H5O_HDR_CHUNK0_SIZE; /* 2-bit field indicating # of bytes to store the size of chunk 0's data */
+    h5o_flags[15] = (int_f)H5O_HDR_ATTR_CRT_ORDER_TRACKED; /* Attribute creation order is tracked */
+    h5o_flags[16] = (int_f)H5O_HDR_ATTR_CRT_ORDER_INDEXED; /* Attribute creation order has index */
+    h5o_flags[17] = (int_f)H5O_HDR_ATTR_STORE_PHASE_CHANGE; /* Non-default attribute storage phase change values stored */
+    h5o_flags[18] = (int_f)H5O_HDR_STORE_TIMES; /* Store access, modification, change & birth times for object */
+    h5o_flags[19] = (int_f)H5O_HDR_ALL_FLAGS;
 
 /* Maximum shared message values.  Number of indexes is 8 to allow room to add
  *  new types of messages.
  */
-      h5o_flags[20] = (int_f)H5O_SHMESG_MAX_NINDEXES;
-      h5o_flags[21] = (int_f)H5O_SHMESG_MAX_LIST_SIZE;
+    h5o_flags[20] = (int_f)H5O_SHMESG_MAX_NINDEXES;
+    h5o_flags[21] = (int_f)H5O_SHMESG_MAX_LIST_SIZE;
 
 /* Types of objects in file */
-      h5o_flags[22] = (int_f)H5O_TYPE_UNKNOWN;	      /* Unknown object type */
-      h5o_flags[23] = (int_f)H5O_TYPE_GROUP;          /* Object is a group */
-      h5o_flags[24] = (int_f)H5O_TYPE_DATASET;        /* Object is a dataset */
-      h5o_flags[25] = (int_f)H5O_TYPE_NAMED_DATATYPE; /* Object is a named data type */
-      h5o_flags[26] = (int_f)H5O_TYPE_NTYPES;         /* Number of different object types */
+    h5o_flags[22] = (int_f)H5O_TYPE_UNKNOWN;	      /* Unknown object type */
+    h5o_flags[23] = (int_f)H5O_TYPE_GROUP;          /* Object is a group */
+    h5o_flags[24] = (int_f)H5O_TYPE_DATASET;        /* Object is a dataset */
+    h5o_flags[25] = (int_f)H5O_TYPE_NAMED_DATATYPE; /* Object is a named data type */
+    h5o_flags[26] = (int_f)H5O_TYPE_NTYPES;         /* Number of different object types */
 
 /* Flags for H5Oget_info.
  * These flags determine which fields will be filled in in the H5O_info_t
- * struct. 
+ * struct.
  */
-      h5o_flags[27] = (int_f)H5O_INFO_ALL; /* (H5O_INFO_BASIC|H5O_INFO_TIME|H5O_INFO_NUM_ATTRS|H5O_INFO_HDR|H5O_INFO_META_SIZE) */
-      h5o_flags[28] = (int_f)H5O_INFO_BASIC; /* Fill in the fileno, addr, type, and rc fields */
-      h5o_flags[29] = (int_f)H5O_INFO_TIME;  /* Fill in the atime, mtime, ctime, and btime fields */
-      h5o_flags[30] = (int_f)H5O_INFO_NUM_ATTRS; /* Fill in the num_attrs field */
-      h5o_flags[31] = (int_f)H5O_INFO_HDR;       /* Fill in the hdr field */
-      h5o_flags[32] = (int_f)H5O_INFO_META_SIZE; /* Fill in the meta_size field */
+    h5o_flags[27] = (int_f)H5O_INFO_ALL;      /* (H5O_INFO_BASIC|H5O_INFO_TIME|H5O_INFO_NUM_ATTRS) */
+    h5o_flags[28] = (int_f)H5O_INFO_BASIC;    /* Fill in the fileno, addr, type, and rc fields */
+    h5o_flags[29] = (int_f)H5O_INFO_TIME;     /* Fill in the atime, mtime, ctime, and btime fields */
+    h5o_flags[30] = (int_f)H5O_INFO_NUM_ATTRS; /* Fill in the num_attrs field */
+
+/* Flags for H5Oget_native_info.
+ * These flags determine which fields will be filled in in the H5O_native_info_t
+ * struct.
+ */
+    h5o_flags[31] = (int_f)H5O_NATIVE_INFO_ALL;       /* (H5O_NATIVE_INFO_HDR|H5O_NATIVE_INFO_META_SIZE) */
+    h5o_flags[32] = (int_f)H5O_NATIVE_INFO_HDR;       /* Fill in the hdr field */
+    h5o_flags[33] = (int_f)H5O_NATIVE_INFO_META_SIZE; /* Fill in the meta_size field */
 /*
  *  H5P flags
  */
-      h5p_flags[0] = (hid_t_f)H5P_FILE_CREATE;
-      h5p_flags[1] = (hid_t_f)H5P_FILE_ACCESS;
-      h5p_flags[2] = (hid_t_f)H5P_DATASET_CREATE;
-      h5p_flags[3] = (hid_t_f)H5P_DATASET_XFER;
-      h5p_flags[4] = (hid_t_f)H5P_FILE_MOUNT;
-      h5p_flags[5] = (hid_t_f)H5P_DEFAULT;
-      h5p_flags[6] = (hid_t_f)H5P_ROOT;
-      h5p_flags[7] = (hid_t_f)H5P_OBJECT_CREATE;
-      h5p_flags[8] = (hid_t_f)H5P_DATASET_ACCESS;
-      h5p_flags[9] = (hid_t_f)H5P_GROUP_CREATE;
-      h5p_flags[10] = (hid_t_f)H5P_GROUP_ACCESS;
-      h5p_flags[11] = (hid_t_f)H5P_DATATYPE_CREATE;
-      h5p_flags[12] = (hid_t_f)H5P_DATATYPE_ACCESS;
-      h5p_flags[13] = (hid_t_f)H5P_STRING_CREATE;
-      h5p_flags[14] = (hid_t_f)H5P_ATTRIBUTE_CREATE;
-      h5p_flags[15] = (hid_t_f)H5P_OBJECT_COPY;
-      h5p_flags[16] = (hid_t_f)H5P_LINK_CREATE;
-      h5p_flags[17] = (hid_t_f)H5P_LINK_ACCESS;
+    h5p_flags[0] = (hid_t_f)H5P_FILE_CREATE;
+    h5p_flags[1] = (hid_t_f)H5P_FILE_ACCESS;
+    h5p_flags[2] = (hid_t_f)H5P_DATASET_CREATE;
+    h5p_flags[3] = (hid_t_f)H5P_DATASET_XFER;
+    h5p_flags[4] = (hid_t_f)H5P_FILE_MOUNT;
+    h5p_flags[5] = (hid_t_f)H5P_DEFAULT;
+    h5p_flags[6] = (hid_t_f)H5P_ROOT;
+    h5p_flags[7] = (hid_t_f)H5P_OBJECT_CREATE;
+    h5p_flags[8] = (hid_t_f)H5P_DATASET_ACCESS;
+    h5p_flags[9] = (hid_t_f)H5P_GROUP_CREATE;
+    h5p_flags[10] = (hid_t_f)H5P_GROUP_ACCESS;
+    h5p_flags[11] = (hid_t_f)H5P_DATATYPE_CREATE;
+    h5p_flags[12] = (hid_t_f)H5P_DATATYPE_ACCESS;
+    h5p_flags[13] = (hid_t_f)H5P_STRING_CREATE;
+    h5p_flags[14] = (hid_t_f)H5P_ATTRIBUTE_CREATE;
+    h5p_flags[15] = (hid_t_f)H5P_OBJECT_COPY;
+    h5p_flags[16] = (hid_t_f)H5P_LINK_CREATE;
+    h5p_flags[17] = (hid_t_f)H5P_LINK_ACCESS;
 
 
 /*
  *  H5P integer flags
  */
-      h5p_flags_int[0] = (int_f)H5P_CRT_ORDER_INDEXED;
-      h5p_flags_int[1] = (int_f)H5P_CRT_ORDER_TRACKED;
+    h5p_flags_int[0] = (int_f)H5P_CRT_ORDER_INDEXED;
+    h5p_flags_int[1] = (int_f)H5P_CRT_ORDER_TRACKED;
 
 /*
  *  H5R flags
  */
-
-      h5r_flags[0] = (int_f)H5R_OBJECT;
-      h5r_flags[1] = (int_f)H5R_DATASET_REGION;
+    h5r_flags[0] = (int_f)H5R_OBJECT;
+    h5r_flags[1] = (int_f)H5R_DATASET_REGION;
 
 /*
  *  H5S flags
  */
-      
-      h5s_hid_flags[0] = (hid_t_f)H5S_ALL;
+    h5s_hid_flags[0] = (hid_t_f)H5S_ALL;
 
-      h5s_hsize_flags[0] = (hsize_t_f)H5S_UNLIMITED;
+    h5s_hsize_flags[0] = (hsize_t_f)H5S_UNLIMITED;
 
-      h5s_flags[0] = (int_f)H5S_SCALAR;
-      h5s_flags[1] = (int_f)H5S_SIMPLE;
-      h5s_flags[2] = (int_f)H5S_NULL;
-      h5s_flags[3] = (int_f)H5S_SELECT_SET;
-      h5s_flags[4] = (int_f)H5S_SELECT_OR;
+    h5s_flags[0] = (int_f)H5S_SCALAR;
+    h5s_flags[1] = (int_f)H5S_SIMPLE;
+    h5s_flags[2] = (int_f)H5S_NULL;
+    h5s_flags[3] = (int_f)H5S_SELECT_SET;
+    h5s_flags[4] = (int_f)H5S_SELECT_OR;
 
-      h5s_flags[5] = (int_f)H5S_SELECT_NOOP;
-      h5s_flags[6] = (int_f)H5S_SELECT_AND;
-      h5s_flags[7] = (int_f)H5S_SELECT_XOR;
-      h5s_flags[8] = (int_f)H5S_SELECT_NOTB;
-      h5s_flags[9] = (int_f)H5S_SELECT_NOTA;
+    h5s_flags[5] = (int_f)H5S_SELECT_NOOP;
+    h5s_flags[6] = (int_f)H5S_SELECT_AND;
+    h5s_flags[7] = (int_f)H5S_SELECT_XOR;
+    h5s_flags[8] = (int_f)H5S_SELECT_NOTB;
+    h5s_flags[9] = (int_f)H5S_SELECT_NOTA;
 
-      h5s_flags[10] = (int_f)H5S_SELECT_APPEND;
-      h5s_flags[11] = (int_f)H5S_SELECT_PREPEND;
-      h5s_flags[12] = (int_f)H5S_SELECT_INVALID;
-      h5s_flags[13] = (int_f)H5S_SEL_ERROR;
-      h5s_flags[14] = (int_f)H5S_SEL_NONE;
+    h5s_flags[10] = (int_f)H5S_SELECT_APPEND;
+    h5s_flags[11] = (int_f)H5S_SELECT_PREPEND;
+    h5s_flags[12] = (int_f)H5S_SELECT_INVALID;
+    h5s_flags[13] = (int_f)H5S_SEL_ERROR;
+    h5s_flags[14] = (int_f)H5S_SEL_NONE;
 
-      h5s_flags[15] = (int_f)H5S_SEL_POINTS;
-      h5s_flags[16] = (int_f)H5S_SEL_HYPERSLABS;
-      h5s_flags[17] = (int_f)H5S_SEL_ALL;
+    h5s_flags[15] = (int_f)H5S_SEL_POINTS;
+    h5s_flags[16] = (int_f)H5S_SEL_HYPERSLABS;
+    h5s_flags[17] = (int_f)H5S_SEL_ALL;
+
 /*
  *  H5T flags
  */
-      h5t_flags[0] = (int_f)H5T_NO_CLASS;
-      h5t_flags[1] = (int_f)H5T_INTEGER;
-      h5t_flags[2] = (int_f)H5T_FLOAT;
-      h5t_flags[3] = (int_f)H5T_TIME;
-      h5t_flags[4] = (int_f)H5T_STRING;
-      h5t_flags[5] = (int_f)H5T_BITFIELD;
-      h5t_flags[6] = (int_f)H5T_OPAQUE;
-      h5t_flags[7] = (int_f)H5T_COMPOUND;
-      h5t_flags[8] = (int_f)H5T_REFERENCE;
-      h5t_flags[9] = (int_f)H5T_ENUM;
-      h5t_flags[10] = (int_f)H5T_ORDER_LE;
-      h5t_flags[11] = (int_f)H5T_ORDER_BE;
-      h5t_flags[12] = (int_f)H5T_ORDER_MIXED;
-      h5t_flags[13] = (int_f)H5T_ORDER_VAX;
-      h5t_flags[14] = (int_f)H5T_ORDER_NONE;
-      h5t_flags[15] = (int_f)H5T_PAD_ZERO;
-      h5t_flags[16] = (int_f)H5T_PAD_ONE;
-      h5t_flags[17] = (int_f)H5T_PAD_BACKGROUND;
-      h5t_flags[18] = (int_f)H5T_PAD_ERROR;
-      h5t_flags[19] = (int_f)H5T_SGN_NONE;
-      h5t_flags[20] = (int_f)H5T_SGN_2;
-      h5t_flags[21] = (int_f)H5T_SGN_ERROR;
-      h5t_flags[22] = (int_f)H5T_NORM_IMPLIED;
-      h5t_flags[23] = (int_f)H5T_NORM_MSBSET;
-      h5t_flags[24] = (int_f)H5T_NORM_NONE;
-      h5t_flags[25] = (int_f)H5T_CSET_ASCII;
-      h5t_flags[26] = (int_f)H5T_CSET_UTF8;
-      h5t_flags[27] = (int_f)H5T_STR_NULLTERM;
-      h5t_flags[28] = (int_f)H5T_STR_NULLPAD;
-      h5t_flags[29] = (int_f)H5T_STR_SPACEPAD;
-      h5t_flags[30] = (int_f)H5T_STR_ERROR;
-      h5t_flags[31] = (int_f)H5T_VLEN;
-      h5t_flags[32] = (int_f)H5T_ARRAY;
-      h5t_flags[33] = (int_f)H5T_DIR_ASCEND;
-      h5t_flags[34] = (int_f)H5T_DIR_DESCEND;
+    h5t_flags[0] = (int_f)H5T_NO_CLASS;
+    h5t_flags[1] = (int_f)H5T_INTEGER;
+    h5t_flags[2] = (int_f)H5T_FLOAT;
+    h5t_flags[3] = (int_f)H5T_TIME;
+    h5t_flags[4] = (int_f)H5T_STRING;
+    h5t_flags[5] = (int_f)H5T_BITFIELD;
+    h5t_flags[6] = (int_f)H5T_OPAQUE;
+    h5t_flags[7] = (int_f)H5T_COMPOUND;
+    h5t_flags[8] = (int_f)H5T_REFERENCE;
+    h5t_flags[9] = (int_f)H5T_ENUM;
+    h5t_flags[10] = (int_f)H5T_ORDER_LE;
+    h5t_flags[11] = (int_f)H5T_ORDER_BE;
+    h5t_flags[12] = (int_f)H5T_ORDER_MIXED;
+    h5t_flags[13] = (int_f)H5T_ORDER_VAX;
+    h5t_flags[14] = (int_f)H5T_ORDER_NONE;
+    h5t_flags[15] = (int_f)H5T_PAD_ZERO;
+    h5t_flags[16] = (int_f)H5T_PAD_ONE;
+    h5t_flags[17] = (int_f)H5T_PAD_BACKGROUND;
+    h5t_flags[18] = (int_f)H5T_PAD_ERROR;
+    h5t_flags[19] = (int_f)H5T_SGN_NONE;
+    h5t_flags[20] = (int_f)H5T_SGN_2;
+    h5t_flags[21] = (int_f)H5T_SGN_ERROR;
+    h5t_flags[22] = (int_f)H5T_NORM_IMPLIED;
+    h5t_flags[23] = (int_f)H5T_NORM_MSBSET;
+    h5t_flags[24] = (int_f)H5T_NORM_NONE;
+    h5t_flags[25] = (int_f)H5T_CSET_ASCII;
+    h5t_flags[26] = (int_f)H5T_CSET_UTF8;
+    h5t_flags[27] = (int_f)H5T_STR_NULLTERM;
+    h5t_flags[28] = (int_f)H5T_STR_NULLPAD;
+    h5t_flags[29] = (int_f)H5T_STR_SPACEPAD;
+    h5t_flags[30] = (int_f)H5T_STR_ERROR;
+    h5t_flags[31] = (int_f)H5T_VLEN;
+    h5t_flags[32] = (int_f)H5T_ARRAY;
+    h5t_flags[33] = (int_f)H5T_DIR_ASCEND;
+    h5t_flags[34] = (int_f)H5T_DIR_DESCEND;
+
 /*
  *  H5Z flags
  */
-      h5z_flags[0] = (int_f)H5Z_FILTER_ERROR;
-      h5z_flags[1] = (int_f)H5Z_FILTER_NONE;
-      h5z_flags[2] = (int_f)H5Z_FILTER_DEFLATE;
-      h5z_flags[3] = (int_f)H5Z_FILTER_SHUFFLE;
-      h5z_flags[4] = (int_f)H5Z_FILTER_FLETCHER32;
-      h5z_flags[5] = (int_f)H5Z_ERROR_EDC;
-      h5z_flags[6] = (int_f)H5Z_DISABLE_EDC;
-      h5z_flags[7] = (int_f)H5Z_ENABLE_EDC;
-      h5z_flags[8] = (int_f)H5Z_NO_EDC;
-      h5z_flags[9] = (int_f)H5Z_FILTER_SZIP;
-      h5z_flags[10] = (int_f)H5Z_FLAG_OPTIONAL;
-      h5z_flags[11] = (int_f)H5Z_FILTER_CONFIG_ENCODE_ENABLED;
-      h5z_flags[12] = (int_f)H5Z_FILTER_CONFIG_DECODE_ENABLED;
-      h5z_flags[13] = (int_f)H5Z_FILTER_ALL;
-      h5z_flags[14] = (int_f)H5Z_FILTER_NBIT;
-      h5z_flags[15] = (int_f)H5Z_FILTER_SCALEOFFSET;
-      h5z_flags[16] = (int_f)H5Z_SO_FLOAT_DSCALE;
-      h5z_flags[17] = (int_f)H5Z_SO_FLOAT_ESCALE;
-      h5z_flags[18] = (int_f)H5Z_SO_INT;
-      h5z_flags[19] = (int_f)H5Z_SO_INT_MINBITS_DEFAULT;
+    h5z_flags[0] = (int_f)H5Z_FILTER_ERROR;
+    h5z_flags[1] = (int_f)H5Z_FILTER_NONE;
+    h5z_flags[2] = (int_f)H5Z_FILTER_DEFLATE;
+    h5z_flags[3] = (int_f)H5Z_FILTER_SHUFFLE;
+    h5z_flags[4] = (int_f)H5Z_FILTER_FLETCHER32;
+    h5z_flags[5] = (int_f)H5Z_ERROR_EDC;
+    h5z_flags[6] = (int_f)H5Z_DISABLE_EDC;
+    h5z_flags[7] = (int_f)H5Z_ENABLE_EDC;
+    h5z_flags[8] = (int_f)H5Z_NO_EDC;
+    h5z_flags[9] = (int_f)H5Z_FILTER_SZIP;
+    h5z_flags[10] = (int_f)H5Z_FLAG_OPTIONAL;
+    h5z_flags[11] = (int_f)H5Z_FILTER_CONFIG_ENCODE_ENABLED;
+    h5z_flags[12] = (int_f)H5Z_FILTER_CONFIG_DECODE_ENABLED;
+    h5z_flags[13] = (int_f)H5Z_FILTER_ALL;
+    h5z_flags[14] = (int_f)H5Z_FILTER_NBIT;
+    h5z_flags[15] = (int_f)H5Z_FILTER_SCALEOFFSET;
+    h5z_flags[16] = (int_f)H5Z_SO_FLOAT_DSCALE;
+    h5z_flags[17] = (int_f)H5Z_SO_FLOAT_ESCALE;
+    h5z_flags[18] = (int_f)H5Z_SO_INT;
+    h5z_flags[19] = (int_f)H5Z_SO_INT_MINBITS_DEFAULT;
 
 /*
  *  H5 Generic flags introduced in version 1.8
  */
 
-      /* H5_index_t enum struct */
+    /* H5_index_t enum struct */
 
-      h5_generic_flags[0] = (int_f)H5_INDEX_UNKNOWN;   /* Unknown index type			*/
-      h5_generic_flags[1] = (int_f)H5_INDEX_NAME;      /* Index on names 			*/
-      h5_generic_flags[2] = (int_f)H5_INDEX_CRT_ORDER; /* Index on creation order 		*/
-      h5_generic_flags[3] = (int_f)H5_INDEX_N;         /* Index on creation order 		*/
+    h5_generic_flags[0] = (int_f)H5_INDEX_UNKNOWN;   /* Unknown index type			*/
+    h5_generic_flags[1] = (int_f)H5_INDEX_NAME;      /* Index on names 			*/
+    h5_generic_flags[2] = (int_f)H5_INDEX_CRT_ORDER; /* Index on creation order 		*/
+    h5_generic_flags[3] = (int_f)H5_INDEX_N;         /* Index on creation order 		*/
 
 
-      /* H5_iter_order_t enum struct */
+    /* H5_iter_order_t enum struct */
 
-      h5_generic_flags[4] = (int_f)H5_ITER_UNKNOWN;       /* Unknown order */
-      h5_generic_flags[5] = (int_f)H5_ITER_INC;           /* Increasing order */
-      h5_generic_flags[6] = (int_f)H5_ITER_DEC;           /* Decreasing order */
-      h5_generic_flags[7] = (int_f)H5_ITER_NATIVE;        /* No particular order, whatever is fastest */
-      h5_generic_flags[8] = (int_f)H5_ITER_N;		  /* Number of iteration orders */
+    h5_generic_flags[4] = (int_f)H5_ITER_UNKNOWN;       /* Unknown order */
+    h5_generic_flags[5] = (int_f)H5_ITER_INC;           /* Increasing order */
+    h5_generic_flags[6] = (int_f)H5_ITER_DEC;           /* Decreasing order */
+    h5_generic_flags[7] = (int_f)H5_ITER_NATIVE;        /* No particular order, whatever is fastest */
+    h5_generic_flags[8] = (int_f)H5_ITER_N;		  /* Number of iteration orders */
 
-      h5_haddr_generic_flags[0] = (haddr_t_f)HADDR_UNDEF; /* undefined address */
+    h5_haddr_generic_flags[0] = (haddr_t_f)HADDR_UNDEF; /* undefined address */
 
-    ret_value = 0;
-    return ret_value;
+    return 0;
 }
 
 int_f

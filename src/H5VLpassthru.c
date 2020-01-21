@@ -188,6 +188,11 @@ static herr_t H5VL_pass_through_blob_get(void *obj, const void *blob_id, void *b
 static herr_t H5VL_pass_through_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
 static herr_t H5VL_pass_through_blob_optional(void *obj, void *blob_id, H5VL_blob_optional_t opt_type, va_list arguments);
 
+/* Token callbacks */
+static herr_t H5VL_pass_through_token_cmp(void *obj, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value);
+static herr_t H5VL_pass_through_token_to_str(void *obj, H5I_type_t obj_type, const H5O_token_t *token, char **token_str);
+static herr_t H5VL_pass_through_token_from_str(void *obj, H5I_type_t obj_type, const char *token_str, H5O_token_t *token);
+
 /* Generic optional callback */
 static herr_t H5VL_pass_through_optional(void *obj, int op_type, hid_t dxpl_id, void **req, va_list arguments);
 
@@ -295,6 +300,11 @@ static const H5VL_class_t H5VL_pass_through_g = {
         H5VL_pass_through_blob_get,                 /* get */
         H5VL_pass_through_blob_specific,            /* specific */
         H5VL_pass_through_blob_optional             /* optional */
+    },
+    {                                           /* token_cls */
+        H5VL_pass_through_token_cmp,                /* cmp */
+        H5VL_pass_through_token_to_str,             /* to_str */
+        H5VL_pass_through_token_from_str              /* from_str */
     },
     H5VL_pass_through_optional                  /* optional */
 };
@@ -3026,6 +3036,104 @@ H5VL_pass_through_blob_optional(void *obj, void *blob_id,
 
     return ret_value;
 } /* end H5VL_pass_through_blob_optional() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VL_pass_through_token_cmp
+ *
+ * Purpose:     Compare two of the connector's object tokens, setting
+ *              *cmp_value, following the same rules as strcmp().
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *---------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_pass_through_token_cmp(void *obj, const H5O_token_t *token1,
+    const H5O_token_t *token2, int *cmp_value)
+{
+    H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
+    herr_t ret_value;
+
+#ifdef ENABLE_PASSTHRU_LOGGING
+    printf("------- PASS THROUGH VOL TOKEN Compare\n");
+#endif
+
+    /* Sanity checks */
+    assert(obj);
+    assert(token1);
+    assert(token2);
+    assert(cmp_value);
+
+    ret_value = H5VLtoken_cmp(o->under_object, o->under_vol_id, token1, token2, cmp_value);
+
+    return ret_value;
+} /* end H5VL_pass_through_token_cmp() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VL_pass_through_token_to_str
+ *
+ * Purpose:     Serialize the connector's object token into a string.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *---------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_pass_through_token_to_str(void *obj, H5I_type_t obj_type,
+    const H5O_token_t *token, char **token_str)
+{
+    H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
+    herr_t ret_value;
+
+#ifdef ENABLE_PASSTHRU_LOGGING
+    printf("------- PASS THROUGH VOL TOKEN To string\n");
+#endif
+
+    /* Sanity checks */
+    assert(obj);
+    assert(token);
+    assert(token_str);
+
+    ret_value = H5VLtoken_to_str(o->under_object, obj_type, o->under_vol_id, token, token_str);
+
+    return ret_value;
+} /* end H5VL_pass_through_token_to_str() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VL_pass_through_token_from_str
+ *
+ * Purpose:     Deserialize the connector's object token from a string.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *---------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_pass_through_token_from_str(void *obj, H5I_type_t obj_type,
+    const char *token_str, H5O_token_t *token)
+{
+    H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
+    herr_t ret_value;
+
+#ifdef ENABLE_PASSTHRU_LOGGING
+    printf("------- PASS THROUGH VOL TOKEN From string\n");
+#endif
+
+    /* Sanity checks */
+    assert(obj);
+    assert(token);
+    assert(token_str);
+
+    ret_value = H5VLtoken_from_str(o->under_object, obj_type, o->under_vol_id, token_str, token);
+
+    return ret_value;
+} /* end H5VL_pass_through_token_from_str() */
 
 
 /*-------------------------------------------------------------------------
