@@ -59,7 +59,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "H5private.h"
 #include "hdf5.h"
 
 #ifdef H5_HAVE_PARALLEL
@@ -80,6 +79,9 @@
 #define PIO_POSIX           0x1
 #define PIO_MPI             0x2
 #define PIO_HDF5            0x4
+
+#define DBL_EPSILON 2.2204460492503131e-16
+#define H5_DBL_ABS_EQUAL(X,Y)       (fabsf((X)-(Y)) < DBL_EPSILON)
 
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
