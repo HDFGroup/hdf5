@@ -9,7 +9,7 @@ use warnings;
 #       need to be decremented. - QAK)
 
 # Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, 7 = 1.14, etc)
-$max_idx = 7;
+$max_idx = 8;
 
 # Min. supported previous library version "index" (0 = v1.0, 1 = 1.2, etc)
 $min_sup_idx = 3;
@@ -354,7 +354,18 @@ sub parse_line ($) {
             my $vers_idx;       # Index of version in array
 
             # Do some validation on the input
-            if(!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ )) {
+            # Note:  v111 is allowed because H5O functions were prematurely versioned
+            #        in HDF5 1.10.  Because users were affected by this, the versioning
+            #        was rescinded but the H5O version 2 functions were kept to be 
+            #        called directly.  Now that the version macros are added in 1.12,
+            #        along with a 3rd version of the H5O functions, the H5O function
+            #        version for default api=v110 should be version 1 to work correctly
+            #        with 1.10 applications that were using unversioned H5O functions,
+            #        and the H5O function version should be version 3 for default api=v112 
+            #        (the default api version for 1.12).  Allowing a v111 entry and 
+            #        incrementing its index 13 lines below allows a version 2 that is
+            #        never accessed via the H5O function macros.
+            if(!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ )) {
                 die "bad version information: $name";
             }
             if(exists($sym_versions{$_})) {
@@ -367,6 +378,9 @@ sub parse_line ($) {
 #print "parse_line: _=$_\n";
             # Get the index of the version
             ($vers_idx) = ($_ =~ /v1(\d+)/);
+            if($vers_idx == 11) {
+                $vers_idx++;
+            }
             $vers_idx /= 2;
 #print "parse_line: vers_idx='$vers_idx'\n";
             push(@vers_nums, $vers_idx);
