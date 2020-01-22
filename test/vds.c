@@ -1134,11 +1134,11 @@ error:
 static int
 test_vds_prefix_first(unsigned config, hid_t fapl)
 {
-    char        srcfilename[FILENAME_BUF_SIZE];
-    char        srcfilename_map[FILENAME_BUF_SIZE];
-    char        vfilename[FILENAME_BUF_SIZE];
-    char        srcfilenamepct[FILENAME_BUF_SIZE];
-    char        srcfilenamepct_map[FILENAME_BUF_SIZE];
+    char        *srcfilename        = NULL;
+    char        *srcfilename_map    = NULL;
+    char        *vfilename          = NULL;
+    char        *srcfilenamepct     = NULL;
+    char        *srcfilenamepct_map = NULL;
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
@@ -1158,11 +1158,22 @@ test_vds_prefix_first(unsigned config, hid_t fapl)
 
     TESTING("basic virtual dataset I/O via H5Pset_vds_prefix(): all selection")
 
-    h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
-    h5_fixname(FILENAME[8], fapl, srcfilename, sizeof srcfilename);
-    h5_fixname_printf(FILENAME[8], fapl, srcfilename_map, sizeof srcfilename_map);
-    h5_fixname(FILENAME[10], fapl, srcfilenamepct, sizeof srcfilenamepct);
-    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, sizeof srcfilenamepct_map);
+    if((srcfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((vfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[0], fapl, vfilename, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[8], fapl, srcfilename, FILENAME_BUF_SIZE);
+    h5_fixname_printf(FILENAME[8], fapl, srcfilename_map, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[10], fapl, srcfilenamepct, FILENAME_BUF_SIZE);
+    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, FILENAME_BUF_SIZE);
 
     /* create tmp directory and get current working directory path */
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
@@ -1346,6 +1357,12 @@ test_vds_prefix_first(unsigned config, hid_t fapl)
         TEST_ERROR
     dcpl = -1;
 
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(vfilename);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
+
     PASSED();
     return 0;
 
@@ -1369,6 +1386,12 @@ test_vds_prefix_first(unsigned config, hid_t fapl)
     if(HDsetenv("HDF5_VDS_PREFIX", "", 1) < 0)
         TEST_ERROR
 
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(vfilename);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
+
     return 1;
 } /* end test_vds_prefix */
 
@@ -1386,12 +1409,12 @@ test_vds_prefix_first(unsigned config, hid_t fapl)
 static int
 test_basic_io(unsigned config, hid_t fapl)
 {
-    char        srcfilename[FILENAME_BUF_SIZE];
-    char        srcfilename_map[FILENAME_BUF_SIZE];
-    char        vfilename[FILENAME_BUF_SIZE];
-    char        vfilename2[FILENAME_BUF_SIZE];
-    char        srcfilenamepct[FILENAME_BUF_SIZE];
-    char        srcfilenamepct_map[FILENAME_BUF_SIZE];
+    char        *srcfilename        = NULL;
+    char        *srcfilename_map    = NULL;
+    char        *vfilename          = NULL;
+    char        *vfilename2         = NULL;
+    char        *srcfilenamepct     = NULL;
+    char        *srcfilenamepct_map = NULL;
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
@@ -1419,12 +1442,25 @@ test_basic_io(unsigned config, hid_t fapl)
 
     TESTING("basic virtual dataset I/O")
 
-    h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
-    h5_fixname(FILENAME[1], fapl, vfilename2, sizeof vfilename2);
-    h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
-    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, sizeof srcfilename_map);
-    h5_fixname(FILENAME[4], fapl, srcfilenamepct, sizeof srcfilenamepct);
-    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, sizeof srcfilenamepct_map);
+    if((srcfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((vfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((vfilename2 = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[0], fapl, vfilename, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[1], fapl, vfilename2, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[2], fapl, srcfilename, FILENAME_BUF_SIZE);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[4], fapl, srcfilenamepct, FILENAME_BUF_SIZE);
+    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, FILENAME_BUF_SIZE);
 
     /* Create DCPL */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -4227,6 +4263,13 @@ test_basic_io(unsigned config, hid_t fapl)
         TEST_ERROR
     dcpl = -1;
 
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(vfilename);
+    HDfree(vfilename2);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
+
     PASSED();
     return 0;
 
@@ -4246,6 +4289,13 @@ error:
         H5Sclose(memspace);
         H5Pclose(dcpl);
     } H5E_END_TRY;
+
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(vfilename);
+    HDfree(vfilename2);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
 
      return 1;
 } /* end test_basic_io() */
@@ -7286,15 +7336,15 @@ error:
 static int
 test_printf(unsigned config, hid_t fapl)
 {
-    char        srcfilename[FILENAME_BUF_SIZE];
-    char        srcfilename_map[FILENAME_BUF_SIZE];
-    char        srcfilename2[FILENAME_BUF_SIZE];
-    char        srcfilename2_map[FILENAME_BUF_SIZE];
-    char        vfilename[FILENAME_BUF_SIZE];
-    char        printf_srcfilename_map[FILENAME_BUF_SIZE];
+    char        *srcfilename            = NULL;
+    char        *srcfilename_map        = NULL;
+    char        *srcfilename2           = NULL;
+    char        *srcfilename2_map       = NULL;
+    char        *vfilename              = NULL;
+    char        *printf_srcfilename_map = NULL;
+    char        *srcfilenamepct         = NULL;
+    char        *srcfilenamepct_map     = NULL;
     const char *printf_srcfilename_map_orig = "vds_src_%b";
-    char        srcfilenamepct[FILENAME_BUF_SIZE];
-    char        srcfilenamepct_map[FILENAME_BUF_SIZE];
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
@@ -7322,14 +7372,31 @@ test_printf(unsigned config, hid_t fapl)
 
     TESTING("virtual dataset I/O with printf source")
 
-    h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
-    h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
-    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, sizeof srcfilename_map);
-    h5_fixname(FILENAME[3], fapl, srcfilename2, sizeof srcfilename2);
-    h5_fixname_printf(FILENAME[2], fapl, srcfilename2_map, sizeof srcfilename2_map);
-    h5_fixname_printf(printf_srcfilename_map_orig, fapl, printf_srcfilename_map, sizeof printf_srcfilename_map);
-    h5_fixname(FILENAME[4], fapl, srcfilenamepct, sizeof srcfilenamepct);
-    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, sizeof srcfilenamepct_map);
+    if((srcfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilename2 = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilename2_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((vfilename = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((printf_srcfilename_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+    if((srcfilenamepct_map = (char *)HDcalloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[0], fapl, vfilename, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[2], fapl, srcfilename, FILENAME_BUF_SIZE);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[3], fapl, srcfilename2, FILENAME_BUF_SIZE);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename2_map, FILENAME_BUF_SIZE);
+    h5_fixname_printf(printf_srcfilename_map_orig, fapl, printf_srcfilename_map, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[4], fapl, srcfilenamepct, FILENAME_BUF_SIZE);
+    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, FILENAME_BUF_SIZE);
 
     /* Create DCPL */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -10940,6 +11007,15 @@ test_printf(unsigned config, hid_t fapl)
         TEST_ERROR
     memspace = -1;
 
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(srcfilename2);
+    HDfree(srcfilename2_map);
+    HDfree(vfilename);
+    HDfree(printf_srcfilename_map);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
+
     PASSED();
     return 0;
 
@@ -10959,6 +11035,15 @@ error:
         H5Pclose(dcpl);
         H5Pclose(dapl);
     } H5E_END_TRY;
+
+    HDfree(srcfilename);
+    HDfree(srcfilename_map);
+    HDfree(srcfilename2);
+    HDfree(srcfilename2_map);
+    HDfree(vfilename);
+    HDfree(printf_srcfilename_map);
+    HDfree(srcfilenamepct);
+    HDfree(srcfilenamepct_map);
 
      return 1;
 } /* end test_printf() */

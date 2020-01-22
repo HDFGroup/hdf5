@@ -842,8 +842,7 @@ error:
  *
  * Purpose:     Tests the file handle interface for FAMILY driver
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
@@ -861,11 +860,20 @@ test_family(void)
     char        dname[]="dataset";
     unsigned int i, j;
     int         *fhandle=NULL, *fhandle2=NULL;
-    int         buf[FAMILY_NUMBER][FAMILY_SIZE];
+    int         **buf = NULL;
+    int         *buf_data = NULL;
     hsize_t     dims[2]={FAMILY_NUMBER, FAMILY_SIZE};
     hsize_t     file_size;
 
     TESTING("FAMILY file driver");
+
+    /* Set up data array */
+    if(NULL == (buf_data = (int *)HDcalloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (buf = (int **)HDcalloc(FAMILY_NUMBER, sizeof(buf_data))))
+        TEST_ERROR;
+    for (i = 0; i < FAMILY_NUMBER; i++)
+        buf[i] = buf_data + (i * FAMILY_SIZE);
 
     /* Set property list and file name for FAMILY driver */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -890,7 +898,7 @@ test_family(void)
                         | H5FD_FEAT_AGGREGATE_SMALLDATA))
         TEST_ERROR
 
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 
     if(H5Fclose(file) < 0)
@@ -905,7 +913,7 @@ test_family(void)
     if(H5Pset_fapl_family(fapl, (hsize_t)H5F_FAMILY_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
 
     /* Check file size API */
@@ -917,7 +925,7 @@ test_family(void)
         TEST_ERROR;
 
     /* Create and write dataset */
-    if((space=H5Screate_simple(2, dims, NULL)) < 0)
+    if((space = H5Screate_simple(2, dims, NULL)) < 0)
         TEST_ERROR;
 
     /* Retrieve the access property list... */
@@ -932,14 +940,14 @@ test_family(void)
     if (H5Pclose(access_fapl) < 0)
         TEST_ERROR;
 
-    if((dset=H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((dset = H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for(i = 0; i < FAMILY_NUMBER; i++)
         for(j = 0; j < FAMILY_SIZE; j++)
             buf[i][j] = (int)((i * 10000) + j);
 
-    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0)
         TEST_ERROR;
 
     /* check file handle API */
@@ -1004,8 +1012,11 @@ test_family(void)
     if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
+    HDfree(buf);
+    HDfree(buf_data);
+
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -1015,8 +1026,12 @@ error:
         H5Pclose(fapl2);
         H5Fclose(file);
     } H5E_END_TRY;
-    return -1;
-}
+
+    HDfree(buf);
+    HDfree(buf_data);
+
+    return FAIL;
+} /* end test_family() */
 
 
 /*-------------------------------------------------------------------------
@@ -1136,8 +1151,7 @@ error:
  *
  * Purpose:     Actually use the member fapl input to the member vfd.
  *
- * Return:      Success:        0
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Jacob Smith
  *              21 May 2019
@@ -1147,108 +1161,91 @@ error:
 static herr_t
 test_family_member_fapl(void)
 {
-    hid_t    file         = H5I_INVALID_HID;
-    hid_t    fapl_id      = H5I_INVALID_HID;
-    hid_t    memb_fapl_id = H5I_INVALID_HID;
-    hid_t    space        = H5I_INVALID_HID;
-    hid_t    dset         = H5I_INVALID_HID;
+    hid_t    file           = H5I_INVALID_HID;
+    hid_t    fapl_id        = H5I_INVALID_HID;
+    hid_t    memb_fapl_id   = H5I_INVALID_HID;
+    hid_t    space          = H5I_INVALID_HID;
+    hid_t    dset           = H5I_INVALID_HID;
     char     filename[1024];
-    char     dname[]      = "dataset";
-    unsigned i            = 0;
-    unsigned j            = 0;
-    int      buf[FAMILY_NUMBER][FAMILY_SIZE];
-    hsize_t  dims[2]      = {FAMILY_NUMBER, FAMILY_SIZE};
+    char     dname[]        = "dataset";
+    unsigned i              = 0;
+    unsigned j              = 0;
+    int     **buf           = NULL;
+    int     *buf_data       = NULL;
+    hsize_t  dims[2]        = {FAMILY_NUMBER, FAMILY_SIZE};
 
     TESTING("Family member FAPL");
 
-    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id) {
+    /* Set up data array */
+    if(NULL == (buf_data = (int *)HDcalloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int))))
         TEST_ERROR;
-    }
-    memb_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == memb_fapl_id) {
+    if(NULL == (buf = (int **)HDcalloc(FAMILY_NUMBER, sizeof(buf_data))))
         TEST_ERROR;
-    }
-    if (H5Pset_fapl_sec2(memb_fapl_id) == FAIL) {
+    for (i = 0; i < FAMILY_NUMBER; i++)
+        buf[i] = buf_data + (i * FAMILY_SIZE);
+
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == H5I_INVALID_HID)
         TEST_ERROR;
-    }
-    if (H5Pset_fapl_family(fapl_id, (hsize_t)FAMILY_SIZE, memb_fapl_id) == FAIL) {
+
+    if((memb_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) ==  H5I_INVALID_HID)
         TEST_ERROR;
-    }
+
+    if (H5Pset_fapl_sec2(memb_fapl_id) == FAIL)
+        TEST_ERROR;
+    if (H5Pset_fapl_family(fapl_id, (hsize_t)FAMILY_SIZE, memb_fapl_id) == FAIL)
+        TEST_ERROR;
+
     h5_fixname(FILENAME[2], fapl_id, filename, sizeof(filename));
 
-    file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-    if (H5I_INVALID_HID == file) {
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) == H5I_INVALID_HID)
         TEST_ERROR;
-    }
 
-    space = H5Screate_simple(2, dims, NULL);
-    if (H5I_INVALID_HID == space) {
+    if((space = H5Screate_simple(2, dims, NULL)) == H5I_INVALID_HID)
         TEST_ERROR;
-    }
 
     /* Create and write to dataset, then close file.
      */
-    dset = H5Dcreate2(
-            file,
-            dname,
-            H5T_NATIVE_INT,
-            space,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT);
-    if (H5I_INVALID_HID == dset) {
+    if((dset = H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) == H5I_INVALID_HID)
         TEST_ERROR;
-    }
+
     for (i = 0; i < FAMILY_NUMBER; i++) {
         for (j = 0; j < FAMILY_SIZE; j++) {
             buf[i][j] = (int)((i * 10000) + j);
         }
     }
-    if (H5Dwrite(dset,
-                 H5T_NATIVE_INT,
-                 H5S_ALL,
-                 H5S_ALL,
-                 H5P_DEFAULT,
-                 buf)
-            == FAIL)
-    {
+
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) == FAIL)
         TEST_ERROR;
-    }
-    if (H5Dclose(dset)         == FAIL) {
+
+    if (H5Dclose(dset) == FAIL)
         TEST_ERROR;
-    }
-    if (H5Sclose(space)        == FAIL) {
+    if (H5Sclose(space) == FAIL)
         TEST_ERROR;
-    }
-    if (H5Fclose(file)         == FAIL) {
+    if (H5Fclose(file) == FAIL)
         TEST_ERROR;
-    }
 
     /* "Close" member FAPL at top level and re-open file.
      * Should succeed, with library managing reference count properly
      */
-    if (H5Pclose(memb_fapl_id) == FAIL) {
+    if (H5Pclose(memb_fapl_id) == FAIL)
         TEST_ERROR;
-    }
 
-    file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
-    if (H5I_INVALID_HID == file) {
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) == H5I_INVALID_HID)
         TEST_ERROR;
-    }
 
-    if (H5Fclose(file) == FAIL) {
+    if (H5Fclose(file) == FAIL)
         TEST_ERROR;
-    }
 
     h5_delete_test_file(FILENAME[2], fapl_id);
 
-    if (H5Pclose(fapl_id) == FAIL) {
+    if (H5Pclose(fapl_id) == FAIL)
         TEST_ERROR;
-    }
+
+    HDfree(buf);
+    HDfree(buf_data);
 
     PASSED();
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -1259,7 +1256,10 @@ error:
         H5Fclose(file);
     } H5E_END_TRY;
 
-    return -1;
+    HDfree(buf);
+    HDfree(buf_data);
+
+    return FAIL;
 } /* end test_family_member_fapl() */
 
 
@@ -1337,9 +1337,18 @@ test_multi(void)
     char        dname[]="dataset";
     char        meta[] = "this is some metadata on this file";
     int         i, j;
-    int         buf[MULTI_SIZE][MULTI_SIZE];
+    int         **buf = NULL;
+    int         *buf_data = NULL;
 
     TESTING("MULTI file driver");
+
+    /* Set up data array */
+    if(NULL == (buf_data = (int *)HDcalloc(MULTI_SIZE * MULTI_SIZE, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (buf = (int **)HDcalloc(MULTI_SIZE, sizeof(buf_data))))
+        TEST_ERROR;
+    for (i = 0; i < MULTI_SIZE; i++)
+        buf[i] = buf_data + (i * MULTI_SIZE);
 
     /* Set file access property list for MULTI driver */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -1443,7 +1452,7 @@ test_multi(void)
     for(i=0; i<MULTI_SIZE; i++)
         for(j=0; j<MULTI_SIZE; j++)
             buf[i][j] = i*10000+j;
-    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0)
         TEST_ERROR;
 
     if((fapl2=H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -1521,6 +1530,9 @@ test_multi(void)
     if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
+    HDfree(buf);
+    HDfree(buf_data);
+
     PASSED();
 
     return SUCCEED;
@@ -1534,6 +1546,10 @@ error:
         H5Fclose(file);
         H5Aclose(attr);
     } H5E_END_TRY;
+
+    HDfree(buf);
+    HDfree(buf_data);
+
     return FAIL;
 } /* end test_multi() */
 
@@ -1572,9 +1588,18 @@ test_multi_compat(void)
     char        sv[H5FD_MEM_NTYPES][32];
     hsize_t     dims[2]={MULTI_SIZE, MULTI_SIZE};
     int         i, j;
-    int         buf[MULTI_SIZE][MULTI_SIZE];
+    int         **buf = NULL;
+    int         *buf_data = NULL;
 
     TESTING("MULTI file driver backward compatibility");
+
+    /* Set up data array */
+    if(NULL == (buf_data = (int *)HDcalloc(MULTI_SIZE * MULTI_SIZE, sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (buf = (int **)HDcalloc(MULTI_SIZE, sizeof(buf_data))))
+        TEST_ERROR;
+    for (i = 0; i < MULTI_SIZE; i++)
+        buf[i] = buf_data + (i * MULTI_SIZE);
 
     /* Set file access property list for MULTI driver */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -1659,7 +1684,7 @@ test_multi_compat(void)
     for(i=0; i<MULTI_SIZE; i++)
         for(j=0; j<MULTI_SIZE; j++)
             buf[i][j] = i*10000+j;
-    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0)
         TEST_ERROR;
 
     if(H5Dclose(dset) < 0)
@@ -1697,9 +1722,12 @@ test_multi_compat(void)
     if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
+    HDfree(buf);
+    HDfree(buf_data);
+
     PASSED();
 
-    return 0;
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY {
@@ -1708,8 +1736,12 @@ error:
         H5Pclose(fapl);
         H5Fclose(file);
     } H5E_END_TRY;
-    return -1;
-}
+
+    HDfree(buf);
+    HDfree(buf_data);
+
+    return FAIL;
+} /* end test_multi_compat() */
 
 
 /*-------------------------------------------------------------------------
