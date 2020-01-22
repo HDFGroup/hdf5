@@ -59,6 +59,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "H5private.h"
 #include "hdf5.h"
 
 #ifdef H5_HAVE_PARALLEL
@@ -82,6 +83,7 @@
 
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
+#define MB_PER_SEC(bytes,t) (H5_DBL_ABS_EQUAL((t), 0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE    1
