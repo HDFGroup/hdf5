@@ -2921,12 +2921,12 @@ main(void)
     }
 
     /* Patch filenames */
-    h5_fixname(FILENAME[0], fapl_id, filename[0], sizeof(filename[0]));
-    h5_fixname(FILENAME[1], fapl_id, filename[1], sizeof(filename[1]));
-    h5_fixname(FILENAME[2], fapl_id, filename[2], sizeof(filename[2]));
-    h5_fixname(FILENAME[3], fapl_id, filename[3], sizeof(filename[3]));
-    h5_fixname(FILENAME[4], fapl_id, filename[4], sizeof(filename[4]));
-    h5_fixname(FILENAME[5], fapl_id, filename[5], sizeof(filename[5]));
+    h5_fixname(FILENAME[0], fapl_id, filename[0], PATH_MAX);
+    h5_fixname(FILENAME[1], fapl_id, filename[1], PATH_MAX);
+    h5_fixname(FILENAME[2], fapl_id, filename[2], PATH_MAX);
+    h5_fixname(FILENAME[3], fapl_id, filename[3], PATH_MAX);
+    h5_fixname(FILENAME[4], fapl_id, filename[4], PATH_MAX);
+    h5_fixname(FILENAME[5], fapl_id, filename[5], PATH_MAX);
 
     /* Push API context */
     if(H5CX_push() < 0) FAIL_STACK_ERROR
