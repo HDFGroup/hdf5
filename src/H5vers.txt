@@ -62,11 +62,20 @@ FUNCTION: H5Literate; H5L_iterate; v18, v112
 FUNCTION: H5Literate_by_name; H5L_iterate; v18, v112
 FUNCTION: H5Lvisit; H5L_iterate; v18, v112
 FUNCTION: H5Lvisit_by_name; H5L_iterate; v18, v112
-FUNCTION: H5Oget_info; ; v18, v110, v112
-FUNCTION: H5Oget_info_by_name; ; v18, v110, v112
-FUNCTION: H5Oget_info_by_idx; ; v18, v110, v112
-FUNCTION: H5Ovisit; ; v18, v110, v112
-FUNCTION: H5Ovisit_by_name; ; v18, v110, v112
+# Note:  v111 is allowed in make_vers because H5O functions were prematurely
+#        versioned in HDF5 1.10.  Because users were affected by this, the
+#        versioning was rescinded but the H5O version 2 functions were kept
+#        to be called directly.  Now that the version macros are added in 1.12,
+#        along with a 3rd version of the H5O functions, the H5O function
+#        version for default api=v110 should be version 1 to work correctly
+#        with 1.10 applications that were using unversioned H5O functions,
+#        and the H5O function version should be version 3 for default api=v112
+#        (the default api version for 1.12).
+FUNCTION: H5Oget_info; ; v18, v111, v112
+FUNCTION: H5Oget_info_by_name; ; v18, v111, v112
+FUNCTION: H5Oget_info_by_idx; ; v18, v111, v112
+FUNCTION: H5Ovisit; ; v18, v111, v112
+FUNCTION: H5Ovisit_by_name; ; v18, v111, v112
 FUNCTION: H5Pencode; ; v110, v112
 FUNCTION: H5Pget_filter; ; v10, v18
 FUNCTION: H5Pget_filter_by_id; ; v16, v18
