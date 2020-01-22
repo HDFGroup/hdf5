@@ -4674,7 +4674,7 @@ verify_entry_reads(haddr_t addr,
         }
     }
 
-    if ( ! success ) {
+    if ( success ) {
 
         if ( reported_entry_reads != expected_entry_reads ) {
 
@@ -4781,7 +4781,7 @@ verify_entry_writes(haddr_t addr,
         }
     }
 
-    if ( ! success ) {
+    if ( success ) {
 
         if ( reported_entry_writes != expected_entry_writes ) {
 
