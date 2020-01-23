@@ -7269,8 +7269,8 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i=0; i<NPOINTS; i++){
-        chunk_row = (int)(ofs / cols);
-        chunk_col = (int)(ofs % cols);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
         ofs = (ofs + inc) % (rows * cols);
         HDassert(!check2[chunk_row][chunk_col]);
 
@@ -7390,14 +7390,14 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j = 0; j < nsize[1] / csize[1]; j++)
             check2[i][j] = 0;
 
-    rows = (long)(nsize[0] / csize[0]);
-    cols = (long)(nsize[1] / csize[1]);
+    H5_CHECKED_ASSIGN(rows, int, nsize[0] / csize[0], long);
+    H5_CHECKED_ASSIGN(cols, int, nsize[1] / csize[1], long);
     make_random_offset_and_increment(rows * cols, &ofs, &inc);
 
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        chunk_row = (int)(ofs / cols);
-        chunk_col = (int)(ofs % cols);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
         ofs = (ofs + inc) % (rows * cols);
         HDassert(!check2[chunk_row][chunk_col]);
 
@@ -7506,8 +7506,8 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        chunk_row = (int)(ofs / cols);
-        chunk_col = (int)(ofs % cols);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
         ofs = (ofs + inc) % (rows * cols);
         HDassert(!check2[chunk_row][chunk_col]);
 
@@ -9732,8 +9732,8 @@ test_fixed_array(hid_t fapl)
 
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS; i++){
-            chunk_row = (int)(ofs / cols);
-            chunk_col = (int)(ofs % cols);
+            H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+            H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
             ofs = (ofs + inc) % (rows * cols);
             HDassert(!chunks[chunk_row][chunk_col]);
 
@@ -9861,8 +9861,8 @@ test_fixed_array(hid_t fapl)
 
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS_BIG; i++){
-            chunk_row = (int)(ofs / cols);
-            chunk_col = (int)(ofs % cols);
+            H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+            H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
             ofs = (ofs + inc) % (rows * cols);
             HDassert(!chunks_big[chunk_row][chunk_col]);
 

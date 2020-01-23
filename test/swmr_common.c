@@ -26,7 +26,8 @@
 
 #include "h5test.h"
 #include "swmr_common.h"
-
+#include "vds_swmr.h"
+ 
 /*******************/
 /* Local Variables */
 /*******************/
@@ -73,6 +74,27 @@ unsigned symbol_count[NLEVELS] = {100, 200, 400, 800, 1600};
 /* Array of dataset information entries (1 per dataset) */
 symbol_info_t *symbol_info[NLEVELS];
 
+hsize_t PLANES[N_SOURCES][RANK] = {
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH},
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH},
+    {1, SM_HEIGHT, WIDTH},
+    {1, LG_HEIGHT, WIDTH}
+};
+
+char FILE_NAMES[N_SOURCES][NAME_LEN] = {
+    {"vds_swmr_src_a.h5"},
+    {"vds_swmr_src_b.h5"},
+    {"vds_swmr_src_c.h5"},
+    {"vds_swmr_src_d.h5"},
+    {"vds_swmr_src_e.h5"},
+    {"vds_swmr_src_f.h5"}
+};
+
+char VDS_FILE_NAME[NAME_LEN] = "vds_swmr.h5";
+char SOURCE_DSET_PATH[NAME_LEN] = "/source_dset";
+char VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
 
 /*-------------------------------------------------------------------------
  * Function:    choose_dataset

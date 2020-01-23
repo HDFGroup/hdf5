@@ -145,11 +145,13 @@ main(void)
         if(H5Sselect_hyperslab(src_sid, H5S_SELECT_SET, start, NULL,
                     MAX_DIMS[i], NULL) < 0)
             TEST_ERROR
-        start[1] = map_start;
+        start[1] = (hsize_t)map_start;
         if(H5Sselect_hyperslab(vds_sid, H5S_SELECT_SET, start, NULL,
                     MAX_DIMS[i], NULL) < 0)
             TEST_ERROR
-        map_start += PLANES[i][1];
+        if(PLANES[i][1] > INT_MAX)
+            TEST_ERROR
+        map_start += (int)PLANES[i][1];
 
         /* Add VDS mapping */
         if(H5Pset_virtual(vds_dcplid, vds_sid, FILE_NAMES[i],

@@ -1660,7 +1660,7 @@ dump_dataset_values(hid_t dset)
             init_acc_pos(&ctx, total_size);
         ctx.need_prefix = TRUE;
 
-        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), ndims))) {
+        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             H5TOOLS_DEBUG("H5Dread reference read");
             if(H5Dread(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf) < 0) {
                 HDfree(ref_buf);
@@ -1831,7 +1831,7 @@ dump_attribute_values(hid_t attr, const char *attr_name)
             init_acc_pos(&ctx, total_size);
         ctx.need_prefix = TRUE;
 
-        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), ndims))) {
+        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             H5TOOLS_DEBUG("H5Aread reference read");
             if(H5Aread(attr, H5T_STD_REF, ref_buf) < 0) {
                 HDfree(ref_buf);

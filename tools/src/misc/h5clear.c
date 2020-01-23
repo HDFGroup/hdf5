@@ -175,7 +175,7 @@ parse_command_line(int argc, const char **argv)
                         usage(h5tools_getprogname());
                         goto done;
                     }
-                    increment = HDatoi(opt_arg);
+                    increment = (hsize_t)HDatoi(opt_arg);
                 }
                 break;
 
