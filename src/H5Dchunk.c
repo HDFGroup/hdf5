@@ -1683,7 +1683,7 @@ H5D__create_chunk_file_map_all(H5D_chunk_map_t *fm, const H5D_io_info_t
     /* Iterate through each chunk in the dataset */
     while(sel_points) {
         H5D_chunk_info_t *new_chunk_info;   /* chunk information to insert into skip list */
-        hssize_t    schunk_points;          /* Number of elements in chunk selection */
+        hsize_t    chunk_points;            /* Number of elements in chunk selection */
 
         /* Add temporary chunk to the list of chunks */
 
@@ -1727,12 +1727,11 @@ H5D__create_chunk_file_map_all(H5D_chunk_map_t *fm, const H5D_io_info_t
         } /* end if */
 
         /* Get number of elements selected in chunk */
-        if((schunk_points = H5S_GET_SELECT_NPOINTS(new_chunk_info->fspace)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
-        H5_CHECKED_ASSIGN(new_chunk_info->chunk_points, uint32_t, schunk_points, hssize_t);
+        chunk_points = H5S_GET_SELECT_NPOINTS(new_chunk_info->fspace);
+        H5_CHECKED_ASSIGN(new_chunk_info->chunk_points, uint32_t, chunk_points, hsize_t);
 
         /* Decrement # of points left in file selection */
-        sel_points -= (hsize_t)schunk_points;
+        sel_points -= chunk_points;
 
         /* Advance to next chunk if we are not done */
         if(sel_points > 0) {
@@ -1870,7 +1869,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
         /* (Casting away const OK - QAK) */
         if(TRUE == H5S_SELECT_INTERSECT_BLOCK(fm->file_space, coords, end)) {
             H5D_chunk_info_t *new_chunk_info;   /* chunk information to insert into skip list */
-            hssize_t    schunk_points;          /* Number of elements in chunk selection */
+            hsize_t    chunk_points;            /* Number of elements in chunk selection */
 
             /* Create dataspace for chunk, 'AND'ing the overall selection with
              *  the current chunk.
@@ -1923,12 +1922,11 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             } /* end if */
 
             /* Get number of elements selected in chunk */
-            if((schunk_points = H5S_GET_SELECT_NPOINTS(new_chunk_info->fspace)) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
-            H5_CHECKED_ASSIGN(new_chunk_info->chunk_points, uint32_t, schunk_points, hssize_t);
+            chunk_points = H5S_GET_SELECT_NPOINTS(new_chunk_info->fspace);
+            H5_CHECKED_ASSIGN(new_chunk_info->chunk_points, uint32_t, chunk_points, hsize_t);
 
             /* Decrement # of points left in file selection */
-            sel_points -= (hsize_t)schunk_points;
+            sel_points -= chunk_points;
 
             /* Leave if we are done */
             if(sel_points == 0)
@@ -4983,12 +4981,12 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     /* Distribute evenly the number of blocks between processes. */
     if(mpi_size == 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Resulted in division by zero")
-    num_blocks = chunk_info->num_io / mpi_size; /* value should be the same on all procs */
+    num_blocks = (size_t)(chunk_info->num_io / (size_t)mpi_size); /* value should be the same on all procs */
 
     /* after evenly distributing the blocks between processes, are
        there any leftover blocks for each individual process
        (round-robin) */
-    leftover_blocks = chunk_info->num_io % mpi_size;
+    leftover_blocks = (size_t)(chunk_info->num_io % (size_t)mpi_size);
 
     /* Cast values to types needed by MPI */
     H5_CHECKED_ASSIGN(blocks, int, num_blocks, size_t);
@@ -4997,9 +4995,9 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
 
     /* Allocate buffers */
     /* (MSC - should not need block_lens if MPI_type_create_hindexed_block is working) */
-    if(NULL == (block_lens = (int *)H5MM_malloc((blocks + 1) * sizeof(int))))
+    if(NULL == (block_lens = (int *)H5MM_malloc((size_t)(blocks + 1) * sizeof(int))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk lengths buffer")
-    if(NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((blocks + 1) * sizeof(MPI_Aint))))
+    if(NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
 
     for(i = 0 ; i < blocks ; i++) {
@@ -5104,7 +5102,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
     const hsize_t *scaled = udata->common.scaled; /* Scaled chunk offset */
     H5S_sel_iter_t *chunk_iter = NULL;  /* Memory selection iteration info */
     hbool_t     chunk_iter_init = FALSE; /* Whether the chunk iterator has been initialized */
-    hssize_t    sel_nelmts;             /* Number of elements in selection */
+    hsize_t     sel_nelmts;             /* Number of elements in selection */
     hsize_t     count[H5O_LAYOUT_NDIMS]; /* Element count of hyperslab */
     size_t      chunk_size;             /*size of a chunk       */
     void        *chunk;	                /* The file chunk  */
@@ -5165,8 +5163,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
 
     /* Get the number of elements in the selection */
     sel_nelmts = H5S_GET_SELECT_NPOINTS(udata->chunk_space);
-    HDassert(sel_nelmts >= 0);
-    H5_CHECK_OVERFLOW(sel_nelmts, hssize_t, size_t);
+    H5_CHECK_OVERFLOW(sel_nelmts, hsize_t, size_t);
 
     /* Check for VL datatype & non-default fill value */
     if(udata->fb_info.has_vlen_fill_type)

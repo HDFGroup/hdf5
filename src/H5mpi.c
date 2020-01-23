@@ -482,7 +482,7 @@ H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
 
     /* Calculate how many Big MPI datatypes are needed to represent the buffer */
     num_big_types = (int)(num_elements/bigio_count);
-    leftover = num_elements - num_big_types * (hsize_t)bigio_count;
+    leftover = (hsize_t)num_elements - (hsize_t)num_big_types * bigio_count;
     H5_CHECKED_ASSIGN(remaining_bytes, int, leftover, hsize_t);
 
     /* Create a contiguous datatype of size equal to the largest
@@ -491,11 +491,11 @@ H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
      * use type_hvector to create the type with the displacement provided
      */
     if (0 == stride_bytes) {
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(bigio_count, old_type, &inner_type)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)bigio_count, old_type, &inner_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
     } /* end if */
     else
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector(bigio_count, 1, stride_bytes, old_type, &inner_type)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)bigio_count, 1, stride_bytes, old_type, &inner_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
 
     /* Create a contiguous datatype of the buffer (minus the remaining < 2GB part)

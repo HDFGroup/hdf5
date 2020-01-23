@@ -147,7 +147,7 @@ __make_file(const char *basename, struct external_def *ext,
             H5REPACKGENTEST_OOPS;
     }
 
-    space_id = H5Screate_simple(rank, dims, NULL);
+    space_id = H5Screate_simple((int)rank, dims, NULL);
     if (space_id == H5I_INVALID_HID)
         H5REPACKGENTEST_OOPS;
 
@@ -296,7 +296,7 @@ generate_f32le(hbool_t external) {
     /* Generate values */
     for (i = 0, k = 0, n = 0; i < dims[0]; i++) {
         for (j = 0; j < dims[1]; j++, k++, n++) {
-            wdata[k] = (float)(n * 801.1 * ((k % 5 == 1) ? (-1) : (1)));
+            wdata[k] = n * 801.1f * ((k % 5 == 1) ? (-1) : (1));
         }
     }
 
