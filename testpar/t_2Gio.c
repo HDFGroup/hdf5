@@ -552,7 +552,7 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
 #define H5FILE_NAME   "hugefile.h5"
 #define DATASETNAME 	"dataset"
 
-int MpioTest2G( MPI_Comm comm )
+static int MpioTest2G( MPI_Comm comm )
 {
     /*
      * HDF5 APIs definitions
