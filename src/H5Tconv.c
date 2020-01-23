@@ -1848,7 +1848,7 @@ H5T_conv_struct_free(H5T_conv_struct_t *priv)
 
     for(i = 0; i < priv->src_nmembs; i++)
         if(src2dst[i] >= 0) {
-            int status;
+            int H5_ATTR_NDEBUG_UNUSED status;
 
             status = H5I_dec_ref(src_memb_id[i]);
             HDassert(status >= 0);

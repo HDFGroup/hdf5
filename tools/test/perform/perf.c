@@ -110,15 +110,13 @@ const char *FILENAME[] = {
 /* function prototypes */
 static int parse_args(int argc, char **argv);
 
-extern int errno;
-
 /* globals needed for getopt */
 extern char *optarg;
 
 int main(int argc, char **argv)
 {
-    char *buf, *tmp, *buf2, *tmp2, *check;
-    int i, j, mynod=0, nprocs=1, err, my_correct = 1, correct, myerrno;
+    char *buf, *tmp, *buf2 = NULL, *tmp2 = NULL, *check;
+    int i, j, mynod=0, nprocs=1, my_correct = 1, correct, myerrno;
     double stim, etim;
     double write_tim = 0;
     double read_tim = 0;
@@ -127,10 +125,6 @@ int main(int argc, char **argv)
     double min_read_tim, min_write_tim;
     double ave_read_tim, ave_write_tim;
     int64_t iter_jump = 0;
-    int64_t seek_position = 0;
-    MPI_File fh;
-    MPI_Status status;
-    int nchars;
     char filename[MAX_PATH];
     herr_t ret;           /* Generic return value */
 

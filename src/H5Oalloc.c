@@ -111,7 +111,7 @@ H5FL_EXTERN(H5O_cont_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__add_gap(H5F_t *f, H5O_t *oh, unsigned chunkno, hbool_t *chk_dirtied,
+H5O__add_gap(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t *oh, unsigned chunkno, hbool_t *chk_dirtied,
     size_t idx, uint8_t *new_gap_loc, size_t new_gap_size)
 {
     hbool_t merged_with_null;           /* Whether the gap was merged with a null message */

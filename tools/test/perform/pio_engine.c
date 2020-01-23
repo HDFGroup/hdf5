@@ -54,22 +54,13 @@
 
 /* sizes of various items. these sizes won't change during program execution */
 /* The following three must have the same type */
-#define ELMT_SIZE           (sizeof(unsigned char))     /* we're doing bytes */
-#define ELMT_MPI_TYPE       MPI_BYTE
 #define ELMT_H5_TYPE        H5T_NATIVE_UCHAR
 
 #define GOTOERROR(errcode)  { ret_code = errcode; goto done; }
-#define GOTODONE        { goto done; }
 #define ERRMSG(mesg) {                                                  \
     HDfprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                       \
     HDfprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
         mesg, (int)__LINE__, __FILE__);                             \
-}
-
-#define MSG(mesg) {                                     \
-    HDfprintf(stderr, "Proc %d: ", pio_mpi_rank_g);       \
-    HDfprintf(stderr, "(%s) at line %4d in %s\n",         \
-        mesg, (int)__LINE__, __FILE__);             \
 }
 
 /* verify: if val is false (0), print mesg. */
