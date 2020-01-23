@@ -1762,7 +1762,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
     hbool_t report_mssg = FALSE;
     hbool_t success = TRUE;
     int target_index;
-    int new_ver_num;
+    int new_ver_num = 0;
     haddr_t target_addr;
 #if DO_WRITE_REQ_ACK
     struct mssg_t reply;
@@ -4609,7 +4609,7 @@ verify_entry_reads(haddr_t addr,
                    int expected_entry_reads)
 {
     hbool_t success = TRUE;
-    int reported_entry_reads;
+    int reported_entry_reads = 0;
     struct mssg_t mssg;
 
     if ( success ) {
@@ -4716,7 +4716,7 @@ verify_entry_writes(haddr_t addr,
                     int expected_entry_writes)
 {
     hbool_t success = TRUE;
-    int reported_entry_writes;
+    int reported_entry_writes = 0;
     struct mssg_t mssg;
 
     if ( success ) {

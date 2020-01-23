@@ -115,7 +115,7 @@ extern char *optarg;
 
 int main(int argc, char **argv)
 {
-    char *buf, *tmp, *buf2, *tmp2, *check;
+    char *buf, *tmp, *buf2 = NULL, *tmp2 = NULL, *check;
     int i, j, mynod=0, nprocs=1, my_correct = 1, correct, myerrno;
     double stim, etim;
     double write_tim = 0;
