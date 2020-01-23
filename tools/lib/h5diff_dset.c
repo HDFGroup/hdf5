@@ -27,11 +27,7 @@
  * Return: Number of differences found
  *-------------------------------------------------------------------------
  */
-hsize_t diff_dataset(hid_t file1_id,
-                     hid_t file2_id,
-                     const char *obj1_name,
-                     const char *obj2_name,
-                     diff_opt_t *opts)
+hsize_t diff_dataset(hid_t file1_id, hid_t file2_id, const char *obj1_name, const char *obj2_name, diff_opt_t *opts)
 {
     int        status = -1;
     hid_t      did1 = H5I_INVALID_HID;
@@ -41,7 +37,7 @@ hsize_t diff_dataset(hid_t file1_id,
     hsize_t    nfound = 0;
     diff_err_t ret_value = opts->err_stat;
 
-    H5TOOLS_DEBUG("diff_dataset start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
     /*-------------------------------------------------------------------------
      * open the handles
      *-------------------------------------------------------------------------
@@ -92,8 +88,7 @@ done:
         /* enable error reporting */
     } H5E_END_TRY;
 
-    H5TOOLS_DEBUG("diff_dataset finish:%d - errstat:%d", nfound, opts->err_stat);
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 
@@ -148,11 +143,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hsize_t diff_datasetid(hid_t did1,
-                       hid_t did2,
-                       const char *obj1_name,
-                       const char *obj2_name,
-                       diff_opt_t *opts)
+hsize_t diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_name, diff_opt_t *opts)
 {
     hid_t      sid1 = H5I_INVALID_HID;
     hid_t      sid2 = H5I_INVALID_HID;
@@ -197,7 +188,7 @@ hsize_t diff_datasetid(hid_t did1,
     unsigned int  vl_data2 = 0;          /*contains VL datatypes */
     diff_err_t    ret_value = opts->err_stat;
 
-    H5TOOLS_DEBUG("diff_datasetid start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
     /* Get the dataspace handle */
     if((sid1 = H5Dget_space(did1)) < 0)
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Dget_space failed");
@@ -606,8 +597,7 @@ done:
         /* enable error reporting */
     } H5E_END_TRY;
 
-    H5TOOLS_DEBUG("diff_datasetid return:%d with nfound:%d", ret_value, nfound);
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG(": %d with nfound:%d", ret_value, nfound);
     return nfound;
 }
 
@@ -623,18 +613,10 @@ done:
  *-------------------------------------------------------------------------
  */
 
-int diff_can_type(hid_t       f_tid1, /* file data type */
-                  hid_t       f_tid2, /* file data type */
-                  int         rank1,
-                  int         rank2,
-                  hsize_t     *dims1,
-                  hsize_t     *dims2,
-                  hsize_t     *maxdim1,
-                  hsize_t     *maxdim2,
-                  const char  *obj1_name,
-                  const char  *obj2_name,
-                  diff_opt_t  *opts,
-                  int         is_compound)
+int diff_can_type(hid_t f_tid1, hid_t f_tid2, int rank1, int rank2,
+                  hsize_t *dims1, hsize_t *dims2, hsize_t *maxdim1, hsize_t *maxdim2,
+                  const char *obj1_name, const char *obj2_name,
+                  diff_opt_t *opts, int is_compound)
 {
     H5T_class_t  tclass1;
     H5T_class_t  tclass2;
@@ -643,7 +625,7 @@ int diff_can_type(hid_t       f_tid1, /* file data type */
     int          i;
     int          ret_value = 1;
 
-    H5TOOLS_DEBUG("diff_can_type start");
+    H5TOOLS_START_DEBUG("");
     /*-------------------------------------------------------------------------
      * check for the same class
      *-------------------------------------------------------------------------
@@ -851,8 +833,7 @@ done:
     if (ret_value < 0)
         opts->err_stat = H5DIFF_ERR;
 
-    H5TOOLS_DEBUG("diff_can_type end - %d", ret_value);
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG(" - %d", ret_value);
     return ret_value;
 }
 
