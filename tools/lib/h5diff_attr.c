@@ -153,7 +153,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
     herr_t         ret_value = SUCCEED;
 
 
-    H5TOOLS_DEBUG("build_match_list_attrs start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
 
     if(H5Oget_info3(loc1_id, &oinfo1, H5O_INFO_NUM_ATTRS) < 0) {
         H5TOOLS_GOTO_ERROR(FAIL, "H5Oget_info first object failed");
@@ -299,9 +299,8 @@ done:
         H5Aclose(attr2_id);
     } H5E_END_TRY;
 
-    H5TOOLS_DEBUG("build_match_list_attrs end - errstat:%d", opts->err_stat);
+    H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
 
-    H5TOOLS_ENDDEBUG("exit");
     return ret_value;
 }
 
@@ -340,7 +339,7 @@ hsize_t diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const 
     int        j;
     diff_err_t ret_value = opts->err_stat;
 
-    H5TOOLS_DEBUG("diff_attr_data start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
 
     /* get the datatypes  */
     if((ftype1_id = H5Aget_type(attr1_id)) < 0)
@@ -517,9 +516,8 @@ done:
         H5Sclose(space2_id);
     } H5E_END_TRY;
 
-    H5TOOLS_DEBUG("diff_attr_data end - errstat:%d", opts->err_stat);
+    H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
 
-    H5TOOLS_ENDDEBUG("exit");
     return nfound;
 }
 
@@ -548,7 +546,7 @@ hsize_t diff_attr(hid_t loc1_id, hid_t loc2_id, const char *path1, const char *p
     hsize_t        nfound_total = 0;
     diff_err_t     ret_value = opts->err_stat;
 
-    H5TOOLS_DEBUG("diff_attr start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
 
     if(build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, opts) < 0) {
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "build_match_list_attrs failed");
@@ -600,8 +598,7 @@ done:
         H5Aclose(attr2_id);
     } H5E_END_TRY;
 
-    H5TOOLS_DEBUG("diff_attr end - errstat:%d", opts->err_stat);
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
     return nfound_total;
 }
 

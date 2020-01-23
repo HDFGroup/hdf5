@@ -292,7 +292,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
     size_t    i = 0;
     hsize_t   curr_pos = elmtno;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     H5TOOLS_DEBUG("elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
     h5tools_str_reset(str);
@@ -325,7 +325,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
         h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)elmtno);
     H5TOOLS_DEBUG("str=%s", str->s);
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 
     /* Add prefix and suffix to the index */
     return h5tools_str_fmt(str, (size_t)0, OPT(info->idx_fmt, "%s: "));
@@ -693,7 +693,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     H5T_class_t    type_class;
     char          *ret_value = NULL;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
     /* Build default formats for long long types */
     if(!fmt_llong[0]) {
         HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH);
@@ -1346,7 +1346,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
     ret_value = h5tools_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
 
-    H5TOOLS_ENDDEBUG("exit with %s", ret_value);
+    H5TOOLS_ENDDEBUG(" with %s", ret_value);
     return ret_value;
 }
 
@@ -1364,7 +1364,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
 {
     ssize_t buf_size;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     h5tools_str_append(str, " \"");
     buf_size = H5Rget_file_name(ref_vp, NULL, 0);
@@ -1406,7 +1406,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
     }
     h5tools_str_append(str, "\"");
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 }
 
 /*-------------------------------------------------------------------------
