@@ -2063,7 +2063,7 @@ done:
  */
 H5A_t *
 H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_size,
-    H5O_copy_t *cpy_info)
+    H5O_copy_t H5_ATTR_NDEBUG_UNUSED *cpy_info)
 {
     H5A_t      *attr_dst = NULL;        /* Destination attribute */
     hid_t       tid_src = -1;           /* Datatype ID for source datatype */

@@ -552,7 +552,7 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
 #define H5FILE_NAME   "hugefile.h5"
 #define DATASETNAME 	"dataset"
 
-int MpioTest2G( MPI_Comm comm )
+static int MpioTest2G( MPI_Comm comm )
 {
     /*
      * HDF5 APIs definitions
@@ -3891,8 +3891,6 @@ actual_io_mode_tests(void) {
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
-#define DSET_NOCOLCAUSE "nocolcause"
-#define NELM          2
 #define FILE_EXTERNAL "nocolcause_extern.data"
 static void
 test_no_collective_cause_mode(int selection_mode)

@@ -364,7 +364,7 @@ H5HL__cache_prefix_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *im
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL__cache_prefix_get_final_load_size(const void *_image, size_t image_len,
+H5HL__cache_prefix_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED image_len,
     void *_udata, size_t *actual_len)
 {
     const uint8_t *image = (const uint8_t *)_image;   			/* Pointer into raw data buffer */
@@ -415,8 +415,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata,
-    hbool_t H5_ATTR_UNUSED *dirty)
+H5HL__cache_prefix_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, 
+    void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5HL_t               *heap = NULL;  /* Local heap */
     H5HL_prfx_t          *prfx = NULL;  /* Heap prefix deserialized */
@@ -555,7 +555,7 @@ H5HL__cache_prefix_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL__cache_prefix_serialize(const H5F_t *f, void *_image, size_t len,
+H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_thing)
 {
     H5HL_prfx_t *prfx = (H5HL_prfx_t *)_thing;  /* Pointer to local heap prefix to query */
@@ -826,8 +826,8 @@ H5HL__cache_datablock_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL__cache_datablock_serialize(const H5F_t *f, void *image, size_t len,
-    void *_thing)
+H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, 
+    size_t H5_ATTR_NDEBUG_UNUSED len, void *_thing)
 {
     H5HL_t      *heap;          /* Pointer to the local heap */
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing;  /* Pointer to the local heap data block */

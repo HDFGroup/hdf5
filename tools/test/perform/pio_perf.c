@@ -80,8 +80,12 @@
 #define PIO_MPI             0x2
 #define PIO_HDF5            0x4
 
+#define DBL_EPSILON 2.2204460492503131e-16
+#define H5_DBL_ABS_EQUAL(X,Y)       (fabsf((X)-(Y)) < DBL_EPSILON)
+
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
+#define MB_PER_SEC(bytes,t) (H5_DBL_ABS_EQUAL((t), 0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE    1

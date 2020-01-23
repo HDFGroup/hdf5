@@ -128,15 +128,19 @@ typedef struct
 /* Definitions for misc. test #8 */
 #define MISC8_FILE              "tmisc8.h5"
 #define MISC8_DSETNAME1         "Dataset1"
-#define MISC8_DSETNAME2         "Dataset2"
-#define MISC8_DSETNAME3         "Dataset3"
 #define MISC8_DSETNAME4         "Dataset4"
 #define MISC8_DSETNAME5         "Dataset5"
+#define MISC8_DSETNAME8         "Dataset8"
+
+#ifndef H5_HAVE_PARALLEL
+#define MISC8_DSETNAME2         "Dataset2"
+#define MISC8_DSETNAME3         "Dataset3"
 #define MISC8_DSETNAME6         "Dataset6"
 #define MISC8_DSETNAME7         "Dataset7"
-#define MISC8_DSETNAME8         "Dataset8"
 #define MISC8_DSETNAME9         "Dataset9"
 #define MISC8_DSETNAME10        "Dataset10"
+#endif
+
 #define MISC8_RANK              2
 #define MISC8_DIM0              50
 #define MISC8_DIM1              50

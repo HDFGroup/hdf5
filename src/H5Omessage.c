@@ -1686,17 +1686,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_msg_reset_share(unsigned type_id, void *mesg)
+H5O_msg_reset_share(unsigned H5_ATTR_NDEBUG_UNUSED type_id, void *mesg)
 {
-    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
-    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
-    HDassert(type);
-    HDassert(type->share_flags & H5O_SHARE_IS_SHARABLE);
+    HDassert(H5O_msg_class_g[type_id]);  /* map the type ID to the actual type object */
+    HDassert(H5O_msg_class_g[type_id]->share_flags & H5O_SHARE_IS_SHARABLE);
     HDassert(mesg);
 
     /* Reset the shared component in the message to zero. */
