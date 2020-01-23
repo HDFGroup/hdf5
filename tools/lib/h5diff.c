@@ -1048,7 +1048,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
      */
 #ifdef H5_HAVE_PARALLEL
     {
-        char *workerTasks = (char*)HDmalloc((g_nTasks - 1) * sizeof(char));
+        char *workerTasks = (char*)HDmalloc((size_t)(g_nTasks - 1) * sizeof(char));
         int   n;
         int   busyTasks = 0;
         struct diffs_found nFoundbyWorker;
@@ -1057,7 +1057,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
         MPI_Status Status;
 
         /*set all tasks as free */
-        HDmemset(workerTasks, 1, (g_nTasks - 1));
+        HDmemset(workerTasks, 1, (size_t)(g_nTasks - 1) * sizeof(char));
 #endif
 
     for(i = 0; i < table->nobjs; i++) {
@@ -1346,7 +1346,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
         } /* end while */
 
         for(i = 1; i < g_nTasks; i++)
-            MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
+            MPI_Send(NULL, 0, MPI_BYTE, (int)i, MPI_TAG_END, MPI_COMM_WORLD);
 
         /* Print any final data waiting in our queue */
         print_incoming_data();
