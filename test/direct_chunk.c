@@ -43,7 +43,7 @@
 #define CHUNK_NX     4
 #define CHUNK_NY     4
 
-#define DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s))*1.001)+12.0)
+#define DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s))*H5_DOUBLE(1.001))+H5_DOUBLE(12.0))
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS1    305

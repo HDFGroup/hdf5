@@ -253,9 +253,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
 
     # gcc 4.5
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5; then
-        H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init"
-        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wunsuffixed-float-constants"
-        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-unsuffixed-float-constants"
+        H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
     fi
 
     # gcc 4.6

@@ -155,7 +155,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     } /* end if */
 
     /* Get time for event */
-    if(H5_DBL_ABS_EQUAL(first_time.etime, 0.0))
+    if(H5_DBL_ABS_EQUAL(first_time.etime, H5_DOUBLE(0.0)))
         H5_timer_begin(&first_time);
     if(H5_debug_g.ttimes)
         H5_timer_begin(&event_time);

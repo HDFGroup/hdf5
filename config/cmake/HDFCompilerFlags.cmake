@@ -176,12 +176,7 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
 
     # Append more extra warning flags that only gcc 4.5+ know about
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
-      set (H5_CFLAGS1 "${H5_CFLAGS1} -Wstrict-overflow=5 -Wjump-misses-init")
-        if (HDF5_ENABLE_DEV_WARNINGS)
-          set (H5_CFLAGS0 "${H5_CFLAGS0} -Wunsuffixed-float-constants")
-        else ()
-          set (H5_CFLAGS0 "${H5_CFLAGS0} -Wno-unsuffixed-float-constants")
-        endif ()
+      set (H5_CFLAGS1 "${H5_CFLAGS1} -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants")
     endif ()
 
     # Append more extra warning flags that only gcc 4.6+ know about
