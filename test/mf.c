@@ -38,7 +38,6 @@
 #include "H5Iprivate.h"
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
 #include "H5VMprivate.h"
-#include "H5private.h"
 
 #define FILENAME_LEN        1024
 
@@ -7529,8 +7528,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t H5_ATTR_SANITY_CHECK multi, 
-    hbool_t split)
+set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
 {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t memb_fapl_arr[H5FD_MEM_NTYPES];
@@ -7539,7 +7537,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t H5_ATTR_SANITY_CHECK multi
     hbool_t relax;
     H5FD_mem_t  mt;
 
-    HDassert(multi || split);
+    HDassert(is_multi_or_split);
 
     HDmemset(memb_name, 0, sizeof memb_name);
 
@@ -7547,7 +7545,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t H5_ATTR_SANITY_CHECK multi
     if(H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
         TEST_ERROR
 
-    if(split) {
+    if(is_multi_or_split) {
         /* Set memb_addr aligned */
         memb_addr[H5FD_MEM_SUPER] = ((memb_addr[H5FD_MEM_SUPER] + pagesize - 1) / pagesize) * pagesize;
         memb_addr[H5FD_MEM_DRAW] = ((memb_addr[H5FD_MEM_DRAW] + pagesize - 1) / pagesize) * pagesize;

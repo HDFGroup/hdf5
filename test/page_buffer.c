@@ -428,7 +428,7 @@ error:
     } H5E_END_TRY;
     return 1;
 }
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
 /*
  *
@@ -2838,7 +2838,7 @@ error:
 
     return 1;
 } /* test_stats_collection */
-#endif
+#endif /* #ifndef H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------

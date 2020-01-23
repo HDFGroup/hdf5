@@ -127,7 +127,7 @@
         (*head)->ctx.H5_GLUE(PROP_FIELD,_set) = TRUE;                         \
     } /* end if */                                                            \
 }
-#endif
+#endif /* defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY) */
 
 #ifdef H5_HAVE_PARALLEL
 /* Macro for the duplicated code to test and set properties for a property list */
