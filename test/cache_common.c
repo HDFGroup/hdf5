@@ -17,9 +17,9 @@
  *        This file contains common code for tests of the cache
  *        implemented in H5C.c
  */
+#include "H5private.h"
 #include "H5CXprivate.h"        /* API Contexts                         */
 #include "H5MMprivate.h"
-#include "H5private.h"
 
 #include "cache_common.h"
 

@@ -25,9 +25,7 @@
 #define H5S_TESTING
 
 #include "testhdf5.h"
-#include "hdf5.h"
 #include "H5Spkg.h"        /* Dataspaces                */
-#include "H5private.h"
 
 #define FILENAME   "tselect.h5"
 
