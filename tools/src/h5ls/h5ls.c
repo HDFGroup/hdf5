@@ -1695,7 +1695,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-dump_attribute_values(hid_t attr, const char *attr_name)
+dump_attribute_values(hid_t attr)
 {
     hid_t               f_type = H5I_INVALID_HID;
     hid_t               space = H5I_INVALID_HID;
@@ -1955,7 +1955,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
         h5tools_str_close(&buffer);
 
         if (data_g)
-            dump_attribute_values(attr, attr_name);
+            dump_attribute_values(attr);
         H5Aclose(attr);
     }
     else {

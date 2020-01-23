@@ -253,7 +253,7 @@ H5D__btree_get_shared(const H5F_t H5_ATTR_UNUSED *f, const void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__btree_new_node(H5F_t *f, H5B_ins_t op, void *_lt_key, void *_udata,
+H5D__btree_new_node(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5B_ins_t op, void *_lt_key, void *_udata,
     void *_rt_key, haddr_t *addr_p/*out*/)
 {
     H5D_btree_key_t	*lt_key = (H5D_btree_key_t *) _lt_key;
@@ -536,7 +536,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5D__btree_insert(H5F_t *f, haddr_t addr, void *_lt_key, hbool_t *lt_key_changed,
+H5D__btree_insert(H5F_t H5_ATTR_NDEBUG_UNUSED *f, haddr_t H5_ATTR_NDEBUG_UNUSED addr, void *_lt_key, hbool_t *lt_key_changed,
     void *_md_key, void *_udata, void *_rt_key, hbool_t H5_ATTR_UNUSED *rt_key_changed,
     haddr_t *new_node_p/*out*/)
 {

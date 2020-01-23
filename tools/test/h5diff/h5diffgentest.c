@@ -4227,7 +4227,7 @@ static void test_comps_array(const char *fname, const char *dset, const char *at
     hsize_t sdims_dset[] = { SDIM_DSET };
     hsize_t sdims_cmpd_arry[] = { SDIM_CMPD_ARRAY };
     int i, j;
-    herr_t ret; /* Generic return value  */
+    herr_t H5_ATTR_NDEBUG_UNUSED ret; /* Generic return value  */
 
     /* Initialize array data to write */
     for (i = 0; i < SDIM_DSET; i++) {
@@ -4336,7 +4336,7 @@ static void test_comps_vlen(const char * fname, const char *dset, const char *at
     hsize_t sdims_dset[] = { SDIM_DSET };
 
     unsigned i, j; /* counting variables */
-    herr_t ret; /* Generic return value  */
+    herr_t H5_ATTR_NDEBUG_UNUSED ret; /* Generic return value  */
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SDIM_DSET; i++) {
@@ -4454,7 +4454,7 @@ static void test_comps_array_vlen(const char * fname, const char *dset, const ch
     hsize_t sdims_dset[] = { SDIM_DSET };
     hsize_t sdims_arry[] = { SDIM_CMPD_ARRAY };
     unsigned i, j, k; /* counting variables */
-    herr_t ret; /* Generic return value  */
+    herr_t H5_ATTR_NDEBUG_UNUSED ret; /* Generic return value  */
 
     /* Initialize array data to write in compound1 */
     for (i = 0; i < SDIM_DSET; i++) {
@@ -4597,7 +4597,7 @@ static void test_comps_vlen_arry(const char * fname, const char *dset, const cha
     hsize_t sdims_cmpd_arry[] = { SDIM_CMPD_ARRAY };
 
     unsigned i, j, k; /* counting variables */
-    herr_t ret; /* Generic return value  */
+    herr_t H5_ATTR_NDEBUG_UNUSED ret; /* Generic return value  */
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SDIM_DSET; i++) {
@@ -5214,7 +5214,7 @@ void write_attr_strings(hid_t loc_id, const char* dset_name, hid_t fid, int make
     hid_t aid = H5I_INVALID_HID;
     hid_t sid = H5I_INVALID_HID;
     hid_t tid = H5I_INVALID_HID;
-    herr_t status;
+    herr_t H5_ATTR_NDEBUG_UNUSED status;
     int val, i, j, k, l, n;
     float f;
 
@@ -6205,7 +6205,7 @@ void write_attr_in(hid_t loc_id, const char* dset_name, hid_t fid, int make_diff
     hid_t aid = H5I_INVALID_HID;
     hid_t sid = H5I_INVALID_HID;
     hid_t tid = H5I_INVALID_HID;
-    herr_t status;
+    herr_t H5_ATTR_NDEBUG_UNUSED status;
     int val, i, j, k, l, n;
     float f;
 
@@ -7197,7 +7197,7 @@ void write_dset_in(hid_t loc_id, const char* dset_name, hid_t fid, int make_diff
     hid_t sid = H5I_INVALID_HID;
     hid_t tid = H5I_INVALID_HID;
     hid_t dcpl = H5I_INVALID_HID;
-    herr_t status;
+    herr_t H5_ATTR_NDEBUG_UNUSED status;
     int val, i, j, k, l, n;
     float f;
     int fillvalue = 2;
@@ -7832,7 +7832,7 @@ void gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
     hsize_t start[10]; /* starting location of hyperslab */
     hsize_t count[10]; /* element count of hyperslab */
     hsize_t coord[5][2]; /* coordinates for point selection */
-    herr_t status;
+    herr_t H5_ATTR_NDEBUG_UNUSED status;
     int i;
 
     /* allocate the buffer for write the references */

@@ -3312,7 +3312,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
 
                 if (vmaps) {
                     size_t next;
-                    ssize_t ssize_out;
+                    ssize_t H5_ATTR_NDEBUG_UNUSED ssize_out;
 
                     ctx->indent_level++;
                     for (next = 0; next < (unsigned) vmaps; next++) {

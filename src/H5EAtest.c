@@ -279,7 +279,7 @@ END_FUNC(STATIC)  /* end H5EA__test_encode() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx))
+H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_NDEBUG_UNUSED *_ctx))
 
     /* Local variables */
 #ifndef NDEBUG

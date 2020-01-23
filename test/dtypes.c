@@ -6732,7 +6732,7 @@ static void create_del_obj_named_test_file(const char *filename, hid_t fapl,
     hid_t my_fapl;      /* Copy of file access property list ID */
     hid_t dcpl;         /* Dataset creation property list ID */
     unsigned use_at_least_v18;/* Whether to use old or new format */
-    herr_t status;      /* Generic return value */
+    herr_t H5_ATTR_NDEBUG_UNUSED status; /* Generic return value */
 
     /* Make copy of FAPL */
     my_fapl = H5Pcopy(fapl);

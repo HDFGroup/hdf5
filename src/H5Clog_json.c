@@ -1281,7 +1281,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__json_write_set_cache_config_log_msg(void *udata, const H5AC_cache_config_t *config,
+H5C__json_write_set_cache_config_log_msg(void *udata, const H5AC_cache_config_t H5_ATTR_NDEBUG_UNUSED *config,
     herr_t fxn_ret_value)
 {
     H5C_log_json_udata_t *json_udata = (H5C_log_json_udata_t *)(udata);

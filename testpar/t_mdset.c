@@ -1959,7 +1959,7 @@ void rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* private communicator size and rank */
     int mpi_size;
     int mpi_rank;
-    int mrc;        /* mpi error code */
+    int mrc; /* mpi error code */
     /* steps to verify and have been verified */
     int steps = 0;
     int steps_done = 0;

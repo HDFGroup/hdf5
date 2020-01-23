@@ -28,7 +28,7 @@
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
-
+#include "H5private.h"
 
 #define BASE_ADDR               (haddr_t)1024
 
@@ -38,7 +38,6 @@ int        failures = 0;
 hbool_t        verbose = TRUE; /* used to control error messages */
 
 #define NFILENAME 2
-#define PARATESTFILE filenames[0]
 const char *FILENAME[NFILENAME]={"CacheTestDummy", NULL};
 #ifndef PATH_MAX
 #define PATH_MAX    512
@@ -219,7 +218,9 @@ struct datum data[NUM_DATA_ENTRIES];
 #define STD_VIRT_NUM_DATA_ENTRIES    NUM_DATA_ENTRIES
 #define EXPRESS_VIRT_NUM_DATA_ENTRIES    (NUM_DATA_ENTRIES / 10)
 /* Use a smaller test size to avoid creating huge MPE logfiles. */
+#ifdef H5_HAVE_MPE
 #define MPE_VIRT_NUM_DATA_ENTIES    (NUM_DATA_ENTRIES / 100)
+#endif
 
 int virt_num_data_entries = NUM_DATA_ENTRIES;
 
@@ -2378,7 +2379,7 @@ datum_get_initial_load_size(void *udata_ptr, size_t *image_len_ptr)
  *-------------------------------------------------------------------------
  */
 static void *
-datum_deserialize(const void * image_ptr,
+datum_deserialize(const void H5_ATTR_NDEBUG_UNUSED *image_ptr,
                   H5_ATTR_UNUSED size_t len,
                   void * udata_ptr,
                   hbool_t * dirty_ptr)
@@ -2491,14 +2492,13 @@ datum_image_len(const void *thing, size_t *image_len)
  */
 static herr_t
 datum_serialize(const H5F_t *f,
-                void *image_ptr,
+                void H5_ATTR_NDEBUG_UNUSED *image_ptr,
                 size_t len,
                 void *thing_ptr)
 {
     herr_t ret_value = SUCCEED;
     int idx;
     struct datum * entry_ptr;
-    H5C_t * cache_ptr;
     struct H5AC_aux_t * aux_ptr;
 
     HDassert( thing_ptr );
@@ -2509,11 +2509,8 @@ datum_serialize(const H5F_t *f,
     HDassert( f );
     HDassert( f->shared );
     HDassert( f->shared->cache );
-
-    cache_ptr = f->shared->cache;
-
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->aux_ptr );
+    HDassert( f->shared->cache->magic == H5C__H5C_T_MAGIC );
+    HDassert( f->shared->cache->aux_ptr );
 
     aux_ptr = (H5AC_aux_t *)(f->shared->cache->aux_ptr);
 

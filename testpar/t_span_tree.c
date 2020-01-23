@@ -37,7 +37,7 @@
 
 
 static void coll_write_test(int chunk_factor);
-static void coll_read_test(int chunk_factor);
+static void coll_read_test(void);
 
 
 /*-------------------------------------------------------------------------
@@ -84,7 +84,7 @@ void
 coll_irregular_cont_read(void)
 {
 
-  coll_read_test(0);
+  coll_read_test();
 
 }
 
@@ -133,7 +133,7 @@ void
 coll_irregular_simple_chunk_read(void)
 {
 
-  coll_read_test(1);
+  coll_read_test();
 
 }
 
@@ -181,7 +181,7 @@ void
 coll_irregular_complex_chunk_read(void)
 {
 
-  coll_read_test(4);
+  coll_read_test();
 
 }
 
@@ -662,7 +662,7 @@ void coll_write_test(int chunk_factor)
  *-------------------------------------------------------------------------
  */
 static void
-coll_read_test(int chunk_factor)
+coll_read_test(void)
 {
 
   const   char *filename;
@@ -923,7 +923,9 @@ coll_read_test(int chunk_factor)
 ****************************************************************/
 
 #define LDSCT_DS_RANK    5
+#if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
 #define LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK 0
+#endif
 
 #define LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG 0
 
@@ -1558,7 +1560,9 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
     size_t        small_ds_size;
     size_t        small_ds_slice_size;
     size_t        large_ds_size;
+#if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     size_t        large_ds_slice_size;
+#endif
     uint32_t      expected_value;
     uint32_t    * small_ds_buf_0 = NULL;
     uint32_t    * small_ds_buf_1 = NULL;
@@ -1612,9 +1616,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
     small_ds_size       = (size_t)((mpi_size + 1) *  1 *  1 * 10 * 10);
     small_ds_slice_size = (size_t)                 ( 1 *  1 * 10 * 10);
     large_ds_size       = (size_t)((mpi_size + 1) * 10 * 10 * 10 * 10);
-    large_ds_slice_size = (size_t)                 (10 * 10 * 10 * 10);
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
+    large_ds_slice_size = (size_t)                 (10 * 10 * 10 * 10);
+
     if ( mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK ) {
         HDfprintf(stdout, "%s:%d: small ds size / slice size = %d / %d.\n",
                   fcnName, mpi_rank,
