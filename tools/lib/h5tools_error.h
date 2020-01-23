@@ -21,10 +21,9 @@
 #include "H5Eprivate.h" /* Error handling       */
 
 /* tools-HDF5 Error variables */
+H5TOOLS_DLLVAR int H5tools_INDENT_g;
 H5TOOLS_DLLVAR hid_t H5tools_ERR_STACK_g;
-H5TOOLS_DLLVAR hid_t H5tools_DBG_ERR_STACK_g;
 H5TOOLS_DLLVAR hid_t H5tools_ERR_CLS_g;
-H5TOOLS_DLLVAR hid_t H5tools_DBG_ERR_CLS_g;
 H5TOOLS_DLLVAR hid_t H5E_tools_g;
 H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
 H5TOOLS_DLLVAR hid_t H5E_tools_min_info_id_g;
@@ -52,9 +51,6 @@ do {                                                                            
     /* Create new HDF5 error stack for the tools to use */                                              \
     if ((H5tools_ERR_STACK_g = H5Ecreate_stack()) < 0)                                                  \
         HDfprintf(stderr, "Failed to create HDF5 tools error stack\n");                                 \
-                                                                                                        \
-    /* Create new HDF5 error stack for debugging, if tools debugging is enabled */                      \
-    H5TOOLS_CREATE_DEBUG_STACK();                                                                       \
                                                                                                         \
     /* Register errors from the HDF5 tools as a new error class */                                      \
     if ((H5tools_ERR_CLS_g = H5Eregister_class("H5tools", "HDF5:tools", lib_str)) < 0)                  \
@@ -95,9 +91,6 @@ do {                                                                            
     /* Unregister the HDF5 tools error class */                                                      \
     if (H5Eunregister_class(H5tools_ERR_CLS_g) < 0)                                                  \
         HDfprintf(stderr, "Failed to unregister the HDF5 tools error class\n");                      \
-                                                                                                     \
-    /* Close the tools debugging error stack, if it was created */                                   \
-    H5TOOLS_CLOSE_DEBUG_STACK();                                                                     \
                                                                                                      \
     /* Close the tools error stack */                                                                \
     if (H5Eclose_stack(H5tools_ERR_STACK_g) < 0)                                                     \
@@ -174,47 +167,35 @@ do {                                                                            
 
 #ifdef H5_TOOLS_DEBUG
 
-#define H5TOOLS_CREATE_DEBUG_STACK()                                                             \
+#define H5TOOLS_START_DEBUG(...)                                                                 \
 do {                                                                                             \
-    /* Create new HDF5 error stack for debugging */                                              \
-    if ((H5tools_DBG_ERR_STACK_g = H5Ecreate_stack()) < 0)                                       \
-        HDfprintf(stderr, "Failed to create HDF5 tools debugging error stack\n");                \
-                                                                                                 \
-    /* Register debugging output from the HDF5 tools as a new error class */                     \
-    if ((H5tools_DBG_ERR_CLS_g = H5Eregister_class("H5tools-debug", "HDF5:tools", lib_str)) < 0) \
-        HDfprintf(stderr, "Failed to register HDF5 tools debugging error class\n");              \
+    H5tools_INDENT_g += 2;                                                                       \
+    HDfprintf(stderr, "%*sENTER %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, FUNC);  \
+    HDfprintf(stderr, __VA_ARGS__);                                                              \
+    HDfprintf(stderr, "\n");                                                                     \
+    HDfflush(stderr);                                                                            \
 } while(0)
 
-#define H5TOOLS_CLOSE_DEBUG_STACK()                                                       \
-do {                                                                                      \
-    /* Unregister the HDF5 tools debugging error class */                                 \
-    if (H5Eunregister_class(H5tools_DBG_ERR_CLS_g) < 0)                                   \
-        HDfprintf(stderr, "Failed to unregister the HDF5 tools debugging error class\n"); \
-                                                                                          \
-    /* Close the tools debugging error stack */                                           \
-    if (H5Eclose_stack(H5tools_DBG_ERR_STACK_g) < 0)                                      \
-        HDfprintf(stderr, "Failed to close HDF5 tools debugging error stack\n");          \
+#define H5TOOLS_DEBUG(...)                                                                       \
+do {                                                                                             \
+    HDfprintf(stderr, "%*s %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, FUNC);       \
+    HDfprintf(stderr, __VA_ARGS__);                                                              \
+    HDfprintf(stderr, "\n");                                                                     \
+    HDfflush(stderr);                                                                            \
 } while(0)
 
-#define H5TOOLS_DEBUG(...)                                                                                                \
-do {                                                                                                                      \
-    H5TOOLS_PUSH_ERROR(H5tools_DBG_ERR_STACK_g, H5tools_DBG_ERR_CLS_g, H5E_tools_g, H5E_tools_min_dbg_id_g, __VA_ARGS__); \
-} while(0)
-
-#define H5TOOLS_ENDDEBUG(...)                                                                                             \
-do {                                                                                                                      \
-    H5TOOLS_PUSH_ERROR(H5tools_DBG_ERR_STACK_g, H5tools_DBG_ERR_CLS_g, H5E_tools_g, H5E_tools_min_dbg_id_g, __VA_ARGS__); \
-    H5Eprint2(H5tools_DBG_ERR_STACK_g, stderr);                                                                           \
+#define H5TOOLS_ENDDEBUG(...)                                                                    \
+do {                                                                                             \
+    HDfprintf(stderr, "%*sEXIT %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, FUNC);   \
+    HDfprintf(stderr, __VA_ARGS__);                                                              \
+    HDfprintf(stderr, "\n");                                                                     \
+    H5tools_INDENT_g -= 2;                                                                       \
+    HDfflush(stderr);                                                                            \
 } while(0)
 
 #else
 
-#define H5TOOLS_CREATE_DEBUG_STACK() \
-do {                                 \
-    ;                                \
-} while(0)
-
-#define H5TOOLS_CLOSE_DEBUG_STACK() \
+#define H5TOOLS_START_DEBUG(...)    \
 do {                                \
     ;                               \
 } while(0)
