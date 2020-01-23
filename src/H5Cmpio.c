@@ -231,8 +231,6 @@ H5C_apply_candidate_list(H5F_t * f,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for entries")
     } /* end if */
 
-    if(num_candidates / (unsigned)mpi_size > INT_MAX)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "num_candidates overflow")
     n = num_candidates / (unsigned)mpi_size;
     if(num_candidates % (unsigned)mpi_size > INT_MAX)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "m overflow")
