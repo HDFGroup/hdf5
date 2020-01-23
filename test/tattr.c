@@ -542,7 +542,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(!H5_DBL_ABS_EQUAL(rdata, H5_DOUBLE(0.0)))
+    if(!H5_DBL_ABS_EQUAL(rdata, 0.0))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,(double)0.0F);
 
     ret=H5Fflush(fil, H5F_SCOPE_GLOBAL);
@@ -551,7 +551,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(!H5_DBL_ABS_EQUAL(rdata, H5_DOUBLE(0.0)))
+    if(!H5_DBL_ABS_EQUAL(rdata, 0.0))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,(double)0.0F);
 
     ret=H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
