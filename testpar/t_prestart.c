@@ -81,13 +81,13 @@ main (int argc, char **argv)
     VRFY((data_array != NULL), "data_array HDmalloc succeeded");
 
     /* Each process takes a slabs of rows. */
-    block[0] = dims[0]/mpi_size;
+    block[0] = dims[0]/(hsize_t)mpi_size;
     block[1] = dims[1];
     stride[0] = block[0];
     stride[1] = block[1];
     count[0] = 1;
     count[1] = 1;
-    start[0] = mpi_rank*block[0];
+    start[0] = (hsize_t)mpi_rank*block[0];
     start[1] = 0;
 
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
@@ -109,7 +109,7 @@ main (int argc, char **argv)
 	    if(*dataptr != mpi_rank+1) {
                 HDprintf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
                        (unsigned long)i, (unsigned long)j,
-                       (unsigned long)(i+start[0]), (unsigned long)(j+start[1]),
+                       (unsigned long)((hsize_t)i+start[0]), (unsigned long)((hsize_t)j+start[1]),
                        mpi_rank+1, *(dataptr));
                 nerrors ++;
             }

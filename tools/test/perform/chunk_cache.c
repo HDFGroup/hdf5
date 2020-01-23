@@ -247,7 +247,8 @@ static int check_partial_chunks_perf(hid_t file)
 
     dataset = H5Dopen2 (file, DSET1_NAME, dapl);
     
-    memspace = H5Screate_simple(row_rank, row_dim, NULL);
+    H5_CHECK_OVERFLOW(row_rank, hsize_t, int);
+    memspace = H5Screate_simple((int)row_rank, row_dim, NULL);
     filespace = H5Dget_space(dataset);
     
     nbytes_global = 0;
@@ -256,7 +257,7 @@ static int check_partial_chunks_perf(hid_t file)
     
     /* Read the data row by row */
     for(i = 0; i < DSET1_DIM1; i++) {
-        start[0] = i;
+        start[0] = (hsize_t)i;
         if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                                      start, NULL, count, NULL) < 0)
             goto error;
@@ -318,7 +319,9 @@ static int check_hash_value_perf(hid_t file)
     
     if((dataset = H5Dopen2 (file, DSET2_NAME, dapl)) < 0)
         goto error;
-    if((memspace = H5Screate_simple(column_rank, column_dim, NULL)) < 0)
+
+    H5_CHECK_OVERFLOW(column_rank, hsize_t, int);
+    if((memspace = H5Screate_simple((int)column_rank, column_dim, NULL)) < 0)
         goto error;
     if((filespace = H5Dget_space(dataset)) < 0)
         goto error;
@@ -329,7 +332,7 @@ static int check_hash_value_perf(hid_t file)
     
     /* Read the data column by column */
     for(i = 0; i < DSET2_DIM2; i++) {
-        start[1] = i;
+        start[1] = (hsize_t)i;
         if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                                      start, NULL, count, NULL) < 0)
             goto error;

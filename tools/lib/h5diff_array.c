@@ -4603,7 +4603,7 @@ hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *opts)
             return FALSE;
     }
 
-    if (H5_DBL_ABS_EQUAL(value, expected))
+    if (H5_LDBL_ABS_EQUAL(value, expected))
         return TRUE;
 
     if (opts->use_system_epsilon)
