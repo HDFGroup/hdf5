@@ -7551,10 +7551,10 @@ static herr_t
 test_deprec(hid_t file)
 {
     hid_t    dataset, space, small_space, create_parms, dcpl;
-    hsize_t    dims[2], small_dims[2];
-    hsize_t     deprec_size;
-    herr_t    status;
-    hsize_t    csize[2];
+    hsize_t  dims[2], small_dims[2];
+    hsize_t  deprec_size;
+    herr_t   H5_ATTR_NDEBUG_UNUSED status;
+    hsize_t  csize[2];
 
     TESTING("deprecated API routines");
 

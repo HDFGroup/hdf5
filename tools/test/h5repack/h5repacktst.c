@@ -3684,10 +3684,10 @@ make_userblock(void)
 {
     hid_t   fid = H5I_INVALID_HID;
     hid_t   fcpl = H5I_INVALID_HID;
-    int     fd = -1;            /* File descriptor for writing userblock */
-    char    ub[USERBLOCK_SIZE]; /* User block data */
-    ssize_t nwritten;           /* # of bytes written */
-    size_t  u;                  /* Local index variable */
+    int     fd = -1;                       /* File descriptor for writing userblock */
+    char    ub[USERBLOCK_SIZE];            /* User block data */
+    ssize_t H5_ATTR_NDEBUG_UNUSED nwritten; /* # of bytes written */
+    size_t  u;                             /* Local index variable */
 
     /* Create file creation property list with userblock set */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -3749,7 +3749,7 @@ verify_userblock( const char* filename)
     int     fd = -1;            /* File descriptor for writing userblock */
     char    ub[USERBLOCK_SIZE]; /* User block data */
     hsize_t ub_size = 0;        /* User block size */
-    ssize_t nread;              /* # of bytes read */
+    ssize_t H5_ATTR_NDEBUG_UNUSED nread; /* # of bytes read */
     size_t  u;                  /* Local index variable */
 
     /* Open file with userblock */
@@ -3816,7 +3816,7 @@ make_userblock_file(void)
 {
     int     fd = -1;            /* File descriptor for writing userblock */
     char    ub[USERBLOCK_SIZE]; /* User block data */
-    ssize_t nwritten;           /* # of bytes written */
+    ssize_t H5_ATTR_NDEBUG_UNUSED nwritten; /* # of bytes written */
     size_t  u;                  /* Local index variable */
 
     /* initialize userblock data */

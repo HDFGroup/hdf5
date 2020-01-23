@@ -75,7 +75,7 @@ H5_mpi_set_bigio_count(hsize_t new_count)
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5_mpi_get_bigio_count()
+H5_mpi_get_bigio_count(void)
 {
     return bigio_count;
 }

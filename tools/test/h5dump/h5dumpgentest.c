@@ -1554,7 +1554,7 @@ gent_many(void)
     dset1_t dset1[6];
 
     hsize_t dim[4];
-    herr_t ret;
+    herr_t H5_ATTR_NDEBUG_UNUSED ret;
 
     fid = H5Fcreate(FILE12, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -2603,7 +2603,7 @@ static void gent_vldatatypes(void)
     hid_t file, dset, space, type;
     hsize_t dims[] = { SPACE1_DIM1 };
     int i;
-    herr_t ret=0;
+    herr_t H5_ATTR_NDEBUG_UNUSED ret=0;
 
     file = H5Fcreate(FILE21, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -2698,7 +2698,7 @@ gent_vldatatypes2(void)
     hid_t  tid1, tid2; /* Datatype IDs         */
     hsize_t  dims1[] = {SPACE1_DIM1};
     unsigned       i,j,k;      /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* Allocate and initialize VL data to write */
     for(i = 0; i < SPACE1_DIM1; i++) {
@@ -2771,7 +2771,7 @@ static void gent_vldatatypes3(void)
     hid_t  tid1, tid2; /* Datatype IDs         */
     hsize_t  dims1[] = {SPACE1_DIM1};
     unsigned       i,j;        /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -2840,7 +2840,7 @@ static void gent_vldatatypes4(void)
     hid_t  tid1, tid2; /* Datatype IDs         */
     hsize_t  dims1[] = {SPACE1_DIM1};
     unsigned       i,j;        /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -2897,14 +2897,14 @@ static void gent_vldatatypes4(void)
 /* Generate a variable-length dataset with NULL values in it */
 static void gent_vldatatypes5(void)
 {
-    hvl_t wdata [SPACE1_DIM1];
-    hid_t  fid1;
-    hid_t  dataset;
-    hid_t  sid1;
-    hid_t  tid1;
-    hsize_t  dims1[] = {SPACE1_DIM1};
-    int                 i,j;          /* counting variable */
-    herr_t  ret;  /* Generic return value  */
+    hvl_t   wdata [SPACE1_DIM1];
+    hid_t   fid1;
+    hid_t   dataset;
+    hid_t   sid1;
+    hid_t   tid1;
+    hsize_t dims1[] = {SPACE1_DIM1};
+    int     i,j;          /* counting variable */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* initialize data for dataset */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -2966,16 +2966,15 @@ static void gent_vldatatypes5(void)
 
 static void gent_array1_big(void)
 {
-    int *wdata;   /* Information to write */
-    hid_t  fid1;  /* HDF5 File IDs  */
-    hid_t  dataset; /* Dataset ID   */
-    hid_t  sid1;       /* Dataspace ID   */
-    hid_t  tid1;       /* Datatype ID   */
-    hsize_t  sdims1[] = {SPACE_ARRAY1BIG_DIM};
-    hsize_t  tdims1[] = {ARRAY1BIG_DIM};
-    int        i,j;        /* counting variables */
-    herr_t  ret;  /* Generic return value  */
-
+    int    *wdata;   /* Information to write */
+    hid_t   fid1;  /* HDF5 File IDs  */
+    hid_t   dataset; /* Dataset ID   */
+    hid_t   sid1;       /* Dataspace ID   */
+    hid_t   tid1;       /* Datatype ID   */
+    hsize_t sdims1[] = {SPACE_ARRAY1BIG_DIM};
+    hsize_t tdims1[] = {ARRAY1BIG_DIM};
+    int     i,j;        /* counting variables */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* for region reference dataset */
     hid_t  dset2;
@@ -3101,15 +3100,15 @@ static void gent_array1(void)
 
 static void gent_array2(void)
 {
-    int wdata[SPACE1_DIM1][ARRAY2_DIM1][ARRAY2_DIM2][ARRAY2_DIM3];   /* Information to write */
-    hid_t  fid;        /* HDF5 File IDs  */
-    hid_t  dataset; /* Dataset ID   */
-    hid_t  sid;        /* Dataspace ID   */
-    hid_t  tid;        /* Datatype ID   */
-    hsize_t  sdims1[] = {SPACE1_DIM1};
-    hsize_t  tdims2[] = {ARRAY2_DIM1,ARRAY2_DIM2,ARRAY2_DIM3};
-    int        i,j,k,l;    /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    int     wdata[SPACE1_DIM1][ARRAY2_DIM1][ARRAY2_DIM2][ARRAY2_DIM3];   /* Information to write */
+    hid_t   fid;        /* HDF5 File IDs  */
+    hid_t   dataset; /* Dataset ID   */
+    hid_t   sid;        /* Dataspace ID   */
+    hid_t   tid;        /* Datatype ID   */
+    hsize_t sdims1[] = {SPACE1_DIM1};
+    hsize_t tdims2[] = {ARRAY2_DIM1,ARRAY2_DIM2,ARRAY2_DIM3};
+    int     i,j,k,l;    /* counting variables */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* Allocate and initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
@@ -3147,17 +3146,17 @@ static void gent_array2(void)
 
 static void gent_array3(void)
 {
-    int wdata[SPACE1_DIM1][ARRAY1_DIM1][ARRAY3_DIM1][ARRAY3_DIM2];   /* Information to write */
-    hid_t  fid;        /* HDF5 File IDs  */
-    hid_t  dataset; /* Dataset ID   */
-    hid_t  sid;        /* Dataspace ID   */
-    hid_t  tid1;       /* 1-D array Datatype ID */
-    hid_t  tid2;       /* 2-D array Datatype ID */
-    hsize_t  sdims1[] = {SPACE1_DIM1};
-    hsize_t  tdims1[] = {ARRAY1_DIM1};
-    hsize_t  tdims2[] = {ARRAY3_DIM1,ARRAY3_DIM2};
-    int        i,j,k,l;    /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    int     wdata[SPACE1_DIM1][ARRAY1_DIM1][ARRAY3_DIM1][ARRAY3_DIM2];   /* Information to write */
+    hid_t   fid;        /* HDF5 File IDs  */
+    hid_t   dataset; /* Dataset ID   */
+    hid_t   sid;        /* Dataspace ID   */
+    hid_t   tid1;       /* 1-D array Datatype ID */
+    hid_t   tid2;       /* 2-D array Datatype ID */
+    hsize_t sdims1[] = {SPACE1_DIM1};
+    hsize_t tdims1[] = {ARRAY1_DIM1};
+    hsize_t tdims2[] = {ARRAY3_DIM1,ARRAY3_DIM2};
+    int     i,j,k,l;    /* counting variables */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* Allocate and initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
@@ -3204,16 +3203,16 @@ static void gent_array4(void)
             int i;
             float f;
     } s2_t;
-    s2_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
-    hid_t  fid1;  /* HDF5 File IDs  */
-    hid_t  dataset; /* Dataset ID   */
-    hid_t  sid1;       /* Dataspace ID   */
-    hid_t  tid1;       /* Array Datatype ID   */
-    hid_t  tid2;       /* Compound Datatype ID   */
-    hsize_t  sdims1[] = {SPACE1_DIM1};
-    hsize_t  tdims1[] = {ARRAY1_DIM1};
-    int        i,j;        /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    s2_t    wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
+    hid_t   fid1;  /* HDF5 File IDs  */
+    hid_t   dataset; /* Dataset ID   */
+    hid_t   sid1;       /* Dataspace ID   */
+    hid_t   tid1;       /* Array Datatype ID   */
+    hid_t   tid2;       /* Compound Datatype ID   */
+    hsize_t sdims1[] = {SPACE1_DIM1};
+    hsize_t tdims1[] = {ARRAY1_DIM1};
+    int     i,j;        /* counting variables */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* Initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
@@ -3270,17 +3269,17 @@ static void gent_array5(void)
             int i;
             float f[ARRAY1_DIM1];
     } s2_t;
-    s2_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
-    hid_t  fid1;  /* HDF5 File IDs  */
-    hid_t  dataset; /* Dataset ID   */
-    hid_t  sid1;       /* Dataspace ID   */
-    hid_t  tid1;       /* Array Datatype ID */
-    hid_t  tid2;       /* Compound Datatype ID */
-    hid_t  tid3;       /* Nested Array Datatype ID */
-    hsize_t  sdims1[] = {SPACE1_DIM1};
-    hsize_t  tdims1[] = {ARRAY1_DIM1};
-    int        i,j,k;      /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    s2_t    wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
+    hid_t   fid1;  /* HDF5 File IDs  */
+    hid_t   dataset; /* Dataset ID   */
+    hid_t   sid1;       /* Dataspace ID   */
+    hid_t   tid1;       /* Array Datatype ID */
+    hid_t   tid2;       /* Compound Datatype ID */
+    hid_t   tid3;       /* Nested Array Datatype ID */
+    hsize_t sdims1[] = {SPACE1_DIM1};
+    hsize_t tdims1[] = {ARRAY1_DIM1};
+    int     i,j,k;      /* counting variables */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* Initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
@@ -3341,16 +3340,16 @@ static void gent_array5(void)
 
 static void gent_array6(void)
 {
-    hvl_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
-    hid_t  fid1;  /* HDF5 File IDs  */
-    hid_t  dataset; /* Dataset ID   */
-    hid_t  sid1;       /* Dataspace ID   */
-    hid_t  tid1;       /* Array Datatype ID   */
-    hid_t  tid2;       /* VL Datatype ID       */
-    hsize_t  sdims1[] = {SPACE1_DIM1};
-    hsize_t  tdims1[] = {ARRAY1_DIM1};
-    int        i,j,k;      /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    hvl_t   wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
+    hid_t   fid1;  /* HDF5 File IDs  */
+    hid_t   dataset; /* Dataset ID   */
+    hid_t   sid1;       /* Dataspace ID   */
+    hid_t   tid1;       /* Array Datatype ID   */
+    hid_t   tid2;       /* VL Datatype ID       */
+    hsize_t sdims1[] = {SPACE1_DIM1};
+    hsize_t tdims1[] = {ARRAY1_DIM1};
+    int     i,j,k;      /* counting variables */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* Initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
@@ -3401,17 +3400,17 @@ static void gent_array6(void)
 
 static void gent_array7(void)
 {
-    hvl_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
-    hid_t  fid1;  /* HDF5 File IDs  */
-    hid_t  dataset; /* Dataset ID   */
-    hid_t  sid1;       /* Dataspace ID   */
-    hid_t  tid1;       /* Array Datatype ID   */
-    hid_t  tid2;       /* VL Datatype ID       */
-    hid_t  tid3;       /* Nested Array Datatype ID   */
-    hsize_t  sdims1[] = {SPACE1_DIM1};
-    hsize_t  tdims1[] = {ARRAY1_DIM1};
-    int        i,j,k,l;    /* Index variables */
-    herr_t  ret;  /* Generic return value  */
+    hvl_t   wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
+    hid_t   fid1;  /* HDF5 File IDs  */
+    hid_t   dataset; /* Dataset ID   */
+    hid_t   sid1;       /* Dataspace ID   */
+    hid_t   tid1;       /* Array Datatype ID   */
+    hid_t   tid2;       /* VL Datatype ID       */
+    hid_t   tid3;       /* Nested Array Datatype ID   */
+    hsize_t sdims1[] = {SPACE1_DIM1};
+    hsize_t tdims1[] = {ARRAY1_DIM1};
+    int     i,j,k,l;    /* Index variables */
+    herr_t  H5_ATTR_NDEBUG_UNUSED ret;  /* Generic return value  */
 
     /* Initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
@@ -3475,7 +3474,7 @@ static void gent_array8(void)
     hid_t       filetype = H5I_INVALID_HID; /* Handles */
     hid_t       space = H5I_INVALID_HID; /* Handles */
     hid_t       dset = H5I_INVALID_HID; /* Handles */
-    herr_t      status = -1;
+    herr_t      H5_ATTR_NDEBUG_UNUSED status = -1;
     hsize_t sdims[] = {F64_DIM0};
     hsize_t tdims[] = {F64_DIM1};
     int         *wdata;      /* Write buffer */
@@ -3542,7 +3541,7 @@ static void gent_empty(void)
     } empty_struct;
     hid_t file, dset, space, type;
     hsize_t dims[] = { SPACE1_DIM1 };
-    herr_t ret=0;
+    herr_t H5_ATTR_NDEBUG_UNUSED ret=0;
 
     file = H5Fcreate(FILE32, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -3930,7 +3929,7 @@ static void write_attr_in(hid_t loc_id,
     hid_t   aid;
     hid_t   sid;
     hid_t   tid;
-    herr_t  status;
+    herr_t  H5_ATTR_NDEBUG_UNUSED status;
     int     val, i, j, k, n;
     float   f;
 
@@ -4371,7 +4370,7 @@ static void write_dset_in(hid_t loc_id,
     hid_t   sid;
     hid_t   tid;
     hid_t   plist_id;
-    herr_t  status;
+    herr_t  H5_ATTR_NDEBUG_UNUSED status;
     int     val, i, j, k, n;
     float   f;
     int     fillvalue=2;
@@ -4809,7 +4808,7 @@ static void gent_attr_all(void)
     hid_t   root_id;
     hid_t   sid;
     hsize_t dims[1] = {2};
-    herr_t  status;
+    herr_t  H5_ATTR_NDEBUG_UNUSED status;
 
     /* Create a file and a dataset */
     fid = H5Fcreate(FILE40, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -4967,7 +4966,7 @@ static void gent_compound_complex(void)
     hid_t      array4_tid;                /* Array datatype handle    */
     hid_t      datafile, dataset;         /* Datafile/dataset handles */
     hid_t      dataspace;                 /* Dataspace handle         */
-    herr_t     status;                    /* Error checking variable */
+    herr_t     H5_ATTR_NDEBUG_UNUSED status;   /* Error checking variable */
     hsize_t    dim[] = {F41_LENGTH};          /* Dataspace dimensions     */
     hsize_t    array_dimb[] = {F41_DIMb};     /* Array dimensions         */
     hsize_t    array_dimd[]={F41_ARRAY_DIMd1,F41_ARRAY_DIMd2}; /* Array dimensions         */
@@ -5116,7 +5115,7 @@ static void gent_named_dtype_attr(void)
     hid_t aid;
     hid_t gid;
     int data=8;
-    herr_t ret;
+    herr_t H5_ATTR_NDEBUG_UNUSED ret;
 
     /* Create a file */
     fid=H5Fcreate(FILE42, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -5338,7 +5337,7 @@ make_external(hid_t fid)
     hsize_t cur_size[1];  /*data space current size */
     hsize_t max_size[1];  /*data space maximum size */
     hsize_t size;         /*bytes reserved for data in the external file*/
-    int     ret;
+    int     H5_ATTR_NDEBUG_UNUSED ret;
 
     cur_size[0] = max_size[0] = 100;
     size = (max_size[0]*sizeof(int)/2);
@@ -5386,7 +5385,8 @@ static void gent_filters(void)
     hsize_t  dims1[RANK]      = {DIM1,DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
     int      buf1[DIM1][DIM2];
-    int      i, j, n, ret;
+    int      i, j, n;
+    int H5_ATTR_NDEBUG_UNUSED ret;
 
     for(i=n=0; i<DIM1; i++){
         for(j=0; j<DIM2; j++){
@@ -5732,8 +5732,7 @@ static void gent_fcontents(void)
     hid_t    tid;   /* datatype ID */
     hsize_t  dims[1]={4};
     int      buf[4]={1,2,3,4};
-    int      ret;
-
+    int      H5_ATTR_NDEBUG_UNUSED ret;
 
     /* create a file */
     fid  = H5Fcreate(FILE46, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -5866,7 +5865,7 @@ static void gent_fvalues(void)
     hvl_t      fillval3;                       /* vlen fill value */
     hsize_t    dimarray[1]={3};                /* array dimension */
     int        buf4[2][3]= {{1,2,3},{4,5,6}};  /* array */
-    int        ret;
+    int        H5_ATTR_NDEBUG_UNUSED ret;
 
     /* create a file */
     fid  = H5Fcreate(FILE48, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -6024,9 +6023,9 @@ static void gent_string(void)
     c_t      buf3 = {24, "Four score and seven\n years ago our forefathers brought forth on this continent a new nation"};
     char     buf4[] = {"Four score and seven\n years ago our forefathers brought forth on this continent a new nation"};
     hsize_t  dims1[]  = {1};
-    hsize_t        dims2[]  = {SPACE1_DIM1};
-    hsize_t        dims4[1];
-    int      ret;
+    hsize_t  dims2[]  = {SPACE1_DIM1};
+    hsize_t  dims4[1];
+    int      H5_ATTR_NDEBUG_UNUSED ret;
 
     dims4[0] = sizeof(buf4);
 
@@ -6121,7 +6120,8 @@ static void gent_aindices(void)
     int      buf2[10][10];
     int      buf3[2][10][10];
     int      buf4[2][2][10][10];
-    int      i, j, k, l, n, ret;
+    int      i, j, k, l, n;
+    int      H5_ATTR_NDEBUG_UNUSED ret;
 
     for(i = n = 0; i < 100; i++)
         buf1[i] = n++;
@@ -6188,11 +6188,11 @@ static void gent_aindices(void)
  */
 static void gent_longlinks(void)
 {
-    hid_t       fid = (-1);     /* File ID */
-    hid_t       gid = (-1);     /* Group ID */
-    hid_t       gid2 = (-1);    /* Datatype ID */
-    char               *objname = NULL; /* Name of object [Long] */
-    size_t              u;              /* Local index variable */
+    hid_t       fid = (-1);      /* File ID */
+    hid_t       gid = (-1);      /* Group ID */
+    hid_t       H5_ATTR_NDEBUG_UNUSED gid2 = (-1);     /* Datatype ID */
+    char        *objname = NULL; /* Name of object [Long] */
+    size_t      u;               /* Local index variable */
 
     /* Create files */
     fid = H5Fcreate(FILE51, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -6369,7 +6369,7 @@ gent_bigdims(void)
     hsize_t i;
     char    c;
     size_t  nelmts;
-    int     ret;
+    int     H5_ATTR_NDEBUG_UNUSED ret;
 
     /* create a file */
     fid  = H5Fcreate(FILE56, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -6465,7 +6465,8 @@ gent_hyperslab(void)
     hid_t    fid;     /* file id */
     hsize_t  dims[2]  = {32,4097}; /* big enough data size to force a second stripmine read */
     double   *buf;
-    int      i, ret;
+    int      i;
+    int      H5_ATTR_NDEBUG_UNUSED ret;
 
     buf = (double*) HDmalloc(32 * 4097 * sizeof(double) );
     for(i = 0; i < 32 * 4097; i++)
@@ -7091,7 +7092,8 @@ gent_dataset_idx(void)
     hsize_t dims[2];
     hsize_t maxdims[2];
     int buf[20][10];
-    int i, j, ret;
+    int i, j;
+    int H5_ATTR_NDEBUG_UNUSED ret;
 
     /* Get a copy of the file aaccess property */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -7615,7 +7617,7 @@ static void
 gent_charsets(void)
 {
     hid_t fid, did, sid;
-    herr_t status;
+    herr_t H5_ATTR_NDEBUG_UNUSED status;
     hsize_t dim[] = {1}; /* Dataspace dimensions */
     typedef struct CharSetInfo {
             const char *ascii_p_;
@@ -7689,7 +7691,7 @@ static void gent_compound_intsizes(void) {
     Array1Struct *Array1;
 
     hid_t Array1Structid; /* File datatype identifier */
-    herr_t status; /* Error checking variable */
+    herr_t H5_ATTR_NDEBUG_UNUSED status; /* Error checking variable */
     hsize_t dim[] = { F70_LENGTH }; /* Dataspace dimensions     */
 
     int m, n, o; /* Array init loop vars     */
@@ -7962,7 +7964,7 @@ static void gent_compound_attr_intsizes(void) {
     Array1Struct Array1[F70_LENGTH];
 
     hid_t Array1Structid; /* File datatype identifier */
-    herr_t status; /* Error checking variable */
+    herr_t H5_ATTR_NDEBUG_UNUSED status; /* Error checking variable */
     hsize_t dim[] = { F70_LENGTH }; /* Dataspace dimensions     */
 
     int m, n, o; /* Array init loop vars     */
@@ -8838,7 +8840,7 @@ static void gent_compound_int_array(void) {
     Cmpd1Struct *Cmpd1;
 
     hid_t Cmpd1Structid; /* File datatype identifier */
-    herr_t status; /* Error checking variable */
+    herr_t H5_ATTR_NDEBUG_UNUSED status; /* Error checking variable */
     hsize_t dim[] = { F76_LENGTH }; /* Dataspace dimensions     */
 
     int m, n; /* Array init loop vars     */
@@ -9094,7 +9096,7 @@ static void gent_compound_ints(void) {
 
     hid_t Cmpd1Structid; /* File datatype identifier */
     hid_t Cmpd2Structid; /* File datatype identifier */
-    herr_t status; /* Error checking variable */
+    herr_t H5_ATTR_NDEBUG_UNUSED status; /* Error checking variable */
     hsize_t dim[] = { F77_LENGTH }; /* Dataspace dimensions     */
 
     int m; /* Array init loop vars     */
@@ -10396,7 +10398,8 @@ static void gent_udfilter(void)
     hsize_t  dims1[RANK]      = {DIM1,DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
     int      buf1[DIM1][DIM2];
-    int      i, j, n, ret;
+    int      i, j, n;
+    int      H5_ATTR_NDEBUG_UNUSED ret;
 
     for(i=n=0; i<DIM1; i++){
         for(j=0; j<DIM2; j++){

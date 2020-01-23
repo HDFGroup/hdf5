@@ -305,15 +305,21 @@
  */
 #ifdef __cplusplus
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED       /*void*/
-#   define H5_ATTR_NORETURN     /*void*/
-#   define H5_ATTR_CONST        /*void*/
-#   define H5_ATTR_PURE         /*void*/
-#   define H5_ATTR_FALLTHROUGH  /*void*/
+#   define H5_ATTR_UNUSED         /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
+#   define H5_ATTR_NORETURN       /*void*/
+#   define H5_ATTR_CONST          /*void*/
+#   define H5_ATTR_PURE           /*void*/
+#   define H5_ATTR_FALLTHROUGH    /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED       __attribute__((unused))
+#ifndef NDEBUG
+#define H5_ATTR_NDEBUG_UNUSED     /*void*/
+#else /* NDEBUG */
+#define H5_ATTR_NDEBUG_UNUSED     H5_ATTR_UNUSED
+#endif /* NDEBUG */
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
@@ -324,11 +330,12 @@
 #endif
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED       /*void*/
-#   define H5_ATTR_NORETURN     /*void*/
-#   define H5_ATTR_CONST        /*void*/
-#   define H5_ATTR_PURE         /*void*/
-#   define H5_ATTR_FALLTHROUGH  /*void*/
+#   define H5_ATTR_UNUSED         /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
+#   define H5_ATTR_NORETURN       /*void*/
+#   define H5_ATTR_CONST          /*void*/
+#   define H5_ATTR_PURE           /*void*/
+#   define H5_ATTR_FALLTHROUGH    /*void*/
 #endif
 #endif /* __cplusplus */
 
