@@ -819,6 +819,7 @@ H5R__set_obj_token(H5R_ref_priv_t *ref, const H5O_token_t *obj_token,
     HDassert(token_size <= H5O_MAX_TOKEN_SIZE);
 
     H5MM_memcpy(&ref->info.obj.token, obj_token, sizeof(H5O_token_t));
+    HDassert(token_size <= 255);
     ref->token_size = (uint8_t)token_size;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1200,7 +1201,7 @@ H5R__decode_obj_token(const unsigned char *buf, size_t *nbytes,
     /* Decode token */
     H5MM_memcpy(obj_token, p, *token_size);
 
-    *nbytes = (size_t)*token_size + H5_SIZEOF_UINT8_T;
+    *nbytes = (size_t)(*token_size + H5_SIZEOF_UINT8_T);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

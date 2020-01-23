@@ -74,10 +74,10 @@ filter_read_internal(const char *filename, hid_t dcpl,
     hs_size[0] = size[0] = HS_DIM1;
     hs_size[1] = HS_DIM2;
 
-    size[1] = hs_size[1] * mpi_size;
+    size[1] = hs_size[1] * (hsize_t)mpi_size;
 
     hs_offset[0] = 0;
-    hs_offset[1] = hs_size[1] * mpi_rank;
+    hs_offset[1] = hs_size[1] * (hsize_t)mpi_rank;
 
     /* Create the data space */
     sid = H5Screate_simple(2, size, NULL);

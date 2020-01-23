@@ -108,7 +108,7 @@ parse_option(int argc, char * const argv[])
         filename_g = optarg;
         break;
     case 'n':    /* number of planes to write/read */
-        if ((nplanes_g = HDatoi(optarg)) <= 0){
+        if ((nplanes_g = (hsize_t)HDatoi(optarg)) <= 0){
         HDfprintf(stderr, "bad number of planes %s, must be a positive integer\n", optarg);
         usage(progname_g);
         Hgoto_error(-1);
@@ -193,17 +193,17 @@ setup_parameters(int argc, char * const argv[])
     return(-1);
     }
     /* set chunk dims */
-    chunkdims_g[0] = chunkplanes_g;
-    chunkdims_g[1]= chunkdims_g[2] = chunksize_g;
+    chunkdims_g[0] = (hsize_t)chunkplanes_g;
+    chunkdims_g[1]= chunkdims_g[2] = (hsize_t)chunksize_g;
 
     /* set dataset initial and max dims */
     dims_g[0] = 0;
     max_dims_g[0] = H5S_UNLIMITED;
-    dims_g[1] = dims_g[2] = max_dims_g[1] = max_dims_g[2] = chunksize_g;
+    dims_g[1] = dims_g[2] = max_dims_g[1] = max_dims_g[2] = (hsize_t)chunksize_g;
 
     /* set nplanes */
     if (nplanes_g == 0)
-        nplanes_g = chunksize_g;
+        nplanes_g = (hsize_t)chunksize_g;
 
     /* show parameters and return */
     show_parameters();
@@ -299,7 +299,7 @@ write_file(void)
     hid_t    dcpl;          /* Dataset creation property list */
     char    *name;
     UC_CTYPE    *buffer, *bufptr;    /* data buffer */
-    hsize_t    cz=chunksize_g;        /* Chunk size */
+    hsize_t    cz=(hsize_t)chunksize_g;        /* Chunk size */
     hid_t    f_sid;            /* dataset file space id */
     hid_t    m_sid;            /* memory space id */
     int        rank;            /* rank */
@@ -413,8 +413,13 @@ write_file(void)
     /* fill buffer with value i+1 */
     bufptr = buffer;
     for (j=0; j<dims[1]; j++)
-        for (k=0; k<dims[2]; k++)
-        *bufptr++ = i;
+        for (k=0; k<dims[2]; k++) {
+            if(i > SHRT_MAX) {
+                HDfprintf(stderr, "rank(%d) of dataset overflow\n", rank);
+                return -1;
+            }
+            *bufptr++ = (short)i;
+        }
 
     /* extend the dataset by one for new plane */
     dims[0]=i+1;
