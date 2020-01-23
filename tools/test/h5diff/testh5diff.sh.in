@@ -150,6 +150,19 @@ $SRC_TOOLS_TESTFILES/vds/5_c.h5
 $SRC_TOOLS_TESTFILES/vds/5_vds.h5
 "
 
+LIST_HDF5_STD_REF_OBJ_TEST_FILES="
+$SRC_TOOLS_TESTFILES/trefer_attr.h5
+$SRC_TOOLS_TESTFILES/trefer_compat.h5
+$SRC_TOOLS_TESTFILES/trefer_ext1.h5
+$SRC_TOOLS_TESTFILES/trefer_ext2.h5
+$SRC_TOOLS_TESTFILES/trefer_grp.h5
+$SRC_TOOLS_TESTFILES/trefer_obj_del.h5
+$SRC_TOOLS_TESTFILES/trefer_obj.h5
+$SRC_TOOLS_TESTFILES/trefer_param.h5
+$SRC_TOOLS_TESTFILES/trefer_reg_1d.h5
+$SRC_TOOLS_TESTFILES/trefer_reg.h5
+"
+
 LIST_OTHER_TEST_FILES="
 $SRC_H5DIFF_TESTFILES/h5diff_10.txt
 $SRC_H5DIFF_TESTFILES/h5diff_100.txt
@@ -259,6 +272,7 @@ $SRC_H5DIFF_TESTFILES/h5diff_55.txt
 $SRC_H5DIFF_TESTFILES/h5diff_56.txt
 $SRC_H5DIFF_TESTFILES/h5diff_57.txt
 $SRC_H5DIFF_TESTFILES/h5diff_58.txt
+$SRC_H5DIFF_TESTFILES/h5diff_58_ref.txt
 $SRC_H5DIFF_TESTFILES/h5diff_59.txt
 $SRC_H5DIFF_TESTFILES/h5diff_500.txt
 $SRC_H5DIFF_TESTFILES/h5diff_501.txt
@@ -338,6 +352,7 @@ $SRC_H5DIFF_TESTFILES/h5diff_80.txt
 $SRC_H5DIFF_TESTFILES/h5diff_90.txt
 $SRC_H5DIFF_TESTFILES/h5diff_8625.txt
 $SRC_H5DIFF_TESTFILES/h5diff_8639.txt
+$SRC_H5DIFF_TESTFILES/h5diff_reg.txt
 $SRC_H5DIFF_TESTFILES/h5diff_v1.txt
 $SRC_H5DIFF_TESTFILES/h5diff_v2.txt
 $SRC_H5DIFF_TESTFILES/h5diff_v3.txt
@@ -347,7 +362,7 @@ $SRC_H5DIFF_TESTFILES/h5diff_vlstr.txt
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_HDF5_VDS_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_HDF5_TEST_FILES_XML $LIST_OTHER_TEST_FILES_XML"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_HDF5_VDS_TEST_FILES $LIST_HDF5_STD_REF_OBJ_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_HDF5_TEST_FILES_XML $LIST_OTHER_TEST_FILES_XML"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -691,7 +706,10 @@ TOOLTEST h5diff_56.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset6a dset6b
 TOOLTEST h5diff_57.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset7a dset7b
 
 # 5.8 (region reference)
-TOOLTEST h5diff_58.txt -v h5diff_dset1.h5 h5diff_dset2.h5 refreg
+TOOLTEST h5diff_58.txt -v2 h5diff_dset1.h5 h5diff_dset2.h5 refreg
+TOOLTEST h5diff_58_ref.txt -v2 h5diff_dset1.h5 h5diff_dset2.h5 /g1/reference2D
+# STD_REF_OBJ
+TOOLTEST h5diff_reg.txt -v2 trefer_attr.h5 trefer_ext2.h5 Dataset3 Dataset3
 
 # test for both dset and attr with same type but with different size
 # ( HDDFV-7942 )

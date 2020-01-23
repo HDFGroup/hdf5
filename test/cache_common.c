@@ -17,24 +17,12 @@
  *        This file contains common code for tests of the cache
  *        implemented in H5C.c
  */
+#include "H5private.h"
 #include "H5CXprivate.h"        /* API Contexts                         */
-#include "H5MFprivate.h"
 #include "H5MMprivate.h"
 
 #include "cache_common.h"
 
-
-H5C_t * saved_cache = NULL; /* store the pointer to the instance of
-                    * of H5C_t created by H5Fcreate()
-                * here between test cache setup and
-                * shutdown.
-                */
-
-haddr_t saved_actual_base_addr = HADDR_UNDEF;   /* Store the address of the
-                            space allocated for cache items in the file between
-                            cache setup & takedown */
-
-hbool_t write_permitted = TRUE;
 hbool_t pass = TRUE; /* set to false on error */
 const char *failure_mssg = NULL;
 
@@ -566,7 +554,7 @@ addr_to_type_and_index(haddr_t addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-get_initial_load_size(void *udata, size_t *image_length, int32_t entry_type)
+get_initial_load_size(void *udata, size_t *image_length, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;
     test_entry_t *base_addr;
@@ -676,7 +664,7 @@ notify_get_initial_load_size(void *udata, size_t *image_length)
  */
 static herr_t
 get_final_load_size(const void H5_ATTR_UNUSED *image, size_t H5_ATTR_UNUSED image_len,
-    void *udata, size_t *actual_len, int32_t entry_type)
+    void *udata, size_t *actual_len, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;
     test_entry_t *base_addr;
@@ -736,7 +724,8 @@ variable_get_final_load_size(const void *image, size_t image_len,
  */
 
 static htri_t
-verify_chksum(const void H5_ATTR_UNUSED *image, size_t H5_ATTR_UNUSED len, void *udata, int32_t entry_type)
+verify_chksum(const void H5_ATTR_UNUSED *image, size_t H5_ATTR_UNUSED len, void *udata, 
+    int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;
     test_entry_t *base_addr;
@@ -789,8 +778,8 @@ variable_verify_chksum(const void *image, size_t len, void *udata)
  *-------------------------------------------------------------------------
  */
 static void *
-deserialize(const void *image, size_t len, void *udata, hbool_t *dirty,
-    int32_t entry_type)
+deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *udata, hbool_t *dirty,
+    int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;
     test_entry_t *base_addr;
@@ -946,12 +935,10 @@ notify_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
  *-------------------------------------------------------------------------
  */
 herr_t
-image_len(const void *thing, size_t *image_length, int32_t entry_type)
+image_len(const void *thing, size_t *image_length, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     const test_entry_t *entry;
-    test_entry_t *base_addr;
     int32_t type;
-    int32_t idx;
 
     HDassert(thing);
     HDassert(image_length);
@@ -961,14 +948,12 @@ image_len(const void *thing, size_t *image_length, int32_t entry_type)
     HDassert(entry->self == entry);
 
     type = entry->type;
-    idx = entry->index;
 
     HDassert((type >= 0) && (type < NUMBER_OF_ENTRY_TYPES));
     HDassert(type == entry_type);
-    HDassert((idx >= 0) && (idx <= max_indices[type]));
+    HDassert((entry->index >= 0) && (entry->index <= max_indices[type]));
 
-    base_addr = entries[type];
-    HDassert(entry == &(base_addr[idx]));
+    HDassert(entry == &(entries[type][entry->index]));
 
     if(type != VARIABLE_ENTRY_TYPE)
     HDassert(entry->size == entry_sizes[type]);
@@ -1068,18 +1053,15 @@ notify_image_len(const void *thing, size_t *image_length)
  *-------------------------------------------------------------------------
  */
 herr_t
-pre_serialize(H5F_t *f,
+pre_serialize(H5F_t H5_ATTR_NDEBUG_UNUSED *f,
               void *thing,
-              haddr_t addr,
-              size_t len,
+              haddr_t H5_ATTR_NDEBUG_UNUSED addr,
+              size_t H5_ATTR_NDEBUG_UNUSED len,
               haddr_t *new_addr_ptr,
               size_t *new_len_ptr,
               unsigned *flags_ptr)
 {
     test_entry_t *entry;
-    test_entry_t *base_addr;
-    int32_t type;
-    int32_t idx;
     int32_t i;
 
     HDassert(f);
@@ -1099,16 +1081,9 @@ pre_serialize(H5F_t *f,
 
     /* shouldn't serialize the entry unless it is dirty */
     HDassert(entry->is_dirty);
-
-    type = entry->type;
-    idx = entry->index;
-
-    HDassert((type >= 0) && (type < NUMBER_OF_ENTRY_TYPES));
-    HDassert((idx >= 0) && (idx <= max_indices[type]));
-
-    base_addr = entries[type];
-
-    HDassert(entry == &(base_addr[idx]));
+    HDassert((entry->type >= 0) && (entry->type < NUMBER_OF_ENTRY_TYPES));
+    HDassert((entry->index >= 0) && (entry->index <= max_indices[entry->type]));
+    HDassert(entry == &(entries[entry->type][entry->index]));
     HDassert(entry->num_flush_ops >= 0);
     HDassert(entry->num_flush_ops < MAX_FLUSH_OPS);
 
@@ -1320,9 +1295,7 @@ herr_t
 serialize(const H5F_t H5_ATTR_UNUSED *f, void *image_ptr, size_t len, void *thing)
 {
     test_entry_t *entry;
-    test_entry_t *base_addr;
     int32_t type;
-    int32_t idx;
 
     HDassert(image_ptr);
     HDassert(thing);
@@ -1336,14 +1309,11 @@ serialize(const H5F_t H5_ATTR_UNUSED *f, void *image_ptr, size_t len, void *thin
     HDassert(entry->is_dirty);
 
     type = entry->type;
-    idx = entry->index;
 
     HDassert((type >= 0) && (type < NUMBER_OF_ENTRY_TYPES));
-    HDassert((idx >= 0) && (idx <= max_indices[type]));
+    HDassert((entry->index >= 0) && (entry->index <= max_indices[type]));
 
-    base_addr = entries[type];
-
-    HDassert(entry == &(base_addr[idx]));
+    HDassert(entry == &(entries[type][entry->index]));
     HDassert(entry->num_flush_ops >= 0);
     HDassert(entry->num_flush_ops < MAX_FLUSH_OPS);
 
@@ -1474,21 +1444,19 @@ notify_serialize(const H5F_t H5_ATTR_UNUSED *f, void *image_ptr, size_t len,
  *-------------------------------------------------------------------------
  */
 static herr_t
-notify(H5C_notify_action_t action, void *thing, int32_t entry_type)
+notify(H5C_notify_action_t action, void *thing, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
     test_entry_t *entry;
-    test_entry_t *base_addr;
 
     HDassert(thing);
 
     entry = (test_entry_t *)thing;
-    base_addr = entries[entry->type];
 
     HDassert(entry->index >= 0);
     HDassert(entry->index <= max_indices[entry->type]);
     HDassert((entry->type >= 0) && (entry->type < NUMBER_OF_ENTRY_TYPES));
     HDassert(entry->type == entry_type);
-    HDassert(entry == &(base_addr[entry->index]));
+    HDassert(entry == &(entries[entry->type][entry->index]));
     HDassert(entry == entry->self);
     if(!(action == H5C_NOTIFY_ACTION_ENTRY_DIRTIED && entry->action == TEST_ENTRY_ACTION_MOVE))
         HDassert(entry->header.addr == entry->addr);
@@ -1553,18 +1521,14 @@ notify_notify(H5C_notify_action_t action, void *thing)
  *-------------------------------------------------------------------------
  */
 herr_t
-free_icr(test_entry_t *entry, int32_t entry_type)
+free_icr(test_entry_t *entry, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
 {
-    test_entry_t *base_addr;
-
     HDassert(entry);
-
-    base_addr = entries[entry->type];
 
     HDassert(entry->type == entry_type);
     HDassert(entry->index >= 0);
     HDassert(entry->index <= max_indices[entry->type]);
-    HDassert(entry == &(base_addr[entry->index]));
+    HDassert(entry == &(entries[entry->type][entry->index]));
     HDassert(entry == entry->self);
     HDassert(entry->cache_ptr != NULL);
     HDassert(entry->cache_ptr->magic == H5C__H5C_T_MAGIC);

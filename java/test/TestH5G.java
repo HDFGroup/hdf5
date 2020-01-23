@@ -24,6 +24,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5G_info_t;
+import hdf.hdf5lib.structs.H5O_token_t;
 
 import org.junit.After;
 import org.junit.Before;
@@ -286,12 +287,12 @@ public class TestH5G {
         String objNames[] = new String[(int) info.nlinks];
         int objTypes[] = new int[(int) info.nlinks];
         int lnkTypes[] = new int[(int) info.nlinks];
-        long objRefs[] = new long[(int) info.nlinks];
+        H5O_token_t objTokens[] = new H5O_token_t[(int) info.nlinks];
 
         int names_found = 0;
         try {
             names_found = H5.H5Gget_obj_info_all(H5fid, GROUPS[0], objNames,
-                    objTypes, lnkTypes, objRefs, HDF5Constants.H5_INDEX_NAME);
+                    objTypes, lnkTypes, objTokens, HDF5Constants.H5_INDEX_NAME);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -317,14 +318,14 @@ public class TestH5G {
             assertNotNull("TestH5G.testH5Gget_obj_info_all_gid: ", info);
             assertTrue("TestH5G.testH5Gget_obj_info_all_gid: number of links is empty", info.nlinks > 0);
             String objNames[] = new String[(int) info.nlinks];
-            long objRefs[] = new long[(int) info.nlinks];
+            H5O_token_t objTokens[] = new H5O_token_t[(int) info.nlinks];
             int lnkTypes[] = new int[(int) info.nlinks];
             int objTypes[] = new int[(int) info.nlinks];
 
             int names_found = 0;
             try {
                 names_found = H5.H5Gget_obj_info_all(gid, null, objNames, objTypes, lnkTypes,
-                        objRefs, HDF5Constants.H5_INDEX_NAME);
+                		objTokens, HDF5Constants.H5_INDEX_NAME);
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -358,14 +359,14 @@ public class TestH5G {
             assertNotNull("TestH5G.testH5Gget_obj_info_all_gid2: ", info);
             assertTrue("TestH5G.testH5Gget_obj_info_all_gid2: number of links is empty", info.nlinks > 0);
             String objNames[] = new String[(int) info.nlinks];
-            long objRefs[] = new long[(int) info.nlinks];
+            H5O_token_t objTokens[] = new H5O_token_t[(int) info.nlinks];
             int lnkTypes[] = new int[(int) info.nlinks];
             int objTypes[] = new int[(int) info.nlinks];
 
             int names_found = 0;
             try {
                 names_found = H5.H5Gget_obj_info_all(gid, null, objNames, objTypes, lnkTypes,
-                        objRefs, HDF5Constants.H5_INDEX_NAME);
+                		objTokens, HDF5Constants.H5_INDEX_NAME);
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -395,12 +396,12 @@ public class TestH5G {
         String objNames[] = new String[(int)groups_max_size];
         int objTypes[] = new int[(int)groups_max_size];
         int lnkTypes[] = new int[(int)groups_max_size];
-        long objRefs[] = new long[(int)groups_max_size];
+        H5O_token_t objTokens[] = new H5O_token_t[(int)groups_max_size];
 
         int names_found = 0;
         try {
             names_found = H5.H5Gget_obj_info_max(gid, objNames, objTypes, lnkTypes,
-                    objRefs, groups_max_size);
+            		objTokens, groups_max_size);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -426,12 +427,12 @@ public class TestH5G {
         String objNames[] = new String[(int)groups_max_size];
         int objTypes[] = new int[(int)groups_max_size];
         int lnkTypes[] = new int[(int)groups_max_size];
-        long objRefs[] = new long[(int)groups_max_size];
+        H5O_token_t objTokens[] = new H5O_token_t[(int)groups_max_size];
 
         int names_found = 0;
         try {
             names_found = H5.H5Gget_obj_info_max(gid, objNames, objTypes, lnkTypes,
-                    objRefs, groups_max_size);
+            		objTokens, groups_max_size);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -471,11 +472,11 @@ public class TestH5G {
         String objNames[] = new String[(int) info.nlinks];
         int objTypes[] = new int[(int) info.nlinks];
         int lnkTypes[] = new int[(int) info.nlinks];
-        long objRefs[] = new long[(int) info.nlinks];
+        H5O_token_t objTokens[] = new H5O_token_t[(int) info.nlinks];
 
         try {
             H5.H5Gget_obj_info_all(H5fid2, GROUPS2[0], objNames,
-                    objTypes, lnkTypes, objRefs, HDF5Constants.H5_INDEX_CRT_ORDER);
+                    objTypes, lnkTypes, objTokens, HDF5Constants.H5_INDEX_CRT_ORDER);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -488,7 +489,7 @@ public class TestH5G {
 
         try {
            H5.H5Gget_obj_info_all(H5fid2, GROUPS2[0], objNames,
-                    objTypes, lnkTypes, objRefs, HDF5Constants.H5_INDEX_NAME);
+                    objTypes, lnkTypes, objTokens, HDF5Constants.H5_INDEX_NAME);
         }
         catch (Throwable err) {
             err.printStackTrace();

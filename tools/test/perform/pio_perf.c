@@ -80,8 +80,12 @@
 #define PIO_MPI             0x2
 #define PIO_HDF5            0x4
 
+#define DBL_EPSILON 2.2204460492503131e-16
+#define H5_DBL_ABS_EQUAL(X,Y)       (fabsf((X)-(Y)) < DBL_EPSILON)
+
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
+#define MB_PER_SEC(bytes,t) (H5_DBL_ABS_EQUAL((t), 0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE    1
@@ -1155,9 +1159,9 @@ report_parameters(struct options *opts)
     recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs), "\n");
 
     HDfprintf(output, "rank %d: File size=", rank);
-    recover_size_and_print((long long)(pow(opts->num_bpp * opts->min_num_procs,2)
+    recover_size_and_print((long long)(pow((double)(opts->num_bpp * opts->min_num_procs),2)
             * opts->num_dsets), ":");
-    recover_size_and_print((long long)(pow(opts->num_bpp * opts->max_num_procs,2)
+    recover_size_and_print((long long)(pow((double)(opts->num_bpp * opts->max_num_procs),2)
             * opts->num_dsets), "\n");
 
     HDfprintf(output, "rank %d: Transfer buffer size=", rank);

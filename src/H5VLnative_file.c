@@ -226,7 +226,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                 ssize_t    *ret  = HDva_arg(arguments, ssize_t *);
                 size_t      len;
 
-                if(NULL == (f = H5F__get_file(obj, type)))
+                if(H5VL_native_get_file_struct(obj, type, &f) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 len = HDstrlen(H5F_OPEN_NAME(f));
@@ -305,15 +305,6 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
     FUNC_ENTER_PACKAGE
 
     switch(specific_type) {
-        /* Finalize H5Fopen */
-        case H5VL_FILE_POST_OPEN:
-            {
-                /* Call package routine */
-                if(H5F__post_open((H5F_t *)obj) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't finish opening file")
-                break;
-            }
-
         /* H5Fflush */
         case H5VL_FILE_FLUSH:
             {
@@ -322,7 +313,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 H5F_t           *f = NULL;              /* File to flush */
 
                 /* Get the file for the object */
-                if(NULL == (f = H5F__get_file(obj, type)))
+                if(H5VL_native_get_file_struct(obj, type, &f) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Nothing to do if the file is read only. This determination is
@@ -450,10 +441,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type,
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5F_t *f = NULL;           /* File */
-    H5VL_native_file_optional_t optional_type = HDva_arg(arguments, H5VL_native_file_optional_t);
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -528,7 +519,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 /* Get the file struct. This call is careful to not return the file pointer
                  * for the top file in a mount hierarchy.
                  */
-                if(NULL == (f = H5F__get_file(obj, type)))
+                if(H5VL_native_get_file_struct(obj, type, &f) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get a file struct")
 
                 /* Get the file info */
@@ -565,8 +556,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             {
                 size_t *max_size_ptr        = HDva_arg(arguments, size_t *);
                 size_t *min_clean_size_ptr  = HDva_arg(arguments, size_t *);
-                size_t *cur_size_ptr        = HDva_arg(arguments, size_t *); 
-                int    *cur_num_entries_ptr = HDva_arg(arguments, int *); 
+                size_t *cur_size_ptr        = HDva_arg(arguments, size_t *);
+                int    *cur_num_entries_ptr = HDva_arg(arguments, int *);
                 uint32_t cur_num_entries;
 
                 /* Go get the size data */
@@ -706,7 +697,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 unsigned *misses        = HDva_arg(arguments, unsigned *);
                 unsigned *evictions     = HDva_arg(arguments, unsigned *);
                 unsigned *bypasses      = HDva_arg(arguments, unsigned *);
-                
+
                 /* Sanity check */
                 if(NULL == f->shared->page_buf)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
@@ -827,6 +818,15 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 #endif /* H5_HAVE_PARALLEL */
+
+        /* Finalize H5Fopen */
+        case H5VL_NATIVE_FILE_POST_OPEN:
+            {
+                /* Call package routine */
+                if(H5F__post_open((H5F_t *)obj) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't finish opening file")
+                break;
+            }
 
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")

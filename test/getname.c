@@ -101,8 +101,8 @@ test_main(hid_t file_id, hid_t fapl)
     hid_t   space_id;
     hid_t   type_id, type2_id;
     hsize_t dims[1] = { 5 };
-    size_t  name_len; /* Name length */ 
-    H5O_info_t oinfo;      /* Object info structs */
+    size_t  name_len; /* Name length */
+    H5O_info2_t oinfo;     /* Object info structs */
     hid_t      dtype;      /* Object identifier for testing */
     hid_t      dtype_anon; /* Object identifier for testing anonymous */
     ssize_t    size;       /* Size returned by H5Iget_name */
@@ -2380,7 +2380,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((size = H5Iget_name(dtype, NULL, 0)) != 0) TEST_ERROR
 
     /* Create a link to the object */
-    if( H5Olink(dtype, file2_id, "datatype", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Olink(dtype, file2_id, "datatype", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Commit a second datatype with no links to it and commit it */
     if((dtype_anon = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
@@ -2390,7 +2390,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((size = H5Iget_name(dtype_anon, NULL,0)) != 0) TEST_ERROR
 
     /* Store the address of the datatype for later use */
-    if(H5Oget_info2(dtype_anon, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Oget_info3(dtype_anon, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
 
     /* Update the reference count to dtype_anon to preserve the datatype */
     if(H5Oincr_refcount(dtype_anon) < 0) TEST_ERROR
@@ -2400,22 +2400,22 @@ test_main(hid_t file_id, hid_t fapl)
     if(H5Fclose(file2_id) < 0) TEST_ERROR
 
     /* Re-open the file and check that the anonymous datatypes persist */
-    if( (file2_id = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((file2_id = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Check the H5Iget_name does not return an error for anon committed datatypes */
-    if((dtype_anon = H5Oopen_by_addr(file2_id, oinfo.addr)) < 0) TEST_ERROR
+    if((dtype_anon = H5Oopen_by_token(file2_id, oinfo.token)) < 0) TEST_ERROR
 
-    if((size = H5Iget_name(dtype_anon,NULL,0)) != 0) TEST_ERROR
+    if((size = H5Iget_name(dtype_anon, NULL, 0)) != 0) TEST_ERROR
 
     if(H5Tclose(dtype_anon) < 0) TEST_ERROR
     if(H5Fclose(file2_id) < 0) TEST_ERROR
 
     PASSED();
 
-    return(0);
+    return 0;
 
 error:
-    return(1);
+    return 1;
 }
 
 static int

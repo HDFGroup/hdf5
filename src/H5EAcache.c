@@ -487,7 +487,8 @@ H5EA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     *image++ = H5EA_HDR_VERSION;
 
     /* Extensible array type */
-    *image++ = hdr->cparam.cls->id;
+    HDassert(hdr->cparam.cls->id <= 255);
+    *image++ = (uint8_t)hdr->cparam.cls->id;
 
     /* General array creation/configuration information */
     *image++ = hdr->cparam.raw_elmt_size;          /* Element size in file (in bytes) */
@@ -875,7 +876,8 @@ H5EA__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     *image++ = H5EA_IBLOCK_VERSION;
 
     /* Extensible array type */
-    *image++ = iblock->hdr->cparam.cls->id;
+    HDassert(iblock->hdr->cparam.cls->id <= 255);
+    *image++ = (uint8_t)iblock->hdr->cparam.cls->id;
 
     /* Address of array header for array which owns this block */
     H5F_addr_encode(f, &image, iblock->hdr->addr);
@@ -1284,7 +1286,8 @@ H5EA__cache_sblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     *image++ = H5EA_SBLOCK_VERSION;
 
     /* Extensible array type */
-    *image++ = sblock->hdr->cparam.cls->id;
+    HDassert(sblock->hdr->cparam.cls->id <= 255);
+    *image++ = (uint8_t)sblock->hdr->cparam.cls->id;
 
     /* Address of array header for array which owns this block */
     H5F_addr_encode(f, &image, sblock->hdr->addr);
@@ -1540,7 +1543,7 @@ END_FUNC(STATIC) 	/* end H5EA__cache_sblock_verify_chksum() */
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5EA__cache_dblock_deserialize(const void *_image, size_t len,
+H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty))
 
     /* Local variables */
@@ -1698,7 +1701,8 @@ H5EA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     *image++ = H5EA_DBLOCK_VERSION;
 
     /* Extensible array type */
-    *image++ = dblock->hdr->cparam.cls->id;
+    HDassert(dblock->hdr->cparam.cls->id <= 255);
+    *image++ = (uint8_t)dblock->hdr->cparam.cls->id;
 
     /* Address of array header for array which owns this block */
     H5F_addr_encode(f, &image, dblock->hdr->addr);
@@ -2076,7 +2080,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_image_len() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__cache_dblk_page_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
+H5EA__cache_dblk_page_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *_image, size_t H5_ATTR_UNUSED len,
     void *_thing))
 
     /* Local variables */

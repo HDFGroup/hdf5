@@ -109,7 +109,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1chunk
     PIN_BYTE_ARRAY(ENVONLY, dim, theArray, &isCopy, "H5Pset_chunk: dim array not pinned");
 
     if (NULL == (da = lp = (hsize_t *) HDmalloc(rank * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pset_chunk: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pset_chunk: memory allocation failed");
 
     jlp = (jlong *)theArray;
     for (i = 0; i < rank; i++) {
@@ -161,7 +161,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1chunk
     PIN_LONG_ARRAY(ENVONLY, dims, theArray, &isCopy, "H5Pget_chunk: input dims not pinned");
 
     if (NULL == (da = (hsize_t *) HDmalloc((size_t)max_ndims * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_chunk: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_chunk: memory allocation failed");
 
     if ((status = H5Pget_chunk((hid_t)plist, (int)max_ndims, da)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -595,7 +595,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pget_filter: cd_values is NULL");
 
     if (NULL == (filter = (char *) HDmalloc(sizeof(char) * (size_t)namelen)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_filter: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter: memory allocation failed");
 
     PIN_INT_ARRAY(ENVONLY, flags, flagsArray, &isCopy, "H5Pget_filter: flags array not pinned");
     PIN_LONG_ARRAY(ENVONLY, cd_nelmts, cd_nelmtsArray, &isCopy, "H5Pget_filter: nelmts array not pinned");
@@ -620,7 +620,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, filter))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_filter: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter: out of memory - unable to construct string from UTF characters");
     }
 
     ENVPTR->SetObjectArrayElement(ENVONLY, name, 0, (jobject)str);
@@ -632,7 +632,7 @@ done:
     if (cd_nelmtsArray)
         UNPIN_LONG_ARRAY(ENVONLY, cd_nelmts, cd_nelmtsArray, (status < 0) ? JNI_ABORT : 0);
     if (flagsArray)
-        UNPIN_INT_ARRAY(ENVONLY, flags, flagsArray, (status < 0) ? JNI_ABORT : 0)
+        UNPIN_INT_ARRAY(ENVONLY, flags, flagsArray, (status < 0) ? JNI_ABORT : 0);
     if (filter)
         HDfree(filter);
 
@@ -671,7 +671,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter2
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pget_filter2: filter_config is NULL");
 
     if (NULL == (filter = (char *) HDmalloc(sizeof(char) * (size_t)namelen)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_filter2: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter2: memory allocation failed");
 
     PIN_INT_ARRAY(ENVONLY, flags, flagsArray, &isCopy, "H5Pget_filter2: flags array not pinned");
     PIN_LONG_ARRAY(ENVONLY, cd_nelmts, cd_nelmtsArray, &isCopy, "H5Pget_filter2: nelmts array not pinned");
@@ -715,7 +715,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter2
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, filter))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_filter2: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter2: out of memory - unable to construct string from UTF characters");
     }
 
     ENVPTR->SetObjectArrayElement(ENVONLY, name, 0, (jobject)str);
@@ -772,7 +772,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter_1by_1id
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_filter_by_id: name is NULL");
 
     if (NULL == (aName = (char *) HDmalloc(sizeof(char) * (size_t)bs)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_filter_by_id: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter_by_id: memory allocation failed");
 
     PIN_INT_ARRAY(ENVONLY, flags, flagsArray, &isCopy, "H5Pget_filter_by_id: flags not pinned");
     PIN_LONG_ARRAY(ENVONLY, cd_nelmts, cd_nelmtsArray, &isCopy, "H5Pget_filter_by_id: cd_nelms not pinned");
@@ -801,7 +801,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter_1by_1id
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, aName))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_filter_by_id: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter_by_id: out of memory - unable to construct string from UTF characters");
     }
 
     ENVPTR->SetObjectArrayElement(ENVONLY, name, 0, (jobject)str);
@@ -858,7 +858,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter_1by_1id2
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_filter_by_id2: filter_config is NULL");
 
     if (NULL == (aName = (char *) HDmalloc(sizeof(char) * (size_t)bs)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_filter_by_id2: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter_by_id2: memory allocation failed");
 
     PIN_INT_ARRAY(ENVONLY, flags, flagsArray, &isCopy, "H5Pget_filter_by_id2: flags not pinned");
     PIN_LONG_ARRAY(ENVONLY, cd_nelmts, cd_nelmtsArray, &isCopy, "H5Pget_filter_by_id2: cd_nelms not pinned");
@@ -882,7 +882,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter_1by_1id2
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, aName))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_filter_by_id2: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_filter_by_id2: out of memory - unable to construct string from UTF characters");
     }
 
     ENVPTR->SetObjectArrayElement(ENVONLY, name, 0, (jobject)str);
@@ -1122,7 +1122,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1external
 
     if (name_size > 0)
         if (NULL == (file = (char *) HDmalloc(sizeof(char) * (size_t)name_size)))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_external: memory allocation failed");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_external: memory allocation failed");
 
     if ((status = H5Pget_external((hid_t) plist, (unsigned)idx, (size_t)name_size,
             file, (off_t *)&o, (hsize_t *)&s)) < 0)
@@ -1140,7 +1140,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1external
 
         if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, file))) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_external: out of memory - unable to construct string from UTF characters");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_external: out of memory - unable to construct string from UTF characters");
         }
 
         ENVPTR->SetObjectArrayElement(ENVONLY, name, 0, (jobject)str);
@@ -1250,7 +1250,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dsetname
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (dname = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_virtual_dsetname: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_dsetname: memory allocation failed");
 
     if (H5Pget_virtual_dsetname((hid_t)dcpl_id, (size_t)index, dname, (size_t)buf_size + 1) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1258,7 +1258,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dsetname
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, dname))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_virtual_dsetname: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_dsetname: out of memory - unable to construct string from UTF characters");
     }
 
 done:
@@ -1288,7 +1288,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1filename
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (fname = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_virtual_filename: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_filename: memory allocation failed");
 
     if (H5Pget_virtual_filename((hid_t)dcpl_id, (size_t)index, fname, (size_t)buf_size + 1) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1296,7 +1296,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1filename
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, fname))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_virtual_filename: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_filename: out of memory - unable to construct string from UTF characters");
     }
 
 done:
@@ -1392,7 +1392,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (pre = (char *) HDmalloc(sizeof(char) * (size_t) prefix_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_virtual_prefix: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_prefix: memory allocation failed");
 
     if (H5Pget_virtual_prefix((hid_t)dapl_id, (char *)pre, (size_t) prefix_size + 1) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1400,7 +1400,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, pre))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_virtual_prefix: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_prefix: out of memory - unable to construct string from UTF characters");
     }
 
 done:

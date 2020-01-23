@@ -88,7 +88,7 @@ static herr_t H5O__copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc,
 static herr_t H5O__copy_free_comm_dt_cb(void *item, void *key, void *op_data);
 static int H5O__copy_comm_dt_cmp(const void *dt1, const void *dt2);
 static herr_t H5O__copy_search_comm_dt_cb(hid_t group, const char *name,
-    const H5L_info_t *linfo, void *udata);
+    const H5L_info2_t *linfo, void *udata);
 static htri_t H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src,
     H5O_loc_t *oloc_dst/*in, out*/, H5O_copy_t *cpy_info);
 static herr_t H5O__copy_insert_comm_dt(H5F_t *file_src, H5O_t *oh_src,
@@ -197,9 +197,9 @@ herr_t
 H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id)
 {
-    H5VL_object_t    *vol_obj1 = NULL;        /* object token of src_id */
+    H5VL_object_t    *vol_obj1 = NULL;        /* object of src_id */
     H5VL_loc_params_t loc_params1;
-    H5VL_object_t    *vol_obj2 = NULL;        /* object token of dst_id */
+    H5VL_object_t    *vol_obj2 = NULL;        /* object of dst_id */
     H5VL_loc_params_t loc_params2;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1523,7 +1523,7 @@ done:
  */
 static herr_t
 H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name,
-    const H5L_info_t *linfo, void *_udata)
+    const H5L_info2_t *linfo, void *_udata)
 {
     H5O_copy_search_comm_dt_ud_t *udata = (H5O_copy_search_comm_dt_ud_t *)_udata; /* Skip list of dtypes in dest file */
     H5G_loc_t   obj_loc;                /* Location of object */

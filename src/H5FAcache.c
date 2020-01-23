@@ -253,7 +253,7 @@ END_FUNC(STATIC) 	/* end H5FA__cache_hdr_verify_chksum() */
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5FA__cache_hdr_deserialize(const void *_image, size_t len,
+H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty))
 
     /* Local variables */
@@ -417,7 +417,8 @@ H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     *image++ = H5FA_HDR_VERSION;
 
     /* Fixed array type */
-    *image++ = hdr->cparam.cls->id;
+    HDassert(hdr->cparam.cls->id <= 255);
+    *image++ = (uint8_t)hdr->cparam.cls->id;
 
     /* General array creation/configuration information */
     *image++ = hdr->cparam.raw_elmt_size;          /* Element size in file (in bytes) */
@@ -650,7 +651,7 @@ END_FUNC(STATIC) 	/* end H5FA__cache_dblock_verify_chksum() */
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5FA__cache_dblock_deserialize(const void *_image, size_t len,
+H5FA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty))
 
     /* Local variables */
@@ -805,7 +806,8 @@ H5FA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     *image++ = H5FA_DBLOCK_VERSION;
 
     /* Fixed array type */
-    *image++ = dblock->hdr->cparam.cls->id;
+    HDassert(dblock->hdr->cparam.cls->id <= 255);
+    *image++ = (uint8_t)dblock->hdr->cparam.cls->id;
 
     /* Address of array header for array which owns this block */
     H5F_addr_encode(f, &image, dblock->hdr->addr);
@@ -1176,7 +1178,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_image_len() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA__cache_dblk_page_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
+H5FA__cache_dblk_page_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *_image, size_t H5_ATTR_UNUSED len,
     void *_thing))
 
     /* Local variables */

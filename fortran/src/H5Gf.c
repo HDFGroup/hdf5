@@ -170,7 +170,7 @@ h5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
     _fcd obj_name, int_f *obj_namelen, int_f *obj_type)
 /******/
 {
-    H5O_info_t oinfo;
+    H5O_info2_t oinfo;
     hid_t c_loc_id = (hid_t)*loc_id;
     char *c_name = NULL;
     size_t c_obj_namelen;
@@ -200,7 +200,7 @@ h5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
     /* Query the object's information */
     if(H5Lget_name_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, c_idx, c_obj_name, c_obj_namelen, H5P_DEFAULT) < 0)
         goto DONE;
-    if(H5Oget_info_by_idx2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, c_idx, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_idx3(gid, ".", H5_INDEX_NAME, H5_ITER_INC, c_idx, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         goto DONE;
 
 /* XXX: Switch from using H5Gget_objtype_by_idx() means that this routine won't

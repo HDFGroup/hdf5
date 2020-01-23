@@ -41,6 +41,8 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"		/* Property Lists                       */
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 
 /****************/
 /* Local Macros */
@@ -290,13 +292,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *info)
+H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *info)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
+    HDassert(link_loc);
     HDassert(lnk);
 
     /* Get information from the link */
@@ -308,7 +311,9 @@ H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *info)
 
         switch(lnk->type) {
             case H5L_TYPE_HARD:
-                info->u.address = lnk->u.hard.addr;
+                /* Serialize the address into a VOL token */
+                if(H5VL_native_addr_to_token(link_loc->file, H5I_FILE, lnk->u.hard.addr, &info->u.token) < 0)
+                    HGOTO_ERROR(H5E_LINK, H5E_CANTSERIALIZE, FAIL, "can't serialize address into object token")
                 break;
 
             case H5L_TYPE_SOFT:

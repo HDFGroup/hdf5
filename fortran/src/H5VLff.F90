@@ -167,10 +167,49 @@ CONTAINS
   END SUBROUTINE H5VLis_connector_registered_f
 
 !
-!****s* H5VL/H5VLis_connector_registered_f
+!****s* H5VL/H5VLget_connector_id_f
 !
 ! NAME
-!  H5VLis_connector_registered_f
+!  H5VLget_connector_id_f
+!
+! PURPOSE
+!  Retrieves the ID for a registered VOL connector.
+!
+! INPUTS
+!  obj_id - Object id
+! OUTPUTS
+!  vol_id - Connector id
+!  hdferr - Returns 0 if successful and -1 if fails
+! SOURCE
+
+  SUBROUTINE H5VLget_connector_id_f(obj_id, vol_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    INTEGER(HID_T), INTENT(OUT) :: vol_id
+    INTEGER, INTENT(OUT) :: hdferr
+!*****
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5VLget_connector_id(obj_id) BIND(C,NAME='H5VLget_connector_id')
+         IMPORT :: HID_T
+         INTEGER(HID_T), INTENT(IN) :: obj_id
+       END FUNCTION H5VLget_connector_id
+    END INTERFACE
+
+    vol_id = H5VLget_connector_id(obj_id)
+
+    IF(vol_id.LT.0)THEN
+       hdferr = -1
+       vol_id = H5I_INVALID_HID_F
+    ENDIF
+
+  END SUBROUTINE H5VLget_connector_id_f
+
+!
+!****s* H5VL/H5VLget_connector_id_by_name_f
+!
+! NAME
+!  H5VLget_connector_id_by_name_f
 !
 ! PURPOSE
 !  Retrieves the ID for a registered VOL connector.
@@ -182,7 +221,7 @@ CONTAINS
 !  hdferr - Returns 0 if successful and -1 if fails
 ! SOURCE
 
-  SUBROUTINE H5VLget_connector_id_f(name, vol_id, hdferr)
+  SUBROUTINE H5VLget_connector_id_by_name_f(name, vol_id, hdferr)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: vol_id
@@ -191,22 +230,23 @@ CONTAINS
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER(HID_T) FUNCTION H5VLget_connector_id(name) BIND(C,NAME='H5VLget_connector_id')
+       INTEGER(HID_T) FUNCTION H5VLget_connector_id_by_name(name) BIND(C,NAME='H5VLget_connector_id_by_name')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-       END FUNCTION H5VLget_connector_id
+       END FUNCTION H5VLget_connector_id_by_name
     END INTERFACE
     
     c_name = TRIM(name)//C_NULL_CHAR
-    vol_id = H5VLget_connector_id(c_name)
-
+    vol_id = H5VLget_connector_id_by_name(c_name)
+    
+    hdferr = 0
     IF(vol_id.LT.0)THEN
        hdferr = -1
        vol_id = H5I_INVALID_HID_F
     ENDIF
 
-  END SUBROUTINE H5VLget_connector_id_f
+  END SUBROUTINE H5VLget_connector_id_by_name_f
 
   SUBROUTINE H5VLget_connector_name_f(obj_id, name, hdferr, name_len)
     IMPLICIT NONE

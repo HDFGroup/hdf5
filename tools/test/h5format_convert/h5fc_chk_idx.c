@@ -45,8 +45,8 @@ main(int argc, char *argv[])
 {
     char *fname = NULL;
     char *dname = NULL;
-    hid_t fid = -1;
-    hid_t did = -1;
+    hid_t fid = H5I_INVALID_HID;
+    hid_t did = H5I_INVALID_HID;
     H5D_chunk_index_t idx_type;
 
     /* h5fc_chk_idx fname dname */

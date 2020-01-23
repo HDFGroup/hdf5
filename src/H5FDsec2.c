@@ -669,6 +669,7 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     haddr_t addr, size_t size, void *buf /*out*/)
 {
     H5FD_sec2_t     *file       = (H5FD_sec2_t *)_file;
+    HDoff_t         offset      = (HDoff_t)addr;
     herr_t          ret_value   = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -687,7 +688,7 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     if(addr != file->pos || OP_READ != file->op) {
         if(HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
-    } /* end if */
+    }
 #endif /* H5_HAVE_PREADWRITE */
 
     /* Read data, being careful of interrupted system calls, partial results,
@@ -697,7 +698,6 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
         h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
-        HDoff_t             offset          = (HDoff_t)addr;
 
         /* Trying to read more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -710,7 +710,8 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
         do {
 #ifdef H5_HAVE_PREADWRITE
             bytes_read = HDpread(file->fd, buf, bytes_in, offset);
-            offset += bytes_read;
+            if(bytes_read > 0)
+                offset += bytes_read;
 #else
             bytes_read = HDread(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
@@ -773,6 +774,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                 haddr_t addr, size_t size, const void *buf)
 {
     H5FD_sec2_t     *file       = (H5FD_sec2_t *)_file;
+    HDoff_t         offset      = (HDoff_t)addr;
     herr_t          ret_value   = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -791,7 +793,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if(addr != file->pos || OP_WRITE != file->op) {
         if(HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
-    } /* end if */
+    }
 #endif /* H5_HAVE_PREADWRITE */
 
     /* Write the data, being careful of interrupted system calls and partial
@@ -801,7 +803,6 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
         h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
-        HDoff_t             offset          = (HDoff_t)addr;
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -814,7 +815,8 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         do {
 #ifdef H5_HAVE_PREADWRITE
             bytes_wrote = HDpwrite(file->fd, buf, bytes_in, offset);
-            offset += bytes_wrote;
+            if(bytes_wrote > 0)
+                offset += bytes_wrote;
 #else
             bytes_wrote = HDwrite(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */

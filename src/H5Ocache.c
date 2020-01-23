@@ -201,7 +201,7 @@ H5O__cache_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_get_final_load_size(const void *image, size_t image_len,
+H5O__cache_get_final_load_size(const void *image, size_t H5_ATTR_NDEBUG_UNUSED image_len,
     void *_udata, size_t *actual_len)
 {
     H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;   /* User data for callback */
@@ -306,7 +306,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__cache_deserialize(const void *image, size_t len, void *_udata,
+H5O__cache_deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
     hbool_t *dirty)
 {
     H5O_t          *oh = NULL;          /* Object header read in */
@@ -763,7 +763,7 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata,
+H5O__cache_chk_deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
     hbool_t *dirty)
 {
     H5O_chunk_proxy_t  *chk_proxy = NULL;       /* Chunk proxy object */

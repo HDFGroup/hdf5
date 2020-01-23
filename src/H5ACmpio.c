@@ -498,7 +498,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t *aux_ptr,
+H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t H5_ATTR_NDEBUG_UNUSED *aux_ptr,
     int sync_point_op)
 {
     herr_t ret_value = SUCCEED;    /* Return value */

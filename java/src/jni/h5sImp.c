@@ -98,7 +98,7 @@ Java_hdf_hdf5lib_H5__1H5Screate_1simple
     PIN_LONG_ARRAY(ENVONLY, dims, dimsP, &isCopy, "H5Screate_simple: dims not pinned");
 
     if (NULL == (sa = lp = (hsize_t *) HDmalloc((size_t)rank * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Screate_simple: failed to allocate dims buffer")
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Screate_simple: failed to allocate dims buffer");
 
     jlp = (jlong *) dimsP;
     for (i = 0; i < rank; i++) {
@@ -115,7 +115,7 @@ Java_hdf_hdf5lib_H5__1H5Screate_1simple
         PIN_LONG_ARRAY(ENVONLY, maxdims, maxdimsP, &isCopy, "H5Screate_simple: maxdims not pinned");
 
         if (NULL == (msa = lp = (hsize_t *) HDmalloc((size_t)rank * sizeof(hsize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Screate_simple: failed to allocate maxdims buffer")
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Screate_simple: failed to allocate maxdims buffer");
 
         jlp = (jlong *) maxdimsP;
         for (i = 0; i < mrank; i++) {
@@ -194,7 +194,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1elements
     PIN_LONG_ARRAY(ENVONLY, coords, P, &isCopy, "H5Sselect_elements: coords not pinned");
 
     if (NULL == (sa = (hssize_t *) HDmalloc( (size_t)num_elemn * 2 * sizeof(hssize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Sselect_elements: failed to allocate coordinate buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_elements: failed to allocate coordinate buffer");
 
     for (i = 0; i < (num_elemn * 2); i++) {
         sa[i] = P[i];
@@ -247,7 +247,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1elements
     nlongs = (int)((size_t)size / sizeof(jlong));
 
     if (NULL == (lp = (hsize_t *) HDmalloc((size_t)nlongs * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Sselect_elements: failed to allocate coordinate buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_elements: failed to allocate coordinate buffer");
 
     jlp = (jlong *) P;
     llp = lp;
@@ -444,7 +444,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1simple_1extent_1dims
         }
 
         if (NULL == (sa = (hsize_t *) HDmalloc((size_t)rank * sizeof(hsize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_simple_extent_dims: failed to allocate dimension buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sget_simple_extent_dims: failed to allocate dimension buffer");
     }
 
     if (NULL == maxdims) {
@@ -462,10 +462,10 @@ Java_hdf_hdf5lib_H5_H5Sget_1simple_1extent_1dims
         if (rank < 0)
             rank = mrank;
         else if (mrank != rank)
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_simple_extent_dims: maxdims rank not same as dims");
+            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sget_simple_extent_dims: maxdims rank not same as dims");
 
         if (NULL == (msa = (hsize_t *) HDmalloc((size_t)rank * sizeof(hsize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_simple_extent_dims: failed to allocate maximum dimension buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sget_simple_extent_dims: failed to allocate maximum dimension buffer");
     }
 
     if ((status = H5Sget_simple_extent_dims(space_id, (hsize_t *)sa, (hsize_t *)msa)) < 0)
@@ -564,7 +564,7 @@ Java_hdf_hdf5lib_H5_H5Sset_1extent_1simple
     PIN_LONG_ARRAY(ENVONLY, dims, dimsP, &isCopy, "H5Sset_extent_simple: dims not pinned");
 
     if (NULL == (sa = lp = (hsize_t *) HDmalloc((size_t)rank * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Sset_extent_simple: failed to allocate dimension buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sset_extent_simple: failed to allocate dimension buffer");
 
     jlp = (jlong *) dimsP;
     for (i = 0; i < rank; i++) {
@@ -581,7 +581,7 @@ Java_hdf_hdf5lib_H5_H5Sset_1extent_1simple
         PIN_LONG_ARRAY(ENVONLY, maxdims, maxdimsP, &isCopy, "H5Sset_extent_simple: maxdims not pinned");
 
         if (NULL == (msa = lp = (hsize_t *) HDmalloc((size_t)rank * sizeof(hsize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Sset_extent_simple: failed to allocate maximum dimension buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sset_extent_simple: failed to allocate maximum dimension buffer");
 
         jlp = (jlong *) maxdimsP;
         for (i = 0; i < rank; i++) {
@@ -660,7 +660,7 @@ Java_hdf_hdf5lib_H5_H5Soffset_1simple
         rank = (size_t) i / sizeof(jlong);
 
         if (NULL == (sa = lp = (hssize_t *) HDmalloc((size_t)rank * sizeof(hssize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Soffset_simple: failed to allocate offset buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Soffset_simple: failed to allocate offset buffer");
 
         jlp = (jlong *) P;
         for (i = 0; (size_t) i < rank; i++) {
@@ -788,7 +788,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1hyperslab
     PIN_LONG_ARRAY(ENVONLY, start, startP, &isCopy, "H5Sselect_hyperslab: start not pinned");
 
     if (NULL == (strt = lp = (hsize_t *) HDmalloc((size_t)start_rank * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate start buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate start buffer");
 
     jlp = (jlong *) startP;
     for (i = 0; i < start_rank; i++) {
@@ -800,7 +800,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1hyperslab
     PIN_LONG_ARRAY(ENVONLY, count, countP, &isCopy, "H5Sselect_hyperslab: count not pinned");
 
     if (NULL == (cnt = lp = (hsize_t *) HDmalloc((size_t)count_rank * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate count buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate count buffer");
 
     jlp = (jlong *) countP;
     for (i = 0; i < count_rank; i++) {
@@ -825,7 +825,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1hyperslab
         PIN_LONG_ARRAY(ENVONLY, stride, strideP, &isCopy, "H5Sselect_hyperslab: stride not pinned");
 
         if (NULL == (strd = lp = (hsize_t *) HDmalloc((size_t)stride_rank * sizeof(hsize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate stride buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate stride buffer");
 
         jlp = (jlong *) strideP;
         for (i = 0; i < stride_rank; i++) {
@@ -851,7 +851,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1hyperslab
         PIN_LONG_ARRAY(ENVONLY, block, blockP, &isCopy, "H5Sselect_hyperslab: block not pinned");
 
         if (NULL == (blk = lp = (hsize_t *) HDmalloc((size_t)block_rank * sizeof(hsize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate block buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_hyperslab: failed to allocate block buffer");
 
         jlp = (jlong *) blockP;
         for (i = 0; i < block_rank; i++) {
@@ -988,7 +988,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1select_1hyper_1blocklist
 
     buf_size = (size_t) numblocks * (size_t) 2 * (size_t) rank * sizeof(hsize_t);
     if (NULL == (ba = (hsize_t *) HDmalloc(buf_size)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_select_hyper_blocklist: failed to allocate block list buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sget_select_hyper_blocklist: failed to allocate block list buffer");
 
     if ((status = H5Sget_select_hyper_blocklist((hid_t)spaceid, (hsize_t) startblock, (hsize_t) numblocks, (hsize_t *)ba)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1044,7 +1044,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1select_1elem_1pointlist
     PIN_LONG_ARRAY(ENVONLY, buf, bufP, &isCopy, "H5Sget_select_elem_pointlist: buffer not pinned");
 
     if (NULL == (ba = (hsize_t *) HDmalloc(((size_t)numpoints * (size_t)rank) * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_select_elem_pointlist: failed to allocate point list buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sget_select_elem_pointlist: failed to allocate point list buffer");
 
     if ((status = H5Sget_select_elem_pointlist((hid_t)spaceid, (hsize_t)startpoint, (hsize_t)numpoints, (hsize_t *)ba)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1094,12 +1094,12 @@ Java_hdf_hdf5lib_H5_H5Sget_1select_1bounds
     }
 
     if (NULL == (strt = (hsize_t *) HDmalloc((size_t)rank * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_select_bounds: failed to allocate start buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sget_select_bounds: failed to allocate start buffer");
 
     PIN_LONG_ARRAY(ENVONLY, end, endP, &isCopy, "H5Sget_select_bounds: end not pinned");
 
     if (NULL == (en = (hsize_t *) HDmalloc((size_t)rank * sizeof(hsize_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_select_bounds: failed to allocate end buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sget_select_bounds: failed to allocate end buffer");
 
     if ((status = H5Sget_select_bounds((hid_t) spaceid, (hsize_t *) strt, (hsize_t *) en)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1148,7 +1148,7 @@ Java_hdf_hdf5lib_H5_H5Sencode
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sencode: buf_size = 0");
 
     if (NULL == (bufPtr = (unsigned char *) HDcalloc((size_t) 1, buf_size)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Sencode: failed to allocate encoding buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sencode: failed to allocate encoding buffer");
 
     if ((status = H5Sencode2((hid_t) obj_id, bufPtr, &buf_size, H5P_DEFAULT)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1258,7 +1258,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1regular_1hyperslab
         PIN_LONG_ARRAY(ENVONLY, start, startP, &isCopy, "H5Sget_regular_hyperslab: start not pinned");
 
         if (NULL == (strt = (hsize_t *) HDmalloc((size_t)start_rank * sizeof(hsize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_regular_hyperslab: failed to allocate start buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sget_regular_hyperslab: failed to allocate start buffer");
     }
 
     if (NULL == stride) {
@@ -1277,7 +1277,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1regular_1hyperslab
         PIN_LONG_ARRAY(ENVONLY, stride, strideP, &isCopy, "H5Sget_regular_hyperslab: stride not pinned");
 
         if (NULL == (strd = (hsize_t *) HDmalloc((size_t)stride_rank * sizeof(hsize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_regular_hyperslab: failed to allocate stride buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sget_regular_hyperslab: failed to allocate stride buffer");
     }
 
     if (NULL == count) {
@@ -1296,7 +1296,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1regular_1hyperslab
         PIN_LONG_ARRAY(ENVONLY, count, countP, &isCopy, "H5Sget_regular_hyperslab: count not pinned");
 
         if (NULL == (cnt = (hsize_t *) HDmalloc((size_t)count_rank * sizeof(hsize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_regular_hyperslab: failed to allocate count buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sget_regular_hyperslab: failed to allocate count buffer");
     }
 
     if (NULL == block) {
@@ -1315,7 +1315,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1regular_1hyperslab
         PIN_LONG_ARRAY(ENVONLY, block, blockP, &isCopy, "H5Sget_regular_hyperslab: block not pinned");
 
         if (NULL == (blk = (hsize_t *) HDmalloc((size_t)block_rank * sizeof(hsize_t))))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Sget_regular_hyperslab: failed to allocate block buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sget_regular_hyperslab: failed to allocate block buffer");
     }
 
     if ((status = H5Sget_regular_hyperslab(space_id, (hsize_t *) strt, (hsize_t *) strd, (hsize_t *) cnt, (hsize_t *) blk)) < 0)
