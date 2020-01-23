@@ -534,13 +534,6 @@
 #define H5_REQUEST_NULL                 NULL
 
 /*
- * A macro to portably decrement enumerated types.
- */
-#ifndef H5_DEC_ENUM
-#  define H5_DEC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)-1))
-#endif
-
-/*
  * Methods to compare the equality of floating-point values:
  *
  *    1. H5_XXX_ABS_EQUAL - check if the difference is smaller than the
