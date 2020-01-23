@@ -274,7 +274,7 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
     trav_table_t *table = NULL;
     size_t   idx;
 
-    H5TOOLS_DEBUG("build_match_list start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
     /* init */
     trav_table_init(info1->fid, &table);
     if (table == NULL) {
@@ -382,7 +382,7 @@ build_match_list (const char *objname1, trav_info_t *info1, const char *objname2
 done:
     *table_out = table;
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 }
 
 
@@ -416,6 +416,7 @@ trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata)
     const char    *ext_path;
     herr_t         ret_value = SUCCEED;
 
+    H5TOOLS_START_DEBUG("");
     /* init linkinfo struct */
     HDmemset(&lnk_info, 0, sizeof(h5tool_link_info_t));
 
@@ -499,7 +500,7 @@ trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata)
 done:
     if (lnk_info.trg_path)
         HDfree(lnk_info.trg_path);
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
@@ -514,11 +515,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hsize_t
-h5diff(const char *fname1,
-               const char *fname2,
-               const char *objname1,
-               const char *objname2,
-               diff_opt_t *opts)
+h5diff(const char *fname1, const char *fname2, const char *objname1, const char *objname2, diff_opt_t *opts)
 {
     hid_t         file1_id = H5I_INVALID_HID;
     hid_t         file2_id = H5I_INVALID_HID;
@@ -552,7 +549,7 @@ h5diff(const char *fname1,
     trav_table_t *match_list = NULL;
     diff_err_t    ret_value = H5DIFF_NO_ERR;
 
-    H5TOOLS_DEBUG("h5diff start");
+    H5TOOLS_START_DEBUG("");
     /* init filenames */
     HDmemset(filenames, 0, MAX_FILENAME * 2);
     /* init link info struct */
@@ -972,9 +969,8 @@ done:
         H5Fclose(file2_id);
     } H5E_END_TRY;
 
-    H5TOOLS_DEBUG("h5diff finish - errstat:%d", opts->err_stat);
+    H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
 
-    H5TOOLS_ENDDEBUG("exit");
     return nfound;
 }
 
@@ -1012,7 +1008,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
     size_t       idx2 = 0;
     diff_err_t   ret_value = opts->err_stat;
 
-    H5TOOLS_DEBUG("diff_match start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
     /*
      * if not root, prepare object name to be pre-appended to group path to
      * make full path
@@ -1367,9 +1363,8 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
     if (table)
         trav_table_free(table);
 
-    H5TOOLS_DEBUG("diff_match finish diffs=%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(" diffs=%d - errstat:%d", nfound, opts->err_stat);
 
-    H5TOOLS_ENDDEBUG("exit");
     return nfound;
 }
 
@@ -1388,12 +1383,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
  *-------------------------------------------------------------------------
  */
 hsize_t
-diff(hid_t file1_id,
-              const char *path1,
-              hid_t file2_id,
-              const char *path2,
-              diff_opt_t * opts,
-              diff_args_t *argdata)
+diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_opt_t * opts, diff_args_t *argdata)
 {
     int           status = -1;
     hid_t         dset1_id = H5I_INVALID_HID;
@@ -1413,7 +1403,7 @@ diff(hid_t file1_id,
     h5tool_link_info_t linkinfo1;
     h5tool_link_info_t linkinfo2;
 
-    H5TOOLS_DEBUG("diff start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
 
     /*init link info struct */
     HDmemset(&linkinfo1, 0, sizeof(h5tool_link_info_t));
@@ -1803,9 +1793,8 @@ done:
         /* enable error reporting */
     } H5E_END_TRY;
 
-    H5TOOLS_DEBUG("diff finish:%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(": %d - errstat:%d", nfound, opts->err_stat);
 
-    H5TOOLS_ENDDEBUG("exit");
     return nfound;
 }
 

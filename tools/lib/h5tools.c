@@ -24,6 +24,12 @@
 #include "h5tools_utils.h"
 #include "H5private.h"
 
+#ifdef H5_TOOLS_DEBUG
+/* global debug variables */
+int       H5tools_INDENT_g = 0;
+#endif
+
+
 /* global variables */
 hid_t       H5tools_ERR_STACK_g = 0;
 hid_t       H5tools_ERR_CLS_g = H5I_INVALID_HID;
@@ -789,7 +795,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     if (!ctx->need_prefix)
         return;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     HDmemset(&prefix, 0, sizeof(h5tools_str_t));
     HDmemset(&str, 0, sizeof(h5tools_str_t));
@@ -857,7 +863,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     h5tools_str_close(&prefix);
     h5tools_str_close(&str);
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 }
 
 /*-------------------------------------------------------------------------
@@ -982,7 +988,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
     if (stream == NULL)
         return dimension_break;
 
-    H5TOOLS_DEBUG("enter need_prefix=%d", ctx->need_prefix);
+    H5TOOLS_START_DEBUG(" need_prefix=%d", ctx->need_prefix);
     H5TOOLS_DEBUG("elmt_counter=%ld - local_elmt_counter=%ld", elmt_counter, local_elmt_counter);
 
     s = h5tools_str_fmt(buffer, (size_t)0, "%s");
@@ -1109,7 +1115,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
 
     ctx->prev_multiline = multiline;
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 
     return dimension_break;
 }
@@ -1150,7 +1156,7 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
     int      secnum;         /* section sequence number */
     int      multiline;      /* datum was multiline */
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
     H5TOOLS_DEBUG("elmt_counter=%ld - local_elmt_counter=%ld", elmt_counter, local_elmt_counter);
 
     s = h5tools_str_fmt(buffer, (size_t)0, "%s");
@@ -1260,7 +1266,7 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
 
     ctx->prev_multiline = multiline;
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 
     return dimension_break;
 }
@@ -1279,7 +1285,7 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
     int i;
     unsigned j;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     if(ctx->ndims > 0) {
         ctx->acc[ctx->ndims - 1] = 1;
@@ -1291,7 +1297,7 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
             ctx->pos[j] = 0;
     }
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 }
 
 /*-------------------------------------------------------------------------
@@ -1313,7 +1319,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
     hbool_t        past_catch = FALSE;
     int            ret_value = 0;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
     if((size = H5Tget_size(tid)) == 0)
         H5TOOLS_THROW((-1), "H5Tget_size failed");
 
@@ -1529,7 +1535,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
     } /* end switch */
 
 CATCH
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
@@ -1562,6 +1568,7 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
     hid_t        sid1 = H5I_INVALID_HID;
     int          ret_value = -1;
 
+    H5TOOLS_START_DEBUG("");
     /* Get the dataspace of the dataset */
     if((sid1 = H5Dget_space(region_id)) < 0)
         H5TOOLS_THROW((-1), "H5Dget_space failed");
@@ -1628,7 +1635,7 @@ CATCH
     if(H5Sclose(sid1) < 0)
         H5TOOLS_ERROR((-1), "H5Sclose failed");
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
@@ -1657,6 +1664,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     hbool_t      past_catch = FALSE;
     hbool_t      ret_value = TRUE;
 
+    H5TOOLS_START_DEBUG("");
     if((snblocks = H5Sget_select_hyper_nblocks(region_space)) <= 0)
         H5TOOLS_THROW(FALSE, "H5Sget_select_hyper_nblocks failed");
     nblocks = (hsize_t)snblocks;
@@ -1692,7 +1700,7 @@ done:
     H5_LEAVE(TRUE)
 
 CATCH
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
@@ -1724,6 +1732,7 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
     void    *region_buf = NULL;
     int      ret_value = 0;
 
+    H5TOOLS_START_DEBUG("");
     if((type_size = H5Tget_size(type_id)) == 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Tget_size failed");
 
@@ -1753,7 +1762,7 @@ done:
     if(H5Sclose(mem_space) < 0)
         H5TOOLS_ERROR((-1), "H5Sclose failed");
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
@@ -1780,6 +1789,7 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
     hbool_t  past_catch = FALSE;
     hbool_t  ret_value = TRUE;
 
+    H5TOOLS_START_DEBUG("");
     if((snpoints = H5Sget_select_elem_npoints(region_space)) <= 0)
         H5TOOLS_THROW(FALSE, "H5Sget_select_elem_npoints failed");
     npoints = (hsize_t)snpoints;
@@ -1806,7 +1816,7 @@ done:
 
     H5_LEAVE(ret_value)
 CATCH
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
