@@ -431,7 +431,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5_ATTR_PURE hssize_t
+H5_ATTR_PURE hsize_t
 H5S_get_select_npoints(const H5S_t *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -439,7 +439,7 @@ H5S_get_select_npoints(const H5S_t *space)
     /* Check args */
     HDassert(space);
 
-    FUNC_LEAVE_NOAPI((hssize_t)space->select.num_elem)
+    FUNC_LEAVE_NOAPI(space->select.num_elem)
 } /* end H5S_get_select_npoints() */
 
 
