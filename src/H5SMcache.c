@@ -397,7 +397,7 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t len,
         *image++ = H5SM_LIST_VERSION;
 
         /* Is message index a list or a B-tree? */
-        *image++ = table->indexes[u].index_type;
+        *image++ = (uint8_t)table->indexes[u].index_type;
 
         /* Type of messages in the index */
         UINT16ENCODE(image, table->indexes[u].mesg_types);

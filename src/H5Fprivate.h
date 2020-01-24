@@ -93,7 +93,7 @@ typedef struct H5F_t H5F_t;
    for (_i = 0; _i < sizeof(int64_t); _i++, _n >>= 8)                  \
       *_p++ = (uint8_t)(_n & 0xff);                          \
    for (/*void*/; _i < 8; _i++)                              \
-      *_p++ = (n) < 0 ? 0xff : 0;                          \
+      *_p++ = (uint8_t)((n) < 0 ? 0xff : 0);                          \
    (p) = (uint8_t*)(p)+8;                              \
 }
 

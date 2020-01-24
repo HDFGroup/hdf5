@@ -29,6 +29,7 @@
 # Creation Date: 2009/04/09
 
 unsigned, UNSIGNED;
+int8_t, SIGNED;
 int, SIGNED;
 int64_t, SIGNED;
 uint8_t, UNSIGNED;
