@@ -35,12 +35,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Cpkg.h"		/* Cache				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* Files				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5private.h"		/* Generic Functions			    */
+#include "H5Cpkg.h"		/* Cache				    */
+#include "H5Eprivate.h"		/* Error handling		  	    */
+#include "H5Fpkg.h"		/* Files				    */
+#include "H5Iprivate.h"		/* IDs			  		    */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 
 /****************/
@@ -132,11 +133,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__verify_cork_tag_test(hid_t fid, haddr_t tag, hbool_t status)
+H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status)
 {
     H5F_t * f;                  /* File Pointer */
     H5C_t * cache;              /* Cache Pointer */
     H5C_tag_iter_vct_ctx_t ctx; /* Context for iterator callback */
+    haddr_t tag;                /* Tagged address */
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Function enter macro */
@@ -145,6 +147,11 @@ H5C__verify_cork_tag_test(hid_t fid, haddr_t tag, hbool_t status)
     /* Get file pointer */
     if(NULL == (f = (H5F_t *)H5VL_object_verify(fid, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* Convert token to address */
+    tag = HADDR_UNDEF;
+    if(H5VL_native_token_to_addr(f, H5I_FILE, tag_token, &tag) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get address for token")
 
     /* Get cache pointer */
     cache = f->shared->cache;

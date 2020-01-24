@@ -376,35 +376,37 @@
 ##############################################################################
 
   macro (ADD_H5_TEST resultfile resultcode)
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> ${ARGN})
-      set_tests_properties (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      if (${resultcode})
-        set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-      if (last_test)
-        set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif ()
-    else ()
-      add_test (
-          NAME H5DIFF-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_ext}>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.txt"
-              -D "TEST_APPEND=EXIT CODE:"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-      )
-      if (last_test)
-        set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+    if (HDF5_TEST_SERIAL)
+      # If using memchecker add tests without using scripts
+      if (HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> ${ARGN})
+        set_tests_properties (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+       if (${resultcode})
+          set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+        endif ()
+        if (last_test)
+          set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+        endif ()
+      else ()
+        add_test (
+            NAME H5DIFF-${resultfile}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_ext}>"
+                -D "TEST_ARGS:STRING=${ARGN}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${resultfile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}.txt"
+                -D "TEST_APPEND=EXIT CODE:"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+        if (last_test)
+          set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+        endif ()
       endif ()
     endif ()
-    if (H5_HAVE_PARALLEL)
+    if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
       ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
     endif ()
   endmacro ()
@@ -1547,7 +1549,7 @@ ADD_H5_TEST (h5diff_v3 0 -c ${FILEV1} ${FILEV2})
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND HDF5_TEST_SERIAL)
   ADD_H5_UD_TEST (h5diff_plugin_test 0 h5diff_ud -v tudfilter.h5 tudfilter2.h5)
   ADD_H5_UD_TEST (h5diff_plugin_fail 2 h5diff_udfail -v tudfilter.h5 tudfilter2.h5)
 endif ()

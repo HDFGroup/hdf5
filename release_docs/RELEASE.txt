@@ -48,6 +48,20 @@ New Features
 
     Configuration:
     -------------
+    - Added new options to CMake for control of testing
+
+      Added CMake options (default ON);
+          HDF5_TEST_SERIAL AND/OR HDF5_TEST_PARALLEL
+          combined with:
+            HDF5_TEST_TOOLS
+            HDF5_TEST_EXAMPLES
+            HDF5_TEST_SWMR
+            HDF5_TEST_FORTRAN
+            HDF5_TEST_CPP
+            HDF5_TEST_JAVA
+
+      (ADB - 2020/01/15, HDFFV-11001)
+
     - Added Clang sanitizers to CMake for analyzer support
 
       Added CMake code and files to execute the Clang sanitizers.
@@ -368,6 +382,14 @@ New Features
 
     Java Library:
     ----------------
+    - Tests fail for non-English locale.
+
+      In the JUnit tests with a non-English locale, only the part before
+      the decimal comma is replaced by XXXX and this leads to a comparison
+      error. Changed the regex for the Time substitution.
+
+      (ADB - 2020/01/09, HDFFV-10995)
+
     - Fix a failure in JUnit-TestH5P on 32-bit architectures
 
       (JTH - 2019/04/30)

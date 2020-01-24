@@ -46,7 +46,7 @@
 
 /* For region compatibility support */
 struct H5Tref_dsetreg {
-    H5VL_token_t token; /* Object token */
+    H5O_token_t token;  /* Object token */
     H5S_t *space;       /* Dataspace */
 };
 
@@ -578,7 +578,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
             {
                 size_t token_size = H5F_SIZEOF_ADDR(src_f);
 
-                if(H5R__create_object((const H5VL_token_t *)src_buf, token_size, dst_ref) < 0)
+                if(H5R__create_object((const H5O_token_t *)src_buf, token_size, dst_ref) < 0)
                     HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create object reference")
             }
             break;
@@ -622,8 +622,9 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
         if((file_id = H5F_get_file_id(src_file, H5I_FILE, FALSE)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-        /* Attach loc ID to reference and hold reference to it */
-        if(H5R__set_loc_id(dst_ref, file_id, TRUE) < 0)
+        /* Attach loc ID to reference and hold reference to it, this is a
+         * user exposed reference so set app_ref to TRUE. */
+        if(H5R__set_loc_id(dst_ref, file_id, TRUE, TRUE) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "unable to attach location id to reference")
     } /* end if */
 
@@ -783,7 +784,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t src_size,
+H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_NDEBUG_UNUSED src_size,
     H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, size_t dst_size)
 {
     const uint8_t *p = (const uint8_t *)src_buf;
@@ -1023,7 +1024,7 @@ H5T__ref_obj_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t src_
 
     /* Get object address */
     if(H5R__decode_token_obj_compat((const unsigned char *)src_buf, &src_size,
-            (H5VL_token_t *)dst_buf, H5F_SIZEOF_ADDR(src_f)) < 0)
+            (H5O_token_t *)dst_buf, H5F_SIZEOF_ADDR(src_f)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object address")
 
 done:
@@ -1100,7 +1101,11 @@ H5T__ref_dsetreg_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file,
 {
     size_t ret_value = sizeof(struct H5Tref_dsetreg);
 
+#ifndef NDEBUG
     FUNC_ENTER_STATIC
+#else
+    FUNC_ENTER_STATIC_NOERR
+#endif
 
     HDassert(src_buf);
 
@@ -1124,7 +1129,9 @@ H5T__ref_dsetreg_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file,
     }
 #endif /* NDEBUG */
 
+#ifndef NDEBUG
 done:
+#endif
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T__ref_dsetreg_disk_getsize() */
 

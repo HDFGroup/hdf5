@@ -27,7 +27,6 @@ const char *FILENAME[3]={ "bigio_test.h5",
 #define DATASET2 "DSET2"
 #define DATASET3 "DSET3"
 #define DATASET4 "DSET4"
-#define DATASET5 "DSET5"
 #define DXFER_COLLECTIVE_IO 0x1  /* Collective IO*/
 #define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
 #define DXFER_BIGCOUNT (1 < 29)
@@ -248,7 +247,7 @@ ccslab_set(int mpi_rank,
     stride[1] =  1;
     count[0]  =  space_dim1;
     count[1]  =  space_dim2;
-    start[0]  =  mpi_rank*count[0];
+    start[0]  =  (hsize_t)mpi_rank*count[0];
     start[1]  =  0;
 
     break;
@@ -257,11 +256,11 @@ ccslab_set(int mpi_rank,
     /* Each process takes several disjoint blocks. */
     block[0]  =  1;
     block[1]  =  1;
-        stride[0] =  3;
-        stride[1] =  3;
-        count[0]  =  space_dim1/(stride[0]*block[0]);
-        count[1]  =  (space_dim2)/(stride[1]*block[1]);
-    start[0]  =  space_dim1*mpi_rank;
+    stride[0] =  3;
+    stride[1] =  3;
+    count[0]  =  space_dim1/(stride[0]*block[0]);
+    count[1]  =  (space_dim2)/(stride[1]*block[1]);
+    start[0]  =  space_dim1*(hsize_t)mpi_rank;
     start[1]  =  0;
 
     break;
@@ -275,7 +274,7 @@ ccslab_set(int mpi_rank,
     stride[1] =  1;
     count[0]  =  ((mpi_rank >= MAX(1,(mpi_size-2)))?0:space_dim1);
     count[1]  =  space_dim2;
-    start[0]  =  mpi_rank*count[0];
+    start[0]  =  (hsize_t)mpi_rank*count[0];
     start[1]  =  0;
 
     break;
@@ -286,14 +285,14 @@ ccslab_set(int mpi_rank,
          half of the domain. */
 
         block[0]  = 1;
-    count[0]  = 2;
-        stride[0] = space_dim1*mpi_size/4+1;
+        count[0]  = 2;
+        stride[0] = (hsize_t)(space_dim1*(hsize_t)mpi_size/4+1);
         block[1]  = space_dim2;
         count[1]  = 1;
         start[1]  = 0;
         stride[1] = 1;
-    if((mpi_rank *3)<(mpi_size*2)) start[0]  = mpi_rank;
-    else start[0] = 1 + space_dim1*mpi_size/2 + (mpi_rank-2*mpi_size/3);
+    if((mpi_rank *3)<(mpi_size*2)) start[0]  = (hsize_t)mpi_rank;
+    else start[0] = 1 + space_dim1*(hsize_t)mpi_size/2 + (hsize_t)(mpi_rank-2*mpi_size/3);
         break;
 
     case BYROW_SELECTINCHUNK:
@@ -301,7 +300,7 @@ ccslab_set(int mpi_rank,
 
         block[0] = 1;
         count[0] = 1;
-    start[0] = mpi_rank*space_dim1;
+    start[0] = (hsize_t)mpi_rank*space_dim1;
         stride[0]= 1;
     block[1] = space_dim2;
     count[1] = 1;
@@ -312,7 +311,7 @@ ccslab_set(int mpi_rank,
 
     default:
     /* Unknown mode.  Set it to cover the whole dataset. */
-    block[0]  = space_dim1*mpi_size;
+    block[0]  = space_dim1*(hsize_t)mpi_size;
     block[1]  = space_dim2;
     stride[0] = block[0];
     stride[1] = block[1];
@@ -520,7 +519,7 @@ dataset_big_write(void)
         HDprintf("\nTesting Dataset1 write by ROW\n");
     /* Create a large dataset */
     dims[0] = bigcount;
-    dims[1] = mpi_size;
+    dims[1] = (hsize_t)mpi_size;
 
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
@@ -528,13 +527,13 @@ dataset_big_write(void)
     VRFY((dataset >= 0), "H5Dcreate2 succeeded");
     H5Sclose(sid);
 
-    block[0] = dims[0]/mpi_size;
+    block[0] = dims[0]/(hsize_t)mpi_size;
     block[1] = dims[1];
     stride[0] = block[0];
     stride[1] = block[1];
     count[0] = 1;
     count[1] = 1;
-    start[0] = mpi_rank*block[0];
+    start[0] = (hsize_t)mpi_rank*block[0];
     start[1] = 0;
 
     /* create a file dataspace independently */
@@ -583,7 +582,7 @@ dataset_big_write(void)
         HDprintf("\nTesting Dataset2 write by COL\n");
     /* Create a large dataset */
     dims[0] = bigcount;
-    dims[1] = mpi_size;
+    dims[1] = (hsize_t)mpi_size;
 
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
@@ -592,13 +591,13 @@ dataset_big_write(void)
     H5Sclose(sid);
 
     block[0] = dims[0];
-    block[1] = dims[1]/mpi_size;
+    block[1] = dims[1]/(hsize_t)mpi_size;
     stride[0] = block[0];
     stride[1] = block[1];
     count[0] = 1;
     count[1] = 1;
     start[0] = 0;
-    start[1] = mpi_rank*block[1];
+    start[1] = (hsize_t)mpi_rank*block[1];
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset);
@@ -709,7 +708,7 @@ dataset_big_write(void)
         HDprintf("\nTesting Dataset4 write point selection\n");
     /* Create a large dataset */
     dims[0] = bigcount;
-    dims[1] = mpi_size * 4;
+    dims[1] = (hsize_t)(mpi_size * 4);
 
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
@@ -724,7 +723,7 @@ dataset_big_write(void)
     count[0] = 1;
     count[1] = 1;
     start[0] = 0;
-    start[1] = dims[1]/mpi_size * mpi_rank;
+    start[1] = dims[1]/(hsize_t)mpi_size * (hsize_t)mpi_rank;
 
     num_points = bigcount;
 
@@ -837,16 +836,16 @@ dataset_big_read(void)
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
     dims[0] = bigcount;
-    dims[1] = mpi_size;
+    dims[1] = (hsize_t)mpi_size;
     /* Each process takes a slabs of cols. */
     block[0] = dims[0];
-    block[1] = dims[1]/mpi_size;
+    block[1] = dims[1]/(hsize_t)mpi_size;
     stride[0] = block[0];
     stride[1] = block[1];
     count[0] = 1;
     count[1] = 1;
     start[0] = 0;
-    start[1] = mpi_rank*block[1];
+    start[1] = (hsize_t)mpi_rank*block[1];
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset);
@@ -899,15 +898,15 @@ dataset_big_read(void)
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
     dims[0] = bigcount;
-    dims[1] = mpi_size;
+    dims[1] = (hsize_t)mpi_size;
     /* Each process takes a slabs of rows. */
-    block[0] = dims[0]/mpi_size;
+    block[0] = dims[0]/(hsize_t)mpi_size;
     block[1] = dims[1];
     stride[0] = block[0];
     stride[1] = block[1];
     count[0] = 1;
     count[1] = 1;
-    start[0] = mpi_rank*block[0];
+    start[0] = (hsize_t)mpi_rank*block[0];
     start[1] = 0;
 
     /* create a file dataspace independently */
@@ -1023,7 +1022,7 @@ dataset_big_read(void)
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
     dims[0] = bigcount;
-    dims[1] = mpi_size * 4;
+    dims[1] = (hsize_t)(mpi_size * 4);
 
     block[0] = dims[0]/2;
     block[1] = 2;
@@ -1032,7 +1031,7 @@ dataset_big_read(void)
     count[0] = 1;
     count[1] = 1;
     start[0] = 0;
-    start[1] = dims[1]/mpi_size * mpi_rank;
+    start[1] = dims[1]/(hsize_t)mpi_size * (hsize_t)mpi_rank;
 
     fill_datasets(start, block, wdata);
     MESG("data_array initialized");
@@ -1462,7 +1461,7 @@ coll_chunktest(const char* filename,
   VRFY((status >= 0),"");
 
   /* setup dimensionality object */
-  dims[0] = space_dim1*mpi_size;
+  dims[0] = space_dim1*(hsize_t)mpi_size;
   dims[1] = space_dim2;
 
   /* allocate memory for data buffer */
@@ -1500,7 +1499,7 @@ coll_chunktest(const char* filename,
   VRFY((crp_plist >= 0),"");
 
   /* Set up chunk information.  */
-  chunk_dims[0] = dims[0]/chunk_factor;
+  chunk_dims[0] = dims[0]/(hsize_t)chunk_factor;
 
   /* to decrease the testing time, maintain bigger chunk size */
   (chunk_factor == 1) ? (chunk_dims[1] = space_dim2) : (chunk_dims[1] = space_dim2/2);

@@ -140,7 +140,7 @@ static void table_attr_mark_exist(unsigned *exist, char *name, table_attrs_t *ta
 static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t ** table_out,  diff_opt_t *opts)
 {
     table_attrs_t *table_lp = NULL;
-    H5O_info_t     oinfo1, oinfo2;    /* Object info */
+    H5O_info2_t    oinfo1, oinfo2;    /* Object info */
     hid_t          attr1_id = H5I_INVALID_HID;     /* attr ID */
     hid_t          attr2_id = H5I_INVALID_HID;     /* attr ID */
     size_t         curr1 = 0;
@@ -153,16 +153,16 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
     herr_t         ret_value = SUCCEED;
 
 
-    H5TOOLS_DEBUG("build_match_list_attrs start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
 
-    if(H5Oget_info2(loc1_id, &oinfo1, H5O_INFO_NUM_ATTRS) < 0) {
+    if(H5Oget_info3(loc1_id, &oinfo1, H5O_INFO_NUM_ATTRS) < 0) {
         H5TOOLS_GOTO_ERROR(FAIL, "H5Oget_info first object failed");
     }
-    H5TOOLS_DEBUG("H5Oget_info2 loc1id=%d", oinfo1.num_attrs);
-    if(H5Oget_info2(loc2_id, &oinfo2, H5O_INFO_NUM_ATTRS) < 0) {
+    H5TOOLS_DEBUG("H5Oget_info3 loc1id=%d", oinfo1.num_attrs);
+    if(H5Oget_info3(loc2_id, &oinfo2, H5O_INFO_NUM_ATTRS) < 0) {
         H5TOOLS_GOTO_ERROR(FAIL, "H5Oget_info second object failed");
     }
-    H5TOOLS_DEBUG("H5Oget_info2 loc2id=%d", oinfo2.num_attrs);
+    H5TOOLS_DEBUG("H5Oget_info3 loc2id=%d", oinfo2.num_attrs);
 
     table_attrs_init(&table_lp);
     if (table_lp == NULL)
@@ -218,9 +218,9 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
         /* close for next turn */
         H5Aclose(attr1_id);
-        attr1_id = -1;
+        attr1_id = H5I_INVALID_HID;
         H5Aclose(attr2_id);
-        attr2_id = -1;
+        attr2_id = H5I_INVALID_HID;
     } /* end while */
 
     /* list1 did not end */
@@ -244,7 +244,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
         /* close for next turn */
         H5Aclose(attr1_id);
-        attr1_id = -1;
+        attr1_id = H5I_INVALID_HID;
     }
 
     /* list2 did not end */
@@ -267,7 +267,7 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
 
         /* close for next turn */
         H5Aclose(attr2_id);
-        attr2_id = -1;
+        attr2_id = H5I_INVALID_HID;
     }
 
     /*------------------------------------------------------
@@ -299,9 +299,8 @@ done:
         H5Aclose(attr2_id);
     } H5E_END_TRY;
 
-    H5TOOLS_DEBUG("build_match_list_attrs end - errstat:%d", opts->err_stat);
+    H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
 
-    H5TOOLS_ENDDEBUG("exit");
     return ret_value;
 }
 
@@ -336,12 +335,11 @@ hsize_t diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const 
     hsize_t    dims2[H5S_MAX_RANK];    /* dimensions of dataset */
     char       np1[512];
     char       np2[512];
-    unsigned   u;                 /* Local index variable */
     hsize_t    nfound = 0;
     int        j;
     diff_err_t ret_value = opts->err_stat;
 
-    H5TOOLS_DEBUG("diff_attr_data start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
 
     /* get the datatypes  */
     if((ftype1_id = H5Aget_type(attr1_id)) < 0)
@@ -518,9 +516,8 @@ done:
         H5Sclose(space2_id);
     } H5E_END_TRY;
 
-    H5TOOLS_DEBUG("diff_attr_data end - errstat:%d", opts->err_stat);
+    H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
 
-    H5TOOLS_ENDDEBUG("exit");
     return nfound;
 }
 
@@ -549,7 +546,7 @@ hsize_t diff_attr(hid_t loc1_id, hid_t loc2_id, const char *path1, const char *p
     hsize_t        nfound_total = 0;
     diff_err_t     ret_value = opts->err_stat;
 
-    H5TOOLS_DEBUG("diff_attr start - errstat:%d", opts->err_stat);
+    H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
 
     if(build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, opts) < 0) {
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "build_match_list_attrs failed");
@@ -601,8 +598,7 @@ done:
         H5Aclose(attr2_id);
     } H5E_END_TRY;
 
-    H5TOOLS_DEBUG("diff_attr end - errstat:%d", opts->err_stat);
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
     return nfound_total;
 }
 

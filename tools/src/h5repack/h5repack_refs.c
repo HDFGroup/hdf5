@@ -42,15 +42,15 @@ int do_copy_refobjs(hid_t fidin,
                     trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
-    hid_t     grp_in = -1;            /* read group ID */
-    hid_t     grp_out = -1;           /* write group ID */
-    hid_t     dset_in = -1;           /* read dataset ID */
-    hid_t     dset_out = -1;          /* write dataset ID */
-    hid_t     type_in = -1;           /* named type ID */
-    hid_t     dcpl_id = -1;           /* dataset creation property list ID */
-    hid_t     space_id = -1;          /* space ID */
-    hid_t     ftype_id = -1;          /* file data type ID */
-    hid_t     mtype_id = -1;          /* memory data type ID */
+    hid_t     grp_in = H5I_INVALID_HID;            /* read group ID */
+    hid_t     grp_out = H5I_INVALID_HID;           /* write group ID */
+    hid_t     dset_in = H5I_INVALID_HID;           /* read dataset ID */
+    hid_t     dset_out = H5I_INVALID_HID;          /* write dataset ID */
+    hid_t     type_in = H5I_INVALID_HID;           /* named type ID */
+    hid_t     dcpl_id = H5I_INVALID_HID;           /* dataset creation property list ID */
+    hid_t     space_id = H5I_INVALID_HID;          /* space ID */
+    hid_t     ftype_id = H5I_INVALID_HID;          /* file data type ID */
+    hid_t     mtype_id = H5I_INVALID_HID;          /* memory data type ID */
     size_t    msize;                  /* memory size of memory type */
     hsize_t   nelmts;                 /* number of elements in dataset */
     int       rank;                   /* rank of dataset */
@@ -145,7 +145,7 @@ int do_copy_refobjs(hid_t fidin,
                      *-------------------------------------------------------------------------
                      */
                     if(H5Tequal(mtype_id, H5T_STD_REF_OBJ)) {
-                        hid_t            refobj_id = -1;
+                        hid_t            refobj_id = H5I_INVALID_HID;
                         hobj_ref_t       *refbuf = NULL; /* buffer for object references */
                         hobj_ref_t       *buf = NULL;
                         const char*      refname;
@@ -221,7 +221,7 @@ int do_copy_refobjs(hid_t fidin,
                      *-------------------------------------------------------------------------
                      */
                     else if(H5Tequal(mtype_id, H5T_STD_REF_DSETREG)) {
-                        hid_t            refobj_id = -1;
+                        hid_t            refobj_id = H5I_INVALID_HID;
                         hdset_reg_ref_t  *refbuf = NULL; /* input buffer for region references */
                         hdset_reg_ref_t  *buf = NULL;    /* output buffer */
                         const char*      refname;
@@ -260,7 +260,7 @@ int do_copy_refobjs(hid_t fidin,
                                  * in the second traversal of the file
                                  */
                                 if((refname = MapIdToName(refobj_id, travt)) != NULL) {
-                                    hid_t region_id = -1;    /* region id of the referenced dataset */
+                                    hid_t region_id = H5I_INVALID_HID;    /* region id of the referenced dataset */
 
                                     if((region_id = H5Rget_region(dset_in, H5R_DATASET_REGION, &buf[u])) < 0)
                                         H5TOOLS_GOTO_ERROR((-1), "H5Rget_region failed");
@@ -430,16 +430,16 @@ static int copy_refs_attr(hid_t loc_in,
                           trav_table_t *travt,
                           hid_t fidout)         /* for saving references */
 {
-    hid_t       attr_id = -1;      /* attr ID */
-    hid_t       attr_out = -1;     /* attr ID */
-    hid_t       space_id = -1;     /* space ID */
-    hid_t       ftype_id = -1;     /* file data type ID */
-    hid_t       mtype_id = -1;     /* memory data type ID */
+    hid_t       attr_id = H5I_INVALID_HID;      /* attr ID */
+    hid_t       attr_out = H5I_INVALID_HID;     /* attr ID */
+    hid_t       space_id = H5I_INVALID_HID;     /* space ID */
+    hid_t       ftype_id = H5I_INVALID_HID;     /* file data type ID */
+    hid_t       mtype_id = H5I_INVALID_HID;     /* memory data type ID */
     size_t      msize;             /* memory size of type */
     hsize_t     nelmts;            /* number of elements in dataset */
     hsize_t     dims[H5S_MAX_RANK];/* dimensions of dataset */
     char        name[255];
-    H5O_info_t  oinfo;             /* Object info */
+    H5O_info2_t oinfo;             /* Object info */
     unsigned    u, i, j;
     int         rank;
     H5T_class_t type_class = -1;
@@ -454,7 +454,7 @@ static int copy_refs_attr(hid_t loc_in,
     int         ref_comp_field_n = 0;
     int         ret_value = 0;
 
-    if(H5Oget_info2(loc_in, &oinfo, H5O_INFO_NUM_ATTRS) < 0)
+    if(H5Oget_info3(loc_in, &oinfo, H5O_INFO_NUM_ATTRS) < 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Oget_info failed");
 
     for(u = 0; u < (unsigned)oinfo.num_attrs; u++) {
@@ -796,16 +796,19 @@ MapIdToName(hid_t refobj_id, trav_table_t *travt)
         if(travt->objs[u].type == (h5trav_type_t)H5O_TYPE_DATASET ||
                 travt->objs[u].type == (h5trav_type_t)H5O_TYPE_GROUP ||
                 travt->objs[u].type == (h5trav_type_t)H5O_TYPE_NAMED_DATATYPE) {
-            H5O_info_t   ref_oinfo;     /* Stat for the refobj id */
+            H5O_info2_t ref_oinfo;     /* Stat for the refobj id */
+            int         token_cmp;
 
             /* obtain information to identify the referenced object uniquely */
-            if(H5Oget_info2(refobj_id, &ref_oinfo, H5O_INFO_BASIC) < 0)
+            if(H5Oget_info3(refobj_id, &ref_oinfo, H5O_INFO_BASIC) < 0)
                 goto out;
 
-            if(ref_oinfo.addr == travt->objs[u].objno) {
+            if(H5Otoken_cmp(refobj_id, &ref_oinfo.token, &travt->objs[u].obj_token, &token_cmp) < 0)
+                goto out;
+            if(!token_cmp) {
                 ret = travt->objs[u].name;
                 goto out;
-            } /* end if */
+            }
         }  /* end if */
     } /* u */
 
@@ -823,8 +826,8 @@ static herr_t update_ref_value(hid_t obj_id, H5R_type_t ref_type, void *ref_in,
         hid_t fid_out, void *ref_out, trav_table_t *travt)
 {
     const char *ref_obj_name;
-    hid_t       space_id = -1;
-    hid_t       ref_obj_id = -1;
+    hid_t       space_id = H5I_INVALID_HID;
+    hid_t       ref_obj_id = H5I_INVALID_HID;
     herr_t      ret_value = SUCCEED;
 
     ref_obj_id = H5Rdereference2(obj_id, H5P_DEFAULT, ref_type, ref_in);

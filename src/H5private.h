@@ -305,15 +305,21 @@
  */
 #ifdef __cplusplus
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED       /*void*/
-#   define H5_ATTR_NORETURN     /*void*/
-#   define H5_ATTR_CONST        /*void*/
-#   define H5_ATTR_PURE         /*void*/
-#   define H5_ATTR_FALLTHROUGH  /*void*/
+#   define H5_ATTR_UNUSED         /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
+#   define H5_ATTR_NORETURN       /*void*/
+#   define H5_ATTR_CONST          /*void*/
+#   define H5_ATTR_PURE           /*void*/
+#   define H5_ATTR_FALLTHROUGH    /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED       __attribute__((unused))
+#ifndef NDEBUG
+#define H5_ATTR_NDEBUG_UNUSED     /*void*/
+#else /* NDEBUG */
+#define H5_ATTR_NDEBUG_UNUSED     H5_ATTR_UNUSED
+#endif /* NDEBUG */
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
@@ -324,11 +330,12 @@
 #endif
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED       /*void*/
-#   define H5_ATTR_NORETURN     /*void*/
-#   define H5_ATTR_CONST        /*void*/
-#   define H5_ATTR_PURE         /*void*/
-#   define H5_ATTR_FALLTHROUGH  /*void*/
+#   define H5_ATTR_UNUSED         /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
+#   define H5_ATTR_NORETURN       /*void*/
+#   define H5_ATTR_CONST          /*void*/
+#   define H5_ATTR_PURE           /*void*/
+#   define H5_ATTR_FALLTHROUGH    /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -525,28 +532,6 @@
  * Used in the VOL code.
  */
 #define H5_REQUEST_NULL                 NULL
-
-/*
- * A macro to portably decrement enumerated types.
- */
-#ifndef H5_DEC_ENUM
-#  define H5_DEC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)-1))
-#endif
-
-/* Double constant wrapper
- *
- * Quiets gcc warnings from -Wunsuffixed-float-constants.
- *
- * This is a really annoying warning since the standard specifies that
- * constants of type double do NOT get a suffix so there's no way
- * to specify a constant of type double. To quiet gcc, we specify floating
- * point constants as type long double and cast to double.
- *
- * Note that this macro only needs to be used where using a double
- * is important. For most code, suffixing constants with F will quiet the
- * compiler and not produce erroneous code.
- */
-#define H5_DOUBLE(S) ((double) S ## L)
 
 /*
  * Methods to compare the equality of floating-point values:

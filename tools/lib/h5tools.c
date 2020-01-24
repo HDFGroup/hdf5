@@ -22,13 +22,19 @@
 #include "h5tools_utils.h"
 #include "H5private.h"
 
+#ifdef H5_TOOLS_DEBUG
+/* global debug variables */
+int       H5tools_INDENT_g = 0;
+#endif
+
+
 /* global variables */
 hid_t       H5tools_ERR_STACK_g = 0;
-hid_t       H5tools_ERR_CLS_g = -1;
-hid_t       H5E_tools_g = -1;
-hid_t       H5E_tools_min_id_g = -1;
-hid_t       H5E_tools_min_info_id_g = -1;
-hid_t       H5E_tools_min_dbg_id_g = -1;
+hid_t       H5tools_ERR_CLS_g = H5I_INVALID_HID;
+hid_t       H5E_tools_g = H5I_INVALID_HID;
+hid_t       H5E_tools_min_id_g = H5I_INVALID_HID;
+hid_t       H5E_tools_min_info_id_g = H5I_INVALID_HID;
+hid_t       H5E_tools_min_dbg_id_g = H5I_INVALID_HID;
 int         compound_data;
 FILE       *rawattrstream = NULL;      /* should initialize to stdout but gcc moans about it */
 FILE       *rawdatastream = NULL;      /* should initialize to stdout but gcc moans about it */
@@ -430,7 +436,7 @@ h5tools_set_error_file(const char *fname, int is_bin)
 static hid_t
 h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 {
-    hid_t  new_fapl = -1; /* Copy of file access property list passed in, or new property list */
+    hid_t  new_fapl = H5I_INVALID_HID; /* Copy of file access property list passed in, or new property list */
     herr_t ret_value = SUCCEED;
 
     /* Make a copy of the FAPL, for the file open call to use, eventually */
@@ -504,7 +510,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 done:
     if((new_fapl != H5P_DEFAULT) && (ret_value < 0)) {
         H5Pclose(new_fapl);
-        new_fapl = -1;
+        new_fapl = H5I_INVALID_HID;
     }
 
     return(new_fapl);
@@ -741,7 +747,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     if (!ctx->need_prefix)
         return;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     HDmemset(&prefix, 0, sizeof(h5tools_str_t));
     HDmemset(&str, 0, sizeof(h5tools_str_t));
@@ -809,7 +815,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     h5tools_str_close(&prefix);
     h5tools_str_close(&str);
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 }
 
 /*-------------------------------------------------------------------------
@@ -934,7 +940,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
     if (stream == NULL)
         return dimension_break;
 
-    H5TOOLS_DEBUG("enter need_prefix=%d", ctx->need_prefix);
+    H5TOOLS_START_DEBUG(" need_prefix=%d", ctx->need_prefix);
     H5TOOLS_DEBUG("elmt_counter=%ld - local_elmt_counter=%ld", elmt_counter, local_elmt_counter);
 
     s = h5tools_str_fmt(buffer, (size_t)0, "%s");
@@ -1061,7 +1067,7 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
 
     ctx->prev_multiline = multiline;
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 
     return dimension_break;
 }
@@ -1102,7 +1108,7 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
     int      secnum;         /* section sequence number */
     int      multiline;      /* datum was multiline */
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
     H5TOOLS_DEBUG("elmt_counter=%ld - local_elmt_counter=%ld", elmt_counter, local_elmt_counter);
 
     s = h5tools_str_fmt(buffer, (size_t)0, "%s");
@@ -1212,7 +1218,7 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
 
     ctx->prev_multiline = multiline;
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 
     return dimension_break;
 }
@@ -1231,7 +1237,7 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
     int i;
     unsigned j;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     if(ctx->ndims > 0) {
         ctx->acc[ctx->ndims - 1] = 1;
@@ -1243,7 +1249,7 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
             ctx->pos[j] = 0;
     }
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 }
 
 /*-------------------------------------------------------------------------
@@ -1265,7 +1271,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
     hbool_t        past_catch = FALSE;
     int            ret_value = 0;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
     if((size = H5Tget_size(tid)) == 0)
         H5TOOLS_THROW((-1), "H5Tget_size failed");
 
@@ -1343,7 +1349,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
 
                     mem = ((unsigned char*)_mem) + block_index * size;
                     for (j = 0; j < nmembs; j++) {
-                        hid_t    memb = -1;
+                        hid_t    memb = H5I_INVALID_HID;
                         size_t   offset;
 
                         offset = H5Tget_member_offset(tid, j);
@@ -1363,7 +1369,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             {
                 int     k, ndims;
                 hsize_t dims[H5S_MAX_RANK], temp_nelmts, nelmts;
-                hid_t   memb = -1;
+                hid_t   memb = H5I_INVALID_HID;
 
                 H5TOOLS_DEBUG("H5T_ARRAY");
                 /* get the array's base datatype for each element */
@@ -1397,7 +1403,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
         case H5T_VLEN:
             {
                 hsize_t      nelmts;
-                hid_t        memb = -1;
+                hid_t        memb = H5I_INVALID_HID;
 
                 H5TOOLS_DEBUG("H5T_VLEN");
                /* get the VL sequences's base datatype for each element */
@@ -1480,10 +1486,8 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             break;
     } /* end switch */
 
-done:
-
 CATCH
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
@@ -1509,13 +1513,14 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
     hsize_t      total_size[H5S_MAX_RANK];
     unsigned     jndx;
     size_t       type_size;
-    hid_t        mem_space = -1;
+    hid_t        mem_space = H5I_INVALID_HID;
     void        *region_buf = NULL;
     hbool_t      past_catch = FALSE;
     hsize_t      blkndx;
-    hid_t        sid1 = -1;
+    hid_t        sid1 = H5I_INVALID_HID;
     int          ret_value = -1;
 
+    H5TOOLS_START_DEBUG("");
     /* Get the dataspace of the dataset */
     if((sid1 = H5Dget_space(region_id)) < 0)
         H5TOOLS_THROW((-1), "H5Dget_space failed");
@@ -1582,7 +1587,7 @@ CATCH
     if(H5Sclose(sid1) < 0)
         H5TOOLS_ERROR((-1), "H5Sclose failed");
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
@@ -1606,11 +1611,12 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     hsize_t     *ptdata = NULL;
     int          sndims;
     unsigned     ndims;
-    hid_t        dtype = -1;
-    hid_t        type_id = -1;
+    hid_t        dtype = H5I_INVALID_HID;
+    hid_t        type_id = H5I_INVALID_HID;
     hbool_t      past_catch = FALSE;
     hbool_t      ret_value = TRUE;
 
+    H5TOOLS_START_DEBUG("");
     if((snblocks = H5Sget_select_hyper_nblocks(region_space)) <= 0)
         H5TOOLS_THROW(FALSE, "H5Sget_select_hyper_nblocks failed");
     nblocks = (hsize_t)snblocks;
@@ -1646,7 +1652,7 @@ done:
     H5_LEAVE(TRUE)
 
 CATCH
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
@@ -1674,10 +1680,11 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
 {
     hsize_t *dims1 = NULL;
     size_t   type_size;
-    hid_t    mem_space = -1;
+    hid_t    mem_space = H5I_INVALID_HID;
     void    *region_buf = NULL;
     int      ret_value = 0;
 
+    H5TOOLS_START_DEBUG("");
     if((type_size = H5Tget_size(type_id)) == 0)
         H5TOOLS_GOTO_ERROR((-1), "H5Tget_size failed");
 
@@ -1707,7 +1714,7 @@ done:
     if(H5Sclose(mem_space) < 0)
         H5TOOLS_ERROR((-1), "H5Sclose failed");
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
@@ -1729,11 +1736,12 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
     hsize_t  npoints;
     int      sndims;
     unsigned ndims;
-    hid_t    dtype = -1;
-    hid_t    type_id = -1;
+    hid_t    dtype = H5I_INVALID_HID;
+    hid_t    type_id = H5I_INVALID_HID;
     hbool_t  past_catch = FALSE;
     hbool_t  ret_value = TRUE;
 
+    H5TOOLS_START_DEBUG("");
     if((snpoints = H5Sget_select_elem_npoints(region_space)) <= 0)
         H5TOOLS_THROW(FALSE, "H5Sget_select_elem_npoints failed");
     npoints = (hsize_t)snpoints;
@@ -1760,7 +1768,7 @@ done:
 
     H5_LEAVE(ret_value)
 CATCH
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 
@@ -1806,21 +1814,27 @@ hbool_t
 h5tools_is_obj_same(hid_t loc_id1, const char *name1,
                     hid_t loc_id2, const char *name2)
 {
-    H5O_info_t oinfo1,  oinfo2;
+    H5O_info2_t oinfo1, oinfo2;
     hbool_t ret_val = FALSE;
 
     if ( name1 && HDstrcmp(name1, "."))
-      H5Oget_info_by_name2(loc_id1, name1, &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT);
+      H5Oget_info_by_name3(loc_id1, name1, &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT);
     else
-      H5Oget_info2(loc_id1, &oinfo1, H5O_INFO_BASIC);
+      H5Oget_info3(loc_id1, &oinfo1, H5O_INFO_BASIC);
 
     if ( name2 && HDstrcmp(name2, "."))
-      H5Oget_info_by_name2(loc_id2, name2, &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT);
+      H5Oget_info_by_name3(loc_id2, name2, &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT);
     else
-      H5Oget_info2(loc_id2, &oinfo2, H5O_INFO_BASIC);
+      H5Oget_info3(loc_id2, &oinfo2, H5O_INFO_BASIC);
 
-    if (oinfo1.fileno == oinfo2.fileno && oinfo1.addr==oinfo2.addr)
-      ret_val = TRUE;
+    if (oinfo1.fileno == oinfo2.fileno) {
+        int token_cmp_val;
+
+        H5Otoken_cmp(loc_id1, &oinfo1.token, &oinfo2.token, &token_cmp_val);
+
+        if(!token_cmp_val)
+            ret_val = TRUE;
+    }
 
     return ret_val;
 }

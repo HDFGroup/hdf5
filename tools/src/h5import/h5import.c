@@ -72,7 +72,7 @@ uint64_t    swap_uint64(uint64_t val);
 
 int main(int argc, char *argv[])
 {
-    struct Options  opt;
+    struct Options *opt;
     int             outfile_named = FALSE;
     int             token;
     int             i;
@@ -99,8 +99,8 @@ int main(int argc, char *argv[])
     (void) HDsetvbuf(stderr, (char *) NULL, _IOLBF, 0);
     (void) HDsetvbuf(stdout, (char *) NULL, _IOLBF, 0);
 
-    /* Initialize the file structure to 0 */
-    HDmemset(&opt, 0, sizeof(struct Options));
+    if((opt = (struct Options *)HDcalloc(1, sizeof(struct Options))) == NULL)
+        goto err;
 
     if (argv[1] && (HDstrcmp("-V", argv[1]) == 0)) {
         print_version(PROGRAMNAME);
@@ -130,12 +130,12 @@ int main(int argc, char *argv[])
         switch (state) {
 
         case 1: /* counting input files */
-            if (opt.fcount < 29) {
-                (void) HDstrcpy(opt.infiles[opt.fcount].datafile, argv[i]);
-                in = &(opt.infiles[opt.fcount].in);
-                opt.infiles[opt.fcount].config = 0;
-                setDefaultValues(in, opt.fcount);
-                opt.fcount++;
+            if (opt->fcount < 29) {
+                (void) HDstrcpy(opt->infiles[opt->fcount].datafile, argv[i]);
+                in = &(opt->infiles[opt->fcount].in);
+                opt->infiles[opt->fcount].config = 0;
+                setDefaultValues(in, opt->fcount);
+                opt->fcount++;
             }
             else {
                 (void) HDfprintf(stderr, err9, argv[i]);
@@ -148,8 +148,8 @@ int main(int argc, char *argv[])
             break;
 
         case 3: /* get configfile name */
-            (void) HDstrcpy(opt.infiles[opt.fcount-1].configfile, argv[i]);
-            opt.infiles[opt.fcount - 1].config = 1;
+            (void) HDstrcpy(opt->infiles[opt->fcount-1].configfile, argv[i]);
+            opt->infiles[opt->fcount - 1].config = 1;
             break;
 
         case 4: /* -o found; look for outfile */
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
                 (void) HDfprintf(stderr, err10, argv[i]);
                 goto err;
             }
-            (void) HDstrcpy(opt.outfile, argv[i]);
+            (void) HDstrcpy(opt->outfile, argv[i]);
             outfile_named = TRUE;
             break;
 
@@ -232,11 +232,11 @@ int main(int argc, char *argv[])
         goto err;
     }
 
-    if (process(&opt) == -1)
+    if (process(opt) == -1)
         goto err;
 
-    for (i = 0; i < opt.fcount; i++) {
-        in = &(opt.infiles[i].in);
+    for (i = 0; i < opt->fcount; i++) {
+        in = &(opt->infiles[i].in);
         if (in->sizeOfDimension)
             HDfree(in->sizeOfDimension);
         if (in->sizeOfChunk)
@@ -248,12 +248,13 @@ int main(int argc, char *argv[])
         if (in->data)
             HDfree(in->data);
     }
+    HDfree(opt);
 
-    return (EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 err:
     (void) HDfprintf(stderr, "%s", err4);
-    for (i = 0; i < opt.fcount; i++) {
-        in = &(opt.infiles[i].in);
+    for (i = 0; i < opt->fcount; i++) {
+        in = &(opt->infiles[i].in);
         if (in->sizeOfDimension)
             HDfree(in->sizeOfDimension);
         if (in->sizeOfChunk)
@@ -265,7 +266,9 @@ err:
         if (in->data)
             HDfree(in->data);
     }
-    return (EXIT_FAILURE);
+    HDfree(opt);
+
+    return EXIT_FAILURE;
 }
 
 static int gtoken(char *s)
@@ -1086,12 +1089,12 @@ out:
  */
 static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
 {
-    hid_t   group_id    = -1;
-    hid_t   dset_id     = -1;
-    hid_t   space_id    = -1;
-    hid_t   mspace_id   = -1;
-    hid_t   type_id     = -1;
-    hid_t   handle      = -1;
+    hid_t   group_id    = H5I_INVALID_HID;
+    hid_t   dset_id     = H5I_INVALID_HID;
+    hid_t   space_id    = H5I_INVALID_HID;
+    hid_t   mspace_id   = H5I_INVALID_HID;
+    hid_t   type_id     = H5I_INVALID_HID;
+    hid_t   handle      = H5I_INVALID_HID;
     char   *str1        = NULL;
     char   *str2        = NULL;
     char   *str3        = NULL;
@@ -4725,15 +4728,15 @@ uint32_t swap_uint32(uint32_t val)
 
 int32_t swap_int32(int32_t val)
 {
-    val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
+    val = (int32_t)(((uint32_t)(val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF));
     return (val << 16) | ((val >> 16) & 0xFFFF);
 }
 
 int64_t swap_int64(int64_t val)
 {
-    val = ((val << 8) & 0xFF00FF00FF00FF00ULL) | ((val >> 8) & 0x00FF00FF00FF00FFULL);
-    val = ((val << 16) & 0xFFFF0000FFFF0000ULL) | ((val >> 16) & 0x0000FFFF0000FFFFULL);
-    return (val << 32) | ((val >> 32) & 0xFFFFFFFFULL);
+    val = (int64_t)(((uint64_t)(val << 8) & 0xFF00FF00FF00FF00ULL) | ((uint64_t)(val >> 8) & 0x00FF00FF00FF00FFULL));
+    val = (int64_t)(((uint64_t)(val << 16) & 0xFFFF0000FFFF0000ULL) | ((uint64_t)(val >> 16) & 0x0000FFFF0000FFFFULL));
+    return (int64_t)((uint64_t)(val << 32) | ((uint64_t)(val >> 32) & 0xFFFFFFFFULL));
 }
 
 uint64_t swap_uint64(uint64_t val)

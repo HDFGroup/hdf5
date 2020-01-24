@@ -879,7 +879,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
     if (nmembs > 0) {
         char        **name;         /* member names */
         unsigned char *value;       /* value array */
-        hid_t       native = -1;    /* native integer data type */
+        hid_t       native = H5I_INVALID_HID;    /* native integer data type */
         size_t      dst_size;       /* destination value type size */
         unsigned    i;              /* miscellaneous counters */
 
@@ -1260,10 +1260,17 @@ print_type(h5tools_str_t *buffer, hid_t type, int ind)
 
     /* Shared? If so then print the type's OID */
     if (H5Tcommitted(type)) {
-        H5O_info_t  oi;
+        H5O_info2_t oi;
 
-        if (H5Oget_info2(type, &oi, H5O_INFO_BASIC) >= 0)
-            h5tools_str_append(buffer,"shared-%lu:"H5_PRINTF_HADDR_FMT" ", oi.fileno, oi.addr);
+        if (H5Oget_info3(type, &oi, H5O_INFO_BASIC) >= 0) {
+            char *type_string = NULL;
+
+            H5Otoken_to_str(type, &oi.token, &type_string);
+
+            h5tools_str_append(buffer,"shared-%lu:%s", oi.fileno, type_string);
+
+            H5free_memory(type_string);
+        } /* end if */
         else
             h5tools_str_append(buffer,"shared ");
     } /* end if */
@@ -1300,7 +1307,7 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
     h5tools_str_t       buffer;            /* string into which to render   */
     h5tools_context_t   datactx;           /* print context  */
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     datactx = *ctx;  /* print context  */
     /* Assume entire data space to be printed */
@@ -1506,7 +1513,7 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
 
     PRINTVALSTREAM(stream, "\n");
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 }
 
 /*-------------------------------------------------------------------------
@@ -1535,7 +1542,7 @@ dump_dataset_values(hid_t dset)
     h5tool_format_t    *info = &ls_dataformat;
     H5R_ref_t          *ref_buf = NULL;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     f_type = H5Dget_type(dset);
     space = H5Dget_space(dset);
@@ -1649,7 +1656,7 @@ dump_dataset_values(hid_t dset)
             init_acc_pos(&ctx, total_size);
         ctx.need_prefix = TRUE;
 
-        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), ndims))) {
+        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             H5TOOLS_DEBUG("H5Dread reference read");
             if(H5Dread(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf) < 0) {
                 HDfree(ref_buf);
@@ -1675,7 +1682,7 @@ done:
 
     PRINTVALSTREAM(rawoutstream, "\n");
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 }
 
 
@@ -1688,7 +1695,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-dump_attribute_values(hid_t attr, const char *attr_name)
+dump_attribute_values(hid_t attr)
 {
     hid_t               f_type = H5I_INVALID_HID;
     hid_t               space = H5I_INVALID_HID;
@@ -1705,7 +1712,7 @@ dump_attribute_values(hid_t attr, const char *attr_name)
     h5tool_format_t    *info = &ls_dataformat;
     H5R_ref_t          *ref_buf = NULL;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     f_type = H5Aget_type(attr);
     space = H5Aget_space(attr);
@@ -1820,7 +1827,7 @@ dump_attribute_values(hid_t attr, const char *attr_name)
             init_acc_pos(&ctx, total_size);
         ctx.need_prefix = TRUE;
 
-        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), ndims))) {
+        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             H5TOOLS_DEBUG("H5Aread reference read");
             if(H5Aread(attr, H5T_STD_REF, ref_buf) < 0) {
                 HDfree(ref_buf);
@@ -1852,7 +1859,7 @@ done:
 
     PRINTVALSTREAM(rawoutstream, "\n");
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 }
 
 /*-------------------------------------------------------------------------
@@ -1881,7 +1888,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1948,14 +1955,14 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
         h5tools_str_close(&buffer);
 
         if (data_g)
-            dump_attribute_values(attr, attr_name);
+            dump_attribute_values(attr);
         H5Aclose(attr);
     }
     else {
         H5TOOLS_DEBUG("Attribute open failed");
         h5tools_str_close(&buffer);
     }
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 
     return 0;
 }
@@ -2284,7 +2291,7 @@ datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void *_iter)
+list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, void *_iter)
 {
     H5O_type_t          obj_type = oinfo->type;          /* Type of the object */
     iter_t             *iter = (iter_t*)_iter;
@@ -2293,7 +2300,7 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
 
-    H5TOOLS_DEBUG("enter");
+    H5TOOLS_START_DEBUG("");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2355,6 +2362,7 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
         if (verbose_g > 0) {
             size_t buf_size = 0;
             char* comment = NULL;
+            char* obj_addr_str = NULL;
             ssize_t cmt_bufsize = -1;
 
             /* Display attributes */
@@ -2363,10 +2371,14 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
                 H5Aiterate2(obj, H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL);
 
             /* Object location & reference count */
+            H5Otoken_to_str(obj, &oinfo->token, &obj_addr_str);
+
             h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", oinfo->fileno, oinfo->addr);
+            h5tools_str_append(&buffer, "    %-10s %lu:%s\n", "Location:", oinfo->fileno, obj_addr_str);
             h5tools_str_append(&buffer, "    %-10s %u\n", "Links:", (unsigned)oinfo->rc);
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+
+            H5free_memory(obj_addr_str);
 
             /* Modification time */
             if (oinfo->mtime > 0) {
@@ -2426,7 +2438,7 @@ done:
     }
     h5tools_str_close(&buffer);
 
-    H5TOOLS_ENDDEBUG("exit");
+    H5TOOLS_ENDDEBUG("");
 
     return 0;
 } /* end list_obj() */
@@ -2442,7 +2454,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
+list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
 {
     char   *buf = NULL;
     iter_t *iter = (iter_t*)_iter;
@@ -2628,7 +2640,7 @@ static herr_t
 visit_obj(hid_t file, const char *oname, iter_t *iter)
 {
     int                 retval = 0;
-    H5O_info_t          oi;              /* Information for object */
+    H5O_info2_t         oi;              /* Information for object */
     hsize_t             curr_pos = 0;    /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
@@ -2640,7 +2652,7 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
     h5tools_str_reset(&buffer);
 
     /* Retrieve info for object to list */
-    if (H5Oget_info_by_name2(file, oname, &oi, H5O_INFO_BASIC|H5O_INFO_TIME, H5P_DEFAULT) < 0) {
+    if (H5Oget_info_by_name3(file, oname, &oi, H5O_INFO_BASIC|H5O_INFO_TIME, H5P_DEFAULT) < 0) {
         if (iter->symlink_target) {
             h5tools_str_append(&buffer, "{**NOT FOUND**}\n");
             iter->symlink_target = FALSE;
@@ -2821,7 +2833,7 @@ leave(int ret)
 int
 main(int argc, const char *argv[])
 {
-    hid_t       file = H5I_INVALID_HID;
+    hid_t       file_id = H5I_INVALID_HID;
     char       *fname = NULL, *oname = NULL, *x;
     const char *s = NULL;
     char       *rest;
@@ -3279,24 +3291,24 @@ main(int argc, const char *argv[])
      * doesn't exist). */
     show_file_name_g = (argc-argno > 1); /*show file names if more than one*/
     while(argno < argc) {
-        H5L_info_t li;
+        H5L_info2_t li;
         iter_t iter;
         symlink_trav_t symlink_list;
         size_t u;
 
         fname = HDstrdup(argv[argno++]);
         oname = NULL;
-        file = -1;
+        file_id = H5I_INVALID_HID;
 
         while (fname && *fname) {
             if (fapl_id != H5P_DEFAULT) {
-                file = H5Fopen(fname, H5F_ACC_RDONLY, fapl_id);
+                file_id = H5Fopen(fname, H5F_ACC_RDONLY, fapl_id);
             }
             else {
-                file = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, preferred_driver, drivername, sizeof drivername);
+                file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, preferred_driver, drivername, sizeof drivername);
             }
 
-            if (file >= 0) {
+            if (file_id >= 0) {
                 if (verbose_g)
                     PRINTSTREAM(rawoutstream, "Opened \"%s\" with %s driver.\n", fname, drivername);
                 break; /*success*/
@@ -3312,7 +3324,7 @@ main(int argc, const char *argv[])
             *oname = '\0';
         } /* end while */
 
-        if (file < 0) {
+        if (file_id < 0) {
             HDfprintf(rawerrorstream, "%s: unable to open file\n", argv[argno-1]);
             HDfree(fname);
             err_exit = 1;
@@ -3347,8 +3359,8 @@ main(int argc, const char *argv[])
 
         /* Remember the file information for later */
         iter.fname = fname;
-        iter.fid = file;
-        iter.gid = -1;
+        iter.fid = file_id;
+        iter.gid = H5I_INVALID_HID;
         iter.symlink_target = FALSE;
         iter.symlink_list = &symlink_list;
         iter.symlink_list->dangle_link = FALSE;
@@ -3360,7 +3372,7 @@ main(int argc, const char *argv[])
         /* Check for root group as object name */
         if (HDstrcmp(oname, root_name)) {
             /* Check the type of link given */
-            if (H5Lget_info(file, oname, &li, H5P_DEFAULT) < 0) {
+            if (H5Lget_info2(file_id, oname, &li, H5P_DEFAULT) < 0) {
                 hsize_t             curr_pos = 0;        /* total data element position   */
                 h5tools_str_t       buffer;          /* string into which to render   */
                 h5tools_context_t   ctx;             /* print context  */
@@ -3381,18 +3393,18 @@ main(int argc, const char *argv[])
 
         /* Open the object and display it's information */
         if (li.type == H5L_TYPE_HARD) {
-            if (visit_obj(file, oname, &iter) < 0) {
+            if (visit_obj(file_id, oname, &iter) < 0) {
                 H5Eset_auto2(H5E_DEFAULT, func, edata);
                 leave(EXIT_FAILURE);
             }
         } /* end if(li.type == H5L_TYPE_HARD) */
         else {
             /* Specified name is not for object -- list that link */
-            /* Use file ID for root group ID */
-            iter.gid = file;
+            /* Use file_id ID for root group ID */
+            iter.gid = file_id;
             list_lnk(oname, &li, &iter);
         }
-        H5Fclose(file);
+        H5Fclose(file_id);
         HDfree(fname);
         if (x)
             HDfree(oname);

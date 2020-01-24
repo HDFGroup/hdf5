@@ -54,22 +54,13 @@
 
 /* sizes of various items. these sizes won't change during program execution */
 /* The following three must have the same type */
-#define ELMT_SIZE           (sizeof(unsigned char))     /* we're doing bytes */
-#define ELMT_MPI_TYPE       MPI_BYTE
 #define ELMT_H5_TYPE        H5T_NATIVE_UCHAR
 
 #define GOTOERROR(errcode)  { ret_code = errcode; goto done; }
-#define GOTODONE        { goto done; }
 #define ERRMSG(mesg) {                                                  \
     HDfprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                       \
     HDfprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
         mesg, (int)__LINE__, __FILE__);                             \
-}
-
-#define MSG(mesg) {                                     \
-    HDfprintf(stderr, "Proc %d: ", pio_mpi_rank_g);       \
-    HDfprintf(stderr, "(%s) at line %4d in %s\n",         \
-        mesg, (int)__LINE__, __FILE__);             \
 }
 
 /* verify: if val is false (0), print mesg. */
@@ -260,7 +251,7 @@ do_pio(parameters param)
     }
 
     if (!param.dim2d){
-        if(((snbytes/pio_mpi_nprocs_g)%buf_size)!=0) {
+        if(((size_t)(snbytes/pio_mpi_nprocs_g)%buf_size)!=0) {
         HDfprintf(stderr,
             "Dataset size/process (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
             "trasfer buffer size (%zu)\n",
@@ -269,7 +260,7 @@ do_pio(parameters param)
         }
     }
     else {
-        if((snbytes%buf_size)!=0) {
+        if(((size_t)snbytes%buf_size)!=0) {
         HDfprintf(stderr,
             "Dataset side size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
             "trasfer buffer size (%zu)\n",
@@ -557,16 +548,16 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     /* HDF5 variables */
     herr_t      hrc;                    /*HDF5 return code              */
     hsize_t     h5dims[2];              /*dataset dim sizes             */
-    hid_t       h5dset_space_id = -1;   /*dataset space ID              */
-    hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
-    hid_t       h5ds_id = -1;           /*dataset handle                */
+    hid_t       h5dset_space_id = H5I_INVALID_HID;   /*dataset space ID              */
+    hid_t       h5mem_space_id = H5I_INVALID_HID;    /*memory dataspace ID           */
+    hid_t       h5ds_id = H5I_INVALID_HID;           /*dataset handle                */
     hsize_t     h5block[2];     /*dataspace selection           */
     hsize_t     h5stride[2];
     hsize_t     h5count[2];
     hsize_t     h5start[2];
     hssize_t    h5offset[2];            /* Selection offset within dataspace */
-    hid_t       h5dcpl = -1;            /* Dataset creation property list */
-    hid_t       h5dxpl = -1;            /* Dataset transfer property list */
+    hid_t       h5dcpl = H5I_INVALID_HID;            /* Dataset creation property list */
+    hid_t       h5dxpl = H5I_INVALID_HID;            /* Dataset transfer property list */
 
     /* Get the parameters from the parameter block */
     blk_size=parms->blk_size;
@@ -589,7 +580,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         } /* end if */
         /* Interleaved Pattern: */
         else {
-            bytes_begin[0] = (off_t)(blk_size*pio_mpi_rank_g);
+            bytes_begin[0] = (off_t)(blk_size*(size_t)pio_mpi_rank_g);
         } /* end else */
 
         /* Prepare buffer for verifying data */
@@ -613,9 +604,9 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             bytes_begin[0] = 0;
 
             if(!parms->h5_use_chunks || parms->io_type==PHDF5)
-                bytes_begin[1] = (off_t)(blk_size*pio_mpi_rank_g);
+                bytes_begin[1] = (off_t)(blk_size*(size_t)pio_mpi_rank_g);
             else
-                bytes_begin[1] = (off_t)(blk_size*blk_size*pio_mpi_rank_g);
+                bytes_begin[1] = (off_t)(blk_size*blk_size*(size_t)pio_mpi_rank_g);
         } /* end else */
 
         /* Prepare buffer for verifying data */
@@ -693,7 +684,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build contiguous file's derived type */
-            mrc = MPI_Type_vector((int)blk_size, (int)1, (int)(snbytes/buf_size),
+            mrc = MPI_Type_vector((int)blk_size, (int)1, (int)((size_t)snbytes/buf_size),
                 mpi_partial_buffer_cont, &mpi_cont_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -711,7 +702,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build interleaved file's derived type */
-            mrc = MPI_Type_vector((int)buf_size, (int)1, (int)(snbytes/blk_size),
+            mrc = MPI_Type_vector((int)buf_size, (int)1, (int)((size_t)snbytes/blk_size),
                 mpi_partial_buffer_inter, &mpi_inter_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -738,7 +729,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build chunk interleaved file's derived type */
-            mrc = MPI_Type_vector((int)(buf_size/blk_size), (int)1, (int)(snbytes/blk_size),
+            mrc = MPI_Type_vector((int)(buf_size/blk_size), (int)1, (int)((size_t)snbytes/blk_size),
                 mpi_full_chunk, &mpi_chunk_inter_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -754,22 +745,22 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         if (!parms->dim2d){
             if(nbytes>0) {
                 /* define a contiguous dataset of nbytes native bytes */
-                h5dims[0] = nbytes;
+                h5dims[0] = (hsize_t)nbytes;
                 h5dset_space_id = H5Screate_simple(1, h5dims, NULL);
                 VRFY((h5dset_space_id >= 0), "H5Screate_simple");
 
                 /* Set up the file dset space id to select the pattern to access */
                 if (!parms->interleaved){
                 /* Contiguous pattern */
-                h5start[0] = bytes_begin[0];
+                h5start[0] = (hsize_t)bytes_begin[0];
                 h5stride[0] = h5block[0] = blk_size;
                 h5count[0] = buf_size/blk_size;
                 } /* end if */
                 else {
                 /* Interleaved access pattern */
                 /* Skip offset over blocks of other processes */
-                h5start[0] = bytes_begin[0];
-                h5stride[0] = blk_size*pio_mpi_nprocs_g;
+                h5start[0] = (hsize_t)bytes_begin[0];
+                h5stride[0] = blk_size*(size_t)pio_mpi_nprocs_g;
                 h5block[0] = blk_size;
                 h5count[0] = buf_size/blk_size;
                 } /* end else */
@@ -797,16 +788,16 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         else {
             if(nbytes>0) {
                 /* define a contiguous dataset of nbytes native bytes */
-                h5dims[0] = snbytes;
-                h5dims[1] = snbytes;
+                h5dims[0] = (hsize_t)snbytes;
+                h5dims[1] = (hsize_t)snbytes;
                 h5dset_space_id = H5Screate_simple(2, h5dims, NULL);
                 VRFY((h5dset_space_id >= 0), "H5Screate_simple");
 
                 /* Set up the file dset space id to select the pattern to access */
                 if (!parms->interleaved){
                 /* Contiguous pattern */
-                h5start[0] = bytes_begin[0];
-                h5start[1] = bytes_begin[1];
+                h5start[0] = (hsize_t)bytes_begin[0];
+                h5start[1] = (hsize_t)bytes_begin[1];
                 h5stride[0] = 1;
                 h5stride[1] = h5block[0] = h5block[1] = blk_size;
                 h5count[0] = 1;
@@ -815,10 +806,10 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 else {
                 /* Interleaved access pattern */
                 /* Skip offset over blocks of other processes */
-                h5start[0] = bytes_begin[0];
-                h5start[1] = bytes_begin[1];
+                h5start[0] = (hsize_t)bytes_begin[0];
+                h5start[1] = (hsize_t)bytes_begin[1];
                 h5stride[0] = blk_size;
-                h5stride[1] = blk_size*pio_mpi_nprocs_g;
+                h5stride[1] = blk_size*(size_t)pio_mpi_nprocs_g;
                 h5block[0] = h5block[1] = blk_size;
                 h5count[0] = buf_size/blk_size;
                 h5count[1] = 1;
@@ -982,7 +973,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     VRFY((rc != 0), "POSIXWRITE");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=buf_size;
+                    nbytes_xfer+=(ssize_t)buf_size;
                 } /* end if */
                 /* Interleaved access pattern */
                 else {
@@ -1011,7 +1002,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         buf_p+=blk_size;
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=blk_size;
+                        nbytes_xfer+=(ssize_t)blk_size;
 
                         /* Decrement number of bytes left this time */
                         nbytes_toxfer-=blk_size;
@@ -1025,8 +1016,8 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Contiguous access pattern */
                     if (!parms->interleaved) {
                         /* Compute file offset */
-                        file_offset=posix_file_offset+(off_t)(((nbytes_xfer/blk_size)
-                            /snbytes)*(blk_size*snbytes)+((nbytes_xfer/blk_size)%snbytes));
+                        file_offset=posix_file_offset+(off_t)((((size_t)nbytes_xfer/blk_size)
+                            /(size_t)snbytes)*(blk_size*(size_t)snbytes)+(((size_t)nbytes_xfer/blk_size)%(size_t)snbytes));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = buf_size;
@@ -1037,9 +1028,9 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Interleaved access pattern */
                     else {
                         /* Compute file offset */
-                        file_offset=posix_file_offset+(off_t)((((nbytes_xfer/buf_size)
-                            *pio_mpi_nprocs_g)/snbytes)*(buf_size*snbytes)
-                            +((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)%snbytes);
+                        file_offset=posix_file_offset+(off_t)(((((size_t)nbytes_xfer/buf_size)
+                            *(size_t)pio_mpi_nprocs_g)/(size_t)snbytes)*(buf_size*(size_t)snbytes)
+                            +(((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size;
@@ -1070,16 +1061,16 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         *snbytes/blk_size*(blk_size*blk_size))+((nbytes_xfer/(buf_size/blk_size))
                         *pio_mpi_nprocs_g)%(snbytes/blk_size*(blk_size*blk_size))); */
 
-                        file_offset=posix_file_offset+(off_t)(((nbytes_xfer/(buf_size/blk_size)
-                        *pio_mpi_nprocs_g)/(snbytes*blk_size))*(buf_size*snbytes)+((nbytes_xfer/(buf_size/blk_size))
-                        *pio_mpi_nprocs_g)%(snbytes*blk_size));
+                        file_offset=posix_file_offset+(off_t)((((size_t)nbytes_xfer/(buf_size/blk_size)
+                        *(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*blk_size))*(buf_size*(size_t)snbytes)+(((size_t)nbytes_xfer/(buf_size/blk_size))
+                        *(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*blk_size));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size * blk_size;
 
                         /* Global offset advance after each I/O operation */
                         /* file_offset_advance = (off_t)(snbytes/blk_size*(blk_size*blk_size)); */
-                        file_offset_advance = (off_t)(snbytes*blk_size);
+                        file_offset_advance = (off_t)snbytes*(off_t)blk_size;
                     } /* end else */
                 } /* end else */
 
@@ -1106,7 +1097,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     buf_p+=nbytes_xfer_advance;
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=nbytes_xfer_advance;
+                    nbytes_xfer+=(ssize_t)nbytes_xfer_advance;
 
                     /* Decrement number of bytes left this time */
                     nbytes_toxfer-=nbytes_xfer_advance;
@@ -1137,7 +1128,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(ssize_t)buf_size;
                     } /* end if */
                     /* Interleaved access pattern */
                     else {
@@ -1162,7 +1153,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                             buf_p+=blk_size;
 
                             /* Advance global offset in dataset */
-                            nbytes_xfer+=blk_size;
+                            nbytes_xfer+=(ssize_t)blk_size;
 
                             /* Decrement number of bytes left this time */
                             nbytes_toxfer-=blk_size;
@@ -1183,7 +1174,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(ssize_t)buf_size;
                     } /* end if */
                     /* Interleaved access pattern */
                     else {
@@ -1202,7 +1193,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(ssize_t)buf_size;
                     } /* end else */
                 } /* end else */
             } /* end if */
@@ -1213,8 +1204,8 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Contiguous access pattern */
                     if (!parms->interleaved) {
                         /* Compute offset in file */
-                        mpi_offset=mpi_file_offset+((nbytes_xfer/blk_size)/snbytes)*
-                            (blk_size*snbytes)+((nbytes_xfer/blk_size)%snbytes);
+                        mpi_offset=mpi_file_offset+(MPI_Offset)((((size_t)nbytes_xfer/blk_size)/(size_t)snbytes)*
+                            (blk_size*(size_t)snbytes))+(MPI_Offset)(((size_t)nbytes_xfer/blk_size)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = buf_size;
@@ -1228,8 +1219,8 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Interleaved access pattern */
                     else {
                         /* Compute offset in file */
-                        mpi_offset=mpi_file_offset+(((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)/snbytes)*
-                            (buf_size*snbytes)+((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)%snbytes;
+                        mpi_offset=mpi_file_offset+(MPI_Offset)(((((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)/(size_t)snbytes)*
+                            (buf_size*(size_t)snbytes))+(MPI_Offset)((((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size;
@@ -1266,16 +1257,16 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                             (buf_size/blk_size*snbytes/blk_size*(blk_size*blk_size))+
                             ((nbytes_xfer/(buf_size/blk_size))*pio_mpi_nprocs_g)%(snbytes
                             /blk_size*(blk_size*blk_size)); */
-                        mpi_offset=mpi_file_offset+((nbytes_xfer/(buf_size/blk_size)
-                            *pio_mpi_nprocs_g)/(snbytes*blk_size))*(buf_size*snbytes)
-                            +((nbytes_xfer/(buf_size/blk_size))*pio_mpi_nprocs_g)%(snbytes*blk_size);
+                        mpi_offset=mpi_file_offset+(MPI_Offset)((((size_t)nbytes_xfer/(buf_size/blk_size)
+                            *(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*blk_size))*(buf_size*(size_t)snbytes))
+                            +(MPI_Offset)((((size_t)nbytes_xfer/(buf_size/blk_size))*(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*blk_size));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size * blk_size;
 
                         /* Global offset advance after each I/O operation */
                         /* mpi_offset_advance = (MPI_Offset)(snbytes/blk_size*(blk_size*blk_size)); */
-                        mpi_offset_advance = (MPI_Offset)(snbytes*blk_size);
+                        mpi_offset_advance = (MPI_Offset)((size_t)snbytes*blk_size);
 
                         /* MPI type to be used for collective access */
                         mpi_collective_type = mpi_chunk_inter_type;
@@ -1301,7 +1292,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                         buf_p+=nbytes_xfer_advance;
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=nbytes_xfer_advance;
+                        nbytes_xfer+=(ssize_t)nbytes_xfer_advance;
 
                         /* Decrement number of bytes left this time */
                         nbytes_toxfer-=nbytes_xfer_advance;
@@ -1324,7 +1315,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                     VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=buf_size*blk_size;
+                    nbytes_xfer+=(off_t)buf_size*(off_t)blk_size;
                 } /* end else */
 
             } /* end else */
@@ -1353,22 +1344,22 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((hrc >= 0), "H5Dwrite");
 
             /* Increment number of bytes transferred */
-            nbytes_xfer += buf_size;
+            nbytes_xfer += (ssize_t)buf_size;
             } /* end if */
             /* 2D dataspace */
             else {
             /* Set up the file dset space id to move the selection to process */
             if (!parms->interleaved){
                 /* Contiguous pattern */
-                h5offset[0] = (nbytes_xfer/(snbytes*blk_size))*blk_size;
-                h5offset[1] = (nbytes_xfer%(snbytes*blk_size))/blk_size;
+                h5offset[0] = (hssize_t)(((size_t)nbytes_xfer/((size_t)snbytes*blk_size))*blk_size);
+                h5offset[1] = (hssize_t)(((size_t)nbytes_xfer%((size_t)snbytes*blk_size))/blk_size);
 
             } /* end if */
             else {
                 /* Interleaved access pattern */
                 /* Skip offset over blocks of other processes */
-                h5offset[0] = ((nbytes_xfer*pio_mpi_nprocs_g)/(snbytes*buf_size))*buf_size;
-                h5offset[1] = ((nbytes_xfer*pio_mpi_nprocs_g)%(snbytes*buf_size))/buf_size;
+                h5offset[0] = (hssize_t)((((size_t)nbytes_xfer*(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*buf_size))*buf_size);
+                h5offset[1] = (hssize_t)((((size_t)nbytes_xfer*(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*buf_size))/buf_size);
 
             } /* end else */
             hrc = H5Soffset_simple(h5dset_space_id, h5offset);
@@ -1380,7 +1371,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((hrc >= 0), "H5Dwrite");
 
             /* Increment number of bytes transferred */
-            nbytes_xfer += buf_size*blk_size;
+            nbytes_xfer += (off_t)buf_size*(off_t)blk_size;
 
             } /* end else */
 
@@ -1402,7 +1393,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         GOTOERROR(FAIL);
         }
 
-        h5ds_id = -1;
+        h5ds_id = H5I_INVALID_HID;
     } /* end if */
     } /* end for */
 
@@ -1458,7 +1449,7 @@ done:
         HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dset_space_id = -1;
+        h5dset_space_id = H5I_INVALID_HID;
     }
     }
 
@@ -1468,7 +1459,7 @@ done:
         HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5mem_space_id = -1;
+        h5mem_space_id = H5I_INVALID_HID;
     }
     }
 
@@ -1478,7 +1469,7 @@ done:
         HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dxpl = -1;
+        h5dxpl = H5I_INVALID_HID;
     }
     }
 
@@ -1537,15 +1528,15 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     /* HDF5 variables */
     herr_t      hrc;                    /*HDF5 return code              */
     hsize_t     h5dims[2];              /*dataset dim sizes             */
-    hid_t       h5dset_space_id = -1;   /*dataset space ID              */
-    hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
-    hid_t       h5ds_id = -1;           /*dataset handle                */
+    hid_t       h5dset_space_id = H5I_INVALID_HID;   /*dataset space ID              */
+    hid_t       h5mem_space_id = H5I_INVALID_HID;    /*memory dataspace ID           */
+    hid_t       h5ds_id = H5I_INVALID_HID;           /*dataset handle                */
     hsize_t h5block[2];     /*dataspace selection           */
     hsize_t h5stride[2];
     hsize_t h5count[2];
     hsize_t h5start[2];
     hssize_t    h5offset[2];            /* Selection offset within dataspace */
-    hid_t       h5dxpl = -1;            /* Dataset transfer property list */
+    hid_t       h5dxpl = H5I_INVALID_HID;            /* Dataset transfer property list */
 
     /* Get the parameters from the parameter block */
     blk_size=parms->blk_size;
@@ -1569,7 +1560,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         } /* end if */
         /* Interleaved Pattern: */
         else {
-            bytes_begin[0] = (off_t)(blk_size*pio_mpi_rank_g);
+            bytes_begin[0] = (off_t)blk_size*(off_t)pio_mpi_rank_g;
         } /* end else */
     }/* end if */
     /* 2D dataspace */
@@ -1591,9 +1582,9 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             bytes_begin[0] = 0;
 
             if (!parms->h5_use_chunks || parms->io_type==PHDF5)
-                bytes_begin[1] = (off_t)(blk_size*pio_mpi_rank_g);
+                bytes_begin[1] = (off_t)blk_size*(off_t)pio_mpi_rank_g;
             else
-                bytes_begin[1] = (off_t)(blk_size*blk_size*pio_mpi_rank_g);
+                bytes_begin[1] = (off_t)blk_size*(off_t)blk_size*(off_t)pio_mpi_rank_g;
         } /* end else */
     } /* end else */
 
@@ -1665,7 +1656,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build contiguous file's derived type */
-            mrc = MPI_Type_vector((int)blk_size, (int)1, (int)(snbytes/buf_size),
+            mrc = MPI_Type_vector((int)blk_size, (int)1, (int)((size_t)snbytes/buf_size),
                 mpi_partial_buffer_cont, &mpi_cont_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -1683,7 +1674,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build interleaved file's derived type */
-            mrc = MPI_Type_vector((int)buf_size, (int)1, (int)(snbytes/blk_size),
+            mrc = MPI_Type_vector((int)buf_size, (int)1, (int)((size_t)snbytes/blk_size),
                 mpi_partial_buffer_inter, &mpi_inter_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -1710,7 +1701,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_COMMIT");
 
             /* Build chunk interleaved file's derived type */
-            mrc = MPI_Type_vector((int)(buf_size/blk_size), (int)1, (int)(snbytes/blk_size),
+            mrc = MPI_Type_vector((int)(buf_size/blk_size), (int)1, (int)((size_t)snbytes/blk_size),
                 mpi_full_chunk, &mpi_chunk_inter_type);
             VRFY((mrc==MPI_SUCCESS), "MPIO_TYPE_CREATE");
 
@@ -1725,22 +1716,22 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         if (!parms->dim2d){
         if(nbytes>0) {
             /* define a contiguous dataset of nbytes native bytes */
-            h5dims[0] = nbytes;
+            h5dims[0] = (hsize_t)nbytes;
             h5dset_space_id = H5Screate_simple(1, h5dims, NULL);
             VRFY((h5dset_space_id >= 0), "H5Screate_simple");
 
             /* Set up the file dset space id to select the pattern to access */
             if (!parms->interleaved){
             /* Contiguous pattern */
-            h5start[0] = bytes_begin[0];
+            h5start[0] = (hsize_t)bytes_begin[0];
             h5stride[0] = h5block[0] = blk_size;
             h5count[0] = buf_size/blk_size;
             } /* end if */
             else {
             /* Interleaved access pattern */
             /* Skip offset over blocks of other processes */
-            h5start[0] = bytes_begin[0];
-            h5stride[0] = blk_size*pio_mpi_nprocs_g;
+            h5start[0] = (hsize_t)bytes_begin[0];
+            h5stride[0] = blk_size*(size_t)pio_mpi_nprocs_g;
             h5block[0] = blk_size;
             h5count[0] = buf_size/blk_size;
             } /* end else */
@@ -1768,16 +1759,16 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         else {
         if(nbytes>0) {
             /* define a contiguous dataset of nbytes native bytes */
-            h5dims[0] = snbytes;
-            h5dims[1] = snbytes;
+            h5dims[0] = (hsize_t)snbytes;
+            h5dims[1] = (hsize_t)snbytes;
             h5dset_space_id = H5Screate_simple(2, h5dims, NULL);
             VRFY((h5dset_space_id >= 0), "H5Screate_simple");
 
             /* Set up the file dset space id to select the pattern to access */
             if (!parms->interleaved){
             /* Contiguous pattern */
-            h5start[0] = bytes_begin[0];
-            h5start[1] = bytes_begin[1];
+            h5start[0] = (hsize_t)bytes_begin[0];
+            h5start[1] = (hsize_t)bytes_begin[1];
             h5stride[0] = 1;
             h5stride[1] = h5block[0] = h5block[1] = blk_size;
             h5count[0] = 1;
@@ -1786,10 +1777,10 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             else {
             /* Interleaved access pattern */
             /* Skip offset over blocks of other processes */
-            h5start[0] = bytes_begin[0];
-            h5start[1] = bytes_begin[1];
+            h5start[0] = (hsize_t)bytes_begin[0];
+            h5start[1] = (hsize_t)bytes_begin[1];
             h5stride[0] = blk_size;
-            h5stride[1] = blk_size*pio_mpi_nprocs_g;
+            h5stride[1] = blk_size*(size_t)pio_mpi_nprocs_g;
             h5block[0] = h5block[1] = blk_size;
             h5count[0] = buf_size/blk_size;
             h5count[1] = 1;
@@ -1913,7 +1904,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     VRFY((rc != 0), "POSIXREAD");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=buf_size;
+                    nbytes_xfer+=(off_t)buf_size;
                 } /* end if */
                 /* Interleaved access pattern */
                 else {
@@ -1942,7 +1933,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     buf_p+=blk_size;
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=blk_size;
+                    nbytes_xfer+=(off_t)blk_size;
 
                     /* Decrement number of bytes left this time */
                     nbytes_toxfer-=blk_size;
@@ -1956,8 +1947,8 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Contiguous access pattern */
                     if (!parms->interleaved) {
                         /* Compute file offset */
-                        file_offset=posix_file_offset+(off_t)(((nbytes_xfer/blk_size)
-                            /snbytes)*(blk_size*snbytes)+((nbytes_xfer/blk_size)%snbytes));
+                        file_offset=posix_file_offset+(off_t)((((size_t)nbytes_xfer/blk_size)
+                            /(size_t)snbytes)*(blk_size*(size_t)snbytes)+(((size_t)nbytes_xfer/blk_size)%(size_t)snbytes));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = buf_size;
@@ -1968,9 +1959,9 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Interleaved access pattern */
                     else {
                         /* Compute file offset */
-                        file_offset=posix_file_offset+(off_t)((((nbytes_xfer/buf_size)
-                            *pio_mpi_nprocs_g)/snbytes)*(buf_size*snbytes)
-                            +((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)%snbytes);
+                        file_offset=posix_file_offset+(off_t)(((((size_t)nbytes_xfer/buf_size)
+                            *(size_t)pio_mpi_nprocs_g)/(size_t)snbytes)*(buf_size*(size_t)snbytes)
+                            +(((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size;
@@ -2001,16 +1992,16 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                         *snbytes/blk_size*(blk_size*blk_size))+((nbytes_xfer/(buf_size/blk_size))
                         *pio_mpi_nprocs_g)%(snbytes/blk_size*(blk_size*blk_size))); */
 
-                        file_offset=posix_file_offset+(off_t)(((nbytes_xfer/(buf_size/blk_size)
-                        *pio_mpi_nprocs_g)/(snbytes*blk_size))*(buf_size*snbytes)+((nbytes_xfer/(buf_size/blk_size))
-                        *pio_mpi_nprocs_g)%(snbytes*blk_size));
+                        file_offset=posix_file_offset+(off_t)((((size_t)nbytes_xfer/(buf_size/blk_size)
+                        *(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*blk_size))*(buf_size*(size_t)snbytes)+(((size_t)nbytes_xfer/(buf_size/blk_size))
+                        *(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*blk_size));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size * blk_size;
 
                         /* Global offset advance after each I/O operation */
                         /* file_offset_advance = (off_t)(snbytes/blk_size*(blk_size*blk_size)); */
-                        file_offset_advance = (off_t)(snbytes*blk_size);
+                        file_offset_advance = (off_t)((size_t)snbytes*blk_size);
                     } /* end else */
                 } /* end else */
 
@@ -2037,7 +2028,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     buf_p+=nbytes_xfer_advance;
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=nbytes_xfer_advance;
+                    nbytes_xfer+=(off_t)nbytes_xfer_advance;
 
                     /* Decrement number of bytes left this time */
                     nbytes_toxfer-=nbytes_xfer_advance;
@@ -2067,7 +2058,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_READ");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(off_t)buf_size;
                     } /* end if */
                     /* Interleaved access pattern */
                     else {
@@ -2092,7 +2083,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                             buf_p+=blk_size;
 
                             /* Advance global offset in dataset */
-                            nbytes_xfer+=blk_size;
+                            nbytes_xfer+=(off_t)blk_size;
 
                             /* Decrement number of bytes left this time */
                             nbytes_toxfer-=blk_size;
@@ -2113,7 +2104,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_READ");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(off_t)buf_size;
                     } /* end if */
                     /* Interleaved access pattern */
                     else {
@@ -2132,7 +2123,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                         VRFY((mrc==MPI_SUCCESS), "MPIO_READ");
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=buf_size;
+                        nbytes_xfer+=(off_t)buf_size;
                     } /* end else */
                 } /* end else */
             } /* end if */
@@ -2143,8 +2134,8 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Contiguous access pattern */
                     if (!parms->interleaved) {
                         /* Compute offset in file */
-                        mpi_offset=mpi_file_offset+((nbytes_xfer/blk_size)/snbytes)*
-                            (blk_size*snbytes)+((nbytes_xfer/blk_size)%snbytes);
+                        mpi_offset=mpi_file_offset+(MPI_Offset)((((size_t)nbytes_xfer/blk_size)/(size_t)snbytes)*
+                            (blk_size*(size_t)snbytes))+(MPI_Offset)(((size_t)nbytes_xfer/blk_size)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = buf_size;
@@ -2158,8 +2149,8 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     /* Interleaved access pattern */
                     else {
                         /* Compute offset in file */
-                        mpi_offset=mpi_file_offset+(((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)/snbytes)*
-                            (buf_size*snbytes)+((nbytes_xfer/buf_size)*pio_mpi_nprocs_g)%snbytes;
+                        mpi_offset=mpi_file_offset+(MPI_Offset)(((((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)/(size_t)snbytes)*
+                            (buf_size*(size_t)snbytes))+(MPI_Offset)((((size_t)nbytes_xfer/buf_size)*(size_t)pio_mpi_nprocs_g)%(size_t)snbytes);
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size;
@@ -2196,16 +2187,16 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                             (buf_size/blk_size*snbytes/blk_size*(blk_size*blk_size))+
                             ((nbytes_xfer/(buf_size/blk_size))*pio_mpi_nprocs_g)%(snbytes
                             /blk_size*(blk_size*blk_size)); */
-                        mpi_offset=mpi_file_offset+((nbytes_xfer/(buf_size/blk_size)
-                            *pio_mpi_nprocs_g)/(snbytes*blk_size))*(buf_size*snbytes)
-                            +((nbytes_xfer/(buf_size/blk_size))*pio_mpi_nprocs_g)%(snbytes*blk_size);
+                        mpi_offset=mpi_file_offset+(MPI_Offset)((((size_t)nbytes_xfer/(buf_size/blk_size)
+                            *(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*blk_size))*(buf_size*(size_t)snbytes))
+                            +(MPI_Offset)((((size_t)nbytes_xfer/(buf_size/blk_size))*(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*blk_size));
 
                         /* Number of bytes to be transferred per I/O operation */
                         nbytes_xfer_advance = blk_size * blk_size;
 
                         /* Global offset advance after each I/O operation */
                         /* mpi_offset_advance = (MPI_Offset)(snbytes/blk_size*(blk_size*blk_size)); */
-                        mpi_offset_advance = (MPI_Offset)(snbytes*blk_size);
+                        mpi_offset_advance = (MPI_Offset)((size_t)snbytes*blk_size);
 
                         /* MPI type to be used for collective access */
                         mpi_collective_type = mpi_chunk_inter_type;
@@ -2231,7 +2222,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                         buf_p+=nbytes_xfer_advance;
 
                         /* Advance global offset in dataset */
-                        nbytes_xfer+=nbytes_xfer_advance;
+                        nbytes_xfer+=(off_t)nbytes_xfer_advance;
 
                         /* Decrement number of bytes left this time */
                         nbytes_toxfer-=nbytes_xfer_advance;
@@ -2254,7 +2245,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                     VRFY((mrc==MPI_SUCCESS), "MPIO_READ");
 
                     /* Advance global offset in dataset */
-                    nbytes_xfer+=buf_size*blk_size;
+                    nbytes_xfer+=(off_t)buf_size*(off_t)blk_size;
                 } /* end else */
 
             } /* end else */
@@ -2282,21 +2273,21 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((hrc >= 0), "H5Dread");
 
             /* Increment number of bytes transferred */
-            nbytes_xfer += buf_size;
+            nbytes_xfer += (off_t)buf_size;
             } /* end if */
             /* 2D dataspace */
             else {
             /* Set up the file dset space id to move the selection to process */
             if (!parms->interleaved){
                 /* Contiguous pattern */
-                h5offset[0] = (nbytes_xfer/(snbytes*blk_size))*blk_size;
-                h5offset[1] = (nbytes_xfer%(snbytes*blk_size))/blk_size;
+                h5offset[0] = (hssize_t)(((size_t)nbytes_xfer/((size_t)snbytes*blk_size))*blk_size);
+                h5offset[1] = (hssize_t)(((size_t)nbytes_xfer%((size_t)snbytes*blk_size))/blk_size);
             } /* end if */
             else {
                 /* Interleaved access pattern */
                 /* Skip offset over blocks of other processes */
-                h5offset[0] = ((nbytes_xfer*pio_mpi_nprocs_g)/(snbytes*buf_size))*buf_size;
-                h5offset[1] = ((nbytes_xfer*pio_mpi_nprocs_g)%(snbytes*buf_size))/buf_size;
+                h5offset[0] = (hssize_t)((((size_t)nbytes_xfer*(size_t)pio_mpi_nprocs_g)/((size_t)snbytes*buf_size))*buf_size);
+                h5offset[1] = (hssize_t)((((size_t)nbytes_xfer*(size_t)pio_mpi_nprocs_g)%((size_t)snbytes*buf_size))/buf_size);
 
             } /* end else */
             hrc = H5Soffset_simple(h5dset_space_id, h5offset);
@@ -2308,7 +2299,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             VRFY((hrc >= 0), "H5Dread");
 
             /* Increment number of bytes transferred */
-            nbytes_xfer += buf_size*blk_size;
+            nbytes_xfer += (off_t)buf_size*(off_t)blk_size;
 
             } /* end else */
             break;
@@ -2357,7 +2348,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         GOTOERROR(FAIL);
         }
 
-        h5ds_id = -1;
+        h5ds_id = H5I_INVALID_HID;
     } /* end if */
     } /* end for */
 
@@ -2413,7 +2404,7 @@ done:
         HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dset_space_id = -1;
+        h5dset_space_id = H5I_INVALID_HID;
     }
     }
 
@@ -2423,7 +2414,7 @@ done:
         HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5mem_space_id = -1;
+        h5mem_space_id = H5I_INVALID_HID;
     }
     }
 
@@ -2433,7 +2424,7 @@ done:
         HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dxpl = -1;
+        h5dxpl = H5I_INVALID_HID;
     }
     }
 
@@ -2451,7 +2442,7 @@ done:
 do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 {
     int ret_code = SUCCESS, mrc;
-    hid_t acc_tpl = -1;         /* file access templates */
+    hid_t acc_tpl = H5I_INVALID_HID;         /* file access templates */
 
     switch (param->io_type) {
         case POSIXIO:

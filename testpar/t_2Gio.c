@@ -312,61 +312,61 @@ slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[],
     switch (mode) {
     case BYROW:
         /* Each process takes a slabs of rows. */
-        block[0] = dim0 / mpi_size;
-        block[1] = dim1;
+        block[0] = (hsize_t)dim0 / (hsize_t)mpi_size;
+        block[1] = (hsize_t)dim1;
         stride[0] = block[0];
         stride[1] = block[1];
         count[0] = 1;
         count[1] = 1;
-        start[0] = mpi_rank * block[0];
+        start[0] = (hsize_t)mpi_rank * block[0];
         start[1] = 0;
         if (VERBOSE_MED)
             HDprintf("slab_set BYROW\n");
         break;
     case BYCOL:
         /* Each process takes a block of columns. */
-        block[0] = dim0;
-        block[1] = dim1 / mpi_size;
+        block[0] = (hsize_t)dim0;
+        block[1] = (hsize_t)dim1 / (hsize_t)mpi_size;
         stride[0] = block[0];
         stride[1] = block[1];
         count[0] = 1;
         count[1] = 1;
         start[0] = 0;
-        start[1] = mpi_rank * block[1];
+        start[1] = (hsize_t)mpi_rank * block[1];
         if (VERBOSE_MED)
             HDprintf("slab_set BYCOL\n");
         break;
     case ZROW:
         /* Similar to BYROW except process 0 gets 0 row */
-        block[0] = (mpi_rank ? dim0 / mpi_size : 0);
-        block[1] = dim1;
+        block[0] = (hsize_t)(mpi_rank ? dim0 / mpi_size : 0);
+        block[1] = (hsize_t)dim1;
         stride[0] = (mpi_rank ? block[0] : 1); /* avoid setting stride to 0 */
         stride[1] = block[1];
         count[0] = 1;
         count[1] = 1;
-        start[0] = (mpi_rank ? mpi_rank * block[0] : 0);
+        start[0] = (hsize_t)(mpi_rank ? (hsize_t)mpi_rank * block[0] : 0);
         start[1] = 0;
         if (VERBOSE_MED)
             HDprintf("slab_set ZROW\n");
         break;
     case ZCOL:
         /* Similar to BYCOL except process 0 gets 0 column */
-        block[0] = dim0;
-        block[1] = (mpi_rank ? dim1 / mpi_size : 0);
+        block[0] = (hsize_t)dim0;
+        block[1] = (hsize_t)(mpi_rank ? dim1 / mpi_size : 0);
         stride[0] = block[0];
         stride[1] = (mpi_rank ? block[1] : 1); /* avoid setting stride to 0 */
         count[0] = 1;
         count[1] = 1;
         start[0] = 0;
-        start[1] = (mpi_rank ? mpi_rank * block[1] : 0);
+        start[1] = (hsize_t)(mpi_rank ? (hsize_t)mpi_rank * block[1] : 0);
         if (VERBOSE_MED)
             HDprintf("slab_set ZCOL\n");
         break;
     default:
         /* Unknown mode.  Set it to cover the whole dataset. */
         HDprintf("unknown slab_set mode (%d)\n", mode);
-        block[0] = dim0;
-        block[1] = dim1;
+        block[0] = (hsize_t)dim0;
+        block[1] = (hsize_t)dim1;
         stride[0] = block[0];
         stride[1] = block[1];
         count[0] = 1;
@@ -552,7 +552,7 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
 #define H5FILE_NAME   "hugefile.h5"
 #define DATASETNAME 	"dataset"
 
-int MpioTest2G( MPI_Comm comm )
+static int MpioTest2G( MPI_Comm comm )
 {
     /*
      * HDF5 APIs definitions
@@ -634,7 +634,8 @@ int MpioTest2G( MPI_Comm comm )
     status = H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
     VRFY((status >= 0), "");
 
-    size_t slice_per_process = (shape[0] + mpi_size - 1) / mpi_size;
+    size_t slice_per_process; 
+    H5_CHECKED_ASSIGN(slice_per_process, size_t, (shape[0] + (hsize_t)mpi_size - 1) / (hsize_t)mpi_size, hsize_t);
     size_t data_size = slice_per_process * shape[1] * shape[2];
     size_t data_size_bytes = sizeof(int) * data_size;
     data = HDmalloc(data_size_bytes);
@@ -645,7 +646,7 @@ int MpioTest2G( MPI_Comm comm )
     }
 
     hsize_t h5_counts[3] = { slice_per_process, shape[1], shape[2] };
-    hsize_t h5_offsets[3] = { mpi_rank * slice_per_process, 0, 0};
+    hsize_t h5_offsets[3] = { (size_t)mpi_rank * slice_per_process, 0, 0};
     hid_t filedataspace = H5Screate_simple(3, shape, NULL);
     VRFY((filedataspace >= 0), "H5Screate_simple succeeded");
 
@@ -755,8 +756,8 @@ dataset_writeInd(void)
      * and the slabs local to the MPI process.
      * ------------------------------------------- */
     /* setup dimensionality object */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple (MAX_RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -876,9 +877,9 @@ dataset_readInd(void)
     MPI_Comm_rank(test_comm,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
-    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_origin1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* setup file access template */
@@ -1007,12 +1008,12 @@ dataset_writeAll(void)
     MPI_Comm_rank(test_comm,&mpi_rank);
 
     /* set up the coords array selection */
-    num_points = dim1;
-    coords = (hsize_t *)HDmalloc(dim1 * MAX_RANK * sizeof(hsize_t));
+    num_points = (size_t)dim1;
+    coords = (hsize_t *)HDmalloc((size_t)dim1 * (size_t)MAX_RANK * sizeof(hsize_t));
     VRFY((coords != NULL), "coords malloc succeeded");
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* -------------------
@@ -1036,8 +1037,8 @@ dataset_writeAll(void)
      * and create the dataset
      * ------------------------- */
     /* setup 2-D dimensionality object */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple (MAX_RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -1338,16 +1339,16 @@ dataset_writeAll(void)
 
 
     if(data_array1) free(data_array1);
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     block[0] = 1;
-    block[1] = dim1;
+    block[1] = (hsize_t)dim1;
     stride[0] = 1;
-    stride[1] = dim1;
+    stride[1] = (hsize_t)dim1;
     count[0] = 1;
     count[1] = 1;
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)dim0/(hsize_t)mpi_size * (hsize_t)mpi_rank;
     start[1] = 0;
 
     dataset_fill(start, block, data_array1);
@@ -1394,7 +1395,7 @@ dataset_writeAll(void)
 
     /* Dataset6: point selection in File - Point selection in Memory*/
     /* create a file dataspace independently */
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)dim0/(hsize_t)mpi_size * (hsize_t)mpi_rank;
     start[1] = 0;
     point_set (start, count, stride, block, num_points, coords, OUT_OF_ORDER);
     file_dataspace = H5Dget_space (dataset6);
@@ -1432,7 +1433,7 @@ dataset_writeAll(void)
 
     /* Dataset7: point selection in File - All selection in Memory*/
     /* create a file dataspace independently */
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)dim0/(hsize_t)mpi_size * (hsize_t)mpi_rank;
     start[1] = 0;
     point_set (start, count, stride, block, num_points, coords, IN_ORDER);
     file_dataspace = H5Dget_space (dataset7);
@@ -1538,14 +1539,14 @@ dataset_readAll(void)
     MPI_Comm_rank(test_comm,&mpi_rank);
 
     /* set up the coords array selection */
-    num_points = dim1;
-    coords = (hsize_t *)HDmalloc(dim0 * dim1 * MAX_RANK * sizeof(hsize_t));
+    num_points = (size_t)dim1;
+    coords = (hsize_t *)HDmalloc((size_t)dim0 * (size_t)dim1 * MAX_RANK * sizeof(hsize_t));
     VRFY((coords != NULL), "coords malloc succeeded");
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
-    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_origin1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* -------------------
@@ -1723,18 +1724,18 @@ dataset_readAll(void)
 
     if(data_array1) free(data_array1);
     if(data_origin1) free(data_origin1);
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
-    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_origin1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     block[0] = 1;
-    block[1] = dim1;
+    block[1] = (hsize_t)dim1;
     stride[0] = 1;
-    stride[1] = dim1;
+    stride[1] = (hsize_t)dim1;
     count[0] = 1;
     count[1] = 1;
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)dim0/(hsize_t)mpi_size * (hsize_t)mpi_rank;
     start[1] = 0;
 
     dataset_fill(start, block, data_origin1);
@@ -1784,12 +1785,12 @@ dataset_readAll(void)
     H5Pclose(xfer_plist);
 
     if(data_array1) free(data_array1);
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* Dataset6: point selection in File - Point selection in Memory*/
     /* create a file dataspace independently */
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)dim0/(hsize_t)mpi_size * (hsize_t)mpi_rank;
     start[1] = 0;
     point_set (start, count, stride, block, num_points, coords, IN_ORDER);
     file_dataspace = H5Dget_space (dataset6);
@@ -1829,7 +1830,7 @@ dataset_readAll(void)
     H5Pclose(xfer_plist);
 
     if(data_array1) free(data_array1);
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* Dataset7: point selection in memory - All selection in file*/
@@ -1839,12 +1840,12 @@ dataset_readAll(void)
     ret = H5Sselect_all(file_dataspace);
     VRFY((ret >= 0), "H5Sselect_all succeeded");
 
-    num_points = dim0 * dim1;
+    num_points = (size_t)dim0 * (size_t)dim1;
     k=0;
     for (i=0 ; i<dim0; i++) {
         for (j=0 ; j<dim1; j++) {
-            coords[k++] = i;
-            coords[k++] = j;
+            coords[k++] = (hsize_t)i;
+            coords[k++] = (hsize_t)j;
         }
     }
     mem_dataspace = H5Dget_space (dataset7);
@@ -1867,7 +1868,7 @@ dataset_readAll(void)
                   xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset7 succeeded");
 
-    start[0] = dim0/mpi_size * mpi_rank;
+    start[0] = (hsize_t)dim0/(hsize_t)mpi_size * (hsize_t)mpi_rank;
     start[1] = 0;
     ret = dataset_vrfy(start, count, stride, block, data_array1+(dim0/mpi_size * dim1 * mpi_rank), data_origin1);
     if(ret) nerrors++;
@@ -1950,11 +1951,11 @@ extend_writeInd(void)
     MPI_Comm_rank(test_comm,&mpi_rank);
 
     /* setup chunk-size. Make sure sizes are > 0 */
-    chunk_dims[0] = chunkdim0;
-    chunk_dims[1] = chunkdim1;
+    chunk_dims[0] = (hsize_t)chunkdim0;
+    chunk_dims[1] = (hsize_t)chunkdim1;
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* -------------------
@@ -2041,8 +2042,8 @@ extend_writeInd(void)
     VRFY((mem_dataspace >= 0), "");
 
     /* Extend its current dim sizes before writing */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     ret = H5Dset_extent(dataset1, dims);
     VRFY((ret >= 0), "H5Dset_extent succeeded");
 
@@ -2101,8 +2102,8 @@ extend_writeInd(void)
     H5Sclose(file_dataspace);
 
     /* Extend dataset2 and try again.  Should succeed. */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     ret = H5Dset_extent(dataset2, dims);
     VRFY((ret >= 0), "H5Dset_extent succeeded");
 
@@ -2263,7 +2264,7 @@ extend_writeInd2(void)
      * Write to the second half of the dataset
      * -------------------------*/
     for (i=0; i<(int)orig_size; i++)
-        written[i] = orig_size + i;
+        H5_CHECKED_ASSIGN(written[i], int, orig_size + (hsize_t)i, hsize_t);
     MESG("data array re-initialized");
     if(VERBOSE_MED) {
     MESG("writing at offset 10: ");
@@ -2338,11 +2339,11 @@ extend_readInd(void)
     MPI_Comm_rank(test_comm,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
-    data_array2 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array2 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array2 != NULL), "data_array2 HDmalloc succeeded");
-    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_origin1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* -------------------
@@ -2521,11 +2522,11 @@ extend_writeAll(void)
     MPI_Comm_rank(test_comm,&mpi_rank);
 
     /* setup chunk-size. Make sure sizes are > 0 */
-    chunk_dims[0] = chunkdim0;
-    chunk_dims[1] = chunkdim1;
+    chunk_dims[0] = (hsize_t)chunkdim0;
+    chunk_dims[1] = (hsize_t)chunkdim1;
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
 
     /* -------------------
@@ -2612,8 +2613,8 @@ extend_writeAll(void)
     VRFY((mem_dataspace >= 0), "");
 
     /* Extend its current dim sizes before writing */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     ret = H5Dset_extent(dataset1, dims);
     VRFY((ret >= 0), "H5Dset_extent succeeded");
 
@@ -2695,8 +2696,8 @@ extend_writeAll(void)
     H5Sclose(file_dataspace);
 
     /* Extend dataset2 and try again.  Should succeed. */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     ret = H5Dset_extent(dataset2, dims);
     VRFY((ret >= 0), "H5Dset_extent succeeded");
 
@@ -2768,11 +2769,11 @@ extend_readAll(void)
     MPI_Comm_rank(test_comm,&mpi_rank);
 
     /* allocate memory for data buffer */
-    data_array1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array1 != NULL), "data_array1 HDmalloc succeeded");
-    data_array2 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_array2 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_array2 != NULL), "data_array2 HDmalloc succeeded");
-    data_origin1 = (DATATYPE *)HDmalloc(dim0*dim1*sizeof(DATATYPE));
+    data_origin1 = (DATATYPE *)HDmalloc((size_t)dim0*(size_t)dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 HDmalloc succeeded");
 
     /* -------------------
@@ -2940,7 +2941,7 @@ compress_readAll(void)
     hid_t dataspace;        /* Dataspace ID */
     hid_t dataset;        /* Dataset ID */
     int rank=1;                 /* Dataspace rank */
-    hsize_t dim=dim0;           /* Dataspace dimensions */
+    hsize_t dim=(hsize_t)dim0;  /* Dataspace dimensions */
     unsigned u;                 /* Local index variable */
     unsigned    chunk_opts;         /* Chunk options */
     unsigned    disable_partial_chunk_filters; /* Whether filters are disabled on partial chunks */
@@ -2968,7 +2969,7 @@ compress_readAll(void)
 
     /* Initialize data buffers */
     for(u=0; u<dim;u++)
-        data_orig[u]=u;
+        data_orig[u]=(DATATYPE)u;
 
     /* Run test both with and without filters disabled on partial chunks */
     for(disable_partial_chunk_filters = 0; disable_partial_chunk_filters <= 1;
@@ -3152,8 +3153,8 @@ none_selection_chunk(void)
     MPI_Comm_rank(test_comm,&mpi_rank);
 
     /* setup chunk-size. Make sure sizes are > 0 */
-    chunk_dims[0] = chunkdim0;
-    chunk_dims[1] = chunkdim1;
+    chunk_dims[0] = (hsize_t)chunkdim0;
+    chunk_dims[1] = (hsize_t)chunkdim1;
 
     /* -------------------
      * START AN HDF5 FILE
@@ -3183,8 +3184,8 @@ none_selection_chunk(void)
     VRFY((ret >= 0), "H5Pset_chunk succeeded");
 
     /* setup dimensionality object */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple(MAX_RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -3461,8 +3462,8 @@ test_actual_io_mode(int selection_mode) {
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
     /* Create the basic Space */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple (MAX_RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -3473,7 +3474,7 @@ test_actual_io_mode(int selection_mode) {
     /* If we are not testing contiguous datasets */
     if(is_chunked) {
         /* Set up chunk information.  */
-        chunk_dims[0] = dims[0]/mpi_size;
+        chunk_dims[0] = dims[0]/(hsize_t)mpi_size;
         chunk_dims[1] = dims[1];
         ret = H5Pset_chunk(dcpl, 2, chunk_dims);
         VRFY((ret >= 0),"chunk creation property list succeeded");
@@ -3539,14 +3540,14 @@ test_actual_io_mode(int selection_mode) {
                  slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
             } else {
                 /* Select the first and the nth chunk in the nth column */
-                block[0] = dim0 / mpi_size;
-                block[1] = dim1 / mpi_size;
+                block[0] = (hsize_t)(dim0 / mpi_size);
+                block[1] = (hsize_t)(dim1 / mpi_size);
                 count[0] = 2;
                 count[1] = 1;
-                stride[0] = mpi_rank * block[0];
+                stride[0] = (hsize_t)mpi_rank * block[0];
                 stride[1] = 1;
                 start[0] = 0;
-                start[1] = mpi_rank*block[1];
+                start[1] = (hsize_t)mpi_rank*block[1];
             }
 
             test_name = "Multi Chunk - Mixed";
@@ -3577,17 +3578,17 @@ test_actual_io_mode(int selection_mode) {
             if(mpi_rank == 0) {
                  /* Select the first chunk in the first column */
                  slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
-                 block[0] = block[0] / mpi_size;
+                 block[0] = block[0] / (hsize_t)mpi_size;
             } else {
                 /* Select the first and the nth chunk in the nth column */
-                block[0] = dim0 / mpi_size;
-                block[1] = dim1 / mpi_size;
+                block[0] = (hsize_t)(dim0 / mpi_size);
+                block[1] = (hsize_t)(dim1 / mpi_size);
                 count[0] = 2;
                 count[1] = 1;
-                stride[0] = mpi_rank * block[0];
+                stride[0] = (hsize_t)mpi_rank * block[0];
                 stride[1] = 1;
                 start[0] = 0;
-                start[1] = mpi_rank*block[1];
+                start[1] = (hsize_t)mpi_rank*block[1];
             }
 
             /* If the testname was not already set by the RESET case */
@@ -3660,7 +3661,7 @@ test_actual_io_mode(int selection_mode) {
     length = dim0 * dim1;
 
     /* Allocate and initialize the buffer */
-    buffer = (int *)HDmalloc(sizeof(int) * length);
+    buffer = (int *)HDmalloc(sizeof(int) * (size_t)length);
     VRFY((buffer != NULL), "HDmalloc of buffer succeeded");
     for(i = 0; i < length; i++)
         buffer[i] = i;
@@ -3891,8 +3892,6 @@ actual_io_mode_tests(void) {
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
-#define DSET_NOCOLCAUSE "nocolcause"
-#define NELM          2
 #define FILE_EXTERNAL "nocolcause_extern.data"
 static void
 test_no_collective_cause_mode(int selection_mode)
@@ -3989,8 +3988,8 @@ test_no_collective_cause_mode(int selection_mode)
             dims[1] = BIG_Y_FACTOR * 6;
         }
         else {
-            dims[0] = dim0;
-            dims[1] = dim1;
+            dims[0] = (hsize_t)dim0;
+            dims[1] = (hsize_t)dim1;
         }
         sid = H5Screate_simple (MAX_RANK, dims, NULL);
         VRFY((sid >= 0), "H5Screate_simple succeeded");
@@ -4012,7 +4011,7 @@ test_no_collective_cause_mode(int selection_mode)
     /* If we are not testing contiguous datasets */
     if(is_chunked) {
         /* Set up chunk information.  */
-        chunk_dims[0] = dims[0]/mpi_size;
+        chunk_dims[0] = dims[0]/(hsize_t)mpi_size;
         chunk_dims[1] = dims[1];
         ret = H5Pset_chunk(dcpl, 2, chunk_dims);
         VRFY((ret >= 0),"chunk creation property list succeeded");
@@ -4093,10 +4092,10 @@ test_no_collective_cause_mode(int selection_mode)
     }
 
     /* Get the number of elements in the selection */
-    length = dims[0] * dims[1];
+    H5_CHECKED_ASSIGN(length, int, dims[0] * dims[1], hsize_t);
 
     /* Allocate and initialize the buffer */
-    buffer = (int *)HDmalloc(sizeof(int) * length);
+    buffer = (int *)HDmalloc(sizeof(int) * (size_t)length);
     VRFY((buffer != NULL), "HDmalloc of buffer succeeded");
     for(i = 0; i < length; i++)
         buffer[i] = i;
@@ -4522,10 +4521,10 @@ dataset_atomicity(void)
 
     buf_size = dim0 * dim1;
     /* allocate memory for data buffer */
-    write_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    write_buf = (int *)HDcalloc((size_t)buf_size, sizeof(int));
     VRFY((write_buf != NULL), "write_buf HDcalloc succeeded");
     /* allocate memory for data buffer */
-    read_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    read_buf = (int *)HDcalloc((size_t)buf_size, sizeof(int));
     VRFY((read_buf != NULL), "read_buf HDcalloc succeeded");
 
     /* setup file access template */
@@ -4541,8 +4540,8 @@ dataset_atomicity(void)
     VRFY((ret >= 0), "H5Pclose succeeded");
 
     /* setup dimensionality object */
-    dims[0] = dim0;
-    dims[1] = dim1;
+    dims[0] = (hsize_t)dim0;
+    dims[1] = (hsize_t)dim1;
     sid = H5Screate_simple (MAX_RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
@@ -4680,10 +4679,10 @@ dataset_atomicity(void)
     VRFY((dataset2 >= 0), "H5Dopen2 succeeded");
 
     /* allocate memory for data buffer */
-    write_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    write_buf = (int *)HDcalloc((size_t)buf_size, sizeof(int));
     VRFY((write_buf != NULL), "write_buf HDcalloc succeeded");
     /* allocate memory for data buffer */
-    read_buf = (int *)HDcalloc(buf_size, sizeof(int));
+    read_buf = (int *)HDcalloc((size_t)buf_size, sizeof(int));
     VRFY((read_buf != NULL), "read_buf HDcalloc succeeded");
 
     for (i=0 ; i<buf_size ; i++) {
@@ -4700,12 +4699,12 @@ dataset_atomicity(void)
     VRFY((atomicity == TRUE), "atomcity set failed");
 
 
-    block[0] = dim0/mpi_size - 1;
-    block[1] = dim1/mpi_size - 1;
+    block[0] = (hsize_t)(dim0/mpi_size) - 1;
+    block[1] = (hsize_t)(dim1/mpi_size) - 1;
     stride[0] = block[0] + 1;
     stride[1] = block[1] + 1;
-    count[0] = mpi_size;
-    count[1] = mpi_size;
+    count[0] = (hsize_t)mpi_size;
+    count[1] = (hsize_t)mpi_size;
     start[0] = 0;
     start[1] = 0;
 
@@ -4761,19 +4760,19 @@ dataset_atomicity(void)
         compare = 5;
 
         for (i=0 ; i<dim0 ; i++) {
-            if ((hsize_t)i >= mpi_rank*(block[0]+1)) {
+            if ((hsize_t)i >= (hsize_t)mpi_rank*(block[0]+1)) {
                 break;
             }
-            if ((i+1)%(block[0]+1)==0) {
+            if (((hsize_t)i+1)%(block[0]+1)==0) {
                 k += dim1;
                 continue;
             }
             for (j=0 ; j<dim1 ; j++) {
-                if ((hsize_t)j >= mpi_rank*(block[1]+1)) {
-                    k += dim1 - mpi_rank*(block[1]+1);
+                if ((hsize_t)j >= (hsize_t)mpi_rank*(block[1]+1)) {
+                    H5_CHECKED_ASSIGN(k, int, (hsize_t)dim1 - (hsize_t)mpi_rank*(block[1]+1) + (hsize_t)k, hsize_t);
                     break;
                 }
-                if ((j+1)%(block[1]+1)==0) {
+                if (((hsize_t)j+1)%(block[1]+1)==0) {
                     k++;
                     continue;
                 }

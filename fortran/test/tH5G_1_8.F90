@@ -665,11 +665,11 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
                           !  H5L_TYPE_SOFT_F      - Soft link
                           !  H5L_TYPE_EXTERNAL_F  - External link
                           !  H5L_TYPE_ERROR _F    - Error
-     INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
+     TYPE(H5O_TOKEN_T_F) :: token  ! If the link is a hard link, token specifies the object token that the link points to
      INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
 
-!     WRITE(*,*) "link creation (w/new group format)"
+     WRITE(*,*) "link creation (w/new group format)"
 
      !  Create a file 
      CALL h5fcreate_f(FileName, H5F_ACC_TRUNC_F, file, error, H5P_DEFAULT_F, fapl)
@@ -698,7 +698,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      CALL check("H5Lcreate_soft_f", error, total_error)
 
      CALL H5Lget_info_f(file, "grp1/soft", &
-          cset, corder, f_corder_valid, link_type, address, val_size, &
+          cset, corder, f_corder_valid, link_type, token, val_size, &
           error, H5P_DEFAULT_F)
      CALL check("H5Lget_info_f",error,total_error)
 
@@ -770,7 +770,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
                          !  H5L_TYPE_SOFT_F      - Soft link
                          !  H5L_TYPE_EXTERNAL_F  - External link
                          !  H5L_TYPE_ERROR _F    - Error
-    INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
+    TYPE(H5O_TOKEN_T_F) :: token  ! If the link is a hard link, token specifies the object token that the link points to
     INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
     INTEGER :: error
@@ -816,7 +816,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 
     !  Get the group's link's information 
     CALL H5Lget_info_f(file_id, "group", &
-         cset, corder, f_corder_valid, link_type, address, val_size, &
+         cset, corder, f_corder_valid, link_type, token, val_size, &
          error, H5P_DEFAULT_F)
     CALL check("H5Lget_info_f",error,total_error)
 
@@ -1179,7 +1179,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER(SIZE_T) :: val_size
   INTEGER :: link_type
-  INTEGER(HADDR_T) :: address
+  TYPE(H5O_TOKEN_T_F) :: token
 
   INTEGER :: u !  Local index variable 
   INTEGER :: Input1, i
@@ -1309,10 +1309,10 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
               ! HDmemset(&linfo, 0, sizeof(linfo));
 
               CALL H5Lget_info_by_idx_f(group_id, ".", idx_type, iorder, INT(0,HSIZE_T), &
-                   link_type, f_corder_valid, corder, cset, address, val_size, error)
+                   link_type, f_corder_valid, corder, cset, token, val_size, error)
 
-              CALL H5Oopen_by_addr_f(group_id, address, grp, error)
-              CALL check("H5Oopen_by_addr_f", error, total_error)
+              CALL H5Oopen_by_token_f(group_id, token, grp, error)
+              CALL check("H5Oopen_by_token_f", error, total_error)
 
               CALL H5Iget_type_f(grp, id_type, error)
               CALL check("H5Iget_type_f", error, total_error)
@@ -1357,11 +1357,11 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
            ! Close the group creation property list 
            CALL H5Pclose_f(gcpl_id, error)
-           CALL check("delete_by_idx.H5Gclose_f", error, total_error)
+           CALL check("delete_by_idx.H5Pclose_f", error, total_error)
 
            ! Close the file 
            CALL H5Fclose_f(file_id, error)
-           CALL check("delete_by_idx.H5Gclose_f", error, total_error)
+           CALL check("delete_by_idx.H5Fclose_f", error, total_error)
 
            IF(cleanup) CALL h5_cleanup_f("file0", H5P_DEFAULT_F, error)
            CALL check("h5_cleanup_f", error, total_error)
@@ -1407,7 +1407,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER :: link_type
-  INTEGER(HADDR_T) :: address
+  TYPE(H5O_TOKEN_T_F) :: token
   INTEGER(SIZE_T) :: val_size   ! Indicates the size, in the number of characters, of the attribute
 
   CHARACTER(LEN=7) :: tmpname     ! Temporary link name 
@@ -1427,14 +1427,14 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   !  Verify the link information for first link, in increasing creation order 
   !  HDmemset(&linfo, 0, sizeof(linfo));
   CALL H5Lget_info_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(0,HSIZE_T), &
-       link_type, f_corder_valid, corder, cset, address, val_size, error)
+       link_type, f_corder_valid, corder, cset, token, val_size, error)
   CALL check("H5Lget_info_by_idx_f", error, total_error)
   CALL verify("H5Lget_info_by_idx_f", corder, 0, total_error)
 
   !  Verify the link information for new link, in increasing creation order 
   ! HDmemset(&linfo, 0, sizeof(linfo));
   CALL H5Lget_info_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(n,HSIZE_T), &
-       link_type, f_corder_valid, corder, cset, address, val_size, error)
+       link_type, f_corder_valid, corder, cset, token, val_size, error)
   CALL check("H5Lget_info_by_idx_f", error, total_error)
   CALL verify("H5Lget_info_by_idx_f", corder, n, total_error)
 
@@ -1516,7 +1516,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
                        !  H5L_TYPE_SOFT_F      - Soft link
                        !  H5L_TYPE_EXTERNAL_F  - External link
                        !  H5L_TYPE_ERROR _F    - Error
-  INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
+  TYPE(H5O_TOKEN_T_F) :: token  ! If the link is a hard link, token specifies the object token that the link points to
   INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
   CHARACTER(LEN=1024) :: filename = 'tempfile.h5'
@@ -1555,7 +1555,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   !  Check that its character encoding is the default 
 
   CALL H5Lget_info_f(file_id, "group", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error, H5P_DEFAULT_F)
 
 ! File-wide default character encoding can not yet be set via the file
@@ -1575,7 +1575,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   !  Check that its character encoding is the default 
   CALL H5Lget_info_f(file_id, "type", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("h5tclose_f", error, total_error)
 
@@ -1636,7 +1636,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   !  Check that its character encoding is the default 
   CALL H5Lget_info_f(file_id, "dataset", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("H5Lget_info_f", error, total_error)
 
@@ -1661,7 +1661,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   ! Check that its character encoding is UTF-8 
   CALL H5Lget_info_f(file_id, "group2", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("H5Lget_info_f", error, total_error)
   CALL verify("H5Lget_info_f",cset, H5T_CSET_UTF8_F,total_error)
@@ -1679,7 +1679,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   ! Check that its character encoding is UTF-8 
   CALL H5Lget_info_f(file_id, "type2", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("H5Lget_info_f", error, total_error)
   CALL verify("H5Lget_info_f",cset, H5T_CSET_UTF8_F,total_error)
@@ -1697,7 +1697,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   !  Check that its character encoding is UTF-8 
   CALL H5Lget_info_f(file_id, "dataset2", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("H5Lget_info_f", error, total_error)
   CALL verify("H5Lget_info_f2",cset, H5T_CSET_UTF8_F,total_error)
@@ -1719,7 +1719,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   !  Check that its character encoding is ASCII 
   CALL H5Lget_info_f(file_id, "/dataset2_link", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("H5Lget_info_f", error, total_error)
   CALL verify("H5Lget_info_f",cset, H5T_CSET_ASCII_F,total_error)
@@ -1727,7 +1727,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   !  Check that the first link's encoding hasn't changed 
 
   CALL H5Lget_info_f(file_id, "/dataset2", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("H5Lget_info_f", error, total_error)
   CALL verify("H5Lget_info_f3",cset, H5T_CSET_UTF8_F,total_error)
@@ -1742,7 +1742,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   CALL check("H5Lcreate_soft_f", error, total_error)
 
   CALL H5Lget_info_f(file_id, "slink_to_dset2", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("H5Lget_info_f", error, total_error)
   CALL verify("H5Lget_info_f",cset, H5T_CSET_UTF8_F,total_error)
@@ -1756,7 +1756,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   CALL check("H5Lmove_f",error, total_error)
 
   CALL H5Lget_info_f(file_id, "moved_slink", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("H5Lget_info_f", error, total_error)
   CALL verify("H5Lget_info_f",cset, H5T_CSET_ASCII_F,total_error)
@@ -1770,7 +1770,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   CALL H5Lcopy_f(file_id, "moved_slink", file_id, "copied_slink", error, lcpl_id)
 
   CALL H5Lget_info_f(file_id, "copied_slink", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("H5Lget_info_f", error, total_error)
   CALL verify("H5Lget_info_f",cset, H5T_CSET_UTF8_F,total_error)
@@ -1782,7 +1782,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   CALL check("H5Lcreate_external_f", error, total_error)
 
   CALL H5Lget_info_f(file_id, "extlink", &
-       cset, corder, f_corder_valid, link_type, address, val_size, &
+       cset, corder, f_corder_valid, link_type, token, val_size, &
        error)
   CALL check("H5Lget_info_f", error, total_error)
   CALL verify("H5Lget_info_f",cset, H5T_CSET_UTF8_F,total_error)

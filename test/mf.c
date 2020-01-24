@@ -7528,7 +7528,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
+set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
 {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t memb_fapl_arr[H5FD_MEM_NTYPES];
@@ -7537,7 +7537,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
     hbool_t relax;
     H5FD_mem_t  mt;
 
-    HDassert(multi || split);
+    HDassert(is_multi_or_split);
 
     HDmemset(memb_name, 0, sizeof memb_name);
 
@@ -7545,7 +7545,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
     if(H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
         TEST_ERROR
 
-    if(split) {
+    if(is_multi_or_split) {
         /* Set memb_addr aligned */
         memb_addr[H5FD_MEM_SUPER] = ((memb_addr[H5FD_MEM_SUPER] + pagesize - 1) / pagesize) * pagesize;
         memb_addr[H5FD_MEM_DRAW] = ((memb_addr[H5FD_MEM_DRAW] + pagesize - 1) / pagesize) * pagesize;
@@ -7614,7 +7614,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
         if((fapl_new = H5Pcopy(fapl)) < 0) TEST_ERROR
 
         if(multi || split)
-            if(set_multi_split(fapl_new, 4096, multi, split) <  0)
+            if(set_multi_split(fapl_new, 4096, split) <  0)
                 TEST_ERROR;
 
         /* Test with TRUE or FALSE for persisting free-space */
