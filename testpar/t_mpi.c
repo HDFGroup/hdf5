@@ -303,7 +303,7 @@ static int test_mpio_gb_file(char *filename) {
                             mpi_rank, mpi_off, mpi_off);
                 /* set data to some trivial pattern for easy verification */
                 for (j = 0; j < MB; j++) 
-                    H5_CHECKED_ASSIGN(*(buf + j), int8_t, i * mpi_size + mpi_rank, int);
+                    *(buf + j) = (int8_t)(i * mpi_size + mpi_rank);
                 if (VERBOSE_MED)
                     HDfprintf(stdout,
                             "proc %d: writing %d bytes at offset %lld\n",
