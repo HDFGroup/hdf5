@@ -4559,16 +4559,16 @@ static hbool_t equal_double(double value, double expected, diff_opt_t *opts) {
             return FALSE;
     }
 
-    /* Are the bits the same? */
-    if (!HDmemcmp(&value, &expected, sizeof(double)))
-        return TRUE;
-
-    /* Check for equality within appropriate floating-point
-     * tolerance, if requested.
-     */
-    if (opts->use_system_epsilon)
+    if (opts->use_system_epsilon) {
+        /* Check equality within some epsilon */
         if (H5_DBL_ABS_EQUAL(value, expected))
             return TRUE;
+    }
+    else {
+        /* Check bits */
+        if (!HDmemcmp(&value, &expected, sizeof(double)))
+            return TRUE;
+    }
 
     return FALSE;
 }
@@ -4607,16 +4607,16 @@ hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *opts)
             return FALSE;
     }
 
-    /* Are the bits the same? */
-    if (!HDmemcmp(&value, &expected, sizeof(long double)))
-        return TRUE;
-
-    /* Check for equality within appropriate floating-point
-     * tolerance, if requested.
-     */
-    if (opts->use_system_epsilon)
+    if (opts->use_system_epsilon) {
+        /* Check equality within some epsilon */
         if (H5_LDBL_ABS_EQUAL(value, expected))
             return TRUE;
+    }
+    else {
+        /* Check bits */
+        if (!HDmemcmp(&value, &expected, sizeof(long double)))
+            return TRUE;
+    }
 
     return FALSE;
 }
@@ -4653,16 +4653,16 @@ static hbool_t equal_float(float value, float expected, diff_opt_t *opts) {
             return FALSE;
     }
 
-    /* Are the bits the same? */
-    if (!HDmemcmp(&value, &expected, sizeof(float)))
-        return TRUE;
-
-    /* Check for equality within appropriate floating-point
-     * tolerance, if requested.
-     */
-    if (opts->use_system_epsilon)
+    if (opts->use_system_epsilon) {
+        /* Check equality within some epsilon */
         if (H5_FLT_ABS_EQUAL(value, expected))
             return TRUE;
+    }
+    else {
+        /* Check bits */
+        if (!HDmemcmp(&value, &expected, sizeof(float)))
+            return TRUE;
+    }
 
     return FALSE;
 }
