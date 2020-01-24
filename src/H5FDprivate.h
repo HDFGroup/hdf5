@@ -81,8 +81,7 @@
 
 /* Retries for metadata file */
 #define H5FD_VFD_SWMR_MD_FILE_RETRY_MAX     50  /* Maximum retries when opening the MD file */
-#define H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX     20  /* Maximum retries when trying to load the MD file header and index */
-#define H5FD_VFD_SWMR_MD_HEADER_RETRY_MAX   40  /* Maximum retries when deserializing the MD file header */
+#define H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX     120 /* Maximum retries when trying to load the MD file header and index */
 #define H5FD_VFD_SWMR_MD_INDEX_RETRY_MAX    5   /* Maximum retries when deserializing the MD file index */
 
 

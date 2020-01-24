@@ -81,10 +81,10 @@ static herr_t H5FD_vfd_swmr_lock(H5FD_t *_file, hbool_t rw);
 static herr_t H5FD_vfd_swmr_unlock(H5FD_t *_file);
 
 /* VFD SWMR */
-static herr_t H5FD__vfd_swmr_header_deserialize(H5FD_t *_file, 
+static htri_t H5FD__vfd_swmr_header_deserialize(H5FD_t *_file, 
     H5FD_vfd_swmr_md_header *md_header);
-static herr_t H5FD__vfd_swmr_index_deserialize(H5FD_t *_file, 
-    H5FD_vfd_swmr_md_index *md_index, H5FD_vfd_swmr_md_header *md_header);
+static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_t *_file, 
+    H5FD_vfd_swmr_md_index *md_index, const H5FD_vfd_swmr_md_header *md_header);
 static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open);
 
 static const H5FD_class_t H5FD_vfd_swmr_g = {
@@ -1136,71 +1136,81 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
         (H5FD_vfd_swmr_t *)_file;  
     bool do_try;
     h5_retry_t retry;
-    H5FD_vfd_swmr_md_header md_header;   /* Metadata file header          */
+    H5FD_vfd_swmr_md_header md_header;      /* Metadata file header, take 1 */
+    H5FD_vfd_swmr_md_header md_header_two;  /* Metadata file header, take 2 */
     H5FD_vfd_swmr_md_index md_index;     /* Metadata file index           */
     herr_t ret_value  = SUCCEED;         /* Return value                  */
+    htri_t rc;
 
     FUNC_ENTER_STATIC
 
     for (do_try = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX,
-                      1, H5_RETRY_ONE_SECOND);
+                      H5_RETRY_ONE_SECOND / 10, H5_RETRY_ONE_SECOND);
          do_try;
          do_try = h5_retry_next(&retry)) {
-        HDmemset(&md_header, 0, sizeof(H5FD_vfd_swmr_md_header));
-        HDmemset(&md_index, 0, sizeof(H5FD_vfd_swmr_md_index));
 
-        /* Load and decode the header */
+        /* Load and decode the header.  Go around again on a temporary
+         * failure (FALSE).  Bail on an irrecoverable failure (FAIL).
+         */
+        rc = H5FD__vfd_swmr_header_deserialize(_file, &md_header);
 
-        if(H5FD__vfd_swmr_header_deserialize(_file, &md_header) < 0)
+        /* Temporary failure, try again. */
+        if (rc == FALSE)
             continue;
 
-        /* Error if header + index does not fit within md_pages_reserved */
-        if((H5FD_MD_HEADER_SIZE + md_header.index_length) > 
-           (uint64_t)((hsize_t)file->md_pages_reserved * 
-                               md_header.fs_page_size))
+        if (rc != TRUE)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not read header");
 
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, \
-                     "header + index does not fit within md_pages_reserved")
+#if 0
+        /* Error if header + index does not fit within md_pages_reserved
+         *
+         * This check doesn't make sense if the index floats, does it? --dyoung
+         */
+        if (H5FD_MD_HEADER_SIZE + md_header.index_length >
+           (hsize_t)file->md_pages_reserved * md_header.fs_page_size) {
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                     "header + index does not fit within md_pages_reserved");
+        }
+#endif
 
-        if(!open) {
-
-            if(md_header.tick_num == file->md_header.tick_num) {
-
-                break; 
-
-            } else if(md_header.tick_num < file->md_header.tick_num)
-
-                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, \
-                            "tick number read is less than local copy")
-        } 
+        if (open)
+            ; // ignore tick number on open
+        else if (md_header.tick_num == file->md_header.tick_num) {
+            /* If the tick number in the header hasn't increased since last
+             * time, then there is not a complete new index to read, so
+             * get out.
+             */
+            HGOTO_DONE(SUCCEED);
+        } else if (md_header.tick_num < file->md_header.tick_num) {
+            /* The tick number must not move backward. */
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                "tick number in header moved backwards");
+        }
 
         HDassert(md_header.tick_num > file->md_header.tick_num || open);
 
-        /* Load and decode the index */
-        if (H5FD__vfd_swmr_index_deserialize(_file, &md_index, &md_header) < 0)
+        /* Load and decode the index.  Go around again on a temporary
+         * failure (FALSE).  Bail on an irrecoverable failure (FAIL).
+         */
+        rc = H5FD__vfd_swmr_index_deserialize(_file, &md_index, &md_header);
+
+        if (rc == FALSE)
             continue;
 
-        /* tick_num is the same in both header and index */
-        if(md_header.tick_num == md_index.tick_num) {
+        if (rc != TRUE)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not read index");
 
-            /* Copy header to VFD local copy */
-            file->md_header = md_header;
-
-            /* Free VFD local entries */
-            if (file->md_index.entries != NULL) {
-
-                HDassert(file->md_index.num_entries);
-
-                file->md_index.entries = (H5FD_vfd_swmr_idx_entry_t *)
-                     H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, 
-                                   file->md_index.entries);
-            }
-
-            /* Copy index info to VFD local copy */
-            file->md_index = md_index;
-            md_index.entries = NULL;
+        /* If the tick_num is the same in both header and index,
+         * and the header reads the same the second time as the first time,
+         * then we should have a consistent picture of the index.
+         */
+        if (md_header.tick_num == md_index.tick_num &&
+            (rc = H5FD__vfd_swmr_header_deserialize(_file,
+                &md_header_two)) == TRUE &&
+            md_header.tick_num == md_header_two.tick_num &&
+            md_header.index_length == md_header_two.index_length &&
+            md_header.index_offset == md_header_two.index_offset)
             break;
-        }
 
         if (md_index.entries != NULL) {
 
@@ -1210,13 +1220,23 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
                                              md_index.entries);
         }
 
+        if (rc == FAIL) {
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                "could not re-read header");
+        }
+
+#if 0
         /* Error when tick_num in header is more than one greater 
          * than in the index 
+         *
+         * It's ok if this happens, we'll catch it and retry
+         * until timeout. --dyoung
          */
         if (md_header.tick_num > (md_index.tick_num + 1)) {
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
                 "tick number mis-match in header and index");
         }
+#endif
     }
 
     /* Exhaust all retries for loading and decoding the md file header 
@@ -1226,6 +1246,21 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
         HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL, \
                 "error in loading/decoding the metadata file header and index")
     }
+
+    /* Free VFD local entries */
+    if (file->md_index.entries != NULL) {
+
+        HDassert(file->md_index.num_entries);
+
+        file->md_index.entries = (H5FD_vfd_swmr_idx_entry_t *)
+             H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, 
+                           file->md_index.entries);
+    }
+
+    /* Copy header and index to VFD */
+    file->md_header = md_header;
+    file->md_index = md_index;
+    md_index.entries = NULL;
 
 done:
 
@@ -1249,91 +1284,59 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static htri_t
 H5FD__vfd_swmr_header_deserialize(H5FD_t *_file, 
     H5FD_vfd_swmr_md_header *md_header)
 {
     H5FD_vfd_swmr_t *file =                 /* VFD SWMR file struct */
         (H5FD_vfd_swmr_t *)_file; 
-    struct stat stat_buf;                   /* Buffer for stat info */
     uint8_t image[H5FD_MD_HEADER_SIZE];     /* Buffer for element data */
-    uint32_t stored_chksum;                 /* Stored metadata checksum value */
-    uint32_t computed_chksum;               /* Computed metadata checksum     */
-                                            /* value                          */
-    uint64_t nanosec = 1;                   /* # of nanoseconds to sleep      */
-                                            /* between retries                */
-    unsigned file_retries =                 /* Retries for 'stat' the file */
-        H5FD_VFD_SWMR_MD_FILE_RETRY_MAX;  
-    unsigned header_retries =               /* Retries for loading header */
-        H5FD_VFD_SWMR_MD_HEADER_RETRY_MAX; 
-    uint8_t *p = NULL;                      /* Pointer to buffer */
-    herr_t ret_value = SUCCEED;             /* Return value */
+    uint32_t stored_chksum;                 /* Stored metadata checksum */
+    uint32_t computed_chksum;               /* Computed metadata checksum */
+    uint8_t *p;
+    htri_t ret_value = TRUE;
     uint64_t index_length;
+    ssize_t nread;
 
     FUNC_ENTER_STATIC
 
-    /* Try to stat the metadata file till md header size */
-    do {
-        /* Retrieve the metadata file size */
-        if(HDfstat(file->md_fd, &stat_buf))
+    /* Set file pointer to the beginning the file */
+    if (lseek(file->md_fd, H5FD_MD_HEADER_OFF, SEEK_SET) < 0) {
+        HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
+                    "unable to seek in metadata file");
+    }
 
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, \
-                        "unable to fstat the md file")
+    /* Read the header */
+    nread = read(file->md_fd, image, H5FD_MD_HEADER_SIZE);
 
-        /* Verify file size is at least header size */
-        if(stat_buf.st_size >= H5FD_MD_HEADER_SIZE)
-            break;
+    /* Try again if a signal interrupted the read. */
+    if (nread == -1 && errno == EINTR)
+        HGOTO_DONE(FALSE);
 
-        /* Sleep and double the sleep time next time */
-        H5_nanosleep(nanosec);
-        nanosec *= 2;               
-    } while (--file_retries);
+    /* We cannot recover from any other error by trying again,
+     * so bail out.
+     */
+    if (nread == -1) {
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL,
+                    "error in reading the shadow header");
+    }
 
-    /* Exhaust all retries for "stat" the md file */
-    if(file_retries == 0)
+    if ((uint64_t)nread < H5FD_MD_HEADER_SIZE)
+        HGOTO_DONE(FALSE);
 
-        HGOTO_ERROR(H5E_VFL, H5E_OPENERROR, FAIL, \
-                    "unable to the metadata file after all retry attempts")
+    /* Verify magic number */
+    if (memcmp(image, H5FD_MD_HEADER_MAGIC, H5_SIZEOF_MAGIC) != 0)
+        HGOTO_DONE(FALSE);
 
-    /* Try to get valid magic and checksum for header */
-    p = image;
-    do {
-        /* Set file pointer to the beginning the file */
-        if(HDlseek(file->md_fd, (HDoff_t)H5FD_MD_HEADER_OFF, SEEK_SET) < 0)
+    /* Verify stored and computed checksums are equal */
+    H5F_get_checksums(image, H5FD_MD_HEADER_SIZE, &stored_chksum, 
+                      &computed_chksum);
 
-            HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
-                        "unable to seek in metadata file")
-
-        /* Read the header */
-        if(HDread(file->md_fd, image, H5FD_MD_HEADER_SIZE) < 
-                  H5FD_MD_HEADER_SIZE)
-
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, \
-                        "error in reading the header in metadata file")
-
-        /* Verify magic number */
-        if(HDmemcmp(p, H5FD_MD_HEADER_MAGIC, (size_t)H5_SIZEOF_MAGIC) == 0) {
-
-            /* Verify stored and computed checksums are equal */
-            H5F_get_checksums(image, H5FD_MD_HEADER_SIZE, &stored_chksum, 
-                              &computed_chksum);
-
-            if(stored_chksum == computed_chksum)
-                break;
-        }
-        /* Sleep and double the sleep time next time */
-        H5_nanosleep(nanosec);
-        nanosec *= 2;
-    } while(--header_retries);
-
-    /* Exhaust all retries for loading the header */
-    if(header_retries == 0)
-
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, \
-                     "incorrect checksum after after all read attempts")
+    if (stored_chksum != computed_chksum)
+        HGOTO_DONE(FALSE);
 
     /* Header magic is already valid */
-    p += H5_SIZEOF_MAGIC;
+    p = image + H5_SIZEOF_MAGIC;
 
     /* Deserialize page size, tick number, index offset, index length */
     UINT32DECODE(p, md_header->fs_page_size);
@@ -1367,7 +1370,7 @@ done:
 
 
 
-/*-------------------------------------------------------------------------
+/*
  * Function:    H5FD__vfd_swmr_index_deserialize()
  *
  * Purpose:     Load and decode the index in the metadata file
@@ -1378,26 +1381,23 @@ done:
  *              --Decode the index entries if the tick number in the header and
  *                the index match
  *
- * Return:      Success:    SUCCEED
+ * Return:      Success:    TRUE
  *              Failure:    FAIL
+ *              Retry:     FALSE
  *
- * Programmer:  Vailin Choi
- *
- *-------------------------------------------------------------------------
  */
-static herr_t
-H5FD__vfd_swmr_index_deserialize(H5FD_t *_file, 
-    H5FD_vfd_swmr_md_index *md_index, H5FD_vfd_swmr_md_header *md_header)
+static htri_t
+H5FD__vfd_swmr_index_deserialize(const H5FD_t *_file, 
+    H5FD_vfd_swmr_md_index *md_index, const H5FD_vfd_swmr_md_header *md_header)
 {
-    H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;   /* VFD SWMR file struct */
+    const H5FD_vfd_swmr_t *file = (const H5FD_vfd_swmr_t *)_file;
     uint8_t *image;                 /* Buffer */
     uint8_t *p = NULL;              /* Pointer to buffer */
     uint32_t stored_chksum;         /* Stored metadata checksum value */
     uint32_t computed_chksum;       /* Computed metadata checksum value */
     unsigned i;                     /* Local index variable */
-    herr_t ret_value = SUCCEED;     /* Return value */
-    h5_retry_t retry;               /* retry state */
-    bool do_try;                    /* more tries remain */
+    htri_t ret_value = TRUE;
+    ssize_t nread;
 
     FUNC_ENTER_STATIC
 
@@ -1407,96 +1407,82 @@ H5FD__vfd_swmr_index_deserialize(H5FD_t *_file,
                    "memory allocation failed for index's on disk image buffer");
     }
 
-    /* Verify magic and checksum for index */
-    p = image;
-    for (do_try = h5_retry_init(&retry, H5FD_VFD_SWMR_MD_INDEX_RETRY_MAX,
-                                 H5_RETRY_DEFAULT_MINIVAL,
-                                 H5_RETRY_ONE_SECOND);
-         do_try;
-         do_try = h5_retry_next(&retry)) {
-        ssize_t nread;
+    /* TBD On each try, seek to the header and read it.  This
+     * entails merging H5FD__vfd_swmr_header_deserialize with this
+     * function (H5FD__vfd_swmr_index_deserialize).
+     */
 
-        /* TBD On each try, seek to the header and read it.  This
-         * entails merging H5FD__vfd_swmr_header_deserialize with this
-         * function (H5FD__vfd_swmr_index_deserialize).
-         */
-
-        /* We may seek past EOF.  That's ok, the read(2) will catch that. */
-        if (lseek(file->md_fd, (HDoff_t)md_header->index_offset, SEEK_SET) < 0){
-            HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL,
-                        "unable to seek in metadata file");
-        }
-
-        nread = read(file->md_fd, image, md_header->index_length);
-
-        /* Try again if a signal interrupted the read. */
-        if (nread == -1 && errno == EINTR)
-            continue;
-
-        /* We cannot recover from any other error by trying again,
-         * so bail out.
-         */
-        if (nread == -1) {
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL,
-                        "error in reading the header in metadata file");
-        }
-
-        /* Try again if the read was not full.
-         *
-         * XXX XXX XXX
-         * A short read should not be possible under the protocol that
-         * I intend to adopt: the writer will write(2) the new index.
-         * In a second write(2), the header describing that index
-         * will be written.  POSIX will guarantee that the former
-         * write is visible before the latter.  Under the protocol,
-         * there should always be `index_length` bytes available to
-         * read at `index_offset`.  If not, the reader should treat it
-         * like an unrecoverable error instead of retrying.
-         */
-        if ((uint64_t)nread < md_header->index_length)
-            continue;
-
-        /* If the index magic is incorrect, then assume that is a
-         * intermittent error such as a "torn write."  Try again.
-         *
-         * XXX XXX XXX
-         * Under the new protocol, where the index is written in
-         * one write(2), and the header is written in a distinct
-         * second write(2), it is reasonable to expect that the
-         * index-write is complete when the index-read occurs.
-         * So we should not read bad magic because we read a 
-         * "torn" write.
-         *
-         * (I am not sure I believe any recent version of UNIX or
-         * Linux suffers from torn writes!  Linux manual pages
-         * indicate that there was an issue, but it was fixed.)
-         *
-         * It is possible under the new protocol that we read
-         * the header on tick `t`, then an arbitrary delay
-         * occurs (the user taps Control-Z, say), and then we
-         * read the index on tick `t + max_lag + 1` or later.
-         * In the mean time, the index may have moved, and its
-         * storage may have been reused.  In that case, we could
-         * read bad magic.  It's possible to recover, then by
-         * re-reading the header.
-         */
-        if (memcmp(p, H5FD_MD_INDEX_MAGIC, H5_SIZEOF_MAGIC) != 0)
-            continue;
-
-        /* Verify stored and computed checksums are equal */
-        H5F_get_checksums(image, md_header->index_length, &stored_chksum, 
-                          &computed_chksum);
-
-        if (stored_chksum == computed_chksum)
-            break;
+    /* We may seek past EOF.  That's ok, the read(2) will catch that. */
+    if (lseek(file->md_fd, (HDoff_t)md_header->index_offset, SEEK_SET) < 0){
+        HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL,
+                    "unable to seek in metadata file");
     }
 
-    /* Exhaust all retries for loading the index */
-    if (!do_try)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "read attempts exhausted")
+    nread = read(file->md_fd, image, md_header->index_length);
 
-    /* Magic is already valid */
-    p += H5_SIZEOF_MAGIC;
+    /* Try again if a signal interrupted the read. */
+    if (nread == -1 && errno == EINTR)
+        HGOTO_DONE(FALSE);
+
+    /* We cannot recover from any other error by trying again,
+     * so bail out.
+     */
+    if (nread == -1) {
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL,
+                    "error in reading the header in metadata file");
+    }
+
+    /* Try again if the read was not full.
+     *
+     * XXX XXX XXX
+     * A short read should not be possible under the protocol that
+     * I intend to adopt: the writer will write(2) the new index.
+     * In a second write(2), the header describing that index
+     * will be written.  POSIX will guarantee that the former
+     * write is visible before the latter.  Under the protocol,
+     * there should always be `index_length` bytes available to
+     * read at `index_offset`.  If not, the reader should treat it
+     * like an unrecoverable error instead of retrying.
+     */
+    if ((size_t)nread < md_header->index_length)
+        HGOTO_DONE(FALSE);
+
+    /* If the index magic is incorrect, then assume that is a
+     * temporary error such as a "torn write."  Try again.
+     *
+     * XXX XXX XXX
+     * Under the new protocol, where the index is written in
+     * one write(2), and the header is written in a distinct
+     * second write(2), it is reasonable to expect that the
+     * index-write is complete when the index-read occurs.
+     * So we should not read bad magic because we read a 
+     * "torn" write.
+     *
+     * (I am not sure I believe any recent version of UNIX or
+     * Linux suffers from torn writes on local filesystems!
+     * Linux manual pages indicate that there was an issue, but
+     * it was fixed.)
+     *
+     * It is possible under the new protocol that we read
+     * the header on tick `t`, then an arbitrary delay
+     * occurs (the user taps Control-Z, say), and then we
+     * read the index on tick `t + max_lag + 1` or later.
+     * In the mean time, the index may have moved, and its
+     * storage may have been reused.  In that case, we could
+     * read bad magic.  It's possible to recover by
+     * re-reading the header.
+     */
+    if (memcmp(image, H5FD_MD_INDEX_MAGIC, H5_SIZEOF_MAGIC) != 0)
+        HGOTO_DONE(FALSE);
+
+    /* Verify stored and computed checksums are equal */
+    H5F_get_checksums(image, md_header->index_length, &stored_chksum, 
+                      &computed_chksum);
+
+    if (stored_chksum != computed_chksum)
+        HGOTO_DONE(FALSE);
+
+    p = image + H5_SIZEOF_MAGIC;
 
     /* Deserialize the index info: tick number, number of entries, entries, 
      * checksum 
@@ -1521,7 +1507,8 @@ H5FD__vfd_swmr_index_deserialize(H5FD_t *_file,
             UINT32DECODE(p, md_index->entries[i].length);
             UINT32DECODE(p, md_index->entries[i].chksum);
          }
-     }
+     } else
+        md_index->entries = NULL;
 
      /* Checksum is already valid */
      UINT32DECODE(p, stored_chksum);
@@ -1537,20 +1524,15 @@ H5FD__vfd_swmr_index_deserialize(H5FD_t *_file,
 
 
 done:
-    if(image) {
-
+    if (image != NULL)
         image = H5MM_xfree(image);
-    }
 
-    if(ret_value < 0) {
+    if (ret_value == FAIL && md_index->entries != NULL) {
 
-       if(md_index->entries) {
+        HDassert(md_index->num_entries != 0);
 
-            HDassert(md_index->num_entries);
-
-            md_index->entries = (H5FD_vfd_swmr_idx_entry_t *)
-                H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, md_index->entries);
-        }
+        md_index->entries =
+            H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, md_index->entries);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
