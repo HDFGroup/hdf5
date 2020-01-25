@@ -725,100 +725,100 @@
   endmacro ()
 
   macro (ADD_H5_EXTERNAL_TEST testname testtype testfile)
-    # canonical file = h5repack_${testfile}.h5 - preexist
-    # external file = h5repack_${testfile}_ex.h5 - preexist
-    # repacked file = h5repack_${testfile}_rp.h5 - created
-    # external data file = h5repack_${testfile}_ex-0.dat
-    if ("${testtype}" STREQUAL "SKIP")
-      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # canonical file = h5repack_${testfile}.h5 - preexist
+      # external file = h5repack_${testfile}_ex.h5 - preexist
+      # repacked file = h5repack_${testfile}_rp.h5 - created
+      # external data file = h5repack_${testfile}_ex-0.dat
+      if ("${testtype}" STREQUAL "SKIP")
         add_test (
             NAME H5REPACK_EXTERNAL-${testname}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
         )
         set_property(TEST H5REPACK_EXTERNAL-${testname} PROPERTY DISABLED)
+      else ()
+        add_test (
+            NAME H5REPACK_EXTERNAL-${testname}-clear-objects
+            COMMAND ${CMAKE_COMMAND} -E remove h5repack_${testfile}_rp.h5
+        )
+        set_tests_properties (H5REPACK_EXTERNAL-${testname}-clear-objects PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            FIXTURES_REQUIRED clear_h5repack
+        )
+        # make sure external data file 0 is available
+        add_test (
+            NAME H5REPACK_EXTERNAL-${testname}_CPY
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${PROJECT_SOURCE_DIR}/testfiles/h5repack_${testfile}_ex-0.dat" "${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex-0.dat"
+        )
+        set_tests_properties (H5REPACK_EXTERNAL-${testname}_CPY PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            DEPENDS H5REPACK_EXTERNAL-${testname}-clear-objects
+        )
+        # comparison of known files
+        add_test (
+            NAME H5REPACK_EXTERNAL-${testname}_DFF1
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
+        )
+        set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF1 PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            DEPENDS H5REPACK_EXTERNAL-${testname}_CPY
+        )
+        # repack the external file to the repacked file
+        add_test (
+            NAME H5REPACK_EXTERNAL-${testname}
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5
+        )
+        set_tests_properties (H5REPACK_EXTERNAL-${testname} PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            DEPENDS H5REPACK_EXTERNAL-${testname}_DFF1
+        )
+        # comparison of repacked file to known files
+        add_test (
+            NAME H5REPACK_EXTERNAL-${testname}_DFF2
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5
+        )
+        set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF2 PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            DEPENDS H5REPACK_EXTERNAL-${testname}
+        )
+        add_test (
+            NAME H5REPACK_EXTERNAL-${testname}_DFF3
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
+        )
+        set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF3 PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            DEPENDS H5REPACK_EXTERNAL-${testname}_DFF2
+        )
+        # invalidate external file by removing its first data file
+        add_test (
+            NAME H5REPACK_EXTERNAL-${testname}_DATA_RMV
+            COMMAND ${CMAKE_COMMAND} -E remove h5repack_${testfile}_ex-0.dat
+        )
+        set_tests_properties (H5REPACK_EXTERNAL-${testname}_DATA_RMV PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            DEPENDS H5REPACK_EXTERNAL-${testname}_DFF3
+        )
+        # verify comparison of repacked file to known file
+        add_test (
+            NAME H5REPACK_EXTERNAL-${testname}_DFF4
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5
+        )
+        set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF4 PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            DEPENDS H5REPACK_EXTERNAL-${testname}_DATA_RMV
+        )
+        # verify comparison of repacked file to known external file fails
+        add_test (
+            NAME H5REPACK_EXTERNAL-${testname}_DFF_FAIL
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
+        )
+        set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF_FAIL PROPERTIES
+            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+            DEPENDS H5REPACK_EXTERNAL-${testname}_DFF4
+            WILL_FAIL "true"
+        )
       endif ()
-    else ()
-      add_test (
-          NAME H5REPACK_EXTERNAL-${testname}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove h5repack_${testfile}_rp.h5
-      )
-      set_tests_properties (H5REPACK_EXTERNAL-${testname}-clear-objects PROPERTIES
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-          FIXTURES_REQUIRED clear_h5repack
-      )
-      # make sure external data file 0 is available
-      add_test (
-          NAME H5REPACK_EXTERNAL-${testname}_CPY
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different
-              "${PROJECT_SOURCE_DIR}/testfiles/h5repack_${testfile}_ex-0.dat" "${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex-0.dat"
-      )
-      set_tests_properties (H5REPACK_EXTERNAL-${testname}_CPY PROPERTIES
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-          DEPENDS H5REPACK_EXTERNAL-${testname}-clear-objects
-      )
-      # comparison of known files
-      add_test (
-          NAME H5REPACK_EXTERNAL-${testname}_DFF1
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
-      )
-      set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF1 PROPERTIES
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-          DEPENDS H5REPACK_EXTERNAL-${testname}_CPY
-      )
-      # repack the external file to the repacked file
-      add_test (
-          NAME H5REPACK_EXTERNAL-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_ext}> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5
-      )
-      set_tests_properties (H5REPACK_EXTERNAL-${testname} PROPERTIES
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-          DEPENDS H5REPACK_EXTERNAL-${testname}_DFF1
-      )
-      # comparison of repacked file to known files
-      add_test (
-          NAME H5REPACK_EXTERNAL-${testname}_DFF2
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5
-      )
-      set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF2 PROPERTIES
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-          DEPENDS H5REPACK_EXTERNAL-${testname}
-      )
-      add_test (
-          NAME H5REPACK_EXTERNAL-${testname}_DFF3
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
-      )
-      set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF3 PROPERTIES
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-          DEPENDS H5REPACK_EXTERNAL-${testname}_DFF2
-      )
-      # invalidate external file by removing its first data file
-      add_test (
-          NAME H5REPACK_EXTERNAL-${testname}_DATA_RMV
-          COMMAND ${CMAKE_COMMAND} -E remove h5repack_${testfile}_ex-0.dat
-      )
-      set_tests_properties (H5REPACK_EXTERNAL-${testname}_DATA_RMV PROPERTIES
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-          DEPENDS H5REPACK_EXTERNAL-${testname}_DFF3
-      )
-      # verify comparison of repacked file to known file
-      add_test (
-          NAME H5REPACK_EXTERNAL-${testname}_DFF4
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5
-      )
-      set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF4 PROPERTIES
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-          DEPENDS H5REPACK_EXTERNAL-${testname}_DATA_RMV
-      )
-      # verify comparison of repacked file to known external file fails
-      add_test (
-          NAME H5REPACK_EXTERNAL-${testname}_DFF_FAIL
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
-      )
-      set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF_FAIL PROPERTIES
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-          DEPENDS H5REPACK_EXTERNAL-${testname}_DFF4
-          WILL_FAIL "true"
-      )
     endif ()
   endmacro ()
 

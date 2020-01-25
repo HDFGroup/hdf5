@@ -69,26 +69,6 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     HL_FORTRAN_f90_ex-clear-objects
     ######### tools/h5clear #########
     H5CLEAR-clearall-objects
-    H5CLEAR-copy_h5clear_fsm_persist_equal.h5
-    H5CLEAR-copy_h5clear_fsm_persist_greater.h5
-    H5CLEAR-copy_h5clear_fsm_persist_less.h5
-    H5CLEAR-copy_h5clear_fsm_persist_noclose.h5
-    H5CLEAR-copy_h5clear_fsm_persist_user_equal.h5
-    H5CLEAR-copy_h5clear_fsm_persist_user_greater.h5
-    H5CLEAR-copy_h5clear_fsm_persist_user_less.h5
-    H5CLEAR-copy_h5clear_log_v3.h5
-    H5CLEAR-copy_h5clear_mdc_image.h5
-    H5CLEAR-copy_h5clear_sec2_v0.h5
-    H5CLEAR-copy_h5clear_sec2_v2.h5
-    H5CLEAR-copy_h5clear_sec2_v3.h5
-    H5CLEAR-copy_h5clear_status_noclear.h5
-    H5CLEAR-copy_latest_h5clear_log_v3.h5
-    H5CLEAR-copy_latest_h5clear_sec2_v3.h5
-    H5CLEAR-copy_mod_h5clear_mdc_image.h5
-    H5CLEAR-copy_mod_h5clr_mdc_image2.h5
-    H5CLEAR-copy_orig_h5clear_sec2_v0.h5
-    H5CLEAR-copy_orig_h5clear_sec2_v2.h5
-    H5CLEAR-copy_orig_h5clear_sec2_v3.h5
     H5CLEAR-h5clear_gentest      # does not close ids by design
     ######### tools/h5copy #########
     H5COPY-clearall-objects
