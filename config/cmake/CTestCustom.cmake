@@ -31,6 +31,7 @@ set (CTEST_CUSTOM_WARNING_EXCEPTION
     "config.cmake.xlatefile.c"
     "warning.*implicit declaration of function"
     "warning.*unknown pragma"
+    "warning.*unrecognized .pragma"
     "note: expanded from macro"
 #    "fpp:[ \t]*warning:[ \t]*cannot remove H5_DEBUG_API - not a predefined macro"
 )
