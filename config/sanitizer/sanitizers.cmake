@@ -28,7 +28,7 @@ function(append value)
   endforeach(variable)
 endfunction()
 
-if(USE_SANITIZER)
+if(USE_SANITIZER AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
   append("-fno-omit-frame-pointer" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
