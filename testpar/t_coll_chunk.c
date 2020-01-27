@@ -710,6 +710,9 @@ coll_chunktest(const char* filename,
           status = H5Sselect_all(file_dataspace);
           VRFY((status >= 0), "H5Sselect_all succeeded");
           break;
+
+      default:
+          break;
   }
 
   switch (mem_selection) {
@@ -732,6 +735,9 @@ coll_chunktest(const char* filename,
       case ALL:
           status = H5Sselect_all(mem_dataspace);
           VRFY((status >= 0), "H5Sselect_all succeeded");
+          break;
+
+      default:
           break;
   }
 
@@ -965,6 +971,9 @@ coll_chunktest(const char* filename,
           status = H5Sselect_all(file_dataspace);
           VRFY((status >= 0), "H5Sselect_all succeeded");
           break;
+
+      default:
+          break;
   }
 
   switch (mem_selection) {
@@ -987,6 +996,9 @@ coll_chunktest(const char* filename,
       case ALL:
           status = H5Sselect_all(mem_dataspace);
           VRFY((status >= 0), "H5Sselect_all succeeded");
+          break;
+
+      default:
           break;
   }
 
