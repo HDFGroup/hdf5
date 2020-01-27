@@ -1415,7 +1415,7 @@ H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
     else
         TAILQ_INSERT_HEAD(&eot_queue_g, entry_ptr, link);
 
-    /* Set up globals accordinly */
+    /* Set up globals accordingly */
     if(!TAILQ_EMPTY(&eot_queue_g)) {
         vfd_swmr_writer_g = TAILQ_FIRST(&eot_queue_g)->vfd_swmr_writer;
         end_of_tick_g = TAILQ_FIRST(&eot_queue_g)->end_of_tick;
