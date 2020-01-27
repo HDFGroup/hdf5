@@ -1345,7 +1345,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             } /* end else */
         } /* end while */
 
-        for(i = 1; i < g_nTasks; i++)
+        for(i = 1; (int)i < g_nTasks; i++)
             MPI_Send(NULL, 0, MPI_BYTE, (int)i, MPI_TAG_END, MPI_COMM_WORLD);
 
         /* Print any final data waiting in our queue */

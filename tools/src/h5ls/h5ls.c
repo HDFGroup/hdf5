@@ -1304,7 +1304,7 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
     hid_t               new_obj_sid = H5I_INVALID_HID;
     hsize_t             elmt_counter = 0;  /*counts the # elements printed. */
     size_t              ncols = 80;        /* available output width        */
-    size_t              i;
+    int                 i;
     hsize_t             curr_pos = 0;      /* total data element position   */
     h5tools_str_t       buffer;            /* string into which to render   */
     h5tools_context_t   datactx;           /* print context  */
@@ -1314,7 +1314,7 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
     datactx = *ctx;  /* print context  */
     /* Assume entire data space to be printed */
     if (datactx.ndims > 0)
-        for (i = 0; i < (size_t)datactx.ndims; i++)
+        for (i = 0; (unsigned)i < datactx.ndims; i++)
             datactx.p_min_idx[i] = 0;
     datactx.need_prefix = TRUE;
 
@@ -1449,13 +1449,13 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
                                 /* Print point information */
                                 H5TOOLS_DEBUG("H5S_SEL_POINTS H5R_DATASET_REGION2");
                                 h5tools_dump_region_data_points(new_obj_sid, new_obj_id, stream, info, &datactx,
-                                                    &buffer, &curr_pos, ncols, i, elmt_counter);
+                                                    &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
                             }
                             else if(region_type == H5S_SEL_HYPERSLABS) {
                                 /* Print block information */
                                 H5TOOLS_DEBUG("H5S_SEL_HYPERSLABS H5R_DATASET_REGION2");
                                 h5tools_dump_region_data_blocks(new_obj_sid, new_obj_id, stream, info, &datactx,
-                                                    &buffer, &curr_pos, ncols, i, elmt_counter);
+                                                    &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
                             }
                             else
                                 H5TOOLS_INFO("invalid region type");
