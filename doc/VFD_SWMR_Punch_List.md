@@ -24,8 +24,8 @@ guide to the syntax.
 
 5.  **Vailin, complete** Add the pb\_expansion\_threshold field to the
     H5F\_vfd\_swmr\_config\_t structure, and update
-    H5Pset\_vfd\_swmr\_config()and
-    H5Pget\_vfd\_swmr\_config()accordingly.
+    H5Pset\_vfd\_swmr\_config() and
+    H5Pget\_vfd\_swmr\_config() accordingly.
 
 6.  **Vailin, in progress** Implement end tick now API call. See section 3.1.2 of the RFC for
     specifications.
