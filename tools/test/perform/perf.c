@@ -110,8 +110,10 @@ const char *FILENAME[] = {
 /* function prototypes */
 static int parse_args(int argc, char **argv);
 
+#ifndef H5_HAVE_UNISTD_H
 /* globals needed for getopt */
 extern char *optarg;
+#endif
 
 int main(int argc, char **argv)
 {

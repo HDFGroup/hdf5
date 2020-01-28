@@ -80,7 +80,7 @@ slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[],
         stride[1] = block[1];
         count[0] = 1;
         count[1] = 1;
-        start[0] = (hsize_t)(mpi_rank ? (hsize_t)mpi_rank * block[0] : 0);
+        start[0] = (mpi_rank ? (hsize_t)mpi_rank * block[0] : 0);
         start[1] = 0;
         if (VERBOSE_MED)
             HDprintf("slab_set ZROW\n");
@@ -90,11 +90,11 @@ slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[],
         block[0] = (hsize_t)dim0;
         block[1] = (hsize_t)(mpi_rank ? dim1 / mpi_size : 0);
         stride[0] = block[0];
-        stride[1] = (mpi_rank ? block[1] : 1); /* avoid setting stride to 0 */
+        stride[1] = (hsize_t)(mpi_rank ? block[1] : 1); /* avoid setting stride to 0 */
         count[0] = 1;
         count[1] = 1;
         start[0] = 0;
-        start[1] = (hsize_t)(mpi_rank ? (hsize_t)mpi_rank * block[1] : 0);
+        start[1] = (mpi_rank ? (hsize_t)mpi_rank * block[1] : 0);
         if (VERBOSE_MED)
             HDprintf("slab_set ZCOL\n");
         break;
@@ -1115,7 +1115,7 @@ dataset_readAll(void)
 
     /* set up the coords array selection */
     num_points = (size_t)dim1;
-    coords = (hsize_t *)HDmalloc((size_t)dim0 * (size_t)dim1 * (size_t)RANK * sizeof(hsize_t));
+    coords = (hsize_t *)HDmalloc((size_t)dim0 * (size_t)dim1 * RANK * sizeof(hsize_t));
     VRFY((coords != NULL), "coords malloc succeeded");
 
     /* allocate memory for data buffer */
@@ -1416,7 +1416,7 @@ dataset_readAll(void)
     ret = H5Sselect_all(file_dataspace);
     VRFY((ret >= 0), "H5Sselect_all succeeded");
 
-    H5_CHECKED_ASSIGN(num_points, size_t, dim0 * dim1, int);
+    num_points = (size_t)(dim0 * dim1);
     k=0;
     for (i=0 ; i<dim0; i++) {
         for (j=0 ; j<dim1; j++) {
@@ -1839,6 +1839,7 @@ extend_writeInd2(void)
     /* -------------------------
      * Write to the second half of the dataset
      * -------------------------*/
+    H5_CHECK_OVERFLOW(orig_size, hsize_t, int);
     for (i=0; i<(int)orig_size; i++)
         written[i] = (int)orig_size + i;
     MESG("data array re-initialized");
@@ -2545,7 +2546,7 @@ compress_readAll(void)
 
     /* Initialize data buffers */
     for(u=0; u<dim;u++)
-        data_orig[u]=(int)u;
+        data_orig[u]=(DATATYPE)u;
 
     /* Run test both with and without filters disabled on partial chunks */
     for(disable_partial_chunk_filters = 0; disable_partial_chunk_filters <= 1;
@@ -3913,7 +3914,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     length = dim0 * dim1;
 
     /* Allocate and initialize the buffer */
-    buffer = (int *)HDmalloc(sizeof(int) * (size_t)length);
+    buffer = (int *)HDmalloc(sizeof(int) * length);
     VRFY((buffer != NULL), "HDmalloc of buffer succeeded");
     for(i = 0; i < length; i++)
         buffer[i] = i;
@@ -4337,20 +4338,22 @@ dataset_atomicity(void)
 
         compare = 5;
 
+        H5_CHECK_OVERFLOW(block[0], hsize_t, int);
+        H5_CHECK_OVERFLOW(block[1], hsize_t, int);
         for (i=0 ; i<dim0 ; i++) {
-            if ((hsize_t)i >= (hsize_t)mpi_rank*(block[0]+1)) {
+            if (i >= mpi_rank*((int)block[0]+1)) {
                 break;
             }
-            if (((hsize_t)i+1)%(block[0]+1)==0) {
+            if ((i+1)%((int)block[0]+1)==0) {
                 k += dim1;
                 continue;
             }
             for (j=0 ; j<dim1 ; j++) {
-                if ((hsize_t)j >= (hsize_t)mpi_rank*(block[1]+1)) {
-                    H5_CHECKED_ASSIGN(k, int, (hsize_t)dim1 - (hsize_t)mpi_rank*(block[1]+1), hsize_t);
+                if (j >= mpi_rank*((int)block[1]+1)) {
+                    k += dim1 - mpi_rank*((int)block[1]+1);
                     break;
                 }
-                if (((hsize_t)j+1)%(block[1]+1)==0) {
+                if ((j+1)%((int)block[1]+1)==0) {
                     k++;
                     continue;
                 }

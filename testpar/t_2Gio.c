@@ -562,7 +562,17 @@ static int MpioTest2G( MPI_Comm comm )
     hid_t   plist_id;            /* property list identifier */
     hid_t   filespace;           /* file and memory dataspace identifiers */
     int     *data;               /* pointer to data buffer to write */
+    size_t  tot_size_bytes;
+    hid_t   dcpl_id;
+    hid_t   memorydataspace;
+    hid_t   filedataspace;
+    size_t  slice_per_process;
+    size_t  data_size;
+    size_t  data_size_bytes;
 
+    hsize_t chunk[3];
+    hsize_t h5_counts[3];
+    hsize_t h5_offsets[3];
     hsize_t shape[3] = {1024, 1024, 1152};
 
     /*
@@ -598,7 +608,7 @@ static int MpioTest2G( MPI_Comm comm )
     /*
      * Create the dataspace for the dataset.
      */
-    size_t tot_size_bytes = sizeof(int);
+    tot_size_bytes = sizeof(int);
     for (int i = 0; i < 3; i++) {
       tot_size_bytes *= shape[i];
     }
@@ -611,9 +621,11 @@ static int MpioTest2G( MPI_Comm comm )
     /*
      * Select chunking
      */
-    hid_t dcpl_id  = H5Pcreate (H5P_DATASET_CREATE);
+    dcpl_id  = H5Pcreate (H5P_DATASET_CREATE);
     VRFY((dcpl_id >= 0), "H5P_DATASET_CREATE");
-    hsize_t chunk[3] = {4, shape[1], shape[2]};
+    chunk[0] = 4;
+    chunk[1] = shape[1];
+    shape[2] = shape[2];
     status = H5Pset_chunk(dcpl_id, 3, chunk);
     VRFY((status >= 0), "H5Pset_chunk succeeded");
 
@@ -634,10 +646,9 @@ static int MpioTest2G( MPI_Comm comm )
     status = H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
     VRFY((status >= 0), "");
 
-    size_t slice_per_process; 
     H5_CHECKED_ASSIGN(slice_per_process, size_t, (shape[0] + (hsize_t)mpi_size - 1) / (hsize_t)mpi_size, hsize_t);
-    size_t data_size = slice_per_process * shape[1] * shape[2];
-    size_t data_size_bytes = sizeof(int) * data_size;
+    data_size = slice_per_process * shape[1] * shape[2];
+    data_size_bytes = sizeof(int) * data_size;
     data = HDmalloc(data_size_bytes);
     VRFY((data != NULL), "data HDmalloc succeeded");
 
@@ -645,9 +656,13 @@ static int MpioTest2G( MPI_Comm comm )
         data[i] = mpi_rank;
     }
 
-    hsize_t h5_counts[3] = { slice_per_process, shape[1], shape[2] };
-    hsize_t h5_offsets[3] = { (size_t)mpi_rank * slice_per_process, 0, 0};
-    hid_t filedataspace = H5Screate_simple(3, shape, NULL);
+    h5_counts[0] = slice_per_process;
+    h5_counts[1] = shape[1];
+    h5_counts[2] = shape[2];
+    h5_offsets[0] = (size_t)mpi_rank * slice_per_process;
+    h5_offsets[1] = 0;
+    h5_offsets[2] = 0;
+    filedataspace = H5Screate_simple(3, shape, NULL);
     VRFY((filedataspace >= 0), "H5Screate_simple succeeded");
 
     // fix reminder along first dimension multiple of chunk[0]
@@ -659,7 +674,7 @@ static int MpioTest2G( MPI_Comm comm )
         h5_offsets, NULL, h5_counts, NULL);
     VRFY((status >= 0), "H5Sselect_hyperslab succeeded");
 
-    hid_t memorydataspace = H5Screate_simple(3, h5_counts, NULL);
+    memorydataspace = H5Screate_simple(3, h5_counts, NULL);
     VRFY((memorydataspace >= 0), "H5Screate_simple succeeded");
 
     status = H5Dwrite(dset_id, H5T_NATIVE_INT,
@@ -2149,7 +2164,7 @@ extend_writeInd2(void)
 {
     const char *filename;
     hid_t fid;                  /* HDF5 file ID */
-    hid_t fapl;            /* File access templates */
+    hid_t fapl_id;            /* File access templates */
     hid_t fs;           /* File dataspace ID */
     hid_t ms;           /* Memory dataspace ID */
     hid_t dataset;        /* Dataset ID */
@@ -2177,15 +2192,15 @@ extend_writeInd2(void)
      * START AN HDF5 FILE
      * -------------------*/
     /* setup file access template */
-    fapl = create_faccess_plist(test_comm, MPI_INFO_NULL, facc_type);
-    VRFY((fapl >= 0), "create_faccess_plist succeeded");
+    fapl_id = create_faccess_plist(test_comm, MPI_INFO_NULL, facc_type);
+    VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
 
     /* create the file collectively */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
     /* Release file-access template */
-    ret = H5Pclose(fapl);
+    ret = H5Pclose(fapl_id);
     VRFY((ret >= 0), "H5Pclose succeeded");
 
 
@@ -3403,7 +3418,7 @@ test_actual_io_mode(int selection_mode) {
     hid_t       sid = -1;
     hid_t       dataset = -1;
     hid_t       data_type = H5T_NATIVE_INT;
-    hid_t       fapl = -1;
+    hid_t       fapl_id = -1;
     hid_t       mem_space = -1;
     hid_t       file_space = -1;
     hid_t       dcpl = -1;
@@ -3454,11 +3469,11 @@ test_actual_io_mode(int selection_mode) {
     HDassert(filename != NULL);
 
     /* Setup the file access template */
-    fapl = create_faccess_plist(mpi_comm, mpi_info, facc_type);
-    VRFY((fapl >= 0), "create_faccess_plist() succeeded");
+    fapl_id = create_faccess_plist(mpi_comm, mpi_info, facc_type);
+    VRFY((fapl_id >= 0), "create_faccess_plist() succeeded");
 
     /* Create the file */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
     /* Create the basic Space */
@@ -3790,7 +3805,7 @@ test_actual_io_mode(int selection_mode) {
 
     /* Release some resources */
     ret = H5Sclose(sid);
-    ret = H5Pclose(fapl);
+    ret = H5Pclose(fapl_id);
     ret = H5Pclose(dcpl);
     ret = H5Pclose(dxpl_write);
     ret = H5Pclose(dxpl_read);
@@ -3919,7 +3934,7 @@ test_no_collective_cause_mode(int selection_mode)
     hid_t       sid = -1;
     hid_t       dataset = -1;
     hid_t       data_type = H5T_NATIVE_INT;
-    hid_t       fapl = -1;
+    hid_t       fapl_id = -1;
     hid_t       dcpl = -1;
     hid_t       dxpl_write = -1;
     hid_t       dxpl_read = -1;
@@ -4000,11 +4015,11 @@ test_no_collective_cause_mode(int selection_mode)
     HDassert(filename != NULL);
 
     /* Setup the file access template */
-    fapl = create_faccess_plist(mpi_comm, mpi_info, l_facc_type);
-    VRFY((fapl >= 0), "create_faccess_plist() succeeded");
+    fapl_id = create_faccess_plist(mpi_comm, mpi_info, l_facc_type);
+    VRFY((fapl_id >= 0), "create_faccess_plist() succeeded");
 
     /* Create the file */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
@@ -4171,8 +4186,8 @@ test_no_collective_cause_mode(int selection_mode)
     /* Release some resources */
     if (sid)
         H5Sclose(sid);
-    if (fapl)
-        H5Pclose(fapl);
+    if (fapl_id)
+        H5Pclose(fapl_id);
     if (dcpl)
         H5Pclose(dcpl);
     if (dxpl_write)
