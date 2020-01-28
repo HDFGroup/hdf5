@@ -27,8 +27,8 @@ build:
         - ml load cmake/3.14.5
         - ml list
         - ml avail openmpi
-#        - df -T
-        - ls /run/user
+        - echo "Check type of available disk drives\n"
+        - df -T
 #
 #
         - CI_PROJ_DIR=${PWD}
