@@ -1614,7 +1614,7 @@ H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries)
     HDassert(p - image == (ptrdiff_t)hdr_size);
 
     /* Set to beginning of the file */
-    if ( HDlseek(f->shared->vfd_swmr_md_fd, (HDoff_t)H5FD_MD_HEADER_OFF, SEEK_SET) < 0 )
+    if ( HDlseek(f->shared->vfd_swmr_md_fd, H5FD_MD_HEADER_OFF, SEEK_SET) < 0 )
 
         HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
                     "unable to seek in metadata file")
@@ -1674,7 +1674,7 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries,
              (num_entries == 0 && index == NULL));
 
     /* Allocate space for the buffer to hold the index */
-    if ( (image = (uint8_t *)HDmalloc(idx_size)) == NULL )
+    if ( (image = HDmalloc(idx_size)) == NULL )
 
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                     "memory allocation failed for md index")
@@ -1685,7 +1685,7 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries,
     p = image;
 
     /* Encode magic for index */
-    HDmemcpy(p, H5FD_MD_INDEX_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    HDmemcpy(p, H5FD_MD_INDEX_MAGIC, H5_SIZEOF_MAGIC);
     p += H5_SIZEOF_MAGIC;
 
     /* Encode tick number */
@@ -1889,8 +1889,7 @@ H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
 
     while ( result == -1 ) {
 
-        req.tv_nsec = rem.tv_nsec;
-        req.tv_sec = rem.tv_sec;
+        req = rem;
         result = HDnanosleep(&req, &rem);
     }
 
