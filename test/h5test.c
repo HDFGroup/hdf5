@@ -23,6 +23,7 @@
 
 #include "h5test.h"
 #include "H5srcdir.h"
+#include "H5srcdir_str.h"
 
 /* Necessary for h5_verify_cached_stabs() */
 #define H5G_FRIEND        /*suppress error about including H5Gpkg      */
@@ -99,6 +100,12 @@ static const char *multi_letters = "msbrglo";
 
 /* The # of seconds to wait for the message file--used by h5_wait_message() */
 #define MESSAGE_TIMEOUT         300             /* Timeout in seconds */
+
+/* Buffer to construct path in and return pointer to */
+static char srcdir_path[1024] = "";
+
+/* Buffer to construct file in and return pointer to */
+static char srcdir_testpath[1024] = "";
 
 /*  The strings that correspond to library version bounds H5F_libver_t in H5Fpublic.h */
 /*  This is used by h5_get_version_string() */
@@ -2038,3 +2045,56 @@ h5_get_version_string(H5F_libver_t libver)
 {
     return(LIBVER_NAMES[libver]);
 } /* end of h5_get_version_string */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_get_srcdir_filename
+ *
+ * Purpose:     Append the test file name to the srcdir path and return the whole string
+ *
+ * Return:      The string
+ *
+ *-------------------------------------------------------------------------
+ */
+const char *H5_get_srcdir_filename(const char *filename)
+{
+    const char *srcdir = H5_get_srcdir();
+
+    /* Check for error */
+    if(NULL == srcdir)
+        return(NULL);
+    else {
+        /* Build path to test file */
+        if((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(srcdir_testpath)) {
+            HDsnprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s%s", srcdir, filename);
+            return(srcdir_testpath);
+        } /* end if */
+        else
+            return(NULL);
+    } /* end else */
+} /* end H5_get_srcdir_filename() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_get_srcdir
+ *
+ * Purpose:     Just return the srcdir path 
+ *
+ * Return:      The string
+ *
+ *-------------------------------------------------------------------------
+ */
+const char *H5_get_srcdir(void)
+{
+    const char *srcdir = HDgetenv("srcdir");
+
+    /* Check for using the srcdir from configure time */
+    if(NULL == srcdir)
+        srcdir = config_srcdir;
+
+    /* Build path to all test files */
+    if((HDstrlen(srcdir) + 2) < sizeof(srcdir_path)) {
+        HDsnprintf(srcdir_path, sizeof(srcdir_path), "%s/", srcdir);
+        return(srcdir_path);
+    } /* end if */
+    else
+        return(NULL);
+} /* end H5_get_srcdir() */
