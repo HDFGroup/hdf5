@@ -534,28 +534,6 @@
 #define H5_REQUEST_NULL                 NULL
 
 /*
- * A macro to portably decrement enumerated types.
- */
-#ifndef H5_DEC_ENUM
-#  define H5_DEC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)-1))
-#endif
-
-/* Double constant wrapper
- *
- * Quiets gcc warnings from -Wunsuffixed-float-constants.
- *
- * This is a really annoying warning since the standard specifies that
- * constants of type double do NOT get a suffix so there's no way
- * to specify a constant of type double. To quiet gcc, we specify floating
- * point constants as type long double and cast to double.
- *
- * Note that this macro only needs to be used where using a double
- * is important. For most code, suffixing constants with F will quiet the
- * compiler and not produce erroneous code.
- */
-#define H5_DOUBLE(S) ((double) S ## L)
-
-/*
  * Methods to compare the equality of floating-point values:
  *
  *    1. H5_XXX_ABS_EQUAL - check if the difference is smaller than the
@@ -1032,6 +1010,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDislower
     #define HDislower(C)    islower((int)(C)) /*cast for solaris warning*/
 #endif /* HDislower */
+#ifndef HDisnan
+    #define HDisnan(X)      isnan(X)
+#endif /* HDisnan */
 #ifndef HDisprint
     #define HDisprint(C)    isprint((int)(C)) /*cast for solaris warning*/
 #endif /* HDisprint */
