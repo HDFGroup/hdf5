@@ -42,7 +42,7 @@ build:
         - echo 'set (MAX_PROC_COUNT 8)' >> config/cmake/scripts/HDF5options.cmake
         - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_TOOLS:BOOL=OFF")' >> config/cmake/scripts/HDF5options.cmake
         - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_EXAMPLES:BOOL=OFF")' >> config/cmake/scripts/HDF5options.cmake
-         - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_NUMPROC_FLAG:STRING=-n")' >> config/cmake/scripts/HDF5options.cmake
+        - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_NUMPROC_FLAG:STRING=-n")' >> config/cmake/scripts/HDF5options.cmake
         - echo 'set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_MAX_NUMPROCS:STRING=6")' >> config/cmake/scripts/HDF5options.cmake
         - ctest -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-openmpi-gcc/8.3.0-Linux-4.18.0-80.7.2.el7.ppc64le-ppc64le",BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC
 #        - ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-openmpi-gcc/8.3.0-Linux-4.18.0-80.7.2.el7.ppc64le-ppc64le",MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC,LOCAL_SKIP_TEST=true
