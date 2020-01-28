@@ -37,7 +37,7 @@ cmake_minimum_required (VERSION 3.10)
 ##############################################################################
 
 set (CTEST_SOURCE_VERSION "1.12.0")
-set (CTEST_SOURCE_VERSEXT "-alpha1")
+set (CTEST_SOURCE_VERSEXT "-beta")
 
 ##############################################################################
 # handle input parameters to script.
