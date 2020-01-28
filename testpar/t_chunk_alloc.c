@@ -385,17 +385,17 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
 
         /* set expected value according the write pattern */
         switch (write_pattern) {
-        case all:
-            value = i%mpi_size + 1;
-            break;
-        case none:
-            value = 0;
-            break;
-        case sec_last:
-            if (i==nchunks-2)
-                value = 100;
-            else
+            case all:
+                value = i%mpi_size + 1;
+                break;
+            case none:
                 value = 0;
+                break;
+            case sec_last:
+                if (i==nchunks-2)
+                    value = 100;
+                else
+                    value = 0;
                 break;
             default:
                 HDassert(0);

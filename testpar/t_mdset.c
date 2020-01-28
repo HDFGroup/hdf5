@@ -235,6 +235,9 @@ void compact_dataset(void)
     char    dname[]="dataset";
     herr_t  ret;
     const char *filename;
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    hbool_t prop_value;
+#endif
 
     size = get_size();
 
@@ -314,7 +317,6 @@ void compact_dataset(void)
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    hbool_t prop_value;
     prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
     ret = H5Pinsert2(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value,
                      NULL, NULL, NULL, NULL, NULL, NULL);
@@ -620,6 +622,9 @@ void dataset_fillvalue(void)
     int acc, i, ii, j, k, l;    /* Local index variables */
     herr_t ret;                 /* Generic return value */
     const char *filename;
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    hbool_t prop_value;
+#endif
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -664,7 +669,6 @@ void dataset_fillvalue(void)
     VRFY((dxpl >= 0), "H5Pcreate succeeded");
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-      hbool_t prop_value;
       prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
       ret = H5Pinsert2(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value,
                    NULL, NULL, NULL, NULL, NULL, NULL);

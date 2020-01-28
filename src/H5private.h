@@ -1597,7 +1597,7 @@ extern char *strdup(const char *s);
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
     HDassert(_tmp_src >= 0);   \
-    HDassert(_tmp_src == _tmp_dst);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
