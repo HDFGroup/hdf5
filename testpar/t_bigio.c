@@ -51,8 +51,6 @@ hsize_t space_dim2 = SPACE_DIM2;
 static void coll_chunktest(const char* filename, int chunk_factor, int select_factor,
                            int api_option, int file_selection, int mem_selection, int mode);
 
-hsize_t H5_mpi_set_bigio_count(hsize_t new_count);
-
 /*
  * Setup the coordinates for point selection.
  */
