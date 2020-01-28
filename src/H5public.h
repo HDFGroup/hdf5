@@ -96,10 +96,10 @@ extern "C" {
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	12	/* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	0	/* For tweaks, bug-fixes, or development     */
-#define H5_VERS_SUBRELEASE "alpha1"	/* For pre-releases like snap0       */
+#define H5_VERS_RELEASE	1	/* For tweaks, bug-fixes, or development     */
+#define H5_VERS_SUBRELEASE "snap0"	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.12.0-alpha1"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.12.1-snap0"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
