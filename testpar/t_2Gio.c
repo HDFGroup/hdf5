@@ -539,6 +539,9 @@ static int MpioTest2G( MPI_Comm comm, int mpi_rank )
     hid_t   filespace;           /* file and memory dataspace identifiers */
     int     *data;               /* pointer to data buffer to write */
 
+    hsize_t chunk[3];
+    hsize_t h5_counts[3];
+    hsize_t h5_offsets[3];
     hsize_t shape[3] = {1024, 1024, 1152};
     size_t  data_size, data_size_bytes, slice_per_process = shape[0]/2;
     size_t  tot_size_bytes = sizeof(int);
