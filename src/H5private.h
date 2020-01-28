@@ -2684,7 +2684,7 @@ H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **ful
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */
 H5_DLL hsize_t  H5_mpi_set_bigio_count(hsize_t new_count);
-H5_DLL hsize_t  H5_mpi_get_bigio_count();
+H5_DLL hsize_t  H5_mpi_get_bigio_count(void);
 H5_DLL herr_t   H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new);
 H5_DLL herr_t   H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new);
 H5_DLL herr_t   H5_mpi_comm_free(MPI_Comm *comm);
