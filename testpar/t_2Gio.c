@@ -2125,7 +2125,7 @@ extend_writeInd2(void)
 {
     const char *filename;
     hid_t fid;                  /* HDF5 file ID */
-    hid_t fapl;            /* File access templates */
+    hid_t fapl_id;            /* File access templates */
     hid_t fs;           /* File dataspace ID */
     hid_t ms;           /* Memory dataspace ID */
     hid_t dataset;        /* Dataset ID */
@@ -2153,15 +2153,15 @@ extend_writeInd2(void)
      * START AN HDF5 FILE
      * -------------------*/
     /* setup file access template */
-    fapl = create_faccess_plist(test_comm, MPI_INFO_NULL, facc_type);
-    VRFY((fapl >= 0), "create_faccess_plist succeeded");
+    fapl_id = create_faccess_plist(test_comm, MPI_INFO_NULL, facc_type);
+    VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
 
     /* create the file collectively */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
     /* Release file-access template */
-    ret = H5Pclose(fapl);
+    ret = H5Pclose(fapl_id);
     VRFY((ret >= 0), "H5Pclose succeeded");
 
 
@@ -3379,7 +3379,7 @@ test_actual_io_mode(int selection_mode) {
     hid_t       sid = -1;
     hid_t       dataset = -1;
     hid_t       data_type = H5T_NATIVE_INT;
-    hid_t       fapl = -1;
+    hid_t       fapl_id = -1;
     hid_t       mem_space = -1;
     hid_t       file_space = -1;
     hid_t       dcpl = -1;
@@ -3430,11 +3430,11 @@ test_actual_io_mode(int selection_mode) {
     HDassert(filename != NULL);
 
     /* Setup the file access template */
-    fapl = create_faccess_plist(mpi_comm, mpi_info, facc_type);
-    VRFY((fapl >= 0), "create_faccess_plist() succeeded");
+    fapl_id = create_faccess_plist(mpi_comm, mpi_info, facc_type);
+    VRFY((fapl_id >= 0), "create_faccess_plist() succeeded");
 
     /* Create the file */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
     /* Create the basic Space */
@@ -3766,7 +3766,7 @@ test_actual_io_mode(int selection_mode) {
 
     /* Release some resources */
     ret = H5Sclose(sid);
-    ret = H5Pclose(fapl);
+    ret = H5Pclose(fapl_id);
     ret = H5Pclose(dcpl);
     ret = H5Pclose(dxpl_write);
     ret = H5Pclose(dxpl_read);
@@ -3895,7 +3895,7 @@ test_no_collective_cause_mode(int selection_mode)
     hid_t       sid = -1;
     hid_t       dataset = -1;
     hid_t       data_type = H5T_NATIVE_INT;
-    hid_t       fapl = -1;
+    hid_t       fapl_id = -1;
     hid_t       dcpl = -1;
     hid_t       dxpl_write = -1;
     hid_t       dxpl_read = -1;
@@ -3976,11 +3976,11 @@ test_no_collective_cause_mode(int selection_mode)
     HDassert(filename != NULL);
 
     /* Setup the file access template */
-    fapl = create_faccess_plist(mpi_comm, mpi_info, l_facc_type);
-    VRFY((fapl >= 0), "create_faccess_plist() succeeded");
+    fapl_id = create_faccess_plist(mpi_comm, mpi_info, l_facc_type);
+    VRFY((fapl_id >= 0), "create_faccess_plist() succeeded");
 
     /* Create the file */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
@@ -4147,8 +4147,8 @@ test_no_collective_cause_mode(int selection_mode)
     /* Release some resources */
     if (sid)
         H5Sclose(sid);
-    if (fapl)
-        H5Pclose(fapl);
+    if (fapl_id)
+        H5Pclose(fapl_id);
     if (dcpl)
         H5Pclose(dcpl);
     if (dxpl_write)

@@ -223,7 +223,7 @@ void coll_write_test(int chunk_factor)
   hsize_t  chunk_dims[2];
 
   herr_t   ret;
-  unsigned i;
+  int      i;
   int      fillvalue = 0;   /* Fill value for the dataset */
 
   int      *matrix_out = NULL;
@@ -682,7 +682,7 @@ coll_read_test(void)
   hsize_t  block[2];  /* Block sizes */
   herr_t   ret;
 
-  unsigned i;
+  int      i;
 
   int     *matrix_out;
   int     *matrix_out1;     /* Buffer to read from the dataset */
