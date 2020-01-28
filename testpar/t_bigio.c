@@ -15,7 +15,7 @@ const char *FILENAME[3]={ "bigio_test.h5",
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
 
-#define MAINPROCESS_G     (!mpi_rank_g) /* define process 0 as main process */
+#define MAIN_PROCESS     (!mpi_rank_g) /* define process 0 as main process */
 
 /* Constants definitions */
 #define RANK        2
@@ -1121,7 +1121,7 @@ single_rank_independent_io(void)
     if (mpi_rank_g == 0)
         HDprintf("single_rank_independent_io\n");
 
-    if (MAINPROCESS_G) {
+    if (MAIN_PROCESS) {
         hsize_t dims[] = { LARGE_DIM };
         hid_t file_id = -1;
         hid_t fapl_id = -1;
