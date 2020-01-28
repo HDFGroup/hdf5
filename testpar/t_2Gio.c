@@ -538,7 +538,6 @@ static int MpioTest2G( MPI_Comm comm, int mpi_rank )
     hid_t   plist_id;            /* property list identifier */
     hid_t   filespace;           /* file and memory dataspace identifiers */
     int     *data;               /* pointer to data buffer to write */
-
     hsize_t chunk[3];
     hsize_t h5_counts[3];
     hsize_t h5_offsets[3];
