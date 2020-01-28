@@ -43,18 +43,28 @@
 /* The maximum size allowed for blobs */
 #define H5VL_MAX_BLOB_ID_SIZE           (16)    /* Allow for 128-bits blob IDs */
 
-/* The maximum size allowed for tokens */
-#define H5VL_MAX_TOKEN_SIZE             (16)    /* Allow for 128-bits tokens */
 
 /*******************/
 /* Public Typedefs */
 /*******************/
 
-/* type for tokens. Token are unique and permanent identifiers that are
- * used to reference HDF5 objects. */
-typedef struct {
-    char __data[H5VL_MAX_TOKEN_SIZE];
-} H5VL_token_t;
+/* Enum type for each VOL subclass */
+/* (Used for various queries, etc) */
+typedef enum H5VL_subclass_t {
+    H5VL_SUBCLS_NONE,                   /* Operations outside of a subclass */
+    H5VL_SUBCLS_INFO,                   /* 'Info' subclass */
+    H5VL_SUBCLS_WRAP,                   /* 'Wrap' subclass */
+    H5VL_SUBCLS_ATTR,                   /* 'Attribute' subclass */
+    H5VL_SUBCLS_DATASET,                /* 'Dataset' subclass */
+    H5VL_SUBCLS_DATATYPE,               /* 'Named datatype' subclass */
+    H5VL_SUBCLS_FILE,                   /* 'File' subclass */
+    H5VL_SUBCLS_GROUP,                  /* 'Group' subclass */
+    H5VL_SUBCLS_LINK,                   /* 'Link' subclass */
+    H5VL_SUBCLS_OBJECT,                 /* 'Object' subclass */
+    H5VL_SUBCLS_REQUEST,                /* 'Request' subclass */
+    H5VL_SUBCLS_BLOB,                   /* 'Blob' subclass */
+    H5VL_SUBCLS_TOKEN                   /* 'Token' subclass */
+} H5VL_subclass_t;
 
 /* types for attribute GET callback */
 typedef enum H5VL_attr_get_t {
@@ -74,13 +84,16 @@ typedef enum H5VL_attr_specific_t {
     H5VL_ATTR_RENAME                        /* H5Arename(_by_name)                 */
 } H5VL_attr_specific_t;
 
+/* Typedef for VOL connector attribute optional VOL operations */
+typedef int H5VL_attr_optional_t;
+
 /* types for dataset GET callback */
 typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_DAPL,                  /* access property list                */
     H5VL_DATASET_GET_DCPL,                  /* creation property list              */
     H5VL_DATASET_GET_OFFSET,                /* offset                              */
     H5VL_DATASET_GET_SPACE,                 /* dataspace                           */
-    H5VL_DATASET_GET_SPACE_STATUS,          /* space  status                       */
+    H5VL_DATASET_GET_SPACE_STATUS,          /* space status                        */
     H5VL_DATASET_GET_STORAGE_SIZE,          /* storage size                        */
     H5VL_DATASET_GET_TYPE                   /* datatype                            */
 } H5VL_dataset_get_t;
@@ -91,6 +104,9 @@ typedef enum H5VL_dataset_specific_t {
     H5VL_DATASET_FLUSH,                     /* H5Dflush                            */
     H5VL_DATASET_REFRESH                    /* H5Drefresh                          */
 } H5VL_dataset_specific_t;
+
+/* Typedef for VOL connector dataset optional VOL operations */
+typedef int H5VL_dataset_optional_t;
 
 /* types for datatype GET callback */
 typedef enum H5VL_datatype_get_t {
@@ -103,6 +119,10 @@ typedef enum H5VL_datatype_specific_t {
     H5VL_DATATYPE_FLUSH,
     H5VL_DATATYPE_REFRESH
 } H5VL_datatype_specific_t;
+
+/* Typedef and values for native VOL connector named datatype optional VOL operations */
+typedef int H5VL_datatype_optional_t;
+/* (No optional named datatype VOL operations currently) */
 
 /* types for file GET callback */
 typedef enum H5VL_file_get_t {
@@ -118,7 +138,6 @@ typedef enum H5VL_file_get_t {
 
 /* types for file SPECIFIC callback */
 typedef enum H5VL_file_specific_t {
-    H5VL_FILE_POST_OPEN,                    /* Adjust file after open, with wrapping context */
     H5VL_FILE_FLUSH,                        /* Flush file                       */
     H5VL_FILE_REOPEN,                       /* Reopen the file                  */
     H5VL_FILE_MOUNT,                        /* Mount a file                     */
@@ -127,6 +146,9 @@ typedef enum H5VL_file_specific_t {
     H5VL_FILE_DELETE,                       /* Delete a file                    */
     H5VL_FILE_IS_EQUAL                      /* Check if two files are the same  */
 } H5VL_file_specific_t;
+
+/* Typedef for VOL connector file optional VOL operations */
+typedef int H5VL_file_optional_t;
 
 /* types for group GET callback */
 typedef enum H5VL_group_get_t {
@@ -139,6 +161,9 @@ typedef enum H5VL_group_specific_t {
     H5VL_GROUP_FLUSH,
     H5VL_GROUP_REFRESH
 } H5VL_group_specific_t;
+
+/* Typedef for VOL connector group optional VOL operations */
+typedef int H5VL_group_optional_t;
 
 /* link create types for VOL */
 typedef enum H5VL_link_create_type_t {
@@ -161,11 +186,16 @@ typedef enum H5VL_link_specific_t {
     H5VL_LINK_ITER             /* H5Literate/visit(_by_name)              */
 } H5VL_link_specific_t;
 
+/* Typedef and values for native VOL connector link optional VOL operations */
+typedef int H5VL_link_optional_t;
+/* (No optional link VOL operations currently) */
+
 /* types for object GET callback */
 typedef enum H5VL_object_get_t {
     H5VL_OBJECT_GET_FILE,              /* object file                       */
     H5VL_OBJECT_GET_NAME,              /* object name                       */
-    H5VL_OBJECT_GET_TYPE               /* object type                       */
+    H5VL_OBJECT_GET_TYPE,              /* object type                       */
+    H5VL_OBJECT_GET_INFO               /* H5Oget_info(_by_idx|name)3        */
 } H5VL_object_get_t;
 
 /* types for object SPECIFIC callback */
@@ -178,12 +208,19 @@ typedef enum H5VL_object_specific_t {
     H5VL_OBJECT_REFRESH                 /* H5{D|G|O|T}refresh                */
 } H5VL_object_specific_t;
 
+/* Typedef for VOL connector object optional VOL operations */
+typedef int H5VL_object_optional_t;
+
 /* types for async request SPECIFIC callback */
 typedef enum H5VL_request_specific_t {
     H5VL_REQUEST_WAITANY,               /* Wait until any request completes */
     H5VL_REQUEST_WAITSOME,              /* Wait until at least one requesst completes */
     H5VL_REQUEST_WAITALL                /* Wait until all requests complete */
 } H5VL_request_specific_t;
+
+/* Typedef and values for native VOL connector request optional VOL operations */
+typedef int H5VL_request_optional_t;
+/* (No optional request VOL operations currently) */
 
 /* types for 'blob' SPECIFIC callback */
 typedef enum H5VL_blob_specific_t {
@@ -192,6 +229,10 @@ typedef enum H5VL_blob_specific_t {
     H5VL_BLOB_ISNULL,                   /* Check if a blob ID is "null" */
     H5VL_BLOB_SETNULL                   /* Set a blob ID to the connector's "null" blob ID value */
 } H5VL_blob_specific_t;
+
+/* Typedef and values for native VOL connector blob optional VOL operations */
+typedef int H5VL_blob_optional_t;
+/* (No optional blob VOL operations currently) */
 
 /* Types for different ways that objects are located in an HDF5 container */
 typedef enum H5VL_loc_type_t {
@@ -215,7 +256,7 @@ typedef struct H5VL_loc_by_idx {
 } H5VL_loc_by_idx_t;
 
 typedef struct H5VL_loc_by_token {
-    H5VL_token_t *token;
+    H5O_token_t *token;
 } H5VL_loc_by_token_t;
 
 /* Structure to hold parameters for object locations.
@@ -278,7 +319,8 @@ typedef struct H5VL_attr_class_t {
     herr_t (*get)(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_attr_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_attr_optional_t opt_type, hid_t dxpl_id,
+        void **req, va_list arguments);
     herr_t (*close) (void *attr, hid_t dxpl_id, void **req);
 } H5VL_attr_class_t;
 
@@ -296,7 +338,8 @@ typedef struct H5VL_dataset_class_t {
     herr_t (*get)(void *obj, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*specific)(void *obj, H5VL_dataset_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_dataset_optional_t opt_type, hid_t dxpl_id,
+        void **req, va_list arguments);
     herr_t (*close) (void *dset, hid_t dxpl_id, void **req);
 } H5VL_dataset_class_t;
 
@@ -309,7 +352,7 @@ typedef struct H5VL_datatype_class_t {
     herr_t (*get)   (void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*specific)(void *obj, H5VL_datatype_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_datatype_optional_t opt_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *dt, hid_t dxpl_id, void **req);
 } H5VL_datatype_class_t;
 
@@ -321,7 +364,8 @@ typedef struct H5VL_file_class_t {
     herr_t (*get)(void *obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*specific)(void *obj, H5VL_file_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_file_optional_t opt_type, hid_t dxpl_id,
+                       void **req, va_list arguments);
     herr_t (*close) (void *file, hid_t dxpl_id, void **req);
 } H5VL_file_class_t;
 
@@ -334,7 +378,7 @@ typedef struct H5VL_group_class_t {
     herr_t (*get)(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*specific)(void *obj, H5VL_group_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_group_optional_t opt_type, hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*close) (void *grp, hid_t dxpl_id, void **req);
 } H5VL_group_class_t;
 
@@ -352,7 +396,8 @@ typedef struct H5VL_link_class_t {
                   hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_link_optional_t opt_type, hid_t dxpl_id,
+                       void **req, va_list arguments);
 } H5VL_link_class_t;
 
 /* H5O routines */
@@ -366,11 +411,29 @@ typedef struct H5VL_object_class_t {
                   hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_object_optional_t opt_type,
+                       hid_t dxpl_id, void **req, va_list arguments);
 } H5VL_object_class_t;
 
 /* Asynchronous request 'notify' callback */
 typedef herr_t (*H5VL_request_notify_t)(void *ctx, H5ES_status_t status);
+
+/* "Levels" for 'get connector class' introspection callback */
+typedef enum H5VL_get_conn_lvl_t {
+    H5VL_GET_CONN_LVL_CURR,         /* Get "current" connector (for this object) */
+    H5VL_GET_CONN_LVL_TERM          /* Get "terminal" connector (for this object) */
+                                    /* (Recursively called, for pass-through connectors) */
+                                    /* (Connectors that "split" must choose which connector to return) */
+} H5VL_get_conn_lvl_t;
+
+/* Forward declaration of H5VL_class_t, defined later in this file */
+struct H5VL_class_t;
+
+/* Container/connector introspection routines */
+typedef struct H5VL_introspect_class_t {
+    herr_t (*get_conn_cls)(void *obj, H5VL_get_conn_lvl_t lvl, const struct H5VL_class_t **conn_cls);
+    herr_t (*opt_query)(void *obj, H5VL_subclass_t cls, int opt_type, hbool_t *supported);
+} H5VL_introspect_class_t;
 
 /* Async request operation routines */
 typedef struct H5VL_request_class_t {
@@ -378,7 +441,7 @@ typedef struct H5VL_request_class_t {
     herr_t (*notify)(void *req, H5VL_request_notify_t cb, void *ctx);
     herr_t (*cancel)(void *req);
     herr_t (*specific)(void *req, H5VL_request_specific_t specific_type, va_list arguments);
-    herr_t (*optional)(void *req, va_list arguments);
+    herr_t (*optional)(void *req, H5VL_request_optional_t opt_type, va_list arguments);
     herr_t (*free)(void *req);
 } H5VL_request_class_t;
 
@@ -387,16 +450,15 @@ typedef struct H5VL_blob_class_t {
     herr_t (*put)(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
     herr_t (*get)(void *obj, const void *blob_id, void *buf, size_t size, void *ctx);
     herr_t (*specific)(void *obj, void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
-    herr_t (*optional)(void *obj, void *blob_id, va_list arguments);
+    herr_t (*optional)(void *obj, void *blob_id, H5VL_blob_optional_t opt_type, va_list arguments);
 } H5VL_blob_class_t;
 
-/*
- * VOL connector identifiers.  Values 0 through 255 are for connectors defined
- * by the HDF5 library.  Values 256 through 511 are available for testing new
- * filters.  Subsequent values should be obtained from the HDF5 development
- * team at help@hdfgroup.org.
- */
-typedef int H5VL_class_value_t;
+/* Object token routines */
+typedef struct H5VL_token_class_t {
+    herr_t (*cmp)(void *obj, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value);
+    herr_t (*to_str)(void *obj, H5I_type_t obj_type, const H5O_token_t *token, char **token_str);
+    herr_t (*from_str)(void *obj, H5I_type_t obj_type, const char *token_str, H5O_token_t *token);
+} H5VL_token_class_t;
 
 /* Class information for each VOL connector */
 typedef struct H5VL_class_t {
@@ -422,11 +484,13 @@ typedef struct H5VL_class_t {
     H5VL_object_class_t     object_cls;     /* Object (H5O*) class callbacks    */
 
     /* Infrastructure / Services */
+    H5VL_introspect_class_t introspect_cls; /* Container/connector introspection class callbacks */
     H5VL_request_class_t    request_cls;    /* Asynchronous request class callbacks */
-    H5VL_blob_class_t       blob_cls;       /* 'blob' callbacks */
+    H5VL_blob_class_t       blob_cls;       /* 'Blob' class callbacks */
+    H5VL_token_class_t      token_cls;      /* VOL connector object token class callbacks */
 
     /* Catch-all */
-    herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments); /* Optional callback */
+    herr_t (*optional)(void *obj, int op_type, hid_t dxpl_id, void **req, va_list arguments); /* Optional callback */
 } H5VL_class_t;
 
 
@@ -444,6 +508,7 @@ extern "C" {
 #endif
 
 /* Helper routines for VOL connector authors */
+H5_DLL hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);
 H5_DLL void *H5VLobject(hid_t obj_id);
 H5_DLL hid_t H5VLget_file_type(void *file_obj, hid_t connector_id,
     hid_t dtype_id);

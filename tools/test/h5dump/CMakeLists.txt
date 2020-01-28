@@ -43,10 +43,12 @@ if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   #add_test (NAME h5dumpgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dumpgentest>)
 endif ()
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
 
-include (CMakeTestsPBITS.cmake)
+  include (CMakeTestsPBITS.cmake)
 
-include (CMakeTestsVDS.cmake)
+  include (CMakeTestsVDS.cmake)
 
-include (CMakeTestsXML.cmake)
+  include (CMakeTestsXML.cmake)
+endif ()

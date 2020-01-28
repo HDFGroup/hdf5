@@ -78,7 +78,7 @@
 ssize_t
 H5I__get_name_test(hid_t id, char *name/*out*/, size_t size, hbool_t *cached)
 {
-    H5VL_object_t *vol_obj;             /* Object token of id */
+    H5VL_object_t *vol_obj;             /* Object of id */
     H5G_loc_t   loc;                    /* Object location */
     hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
     hbool_t     vol_wrapper_set = FALSE;/* Whether the VOL object wrapping context was set up */
@@ -96,7 +96,7 @@ H5I__get_name_test(hid_t id, char *name/*out*/, size_t size, hbool_t *cached)
         HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
 
     /* Set wrapper info in API context */
-    if(H5VL_set_vol_wrapper(vol_obj->data, vol_obj->connector) < 0)
+    if(H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 

@@ -26,4 +26,22 @@ public class H5_ih_info_t implements Serializable {
         this.index_size = index_size;
         this.heap_size = heap_size;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+
+        if (!(o instanceof H5_ih_info_t))
+            return false;
+
+        H5_ih_info_t info = (H5_ih_info_t) o;
+
+        if (this.index_size != info.index_size)
+        	return false;
+        if (this.heap_size != info.heap_size)
+        	return false;
+
+        return true;
+    }
 }

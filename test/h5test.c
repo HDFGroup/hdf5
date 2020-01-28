@@ -1321,8 +1321,7 @@ h5_dump_info_object(MPI_Info info)
     int    flag;
     int    i, nkeys;
 
-    HDprintf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", (int)info,
-  MPI_MAX_INFO_VAL);
+    HDprintf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
     if (info==MPI_INFO_NULL){
   HDprintf("object is MPI_INFO_NULL\n");
     }
@@ -1698,7 +1697,7 @@ error:
  */
 static herr_t
 h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name,
-    const H5O_info_t *oinfo, void H5_ATTR_UNUSED *udata)
+    const H5O_info2_t *oinfo, void H5_ATTR_UNUSED *udata)
 {
     if(oinfo->type == H5O_TYPE_GROUP)
         return H5G__verify_cached_stabs_test(oid);
@@ -1746,7 +1745,7 @@ h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
             continue;
         } /* end if */
 
-        if(H5Ovisit2(file, H5_INDEX_NAME, H5_ITER_NATIVE,
+        if(H5Ovisit3(file, H5_INDEX_NAME, H5_ITER_NATIVE,
                 h5_verify_cached_stabs_cb, NULL, H5O_INFO_BASIC) < 0)
             goto error;
 

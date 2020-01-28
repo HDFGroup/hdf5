@@ -21,7 +21,7 @@
  *-------------------------------------------------------------------------
  */
 typedef struct trav_addr_path_t {
-    haddr_t addr;
+    H5O_token_t token;
     char *path;
 } trav_addr_path_t;
 
@@ -43,7 +43,7 @@ typedef struct {
     hbool_t is_absolute;            /* Whether the traversal has absolute paths */
     const char *base_grp_name;      /* Name of the group that serves as the base
                                      * for iteration */
-    unsigned fields;                /* Fields needed in H5O_info_t struct */
+    unsigned fields;                /* Fields needed in H5O_info2_t struct */
 } trav_ud_traverse_t;
 
 typedef struct {
@@ -65,10 +65,10 @@ typedef struct trav_path_op_data_t {
  */
 static void trav_table_add(trav_table_t *table,
                         const char *objname,
-                        const H5O_info_t *oinfo);
+                        const H5O_info2_t *oinfo);
 
 static void trav_table_addlink(trav_table_t *table,
-                        haddr_t objno,
+                        const H5O_token_t *obj_token,
                         const char *path);
 
 /*-------------------------------------------------------------------------
@@ -114,17 +114,17 @@ h5trav_set_verbose(int print_verbose)
  *-------------------------------------------------------------------------
  */
 
-
+
 /*-------------------------------------------------------------------------
- * Function: trav_addr_add
+ * Function: trav_token_add
  *
- * Purpose:  Add a hardlink address to visited data structure
+ * Purpose:  Add an object token to visited data structure
  *
  * Return:   void
  *-------------------------------------------------------------------------
  */
 static void
-trav_addr_add(trav_addr_t *visited, haddr_t addr, const char *path)
+trav_token_add(trav_addr_t *visited, H5O_token_t *token, const char *path)
 {
     size_t idx;         /* Index of address to use */
 
@@ -136,35 +136,39 @@ trav_addr_add(trav_addr_t *visited, haddr_t addr, const char *path)
 
     /* Append it */
     idx = visited->nused++;
-    visited->objs[idx].addr = addr;
+    HDmemcpy(&visited->objs[idx].token, token, sizeof(H5O_token_t));
     visited->objs[idx].path = HDstrdup(path);
-} /* end trav_addr_add() */
+} /* end trav_token_add() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function: trav_addr_visited
+ * Function: trav_token_visited
  *
- * Purpose:  Check if an address has already been visited
+ * Purpose:  Check if an object token has already been seen
  *
  * Return:   TRUE/FALSE
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE static const char *
-trav_addr_visited(trav_addr_t *visited, haddr_t addr)
+trav_token_visited(hid_t loc_id, trav_addr_t *visited, H5O_token_t *token)
 {
     size_t u;           /* Local index variable */
+    int token_cmp;
 
     /* Look for address */
-    for(u = 0; u < visited->nused; u++)
+    for(u = 0; u < visited->nused; u++) {
         /* Check for address already in array */
-        if(visited->objs[u].addr == addr)
+        if(H5Otoken_cmp(loc_id, &visited->objs[u].token, token, &token_cmp) < 0)
+            return NULL;
+        if(!token_cmp)
             return(visited->objs[u].path);
+    }
 
-    /* Didn't find address */
+    /* Didn't find object token */
     return(NULL);
-} /* end trav_addr_visited() */
+} /* end trav_token_visited() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: traverse_cb
  *
@@ -172,7 +176,7 @@ trav_addr_visited(trav_addr_t *visited, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
+traverse_cb(hid_t loc_id, const char *path, const H5L_info2_t *linfo,
     void *_udata)
 {
     trav_ud_traverse_t *udata = (trav_ud_traverse_t *)_udata;     /* User data */
@@ -199,10 +203,10 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
 
     /* Perform the correct action for different types of links */
     if(linfo->type == H5L_TYPE_HARD) {
-        H5O_info_t oinfo;
+        H5O_info2_t oinfo;
 
         /* Get information about the object */
-        if(H5Oget_info_by_name2(loc_id, path, &oinfo, udata->fields, H5P_DEFAULT) < 0) {
+        if(H5Oget_info_by_name3(loc_id, path, &oinfo, udata->fields, H5P_DEFAULT) < 0) {
             if(new_name)
                 HDfree(new_name);
             return(H5_ITER_ERROR);
@@ -212,8 +216,8 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
          *  already visited, if it isn't there already
          */
         if(oinfo.rc > 1)
-            if(NULL == (already_visited = trav_addr_visited(udata->seen, oinfo.addr)))
-                trav_addr_add(udata->seen, oinfo.addr, full_name);
+            if(NULL == (already_visited = trav_token_visited(loc_id, udata->seen, &oinfo.token)))
+                trav_token_add(udata->seen, &oinfo.token, full_name);
 
         /* Make 'visit object' callback */
         if(udata->visitor->visit_obj)
@@ -239,7 +243,7 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
     return(H5_ITER_CONT);
 } /* end traverse_cb() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: traverse
  *
@@ -254,12 +258,12 @@ static int
 traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
         hbool_t recurse, const trav_visitor_t *visitor, unsigned fields)
 {
-    H5O_info_t  oinfo;          /* Object info for starting group */
-    int         ret_value = SUCCEED;
+    H5O_info2_t oinfo;          /* Object info for starting group */
+    int         ret_value = 0;
 
     /* Get info for starting object */
-    if(H5Oget_info_by_name2(file_id, grp_name, &oinfo, fields, H5P_DEFAULT) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Oget_info_by_name failed");
+    if(H5Oget_info_by_name3(file_id, grp_name, &oinfo, fields, H5P_DEFAULT) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Oget_info_by_name failed");
 
     /* Visit the starting object */
     if(visit_start && visitor->visit_obj)
@@ -276,7 +280,7 @@ traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
 
         /* Check for multiple links to top group */
         if(oinfo.rc > 1)
-            trav_addr_add(&seen, oinfo.addr, grp_name);
+            trav_token_add(&seen, &oinfo.token, grp_name);
 
         /* Set up user data structure */
         udata.seen = &seen;
@@ -288,13 +292,13 @@ traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
         /* Check for iteration of links vs. visiting all links recursively */
         if(recurse) {
             /* Visit all links in group, recursively */
-            if(H5Lvisit_by_name(file_id, grp_name, trav_index_by, trav_index_order, traverse_cb, &udata, H5P_DEFAULT) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lvisit_by_name failed");
+            if(H5Lvisit_by_name2(file_id, grp_name, trav_index_by, trav_index_order, traverse_cb, &udata, H5P_DEFAULT) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Lvisit_by_name failed");
         } /* end if */
         else {
             /* Iterate over links in group */
-            if(H5Literate_by_name(file_id, grp_name, trav_index_by, trav_index_order, NULL, traverse_cb, &udata, H5P_DEFAULT) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Literate_by_name failed");
+            if(H5Literate_by_name2(file_id, grp_name, trav_index_by, trav_index_order, NULL, traverse_cb, &udata, H5P_DEFAULT) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Literate_by_name failed");
         } /* end else */
 
         /* Free visited addresses table */
@@ -312,7 +316,7 @@ done:
     return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: trav_info_add
  *
@@ -338,7 +342,9 @@ trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type)
         info->paths[idx].path = HDstrdup(path);
         info->paths[idx].type = obj_type;
         info->paths[idx].fileno = 0;
-        info->paths[idx].objno = HADDR_UNDEF;
+
+        /* Set token to 'undefined' values */
+        info->paths[idx].obj_token = H5O_TOKEN_UNDEF;
     }
 } /* end trav_info_add() */
 
@@ -354,19 +360,19 @@ trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type)
 void
 trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
 {
-    H5O_info_t oinfo;
+    H5O_info2_t oinfo;
     size_t idx = info->nused - 1;
 
-    if ( info->paths[idx].path && HDstrcmp(info->paths[idx].path, "."))
-      H5Oget_info_by_name2(loc_id, info->paths[idx].path, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+    if(info->paths[idx].path && HDstrcmp(info->paths[idx].path, "."))
+        H5Oget_info_by_name3(loc_id, info->paths[idx].path, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     else
-      H5Oget_info2(loc_id, &oinfo, H5O_INFO_BASIC);
+        H5Oget_info3(loc_id, &oinfo, H5O_INFO_BASIC);
 
-    info->paths[idx].objno = oinfo.addr;
+    HDmemcpy(&info->paths[idx].obj_token, &oinfo.token, sizeof(H5O_token_t));
     info->paths[idx].fileno = oinfo.fileno;
 } /* end trav_fileinfo_add() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: trav_info_visit_obj
  *
@@ -377,7 +383,7 @@ trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
  *-------------------------------------------------------------------------
  */
 int
-trav_info_visit_obj(const char *path, const H5O_info_t *oinfo,
+trav_info_visit_obj(const char *path, const H5O_info2_t *oinfo,
         const char H5_ATTR_UNUSED *already_visited, void *udata)
 {
     size_t idx;
@@ -390,13 +396,13 @@ trav_info_visit_obj(const char *path, const H5O_info_t *oinfo,
     /* set object addr and fileno. These are for checking same object */
     info_p = (trav_info_t *) udata;
     idx = info_p->nused - 1;
-    info_p->paths[idx].objno = oinfo->addr;
+    HDmemcpy(&info_p->paths[idx].obj_token, &oinfo->token, sizeof(H5O_token_t));
     info_p->paths[idx].fileno = oinfo->fileno;
 
     return(0);
 } /* end trav_info_visit_obj() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: trav_info_visit_lnk
  *
@@ -407,7 +413,7 @@ trav_info_visit_obj(const char *path, const H5O_info_t *oinfo,
  *-------------------------------------------------------------------------
  */
 int
-trav_info_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
+trav_info_visit_lnk(const char *path, const H5L_info2_t *linfo, void *udata)
 {
     /* Add the link to the 'info' struct */
     trav_info_add((trav_info_t *)udata, path, ((linfo->type == H5L_TYPE_SOFT) ? H5TRAV_TYPE_LINK : H5TRAV_TYPE_UDLINK));
@@ -415,7 +421,7 @@ trav_info_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
     return(0);
 } /* end trav_info_visit_lnk() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: h5trav_getinfo
  *
@@ -430,7 +436,7 @@ int
 h5trav_getinfo(hid_t file_id, trav_info_t *info)
 {
     trav_visitor_t info_visitor;        /* Visitor structure for trav_info_t's */
-    int            ret_value = SUCCEED;
+    int            ret_value = 0;
 
     /* Init visitor structure */
     info_visitor.visit_obj = trav_info_visit_obj;
@@ -439,7 +445,7 @@ h5trav_getinfo(hid_t file_id, trav_info_t *info)
 
     /* Traverse all objects in the file, visiting each object & link */
     if(traverse(file_id, "/", TRUE, TRUE, &info_visitor, H5O_INFO_BASIC) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
+        H5TOOLS_GOTO_ERROR((-1), "traverse failed");
 
 done:
     return ret_value;
@@ -501,7 +507,7 @@ trav_info_init(const char *filename, hid_t fileid, trav_info_t **_info)
     *_info = info;
 } /* end trav_info_init() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: trav_info_free
  *
@@ -536,7 +542,7 @@ trav_info_free(trav_info_t *info)
  *-------------------------------------------------------------------------
  */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: trav_table_visit_obj
  *
@@ -547,7 +553,7 @@ trav_info_free(trav_info_t *info)
  *-------------------------------------------------------------------------
  */
 static int
-trav_table_visit_obj(const char *path, const H5O_info_t *oinfo,
+trav_table_visit_obj(const char *path, const H5O_info2_t *oinfo,
     const char *already_visited, void *udata)
 {
     trav_table_t *table = (trav_table_t *)udata;
@@ -558,12 +564,12 @@ trav_table_visit_obj(const char *path, const H5O_info_t *oinfo,
         trav_table_add(table, path, oinfo);
     else
         /* Add alias for object to table */
-        trav_table_addlink(table, oinfo->addr, path);
+        trav_table_addlink(table, &oinfo->token, path);
 
     return 0;
 } /* end trav_table_visit_obj() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: trav_table_visit_lnk
  *
@@ -574,7 +580,7 @@ trav_table_visit_obj(const char *path, const H5O_info_t *oinfo,
  *-------------------------------------------------------------------------
  */
 static int
-trav_table_visit_lnk(const char *path, const H5L_info_t H5_ATTR_UNUSED *linfo, void *udata)
+trav_table_visit_lnk(const char *path, const H5L_info2_t H5_ATTR_UNUSED *linfo, void *udata)
 {
     /* Add the link to the 'table' struct */
     trav_table_add((trav_table_t *)udata, path, NULL);
@@ -582,7 +588,7 @@ trav_table_visit_lnk(const char *path, const H5L_info_t H5_ATTR_UNUSED *linfo, v
     return 0;
 } /* end trav_table_visit_lnk() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: h5trav_gettable
  *
@@ -596,7 +602,7 @@ int
 h5trav_gettable(hid_t fid, trav_table_t *table)
 {
     trav_visitor_t table_visitor;       /* Visitor structure for trav_table_t's */
-    int            ret_value = SUCCEED;
+    int            ret_value = 0;
 
     /* Init visitor structure */
     table_visitor.visit_obj = trav_table_visit_obj;
@@ -605,7 +611,7 @@ h5trav_gettable(hid_t fid, trav_table_t *table)
 
     /* Traverse all objects in the file, visiting each object & link */
     if(traverse(fid, "/", TRUE, TRUE, &table_visitor, H5O_INFO_BASIC) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
+        H5TOOLS_GOTO_ERROR((-1), "traverse failed");
 
 done:
     return ret_value;
@@ -663,9 +669,7 @@ h5trav_getindext(const char *name, const trav_table_t *table)
  *-------------------------------------------------------------------------
  */
 static void
-trav_table_add(trav_table_t *table,
-                    const char *path,
-                    const H5O_info_t *oinfo)
+trav_table_add(trav_table_t *table, const char *path, const H5O_info2_t *oinfo)
 {
     size_t new_obj;
 
@@ -676,7 +680,11 @@ trav_table_add(trav_table_t *table,
         } /* end if */
 
         new_obj = table->nobjs++;
-        table->objs[new_obj].objno = oinfo ? oinfo->addr : HADDR_UNDEF;
+        if(oinfo)
+            HDmemcpy(&table->objs[new_obj].obj_token, &oinfo->token, sizeof(H5O_token_t));
+        else
+            /* Set token to 'undefined' values */
+            table->objs[new_obj].obj_token = H5O_TOKEN_UNDEF;
         table->objs[new_obj].flags[0] = table->objs[new_obj].flags[1] = 0;
         table->objs[new_obj].is_same_trgobj = 0;
         table->objs[new_obj].name = (char *)HDstrdup(path);
@@ -696,13 +704,16 @@ trav_table_add(trav_table_t *table,
  *-------------------------------------------------------------------------
  */
 static void
-trav_table_addlink(trav_table_t *table, haddr_t objno, const char *path)
+trav_table_addlink(trav_table_t *table, const H5O_token_t *obj_token, const char *path)
 {
     size_t i;           /* Local index variable */
+    int token_cmp;
 
     if(table) {
         for(i = 0; i < table->nobjs; i++) {
-            if(table->objs[i].objno == objno) {
+            if(H5Otoken_cmp(table->fid, &table->objs[i].obj_token, obj_token, &token_cmp) < 0)
+                return;
+            if(!token_cmp) {
                 size_t n;
 
                 /* already inserted? */
@@ -720,9 +731,9 @@ trav_table_addlink(trav_table_t *table, haddr_t objno, const char *path)
                 table->objs[i].links[n].new_name = (char *)HDstrdup(path);
 
                 return;
-            } /* end for */
+            } /* end if */
         } /* end for */
-    }
+    } /* end if */
 }
 
 
@@ -748,7 +759,10 @@ void trav_table_addflags(unsigned *flags,
         } /* end if */
 
         new_obj = table->nobjs++;
-        table->objs[new_obj].objno = 0;
+
+        /* Set token to 'undefined' values */
+        table->objs[new_obj].obj_token = H5O_TOKEN_UNDEF;
+
         table->objs[new_obj].flags[0] = flags[0];
         table->objs[new_obj].flags[1] = flags[1];
         table->objs[new_obj].is_same_trgobj = 0;
@@ -769,10 +783,11 @@ void trav_table_addflags(unsigned *flags,
  * Return:   void
  *-------------------------------------------------------------------------
  */
-void trav_table_init(trav_table_t **tbl)
+void trav_table_init(hid_t fid, trav_table_t **tbl)
 {
     trav_table_t* table = (trav_table_t*) HDmalloc(sizeof(trav_table_t));
     if(table) {
+        table->fid = fid;
         table->size = 0;
         table->nobjs = 0;
         table->objs = NULL;
@@ -834,8 +849,8 @@ trav_attr(hid_t
 #ifdef H5TRAV_PRINT_SPACE
     }
     else {
-        hid_t               attr = -1;
-        hid_t               space = -1;
+        hid_t               attr = H5I_INVALID_HID;
+        hid_t               space = H5I_INVALID_HID;
         hsize_t             size[H5S_MAX_RANK];
         int                 ndims;
         int                 i;
@@ -882,7 +897,7 @@ trav_attr(hid_t
     return(0);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: trav_print_visit_obj
  *
@@ -893,8 +908,8 @@ trav_attr(hid_t
  *-------------------------------------------------------------------------
  */
 static int
-trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
-        const char *already_visited, void *udata)
+trav_print_visit_obj(const char *path, const H5O_info2_t *oinfo,
+    const char *already_visited, void *udata)
 {
     trav_print_udata_t *print_udata = (trav_print_udata_t *)udata;
     /* Print the name of the object */
@@ -940,7 +955,7 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
     return(0);
 } /* end trav_print_visit_obj() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: trav_print_visit_lnk
  *
@@ -951,7 +966,7 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
  *-------------------------------------------------------------------------
  */
 static int
-trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
+trav_print_visit_lnk(const char *path, const H5L_info2_t *linfo, void *udata)
 {
     trav_print_udata_t *print_udata = (trav_print_udata_t *)udata;
 
@@ -1004,7 +1019,7 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
     return(0);
 } /* end trav_print_visit_lnk() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: h5trav_print
  *
@@ -1019,7 +1034,7 @@ h5trav_print(hid_t fid)
 {
     trav_print_udata_t print_udata;     /* User data for traversal */
     trav_visitor_t print_visitor;       /* Visitor structure for printing objects */
-    int            ret_value = SUCCEED;
+    int ret_value = 0;
 
     /* Init user data for printing */
     print_udata.fid = fid;
@@ -1031,13 +1046,13 @@ h5trav_print(hid_t fid)
 
     /* Traverse all objects in the file, visiting each object & link */
     if(traverse(fid, "/", TRUE, TRUE, &print_visitor, H5O_INFO_BASIC) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "traverse failed");
 
 done:
     return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: h5trav_visit
  *
@@ -1053,7 +1068,7 @@ h5trav_visit(hid_t fid, const char *grp_name, hbool_t visit_start,
     void *udata, unsigned fields)
 {
     trav_visitor_t visitor;             /* Visitor structure for objects */
-    int            ret_value = SUCCEED;
+    int            ret_value = 0;
 
     /* Init visitor structure */
     visitor.visit_obj = visit_obj;
@@ -1062,7 +1077,7 @@ h5trav_visit(hid_t fid, const char *grp_name, hbool_t visit_start,
 
     /* Traverse all objects in the file, visiting each object & link */
     if(traverse(fid, grp_name, visit_start, recurse, &visitor, fields) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "traverse failed");
+        H5TOOLS_GOTO_ERROR((-1), "traverse failed");
 
 done:
     return ret_value;
@@ -1080,8 +1095,8 @@ done:
 herr_t
 symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, const char *path)
 {
-    herr_t    ret_value = SUCCEED;
-    size_t    idx;         /* Index of address to use */
+    size_t idx;         /* Index of address to use */
+    herr_t ret_value = SUCCEED;
 
     /* Allocate space if necessary */
     if(visited->nused == visited->nalloc) {
@@ -1089,7 +1104,7 @@ symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, co
 
         visited->nalloc = MAX(1, visited->nalloc * 2);
         if(NULL == (tmp_ptr = HDrealloc(visited->objs, visited->nalloc * sizeof(symlink_trav_path_t))))
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "visited data structure realloc failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "visited data structure realloc failed");
         visited->objs = (symlink_trav_path_t *)tmp_ptr;
     } /* end if */
 
@@ -1103,7 +1118,7 @@ symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, co
     if(type == H5L_TYPE_EXTERNAL) {
         if(NULL == (visited->objs[idx].file = HDstrdup(file))) {
             visited->nused--;
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "visited data structure name allocation failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "visited data structure name allocation failed");
         } /* end if */
     } /* end if */
 
@@ -1111,14 +1126,14 @@ symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, co
         visited->nused--;
         if(visited->objs[idx].file)
             HDfree (visited->objs[idx].file);
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "visited data structure path allocation failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "visited data structure path allocation failed");
     } /* end if */
 
 done:
     return ret_value;
 } /* end symlink_visit_add() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: symlink_is_visited
  *

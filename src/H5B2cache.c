@@ -398,7 +398,8 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     *image++ = H5B2_HDR_VERSION;
 
     /* B-tree type */
-    *image++ = hdr->cls->id;
+    HDassert(hdr->cls->id <= 255);
+    *image++ = (uint8_t)hdr->cls->id;
 
     /* Node size (in bytes) */
     UINT32ENCODE(image, hdr->node_size);
@@ -653,6 +654,7 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     unsigned		u;              /* Local index variable */
     H5B2_internal_t	*ret_value = NULL;      /* Return value */
+    int node_nrec = 0;
 
     FUNC_ENTER_STATIC
 
@@ -715,7 +717,8 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     for(u = 0; u < (unsigned)(internal->nrec + 1); u++) {
         /* Decode node pointer */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &(int_node_ptr->addr));
-        UINT64DECODE_VAR(image, int_node_ptr->node_nrec, udata->hdr->max_nrec_size);
+        UINT64DECODE_VAR(image, node_nrec, udata->hdr->max_nrec_size);
+        H5_CHECKED_ASSIGN(int_node_ptr->node_nrec, uint16_t, node_nrec, int);
         if(udata->depth > 1)
             UINT64DECODE_VAR(image, int_node_ptr->all_nrec, udata->hdr->node_info[udata->depth - 1].cum_max_nrec_size)
         else
@@ -818,7 +821,8 @@ H5B2__cache_int_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     *image++ = H5B2_INT_VERSION;
 
     /* B-tree type */
-    *image++ = internal->hdr->cls->id;
+    HDassert(internal->hdr->cls->id <= 255);
+    *image++ = (uint8_t)internal->hdr->cls->id;
     HDassert((size_t)(image - (uint8_t *)_image) == (H5B2_INT_PREFIX_SIZE - H5B2_SIZEOF_CHKSUM));
 
     /* Serialize records for internal node */
@@ -1219,7 +1223,8 @@ H5B2__cache_leaf_serialize(const H5F_t H5_ATTR_UNUSED *f, void *_image, size_t H
     *image++ = H5B2_LEAF_VERSION;
 
     /* B-tree type */
-    *image++ = leaf->hdr->cls->id;
+    HDassert(leaf->hdr->cls->id <= 255);
+    *image++ = (uint8_t)leaf->hdr->cls->id;
     HDassert((size_t)(image - (uint8_t *)_image) == (H5B2_LEAF_PREFIX_SIZE - H5B2_SIZEOF_CHKSUM));
 
     /* Serialize records for leaf node */

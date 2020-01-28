@@ -1313,7 +1313,7 @@ test_reference_obj_deleted(void)
 **
 ****************************************************************/
 static herr_t
-test_deref_iter_op(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_UNUSED *info,
+test_deref_iter_op(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR_UNUSED *info,
     void *op_data)
 {
     int *count = (int *)op_data;        /* Pointer to name counter */
@@ -1363,7 +1363,7 @@ test_reference_group(void)
     hobj_ref_t rref;            /* Reference to read */
     H5G_info_t ginfo;           /* Group info struct */
     char objname[NAME_SIZE];    /* Buffer to store name */
-    H5O_info_t oinfo;           /* Object info struct */
+    H5O_info2_t oinfo;          /* Object info struct */
     int count = 0;              /* Count within iterated group */
     ssize_t size;               /* Name length */
     herr_t ret;
@@ -1438,7 +1438,7 @@ test_reference_group(void)
     CHECK(gid, FAIL, "H5Rdereference2");
 
     /* Iterate through objects in dereferenced group */
-    ret = H5Literate(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_deref_iter_op, &count);
+    ret = H5Literate2(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_deref_iter_op, &count);
     CHECK(ret, FAIL, "H5Literate");
 
     /* Various queries on the group opened */
@@ -1450,9 +1450,9 @@ test_reference_group(void)
     CHECK(size, FAIL, "H5Lget_name_by_idx");
     VERIFY_STR(objname, DSETNAME2, "H5Lget_name_by_idx");
 
-    ret = H5Oget_info_by_idx2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_idx");
-    VERIFY(oinfo.type, H5O_TYPE_DATASET, "H5Oget_info_by_idx");
+    ret = H5Oget_info_by_idx3(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_idx3");
+    VERIFY(oinfo.type, H5O_TYPE_DATASET, "H5Oget_info_by_idx3");
 
     /* Unlink one of the objects in the dereferenced group */
     ret = H5Ldelete(gid, GROUPNAME2, H5P_DEFAULT);

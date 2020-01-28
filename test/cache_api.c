@@ -24,6 +24,11 @@
 
 /* global variable declarations: */
 
+const char *FILENAME[] = {
+    "cache_api_test",
+    NULL
+};
+
 /* macro definitions */
 
 /* private function declarations: */
@@ -207,7 +212,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -355,7 +360,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -688,7 +693,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -1034,7 +1039,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -1659,7 +1664,7 @@ init_invalid_configs(void) {
     configs[13].lower_hr_threshold          = 1.00000001f;
 
     /* 14 -- increment too small */
-    configs[14].increment                   = H5_DOUBLE(0.999999999999);
+    configs[14].increment                   = 0.999999999999;
 
     /* 15 -- invalid flash_incr_mode */
     configs[15].flash_incr_mode             = (enum H5C_cache_flash_incr_mode)-1;
@@ -1692,7 +1697,7 @@ init_invalid_configs(void) {
 
     /* 23 -- decrement too big */
     configs[23].decr_mode                   = H5C_decr__threshold;
-    configs[23].decrement                   = H5_DOUBLE(1.0000000001);
+    configs[23].decrement                   = 1.0000000001;
 
     /* 24 -- epochs_before_eviction too small */
     configs[24].epochs_before_eviction      = 0;
@@ -1704,13 +1709,13 @@ init_invalid_configs(void) {
     configs[26].empty_reserve               = -0.0000000001f;
 
     /* 27 -- empty_reserve too big */
-    configs[27].empty_reserve               = H5_DOUBLE(1.00000000001);
+    configs[27].empty_reserve               = 1.00000000001;
 
     /* 28 -- upper_hr_threshold too small */
     configs[28].upper_hr_threshold          = -0.000000001f;
 
     /* 29 -- upper_hr_threshold too big */
-    configs[29].upper_hr_threshold          = H5_DOUBLE(1.00000001);
+    configs[29].upper_hr_threshold          = 1.00000001;
 
     /* 30 -- upper_hr_threshold <= lower_hr_threshold */
     configs[30].lower_hr_threshold          = 0.9f;
@@ -1963,7 +1968,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
             HDfprintf(stdout, "%s: calling h5_fixname().\n", FUNC);
         }
 
-        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;

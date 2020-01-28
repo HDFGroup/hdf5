@@ -847,34 +847,146 @@ GROUP "/" {
          DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
-         (0): DATASET 976 /dset , DATASET 976 /dset 
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
          }
       }
       ATTRIBUTE "reference2D" {
          DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
-         (0,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (1,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (2,0): DATASET 976 /dset , DATASET 976 /dset 
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
          }
       }
       ATTRIBUTE "reference3D" {
          DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
-         (0,0,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (0,1,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (0,2,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (1,0,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (1,1,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (1,2,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (2,0,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (2,1,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (2,2,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (3,0,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (3,1,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (3,2,0): DATASET 976 /dset , DATASET 976 /dset 
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
          }
       }
       ATTRIBUTE "string" {
@@ -1805,34 +1917,146 @@ GROUP "/" {
          DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
          DATA {
-         (0): DATASET 976 /dset , DATASET 976 /dset 
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
          }
       }
       DATASET "reference2D" {
          DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 3, 2 ) / ( 3, 2 ) }
          DATA {
-         (0,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (1,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (2,0): DATASET 976 /dset , DATASET 976 /dset 
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
          }
       }
       DATASET "reference3D" {
          DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
          DATASPACE  SIMPLE { ( 4, 3, 2 ) / ( 4, 3, 2 ) }
          DATA {
-         (0,0,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (0,1,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (0,2,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (1,0,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (1,1,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (1,2,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (2,0,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (2,1,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (2,2,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (3,0,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (3,1,0): DATASET 976 /dset , DATASET 976 /dset ,
-         (3,2,0): DATASET 976 /dset , DATASET 976 /dset 
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
+            DATASET "tattr2.h5/dset"
+               DATA {
+               (0): 0, 0
+               }
          }
       }
       DATASET "string" {

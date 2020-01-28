@@ -53,11 +53,11 @@ unsigned outBuffOffset;
 FILE*    overflow_file = NULL;
 
 /* local functions */
-static void init_table(table_t **tbl);
+static void init_table(hid_t fid, table_t **tbl);
 #ifdef H5DUMP_DEBUG
-static void dump_table(char* tablename, table_t *table);
+static void dump_table(hid_t fid, char* tablename, table_t *table);
 #endif  /* H5DUMP_DEBUG */
-static void add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t recorded);
+static void add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool_t recorded);
 
 /*-------------------------------------------------------------------------
  * Function: parallel_print
@@ -599,10 +599,11 @@ print_version(const char *progname)
  *-------------------------------------------------------------------------
  */
 static void
-init_table(table_t **tbl)
+init_table(hid_t fid, table_t **tbl)
 {
     table_t *table = (table_t *)HDmalloc(sizeof(table_t));
 
+    table->fid = fid;
     table->size = 20;
     table->nobjs = 0;
     table->objs = (obj_t *)HDmalloc(table->size * sizeof(obj_t));
@@ -644,15 +645,21 @@ free_table(table_t *table)
  *-------------------------------------------------------------------------
  */
 static void
-dump_table(char* tablename, table_t *table)
+dump_table(hid_t fid, char* tablename, table_t *table)
 {
     unsigned u;
+    char *obj_addr_str = NULL;
 
     PRINTSTREAM(rawoutstream,"%s: # of entries = %d\n", tablename,table->nobjs);
-    for (u = 0; u < table->nobjs; u++)
-        PRINTSTREAM(rawoutstream,"%a %s %d %d\n", table->objs[u].objno,
+    for (u = 0; u < table->nobjs; u++) {
+        H5VLconnector_token_to_str(fid, table->objs[u].obj_token, &obj_addr_str);
+
+        PRINTSTREAM(rawoutstream,"%s %s %d %d\n", obj_addr_str,
            table->objs[u].objname,
            table->objs[u].displayed, table->objs[u].recorded);
+
+        H5VLfree_token_str(fid, obj_addr_str);
+    }
 }
 
 
@@ -667,9 +674,9 @@ dump_table(char* tablename, table_t *table)
 void
 dump_tables(find_objs_t *info)
 {
-    dump_table("group_table", info->group_table);
-    dump_table("dset_table", info->dset_table);
-    dump_table("type_table", info->type_table);
+    dump_table(info->fid, "group_table", info->group_table);
+    dump_table(info->fid, "dset_table", info->dset_table);
+    dump_table(info->fid, "type_table", info->type_table);
 }
 #endif  /* H5DUMP_DEBUG */
 
@@ -685,13 +692,17 @@ dump_tables(find_objs_t *info)
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE obj_t *
-search_obj(table_t *table, haddr_t objno)
+search_obj(table_t *table, const H5O_token_t *obj_token)
 {
     unsigned u;
+    int token_cmp;
 
-    for(u = 0; u < table->nobjs; u++)
-        if(table->objs[u].objno == objno)
+    for(u = 0; u < table->nobjs; u++) {
+        if(H5Otoken_cmp(table->fid, &table->objs[u].obj_token, obj_token, &token_cmp) < 0)
+            return NULL;
+        if(!token_cmp)
             return &(table->objs[u]);
+    }
 
     return NULL;
 }
@@ -708,7 +719,7 @@ search_obj(table_t *table, haddr_t objno)
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen, void *op_data)
+find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_seen, void *op_data)
 {
     find_objs_t *info = (find_objs_t*)op_data;
     herr_t ret_value = 0;
@@ -716,26 +727,26 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
     switch(oinfo->type) {
         case H5O_TYPE_GROUP:
             if(NULL == already_seen)
-                add_obj(info->group_table, oinfo->addr, name, TRUE);
+                add_obj(info->group_table, &oinfo->token, name, TRUE);
             break;
 
         case H5O_TYPE_DATASET:
             if(NULL == already_seen) {
-                hid_t dset = -1;
+                hid_t dset = H5I_INVALID_HID;
 
                 /* Add the dataset to the list of objects */
-                add_obj(info->dset_table, oinfo->addr, name, TRUE);
+                add_obj(info->dset_table, &oinfo->token, name, TRUE);
 
                 /* Check for a dataset that uses a named datatype */
                 if((dset = H5Dopen2(info->fid, name, H5P_DEFAULT)) >= 0) {
                     hid_t type = H5Dget_type(dset);
 
                     if(H5Tcommitted(type) > 0) {
-                        H5O_info_t type_oinfo;
+                        H5O_info2_t type_oinfo;
 
-                        H5Oget_info2(type, &type_oinfo, H5O_INFO_BASIC);
-                        if(search_obj(info->type_table, type_oinfo.addr) == NULL)
-                            add_obj(info->type_table, type_oinfo.addr, name, FALSE);
+                        H5Oget_info3(type, &type_oinfo, H5O_INFO_BASIC);
+                        if(search_obj(info->type_table, &type_oinfo.token) == NULL)
+                            add_obj(info->type_table, &type_oinfo.token, name, FALSE);
                     } /* end if */
 
                     H5Tclose(type);
@@ -750,8 +761,8 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
             if(NULL == already_seen) {
                 obj_t *found_obj;
 
-                if((found_obj = search_obj(info->type_table, oinfo->addr)) == NULL)
-                    add_obj(info->type_table, oinfo->addr, name, TRUE);
+                if((found_obj = search_obj(info->type_table, &oinfo->token)) == NULL)
+                    add_obj(info->type_table, &oinfo->token, name, TRUE);
                 else {
                     /* Use latest version of name */
                     HDfree(found_obj->objname);
@@ -791,9 +802,9 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     herr_t ret_value = SUCCEED;
 
     /* Initialize the tables */
-    init_table(group_table);
-    init_table(dset_table);
-    init_table(type_table);
+    init_table(fid, group_table);
+    init_table(fid, dset_table);
+    init_table(fid, type_table);
 
     /* Init the find_objs_t */
     info->fid = fid;
@@ -803,7 +814,7 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
 
     /* Find all shared objects */
     if((ret_value = h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info, H5O_INFO_BASIC)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "finding shared objects failed")
+        H5TOOLS_GOTO_ERROR(FAIL, "finding shared objects failed");
 
 done:
     /* Release resources */
@@ -829,7 +840,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
+add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool_t record)
 {
     size_t u;
 
@@ -843,7 +854,7 @@ add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
     u = table->nobjs++;
 
     /* Set information about object */
-    table->objs[u].objno = objno;
+    HDmemcpy(&table->objs[u].obj_token, obj_token, sizeof(H5O_token_t));
     table->objs[u].objname = HDstrdup(objname);
     table->objs[u].recorded = record;
     table->objs[u].displayed = 0;
@@ -893,7 +904,7 @@ int
 H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info, hbool_t get_obj_type)
 {
     htri_t l_ret;
-    H5O_info_t trg_oinfo;
+    H5O_info2_t trg_oinfo;
     hid_t fapl = H5P_DEFAULT;
     hid_t lapl = H5P_DEFAULT;
     int   ret_value = -1; /* init to fail */
@@ -904,39 +915,39 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
     /* if path is root, return group type */
     if(!HDstrcmp(linkpath,"/")) {
         link_info->trg_type = H5O_TYPE_GROUP;
-        HGOTO_DONE(2);
+        H5TOOLS_GOTO_DONE(2);
     }
 
     /* check if link itself exist */
     if(H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: link <%s> doesn't exist \n",linkpath);
-        HGOTO_DONE(FAIL);
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* get info from link */
-    if(H5Lget_info(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0) {
+    if(H5Lget_info2(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link info from <%s>\n",linkpath);
-        HGOTO_DONE(FAIL);
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* given path is hard link (object) */
     if(link_info->linfo.type == H5L_TYPE_HARD)
-        HGOTO_DONE(2);
+        H5TOOLS_GOTO_DONE(2);
 
     /* trg_path must be freed out of this function when finished using */
     if((link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char))) == NULL) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to allocate buffer for <%s>\n",linkpath);
-        HGOTO_DONE(FAIL);
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* get link value */
     if(H5Lget_val(file_id, linkpath, (void *)link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0) {
         if(link_info->opt.msg_mode == 1)
             parallel_print("Warning: unable to get link value from <%s>\n",linkpath);
-        HGOTO_DONE(FAIL);
+        H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /*-----------------------------------------------------
@@ -945,13 +956,13 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
      */
     if(link_info->linfo.type == H5L_TYPE_EXTERNAL) {
         if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         if(H5Pset_fapl_sec2(fapl) < 0)
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         if((lapl = H5Pcreate(H5P_LINK_ACCESS)) < 0)
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         if(H5Pset_elink_fapl(lapl, fapl) < 0)
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
     } /* end if */
 
     /* Check for retrieving object info */
@@ -964,29 +975,29 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
 
         /* detect dangling link */
         if(l_ret == FALSE) {
-            HGOTO_DONE(0);
+            H5TOOLS_GOTO_DONE(0);
         }
         else if(l_ret < 0) {       /* function failed */
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         }
 
         /* get target object info */
-        if(H5Oget_info_by_name2(file_id, linkpath, &trg_oinfo, H5O_INFO_BASIC, lapl) < 0) {
+        if(H5Oget_info_by_name3(file_id, linkpath, &trg_oinfo, H5O_INFO_BASIC, lapl) < 0) {
             if(link_info->opt.msg_mode == 1)
                 parallel_print("Warning: unable to get object information for <%s>\n", linkpath);
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         } /* end if */
 
         /* check unknown type */
         if(trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES) {
             if(link_info->opt.msg_mode == 1)
                 parallel_print("Warning: target object of <%s> is unknown type\n", linkpath);
-            HGOTO_DONE(FAIL);
+            H5TOOLS_GOTO_DONE(FAIL);
         }  /* end if */
 
         /* set target obj type to return */
+        HDmemcpy(&link_info->obj_token, &trg_oinfo.token, sizeof(H5O_token_t));
         link_info->trg_type = trg_oinfo.type;
-        link_info->objno = trg_oinfo.addr;
         link_info->fileno = trg_oinfo.fileno;
     } /* end if */
     else
@@ -1049,14 +1060,14 @@ h5tools_getenv_update_hyperslab_bufsize(void)
 {
     const char *env_str = NULL;
     long hyperslab_bufsize_mb;
-    int ret_value = 1;
+    int  ret_value = 1;
 
     /* check if environment variable is set for the hyperslab buffer size */
     if (NULL != (env_str = HDgetenv ("H5TOOLS_BUFSIZE"))) {
         errno = 0;
         hyperslab_bufsize_mb = HDstrtol(env_str, (char**)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "hyperslab buffer size failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "hyperslab buffer size failed");
 
         /* convert MB to byte */
         H5TOOLS_BUFSIZE = (hsize_t)hyperslab_bufsize_mb * 1024 * 1024;

@@ -241,7 +241,7 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *-------------------------------------------------------------------------
  */
 static void *
-H5FS__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, 
+H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata, 
     hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5FS_t		*fspace = NULL; /* Free space header info */
@@ -404,8 +404,8 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len)
  */
 static herr_t 
 H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing,
-    haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t *new_addr, size_t *new_len,
-    unsigned *flags)
+    haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t H5_ATTR_NDEBUG_UNUSED *new_addr, 
+    size_t H5_ATTR_NDEBUG_UNUSED *new_len, unsigned *flags)
 {
     H5FS_t 	*fspace = (H5FS_t *)_thing;     /* Pointer to the object */
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
@@ -694,7 +694,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t len,
+H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_thing)
 {
     H5FS_t     *fspace = (H5FS_t *)_thing;      /* Pointer to the object */
@@ -735,7 +735,7 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t len,
     *image++ = H5FS_HDR_VERSION;
 
     /* Client ID */
-    *image++ = fspace->client;
+    H5_CHECKED_ASSIGN(*image++, uint8_t, fspace->client, int);
 
     /* Total space tracked */
     H5F_ENCODE_LENGTH(f, image, fspace->tot_space);
@@ -979,8 +979,8 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
  *-------------------------------------------------------------------------
  */
 static void *
-H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
-    hbool_t *dirty)
+H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
+    hbool_t H5_ATTR_NDEBUG_UNUSED *dirty)
 {
     H5FS_sinfo_cache_ud_t  *udata = (H5FS_sinfo_cache_ud_t *)_udata;    /* User data for callback */
     H5FS_t                 *fspace;         /* free space manager */
@@ -1025,11 +1025,11 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
 
     /* Check for any serialized sections */
     if(fspace->serial_sect_count > 0) {
-        hsize_t old_tot_sect_count;     /* Total section count from header */
-        hsize_t old_serial_sect_count;  /* Total serializable section count from header */
-        hsize_t old_ghost_sect_count;   /* Total ghost section count from header */
-        hsize_t old_tot_space;          /* Total space managed from header */
-        unsigned sect_cnt_size;         /* The size of the section size counts */
+        hsize_t old_tot_sect_count;                         /* Total section count from header */
+        hsize_t H5_ATTR_NDEBUG_UNUSED old_serial_sect_count; /* Total serializable section count from header */
+        hsize_t H5_ATTR_NDEBUG_UNUSED old_ghost_sect_count;  /* Total ghost section count from header */
+        hsize_t H5_ATTR_NDEBUG_UNUSED old_tot_space;         /* Total space managed from header */
+        unsigned sect_cnt_size;                             /* The size of the section size counts */
 
         /* Compute the size of the section counts */
         sect_cnt_size = H5VM_limit_enc_size((uint64_t)fspace->serial_sect_count);
@@ -1046,8 +1046,8 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
 
         /* Walk through the image, deserializing sections */
         do {
-            hsize_t sect_size;      /* Current section size */
-            size_t node_count;      /* # of sections of this size */
+            hsize_t sect_size = 0;      /* Current section size */
+            size_t node_count = 0;      /* # of sections of this size */
             size_t u;               /* Local index variable */
 
             /* The number of sections of this node's size */
@@ -1061,7 +1061,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
             /* Loop over nodes of this size */
             for(u = 0; u < node_count; u++) {
                 H5FS_section_info_t *new_sect;  /* Section that was deserialized */
-                haddr_t sect_addr;      /* Address of free space section in the address space */
+                haddr_t sect_addr = 0;  /* Address of free space section in the address space */
                 unsigned sect_type;     /* Type of free space section */
                 unsigned des_flags;     /* Flags from deserialize callback */
 
@@ -1141,7 +1141,6 @@ static herr_t
 H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
 {
     const H5FS_sinfo_t *sinfo = (const H5FS_sinfo_t *)_thing;   /* Pointer to the object */
-    const H5FS_t *fspace;               /* Free space header */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1149,10 +1148,9 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
     HDassert(sinfo);
     HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
-    fspace = sinfo->fspace;
-    HDassert(fspace);
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
+    HDassert(sinfo->fspace);
+    HDassert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
     HDassert(image_len);
 
     /* Set the image length size */
@@ -1180,7 +1178,8 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
  */
 static herr_t 
 H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr,
-    size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags)
+    size_t H5_ATTR_NDEBUG_UNUSED len, haddr_t *new_addr, size_t H5_ATTR_NDEBUG_UNUSED *new_len, 
+    unsigned *flags)
 {
     H5FS_sinfo_t 	*sinfo = (H5FS_sinfo_t *)_thing;        /* Pointer to the object */
     H5FS_t 		*fspace;                /* Free space header */
@@ -1267,7 +1266,6 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len,
     void *_thing)
 {
     H5FS_sinfo_t        *sinfo = (H5FS_sinfo_t *)_thing;        /* Pointer to the object */
-    H5FS_t              *fspace;            /* Free space header */
     H5FS_iter_ud_t      udata;              /* User data for callbacks */
     uint8_t             *image = (uint8_t *)_image;     /* Pointer into raw data buffer */
     uint8_t             *chksum_image = NULL;           /* Points to chksum location */
@@ -1283,12 +1281,11 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len,
     HDassert(sinfo);
     HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
-    fspace = sinfo->fspace;
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
-    HDassert(fspace->cache_info.is_pinned);
-    HDassert(fspace->sect_size == len);
-    HDassert(fspace->sect_cls);
+    HDassert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
+    HDassert(sinfo->fspace->cache_info.is_pinned);
+    HDassert(sinfo->fspace->sect_size == len);
+    HDassert(sinfo->fspace->sect_cls);
 
     /* Magic number */
     H5MM_memcpy(image, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -1418,7 +1415,6 @@ static herr_t
 H5FS__cache_sinfo_free_icr(void *_thing)
 {
     H5FS_sinfo_t        *sinfo = (H5FS_sinfo_t *)_thing;    /* Pointer to the object */
-    H5FS_t              *fspace;                /* Free space header */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1427,10 +1423,9 @@ H5FS__cache_sinfo_free_icr(void *_thing)
     HDassert(sinfo);
     HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
-    fspace = sinfo->fspace;
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
-    HDassert(fspace->cache_info.is_pinned);
+    HDassert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
+    HDassert(sinfo->fspace->cache_info.is_pinned);
 
     /* Destroy free space info */
     if(H5FS__sinfo_dest(sinfo) < 0)

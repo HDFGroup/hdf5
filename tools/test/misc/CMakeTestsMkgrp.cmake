@@ -61,22 +61,27 @@
   endif ()
 
   macro (ADD_H5_TEST resultfile resultcode resultoption)
-    add_test (
-        NAME H5MKGRP-${resultfile}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ${resultfile}.h5
-    )
-    set_tests_properties (H5MKGRP-${resultfile}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    )
-    add_test (
-        NAME H5MKGRP-${resultfile}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp${tgt_ext}> ${resultoption} ${resultfile}.h5 ${ARGN}
-    )
-    set_tests_properties (H5MKGRP-${resultfile} PROPERTIES
-        DEPENDS H5MKGRP-${resultfile}-clear-objects
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    )
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5MKGRP-${resultfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp${tgt_ext}> ${resultoption} ${resultfile}.h5 ${ARGN}
+      )
+    else ()
+      add_test (
+          NAME H5MKGRP-${resultfile}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove ${resultfile}.h5
+      )
+      set_tests_properties (H5MKGRP-${resultfile}-clear-objects PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+      )
+      add_test (
+          NAME H5MKGRP-${resultfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp${tgt_ext}> ${resultoption} ${resultfile}.h5 ${ARGN}
+      )
+      set_tests_properties (H5MKGRP-${resultfile} PROPERTIES
+          DEPENDS H5MKGRP-${resultfile}-clear-objects
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+      )
       add_test (
           NAME H5MKGRP-${resultfile}-h5ls
           COMMAND "${CMAKE_COMMAND}"
@@ -96,7 +101,7 @@
 
   macro (ADD_H5_CMP resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${ARGN})
+      add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp${tgt_ext}> ${ARGN})
     else ()
       add_test (
           NAME H5MKGRP_CMP-${resultfile}-clear-objects

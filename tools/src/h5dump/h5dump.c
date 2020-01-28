@@ -634,8 +634,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
 /*-------------------------------------------------------------------------
  * Function:    parse_subset_params
  *
- * Purpose:     Parse the so-called "terse" syntax for specifying subsetting
- *              parameters.
+ * Purpose:     Parse the so-called "terse" syntax for specifying subsetting parameters.
  *
  * Return:      Success:    struct subset_t object
  *              Failure:    NULL
@@ -1394,12 +1393,12 @@ error:
 int
 main(int argc, const char *argv[])
 {
-    hid_t               fid = -1;
-    hid_t               gid = -1;
+    hid_t               fid = H5I_INVALID_HID;
+    hid_t               gid = H5I_INVALID_HID;
     hid_t               fapl_id = H5P_DEFAULT;
     H5E_auto2_t         func;
     H5E_auto2_t         tools_func;
-    H5O_info_t          oi;
+    H5O_info2_t         oi;
     struct handler_t   *hand = NULL;
     int                 i;
     unsigned            u;
@@ -1568,7 +1567,7 @@ main(int argc, const char *argv[])
         }
 
         /* Get object info for root group */
-        if(H5Oget_info_by_name2(fid, "/", &oi, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
+        if(H5Oget_info_by_name3(fid, "/", &oi, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
             error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
@@ -1703,6 +1702,8 @@ main(int argc, const char *argv[])
         free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
+
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     leave(h5tools_getstatus());
 

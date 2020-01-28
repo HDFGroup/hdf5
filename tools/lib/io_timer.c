@@ -138,43 +138,43 @@ io_time_set(io_time_t *pt, timer_type t, int start_stop)
     switch(pt->type){
 #ifdef H5_HAVE_PARALLEL
     case MPI_CLOCK:
-	if (start_stop == TSTART) {
-	    pt->mpi_timer[t] = MPI_Wtime();
+    if (start_stop == TSTART) {
+        pt->mpi_timer[t] = MPI_Wtime();
 
-	    /* When we start the timer for HDF5_FINE_WRITE_FIXED_DIMS or HDF5_FINE_READ_FIXED_DIMS
-	     * we compute the time it took to only open the file */
-	    if(t == HDF5_FINE_WRITE_FIXED_DIMS)
-		pt->total_time[HDF5_FILE_WRITE_OPEN] += pt->mpi_timer[t] - pt->mpi_timer[HDF5_GROSS_WRITE_FIXED_DIMS];
-	    else if(t == HDF5_FINE_READ_FIXED_DIMS)
-		pt->total_time[HDF5_FILE_READ_OPEN] += pt->mpi_timer[t] - pt->mpi_timer[HDF5_GROSS_READ_FIXED_DIMS];
+        /* When we start the timer for HDF5_FINE_WRITE_FIXED_DIMS or HDF5_FINE_READ_FIXED_DIMS
+        * we compute the time it took to only open the file */
+        if(t == HDF5_FINE_WRITE_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_WRITE_OPEN] += pt->mpi_timer[t] - pt->mpi_timer[HDF5_GROSS_WRITE_FIXED_DIMS];
+        else if(t == HDF5_FINE_READ_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_READ_OPEN] += pt->mpi_timer[t] - pt->mpi_timer[HDF5_GROSS_READ_FIXED_DIMS];
 
-	} else {
-	    pt->total_time[t] += MPI_Wtime() - pt->mpi_timer[t];
-	    pt->mpi_timer[t] = MPI_Wtime();
+    } else {
+        pt->total_time[t] += MPI_Wtime() - pt->mpi_timer[t];
+        pt->mpi_timer[t] = MPI_Wtime();
 
-	    /* When we stop the timer for HDF5_GROSS_WRITE_FIXED_DIMS or HDF5_GROSS_READ_FIXED_DIMS
-	     * we compute the time it took to close the file after the last read/write finished */
-	    if(t == HDF5_GROSS_WRITE_FIXED_DIMS)
-		pt->total_time[HDF5_FILE_WRITE_CLOSE] += pt->mpi_timer[t] - pt->mpi_timer[HDF5_FINE_WRITE_FIXED_DIMS];
-	    else if(t == HDF5_GROSS_READ_FIXED_DIMS)
-		pt->total_time[HDF5_FILE_READ_CLOSE] += pt->mpi_timer[t] - pt->mpi_timer[HDF5_FINE_READ_FIXED_DIMS];
-	}
-	break;
+        /* When we stop the timer for HDF5_GROSS_WRITE_FIXED_DIMS or HDF5_GROSS_READ_FIXED_DIMS
+        * we compute the time it took to close the file after the last read/write finished */
+        if(t == HDF5_GROSS_WRITE_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_WRITE_CLOSE] += pt->mpi_timer[t] - pt->mpi_timer[HDF5_FINE_WRITE_FIXED_DIMS];
+        else if(t == HDF5_GROSS_READ_FIXED_DIMS)
+        pt->total_time[HDF5_FILE_READ_CLOSE] += pt->mpi_timer[t] - pt->mpi_timer[HDF5_FINE_READ_FIXED_DIMS];
+    }
+    break;
 #else
     case MPI_CLOCK:
-	    HDfprintf(stderr, "MPI clock set in serial library\n");
-	    return NULL;
+        HDfprintf(stderr, "MPI clock set in serial library\n");
+        return NULL;
 #endif /* H5_HAVE_PARALLEL */
     case SYS_CLOCK:
             if (start_stop == TSTART) {
                 HDgettimeofday(&pt->sys_timer[t], NULL);
 
-		/* When we start the timer for HDF5_FINE_WRITE_FIXED_DIMS or HDF5_FINE_READ_FIXED_DIMS
-		 * we compute the time it took to only open the file */
-		if(t == HDF5_FINE_WRITE_FIXED_DIMS)
-		    pt->total_time[HDF5_FILE_WRITE_OPEN] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_GROSS_WRITE_FIXED_DIMS]));
-		else if(t == HDF5_FINE_READ_FIXED_DIMS)
-		    pt->total_time[HDF5_FILE_READ_OPEN] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_GROSS_READ_FIXED_DIMS]));
+        /* When we start the timer for HDF5_FINE_WRITE_FIXED_DIMS or HDF5_FINE_READ_FIXED_DIMS
+        * we compute the time it took to only open the file */
+        if(t == HDF5_FINE_WRITE_FIXED_DIMS)
+            pt->total_time[HDF5_FILE_WRITE_OPEN] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_GROSS_WRITE_FIXED_DIMS]));
+        else if(t == HDF5_FINE_READ_FIXED_DIMS)
+            pt->total_time[HDF5_FILE_READ_OPEN] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_GROSS_READ_FIXED_DIMS]));
 
 
             } else {
@@ -183,19 +183,19 @@ io_time_set(io_time_t *pt, timer_type t, int start_stop)
                 HDgettimeofday(&sys_t, NULL);
                 pt->total_time[t] += sub_time(&sys_t, &(pt->sys_timer[t]));
 
-		/* When we stop the timer for HDF5_GROSS_WRITE_FIXED_DIMS or HDF5_GROSS_READ_FIXED_DIMS
-		 * we compute the time it took to close the file after the last read/write finished */
-		if(t == HDF5_GROSS_WRITE_FIXED_DIMS)
-		    pt->total_time[HDF5_FILE_WRITE_CLOSE] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_FINE_WRITE_FIXED_DIMS]));
-		else if(t == HDF5_GROSS_READ_FIXED_DIMS)
-		    pt->total_time[HDF5_FILE_READ_CLOSE] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_FINE_READ_FIXED_DIMS]));
+        /* When we stop the timer for HDF5_GROSS_WRITE_FIXED_DIMS or HDF5_GROSS_READ_FIXED_DIMS
+        * we compute the time it took to close the file after the last read/write finished */
+        if(t == HDF5_GROSS_WRITE_FIXED_DIMS)
+            pt->total_time[HDF5_FILE_WRITE_CLOSE] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_FINE_WRITE_FIXED_DIMS]));
+        else if(t == HDF5_GROSS_READ_FIXED_DIMS)
+            pt->total_time[HDF5_FILE_READ_CLOSE] += sub_time(&(pt->sys_timer[t]), &(pt->sys_timer[HDF5_FINE_READ_FIXED_DIMS]));
 
             }
-	break;
+    break;
 
     default:
-	    HDfprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
-	    return NULL;
+        HDfprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
+        return NULL;
     } /* end switch */
 
 #if 0
@@ -221,10 +221,3 @@ io_time_get(io_time_t *pt, timer_type t)
 
     return pt->total_time[t];
 }
-
-#if 0
-/* standalone is not working yet. Need fix later. -AKC- */
-#ifdef STANDALONE
-#include "pio_standalone.c"
-#endif
-#endif

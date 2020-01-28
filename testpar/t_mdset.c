@@ -13,6 +13,7 @@
 
 #include "testphdf5.h"
 #include "H5Dprivate.h"
+#include "H5private.h"
 
 #define DIM  2
 #define SIZE 32
@@ -156,11 +157,12 @@ void multiple_dset_write(void)
     ndatasets = pt->count;
 
     size = get_size();
+    H5_CHECK_OVERFLOW(size, int, size_t);
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    outme = HDmalloc((size_t)(size * size * sizeof(double)));
+    outme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
@@ -237,15 +239,15 @@ void compact_dataset(void)
     size = get_size();
 
     for(i = 0; i < DIM; i++ )
-        file_dims[i] = size;
+        file_dims[i] = (hsize_t)size;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    outme = HDmalloc((size_t)(size * size * sizeof(double)));
+    outme = HDmalloc((size_t)((size_t)size * (size_t)size * sizeof(double)));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
-    inme = HDmalloc((size_t)(size * size * sizeof(double)));
+    inme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
     VRFY((outme != NULL), "HDmalloc succeeded for inme");
 
     filename = GetTestParameters();
@@ -332,7 +334,7 @@ void compact_dataset(void)
     /* Verify data value */
     for(i = 0; i < size; i++)
         for(j = 0; j < size; j++)
-            if(inme[(i * size) + j] != outme[(i * size) + j])
+            if(!H5_DBL_ABS_EQUAL(inme[(i * size) + j], outme[(i * size) + j]))
                 if(err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
                     HDprintf("Dataset Verify failed at [%d][%d]: expect %f, got %f\n", i, j, outme[(i * size) + j], inme[(i * size) + j]);
 
@@ -362,7 +364,7 @@ void null_dataset(void)
     hid_t    iof, plist, dxpl, dataset, attr, sid;
     unsigned uval=2;    /* Buffer for writing to dataset */
     int      val=1;          /* Buffer for writing to attribute */
-    int      nelem;
+    hssize_t nelem;
     char     dname[]="dataset";
     char     attr_name[]="attribute";
     herr_t   ret;
@@ -626,7 +628,7 @@ void dataset_fillvalue(void)
 
     /* Set the dataset dimension to be one row more than number of processes */
     /* and calculate the actual dataset size. */
-    dset_dims[0]=mpi_size+1;
+    dset_dims[0]=(hsize_t)(mpi_size+1);
     dset_size=dset_dims[0]*dset_dims[1]*dset_dims[2]*dset_dims[3];
 
     /* Allocate space for the buffers */
@@ -719,7 +721,7 @@ void dataset_fillvalue(void)
      * Each process writes 1 row of data. Thus last row is not written.
      */
     /* Create hyperslabs in memory and file dataspaces */
-    req_start[0]=mpi_rank;
+    req_start[0]=(hsize_t)mpi_rank;
     ret = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, req_start, NULL, req_count, NULL);
     VRFY((ret >= 0), "H5Sselect_hyperslab succeeded on memory dataspace");
     ret = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, req_start, NULL, req_count, NULL);
@@ -877,7 +879,7 @@ void collective_group_write(void)
     chunk_size[0] =(hsize_t)(size / 2);
     chunk_size[1] =(hsize_t)(size / 2);
 
-    outme = HDmalloc((size_t)(size * size * sizeof(DATATYPE)));
+    outme = HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
@@ -1001,10 +1003,10 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
 
     size = get_size();
 
-    indata =(DATATYPE*)HDmalloc((size_t)(size * size * sizeof(DATATYPE)));
+    indata =(DATATYPE*)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((indata != NULL), "HDmalloc succeeded for indata");
 
-    outdata =(DATATYPE*)HDmalloc((size_t)(size * size * sizeof(DATATYPE)));
+    outdata =(DATATYPE*)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((outdata != NULL), "HDmalloc succeeded for outdata");
 
     /* open every group under root group. */
@@ -1172,7 +1174,7 @@ write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
     size = get_size();
 
-    outme = HDmalloc((size_t)(size * size * sizeof(double)));
+    outme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
     for(n = 0; n < NDATASET; n++) {
@@ -1332,10 +1334,10 @@ read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
     size = get_size();
 
-    indata =(DATATYPE*)HDmalloc((size_t)(size * size * sizeof(DATATYPE)));
+    indata =(DATATYPE*)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((indata != NULL), "HDmalloc succeeded for indata");
 
-    outdata =(DATATYPE*)HDmalloc((size_t)(size * size * sizeof(DATATYPE)));
+    outdata =(DATATYPE*)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((outdata != NULL), "HDmalloc succeeded for outdata");
 
     for(n=0; n<NDATASET; n++) {
@@ -1489,8 +1491,8 @@ check_value(DATATYPE *indata, DATATYPE *outdata, int size)
 
     get_slab(chunk_origin, chunk_dims, count, NULL, size);
 
-    indata += chunk_origin[0]*size;
-    outdata += chunk_origin[0]*size;
+    indata += chunk_origin[0]*(hsize_t)size;
+    outdata += chunk_origin[0]*(hsize_t)size;
     for(i=chunk_origin[0]; i<(chunk_origin[0]+chunk_dims[0]); i++)
         for(j=chunk_origin[1]; j<(chunk_origin[1]+chunk_dims[1]); j++) {
             if(*indata != *outdata )
@@ -1523,15 +1525,15 @@ get_slab(hsize_t chunk_origin[], hsize_t chunk_dims[], hsize_t count[],
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
     if(chunk_origin != NULL) {
-        chunk_origin[0] = mpi_rank *(size/mpi_size);
+        chunk_origin[0] = (hsize_t)mpi_rank * (hsize_t)(size/mpi_size);
         chunk_origin[1] = 0;
     }
     if(chunk_dims != NULL) {
-        chunk_dims[0]   = size/mpi_size;
-        chunk_dims[1]   = size;
+        chunk_dims[0]   = (hsize_t)(size/mpi_size);
+        chunk_dims[1]   = (hsize_t)size;
     }
     if(file_dims != NULL)
-        file_dims[0] = file_dims[1] = size;
+        file_dims[0] = file_dims[1] = (hsize_t)size;
     if(count != NULL)
         count[0] = count[1] = 1;
 }
@@ -1959,7 +1961,7 @@ void rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* private communicator size and rank */
     int mpi_size;
     int mpi_rank;
-    int mrc;        /* mpi error code */
+    int mrc; /* mpi error code */
     /* steps to verify and have been verified */
     int steps = 0;
     int steps_done = 0;
@@ -2477,7 +2479,7 @@ void rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
 
                     /* compare read data with expected data */
                     for ( j = 0; j < LOCAL_DATA_SIZE; j++ )
-                        if (data_read[j] != data[j]){
+                        if (!H5_DBL_ABS_EQUAL(data_read[j], data[j])){
                             HDfprintf(stdout,
                                     "%0d:%s: Reading datasets value failed in "
                                     "Dataset %d, at position %d: expect %f, got %f.\n",
@@ -2540,7 +2542,7 @@ void rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                         VRFY((err >= 0), "H5Aread failed.\n");
                         /* compare read attribute data with expected data */
                         for ( j = 0; j < LOCAL_DATA_SIZE; j++ )
-                            if (att_read[j] != att[j]){
+                            if (!H5_DBL_ABS_EQUAL(att_read[j], att[j])){
                                 HDfprintf(stdout,
                                         "%0d:%s: Mismatched attribute data read in Dataset %d, at position %d: expect %f, got %f.\n",
                                         mpi_rank, fcn_name, i, j, att[j], att_read[j]);
@@ -2592,7 +2594,7 @@ void rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                         VRFY((err >= 0), "H5Aread failed.\n");
                         /* compare read attribute data with expected data */
                         for ( j = 0; j < LARGE_ATTR_SIZE; j++ )
-                            if (lg_att_read[j] != lg_att[j]){
+                            if (!H5_DBL_ABS_EQUAL(lg_att_read[j], lg_att[j])){
                                 HDfprintf(stdout,
                                         "%0d:%s: Mismatched large attribute data read in Dataset %d, at position %d: expect %f, got %f.\n",
                                         mpi_rank, fcn_name, i, j, lg_att[j], lg_att_read[j]);

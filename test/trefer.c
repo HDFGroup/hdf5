@@ -566,9 +566,9 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hsize_t *coords;                /* Coordinate buffer */
     hsize_t low[SPACE2_RANK];       /* Selection bounds */
     hsize_t high[SPACE2_RANK];      /* Selection bounds */
-    H5R_ref_t *wbuf,                   /* buffer to write to disk */
-           *rbuf;                   /* buffer read from disk */
-    H5R_ref_t  nvrbuf[3]={{{0}},{{101}},{{255}}}; /* buffer with non-valid refs */
+    H5R_ref_t *wbuf,                /* buffer to write to disk */
+              *rbuf;                /* buffer read from disk */
+    H5R_ref_t  nvrbuf[3]={{{{0}}},{{{101}}},{{{255}}}}; /* buffer with non-valid refs */
     uint8_t *dwbuf,                 /* Buffer for writing numeric data to disk */
             *drbuf;                 /* Buffer for reading numeric data from disk */
     uint8_t *tu8;                   /* Temporary pointer to uint8 data */
@@ -580,7 +580,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hid_t dset_NA;                  /* Dataset id for undefined reference */
     hid_t space_NA;                 /* Dataspace id for undefined reference */
     hsize_t dims_NA[1] = {1};       /* Dims array for undefined reference */
-    H5R_ref_t rdata_NA[1];             /* Read buffer */
+    H5R_ref_t rdata_NA[1];          /* Read buffer */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataset Region Reference Functions\n"));
@@ -1380,7 +1380,7 @@ test_reference_obj_deleted(void)
 **
 ****************************************************************/
 static herr_t
-test_deref_iter_op(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_UNUSED *info,
+test_deref_iter_op(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR_UNUSED *info,
     void *op_data)
 {
     int *count = (int *)op_data;        /* Pointer to name counter */
@@ -1430,7 +1430,7 @@ test_reference_group(void)
     H5R_ref_t rref;                /* Reference to read */
     H5G_info_t ginfo;           /* Group info struct */
     char objname[NAME_SIZE];    /* Buffer to store name */
-    H5O_info_t oinfo;           /* Object info struct */
+    H5O_info2_t oinfo;          /* Object info struct */
     int count = 0;              /* Count within iterated group */
     ssize_t size;               /* Name length */
     herr_t ret;
@@ -1508,7 +1508,7 @@ test_reference_group(void)
     CHECK(gid, H5I_INVALID_HID, "H5Ropen_object");
 
     /* Iterate through objects in dereferenced group */
-    ret = H5Literate(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_deref_iter_op, &count);
+    ret = H5Literate2(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_deref_iter_op, &count);
     CHECK(ret, FAIL, "H5Literate");
 
     /* Various queries on the group opened */
@@ -1520,9 +1520,9 @@ test_reference_group(void)
     CHECK(size, (-1), "H5Lget_name_by_idx");
     VERIFY_STR(objname, DSETNAME2, "H5Lget_name_by_idx");
 
-    ret = H5Oget_info_by_idx2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_idx");
-    VERIFY(oinfo.type, H5O_TYPE_DATASET, "H5Oget_info_by_idx");
+    ret = H5Oget_info_by_idx3(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_idx3");
+    VERIFY(oinfo.type, H5O_TYPE_DATASET, "H5Oget_info_by_idx3");
 
     /* Unlink one of the objects in the dereferenced group */
     ret = H5Ldelete(gid, GROUPNAME2, H5P_DEFAULT);
@@ -2516,7 +2516,8 @@ test_reference_perf(void)
         ret = H5Rdestroy(&wbuf[0]);
         CHECK(ret, FAIL, "H5Rdestroy");
     }
-    HDprintf("--- Object reference create time: %lfs\n", t / MAX_ITER_CREATE);
+    if(VERBOSE_MED)
+        HDprintf("--- Object reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Create reference to dataset */
     ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
@@ -2534,7 +2535,8 @@ test_reference_perf(void)
         t2 = H5_get_time();
         t += t2 - t1;
     }
-    HDprintf("--- Object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+    if(VERBOSE_MED)
+        HDprintf("--- Object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2552,7 +2554,8 @@ test_reference_perf(void)
         t2 = H5_get_time();
         t += t2 - t1;
     }
-    HDprintf("--- Deprecated object reference create time: %lfs\n", t / MAX_ITER_CREATE);
+    if(VERBOSE_MED)
+        HDprintf("--- Deprecated object reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Create reference to dataset */
     ret = H5Rcreate(&wbuf_deprec[0], fid1, "/Group1/Dataset1", H5R_OBJECT1, H5I_INVALID_HID);
@@ -2567,7 +2570,8 @@ test_reference_perf(void)
         t2 = H5_get_time();
         t += t2 - t1;
     }
-    HDprintf("--- Deprecated object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+    if(VERBOSE_MED)
+        HDprintf("--- Deprecated object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2588,7 +2592,8 @@ test_reference_perf(void)
         ret = H5Rdestroy(&wbuf_reg[0]);
         CHECK(ret, FAIL, "H5Rdestroy");
     }
-    HDprintf("--- Region reference create time: %lfs\n", t / MAX_ITER_CREATE);
+    if(VERBOSE_MED)
+        HDprintf("--- Region reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Store first dataset region */
     ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, H5P_DEFAULT, &wbuf_reg[0]);
@@ -2603,7 +2608,8 @@ test_reference_perf(void)
         t2 = H5_get_time();
         t += t2 - t1;
     }
-    HDprintf("--- Region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+    if(VERBOSE_MED)
+        HDprintf("--- Region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2622,7 +2628,8 @@ test_reference_perf(void)
         t2 = H5_get_time();
         t += t2 - t1;
     }
-    HDprintf("--- Deprecated region reference create time: %lfs\n", t / MAX_ITER_CREATE);
+    if(VERBOSE_MED)
+        HDprintf("--- Deprecated region reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     t = 0;
     for(i = 0; i < MAX_ITER_WRITE; i++) {
@@ -2633,7 +2640,8 @@ test_reference_perf(void)
         t2 = H5_get_time();
         t += t2 - t1;
     }
-    HDprintf("--- Deprecated region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+    if(VERBOSE_MED)
+        HDprintf("--- Deprecated region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2666,7 +2674,8 @@ test_reference_perf(void)
         ret = H5Rdestroy(&rbuf[0]);
         CHECK(ret, FAIL, "H5Rdestroy");
     }
-    HDprintf("--- Object reference read time: %lfs\n", t / MAX_ITER_READ);
+    if(VERBOSE_MED)
+        HDprintf("--- Object reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
@@ -2711,7 +2720,8 @@ test_reference_perf(void)
         t2 = H5_get_time();
         t += t2 - t1;
     }
-    HDprintf("--- Deprecated object reference read time: %lfs\n", t / MAX_ITER_READ);
+    if(VERBOSE_MED)
+        HDprintf("--- Deprecated object reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2732,7 +2742,8 @@ test_reference_perf(void)
         ret = H5Rdestroy(&rbuf_reg[0]);
         CHECK(ret, FAIL, "H5Rdestroy");
     }
-    HDprintf("--- Region reference read time: %lfs\n", t / MAX_ITER_READ);
+    if(VERBOSE_MED)
+        HDprintf("--- Region reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_reg);
@@ -2755,7 +2766,8 @@ test_reference_perf(void)
         t2 = H5_get_time();
         t += t2 - t1;
     }
-    HDprintf("--- Deprecated region reference read time: %lfs\n", t / MAX_ITER_READ);
+    if(VERBOSE_MED)
+        HDprintf("--- Deprecated region reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2816,7 +2828,7 @@ test_reference(void)
         for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Invalid combinations, just continue */
-            if(high <= H5F_LIBVER_V112 || high < low)
+            if(high <= H5F_LIBVER_V110 || high < low)
                 continue;
 
             test_reference_region(low, high);       /* Test basic H5R dataset region reference code */
