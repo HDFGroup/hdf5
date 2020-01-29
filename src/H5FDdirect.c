@@ -459,8 +459,8 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
 #endif
     h5_stat_t    sb;
     H5P_genplist_t   *plist;      /* Property list */
-    int                 *buf1, *buf2;
-    H5FD_t    *ret_value;
+    void                 *buf1, *buf2;
+    H5FD_t    *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -525,13 +525,13 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     /* NOTE: Use HDmalloc and HDfree here to ensure compatibility with
      *       HDposix_memalign.
      */
-    buf1 = (int *)HDmalloc(sizeof(int));
+    buf1 = HDmalloc(sizeof(int));
     if(HDposix_memalign(&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "HDposix_memalign failed")
 
     if(o_flags & O_CREAT) {
-        if(HDwrite(file->fd, (void*)buf1, sizeof(int))<0) {
-            if(HDwrite(file->fd, (void*)buf2, file->fa.fbsize)<0)
+        if(HDwrite(file->fd, buf1, sizeof(int))<0) {
+            if(HDwrite(file->fd, buf2, file->fa.fbsize)<0)
                 HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "file system may not support Direct I/O")
             else
                 file->fa.must_align = TRUE;
@@ -540,8 +540,8 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
             HDftruncate(file->fd, (HDoff_t)0);
         }
     } else {
-        if(HDread(file->fd, (void*)buf1, sizeof(int))<0) {
-            if(HDread(file->fd, (void*)buf2, file->fa.fbsize)<0)
+        if(HDread(file->fd, buf1, sizeof(int))<0) {
+            if(HDread(file->fd, buf2, file->fa.fbsize)<0)
                 HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "file system may not support Direct I/O")
             else
                 file->fa.must_align = TRUE;
@@ -549,7 +549,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
             if(o_flags & O_RDWR) {
                 if(HDlseek(file->fd, (HDoff_t)0, SEEK_SET) < 0)
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, NULL, "unable to seek to proper position")
-                if(HDwrite(file->fd, (void *)buf1, sizeof(int))<0)
+                if(HDwrite(file->fd, buf1, sizeof(int))<0)
                     file->fa.must_align = TRUE;
                 else
                     file->fa.must_align = FALSE;

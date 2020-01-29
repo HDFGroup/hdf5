@@ -15,7 +15,7 @@ const char *FILENAME[3]={ "bigio_test.h5",
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
 
-#define MAIN_PROCESS     (!mpi_rank_g) /* define process 0 as main process */
+#define MAIN_PROCESS (mpi_rank_g == 0) /* define process 0 as main process */
 
 /* Constants definitions */
 #define RANK        2
@@ -1131,7 +1131,7 @@ single_rank_independent_io(void)
         void *data = NULL;
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-	    VRFY_G((fapl_id >= 0), "H5P_FILE_ACCESS");
+        VRFY_G((fapl_id >= 0), "H5P_FILE_ACCESS");
 
         H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
         file_id = H5Fcreate(FILENAME[1], H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);

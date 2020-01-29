@@ -12,8 +12,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose: A library for displaying the values of a dataset in a human
- *  readable format.
+ * Purpose: A library for routines that are common
+ *          amongst the various HDF5 tools.
  */
 
 #include "h5tools.h"
