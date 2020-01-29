@@ -492,7 +492,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'j':
-                options->low_bound = (H5F_libver_t)HDatoi(opt_arg);
+                options->low_bound = HDatoi(opt_arg);
                 if (options->low_bound < H5F_LIBVER_EARLIEST || options->low_bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing low bound\n");
                     goto done;
@@ -500,7 +500,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'k':
-                options->high_bound = (H5F_libver_t)HDatoi(opt_arg);
+                options->high_bound = HDatoi(opt_arg);
                 if (options->high_bound < H5F_LIBVER_EARLIEST || options->high_bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing high bound\n");
                     goto done;
