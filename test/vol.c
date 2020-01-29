@@ -38,13 +38,14 @@ const char *FILENAME[] = {
 #define N_ELEMENTS  10
 
 #define FAKE_VOL_NAME   "fake"
+#define FAKE_VOL_VALUE ((H5VL_class_value_t)501)
 
 /* A VOL class struct that describes a VOL class with no
  * functionality.
  */
 static const H5VL_class_t fake_vol_g = {
     0,                                              /* version      */
-    (H5VL_class_value_t)501,                        /* value        */
+    FAKE_VOL_VALUE,                                 /* value        */
     FAKE_VOL_NAME,                                  /* name         */
     0,                                              /* capability flags */
     NULL,                                           /* initialize   */
@@ -174,7 +175,11 @@ test_vol_registration(void)
     TESTING("VOL registration");
 
     /* The test/fake VOL connector should not be registered at the start of the test */
-    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
+    if ((is_registered = H5VLis_connector_registered_by_name(FAKE_VOL_NAME)) < 0)
+        TEST_ERROR;
+    if (is_registered > 0)
+        FAIL_PUTS_ERROR("VOL connector is inappropriately registered");
+    if ((is_registered = H5VLis_connector_registered_by_value(FAKE_VOL_VALUE)) < 0)
         TEST_ERROR;
     if (is_registered > 0)
         FAIL_PUTS_ERROR("VOL connector is inappropriately registered");
@@ -203,7 +208,11 @@ test_vol_registration(void)
         TEST_ERROR;
 
     /* The test/fake VOL connector should be registered now */
-    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
+    if ((is_registered = H5VLis_connector_registered_by_name(FAKE_VOL_NAME)) < 0)
+        TEST_ERROR;
+    if (0 == is_registered)
+        FAIL_PUTS_ERROR("VOL connector is un-registered");
+    if ((is_registered = H5VLis_connector_registered_by_value(FAKE_VOL_VALUE)) < 0)
         TEST_ERROR;
     if (0 == is_registered)
         FAIL_PUTS_ERROR("VOL connector is un-registered");
@@ -213,7 +222,11 @@ test_vol_registration(void)
         TEST_ERROR;
 
     /* The test/fake VOL connector should still be registered now */
-    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
+    if ((is_registered = H5VLis_connector_registered_by_name(FAKE_VOL_NAME)) < 0)
+        TEST_ERROR;
+    if (0 == is_registered)
+        FAIL_PUTS_ERROR("VOL connector is un-registered");
+    if ((is_registered = H5VLis_connector_registered_by_value(FAKE_VOL_VALUE)) < 0)
         TEST_ERROR;
     if (0 == is_registered)
         FAIL_PUTS_ERROR("VOL connector is un-registered");
@@ -223,7 +236,11 @@ test_vol_registration(void)
         TEST_ERROR;
 
     /* The test/fake VOL connector should still be registered now */
-    if ((is_registered = H5VLis_connector_registered(FAKE_VOL_NAME)) < 0)
+    if ((is_registered = H5VLis_connector_registered_by_name(FAKE_VOL_NAME)) < 0)
+        TEST_ERROR;
+    if (0 == is_registered)
+        FAIL_PUTS_ERROR("VOL connector is un-registered");
+    if ((is_registered = H5VLis_connector_registered_by_value(FAKE_VOL_VALUE)) < 0)
         TEST_ERROR;
     if (0 == is_registered)
         FAIL_PUTS_ERROR("VOL connector is un-registered");
@@ -272,7 +289,12 @@ test_native_vol_init(void)
     TESTING("Native VOL connector initialization");
 
     /* The native VOL connector should always be registered */
-    if ((is_registered = H5VLis_connector_registered(H5VL_NATIVE_NAME)) < 0)
+    if ((is_registered = H5VLis_connector_registered_by_name(H5VL_NATIVE_NAME)) < 0)
+        TEST_ERROR;
+    if (0 == is_registered)
+        FAIL_PUTS_ERROR("native VOL connector is un-registered");
+
+    if ((is_registered = H5VLis_connector_registered_by_value(H5VL_NATIVE_VALUE)) < 0)
         TEST_ERROR;
     if (0 == is_registered)
         FAIL_PUTS_ERROR("native VOL connector is un-registered");

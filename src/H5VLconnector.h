@@ -512,7 +512,8 @@ H5_DLL hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);
 H5_DLL void *H5VLobject(hid_t obj_id);
 H5_DLL hid_t H5VLget_file_type(void *file_obj, hid_t connector_id,
     hid_t dtype_id);
-H5_DLL hid_t H5VLpeek_connector_id(const char *name);
+H5_DLL hid_t H5VLpeek_connector_id_by_name(const char *name);
+H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 
 #ifdef __cplusplus
 }
