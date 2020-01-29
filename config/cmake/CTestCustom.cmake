@@ -135,7 +135,9 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK-szip_individual-clear-objects
     H5REPACK-szip_remove-clear-objects
     H5REPACK-upgrade_layout-clear-objects
+    H5REPACK_DMP-attrregion-clear-objects
     H5REPACK_DMP-crtorder-clear-objects
+    H5REPACK_DMP-dataregion-clear-objects
     H5REPACK_DMP-deflate_limit-clear-objects
     H5REPACK-bug1814-clear-objects
     H5REPACK-HDFFV-5932-clear-objects
