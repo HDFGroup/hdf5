@@ -25,6 +25,7 @@
 
 /* Include library header files */
 #include "H5ACprivate.h"
+#include "H5MFprivate.h"
 #include "H5Cpkg.h"
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"

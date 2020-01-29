@@ -625,7 +625,7 @@ static int MpioTest2G( MPI_Comm comm )
     VRFY((dcpl_id >= 0), "H5P_DATASET_CREATE");
     chunk[0] = 4;
     chunk[1] = shape[1];
-    shape[2] = shape[2];
+    chunk[2] = shape[2];
     status = H5Pset_chunk(dcpl_id, 3, chunk);
     VRFY((status >= 0), "H5Pset_chunk succeeded");
 

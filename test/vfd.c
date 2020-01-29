@@ -562,6 +562,7 @@ test_direct(void)
     size_t  mbound;
     size_t  fbsize;
     size_t  cbsize;
+    void *proto_points = NULL, *proto_check = NULL;
     int    *points = NULL, *check = NULL, *p1 = NULL, *p2 = NULL;
     int    wdata2[DSET2_DIM] = {11,12,13,14};
     int    rdata2[DSET2_DIM];
@@ -633,10 +634,12 @@ test_direct(void)
 
     /* Allocate aligned memory for data set 1. For data set 1, everything is aligned including
      * memory address, size of data, and file address. */
-    if(0 != HDposix_memalign(&points, (size_t)FBSIZE, (size_t)(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+    if(0 != HDposix_memalign(&proto_points, (size_t)FBSIZE, (size_t)(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
         TEST_ERROR;
-    if(0 != HDposix_memalign(&check, (size_t)FBSIZE, (size_t)(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+    points = proto_points;
+    if(0 != HDposix_memalign(&proto_check, (size_t)FBSIZE, (size_t)(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
         TEST_ERROR;
+    check = proto_check;
 
     /* Initialize the dset1 */
     p1 = points;
@@ -746,10 +749,10 @@ error:
         H5Fclose(file);
     } H5E_END_TRY;
 
-    if(points)
-        HDfree(points);
-    if(check)
-        HDfree(check);
+    if(proto_points)
+        HDfree(proto_points);
+    if(proto_check)
+        HDfree(proto_check);
 
     return -1;
 #endif /*H5_HAVE_DIRECT*/

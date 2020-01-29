@@ -129,6 +129,7 @@ static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
     int flags);
 static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
+static off_t sqrto(off_t);
 
 /*
  * Function:        do_pio
@@ -199,7 +200,7 @@ do_pio(parameters param)
         bsize = buf_size;   /* Actual buffer size       */
     }
     else {
-        snbytes = (off_t)sqrt((double)nbytes);  /* General dataset size     */
+        snbytes = sqrto(nbytes);  /* General dataset size     */
         bsize = buf_size * blk_size;    /* Actual buffer size       */
     }
 
@@ -596,7 +597,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* nbytes is always the number of bytes per dataset (1D or 2D). If the
            dataspace is 2D, snbytes is the size of a side of the dataset square.
          */
-        snbytes = (off_t)sqrt((double)nbytes);
+        snbytes = sqrto(nbytes);
 
         /* Contiguous Pattern: */
         if (!parms->interleaved) {
@@ -1489,6 +1490,13 @@ done:
     return ret_code;
 }
 
+static off_t
+sqrto(off_t x)
+{
+    double root_x = sqrt((double)x);
+    return (off_t)root_x;
+}
+
 /*
  * Function:        do_read
  * Purpose:         read the required amount of data from the file.
@@ -1581,7 +1589,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* nbytes is always the number of bytes per dataset (1D or 2D). If the
            dataspace is 2D, snbytes is the size of a side of the 'dataset square'.
          */
-        snbytes = (off_t)sqrt((double)nbytes);
+        snbytes = sqrto(nbytes);
 
         bsize = buf_size * blk_size;
 
