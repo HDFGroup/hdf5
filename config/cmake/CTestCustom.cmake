@@ -25,6 +25,7 @@ set (CTEST_CUSTOM_WARNING_EXCEPTION
 #    "H5Tconv.c[0-9 \t:]*warning:[ \t]*comparison is always false due to limited range of data type"
 #    "H5Ztrans.c.[0-9]+.[ \t]*:[ \t]*warning C4244"
     "src.ZLIB.*:[ \t]*warning"
+    "warning LNK4197:.*ZLIB-prefix"
     "src.SZIP.*:[ \t]*warning"
 #    "POSIX name for this item is deprecated"
     "disabling jobserver mode"
@@ -134,7 +135,9 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK-szip_individual-clear-objects
     H5REPACK-szip_remove-clear-objects
     H5REPACK-upgrade_layout-clear-objects
+    H5REPACK_DMP-attrregion-clear-objects
     H5REPACK_DMP-crtorder-clear-objects
+    H5REPACK_DMP-dataregion-clear-objects
     H5REPACK_DMP-deflate_limit-clear-objects
     H5REPACK-bug1814-clear-objects
     H5REPACK-HDFFV-5932-clear-objects

@@ -371,9 +371,7 @@ hsize_t diff_array(void *_mem1, void *_mem2, hsize_t nelmts, hsize_t hyper_start
         } /* i */
         close_member_types(&members);
     } /* switch */
-    H5TOOLS_DEBUG("diff_array finish:%d - errstat:%d", nfound, opts->err_stat);
-
-    H5TOOLS_ENDDEBUG(": %d", nfound);
+    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 
@@ -2216,9 +2214,7 @@ diff_datum(void *_mem1, void *_mem2, hid_t m_type, hsize_t idx, int rank,
 done:
     opts->err_stat = opts->err_stat | ret_value;
 
-    H5TOOLS_DEBUG("diff_datum finish:%d - errstat:%d", nfound, opts->err_stat);
-
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 
