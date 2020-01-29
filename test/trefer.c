@@ -2123,7 +2123,7 @@ test_reference_compat_conv(void)
     /* Allocate write & read buffers */
     wbuf_obj = (hobj_ref_t *)HDcalloc(sizeof(hobj_ref_t), SPACE1_DIM1);
     rbuf_obj = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    wbuf_reg = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    wbuf_reg = HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
     rbuf_reg = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
 
     /* Create file */
