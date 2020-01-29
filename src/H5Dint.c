@@ -1535,7 +1535,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Shallow copy (take ownership) of the object location object */
-    if(H5O_loc_copy(&(dataset->oloc), loc->oloc, H5_COPY_SHALLOW) < 0)
+    if(H5O_loc_copy_shallow(&(dataset->oloc), loc->oloc) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, NULL, "can't copy object location")
 
     /* Shallow copy (take ownership) of the group hier. path */
@@ -3882,7 +3882,7 @@ H5D__get_type(const H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to patch datatype's file pointer")
 
     /* Copy the dataset's datatype */
-    if(NULL == (dt = H5T_copy(dset->shared->type, H5T_COPY_REOPEN)))
+    if(NULL == (dt = H5T_copy_reopen(dset->shared->type)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy datatype")
 
     /* Mark any datatypes as being in memory now */
