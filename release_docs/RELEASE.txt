@@ -48,6 +48,15 @@ New Features
 
     Configuration:
     -------------
+    - Added common warnings files for gnu and intel
+
+      Added warnings files to use one common set of flags
+      during configure for both autotools and CMake build
+      systems. The initial implementation only affects a
+      general set of flags for gnu and intel compilers.
+
+      (ADB - 2020/01/17)
+
     - Added new options to CMake for control of testing
 
       Added CMake options (default ON);
