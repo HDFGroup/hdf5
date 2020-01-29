@@ -45,8 +45,10 @@ main(void)
         TEST_ERROR
 
     /* Create the read buffer */
-    n_elements = VDS_PLANE[1] * VDS_PLANE[2];
-    size = n_elements * sizeof(int);
+    if(VDS_PLANE[1] * VDS_PLANE[2] > INT_MAX)
+        TEST_ERROR
+    n_elements = (int)(VDS_PLANE[1] * VDS_PLANE[2]);
+    size = (size_t)n_elements * sizeof(int);
     if(NULL == (buffer = (int *)HDmalloc(size)))
         TEST_ERROR
 

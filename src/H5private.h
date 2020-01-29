@@ -305,15 +305,21 @@
  */
 #ifdef __cplusplus
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED       /*void*/
-#   define H5_ATTR_NORETURN     /*void*/
-#   define H5_ATTR_CONST        /*void*/
-#   define H5_ATTR_PURE         /*void*/
-#   define H5_ATTR_FALLTHROUGH  /*void*/
+#   define H5_ATTR_UNUSED         /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
+#   define H5_ATTR_NORETURN       /*void*/
+#   define H5_ATTR_CONST          /*void*/
+#   define H5_ATTR_PURE           /*void*/
+#   define H5_ATTR_FALLTHROUGH    /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED       __attribute__((unused))
+#ifndef NDEBUG
+#define H5_ATTR_NDEBUG_UNUSED     /*void*/
+#else /* NDEBUG */
+#define H5_ATTR_NDEBUG_UNUSED     H5_ATTR_UNUSED
+#endif /* NDEBUG */
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
@@ -324,11 +330,12 @@
 #endif
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED       /*void*/
-#   define H5_ATTR_NORETURN     /*void*/
-#   define H5_ATTR_CONST        /*void*/
-#   define H5_ATTR_PURE         /*void*/
-#   define H5_ATTR_FALLTHROUGH  /*void*/
+#   define H5_ATTR_UNUSED         /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
+#   define H5_ATTR_NORETURN       /*void*/
+#   define H5_ATTR_CONST          /*void*/
+#   define H5_ATTR_PURE           /*void*/
+#   define H5_ATTR_FALLTHROUGH    /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -1609,7 +1616,7 @@ extern char *strdup(const char *s);
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
     HDassert(_tmp_src >= 0);   \
-    HDassert(_tmp_src == _tmp_dst);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -2677,7 +2684,7 @@ H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **ful
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */
 H5_DLL hsize_t  H5_mpi_set_bigio_count(hsize_t new_count);
-H5_DLL hsize_t  H5_mpi_get_bigio_count();
+H5_DLL hsize_t  H5_mpi_get_bigio_count(void);
 H5_DLL herr_t   H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new);
 H5_DLL herr_t   H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new);
 H5_DLL herr_t   H5_mpi_comm_free(MPI_Comm *comm);

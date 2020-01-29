@@ -166,7 +166,7 @@ ph5diff_worker(int nID)
         {
             struct diff_mpi_args args;
             struct diffs_found  diffs;
-            int i;
+            unsigned i;
 
             /* Make certain we've received the filenames and opened the files already */
             if(file1_id < 0 || file2_id < 0)

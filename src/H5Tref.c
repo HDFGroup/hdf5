@@ -784,7 +784,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t src_size,
+H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_NDEBUG_UNUSED src_size,
     H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, size_t dst_size)
 {
     const uint8_t *p = (const uint8_t *)src_buf;
@@ -1101,7 +1101,11 @@ H5T__ref_dsetreg_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file,
 {
     size_t ret_value = sizeof(struct H5Tref_dsetreg);
 
+#ifndef NDEBUG
     FUNC_ENTER_STATIC
+#else
+    FUNC_ENTER_STATIC_NOERR
+#endif
 
     HDassert(src_buf);
 
@@ -1125,7 +1129,9 @@ H5T__ref_dsetreg_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file,
     }
 #endif /* NDEBUG */
 
+#ifndef NDEBUG
 done:
+#endif
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T__ref_dsetreg_disk_getsize() */
 

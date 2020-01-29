@@ -2290,7 +2290,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
             /* Retrieve free space size from free space manager */
             if(H5FS_sect_stats(f->shared->fs_man[type], &type_fs_size, NULL) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space stats")
-            if(H5FS_size(f, f->shared->fs_man[type], &type_meta_size) < 0)
+            if(H5FS_size(f->shared->fs_man[type], &type_meta_size) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space metadata stats")
 
             /* Increment total free space for types */
