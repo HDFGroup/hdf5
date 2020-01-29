@@ -1052,15 +1052,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_fileno(hid_t file_id, unsigned long *fileno)
+H5Fget_fileno(hid_t file_id, unsigned long *fnumber)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Ul", file_id, fileno);
+    H5TRACE2("e", "i*Ul", file_id, fnumber);
 
-    /* If no fileno pointer was passed in, exit quietly */
-    if(fileno) {
+    /* If no fnumber pointer was passed in, exit quietly */
+    if(fnumber) {
         H5VL_object_t   *vol_obj;                      /* File info */
 
         /* Get the internal file structure */
@@ -1068,7 +1068,7 @@ H5Fget_fileno(hid_t file_id, unsigned long *fileno)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
         /* Get the flags */
-        if((ret_value = H5VL_file_get(vol_obj, H5VL_FILE_GET_FILENO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fileno)) < 0)
+        if((ret_value = H5VL_file_get(vol_obj, H5VL_FILE_GET_FILENO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fnumber)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file's 'file number'")
     } /* end if */
 

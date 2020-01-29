@@ -133,11 +133,10 @@ H5FL_EXTERN(H5D_chunk_info_t);
 H5FL_BLK_EXTERN(type_conv);
 
 /* Disable warning for intentional identical branches here -QAK */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wlarger-than="
+H5_GCC_DIAG_OFF(larger-than=)
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(larger-than=)
 
 /* Dataset ID class */
 static const H5I_class_t H5I_DATASET_CLS[1] = {{

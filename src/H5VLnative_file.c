@@ -207,12 +207,12 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
         /* H5Fget_fileno */
         case H5VL_FILE_GET_FILENO:
             {
-                unsigned long *fileno = HDva_arg(arguments, unsigned long *);
+                unsigned long *fno = HDva_arg(arguments, unsigned long *);
                 unsigned long my_fileno = 0;
 
                 f = (H5F_t *)obj;
                 H5F_GET_FILENO(f, my_fileno);
-                *fileno = my_fileno;    /* sigh */
+                *fno = my_fileno;    /* sigh */
 
                 break;
             }
