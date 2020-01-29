@@ -129,7 +129,7 @@ H5TOOLS_DLL void warn_msg(const char *fmt, ...);
 H5TOOLS_DLL void help_ref_msg(FILE *output);
 H5TOOLS_DLL void free_table(table_t *table);
 #ifdef H5DUMP_DEBUG
-H5TOOLS_DLL void dump_tables(find_objs_t *info)
+H5TOOLS_DLL void dump_tables(find_objs_t *info);
 #endif  /* H5DUMP_DEBUG */
 H5TOOLS_DLL herr_t init_objs(hid_t fid, find_objs_t *info, table_t **group_table, table_t **dset_table, table_t **type_table);
 H5TOOLS_DLL obj_t *search_obj(table_t *temp, const H5O_token_t *obj_token);
