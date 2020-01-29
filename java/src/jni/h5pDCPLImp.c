@@ -1237,7 +1237,7 @@ done:
  */
 JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dsetname
-    (JNIEnv *env, jclass clss, jlong dcpl_id, jlong index)
+    (JNIEnv *env, jclass clss, jlong dcpl_id, jlong idx)
 {
     ssize_t  buf_size;
     char    *dname = NULL;
@@ -1246,13 +1246,13 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dsetname
     UNUSED(clss);
 
     /* get the length of the filename */
-    if ((buf_size = H5Pget_virtual_dsetname((hid_t)dcpl_id, (size_t)index, NULL, 0)) < 0)
+    if ((buf_size = H5Pget_virtual_dsetname((hid_t)dcpl_id, (size_t) idx, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (dname = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_dsetname: memory allocation failed");
 
-    if (H5Pget_virtual_dsetname((hid_t)dcpl_id, (size_t)index, dname, (size_t)buf_size + 1) < 0)
+    if (H5Pget_virtual_dsetname((hid_t)dcpl_id, (size_t) idx, dname, (size_t)buf_size + 1) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     dname[buf_size] = '\0';
 
@@ -1275,7 +1275,7 @@ done:
  */
 JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1virtual_1filename
-    (JNIEnv *env, jclass clss, jlong dcpl_id, jlong index)
+    (JNIEnv *env, jclass clss, jlong dcpl_id, jlong idx)
 {
     ssize_t  buf_size;
     char    *fname = NULL;
@@ -1284,13 +1284,13 @@ Java_hdf_hdf5lib_H5_H5Pget_1virtual_1filename
     UNUSED(clss);
 
     /* get the length of the filename */
-    if ((buf_size = H5Pget_virtual_filename((hid_t)dcpl_id, (size_t)index, NULL, 0)) < 0)
+    if ((buf_size = H5Pget_virtual_filename((hid_t)dcpl_id, (size_t) idx, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (fname = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_virtual_filename: memory allocation failed");
 
-    if (H5Pget_virtual_filename((hid_t)dcpl_id, (size_t)index, fname, (size_t)buf_size + 1) < 0)
+    if (H5Pget_virtual_filename((hid_t)dcpl_id, (size_t) idx, fname, (size_t)buf_size + 1) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     fname[buf_size] = '\0';
 
@@ -1313,13 +1313,13 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1virtual_1srcspace
-    (JNIEnv *env, jclass clss, jlong dcpl_id, jlong index)
+    (JNIEnv *env, jclass clss, jlong dcpl_id, jlong idx)
 {
     hid_t space_id = H5I_INVALID_HID;
 
     UNUSED(clss);
 
-    if ((space_id = H5Pget_virtual_srcspace((hid_t)dcpl_id, (size_t)index)) < 0)
+    if ((space_id = H5Pget_virtual_srcspace((hid_t)dcpl_id, (size_t) idx)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -1333,13 +1333,13 @@ done:
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1virtual_1vspace
-    (JNIEnv *env, jclass clss, jlong dcpl_id, jlong index)
+    (JNIEnv *env, jclass clss, jlong dcpl_id, jlong idx)
 {
     hid_t space_id = H5I_INVALID_HID;
 
     UNUSED(clss);
 
-    if ((space_id = H5Pget_virtual_vspace((hid_t)dcpl_id, (size_t)index)) < 0)
+    if ((space_id = H5Pget_virtual_vspace((hid_t)dcpl_id, (size_t) idx)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:

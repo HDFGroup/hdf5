@@ -779,8 +779,7 @@ error:
  *      'first_name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 static herr_t
 test_family_opens(char *fname, hid_t fa_pl)
 {
@@ -837,7 +836,7 @@ test_family_opens(char *fname, hid_t fa_pl)
 error:
     return -1;
 } /* end test_family_opens() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------
@@ -1061,8 +1060,7 @@ error:
  *      'newname_individual', etc. in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 static herr_t
 test_family_compat(void)
 {
@@ -1146,7 +1144,7 @@ error:
 
     return -1;
 } /* end test_family_compat() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------
@@ -1285,8 +1283,7 @@ error:
  *      'sf_name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 static herr_t
 test_multi_opens(char *fname)
 {
@@ -1304,7 +1301,7 @@ test_multi_opens(char *fname)
 
     return(fid >= 0 ? FAIL : SUCCEED);
 } /* end test_multi_opens() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------
