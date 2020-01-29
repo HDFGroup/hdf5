@@ -1131,7 +1131,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                 uint32_t                        global_no_collective_cause;
                 hbool_t                         local_error_message_previously_written = FALSE;
                 hbool_t                         global_error_message_previously_written = FALSE;
-                size_t                          index;
+                size_t                          idx;
                 size_t                          cause_strings_len;
                 char                            local_no_collective_cause_string[512] = "";
                 char                            global_no_collective_cause_string[512] = "";
@@ -1153,8 +1153,11 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
 
                 /* Append each of the "reason for breaking collective I/O" error messages to the
                  * local and global no collective cause strings */
-                for (cause = 1, index = 0; (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (index < cause_strings_len); cause <<= 1, index++) {
-                    size_t cause_strlen = HDstrlen(cause_strings[index]);
+                for (cause = 1, idx = 0;
+                     (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) &&
+                     (idx < cause_strings_len);
+                     cause <<= 1, idx++) {
+                    size_t cause_strlen = HDstrlen(cause_strings[idx]);
 
                     if (cause & local_no_collective_cause) {
                         /* Check if there were any previous error messages included. If so, prepend a semicolon
@@ -1163,7 +1166,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                         if(local_error_message_previously_written)
                             HDstrncat(local_no_collective_cause_string, "; ", 2);
 
-                        HDstrncat(local_no_collective_cause_string, cause_strings[index], cause_strlen);
+                        HDstrncat(local_no_collective_cause_string,
+				  cause_strings[idx], cause_strlen);
 
                         local_error_message_previously_written = TRUE;
                     } /* end if */
@@ -1175,7 +1179,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                         if(global_error_message_previously_written)
                             HDstrncat(global_no_collective_cause_string, "; ", 2);
 
-                        HDstrncat(global_no_collective_cause_string, cause_strings[index], cause_strlen);
+                        HDstrncat(global_no_collective_cause_string,
+				  cause_strings[idx], cause_strlen);
 
                         global_error_message_previously_written = TRUE;
                     } /* end if */
