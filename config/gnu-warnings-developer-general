@@ -6,9 +6,3 @@
 -Winline
 -Wmissing-format-attribute
 -Wmissing-noreturn
-# suggested dev warnings from general section
-# -Wdisabled-optimization
-# -Wswitch-default
-# -Wswitch-enum
-# -Wunsafe-loop-optimizations
-# -Wunused-macros
