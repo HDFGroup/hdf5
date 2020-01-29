@@ -338,7 +338,7 @@ H5Z_calc_parms_compound(const H5T_t *type, size_t *cd_values_actual_nparms)
         H5T_class_t dtype_member_class; /* Compound datatype's member datatype's class */
 
         /* Get member datatype */
-        if(NULL == (dtype_member = H5T_get_member_type(type, u, H5T_COPY_TRANSIENT)))
+        if(NULL == (dtype_member = H5T_get_member_type(type, u)))
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype")
 
         /* Get member datatype's class */
@@ -695,7 +695,7 @@ H5Z_set_parms_compound(const H5T_t *type, unsigned *cd_values_index,
     /* For each member, set parameters */
     for(u = 0; u < nmembers; u++) {
         /* Get member datatype */
-        if(NULL == (dtype_member = H5T_get_member_type(type, u, H5T_COPY_TRANSIENT)))
+        if(NULL == (dtype_member = H5T_get_member_type(type, u)))
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype")
 
         /* Get member datatype's class */

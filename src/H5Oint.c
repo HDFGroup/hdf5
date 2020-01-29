@@ -1913,26 +1913,18 @@ H5O_loc_reset(H5O_loc_t *loc)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_reset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_loc_copy
  *
- * Purpose:     Copy object location information
+ * Purpose:     Copy object location information, according to the depth.
  *
  * Return:    Success:    Non-negative
- *        Failure:    Negative
+ *            Failure:    Negative
  *
  * Programmer:    Quincey Koziol
  *              koziol@ncsa.uiuc.edu
  *              Monday, September 19, 2005
- *
- * Notes:       'depth' parameter determines how much of the group entry
- *              structure we want to copy.  The values are:
- *                  H5_COPY_SHALLOW - Copy all the field values from the source
- *                      to the destination, but not copying objects pointed to.
- *                      (Destination "takes ownership" of objects pointed to)
- *                  H5_COPY_DEEP - Copy all the fields from the source to
- *                      the destination, deep copying objects pointed to.
  *
  *-------------------------------------------------------------------------
  */
@@ -1946,25 +1938,88 @@ H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
     HDassert(dst);
     HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
-    /* Copy the top level information */
-    H5MM_memcpy(dst, src, sizeof(H5O_loc_t));
-
-    /* Deep copy the names */
-    if(depth == H5_COPY_DEEP) {
-        /* If the original entry was holding open the file, this one should
-         * hold it open, too.
-         */
-        if(src->holding_file)
-            H5F_INCR_NOPEN_OBJS(dst->file);
-    }
-    else if(depth == H5_COPY_SHALLOW) {
-        H5O_loc_reset(src);
-    }
+    /* Invoke correct routine */
+    if(depth == H5_COPY_SHALLOW)
+        H5O_loc_copy_shallow(dst, src);
+    else
+        H5O_loc_copy_deep(dst, src);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_copy() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_loc_copy_shallow
+ *
+ * Purpose:     Shallow copy object location information.  Copies all the field
+ *              values from the source to the destination, but not copying
+ *              objects pointed to.  (i.e. destination "takes ownership" of
+ *              objects pointed to)
+ *
+ * Return:    Success:    Non-negative
+ *            Failure:    Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        January 18, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_loc_copy_shallow(H5O_loc_t *dst, H5O_loc_t *src)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    /* Check arguments */
+    HDassert(src);
+    HDassert(dst);
+
+    /* Copy the top level information */
+    H5MM_memcpy(dst, src, sizeof(H5O_loc_t));
+
+    /* Reset the source location, as the destination 'owns' it now */
+    H5O_loc_reset(src);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_loc_copy_shallow() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_loc_copy_deep
+ *
+ * Purpose:     Deep copy object location information.  Copies all the fields
+ *              from the source to the destination, deep copying objects
+ *              pointed to.
+ *
+ * Return:    Success:    Non-negative
+ *            Failure:    Negative
+ *
+ * Programmer:	David Young
+ *	        January 18, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_loc_copy_deep(H5O_loc_t *dst, const H5O_loc_t *src)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check arguments */
+    HDassert(src);
+    HDassert(dst);
+
+    /* Copy the top level information */
+    H5MM_memcpy(dst, src, sizeof(H5O_loc_t));
+
+    /* If the original entry was holding open the file, this one should
+     * hold it open, too.
+     */
+    if(src->holding_file)
+        H5F_INCR_NOPEN_OBJS(dst->file);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_loc_copy_deep() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_loc_hold_file
  *

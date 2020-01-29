@@ -766,7 +766,7 @@ H5F_traverse_mount(H5O_loc_t *oloc/*in,out*/)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to free object location")
 
             /* Copy the entry for the root group */
-            if(H5O_loc_copy(oloc, mnt_oloc, H5_COPY_DEEP) < 0)
+            if(H5O_loc_copy_deep(oloc, mnt_oloc) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "unable to copy object location")
 
             /* In case the shared root group info points to a different file handle
