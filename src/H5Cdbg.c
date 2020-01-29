@@ -319,9 +319,8 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
                (int)(entry_ptr->is_dirty),
                entry_ptr->type->name);
 
-            HDfprintf(stdout, "		node_ptr = 0x%llx, item = %p\n",
-                      (unsigned long long)node_ptr,
-                      H5SL_item(node_ptr));
+            HDfprintf(stdout, "		node_ptr = %p, item = %p\n",
+                      node_ptr, H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
             node_ptr = H5SL_next(node_ptr);
