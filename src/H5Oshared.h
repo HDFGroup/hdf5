@@ -381,7 +381,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5_INLINE herr_t
-H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
+H5O_SHARED_POST_COPY_FILE(const H5O_loc_t H5_ATTR_NDEBUG_UNUSED *oloc_src, const void *mesg_src,
     H5O_loc_t *oloc_dst, void *mesg_dst, unsigned *mesg_flags,
     H5O_copy_t *cpy_info)
 {

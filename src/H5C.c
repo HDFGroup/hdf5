@@ -1056,7 +1056,6 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
     H5C_ring_t		ring;
     H5C_t             * cache_ptr;
     hbool_t             destroy;
-    hbool_t		ignore_protected;
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1101,9 +1100,8 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-    ignore_protected = ( (flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0 );
     destroy = ( (flags & H5C__FLUSH_INVALIDATE_FLAG) != 0 );
-    HDassert( ! ( destroy && ignore_protected ) );
+    HDassert( ! ( destroy && ( (flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0 )) );
     HDassert( ! ( cache_ptr->flush_in_progress ) );
 
     cache_ptr->flush_in_progress = TRUE;
@@ -3856,7 +3854,11 @@ H5C__unpin_entry_real(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
 {
     herr_t ret_value = SUCCEED;    /* Return value */
 
+#if H5C_DO_SANITY_CHECKS
     FUNC_ENTER_STATIC
+#else
+    FUNC_ENTER_STATIC_NOERR
+#endif
 
     /* Sanity checking */
     HDassert(cache_ptr);
@@ -3873,7 +3875,9 @@ H5C__unpin_entry_real(H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
     /* Update the stats for an unpin operation */
     H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
 
+#if H5C_DO_SANITY_CHECKS
 done:
+#endif
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__unpin_entry_real() */
 

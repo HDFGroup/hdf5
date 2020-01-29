@@ -37,7 +37,7 @@
 
 
 static void coll_write_test(int chunk_factor);
-static void coll_read_test(int chunk_factor);
+static void coll_read_test(void);
 
 
 /*-------------------------------------------------------------------------
@@ -84,7 +84,7 @@ void
 coll_irregular_cont_read(void)
 {
 
-  coll_read_test(0);
+  coll_read_test();
 
 }
 
@@ -133,7 +133,7 @@ void
 coll_irregular_simple_chunk_read(void)
 {
 
-  coll_read_test(1);
+  coll_read_test();
 
 }
 
@@ -181,7 +181,7 @@ void
 coll_irregular_complex_chunk_read(void)
 {
 
-  coll_read_test(4);
+  coll_read_test();
 
 }
 
@@ -223,7 +223,7 @@ void coll_write_test(int chunk_factor)
   hsize_t  chunk_dims[2];
 
   herr_t   ret;
-  unsigned i;
+  int      i;
   int      fillvalue = 0;   /* Fill value for the dataset */
 
   int      *matrix_out = NULL;
@@ -246,19 +246,19 @@ void coll_write_test(int chunk_factor)
    * Buffers' initialization.
    */
 
-  mdim1[0] = MSPACE1_DIM *mpi_size;
+  mdim1[0] = (hsize_t)(MSPACE1_DIM*mpi_size);
   mdim[0]  = MSPACE_DIM1;
-  mdim[1]  = MSPACE_DIM2*mpi_size;
+  mdim[1]  = (hsize_t)(MSPACE_DIM2*mpi_size);
   fsdim[0] = FSPACE_DIM1;
-  fsdim[1] = FSPACE_DIM2*mpi_size;
+  fsdim[1] = (hsize_t)(FSPACE_DIM2*mpi_size);
 
-  vector = (int*)HDmalloc(sizeof(int)*mdim1[0]*mpi_size);
-  matrix_out  = (int*)HDmalloc(sizeof(int)*mdim[0]*mdim[1]*mpi_size);
-  matrix_out1 = (int*)HDmalloc(sizeof(int)*mdim[0]*mdim[1]*mpi_size);
+  vector = (int*)HDmalloc(sizeof(int)*(size_t)mdim1[0]*(size_t)mpi_size);
+  matrix_out  = (int*)HDmalloc(sizeof(int)*(size_t)mdim[0]*(size_t)mdim[1]*(size_t)mpi_size);
+  matrix_out1 = (int*)HDmalloc(sizeof(int)*(size_t)mdim[0]*(size_t)mdim[1]*(size_t)mpi_size);
 
-  HDmemset(vector,0,sizeof(int)*mdim1[0]*mpi_size);
+  HDmemset(vector,0,sizeof(int)*(size_t)mdim1[0]*(size_t)mpi_size);
   vector[0] = vector[MSPACE1_DIM*mpi_size - 1] = -1;
-  for (i = 1; i < MSPACE1_DIM*mpi_size - 1; i++) vector[i] = i;
+  for (i = 1; i < MSPACE1_DIM*mpi_size - 1; i++) H5_CHECKED_ASSIGN(vector[i], int, i, unsigned);
 
   /* Grab file access property list */
   facc_plist = create_faccess_plist(comm, info, facc_type);
@@ -280,8 +280,8 @@ void coll_write_test(int chunk_factor)
   VRFY((ret >= 0),"Fill value creation property list succeeded");
 
   if(chunk_factor != 0) {
-    chunk_dims[0] = fsdim[0] / chunk_factor;
-    chunk_dims[1] = fsdim[1] / chunk_factor;
+    chunk_dims[0] = fsdim[0] / (hsize_t)chunk_factor;
+    chunk_dims[1] = fsdim[1] / (hsize_t)chunk_factor;
     ret = H5Pset_chunk(dcrt_plist, 2, chunk_dims);
     VRFY((ret >= 0),"chunk creation property list succeeded");
   }
@@ -317,7 +317,7 @@ void coll_write_test(int chunk_factor)
    */
 
   start[0]  = FHSTART0;
-  start[1]  = FHSTART1 + mpi_rank * FHSTRIDE1 * FHCOUNT1;
+  start[1]  = (hsize_t)(FHSTART1 + mpi_rank * FHSTRIDE1 * FHCOUNT1);
   stride[0] = FHSTRIDE0;
   stride[1] = FHSTRIDE1;
   count[0]  = FHCOUNT0;
@@ -338,7 +338,7 @@ void coll_write_test(int chunk_factor)
    */
 
   start[0]  = SHSTART0;
-  start[1]  = SHSTART1+SHCOUNT1*SHBLOCK1*mpi_rank;
+  start[1]  = (hsize_t)(SHSTART1+SHCOUNT1*SHBLOCK1*mpi_rank);
   stride[0] = SHSTRIDE0;
   stride[1] = SHSTRIDE1;
   count[0]  = SHCOUNT0;
@@ -476,7 +476,7 @@ void coll_write_test(int chunk_factor)
    *
    */
   start[0]  = RFFHSTART0;
-  start[1]  = RFFHSTART1+mpi_rank*RFFHCOUNT1;
+  start[1]  = (hsize_t)(RFFHSTART1+mpi_rank*RFFHCOUNT1);
   block[0]  = RFFHBLOCK0;
   block[1]  = RFFHBLOCK1;
   stride[0] = RFFHSTRIDE0;
@@ -503,7 +503,7 @@ void coll_write_test(int chunk_factor)
    */
 
   start[0] = RFSHSTART0;
-  start[1] = RFSHSTART1+RFSHCOUNT1*mpi_rank;
+  start[1] = (hsize_t)(RFSHSTART1+RFSHCOUNT1*mpi_rank);
   block[0] = RFSHBLOCK0;
   block[1] = RFSHBLOCK1;
   stride[0] = RFSHSTRIDE0;
@@ -542,7 +542,7 @@ void coll_write_test(int chunk_factor)
 
 
   start[0]  = RMFHSTART0;
-  start[1]  = RMFHSTART1+mpi_rank*RMFHCOUNT1;
+  start[1]  = (hsize_t)(RMFHSTART1+mpi_rank*RMFHCOUNT1);
   block[0]  = RMFHBLOCK0;
   block[1]  = RMFHBLOCK1;
   stride[0] = RMFHSTRIDE0;
@@ -565,7 +565,7 @@ void coll_write_test(int chunk_factor)
    *
    */
   start[0]  = RMSHSTART0;
-  start[1]  = RMSHSTART1+mpi_rank*RMSHCOUNT1;
+  start[1]  = (hsize_t)(RMSHSTART1+mpi_rank*RMSHCOUNT1);
   block[0]  = RMSHBLOCK0;
   block[1]  = RMSHBLOCK1;
   stride[0] = RMSHSTRIDE0;
@@ -580,8 +580,8 @@ void coll_write_test(int chunk_factor)
    * Initialize data buffer.
    */
 
-  HDmemset(matrix_out,0,sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
-  HDmemset(matrix_out1,0,sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
+  HDmemset(matrix_out,0,sizeof(int)*(size_t)MSPACE_DIM1*(size_t)MSPACE_DIM2*(size_t)mpi_size);
+  HDmemset(matrix_out1,0,sizeof(int)*(size_t)MSPACE_DIM1*(size_t)MSPACE_DIM2*(size_t)mpi_size);
   /*
    * Read data back to the buffer matrix_out.
    */
@@ -662,7 +662,7 @@ void coll_write_test(int chunk_factor)
  *-------------------------------------------------------------------------
  */
 static void
-coll_read_test(int chunk_factor)
+coll_read_test(void)
 {
 
   const   char *filename;
@@ -682,7 +682,7 @@ coll_read_test(int chunk_factor)
   hsize_t  block[2];  /* Block sizes */
   herr_t   ret;
 
-  unsigned i;
+  int      i;
 
   int     *matrix_out;
   int     *matrix_out1;     /* Buffer to read from the dataset */
@@ -704,9 +704,9 @@ coll_read_test(int chunk_factor)
   /* Initialize the buffer */
 
   mdim[0] = MSPACE_DIM1;
-  mdim[1] = MSPACE_DIM2*mpi_size;
-  matrix_out =(int*)HDmalloc(sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
-  matrix_out1=(int*)HDmalloc(sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
+  mdim[1] = (hsize_t)(MSPACE_DIM2*mpi_size);
+  matrix_out =(int*)HDmalloc(sizeof(int)*(size_t)MSPACE_DIM1*(size_t)MSPACE_DIM2*(size_t)mpi_size);
+  matrix_out1=(int*)HDmalloc(sizeof(int)*(size_t)MSPACE_DIM1*(size_t)MSPACE_DIM2*(size_t)mpi_size);
 
   /*** For testing collective hyperslab selection read ***/
 
@@ -741,7 +741,7 @@ coll_read_test(int chunk_factor)
    *
    */
   start[0]  = RFFHSTART0;
-  start[1]  = RFFHSTART1+mpi_rank*RFFHCOUNT1;
+  start[1]  = (hsize_t)(RFFHSTART1+mpi_rank*RFFHCOUNT1);
   block[0]  = RFFHBLOCK0;
   block[1]  = RFFHBLOCK1;
   stride[0] = RFFHSTRIDE0;
@@ -761,7 +761,7 @@ coll_read_test(int chunk_factor)
    *
    */
   start[0]  = RFSHSTART0;
-  start[1]  = RFSHSTART1+RFSHCOUNT1*mpi_rank;
+  start[1]  = (hsize_t)(RFSHSTART1+RFSHCOUNT1*mpi_rank);
   block[0]  = RFSHBLOCK0;
   block[1]  = RFSHBLOCK1;
   stride[0] = RFSHSTRIDE0;
@@ -791,7 +791,7 @@ coll_read_test(int chunk_factor)
    */
 
   start[0]  = RMFHSTART0;
-  start[1]  = RMFHSTART1+mpi_rank*RMFHCOUNT1;
+  start[1]  = (hsize_t)(RMFHSTART1+mpi_rank*RMFHCOUNT1);
   block[0]  = RMFHBLOCK0;
   block[1]  = RMFHBLOCK1;
   stride[0] = RMFHSTRIDE0;
@@ -813,7 +813,7 @@ coll_read_test(int chunk_factor)
    *
    */
   start[0]  = RMSHSTART0;
-  start[1]  = RMSHSTART1+mpi_rank*RMSHCOUNT1;
+  start[1]  = (hsize_t)(RMSHSTART1+mpi_rank*RMSHCOUNT1);
   block[0]  = RMSHBLOCK0;
   block[1]  = RMSHBLOCK1;
   stride[0] = RMSHSTRIDE0;
@@ -828,8 +828,8 @@ coll_read_test(int chunk_factor)
    * Initialize data buffer.
    */
 
-  HDmemset(matrix_out,0,sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
-  HDmemset(matrix_out1,0,sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
+  HDmemset(matrix_out,0,sizeof(int)*(size_t)MSPACE_DIM1*(size_t)MSPACE_DIM2*(size_t)mpi_size);
+  HDmemset(matrix_out1,0,sizeof(int)*(size_t)MSPACE_DIM1*(size_t)MSPACE_DIM2*(size_t)mpi_size);
 
   /*
    * Read data back to the buffer matrix_out.
@@ -923,7 +923,9 @@ coll_read_test(int chunk_factor)
 ****************************************************************/
 
 #define LDSCT_DS_RANK    5
+#if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
 #define LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK 0
+#endif
 
 #define LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG 0
 
@@ -1002,9 +1004,9 @@ lower_dim_size_comp_test__select_checker_board(
      * pre-C99 compilers again.
      */
 
-    base_count = dims[sel_offset] / (checker_edge_size * 2);
+    base_count = dims[sel_offset] / (hsize_t)(checker_edge_size * 2);
 
-    if ( (dims[sel_rank] % (checker_edge_size * 2)) > 0 ) {
+    if ( (dims[sel_rank] % (hsize_t)(checker_edge_size * 2)) > 0 ) {
 
         base_count++;
     }
@@ -1558,7 +1560,9 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
     size_t        small_ds_size;
     size_t        small_ds_slice_size;
     size_t        large_ds_size;
+#if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     size_t        large_ds_slice_size;
+#endif
     uint32_t      expected_value;
     uint32_t    * small_ds_buf_0 = NULL;
     uint32_t    * small_ds_buf_1 = NULL;
@@ -1612,9 +1616,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size,
     small_ds_size       = (size_t)((mpi_size + 1) *  1 *  1 * 10 * 10);
     small_ds_slice_size = (size_t)                 ( 1 *  1 * 10 * 10);
     large_ds_size       = (size_t)((mpi_size + 1) * 10 * 10 * 10 * 10);
-    large_ds_slice_size = (size_t)                 (10 * 10 * 10 * 10);
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
+    large_ds_slice_size = (size_t)                 (10 * 10 * 10 * 10);
+
     if ( mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK ) {
         HDfprintf(stdout, "%s:%d: small ds size / slice size = %d / %d.\n",
                   fcnName, mpi_rank,

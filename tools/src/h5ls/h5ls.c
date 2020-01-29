@@ -1302,7 +1302,7 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
     hid_t               new_obj_sid = H5I_INVALID_HID;
     hsize_t             elmt_counter = 0;  /*counts the # elements printed. */
     size_t              ncols = 80;        /* available output width        */
-    size_t              i;
+    int                 i;
     hsize_t             curr_pos = 0;      /* total data element position   */
     h5tools_str_t       buffer;            /* string into which to render   */
     h5tools_context_t   datactx;           /* print context  */
@@ -1312,7 +1312,7 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
     datactx = *ctx;  /* print context  */
     /* Assume entire data space to be printed */
     if (datactx.ndims > 0)
-        for (i = 0; i < (size_t)datactx.ndims; i++)
+        for (i = 0; (unsigned)i < datactx.ndims; i++)
             datactx.p_min_idx[i] = 0;
     datactx.need_prefix = TRUE;
 
@@ -1447,13 +1447,13 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
                                 /* Print point information */
                                 H5TOOLS_DEBUG("H5S_SEL_POINTS H5R_DATASET_REGION2");
                                 h5tools_dump_region_data_points(new_obj_sid, new_obj_id, stream, info, &datactx,
-                                                    &buffer, &curr_pos, ncols, i, elmt_counter);
+                                                    &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
                             }
                             else if(region_type == H5S_SEL_HYPERSLABS) {
                                 /* Print block information */
                                 H5TOOLS_DEBUG("H5S_SEL_HYPERSLABS H5R_DATASET_REGION2");
                                 h5tools_dump_region_data_blocks(new_obj_sid, new_obj_id, stream, info, &datactx,
-                                                    &buffer, &curr_pos, ncols, i, elmt_counter);
+                                                    &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
                             }
                             else
                                 H5TOOLS_INFO("invalid region type");
@@ -1656,7 +1656,7 @@ dump_dataset_values(hid_t dset)
             init_acc_pos(&ctx, total_size);
         ctx.need_prefix = TRUE;
 
-        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), ndims))) {
+        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             H5TOOLS_DEBUG("H5Dread reference read");
             if(H5Dread(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf) < 0) {
                 HDfree(ref_buf);
@@ -1695,7 +1695,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-dump_attribute_values(hid_t attr, const char *attr_name)
+dump_attribute_values(hid_t attr)
 {
     hid_t               f_type = H5I_INVALID_HID;
     hid_t               space = H5I_INVALID_HID;
@@ -1827,7 +1827,7 @@ dump_attribute_values(hid_t attr, const char *attr_name)
             init_acc_pos(&ctx, total_size);
         ctx.need_prefix = TRUE;
 
-        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), ndims))) {
+        if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             H5TOOLS_DEBUG("H5Aread reference read");
             if(H5Aread(attr, H5T_STD_REF, ref_buf) < 0) {
                 HDfree(ref_buf);
@@ -1955,7 +1955,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
         h5tools_str_close(&buffer);
 
         if (data_g)
-            dump_attribute_values(attr, attr_name);
+            dump_attribute_values(attr);
         H5Aclose(attr);
     }
     else {

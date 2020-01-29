@@ -403,7 +403,7 @@ H5HF__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_hdr_get_final_load_size(const void *_image, size_t image_len,
+H5HF__cache_hdr_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED image_len,
     void *_udata, size_t *actual_len)
 {
     H5HF_hdr_t hdr;             /* Temporary fractal heap header */
@@ -749,7 +749,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t len,
+H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_thing)
 {
     H5HF_hdr_t *hdr = (H5HF_hdr_t *)_thing;     /* Fractal heap info */
@@ -979,8 +979,8 @@ H5HF__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
  *-------------------------------------------------------------------------
  */
 static void *
-H5HF__cache_iblock_deserialize(const void *_image, size_t len, void *_udata,
-    hbool_t H5_ATTR_UNUSED *dirty)
+H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, 
+    void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5HF_hdr_t          *hdr;           /* Shared fractal heap information */
     H5HF_iblock_cache_ud_t *udata = (H5HF_iblock_cache_ud_t *)_udata; /* User data for callback */
@@ -1326,7 +1326,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t len,
+H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_thing)
 {
     H5HF_hdr_t 		*hdr;           /* Shared fractal heap information */
@@ -1471,8 +1471,8 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
     else {
         /* if this is a child iblock, verify that the pointers are */
         /* either uninitialized or set up correctly.               */
-        H5HF_indirect_t *par_iblock = iblock->parent;
-        unsigned indir_idx;  /* Index in parent's child iblock pointer array */
+        H5HF_indirect_t H5_ATTR_NDEBUG_UNUSED *par_iblock = iblock->parent;
+        unsigned H5_ATTR_NDEBUG_UNUSED indir_idx;  /* Index in parent's child iblock pointer array */
 
         /* Sanity check */
         HDassert(par_iblock->child_iblocks);
@@ -2438,8 +2438,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_dblock_serialize(const H5F_t *f, void *image, size_t len,
-    void *_thing)
+H5HF__cache_dblock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, 
+    size_t H5_ATTR_NDEBUG_UNUSED len, void *_thing)
 {
     H5HF_direct_t       *dblock = (H5HF_direct_t *)_thing;      /* Direct block info */
     herr_t               ret_value = SUCCEED;    /* Return value */

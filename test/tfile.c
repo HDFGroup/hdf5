@@ -25,6 +25,7 @@
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5private.h"
 
 /*
  * This file needs to access private information from the H5F package.
@@ -4208,7 +4209,7 @@ test_filespace_info(const char *env_h5_drvr)
 **
 *****************************************************************/
 static int
-set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
+set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
 {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t memb_fapl_arr[H5FD_MEM_NTYPES];
@@ -4217,7 +4218,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
     hbool_t relax;
     H5FD_mem_t  mt;
 
-    HDassert(split || multi);
+    HDassert(split);
 
     HDmemset(memb_name, 0, sizeof memb_name);
 
@@ -4308,7 +4309,7 @@ test_file_freespace(const char *env_h5_drvr)
                 my_fapl = new_fapl;
 
                 if(multi_vfd || split_vfd) {
-                    ret = set_multi_split(new_fapl, FSP_SIZE_DEF, multi_vfd, split_vfd);
+                    ret = set_multi_split(new_fapl, FSP_SIZE_DEF, split_vfd);
                     CHECK(ret, FAIL, "set_multi_split");
                 }
 
@@ -4474,7 +4475,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
 
             /* Set up paged aligned address space for multi/split driver */
             if(multi_vfd || split_vfd) {
-                ret = set_multi_split(fapl, FSP_SIZE_DEF, multi_vfd, split_vfd);
+                ret = set_multi_split(fapl, FSP_SIZE_DEF, split_vfd);
                 CHECK(ret, FAIL, "set_multi_split");
             }
 

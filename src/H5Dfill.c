@@ -249,12 +249,11 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf,
          * of the VL data.
          */
         if(TRUE == H5T_detect_class(fill_type, H5T_VLEN, FALSE)) {
-            hssize_t nelmts;                    /* Number of data elements */
+            hsize_t nelmts;                    /* Number of data elements */
 
             /* Get the number of elements in the selection */
             nelmts = H5S_GET_SELECT_NPOINTS(space);
-            HDassert(nelmts >= 0);
-            H5_CHECK_OVERFLOW(nelmts, hssize_t, size_t);
+            H5_CHECK_OVERFLOW(nelmts, hsize_t, size_t);
 
             /* Allocate a temporary buffer */
             if(NULL == (tmp_buf = H5FL_BLK_MALLOC(type_conv, (size_t)nelmts * buf_size)))
