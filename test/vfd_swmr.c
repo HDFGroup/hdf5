@@ -2701,22 +2701,22 @@ main(void)
         nerrors += test_multiple_concur_file_opens();
         nerrors += test_same_file_opens();
 
-        } /* end if */
+    }
 
-        if(nerrors)
-            goto error;
+    if(nerrors)
+        goto error;
 
-        HDputs("All VFD SWMR tests passed.");
+    HDputs("All VFD SWMR tests passed.");
 
-        HDexit(EXIT_SUCCESS);
+    HDexit(EXIT_SUCCESS);
 
-    error:
-        HDprintf("***** %d VFD SWMR TEST%s FAILED! *****\n",
-            nerrors, nerrors > 1 ? "S" : "");
+error:
+    HDprintf("***** %d VFD SWMR TEST%s FAILED! *****\n",
+        nerrors, nerrors > 1 ? "S" : "");
 
-        H5E_BEGIN_TRY {
-            H5Pclose(fapl);
-        } H5E_END_TRY;
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+    } H5E_END_TRY;
 
-        HDexit(EXIT_FAILURE);
-} /* main() */
+    HDexit(EXIT_FAILURE);
+}
