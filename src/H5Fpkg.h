@@ -568,12 +568,6 @@ H5_DLL haddr_t H5F__alloc(H5F_t *f, H5F_mem_t type, hsize_t size, haddr_t *frag_
 H5_DLL herr_t H5F__free(H5F_t *f, H5F_mem_t type, haddr_t addr, hsize_t size);
 H5_DLL htri_t H5F__try_extend(H5F_t *f, H5FD_mem_t type, haddr_t blk_end, hsize_t extra_requested);
 
-/* VFD SWMR */
-/* Space allocation routines */
-H5_DLL haddr_t H5F__alloc_md(H5F_t *f, hsize_t size);
-H5_DLL herr_t H5F__free_md(H5F_t *f, haddr_t addr, hsize_t size);
-H5_DLL htri_t H5F__try_extend_md(H5F_t *f, haddr_t blk_end, hsize_t extra_requested);
-
 /* Functions that get/retrieve values from VFD layer */
 H5_DLL herr_t H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr);
 H5_DLL herr_t H5F__set_base_addr(const H5F_t *f, haddr_t addr);

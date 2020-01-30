@@ -42,9 +42,6 @@
 /* Local Macros */
 /****************/
 
-/* Define this to display debugging information for VFD SWMR */
-/* #define H5F_VFD_SWMR_DEBUG */
-
 
 
 /******************/
@@ -60,7 +57,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static haddr_t H5F__extend_md(H5F_t *f, hsize_t size);
 
 
 /*********************/
@@ -227,158 +223,3 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__try_extend() */
 
-
-/*
- * VFD SWMR
- */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__free_md
- *
- * Purpose:     Release space at the end of the metadata file's allocated space
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F__free_md(H5F_t *f, haddr_t addr, hsize_t size)
-{
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(size > 0);
-
-     /* Sanity checking */
-    if(!H5F_addr_defined(addr))
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid file offset")
-
-    if(addr > f->shared->maxaddr || H5F_addr_overflow(addr, size) || (addr + size) > f->shared->maxaddr)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid file free space region to free")
-
-    /* Check if this free block is at the end of file allocated space.
-     * Truncate it if this is true.
-     */
-    if(f->shared->vfd_swmr_md_eoa == (addr + size))
-        f->shared->vfd_swmr_md_eoa = addr;
-    else {
-        /* leak memory */
-#ifdef H5F_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: LEAKED MEMORY!!! addr = %a, size = %Hu\n", FUNC, addr, size);
-#endif
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__free_md() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__alloc_md
- *
- * Purpose:     Allocate space at the end of the metadata file 
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5F__alloc_md(H5F_t *f, hsize_t size)
-{
-    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(size > 0);
-
-    /* Extend the EOA space of the metadata file */
-    ret_value = H5F__extend_md(f, size);
-
-    if(!H5F_addr_defined(ret_value))
-        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "driver eoa update request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5F__alloc_md() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__try_extend_md
- *
- * Purpose:     Try to extend a block at the end of the metadata file, if possible.
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5F__try_extend_md(H5F_t *f, haddr_t blk_end, hsize_t extra_requested)
-{
-    htri_t ret_value = FALSE;   /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(extra_requested > 0);
-
-    /* Check if the block is exactly at the end of the file */
-    if(H5F_addr_eq(blk_end, f->shared->vfd_swmr_md_eoa)) {
-
-         /* Extend the EOA space of the metadata file */
-        if(HADDR_UNDEF == H5F__extend_md(f, extra_requested))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTEXTEND, FAIL, "driver extend request failed")
-
-        /* Indicate success */
-        ret_value = TRUE;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__try_extend_md() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__extend_md
- *
- * Purpose:     Extend the EOA space of the metadata file.
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-static haddr_t 
-H5F__extend_md(H5F_t *f, hsize_t size)
-{
-    haddr_t eoa;
-    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Get current end-of-allocated space address */
-    eoa = f->shared->vfd_swmr_md_eoa;
-
-    /* Check for overflow when extending */
-    if(H5F_addr_overflow(eoa, size) || (eoa + size) > f->shared->maxaddr)
-        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed")
-
-    /* Set the address to return */
-    ret_value = eoa;
-
-    /* Extend the end-of-allocated space address */
-    f->shared->vfd_swmr_md_eoa += size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}

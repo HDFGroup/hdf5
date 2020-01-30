@@ -1365,27 +1365,3 @@ H5F_use_vfd_swmr(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->vfd_swmr)
 } /* end H5F_use_vfd_swmr() */
-
-
-/*-------------------------------------------------------------------------
- * Function: H5F_get_vfd_swmr_md_eoa
- *
- * Purpose:  Quick and dirty routine to retrieve the EOA for the metadata file
- *           (Mainly added to stop non-file routines from poking about in the
- *           H5F_t data structure)
- *
- * Return:   The EOA for the metadata file
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5F_get_vfd_swmr_md_eoa(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->vfd_swmr);
-
-    FUNC_LEAVE_NOAPI(f->shared->vfd_swmr_md_eoa)
-} /* end H5F_get_vfd_swmr_md_eof() */

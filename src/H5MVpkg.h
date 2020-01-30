@@ -73,6 +73,8 @@ H5_DLL H5MV_free_section_t *H5MV__sect_new(haddr_t sect_off, hsize_t sect_size);
 H5_DLL herr_t H5MV__sect_free(H5FS_section_info_t *sect);
 H5_DLL htri_t H5MV__sect_can_shrink(const H5FS_section_info_t *_sect, void *udata);
 H5_DLL herr_t H5MV__sect_shrink(H5FS_section_info_t **_sect, void *udata);
+H5_DLL haddr_t H5MV_get_vfd_swmr_md_eoa(const H5F_t *);
+H5_DLL herr_t H5MV__free_md(H5F_shared_t *, haddr_t, hsize_t);
 
 
 /* Testing routines */

@@ -415,7 +415,6 @@ uint64_decode(uint8_t **pp)
 #define H5F_FIRST_ALLOC_DEALLOC(F) (H5F_get_first_alloc_dealloc(F))
 #define H5F_EOA_PRE_FSM_FSALLOC(F) (H5F_get_eoa_pre_fsm_fsalloc(F))
 #define H5F_USE_VFD_SWMR(F)     (H5F_use_vfd_swmr(F))
-#define H5F_VFD_SWMR_MD_EOA(F)  (H5F_get_vfd_swmr_md_eoa(F))
 #define H5F_NULL_FSM_ADDR(F)    (H5F_get_null_fsm_addr(F))
 #define H5F_GET_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr(F))
 #define H5F_SET_MIN_DSET_OHDR(F, V) (H5F_set_min_dset_ohdr((F), (V)))
@@ -921,7 +920,6 @@ H5_DLL herr_t H5F_cwfs_remove_heap(H5F_shared_t *shared, struct H5HG_heap_t *hea
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE * stream, int indent, int fwidth);
 
 H5_DLL hbool_t H5F_use_vfd_swmr(const H5F_t *f);
-H5_DLL haddr_t H5F_get_vfd_swmr_md_eoa(const H5F_t *f);
 
 #endif /* _H5Fprivate_H */
 
