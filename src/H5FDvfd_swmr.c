@@ -1224,19 +1224,6 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
                 "could not re-read header");
         }
-
-#if 0
-        /* Error when tick_num in header is more than one greater 
-         * than in the index 
-         *
-         * It's ok if this happens, we'll catch it and retry
-         * until timeout. --dyoung
-         */
-        if (md_header.tick_num > (md_index.tick_num + 1)) {
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
-                "tick number mis-match in header and index");
-        }
-#endif
     }
 
     /* Exhaust all retries for loading and decoding the md file header 
@@ -1406,11 +1393,6 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_t *_file,
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
                    "memory allocation failed for index's on disk image buffer");
     }
-
-    /* TBD On each try, seek to the header and read it.  This
-     * entails merging H5FD__vfd_swmr_header_deserialize with this
-     * function (H5FD__vfd_swmr_index_deserialize).
-     */
 
     /* We may seek past EOF.  That's ok, the read(2) will catch that. */
     if (lseek(file->md_fd, (HDoff_t)md_header->index_offset, SEEK_SET) < 0){
