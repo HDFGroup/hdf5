@@ -216,9 +216,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLis_connector_registered
+ * Function:    H5VLis_connector_registered_by_name
  *
  * Purpose:     Tests whether a VOL class has been registered or not
+ *              according to a supplied connector name.
  *
  * Return:      >0 if a VOL connector with that name has been registered
  *              0 if a VOL connector with that name has NOT been registered
@@ -230,7 +231,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5VLis_connector_registered(const char *name)
+H5VLis_connector_registered_by_name(const char *name)
 {
     htri_t ret_value = FALSE;           /* Return value */
 
@@ -238,12 +239,41 @@ H5VLis_connector_registered(const char *name)
     H5TRACE1("t", "*s", name);
 
     /* Check if connector with this name is registered */
-    if((ret_value = H5VL__is_connector_registered(name)) < 0)
+    if((ret_value = H5VL__is_connector_registered_by_name(name)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't check for VOL")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLis_connector_registered() */
+} /* end H5VLis_connector_registered_by_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLis_connector_registered_by_value
+ *
+ * Purpose:     Tests whether a VOL class has been registered or not
+ *              according to a supplied connector value (ID).
+ *
+ * Return:      >0 if a VOL connector with that value has been registered
+ *              0 if a VOL connector with that value hasn't been registered
+ *              <0 on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5VLis_connector_registered_by_value(H5VL_class_value_t connector_value)
+{
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "VC", connector_value);
+
+    /* Check if connector with this value is registered */
+    if((ret_value = H5VL__is_connector_registered_by_value(connector_value)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't check for VOL")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLis_connector_registered_by_value() */
 
 
 /*-------------------------------------------------------------------------
@@ -313,7 +343,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VLpeek_connector_id
+ * Function:    H5VLget_connector_id_by_value
+ *
+ * Purpose:     Retrieves the ID for a registered VOL connector.
+ *
+ * Return:      A valid VOL connector ID if a connector with that value has
+ *              been registered. This ID will need to be closed using
+ *              H5VLclose().
+ *
+ *              H5I_INVALID_HID on error or if a VOL connector with that
+ *              value has not been registered.
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VLget_connector_id_by_value(H5VL_class_value_t connector_value)
+{
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE1("i", "VC", connector_value);
+
+    /* Get connector ID with this value */
+    if((ret_value = H5VL__get_connector_id_by_value(connector_value, TRUE)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLget_connector_id_by_value() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLpeek_connector_id_by_name
  *
  * Purpose:     Retrieves the ID for a registered VOL connector.
  *
@@ -328,7 +389,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VLpeek_connector_id(const char *name)
+H5VLpeek_connector_id_by_name(const char *name)
 {
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
@@ -336,12 +397,44 @@ H5VLpeek_connector_id(const char *name)
     H5TRACE1("i", "*s", name);
 
     /* Get connector ID with this name */
-    if((ret_value = H5VL__peek_connector_id(name)) < 0)
+    if((ret_value = H5VL__peek_connector_id_by_name(name)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5VLpeek_connector_id() */
+} /* end H5VLpeek_connector_id_by_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLpeek_connector_id_by_value
+ *
+ * Purpose:     Retrieves the ID for a registered VOL connector.
+ *
+ * Return:      A valid VOL connector ID if a connector with that value
+ *              has been registered. This ID is *not* owned by the caller
+ *              and H5VLclose() should not be called.  Intended for use by
+ *              VOL connectors to find their own ID.
+ *
+ *              H5I_INVALID_HID on error or if a VOL connector with that
+ *              value has not been registered.
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VLpeek_connector_id_by_value(H5VL_class_value_t value)
+{
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE1("i", "VC", value);
+
+    /* Get connector ID with this value */
+    if((ret_value = H5VL__peek_connector_id_by_value(value)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLpeek_connector_id_by_value() */
 
 
 /*-------------------------------------------------------------------------
