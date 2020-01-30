@@ -76,7 +76,7 @@
     + 8                                 /* Tick num */                          \
     + 4                                 /* Number of entries */                 \
     + (N * H5FD_MD_INDEX_ENTRY_SIZE)    /* Index entries */                     \
-    + H5FD_SIZEOF_CHKSUM                /* Metadata header checksum */          \
+    + H5FD_SIZEOF_CHKSUM                /* Metadata index checksum */          \
     )
 
 /* Retries for metadata file */
