@@ -1034,6 +1034,7 @@ H5CX_restore_state(const H5CX_state_t *api_state)
  *
  *-------------------------------------------------------------------------
  */
+H5_GCC_DIAG_OFF(cast-qual)
 herr_t
 H5CX_free_state(H5CX_state_t *api_state)
 {
@@ -1071,9 +1072,9 @@ H5CX_free_state(H5CX_state_t *api_state)
 
     /* Release the VOL connector property, if it was set */
     if(api_state->vol_connector_prop.connector_id) {
-        /* Clean up any VOL connector info */
+        /* Clean up any VOL connector info, ignoring const-ness of connector info */
         if(api_state->vol_connector_prop.connector_info)
-            if(H5VL_free_connector_info(api_state->vol_connector_prop.connector_id, api_state->vol_connector_prop.connector_info) < 0)
+            if(H5VL_free_connector_info(api_state->vol_connector_prop.connector_id, (void *)api_state->vol_connector_prop.connector_info) < 0)
                 HGOTO_ERROR(H5E_CONTEXT, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
         /* Decrement connector ID */
         if(H5I_dec_ref(api_state->vol_connector_prop.connector_id) < 0)
@@ -1086,6 +1087,7 @@ H5CX_free_state(H5CX_state_t *api_state)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_free_state() */
+H5_GCC_DIAG_ON(cast-qual)
 
 
 /*-------------------------------------------------------------------------

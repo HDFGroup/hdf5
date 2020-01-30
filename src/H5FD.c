@@ -574,6 +574,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+H5_GCC_DIAG_OFF(cast-qual)
 herr_t
 H5FD_fapl_close(hid_t driver_id, const void *driver_info)
 {
@@ -591,17 +592,19 @@ H5FD_fapl_close(hid_t driver_id, const void *driver_info)
         /* Allow driver to free info or do it ourselves */
         if(driver_info) {
             if(driver->fapl_free) {
-                if((driver->fapl_free)((void *)driver_info) < 0)        /* Casting away const OK -QAK */
+                /* Free the const pointer (why we turn off the diagnostic) */
+                if((driver->fapl_free)((void *)driver_info) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed")
-            } /* end if */
+            }
             else
-                driver_info = H5MM_xfree((void *)driver_info);        /* Casting away const OK -QAK */
-        } /* end if */
-    } /* end if */
+                driver_info = H5MM_xfree_const(driver_info);
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_fapl_close() */
+H5_GCC_DIAG_ON(cast-qual)
 
 
 /*-------------------------------------------------------------------------

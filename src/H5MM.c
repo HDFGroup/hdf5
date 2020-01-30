@@ -566,6 +566,32 @@ H5MM_xfree(void *mem)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5MM_xfree_const
+ *
+ * Purpose:     H5MM_xfree() wrapper that handles const pointers without
+ *              warnings. Used for freeing buffers that should be regarded
+ *              as const in use but need to be freed when no longer needed.
+ *
+ * Return:      Success:    NULL
+ *              Failure:    never fails
+ *
+ *-------------------------------------------------------------------------
+ */
+H5_GCC_DIAG_OFF(cast-qual)
+void *
+H5MM_xfree_const(const void *mem)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    H5MM_xfree((void *)mem);
+
+    FUNC_LEAVE_NOAPI(NULL)
+} /* end H5MM_xfree_const() */
+H5_GCC_DIAG_ON(cast-qual)
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5MM_memcpy
  *
  * Purpose:     Like memcpy(3) but with sanity checks on the parameters,
