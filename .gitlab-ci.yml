@@ -47,14 +47,11 @@ build:
         - SKIP_TESTS="-E '"
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-btree2"
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-cache"
-        - SKIP_TESTS=$SKIP_TESTS"|H5TEST-earray"
-        - SKIP_TESTS=$SKIP_TESTS"|H5TEST-evict_on_close"
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-fheap"
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-objcopy"
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-set_extent"
-        - SKIP_TESTS=$SKIP_TESTS"|H5TEST-testhdf5-base"
         - SKIP_TESTS=$SKIP_TESTS"'"
-        - ctest -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-openmpi-gcc/8.3.0-Linux-4.18.0-80.7.2.el7.ppc64le-ppc64le",BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC ${SKIP_TESTS} -C Release -VV
+        - ctest -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-openmpi-gcc/8.3.0-Linux-4.18.0-80.7.2.el7.ppc64le-ppc64le",BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC ${SKIP_TESTS} -C Release -VV --timeout 1800
 #        - ctest . -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-openmpi-gcc/8.3.0-Linux-4.18.0-80.7.2.el7.ppc64le-ppc64le",MPI=true,BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true,MODEL=HPC,LOCAL_SKIP_TEST=true
 # run ctest command for only MPI (parallel) tests
 #        - cd build
