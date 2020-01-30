@@ -48,6 +48,7 @@ build:
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-btree2"
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-cache"
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-earray"
+        - SKIP_TESTS=$SKIP_TESTS"|H5TEST-evict_on_close"
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-fheap"
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-objcopy"
         - SKIP_TESTS=$SKIP_TESTS"|H5TEST-set_extent"
