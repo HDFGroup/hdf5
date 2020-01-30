@@ -44,7 +44,7 @@ typedef struct H5VL_object_t {
 /* Internal structure to hold the connector ID & info for FAPLs */
 typedef struct H5VL_connector_prop_t {
     hid_t       connector_id;           /* VOL connector's ID                                   */
-    void        *connector_info;        /* VOL connector info, for open callbacks               */
+    const void  *connector_info;        /* VOL connector info, for open callbacks               */
 } H5VL_connector_prop_t;
 
 /* Which kind of VOL connector field to use for searching */

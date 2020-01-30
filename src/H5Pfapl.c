@@ -1146,6 +1146,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+H5_GCC_DIAG_OFF(cast-qual)
 static herr_t
 H5P__file_driver_free(void *value)
 {
@@ -1167,22 +1168,24 @@ H5P__file_driver_free(void *value)
 
                 /* Allow driver to free info or do it ourselves */
                 if(driver->fapl_free) {
-                    if((driver->fapl_free)((void *)info->driver_info) < 0)      /* Casting away const OK -QAK */
+                    /* Free the const pointer (why we turn off the diagnostic) */
+                    if((driver->fapl_free)((void *)info->driver_info) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "driver info free request failed")
-                } /* end if */
+                }
                 else
-                    H5MM_xfree((void *)info->driver_info);      /* Casting away const OK -QAK */
-            } /* end if */
+                    H5MM_xfree_const(info->driver_info);
+            }
 
             /* Decrement reference count for driver */
             if(H5I_dec_ref(info->driver_id) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement reference count for driver ID")
-        } /* end if */
-    } /* end if */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_driver_free() */
+H5_GCC_DIAG_ON(cast-qual)
 
 
 /*-------------------------------------------------------------------------
@@ -5407,7 +5410,7 @@ H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
 
         /* Prepare the VOL connector property */
         vol_prop.connector_id = vol_id;
-        vol_prop.connector_info = (void *)vol_info;
+        vol_prop.connector_info = vol_info;
 
         /* Set the connector ID & info property */
         if(H5P_set(plist, H5F_ACS_VOL_CONN_NAME, &vol_prop) < 0)
