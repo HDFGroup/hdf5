@@ -69,45 +69,6 @@ static void char_init(), char_out(), flush_char();
 
 static byte pc2nc[256];
 
-/*************************************************************/
-int hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap,
-                byte *gmap, byte *bmap, byte *pc2ncmap, int numcols,
-                int colorstyle, int BitsPerPixel)
-{
-    int InitCodeSize;
-    int i;
-    byte *pic8 = pic;
-
-    /* Shut compiler up... */
-    ptype=ptype;
-    rmap=rmap;
-    gmap=gmap;
-    bmap=bmap;
-    numcols=numcols;
-    colorstyle=colorstyle;
-
-    for (i = 0; i < 256; i++) {
-      pc2nc[i] = pc2ncmap[i];
-    }
-
-    if (BitsPerPixel <= 1)
-        InitCodeSize = 2;
-    else
-        InitCodeSize = BitsPerPixel;
-
-    if (!fp) {
-        fprintf(stderr,  "WriteGIF: file not open for writing\n" );
-        return (1);
-    }
-
-    compress(InitCodeSize+1, fp, pic8, w*h);
-
-    if (ferror(fp))
-        return -1;
-
-    return  0 ;
-}
-
 /***********************************************************************/
 static unsigned long cur_accum = 0;
 static int           cur_bits = 0;
@@ -123,8 +84,8 @@ static int maxbits = XV_BITS;         /* user settable max # bits/code */
 static int maxcode;                   /* maximum code, given n_bits */
 static int maxmaxcode = 1 << XV_BITS; /* NEVER generate this */
 
-static  count_int      htab [HSIZE];
-static  unsigned short codetab [HSIZE];
+static  count_int      *htab;
+static  unsigned short *codetab;
 
 #define HashTabOf(i)   htab[i]
 #define CodeTabOf(i)   codetab[i]
@@ -173,6 +134,57 @@ static FILE *g_outfile;
 static int ClearCode;
 static int EOFCode;
 
+/*************************************************************/
+int hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap,
+                byte *gmap, byte *bmap, byte *pc2ncmap, int numcols,
+                int colorstyle, int BitsPerPixel)
+{
+    int InitCodeSize;
+    int i;
+    byte *pic8 = pic;
+
+    if (!(htab = calloc(HSIZE, sizeof(count_int)))) {
+        fprintf(stderr, "Out of memory");
+        return 1;
+    }
+    if (!(codetab = calloc(HSIZE, sizeof(unsigned short)))) {
+        fprintf(stderr, "Out of memory");
+        return 1;
+    }
+
+    /* Shut compiler up... */
+    ptype=ptype;
+    rmap=rmap;
+    gmap=gmap;
+    bmap=bmap;
+    numcols=numcols;
+    colorstyle=colorstyle;
+
+    for (i = 0; i < 256; i++) {
+      pc2nc[i] = pc2ncmap[i];
+    }
+
+    if (BitsPerPixel <= 1)
+        InitCodeSize = 2;
+    else
+        InitCodeSize = BitsPerPixel;
+
+    if (!fp) {
+        fprintf(stderr,  "WriteGIF: file not open for writing\n");
+        return 1;
+    }
+
+    compress(InitCodeSize+1, fp, pic8, w*h);
+
+    free(htab);
+    free(codetab);
+
+    if (ferror(fp))
+        return -1;
+
+    return  0 ;
+}
+
 /********************************************************/
 static void compress(int init_bits, FILE *outfile, byte *data, int len)
 {
@@ -194,8 +206,6 @@ static void compress(int init_bits, FILE *outfile, byte *data, int len)
     /* initialize 'compress' globals */
     maxbits = XV_BITS;
     maxmaxcode = 1<<XV_BITS;
-    memset(htab, 0, sizeof(htab));
-    memset(codetab, 0, sizeof(codetab));
     hsize = HSIZE;
     free_ent = 0;
     clear_flg = 0;
