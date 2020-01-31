@@ -276,7 +276,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 
 done:
     /* Release the copy of the driver info, if it was set up */
-    if(driver_prop_copied && H5FD_fapl_close(driver_prop.driver_id, driver_prop.driver_info) < 0)
+    if(driver_prop_copied && H5FD_free_driver_info(driver_prop.driver_id, driver_prop.driver_info) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close copy of driver info")
 
     FUNC_LEAVE_NOAPI(ret_value)

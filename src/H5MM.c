@@ -577,18 +577,17 @@ H5MM_xfree(void *mem)
  *
  *-------------------------------------------------------------------------
  */
-H5_GCC_DIAG_OFF(cast-qual)
 void *
 H5MM_xfree_const(const void *mem)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    H5MM_xfree((void *)mem);
+    /* Cast through uintptr_t to de-const memory */
+    H5MM_xfree((void *)(uintptr_t)mem);
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* end H5MM_xfree_const() */
-H5_GCC_DIAG_ON(cast-qual)
 
 
 /*-------------------------------------------------------------------------

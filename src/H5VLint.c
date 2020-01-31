@@ -670,7 +670,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_GCC_DIAG_OFF(cast-qual)
 herr_t
 H5VL_conn_free(const H5VL_connector_prop_t *connector_prop)
 {
@@ -682,8 +681,8 @@ H5VL_conn_free(const H5VL_connector_prop_t *connector_prop)
         /* Free the connector info (if it exists) and decrement the ID */
         if(connector_prop->connector_id > 0) {
             if(connector_prop->connector_info)
-                /* Free the connector info, ignoring the const */
-                if(H5VL_free_connector_info(connector_prop->connector_id, (void *)connector_prop->connector_info) < 0)
+                /* Free the connector info */
+                if(H5VL_free_connector_info(connector_prop->connector_id, connector_prop->connector_info) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
 
             /* Decrement reference count for connector ID */
@@ -695,7 +694,6 @@ H5VL_conn_free(const H5VL_connector_prop_t *connector_prop)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_conn_free() */
-H5_GCC_DIAG_ON(cast-qual)
 
 
 /*-------------------------------------------------------------------------

@@ -202,7 +202,7 @@ H5FD__free_cls(H5FD_class_t *cls)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_free_cls() */
+} /* end H5FD__free_cls() */
 
 
 /*-------------------------------------------------------------------------
@@ -566,17 +566,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_fapl_close
+ * Function:    H5FD_free_driver_info
  *
- * Purpose:     Closes a driver for a dataset transfer property list
+ * Purpose:     Frees a driver's info
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-H5_GCC_DIAG_OFF(cast-qual)
 herr_t
-H5FD_fapl_close(hid_t driver_id, const void *driver_info)
+H5FD_free_driver_info(hid_t driver_id, const void *driver_info)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -592,8 +591,9 @@ H5FD_fapl_close(hid_t driver_id, const void *driver_info)
         /* Allow driver to free info or do it ourselves */
         if(driver_info) {
             if(driver->fapl_free) {
-                /* Free the const pointer (why we turn off the diagnostic) */
-                if((driver->fapl_free)((void *)driver_info) < 0)
+                /* Free the const pointer */
+                /* Cast through uintptr_t to de-const memory */
+                if((driver->fapl_free)((void *)(uintptr_t)driver_info) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed")
             }
             else
@@ -603,8 +603,7 @@ H5FD_fapl_close(hid_t driver_id, const void *driver_info)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_fapl_close() */
-H5_GCC_DIAG_ON(cast-qual)
+} /* end H5FD_free_driver_info() */
 
 
 /*-------------------------------------------------------------------------

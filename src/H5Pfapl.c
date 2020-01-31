@@ -1162,7 +1162,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_GCC_DIAG_OFF(cast-qual)
 static herr_t
 H5P__file_driver_free(void *value)
 {
@@ -1175,22 +1174,11 @@ H5P__file_driver_free(void *value)
 
         /* Copy the driver & info, if there is one */
         if(info->driver_id > 0) {
-            if(info->driver_info) {
-                H5FD_class_t *driver;       /* Pointer to driver */
 
-                /* Retrieve the driver for the ID */
-                if(NULL == (driver = (H5FD_class_t *)H5I_object(info->driver_id)))
-                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a driver ID")
-
-                /* Allow driver to free info or do it ourselves */
-                if(driver->fapl_free) {
-                    /* Free the const pointer (why we turn off the diagnostic) */
-                    if((driver->fapl_free)((void *)info->driver_info) < 0)
-                        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "driver info free request failed")
-                }
-                else
-                    H5MM_xfree_const(info->driver_info);
-            }
+            /* Free the driver info, if it exists */
+            if(info->driver_info)
+                if(H5FD_free_driver_info(info->driver_id, info->driver_info) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "driver info free request failed")
 
             /* Decrement reference count for driver */
             if(H5I_dec_ref(info->driver_id) < 0)
@@ -1201,7 +1189,6 @@ H5P__file_driver_free(void *value)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_driver_free() */
-H5_GCC_DIAG_ON(cast-qual)
 
 
 /*-------------------------------------------------------------------------
