@@ -566,8 +566,8 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hsize_t *coords;                /* Coordinate buffer */
     hsize_t low[SPACE2_RANK];       /* Selection bounds */
     hsize_t high[SPACE2_RANK];      /* Selection bounds */
-    H5R_ref_t *wbuf,                   /* buffer to write to disk */
-           *rbuf;                   /* buffer read from disk */
+    H5R_ref_t *wbuf,                /* buffer to write to disk */
+              *rbuf;                /* buffer read from disk */
     H5R_ref_t  nvrbuf[3]={{{{0}}},{{{101}}},{{{255}}}}; /* buffer with non-valid refs */
     uint8_t *dwbuf,                 /* Buffer for writing numeric data to disk */
             *drbuf;                 /* Buffer for reading numeric data from disk */
@@ -580,7 +580,7 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     hid_t dset_NA;                  /* Dataset id for undefined reference */
     hid_t space_NA;                 /* Dataspace id for undefined reference */
     hsize_t dims_NA[1] = {1};       /* Dims array for undefined reference */
-    H5R_ref_t rdata_NA[1];             /* Read buffer */
+    H5R_ref_t rdata_NA[1];          /* Read buffer */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataset Region Reference Functions\n"));
@@ -2123,7 +2123,7 @@ test_reference_compat_conv(void)
     /* Allocate write & read buffers */
     wbuf_obj = (hobj_ref_t *)HDcalloc(sizeof(hobj_ref_t), SPACE1_DIM1);
     rbuf_obj = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
-    wbuf_reg = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    wbuf_reg = HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
     rbuf_reg = HDcalloc(sizeof(H5R_ref_t), SPACE1_DIM1);
 
     /* Create file */

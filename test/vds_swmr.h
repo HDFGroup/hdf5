@@ -84,31 +84,17 @@
 #define N_PLANES_TO_WRITE   25
 
 /* Planes */
-static hsize_t PLANES[N_SOURCES][RANK] = {
-    {1, SM_HEIGHT, WIDTH},
-    {1, LG_HEIGHT, WIDTH},
-    {1, SM_HEIGHT, WIDTH},
-    {1, LG_HEIGHT, WIDTH},
-    {1, SM_HEIGHT, WIDTH},
-    {1, LG_HEIGHT, WIDTH}
-};
+H5TEST_DLLVAR hsize_t PLANES[N_SOURCES][RANK];
 
 /* File names for source datasets */
-static char FILE_NAMES[N_SOURCES][NAME_LEN] = {
-    {"vds_swmr_src_a.h5"},
-    {"vds_swmr_src_b.h5"},
-    {"vds_swmr_src_c.h5"},
-    {"vds_swmr_src_d.h5"},
-    {"vds_swmr_src_e.h5"},
-    {"vds_swmr_src_f.h5"}
-};
+H5TEST_DLLVAR char FILE_NAMES[N_SOURCES][NAME_LEN];
 
 /* VDS file name */
-static char VDS_FILE_NAME[NAME_LEN] = "vds_swmr.h5";
+H5TEST_DLLVAR char VDS_FILE_NAME[NAME_LEN];
 
 /* Dataset names */
-static char SOURCE_DSET_PATH[NAME_LEN] = "/source_dset";
-static char VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
+H5TEST_DLLVAR char SOURCE_DSET_PATH[NAME_LEN];
+H5TEST_DLLVAR char VDS_DSET_NAME[NAME_LEN];
 
 /* Fill values */
 #endif /* VDS_SWMR_H */

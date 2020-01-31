@@ -1798,12 +1798,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED *sset, 
     hid_t               space = H5I_INVALID_HID;
     hid_t               type = H5I_INVALID_HID;
     hid_t               p_type = H5I_INVALID_HID;
-    hsize_t             size[64];
-    hsize_t             nelmts = 1;
-    int                 ndims;
-    int                 i;
     int                 status = -1;
-    void               *buf = NULL;
     hsize_t             curr_pos = 0;        /* total data element position   */
     h5tools_str_t       buffer;              /* string into which to render   */
     h5tools_context_t   ctx;                 /* print context  */

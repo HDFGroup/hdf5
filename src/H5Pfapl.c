@@ -5753,10 +5753,10 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
 {
     const H5VL_connector_prop_t *info1 = (const H5VL_connector_prop_t *)_info1; /* Create local aliases for values */
     const H5VL_connector_prop_t *info2 = (const H5VL_connector_prop_t *)_info2;
-    H5VL_class_t *cls1, *cls2;  /* connector class for each property */
-    int cmp_value = 0;          /* Value from comparison */
-    herr_t status;              /* Status from info comparison */
-    int ret_value = 0;          /* Return value */
+    H5VL_class_t *cls1, *cls2;          /* connector class for each property */
+    int cmp_value = 0;                  /* Value from comparison */
+    herr_t H5_ATTR_NDEBUG_UNUSED status; /* Status from info comparison */
+    int ret_value = 0;                  /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 

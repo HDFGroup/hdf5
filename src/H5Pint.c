@@ -2780,8 +2780,8 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P__poke_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
-    void *_udata)
+H5P__poke_plist_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_ATTR_NDEBUG_UNUSED *name, 
+    H5P_genprop_t *prop, void *_udata)
 {
     H5P_prop_set_ud_t *udata = (H5P_prop_set_ud_t *)_udata;    /* User data for callback */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -2827,7 +2827,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P__poke_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
+H5P__poke_pclass_cb(H5P_genplist_t *plist, const char H5_ATTR_NDEBUG_UNUSED *name, H5P_genprop_t *prop,
     void *_udata)
 {
     H5P_prop_set_ud_t *udata = (H5P_prop_set_ud_t *)_udata;    /* User data for callback */
@@ -4260,10 +4260,9 @@ property list class.
  REVISION LOG
 --------------------------------------------------------------------------*/
 static int
-H5P__iterate_pclass_cb(void *_item, void *_key, void *_udata)
+H5P__iterate_pclass_cb(void *_item, void H5_ATTR_NDEBUG_UNUSED *_key, void *_udata)
 {
     H5P_genprop_t *item = (H5P_genprop_t *)_item;       /* Pointer to the property */
-    char *key = (char *)_key;                           /* Pointer to the property's name */
     H5P_iter_pclass_ud_t *udata = (H5P_iter_pclass_ud_t *)_udata;     /* Pointer to user data */
     int ret_value = 0;                                  /* Return value */
 
@@ -4271,7 +4270,7 @@ H5P__iterate_pclass_cb(void *_item, void *_key, void *_udata)
 
     /* Sanity check */
     HDassert(item);
-    HDassert(key);
+    HDassert((char *)_key);
 
     /* Check if we've found the correctly indexed property */
     if(*udata->curr_idx_ptr >= udata->prev_idx) {
@@ -4397,8 +4396,8 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P__peek_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
-    void *_udata)
+H5P__peek_cb(H5P_genplist_t H5_ATTR_NDEBUG_UNUSED *plist, const char H5_ATTR_NDEBUG_UNUSED *name, 
+    H5P_genprop_t *prop, void *_udata)
 {
     H5P_prop_get_ud_t *udata = (H5P_prop_get_ud_t *)_udata;    /* User data for callback */
     herr_t ret_value = SUCCEED; /* Return value */

@@ -2020,7 +2020,6 @@ H5B_valid(H5F_t *f, const H5B_class_t *type, haddr_t addr)
 {
     H5B_t               *bt = NULL;             /* The B-tree */
     H5UC_t              *rc_shared;             /* Ref-counted shared info */
-    H5B_shared_t        *shared;                /* Pointer to shared B-tree info */
     H5B_cache_ud_t      cache_udata;            /* User-data for metadata cache callback */
     htri_t		ret_value = SUCCEED;    /* Return value */
 
@@ -2038,8 +2037,7 @@ H5B_valid(H5F_t *f, const H5B_class_t *type, haddr_t addr)
     /* Get shared info for B-tree */
     if(NULL == (rc_shared = (type->get_shared)(f, NULL)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object")
-    shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
-    HDassert(shared);
+    HDassert(H5UC_GET_OBJ(rc_shared) != NULL);
 
     /*
      * Load the tree node.
