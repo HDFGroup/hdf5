@@ -1032,6 +1032,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDislower
     #define HDislower(C)    islower((int)(C)) /*cast for solaris warning*/
 #endif /* HDislower */
+#ifndef HDisnan
+    #define HDisnan(X)      isnan(X)
+#endif /* HDisnan */
 #ifndef HDisprint
     #define HDisprint(C)    isprint((int)(C)) /*cast for solaris warning*/
 #endif /* HDisprint */
