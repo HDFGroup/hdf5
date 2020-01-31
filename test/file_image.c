@@ -678,8 +678,7 @@ error:
  *      'member_file_name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 static int
 test_get_file_image(const char * test_banner,
                     const int file_name_num,
@@ -946,7 +945,7 @@ test_get_file_image(const char * test_banner,
 error:
     return 1;
 } /* end test_get_file_image() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /******************************************************************************

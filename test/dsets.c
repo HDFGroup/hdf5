@@ -2294,9 +2294,9 @@ H5_ATTR_UNUSED
 
     hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
 
-#if(defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP)
+#if defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP)
     hsize_t     combo_size;         /* Size of dataset with multiple filters */
-#endif /* defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP */
+#endif /* defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP) */
 
     /* test the H5Zget_filter_info function */
     if(test_get_filter_info() < 0) goto error;
