@@ -1158,27 +1158,17 @@ H5P__file_driver_free(void *value)
 
         /* Copy the driver & info, if there is one */
         if(info->driver_id > 0) {
-            if(info->driver_info) {
-                H5FD_class_t *driver;       /* Pointer to driver */
 
-                /* Retrieve the driver for the ID */
-                if(NULL == (driver = (H5FD_class_t *)H5I_object(info->driver_id)))
-                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a driver ID")
-
-                /* Allow driver to free info or do it ourselves */
-                if(driver->fapl_free) {
-                    if((driver->fapl_free)((void *)info->driver_info) < 0)      /* Casting away const OK -QAK */
-                        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "driver info free request failed")
-                } /* end if */
-                else
-                    H5MM_xfree((void *)info->driver_info);      /* Casting away const OK -QAK */
-            } /* end if */
+            /* Free the driver info, if it exists */
+            if(info->driver_info)
+                if(H5FD_free_driver_info(info->driver_id, info->driver_info) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "driver info free request failed")
 
             /* Decrement reference count for driver */
             if(H5I_dec_ref(info->driver_id) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement reference count for driver ID")
-        } /* end if */
-    } /* end if */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5407,7 +5397,7 @@ H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
 
         /* Prepare the VOL connector property */
         vol_prop.connector_id = vol_id;
-        vol_prop.connector_info = (void *)vol_info;
+        vol_prop.connector_info = vol_info;
 
         /* Set the connector ID & info property */
         if(H5P_set(plist, H5F_ACS_VOL_CONN_NAME, &vol_prop) < 0)
