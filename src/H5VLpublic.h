@@ -43,7 +43,7 @@
 /*
  * VOL connector identifiers.  Values 0 through 255 are for connectors defined
  * by the HDF5 library.  Values 256 through 511 are available for testing new
- * filters.  Subsequent values should be obtained from the HDF5 development
+ * connectors. Subsequent values should be obtained from the HDF5 development
  * team at help@hdfgroup.org.
  */
 typedef int H5VL_class_value_t;
@@ -61,14 +61,13 @@ typedef int H5VL_class_value_t;
 extern "C" {
 #endif
 
-/* The H5VL types uses in the API calls are not opaque - they are defined in
- * H5VLconnector.h, which is included at the top of this file.
- */
 H5_DLL hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vipl_id);
 H5_DLL hid_t H5VLregister_connector_by_value(H5VL_class_value_t connector_value, hid_t vipl_id);
-H5_DLL htri_t H5VLis_connector_registered(const char *name);
+H5_DLL htri_t H5VLis_connector_registered_by_name(const char *name);
+H5_DLL htri_t H5VLis_connector_registered_by_value(H5VL_class_value_t connector_value);
 H5_DLL hid_t H5VLget_connector_id(hid_t obj_id);
 H5_DLL hid_t H5VLget_connector_id_by_name(const char *name);
+H5_DLL hid_t H5VLget_connector_id_by_value(H5VL_class_value_t connector_value);
 H5_DLL ssize_t H5VLget_connector_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL herr_t H5VLclose(hid_t connector_id);
 H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
