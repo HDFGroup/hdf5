@@ -581,7 +581,7 @@ H5FD_free_driver_info(hid_t driver_id, const void *driver_info)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(driver_id > 0) {
+    if(driver_id > 0 && driver_info) {
         H5FD_class_t	*driver;
 
         /* Retrieve the driver for the ID */
@@ -589,16 +589,14 @@ H5FD_free_driver_info(hid_t driver_id, const void *driver_info)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
 
         /* Allow driver to free info or do it ourselves */
-        if(driver_info) {
-            if(driver->fapl_free) {
-                /* Free the const pointer */
-                /* Cast through uintptr_t to de-const memory */
-                if((driver->fapl_free)((void *)(uintptr_t)driver_info) < 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed")
-            }
-            else
-                driver_info = H5MM_xfree_const(driver_info);
+        if(driver->fapl_free) {
+            /* Free the const pointer */
+            /* Cast through uintptr_t to de-const memory */
+            if((driver->fapl_free)((void *)(uintptr_t)driver_info) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed")
         }
+        else
+            driver_info = H5MM_xfree_const(driver_info);
     }
 
 done:
