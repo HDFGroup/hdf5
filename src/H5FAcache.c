@@ -253,7 +253,7 @@ END_FUNC(STATIC) 	/* end H5FA__cache_hdr_verify_chksum() */
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5FA__cache_hdr_deserialize(const void *_image, size_t len,
+H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty))
 
     /* Local variables */
@@ -651,7 +651,7 @@ END_FUNC(STATIC) 	/* end H5FA__cache_dblock_verify_chksum() */
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5FA__cache_dblock_deserialize(const void *_image, size_t len,
+H5FA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty))
 
     /* Local variables */
@@ -1178,7 +1178,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_image_len() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA__cache_dblk_page_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
+H5FA__cache_dblk_page_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *_image, size_t H5_ATTR_UNUSED len,
     void *_thing))
 
     /* Local variables */

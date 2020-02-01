@@ -2294,9 +2294,9 @@ H5_ATTR_UNUSED
 
     hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
 
-#if(defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP)
+#if defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP)
     hsize_t     combo_size;         /* Size of dataset with multiple filters */
-#endif /* defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP */
+#endif /* defined(H5_HAVE_FILTER_DEFLATE) || defined(H5_HAVE_FILTER_SZIP) */
 
     /* test the H5Zget_filter_info function */
     if(test_get_filter_info() < 0) goto error;
@@ -7165,8 +7165,8 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i=0; i<NPOINTS; i++){
-        chunk_row = (int)(ofs / cols);
-        chunk_col = (int)(ofs % cols);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
         ofs = (ofs + inc) % (rows * cols);
         HDassert(!check2[chunk_row][chunk_col]);
 
@@ -7286,14 +7286,14 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         for(j = 0; j < nsize[1] / csize[1]; j++)
             check2[i][j] = 0;
 
-    rows = (long)(nsize[0] / csize[0]);
-    cols = (long)(nsize[1] / csize[1]);
+    H5_CHECKED_ASSIGN(rows, int, nsize[0] / csize[0], long);
+    H5_CHECKED_ASSIGN(cols, int, nsize[1] / csize[1], long);
     make_random_offset_and_increment(rows * cols, &ofs, &inc);
 
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        chunk_row = (int)(ofs / cols);
-        chunk_col = (int)(ofs % cols);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
         ofs = (ofs + inc) % (rows * cols);
         HDassert(!check2[chunk_row][chunk_col]);
 
@@ -7402,8 +7402,8 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
-        chunk_row = (int)(ofs / cols);
-        chunk_col = (int)(ofs % cols);
+        H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+        H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
         ofs = (ofs + inc) % (rows * cols);
         HDassert(!check2[chunk_row][chunk_col]);
 
@@ -7551,10 +7551,10 @@ static herr_t
 test_deprec(hid_t file)
 {
     hid_t    dataset, space, small_space, create_parms, dcpl;
-    hsize_t    dims[2], small_dims[2];
-    hsize_t     deprec_size;
-    herr_t    status;
-    hsize_t    csize[2];
+    hsize_t  dims[2], small_dims[2];
+    hsize_t  deprec_size;
+    herr_t   H5_ATTR_NDEBUG_UNUSED status;
+    hsize_t  csize[2];
 
     TESTING("deprecated API routines");
 
@@ -9524,8 +9524,8 @@ test_fixed_array(hid_t fapl)
 
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS; i++){
-            chunk_row = (int)(ofs / cols);
-            chunk_col = (int)(ofs % cols);
+            H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+            H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
             ofs = (ofs + inc) % (rows * cols);
             HDassert(!chunks[chunk_row][chunk_col]);
 
@@ -9653,8 +9653,8 @@ test_fixed_array(hid_t fapl)
 
         /* Generate random point coordinates. Only one point is selected per chunk */
         for(i = 0; i < POINTS_BIG; i++){
-            chunk_row = (int)(ofs / cols);
-            chunk_col = (int)(ofs % cols);
+            H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
+            H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
             ofs = (ofs + inc) % (rows * cols);
             HDassert(!chunks_big[chunk_row][chunk_col]);
 

@@ -447,7 +447,7 @@ H5HF__space_size(H5HF_hdr_t *hdr, hsize_t *fs_size)
 
     /* Get free space metadata size */
     if(hdr->fspace) {
-        if(H5FS_size(hdr->f, hdr->fspace, fs_size) < 0)
+        if(H5FS_size(hdr->fspace, fs_size) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info")
     } /* end if */
     else

@@ -2788,22 +2788,24 @@ H5VL_pass_through_request_specific(void *obj, H5VL_request_specific_t specific_t
 
             /* Release requests that have completed */
             if(H5VL_REQUEST_WAITANY == specific_type) {
-                size_t *index;          /* Pointer to the index of completed request */
+                size_t *idx;          /* Pointer to the index of completed request */
                 H5ES_status_t *status;  /* Pointer to the request's status */
 
                 /* Retrieve the remaining arguments */
-                index = va_arg(tmp_arguments, size_t *);
-                assert(*index <= req_count);
+                idx = va_arg(tmp_arguments, size_t *);
+                assert(*idx <= req_count);
                 status = va_arg(tmp_arguments, H5ES_status_t *);
 
                 /* Reissue the WAITANY 'request specific' call */
-                ret_value = H5VL_pass_through_request_specific_reissue(o->under_object, o->under_vol_id, specific_type, req_count, under_req_array, timeout, index, status);
+                ret_value = H5VL_pass_through_request_specific_reissue(o->under_object, o->under_vol_id, specific_type, req_count, under_req_array, timeout,
+                                                                       idx,
+                                                                       status);
 
                 /* Release the completed request, if it completed */
                 if(ret_value >= 0 && *status != H5ES_STATUS_IN_PROGRESS) {
                     H5VL_pass_through_t *tmp_o;
 
-                    tmp_o = (H5VL_pass_through_t *)req_array[*index];
+                    tmp_o = (H5VL_pass_through_t *)req_array[*idx];
                     H5VL_pass_through_free_obj(tmp_o);
                 } /* end if */
             } /* end if */

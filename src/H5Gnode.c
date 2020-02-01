@@ -762,12 +762,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5G_node_remove(H5F_t *f, haddr_t addr, void *_lt_key/*in,out*/,
+H5G_node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key/*in,out*/,
     hbool_t H5_ATTR_UNUSED *lt_key_changed/*out*/,
     void *_udata/*in,out*/, void *_rt_key/*in,out*/,
     hbool_t *rt_key_changed/*out*/)
 {
-    H5G_node_key_t  *lt_key = (H5G_node_key_t *)_lt_key;
     H5G_node_key_t  *rt_key = (H5G_node_key_t *)_rt_key;
     H5G_bt_rm_t     *udata = (H5G_bt_rm_t *)_udata;
     H5G_node_t      *sn = NULL;
@@ -781,7 +780,7 @@ H5G_node_remove(H5F_t *f, haddr_t addr, void *_lt_key/*in,out*/,
     /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(lt_key);
+    HDassert((H5G_node_key_t *)_lt_key);
     HDassert(rt_key);
     HDassert(udata && udata->common.heap);
 

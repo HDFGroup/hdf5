@@ -215,8 +215,10 @@ herr_t
 H5Zregister(const void *cls)
 {
     const H5Z_class2_t  *cls_real = (const H5Z_class2_t *) cls; /* "Real" class pointer */
-    H5Z_class2_t        cls_new;                  /* Translated class struct */
     herr_t              ret_value = SUCCEED;      /* Return value */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    H5Z_class2_t        cls_new;    /* Translated class struct */
+#endif
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "*x", cls);

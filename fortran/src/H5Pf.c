@@ -488,12 +488,26 @@ h5pget_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
  *  Removed extra length parameters EP 7/6/00
  * SOURCE
 */
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+int_f
+h5pget_version_c (hid_t_f H5_ATTR_UNUSED *prp_id, int_f * boot,int_f * freelist, int_f * stab, int_f *shhdr)
+/******/
+{
+     /*
+      * Fill in fake values [since we need a file ID to call H5Fget_info :-( -QAK ]
+      */
+     *boot = (int_f)0;
+     *freelist = (int_f)0;
+     *stab = (int_f)0;
+     *shhdr = (int_f)0;
+
+     return 0;
+}
+#else /* H5_NO_DEPRECATED_SYMBOLS */
 int_f
 h5pget_version_c (hid_t_f *prp_id, int_f * boot,int_f * freelist, int_f * stab, int_f *shhdr)
 /******/
 {
-     int ret_value = -1;
-#ifndef H5_NO_DEPRECATED_SYMBOLS
      herr_t ret;
      unsigned c_boot;
      unsigned c_freelist;
@@ -504,25 +518,16 @@ h5pget_version_c (hid_t_f *prp_id, int_f * boot,int_f * freelist, int_f * stab, 
       * Call H5Pget_version function.
       */
      ret = H5Pget_version((hid_t)*prp_id, &c_boot, &c_freelist, &c_stab, &c_shhdr);
-     if (ret < 0) return ret_value;
+     if (ret < 0) return -1;
 
      *boot = (int_f)c_boot;
      *freelist = (int_f)c_freelist;
      *stab = (int_f)c_stab;
      *shhdr = (int_f)c_shhdr;
-#else /* H5_NO_DEPRECATED_SYMBOLS */
-     /*
-      * Fill in fake values [since we need a file ID to call H5Fget_info :-( -QAK ]
-      */
-     *boot = (int_f)0;
-     *freelist = (int_f)0;
-     *stab = (int_f)0;
-     *shhdr = (int_f)0;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-     ret_value = 0;
 
-     return ret_value;
+     return 0;
 }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /****if* H5Pf/h5pget_userblock_c
  * NAME
