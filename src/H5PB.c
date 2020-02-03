@@ -1752,7 +1752,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
                     "\n\nmax mdf index len (%" PRIu32 ") exceeded.\n\n",
                     shared->mdf_idx_len);
                 HDfprintf(stderr, "tick = %" PRIu64 ".\n", shared->tick_num);
-                exit(1);
+                exit(EXIT_FAILURE);
             }
 
             ie_ptr = idx + new_index_entry_index;
@@ -1836,7 +1836,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5PB_vfd_swmr__update_index */
+}
 
 
 /*-------------------------------------------------------------------------
