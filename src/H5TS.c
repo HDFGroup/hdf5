@@ -47,12 +47,12 @@ typedef struct _tid h5_tid_t;
 
 struct _tid {
     h5_tid_t *next;
-    unsigned long id;
+    uint64_t id;
 };
 
 /* Pointer to first free thread ID record or NULL. */
 static h5_tid_t *tid_next_free = NULL;
-static unsigned long tid_next_id = 0;
+static uint64_t tid_next_id = 0;
 
 /* Mutual exclusion for access to tid_next_free and tid_next_id. */
 static pthread_mutex_t tid_mtx;
@@ -118,18 +118,18 @@ tid_init(void)
     pthread_key_create(&tid_key, tid_destructor);
 }
 
-/* Return an integer identifier, ID, for the current thread satisfies the
+/* Return an integer identifier, ID, for the current thread satisfying the
  * following properties:
  *
- * 1 1 <= ID <= ULONG_MAX
- * 2 The ID is constant over the thread's lifetime.
+ * 1 1 <= ID <= UINT64_MAX
+ * 2 ID is constant over the thread's lifetime.
  * 3 No two threads share an ID during their lifetimes.
  * 4 A thread's ID is available for reuse as soon as it is joined.
  *
  * ID 0 is reserved.  H5TS_thread_id() returns 0 if the library was not built
  * with thread safety or if an error prevents it from assigning an ID.
  */
-unsigned long
+uint64_t
 H5TS_thread_id(void)
 {
     h5_tid_t *tid = pthread_getspecific(tid_key);
@@ -149,7 +149,7 @@ H5TS_thread_id(void)
     pthread_mutex_lock(&tid_mtx);
     if ((tid = tid_next_free) != NULL)
         tid_next_free = tid->next;
-    else if (tid_next_id != ULONG_MAX) {
+    else if (tid_next_id != UINT64_MAX) {
         tid = &proto_tid;
         tid->id = ++tid_next_id;
     }
@@ -641,7 +641,7 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 
 #else  /* H5_HAVE_THREADSAFE */
 
-unsigned long
+uint64_t
 H5TS_thread_id(void)
 {
     return 0;
