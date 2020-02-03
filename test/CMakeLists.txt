@@ -290,6 +290,7 @@ set (H5_TESTS
     cache_logging
     cork
     swmr
+    thread_id
     vol
 )
 
