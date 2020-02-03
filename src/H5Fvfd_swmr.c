@@ -160,7 +160,7 @@ herr_t
 H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
 {
     hsize_t md_size;                /* Size of the metadata file */
-    haddr_t md_addr;                /* Address returned from H5MV_alloc() */
+    haddr_t hdr_addr, idx_addr;     /* Addresses returned from H5MV_alloc() */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -193,11 +193,24 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         md_size = (hsize_t)f->shared->vfd_swmr_config.md_pages_reserved * 
                   f->shared->fs_page_size;
 
-        /* Make sure that the free-space manager for the metadata file is initialized */
-        if((md_addr = H5MV_alloc(f, md_size)) == HADDR_UNDEF)
-            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
-                            "error in allocating md_pages_reserved from the metadata file")
-        HDassert(H5F_addr_eq(md_addr, H5FD_MD_HEADER_OFF));
+        assert(f->shared->fs_page_size >= H5FD_MD_HEADER_SIZE);
+
+        /* Allocate an entire page from the shadow file for the header. */
+        if((hdr_addr = H5MV_alloc(f, f->shared->fs_page_size)) == HADDR_UNDEF) {
+            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                "error allocating shadow-file header");
+        }
+        HDassert(H5F_addr_eq(hdr_addr, H5FD_MD_HEADER_OFF));
+
+        idx_addr = H5MV_alloc(f, md_size - f->shared->fs_page_size);
+        if (idx_addr == HADDR_UNDEF) {
+            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                "error allocating shadow-file index");
+        }
+
+        HDassert(H5F_addr_eq(idx_addr, f->shared->fs_page_size));
+
+        f->shared->writer_index_offset = idx_addr;
 
         /* Set the metadata file size to md_pages_reserved */
         if ( -1 == HDftruncate(f->shared->vfd_swmr_md_fd, (HDoff_t)md_size) )
@@ -213,15 +226,15 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
          */
         if ( !file_create ) {
 
-            if ( H5F__vfd_swmr_construct_write_md_hdr(f, 0) < 0 )
-
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
-                            "fail to create header in md")
-
             if ( H5F__vfd_swmr_construct_write_md_idx(f, 0, NULL) < 0 )
 
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
                             "fail to create index in md")
+
+            if ( H5F__vfd_swmr_construct_write_md_hdr(f, 0) < 0 )
+
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
+                            "fail to create header in md")
         }
 
     } else { /* VFD SWMR reader  */
@@ -555,6 +568,12 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                             "unable to flush clean entry")
+
+#if 0
+            fprintf(stderr, "released %" PRIu32 " bytes at %" PRIu64 "\n",
+                old_image->length,
+                old_image->md_file_page_offset * f->shared->fs_page_size);
+#endif
 
             /* Remove the entry from the delayed list */
             TAILQ_REMOVE(&f->shared->old_images, old_image, link);
@@ -1601,7 +1620,7 @@ H5F__vfd_swmr_construct_write_md_hdr(H5F_t *f, uint32_t num_entries)
     /* Encode page size, tick number, index offset, index length */
     UINT32ENCODE(p, f->shared->fs_page_size);
     UINT64ENCODE(p, f->shared->tick_num);
-    UINT64ENCODE(p, hdr_size);
+    UINT64ENCODE(p, f->shared->writer_index_offset);
     UINT64ENCODE(p, H5FD_MD_INDEX_SIZE(num_entries));
 
     /* Calculate checksum for header */
@@ -1714,10 +1733,8 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries,
     /* Verify the md file descriptor exists */
     HDassert(f->shared->vfd_swmr_md_fd >= 0);
 
-    /* Set to right after the header */
-    if ( HDlseek(f->shared->vfd_swmr_md_fd, (HDoff_t)(H5FD_MD_HEADER_OFF + H5FD_MD_HEADER_SIZE), 
-                 SEEK_SET) < 0)
-
+    if (HDlseek(f->shared->vfd_swmr_md_fd,
+                (HDoff_t)f->shared->writer_index_offset, SEEK_SET) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
                     "unable to seek in metadata file")
     
@@ -1815,13 +1832,14 @@ H5F__vfd_swmr_writer__create_index(H5F_t * f)
     HDassert(f->shared->mdf_idx_len == 0);
     HDassert(f->shared->mdf_idx_entries_used == 0);
 
-    bytes_available = (size_t)f->shared->fs_page_size * 
-                      (size_t)(f->shared->vfd_swmr_config.md_pages_reserved) -
-                      H5FD_MD_HEADER_SIZE;
+    bytes_available =
+        (size_t)f->shared->fs_page_size *
+        (size_t)(f->shared->vfd_swmr_config.md_pages_reserved - 1);
 
     HDassert(bytes_available > 0);
 
-    entries_in_index = bytes_available / H5FD_MD_INDEX_ENTRY_SIZE;
+    entries_in_index =
+        (bytes_available - H5FD_MD_INDEX_SIZE(0)) / H5FD_MD_INDEX_ENTRY_SIZE;
 
     HDassert(entries_in_index > 0);
 
@@ -1843,6 +1861,61 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5F__vfd_swmr_writer__create_index() */
+
+H5FD_vfd_swmr_idx_entry_t *
+vfd_swmr_enlarge_shadow_index(H5F_t *f)
+{
+    H5F_shared_t *shared = f->shared;
+    H5FD_vfd_swmr_idx_entry_t *ret_value = NULL;
+    haddr_t idx_addr;
+    hsize_t idx_size;
+    H5FD_vfd_swmr_idx_entry_t *new_mdf_idx = NULL, *old_mdf_idx;
+    uint32_t new_mdf_idx_len, old_mdf_idx_len;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    old_mdf_idx = shared->mdf_idx;
+    old_mdf_idx_len = shared->mdf_idx_len;
+
+    if (UINT32_MAX - old_mdf_idx_len >= old_mdf_idx_len)
+        new_mdf_idx_len = old_mdf_idx_len * 2;
+    else
+        new_mdf_idx_len = UINT32_MAX;
+
+    idx_size = H5FD_MD_INDEX_SIZE(new_mdf_idx_len);
+
+    idx_addr = H5MV_alloc(f, idx_size);
+
+    if (idx_addr == HADDR_UNDEF) {
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+            "shadow-file allocation failed for index")
+    }
+
+    new_mdf_idx = HDmalloc(new_mdf_idx_len * sizeof(new_mdf_idx[0]));
+
+    if (new_mdf_idx == NULL) {
+        (void)H5MV_free(f, idx_addr, idx_size);
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+            "memory allocation failed for md index")
+    }
+
+    /* Copy the old index in its entirety to the new, instead of copying
+     * just the _entries_used, because the caller may have been in the
+     * process of adding entries, and some callers may not update
+     * _entries_used immediately.
+     */ 
+    memcpy(new_mdf_idx, old_mdf_idx, sizeof(new_mdf_idx[0]) * old_mdf_idx_len);
+
+    fprintf(stderr, "ding ding\n");
+    /* TBD record previous index offset & size to be freed after the new one
+     * is in service.
+     */
+    shared->writer_index_offset = idx_addr;
+    ret_value = shared->mdf_idx = new_mdf_idx;
+    shared->mdf_idx_len = new_mdf_idx_len;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------

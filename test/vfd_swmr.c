@@ -63,7 +63,7 @@ static unsigned test_writer_md(void);
  *                 --version: should be a known version
  *                 --tick_len: should be >= 0
  *                 --max_lag: should be >= 3
- *                 --md_pages_reserved: should be >= 1
+ *                 --md_pages_reserved: should be >= 2
  *                 --md_file_path: should contain the metadata file path (POSIX)
  *              B) Verify that info set in the fapl is retrieved correctly.
  *
@@ -709,7 +709,7 @@ test_writer_create_open_flush(void)
     my_config->tick_len = 1; 
     my_config->max_lag = 3;
     my_config->writer = TRUE;
-    my_config->md_pages_reserved = 1;
+    my_config->md_pages_reserved = 2;
     HDstrcpy(my_config->md_file_path, MD_FILENAME);
 
     /* Set the VFD SWMR configuration in fapl */

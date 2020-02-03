@@ -5582,9 +5582,9 @@ H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
     if(config_ptr->max_lag < 3 )
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "max_lag must be at least 3")
 
-    /* This field must be >= 1 */
-    if(config_ptr->md_pages_reserved < 1 )
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "md_pages_reserved must be at least 1")
+    /* This field must be >= 2 */
+    if(config_ptr->md_pages_reserved < 2 )
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "md_pages_reserved must be at least 2")
 
     /* This field must be in the range [0, 100] */
     if(config_ptr->pb_expansion_threshold < 0 || config_ptr->pb_expansion_threshold > H5F__MAX_PB_EXPANSION_THRESHOLD)

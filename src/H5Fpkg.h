@@ -402,6 +402,7 @@ struct H5F_shared_t {
                                              * configuration from the
                                              * FAPL used to open the file 
                                              */
+    haddr_t writer_index_offset;
     hbool_t vfd_swmr;                       /* The file is opened with VFD 
                                              * SWMR configured or not
                                              */

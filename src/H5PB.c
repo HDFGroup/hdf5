@@ -1746,8 +1746,8 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
             new_index_entry_index = shared->mdf_idx_entries_used + 
                                     idx_ent_added++;
 
-            if ( new_index_entry_index >= shared->mdf_idx_len ) {
-
+            if (new_index_entry_index >= shared->mdf_idx_len &&
+                (idx = vfd_swmr_enlarge_shadow_index(f)) == NULL) {
                 HDfprintf(stderr,
                     "\n\nmax mdf index len (%" PRIu32 ") exceeded.\n\n",
                     shared->mdf_idx_len);

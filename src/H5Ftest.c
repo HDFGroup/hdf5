@@ -497,7 +497,7 @@ H5F__vfd_swmr_verify_md_hdr_and_idx(H5F_t *f,
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect index_length read from metadata file")
 
     /* Verify index_offset read from header in the metadata file is the size of md header */
-    if(md_hdr->index_offset != H5FD_MD_HEADER_SIZE)
+    if(md_hdr->index_offset != f->shared->fs_page_size)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect index_offset read from metadata file")
 
     /* Verify num_entries read from index in the metadata file is num_entries */

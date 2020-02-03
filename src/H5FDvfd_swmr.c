@@ -1082,52 +1082,50 @@ done:
 } /* end H5FD_vfd_swmr_unlock() */
 
 
-/*-------------------------------------------------------------------------
+/*
  * Function:    H5FD__vfd_swmr_load_hdr_and_idx()
  *
  * Purpose:     Load and decode the header and index in the metadata file
  *
- *              Try to load and decode the header:
- *
- *              --If fail, RETRY
- *
- *              --If succeed:
- *
- *                  --If the size of header and index does not fit within 
- *                    md_pages_reserved, return error
- *
- *                  --If NOT an initial open call:
- *
- *                      --If tick_num just read is the same as the VFD's 
- *                        local copy, just return
- *
- *                      --If tick_num just read is less than the VFD's 
- *                        local copy, return error
- *
- *                  --If tick_num just read is greater than the VFD's 
- *                    local copy or an initial open call:
- *
- *                      --Try to load and decode the index:
- *
- *                          --If fail, RETRY
- *
- *                          --If succeed:
- *
- *                              --If tick_num in header matches that in 
- *                                index, replace the VFD's local copy with 
- *                                the header and index just read
- *
- *                              --If tick_num in header is 1 greater than 
- *                                that in index, RETRY
- *
- *                              --Otherwise, return error
+ * In H5FD__vfd_swmr_load_hdr_and_idx(), we follow this protocol for reading
+ * the shadow file:
+ * 
+ * 0 If the maximum number of retries have been attempted, then exit
+ *   with an error.
+ * 
+ * 1 Try to read the shadow file *header*.  If successful, continue to 2.
+ * 
+ *   If there is a hard failure, then return an error.  If there is a failure
+ *   that may be transient, then sleep and retry at 0.
+ * 
+ * 2 If the tick number in the header is less than the tick last read by the VFD,
+ *   then return an error.
+ * 
+ * 3 If the tick number in the header is equal to the last tick read by the
+ *   VFD, then exit without doing anything.
+ * 
+ * 4 Try to read the shadow file *index*.  If successful, continue to 5.
+ * 
+ *   If there is a hard failure, then return an error.  If there is a failure
+ *   that may be transient, then sleep and retry at 0.
+ * 
+ * 5 If a different tick number was read from the index than from the index,
+ *   then continue at 0.
+ * 
+ * 6 Try to *re-read* the shadow file *header*.  If successful, continue to 7.
+ * 
+ *   If there is a hard failure, then return an error.  If there is a failure
+ *   that may be transient, then sleep and retry at 0.
+ * 
+ * 7 Compare the header that was read previously with the new header.  If
+ *   the new header is different than the old, then we may not have read
+ *   the index at the right shadow-file offset, or the index may have been
+ *   read in an inconsistent state, so sleep and retry at 0.  Otherwise,
+ *   return success.
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  *
- * Programmer:  Vailin Choi
- *
- *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
@@ -1141,6 +1139,7 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
     H5FD_vfd_swmr_md_index md_index;     /* Metadata file index           */
     herr_t ret_value  = SUCCEED;         /* Return value                  */
     htri_t rc;
+    static uint64_t last_index_offset = 0;
 
     FUNC_ENTER_STATIC
 
@@ -1161,17 +1160,11 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
         if (rc != TRUE)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not read header");
 
-#if 0
-        /* Error if header + index does not fit within md_pages_reserved
-         *
-         * This check doesn't make sense if the index floats, does it? --dyoung
-         */
-        if (H5FD_MD_HEADER_SIZE + md_header.index_length >
-           (hsize_t)file->md_pages_reserved * md_header.fs_page_size) {
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
-                     "header + index does not fit within md_pages_reserved");
+        if (md_header.index_offset != last_index_offset) {
+            fprintf(stderr, "index offset %" PRIu64 "\n",
+                md_header.index_offset);
+            last_index_offset = md_header.index_offset;
         }
-#endif
 
         if (open)
             ; // ignore tick number on open
