@@ -120,7 +120,6 @@ H5MV__create(H5F_t *f)
     /*
      * Check arguments.
      */
-    HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->fs_state_md == H5F_FS_STATE_CLOSED);
 
