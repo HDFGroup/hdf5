@@ -697,9 +697,8 @@ test_writer_create_open_flush(void)
     TESTING("Create/Open/Flush an HDF5 file for VFD SWMR");
 
     /* Allocate memory for the configuration structure */
-    if((my_config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
+    if((my_config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
-    HDmemset(my_config, 0, sizeof(H5F_vfd_swmr_config_t));
 
     /* Create a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -735,7 +734,7 @@ test_writer_create_open_flush(void)
 
     /* Verify info in metadata file when creating the HDF5 file */
     if(H5F__vfd_swmr_writer_create_open_flush_test(fid, TRUE) < 0)
-        TEST_ERROR
+        FAIL_STACK_ERROR;
 
 #ifdef LATER /* Will activate the test when flush is implemented */
     /* Flush the HDF5 file */
@@ -744,7 +743,7 @@ test_writer_create_open_flush(void)
 
     /* Verify info in metadata file when flushing the HDF5 file */
     if(H5F__vfd_swmr_writer_create_open_flush_test(fid, FALSE) < 0)
-        TEST_ERROR
+        FAIL_STACK_ERROR
 #endif
 
     /* Close the file */
@@ -753,11 +752,11 @@ test_writer_create_open_flush(void)
 
     /* Re-open the file as VFD SWMR writer */
     if((fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify info in metadata file when reopening the HDF5 file */
     if(H5F__vfd_swmr_writer_create_open_flush_test(fid, FALSE) < 0)
-        TEST_ERROR
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if(H5Fclose(fid) < 0)
