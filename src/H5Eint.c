@@ -37,6 +37,7 @@
 #include "H5Epkg.h"             /* Error handling                           */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
+#include "H5TSprivate.h"        /* Thread stuff                             */
 
 
 /****************/
