@@ -1184,7 +1184,7 @@ h5_show_hostname(void)
             HDprintf("thread 0.");
     }
 #else
-    HDprintf("thread %lu.", H5TS_thread_id());
+    HDprintf("thread %" PRIu64 ".", H5TS_thread_id());
 #endif
 #ifdef H5_HAVE_WIN32_API
 

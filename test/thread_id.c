@@ -71,29 +71,30 @@ atomic_printf(const char *fmt, ...)
 static void *
 thread_main(void H5_ATTR_UNUSED *arg)
 {
-    unsigned long ntid, tid;
+    uint64_t ntid, tid;
 
     tid = H5TS_thread_id();
 
     if (tid < 1 || NTHREADS < tid) {
-        atomic_printf("unexpected tid %lu FAIL\n", tid);
+        atomic_printf("unexpected tid %" PRIu64 " FAIL\n", tid);
         goto pre_barrier_error;
     }
     pthread_mutex_lock(&used_lock);
     if (used[tid - 1]) {
-        atomic_printf("reused tid %lu FAIL\n", tid);
+        atomic_printf("reused tid %" PRIu64 " FAIL\n", tid);
         pthread_mutex_unlock(&used_lock);
         goto pre_barrier_error;
     }
     used[tid - 1] = true;
     pthread_mutex_unlock(&used_lock);
 
-    atomic_printf("tid %lu in [1, %d] PASS\n", tid, NTHREADS);
+    atomic_printf("tid %" PRIu64 " in [1, %d] PASS\n", tid, NTHREADS);
     pthread_barrier_wait(&barrier);
 
     ntid = H5TS_thread_id();
     if (ntid != tid) {
-        atomic_printf("tid changed from %lu to %lu FAIL\n", tid, ntid);
+        atomic_printf("tid changed from %" PRIu64 " to %" PRIu64 " FAIL\n",
+            tid, ntid);
         failed = true;
     }
     return NULL;
