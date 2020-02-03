@@ -684,7 +684,7 @@ H5_DLL herr_t H5PB_vfd_swmr__release_tick_list(H5F_shared_t *);
 
 H5_DLL herr_t H5PB_vfd_swmr__set_tick(H5F_shared_t *);
 
-H5_DLL herr_t H5PB_vfd_swmr__update_index(H5F_shared_t *shared,
+H5_DLL herr_t H5PB_vfd_swmr__update_index(H5F_t *f,
     uint32_t * idx_ent_added_ptr, uint32_t * idx_ent_modified_ptr,
     uint32_t * idx_ent_not_in_tl_ptr, uint32_t * idx_ent_not_in_tl_flushed_ptr);
 

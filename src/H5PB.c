@@ -1676,7 +1676,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5PB_vfd_swmr__update_index(H5F_shared_t *shared, 
+H5PB_vfd_swmr__update_index(H5F_t *f, 
                             uint32_t * idx_ent_added_ptr, 
                             uint32_t * idx_ent_modified_ptr,
                             uint32_t * idx_ent_not_in_tl_ptr,
@@ -1689,6 +1689,7 @@ H5PB_vfd_swmr__update_index(H5F_shared_t *shared,
     uint32_t idx_ent_not_in_tl_flushed = 0;
     H5PB_t * pb_ptr = NULL;
     H5PB_entry_t *entry;
+    H5F_shared_t *shared = f->shared;
     H5FD_vfd_swmr_idx_entry_t * ie_ptr = NULL;
     H5FD_vfd_swmr_idx_entry_t * idx = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */

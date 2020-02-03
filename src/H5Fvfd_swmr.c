@@ -877,7 +877,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
      *    the metadata file index, adding or modifying entries as 
      *    appropriate.
      */
-    if ( H5PB_vfd_swmr__update_index(f->shared, &idx_entries_added, 
+    if ( H5PB_vfd_swmr__update_index(f, &idx_entries_added, 
                                      &idx_entries_modified, 
                                      &idx_ent_not_in_tl, 
                                      &idx_ent_not_in_tl_flushed) < 0 )
