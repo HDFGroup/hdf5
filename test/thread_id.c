@@ -26,12 +26,12 @@
  */
 #include "testhdf5.h"
 
+#if defined(H5_HAVE_THREADSAFE) && !defined(H5_HAVE_WIN_THREADS)
+
 #define threads_failure(_call, _result) do {                \
     errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__,   \
         __LINE__, strerror(_result));                       \
 } while (false)
-
-#if defined(H5_HAVE_THREADSAFE) && !defined(H5_HAVE_WIN_THREADS)
 
 #define NTHREADS 5
 
