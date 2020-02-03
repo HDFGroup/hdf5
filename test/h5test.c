@@ -1164,10 +1164,8 @@ h5_show_hostname(void)
         else
             HDprintf("thread 0.");
     }
-#elif defined(H5_HAVE_THREADSAFE)
-    HDprintf("thread %lu.", HDpthread_self_ulong());
 #else
-    HDprintf("thread 0.");
+    HDprintf("thread %lu.", H5TS_thread_id());
 #endif
 #ifdef H5_HAVE_WIN32_API
 

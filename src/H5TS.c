@@ -37,6 +37,31 @@ H5TS_key_t H5TS_funcstk_key_g;
 H5TS_key_t H5TS_apictx_key_g;
 H5TS_key_t H5TS_cancel_key_g;
 
+#ifndef H5_HAVE_WIN_THREADS
+
+/* An h5_tid_t is a record of a thread identifier that is
+ * available for reuse.
+ */
+struct _tid;
+typedef struct _tid h5_tid_t;
+
+struct _tid {
+    h5_tid_t *next;
+    unsigned long id;
+};
+
+/* Pointer to first free thread ID record or NULL. */
+static h5_tid_t *tid_next_free = NULL;
+static unsigned long tid_next_id = 0;
+
+/* Mutual exclusion for access to tid_next_free and tid_next_id. */
+static pthread_mutex_t tid_mtx;
+
+/* Key for thread-local storage of the thread ID. */
+static H5TS_key_t tid_key;
+
+#endif /* H5_HAVE_WIN_THREADS */
+
 
 /*--------------------------------------------------------------------------
  * NAME
@@ -67,6 +92,89 @@ H5TS_key_destructor(void *key_val)
 
 
 #ifndef H5_HAVE_WIN_THREADS
+
+/* When a thread shuts down, put its ID record on the free list. */
+static void
+tid_destructor(void *_v)
+{
+    h5_tid_t *tid = _v;
+
+    if (tid == NULL)
+        return;
+
+    /* XXX I can use mutexes in destructors, right? */
+    /* TBD use an atomic CAS */
+    pthread_mutex_lock(&tid_mtx);
+    tid->next = tid_next_free;
+    tid_next_free = tid;
+    pthread_mutex_unlock(&tid_mtx);
+}
+
+/* Initialize for integer thread identifiers. */
+static void
+tid_init(void)
+{
+    pthread_mutex_init(&tid_mtx, NULL);
+    pthread_key_create(&tid_key, tid_destructor);
+}
+
+/* Return an integer identifier, ID, for the current thread satisfies the
+ * following properties:
+ *
+ * 1 1 <= ID <= ULONG_MAX
+ * 2 The ID is constant over the thread's lifetime.
+ * 3 No two threads share an ID during their lifetimes.
+ * 4 A thread's ID is available for reuse as soon as it is joined.
+ *
+ * ID 0 is reserved.  H5TS_thread_id() returns 0 if the library was not built
+ * with thread safety or if an error prevents it from assigning an ID.
+ */
+unsigned long
+H5TS_thread_id(void)
+{
+    h5_tid_t *tid = pthread_getspecific(tid_key);
+    h5_tid_t proto_tid;
+
+    /* An ID is already assigned. */
+    if (tid != NULL)
+        return tid->id;
+
+    /* An ID is *not* already assigned: reuse an ID that's on the
+     * free list, or else generate a new ID.
+     * 
+     * Allocating memory while holding a mutex is bad form, so
+     * point `tid` at `proto_tid` if we need to allocate some
+     * memory.
+     */
+    pthread_mutex_lock(&tid_mtx);
+    if ((tid = tid_next_free) != NULL)
+        tid_next_free = tid->next;
+    else if (tid_next_id != ULONG_MAX) {
+        tid = &proto_tid;
+        tid->id = ++tid_next_id;
+    }
+    pthread_mutex_unlock(&tid_mtx);
+
+    /* If a prototype ID record was established, copy it to the heap. */
+    if (tid == &proto_tid) {
+        if ((tid = HDmalloc(sizeof(*tid))) != NULL)
+            *tid = proto_tid;
+    }
+
+    if (tid == NULL)
+        return 0;
+
+    /* Finish initializing the ID record and set a thread-local pointer
+     * to it.
+     */
+    tid->next = NULL;
+    if (pthread_setspecific(tid_key, tid) != 0) {
+        tid_destructor(tid);
+        return 0;
+    }
+
+    return tid->id;
+}
 
 /*--------------------------------------------------------------------------
  * NAME
@@ -103,6 +211,9 @@ H5TS_pthread_first_thread_init(void)
     pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
     pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
     H5_g.init_lock.lock_count = 0;
+
+    /* Initialize integer thread identifiers. */
+    tid_init();
 
     /* initialize key for thread-specific error stacks */
     pthread_key_create(&H5TS_errstk_key_g, H5TS_key_destructor);
@@ -527,6 +638,14 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
     return ret_value;
 
 } /* H5TS_create_thread */
+
+#else  /* H5_HAVE_THREADSAFE */
+
+unsigned long
+H5TS_thread_id(void)
+{
+    return 0;
+}
 
 #endif  /* H5_HAVE_THREADSAFE */
 
