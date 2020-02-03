@@ -260,7 +260,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
                 HDfprintf(stream, "thread 0");
         } /* end block */
 #else
-        HDfprintf(stream, "thread %lu", H5TS_thread_id());
+        HDfprintf(stream, "thread %" PRIu64, H5TS_thread_id());
 #endif
         HDfprintf(stream, ":\n");
     } /* end if */
@@ -390,7 +390,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
                 HDfprintf(stream, "thread 0");
         } /* end block */
 #else
-        HDfprintf(stream, "thread %lu", H5TS_thread_id());
+        HDfprintf(stream, "thread %" PRIu64, H5TS_thread_id());
 #endif
         HDfprintf(stream, ":\n");
     } /* end if */
