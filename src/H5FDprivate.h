@@ -354,7 +354,7 @@ H5_DLL herr_t H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t read_index,
 H5_DLL H5FD_vfd_swmr_idx_entry_t *vfd_swmr_enlarge_shadow_index(struct H5F_t *);
 H5_DLL hbool_t H5FD_is_vfd_swmr_driver(H5FD_t *_file);
 H5_DLL H5FD_t *H5FD_vfd_swmr_get_underlying_vfd(H5FD_t *_file);
-H5_DLL void H5FD_vfd_swmr_dump_status(H5FD_t *_file, int64_t page);
+H5_DLL void H5FD_vfd_swmr_dump_status(H5FD_t *, uint64_t);
 H5_DLL void H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file);
 
 /* Function prototypes for MPI based VFDs*/

@@ -1640,7 +1640,7 @@ H5FD_vfd_swmr_get_underlying_vfd(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 void
-H5FD_vfd_swmr_dump_status(H5FD_t *_file, int64_t page)
+H5FD_vfd_swmr_dump_status(H5FD_t *_file, uint64_t page)
 {
     hbool_t in_index = FALSE;
     int i = 0;
@@ -1657,7 +1657,7 @@ H5FD_vfd_swmr_dump_status(H5FD_t *_file, int64_t page)
 
     while ( ( ! in_index ) && ( i < (int)num_entries ) ) {
 
-        if ( index[i].hdf5_page_offset == (uint64_t)page ) {
+        if ( index[i].hdf5_page_offset == page ) {
 
             in_index = TRUE;
         }
