@@ -132,7 +132,7 @@ if (NOT BUILD_SHARED_LIBS)
       PRIVATE
           "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
       INTERFACE
-          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/static>"
   )
   target_compile_definitions(${HDF5_F90_TEST_LIB_TARGET}
       PRIVATE
@@ -165,7 +165,7 @@ else ()
       PRIVATE
           "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
       INTERFACE
-          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/shared>"
   )
   target_compile_definitions(${HDF5_F90_TEST_LIBSH_TARGET}
       PUBLIC
