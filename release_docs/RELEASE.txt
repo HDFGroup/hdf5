@@ -391,6 +391,12 @@ New Features
 
     Java Library:
     ----------------
+    - Added ability to test java library with VOLs.
+
+      Created new CMake script that combines the java and vol test scripts.
+
+      (ADB - 2020/02/03, HDFFV-10996)
+
     - Tests fail for non-English locale.
 
       In the JUnit tests with a non-English locale, only the part before
