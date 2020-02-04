@@ -531,12 +531,12 @@ done:
 } /* H5F__vfd_swmr_verify_md_hdr_and_idx() */
 
 static unsigned
-count_old_images(old_image_queue_t *old_images)
+count_shadow_defrees(shadow_defree_queue_t *shadow_defrees)
 {
-    old_image_t *old_image;
+    shadow_defree_t *shadow_defree;
     unsigned count = 0;
 
-    TAILQ_FOREACH(old_image, old_images, link)
+    TAILQ_FOREACH(shadow_defree, shadow_defrees, link)
         count++;
 
     return count;
@@ -551,7 +551,7 @@ count_old_images(old_image_queue_t *old_images)
  *          --info read from the metadata file is as indicated by
  *          the input: num_entries, index
  *          --# of entries on the delayed list is as indicated by 
- *          the input: nold_images
+ *          the input: nshadow_defrees
  *
  * Return:  SUCCEED/FAIL
  *
@@ -559,7 +559,7 @@ count_old_images(old_image_queue_t *old_images)
  */
 herr_t
 H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries,
-    H5FD_vfd_swmr_idx_entry_t *index, unsigned nold_images)
+    H5FD_vfd_swmr_idx_entry_t *index, unsigned nshadow_defrees)
 {
     H5F_t *f;                       /* File pointer */
     int md_fd = -1;                 /* The metadata file descriptor */
@@ -581,7 +581,7 @@ H5F__vfd_swmr_writer_md_test(hid_t file_id, unsigned num_entries,
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "error updating the md file with the index")
 
     /* Verify the number of entries in the delayed list is as expected */
-    if(count_old_images(&f->shared->old_images) < nold_images)
+    if(count_shadow_defrees(&f->shared->shadow_defrees) < nshadow_defrees)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect # of entries in the delayed list")
 
     /* Open the metadata file */

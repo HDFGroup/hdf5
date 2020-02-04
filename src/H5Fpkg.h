@@ -230,13 +230,13 @@ typedef struct H5F_mtab_t {
  *  tick_num:               Sequence # of the current tick
  *  link:                   tailqueue linkage
  */
-typedef struct old_image {
+typedef struct shadow_defree {
     uint64_t hdf5_page_offset;
     uint64_t md_file_page_offset;
     uint32_t length;
     uint64_t tick_num;                     
-    TAILQ_ENTRY(old_image) link;
-} old_image_t;
+    TAILQ_ENTRY(shadow_defree) link;
+} shadow_defree_t;
 
 /* Structure specifically to store superblock. This was originally
  * maintained entirely within H5F_shared_t, but is now extracted
@@ -257,17 +257,18 @@ typedef struct H5F_super_t {
     H5G_entry_t *root_ent;      /* Root group symbol table entry              */
 } H5F_super_t;
 
-typedef struct deferred_free {
-    SIMPLEQ_ENTRY(deferred_free) link;
+/* VFD SWMR: deferred free on the lower VFD. */
+typedef struct lower_defree {
+    SIMPLEQ_ENTRY(lower_defree) link;
     H5FD_mem_t alloc_type;
     haddr_t addr;
     hsize_t size;
     uint64_t free_after_tick;
-} deferred_free_t;
+} lower_defree_t;
 
-typedef SIMPLEQ_HEAD(deferred_free_queue, deferred_free) deferred_free_queue_t;
+typedef SIMPLEQ_HEAD(lower_defree_queue, lower_defree) lower_defree_queue_t;
 
-typedef TAILQ_HEAD(old_image_queue, old_image) old_image_queue_t;
+typedef TAILQ_HEAD(shadow_defree_queue, shadow_defree) shadow_defree_queue_t;
 
 /*
  * Define the structure to store the file information for HDF5 files. One of
@@ -412,7 +413,7 @@ struct H5F_shared_t {
                                              */
     uint64_t tick_num;                      /* Number of the current tick */
     struct timespec end_of_tick;            /* End time of the current tick */
-    deferred_free_queue_t deferred_frees;    /* For use by VFD SWMR writers. */
+    lower_defree_queue_t lower_defrees;    /* For use by VFD SWMR writers. */
     /* VFD SWMR metadata file index */
     H5FD_vfd_swmr_idx_entry_t * mdf_idx;    /* pointer to an array of instance
                                              * of H5FD_vfd_swmr_idx_entry_t of 
@@ -469,7 +470,7 @@ struct H5F_shared_t {
                                              */
 
     /* Delayed free space release doubly linked list */
-    old_image_queue_t old_images;
+    shadow_defree_queue_t shadow_defrees;
     char               *extpath;        /* Path for searching target external link file                 */
 
 #ifdef H5_HAVE_PARALLEL

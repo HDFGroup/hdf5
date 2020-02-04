@@ -136,7 +136,7 @@ static herr_t
 defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr,
     hsize_t size)
 {
-    deferred_free_t *df;
+    lower_defree_t *df;
 
     if ((df = malloc(sizeof(*df))) == NULL)
         return FAIL;
@@ -146,7 +146,7 @@ defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr,
     df->size = size;
     df->free_after_tick = shared->tick_num + shared->vfd_swmr_config.max_lag;
 
-    SIMPLEQ_INSERT_TAIL(&shared->deferred_frees, df, link);
+    SIMPLEQ_INSERT_TAIL(&shared->lower_defrees, df, link);
 
     return SUCCEED;
 }
@@ -154,12 +154,12 @@ defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr,
 static herr_t
 process_deferred_frees(H5F_t *f)
 {
-    deferred_free_t *df;
+    lower_defree_t *df;
     herr_t err = SUCCEED;
     H5F_shared_t *shared = f->shared;
     const uint64_t tick_num = shared->tick_num;
 
-    while ((df = SIMPLEQ_FIRST(&shared->deferred_frees)) != NULL) {
+    while ((df = SIMPLEQ_FIRST(&shared->lower_defrees)) != NULL) {
         if (tick_num <= df->free_after_tick)
             break;
         /* Have to remove the item before processing it because we
@@ -167,7 +167,7 @@ process_deferred_frees(H5F_t *f)
          * the item was still on the queue, it would be processed
          * a second time, and that's not good.
          */ 
-        SIMPLEQ_REMOVE_HEAD(&shared->deferred_frees, link);
+        SIMPLEQ_REMOVE_HEAD(&shared->lower_defrees, link);
         if (H5MF__xfree_impl(f, df->alloc_type, df->addr, df->size) < 0)
             err = FAIL;
         free(df);

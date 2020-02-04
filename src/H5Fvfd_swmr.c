@@ -113,8 +113,8 @@ eot_queue_t eot_queue_g = TAILQ_HEAD_INITIALIZER(eot_queue_g);
 /* Local Variables */
 /*******************/
 
-/* Declare a free list to manage the old_image_t struct */
-H5FL_DEFINE(old_image_t);
+/* Declare a free list to manage the shadow_defree_t struct */
+H5FL_DEFINE(shadow_defree_t);
 
 /* Declare a free list to manage the eot_queue_entry_t struct */
 H5FL_DEFINE(eot_queue_entry_t);
@@ -173,7 +173,7 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
         HDassert(f->shared->vfd_swmr_config.writer);
 
-        SIMPLEQ_INIT(&f->shared->deferred_frees);
+        SIMPLEQ_INIT(&f->shared->lower_defrees);
         f->shared->vfd_swmr_writer = TRUE;
         f->shared->tick_num = 1;
 
@@ -314,7 +314,7 @@ done:
 herr_t
 H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 {
-    old_image_t *curr;
+    shadow_defree_t *curr;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -358,12 +358,12 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
                 "unable to close the free-space manager for the metadata file")
 
         /* Free the delayed list */ 
-        while ((curr = TAILQ_FIRST(&f->shared->old_images)) != NULL) {
-            TAILQ_REMOVE(&f->shared->old_images, curr, link);
-            H5FL_FREE(old_image_t, curr);
+        while ((curr = TAILQ_FIRST(&f->shared->shadow_defrees)) != NULL) {
+            TAILQ_REMOVE(&f->shared->shadow_defrees, curr, link);
+            H5FL_FREE(shadow_defree_t, curr);
         }
 
-        assert(TAILQ_EMPTY(&f->shared->old_images));
+        assert(TAILQ_EMPTY(&f->shared->shadow_defrees));
     } else { /* For file flush */
 
         /* Update end_of_tick */
@@ -383,20 +383,20 @@ int
 shadow_image_defer_free(H5F_shared_t *shared,
     const H5FD_vfd_swmr_idx_entry_t *entry)
 {
-    old_image_t *old_image;
+    shadow_defree_t *shadow_defree;
 
-    if (NULL == (old_image = H5FL_CALLOC(old_image_t)))
+    if (NULL == (shadow_defree = H5FL_CALLOC(shadow_defree_t)))
         return -1;
 
-    old_image->hdf5_page_offset = entry->hdf5_page_offset;
-    old_image->md_file_page_offset = entry->md_file_page_offset;
-    old_image->length = entry->length;
-    old_image->tick_num = shared->tick_num;
+    shadow_defree->hdf5_page_offset = entry->hdf5_page_offset;
+    shadow_defree->md_file_page_offset = entry->md_file_page_offset;
+    shadow_defree->length = entry->length;
+    shadow_defree->tick_num = shared->tick_num;
 
-    if (TAILQ_EMPTY(&shared->old_images))
+    if (TAILQ_EMPTY(&shared->shadow_defrees))
         ldbgf("Adding to the old images list.\n"); 
 
-    TAILQ_INSERT_HEAD(&shared->old_images, old_image, link);
+    TAILQ_INSERT_HEAD(&shared->shadow_defrees, shadow_defree, link);
     return 0;
 }
 
@@ -439,10 +439,10 @@ herr_t
 H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries, 
     H5FD_vfd_swmr_idx_entry_t *index)
 {
-    old_image_t *prev;          /* Points to the previous entry 
+    shadow_defree_t *prev;          /* Points to the previous entry 
                                  * in the delayed list 
                                  */
-    old_image_t *old_image;      /* Points to an entry in the 
+    shadow_defree_t *shadow_defree;      /* Points to an entry in the 
                                   * delayed list 
                                   */
     haddr_t md_addr;                        /* Address in the metadata file */
@@ -555,31 +555,31 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
      *      --remove the associated entries from the list
      */
      
-     TAILQ_FOREACH_REVERSE_SAFE(old_image, &f->shared->old_images,
-         old_image_queue, link, prev) {
+     TAILQ_FOREACH_REVERSE_SAFE(shadow_defree, &f->shared->shadow_defrees,
+         shadow_defree_queue, link, prev) {
 
         /* max_lag is at least 3 */
         if ( ( f->shared->tick_num > f->shared->vfd_swmr_config.max_lag ) &&
-             ( old_image->tick_num <=
+             ( shadow_defree->tick_num <=
                f->shared->tick_num - f->shared->vfd_swmr_config.max_lag ) ) {
 
-            if ( H5MV_free(f, old_image->md_file_page_offset *
-                           f->shared->fs_page_size, old_image->length) < 0 )
+            if ( H5MV_free(f, shadow_defree->md_file_page_offset *
+                           f->shared->fs_page_size, shadow_defree->length) < 0 )
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                             "unable to flush clean entry")
 
 #if 0
             fprintf(stderr, "released %" PRIu32 " bytes at %" PRIu64 "\n",
-                old_image->length,
-                old_image->md_file_page_offset * f->shared->fs_page_size);
+                shadow_defree->length,
+                shadow_defree->md_file_page_offset * f->shared->fs_page_size);
 #endif
 
             /* Remove the entry from the delayed list */
-            TAILQ_REMOVE(&f->shared->old_images, old_image, link);
+            TAILQ_REMOVE(&f->shared->shadow_defrees, shadow_defree, link);
 
             /* Free the delayed entry struct */
-            H5FL_FREE(old_image_t, old_image);
+            H5FL_FREE(shadow_defree_t, shadow_defree);
 
         } else {
 
@@ -587,7 +587,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
         }
     }
 
-    if (TAILQ_EMPTY(&f->shared->old_images))
+    if (TAILQ_EMPTY(&f->shared->shadow_defrees))
         ldbgf("Emptied the old images list.\n");
 
 done:
