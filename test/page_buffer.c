@@ -85,21 +85,25 @@ error:
 }
 
 static struct timespec
-print_elapsed_time(struct timespec *lastp, const char *fn, int ln)
+print_elapsed_time(const struct timespec H5_ATTR_UNUSED *lastp,
+    const char H5_ATTR_UNUSED *fn, int H5_ATTR_UNUSED ln)
 {
+#if 0
     uint64_t elapsed_ns;
     struct timespec diff, now, last;
+#endif
+    struct timespec now;
 
     if (clock_gettime(CLOCK_MONOTONIC, &now) == -1)
         err(EXIT_FAILURE, "%s: clock_gettime", __func__);
 
+#if 0
     last = (lastp == NULL) ? now : *lastp;
 
     timespecsub(&now, &last, &diff);
 
     elapsed_ns = (uint64_t)diff.tv_sec * (uint64_t)1000000000 + diff.tv_nsec;
 
-#if 0
     printf("%5" PRIu64 ".%03" PRIu64 " %s.%d\n",
         elapsed_ns / 1000000000, (elapsed_ns / 1000000) % 1000, fn, ln);
 #endif
@@ -149,7 +153,7 @@ pgbuf_read_each_equals(H5F_t *f, H5FD_mem_t ty, haddr_t addr, size_t nelts,
 
     for (i = 0; i < nelts; i++) {
         if (data[i] != val) {
-            printf("%s: read %d at data[%d], expected %d\n", __func__,
+            printf("%s: read %d at data[%zu], expected %d\n", __func__,
                 data[i], i, val);
             return false;
         }
@@ -688,6 +692,7 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     H5F_t *f;
     const uint32_t max_lag = 5;
     hsize_t pgsz = sizeof(int) * 200;
+    haddr_t addr;
 
     TESTING("Multipage Metadata Delay Handling");
 
@@ -718,8 +723,7 @@ test_mpmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
-    const haddr_t addr = H5MF_alloc(f, H5FD_MEM_BTREE,
-        sizeof(int) * num_elements);
+    addr = H5MF_alloc(f, H5FD_MEM_BTREE, sizeof(int) * num_elements);
     /* allocate space for 2000 elements */
     if (HADDR_UNDEF == addr)
         FAIL_STACK_ERROR;
@@ -837,6 +841,8 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
     hsize_t ofs;
     bool flushed;
     struct timespec last;
+    haddr_t addr;
+    haddr_t pressure;
 
     TESTING("Single Page Metadata Flush & Eviction Handling");
 
@@ -870,14 +876,14 @@ test_spmde_lru_evict_basic(hid_t orig_fapl, const char *env_h5_drvr)
     /* Allocate a region whose pages we can write to force eviction of
      * least-recently used pages.
      */
-    const haddr_t pressure = H5MF_alloc(f, H5FD_MEM_BTREE, pgbufsz);
+    pressure = H5MF_alloc(f, H5FD_MEM_BTREE, pgbufsz);
     if (HADDR_UNDEF == pressure)
         FAIL_STACK_ERROR;
 
     /* Allocate a whole page for our 20 elements so that they do
      * not share a "hot" page with something else.
      */
-    const haddr_t addr = H5MF_alloc(f, H5FD_MEM_BTREE, pgsz);
+    addr = H5MF_alloc(f, H5FD_MEM_BTREE, pgsz);
     if (HADDR_UNDEF == addr)
         FAIL_STACK_ERROR;
 
@@ -1030,6 +1036,7 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     H5F_t *f;
     const uint32_t max_lag = 5;
     hsize_t pgsz = sizeof(int) * 200;
+    haddr_t addr;
 
     TESTING("Single Page Metadata Delay Handling");
 
@@ -1060,7 +1067,7 @@ test_spmde_delay_basic(hid_t orig_fapl, const char *env_h5_drvr)
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
-    const haddr_t addr = H5MF_alloc(f, H5FD_MEM_BTREE,
+    addr = H5MF_alloc(f, H5FD_MEM_BTREE,
         sizeof(int) * num_elements);
     /* allocate space for 2000 elements */
     if (HADDR_UNDEF == addr)
