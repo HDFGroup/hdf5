@@ -26,6 +26,9 @@
 #ifndef _H5Fpkg_H
 #define _H5Fpkg_H
 
+/* BSD queue macros */
+#include "bsdqueue.h"
+
 /* Get package's private header */
 #include "H5Fprivate.h"
 
@@ -253,8 +256,6 @@ typedef struct H5F_super_t {
     haddr_t     root_addr;      /* Root group address                         */
     H5G_entry_t *root_ent;      /* Root group symbol table entry              */
 } H5F_super_t;
-
-#include "bsdqueue.h"
 
 typedef struct deferred_free {
     SIMPLEQ_ENTRY(deferred_free) link;
