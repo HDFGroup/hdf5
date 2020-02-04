@@ -44,12 +44,12 @@
  * This will allow program to continue and can be used for debugging.
  * (The "do {...} while(0)" is to group all the statements as one unit.)
  */
-#define VRFY_IMPL(val, mesg, rankvar) do {                                            \
+#define VRFY_IMPL(val, mesg, rankvar) do {                              \
     if (val) {                                                          \
         MESG(mesg);                                                     \
     }                                                                   \
     else {                                                              \
-        HDprintf("Proc %d: ", rankvar);                                \
+        HDprintf("Proc %d: ", rankvar);                                 \
         HDprintf("*** Parallel ERROR ***\n");                           \
         HDprintf("    VRFY (%s) failed at line %4d in %s\n",            \
                mesg, (int)__LINE__, __FILE__);                          \

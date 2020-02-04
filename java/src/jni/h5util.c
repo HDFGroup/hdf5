@@ -28,6 +28,8 @@ extern "C" {
 #include "hdf5.h"
 #include "h5util.h"
 
+#define SKIP_UNUSED_DUMP_ROUTINES
+
 /* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
 hsize_t H5TOOLS_BUFSIZE = (32 * 1024 * 1024);  /* 32 MB */
 int     H5TOOLS_TEXT_BLOCK = 16;  /* Number of elements on a line in a text export file */
@@ -52,8 +54,10 @@ void        *edata;
 /* Local Prototypes */
 /********************/
 
+#ifndef SKIP_UNUSED_DUMP_ROUTINES
 static int     h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
 static int     h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
+#endif
 static int     h5str_is_zero(const void *_mem, size_t size);
 static hid_t   h5str_get_native_type(hid_t type);
 static hid_t   h5str_get_little_endian_type(hid_t type);
@@ -708,7 +712,6 @@ h5str_sprintf
     unsigned char *ucptr = (unsigned char *) in_buf;
     static char    fmt_llong[8], fmt_ullong[8];
     H5T_class_t    tclass = H5T_NO_CLASS;
-    H5T_str_t      pad;
     size_t         typeSize = 0;
     H5T_sign_t     nsign = H5T_SGN_ERROR;
     hid_t          mtid = H5I_INVALID_HID;
@@ -814,7 +817,6 @@ h5str_sprintf
             else {
                 tmp_str = cptr;
             }
-            pad = H5Tget_strpad(tid);
 
             /* Check for NULL pointer for string */
             if (!tmp_str) {
@@ -1482,6 +1484,7 @@ done:
     return ret_value;
 } /* end h5str_dump_region_blocks_data */
 
+#ifndef SKIP_UNUSED_DUMP_ROUTINES
 static int
 h5str_dump_region_blocks
     (JNIEnv *env, h5str_t *str, hid_t region, hid_t region_id)
@@ -1569,6 +1572,7 @@ done:
 
     return ret_value;
 } /* end h5str_dump_region_blocks */
+#endif
 
 /*-------------------------------------------------------------------------
  * Purpose: Print the data values from a dataset referenced by region points.
@@ -1701,6 +1705,7 @@ done:
     return ret_value;
 } /* end h5str_dump_region_points_data */
 
+#ifndef SKIP_UNUSED_DUMP_ROUTINES
 static int
 h5str_dump_region_points
     (JNIEnv *env, h5str_t *str, hid_t region, hid_t region_id)
@@ -1776,6 +1781,7 @@ done:
 
     return ret_value;
 } /* end h5str_dump_region_points */
+#endif
 
 static int
 h5str_is_zero

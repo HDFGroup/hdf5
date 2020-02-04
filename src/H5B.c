@@ -2037,7 +2037,7 @@ H5B_valid(H5F_t *f, const H5B_class_t *type, haddr_t addr)
     /* Get shared info for B-tree */
     if(NULL == (rc_shared = (type->get_shared)(f, NULL)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object")
-    HDassert((H5B_shared_t *)H5UC_GET_OBJ(rc_shared));
+    HDassert(H5UC_GET_OBJ(rc_shared) != NULL);
 
     /*
      * Load the tree node.
