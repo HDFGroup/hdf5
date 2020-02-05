@@ -32,6 +32,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
+- Bug Fixes since HDF5-1.12.0-alpha1
 - Major Bug Fixes since HDF5-1.10.0
 - Supported Platforms
 - Tested Configuration Features Summary
@@ -85,6 +86,50 @@ New Features
 
     Library:
     --------
+    - Refactored public exposure of haddr_t type in favor of "object tokens"
+
+      To better accommodate HDF5 VOL connectors where "object addresses in a file"
+      may not make much sense, the following changes were made to the library:
+
+      * Introduced new H5O_token_t "object token" type, which represents a
+        unique and permanent identifier for referencing an HDF5 object within
+        a container; these "object tokens" are meant to replace object addresses.
+        Along with the new type, a new H5Oopen_by_token API call was introduced
+        to open an object by a token, similar to how object addresses were
+        previously used with H5Oopen_by_addr.
+
+      * Introduced new H5Lget_info2, H5Lget_info_by_idx2, H5Literate2, H5Literate_by_name2,
+        H5Lvisit2 and H5Lvisit_by_name2 API calls, along with their associated H5L_info2_t
+        struct and H5L_iterate2_t callback function, which work with the newly-introduced
+        object tokens, instead of object addresses. The original functions have been
+        renamed to version 1 functions and are deprecated in favor of the new version 2
+        functions. The H5L_info_t and H5L_iterate_t types have been renamed to version 1
+        types and are now deprecated in favor of their version 2 counterparts. For each of
+        the functions and types, compatibility macros take place of the original symbols.
+
+      * Introduced new H5Oget_info3, H5Oget_info_by_name3, H5Oget_info_by_idx3,
+        H5Ovisit3 and H5Ovisit_by_name3 API calls, along with their associated H5O_info2_t
+        struct and H5O_iterate2_t callback function, which work with the newly-introduced
+        object tokens, instead of object addresses. The version 2 functions are now
+        deprecated in favor of the version 3 functions. The H5O_info_t and H5O_iterate_t
+        types have been renamed to version 1 types and are now deprecated in favor of their
+        version 2 counterparts. For each, compatibility macros take place of the original
+        symbols.
+
+      * Introduced new H5Oget_native_info, H5Oget_native_info_by_name and
+        H5Oget_native_info_by_idx API calls, along with their associated H5O_native_info_t
+        struct, which are used to retrieve the native HDF5 file format-specific information
+        about an object. This information (such as object header info and B-tree/heap info)
+        has been removed from the new H5O_info2_t struct so that the more generic
+        H5Oget_info(_by_name/_by_idx)3 routines will not try to retrieve it for non-native
+        VOL connectors.
+
+      * Added new H5Otoken_cmp, H5Otoken_to_str and H5Otoken_from_str routines to compare
+        two object tokens, convert an object token into a nicely-readable string format and
+        to convert an object token string back into a real object token, respectively.
+
+      (DER, QAK, JTH - 2020/01/16)
+
     - Virtual Object Layer (VOL)
 
       In this major HDF5 release we introduce HDF5 Virtual Object Layer (VOL).
@@ -111,9 +156,6 @@ New Features
       a list of new APIs, see
 
           https://portal.hdfgroup.org/display/HDF5/Update+to+References
-
-      Current known limitations for references in this release:
-      • h5dump will fail to display references on big-endian machines.
 
     - Add new public function H5Sselect_adjust.
 
@@ -193,8 +235,59 @@ Support for new platforms, languages and compilers.
     - Added spectrum mpi with clang, gcc and xl compilers on Linux 4.14.0
 
 
+Bug Fixes since HDF5-1.12.0-alpha1 release
+==========================================
+    Library
+    -------
+    - Improved peformance when creating a large number of small datasets by
+      retrieving default property values from the API context instead of doing
+      skip list searches.
+
+      (CJH - 2019/12/10, HDFFV-10658)
+
+    - Fixed user-created data access properties not existing in the property list
+      returned by H5Dget_access_plist. Thanks to Steven Varga for submitting a
+      reproducer and a patch.
+
+      (CJH - 2019/12/09, HDFFV-10934)
+
+    Java Library:
+    ----------------
+    - Added ability to test java library with VOLs.
+
+      Created new CMake script that combines the java and vol test scripts.
+
+      (ADB - 2020/02/03, HDFFV-10996)
+
+    - Tests fail for non-English locale.
+
+      In the JUnit tests with a non-English locale, only the part before
+      the decimal comma is replaced by XXXX and this leads to a comparison
+      error. Changed the regex for the Time substitution.
+
+      (ADB - 2020/01/09, HDFFV-10995)
+
+    Tools:
+    ------
+    - h5diff was updated to use the new reference APIs.
+
+      h5diff uses the new reference APIs to compare references.
+      Attribute references can also be compared.
+
+      (ADB - 2019/12/19, HDFFV-10980)
+
+    - h5dump and h5ls were updated to use the new reference APIs.
+
+      The tools library now use the new reference APIs to inspect a
+      file. Also the DDL spec was updated to reflect the format
+      changes produced with the new APIs. The export API and support
+      functions in the JNI were updated to match.
+
+      (ADB - 2019/12/06, HDFFV-10876 and HDFFV-10877)
+
+
 Major Bug Fixes since HDF5-1.10.0 release
-==================================
+=========================================
 
     - For major bug fixes please see HISTORY-1_10_0-1_12_0.txt file
 
@@ -256,19 +349,11 @@ Supported Platforms
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
                                   Visual Studio 2019 w/ Intel Fortran 19 (cmake)
 
-    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
-    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
-    (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
-
-    Mac OS X El Capitan 10.11.6   Apple clang/clang++ version 7.3.0 from Xcode 7.3
-    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
-    (osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
-
-    Mac OS High Sierra 10.13.6    Apple LLVM version 10.0.0 (clang/clang++-1000.10.44.4)
+    macOS 10.13.6 High Sierra     Apple LLVM version 10.0.0 (clang/clang++-1000.10.44.4)
     64-bit                        gfortran GNU Fortran (GCC) 6.3.0
     (bear)                        Intel icc/icpc/ifort version 19.0.4
 
-    Mac OS Mojave 10.14.6         Apple LLVM version 10.0.1 (clang/clang++-1001.0.46.4)
+    macOS 10.14.6 Mohave          Apple LLVM version 10.0.1 (clang/clang++-1001.0.46.4)
     64-bit                        gfortran GNU Fortran (GCC) 6.3.0
     (bobcat)                      Intel icc/icpc/ifort version 19.0.4
 
@@ -296,10 +381,8 @@ Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
 Windows 10 x64                          y        y/y    n        y    y     y
-Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
-Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     ?
-Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     ?
-Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     ?
+macOS 10.13.6 64-bit                    n        y/y    n        y    y     ?
+macOS 10.14.6 64-bit                    n        y/y    n        y    y     ?
 CentOS 6.7 Linux 2.6.18 x86_64 GNU      n        y/y    n        y    y     y
 CentOS 6.7 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
 CentOS 6.7 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
@@ -318,10 +401,8 @@ Windows 7 Cygwin                           n       n         n         y
 Windows 7 x64 Cygwin                       n       n         n         y
 Windows 10                                 y       y         y         y
 Windows 10 x64                             y       y         y         y
-Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y
-Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
-Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
-Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
+macOS 10.13.6 64-bit                       y       n         y         y
+macOS 10.14.6 64-bit                       y       n         y         y
 CentOS 6.7 Linux 2.6.18 x86_64 GNU         y       y         y         y
 CentOS 6.7 Linux 2.6.18 x86_64 Intel       y       y         y         n
 CentOS 6.7 Linux 2.6.32 x86_64 PGI         y       y         y         n
@@ -367,6 +448,14 @@ The following platforms are not supported but have been tested for this release.
    #1 SMP x86_64  GNU/Linux       GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
                                   GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
                                      (cmake and autotools)
+
+    Mac OS X El Capitan 10.11.6   Apple LLVM version 7.3.0 (clang/clang++-703.0.29)
+    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
+
+    macOS 10.12.6 Sierra          Apple LLVM version 9.0.0 (clang/clang++-900.0.39.2)
+    64-bit                        gfortran GNU Fortran (GCC) 7.4.0
+    (kite)                        Intel icc/icpc/ifort version 17.0.8
 
 
 Known Problems
