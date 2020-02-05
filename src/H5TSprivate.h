@@ -26,6 +26,7 @@
 #ifndef H5TSprivate_H_
 #define H5TSprivate_H_
 
+#ifdef H5_HAVE_THREADSAFE
 /* Public headers needed by this file */
 #ifdef LATER
 #include "H5TSpublic.h"		/*Public API prototypes */
@@ -127,6 +128,12 @@ H5_DLL H5TS_thread_t H5TS_create_thread(void *(*func)(void *), H5TS_attr_t * att
 #if defined c_plusplus || defined __cplusplus
 }
 #endif	/* c_plusplus || __cplusplus */
+
+#else /* H5_HAVE_THREADSAFE */
+
+#define H5TS_thread_id() ((uint64_t)0)
+
+#endif /* H5_HAVE_THREADSAFE */
 
 #endif	/* H5TSprivate_H_ */
 
