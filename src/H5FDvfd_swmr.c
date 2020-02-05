@@ -656,7 +656,9 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
     hid_t H5_ATTR_UNUSED dxpl_id,
     const haddr_t addr, size_t size, void *buf /*out*/)
 {
+    const size_t init_size = size;
     haddr_t target_page;
+    haddr_t page_offset;
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
     H5FD_vfd_swmr_idx_entry_t *index = NULL; /* Metadata file index */
     H5FD_vfd_swmr_idx_entry_t *entry;
@@ -702,170 +704,166 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
     }
 #endif /* JRM */
 
+    if (entry == NULL) {
+         /* Cannot find addr in index, read from the underlying hdf5 file */
+        if(H5FD_read(file->hdf5_file_lf, type, addr, size, buf) < 0) {
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, \
+                        "file read request failed");
+        }
+        HGOTO_DONE(SUCCEED);
+    }
+
     /* Found in index, read from the metadata file */
-    if (entry != NULL) {
+    HDassert(addr >= target_page * fs_page_size);
 
-        haddr_t page_offset;
-        size_t init_size = size;
-
-        HDassert(addr >= target_page * fs_page_size);
-        
-        page_offset = addr - (target_page * fs_page_size);
+    page_offset = addr - (target_page * fs_page_size);
 
 #if 0 /* JRM */
-        if ( ( page_offset != 0 ) &&
-             ( ( file->pb_configured ) ||
-               ( page_offset + size > fs_page_size ) ) ) {
+    if ( ( page_offset != 0 ) &&
+         ( ( file->pb_configured ) ||
+           ( page_offset + size > fs_page_size ) ) ) {
 
-            HDfprintf(stderr,
-                "page_offset = %" PRIuHADDR ", size = %zu, "
-                "page_size = %" PRIu32 "\n", page_offset, size, fs_page_size);
+        HDfprintf(stderr,
+            "page_offset = %" PRIuHADDR ", size = %zu, "
+            "page_size = %" PRIu32 "\n", page_offset, size, fs_page_size);
+    }
+#endif /* JRM */
+
+    HDassert( ( page_offset == 0 ) ||
+              ( ( ! file->pb_configured ) &&
+                ( page_offset + size <= fs_page_size ) ) );
+
+#if 0 /* JRM */
+    HDfprintf(stderr,
+        "addr = %" PRIuHADDR ", page = %" PRIuHADDR ", len = %zu\n",
+        addr, addr / fs_page_size, size);
+    HDfprintf(stderr,
+        "reading index[%td]  fo/mdfo/l/chksum/fc/lc = %" PRIu64 "/%" PRIu64 "/%" PRIu32 "/%" PRIu32 "\n",
+              entry - index,
+              entry->hdf5_page_offset,
+              entry->md_file_page_offset,
+              entry->length,
+              entry->chksum);
+
+
+#endif /* JRM */
+
+    HDassert(entry->hdf5_page_offset * fs_page_size <= addr);
+    HDassert(addr < (entry->hdf5_page_offset + 1) * fs_page_size);
+#if 0 /* JRM */
+    if ( size != entry->length ) {
+
+        HDfprintf(stderr,
+            "size = %" PRIu32 ", index[%td].length = %" PRIu32 ".\n",
+            size, entry - index, entry->length);
+    }
+
+    if ( ( init_size != 8 ) &&
+         ( init_size != entry->length ) ) {
+
+        HDfprintf(stderr,
+            "ERROR: addr = %" PRIuHADDR ", page = %" PRIuHADDR
+            ", len = %zu\n", addr, addr / fs_page_size, init_size);
+    }
+
+    HDassert((init_size == 8) ||
+             (init_size == entry->length));
+#endif /* JRM */
+
+    HDassert( ( ! file->pb_configured ) ||
+              ( init_size == entry->length ) );
+
+    do {
+        char *p = buf;
+
+        if(HDlseek(file->md_fd, (HDoff_t)
+                   ((entry->md_file_page_offset * fs_page_size)
+                    + page_offset), SEEK_SET) < 0)
+
+            HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
+                        "unable to seek in metadata file")
+
+        /* Coding borrowed from sec2 read */
+        while(size > 0) {
+
+            h5_posix_io_t     bytes_in    = 0;    /* # of bytes to read  */
+            h5_posix_io_ret_t bytes_read  = -1;   /* # of bytes actually */
+                                                  /* read                */
+
+            /* Trying to read more bytes than the return type can handle is
+             * undefined behavior in POSIX.
+             */
+            if(size > H5_POSIX_MAX_IO_BYTES)
+                bytes_in = H5_POSIX_MAX_IO_BYTES;
+            else
+                bytes_in = (h5_posix_io_t)size;
+
+            do {
+                bytes_read = HDread(file->md_fd, p, bytes_in);
+            } while(-1 == bytes_read && EINTR == errno);
+
+            if(-1 == bytes_read) /* error */
+
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, \
+                "error reading the page/multi-page entry from the md file")
+
+            HDassert(bytes_read >= 0);
+            HDassert((size_t)bytes_read <= size);
+
+            size -= (size_t)bytes_read;
+            p += bytes_read;
+        }
+
+        /* Verify stored and computed checksums are equal */
+#if 0 /* JRM */
+        computed_chksum = H5_checksum_metadata(buf, entry->length, 0);
+#else /* JRM */
+        /* this is a hack to allow the library to find the superblock
+         * signature -- clean this up.
+         *                                   JRM -- 1/14/19
+         */
+        if ( file->pb_configured ) {
+            computed_chksum = H5_checksum_metadata(buf, entry->length, 0);
+        } else {
+            computed_chksum = entry->chksum;
         }
 #endif /* JRM */
 
-        HDassert( ( page_offset == 0 ) ||
-                  ( ( ! file->pb_configured ) &&
-                    ( page_offset + size <= fs_page_size ) ) );
-
 #if 0 /* JRM */
         HDfprintf(stderr,
-            "addr = %" PRIuHADDR ", page = %" PRIuHADDR ", len = %zu\n",
-            addr, addr / fs_page_size, size);
+               "computed / actual chksum / fc / lc = 0x%" PRIx32 "/0x%" PRIx32 "/%x/%x\n",
+               computed_chksum,
+               entry->chksum,
+               ((char *)buf)[0],
+               ((char *)buf)[4095]);
+#endif /* JRM */
+
+        if(entry->chksum == computed_chksum)
+            break;
+
+         /* Double the sleep time next time */
+         H5_nanosleep(nanosec);
+         nanosec *= 2;
+
+    } while(--entry_retries);
+
+    /* Exhaust all retries for reading the page/multi-page entry */
+    if(entry_retries == 0) {
+
+        HDfprintf(stderr, "ERROR: addr = %" PRIuHADDR
+            ", page = %" PRIuHADDR ", len = %zu\n",
+                  addr, addr / fs_page_size, init_size);
+        HDfprintf(stderr, " type = %d\n", type);
         HDfprintf(stderr,
-            "reading index[%td]  fo/mdfo/l/chksum/fc/lc = %" PRIu64 "/%" PRIu64 "/%" PRIu32 "/%" PRIu32 "\n",
+        "reading index[%td]  fo/mdfo/l/chksum/fc/lc = %" PRIu64 "/%" PRIu64 "/%" PRIu32 "/%" PRIx32 "\n",
                   entry - index,
                   entry->hdf5_page_offset,
                   entry->md_file_page_offset,
                   entry->length,
                   entry->chksum);
 
-
-#endif /* JRM */
-
-        HDassert(entry->hdf5_page_offset * fs_page_size <= addr);
-        HDassert(addr < (entry->hdf5_page_offset + 1) * fs_page_size);
-#if 0 /* JRM */
-        if ( size != entry->length ) {
-
-            HDfprintf(stderr,
-                "size = %" PRIu32 ", index[%td].length = %" PRIu32 ".\n",
-                size, entry - index, entry->length);
-        }
-
-        if ( ( init_size != 8 ) &&
-             ( init_size != entry->length ) ) {
-
-            HDfprintf(stderr,
-                "ERROR: addr = %" PRIuHADDR ", page = %" PRIuHADDR
-                ", len = %zu\n", addr, addr / fs_page_size, init_size);
-        }
-
-        HDassert((init_size == 8) ||
-                 (init_size == entry->length));
-#endif /* JRM */
-
-        HDassert( ( ! file->pb_configured ) ||
-                  ( init_size == entry->length ) );
-
-        do {
-            char *p = buf;
-
-            if(HDlseek(file->md_fd, (HDoff_t)
-                       ((entry->md_file_page_offset * fs_page_size)
-                        + page_offset), SEEK_SET) < 0)
-
-                HGOTO_ERROR(H5E_VFL, H5E_SEEKERROR, FAIL, \
-                            "unable to seek in metadata file")
-
-            /* Coding borrowed from sec2 read */
-            while(size > 0) {
-
-                h5_posix_io_t     bytes_in    = 0;    /* # of bytes to read  */
-                h5_posix_io_ret_t bytes_read  = -1;   /* # of bytes actually */
-                                                      /* read                */ 
-
-                /* Trying to read more bytes than the return type can handle is
-                 * undefined behavior in POSIX.
-                 */
-                if(size > H5_POSIX_MAX_IO_BYTES)
-                    bytes_in = H5_POSIX_MAX_IO_BYTES;
-                else
-                    bytes_in = (h5_posix_io_t)size;
-
-                do {
-                    bytes_read = HDread(file->md_fd, p, bytes_in);
-                } while(-1 == bytes_read && EINTR == errno);
-        
-                if(-1 == bytes_read) /* error */
-
-                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, \
-                    "error reading the page/multi-page entry from the md file")
-        
-                HDassert(bytes_read >= 0);
-                HDassert((size_t)bytes_read <= size);
-        
-                size -= (size_t)bytes_read;
-                p += bytes_read;
-            }
-
-            /* Verify stored and computed checksums are equal */
-#if 0 /* JRM */
-            computed_chksum = H5_checksum_metadata(buf, entry->length, 0);
-#else /* JRM */
-            /* this is a hack to allow the library to find the superblock 
-             * signature -- clean this up.   
-             *                                   JRM -- 1/14/19
-             */
-            if ( file->pb_configured ) {
-                computed_chksum = H5_checksum_metadata(buf, entry->length, 0);
-            } else {
-                computed_chksum = entry->chksum;
-            }
-#endif /* JRM */
-
-#if 0 /* JRM */
-            HDfprintf(stderr, 
-                   "computed / actual chksum / fc / lc = 0x%" PRIx32 "/0x%" PRIx32 "/%x/%x\n",
-                   computed_chksum,
-                   entry->chksum,
-                   ((char *)buf)[0],
-                   ((char *)buf)[4095]);
-#endif /* JRM */
-
-            if(entry->chksum == computed_chksum)
-                break;
-
-             /* Double the sleep time next time */
-             H5_nanosleep(nanosec);
-             nanosec *= 2;               
-
-        } while(--entry_retries);
-
-        /* Exhaust all retries for reading the page/multi-page entry */
-        if(entry_retries == 0) {
-
-            HDfprintf(stderr, "ERROR: addr = %" PRIuHADDR
-                ", page = %" PRIuHADDR ", len = %zu\n", 
-                      addr, addr / fs_page_size, init_size);
-            HDfprintf(stderr, " type = %d\n", type);
-            HDfprintf(stderr, 
-            "reading index[%td]  fo/mdfo/l/chksum/fc/lc = %" PRIu64 "/%" PRIu64 "/%" PRIu32 "/%" PRIx32 "\n",
-                      entry - index,
-                      entry->hdf5_page_offset,
-                      entry->md_file_page_offset,
-                      entry->length,
-                      entry->chksum);
-
-            HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL, \
-                        "error in reading the page/multi-page entry")
-        }
-
-    } else { /* Cannot find addr in index, read from the underlying hdf5 file */
-
-        if(H5FD_read(file->hdf5_file_lf, type, addr, size, buf) < 0)
-
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, \
-                        "file read request failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTLOAD, FAIL, \
+                    "error in reading the page/multi-page entry")
     }
 
 done:
