@@ -247,6 +247,50 @@ New Features
 
     Library:
     --------
+    - Refactored public exposure of haddr_t type in favor of "object tokens"
+
+      To better accommodate HDF5 VOL connectors where "object addresses in a file"
+      may not make much sense, the following changes were made to the library:
+
+      * Introduced new H5O_token_t "object token" type, which represents a
+        unique and permanent identifier for referencing an HDF5 object within
+        a container; these "object tokens" are meant to replace object addresses.
+        Along with the new type, a new H5Oopen_by_token API call was introduced
+        to open an object by a token, similar to how object addresses were
+        previously used with H5Oopen_by_addr.
+
+      * Introduced new H5Lget_info2, H5Lget_info_by_idx2, H5Literate2, H5Literate_by_name2,
+        H5Lvisit2 and H5Lvisit_by_name2 API calls, along with their associated H5L_info2_t
+        struct and H5L_iterate2_t callback function, which work with the newly-introduced
+        object tokens, instead of object addresses. The original functions have been
+        renamed to version 1 functions and are deprecated in favor of the new version 2
+        functions. The H5L_info_t and H5L_iterate_t types have been renamed to version 1
+        types and are now deprecated in favor of their version 2 counterparts. For each of
+        the functions and types, compatibility macros take place of the original symbols.
+
+      * Introduced new H5Oget_info3, H5Oget_info_by_name3, H5Oget_info_by_idx3,
+        H5Ovisit3 and H5Ovisit_by_name3 API calls, along with their associated H5O_info2_t
+        struct and H5O_iterate2_t callback function, which work with the newly-introduced
+        object tokens, instead of object addresses. The version 2 functions are now
+        deprecated in favor of the version 3 functions. The H5O_info_t and H5O_iterate_t
+        types have been renamed to version 1 types and are now deprecated in favor of their
+        version 2 counterparts. For each, compatibility macros take place of the original
+        symbols.
+
+      * Introduced new H5Oget_native_info, H5Oget_native_info_by_name and
+        H5Oget_native_info_by_idx API calls, along with their associated H5O_native_info_t
+        struct, which are used to retrieve the native HDF5 file format-specific information
+        about an object. This information (such as object header info and B-tree/heap info)
+        has been removed from the new H5O_info2_t struct so that the more generic
+        H5Oget_info(_by_name/_by_idx)3 routines will not try to retrieve it for non-native
+        VOL connectors.
+
+      * Added new H5Otoken_cmp, H5Otoken_to_str and H5Otoken_from_str routines to compare
+        two object tokens, convert an object token into a nicely-readable string format and
+        to convert an object token string back into a real object token, respectively.
+
+      (DER, QAK, JTH - 2020/01/16)
+
     - Add new public function H5Sselect_adjust.
 
       This function shifts a dataspace selection by a specified logical offset
