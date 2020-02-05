@@ -678,20 +678,10 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
     HDassert(file && file->pub.cls);
     HDassert(buf);
 
-#if 0 /* JRM */
-    /* index should be loaded only at file open, and at end of tick -- JRM */
-
-    /* Try loading and decoding the header and index in the metadata file */
-    if(H5FD__vfd_swmr_load_hdr_and_idx(_file, FALSE) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, \
-                    "unable to load/decode the md file header/index")
-#endif /* JRM */
-
     index        = file->md_index.entries;
     num_entries  = (int)file->md_index.num_entries;
     fs_page_size = file->md_header.fs_page_size;
 
-#if 1 /* JRM */
     /* Try finding the addr from the index */
     cmp = -1;
     lo = 0;
@@ -733,32 +723,6 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
         HDfprintf(stderr,
             "vfd swmr read passing through page / size = %" PRIu64 "/%zu\n",
             target_page, size);
-    }
-#endif /* JRM */
-#else /* JRM */
-    {
-        target_page  = (addr / fs_page_size);
-        cmp          = -1;
-        my_idx       = 0;
-
-        HDassert(target_page * fs_page_size <= addr);
-        HDassert(addr < (target_page + 1) * fs_page_size);
-
-        while ( ( cmp == -1 ) && ( my_idx < num_entries ) ) {
-
-            HDassert( ( my_idx == 0 ) ||
-                      ( index[my_idx-1].hdf5_page_offset < 
-                        index[my_idx].hdf5_page_offset ) );
-
-            if ( index[my_idx].hdf5_page_offset == (uint64_t)target_page ) {
-
-                cmp = 0;
-
-            } else {
-
-                my_idx++;
-            }
-        }
     }
 #endif /* JRM */
 
