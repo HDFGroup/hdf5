@@ -231,7 +231,6 @@ typedef struct H5F_mtab_t {
  *  link:                   tailqueue linkage
  */
 typedef struct shadow_defree {
-    uint64_t hdf5_page_offset;
     uint64_t md_file_page_offset;
     uint32_t length;
     uint64_t tick_num;                     

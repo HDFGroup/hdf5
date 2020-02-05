@@ -388,7 +388,6 @@ shadow_image_defer_free(H5F_shared_t *shared,
     if (NULL == (shadow_defree = H5FL_CALLOC(shadow_defree_t)))
         return -1;
 
-    shadow_defree->hdf5_page_offset = entry->hdf5_page_offset;
     shadow_defree->md_file_page_offset = entry->md_file_page_offset;
     shadow_defree->length = entry->length;
     shadow_defree->tick_num = shared->tick_num;
