@@ -1669,8 +1669,10 @@ H5FD_vfd_swmr_dump_status(H5FD_t *_file, uint64_t page)
     }
 
     HDfprintf(stderr, 
-              "fd: tick = %lld, index_len = %d, page %lld in index = %d.\n",
-              file->md_index.tick_num, num_entries, page, in_index);
+              "fd: tick = %" PRIu64 ", index_len = %" PRIu32 ", page %" PRIu64
+              " in index = %s.\n",
+              file->md_index.tick_num, num_entries, page,
+              in_index ? "true" : "false");
 
     FUNC_LEAVE_NOAPI_VOID
 
