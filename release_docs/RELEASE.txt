@@ -48,6 +48,13 @@ New Features
 
     Configuration:
     -------------
+    - Fixed CMake include properties for Fortran libraries
+
+      Corrected the library properties for Fortran to use the
+      correct path for the Fortran module files.
+
+      (ADB - 2020/02/04, HDFFV-11012)
+
     - Added common warnings files for gnu and intel
 
       Added warnings files to use one common set of flags
