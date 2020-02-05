@@ -726,13 +726,13 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
 
 #if 0 /* JRM */
     if ( cmp == 0 ) {
-
-        HDfprintf(stderr, "vfd swrm read found target page/idx %lld/%d.\n", 
-                  target_page, my_idx);
+        HDfprintf(stderr,
+            "vfd swmr read found target page/idx %" PRIu64 "/%d.\n",
+            target_page, my_idx);
     } else {
-        HDfprintf(stderr, 
-                  "vfd swrm read passing through page / size = %lld/%lld\n",
-                  (uint64_t)target_page, (uint64_t)size);
+        HDfprintf(stderr,
+            "vfd swmr read passing through page / size = %" PRIu64 "/%zu\n",
+            target_page, size);
     }
 #endif /* JRM */
 #else /* JRM */
