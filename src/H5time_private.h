@@ -103,7 +103,7 @@
 			(vsp)->tv_nsec += 1000000000L;			\
 		}							\
 	} while (/* CONSTCOND */ 0)
-#define timespec2ns(x) (((uint64_t)(x)->tv_sec) * 1000000000L + (x)->tv_nsec)
+#define timespec2ns(x) (((uint64_t)(x)->tv_sec) * 1000000000UL + (uint64_t)(x)->tv_nsec)
 #endif
 
 #endif /* _H5time_private_H */
