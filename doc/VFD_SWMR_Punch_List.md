@@ -141,7 +141,7 @@ primarily on Jelly.
 
     Ultimately, we should suspend ticks over the H5Dset_extent/H5Dwrite.
 
-27. **Vailin, complete** Change the field name "vfd_swmr_writer" to "writer" in 
+27. **Vailin, complete** Change the field name "vfd\_swmr\_writer" to "writer" in 
     "struct H5F_vfd_swmr_config_t" and all references to it.  See page 11 in the RFC.
 
 28. **Vailin, complete** Fix bug as stated on page 9 in the RFC section 3.1.1:
@@ -155,7 +155,7 @@ primarily on Jelly.
     then run the vfd_swmr_addrem_writer.c.
 
 30. **David, merged, needs unit test** Add a delay to the FSM so that
-    freed regions are not reused before max_lag ticks are up.
+    freed regions are not reused before max\_lag ticks are up.
 
 31. Create a large dataset with a small chunk size to verify that
     page management in the extensible array is handled properly by
