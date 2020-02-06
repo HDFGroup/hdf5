@@ -1925,7 +1925,7 @@ done:
  *           all pending delayed writes must be allowed drain.
  *
  *           This function facilitates this by sleeping for a tick, and
- *           the running the writer end of tick function.  
+ *           then running the writer end of tick function.
  *
  *           It should only be called as part the flush or close operations.
  *
