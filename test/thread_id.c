@@ -156,8 +156,7 @@ main(void)
 int
 main(void)
 {
-    errx(EXIT_FAILURE, "not implemented in this configuration.");
+    HDfprintf(stderr, "not implemented in this configuration.\n");
+    return EXIT_SUCCESS;
 }
-
 #endif /*H5_HAVE_THREADSAFE && !H5_HAVE_WIN_THREADS*/
-
