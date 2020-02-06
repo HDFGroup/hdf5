@@ -379,17 +379,16 @@ done:
 
 } /* H5F_vfd_swmr_close_or_flush() */
 
-int
-shadow_image_defer_free(H5F_shared_t *shared,
-    const H5FD_vfd_swmr_idx_entry_t *entry)
+static int
+shadow_range_defer_free(H5F_shared_t *shared, uint64_t offset, uint32_t length)
 {
     shadow_defree_t *shadow_defree;
 
     if (NULL == (shadow_defree = H5FL_CALLOC(shadow_defree_t)))
         return -1;
 
-    shadow_defree->md_file_page_offset = entry->md_file_page_offset;
-    shadow_defree->length = entry->length;
+    shadow_defree->offset = offset;
+    shadow_defree->length = length;
     shadow_defree->tick_num = shared->tick_num;
 
     if (TAILQ_EMPTY(&shared->shadow_defrees))
@@ -397,6 +396,14 @@ shadow_image_defer_free(H5F_shared_t *shared,
 
     TAILQ_INSERT_HEAD(&shared->shadow_defrees, shadow_defree, link);
     return 0;
+}
+
+int
+shadow_image_defer_free(H5F_shared_t *shared,
+    const H5FD_vfd_swmr_idx_entry_t *entry)
+{
+    return shadow_range_defer_free(shared,
+        entry->md_file_page_offset * shared->fs_page_size, entry->length);
 }
 
 
@@ -562,8 +569,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
              ( shadow_defree->tick_num <=
                f->shared->tick_num - f->shared->vfd_swmr_config.max_lag ) ) {
 
-            if ( H5MV_free(f, shadow_defree->md_file_page_offset *
-                           f->shared->fs_page_size, shadow_defree->length) < 0 )
+            if (H5MV_free(f, shadow_defree->offset, shadow_defree->length) < 0)
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                             "unable to flush clean entry")
@@ -1906,9 +1912,14 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
     memcpy(new_mdf_idx, old_mdf_idx, sizeof(new_mdf_idx[0]) * old_mdf_idx_len);
 
     fprintf(stderr, "ding ding\n");
-    /* TBD record previous index offset & size to be freed after the new one
-     * is in service.
-     */
+
+    /* Reclaim index. */
+    if (shadow_range_defer_free(shared, shared->writer_index_offset,
+                                H5FD_MD_INDEX_SIZE(old_mdf_idx_len)) == -1) {
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+            "could not schedule index reclamation");
+    }
+
     shared->writer_index_offset = idx_addr;
     ret_value = shared->mdf_idx = new_mdf_idx;
     shared->mdf_idx_len = new_mdf_idx_len;
