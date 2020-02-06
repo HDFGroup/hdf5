@@ -1913,7 +1913,12 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
 
     fprintf(stderr, "ding ding\n");
 
-    /* Reclaim index. */
+    /* Postpone reclamation of the old index until max_lag ticks from now.
+     * It's only necessary to wait until after the new index is in place,
+     * so it's possible that some disused shadow storage will build up
+     * past what is strictly necessary, but it seems like a reasonable
+     * trade-off for simplicity.
+     */
     if (shadow_range_defer_free(shared, shared->writer_index_offset,
                                 H5FD_MD_INDEX_SIZE(old_mdf_idx_len)) == -1) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
