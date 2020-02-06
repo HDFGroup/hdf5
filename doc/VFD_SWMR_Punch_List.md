@@ -164,3 +164,14 @@ primarily on Jelly.
 32. Make a fixed-size dataset with a small chunk size to verify ... see #31.
 
 33. Make automated tests out of the `credel` and `gaussians` tests.
+
+34. Conserve space in the shadow file.
+    In vfd_swmr_enlarge_shadow_index(),
+    we postpone reclamation of the old shadow index for max\_lag ticks, but
+    it's not necessary to wait that long.  David traded some space
+    efficiency for simplicity, for now.  See the note in the source code.
+
+35. In the documentation, we should note that if a writer deletes an
+    object that the reader has open (possesses an hid_t), and max_lag
+    ticks later the reader tries to access the object by hid_t, the
+    reader get an error result, or crash, or access the wrong object.
