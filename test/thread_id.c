@@ -18,7 +18,6 @@
  * 3 No two threads share an ID during their lifetimes.
  * 4 A thread's ID is available for reuse as soon as it is joined.
  */
-#include <err.h>
 
 /*
  * Include required headers.  This file tests internal library functions,
@@ -26,10 +25,41 @@
  */
 #include "testhdf5.h"
 
+static void my_errx(int, const char *, ...) H5_ATTR_FORMAT(printf, 2, 3);
+
+static void
+my_errx(int code, const char *fmt, ...)
+{
+    va_list ap;
+
+    (void)fprintf(stderr, "thread_id: ");
+    va_start(ap, fmt);
+    (void)vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    (void)fputc('\n', stderr);
+    exit(code);
+}
+
 #if defined(H5_HAVE_THREADSAFE) && !defined(H5_HAVE_WIN_THREADS)
 
+static void my_err(int, const char *, ...) H5_ATTR_FORMAT(printf, 2, 3);
+
+static void
+my_err(int code, const char *fmt, ...)
+{
+    va_list ap;
+    int errno_copy = errno;
+
+    (void)fprintf(stderr, "thread_id: ");
+    va_start(ap, fmt);
+    (void)vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    (void)fprintf(stderr, ": %s\n", strerror(errno_copy));
+    exit(code);
+}
+
 #define threads_failure(_call, _result) do {                \
-    errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__,   \
+    my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__,   \
         __LINE__, strerror(_result));                       \
 } while (false)
 
@@ -52,13 +82,13 @@ atomic_printf(const char *fmt, ...)
     va_end(ap);
 
     if (nprinted == -1)
-        err(EXIT_FAILURE, "%s.%d: vsnprintf", __func__, __LINE__);
+        my_err(EXIT_FAILURE, "%s.%d: vsnprintf", __func__, __LINE__);
     else if (nprinted >= (ssize_t)sizeof(buf))
-        errx(EXIT_FAILURE, "%s.%d: vsnprintf overflowed", __func__, __LINE__);
+        my_errx(EXIT_FAILURE, "%s.%d: vsnprintf overflowed", __func__, __LINE__);
 
     nwritten = write(STDOUT_FILENO, buf, (size_t)nprinted);
     if (nwritten < nprinted) {
-        errx(EXIT_FAILURE, "%s.%d: write error or short write",
+        my_errx(EXIT_FAILURE, "%s.%d: write error or short write",
             __func__, __LINE__);
     }
 }
@@ -114,7 +144,7 @@ main(void)
      * mutex, etc.
      */
     if (H5open() != SUCCEED)
-        errx(EXIT_FAILURE, "%s.%d: H5open failed", __func__, __LINE__);
+        my_errx(EXIT_FAILURE, "%s.%d: H5open failed", __func__, __LINE__);
 
     if ((rc = pthread_mutex_init(&used_lock, NULL)) == -1)
         threads_failure(pthread_mutex_init, rc);
@@ -144,7 +174,7 @@ main(void)
 
         for (i = 0; i < NTHREADS; i++) {
             if (!used[i]) // access synchronized by thread create/join
-                errx(EXIT_FAILURE, "thread ID %d did not run.", i + 1);
+                my_errx(EXIT_FAILURE, "thread ID %d did not run.", i + 1);
         }
     }
     if ((rc = pthread_barrier_destroy(&barrier)) != 0)
