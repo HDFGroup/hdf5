@@ -475,6 +475,8 @@
 ./src/hdf5.lnt        _DO_NOT_DISTRIBUTE_
 ./src/hdf5-win.lnt      _DO_NOT_DISTRIBUTE_
 ./src/hdf5-lin.lnt      _DO_NOT_DISTRIBUTE_
+./src/hlog.c
+./src/hlog.h
 ./src/COPYING
 ./src/H5.c
 ./src/H5checksum.c
