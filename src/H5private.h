@@ -1897,11 +1897,13 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
 /* global library version information string */
 extern char  H5_lib_vers_info_g[];
 
+/* Include required thread-safety header, always, for the H5TS_thread_id()
+ * definition.
+ */
+#include "H5TSprivate.h"
+
 /* Lock headers */
 #ifdef H5_HAVE_THREADSAFE
-
-/* Include required thread-safety header */
-#include "H5TSprivate.h"
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {
