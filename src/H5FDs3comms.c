@@ -1202,7 +1202,7 @@ H5FD_s3comms_s3r_open(const char          *url,
 
     if ((region      != NULL && *region      != '\0') ||
         (id          != NULL && *id          != '\0') ||
-        (signing_key != NULL && *signing_key != '\0'))
+        (signing_key != NULL))
     {
         /* if one exists, all three must exist
          */
@@ -1214,7 +1214,7 @@ H5FD_s3comms_s3r_open(const char          *url,
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
                         "secret id cannot be null.\n");
         }
-        if (signing_key == NULL || signing_key[0] == '\0') {
+        if (signing_key == NULL) {
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
                         "signing key cannot be null.\n");
         }
