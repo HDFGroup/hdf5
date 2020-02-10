@@ -218,6 +218,19 @@ New Features
           - set the ENV variable HDF5_ROS3_TEST_BUCKET_URL to the s3 url for the
                 s3 bucket containing the HDF5 files to be accessed.
 
+    FORTRAN Library:
+    ----------------
+    - Added new Fortran parameters:
+
+        H5F_LIBVER_ERROR_F
+        H5F_LIBVER_NBOUNDS_F
+        H5F_LIBVER_V18_F
+        H5F_LIBVER_V110_F
+        H5F_LIBVER_V112_F
+
+    - Added new Fortran API: h5pget_libver_bounds_f
+
+    (MSB - 2020/02/11, HDFFV-11018)
 
     Java Library:
     ----------------
