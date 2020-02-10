@@ -105,9 +105,6 @@ H5TS_key_destructor(void *key_val)
  * DESCRIPTION
  *   When a thread shuts down, put its ID record on the free list.
  *
- * PROGRAMMER: Rusty Shackleford
- *             February 7, 2020
- *
  *--------------------------------------------------------------------------
  */
 static void
@@ -118,7 +115,6 @@ H5TS_tid_destructor(void *_v)
     if (tid == NULL)
         return;
 
-    /* XXX I can use mutexes in destructors, right? */
     /* TBD use an atomic CAS */
     pthread_mutex_lock(&H5TS_tid_mtx);
     tid->next = H5TS_tid_next_free;
@@ -138,9 +134,6 @@ H5TS_tid_destructor(void *_v)
  * DESCRIPTION
  *   Initialize for integer thread identifiers.
  *
- * PROGRAMMER: Dale Alvin Gribble
- *             February 7, 2020
- *
  *--------------------------------------------------------------------------
  */
 static void
@@ -150,17 +143,6 @@ H5TS_tid_init(void)
     pthread_key_create(&H5TS_tid_key, H5TS_tid_destructor);
 }
 
-/* Return an integer identifier, ID, for the current thread satisfying the
- * following properties:
- *
- * 1 1 <= ID <= UINT64_MAX
- * 2 ID is constant over the thread's lifetime.
- * 3 No two threads share an ID during their lifetimes.
- * 4 A thread's ID is available for reuse as soon as it is joined.
- *
- * ID 0 is reserved.  H5TS_thread_id() returns 0 if the library was not built
- * with thread safety or if an error prevents it from assigning an ID.
- */
 /*--------------------------------------------------------------------------
  * NAME
  *    H5TS_thread_id
@@ -182,9 +164,6 @@ H5TS_tid_init(void)
  *   ID 0 is reserved.  H5TS_thread_id() returns 0 if the library was not
  *   built with thread safety or if an error prevents it from assigning an
  *   ID.
- *
- * PROGRAMMER: Rusty Shackleford
- *             February 7, 2020
  *
  *--------------------------------------------------------------------------
  */
