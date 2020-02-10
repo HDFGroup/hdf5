@@ -112,6 +112,7 @@ SUBROUTINE test_create(total_error)
   INTEGER :: ifill
   REAL :: rfill
   REAL(KIND=dp) :: dpfill
+  INTEGER :: low, high
 
   !
   ! * Create a file.
@@ -205,11 +206,41 @@ SUBROUTINE test_create(total_error)
   CALL check("h5fclose_f", error, total_error)
 
   !  Open the file and get the dataset fill value from each dataset 
-  CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
-  CALL check("H5Pcreate_f",error, total_error)
+  CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
+  CALL check("h5pcreate_f",error, total_error)
+
+  CALL h5pset_libver_bounds_f(fapl, H5F_LIBVER_V18_F, H5F_LIBVER_V18_F, error)
+  CALL check("h5pset_libver_bounds_f",error, total_error)
+  CALL h5pget_libver_bounds_f(fapl, low, high, error)
+  CALL check("h5pget_libver_bounds_f",error, total_error)
+  CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V18_F, total_error)
+  CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V18_F, total_error)
+
+  CALL h5pset_libver_bounds_f(fapl, H5F_LIBVER_V18_F, H5F_LIBVER_V110_F, error)
+  CALL check("h5pset_libver_bounds_f",error, total_error)
+  CALL h5pget_libver_bounds_f(fapl, low, high, error)
+  CALL check("h5pget_libver_bounds_f",error, total_error)
+  CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V18_F, total_error)
+  CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V110_F, total_error)
+
+  CALL h5pset_libver_bounds_f(fapl, H5F_LIBVER_V112_F, H5F_LIBVER_V112_F, error)
+  CALL check("h5pset_libver_bounds_f",error, total_error)
+  CALL h5pget_libver_bounds_f(fapl, low, high, error)
+  CALL check("h5pget_libver_bounds_f",error, total_error)
+  CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V112_F, total_error)
+  CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V112_F, total_error)
 
   CALL H5Pset_libver_bounds_f(fapl, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
   CALL check("H5Pset_libver_bounds_f",error, total_error)
+  CALL h5pget_libver_bounds_f(fapl, low, high, error)
+  CALL check("h5pget_libver_bounds_f",error, total_error)
+  CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_LATEST_F, total_error)
+  CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_LATEST_F, total_error)
+  IF(H5F_LIBVER_LATEST_F.GE.H5F_LIBVER_NBOUNDS_F)THEN
+     WRITE(*,'(A,I0,A,I0,A)') &
+          "***ERROR: H5F_LIBVER_LATEST_F (",H5F_LIBVER_LATEST_F,") .GE. H5F_LIBVER_NBOUNDS_F (",H5F_LIBVER_NBOUNDS_F,")"
+     total_error = total_error + 1
+  ENDIF
 
   CALL h5fopen_f (FILENAME, H5F_ACC_RDONLY_F, file, error, fapl)
   CALL check("h5fopen_f", error, total_error)

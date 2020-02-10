@@ -4754,6 +4754,65 @@ CONTAINS
 
   END SUBROUTINE h5pget_attr_creation_order_f
 
+!****s* H5P/H5Pget_libver_bounds_f
+! NAME
+!   H5Pget_libver_bounds_f
+!
+! PURPOSE
+!   Retrieves the lower and upper bounds on the HDF5 library release versions that indirectly 
+!   determine the object format versions used when creating objects in the file.
+!
+! INPUTS
+!
+!  fapl_id - File access property list identifier
+!  low     - The earliest version of the library that will be used for writing objects.
+!  high    - The latest version of the library that will be used for writing objects.
+!
+! OUTPUTS
+!
+!  hdferr  - error code
+!  	      Success:  0
+!  	      Failure: -1
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  February 10, 2020
+!
+! Fortran Interface:
+  SUBROUTINE h5pget_libver_bounds_f(fapl_id, low, high, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
+    INTEGER, INTENT(OUT) :: low      ! The earliest version of the library that will be used for writing objects.
+    INTEGER, INTENT(OUT) :: high     ! The latest version of the library that will be used for writing objects.
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code: 0 on success and -1 on failure
+!*****
+! Local variables
+    INTEGER(ENUM_T) :: low_c, high_c
+    INTEGER(C_INT) :: hdferr_c
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER(C_INT) FUNCTION h5pget_libver_bounds(fapl_id, low, high) &
+            BIND(C,NAME='H5Pget_libver_bounds')
+         IMPORT :: C_INT, HID_T, ENUM_T
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN) , VALUE :: fapl_id
+         INTEGER(ENUM_T), INTENT(OUT) :: low
+         INTEGER(ENUM_T), INTENT(OUT) :: high
+       END FUNCTION h5pget_libver_bounds
+    END INTERFACE
+
+    hdferr_c = H5Pget_libver_bounds(fapl_id, low_c, high_c)
+
+    low  = INT(low_c)
+    high = INT(high_c)
+
+    hdferr = 0
+    IF(hdferr_c.LT.0) hdferr = -1
+
+  END SUBROUTINE h5pget_libver_bounds_f
+
 !****s* H5P/H5Pset_libver_bounds_f
 ! NAME
 ! 	      H5Pset_libver_bounds_f
@@ -4781,32 +4840,30 @@ CONTAINS
   SUBROUTINE h5pset_libver_bounds_f(fapl_id, low, high, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
-    INTEGER, INTENT(IN) :: low   ! The earliest version of the library that will be used for writing objects.
-                                 ! Currently, low must be one of two pre-defined values:
-                                 !            HDF_LIBVER_EARLIEST_F
-                                 !            HDF_LIBVER_LATEST_F
-    INTEGER, INTENT(IN) :: high  ! The latest version of the library that will be used for writing objects.
-                                 ! Currently, low must set to the pre-defined value:
-                                 !            HDF_LIBVER_LATEST_F
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code
-                                    ! 0 on success and -1 on failure
-!***** 
+    INTEGER, INTENT(IN)  :: low    ! The earliest version of the library that will be used for writing objects.
+    INTEGER, INTENT(IN)  :: high   ! The latest version of the library that will be used for writing objects.
+    INTEGER, INTENT(OUT) :: hdferr ! Error code: 0 on success and -1 on failure
+!*****
+! Local variables
+    INTEGER(C_INT) :: hdferr_c
 !
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION h5pset_libver_bounds_c(fapl_id, low, high) &
-            BIND(C,NAME='h5pset_libver_bounds_c')
-         IMPORT :: HID_T
+       INTEGER(C_INT) FUNCTION h5pset_libver_bounds(fapl_id, low, high) &
+            BIND(C,NAME='H5Pset_libver_bounds')
+         IMPORT :: C_INT, HID_T, ENUM_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: fapl_id
-         INTEGER, INTENT(IN) :: low
-         INTEGER, INTENT(IN) :: high
-
-       END FUNCTION H5pset_libver_bounds_c
+         INTEGER(HID_T),  INTENT(IN), VALUE :: fapl_id
+         INTEGER(ENUM_T), INTENT(IN), VALUE :: low
+         INTEGER(ENUM_T), INTENT(IN), VALUE :: high
+       END FUNCTION h5pset_libver_bounds
     END INTERFACE
 
-    hdferr = h5pset_libver_bounds_c(fapl_id, low, high)
+    hdferr_c = h5pset_libver_bounds(fapl_id, INT(low, ENUM_T), INT(high, ENUM_T))
+
+    hdferr = 0
+    IF(hdferr_c.LT.0) hdferr = -1
 
   END SUBROUTINE h5pset_libver_bounds_f
 
