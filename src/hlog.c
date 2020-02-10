@@ -25,9 +25,9 @@
 #include "hlog.h"
 #include "H5time_private.h"
 
-TAILQ_HEAD(, hlog_sink) hlog_sinks = TAILQ_HEAD_INITIALIZER(hlog_sinks);
+TAILQ_HEAD(, hlog_outlet) hlog_outlets = TAILQ_HEAD_INITIALIZER(hlog_outlets);
 
-HLOG_SINK_TOP_DEFN(all);
+HLOG_OUTLET_TOP_DEFN(all);
 
 static struct timespec timestamp_zero;
 
@@ -49,7 +49,7 @@ hlog_init(void)
     }
 
     while ((item = strsep(&settings, ",")) != NULL) {
-        hlog_sink_state_t state;
+        hlog_outlet_state_t state;
         char key[64 + 1], val[4 + 1];   // + 1 for the terminating NUL
         int nconverted;
 
@@ -60,11 +60,11 @@ hlog_init(void)
         }
 
         if (strcmp(val, "on") == 0 || strcmp(val, "yes") == 0)
-            state = HLOG_SINK_S_ON;
+            state = HLOG_OUTLET_S_ON;
         else if (strcmp(val, "off") == 0 || strcmp(val, "no") == 0)
-            state = HLOG_SINK_S_OFF;
+            state = HLOG_OUTLET_S_OFF;
         else if (strcmp(val, "pass") == 0)
-            state = HLOG_SINK_S_PASS;
+            state = HLOG_OUTLET_S_PASS;
         else {
             warnx("%s: bad HLOG value \"%s\" in item \"%s\"", __func__,
                 val, item);
@@ -226,18 +226,18 @@ hlog_warnx(const char *fmt, ...)
 	va_end(ap);
 }
 
-struct hlog_sink *
-hlog_sink_find_active(struct hlog_sink *ls0)
+struct hlog_outlet *
+hlog_outlet_find_active(struct hlog_outlet *ls0)
 {
-	struct hlog_sink *ls;
+	struct hlog_outlet *ls;
 
-	HLOG_SINK_FOREACH(ls, ls0) {
+	HLOG_OUTLET_FOREACH(ls, ls0) {
 		switch (ls->ls_state) {
-		case HLOG_SINK_S_PASS:
+		case HLOG_OUTLET_S_PASS:
 			continue;
-		case HLOG_SINK_S_OFF:
+		case HLOG_OUTLET_S_OFF:
 			return NULL;
-		case HLOG_SINK_S_ON:
+		case HLOG_OUTLET_S_ON:
 		default:
 			return ls;
 		}
@@ -246,7 +246,7 @@ hlog_sink_find_active(struct hlog_sink *ls0)
 }
 
 void
-hlog_always(struct hlog_sink *ls __unused, const char *fmt, ...)
+hlog_always(struct hlog_outlet *ls __unused, const char *fmt, ...)
 {
 	va_list ap;
 
@@ -256,12 +256,12 @@ hlog_always(struct hlog_sink *ls __unused, const char *fmt, ...)
 }
 
 void
-hlog_impl(struct hlog_sink *ls0, const char *fmt, ...)
+hlog_impl(struct hlog_outlet *ls0, const char *fmt, ...)
 {
-	struct hlog_sink *ls;
+	struct hlog_outlet *ls;
 	va_list ap;
 
-	if ((ls = hlog_sink_find_active(ls0)) == NULL)
+	if ((ls = hlog_outlet_find_active(ls0)) == NULL)
 		return;
 
 	va_start(ap, fmt);
@@ -269,21 +269,21 @@ hlog_impl(struct hlog_sink *ls0, const char *fmt, ...)
 	va_end(ap);
 }
 
-struct hlog_sink *
-hlog_sink_lookup(const char *name)
+struct hlog_outlet *
+hlog_outlet_lookup(const char *name)
 {
-	struct hlog_sink *ls;
-	TAILQ_FOREACH(ls, &hlog_sinks, ls_next) {
+	struct hlog_outlet *ls;
+	TAILQ_FOREACH(ls, &hlog_outlets, ls_next) {
 		if (strcmp(ls->ls_name, name) == 0)
 			return ls;
 	}
 	return NULL;
 }
 
-static struct hlog_sink *
-hlog_sink_create(const char *name)
+static struct hlog_outlet *
+hlog_outlet_create(const char *name)
 {
-	struct hlog_sink *ls;
+	struct hlog_outlet *ls;
 
 	if ((ls = calloc(1, sizeof(*ls))) == NULL)
 		return NULL;
@@ -297,7 +297,7 @@ hlog_sink_create(const char *name)
 }
 
 static void
-hlog_sink_destroy(struct hlog_sink *ls)
+hlog_outlet_destroy(struct hlog_outlet *ls)
 {
 	/*LINTED*/
 	if (ls->ls_name0 != NULL)
@@ -306,46 +306,46 @@ hlog_sink_destroy(struct hlog_sink *ls)
 }
 
 int
-hlog_set_state(const char *name, enum hlog_sink_state state, bool rendezvous)
+hlog_set_state(const char *name, enum hlog_outlet_state state, bool rendezvous)
 {
-	struct hlog_sink *ls;
+	struct hlog_outlet *ls;
 	errno = 0;
 
 	switch (state) {
-	case HLOG_SINK_S_PASS:
-	case HLOG_SINK_S_OFF:
-	case HLOG_SINK_S_ON:
+	case HLOG_OUTLET_S_PASS:
+	case HLOG_OUTLET_S_OFF:
+	case HLOG_OUTLET_S_ON:
 		break;
 	default:
 		errno = EINVAL;
 		return -1;
 	}
-	if ((ls = hlog_sink_lookup(name)) == NULL && !rendezvous) {
+	if ((ls = hlog_outlet_lookup(name)) == NULL && !rendezvous) {
 		errno = ESRCH;
 		return -1;
 	} else if (ls == NULL) {
-		if ((ls = hlog_sink_create(name)) == NULL)
+		if ((ls = hlog_outlet_create(name)) == NULL)
 			return -1;
-		TAILQ_INSERT_TAIL(&hlog_sinks, ls, ls_next);
+		TAILQ_INSERT_TAIL(&hlog_outlets, ls, ls_next);
 	}
 	ls->ls_state = state;
 	return 0;
 }
 
 void
-hlog_sink_register(struct hlog_sink *ls_arg)
+hlog_outlet_register(struct hlog_outlet *ls_arg)
 {
-	struct hlog_sink *ls;
-	if ((ls = hlog_sink_lookup(ls_arg->ls_name)) == NULL ||
+	struct hlog_outlet *ls;
+	if ((ls = hlog_outlet_lookup(ls_arg->ls_name)) == NULL ||
 	    ls->ls_rendezvous) {
-		TAILQ_INSERT_TAIL(&hlog_sinks, ls_arg, ls_next);
+		TAILQ_INSERT_TAIL(&hlog_outlets, ls_arg, ls_next);
 		if (ls == NULL)
 			return;
 		warnx("%s: rendezvous with log-sink '%s'", __func__,
 		    ls->ls_name);
 		ls_arg->ls_state = ls->ls_state;
-		TAILQ_REMOVE(&hlog_sinks, ls, ls_next);
-		hlog_sink_destroy(ls);
+		TAILQ_REMOVE(&hlog_outlets, ls, ls_next);
+		hlog_outlet_destroy(ls);
 	} else
 		warnx("%s: duplicate log-sink, '%s'", __func__, ls->ls_name);
 }

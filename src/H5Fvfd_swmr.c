@@ -86,10 +86,10 @@ unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          * on the 0->1 and 1->0
                                          * transitions.
                                          */
-HLOG_SINK_DECL(swmr);
-HLOG_SINK_SHORT_DEFN(swmr, all);
-HLOG_SINK_SHORT_DEFN(eot, swmr);
-HLOG_SINK_SHORT_DEFN(shadow_defrees, swmr);
+HLOG_OUTLET_DECL(swmr);
+HLOG_OUTLET_SHORT_DEFN(swmr, all);
+HLOG_OUTLET_SHORT_DEFN(eot, swmr);
+HLOG_OUTLET_SHORT_DEFN(shadow_defrees, swmr);
 
 /*
  *  The head of the end of tick queue (EOT queue) for files opened in either

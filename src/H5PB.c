@@ -123,10 +123,10 @@ H5FL_DEFINE_STATIC(H5PB_t);
 /* Declare a free list to manage the H5PB_entry_t struct */
 H5FL_DEFINE_STATIC(H5PB_entry_t);
 
-HLOG_SINK_DECL(pagebuffer);
-HLOG_SINK_SHORT_DEFN(pagebuffer, all);
-HLOG_SINK_SHORT_DEFN(pbflush, pagebuffer);
-HLOG_SINK_SHORT_DEFN(pbflush_entry, pbflush);
+HLOG_OUTLET_DECL(pagebuffer);
+HLOG_OUTLET_SHORT_DEFN(pagebuffer, all);
+HLOG_OUTLET_SHORT_DEFN(pbflush, pagebuffer);
+HLOG_OUTLET_SHORT_DEFN(pbflush_entry, pbflush);
 
 
 /*-------------------------------------------------------------------------
