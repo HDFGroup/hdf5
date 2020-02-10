@@ -639,13 +639,4 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 
 } /* H5TS_create_thread */
 
-#else  /* H5_HAVE_THREADSAFE */
-
-uint64_t
-H5TS_thread_id(void)
-{
-    return 0;
-}
-
 #endif  /* H5_HAVE_THREADSAFE */
-
