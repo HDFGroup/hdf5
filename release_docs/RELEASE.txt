@@ -311,6 +311,16 @@ Bug Fixes since HDF5-1.12.0-alpha1 release
 
     Tools:
     ------
+    - h5repack was fixed to repack the reference attributes properly.
+      The code line that checks if the update of reference inside a compound
+      datatype is misplaced outside the code block loop that carries out the
+      check. In consequence, the next attribute that is not the reference
+      type was repacked again as the reference type and caused the failure of
+      repacking. The fix is to move the corresponding code line to the correct
+      code block.
+
+      (KY -2020/02/10, HDFFV-11014)
+
     - h5diff was updated to use the new reference APIs.
 
       h5diff uses the new reference APIs to compare references.
