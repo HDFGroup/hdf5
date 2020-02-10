@@ -129,7 +129,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5VLpassthru.c \
         H5VM.c H5WB.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c \
-        H5Zscaleoffset.c H5Zszip.c H5Ztrans.c
+        H5Zscaleoffset.c H5Zszip.c H5Ztrans.c \
+        hlog.c
 
 # Only compile parallel sources if necessary
 if BUILD_PARALLEL_CONDITIONAL

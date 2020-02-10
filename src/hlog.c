@@ -12,6 +12,8 @@
 #include <err.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h> /* for uintmax_t */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,67 +22,100 @@
 #include <sys/param.h>
 #include <sys/cdefs.h>
 
-#include "hlog/hlog.h"
+#include "hlog.h"
+#include "H5time_private.h"
 
-#ifndef lint
-__RCSID("$Id: log.c 4702 2007-06-22 07:01:28Z dyoung $");
-#endif
+TAILQ_HEAD(, hlog_sink) hlog_sinks = TAILQ_HEAD_INITIALIZER(hlog_sinks);
 
-static enum loglib_mode loglib_mode = LOGLIB_M_STDERR;
-TAILQ_HEAD(, loglib_sink) loglib_sinks = TAILQ_HEAD_INITIALIZER(loglib_sinks);
+HLOG_SINK_TOP_DEFN(all);
 
-LOGLIB_SINK_TOP_DEFN(all);
+static struct timespec timestamp_zero;
 
-LOGLIB_SINK_SHORT_DEFN(arithmetic, all);
-LOGLIB_SINK_SHORT_DEFN(mem, all);
+void hlog_init(void) __constructor;
+static void hlog_init_timestamps(void);
 
-LOGLIB_SINK_MEDIUM_DEFN(sys, all, LOG_NOTICE);
-LOGLIB_SINK_MEDIUM_DEFN(notice, all, LOG_NOTICE);
-LOGLIB_SINK_MEDIUM_DEFN(err, all, LOG_ERR);
-LOGLIB_SINK_MEDIUM_DEFN(warn, all, LOG_WARNING);
-
-int
-loglib_start(enum loglib_mode mode, int facility)
+void
+hlog_init(void)
 {
-	loglib_mode = mode;
+    const char *settings0;
+    char *item, *settings;
 
-	if (mode == LOGLIB_M_STDERR)
-		return 0;
-	else if (mode != LOGLIB_M_SYSLOG)
-		return -1;
+    if ((settings0 = getenv("HLOG")) == NULL)
+        return;
 
-	openlog(getprogname(), 0, facility);
-	(void)setlogmask(LOG_UPTO(LOG_DEBUG));
-	return 0;
+    if ((settings = strdup(settings0)) == NULL) {
+        warn("%s: cannot duplicate settings string", __func__);
+        return;
+    }
+
+    while ((item = strsep(&settings, ",")) != NULL) {
+        hlog_sink_state_t state;
+        char key[64 + 1], val[4 + 1];   // + 1 for the terminating NUL
+        int nconverted;
+
+        nconverted = sscanf(item, " %64[0-9a-z_] = %4s ", key, val);
+        if (nconverted != 2) {
+            warnx("%s: malformed HLOG item \"%s\"", __func__, item);
+            continue;
+        }
+
+        if (strcmp(val, "on") == 0 || strcmp(val, "yes") == 0)
+            state = HLOG_SINK_S_ON;
+        else if (strcmp(val, "off") == 0 || strcmp(val, "no") == 0)
+            state = HLOG_SINK_S_OFF;
+        else if (strcmp(val, "pass") == 0)
+            state = HLOG_SINK_S_PASS;
+        else {
+            warnx("%s: bad HLOG value \"%s\" in item \"%s\"", __func__,
+                val, item);
+            continue;
+        }
+
+        if (hlog_set_state(key, state, true) == -1) {
+            warn("%s: could not set state for HLOG item \"%s\"", __func__,
+                item);
+        }
+    }
+
+    free(settings);
+}
+
+
+static void
+hlog_init_timestamps(void)
+{
+    static bool initialized = false;
+
+    if (initialized)
+        return;
+
+    if (clock_gettime(CLOCK_MONOTONIC, &timestamp_zero) == -1)
+        err(EXIT_FAILURE, "%s: clock_gettime", __func__);
+
+    initialized = true;
 }
 
 static void
-loglib_print_time(void)
+hlog_print_time(void)
 {
-	time_t t;
-	struct tm *tm;
-	char buf[80];
+    struct timespec elapsed, now;
 
-	t = time(NULL);
-	tm = gmtime(&t);
-	if (strftime(buf, sizeof(buf),"%Y%m%d%H%M%S ", tm) == 0) {
-		warnx("%s: strftime failed", __func__);
-		return;
-	}
-	(void)fprintf(stderr, "%s", buf);
+    hlog_init_timestamps();
+
+    if (clock_gettime(CLOCK_MONOTONIC, &now) == -1)
+        err(EXIT_FAILURE, "%s: clock_gettime", __func__);
+
+    timespecsub(&now, &timestamp_zero, &elapsed);
+
+    fprintf(stderr, "%ju.%.9ld ", (uintmax_t)elapsed.tv_sec, elapsed.tv_nsec);
 }
 
 void
-loglib_vlog(int priority, const char *fmt, va_list ap)
+vhlog(const char *fmt, va_list ap)
 {
-	if (loglib_mode == LOGLIB_M_SYSLOG) {
-		vsyslog(priority, fmt, ap);
-		return;
-	} else {
-		loglib_print_time();
-		(void)vfprintf(stderr, fmt, ap);
-		(void)fputc('\n', stderr);
-	}
+        hlog_print_time();
+        (void)vfprintf(stderr, fmt, ap);
+        (void)fputc('\n', stderr);
 }
 
 static char *
@@ -96,8 +131,7 @@ message_extend_stderr(const char *fmt0)
 	fmtlen = strlen(fmt0) + strlen(m) + sizeof(sep);
 
 	if ((fmt = malloc(fmtlen)) == NULL) {
-		syslog(LOG_ERR, "%s: malloc failed: %s", __func__,
-		    strerror(errno));
+		err(EXIT_FAILURE, "%s: malloc failed", __func__);
 		return NULL;
 	}
 
@@ -110,127 +144,100 @@ message_extend_stderr(const char *fmt0)
 }
 
 static char *
-message_extend_syslogd(const char *fmt0)
-{
-	static const char minterp[] = ": %m";
-	char *fmt;
-	size_t fmtlen;
-
-	fmtlen = sizeof(minterp) + strlen(fmt0);
-
-	if ((fmt = malloc(fmtlen)) == NULL) {
-		syslog(LOG_ERR, "%s: malloc failed: %s", __func__,
-		    strerror(errno));
-		return NULL;
-	}
-
-	/* Note well the safe strcpy, strcat usage.  Thank you. */
-	strcpy(fmt, fmt0);
-	strcat(fmt, minterp);
-
-	return fmt;
-}
-
-static char *
 message_extend(const char *fmt0)
 {
-	switch (loglib_mode) {
-	case LOGLIB_M_SYSLOG:
-		return message_extend_syslogd(fmt0);
-	default:
-		return message_extend_stderr(fmt0);
-	}
+        return message_extend_stderr(fmt0);
 }
 
 void
-loglib_verr(int status, const char *fmt0, va_list ap)
+vhlog_err(int status, const char *fmt0, va_list ap)
 {
 	char *fmt;
 
 	if ((fmt = message_extend(fmt0)) == NULL)
 		exit(status);
-	loglib_vlog(LOG_ERR, fmt, ap);
+	vhlog(fmt, ap);
 	free(fmt);
 
 	exit(status);
 }
 
 void
-loglib_verrx(int status, const char *fmt, va_list ap)
+vhlog_errx(int status, const char *fmt, va_list ap)
 {
-	loglib_vlog(LOG_ERR, fmt, ap);
+	vhlog(fmt, ap);
 	exit(status);
 }
 
 void
-loglib_vwarn(const char *fmt0, va_list ap)
+vhlog_warn(const char *fmt0, va_list ap)
 {
 	char *fmt;
 
 	if ((fmt = message_extend(fmt0)) == NULL)
 		return;
-	loglib_vlog(LOG_WARNING, fmt, ap);
+	vhlog(fmt, ap);
 	free(fmt);
 }
 
 void
-loglib_vwarnx(const char *fmt, va_list ap)
+vhlog_warnx(const char *fmt, va_list ap)
 {
-	loglib_vlog(LOG_WARNING, fmt, ap);
+	vhlog(fmt, ap);
 }
 
 void
-loglib_err(int status, const char *fmt, ...)
+hlog_err(int status, const char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
-	loglib_verr(status, fmt, ap);
+	vhlog_err(status, fmt, ap);
 	va_end(ap);
 }
 
 void
-loglib_errx(int status, const char *fmt, ...)
+hlog_errx(int status, const char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
-	loglib_verrx(status, fmt, ap);
+	vhlog_errx(status, fmt, ap);
 	va_end(ap);
 }
 
 void
-loglib_warn(const char *fmt, ...)
+hlog_warn(const char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
-	loglib_vwarn(fmt, ap);
+	vhlog_warn(fmt, ap);
 	va_end(ap);
 }
 
 void
-loglib_warnx(const char *fmt, ...)
+hlog_warnx(const char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
-	loglib_vwarnx(fmt, ap);
+	vhlog_warnx(fmt, ap);
 	va_end(ap);
 }
 
-struct loglib_sink *
-loglib_sink_find_active(struct loglib_sink *ls0)
+struct hlog_sink *
+hlog_sink_find_active(struct hlog_sink *ls0)
 {
-	struct loglib_sink *ls;
+	struct hlog_sink *ls;
 
-	LOGLIB_SINK_FOREACH(ls, ls0) {
+	HLOG_SINK_FOREACH(ls, ls0) {
 		switch (ls->ls_state) {
-		case LOGLIB_SINK_S_PASS:
+		case HLOG_SINK_S_PASS:
 			continue;
-		case LOGLIB_SINK_S_OFF:
+		case HLOG_SINK_S_OFF:
 			return NULL;
-		case LOGLIB_SINK_S_ON:
+		case HLOG_SINK_S_ON:
 		default:
 			return ls;
 		}
@@ -239,127 +246,106 @@ loglib_sink_find_active(struct loglib_sink *ls0)
 }
 
 void
-loglib_always_log(struct loglib_sink *ls, const char *fmt, ...)
+hlog_always(struct hlog_sink *ls __unused, const char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
-	loglib_vlog(ls->ls_priority, fmt, ap);
+	vhlog(fmt, ap);
 	va_end(ap);
 }
 
 void
-loglib_log(struct loglib_sink *ls0, const char *fmt, ...)
+hlog_impl(struct hlog_sink *ls0, const char *fmt, ...)
 {
-	struct loglib_sink *ls;
+	struct hlog_sink *ls;
 	va_list ap;
 
-	if ((ls = loglib_sink_find_active(ls0)) == NULL)
+	if ((ls = hlog_sink_find_active(ls0)) == NULL)
 		return;
 
 	va_start(ap, fmt);
-	loglib_vlog(ls->ls_priority, fmt, ap);
+	vhlog(fmt, ap);
 	va_end(ap);
 }
 
-struct loglib_sink *
-loglib_sink_lookup(const char *name)
+struct hlog_sink *
+hlog_sink_lookup(const char *name)
 {
-	struct loglib_sink *ls;
-	TAILQ_FOREACH(ls, &loglib_sinks, ls_next) {
+	struct hlog_sink *ls;
+	TAILQ_FOREACH(ls, &hlog_sinks, ls_next) {
 		if (strcmp(ls->ls_name, name) == 0)
 			return ls;
 	}
 	return NULL;
 }
 
-static struct loglib_sink *
-loglib_sink_create(const char *name)
+static struct hlog_sink *
+hlog_sink_create(const char *name)
 {
-	struct loglib_sink *ls;
-	static struct nmalloc_pool *np;
+	struct hlog_sink *ls;
 
-	if (np == NULL && (np = nmalloc_pool_create(__func__)) == NULL)
-		return NULL;
-
-	if ((ls = nzmalloc(np, sizeof(*ls))) == NULL)
+	if ((ls = calloc(1, sizeof(*ls))) == NULL)
 		return NULL;
 	else if ((ls->ls_name0 = strdup(name)) == NULL) {
-		nfree(ls);
+		free(ls);
 		return NULL;
 	}
 	ls->ls_name = ls->ls_name0;
-	ls->ls_rendezvous = 1;
+	ls->ls_rendezvous = true;
 	return ls;
 }
 
 static void
-loglib_sink_destroy(struct loglib_sink *ls)
+hlog_sink_destroy(struct hlog_sink *ls)
 {
 	/*LINTED*/
 	if (ls->ls_name0 != NULL)
 		free(ls->ls_name0);
-	nfree(ls);
+	free(ls);
 }
 
 int
-loglib_set_state(const char *name, enum loglib_sink_state state, int rendezvous)
+hlog_set_state(const char *name, enum hlog_sink_state state, bool rendezvous)
 {
-	struct loglib_sink *ls;
+	struct hlog_sink *ls;
 	errno = 0;
 
 	switch (state) {
-	case LOGLIB_SINK_S_PASS:
-	case LOGLIB_SINK_S_OFF:
-	case LOGLIB_SINK_S_ON:
+	case HLOG_SINK_S_PASS:
+	case HLOG_SINK_S_OFF:
+	case HLOG_SINK_S_ON:
 		break;
 	default:
 		errno = EINVAL;
 		return -1;
 	}
-	if ((ls = loglib_sink_lookup(name)) == NULL && !rendezvous) {
+	if ((ls = hlog_sink_lookup(name)) == NULL && !rendezvous) {
 		errno = ESRCH;
 		return -1;
 	} else if (ls == NULL) {
-		if ((ls = loglib_sink_create(name)) == NULL)
+		if ((ls = hlog_sink_create(name)) == NULL)
 			return -1;
-		TAILQ_INSERT_TAIL(&loglib_sinks, ls, ls_next);
+		TAILQ_INSERT_TAIL(&hlog_sinks, ls, ls_next);
 	}
 	ls->ls_state = state;
 	return 0;
 }
 
 void
-loglib_sink_register(struct loglib_sink *ls_arg)
+hlog_sink_register(struct hlog_sink *ls_arg)
 {
-	struct loglib_sink *ls;
-	if ((ls = loglib_sink_lookup(ls_arg->ls_name)) == NULL ||
+	struct hlog_sink *ls;
+	if ((ls = hlog_sink_lookup(ls_arg->ls_name)) == NULL ||
 	    ls->ls_rendezvous) {
-		TAILQ_INSERT_TAIL(&loglib_sinks, ls_arg, ls_next);
+		TAILQ_INSERT_TAIL(&hlog_sinks, ls_arg, ls_next);
 		if (ls == NULL)
 			return;
 		warnx("%s: rendezvous with log-sink '%s'", __func__,
 		    ls->ls_name);
 		ls_arg->ls_state = ls->ls_state;
-		TAILQ_REMOVE(&loglib_sinks, ls, ls_next);
-		loglib_sink_destroy(ls);
+		TAILQ_REMOVE(&hlog_sinks, ls, ls_next);
+		hlog_sink_destroy(ls);
 	} else
 		warnx("%s: duplicate log-sink, '%s'", __func__, ls->ls_name);
-}
-
-/*ARGSUSED*/
-int
-log_printer(void *arg __unused, const char *fmt, ...)
-{
-	va_list ap;
-	struct loglib_sink *ls;
-	if ((ls = loglib_sink_find_active(&log_notice)) == NULL) {
-		errno = EAGAIN;
-		return -1;
-	}
-
-	va_start(ap, fmt);
-	loglib_vlog(ls->ls_priority, fmt, ap);
-	va_end(ap);
-	return 0;
 }

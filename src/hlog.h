@@ -9,123 +9,123 @@
  *
  * See COPYING at the top of the HDF5 distribution for license terms.
  */
-#ifndef	_LOGLIB_H
-#define	_LOGLIB_H
+#ifndef	_HLOG_H
+#define	_HLOG_H
 
 #include <stdarg.h>
 #include <syslog.h>
 #include <sys/cdefs.h>
-#include <sys/queue.h>
 
-#include "misc/misc.h"
+#include "bsdqueue.h"
 
-enum loglib_mode {LOGLIB_M_SYSLOG = 0, LOGLIB_M_STDERR};
+#ifndef __unused
+#define __unused __attribute__((unused))
+#endif
 
-enum loglib_sink_state	{
-	  LOGLIB_SINK_S_PASS = 0
-	, LOGLIB_SINK_S_OFF = 1
-	, LOGLIB_SINK_S_ON = 2
+#ifndef __constructor
+#define __constructor __attribute__((constructor))
+#endif
+
+#ifndef __noreturn
+#define __noreturn __attribute__((__noreturn__))
+#endif
+
+#ifndef __printflike
+#define __printflike(_fmt, _args) \
+    __attribute__((__format__(__printf__,_fmt,_args)))
+#endif
+
+enum hlog_sink_state {
+	  HLOG_SINK_S_PASS = 0
+	, HLOG_SINK_S_OFF = 1
+	, HLOG_SINK_S_ON = 2
 };
 
-struct loglib_sink {
+typedef enum hlog_sink_state hlog_sink_state_t;
+
+struct hlog_sink {
 	const char			*ls_name;
 	char				*ls_name0;
-	struct loglib_sink		*ls_parent;
-	enum loglib_sink_state		ls_state;	
-	int				ls_priority;
-	int				ls_rendezvous;
-	TAILQ_ENTRY(loglib_sink)	ls_next;
+	struct hlog_sink		*ls_parent;
+	enum hlog_sink_state		ls_state;	
+	bool				ls_rendezvous;
+	TAILQ_ENTRY(hlog_sink)	        ls_next;
 };
 
-#define	LOGLIB_CONSTRUCTOR(__sym)					\
-void loglib_constructor_##__sym(void) __attribute__((constructor));	\
+#define	HLOG_CONSTRUCTOR(__sym)					        \
+void hlog_constructor_##__sym(void) __constructor;	                \
 void									\
-loglib_constructor_##__sym(void)					\
+hlog_constructor_##__sym(void)					        \
 {									\
-	loglib_sink_register(&__sym);					\
+	hlog_sink_register(&__sym);					\
 }									\
-void loglib_constructor_##__sym(void) __attribute__((constructor))
+void hlog_undefined_##__sym(void) __constructor
 
-#define	LOGLIB_SINK_FOREACH(__le, __le0)				\
+#define	HLOG_SINK_FOREACH(__le, __le0)				        \
 	for ((__le) = (__le0); (__le) != NULL; (__le) = (__le)->ls_parent)
 
-#define	LOGLIB_SINK_DECL1(__sym)	extern struct loglib_sink __sym
+#define	HLOG_SINK_DECL1(__sym)	extern struct hlog_sink __sym
 
-#define	LOGLIB_SINK_DECL(__name)	LOGLIB_SINK_DECL1(log_##__name)
+#define	HLOG_SINK_DECL(__name)	HLOG_SINK_DECL1(log_##__name)
 
-#define	LOGLIB_SINK_DEFN(__sym, __name, __parent, __state, __priority)	\
-	struct loglib_sink __sym = {					\
+#define	HLOG_SINK_DEFN(__sym, __name, __parent, __state)	        \
+	struct hlog_sink __sym = {					\
 		  .ls_name = __name					\
 		, .ls_parent = (__parent)				\
 		, .ls_state = (__state)					\
-		, .ls_priority = (__priority)				\
 	};								\
-	LOGLIB_CONSTRUCTOR(__sym)
+	HLOG_CONSTRUCTOR(__sym)
 
-#define	LOGLIB_SINK_MEDIUM_DEFN(__name, __parent, __priority)		\
-    LOGLIB_SINK_DEFN(log_##__name, #__name, &log_##__parent,		\
-        LOGLIB_SINK_S_PASS, (__priority))
+#define	HLOG_SINK_MEDIUM_DEFN(__name, __parent)		                \
+    HLOG_SINK_DEFN(log_##__name, #__name, &log_##__parent,		\
+        HLOG_SINK_S_PASS)
 
-#define	LOGLIB_SINK_SHORT_DEFN(__name, __parent)			\
-    LOGLIB_SINK_MEDIUM_DEFN(__name, __parent, LOG_INFO)
+#define	HLOG_SINK_SHORT_DEFN(__name, __parent)			        \
+    HLOG_SINK_MEDIUM_DEFN(__name, __parent)
 
-#define	LOGLIB_SINK_TOP_DEFN(__name)					\
-    LOGLIB_SINK_DEFN(log_##__name, #__name, NULL, LOGLIB_SINK_S_ON,	\
-        LOG_INFO)
+#define	HLOG_SINK_TOP_DEFN(__name)					\
+    HLOG_SINK_DEFN(log_##__name, #__name, NULL, HLOG_SINK_S_OFF)
 
-#define	LOGLIB_F_ALL	(0xffffffff)
+HLOG_SINK_DECL(all);
+HLOG_SINK_DECL(arithmetic);
+HLOG_SINK_DECL(mem);
+HLOG_SINK_DECL(sys);
+HLOG_SINK_DECL(notice);
+HLOG_SINK_DECL(err);
+HLOG_SINK_DECL(warn);
 
-LOGLIB_SINK_DECL(all);
-LOGLIB_SINK_DECL(arithmetic);
-LOGLIB_SINK_DECL(mem);
-LOGLIB_SINK_DECL(sys);
-LOGLIB_SINK_DECL(notice);
-LOGLIB_SINK_DECL(err);
-LOGLIB_SINK_DECL(warn);
+#define hlog(_name, _fmt, ...)    \
+    hlog_impl(&log_##_name, _fmt, __VA_ARGS__)
 
-#define	LOGLIB_LOG	loglib_log
+#define	hlog_fast(_name, ...)						    \
+    do {								    \
+            struct hlog_sink *_ls;				            \
+            if ((_ls = hlog_sink_find_active((&log_##_name))) != NULL)      \
+                    hlog_always((_ls), __VA_ARGS__);		            \
+    } while (/*CONSTCOND*/0)
 
-#define	LOGLIB_LAZY(__ls0, ...)						\
-	do {								\
-		struct loglib_sink *__ls;				\
-		if ((__ls = loglib_sink_find_active((__ls0))) != NULL)	\
-			loglib_always_log((__ls), __VA_ARGS__);		\
-	} while (/*CONSTCOND*/0)
+struct hlog_sink *hlog_sink_find_active(struct hlog_sink *);
+void hlog_sink_register(struct hlog_sink *);
+struct hlog_sink *hlog_sink_lookup(const char *);
+int hlog_set_state(const char *, enum hlog_sink_state, bool);
 
-struct loglib_sink *loglib_sink_find_active(struct loglib_sink *);
-extern void loglib_sink_register(struct loglib_sink *);
-extern struct loglib_sink *loglib_sink_lookup(const char *);
-extern int loglib_set_state(const char *, enum loglib_sink_state, int);
-extern int loglib_start(enum loglib_mode, int);
+void vhlog(const char *, va_list) __printflike(1,0);
 
-void loglib_vlog(int, const char *, va_list)
-    __attribute__((__format__(__printf__,2,0)));
+void vhlog_warn(const char *, va_list) __printflike(1,0);
+void vhlog_warnx(const char *, va_list) __printflike(1,0);
+void vhlog_err(int, const char *, va_list) __printflike(2,0) __noreturn;
+void vhlog_errx(int, const char *, va_list) __printflike(2,0) __noreturn;
 
-void loglib_vwarn(const char *, va_list)
-    __attribute__((__format__(__printf__,1,0)));
-void loglib_vwarnx(const char *, va_list)
-    __attribute__((__format__(__printf__,1,0)));
-void loglib_verr(int, const char *, va_list)
-    __attribute__((__format__(__printf__,2,0))) __attribute__((__noreturn__));
-void loglib_verrx(int, const char *, va_list)
-    __attribute__((__format__(__printf__,2,0))) __attribute__((__noreturn__));
+void hlog_warnx(const char *, ...) __printflike(1,2);
+void hlog_warn(const char *, ...) __printflike(1,2);
 
-void loglib_warnx(const char *, ...)
-    __attribute__((__format__(__printf__,1,2)));
-void loglib_warn(const char *, ...)
-    __attribute__((__format__(__printf__,1,2)));
+void hlog_err(int, const char *, ...) __printflike(2,3) __noreturn;
+void hlog_errx(int, const char *, ...) __printflike(2,3) __noreturn;
 
-void loglib_err(int, const char *, ...)
-    __attribute__((__format__(__printf__,2,3))) __attribute__((__noreturn__));
-void loglib_errx(int, const char *, ...)
-    __attribute__((__format__(__printf__,2,3))) __attribute__((__noreturn__));
+void hlog_always(struct hlog_sink *, const char *, ...)
+    __printflike(2,3);
 
-void loglib_always_log(struct loglib_sink *, const char *, ...)
-    __attribute__((__format__(__printf__,2,3)));
+void hlog_impl(struct hlog_sink *, const char *, ...)
+    __printflike(2,3);
 
-void loglib_log(struct loglib_sink *, const char *, ...)
-    __attribute__((__format__(__printf__,2,3)));
-
-int log_printer(void *, const char *, ...);
-
-#endif	/* _LOGLIB_H */
+#endif	/* _HLOG_H */

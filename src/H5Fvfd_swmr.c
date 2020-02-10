@@ -48,7 +48,7 @@
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5SMprivate.h"        /* Shared Object Header Messages            */
 #include "H5Tprivate.h"         /* Datatypes                                */
-
+#include "hlog.h"
 
 /****************/
 /* Local Macros */
@@ -86,22 +86,10 @@ unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          * on the 0->1 and 1->0
                                          * transitions.
                                          */
-static const bool ldbg_enabled = false;
-
-static void
-ldbgf(const char *fmt, ...)
-{
-    va_list ap;
-
-    va_start(ap, fmt);
-
-    if (!ldbg_enabled)
-        return;
-
-    (void)vprintf(fmt, ap);
-
-    va_end(ap);
-}
+HLOG_SINK_DECL(swmr);
+HLOG_SINK_SHORT_DEFN(swmr, all);
+HLOG_SINK_SHORT_DEFN(eot, swmr);
+HLOG_SINK_SHORT_DEFN(shadow_defrees, swmr);
 
 /*
  *  The head of the end of tick queue (EOT queue) for files opened in either
@@ -362,6 +350,7 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
             TAILQ_REMOVE(&f->shared->shadow_defrees, curr, link);
             H5FL_FREE(shadow_defree_t, curr);
         }
+        hlog_fast(shadow_defrees, "Emptied deferred shadow frees.");
 
         assert(TAILQ_EMPTY(&f->shared->shadow_defrees));
     } else { /* For file flush */
@@ -392,7 +381,7 @@ shadow_range_defer_free(H5F_shared_t *shared, uint64_t offset, uint32_t length)
     shadow_defree->tick_num = shared->tick_num;
 
     if (TAILQ_EMPTY(&shared->shadow_defrees))
-        ldbgf("Adding to the old images list.\n"); 
+        hlog_fast(shadow_defrees, "Adding first deferred shadow free."); 
 
     TAILQ_INSERT_HEAD(&shared->shadow_defrees, shadow_defree, link);
     return 0;
@@ -454,6 +443,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
     haddr_t md_addr;                        /* Address in the metadata file */
     unsigned i;                             /* Local index variable */
     herr_t ret_value = SUCCEED;             /* Return value */
+    bool visited_any_defree = false;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -564,6 +554,8 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
      TAILQ_FOREACH_REVERSE_SAFE(shadow_defree, &f->shared->shadow_defrees,
          shadow_defree_queue, link, prev) {
 
+        visited_any_defree = true;
+
         /* max_lag is at least 3 */
         if ( ( f->shared->tick_num > f->shared->vfd_swmr_config.max_lag ) &&
              ( shadow_defree->tick_num <=
@@ -592,8 +584,8 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
         }
     }
 
-    if (TAILQ_EMPTY(&f->shared->shadow_defrees))
-        ldbgf("Emptied the old images list.\n");
+    if (visited_any_defree && TAILQ_EMPTY(&f->shared->shadow_defrees))
+        hlog_fast(shadow_defrees, "Removed last deferred shadow free.");
 
 done:
 
@@ -1112,11 +1104,11 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
     HDassert(f->shared->vfd_swmr);
     HDassert(!f->shared->vfd_swmr_writer);
     HDassert(f->shared->lf);
-#if 0 /* JRM */
-    HDfprintf(stderr, "--- reader EOT entering ---\n");
-    HDfprintf(stderr, "--- reader EOT init index used / len = %d / %d ---\n",
+
+    hlog_fast(eot, "--- reader EOT entering ---");
+    hlog_fast(eot, "--- reader EOT init index used / len = %d / %d ---",
               f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
-#endif /* JRM */
+
     /* 1) Direct the VFD SWMR reader VFD to load the current header
      *    from the metadata file, and report the current tick.
      *
