@@ -960,7 +960,7 @@ error :
  *
  * Function:   test_set_configured_fapl()
  *
- * Purpose:    Verify `h5tools_set_configured_fapl()` with ROS3 VFD
+ * Purpose:    Verify `h5tools_get_fapl()` with ROS3 and HDFS VFDs
  *
  * Return:     0 if test passes
  *             1 if failure
@@ -1147,7 +1147,8 @@ test_set_configured_fapl(void)
     TESTING("programmatic fapl set");
 
     for (i = 0; i < n_cases; i++) {
-        int      result;
+        h5tools_get_fapl_info_t get_fapl_info;
+        hid_t result;
         testcase C = cases[i];
 
         fapl_id = H5I_INVALID_HID;
@@ -1169,11 +1170,14 @@ test_set_configured_fapl(void)
 #endif /* UTIL_TEST_DEBUG */
 
         /* test */
-        result = h5tools_set_configured_fapl(
-                fapl_id,
-                C.vfdname,
-                C.conf_fa);
-        JSVERIFY( result, C.expected, C.message )
+        get_fapl_info.get_type = GET_VFD_BY_NAME;
+        get_fapl_info.info = C.conf_fa;
+        get_fapl_info.u.name = C.vfdname;
+        result = h5tools_get_fapl(H5P_DEFAULT, &get_fapl_info);
+        if (C.expected == 0)
+            JSVERIFY( result, H5I_INVALID_HID, C.message)
+        else
+            JSVERIFY_NOT( result, H5I_INVALID_HID, C.message)
 
 #if UTIL_TEST_DEBUG
         HDfprintf(stderr, "after test\n"); fflush(stderr);

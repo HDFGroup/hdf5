@@ -570,14 +570,14 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     *-------------------------------------------------------------------------
     */
     /* open file 1 */
-    if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
+    if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname1);
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "<%s>: unable to open file\n", fname1);
     } /* end if */
     H5TOOLS_DEBUG("file1_id = %s", fname1);
 
     /* open file 2 */
-    if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
+    if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname2);
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "<%s>: unable to open file\n", fname2);
     } /* end if */

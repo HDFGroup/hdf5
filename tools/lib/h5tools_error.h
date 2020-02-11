@@ -101,14 +101,16 @@ do {                                                                            
  * H5TOOLS_PUSH_ERROR macro, used to push an error to an error stack. Not meant to
  * be called directly.
  */
-#define H5TOOLS_PUSH_ERROR(estack_id, err_cls, maj_err_id, min_err_id, ...)                          \
-do {                                                                                                 \
-    if (estack_id >= 0 && err_cls >= 0)                                                              \
-        H5Epush2(estack_id, __FILE__, FUNC, __LINE__, err_cls, maj_err_id, min_err_id, __VA_ARGS__); \
-    else {                                                                                           \
-        HDfprintf(stderr, __VA_ARGS__);                                                              \
-        HDfprintf(stderr, "\n");                                                                     \
-    }                                                                                                \
+#define H5TOOLS_PUSH_ERROR(estack_id, err_cls, maj_err_id, min_err_id, ...)                              \
+do {                                                                                                     \
+    if (enable_error_stack > 0) {                                                                        \
+        if (estack_id >= 0 && err_cls >= 0)                                                              \
+            H5Epush2(estack_id, __FILE__, FUNC, __LINE__, err_cls, maj_err_id, min_err_id, __VA_ARGS__); \
+        else {                                                                                           \
+            HDfprintf(stderr, __VA_ARGS__);                                                              \
+            HDfprintf(stderr, "\n");                                                                     \
+        }                                                                                                \
+    }                                                                                                    \
 } while(0)
 
 /*
@@ -167,30 +169,30 @@ do {                                                                            
 
 #ifdef H5_TOOLS_DEBUG
 
-#define H5TOOLS_START_DEBUG(...)                                                                 \
-do {                                                                                             \
-    H5tools_INDENT_g += 2;                                                                       \
+#define H5TOOLS_START_DEBUG(...)                                                                     \
+do {                                                                                                 \
+    H5tools_INDENT_g += 2;                                                                           \
     HDfprintf(stderr, "%*sENTER %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, FUNC);  \
-    HDfprintf(stderr, __VA_ARGS__);                                                              \
-    HDfprintf(stderr, "\n");                                                                     \
-    HDfflush(stderr);                                                                            \
+    HDfprintf(stderr, __VA_ARGS__);                                                                  \
+    HDfprintf(stderr, "\n");                                                                         \
+    HDfflush(stderr);                                                                                \
 } while(0)
 
-#define H5TOOLS_DEBUG(...)                                                                       \
-do {                                                                                             \
+#define H5TOOLS_DEBUG(...)                                                                           \
+do {                                                                                                 \
     HDfprintf(stderr, "%*s %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, FUNC);       \
-    HDfprintf(stderr, __VA_ARGS__);                                                              \
-    HDfprintf(stderr, "\n");                                                                     \
-    HDfflush(stderr);                                                                            \
+    HDfprintf(stderr, __VA_ARGS__);                                                                  \
+    HDfprintf(stderr, "\n");                                                                         \
+    HDfflush(stderr);                                                                                \
 } while(0)
 
-#define H5TOOLS_ENDDEBUG(...)                                                                    \
-do {                                                                                             \
+#define H5TOOLS_ENDDEBUG(...)                                                                        \
+do {                                                                                                 \
     HDfprintf(stderr, "%*sEXIT %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, FUNC);   \
-    HDfprintf(stderr, __VA_ARGS__);                                                              \
-    HDfprintf(stderr, "\n");                                                                     \
-    H5tools_INDENT_g -= 2;                                                                       \
-    HDfflush(stderr);                                                                            \
+    HDfprintf(stderr, __VA_ARGS__);                                                                  \
+    HDfprintf(stderr, "\n");                                                                         \
+    H5tools_INDENT_g -= 2;                                                                           \
+    HDfflush(stderr);                                                                                \
 } while(0)
 
 #else

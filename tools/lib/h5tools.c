@@ -31,7 +31,7 @@ int       H5tools_INDENT_g = 0;
 
 
 /* global variables */
-hid_t       H5tools_ERR_STACK_g = 0;
+hid_t       H5tools_ERR_STACK_g = H5I_INVALID_HID;
 hid_t       H5tools_ERR_CLS_g = H5I_INVALID_HID;
 hid_t       H5E_tools_g = H5I_INVALID_HID;
 hid_t       H5E_tools_min_id_g = H5I_INVALID_HID;
@@ -56,46 +56,42 @@ unsigned long long packed_data_mask;  /* mask in which packed bits to display */
 int         enable_error_stack = 0;   /* re-enable error stack; disable=0 enable=1 */
 
 /* sort parameters */
-H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
-H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
+H5_index_t      sort_by        = H5_INDEX_NAME; /* sort_by [creation_order | name]  */
+H5_iter_order_t sort_order     = H5_ITER_INC;   /* sort_order [ascending | descending] */
 
 /* module-scoped variables */
 static int  h5tools_init_g;     /* if h5tools lib has been initialized */
 
-/* This enum should match the entries in the below drivers_list since they
- * are indexes into the drivers_list array. */
-typedef enum {
-    SEC2_IDX = 0
-   ,FAMILY_IDX
-   ,SPLIT_IDX
-   ,MULTI_IDX
-#ifdef H5_HAVE_PARALLEL
-   ,MPIO_IDX
-#endif /* H5_HAVE_PARALLEL */
-   ,SWMR_IDX
-} driver_idx;
+/* Names of VOL connectors */
+const char *volnames[] = {
+    H5VL_NATIVE_NAME,
+    H5VL_PASSTHRU_NAME,
+};
 
-/* Names of VFDs */
-static const char *drivernames[]={
-    [SEC2_IDX] = "sec2",
-    [FAMILY_IDX] = "family",
-    [SPLIT_IDX] = "split",
-    [MULTI_IDX] = "multi",
-#ifdef H5_HAVE_PARALLEL
-    [MPIO_IDX] = "mpio",
-#endif /* H5_HAVE_PARALLEL */
+/* Names of VFDs. These names are always available so that
+ * the tools can emit special messages when a VFD is asked
+ * for by name but is not compiled into the library or is
+ * somehow otherwise not enabled.
+ *
+ */
+const char *drivernames[] = {
+    [SEC2_VFD_IDX] = "sec2",
+    [DIRECT_VFD_IDX] = "direct",
+    [LOG_VFD_IDX] = "log",
+    [WINDOWS_VFD_IDX] = "windows",
+    [STDIO_VFD_IDX] = "stdio",
+    [CORE_VFD_IDX] = "core",
+    [FAMILY_VFD_IDX] = "family",
+    [SPLIT_VFD_IDX] = "split",
+    [MULTI_VFD_IDX] = "multi",
+    [MPIO_VFD_IDX] = "mpio",
+    [ROS3_VFD_IDX] = "ros3",
+    [HDFS_VFD_IDX] = "hdfs",
     [SWMR_IDX] = "swmr",
 };
 
-/* If h5tools_fopen() may try the i'th driver if its arguments do not
- * specify one and specified_only[i] is false.  If specified_only[i] is
- * true, then the arguments must be specify the driver. 
- */
-static bool specified_only[] = {
-    [SWMR_IDX] = true
-};
-
-#define NUM_DRIVERS     (sizeof(drivernames) / sizeof(drivernames[0]))
+#define NUM_VOLS    (sizeof(volnames) / sizeof(volnames[0]))
+#define NUM_DRIVERS (sizeof(drivernames) / sizeof(drivernames[0]))
 
 /*-------------------------------------------------------------------------
  * Function: h5tools_init
@@ -144,16 +140,19 @@ h5tools_init(void)
 void
 h5tools_close(void)
 {
-    H5E_auto2_t         tools_func;
-    void               *tools_edata;
+    H5E_auto2_t  tools_func;
+    void        *tools_edata;
+
     if (h5tools_init_g) {
         /* special case where only data is output to stdout */
-        if((rawoutstream == NULL) && rawdatastream && (rawdatastream == stdout))
+        if ((rawoutstream == NULL) && rawdatastream && (rawdatastream == stdout))
             HDfprintf(rawdatastream, "\n");
 
         H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-        if(tools_func!=NULL)
+
+        if (tools_func)
             H5Eprint2(H5tools_ERR_STACK_g, rawerrorstream);
+
         if (rawattrstream && rawattrstream != stdout) {
             if (fclose(rawattrstream))
                 perror("closing rawattrstream");
@@ -484,178 +483,525 @@ swmr_fapl_augment(hid_t fapl, const char *fname)
 }
 
 /*-------------------------------------------------------------------------
- * Function: h5tools_get_fapl
+ * Function: h5tools_set_vfd_fapl
  *
- * Purpose:  Get a FAPL for a given VFL driver name.
+ * Purpose:  Given a VFL driver name, sets the appropriate driver on the
+ *           specified FAPL.
+ *
+ * TODO:     Add handling for Windows VFD.
  *
  * Return:   positive - succeeded
  *           negative - failed
  *-------------------------------------------------------------------------
  */
-static hid_t
-h5tools_get_fapl(hid_t fapl, const char *fname, const char *driver,
-    unsigned *drivernum)
+static herr_t
+h5tools_set_vfd_fapl(hid_t fapl, h5tools_get_fapl_info_t *get_info)
 {
-    hid_t  new_fapl = H5I_INVALID_HID; /* Copy of file access property list passed in, or new property list */
     herr_t ret_value = SUCCEED;
 
-    /* Make a copy of the FAPL, for the file open call to use, eventually */
-    if (fapl == H5P_DEFAULT) {
-        if ((new_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pcreate failed");
-    } /* end if */
-    else {
-        if ((new_fapl = H5Pcopy(fapl)) < 0)
-            H5TOOLS_GOTO_ERROR(FAIL, "H5Pcopy failed");
-    } /* end else */
+    /* Currently, only retrieving a VFD by name is supported */
+    if (GET_VFD_BY_NAME != get_info->get_type)
+        H5TOOLS_GOTO_ERROR(FAIL, "unsupported VFD retrieval type; only retrieval by name is supported");
 
-    /* Determine which driver the user wants to open the file with. Try
-     * that driver. If it can't open it, then fail. */
-    if (!HDstrcmp(driver, drivernames[SWMR_IDX])) {
+    /*
+     * Determine which driver the user wants to open the file with.
+     * Try that driver; if it can't open the file, then fail.
+     */
+    if (!HDstrcmp(get_info->u.name, drivernames[SWMR_VFD_IDX])) {
         /* SWMR driver */
-        if (swmr_fapl_augment(new_fapl, fname) < 0)
+        if (swmr_fapl_augment(fapl, vfd_info->fname) < 0)
             H5TOOLS_GOTO_ERROR(FAIL, "swmr_fapl_augment failed");
-        if (drivernum)
-            *drivernum = SWMR_IDX;
-    } else if (!HDstrcmp(driver, drivernames[SEC2_IDX])) {
-        /* SEC2 driver */
-        if (H5Pset_fapl_sec2(new_fapl) < 0)
+    } else if (!HDstrcmp(get_info->u.name, drivernames[SEC2_VFD_IDX])) {
+        /* SEC2 Driver */
+        if (H5Pset_fapl_sec2(fapl) < 0)
             H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_sec2 failed");
-
-        if (drivernum)
-            *drivernum = SEC2_IDX;
     }
-    else if (!HDstrcmp(driver, drivernames[FAMILY_IDX])) {
+    else if (!HDstrcmp(get_info->u.name, drivernames[DIRECT_VFD_IDX])) {
+#ifdef H5_HAVE_DIRECT
+        /* Direct Driver */
+        if (H5Pset_fapl_direct(fapl, 1024, 4096, 8 * 4096) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_direct failed");
+#else
+        H5TOOLS_GOTO_ERROR(FAIL, "Direct VFD is not enabled");
+#endif
+    }
+    else if (!HDstrcmp(get_info->u.name, drivernames[LOG_VFD_IDX])) {
+        unsigned long long log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
+
+        /* Log Driver */
+        if (H5Pset_fapl_log(fapl, NULL, log_flags, (size_t) 0) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_sec2 failed");
+    }
+    else if (!HDstrcmp(get_info->u.name, drivernames[WINDOWS_VFD_IDX])) {
+#ifdef H5_HAVE_WINDOWS
+
+#else
+        H5TOOLS_GOTO_ERROR(FAIL, "Windows VFD is not enabled");
+#endif
+    }
+    else if (!HDstrcmp(get_info->u.name, drivernames[STDIO_VFD_IDX])) {
+        /* Stdio Driver */
+        if (H5Pset_fapl_stdio(fapl) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_stdio failed");
+    }
+    else if (!HDstrcmp(get_info->u.name, drivernames[CORE_VFD_IDX])) {
+        /* Core Driver */
+        if (H5Pset_fapl_core(fapl, (size_t) H5_MB, TRUE) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_stdio failed");
+    }
+    else if (!HDstrcmp(get_info->u.name, drivernames[FAMILY_VFD_IDX])) {
         /* FAMILY Driver */
 
         /* Set member size to be 0 to indicate the current first member size
          * is the member size.
          */
-        if (H5Pset_fapl_family(new_fapl, (hsize_t) 0, H5P_DEFAULT) < 0)
+        if (H5Pset_fapl_family(fapl, (hsize_t) 0, H5P_DEFAULT) < 0)
             H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_family failed");
-
-        if (drivernum)
-            *drivernum = FAMILY_IDX;
     }
-    else if (!HDstrcmp(driver, drivernames[SPLIT_IDX])) {
+    else if (!HDstrcmp(get_info->u.name, drivernames[SPLIT_VFD_IDX])) {
         /* SPLIT Driver */
-        if (H5Pset_fapl_split(new_fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
+        if (H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
             H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_split failed");
-
-        if (drivernum)
-            *drivernum = SPLIT_IDX;
     }
-    else if (!HDstrcmp(driver, drivernames[MULTI_IDX])) {
+    else if (!HDstrcmp(get_info->u.name, drivernames[MULTI_VFD_IDX])) {
         /* MULTI Driver */
-        if (H5Pset_fapl_multi(new_fapl, NULL, NULL, NULL, NULL, TRUE) < 0)
+        if (H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE) < 0)
             H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_multi failed");
-
-        if(drivernum)
-            *drivernum = MULTI_IDX;
     }
+    else if (!HDstrcmp(get_info->u.name, drivernames[MPIO_VFD_IDX])) {
 #ifdef H5_HAVE_PARALLEL
-    else if(!HDstrcmp(driver, drivernames[MPIO_IDX])) {
         int mpi_initialized, mpi_finalized;
 
         /* MPI-I/O Driver */
+
         /* check if MPI is available. */
         MPI_Initialized(&mpi_initialized);
         MPI_Finalized(&mpi_finalized);
 
-        if(mpi_initialized && !mpi_finalized) {
-            if(H5Pset_fapl_mpio(new_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
+        if (mpi_initialized && !mpi_finalized) {
+            if (H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
                 H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_mpio failed");
-            if(drivernum)
-                *drivernum = MPIO_IDX;
         } /* end if */
-    }
+#else
+        H5TOOLS_GOTO_ERROR(FAIL, "MPI-I/O VFD is not enabled");
 #endif /* H5_HAVE_PARALLEL */
+    }
+    else if (!HDstrcmp(get_info->u.name, drivernames[ROS3_VFD_IDX])) {
+#ifdef H5_HAVE_ROS3_VFD
+        if (!get_info->info)
+            H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD info is invalid");
+        if (H5Pset_fapl_ros3(fapl, (H5FD_ros3_fapl_t *)get_info->info) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3() failed");
+#else
+        H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD is not enabled");
+#endif
+    }
+    else if (!HDstrcmp(get_info->u.name, drivernames[HDFS_VFD_IDX])) {
+#ifdef H5_HAVE_LIBHDFS
+        if (!get_info->info)
+            H5TOOLS_GOTO_ERROR(FAIL, "HDFS VFD info is invalid");
+        if (H5Pset_fapl_hdfs(fapl, (H5FD_hdfs_fapl_t *)get_info->info) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_hdfs() failed");
+#else
+        H5TOOLS_GOTO_ERROR(FAIL, "The HDFS VFD is not enabled");
+#endif
+    }
     else
-        ret_value = -1;
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid VFD name");
 
 done:
-    if((new_fapl != H5P_DEFAULT) && (ret_value < 0)) {
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: h5tools_set_vol_fapl
+ *
+ * Purpose:  Given a VOL connector name or ID, sets the appropriate
+ *           connector on the specified FAPL.
+ *
+ * Return:   positive - succeeded
+ *           negative - failed
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+h5tools_set_vol_fapl(hid_t fapl, h5tools_get_fapl_info_t *get_info)
+{
+    htri_t connector_is_registered;
+    hid_t  connector_id = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED;
+
+    if (GET_VOL_BY_NAME != get_info->get_type && GET_VOL_BY_ID != get_info->get_type)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid VOL retrieval type");
+
+    if (GET_VOL_BY_NAME == get_info->get_type) {
+        /* Retrieve VOL connector by name */
+
+        if ((connector_is_registered = H5VLis_connector_registered_by_name(get_info->u.name)) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "can't check if VOL connector is registered");
+        if (connector_is_registered) {
+            if ((connector_id = H5VLget_connector_id_by_name(get_info->u.name)) < 0)
+                H5TOOLS_GOTO_ERROR(FAIL, "can't get VOL connector ID");
+        }
+        else {
+            /* Check for VOL connectors that ship with the library */
+            if (!strcmp(get_info->u.name, H5VL_NATIVE_NAME)) {
+                connector_id = H5VL_NATIVE;
+            }
+            else if (!strcmp(get_info->u.name, H5VL_PASSTHRU_NAME)) {
+                connector_id = H5VL_PASSTHRU;
+            }
+            else {
+                if ((connector_id = H5VLregister_connector_by_name(get_info->u.name, H5P_DEFAULT)) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "can't register VOL connector");
+            }
+        }
+    }
+    else {
+        /* Retrieve VOL connector by ID */
+
+        if ((connector_is_registered = H5VLis_connector_registered_by_value((H5VL_class_value_t) get_info->u.id)) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "can't check if VOL connector is registered");
+        if (connector_is_registered) {
+            if ((connector_id = H5VLget_connector_id_by_value((H5VL_class_value_t) get_info->u.id)) < 0)
+                H5TOOLS_GOTO_ERROR(FAIL, "can't get VOL connector ID");
+        }
+        else {
+            /* Check for VOL connectors that ship with the library */
+            if (get_info->u.id == H5VL_NATIVE_VALUE) {
+                connector_id = H5VL_NATIVE;
+            }
+            else if (get_info->u.id == H5VL_PASSTHRU_VALUE) {
+                connector_id = H5VL_PASSTHRU;
+            }
+            else {
+                if ((connector_id = H5VLregister_connector_by_value((H5VL_class_value_t) get_info->u.id, H5P_DEFAULT)) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "can't register VOL connector");
+            }
+        }
+    }
+
+    if (H5Pset_vol(fapl, connector_id, get_info->info) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "can't set VOL connector on FAPL");
+
+done:
+    if (ret_value < 0) {
+        if (connector_id >= 0 && H5Idec_ref(connector_id) < 0)
+            H5TOOLS_ERROR(FAIL, "failed to decrement refcount on VOL connector ID");
+    }
+
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: h5tools_get_fapl
+ *
+ * Purpose:  Get a FAPL for a given VFL driver name, VOL connector name
+ *           or VOL connector ID.
+ *
+ * Return:   positive - succeeded
+ *           negative - failed
+ *-------------------------------------------------------------------------
+ */
+hid_t
+h5tools_get_fapl(hid_t fapl, h5tools_get_fapl_info_t *get_info)
+{
+    hid_t new_fapl = H5I_INVALID_HID;
+    hid_t ret_value = H5I_INVALID_HID;
+
+    if (fapl < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid FAPL");
+    if (!get_info)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid FAPL retrieval info");
+
+    /* Make a copy of the FAPL if necessary, or create a FAPL if
+     * H5P_DEFAULT is specified. */
+    if (H5P_DEFAULT == fapl) {
+        if ((new_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5Pcreate failed");
+    } /* end if */
+    else {
+        if ((new_fapl = H5Pcopy(fapl)) < 0)
+            H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5Pcopy failed");
+    }
+
+    if (GET_VFD_BY_NAME == get_info->get_type) {
+        if (h5tools_set_vfd_fapl(new_fapl, get_info) < 0)
+            H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to set VFD on FAPL");
+    }
+    else if (GET_VOL_BY_NAME == get_info->get_type || GET_VOL_BY_ID == get_info->get_type) {
+        if (h5tools_set_vol_fapl(new_fapl, get_info) < 0)
+            H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to set VOL on FAPL");
+    }
+    else
+        H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "invalid FAPL retrieval type");
+
+    ret_value = new_fapl;
+
+done:
+    if ((new_fapl >= 0) && (ret_value < 0)) {
         H5Pclose(new_fapl);
         new_fapl = H5I_INVALID_HID;
     }
 
-    return(new_fapl);
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: h5tools_get_vfd_name
+ *
+ * Purpose:  Given a FAPL, retrieves the name of the VFL driver set on it
+ *           if using a native-terminal VOL connector. If a
+ *           non-native-terminal VOL connector is set on the FAPL, the
+ *           first byte of the returned driver name will be set to the null
+ *           terminator.
+ *
+ * Return:   SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size)
+{
+    hid_t  fapl_vol_id = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED;
+
+    if (fapl_id < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid FAPL");
+    if (!drivername)
+        H5TOOLS_GOTO_ERROR(FAIL, "drivername is NULL");
+    if (drivername && !drivername_size)
+        H5TOOLS_GOTO_ERROR(FAIL, "drivername_size must be non-zero");
+
+    /* Initialize the driver name */
+    drivername[0] = '\0';
+
+    if (fapl_id == H5P_DEFAULT)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+
+    /* Retrieve ID of the VOL connector set on the FAPL */
+    if (H5Pget_vol_id(fapl_id, &fapl_vol_id) < 0)
+        H5TOOLS_ERROR(FAIL, "failed to retrieve VOL ID from FAPL");
+
+    /* TODO: For now, we have no way of determining if an arbitrary
+     * VOL connector is native-terminal. */
+    if (fapl_vol_id == H5VL_NATIVE) {
+        const char *driver_name;
+        hid_t       driver_id;
+
+        if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "failed to retrieve VFL driver ID from FAPL");
+
+        if (driver_id == H5FD_SEC2)
+            driver_name = drivernames[SEC2_VFD_IDX];
+#ifdef H5_HAVE_DIRECT
+        else if (driver_id == H5FD_DIRECT)
+            driver_name = drivernames[DIRECT_VFD_IDX];
+#endif
+        else if (driver_id == H5FD_LOG)
+            driver_name = drivernames[LOG_VFD_IDX];
+#ifdef H5_HAVE_WINDOWS
+        else if (driver_id == H5FD_WINDOWS)
+            driver_name = drivernames[WINDOWS_VFD_IDX];
+#endif
+        else if (driver_id == H5FD_STDIO)
+            driver_name = drivernames[STDIO_VFD_IDX];
+        else if (driver_id == H5FD_CORE)
+            driver_name = drivernames[CORE_VFD_IDX];
+        else if (driver_id == H5FD_FAMILY)
+            driver_name = drivernames[FAMILY_VFD_IDX];
+        else if (driver_id == H5FD_MULTI)
+            driver_name = drivernames[MULTI_VFD_IDX];
+#ifdef H5_HAVE_PARALLEL
+        else if (driver_id == H5FD_MPIO)
+            driver_name = drivernames[MPIO_VFD_IDX];
+#endif
+#ifdef H5_HAVE_ROS3_VFD
+        else if (driver_id == H5FD_ROS3)
+            driver_name = drivernames[ROS3_VFD_IDX];
+#endif
+#ifdef H5_HAVE_LIBHDFS
+        else if (driver_id == H5FD_HDFS)
+            driver_name = drivernames[HDFS_VFD_IDX];
+#endif
+        else
+            driver_name = "unknown";
+
+        HDstrncpy(drivername, driver_name, drivername_size);
+        drivername[drivername_size - 1] = '\0';
+    }
+
+done:
+    /* Close retrieved VOL ID */
+    if (fapl_vol_id >= 0)
+        if (H5VLclose(fapl_vol_id) < 0)
+            H5TOOLS_ERROR(FAIL, "failed to close VOL ID");
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
  * Function: h5tools_fopen
  *
- * Purpose:  Loop through the various types of VFL drivers trying to open FNAME.
- *      If the HDF5 library is version 1.2 or less, then we have only the SEC2
- *      driver to try out. If the HDF5 library is greater than version 1.2,
- *      then we have the FAMILY, SPLIT, and MULTI drivers to play with.
+ * Purpose:  Opens file FNAME using the specified flags and FAPL.
  *
- *      If DRIVER is non-NULL, then it will try to open the file with that
- *      driver first. We assume that the user knows what they are doing so, if
- *      we fail, then we won't try other file drivers.
+ *           The 'use_specific_driver' parameter is used to control the
+ *           VFD/VOL connector that this routine uses to open the file
+ *           with. If 'use_specific_driver' is set to TRUE, this routine
+ *           assumes that the caller has already set a specific VFD or VOL
+ *           connector on the given FAPL and will attempt to directly use
+ *           the FAPL for opening the file. We assume that the caller knows
+ *           what they are doing; if the file is unable to be opened using
+ *           that FAPL, this routine will return H5I_INVALID_HID.
+ *
+ *           However, if 'use_specific_driver' is set to FALSE, this
+ *           routine assumes that the caller HAS NOT set a specific VFD or
+ *           VOL connector on the given FAPL and will instead loop through
+ *           the various available VFL drivers and VOL connectors trying to
+ *           open FNAME.
+ *
+ *           The list of available VFL drivers is as follows:
+ *             - If the HDF5 library is version 1.2 or less, then we have
+ *               only the SEC2 driver to try out.
+ *             - If the HDF5 library is greater than version 1.2, then we
+ *               have the FAMILY, SPLIT, and MULTI drivers to play with.
+ *
+ *           The list of available VOL connectors is as follows:
+ *             - "Native" VOL connector
+ *             - Pass-through VOL connector
  *
  * Return:
- *      On success, returns a file id for the opened file. If DRIVERNAME is
- *      non-null then the first DRIVERNAME_SIZE-1 characters of the driver
- *      name are copied into the DRIVERNAME array and null terminated.
+ *      On success, returns a file ID for the opened file. If DRIVERNAME is
+ *      non-null and the native VOL connector is the terminal connector,
+ *      then the first DRIVERNAME_SIZE-1 characters of the driver name are
+ *      copied into the DRIVERNAME array and null terminated. If the
+ *      native VOL connector is NOT the terminal connector, then the first
+ *      byte of DRIVERNAME will be set to the null terminator.
  *
- *      Otherwise, the function returns FAIL. If DRIVERNAME is non-null then
- *      the first byte is set to the null terminator.
+ *      On failure, the function returns H5I_INVALID_HID and DRIVERNAME
+ *      will not be set.
  *-------------------------------------------------------------------------
  */
 hid_t
-h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
+h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, hbool_t use_specific_driver,
     char *drivername, size_t drivername_size)
 {
-    unsigned    drivernum;
-    hid_t       fid = FAIL;
-    hid_t       my_fapl = H5P_DEFAULT;
+    hid_t    fid = H5I_INVALID_HID;
+    hid_t    tmp_vol_fapl = H5I_INVALID_HID;
+    hid_t    tmp_vfd_fapl = H5I_INVALID_HID;
+    hid_t    used_fapl = H5I_INVALID_HID;
+    unsigned volnum, drivernum;
+    hid_t    ret_value = H5I_INVALID_HID;
 
-    /* Try to open the file using every eligible driver. */
-    for (drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
-        if (driver == NULL && specified_only[drivernum])
-            continue;
-        if (driver != NULL && strcmp(drivernames[drivernum], driver) != 0)
-            continue;
-        /* Get the correct FAPL for the given driver */
-        if((my_fapl = h5tools_get_fapl(fapl, fname, drivernames[drivernum],
-                NULL)) < 0)
-            goto done;
+    /*
+     * First try to open the file using just the given FAPL. If the
+     * HDF5_VOL_CONNECTOR environment variable has been set, this will
+     * allow us to attempt to open the file using the specified VOL
+     * connector before we go looping through all available ones,
+     * which will override any VOL connector set by use of the
+     * environment variable.
+     */
 
-        /* allow error stack display if enable-error-stack has optional arg number */
-        if (enable_error_stack > 1) {
-            fid = H5Fopen(fname, flags, my_fapl);
-        } else {
-            H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, flags, my_fapl);
-            } H5E_END_TRY;
-        }
-
-        if (fid != FAIL)
-            break;
-
-        /* Close the FAPL */
-        H5Pclose(my_fapl);
-        my_fapl = H5P_DEFAULT;
+    /* Allow error stack display if --enable-error-stack has optional arg number */
+    if (enable_error_stack > 1) {
+        fid = H5Fopen(fname, flags, fapl);
+    }
+    else {
+        H5E_BEGIN_TRY {
+            fid = H5Fopen(fname, flags, fapl);
+        } H5E_END_TRY;
     }
 
-    /* Save the driver name */
-    if (drivername && drivername_size) {
-        if (fid != FAIL) {
-            HDstrncpy(drivername, drivernames[drivernum], drivername_size);
-            drivername[drivername_size - 1] = '\0';
+    /* If we succeeded in opening the file, we're done. */
+    if (fid >= 0) {
+        used_fapl = fapl;
+        H5TOOLS_GOTO_DONE(fid);
+    }
+
+    /*
+     * If we failed to open the file and the caller specified 'use_specific_driver'
+     * as TRUE, we should return failure now since the file couldn't be opened with
+     * the VFL driver/VOL connector that was set on the FAPL by the caller.
+     */
+    if (fid < 0 && use_specific_driver)
+        H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to open file using specified FAPL");
+
+    /*
+     * As a final resort, try to open the file using each of the available
+     * VOL connectors. When the native VOL connector is the current "terminal"
+     * connector being looked at, also try using each of the available VFL drivers.
+     */
+    for (volnum = 0; volnum < NUM_VOLS; volnum++) {
+        h5tools_get_fapl_info_t get_vol_info;
+
+        get_vol_info.get_type = GET_VOL_BY_NAME;
+        get_vol_info.info = NULL;
+        get_vol_info.u.name = volnames[volnum];
+
+        /* Get a FAPL for the current VOL connector */
+        if ((tmp_vol_fapl = h5tools_get_fapl(fapl, &get_vol_info)) < 0)
+            continue;
+
+        /* TODO: For now, we have no way of determining if an arbitrary
+         * VOL connector is native-terminal. */
+        if (NATIVE_VOL_IDX == volnum) {
+            /*
+             * If using the native VOL connector, or a VOL connector which has the
+             * native connector as its terminal connector, loop through all of the
+             * VFL drivers as well.
+             */
+            for (drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
+                h5tools_get_fapl_info_t get_vfd_info;
+
+                /* Skip the log VFD as it prints out to standard out */
+                if (drivernum == LOG_VFD_IDX)
+                    continue;
+
+                get_vfd_info.get_type = GET_VFD_BY_NAME;
+                get_vfd_info.info = NULL;
+                get_vfd_info.u.name = drivernames[drivernum];
+
+                /* Using the current VOL FAPL as a base, get the correct FAPL for the given VFL driver */
+                if ((tmp_vfd_fapl = h5tools_get_fapl(tmp_vol_fapl, &get_vfd_info)) < 0)
+                    continue;
+
+                if ((fid = h5tools_fopen(fname, flags, tmp_vfd_fapl, TRUE, drivername, drivername_size)) >= 0) {
+                    used_fapl = tmp_vfd_fapl;
+                    H5TOOLS_GOTO_DONE(fid);
+                }
+                else {
+                    /* Close the temporary VFD FAPL */
+                    H5Pclose(tmp_vfd_fapl);
+                    tmp_vfd_fapl = H5I_INVALID_HID;
+                }
+            }
         }
         else {
-            /*no file opened*/
-            drivername[0] = '\0';
+            if ((fid = h5tools_fopen(fname, flags, tmp_vol_fapl, TRUE, drivername, drivername_size)) >= 0) {
+                used_fapl = tmp_vol_fapl;
+                H5TOOLS_GOTO_DONE(fid);
+            }
+            else {
+                /* Close the temporary VOL FAPL */
+                H5Pclose(tmp_vol_fapl);
+                tmp_vol_fapl = H5I_INVALID_HID;
+            }
         }
     }
 
-done:
-    if(my_fapl != H5P_DEFAULT)
-        H5Pclose(my_fapl);
+    /* File was unable to be opened at all */
+    ret_value = H5I_INVALID_HID;
 
-    return fid;
+done:
+    /* Save the driver name if using a native-terminal VOL connector */
+    if (drivername && drivername_size && ret_value >= 0)
+        if (used_fapl >= 0 && h5tools_get_vfd_name(used_fapl, drivername, drivername_size) < 0)
+            H5TOOLS_ERROR(H5I_INVALID_HID, "failed to retrieve name of VFD used to open file");
+
+    if (tmp_vfd_fapl >= 0)
+        H5Pclose(tmp_vfd_fapl);
+    if (tmp_vol_fapl >= 0)
+        H5Pclose(tmp_vol_fapl);
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
