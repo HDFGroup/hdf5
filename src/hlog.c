@@ -306,7 +306,7 @@ hlog_outlet_destroy(struct hlog_outlet *ls)
 }
 
 int
-hlog_set_state(const char *name, enum hlog_outlet_state state, bool rendezvous)
+hlog_set_state(const char *name, hlog_outlet_state_t state, bool rendezvous)
 {
 	struct hlog_outlet *ls;
 	errno = 0;

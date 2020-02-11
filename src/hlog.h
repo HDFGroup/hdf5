@@ -44,10 +44,11 @@ enum hlog_outlet_state {
 typedef enum hlog_outlet_state hlog_outlet_state_t;
 
 struct hlog_outlet {
+        hlog_outlet_state_t             ls_resolved;
 	const char			*ls_name;
 	char				*ls_name0;
 	struct hlog_outlet		*ls_parent;
-	enum hlog_outlet_state		ls_state;	
+	hlog_outlet_state_t		ls_state;	
 	bool				ls_rendezvous;
 	TAILQ_ENTRY(hlog_outlet)	        ls_next;
 };
@@ -101,7 +102,7 @@ HLOG_OUTLET_DECL(all);
 struct hlog_outlet *hlog_outlet_find_active(struct hlog_outlet *);
 void hlog_outlet_register(struct hlog_outlet *);
 struct hlog_outlet *hlog_outlet_lookup(const char *);
-int hlog_set_state(const char *, enum hlog_outlet_state, bool);
+int hlog_set_state(const char *, hlog_outlet_state_t, bool);
 
 void vhlog(const char *, va_list) __printflike(1,0);
 
