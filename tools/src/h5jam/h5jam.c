@@ -197,8 +197,8 @@ main (int argc, const char *argv[])
     int         ofid = -1;
     void       *edata;
     H5E_auto2_t func;
-    hid_t       ifile = -1;
-    hid_t       plist = -1;
+    hid_t       ifile = H5I_INVALID_HID;
+    hid_t       plist = H5I_INVALID_HID;
     herr_t      status;
     htri_t      testval;
     hsize_t     usize;

@@ -338,14 +338,14 @@ static void gent_att_compound_vlstr(hid_t loc_id)
         const char *v;
     } s1;
     hsize_t dim[1] = {1};    /* Dimension size */
-    hid_t sid = -1;         /* Dataspace ID */
-    hid_t tid = -1;         /* Datatype ID */
-    hid_t aid = -1;         /* Attribute ID */
-    hid_t did = -1;         /* Dataset ID */
-    hid_t gid = -1;         /* Group ID */
-    hid_t vl_str_tid = -1;    /* Variable length datatype ID */
-    hid_t cmpd_tid = -1;    /* Compound datatype ID */
-    hid_t null_sid = -1;    /* Null dataspace ID */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t tid = H5I_INVALID_HID;         /* Datatype ID */
+    hid_t aid = H5I_INVALID_HID;         /* Attribute ID */
+    hid_t did = H5I_INVALID_HID;         /* Dataset ID */
+    hid_t gid = H5I_INVALID_HID;         /* Group ID */
+    hid_t vl_str_tid = H5I_INVALID_HID;    /* Variable length datatype ID */
+    hid_t cmpd_tid = H5I_INVALID_HID;    /* Compound datatype ID */
+    hid_t null_sid = H5I_INVALID_HID;    /* Null dataspace ID */
     s1 buf;                 /* Buffer */
 
     buf.i = 9;
@@ -725,7 +725,7 @@ out:
  *------------------------------------------------------------------------*/
 static void Test_Obj_Copy(void)
 {
-    hid_t fid = -1;                /* File id */
+    hid_t fid = H5I_INVALID_HID;                /* File id */
     hid_t fapl_new = (-1);            /* File access property id */
     unsigned new_format;        /* New format or old format */
 
