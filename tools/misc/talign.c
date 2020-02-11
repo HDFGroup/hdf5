@@ -32,11 +32,11 @@ const char *setname = "align";
 
 int main(void)
 {
-    hid_t fil=-1, spc=-1, set=-1;
-    hid_t cs6=-1, cmp=-1, fix=-1;
-    hid_t cmp1=-1, cmp2=-1, cmp3=-1;
-    hid_t plist=-1;
-    hid_t array_dt=-1;
+    hid_t fil=H5I_INVALID_HID, spc=H5I_INVALID_HID, set=H5I_INVALID_HID;
+    hid_t cs6=H5I_INVALID_HID, cmp=H5I_INVALID_HID, fix=H5I_INVALID_HID;
+    hid_t cmp1=H5I_INVALID_HID, cmp2=H5I_INVALID_HID, cmp3=H5I_INVALID_HID;
+    hid_t plist=H5I_INVALID_HID;
+    hid_t array_dt=H5I_INVALID_HID;
 
     hsize_t dim[2];
     hsize_t cdim[4];

@@ -17,7 +17,7 @@ endif ()
 
 if (BUILD_SHARED_LIBS)
   add_executable (h5copy-shared ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copy.c)
-  target_include_directories(h5copy-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5copy-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5copy-shared SHARED)
   target_link_libraries (h5copy-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (h5copy-shared PROPERTIES FOLDER tools)

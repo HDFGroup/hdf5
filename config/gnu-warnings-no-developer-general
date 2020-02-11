@@ -1,0 +1,4 @@
+-Wno-aggregate-return
+-Wno-inline
+-Wno-missing-format-attribute
+-Wno-missing-noreturn
