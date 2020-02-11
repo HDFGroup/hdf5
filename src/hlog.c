@@ -261,8 +261,12 @@ hlog_impl(struct hlog_outlet *ls0, const char *fmt, ...)
 	struct hlog_outlet *ls;
 	va_list ap;
 
-	if ((ls = hlog_outlet_find_active(ls0)) == NULL)
-		return;
+	if ((ls = hlog_outlet_find_active(ls0)) == NULL) {
+            ls0->ls_resolved = HLOG_OUTLET_S_OFF;
+            return;
+        }
+
+        ls0->ls_resolved = HLOG_OUTLET_S_ON;
 
 	va_start(ap, fmt);
 	vhlog(fmt, ap);

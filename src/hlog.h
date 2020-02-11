@@ -53,6 +53,8 @@ struct hlog_outlet {
 	TAILQ_ENTRY(hlog_outlet)	ls_next;
 };
 
+typedef struct hlog_outlet hlog_outlet_t;
+
 #define	HLOG_CONSTRUCTOR(__sym)					        \
 void hlog_constructor_##__sym(void) __constructor;	                \
 void									\
@@ -94,9 +96,14 @@ HLOG_OUTLET_DECL(all);
 
 #define	hlog_fast(_name, ...)						    \
     do {								    \
-            struct hlog_outlet *_ls;				            \
-            if ((_ls = hlog_outlet_find_active((&log_##_name))) != NULL)    \
-                    hlog_always((_ls), __VA_ARGS__);		            \
+            hlog_outlet_t *_ls0 = &log_##_name;		                    \
+                                                                            \
+            if (_ls0->ls_resolved == HLOG_OUTLET_S_OFF)                     \
+                break;                                                      \
+            else if (_ls0->ls_resolved == HLOG_OUTLET_S_ON)                 \
+                hlog_always(_ls0, __VA_ARGS__);                             \
+            else                                                            \
+                hlog_impl(_ls0, __VA_ARGS__);                               \
     } while (/*CONSTCOND*/0)
 
 struct hlog_outlet *hlog_outlet_find_active(struct hlog_outlet *);
