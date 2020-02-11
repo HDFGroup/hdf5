@@ -87,12 +87,6 @@ void hlog_undefined_##__sym(void) __constructor
     HLOG_OUTLET_DEFN(log_##__name, #__name, NULL, HLOG_OUTLET_S_OFF)
 
 HLOG_OUTLET_DECL(all);
-HLOG_OUTLET_DECL(arithmetic);
-HLOG_OUTLET_DECL(mem);
-HLOG_OUTLET_DECL(sys);
-HLOG_OUTLET_DECL(notice);
-HLOG_OUTLET_DECL(err);
-HLOG_OUTLET_DECL(warn);
 
 #define hlog(_name, _fmt, ...)    \
     hlog_impl(&log_##_name, _fmt, __VA_ARGS__)
