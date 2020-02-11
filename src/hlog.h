@@ -48,9 +48,9 @@ struct hlog_outlet {
 	const char			*ls_name;
 	char				*ls_name0;
 	struct hlog_outlet		*ls_parent;
-	hlog_outlet_state_t		ls_state;	
+	hlog_outlet_state_t		ls_state;
 	bool				ls_rendezvous;
-	TAILQ_ENTRY(hlog_outlet)	        ls_next;
+	TAILQ_ENTRY(hlog_outlet)	ls_next;
 };
 
 #define	HLOG_CONSTRUCTOR(__sym)					        \
