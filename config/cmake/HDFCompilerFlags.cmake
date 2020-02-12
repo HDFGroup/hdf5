@@ -30,8 +30,10 @@ macro (ADD_H5_FLAGS h5_flag_var infile)
   #message (STATUS "h5_flag_var=${${h5_flag_var}}")
 endmacro ()
 
-message (STATUS "Warnings Configuration:")
 set (CMAKE_C_FLAGS "${CMAKE_C99_STANDARD_COMPILE_OPTION} ${CMAKE_C_FLAGS}")
+set (CMAKE_C_FLAGS "${CMAKE_C_SANITIZER_FLAGS} ${CMAKE_C_FLAGS}")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_SANITIZER_FLAGS} ${CMAKE_CXX_FLAGS}")
+message (STATUS "Warnings Configuration: default: ${CMAKE_C_FLAGS} : ${CMAKE_CXX_FLAGS}")
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
