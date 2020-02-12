@@ -1,9 +1,9 @@
 cmake_minimum_required (VERSION 3.10)
 project (HDF5 C)
 
-if(POLICY CMP0074)
-  cmake_policy(SET CMP0074 NEW)
-endif()
+if (POLICY CMP0074)
+  cmake_policy (SET CMP0074 NEW)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
@@ -15,7 +15,7 @@ endif()
 # Make install can be used to install all components for system-wide use.
 #
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
-    MESSAGE(FATAL_ERROR "\nERROR! ${PROJECT_NAME} DOES NOT SUPPORT IN SOURCE BUILDS!\n"
+    message (FATAL_ERROR "\nERROR! ${PROJECT_NAME} DOES NOT SUPPORT IN SOURCE BUILDS!\n"
       "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
       " == CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}\n"
       "NEXT STEPS:\n"
@@ -94,7 +94,7 @@ mark_as_advanced (HDF5_EXTERNAL_LIB_PREFIX)
 #   # Add the sub project
 #   add_subdirectory (Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
-string(TIMESTAMP CONFIG_DATE "%Y-%m-%d")
+string (TIMESTAMP CONFIG_DATE "%Y-%m-%d")
 
 #-----------------------------------------------------------------------------
 # Allow Visual Studio solution directories
@@ -352,6 +352,7 @@ set (H5_ENABLE_STATIC_LIB NO)
 option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
 option (ONLY_SHARED_LIBS "Only Build Shared Libraries" OFF)
+mark_as_advanced (ONLY_SHARED_LIBS)
 
 if (BUILD_STATIC_LIBS)
   set (H5_ENABLE_STATIC_LIB YES)
@@ -371,6 +372,12 @@ if (ONLY_SHARED_LIBS)
 endif ()
 
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if (NOT BUILD_SHARED_LIBS)
+  set (tgt_file_ext "")
+else ()
+  set (tgt_file_ext "-shared")
+endif ()
 
 #-----------------------------------------------------------------------------
 # Option to Build Static executables
@@ -397,7 +404,7 @@ option (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" O
 if (HDF5_ENABLE_COVERAGE)
   include (${HDF5_SOURCE_DIR}/config/sanitizer/code-coverage.cmake)
   if(CODE_COVERAGE AND CODE_COVERAGE_ADDED)
-    add_code_coverage() # Adds instrumentation to all targets
+    add_code_coverage () # Adds instrumentation to all targets
   else ()
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --coverage -O0 -fprofile-arcs -ftest-coverage")
@@ -643,8 +650,8 @@ if (HDF5_ENABLE_THREADSAFE)
       message (FATAL_ERROR " **** thread-safe option requires Win32 threads or Pthreads **** ")
     endif ()
   endif ()
-  set(THREADS_PREFER_PTHREAD_FLAG ON)
-  find_package(Threads REQUIRED)
+  set (THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package (Threads REQUIRED)
   if (Threads_FOUND)
     set (H5_HAVE_THREADSAFE 1)
   endif ()

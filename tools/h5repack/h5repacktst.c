@@ -195,7 +195,6 @@ int main (void)
      * 2) use the h5diff function to compare the input and output file
      *-------------------------------------------------------------------------
      */
-
     /*-------------------------------------------------------------------------
     * file with fill values
     *-------------------------------------------------------------------------
@@ -1559,7 +1558,7 @@ error:
 static
 int make_testfiles(void)
 {
-    hid_t    fid = -1;
+    hid_t    fid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
      * create a file for general copy test
@@ -1820,12 +1819,12 @@ out:
 static
 int make_all_objects(hid_t loc_id)
 {
-    hid_t   did = -1;
-    hid_t   gid = -1;
-    hid_t   tid = -1;
-    hid_t   rid = -1;
-    hid_t   sid = -1;
-    hid_t   gcplid = -1;
+    hid_t   did = H5I_INVALID_HID;
+    hid_t   gid = H5I_INVALID_HID;
+    hid_t   tid = H5I_INVALID_HID;
+    hid_t   rid = H5I_INVALID_HID;
+    hid_t   sid = H5I_INVALID_HID;
+    hid_t   gcplid = H5I_INVALID_HID;
     hsize_t dims[1] = {2};
     /* compound datatype */
     typedef struct s_t
@@ -1942,10 +1941,10 @@ out:
 static
 int make_attributes(hid_t loc_id)
 {
-    hid_t   did = -1;
-    hid_t   gid = -1;
-    hid_t   rid = -1;
-    hid_t   sid = -1;
+    hid_t   did = H5I_INVALID_HID;
+    hid_t   gid = H5I_INVALID_HID;
+    hid_t   rid = H5I_INVALID_HID;
+    hid_t   sid = H5I_INVALID_HID;
     hsize_t dims[1] = {2};
 
     /*-------------------------------------------------------------------------
@@ -2013,8 +2012,8 @@ static
 int make_hlinks(hid_t loc_id)
 {
     hid_t   g1id =- 1;
-    hid_t   g2id = -1;
-    hid_t   g3id = -1;
+    hid_t   g2id = H5I_INVALID_HID;
+    hid_t   g3id = H5I_INVALID_HID;
     hsize_t dims[2] = {3,2};
     int     buf[3][2] = {{1,1}, {1,2}, {2,2}};
 
@@ -2083,8 +2082,8 @@ out:
 static
 int make_szip(hid_t loc_id)
 {
-    hid_t    dcpl = -1; /* dataset creation property list */
-    hid_t    sid = -1;  /* dataspace ID */
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
     unsigned szip_options_mask = H5_SZIP_ALLOW_K13_OPTION_MASK | H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block = 8;
     hsize_t  dims[RANK] = {DIM1, DIM2};
@@ -2154,8 +2153,8 @@ out:
 static
 int make_deflate(hid_t loc_id)
 {
-    hid_t      dcpl = -1; /* dataset creation property list */
-    hid_t      sid = -1;  /* dataspace ID */
+    hid_t      dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t      sid = H5I_INVALID_HID;  /* dataspace ID */
     hsize_t    dims[RANK] = {DIM1,DIM2};
     hsize_t    chunk_dims[RANK] = {CDIM1,CDIM2};
     int        buf[DIM1][DIM2];
@@ -2294,8 +2293,8 @@ out:
 static
 int make_fletcher32(hid_t loc_id)
 {
-    hid_t    dcpl = -1; /* dataset creation property list */
-    hid_t    sid = -1;  /* dataspace ID */
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
     hsize_t  dims[RANK]={DIM1,DIM2};
     hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
     int      buf[DIM1][DIM2];
@@ -2361,10 +2360,10 @@ out:
 static
 int make_nbit(hid_t loc_id)
 {
-    hid_t    dcpl = -1; /* dataset creation property list */
-    hid_t    sid = -1;  /* dataspace ID */
-    hid_t    dtid = -1;
-    hid_t    dsid = -1;
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
+    hid_t    dtid = H5I_INVALID_HID;
+    hid_t    dsid = H5I_INVALID_HID;
     hsize_t  dims[RANK]={DIM1,DIM2};
     hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
     int      buf[DIM1][DIM2];
@@ -2442,10 +2441,10 @@ out:
 static
 int make_scaleoffset(hid_t loc_id)
 {
-    hid_t    dcpl = -1; /* dataset creation property list */
-    hid_t    sid = -1;  /* dataspace ID */
-    hid_t    dtid = -1;
-    hid_t    dsid = -1;
+    hid_t    dcpl = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid = H5I_INVALID_HID;  /* dataspace ID */
+    hid_t    dtid = H5I_INVALID_HID;
+    hid_t    dsid = H5I_INVALID_HID;
     hsize_t  dims[RANK] = {DIM1,DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
     int      buf[DIM1][DIM2];
@@ -2687,11 +2686,11 @@ int make_early(void)
 {
     hsize_t dims[1] ={3000};
     hsize_t cdims[1]={30};
-    hid_t   fid=-1;
-    hid_t   did=-1;
-    hid_t   sid=-1;
-    hid_t   tid=-1;
-    hid_t   dcpl=-1;
+    hid_t   fid=H5I_INVALID_HID;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
+    hid_t   tid=H5I_INVALID_HID;
+    hid_t   dcpl=H5I_INVALID_HID;
     int     i;
     char    name[16];
     int     iter=100;
@@ -2782,8 +2781,8 @@ out:
 static
 int make_layout(hid_t loc_id)
 {
-    hid_t    dcpl=-1; /* dataset creation property list */
-    hid_t    sid=-1;  /* dataspace ID */
+    hid_t    dcpl=H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid=H5I_INVALID_HID;  /* dataspace ID */
     hsize_t  dims[RANK]={DIM1,DIM2};
     hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
     int      buf[DIM1][DIM2];
@@ -2896,12 +2895,12 @@ static
 int make_layout2(hid_t loc_id)
 {
 
-    hid_t    contig_dcpl = -1;   /* dataset creation property list */
-    hid_t    chunked_dcpl = -1; /* dataset creation property list */
+    hid_t    contig_dcpl = H5I_INVALID_HID;   /* dataset creation property list */
+    hid_t    chunked_dcpl = H5I_INVALID_HID; /* dataset creation property list */
 
     int      i, j, n;    /* Local index variables */
     int       ret_value = -1;  /* Return value */
-    hid_t    s_sid = -1;  /* dataspace ID */
+    hid_t    s_sid = H5I_INVALID_HID;  /* dataspace ID */
 
     hsize_t  s_dims[RANK] = {S_DIM1,S_DIM2};  /* Dataspace (< 1 k) */
     hsize_t  chunk_dims[RANK] = {S_DIM1/2, S_DIM2/2};  /* Dimension sizes for chunks */
@@ -2971,11 +2970,11 @@ out:
 static
 int make_layout3(hid_t loc_id)
 {
-    hid_t    dcpl1=-1; /* dataset creation property list */
-    hid_t    dcpl2=-1; /* dataset creation property list */
-    hid_t    dcpl3=-1; /* dataset creation property list */
-    hid_t    sid1=-1;  /* dataspace ID */
-    hid_t    sid2=-1;  /* dataspace ID */
+    hid_t    dcpl1=H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    dcpl2=H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    dcpl3=H5I_INVALID_HID; /* dataset creation property list */
+    hid_t    sid1=H5I_INVALID_HID;  /* dataspace ID */
+    hid_t    sid2=H5I_INVALID_HID;  /* dataspace ID */
     hsize_t  dims1[RANK]={DIM1_L3,DIM2_L3};
     hsize_t  dims2[RANK]={SDIM1_L3,SDIM2_L3};
     hsize_t  maxdims[RANK]={H5S_UNLIMITED, H5S_UNLIMITED};
@@ -3104,8 +3103,8 @@ out:
 static
 int make_fill(hid_t loc_id)
 {
-    hid_t   did=-1;
-    hid_t   sid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
     hid_t   dcpl;
     hsize_t dims[2]={3,2};
     int     buf[3][2]= {{1,1},{1,2},{2,2}};
@@ -3157,9 +3156,9 @@ out:
 static
 int make_big(hid_t loc_id)
 {
-    hid_t   did=-1;
-    hid_t   f_sid=-1;
-    hid_t   m_sid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   f_sid=H5I_INVALID_HID;
+    hid_t   m_sid=H5I_INVALID_HID;
     hid_t   tid;
     hid_t   dcpl;
     hsize_t dims[1]={ H5TOOLS_MALLOCSIZE + 1}; /* dataset dimensions */
@@ -3238,8 +3237,8 @@ out:
 static
 int make_external(hid_t loc_id)
 {
-    hid_t   did=-1;
-    hid_t   sid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
     hid_t   dcpl;
     int     buf[2]={1,2};
     hsize_t cur_size[1];    /* data space current size  */
@@ -3292,8 +3291,8 @@ out:
 static int
 make_userblock(void)
 {
-    hid_t   fid = -1;
-    hid_t   fcpl = -1;
+    hid_t   fid = H5I_INVALID_HID;
+    hid_t   fcpl = H5I_INVALID_HID;
     int     fd = -1;            /* File descriptor for writing userblock */
     char    ub[USERBLOCK_SIZE]; /* User block data */
     ssize_t nwritten;           /* # of bytes written */
@@ -3354,8 +3353,8 @@ out:
 static int
 verify_userblock( const char* filename)
 {
-    hid_t   fid = -1;
-    hid_t   fcpl = -1;
+    hid_t   fid = H5I_INVALID_HID;
+    hid_t   fcpl = H5I_INVALID_HID;
     int     fd = -1;            /* File descriptor for writing userblock */
     char    ub[USERBLOCK_SIZE]; /* User block data */
     hsize_t ub_size = 0;        /* User block size */
@@ -3484,10 +3483,10 @@ int write_dset_in(hid_t loc_id,
         GREEN
     } e_t;
 
-    hid_t   did=-1;
-    hid_t   sid=-1;
-    hid_t   tid=-1;
-    hid_t   pid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
+    hid_t   tid=H5I_INVALID_HID;
+    hid_t   pid=H5I_INVALID_HID;
     unsigned i, j;
     int     val, k, n;
     float   f;
@@ -3730,7 +3729,7 @@ int write_dset_in(hid_t loc_id,
         dbuf = (double*)HDmalloc( size );
         if (NULL == dbuf)
         {
-            printf ("\nError: Cannot allocate memory for \"arrayd\" data buffer size %dMB.\n", (int) size / 1000000 );
+            HDprintf ("\nError: Cannot allocate memory for \"arrayd\" data buffer size %dMB.\n", (int) size / 1000000 );
             goto out;
         }
 
@@ -4230,10 +4229,10 @@ out:
 static
 int make_dset_reg_ref(hid_t loc_id)
 {
-    hid_t           did1=-1; /* Dataset ID   */
-    hid_t           did2=-1; /* Dereferenced dataset ID */
-    hid_t           sid1=-1;  /* Dataspace ID #1  */
-    hid_t           sid2=-1;  /* Dataspace ID #2  */
+    hid_t           did1=H5I_INVALID_HID; /* Dataset ID   */
+    hid_t           did2=H5I_INVALID_HID; /* Dereferenced dataset ID */
+    hid_t           sid1=H5I_INVALID_HID;  /* Dataspace ID #1  */
+    hid_t           sid2=H5I_INVALID_HID;  /* Dataspace ID #2  */
     hsize_t         dims1[] = {SPACE1_DIM1};
     hsize_t         dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t         start[SPACE2_RANK];     /* Starting location of hyperslab */
@@ -4349,9 +4348,9 @@ int write_attr_in(hid_t loc_id,
         GREEN
     } e_t;
 
-    hid_t   aid = -1;
-    hid_t   sid = -1;
-    hid_t   tid = -1;
+    hid_t   aid = H5I_INVALID_HID;
+    hid_t   sid = H5I_INVALID_HID;
+    hid_t   tid = H5I_INVALID_HID;
     int     val, j, k, n;
     unsigned i;
     float   f;
@@ -4434,7 +4433,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_BITFIELD
@@ -4464,7 +4463,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_OPAQUE
@@ -4491,7 +4490,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_COMPOUND
@@ -4529,7 +4528,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_REFERENCE
@@ -4578,7 +4577,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_VLEN
@@ -4623,13 +4622,13 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
-    aid = -1;
+    aid = H5I_INVALID_HID;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
     if (H5Sclose(sid) < 0)
         goto out;
-    sid = -1;
+    sid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_ARRAY
@@ -4664,7 +4663,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT
@@ -4742,7 +4741,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_BITFIELD
@@ -4775,7 +4774,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_OPAQUE
@@ -4803,7 +4802,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_COMPOUND
@@ -4839,7 +4838,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_REFERENCE
@@ -4894,7 +4893,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_VLEN
@@ -4945,13 +4944,13 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
-    aid = -1;
+    aid = H5I_INVALID_HID;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
     if (H5Sclose(sid) < 0)
         goto out;
-    sid = -1;
+    sid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_ARRAY
@@ -4994,7 +4993,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT
@@ -5114,7 +5113,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_BITFIELD
@@ -5168,7 +5167,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_OPAQUE
@@ -5182,7 +5181,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_COMPOUND
@@ -5268,7 +5267,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_REFERENCE
@@ -5353,7 +5352,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_VLEN
@@ -5407,13 +5406,13 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
-    aid = -1;
+    aid = H5I_INVALID_HID;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
     if (H5Sclose(sid) < 0)
         goto out;
-    sid = -1;
+    sid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_ARRAY
@@ -5447,7 +5446,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
-    tid = -1;
+    tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT
@@ -5527,7 +5526,7 @@ int make_dset(hid_t loc_id,
               hid_t dcpl,
               void *buf)
 {
-    hid_t   did=-1;
+    hid_t   did=H5I_INVALID_HID;
 
     if ((did = H5Dcreate2(loc_id, name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         return -1;
@@ -5564,8 +5563,8 @@ int write_dset( hid_t loc_id,
                hid_t tid,
                void *buf )
 {
-    hid_t   did=-1;
-    hid_t   sid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
 
     if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
         return -1;
@@ -5650,11 +5649,11 @@ static
 int make_named_dtype(hid_t loc_id)
 {
     hsize_t dims[1] ={3};
-    hid_t   did=-1;
-    hid_t   aid=-1;
-    hid_t   sid=-1;
-    hid_t   tid=-1;
-    hid_t   gid=-1;
+    hid_t   did=H5I_INVALID_HID;
+    hid_t   aid=H5I_INVALID_HID;
+    hid_t   sid=H5I_INVALID_HID;
+    hid_t   tid=H5I_INVALID_HID;
+    hid_t   gid=H5I_INVALID_HID;
 
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         goto out;

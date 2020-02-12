@@ -35,7 +35,7 @@ foreach (example ${examples})
         FOLDER examples/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
     )
-   else ()
+  else ()
     target_include_directories (hl_f90_ex_${example}
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_SRC_DIR}/src"
@@ -49,7 +49,7 @@ foreach (example ${examples})
         FOLDER examples/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
     )
- endif ()
+  endif ()
 endforeach ()
 
 if (BUILD_TESTING AND HDF5_TEST_FORTRAN AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)

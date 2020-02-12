@@ -197,8 +197,8 @@ main (int argc, const char *argv[])
     int         ofid = -1;
     void       *edata;
     H5E_auto2_t func;
-    hid_t       ifile = -1;
-    hid_t       plist = -1;
+    hid_t       ifile = H5I_INVALID_HID;
+    hid_t       plist = H5I_INVALID_HID;
     herr_t      status;
     htri_t      testval;
     hsize_t     usize;
@@ -522,7 +522,9 @@ compute_user_block_size(hsize_t ublock_size)
 /*-------------------------------------------------------------------------
  *  Write zeroes to fill the file from 'where' to 512, 1024, etc. bytes.
  *
- *  Returns the size of the padded file.
+ *  Sets new_where to the size of the padded file and
+ *  returns SUCCEED/FAIL.
+ *-------------------------------------------------------------------------
  */
 herr_t
 write_pad(int ofile, hsize_t old_where, hsize_t *new_where)

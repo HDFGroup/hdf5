@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -14,8 +14,23 @@
 
 # This file should be sourced into configure if the compiler is the
 # GNU gcc compiler or a derivative.  It is careful not to do anything
-# if the compiler is not GNU; otherwise `cc_flags_set' is set to `yes'
+# if the compiler is not GNU; otherwise 'cc_flags_set' is set to 'yes'
 #
+
+#
+# Prepend `$srcdir/config/gnu-` to the filename suffix(es) given as
+# subroutine argument(s), remove comments starting with # and ending
+# at EOL, replace spans of whitespace (including newlines) with spaces,
+# and re-emit the file(s) thus filtered on the standard output stream.
+#
+load_gcc_arguments()
+{
+    set -- $(for arg; do
+        sed 's,#.*$,,' $srcdir/config/gnu-${arg}
+    done)
+    IFS=' ' echo "$*"
+}
+
 
 # Get the compiler version in a way that works for gcc
 # unless a compiler version is already known
@@ -23,7 +38,7 @@
 #   cc_vendor:    The compiler name: gcc
 #   cc_version:   Version number: 2.91.60, 2.7.2.1
 #
-if test X = "X$cc_flags_set"; then
+if test "X-" = "X-$cc_flags_set"; then
     # PathScale compiler spits out gcc version string too. Need to
     # filter it out.
     # icc beginning with version 12 includes a "gcc version compatiblilty"
@@ -37,13 +52,13 @@ if test X = "X$cc_flags_set"; then
     cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
     cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
     if test X = "X$cc_vendor" -a X != "X$cc_version"; then
-	cc_vendor=gcc
+        cc_vendor=gcc
     fi
     if test "-" != "$cc_vendor-$cc_version"; then
-	echo "compiler '$CC' is GNU $cc_vendor-$cc_version"
+        echo "compiler '$CC' is GNU $cc_vendor-$cc_version"
     fi
 
-    # Some version numbers
+    # Get the compiler version numbers
     cc_vers_major=`echo $cc_version | cut -f1 -d.`
     cc_vers_minor=`echo $cc_version | cut -f2 -d.`
     cc_vers_patch=`echo $cc_version | cut -f3 -d.`
@@ -92,7 +107,8 @@ case "$cc_vendor-$cc_version" in
     esac
 
     # General
-    H5_CFLAGS="$H5_CFLAGS $arch -std=c99 -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
+    H5_CFLAGS="$H5_CFLAGS $arch -std=c99"
+    H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments warnings-general)"
 
     # Production
     case "$cc_vendor-$cc_version" in
