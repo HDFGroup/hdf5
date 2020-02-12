@@ -79,12 +79,12 @@ void hlog_undefined_##__sym(void) __constructor
 	};								\
 	HLOG_CONSTRUCTOR(__sym)
 
-#define	HLOG_OUTLET_MEDIUM_DEFN(__name, __parent)		        \
+#define	HLOG_OUTLET_MEDIUM_DEFN(__name, __parent, __state)	        \
     HLOG_OUTLET_DEFN(log_##__name, #__name, &log_##__parent,		\
-        HLOG_OUTLET_S_PASS)
+        __state)
 
 #define	HLOG_OUTLET_SHORT_DEFN(__name, __parent)			\
-    HLOG_OUTLET_MEDIUM_DEFN(__name, __parent)
+    HLOG_OUTLET_MEDIUM_DEFN(__name, __parent, HLOG_OUTLET_S_PASS)
 
 #define	HLOG_OUTLET_TOP_DEFN(__name)					\
     HLOG_OUTLET_DEFN(log_##__name, #__name, NULL, HLOG_OUTLET_S_OFF)
