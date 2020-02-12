@@ -871,7 +871,7 @@ done:
 } /* end H5FD_vfd_swmr_read() */
 
 
-/*-------------------------------------------------------------------------
+/*
  * Function:    H5FD_vfd_swmr_write
  *
  * Purpose:     Writes SIZE bytes of data to FILE beginning at address ADDR
@@ -879,18 +879,13 @@ done:
  *              DXPL_ID.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
- *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_vfd_swmr_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
-    haddr_t addr, size_t size, const void *buf)
+H5FD_vfd_swmr_write(H5FD_t *_file, H5FD_mem_t type,
+    hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size, const void *buf)
 {
     H5FD_vfd_swmr_t     *file       = (H5FD_vfd_swmr_t *)_file;
-    herr_t              ret_value   = SUCCEED;                  /* Return value */
+    herr_t              ret_value   = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1014,34 +1009,34 @@ done:
  *
  * In H5FD__vfd_swmr_load_hdr_and_idx(), we follow this protocol for reading
  * the shadow file:
- * 
+ *
  * 0 If the maximum number of retries have been attempted, then exit
  *   with an error.
- * 
+ *
  * 1 Try to read the shadow file *header*.  If successful, continue to 2.
- * 
+ *
  *   If there is a hard failure, then return an error.  If there is a failure
  *   that may be transient, then sleep and retry at 0.
- * 
- * 2 If the tick number in the header is less than the tick last read by the VFD,
- *   then return an error.
- * 
+ *
+ * 2 If the tick number in the header is less than the tick last read by the
+ *   VFD, then return an error.
+ *
  * 3 If the tick number in the header is equal to the last tick read by the
  *   VFD, then exit without doing anything.
- * 
+ *
  * 4 Try to read the shadow file *index*.  If successful, continue to 5.
- * 
+ *
  *   If there is a hard failure, then return an error.  If there is a failure
  *   that may be transient, then sleep and retry at 0.
- * 
+ *
  * 5 If a different tick number was read from the index than from the index,
  *   then continue at 0.
- * 
+ *
  * 6 Try to *re-read* the shadow file *header*.  If successful, continue to 7.
- * 
+ *
  *   If there is a hard failure, then return an error.  If there is a failure
  *   that may be transient, then sleep and retry at 0.
- * 
+ *
  * 7 Compare the header that was read previously with the new header.  If
  *   the new header is different than the old, then we may not have read
  *   the index at the right shadow-file offset, or the index may have been
