@@ -90,6 +90,8 @@ HLOG_OUTLET_DECL(swmr);
 HLOG_OUTLET_SHORT_DEFN(swmr, all);
 HLOG_OUTLET_SHORT_DEFN(eot, swmr);
 HLOG_OUTLET_SHORT_DEFN(shadow_defrees, swmr);
+HLOG_OUTLET_MEDIUM_DEFN(noisy_shadow_defrees, shadow_defrees,
+    HLOG_OUTLET_S_OFF);
 
 /*
  *  The head of the end of tick queue (EOT queue) for files opened in either
@@ -443,7 +445,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
     haddr_t md_addr;                        /* Address in the metadata file */
     unsigned i;                             /* Local index variable */
     herr_t ret_value = SUCCEED;             /* Return value */
-    bool visited_any_defree = false;
+    bool queue_was_nonempty;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -540,6 +542,8 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
                     "fail to construct & write header to md")
 
+    queue_was_nonempty = !TAILQ_EMPTY(&f->shared->shadow_defrees);
+
     /* 
      * Release time out entries from the delayed list by scanning the 
      * list from the bottom up:
@@ -554,8 +558,6 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
      TAILQ_FOREACH_REVERSE_SAFE(shadow_defree, &f->shared->shadow_defrees,
          shadow_defree_queue, link, prev) {
 
-        visited_any_defree = true;
-
         /* max_lag is at least 3 */
         if ( ( f->shared->tick_num > f->shared->vfd_swmr_config.max_lag ) &&
              ( shadow_defree->tick_num <=
@@ -566,11 +568,9 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                             "unable to flush clean entry")
 
-#if 0
-            fprintf(stderr, "released %" PRIu32 " bytes at %" PRIu64 "\n",
-                shadow_defree->length,
-                shadow_defree->md_file_page_offset * f->shared->fs_page_size);
-#endif
+            hlog_fast(noisy_shadow_defrees,
+                "released %" PRIu32 " bytes at %" PRIu64 "\n",
+                shadow_defree->length, shadow_defree->offset);
 
             /* Remove the entry from the delayed list */
             TAILQ_REMOVE(&f->shared->shadow_defrees, shadow_defree, link);
@@ -584,7 +584,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
         }
     }
 
-    if (visited_any_defree && TAILQ_EMPTY(&f->shared->shadow_defrees))
+    if (queue_was_nonempty && TAILQ_EMPTY(&f->shared->shadow_defrees))
         hlog_fast(shadow_defrees, "Removed last deferred shadow free.");
 
 done:
