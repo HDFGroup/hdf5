@@ -32,12 +32,12 @@ my_errx(int code, const char *fmt, ...)
 {
     va_list ap;
 
-    (void)fprintf(stderr, "thread_id: ");
-    va_start(ap, fmt);
-    (void)vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    (void)fputc('\n', stderr);
-    exit(code);
+    (void)HDfprintf(stderr, "thread_id: ");
+    HDva_start(ap, fmt);
+    (void)HDvfprintf(stderr, fmt, ap);
+    HDva_end(ap);
+    (void)HDfputc('\n', stderr);
+    HDexit(code);
 }
 
 #if defined(H5_HAVE_THREADSAFE) && !defined(H5_HAVE_WIN_THREADS)
@@ -50,17 +50,17 @@ my_err(int code, const char *fmt, ...)
     va_list ap;
     int errno_copy = errno;
 
-    (void)fprintf(stderr, "thread_id: ");
-    va_start(ap, fmt);
-    (void)vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    (void)fprintf(stderr, ": %s\n", strerror(errno_copy));
-    exit(code);
+    (void)HDfprintf(stderr, "thread_id: ");
+    HDva_start(ap, fmt);
+    (void)HDvfprintf(stderr, fmt, ap);
+    HDva_end(ap);
+    (void)HDfprintf(stderr, ": %s\n", HDstrerror(errno_copy));
+    HDexit(code);
 }
 
 #define threads_failure(_call, _result) do {                \
     my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__,   \
-        __LINE__, strerror(_result));                       \
+        __LINE__, HDstrerror(_result));                       \
 } while (false)
 
 #define NTHREADS 5
