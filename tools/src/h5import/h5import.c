@@ -1086,12 +1086,12 @@ out:
  */
 static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
 {
-    hid_t   group_id    = -1;
-    hid_t   dset_id     = -1;
-    hid_t   space_id    = -1;
-    hid_t   mspace_id   = -1;
-    hid_t   type_id     = -1;
-    hid_t   handle      = -1;
+    hid_t   group_id    = H5I_INVALID_HID;
+    hid_t   dset_id     = H5I_INVALID_HID;
+    hid_t   space_id    = H5I_INVALID_HID;
+    hid_t   mspace_id   = H5I_INVALID_HID;
+    hid_t   type_id     = H5I_INVALID_HID;
+    hid_t   handle      = H5I_INVALID_HID;
     char   *str1        = NULL;
     char   *str2        = NULL;
     char   *str3        = NULL;

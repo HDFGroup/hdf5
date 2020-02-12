@@ -47,6 +47,15 @@ New Features
 
     Configuration:
     -------------
+    - Added common warnings files for gnu and intel
+
+      Added warnings files to use one common set of flags
+      during configure for both autotools and CMake build
+      systems. The initial implementation only affects a
+      general set of flags for gnu and intel compilers.
+
+      (ADB - 2020/01/17)
+
     - Added new options to CMake for control of testing
 
       Added CMake options (default ON);
@@ -61,9 +70,18 @@ New Features
 
       (ADB - 2020/01/15, HDFFV-11001)
 
-    - Added Clang sanitizers to CMake for analyzer support
+    - Added Clang sanitizers to CMake for analyzer support if compiler is clang.
 
-      Added CMake code and files to execute the Clang sanitizers.
+      Added CMake code and files to execute the Clang sanitizers if
+      HDF5_ENABLE_SANITIZERS is enabled and the USE_SANITIZER option
+      is set to one of the following:
+          Address
+          Memory
+          MemoryWithOrigins
+          Undefined
+          Thread
+          Leak
+          'Address;Undefined'
 
       (ADB - 2019/12/12, TRILAB-135)
 
@@ -367,6 +385,13 @@ Bug Fixes since HDF5-1.10.5 release
 
     Configuration
     -------------
+    - Fixed CMake include properties for Fortran libraries
+
+      Corrected the library properties for Fortran to use the
+      correct path for the Fortran module files.
+
+      (ADB - 2020/02/04, HDFFV-11012)
+
     - Correct option for default API version
 
       CMake options for default API version are not mutually exclusive.

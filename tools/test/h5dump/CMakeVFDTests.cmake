@@ -53,19 +53,13 @@ add_custom_target(HDF5_VFD_H5DUMP_files ALL COMMENT "Copying files needed by HDF
 ##############################################################################
 ##############################################################################
 
-if (NOT BUILD_SHARED_LIBS)
-  set (tgt_ext "")
-else ()
-  set (tgt_ext "-shared")
-endif ()
-
 macro (ADD_VFD_H5DUMP_TEST vfdname resultfile resultcode)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     add_test (
         NAME H5DUMP_VFD-${vfdname}-${resultfile}-h5dump
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_VFD:STRING=${vfdname}"
             -D "TEST_EXPECT=${resultcode}"

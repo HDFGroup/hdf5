@@ -266,7 +266,7 @@ if (NOT ONLY_SHARED_LIBS)
       PRIVATE
           "${HDF5_F90_SRC_SOURCE_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
       INTERFACE
-          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/static>"
   )
   target_compile_definitions(${HDF5_F90_LIB_TARGET}
       PRIVATE
@@ -306,7 +306,7 @@ if (BUILD_SHARED_LIBS)
       PRIVATE
           "${HDF5_F90_SRC_SOURCE_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
       INTERFACE
-          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/shared>"
   )
   target_compile_definitions(${HDF5_F90_LIBSH_TARGET}
       PUBLIC

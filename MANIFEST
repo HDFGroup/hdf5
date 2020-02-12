@@ -139,6 +139,12 @@
 ./config/pgi-flags
 ./config/solaris
 
+#warnings files for both autotools and CMake
+./config/gnu-warnings-general
+./config/gnu-warnings-developer-general
+./config/gnu-warnings-no-developer-general
+./config/intel-warnings-general
+
 ./config/site-specific/BlankForm
 
 ./examples/Attributes.txt
