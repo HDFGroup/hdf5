@@ -7815,29 +7815,6 @@ error:
     return 1;
 } /* end test_versionbounds() */
 
-herr_t no_operation(H5T_t *t, int mode);
-herr_t H5T__forward_args_with_func_overhead(H5T_t *t, int);
-herr_t H5T__forward_args_without_func_overhead(H5T_t *t, int);
-
-herr_t __attribute__((noinline))
-H5T__forward_args_with_func_overhead(H5T_t *t, int mode)
-{
-    herr_t ret_value = FAIL;
-
-    FUNC_ENTER_STATIC
-
-    if ((ret_value = no_operation(t, mode)) == FAIL)
-        HGOTO_ERROR(17, 31, FAIL, "that didn't work");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-herr_t __attribute__((noinline))
-H5T__forward_args_without_func_overhead(H5T_t *t, int mode)
-{
-    return no_operation(t, mode);
-}
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -7860,11 +7837,6 @@ main(void)
 {
     long    nerrors = 0;
     hid_t    fapl = -1;
-    H5T_t *t;
-    int i, ntimes = 100 * 1000 * 1000;
-    uint64_t start, stop;
-    typedef herr_t (*fn_t)(H5T_t *, int);
-    volatile fn_t fn = no_operation;
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -7874,36 +7846,6 @@ main(void)
 
     if(ALIGNMENT)
     printf("Testing non-aligned conversions (ALIGNMENT=%d)....\n", ALIGNMENT);
-
-    t = (H5T_t *)H5I_object(H5T_NATIVE_SHORT);
-    if (t == NULL) abort();
-
-    fn = no_operation;
-    start = __builtin_ia32_rdtsc();
-    for (i = 0; i < ntimes; i++) {
-        (*fn)(t, 10);
-    }
-    stop = __builtin_ia32_rdtsc();
-    printf("%d calls to %11s routine, %" PRIu64 " cycles\n",
-        ntimes, "no-op", stop - start);
-
-    fn = H5T__forward_args_without_func_overhead;
-    start = __builtin_ia32_rdtsc();
-    for (i = 0; i < ntimes; i++) {
-        (*fn)(t, 10);
-    }
-    stop = __builtin_ia32_rdtsc();
-    printf("%d calls to %11s version, %" PRIu64 " cycles\n",
-        ntimes, "no-overhead", stop - start);
-
-    fn = H5T__forward_args_with_func_overhead;
-    start = __builtin_ia32_rdtsc();
-    for (i = 0; i < ntimes; i++) {
-        (*fn)(t, 10);
-    }
-    stop = __builtin_ia32_rdtsc();
-    printf("%d calls to %11s version, %" PRIu64 " cycles\n",
-        ntimes, "overhead", stop - start);
 
     /* Do the tests */
     nerrors += test_classes();
