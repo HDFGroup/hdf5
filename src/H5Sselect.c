@@ -431,7 +431,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5_ATTR_PURE hssize_t
+H5_ATTR_PURE hsize_t
 H5S_get_select_npoints(const H5S_t *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -439,7 +439,7 @@ H5S_get_select_npoints(const H5S_t *space)
     /* Check args */
     HDassert(space);
 
-    FUNC_LEAVE_NOAPI((hssize_t)space->select.num_elem)
+    FUNC_LEAVE_NOAPI(space->select.num_elem)
 } /* end H5S_get_select_npoints() */
 
 
@@ -947,8 +947,6 @@ H5S_select_is_regular(const H5S_t *space)
 herr_t
 H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
 {
-    hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
-    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -957,23 +955,55 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
     HDassert(space);
     HDassert(offset);
 
-    /* Check for an all-zero offset vector */
-    for(u = 0; u < space->extent.rank; u++)
-        if(0 != offset[u]) {
-            non_zero_offset = TRUE;
-            break;
-        } /* end if */
-
-    /* Only perform operation if the offset is non-zero */
-    if(non_zero_offset)
-        ret_value = (*space->select.type->adjust_u)(space, offset);
+    /* Perform operation */
+    ret_value = (*space->select.type->adjust_u)(space, offset);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_adjust_u() */
 
+
 /*--------------------------------------------------------------------------
  NAME
-    H5Sselect_adjust_u
+    H5S_select_adjust_s
+ PURPOSE
+    Adjust a selection by subtracting an offset
+ USAGE
+    herr_t H5S_select_adjust_u(space, offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
+        const hssize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves a selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    This routine participates in the "Inlining C function pointers"
+        pattern, don't call it directly, use the appropriate macro
+        defined in H5Sprivate.h.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_adjust_s(H5S_t *space, const hssize_t *offset)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(space);
+    HDassert(offset);
+
+    /* Perform operation */
+    ret_value = (*space->select.type->adjust_s)(space, offset);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_select_adjust_s() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_adjust
  PURPOSE
     Adjust a selection by subtracting an offset
  USAGE
@@ -990,25 +1020,35 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sselect_adjust_u(hid_t space_id, const hsize_t *offset)
+H5Sselect_adjust(hid_t space_id, const hssize_t *offset)
 {
     H5S_t *space;
+    hsize_t low_bounds[H5S_MAX_RANK];
+    hsize_t high_bounds[H5S_MAX_RANK];
+    unsigned u;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*h", space_id, offset);
+    H5TRACE2("e", "i*Hs", space_id, offset);
 
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
     if(NULL == offset)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "NULL offset pointer")
 
-    if(H5S_select_adjust_u(space, offset) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection");
+    /* Check bounds */
+    if(H5S_SELECT_BOUNDS(space, low_bounds, high_bounds) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get selection bounds")
+    for(u = 0; u < space->extent.rank; u++)
+        if(offset[u] > (hssize_t)low_bounds[u])
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjustment would move selection below zero offset")
+
+    if(H5S_select_adjust_s(space, offset) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Sselect_adjust_u() */
+} /* end H5Sselect_adjust() */
 
 
 /*--------------------------------------------------------------------------
@@ -2533,11 +2573,12 @@ done:
     within the selection of dst_space
 
  USAGE
-    herr_t H5S_select_project_intersection(src_space,dst_space,src_intersect_space,proj_space)
+    herr_t H5S_select_project_intersection(src_space,dst_space,src_intersect_space,proj_space,share_selection)
         H5S_t *src_space;       IN: Selection that is mapped to dst_space, and intersected with src_intersect_space
-        H5S_t *dst_space;       IN: Selection that is mapped to src_space, and which contains the result
+        H5S_t *dst_space;       IN: Selection that is mapped to src_space
         H5S_t *src_intersect_space; IN: Selection whose intersection with src_space is projected to dst_space to obtain the result
         H5S_t **new_space_ptr;  OUT: Will contain the result (intersection of src_intersect_space and src_space projected from src_space to dst_space) after the operation
+        hbool_t share_selection; IN: Whether we are allowed to share structures inside dst_space with proj_space
 
  RETURNS
     Non-negative on success/Negative on failure.
@@ -2555,9 +2596,15 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
-    const H5S_t *src_intersect_space, H5S_t **new_space_ptr)
+    const H5S_t *src_intersect_space, H5S_t **new_space_ptr,
+    hbool_t share_selection)
 {
-    H5S_t *new_space = NULL;           /* New dataspace constructed */
+    H5S_t *new_space = NULL;            /* New dataspace constructed */
+    H5S_t *tmp_src_intersect_space = NULL; /* Temporary SIS converted from points->hyperslabs */
+    H5S_sel_iter_t *ss_iter = NULL;     /* Selection iterator for src_space */
+    hbool_t ss_iter_init = FALSE;       /* Whether ss_iter has been initialized */
+    H5S_sel_iter_t *ds_iter = NULL;     /* Selection iterator for dst_space */
+    hbool_t ds_iter_init = FALSE;       /* Whether ds_iter has been initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2567,6 +2614,13 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     HDassert(dst_space);
     HDassert(src_intersect_space);
     HDassert(new_space_ptr);
+    HDassert(H5S_GET_SELECT_NPOINTS(src_space) == H5S_GET_SELECT_NPOINTS(dst_space));
+    HDassert(H5S_GET_EXTENT_NDIMS(src_space) == H5S_GET_EXTENT_NDIMS(src_intersect_space));
+
+    if(NULL == (ss_iter = H5FL_CALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
+    if(NULL == (ds_iter = H5FL_CALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
 
     /* Create new space, using dst extent.  Start with "all" selection. */
     if(NULL == (new_space = H5S_create(H5S_SIMPLE)))
@@ -2576,7 +2630,7 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
     /* If the intersecting space is "all", the intersection must be equal to the
      * source space and the projection must be equal to the destination space */
-    if(src_intersect_space->select.type->type == H5S_SEL_ALL) {
+    if(H5S_GET_SELECT_TYPE(src_intersect_space) == H5S_SEL_ALL) {
         /* Copy the destination selection. */
         if(H5S_select_copy(new_space, dst_space, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination space selection")
@@ -2590,20 +2644,136 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
         if(H5S_select_none(new_space) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
     } /* end if */
-    /* If any of the spaces use point selection, fall back to general algorithm */
-    else if((src_intersect_space->select.type->type == H5S_SEL_POINTS)
-            || (src_space->select.type->type == H5S_SEL_POINTS)
-            || (dst_space->select.type->type == H5S_SEL_POINTS))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "point selections not currently supported")
     else {
-        HDassert(src_intersect_space->select.type->type == H5S_SEL_HYPERSLABS);
-        HDassert(src_space->select.type->type != H5S_SEL_NONE);
-        HDassert(dst_space->select.type->type != H5S_SEL_NONE);
+        /* Handle scalar dataspaces.  It should not be possible for the source
+         * intersect space or the source space to be scalar since scalar spaces
+         * only support all or none selections, and both of those cases are
+         * covered above, and the source intersect space must have the same
+         * rank, so it also cannot be scalar, as scalar dataspaces have a rank
+         * of 0. */
+        HDassert(H5S_GET_EXTENT_TYPE(src_space) != H5S_SCALAR);
+        HDassert(H5S_GET_EXTENT_TYPE(src_intersect_space) != H5S_SCALAR);
 
-        /* Intersecting space is hyperslab selection.  Call the hyperslab
-         * routine to project to another hyperslab selection. */
-        if(H5S__hyper_project_intersection(src_space, dst_space, src_intersect_space, new_space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't project hyperslab ondot destination selection")
+        /* Check for scalar dst_space.  In this case we simply check if the
+         * (single) point selected in src_space intersects src_intersect_space,
+         * if so select all in new_space, otherwise select none. */
+        if(H5S_GET_EXTENT_TYPE(dst_space) == H5S_SCALAR) {
+            hsize_t coords_start[H5S_MAX_RANK];
+            hsize_t coords_end[H5S_MAX_RANK];
+            htri_t intersect;
+
+            /* Get source space bounds.  Should be a single point. */
+            if(H5S_SELECT_BOUNDS(src_space, coords_start, coords_end) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get source space bounds")
+            HDassert(0 == HDmemcmp(coords_start, coords_end, H5S_GET_EXTENT_NDIMS(src_space) * sizeof(coords_start[0])));
+
+            /* Check for intersection */
+            if((intersect = H5S_SELECT_INTERSECT_BLOCK(src_intersect_space, coords_start, coords_end)) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, FAIL, "can't check for intersection")
+
+            /* Select all or none as appropriate */
+            if(intersect) {
+                if(H5S_select_all(new_space, TRUE) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't select all")
+            } /* end if */
+            else
+                if(H5S_select_none(new_space) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+        } /* end if */
+        else {
+            /* If the source intersect space is a point selection, convert it to a
+             * hyperslab (discarding ordering).  We can get away with this because
+             * the order does not matter for the source intersect space */
+            /* Maybe we should just leave it as a point selection for the point by
+             * point algorithm?  The search through the selection in
+             * H5S_SELECT_INTERSECT_BLOCK will likely be O(N) either way.  -NAF */
+            if(H5S_GET_SELECT_TYPE(src_intersect_space) == H5S_SEL_POINTS) {
+                H5S_pnt_node_t *curr_pnt = src_intersect_space->select.sel_info.pnt_lst->head;
+
+                /* Create dataspace and copy extent */
+                if(NULL == (tmp_src_intersect_space = H5S_create(H5S_SIMPLE)))
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create temporary source intersect dataspace")
+                if(H5S__extent_copy_real(&tmp_src_intersect_space->extent, &src_intersect_space->extent, FALSE) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy source intersect space extent")
+
+                /* Iterate over points */
+                for(curr_pnt = src_intersect_space->select.sel_info.pnt_lst->head; curr_pnt; curr_pnt = curr_pnt->next)
+                    /* Add point to hyperslab selection */
+                    if(H5S_hyper_add_span_element(tmp_src_intersect_space, src_intersect_space->extent.rank, curr_pnt->pnt) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't add point to temporary dataspace selection")
+
+                /* Redirect local src_intersect_space pointer (will not affect
+                 * calling function) */
+                src_intersect_space = tmp_src_intersect_space;
+            } /* end for */
+
+            /* By this point, src_intersect_space must be a hyperslab selection */
+            HDassert(H5S_GET_SELECT_TYPE(src_intersect_space) == H5S_SEL_HYPERSLABS);
+
+            /* If either the source space or the destination space is a point
+             * selection, iterate element by element */
+            if((H5S_GET_SELECT_TYPE(src_space) == H5S_SEL_POINTS)
+                    || (H5S_GET_SELECT_TYPE(dst_space) == H5S_SEL_POINTS)) {
+                hsize_t coords[H5S_MAX_RANK];
+                htri_t intersect;
+
+                /* Start with "none" selection */
+                if(H5S_select_none(new_space) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+
+                /* Initialize iterators */
+                if(H5S_select_iter_init(ss_iter, src_space, 1, H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't initialize source space selection iterator")
+                ss_iter_init = TRUE;
+                if(H5S_select_iter_init(ds_iter, dst_space, 1, H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't initialize destination space selection iterator")
+                ds_iter_init = TRUE;
+
+                /* Iterate over points */
+                do {
+                    HDassert(ss_iter->elmt_left > 0);
+                    HDassert(ss_iter->elmt_left > 0);
+
+                    /* Get SS coords */
+                    if(H5S_SELECT_ITER_COORDS(ss_iter, coords) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get source selection coordinates")
+
+                    /* Check for intersection */
+                    if((intersect = H5S_SELECT_INTERSECT_BLOCK(src_intersect_space, coords, coords)) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, FAIL, "can't check for intersection")
+
+                    /* Add point if it intersects */
+                    if(intersect) {
+                        /* Get DS coords */
+                        if(H5S_SELECT_ITER_COORDS(ds_iter, coords) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get destination selection coordinates")
+
+                        /* Add point to new_space */
+                        if(H5S_select_elements(new_space, H5S_SELECT_APPEND, 1, coords) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't add point to new selection")
+                    } /* end if */
+
+                    /* Advance iterators */
+                    if(H5S_SELECT_ITER_NEXT(ss_iter, 1) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "can't advacne source selection iterator")
+                    ss_iter->elmt_left--;
+                    if(H5S_SELECT_ITER_NEXT(ds_iter, 1) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "can't advacne destination selection iterator")
+                    ds_iter->elmt_left--;
+                } while(ss_iter->elmt_left > 0);
+                HDassert(H5S_SELECT_ITER_NELMTS(ds_iter) == 0);
+            } /* end if */
+            else {
+                HDassert(H5S_GET_SELECT_TYPE(src_space) != H5S_SEL_NONE);
+                HDassert(H5S_GET_SELECT_TYPE(dst_space) != H5S_SEL_NONE);
+
+                /* Source and destination selections are all or hyperslab,
+                 * intersecting selection is hyperslab.  Call the hyperslab routine
+                 * to project to another hyperslab selection. */
+                if(H5S__hyper_project_intersection(src_space, dst_space, src_intersect_space, new_space, share_selection) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't project hyperslab onto destination selection")
+            } /* end else */
+        } /* end else */
     } /* end else */
 
     /* load the address of the new space into *new_space_ptr */
@@ -2615,8 +2785,96 @@ done:
         if(new_space && H5S_close(new_space) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
 
+    /* General cleanup */
+    if(tmp_src_intersect_space && H5S_close(tmp_src_intersect_space) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release temporary dataspace")
+    if(ss_iter_init && H5S_SELECT_ITER_RELEASE(ss_iter) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release source selection iterator")
+    if(ds_iter_init && H5S_SELECT_ITER_RELEASE(ds_iter) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release destination selection iterator")
+
+    ss_iter = H5FL_FREE(H5S_sel_iter_t, ss_iter);
+    ds_iter = H5FL_FREE(H5S_sel_iter_t, ds_iter);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_project_intersection() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_project_intersection
+
+ PURPOSE
+    Projects the intersection of of the selections of src_space_id and
+    src_intersect_space_id within the selection of src_space_id as a
+    selection within the selection of dst_space_id.
+
+ USAGE
+    hid_t H5Sselect_project_intersection(src_space_id,dst_space_d,src_intersect_space_id)
+        hid_t src_space_id;         IN: Selection that is mapped to dst_space_id, and intersected with src_intersect_space_id
+        hid_t dst_space_id;         IN: Selection that is mapped to src_space_id
+        hid_t src_intersect_space_id; IN: Selection whose intersection with src_space_id is projected to dst_space_id to obtain the result
+
+ RETURNS
+    A dataspace with a selection equal to the intersection of
+    src_intersect_space_id and src_space_id projected from src_space to
+    dst_space on success, negative on failure.
+
+ DESCRIPTION
+    Projects the intersection of of the selections of src_space and
+    src_intersect_space within the selection of src_space as a selection
+    within the selection of dst_space.  The result is placed in the
+    selection of new_space_ptr.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hid_t
+H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_id,
+    hid_t src_intersect_space_id)
+{
+    H5S_t *src_space, *dst_space, *src_intersect_space; /* Input dataspaces */
+    H5S_t *proj_space = NULL;  /* Output dataspace */
+    hid_t ret_value;           /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "iii", src_space_id, dst_space_id, src_intersect_space_id);
+
+    /* Check args */
+    if(NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(NULL == (dst_space = (H5S_t *)H5I_object_verify(dst_space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(NULL == (src_intersect_space = (H5S_t *)H5I_object_verify(src_intersect_space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
+
+    /* Check numbers of points selected matches in source and destination */
+    if(H5S_GET_SELECT_NPOINTS(src_space) != H5S_GET_SELECT_NPOINTS(dst_space))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "number of points selected in source space does not match that in destination space")
+
+    /* Check numbers of dimensions matches in source and source intersect spaces
+     */
+    if(H5S_GET_EXTENT_NDIMS(src_space) != H5S_GET_EXTENT_NDIMS(src_intersect_space))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "rank of source space does not match rank of source intersect space")
+
+    /* Perform operation */
+    if(H5S_select_project_intersection(src_space, dst_space,
+            src_intersect_space, &proj_space, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project dataspace intersection")
+
+    /* Atomize */
+    if((ret_value = H5I_register(H5I_DATASPACE, proj_space, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+
+done:
+    if(ret_value < 0)
+        if(proj_space && H5S_close(proj_space) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Sselect_project_intersection() */
 
 
 /*--------------------------------------------------------------------------
@@ -2836,7 +3094,7 @@ H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes,
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "length array pointer is NULL")
 
     /* Get the sequences of bytes */
-    if(maxseq > 0 && maxbytes > 0) {
+    if(maxseq > 0 && maxbytes > 0 && sel_iter->elmt_left > 0) {
         if(H5S_SELECT_ITER_GET_SEQ_LIST(sel_iter, maxseq, maxbytes, nseq, nbytes, off, len) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed")
     } /* end if */

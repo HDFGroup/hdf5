@@ -24,7 +24,8 @@
   *-------------------------------------------------------------------------
  */
 
-void init_packobject(pack_info_t *obj) {
+void init_packobject(pack_info_t *obj)
+{
     int j, k;
 
     HDstrcpy(obj->path, "\0");
@@ -49,11 +50,12 @@ void init_packobject(pack_info_t *obj) {
  *-------------------------------------------------------------------------
  */
 
-static void aux_tblinsert_filter(pack_opttbl_t *table, unsigned int I, filter_info_t filt) {
+static void aux_tblinsert_filter(pack_opttbl_t *table, unsigned int I, filter_info_t filt)
+{
     if (table->objs[I].nfilters < H5_REPACK_MAX_NFILTERS)
         table->objs[I].filter[table->objs[I].nfilters++] = filt;
     else
-        H5TOOLS_INFO(H5E_tools_min_id_g, "cannot insert the filter in this object. Maximum capacity exceeded");
+        H5TOOLS_INFO("cannot insert the filter in this object. Maximum capacity exceeded");
 }
 
 /*-------------------------------------------------------------------------
@@ -64,7 +66,8 @@ static void aux_tblinsert_filter(pack_opttbl_t *table, unsigned int I, filter_in
  * Return: void
  *-------------------------------------------------------------------------
  */
-static void aux_tblinsert_layout(pack_opttbl_t *table, unsigned int I, pack_info_t *pack) {
+static void aux_tblinsert_layout(pack_opttbl_t *table, unsigned int I, pack_info_t *pack)
+{
     int k;
 
     table->objs[I].layout = pack->layout;
@@ -97,21 +100,23 @@ static int
 aux_inctable(pack_opttbl_t *table, unsigned n_objs)
 {
     unsigned u;
+    int ret_value = 0;
 
     table->size += n_objs;
     table->objs = (pack_info_t*) HDrealloc(table->objs, table->size * sizeof(pack_info_t));
     if (table->objs == NULL) {
-        H5TOOLS_INFO(H5E_tools_min_id_g, "not enough memory for options table");
-        return -1;
+        H5TOOLS_INFO("not enough memory for options table");
+        ret_value = -1;
+    }
+    else {
+        for (u = table->nelems; u < table->size; u++)
+            init_packobject(&table->objs[u]);
     }
 
-    for (u = table->nelems; u < table->size; u++)
-        init_packobject(&table->objs[u]);
-
-    return 0;
+    return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: options_table_init
  *
@@ -123,28 +128,28 @@ aux_inctable(pack_opttbl_t *table, unsigned n_objs)
 int options_table_init(pack_opttbl_t **tbl) {
     unsigned int i;
     pack_opttbl_t *table;
+    int ret_value = 0;
 
     if (NULL == (table = (pack_opttbl_t *) HDmalloc(sizeof(pack_opttbl_t)))) {
-        H5TOOLS_INFO(H5E_tools_min_id_g, "not enough memory for options table");
-        return -1;
+        H5TOOLS_GOTO_ERROR((-1), "not enough memory for options table");
     }
 
     table->size = 30;
     table->nelems = 0;
     if (NULL == (table->objs = (pack_info_t*) HDmalloc(table->size * sizeof(pack_info_t)))) {
-        H5TOOLS_INFO(H5E_tools_min_id_g, "not enough memory for options table");
         HDfree(table);
-        return -1;
+        H5TOOLS_GOTO_ERROR((-1), "not enough memory for options table");
     }
 
     for (i = 0; i < table->size; i++)
         init_packobject(&table->objs[i]);
 
     *tbl = table;
-    return 0;
+done:
+    return ret_value;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function: options_table_free
  *
@@ -174,6 +179,7 @@ options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack, pa
     unsigned i, j, I;
     unsigned added = 0;
     hbool_t found = FALSE;
+    int ret_value = 0;
 
     /* increase the size of the collection by N_OBJS if necessary */
     if (table->nelems + n_objs >= table->size)
@@ -190,7 +196,7 @@ options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack, pa
                 if (HDstrcmp(obj_list[j].obj,table->objs[i].path) == 0) {
                     /* already chunk info inserted for this one; exit */
                     if (table->objs[i].chunk.rank > 0) {
-                        H5TOOLS_INFO(H5E_tools_min_id_g, "chunk information already inserted for <%s>\n", obj_list[j].obj);
+                        H5TOOLS_INFO("chunk information already inserted for <%s>\n", obj_list[j].obj);
                         HDexit(EXIT_FAILURE);
                     }
                     /* insert the layout info */
@@ -237,7 +243,7 @@ options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack, pa
 
     table->nelems += added;
 
-    return 0;
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------

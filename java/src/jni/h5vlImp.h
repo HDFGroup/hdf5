@@ -40,21 +40,48 @@ Java_hdf_hdf5lib_H5_H5VLregister_1connector_1by_1value
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5VLis_connector_registered
+ * Method:    H5VLis_connector_registered_by_name
  * Signature: (Ljava/lang/String;)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5VLis_1connector_1registered
+Java_hdf_hdf5lib_H5_H5VLis_1connector_1registered_1by_1name
   (JNIEnv *, jclass, jobject);
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5VLis_connector_registered_by_value
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5VLis_1connector_1registered_1by_1value
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5VLget_connector_id
- * Signature: (Ljava/lang/String;)J
+ * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5VLget_1connector_1id
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5VLget_connector_id_by_name
+ * Signature: (Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5VLget_1connector_1id_1by_1name
   (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5VLget_connector_id_by_value
+ * Signature: (I)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5VLget_1connector_1id_1by_1value
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     hdf_hdf5lib_H5

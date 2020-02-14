@@ -6005,7 +6005,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
 
             /* Populate memb_fapl_arr, patch memb_addr so member file addresses
              * are aligned */
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                 memb_fapl_arr[mt] = memb_fapl;
                 memb_addr[mt] = ((memb_addr[mt] + align - 1) / align) * align;
             } /* end for */
@@ -6015,7 +6015,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
                 TEST_ERROR
 
             /* Free memb_name */
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
                 free(memb_name[mt]);
         } /* end else */
 
@@ -6378,7 +6378,7 @@ error:
     HDmemset(memb_name, 0, sizeof memb_name);                   \
     HDmemset(memb_addr, 0, sizeof memb_addr);                   \
     HDmemset(sv, 0, sizeof sv);                         \
-    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) { \
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) { \
         memb_map[mt] = H5FD_MEM_SUPER;                      \
         memb_fapl[mt] = H5P_DEFAULT;                        \
     }                                       \
@@ -7128,7 +7128,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
         for(fs_threshold = 0; fs_threshold <= TEST_THRESHOLD10; fs_threshold++) {
 
             /* Testing for H5F_FSPACE_STRATEGY_FSM_AGGR and H5F_FSPACE_STRATEGY_PAGE strategies only */
-            for(fs_type = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_type < H5F_FSPACE_STRATEGY_AGGR; H5_INC_ENUM(H5F_fspace_strategy_t, fs_type)) {
+            for(fs_type = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_type < H5F_FSPACE_STRATEGY_AGGR; fs_type++) {
 
                 if(!contig_addr_vfd && (fs_persist || fs_type == H5F_FSPACE_STRATEGY_PAGE))
                     continue;
@@ -7296,7 +7296,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
     /* Test with TRUE or FALSE for persisting free-space */
     for(fs_persist = FALSE; fs_persist <= TRUE; fs_persist++) {
         /* Testing for H5F_FSPACE_STRATEGY_FSM_AGGR and H5F_FSPACE_STRATEGY_PAGE strategies only */
-        for(fs_type = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_type < H5F_FSPACE_STRATEGY_AGGR; H5_INC_ENUM(H5F_fspace_strategy_t, fs_type)) {
+        for(fs_type = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_type < H5F_FSPACE_STRATEGY_AGGR; fs_type++) {
 
             /* Skip for multi/split driver: persisting free-space or paged aggregation strategy */
             if(!contig_addr_vfd && (fs_persist || fs_type == H5F_FSPACE_STRATEGY_PAGE))
@@ -7528,7 +7528,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
+set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
 {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t memb_fapl_arr[H5FD_MEM_NTYPES];
@@ -7537,7 +7537,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
     hbool_t relax;
     H5FD_mem_t  mt;
 
-    HDassert(multi || split);
+    HDassert(is_multi_or_split);
 
     HDmemset(memb_name, 0, sizeof memb_name);
 
@@ -7545,13 +7545,13 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
     if(H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
         TEST_ERROR
 
-    if(split) {
+    if(is_multi_or_split) {
         /* Set memb_addr aligned */
         memb_addr[H5FD_MEM_SUPER] = ((memb_addr[H5FD_MEM_SUPER] + pagesize - 1) / pagesize) * pagesize;
         memb_addr[H5FD_MEM_DRAW] = ((memb_addr[H5FD_MEM_DRAW] + pagesize - 1) / pagesize) * pagesize;
     } else {
         /* Set memb_addr aligned */
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
             memb_addr[mt] = ((memb_addr[mt] + pagesize - 1) / pagesize) * pagesize;
     } /* end else */
 
@@ -7560,7 +7560,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
         TEST_ERROR
 
     /* Free memb_name */
-    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
         free(memb_name[mt]);
 
     return 0;
@@ -7614,7 +7614,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
         if((fapl_new = H5Pcopy(fapl)) < 0) TEST_ERROR
 
         if(multi || split)
-            if(set_multi_split(fapl_new, 4096, multi, split) <  0)
+            if(set_multi_split(fapl_new, 4096, split) <  0)
                 TEST_ERROR;
 
         /* Test with TRUE or FALSE for persisting free-space */
@@ -8616,7 +8616,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
 
                 /* Populate memb_fapl_arr */
                 /* Set memb_addr aligned */
-                for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+                for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                     memb_fapl_arr[mt] = memb_fapl;
                     memb_addr[mt] = ((memb_addr[mt] + TBLOCK_SIZE4096 - 1) / TBLOCK_SIZE4096) * TBLOCK_SIZE4096;
                 }
@@ -8628,7 +8628,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
             } /* end else */
 
             /* Free memb_name */
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
                 free(memb_name[mt]);
 
             /* Close memb_fapl */
@@ -8875,7 +8875,7 @@ main(void)
     nerrors += test_mf_aggr_absorb(env_h5_drvr, fapl);
 
     /* For old library format--tests for alignment */
-    for(curr_test = TEST_NORMAL; curr_test < TEST_NTESTS; H5_INC_ENUM(test_type_t, curr_test)) {
+    for(curr_test = TEST_NORMAL; curr_test < TEST_NTESTS; curr_test++) {
 
         switch(curr_test) {
             case TEST_NORMAL: /* set alignment = 1024 */

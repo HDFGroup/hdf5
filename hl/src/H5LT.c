@@ -1360,7 +1360,7 @@ out:
 */
 
 static herr_t
-find_dataset(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *op_data)
+find_dataset(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *op_data)
 {
     /* Define a default zero value for return. This will cause the iterator to continue if
     * the dataset is not found yet.
@@ -1407,13 +1407,18 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *op_d
 *
 *-------------------------------------------------------------------------
 */
-
+/* H5Literate wants a non-const pointer but we have a const pointer in the API
+ * call. It's safe to ignore this because we control the callback, don't
+ * modify the op_data buffer (i.e.: dset_name) during the traversal, and the
+ * library never modifies that buffer.
+ */
+H5_GCC_DIAG_OFF(cast-qual)
 herr_t
 H5LTfind_dataset( hid_t loc_id, const char *dset_name )
 {
-    return H5Literate(loc_id, H5_INDEX_NAME, H5_ITER_INC, 0, find_dataset, (void *)dset_name);
+    return H5Literate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, 0, find_dataset, (void *)dset_name);
 }
-
+H5_GCC_DIAG_ON(cast-qual)
 
 /*-------------------------------------------------------------------------
 *
@@ -2033,13 +2038,18 @@ herr_t H5LTfind_attribute( hid_t loc_id, const char* attr_name )
 *
 *-------------------------------------------------------------------------
 */
-
+/* H5Aiterate wants a non-const pointer but we have a const pointer in the API
+ * call. It's safe to ignore this because we control the callback, don't
+ * modify the op_data buffer (i.e.: attr_name) during the traversal, and the
+ * library never modifies that buffer.
+ */
+H5_GCC_DIAG_OFF(cast-qual)
 herr_t
 H5LT_find_attribute( hid_t loc_id, const char* attr_name )
 {
     return H5Aiterate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name);
 }
-
+H5_GCC_DIAG_ON(cast-qual)
 
 
 /*-------------------------------------------------------------------------

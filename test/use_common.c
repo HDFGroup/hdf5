@@ -343,44 +343,45 @@ int write_uc_file(hbool_t tosend, hid_t fid)
     count[1]=dims[1];
     count[2]=dims[2];
     for (i=0; i<UC_opts.nplanes; i++){
-    /* fill buffer with value i+1 */
-    bufptr = buffer;
-    for (j=0; j<dims[1]; j++)
-        for (k=0; k<dims[2]; k++)
-        *bufptr++ = (UC_CTYPE)i;
+        /* fill buffer with value i+1 */
+        bufptr = buffer;
+        for (j=0; j<dims[1]; j++)
+            for (k=0; k<dims[2]; k++)
+                *bufptr++ = (UC_CTYPE)i;
 
         /* Cork the dataset's metadata in the cache, if SWMR is enabled */
-        if(UC_opts.use_swmr)
+        if(UC_opts.use_swmr) {
             if(H5Odisable_mdc_flushes(dsid) < 0) {
                 HDfprintf(stderr, "H5Odisable_mdc_flushes failed\n");
                 return -1;
             }
+        }
 
-    /* extend the dataset by one for new plane */
-    dims[0]=i+1;
+        /* extend the dataset by one for new plane */
+        dims[0]=i+1;
         if(H5Dset_extent(dsid, dims) < 0){
             HDfprintf(stderr, "H5Dset_extent failed\n");
             return -1;
-    }
+        }
 
         /* Get the dataset's dataspace */
         if((f_sid = H5Dget_space(dsid)) < 0){
             HDfprintf(stderr, "H5Dset_extent failed\n");
             return -1;
-    }
+        }
 
-    start[0]=i;
+        start[0]=i;
         /* Choose the next plane to write */
         if(H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0){
             HDfprintf(stderr, "Failed H5Sselect_hyperslab\n");
             return -1;
-    }
+        }
 
         /* Write plane to the dataset */
         if(H5Dwrite(dsid, UC_DATATYPE, m_sid, f_sid, H5P_DEFAULT, buffer) < 0){
             HDfprintf(stderr, "Failed H5Dwrite\n");
             return -1;
-    }
+        }
 
         /* Uncork the dataset's metadata from the cache, if SWMR is enabled */
         if(UC_opts.use_swmr)
@@ -389,12 +390,11 @@ int write_uc_file(hbool_t tosend, hid_t fid)
                 return -1;
             }
 
-    /* flush file to make the just written plane available. */
-    if(H5Dflush(dsid) < 0)
-    {
-        HDfprintf(stderr, "Failed to H5Fflush file\n");
-        return -1;
-    }
+        /* flush file to make the just written plane available. */
+        if(H5Dflush(dsid) < 0) {
+            HDfprintf(stderr, "Failed to H5Fflush file\n");
+            return -1;
+        }
     }
 
     /* Done writing. Free/Close all resources including data file */

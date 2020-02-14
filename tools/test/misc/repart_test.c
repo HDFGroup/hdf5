@@ -47,8 +47,8 @@ herr_t test_single_h5repart_opens(void);
 herr_t
 test_family_h5repart_opens(void)
 {
-    hid_t       fid = -1;
-    hid_t       fapl_id = -1;
+    hid_t       fid = H5I_INVALID_HID;
+    hid_t       fapl_id = H5I_INVALID_HID;
 
     /* open 1st file(single member file) with correct family size(20000 byte) */
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -102,7 +102,7 @@ error:
 herr_t
 test_single_h5repart_opens(void)
 {
-    hid_t       fid = -1;
+    hid_t       fid = H5I_INVALID_HID;
 
     /* open the single file */
     if ((fid = H5Fopen(FILENAME[2], H5F_ACC_RDWR, H5P_DEFAULT)) < 0)

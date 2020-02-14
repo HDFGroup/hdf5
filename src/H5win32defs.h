@@ -40,6 +40,12 @@ typedef __int64             h5_stat_size_t;
 #define HDfileno(F)         _fileno(F)
 #define HDfstat(F,B)        _fstati64(F,B)
 #define HDisatty(F)         _isatty(F)
+
+/* The isnan function needs underscore in VS2012 and earlier */
+#if (_MSC_VER <= 1700)
+  #define HDisnan(X)      _isnan(X)
+#endif /* MSC_VER < 1700 */
+
 #define HDgetcwd(S,Z)       _getcwd(S,Z)
 #define HDgetdcwd(D,S,Z)    _getdcwd(D,S,Z)
 #define HDgetdrive()        _getdrive()
@@ -156,10 +162,6 @@ extern "C" {
 #define HDvsnprintf         c99_vsnprintf /*varargs*/
 
 /* Non-POSIX functions */
-
-/* Don't use actual pthread_self on Windows because the return
- * type cannot be cast as a ulong like other systems. */
-#define HDpthread_self_ulong() ((unsigned long)GetCurrentThreadId())
 
 #ifndef H5_HAVE_MINGW
 #define HDftruncate(F,L)    _chsize_s(F,L)

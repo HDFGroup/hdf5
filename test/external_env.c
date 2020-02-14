@@ -15,7 +15,6 @@
  * Purpose:    Tests datasets stored in external raw files.
  */
 #include "external_common.h"
-#include "external_fname.h"
 
 static const char *EXT_ENV_FNAME[] = {
     "extern_env_dir/env_file_1",
@@ -189,7 +188,7 @@ main(void)
     HDputs("All external storage tests passed.");
 
     /* Clean up files used by file set tests */
-    if(h5_cleanup(EXT_FNAME, fapl_id_old)) {
+    if(h5_cleanup(EXT_ENV_FNAME, fapl_id_old)) {
         HDremove("extern_env_1r.raw");
         HDremove("extern_env_2r.raw");
         HDremove("extern_env_3r.raw");

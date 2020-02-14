@@ -40,8 +40,8 @@
 #define H5R_IS_EXTERNAL         0x1     /* Set when encoding reference to external file */
 
 /* Macros for convenience */
-#define H5R_REF_FILENAME(x)     ((x)->ref.obj.filename)
-#define H5R_REF_ATTRNAME(x)     ((x)->ref.attr.name)
+#define H5R_REF_FILENAME(x)     ((x)->info.obj.filename)
+#define H5R_REF_ATTRNAME(x)     ((x)->info.attr.name)
 
 /* Header size */
 #define H5R_ENCODE_HEADER_SIZE  (2 * H5_SIZEOF_UINT8_T)
@@ -52,7 +52,7 @@
 
 /* Object reference */
 typedef struct H5R_ref_priv_obj_t {
-    H5VL_token_t token;         /* Object token     */
+    H5O_token_t token;          /* Object token     */
     char *filename;             /* File name        */
 } H5R_ref_priv_obj_t;
 
@@ -74,12 +74,12 @@ typedef struct H5R_ref_priv_t {
         H5R_ref_priv_obj_t  obj;/* Object reference                 */
         H5R_ref_priv_reg_t  reg;/* Region reference                 */
         H5R_ref_priv_attr_t attr;/* Attribute Reference             */
-    } ref;
+    } info;
     hid_t    loc_id;            /* Cached location identifier       */
     uint32_t encode_size;       /* Cached encoding size             */
     int8_t   type;              /* Reference type                   */
     uint8_t  token_size;        /* Cached token size                */
-    char unused[18];            /* Unused                           */
+    hbool_t  app_ref;           /* App ref on loc_id                */
 } H5R_ref_priv_t;
 
 /*****************************/
@@ -90,12 +90,12 @@ typedef struct H5R_ref_priv_t {
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t   H5R__create_object(const H5VL_token_t *obj_token, size_t token_size, H5R_ref_priv_t *ref);
-H5_DLL herr_t   H5R__create_region(const H5VL_token_t *obj_token, size_t token_size, H5S_t *space, H5R_ref_priv_t *ref);
-H5_DLL herr_t   H5R__create_attr(const H5VL_token_t *obj_token, size_t token_size, const char *attr_name, H5R_ref_priv_t *ref);
+H5_DLL herr_t   H5R__create_object(const H5O_token_t *obj_token, size_t token_size, H5R_ref_priv_t *ref);
+H5_DLL herr_t   H5R__create_region(const H5O_token_t *obj_token, size_t token_size, H5S_t *space, H5R_ref_priv_t *ref);
+H5_DLL herr_t   H5R__create_attr(const H5O_token_t *obj_token, size_t token_size, const char *attr_name, H5R_ref_priv_t *ref);
 H5_DLL herr_t   H5R__destroy(H5R_ref_priv_t *ref);
 
-H5_DLL herr_t   H5R__set_loc_id(H5R_ref_priv_t *ref, hid_t id, hbool_t inc_ref);
+H5_DLL herr_t   H5R__set_loc_id(H5R_ref_priv_t *ref, hid_t id, hbool_t inc_ref, hbool_t app_ref);
 H5_DLL hid_t    H5R__get_loc_id(const H5R_ref_priv_t *ref);
 H5_DLL hid_t    H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id);
 
@@ -103,8 +103,8 @@ H5_DLL H5R_type_t   H5R__get_type(const H5R_ref_priv_t *ref);
 H5_DLL htri_t   H5R__equal(const H5R_ref_priv_t *ref1, const H5R_ref_priv_t *ref2);
 H5_DLL herr_t   H5R__copy(const H5R_ref_priv_t *src_ref, H5R_ref_priv_t *dst_ref);
 
-H5_DLL herr_t   H5R__get_obj_token(const H5R_ref_priv_t *ref, H5VL_token_t *obj_token, size_t *token_size);
-H5_DLL herr_t   H5R__set_obj_token(H5R_ref_priv_t *ref, const H5VL_token_t *obj_token, size_t token_size);
+H5_DLL herr_t   H5R__get_obj_token(const H5R_ref_priv_t *ref, H5O_token_t *obj_token, size_t *token_size);
+H5_DLL herr_t   H5R__set_obj_token(H5R_ref_priv_t *ref, const H5O_token_t *obj_token, size_t token_size);
 H5_DLL herr_t   H5R__get_region(const H5R_ref_priv_t *ref, H5S_t *space);
 
 H5_DLL ssize_t  H5R__get_file_name(const H5R_ref_priv_t *ref, char *buf, size_t size);
@@ -118,13 +118,13 @@ H5_DLL herr_t   H5R__encode_heap(H5F_t *f, unsigned char *buf, size_t *nalloc, c
 H5_DLL herr_t   H5R__decode_heap(H5F_t *f, const unsigned char *buf, size_t *nbytes, unsigned char **data_ptr, size_t *data_size);
 H5_DLL herr_t   H5R__free_heap(H5F_t *f, const unsigned char *buf, size_t nbytes);
 
-H5_DLL herr_t   H5R__decode_token_compat(hid_t id, H5I_type_t type, H5R_type_t ref_type, const unsigned char *buf, H5VL_token_t *obj_token);
+H5_DLL herr_t   H5R__decode_token_compat(H5VL_object_t *vol_obj, H5I_type_t type, H5R_type_t ref_type, const unsigned char *buf, H5O_token_t *obj_token);
 
-H5_DLL herr_t   H5R__encode_token_obj_compat(const H5VL_token_t *obj_token, size_t token_size, unsigned char *buf, size_t *nalloc);
-H5_DLL herr_t   H5R__decode_token_obj_compat(const unsigned char *buf, size_t *nbytes, H5VL_token_t *obj_token, size_t token_size);
+H5_DLL herr_t   H5R__encode_token_obj_compat(const H5O_token_t *obj_token, size_t token_size, unsigned char *buf, size_t *nalloc);
+H5_DLL herr_t   H5R__decode_token_obj_compat(const unsigned char *buf, size_t *nbytes, H5O_token_t *obj_token, size_t token_size);
 
-H5_DLL herr_t   H5R__encode_token_region_compat(H5F_t *f, const H5VL_token_t *obj_token, size_t token_size, H5S_t *space, unsigned char *buf, size_t *nalloc);
-H5_DLL herr_t   H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbytes, H5VL_token_t *obj_token, size_t token_size, H5S_t **space_ptr);
+H5_DLL herr_t   H5R__encode_token_region_compat(H5F_t *f, const H5O_token_t *obj_token, size_t token_size, H5S_t *space, unsigned char *buf, size_t *nalloc);
+H5_DLL herr_t   H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbytes, H5O_token_t *obj_token, size_t token_size, H5S_t **space_ptr);
 
 #endif /* _H5Rpkg_H */
 

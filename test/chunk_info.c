@@ -119,7 +119,7 @@ const char *FILENAME[] = {
 #define INVALID_CHK_INDEX       5
 
 /* For compressed data */
-#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001)+12)
+#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001)+12.0)
 
 /* For use in error reporting */
 #define MSG_CHK_ADDR    "Chunk address should not be HADDR_UNDEF because of H5D_ALLOC_TIME_EARLY."

@@ -20,7 +20,7 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
    --no-dangling-links
                    Must be used with --follow-symlinks option;
                    otherwise, h5ls shows error message and returns an exit
-                   code of 1. 
+                   code of 1.
                    Check for any symbolic links (soft links or external links)
                    that do not resolve to an existing object (dataset, group,
                    or named datatype).
@@ -55,11 +55,8 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
     "%05d" to open a file family.
 
   Deprecated Options
-    The following options have been deprecated in HDF5. While they remain
-    available, they have been superseded as indicated and may be removed
-    from HDF5 in the future. Use the indicated replacement option in all
-    new work; where possible, existing scripts, et cetera, should also be
-    updated to use the replacement option.
+    The following options have been removed in HDF5 1.12. Use the indicated
+    replacement option in all work.
 
    -E or --external   Follow external links.
                       Replaced by --follow-symlinks.

@@ -305,15 +305,21 @@
  */
 #ifdef __cplusplus
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED       /*void*/
-#   define H5_ATTR_NORETURN     /*void*/
-#   define H5_ATTR_CONST        /*void*/
-#   define H5_ATTR_PURE         /*void*/
-#   define H5_ATTR_FALLTHROUGH  /*void*/
+#   define H5_ATTR_UNUSED         /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
+#   define H5_ATTR_NORETURN       /*void*/
+#   define H5_ATTR_CONST          /*void*/
+#   define H5_ATTR_PURE           /*void*/
+#   define H5_ATTR_FALLTHROUGH    /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED       __attribute__((unused))
+#ifndef NDEBUG
+#define H5_ATTR_NDEBUG_UNUSED     /*void*/
+#else /* NDEBUG */
+#define H5_ATTR_NDEBUG_UNUSED     H5_ATTR_UNUSED
+#endif /* NDEBUG */
 #   define H5_ATTR_NORETURN     __attribute__((noreturn))
 #   define H5_ATTR_CONST        __attribute__((const))
 #   define H5_ATTR_PURE         __attribute__((pure))
@@ -324,11 +330,12 @@
 #endif
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED       /*void*/
-#   define H5_ATTR_NORETURN     /*void*/
-#   define H5_ATTR_CONST        /*void*/
-#   define H5_ATTR_PURE         /*void*/
-#   define H5_ATTR_FALLTHROUGH  /*void*/
+#   define H5_ATTR_UNUSED         /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
+#   define H5_ATTR_NORETURN       /*void*/
+#   define H5_ATTR_CONST          /*void*/
+#   define H5_ATTR_PURE           /*void*/
+#   define H5_ATTR_FALLTHROUGH    /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -344,6 +351,14 @@
 #define SUCCEED    0
 #define FAIL    (-1)
 #define UFAIL    (unsigned)(-1)
+
+/* The HDF5 library uses the symbol `ERR` frequently.  So do
+ * header files for libraries such as curses(3), terminfo(3), etc.
+ * Remove its definition here to avoid clashes with HDF5.
+ */
+#ifdef ERR
+#undef ERR
+#endif
 
 /* number of members in an array */
 #ifndef NELMTS
@@ -513,39 +528,10 @@
 #   define H5_POSIX_CREATE_MODE_RW      0666
 #endif
 
-/*
- * A macro to portably increment enumerated types.
- */
-#ifndef H5_INC_ENUM
-#  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
-#endif
-
 /* Represents an empty asynchronous request handle.
  * Used in the VOL code.
  */
 #define H5_REQUEST_NULL                 NULL
-
-/*
- * A macro to portably decrement enumerated types.
- */
-#ifndef H5_DEC_ENUM
-#  define H5_DEC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)-1))
-#endif
-
-/* Double constant wrapper
- *
- * Quiets gcc warnings from -Wunsuffixed-float-constants.
- *
- * This is a really annoying warning since the standard specifies that
- * constants of type double do NOT get a suffix so there's no way
- * to specify a constant of type double. To quiet gcc, we specify floating
- * point constants as type long double and cast to double.
- *
- * Note that this macro only needs to be used where using a double
- * is important. For most code, suffixing constants with F will quiet the
- * compiler and not produce erroneous code.
- */
-#define H5_DOUBLE(S) ((double) S ## L)
 
 /*
  * Methods to compare the equality of floating-point values:
@@ -1024,6 +1010,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDislower
     #define HDislower(C)    islower((int)(C)) /*cast for solaris warning*/
 #endif /* HDislower */
+#ifndef HDisnan
+    #define HDisnan(X)      isnan(X)
+#endif /* HDisnan */
 #ifndef HDisprint
     #define HDisprint(C)    isprint((int)(C)) /*cast for solaris warning*/
 #endif /* HDisprint */
@@ -1240,13 +1229,23 @@ typedef off_t               h5_stat_size_t;
         #define HDrandom()    HDrand()
     #endif /* HDrandom */
     H5_DLL int HDrand(void);
-#elif H5_HAVE_RANDOM
+    #ifndef HDsrandom
+        #define HDsrandom(S)    HDsrand(S)
+    #endif /* HDsrandom */
+    H5_DLL void HDsrand(unsigned int seed);
+#elif defined(H5_HAVE_RANDOM)
     #ifndef HDrand
         #define HDrand()    random()
     #endif /* HDrand */
     #ifndef HDrandom
         #define HDrandom()    random()
     #endif /* HDrandom */
+    #ifndef HDsrand
+        #define HDsrand(S)    srandom(S)
+    #endif /* HDsrand */
+    #ifndef HDsrandom
+        #define HDsrandom(S)    srandom(S)
+    #endif /* HDsrandom */
 #else /* H5_HAVE_RANDOM */
     #ifndef HDrand
         #define HDrand()    rand()
@@ -1254,6 +1253,12 @@ typedef off_t               h5_stat_size_t;
     #ifndef HDrandom
         #define HDrandom()    rand()
     #endif /* HDrandom */
+    #ifndef HDsrand
+        #define HDsrand(S)    srand(S)
+    #endif /* HDsrand */
+    #ifndef HDsrandom
+        #define HDsrandom(S)    srand(S)
+    #endif /* HDsrandom */
 #endif /* H5_HAVE_RANDOM */
 
 #ifndef HDread
@@ -1374,26 +1379,6 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsqrt
     #define HDsqrt(X)    sqrt(X)
 #endif /* HDsqrt */
-#ifdef H5_HAVE_RAND_R
-    H5_DLL void HDsrand(unsigned int seed);
-    #ifndef HDsrandom
-        #define HDsrandom(S)    HDsrand(S)
-    #endif /* HDsrandom */
-#elif H5_HAVE_RANDOM
-    #ifndef HDsrand
-        #define HDsrand(S)    srandom(S)
-    #endif /* HDsrand */
-    #ifndef HDsrandom
-        #define HDsrandom(S)    srandom(S)
-    #endif /* HDsrandom */
-#else /* H5_HAVE_RAND_R */
-    #ifndef HDsrand
-        #define HDsrand(S)    srand(S)
-    #endif /* HDsrand */
-    #ifndef HDsrandom
-        #define HDsrandom(S)    srand(S)
-    #endif /* HDsrandom */
-#endif /* H5_HAVE_RAND_R */
 #ifndef HDsscanf
     #define HDsscanf(S,FMT,...)   sscanf(S,FMT,__VA_ARGS__)
 #endif /* HDsscanf */
@@ -1611,10 +1596,9 @@ extern char *strdup(const char *s);
     #define HDstrdup(S)     strdup(S)
 #endif /* HDstrdup */
 
-/* Use this version of pthread_self for printing the thread ID */
-#ifndef HDpthread_self_ulong
-    #define HDpthread_self_ulong()    ((unsigned long)pthread_self())
-#endif /* HDpthread_self_ulong */
+#ifndef HDpthread_self
+    #define HDpthread_self()    pthread_self()
+#endif /* HDpthread_self */
 
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */
@@ -1659,7 +1643,7 @@ extern char *strdup(const char *s);
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
     HDassert(_tmp_src >= 0);   \
-    HDassert(_tmp_src == _tmp_dst);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1692,9 +1676,18 @@ extern char *strdup(const char *s);
 
 /* Assign a variable to one of a different size (think safer dst = (dsttype)src").
  * The code generated by the macro checks for overflows.
+ *
+ * Use w##x##y##z instead of H5_GLUE4(w, x, y, z) because srctype
+ * or dsttype on some systems (e.g., NetBSD 8 and earlier) may
+ * supply some standard types using a macro---e.g.,
+ * #define uint8_t __uint8_t.  The preprocessor will expand the
+ * macros before it evaluates H5_GLUE4(), and that will generate
+ * an unexpected name such as ASSIGN___uint8_t_TO___uint16_t.
+ * The preprocessor does not expand macros in w##x##y##z, so
+ * that will always generate the expected name.
  */
 #define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype)  \
-    H5_GLUE4(ASSIGN_,srctype,_TO_,dsttype)(dst,dsttype,src,srctype)\
+    ASSIGN_##srctype##_TO_##dsttype(dst,dsttype,src,srctype)\
 
 #else /* NDEBUG */
 #define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype)  \
@@ -2764,7 +2757,7 @@ H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **ful
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */
 H5_DLL hsize_t  H5_mpi_set_bigio_count(hsize_t new_count);
-H5_DLL hsize_t  H5_mpi_get_bigio_count();
+H5_DLL hsize_t  H5_mpi_get_bigio_count(void);
 H5_DLL herr_t   H5_mpi_comm_dup(MPI_Comm comm, MPI_Comm *comm_new);
 H5_DLL herr_t   H5_mpi_info_dup(MPI_Info info, MPI_Info *info_new);
 H5_DLL herr_t   H5_mpi_comm_free(MPI_Comm *comm);

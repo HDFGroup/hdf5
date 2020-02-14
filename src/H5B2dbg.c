@@ -87,7 +87,7 @@
  */
 herr_t
 H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
-    const H5B2_class_t *type, haddr_t obj_addr)
+    const H5B2_class_t H5_ATTR_NDEBUG_UNUSED *type, haddr_t H5_ATTR_NDEBUG_UNUSED obj_addr)
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header info */
     unsigned    u;                      /* Local index variable */
@@ -182,7 +182,7 @@ done:
  */
 herr_t
 H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
-    const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec, unsigned depth, haddr_t obj_addr)
+    const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec, unsigned depth, haddr_t H5_ATTR_NDEBUG_UNUSED obj_addr)
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
     H5B2_internal_t	*internal = NULL;   /* B-tree internal node */
@@ -294,7 +294,7 @@ done:
  */
 herr_t
 H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
-    const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec, haddr_t obj_addr)
+    const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec, haddr_t H5_ATTR_NDEBUG_UNUSED obj_addr)
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
     H5B2_leaf_t	*leaf = NULL;           /* B-tree leaf node */

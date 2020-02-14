@@ -73,14 +73,23 @@ typedef struct {
     H5G_loc_t  *loc;            /* Group location to set */
 } H5G_loc_fbi_t;
 
-/* User data for getting an object's info in a group */
+/* User data for getting an object's data model info in a group */
 typedef struct {
     /* downward */
-    unsigned fields;            /* which fields in H5O_info_t struct to fill in */
+    unsigned fields;            /* which fields in H5O_info2_t struct to fill in */
 
     /* upward */
-    H5O_info_t  *oinfo;         /* Object information to retrieve */
+    H5O_info2_t  *oinfo;        /* Object information to retrieve */
 } H5G_loc_info_t;
+
+/* User data for getting an object's native info in a group */
+typedef struct {
+    /* downward */
+    unsigned fields;            /* which fields in H5O_native_info_t struct to fill in */
+
+    /* upward */
+    H5O_native_info_t  *oinfo;  /* Object information to retrieve */
+} H5G_loc_native_info_t;
 
 /* User data for setting an object's comment in a group */
 typedef struct {
@@ -112,6 +121,12 @@ static herr_t H5G__loc_find_cb(H5G_loc_t *grp_loc, const char *name,
 static herr_t H5G__loc_find_by_idx_cb(H5G_loc_t *grp_loc, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata,
     H5G_own_loc_t *own_loc);
+static herr_t H5G__loc_addr_cb(H5G_loc_t *grp_loc, const char *name,
+    const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata, H5G_own_loc_t *own_loc);
+static herr_t H5G__loc_info_cb(H5G_loc_t *grp_loc, const char *name,
+    const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata, H5G_own_loc_t *own_loc);
+static herr_t H5G__loc_native_info_cb(H5G_loc_t *grp_loc, const char *name,
+    const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata, H5G_own_loc_t *own_loc);
 static herr_t H5G__loc_set_comment_cb(H5G_loc_t *grp_loc, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata,
     H5G_own_loc_t *own_loc);
@@ -684,9 +699,81 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_loc_info_cb
+ * Function:	H5G__loc_addr_cb
  *
- * Purpose:	Callback for retrieving object info for an object in a group
+ * Purpose:	Callback for retrieving the address for an object in a group
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, December 21, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G__loc_addr_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc,
+    void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
+{
+    haddr_t *udata = (haddr_t *)_udata; /* User data passed in */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the name in this group resolved to a valid link */
+    if(obj_loc == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+
+    /* Set address of object */
+    *udata = obj_loc->oloc->addr;
+
+done:
+    /* Indicate that this callback didn't take ownership of the group *
+     * location for the object */
+    *own_loc = H5G_OWN_NONE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__loc_addr_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G__loc_addr
+ *
+ * Purpose:	Retrieve the information for an object from a group location
+ *              and path to that object
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, November 23, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G__loc_addr(const H5G_loc_t *loc, const char *name, haddr_t *addr/*out*/)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args. */
+    HDassert(loc);
+    HDassert(name && *name);
+    HDassert(addr);
+
+    /* Traverse group hierarchy to locate object */
+    if(H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_addr_cb, addr) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__loc_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G__loc_info_cb
+ *
+ * Purpose:	Callback for retrieving data model info for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -696,13 +783,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_loc_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name, const H5O_link_t H5_ATTR_UNUSED *lnk,
+H5G__loc_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name, const H5O_link_t H5_ATTR_UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_loc_info_t *udata = (H5G_loc_info_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check if the name in this group resolved to a valid link */
     if(obj_loc == NULL)
@@ -718,13 +805,13 @@ done:
     *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_loc_info_cb() */
+} /* end H5G__loc_info_cb() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_loc_info
  *
- * Purpose:	Retrieve the information for an object from a group location
+ * Purpose:	Retrieve the data model information for an object from a group location
  *              and path to that object
  *
  * Return:	Non-negative on success/Negative on failure
@@ -735,7 +822,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_info(const H5G_loc_t *loc, const char *name, H5O_info_t *oinfo/*out*/, unsigned fields)
+H5G_loc_info(const H5G_loc_t *loc, const char *name, H5O_info2_t *oinfo/*out*/, unsigned fields)
 {
     H5G_loc_info_t udata;               /* User data for traversal callback */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -752,12 +839,90 @@ H5G_loc_info(const H5G_loc_t *loc, const char *name, H5O_info_t *oinfo/*out*/, u
     udata.oinfo = oinfo;
 
     /* Traverse group hierarchy to locate object */
-    if(H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G_loc_info_cb, &udata) < 0)
+    if(H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_info_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_loc_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G__loc_native_info_cb
+ *
+ * Purpose:	Callback for retrieving native info for an object in a group
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 23, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G__loc_native_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name, const H5O_link_t H5_ATTR_UNUSED *lnk,
+    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
+{
+    H5G_loc_native_info_t *udata = (H5G_loc_native_info_t *)_udata;   /* User data passed in */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the name in this group resolved to a valid link */
+    if(obj_loc == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+
+    /* Query object information */
+    if(H5O_get_native_info(obj_loc->oloc, udata->oinfo, udata->fields) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object info")
+
+done:
+    /* Indicate that this callback didn't take ownership of the group *
+     * location for the object */
+    *own_loc = H5G_OWN_NONE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__loc_native_info_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_loc_native_info
+ *
+ * Purpose:	Retrieve the native information for an object from a group location
+ *              and path to that object
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, November 23, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_loc_native_info(const H5G_loc_t *loc, const char *name, H5O_native_info_t *oinfo/*out*/,
+    unsigned fields)
+{
+    H5G_loc_native_info_t udata;        /* User data for traversal callback */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check args. */
+    HDassert(loc);
+    HDassert(name && *name);
+    HDassert(oinfo);
+
+    /* Set up user data for locating object */
+    udata.fields = fields;
+    udata.oinfo = oinfo;
+
+    /* Traverse group hierarchy to locate object */
+    if(H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_native_info_cb, &udata) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_loc_native_info() */
 
 
 /*-------------------------------------------------------------------------

@@ -163,7 +163,7 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
      *  can merge with the metadata or small 'raw' data aggregator
      */
     all_same = TRUE;
-    for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
+    for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; type++)
         /* Check for any different type mappings */
         if(f_sh->fs_type_map[type] != f_sh->fs_type_map[H5FD_MEM_DEFAULT]) {
             all_same = FALSE;
@@ -187,7 +187,7 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
             /* One or more allocation type don't map to the same free list type */
             /* Check if all the metadata allocation types map to the same type */
             all_metadata_same = TRUE;
-            for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
+            for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++)
                 /* Skip checking raw data free list mapping */
                 /* (global heap is treated as raw data) */
                 if(type != H5FD_MEM_DRAW && type != H5FD_MEM_GHEAP) {
@@ -1686,7 +1686,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
         /* Iterate over all the free space types that have managers and
          * get each free list's space
          */
-        for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype)) {
+        for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; ptype++) {
             /* Test to see if we need to switch rings -- do so if required */
             if(H5MF__fsm_type_is_self_referential(f->shared, ptype))
                 needed_ring = H5AC_RING_MDFSM;
@@ -1708,7 +1708,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
         /* Iterate over all the free space types that have managers and
          * get each free list's space
          */
-        for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+        for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; type++) {
             /* Test to see if we need to switch rings -- do so if required */
             if(H5MF__fsm_type_is_self_referential(f->shared, (H5F_mem_page_t)type))
                 needed_ring = H5AC_RING_MDFSM;
@@ -1807,9 +1807,9 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
          *
          * In passing, verify that all the free space managers are closed.
          */
-        for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
+        for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
             fsinfo.fs_addr[ptype - 1] = HADDR_UNDEF;
-        for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
+        for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++)
             fsinfo.fs_addr[type-1] = f->shared->fs_addr[type];
         fsinfo.strategy = f->shared->fs_strategy;
         fsinfo.persist = f->shared->fs_persist;
@@ -1824,7 +1824,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
             HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
 
         /* Close the free space managers */
-        for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+        for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++) {
             if(f->shared->fs_man[type]) {
                 /* Test to see if we need to switch rings -- do so if required */
                 if(H5MF__fsm_type_is_self_referential(f->shared, (H5F_mem_page_t)type))
@@ -1877,7 +1877,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
         HDassert(H5F_NULL_FSM_ADDR(f) || final_eoa == f->shared->eoa_fsm_fsalloc);
     } /* end if */
     else {  /* super_vers can be 0, 1, 2 */
-        for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
+        for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; type++)
             if(H5MF__close_delete_fstype(f, (H5F_mem_page_t)type) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
     } /* end else */
@@ -1958,7 +1958,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     fsinfo.eoa_pre_fsm_fsalloc = HADDR_UNDEF;
     fsinfo.version = f->shared->fs_version;
 
-    for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
+    for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
         fsinfo.fs_addr[ptype - 1] = HADDR_UNDEF;
 
     if(f->shared->fs_persist) {
@@ -1980,7 +1980,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
          * file space for the self referential free space managers.  Other
          * data was gathered above.
          */
-        for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
+        for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
             fsinfo.fs_addr[ptype-1] = f->shared->fs_addr[ptype];
         fsinfo.eoa_pre_fsm_fsalloc = f->shared->eoa_fsm_fsalloc;
 
@@ -1990,7 +1990,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
 
         /* Close the free space managers */
         /* use H5MF__close_fstype() for this? */
-        for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype)) {
+        for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; ptype++) {
             if(f->shared->fs_man[ptype]) {
                 /* Test to see if we need to switch rings -- do so if required */
                 if(H5MF__fsm_type_is_self_referential(f->shared, ptype))
@@ -2052,7 +2052,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
         /* Iterate over all the free space types that have managers 
          * and get each free list's space 
          */
-        for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
+        for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
             if(H5MF__close_delete_fstype(f, ptype) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close the free space manager")
 
@@ -2125,7 +2125,7 @@ H5MF__close_shrink_eoa(H5F_t *f)
 
         if(H5F_PAGED_AGGR(f)) {
             /* Check the last section of each free-space manager */
-            for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype)) {
+            for(ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; ptype++) {
                 if(f->shared->fs_man[ptype]) {
                     /* Test to see if we need to switch rings -- do so if required */
                     if(H5MF__fsm_type_is_self_referential(f->shared, ptype))
@@ -2149,7 +2149,7 @@ H5MF__close_shrink_eoa(H5F_t *f)
         } /* end if */
         else {
             /* Check the last section of each free-space manager */
-            for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+            for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; type++) {
                 if(f->shared->fs_man[type]) {
                     /* Test to see if we need to switch rings -- do so if required */
                     if(H5MF__fsm_type_is_self_referential(f->shared, (H5F_mem_page_t)type))
@@ -2245,7 +2245,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
         end_type = (H5F_mem_page_t)H5FD_MEM_NTYPES;
     } /* end else */
 
-    for(tt = H5FD_MEM_SUPER; tt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, tt))
+    for(tt = H5FD_MEM_SUPER; tt < H5FD_MEM_NTYPES; tt++)
         if(HADDR_UNDEF == (fs_eoa[tt] = H5F_get_eoa(f, tt)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 
@@ -2260,7 +2260,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
     } /* end if */
 
     /* Iterate over all the free space types that have managers and get each free list's space */
-    for(type = start_type; type < end_type; H5_INC_ENUM(H5F_mem_page_t, type)) {
+    for(type = start_type; type < end_type; type++) {
         fs_started[type] = FALSE;
 
         /* Check if the free space for the file has been initialized */
@@ -2290,7 +2290,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
             /* Retrieve free space size from free space manager */
             if(H5FS_sect_stats(f->shared->fs_man[type], &type_fs_size, NULL) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space stats")
-            if(H5FS_size(f, f->shared->fs_man[type], &type_meta_size) < 0)
+            if(H5FS_size(f->shared->fs_man[type], &type_meta_size) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space metadata stats")
 
             /* Increment total free space for types */
@@ -2300,7 +2300,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
     } /* end for */
 
     /* Close the free-space managers if they were opened earlier in this routine */
-    for(type = start_type; type < end_type; H5_INC_ENUM(H5F_mem_page_t, type)) {
+    for(type = start_type; type < end_type; type++) {
         /* Test to see if we need to switch rings -- do so if required */
         if(H5MF__fsm_type_is_self_referential(f->shared, (H5F_mem_page_t)type))
             needed_ring = H5AC_RING_MDFSM;
@@ -2387,7 +2387,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
         if(H5F_PAGED_AGGR(f)) /* set to the corresponding LARGE free-space manager */
             end_type = (H5F_mem_page_t)(end_type + H5FD_MEM_NTYPES);
         else
-            H5_INC_ENUM(H5F_mem_page_t, end_type);
+            end_type++;
     } /* end else */
 
     /* Set up user data for section iteration */
@@ -2403,7 +2403,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
     curr_ring = H5AC_RING_RDFSM;
 
     /* Iterate over memory types, retrieving the number of sections of each type */
-    for(ty = start_type; ty < end_type; H5_INC_ENUM(H5F_mem_page_t, ty)) {
+    for(ty = start_type; ty < end_type; ty++) {
         hbool_t fs_started = FALSE;	/* The free-space manager is opened or not */
         size_t nums = 0;		/* The number of free-space sections */
 
@@ -2733,7 +2733,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
             else /* no need for a second pass */
                 break;
 
-            for(mem_type = H5FD_MEM_SUPER; mem_type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5F_mem_t, mem_type)) {
+            for(mem_type = H5FD_MEM_SUPER; mem_type < H5FD_MEM_NTYPES; mem_type++) {
                 H5MF__alloc_to_fs_type(f->shared, mem_type, alloc_size, &fsm_type);
 
                 if(pass_count == 0) { /* this is the first pass */
@@ -2834,7 +2834,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          * those addresses are unknown.  This is OK -- we will write the correct
          * values to the message at free space manager shutdown.
          */
-        for(fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, fsm_type))
+        for(fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; fsm_type++)
             fsinfo.fs_addr[fsm_type - 1] = HADDR_UNDEF;
         fsinfo.strategy = f->shared->fs_strategy;
         fsinfo.persist = f->shared->fs_persist;
@@ -2867,7 +2867,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          */
 
         /* Reinitialize fsm_visited */
-        for(fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, fsm_type))
+        for(fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; fsm_type++)
             fsm_visited[fsm_type] = FALSE;
 
         for(pass_count = 0; pass_count <= 1; pass_count++) {
@@ -2878,7 +2878,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
             else /* no need for a second pass */
                 break;
 
-            for(mem_type = H5FD_MEM_SUPER; mem_type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5F_mem_t, mem_type)) {
+            for(mem_type = H5FD_MEM_SUPER; mem_type < H5FD_MEM_NTYPES; mem_type++) {
                 H5MF__alloc_to_fs_type(f->shared, mem_type, alloc_size, &fsm_type);
 
                 if(pass_count == 0) { /* this is the first pass */
@@ -2975,7 +2975,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
         } /* end for */
 
         /* verify that all opened FSMs were closed */
-        for(fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, fsm_type))
+        for(fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; fsm_type++)
             HDassert(!fsm_opened[fsm_type]);
 
         /* Indicate that the FSM was settled successfully */

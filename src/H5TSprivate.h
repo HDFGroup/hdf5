@@ -26,6 +26,7 @@
 #ifndef H5TSprivate_H_
 #define H5TSprivate_H_
 
+#ifdef H5_HAVE_THREADSAFE
 /* Public headers needed by this file */
 #include "H5TSpublic.h"		/* Public API prototypes */
 
@@ -68,6 +69,8 @@ H5_DLL void H5TS_win32_process_exit(void);
 H5_DLL herr_t H5TS_win32_thread_enter(void);
 H5_DLL herr_t H5TS_win32_thread_exit(void);
 
+#define H5TS_thread_id() ((uint64_t)GetCurrentThreadId())
+
 #else /* H5_HAVE_WIN_THREADS */
 
 /* Library level data structures */
@@ -95,16 +98,17 @@ typedef pthread_once_t H5TS_once_t;
 #define H5TS_SCOPE_PROCESS PTHREAD_SCOPE_PROCESS
 #define H5TS_CALL_CONV /* unused - Windows only */
 
-/* Portability function aliases */
-#define H5TS_get_thread_local_value(key)	HDpthread_getspecific(key)
-#define H5TS_set_thread_local_value(key, value)	HDpthread_setspecific(key, value)
-#define H5TS_attr_init(attr_ptr)                HDpthread_attr_init((attr_ptr))
-#define H5TS_attr_setscope(attr_ptr, scope)     HDpthread_attr_setscope(attr_ptr, scope)
-#define H5TS_attr_destroy(attr_ptr)             HDpthread_attr_destroy(attr_ptr)
-#define H5TS_wait_for_thread(thread)            HDpthread_join(thread, NULL)
-#define H5TS_mutex_init(mutex)                  HDpthread_mutex_init(mutex, NULL)
-#define H5TS_mutex_lock_simple(mutex)           HDpthread_mutex_lock(mutex)
-#define H5TS_mutex_unlock_simple(mutex)         HDpthread_mutex_unlock(mutex)
+/* Functions */
+#define H5TS_get_thread_local_value(key)	pthread_getspecific( key )
+#define H5TS_set_thread_local_value(key, value)	pthread_setspecific( key, value )
+#define H5TS_attr_init(attr_ptr) pthread_attr_init((attr_ptr))
+#define H5TS_attr_setscope(attr_ptr, scope) pthread_attr_setscope(attr_ptr, scope)
+#define H5TS_attr_destroy(attr_ptr) pthread_attr_destroy(attr_ptr)
+#define H5TS_wait_for_thread(thread) pthread_join(thread, NULL)
+#define H5TS_mutex_init(mutex) pthread_mutex_init(mutex, NULL)
+#define H5TS_mutex_lock_simple(mutex) pthread_mutex_lock(mutex)
+#define H5TS_mutex_unlock_simple(mutex) pthread_mutex_unlock(mutex)
+H5_DLL uint64_t H5TS_thread_id(void);
 
 /* Pthread-only routines */
 H5_DLL void   H5TS_pthread_first_thread_init(void);
@@ -128,6 +132,12 @@ H5_DLL herr_t H5TS_cancel_count_dec(void);
 
 /* Testing routines */
 H5_DLL H5TS_thread_t H5TS_create_thread(void *(*func)(void *), H5TS_attr_t * attr, void *udata);
+
+#else /* H5_HAVE_THREADSAFE */
+
+#define H5TS_thread_id() ((uint64_t)0)
+
+#endif /* H5_HAVE_THREADSAFE */
 
 #endif	/* H5TSprivate_H_ */
 

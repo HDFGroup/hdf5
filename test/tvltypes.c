@@ -465,14 +465,14 @@ test_vltypes_vlen_atomic(void)
     ret = H5Dvlen_get_buf_size(dataset, tid1, sid1, &size);
     CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
 
+    /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
+    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(unsigned int),"H5Dvlen_get_buf_size");
+
     /* Try to call H5Dvlen_get_buf with bad dataspace */
     H5E_BEGIN_TRY {
         ret = H5Dvlen_get_buf_size(dataset, tid1, sid2, &size);
     } H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dvlen_get_buf_size");
-
-    /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
-    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(unsigned int),"H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
     ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,xfer_pid,rdata);
@@ -2398,17 +2398,17 @@ test_vltypes_fill_value(void)
     typedef struct dtype1_struct {
         unsigned int    gui;
         unsigned int    pgui;
-        char   *str_id;
-        char   *str_name;
-        char   *str_desc;
-        char   *str_orig;
-        char   *str_stat;
+        const char   *str_id;
+        const char   *str_name;
+        const char   *str_desc;
+        const char   *str_orig;
+        const char   *str_stat;
         unsigned int    ver;
         double val;
         double ma;
         double mi;
-        char   *str_form;
-        char   *str_unit;
+        const char   *str_form;
+        const char   *str_unit;
     } dtype1_struct;
 
     herr_t ret;
@@ -2543,7 +2543,7 @@ test_vltypes_fill_value(void)
     CHECK(file_id, FAIL, "H5Fcreate");
 
     /* Create datasets with different storage layouts */
-    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; H5_INC_ENUM(H5D_layout_t, layout)) {
+    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
         unsigned compress_loop;         /* # of times to run loop, for testing compressed chunked dataset */
         unsigned test_loop;             /* Loop over datasets */
 
@@ -2659,7 +2659,7 @@ test_vltypes_fill_value(void)
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Read empty datasets with different storage layouts */
-    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; H5_INC_ENUM(H5D_layout_t, layout)) {
+    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
         unsigned compress_loop;         /* # of times to run loop, for testing compressed chunked dataset */
         unsigned test_loop;             /* Loop over datasets */
 
@@ -2860,7 +2860,7 @@ test_vltypes_fill_value(void)
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Write one element & fill values to  datasets with different storage layouts */
-    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; H5_INC_ENUM(H5D_layout_t, layout)) {
+    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
         unsigned compress_loop;         /* # of times to run loop, for testing compressed chunked dataset */
         unsigned test_loop;             /* Loop over datasets */
 

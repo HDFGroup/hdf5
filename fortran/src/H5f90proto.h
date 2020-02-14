@@ -23,7 +23,7 @@ H5_FCDLL void HD5packFstring(char *src, char *dest, size_t len);
 
 
 /*
- * Storage info struct used by H5O_info_t and H5F_info_t 
+ * Storage info struct used by H5O_info_t and H5F_info_t
  * interoperable with Fortran.
  */
 typedef struct H5_ih_info_t_f {
@@ -31,7 +31,7 @@ typedef struct H5_ih_info_t_f {
     hsize_t     heap_size;
 } H5_ih_info_t_f;
 
-/* Information struct for object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx) 
+/* Information struct for object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx)
  *  interoperable with Fortran.
  */
 typedef struct H5O_hdr_info_t_f {
@@ -51,12 +51,11 @@ typedef struct H5O_hdr_info_t_f {
     } mesg;
 } H5O_hdr_info_t_f;
 
-/* Information struct for object (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx) 
- *  interoperable with Fortran.
+/* Information struct for object (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx)
  */
 typedef struct H5O_info_t_f {
     unsigned long 	fileno;		/* File number that object is located in */
-    haddr_t_f 		addr;		/* Object address in file	*/
+    H5O_token_t 	token;		/* Token of object in file	*/
     int 		type;		/* Basic object type (group, dataset, etc.) */
     int_f 		rc;		/* Reference count of object    */
     int_f	        atime[8];	/* Access time			*/
@@ -64,13 +63,18 @@ typedef struct H5O_info_t_f {
     int_f		ctime[8];	/* Change time			*/
     int_f		btime[8];	/* Birth time			*/
     hsize_t 		num_attrs;	/* # of attributes attached to object */
+} H5O_info_t_f;
+
+/* Information struct for native object (for H5Oget_native_info/H5Oget_native_info_by_name/H5Oget_native_info_by_idx)
+ */
+typedef struct H5O_native_info_t_f {
     H5O_hdr_info_t_f    hdr;            /* Object header information */
     /* Extra metadata storage for obj & attributes */
     struct {
         H5_ih_info_t_f   obj;             /* v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */
         H5_ih_info_t_f   attr;            /* v2 B-tree & heap for attributes */
     } meta_size;
-} H5O_info_t_f;
+} H5O_native_info_t_f;
 
 
 /*
@@ -312,12 +316,12 @@ H5_FCDLL int_f h5tconvert_c(hid_t_f *src_id, hid_t_f *dst_id, size_t_f *nelmts, 
 
 H5_FCDLL int_f h5oopen_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid_t_f *obj_id);
 H5_FCDLL int_f h5oclose_c(hid_t_f *object_id );
-H5_FCDLL int_f h5oopen_by_addr_c(hid_t_f *loc_id, haddr_t_f *addr, hid_t_f *obj_id);
+H5_FCDLL int_f h5oopen_by_token_c(hid_t_f *loc_id, H5O_token_t *token, hid_t_f *obj_id);
 H5_FCDLL int_f h5olink_c(hid_t_f *object_id, hid_t_f *new_loc_id, _fcd name, size_t_f *namelen,
 			   hid_t_f *lcpl_id, hid_t_f *lapl_id);
-H5_FCDLL int_f h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op, void *op_data, int_f *fields);
+H5_FCDLL int_f h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate2_t op, void *op_data, int_f *fields);
 H5_FCDLL int_f h5ovisit_by_name_c(hid_t_f *loc_id,  _fcd object_name, size_t_f *namelen, int_f *index_type, int_f *order,
-				   H5O_iterate_t op, void *op_data, hid_t_f *lapl_id, int_f *fields );
+				   H5O_iterate2_t op, void *op_data, hid_t_f *lapl_id, int_f *fields );
 H5_FCDLL int_f h5oget_info_c(hid_t_f *object_id, H5O_info_t_f *object_info, int_f *fields);
 H5_FCDLL int_f h5oget_info_by_idx_c(hid_t_f *loc_id, _fcd  group_name, size_t_f *namelen, 
 				      int_f *index_field, int_f *order, hsize_t_f *n, hid_t_f *lapl_id, H5O_info_t_f *object_info, int_f *fields);
@@ -336,6 +340,8 @@ H5_FCDLL int_f h5oopen_by_idx_c(hid_t_f *loc_id, _fcd  group_name, size_t_f *gro
 H5_FCDLL int_f h5oget_comment_c(hid_t_f *object_id, _fcd comment, size_t_f *commentsize, hssize_t_f *bufsize);
 H5_FCDLL int_f h5oget_comment_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *name_size, 
 					  _fcd comment, size_t_f *commentsize, size_t_f *bufsize, hid_t_f *lapl_id);
+H5_FCDLL int_f h5otoken_cmp_c(hid_t_f *loc_id, H5O_token_t *token1,
+                                H5O_token_t *token2, int_f *cmp_value);
 /*
  * Functions from H5Pf.c
  */
@@ -448,7 +454,6 @@ H5_FCDLL int_f h5pset_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_f
 H5_FCDLL int_f h5pset_shared_mesg_nindexes_c(hid_t_f *plist_id, int_f *nindexes );
 H5_FCDLL int_f h5pset_shared_mesg_index_c(hid_t_f *fcpl_id, int_f *index_num, int_f *mesg_type_flags, int_f *min_mesg_size);
 H5_FCDLL int_f h5pget_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags);
-H5_FCDLL int_f h5pset_libver_bounds_c(hid_t_f *fapl_id, int_f *low, int_f *high);
 H5_FCDLL int_f h5pset_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags);
 H5_FCDLL int_f h5pget_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dense );
 H5_FCDLL int_f h5pget_obj_track_times_c(hid_t_f *plist_id, int_f *flag);
@@ -568,11 +573,11 @@ H5_FCDLL int_f h5ldelete_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *gr
 H5_FCDLL int_f h5lexists_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, int_f *link_exists);
 H5_FCDLL int_f h5lget_info_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
 			       int_f *cset, int_f *corder, int_f *corder_valid, int_f *link_type,
-			       haddr_t_f *address, size_t_f *val_size,
-			       hid_t_f *lapl_id);
+			       H5O_token_t *token, size_t_f *val_size, hid_t_f *lapl_id);
 H5_FCDLL int_f h5lget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		      int_f *index_field, int_f *order, hsize_t_f *n,
-		      int_f *link_type, int_f *corder_valid, int_f *corder, int_f *cset, haddr_t_f *address, size_t_f *val_size, hid_t_f *lapl_id);
+		      int_f *link_type, int_f *corder_valid, int_f *corder,
+                      int_f *cset, H5O_token_t *token, size_t_f *val_size, hid_t_f *lapl_id);
 H5_FCDLL int_f h5lis_registered_c(int_f *link_cls_id);
 H5_FCDLL int_f h5lmove_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *dest_loc_id,
 			  _fcd dest_name, size_t_f *dest_namelen, hid_t_f *lcpl_id, hid_t_f *lapl_id);
@@ -582,8 +587,8 @@ H5_FCDLL int_f h5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *
 H5_FCDLL int_f h5lget_val_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, size_t_f *size,
 			     void *linkval_buff, hid_t_f *lapl_id) ;
 
-H5_FCDLL int_f h5literate_c(hid_t_f *group_id, int_f *index_type, int_f *order, hsize_t_f *idx, H5L_iterate_t op, void *op_data );
-H5_FCDLL int_f h5literate_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, int_f *index_type, int_f *order, hsize_t_f *idx, H5L_iterate_t op, void *op_data, hid_t_f *lapl_id);
+H5_FCDLL int_f h5literate_c(hid_t_f *group_id, int_f *index_type, int_f *order, hsize_t_f *idx, H5L_iterate2_t op, void *op_data );
+H5_FCDLL int_f h5literate_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, int_f *index_type, int_f *order, hsize_t_f *idx, H5L_iterate2_t op, void *op_data, hid_t_f *lapl_id);
 
 
 #endif /* _H5f90proto_H */

@@ -126,7 +126,8 @@ int main(int argc, const char *argv[])
 static void
 ph5diff_worker(int nID)
 {
-    hid_t file1_id = -1, file2_id = -1;
+    hid_t file1_id = H5I_INVALID_HID;
+    hid_t file2_id = H5I_INVALID_HID;
 
     while(1)
     {
@@ -165,7 +166,7 @@ ph5diff_worker(int nID)
         {
             struct diff_mpi_args args;
             struct diffs_found  diffs;
-            int i;
+            unsigned i;
 
             /* Make certain we've received the filenames and opened the files already */
             if(file1_id < 0 || file2_id < 0)

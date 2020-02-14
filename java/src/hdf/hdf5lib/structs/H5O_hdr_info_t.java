@@ -16,7 +16,7 @@ package hdf.hdf5lib.structs;
 import java.io.Serializable;
 
 // Information struct for object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx)
-public class H5O_hdr_info_t implements Serializable{
+public class H5O_hdr_info_t implements Serializable {
     private static final long serialVersionUID = 7883826382952577189L;
     public int version;       /* Version number of header format in file */
     public int nmesgs;        /* Number of object header messages */
@@ -43,5 +43,39 @@ public class H5O_hdr_info_t implements Serializable{
         this.space_free = space_free;
         this.mesg_present = mesg_present;
         this.mesg_shared = mesg_shared;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+
+        if (!(o instanceof H5O_hdr_info_t))
+            return false;
+
+        H5O_hdr_info_t info = (H5O_hdr_info_t) o;
+
+        if (this.version != info.version)
+        	return false;
+        if (this.nmesgs != info.nmesgs)
+        	return false;
+        if (this.nchunks != info.nchunks)
+        	return false;
+        if (this.flags != info.flags)
+        	return false;
+        if (this.space_total != info.space_total)
+        	return false;
+        if (this.space_meta != info.space_meta)
+        	return false;
+        if (this.space_mesg != info.space_mesg)
+        	return false;
+        if (this.space_free != info.space_free)
+        	return false;
+        if (this.mesg_present != info.mesg_present)
+        	return false;
+        if (this.mesg_shared != info.mesg_shared)
+        	return false;        
+
+        return true;
     }
 }

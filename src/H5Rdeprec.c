@@ -87,20 +87,20 @@
 /*-------------------------------------------------------------------------
  * Function:    H5Rget_obj_type1
  *
- * Purpose: Retrieves the type of the object that a reference points to.
+ * Purpose:     Retrieves the type of the object that a reference points to.
  *
- * Return: Object type (as defined in H5Gpublic.h) on success
- *         H5G_UNKNOWN on failure
+ * Return:      Success:    Object type (as defined in H5Gpublic.h)
+ *              Failure:    H5G_UNKNOWN
  *
  *-------------------------------------------------------------------------
  */
 H5G_obj_t
 H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     H5O_type_t obj_type;                /* Object type */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference buffer */
     H5G_obj_t ret_value;                /* Return value */
@@ -123,17 +123,17 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "invalid location identifier")
 
     /* Get object token */
-    if(H5R__decode_token_compat(id, vol_obj_type, ref_type, buf, &obj_token) < 0)
+    if(H5R__decode_token_compat(vol_obj, vol_obj_type, ref_type, buf, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, H5G_UNKNOWN, "unable to get object token")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Retrieve object's type */
     if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_type) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, H5G_UNKNOWN, "can't retrieve object type")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5G_UNKNOWN, "can't retrieve object type")
 
     /* Set return value */
     ret_value = H5G_map_obj_type(obj_type);
@@ -146,20 +146,21 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rdereference1
  *
- * Purpose: Given a reference to some object, open that object and return an
- * ID for that object.
+ * Purpose:     Given a reference to some object, open that object and return
+ *              an ID for that object.
  *
- * Return:  Valid ID on success/Negative on failure
+ * Return:      Success:    Valid ID
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     H5I_type_t opened_type;             /* Opened object type */
     void *opened_obj = NULL;            /* Opened object */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference buffer */
@@ -183,12 +184,12 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Get object token */
-    if(H5R__decode_token_compat(obj_id, vol_obj_type, ref_type, buf, &obj_token) < 0)
+    if(H5R__decode_token_compat(vol_obj, vol_obj_type, ref_type, buf, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, H5I_INVALID_HID, "unable to get object token")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Dereference */
@@ -209,12 +210,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rcreate
  *
- * Purpose: Creates a particular type of reference specified with REF_TYPE,
- * in the space pointed to by REF. The LOC_ID and NAME are used to locate the
- * object pointed to and the SPACE_ID is used to choose the region pointed to
- * (for Dataset Region references).
+ * Purpose:     Creates a particular type of reference specified with REF_TYPE,
+ *              in the space pointed to by REF. The LOC_ID and NAME are used to
+ *              locate the object pointed to and the SPACE_ID is used to choose
+ *              the region pointed to (for Dataset Region references).
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:      Non-negative on success / negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -222,10 +223,10 @@ herr_t
 H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
     hid_t space_id)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
     hid_t file_id = H5I_INVALID_HID;    /* File ID for region reference */
     void *vol_obj_file = NULL;
@@ -251,6 +252,19 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
     if(NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+#ifndef NDEBUG
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(vol_obj, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
+#endif /* NDEBUG */
+
     /* Get object type */
     if((vol_obj_type = H5I_get_type(loc_id)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
@@ -258,14 +272,15 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.lapl_id = H5P_LINK_ACCESS_DEFAULT;
     loc_params.obj_type = vol_obj_type;
 
     /* Get the object token */
-    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_token) < 0)
+    if(H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_LOOKUP, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to retrieve object token")
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(loc_id, vol_obj_type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, vol_obj_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Retrieve VOL object */
@@ -273,16 +288,17 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get container info */
-    if(H5VL_file_get(vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &cont_info) < 0)
+    if(H5VL_file_get((const H5VL_object_t *)vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &cont_info) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get container info")
 
     /* Create reference */
     if(ref_type == H5R_OBJECT1) {
         size_t buf_size = H5R_OBJ_REF_BUF_SIZE;
 
-        if((ret_value = H5R__encode_token_obj_compat((const H5VL_token_t *)&obj_token, cont_info.token_size, buf, &buf_size)) < 0)
+        if((ret_value = H5R__encode_token_obj_compat((const H5O_token_t *)&obj_token, cont_info.token_size, buf, &buf_size)) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "unable to encode object reference")
-    } else {
+    } /* end if */
+    else {
         H5F_t *f = NULL;
         H5S_t *space = NULL; /* Pointer to dataspace containing region */
         size_t buf_size = H5R_DSET_REG_REF_BUF_SIZE;
@@ -293,17 +309,14 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type,
         if(NULL == (space = (struct H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-        /* Currently restrict API usage to native VOL
-         * TODO check for terminal connector or use capability flag */
-
         /* Retrieve file from VOL object */
-        if(NULL == (f = (H5F_t *)H5VL_object_data(vol_obj_file)))
+        if(NULL == (f = (H5F_t *)H5VL_object_data((const H5VL_object_t *)vol_obj_file)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL object")
 
         /* Encode dataset region */
-        if((ret_value = H5R__encode_token_region_compat(f, (const H5VL_token_t *)&obj_token, cont_info.token_size, space, buf, &buf_size)) < 0)
+        if((ret_value = H5R__encode_token_region_compat(f, (const H5O_token_t *)&obj_token, cont_info.token_size, space, buf, &buf_size)) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "unable to encode region reference")
-    }
+    } /* end else */
 
 done:
     if(file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
@@ -315,10 +328,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rget_obj_type2
  *
- * Purpose: Given a reference to some object, this function returns the type
- * of object pointed to.
+ * Purpose:     Given a reference to some object, this function returns the
+ *              type of object pointed to.
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:      Non-negative on success / negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -326,10 +339,10 @@ herr_t
 H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
     H5O_type_t *obj_type)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference pointer */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -351,17 +364,17 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get object token */
-    if(H5R__decode_token_compat(id, vol_obj_type, ref_type, buf, &obj_token) < 0)
+    if(H5R__decode_token_compat(vol_obj, vol_obj_type, ref_type, buf, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object token")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Retrieve object's type */
     if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, obj_type) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object type")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve object type")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -371,10 +384,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rdereference2
  *
- * Purpose: Given a reference to some object, open that object and return an
- * ID for that object.
+ * Purpose:     Given a reference to some object, open that object and return
+ *              an ID for that object.
  *
- * Return:  Valid ID on success/Negative on failure
+ * Return:      Success:    Valid ID
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
@@ -382,10 +396,10 @@ hid_t
 H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type,
     const void *ref)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     H5I_type_t opened_type;             /* Opened object type */
     void *opened_obj = NULL;            /* Opened object */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference pointer */
@@ -415,12 +429,12 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Get object token */
-    if(H5R__decode_token_compat(obj_id, vol_obj_type, ref_type, buf, &obj_token) < 0)
+    if(H5R__decode_token_compat(vol_obj, vol_obj_type, ref_type, buf, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, H5I_INVALID_HID, "unable to get object token")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Open object by token */
@@ -439,18 +453,19 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rget_region
  *
- * Purpose: Given a reference to some object, creates a copy of the dataset
- * pointed to's dataspace and defines a selection in the copy which is the
- * region pointed to.
+ * Purpose:     Given a reference to some object, creates a copy of the dataset
+ *              pointed to's dataspace and defines a selection in the copy
+ *              which is the region pointed to.
  *
- * Return:  Valid ID on success/Negative on failure
+ * Return:      Success:    Valid ID
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     void *vol_obj_file = NULL;          /* VOL file */
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
@@ -474,12 +489,25 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
     if(NULL == (vol_obj = H5VL_vol_object(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
+#ifndef NDEBUG
+    {
+        hbool_t is_native = FALSE;  /* Whether the src file is using the native VOL connector */
+
+        /* Check if using native VOL connector */
+        if(H5VL_object_is_native(vol_obj, &is_native) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "can't query if file uses native VOL connector")
+
+        /* Must use native VOL connector for this operation */
+        HDassert(is_native);
+    }
+#endif /* NDEBUG */
+
     /* Get object type */
     if((vol_obj_type = H5I_get_type(id)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Get the file for the object */
-    if((file_id = H5F_get_file_id(id, vol_obj_type, FALSE)) < 0)
+    if((file_id = H5F_get_file_id(vol_obj, vol_obj_type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file or file object")
 
     /* Retrieve VOL object */
@@ -487,11 +515,11 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Get container info */
-    if(H5VL_file_get(vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &cont_info) < 0)
+    if(H5VL_file_get((const H5VL_object_t *)vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &cont_info) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "unable to get container info")
 
     /* Retrieve file from VOL object */
-    if(NULL == (f = (H5F_t *)H5VL_object_data(vol_obj_file)))
+    if(NULL == (f = (H5F_t *)H5VL_object_data((const H5VL_object_t *)vol_obj_file)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid VOL object")
 
     /* Get the dataspace with the correct region selected */
@@ -500,7 +528,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 
     /* Atomize */
     if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace atom")
 
 done:
     if(file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
@@ -512,10 +540,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Rget_name
  *
- * Purpose: Given a reference to some object, determine a path to the object
- * referenced in the file.
+ * Purpose:     Given a reference to some object, determine a path to the
+ *              object referenced in the file.
  *
- * Return:  Non-negative length of the path on success/Negative on failure
+ * Return:      Success:    Non-negative length of the path
+ *              Failure:    -1
  *
  *-------------------------------------------------------------------------
  */
@@ -523,10 +552,10 @@ ssize_t
 H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name,
     size_t size)
 {
-    H5VL_object_t *vol_obj = NULL;      /* Object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* Object of loc_id */
     H5I_type_t vol_obj_type = H5I_BADID;/* Object type of loc_id */
     H5VL_loc_params_t loc_params;       /* Location parameters */
-    H5VL_token_t obj_token = {0};       /* Object token */
+    H5O_token_t obj_token = {0};        /* Object token */
     const unsigned char *buf = (const unsigned char *)ref; /* Reference pointer */
     ssize_t ret_value = -1;  /* Return value */
 
@@ -548,18 +577,19 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
     /* Get object token */
-    if(H5R__decode_token_compat(id, vol_obj_type, ref_type, buf, &obj_token) < 0)
+    if(H5R__decode_token_compat(vol_obj, vol_obj_type, ref_type, buf, &obj_token) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, (-1), "unable to get object token")
 
     /* Set location parameters */
     loc_params.type = H5VL_OBJECT_BY_TOKEN;
-    loc_params.loc_data.loc_by_token.token = obj_token;
+    loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type = vol_obj_type;
 
     /* Retrieve object's name */
     if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value, name, size) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, (-1), "can't retrieve object name")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "can't retrieve object name")
 
 done:
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rget_name() */
+

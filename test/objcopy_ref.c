@@ -44,53 +44,15 @@ const char *FILENAME[] = {
 #define CONFIG_DENSE 16
 #define MAX_CONFIGURATION 31
 
-#define NAME_DATATYPE_SIMPLE     "H5T_NATIVE_INT"
-#define NAME_DATATYPE_SIMPLE2     "H5T_NATIVE_INT-2"
-#define NAME_DATATYPE_VL     "vlen of int"
-#define NAME_DATATYPE_VL_VL     "vlen of vlen of int"
 #define NAME_DATASET_SIMPLE     "dataset_simple"
-#define NAME_DATASET_SIMPLE2    "dataset_simple_copy"
-#define NAME_DATASET_SIMPLE3    "dataset_simple_another_copy"
-#define NAME_DATASET_COMPOUND     "dataset_compound"
-#define NAME_DATASET_CHUNKED     "dataset_chunked"
-#define NAME_DATASET_CHUNKED_SINGLE     "dataset_chunked_single"
-#define NAME_DATASET_CHUNKED2     "dataset_chunked2"
-#define NAME_DATASET_CHUNKED2_SINGLE     "dataset_chunked2_single"
-#define NAME_DATASET_CHUNKED3     "dataset_chunked3"
-#define NAME_DATASET_CHUNKED3_SINGLE     "dataset_chunked3_single"
-#define NAME_DATASET_CHUNKED4     "dataset_chunked4"
-#define NAME_DATASET_CHUNKED4_SINGLE     "dataset_chunked4_single"
-#define NAME_DATASET_COMPACT     "dataset_compact"
-#define NAME_DATASET_EXTERNAL     "dataset_ext"
-#define NAME_DATASET_NAMED_DTYPE     "dataset_named_dtype"
-#define NAME_DATASET_NAMED_DTYPE2     "dataset_named_dtype2"
-#define NAME_DATASET_MULTI_OHDR     "dataset_multi_ohdr"
-#define NAME_DATASET_MULTI_OHDR2     "dataset_multi_ohdr2"
-#define NAME_DATASET_VL     "dataset_vl"
-#define NAME_DATASET_VL2     "dataset_vl2"
-#define NAME_DATASET_VL_VL     "dataset_vl_vl"
-#define NAME_DATASET_VL_VL2     "dataset_vl_vl2"
-#define NAME_DATASET_CMPD_VL     "dataset_cmpd_vl"
 #define NAME_DATASET_SUB_SUB     "/g0/g00/g000/dataset_simple"
 #define NAME_GROUP_UNCOPIED     "/uncopied"
-#define NAME_GROUP_EMPTY     "/empty"
 #define NAME_GROUP_TOP         "/g0"
-#define NAME_GROUP_TOP2         "/g1"
-#define NAME_GROUP_TOP3         "/g2"
-#define NAME_GROUP_TOP4         "/g3"
 #define NAME_GROUP_SUB         "/g0/g00"
-#define NAME_GROUP_SUB_2    "/g0/g01"
-#define NAME_GROUP_SUB_SUB     "/g0/g00/g000"
 #define NAME_GROUP_SUB_SUB2     "g000"
-#define NAME_GROUP_DATASET     "/g0/dataset_simple"
 #define NAME_GROUP_LINK        "/g_links"
 #define NAME_GROUP_LINK2    "/g_links2"
-#define NAME_GROUP_LOOP        "g_loop"
-#define NAME_GROUP_LOOP2    "g_loop2"
-#define NAME_GROUP_LOOP3    "g_loop3"
 #define NAME_GROUP_REF            "ref_grp"
-#define NAME_LINK_DATASET    "/g_links/dataset_simple"
-#define NAME_LINK_HARD        "/g_links/hard_link_to_dataset_simple"
 #define NAME_LINK_SOFT        "/g_links/soft_link_to_dataset_simple"
 #define NAME_LINK_SOFT2        "/g_links2/soft_link_to_dataset_simple"
 #define NAME_LINK_EXTERN    "/g_links/external_link_to_dataset_simple"
@@ -99,28 +61,20 @@ const char *FILENAME[] = {
 #define NAME_LINK_SOFT_DANGLE2    "/g_links2/soft_link_to_nowhere"
 #define NAME_LINK_EXTERN_DANGLE "/g_links/external_link_to_nowhere"
 #define NAME_LINK_EXTERN_DANGLE2        "/g_links2/external_link_to_nowhere"
-#define NAME_OLD_FORMAT        "/dset1"
 
 #define NAME_BUF_SIZE   1024
 #define ATTR_NAME_LEN 80
 #define DIM_SIZE_1 12
 #define DIM_SIZE_2  6
-#define MAX_DIM_SIZE_1    100
-#define MAX_DIM_SIZE_2    80
-#define CHUNK_SIZE_1 5          /* Not an even fraction of dimension sizes, so we test copying partial chunks */
-#define CHUNK_SIZE_2 5
-#define NUM_SUB_GROUPS  20
-#define NUM_WIDE_LOOP_GROUPS  10
-#define NUM_DATASETS  10
 
 unsigned num_attributes_g;         /* Number of attributes created */
 
 /* Table containing object id and object name */
 /* (Used for detecting duplicate objects when comparing groups */
 static struct {
-    size_t  nalloc;             /* number of slots allocated */
-    size_t  nobjs;              /* number of objects */
-    haddr_t *obj;               /* Addresses of objects seen */
+    size_t      nalloc;         /* number of slots allocated */
+    size_t      nobjs;          /* number of objects */
+    H5O_token_t *obj;           /* tokens for objects seen */
 } idtab_g;
 
 /* Local function prototypes */
@@ -133,88 +87,92 @@ static int
 compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags);
 
 /*-------------------------------------------------------------------------
- * Function: addr_insert
+ * Function:    token_insert
  *
- * Purpose: Add an address to the table.
+ * Purpose:     Add a token to the table.
  *
- * Return: void
+ * Return:      void
  *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
  */
 static void
-addr_insert(H5O_info_t *oi)
+token_insert(H5O_info2_t *oinfo)
 {
     size_t  n;
 
     /* Don't add it if the link count is 1 because such an object can only
      * be encountered once. */
-    if(oi->rc < 2)
+    if(oinfo->rc < 2)
         return;
 
     /* Extend the table */
     if(idtab_g.nobjs >= idtab_g.nalloc) {
-        idtab_g.nalloc = MAX(256, 2*idtab_g.nalloc);
-        idtab_g.obj = (haddr_t *)HDrealloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
-    } /* end if */
+        idtab_g.nalloc = MAX(256, 2 * idtab_g.nalloc);
+        idtab_g.obj = (H5O_token_t *)HDrealloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
+    }
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
-    idtab_g.obj[n] = oi->addr;
-} /* end addr_insert() */
+    idtab_g.obj[n] = oinfo->token;
+} /* end token_insert() */
 
 
 /*-------------------------------------------------------------------------
- * Function: addr_lookup
+ * Function:    token_lookup
  *
- * Purpose: Check if address has already been encountered
+ * Purpose:     Check if a token has already been encountered
  *
- * Return: Success: TRUE/FALSE
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    (can't fail)
  *
- * Failure: (can't fail)
- *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hbool_t
-addr_lookup(H5O_info_t *oi)
+token_lookup(hid_t loc_id, H5O_info2_t *oinfo)
 {
-    size_t  n;
+    size_t n;
+    int token_cmp;
 
-    if(oi->rc < 2) return FALSE; /*only one link possible*/
+    if(oinfo->rc < 2)
+        return FALSE; /*only one link possible*/
 
-    for(n = 0; n < idtab_g.nobjs; n++)
-        if(H5F_addr_eq(idtab_g.obj[n], oi->addr))
+    for(n = 0; n < idtab_g.nobjs; n++) {
+        if(H5Otoken_cmp(loc_id, &(idtab_g.obj[n]), &oinfo->token, &token_cmp) < 0)
+            return FALSE;
+        if(0 == token_cmp)
             return TRUE;
+    }
 
     return FALSE;
-} /* end addr_lookup() */
+} /* end token_lookup() */
 
 
 /*-------------------------------------------------------------------------
- * Function: addr_reset
+ * Function:    token_reset
  *
- * Purpose: Reset the address tracking data structures
+ * Purpose:     Reset the token tracking data structures
  *
- * Return: void
+ * Return:      void
  *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
  */
 static void
-addr_reset(void)
+token_reset(void)
 {
     if(idtab_g.obj)
         HDfree(idtab_g.obj);
     idtab_g.obj = NULL;
     idtab_g.nalloc = idtab_g.nobjs = 0;
-} /* end addr_reset() */
+} /* end token_reset() */
 
 
 /*-------------------------------------------------------------------------
@@ -247,8 +205,8 @@ attach_ref_attr(hid_t file_id, hid_t loc_id)
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data2) < 0) TEST_ERROR
 
     /* create an attribute with two object references */
-    if(H5Rcreate_object(file_id, dsetname1, &ref[0]) < 0) TEST_ERROR
-    if(H5Rcreate_object(file_id, dsetname2, &ref[1]) < 0) TEST_ERROR
+    if(H5Rcreate_object(file_id, dsetname1, H5P_DEFAULT, &ref[0]) < 0) TEST_ERROR
+    if(H5Rcreate_object(file_id, dsetname2, H5P_DEFAULT, &ref[1]) < 0) TEST_ERROR
     if((aid = H5Acreate2(loc_id, "obj_ref_attr", H5T_STD_REF, sid_ref, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Awrite(aid, H5T_STD_REF, ref) < 0) TEST_ERROR
 
@@ -315,12 +273,12 @@ attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
 
     /* create reg_ref of block selection */
     if(H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0) TEST_ERROR
-    if(H5Rcreate_region(file_id, dsetnamev, space_id, &ref[0]) < 0) TEST_ERROR
+    if(H5Rcreate_region(file_id, dsetnamev, space_id, H5P_DEFAULT, &ref[0]) < 0) TEST_ERROR
 
     /* create reg_ref of point selection */
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
     if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord) < 0) TEST_ERROR
-    if(H5Rcreate_region(file_id, dsetnamev, space_id, &ref[1]) < 0) TEST_ERROR
+    if(H5Rcreate_region(file_id, dsetnamev, space_id, H5P_DEFAULT, &ref[1]) < 0) TEST_ERROR
 
     /* create reg_ref attribute */
     if((aid = H5Acreate2(loc_id, "reg_ref_attr", H5T_STD_REF, spacer_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -402,10 +360,10 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     count[0] = 2;
     count[1] = 3;
     if(H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0) TEST_ERROR
-    if(H5Rcreate_region(file_id, dsetnamev, space_id, &ref[0]) < 0) TEST_ERROR
+    if(H5Rcreate_region(file_id, dsetnamev, space_id, H5P_DEFAULT, &ref[0]) < 0) TEST_ERROR
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
     if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord) < 0) TEST_ERROR
-    if(H5Rcreate_region(file_id, dsetnamev, space_id, &ref[1]) < 0) TEST_ERROR
+    if(H5Rcreate_region(file_id, dsetnamev, space_id, H5P_DEFAULT, &ref[1]) < 0) TEST_ERROR
     if(H5Dwrite(dsetr_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref) < 0) TEST_ERROR
     if(H5Dclose(dsetr_id) < 0) TEST_ERROR
 
@@ -672,7 +630,7 @@ static int
 compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
 {
     hid_t aid = -1, aid2 = -1;                  /* Attribute IDs */
-    H5O_info_t oinfo1, oinfo2;                  /* Object info */
+    H5O_info2_t oinfo1, oinfo2;                  /* Object info */
     unsigned cpy_flags;                         /* Object copy flags */
 
     /* Retrieve the object copy flags from the property list, if it's non-DEFAULT */
@@ -683,10 +641,10 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
         cpy_flags = 0;
 
     /* Check the number of attributes on source dataset */
-    if(H5Oget_info2(oid, &oinfo1, H5O_INFO_NUM_ATTRS) < 0) TEST_ERROR
+    if(H5Oget_info3(oid, &oinfo1, H5O_INFO_NUM_ATTRS) < 0) TEST_ERROR
 
     /* Check the number of attributes on destination dataset */
-    if(H5Oget_info2(oid2, &oinfo2, H5O_INFO_NUM_ATTRS) < 0) TEST_ERROR
+    if(H5Oget_info3(oid2, &oinfo2, H5O_INFO_NUM_ATTRS) < 0) TEST_ERROR
 
     if(cpy_flags & H5O_COPY_WITHOUT_ATTR_FLAG) {
         /* Check that the destination has no attributes */
@@ -855,11 +813,11 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
 
         /* Check for object or region reference */
         if(H5Tequal(tid, H5T_STD_REF) > 0) {
-            const H5R_ref_t *ref_buf1, *ref_buf2;      /* Aliases for buffers to compare */
+            H5R_ref_t *ref_buf1, *ref_buf2;      /* Aliases for buffers to compare */
 
             /* Loop over elements in buffers */
-            ref_buf1 = (const H5R_ref_t *)buf1;
-            ref_buf2 = (const H5R_ref_t *)buf2;
+            ref_buf1 = (H5R_ref_t *)buf1;
+            ref_buf2 = (H5R_ref_t *)buf2;
             for(u = 0; u < nelmts; u++, ref_buf1++, ref_buf2++) {
                 hid_t obj1_id, obj2_id;         /* IDs for objects referenced */
                 H5O_type_t obj1_type, obj2_type; /* Types of objects referenced */
@@ -875,11 +833,13 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
 
                 /* break the infinite loop when the ref_object points to itself */
                 if(obj_owner > 0) {
-                    H5O_info_t oinfo1, oinfo2;
+                    H5O_info2_t oinfo1, oinfo2;
+                    int token_cmp;
 
-                    if(H5Oget_info2(obj_owner, &oinfo1, H5O_INFO_BASIC) < 0) TEST_ERROR
-                    if(H5Oget_info2(obj1_id, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
-                    if(H5F_addr_eq(oinfo1.addr, oinfo2.addr)) {
+                    if(H5Oget_info3(obj_owner, &oinfo1, H5O_INFO_BASIC) < 0) TEST_ERROR
+                    if(H5Oget_info3(obj1_id, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
+                    if(H5Otoken_cmp(obj1_id, &oinfo1.token, &oinfo2.token, &token_cmp) < 0) TEST_ERROR
+                    if(0 == token_cmp) {
                         if(H5Oclose(obj1_id) < 0) TEST_ERROR
                         if(H5Oclose(obj2_id) < 0) TEST_ERROR
                         return TRUE;
@@ -1157,8 +1117,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
     if(ginfo2.nlinks > 0) {
         char objname[NAME_BUF_SIZE];            /* Name of object in group */
         char objname2[NAME_BUF_SIZE];           /* Name of object in group */
-        H5L_info_t linfo;                       /* Link information */
-        H5L_info_t linfo2;                      /* Link information */
+        H5L_info2_t linfo;                      /* Link information */
+        H5L_info2_t linfo2;                     /* Link information */
 
         /* Loop over contents of groups */
         for(idx = 0; idx < ginfo.nlinks; idx++) {
@@ -1168,18 +1128,24 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
             if(HDstrcmp(objname, objname2)) TEST_ERROR
 
             /* Get link info */
-            if(H5Lget_info(gid, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-            if(H5Lget_info(gid2, objname2, &linfo2, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_info2(gid, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_info2(gid2, objname2, &linfo2, H5P_DEFAULT) < 0) TEST_ERROR
             if(linfo.type != linfo2.type) TEST_ERROR
 
             /* Extra checks for "real" objects */
             if(linfo.type == H5L_TYPE_HARD) {
-                hid_t oid, oid2;                /* IDs of objects within group */
-                H5O_info_t oinfo, oinfo2;       /* Object info */
+                hid_t oid, oid2;                    /* IDs of objects within group */
+                H5O_info2_t oinfo, oinfo2;          /* Data model object info */
+                H5O_native_info_t ninfo, ninfo2;    /* Native file format object info */
 
                 /* Compare some pieces of the object info */
-                if(H5Oget_info_by_name2(gid, objname, &oinfo, H5O_INFO_BASIC|H5O_INFO_HDR, H5P_DEFAULT) < 0) TEST_ERROR
-                if(H5Oget_info_by_name2(gid2, objname2, &oinfo2, H5O_INFO_BASIC|H5O_INFO_HDR, H5P_DEFAULT) < 0) TEST_ERROR
+                /* Get data model object info */
+                if(H5Oget_info_by_name3(gid, objname, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Oget_info_by_name3(gid2, objname2, &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) TEST_ERROR
+
+                /* Get native object info */
+                if(H5Oget_native_info_by_name(gid, objname, &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Oget_native_info_by_name(gid2, objname2, &ninfo2, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0) TEST_ERROR
 
                 if(oinfo.type != oinfo2.type) TEST_ERROR
                 if(oinfo.rc != oinfo2.rc) TEST_ERROR
@@ -1190,17 +1156,18 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                  * of messages hasn't increased.
                  */
                  if(H5O_COPY_PRESERVE_NULL_FLAG & copy_flags) {
-                    if(oinfo.hdr.nmesgs != oinfo2.hdr.nmesgs)
+                    if(ninfo.hdr.nmesgs != ninfo2.hdr.nmesgs)
                         ;
                     else
-                        if(oinfo.hdr.nmesgs < oinfo2.hdr.nmesgs) TEST_ERROR
+                        if(ninfo.hdr.nmesgs < ninfo2.hdr.nmesgs)
+                            TEST_ERROR
                  }
 
                 /* Check for object already having been compared */
-                if(addr_lookup(&oinfo))
+                if(token_lookup(gid, &oinfo))
                     continue;
                 else
-                    addr_insert(&oinfo);
+                    token_insert(&oinfo);
 
                 /* Open objects */
                 if((oid = H5Oopen(gid, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -1316,8 +1283,8 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -1451,7 +1418,7 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination
+    /* Create an uncopied object in destination file so that tokens in source and destination
        files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
@@ -1587,7 +1554,6 @@ main(void)
     unsigned    max_compact, min_dense;
     int     configuration;  /* Configuration of tests. */
     int    ExpressMode;
-    hbool_t same_file;  /* Whether to run tests that only use one file */
 
     /* Setup */
     h5_reset();
@@ -1620,11 +1586,6 @@ main(void)
         hid_t fcpl_src;
         hid_t fcpl_dst;
 
-        /* Start with same_file == TRUE.  Use source file settings for these
-         * tests.  Don't run with a non-default destination file setting, as
-         * destination settings have no effect. */
-        same_file = TRUE;
-
         /* No need to test dense attributes with old format */
         if(!(configuration & CONFIG_SRC_NEW_FORMAT) && (configuration & CONFIG_DENSE))
             continue;
@@ -1646,7 +1607,6 @@ main(void)
         if(configuration & CONFIG_SHARE_DST) {
             HDputs("Testing with shared dst messages:");
             fcpl_dst = fcpl_shared;
-            same_file = FALSE;
         }
         else {
             HDputs("Testing without shared dst messages:");
@@ -1678,7 +1638,6 @@ main(void)
         if(configuration & CONFIG_DST_NEW_FORMAT) {
             HDputs("Testing with latest format for destination file:");
             dst_fapl = fapl2;
-            same_file = FALSE;
         } /* end if */
         else {
             HDputs("Testing with oldest file format for destination file:");
@@ -1691,8 +1650,8 @@ main(void)
                     FALSE, "H5Ocopy(): expand object reference");
     } /* end for */
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);

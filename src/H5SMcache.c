@@ -212,8 +212,8 @@ H5SM__cache_table_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
  *-------------------------------------------------------------------------
  */
 static void *
-H5SM__cache_table_deserialize(const void *_image, size_t len, void *_udata,
-    hbool_t H5_ATTR_UNUSED *dirty)
+H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, 
+    void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5F_t		   *f;                  /* File pointer -- from user data */
     H5SM_master_table_t    *table = NULL;       /* Shared message table that we deserializing */
@@ -364,7 +364,7 @@ H5SM__cache_table_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t len,
+H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_thing)
 {
     H5SM_master_table_t *table = (H5SM_master_table_t *)_thing; /* Shared message table to encode */
@@ -397,7 +397,7 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t len,
         *image++ = H5SM_LIST_VERSION;
 
         /* Is message index a list or a B-tree? */
-        *image++ = table->indexes[u].index_type;
+        *image++ = (uint8_t)table->indexes[u].index_type;
 
         /* Type of messages in the index */
         UINT16ENCODE(image, table->indexes[u].mesg_types);
@@ -568,8 +568,8 @@ H5SM__cache_list_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
  *-------------------------------------------------------------------------
  */
 static void *
-H5SM__cache_list_deserialize(const void *_image, size_t len, void *_udata,
-    hbool_t H5_ATTR_UNUSED *dirty)
+H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, 
+    void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5SM_list_t          *list = NULL;     /* The SOHM list being read in */
     H5SM_list_cache_ud_t *udata = (H5SM_list_cache_ud_t *)_udata;    /* User data for callback */
@@ -687,7 +687,7 @@ H5SM__cache_list_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t len,
+H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UNUSED len,
     void *_thing)
 {
     H5SM_list_t *list = (H5SM_list_t *)_thing ;   /* Instance being serialized */

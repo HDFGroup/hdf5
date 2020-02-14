@@ -50,7 +50,8 @@ const char *FILENAME[] = {
  * To get this data file, define H5O_ENABLE_BOGUS in src/H5Oprivate, rebuild
  * the library and simply compile gen_bogus.c with that HDF5 library and run it.
  */
-#define FILE_BOGUS "tbogus.h5"
+#define FILE_BOGUS      "tbogus.h5"
+#define TESTFILE_LEN    256
 
 /*  */
 #define FILE_OHDR_SWMR "ohdr_swmr.h5"
@@ -321,7 +322,7 @@ test_ohdr_swmr(hbool_t new_format)
     hsize_t dims[1];                /* Dimension sizes */
     size_t u;                       /* Iterator */
     int n;                          /* Data variable */
-    H5O_info_t obj_info;            /* Information for the object */
+    H5O_native_info_t ninfo;        /* Information for the object */
 
     if(new_format) {
         TESTING("exercise the coding for the re-read of the object header for SWMR access: latest-format");
@@ -391,16 +392,16 @@ test_ohdr_swmr(hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Get the object information */
-    if(H5Oget_info2(did, &obj_info, H5O_INFO_HDR) < 0)
+    if(H5Oget_native_info(did, &ninfo, H5O_NATIVE_INFO_HDR) < 0)
         FAIL_STACK_ERROR
 
     if(new_format)
-        if(obj_info.hdr.version != OBJ_VERSION_LATEST)
+        if(ninfo.hdr.version != OBJ_VERSION_LATEST)
             FAIL_STACK_ERROR
 
     /* The size of object header should be greater than the speculative read size of H5O_SPEC_READ_SIZE */
     /* This will exercise the coding for the re-read of the object header for SWMR access */
-    if(obj_info.hdr.space.total < H5O_SPEC_READ_SIZE)
+    if(ninfo.hdr.space.total < H5O_SPEC_READ_SIZE)
         TEST_ERROR;
 
     /* Close the dataset */
@@ -473,13 +474,13 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     hid_t fid_bogus = -1;    /* bogus file ID */
     hid_t gid_bogus = -1;    /* bogus group ID */
     hid_t loc_bogus = -1;    /* location: bogus file or group ID */
-    char testfile[256];
+    char testfile[TESTFILE_LEN];
 
     /* create a different name for a local copy of the data file to be
        opened with rd/wr file permissions in case build and test are
        done in the source directory. */
-    HDstrncpy(testfile, FILE_BOGUS, HDstrlen(FILE_BOGUS));
-    testfile[HDstrlen(FILE_BOGUS)]='\0';
+    HDstrncpy(testfile, FILE_BOGUS, TESTFILE_LEN);
+    testfile[TESTFILE_LEN - 1]='\0';
     HDstrncat(testfile, ".copy", 5);
 
     /* Make a copy of the data file from svn. */
@@ -756,10 +757,10 @@ error:
  */
 static int
 count_attributes(hid_t dset_id)
-{   
-    H5O_info_t info;
-    
-    if(H5Oget_info2(dset_id, &info, H5O_INFO_ALL) < 0)
+{
+    H5O_info2_t info;
+
+    if(H5Oget_info3(dset_id, &info, H5O_INFO_NUM_ATTRS) < 0)
         return -1;
     else
         return (int)info.num_attrs; /* should never exceed int bounds */
@@ -773,10 +774,13 @@ count_attributes(hid_t dset_id)
 static herr_t
 _oh_getsize(hid_t did, hsize_t *size_out)
 {
-    H5O_info_t info;
-    if(FAIL == H5Oget_info2(did, &info, H5O_INFO_HDR))
+    H5O_native_info_t ninfo;
+
+    if(FAIL == H5Oget_native_info(did, &ninfo, H5O_NATIVE_INFO_HDR))
         return FAIL;
-    *size_out = info.hdr.space.total;
+
+    *size_out = ninfo.hdr.space.total;
+
     return SUCCEED;
 } /* _oh_getsize */
 
@@ -1624,8 +1628,8 @@ main(void)
     api_ctx_pushed = TRUE;
 
     /* Loop through all the combinations of low/high library format bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-      for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+      for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
         const char *low_string;     /* Message for library version low bound */
         const char *high_string;    /* Message for library version high bound */
         char msg[80];               /* Message for file format version */

@@ -1838,7 +1838,6 @@ test_swmr_write_big(hbool_t newest_format)
     pid_t pid;				    /* Process ID */
 #endif /* H5_HAVE_UNISTD_H */
     int status;				    /* Status returned from child process */
-    char *new_argv[] = {NULL};
     char *driver = NULL;        /* VFD string (from env variable) */
     hbool_t     api_ctx_pushed = FALSE;             /* Whether API context pushed */
 
@@ -1968,6 +1967,13 @@ test_swmr_write_big(hbool_t newest_format)
         FAIL_STACK_ERROR;
     }
     else if(0 == pid) { /* Child process */
+        /* By convention, argv[0] tells the name of program invoked.
+         *
+         * execv on NetBSD 8 will actually return EFAULT if there is a
+         * NULL at argv[0], so we follow the convention unconditionally.
+         */
+        char swmr_reader[] = SWMR_READER;
+        char * const new_argv[] = {swmr_reader, NULL};
         /* Run the reader */
         status = HDexecv(SWMR_READER, new_argv);
         HDprintf("errno from execv = %s\n", strerror(errno));

@@ -41,9 +41,10 @@
 #define H5S_SELECT_FLAG_BITS    (H5S_HYPER_REGULAR)
 
 /* Versions for H5S_SEL_HYPER selection info */
-#define H5S_HYPER_VERSION_1     1
-#define H5S_HYPER_VERSION_2     2
-#define H5S_HYPER_VERSION_3     3
+#define H5S_HYPER_VERSION_1         1
+#define H5S_HYPER_VERSION_2         2
+#define H5S_HYPER_VERSION_3         3
+#define H5S_HYPER_VERSION_LATEST    H5S_HYPER_VERSION_3
 
 /* Versions for H5S_SEL_POINTS selection info */
 #define H5S_POINT_VERSION_1     1
@@ -147,6 +148,21 @@ struct H5S_hyper_span_t {
     struct H5S_hyper_span_t *next;      /* Pointer to next span in list */
 };
 
+/* "Operation info" struct.  Used to hold temporary information during  copies,
+ * 'adjust', 'nelem', and 'rebuild' operations, and higher level algorithms that
+ * generate this information. */
+typedef struct H5S_hyper_op_info_t {
+    uint64_t op_gen;            /* Generation of the scratch info */
+    union {
+        struct H5S_hyper_span_info_t *copied;  /* Pointer to already copied span tree */
+        hsize_t nelmts;         /* # of elements */
+        hsize_t nblocks;        /* # of blocks */
+#ifdef H5_HAVE_PARALLEL
+        MPI_Datatype down_type; /* MPI datatype for span tree */
+#endif  /* H5_HAVE_PARALLEL */
+    }u;
+} H5S_hyper_op_info_t;
+
 /* Information about a list of hyperslab spans in one dimension (typedef'd in H5Sprivate.h) */
 struct H5S_hyper_span_info_t {
     unsigned count;     /* Ref. count of number of spans which share this span */
@@ -165,17 +181,10 @@ struct H5S_hyper_span_info_t {
     hsize_t *low_bounds;        /* The smallest element selected in each dimension */
     hsize_t *high_bounds;       /* The largest element selected in each dimension */
 
-    /* "Operation generation" fields */
+    /* "Operation info" fields */
     /* (Used during copies, 'adjust', 'nelem', and 'rebuild' operations) */
-    uint64_t op_gen;            /* Generation of the scratch info */
-    union {
-        struct H5S_hyper_span_info_t *copied;  /* Pointer to already copied span tree */
-        hsize_t nelmts;         /* # of elements */
-        hsize_t nblocks;        /* # of blocks */
-#ifdef H5_HAVE_PARALLEL
-        MPI_Datatype down_type; /* MPI datatype for span tree */
-#endif  /* H5_HAVE_PARALLEL */
-    }u;
+    /* Currently the maximum number of simultaneous operations is 2 */
+    H5S_hyper_op_info_t op_info[2];
 
     struct H5S_hyper_span_t *head;  /* Pointer to the first span of list of spans in the current dimension */
     struct H5S_hyper_span_t *tail;  /* Pointer to the last span of list of spans in the current dimension */
@@ -253,6 +262,8 @@ typedef htri_t (*H5S_sel_shape_same_func_t)(const H5S_t *space1, const H5S_t *sp
 typedef htri_t (*H5S_sel_intersect_block_func_t)(const H5S_t *space, const hsize_t *start, const hsize_t *end);
 /* Method to adjust a selection by an offset */
 typedef herr_t (*H5S_sel_adjust_u_func_t)(H5S_t *space, const hsize_t *offset);
+/* Method to adjust a selection by an offset (signed) */
+typedef herr_t (*H5S_sel_adjust_s_func_t)(H5S_t *space, const hssize_t *offset);
 /* Method to construct single element projection onto scalar dataspace */
 typedef herr_t (*H5S_sel_project_scalar)(const H5S_t *space, hsize_t *offset);
 /* Method to construct selection projection onto/into simple dataspace */
@@ -281,6 +292,7 @@ typedef struct {
     H5S_sel_shape_same_func_t shape_same;       /* Method to determine if two dataspaces' selections are the same shape */
     H5S_sel_intersect_block_func_t intersect_block; /* Method to determine if a dataspaces' selection intersects a block */
     H5S_sel_adjust_u_func_t adjust_u;           /* Method to adjust a selection by an offset */
+    H5S_sel_adjust_s_func_t adjust_s;           /* Method to adjust a selection by an offset (signed) */
     H5S_sel_project_scalar project_scalar;      /* Method to construct scalar dataspace projection */
     H5S_sel_project_simple project_simple;      /* Method to construct simple dataspace projection */
     H5S_sel_iter_init_func_t iter_init;         /* Method to initialize iterator for current selection */
@@ -377,7 +389,8 @@ H5_DLL uint64_t H5S__hyper_get_op_gen(void);
 H5_DLL void H5S__hyper_rebuild(H5S_t *space);
 H5_DLL herr_t H5S__modify_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
 H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
-    const H5S_t *dst_space, const H5S_t *src_intersect_space, H5S_t *proj_space);
+    const H5S_t *dst_space, const H5S_t *src_intersect_space, H5S_t *proj_space,
+    hbool_t share_space);
 
 /* Testing functions */
 #ifdef H5S_TESTING

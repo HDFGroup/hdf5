@@ -39,9 +39,7 @@ const char *FILENAME[] = {
  *
  * Purpose:    H5O_mtime_decode() test.
  *
- * Return:    Success:
- *
- *        Failure:
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:    Robb Matzke
  *              Thursday, July 30, 1998
@@ -62,9 +60,10 @@ main(void)
     hsize_t    size[1] = {2};
     time_t    now;
     struct tm    *tm;
-    H5O_info_t    oi1, oi2;
+    H5O_info2_t    oi1, oi2;
     signed char    buf1[32], buf2[32];
     char    filename[1024];
+    int token_cmp;
 
     h5_reset();
     fapl = h5_fileaccess();
@@ -90,14 +89,15 @@ main(void)
      */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR;
-    if(H5Oget_info_by_name2(file, "dset", &oi1, H5O_INFO_BASIC|H5O_INFO_TIME, H5P_DEFAULT) < 0) TEST_ERROR;
+    if(H5Oget_info_by_name3(file, "dset", &oi1, H5O_INFO_BASIC|H5O_INFO_TIME, H5P_DEFAULT) < 0) TEST_ERROR;
     if((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0) TEST_ERROR;
-    if(H5Oget_info2(dset, &oi2, H5O_INFO_BASIC|H5O_INFO_TIME) < 0) TEST_ERROR;
+    if(H5Oget_info3(dset, &oi2, H5O_INFO_BASIC|H5O_INFO_TIME) < 0) TEST_ERROR;
+    if(H5Otoken_cmp(file, &oi1.token, &oi2.token, &token_cmp) < 0)TEST_ERROR;
     if(H5Dclose(dset) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
 
-    /* Compare addresses & times from the two ways of calling H5Oget_info() */
-    if(oi1.addr != oi2.addr || oi1.ctime != oi2.ctime) {
+    /* Compare object tokens & times from the two ways of calling H5Oget_info() */
+    if(token_cmp || oi1.ctime != oi2.ctime) {
         H5_FAILED();
         HDputs("    Calling H5Oget_info() with the dataset ID returned");
         HDputs("    different values than calling it with a file and dataset");
@@ -134,7 +134,7 @@ main(void)
 
         file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
         if(file >= 0){
-            if(H5Oget_info_by_name2(file, "/Dataset1", &oi1, H5O_INFO_TIME, H5P_DEFAULT) < 0)
+            if(H5Oget_info_by_name3(file, "/Dataset1", &oi1, H5O_INFO_TIME, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if(oi1.ctime != MTIME1) {
                 H5_FAILED();
@@ -164,7 +164,7 @@ main(void)
 
         file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
         if(file >= 0){
-            if(H5Oget_info_by_name2(file, "/Dataset1", &oi2, H5O_INFO_TIME, H5P_DEFAULT) < 0)
+            if(H5Oget_info_by_name3(file, "/Dataset1", &oi2, H5O_INFO_TIME, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if(oi2.ctime != MTIME2) {
                H5_FAILED();
@@ -188,10 +188,10 @@ main(void)
     /* All looks good */
     HDputs("All modification time tests passed.");
     h5_cleanup(FILENAME, fapl);
-    return 0;
+    return EXIT_SUCCESS;
 
     /* Something broke */
 error:
-    return 1;
-}
+    return EXIT_FAILURE;
+} /* end main() */
 

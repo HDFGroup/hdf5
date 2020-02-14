@@ -861,12 +861,11 @@ static void test_write_same_element(void)
     hid_t   file1, dataset1;
     hid_t   mspace, fspace, dtype;
     hsize_t fdim[] = {SPACE1_DIM1};
-    char *val[SPACE1_DIM1] = {"But", "reuniting", "is a", "great joy"};
+    const char *wdata[SPACE1_DIM1] = {"Parting", "is such a", "sweet", "sorrow."};
+    const char *val[SPACE1_DIM1] = {"But", "reuniting", "is a", "great joy"};
     hsize_t marray[] = {NUMP};
     hsize_t coord[SPACE1_RANK][NUMP];
     herr_t ret;
-
-    char *wdata[SPACE1_DIM1] = {"Parting", "is such a", "sweet", "sorrow."};
 
     file1 = H5Fcreate(DATAFILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file1, FAIL, "H5Fcreate");

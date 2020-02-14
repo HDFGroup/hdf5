@@ -1216,8 +1216,8 @@ test_compound_6(void)
     orig = (unsigned char*)HDmalloc(nelmts * sizeof(struct st));
     for (i=0; i<(int)nelmts; i++) {
         s_ptr = ((struct st*)((void *)orig)) + i;
-        s_ptr->b    = (i*8+1) & 0x7fff;
-        s_ptr->d    = (i*8+6) & 0x7fff;
+        s_ptr->b    = (int16_t)((i*8+1) & 0x7fff);
+        s_ptr->d    = (int16_t)((i*8+6) & 0x7fff);
     }
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
@@ -5884,7 +5884,7 @@ test_latest(void)
     hid_t       file = (-1);            /* File ID */
     hid_t       tid1 = (-1), tid2 = (-1); /* Datatype ID */
     hid_t       fapl = (-1);            /* File access property list */
-    H5O_info_t    oi;                     /* Stat buffer for committed datatype */
+    H5O_native_info_t    oi;            /* Stat buffer for committed datatype */
     hsize_t     old_dtype_oh_size;      /* Size of object header with "old" format */
     hsize_t     new_dtype_oh_size;      /* Size of object header with "new" format */
     char        filename[1024];         /* Buffer for filename */
@@ -5918,7 +5918,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Oget_info_by_name2(file, compnd_type, &oi, H5O_INFO_HDR, H5P_DEFAULT) < 0)
+    if(H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
     old_dtype_oh_size = oi.hdr.space.total;
 
@@ -5943,7 +5943,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Oget_info_by_name2(file, compnd_type, &oi, H5O_INFO_HDR, H5P_DEFAULT) < 0)
+    if(H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Check that the object header info is still the same */
@@ -5979,7 +5979,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Oget_info_by_name2(file, compnd_type, &oi, H5O_INFO_HDR, H5P_DEFAULT) < 0)
+    if(H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
     new_dtype_oh_size = oi.hdr.space.total;
 
@@ -6008,7 +6008,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Oget_info_by_name2(file, compnd_type, &oi, H5O_INFO_HDR, H5P_DEFAULT) < 0)
+    if(H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Check that the object header info is still the same */
@@ -6732,7 +6732,7 @@ static void create_del_obj_named_test_file(const char *filename, hid_t fapl,
     hid_t my_fapl;      /* Copy of file access property list ID */
     hid_t dcpl;         /* Dataset creation property list ID */
     unsigned use_at_least_v18;/* Whether to use old or new format */
-    herr_t status;      /* Generic return value */
+    herr_t H5_ATTR_NDEBUG_UNUSED status; /* Generic return value */
 
     /* Make copy of FAPL */
     my_fapl = H5Pcopy(fapl);
@@ -6858,8 +6858,8 @@ test_delete_obj_named(hid_t fapl)
 
     /* Loop through all valid the combinations of low/high library format bounds,
        to test delete objects that use named datatypes through different file IDs */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Skip invalid low/high combination */
             if ((high == H5F_LIBVER_EARLIEST) || (low > high))
@@ -6959,8 +6959,8 @@ test_delete_obj_named_fileid(hid_t fapl)
     h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
 
     /* Loop through all the combinations of low/high library format bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Skip invalid low/high combination */
             if ((high == H5F_LIBVER_EARLIEST) || (low > high))
@@ -7292,7 +7292,7 @@ test_utf_ascii_conv(void)
 
     /* Test conversion in memory */
     H5E_BEGIN_TRY {
-        status = H5Tconvert(utf8_vtid, ascii_vtid, 1, (void *)utf8_w, NULL, H5P_DEFAULT);
+        status = H5Tconvert(utf8_vtid, ascii_vtid, 1, &utf8_w, NULL, H5P_DEFAULT);
     } H5E_END_TRY
     if(status >= 0)
         FAIL_STACK_ERROR
@@ -7325,7 +7325,7 @@ test_utf_ascii_conv(void)
      ************************************************/
     /* Test conversion in memory */
     H5E_BEGIN_TRY {
-        status = H5Tconvert(ascii_vtid, utf8_vtid, 1, (void *)ascii_w, NULL, H5P_DEFAULT);
+        status = H5Tconvert(ascii_vtid, utf8_vtid, 1, &ascii_w, NULL, H5P_DEFAULT);
     } H5E_END_TRY
     if(status >= 0)
         FAIL_STACK_ERROR

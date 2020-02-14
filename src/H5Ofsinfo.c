@@ -112,7 +112,7 @@ H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
     if(NULL == (fsinfo = H5FL_CALLOC(H5O_fsinfo_t)))
     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
+    for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
         fsinfo->fs_addr[ptype - 1] = HADDR_UNDEF;
 
     /* Version of message */
@@ -141,7 +141,7 @@ H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
                 fsinfo->threshold = threshold;
                 if(HADDR_UNDEF == (fsinfo->eoa_pre_fsm_fsalloc = H5F_get_eoa(f, H5FD_MEM_DEFAULT)) )
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file size")
-                for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
+                for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++)
                     H5F_addr_decode(f, &p, &(fsinfo->fs_addr[type-1]));
                 break;
 
@@ -181,7 +181,7 @@ H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
         /* Decode addresses of free space managers, if persisting */
         if(fsinfo->persist) {
-            for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
+            for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
                 H5F_addr_decode(f, &p, &(fsinfo->fs_addr[ptype - 1]));
         } /* end if */
 
@@ -223,8 +223,8 @@ H5O_fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     HDassert(p);
     HDassert(fsinfo);
 
-    *p++ = (uint8_t)fsinfo->version;    /* message version */
-    *p++ = fsinfo->strategy;        /* File space strategy */
+    *p++ = (uint8_t)fsinfo->version;          /* message version */
+    *p++ = (uint8_t)fsinfo->strategy;         /* File space strategy */
     *p++ = (unsigned char)fsinfo->persist;    /* Free-space persist or not */
     H5F_ENCODE_LENGTH(f, p, fsinfo->threshold); /* Free-space section size threshold */
 
@@ -235,7 +235,7 @@ H5O_fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     /* Store addresses of free-space managers, if persisting */
     if(fsinfo->persist) {
         /* Addresses of free-space managers */
-        for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
+        for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
             H5F_addr_encode(f, &p, fsinfo->fs_addr[ptype - 1]);
     } /* end if */
 
@@ -480,7 +480,7 @@ H5O__fsinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE * stream,
               "eoa_pre_fsm_fsalloc:", fsinfo->eoa_pre_fsm_fsalloc);
 
     if(fsinfo->persist) {
-        for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
+        for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
             HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
                 "Free space manager address:", fsinfo->fs_addr[ptype-1]);
     } /* end if */

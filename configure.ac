@@ -232,6 +232,9 @@ case $host_os in
   freebsd*)
     host_os_novers=freebsd
     ;;
+  netbsd*)
+    host_os_novers=netbsd
+    ;;
   solaris*)
     host_os_novers=solaris
     ;;
@@ -2962,6 +2965,28 @@ fi
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
+
+## ----------------------------------------------------------------------
+## Use custom examples path.
+##
+AC_MSG_CHECKING([for custom examples path definition])
+AC_ARG_WITH([examplesdir],
+            [AS_HELP_STRING([--with-examplesdir=location],
+                            [Specify path for examples
+                            [default="DATAROOTDIR/hdf5_examples"]])],,
+            withval="${datarootdir}/hdf5_examples")
+
+if test "X$withval" = "X"; then
+    AC_MSG_RESULT([default])
+    examplesdir="${datarootdir}/hdf5_examples"
+else
+    AC_MSG_RESULT([$withval])
+    examplesdir=$withval
+fi
+
+AC_SUBST([examplesdir])
+AC_DEFINE_UNQUOTED([EXAMPLESDIR], ["$examplesdir"],
+            [Define the examples directory])
 
 ## ----------------------------------------------------------------------
 ## Enable custom plugin default path for library.  It requires SHARED support.

@@ -25,6 +25,7 @@
 #include "H5Iprivate.h"
 #include "H5Pprivate.h"
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
+#include "H5private.h"
 
 /*
  * This file needs to access private information from the H5F package.
@@ -4083,7 +4084,7 @@ test_filespace_info(const char *env_h5_drvr)
             for(fs_threshold = 0; fs_threshold <= TEST_THRESHOLD10; fs_threshold++) {
 
                 /* Test with 4 file space strategies */
-                for(fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_strategy < H5F_FSPACE_STRATEGY_NTYPES; H5_INC_ENUM(H5F_fspace_strategy_t, fs_strategy)) {
+                for(fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_strategy < H5F_FSPACE_STRATEGY_NTYPES; fs_strategy++) {
 
                     if(!contig_addr_vfd && (fs_strategy == H5F_FSPACE_STRATEGY_PAGE || fs_persist))
                         continue;
@@ -4208,7 +4209,7 @@ test_filespace_info(const char *env_h5_drvr)
 **
 *****************************************************************/
 static int
-set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
+set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
 {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t memb_fapl_arr[H5FD_MEM_NTYPES];
@@ -4217,7 +4218,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
     hbool_t relax;
     H5FD_mem_t  mt;
 
-    HDassert(split || multi);
+    HDassert(split);
 
     HDmemset(memb_name, 0, sizeof memb_name);
 
@@ -4231,7 +4232,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
         memb_addr[H5FD_MEM_DRAW] = ((memb_addr[H5FD_MEM_DRAW] + pagesize - 1) / pagesize) * pagesize;
     } else {
         /* Set memb_addr aligned */
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
             memb_addr[mt] = ((memb_addr[mt] + pagesize - 1) / pagesize) * pagesize;
     } /* end else */
 
@@ -4240,7 +4241,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t multi, hbool_t split)
         TEST_ERROR
 
     /* Free memb_name */
-    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
         free(memb_name[mt]);
 
     return 0;
@@ -4308,7 +4309,7 @@ test_file_freespace(const char *env_h5_drvr)
                 my_fapl = new_fapl;
 
                 if(multi_vfd || split_vfd) {
-                    ret = set_multi_split(new_fapl, FSP_SIZE_DEF, multi_vfd, split_vfd);
+                    ret = set_multi_split(new_fapl, FSP_SIZE_DEF, split_vfd);
                     CHECK(ret, FAIL, "set_multi_split");
                 }
 
@@ -4474,7 +4475,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
 
             /* Set up paged aligned address space for multi/split driver */
             if(multi_vfd || split_vfd) {
-                ret = set_multi_split(fapl, FSP_SIZE_DEF, multi_vfd, split_vfd);
+                ret = set_multi_split(fapl, FSP_SIZE_DEF, split_vfd);
                 CHECK(ret, FAIL, "set_multi_split");
             }
 
@@ -4607,7 +4608,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
         if(multi_vfd) {
             hssize_t ntmp;
 
-            for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+            for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++) {
                 if(type == H5FD_MEM_DRAW || type == H5FD_MEM_GHEAP)
                     continue;
                 /* Get the # of free-space sections in the file for metadata */
@@ -5177,7 +5178,7 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
 {
     hid_t       file, group;            /* Handles */
     hid_t       fapl;                   /* File access property list */
-    H5O_info_t  oinfo;                  /* Object info */
+    H5O_native_info_t  ninfo;           /* Object info */
     herr_t      ret;                    /* Return value */
 
     /*
@@ -5195,9 +5196,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     /*
      * Make sure the root group has the correct object header version
      */
-    ret = H5Oget_info_by_name2(file, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
+    ret = H5Oget_native_info_by_name(file, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_native_info_by_name");
+    VERIFY(ninfo.hdr.version, oh_vers_create, "H5Oget_native_info_by_name");
 
     /*
      * Reopen the file and make sure the root group still has the correct version
@@ -5211,9 +5212,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     file = H5Fopen("tfile5.h5", H5F_ACC_RDWR, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
-    ret = H5Oget_info_by_name2(file, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
+    ret = H5Oget_native_info_by_name(file, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_native_info_by_name");
+    VERIFY(ninfo.hdr.version, oh_vers_create, "H5Oget_native_info_by_name");
 
     /*
      * Create a group named "G1" in the file, and make sure it has the correct
@@ -5222,9 +5223,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     group = H5Gcreate2(file, "/G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
-    ret = H5Oget_info2(group, &oinfo, H5O_INFO_HDR);
-    CHECK(ret, FAIL, "H5Oget_info");
-    VERIFY(oinfo.hdr.version, oh_vers_mod, "H5Oget_info");
+    ret = H5Oget_native_info(group, &ninfo, H5O_NATIVE_INFO_HDR);
+    CHECK(ret, FAIL, "H5Oget_native)info");
+    VERIFY(ninfo.hdr.version, oh_vers_mod, "H5Oget_native_info");
 
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
@@ -5236,9 +5237,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     group = H5Gcreate2(file, "/G1/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(group, FAIL, "H5Gcreate");
 
-    ret = H5Oget_info2(group, &oinfo, H5O_INFO_HDR);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, oh_vers_mod, "H5Oget_info_by_name");
+    ret = H5Oget_native_info(group, &ninfo, H5O_NATIVE_INFO_HDR);
+    CHECK(ret, FAIL, "H5Oget_native_info");
+    VERIFY(ninfo.hdr.version, oh_vers_mod, "H5Oget_native_info");
 
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
@@ -5246,9 +5247,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
     /*
      * Make sure the root group still has the correct object header version
      */
-    ret = H5Oget_info_by_name2(file, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
-    VERIFY(oinfo.hdr.version, oh_vers_create, "H5Oget_info_by_name");
+    ret = H5Oget_native_info_by_name(file, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_native_info_by_name");
+    VERIFY(ninfo.hdr.version, oh_vers_create, "H5Oget_native_info_by_name");
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
@@ -5348,7 +5349,7 @@ test_libver_bounds_open(void)
     /* Opening VERBFNAME in these combination should succeed.
        For each low bound, verify that it is upgraded properly */
     high = H5F_LIBVER_LATEST;
-    for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low))
+    for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++)
     {
         H5F_libver_t new_low = H5F_LIBVER_EARLIEST;
 
@@ -5515,8 +5516,8 @@ test_libver_bounds_low_high(void)
     CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
 
     /* Loop through all the combinations of low/high version bounds */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low))
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++)
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             H5E_BEGIN_TRY {
                 /* Set the low/high version bounds */
@@ -5919,8 +5920,8 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non
         CHECK(new_fapl, FAIL, "H5Pcreate");
 
         /* Loop through all the combinations of low/high bounds in new_fapl */
-        for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-            for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+        for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+            for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
                 H5E_BEGIN_TRY {
                     ret = H5Pset_libver_bounds(new_fapl, low, high);
                 } H5E_END_TRY;
@@ -6034,7 +6035,7 @@ test_libver_bounds_obj(hid_t fapl)
     hid_t new_fapl = H5I_INVALID_HID;   /* File access property list */
     H5F_t *f = NULL;        /* Internal file pointer */
     H5F_libver_t low, high; /* Low and high bounds */
-    H5O_info_t  oinfo;      /* Object info */
+    H5O_native_info_t  ninfo;      /* Object info */
     H5G_info_t ginfo;       /* Group info */
     herr_t ret;             /* Return value */
 
@@ -6058,11 +6059,11 @@ test_libver_bounds_obj(hid_t fapl)
     CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Get root group's object info */
-    ret = H5Oget_info_by_name2(fid, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    ret = H5Oget_native_info_by_name(fid, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_native_info_by_name");
 
     /* Verify object header version is 2 because shared message is enabled */
-    VERIFY(oinfo.hdr.version, H5O_VERSION_2, "H5O_obj_ver_bounds");
+    VERIFY(ninfo.hdr.version, H5O_VERSION_2, "H5O_obj_ver_bounds");
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -6077,11 +6078,11 @@ test_libver_bounds_obj(hid_t fapl)
     CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
     /* Get root group's object info */
-    ret = H5Oget_info_by_name2(fid, "/", &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    ret = H5Oget_native_info_by_name(fid, "/", &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_native_info_by_name");
 
     /* Verify object header version is as indicated by low_bound */
-    VERIFY(oinfo.hdr.version, H5O_obj_ver_bounds[low], "H5O_obj_ver_bounds");
+    VERIFY(ninfo.hdr.version, H5O_obj_ver_bounds[low], "H5O_obj_ver_bounds");
 
     /* Close the file */
     ret = H5Fclose(fid);
@@ -6095,8 +6096,8 @@ test_libver_bounds_obj(hid_t fapl)
     /* Loop through all the combinations of low/high bounds in new_fapl */
     /* Open the file with the fapl; create a group and verify the
        object header version, then delete the group and close the file.*/
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -6132,11 +6133,11 @@ test_libver_bounds_obj(hid_t fapl)
                     VERIFY(ginfo.storage_type, H5G_STORAGE_TYPE_SYMBOL_TABLE, "H5Gget_info");
 
                 /* Get object header information */
-                ret = H5Oget_info_by_name2(gid, GRP_NAME, &oinfo, H5O_INFO_HDR, H5P_DEFAULT);
-                CHECK(ret, FAIL, "H5Oget_info_by_name");
+                ret = H5Oget_native_info_by_name(gid, GRP_NAME, &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
+                CHECK(ret, FAIL, "H5Oget_native_info_by_name");
 
                 /* Verify object header version as indicated by low_bound */
-                VERIFY(oinfo.hdr.version, H5O_obj_ver_bounds[f->shared->low_bound], "H5O_obj_ver_bounds");
+                VERIFY(ninfo.hdr.version, H5O_obj_ver_bounds[f->shared->low_bound], "H5O_obj_ver_bounds");
 
                 /* Close the group */
                 ret = H5Gclose(gid);
@@ -6306,8 +6307,8 @@ test_libver_bounds_dataset(hid_t fapl)
     /* Loop through all the combinations of low/high bounds in new_fapl */
     /* Open the file with the fapl and create the chunked dataset */
     /* Verify the dataset's layout, fill value and filter pipleline message versions */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -6519,8 +6520,8 @@ test_libver_bounds_dataspace(hid_t fapl)
     /* Loop through all the combinations of low/high bounds in new_fapl */
     /* Open the file and create the chunked/compact/contiguous datasets */
     /* Verify the dataspace message version for the three datasets */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             hid_t tmp_sid, tmp_sid_compact, tmp_sid_contig;             /* Dataspace IDs */
             H5S_t *tmp_space, *tmp_space_compact, *tmp_space_contig;    /* Internal dataspace pointers */
 
@@ -6844,8 +6845,8 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
     /* Open the file and create the chunked dataset with the input tid */
     /* Verify the dataset's datatype message version */
     /* Also verify the committed atatype message version */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;
@@ -7165,8 +7166,8 @@ test_libver_bounds_attributes(hid_t fapl)
     /* Loop through all the combinations of low/high bounds */
     /* Open the file and group and attach an attribute to the group */
     /* Verify the attribute version */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             H5E_BEGIN_TRY {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             } H5E_END_TRY;

@@ -287,6 +287,7 @@ set (H5_TESTS
     cache_logging
     cork
     swmr
+    thread_id
     vol
 )
 
@@ -525,4 +526,6 @@ else ()
 endif ()
 set_target_properties (use_disable_mdc_flushes PROPERTIES FOLDER test)
 
-include (CMakeTests.cmake)
+if (HDF5_TEST_SERIAL)
+  include (CMakeTests.cmake)
+endif ()

@@ -48,6 +48,62 @@ New Features
 
     Configuration:
     -------------
+    - Fixed CMake include properties for Fortran libraries
+
+      Corrected the library properties for Fortran to use the
+      correct path for the Fortran module files.
+
+      (ADB - 2020/02/04, HDFFV-11012)
+
+    - Added common warnings files for gnu and intel
+
+      Added warnings files to use one common set of flags
+      during configure for both autotools and CMake build
+      systems. The initial implementation only affects a
+      general set of flags for gnu and intel compilers.
+
+      (ADB - 2020/01/17)
+
+    - Added new options to CMake for control of testing
+
+      Added CMake options (default ON);
+          HDF5_TEST_SERIAL AND/OR HDF5_TEST_PARALLEL
+          combined with:
+            HDF5_TEST_TOOLS
+            HDF5_TEST_EXAMPLES
+            HDF5_TEST_SWMR
+            HDF5_TEST_FORTRAN
+            HDF5_TEST_CPP
+            HDF5_TEST_JAVA
+
+      (ADB - 2020/01/15, HDFFV-11001)
+
+    - Added Clang sanitizers to CMake for analyzer support
+
+      Added CMake code and files to execute the Clang sanitizers.
+
+      (ADB - 2019/12/12, TRILAB-135)
+
+    - Update CMake for VS2019 support
+
+      CMake added support for VS2019 in version 3.15. Changes to the CMake
+      generator setting required changes to scripts. Also updated version
+      references in CMake files as necessary.
+
+      (ADB - 2019/11/18, HDFFV-10962)
+
+    - Update CMake options to match new autotools options
+
+      Add configure options (autotools - CMake):
+            enable-asserts       HDF5_ENABLE_ASSERTS
+            enable-symbols       HDF5_ENABLE_SYMBOLS
+            enable-profiling     HDF5_ENABLE_PROFILING
+            enable-optimization  HDF5_ENABLE_OPTIMIZATION
+      In addition NDEBUG is no longer forced defined and relies on the CMake
+      process.
+
+      (ADB - 2019/10/07, HDFFV-100901, HDFFV-10637, TRILAB-97)
+
     - Update CMake tests to use FIXTURES
 
       CMake test fixtures allow setup/cleanup tests and other dependency
@@ -191,6 +247,75 @@ New Features
 
     Library:
     --------
+    - Refactored public exposure of haddr_t type in favor of "object tokens"
+
+      To better accommodate HDF5 VOL connectors where "object addresses in a file"
+      may not make much sense, the following changes were made to the library:
+
+      * Introduced new H5O_token_t "object token" type, which represents a
+        unique and permanent identifier for referencing an HDF5 object within
+        a container; these "object tokens" are meant to replace object addresses.
+        Along with the new type, a new H5Oopen_by_token API call was introduced
+        to open an object by a token, similar to how object addresses were
+        previously used with H5Oopen_by_addr.
+
+      * Introduced new H5Lget_info2, H5Lget_info_by_idx2, H5Literate2, H5Literate_by_name2,
+        H5Lvisit2 and H5Lvisit_by_name2 API calls, along with their associated H5L_info2_t
+        struct and H5L_iterate2_t callback function, which work with the newly-introduced
+        object tokens, instead of object addresses. The original functions have been
+        renamed to version 1 functions and are deprecated in favor of the new version 2
+        functions. The H5L_info_t and H5L_iterate_t types have been renamed to version 1
+        types and are now deprecated in favor of their version 2 counterparts. For each of
+        the functions and types, compatibility macros take place of the original symbols.
+
+      * Introduced new H5Oget_info3, H5Oget_info_by_name3, H5Oget_info_by_idx3,
+        H5Ovisit3 and H5Ovisit_by_name3 API calls, along with their associated H5O_info2_t
+        struct and H5O_iterate2_t callback function, which work with the newly-introduced
+        object tokens, instead of object addresses. The version 2 functions are now
+        deprecated in favor of the version 3 functions. The H5O_info_t and H5O_iterate_t
+        types have been renamed to version 1 types and are now deprecated in favor of their
+        version 2 counterparts. For each, compatibility macros take place of the original
+        symbols.
+
+      * Introduced new H5Oget_native_info, H5Oget_native_info_by_name and
+        H5Oget_native_info_by_idx API calls, along with their associated H5O_native_info_t
+        struct, which are used to retrieve the native HDF5 file format-specific information
+        about an object. This information (such as object header info and B-tree/heap info)
+        has been removed from the new H5O_info2_t struct so that the more generic
+        H5Oget_info(_by_name/_by_idx)3 routines will not try to retrieve it for non-native
+        VOL connectors.
+
+      * Added new H5Otoken_cmp, H5Otoken_to_str and H5Otoken_from_str routines to compare
+        two object tokens, convert an object token into a nicely-readable string format and
+        to convert an object token string back into a real object token, respectively.
+
+      (DER, QAK, JTH - 2020/01/16)
+
+    - Add new public function H5Sselect_adjust.
+
+      This function shifts a dataspace selection by a specified logical offset
+      within the dataspace extent.  This can be useful for VOL developers to
+      implement chunked datasets.
+
+      (NAF - 2019/11/18)
+
+    - Add new public function H5Sselect_project_intersection.
+
+      This function computes the intersection between two dataspace selections
+      and projects that intersection into a third selection.  This can be useful
+      for VOL developers to implement chunked or virtual datasets.
+
+      (NAF - 2019/11/13, ID-148)
+
+    - Add new public function H5VLget_file_type.
+
+      This function returns a datatype equivalent to the supplied datatype but
+      with the location set to be in the file.  This datatype can then be used
+      with H5Tconvert to convert data between file and in-memory representation.
+      This funcition is intended for use only by VOL connector developers.
+
+      (NAF - 2019/11/08, ID-127)
+
     - Add S3 and HDFS VFDs to HDF5 maintenance
 
       Fix windows requirements and java tests. Windows requires CMake 3.13.
@@ -317,6 +442,20 @@ New Features
 
     Java Library:
     ----------------
+    - Added ability to test java library with VOLs.
+
+      Created new CMake script that combines the java and vol test scripts.
+
+      (ADB - 2020/02/03, HDFFV-10996)
+
+    - Tests fail for non-English locale.
+
+      In the JUnit tests with a non-English locale, only the part before
+      the decimal comma is replaced by XXXX and this leads to a comparison
+      error. Changed the regex for the Time substitution.
+
+      (ADB - 2020/01/09, HDFFV-10995)
+
     - Fix a failure in JUnit-TestH5P on 32-bit architectures
 
       (JTH - 2019/04/30)
@@ -340,6 +479,32 @@ New Features
 
     Tools:
     ------
+    - h5repack was fixed to repack the reference attributes properly.
+      The code line that checks if the update of reference inside a compound
+      datatype is misplaced outside the code block loop that carries out the
+      check. In consequence, the next attribute that is not the reference
+      type was repacked again as the reference type and caused the failure of
+      repacking. The fix is to move the corresponding code line to the correct
+      code block.
+
+      (KY -2020/02/07, HDFFV-11014)
+
+    - h5diff was updated to use the new reference APIs.
+
+      h5diff uses the new reference APIs to compare references.
+      Attribute references can also be compared.
+
+      (ADB - 2019/12/19, HDFFV-10980)
+
+    - h5dump and h5ls were updated to use the new reference APIs.
+
+      The tools library now use the new reference APIs to inspect a
+      file. Also the DDL spec was updated to reflect the format
+      changes produced with the new APIs. The export API and support
+      functions in the JNI were updated to match.
+
+      (ADB - 2019/12/06, HDFFV-10876 and HDFFV-10877)
+
     - h5repack was fixed to repack datasets with external storage
       to other types of storage.
 
@@ -380,6 +545,18 @@ Bug Fixes since HDF5-1.10.3 release
 
     Library
     -------
+    - Improved peformance when creating a large number of small datasets by
+      retrieving default property values from the API context instead of doing
+      skip list searches.
+
+      (CJH - 2019/12/10, HDFFV-10658)
+
+    - Fixed user-created data access properties not existing in the property list
+      returned by H5Dget_access_plist. Thanks to Steven Varga for submitting a
+      reproducer and a patch.
+
+      (CJH - 2019/12/9, HDFFV-10934)
+
     - Fixed the iteration error in test_versionbounds() in test/dtypes.c
 
       The test was supposed to loop through all valid combinations of
@@ -600,6 +777,21 @@ Bug Fixes since HDF5-1.10.3 release
       fcntl(2)-based file locking now correctly passes the struct pointer.
 
       (DER - 2019/08/27, HDFFV-10892)
+
+    - Torn pread/pwrite I/O would result in read and write corruption.
+
+      In the sec2, log, and core (with backing store) virtual file drivers
+      (VFDs), the read and write calls incorrectly reset the offset parameter
+      on torn pread and pwrite operations (i.e., I/O operations which fail to
+      be written atomically by the OS). For this bug to occur, pread/pwrite
+      have to be configured (this is the default if they are present on the
+      system) and the pread/pwrite operation has to fail to transfer all
+      the bytes, resulting in a multiple pread/pwrite calls.
+
+      This feature was initially enabled in HDF5 1.10.5 so the bug is
+      limited to that version.
+
+      (DER - 2019/12/09, HDFFV-10945)
 
 
     Java Library:
@@ -991,17 +1183,16 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+    Windows 7                     Visual Studio 2015 w/ Intel Fortran 18 (cmake)
 
-    Windows 7 x64                 Visual Studio 2013
-                                  Visual Studio 2015 w/ Intel Fortran 16 (cmake)
-                                  Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
+    Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
                                   Visual Studio 2015 w/ MSMPI 8 (cmake)
 
     Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-                                  Visual Studio 2017 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2017 w/ Intel Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ Intel Fortran 19 (cmake)
 
     Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
@@ -1109,24 +1300,10 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP ppc64 GNU/Linux           IBM XL C/C++ for Linux, V13.1
     (ostrich)                        and IBM XL Fortran for Linux, V15.1
 
-    Debian 8.4 3.16.0-4-amd64 #1 SMP Debian 3.16.36-1 x86_64 GNU/Linux
-                                  gcc, g++ (Debian 4.9.2-10) 4.9.2
-                                  GNU Fortran (Debian 4.9.2-10) 4.9.2
-                                  (cmake and autotools)
-
-    Fedora 24  4.7.2-201.fc24.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc, g++ (GCC) 6.1.1 20160621
-                                      (Red Hat 6.1.1-3)
-                                  GNU Fortran (GCC) 6.1.1 20160621
-                                      (Red Hat 6.1.1-3)
-                                  (cmake and autotools)
-
-    Ubuntu 16.04.1 4.4.0-38-generic #57-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc, g++ (Ubuntu 5.4.0-6ubuntu1~16.04.2)
-                                      5.4.0 20160609
-                                  GNU Fortran (Ubuntu 5.4.0-6ubuntu1~16.04.2)
-                                      5.4.0 20160609
-                                  (cmake and autotools)
+   Fedora30 5.3.11-200.fc30.x86_64
+   #1 SMP x86_64  GNU/Linux          GNU gcc (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+                                     GNU Fortran (GCC) 9.2.1 20190827 (Red Hat 9.2.1 20190827)
+                                     (cmake and autotools)
 
 
 Known Problems

@@ -110,15 +110,15 @@ const char *FILENAME[] = {
 /* function prototypes */
 static int parse_args(int argc, char **argv);
 
-extern int errno;
-
+#ifndef H5_HAVE_UNISTD_H
 /* globals needed for getopt */
 extern char *optarg;
+#endif
 
 int main(int argc, char **argv)
 {
-    char *buf, *tmp, *buf2, *tmp2, *check;
-    int i, j, mynod=0, nprocs=1, err, my_correct = 1, correct, myerrno;
+    char *buf, *tmp, *buf2 = NULL, *tmp2 = NULL, *check;
+    int i, j, mynod=0, nprocs=1, my_correct = 1, correct, myerrno;
     double stim, etim;
     double write_tim = 0;
     double read_tim = 0;
@@ -127,10 +127,6 @@ int main(int argc, char **argv)
     double min_read_tim, min_write_tim;
     double ave_read_tim, ave_write_tim;
     int64_t iter_jump = 0;
-    int64_t seek_position = 0;
-    MPI_File fh;
-    MPI_Status status;
-    int nchars;
     char filename[MAX_PATH];
     herr_t ret;           /* Generic return value */
 
@@ -164,7 +160,7 @@ int main(int argc, char **argv)
     iter_jump = nprocs * opt_block;
 
     /* setup a buffer of data to write */
-    if (!(tmp = (char *) malloc(opt_block + 256))) {
+    if (!(tmp = (char *) malloc((size_t)opt_block + 256))) {
             perror("malloc");
             goto die_jar_jar_die;
     }
@@ -172,7 +168,7 @@ int main(int argc, char **argv)
 
     if (opt_correct) {
             /* do the same buffer setup for verifiable data */
-            if (!(tmp2 = (char *) malloc(opt_block + 256))) {
+            if (!(tmp2 = (char *) malloc((size_t)opt_block + 256))) {
                     perror("malloc2");
                     goto die_jar_jar_die;
              }
@@ -222,7 +218,7 @@ int main(int argc, char **argv)
     VRFY((fid >= 0), "H5Fcreate succeeded", H5FATAL);
 
     /* define a contiquous dataset of opt_iter*nprocs*opt_block chars */
-    dims[0] = opt_iter * nprocs * opt_block;
+    dims[0] = (hsize_t)opt_iter * (hsize_t)nprocs * (hsize_t)opt_block;
     sid = H5Screate_simple(RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded", H5FATAL);
     dataset = H5Dcreate2(fid, "Dataset1", H5T_NATIVE_CHAR, sid,
@@ -230,7 +226,7 @@ int main(int argc, char **argv)
     VRFY((dataset >= 0), "H5Dcreate2 succeeded", H5FATAL);
 
     /* create the memory dataspace and the file dataspace */
-    dims[0] = opt_block;
+    dims[0] = (hsize_t)opt_block;
     mem_dataspace = H5Screate_simple(RANK, dims, NULL);
     VRFY((mem_dataspace >= 0), "", H5FATAL);
     file_dataspace = H5Dget_space(dataset);
@@ -242,7 +238,7 @@ int main(int argc, char **argv)
     for(j=0; j < opt_iter; j++) {
         /* setup a file dataspace selection */
         start[0] = (hsize_t)((j * iter_jump) + (mynod * opt_block));
-        stride[0] = block[0] = opt_block;
+        stride[0] = block[0] = (hsize_t)opt_block;
         count[0]= 1;
         ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
         VRFY((ret >= 0), "H5Sset_hyperslab succeeded", H5FATAL);
@@ -295,7 +291,7 @@ int main(int argc, char **argv)
     for (j=0; j < opt_iter; j++) {
         /* setup a file dataspace selection */
         start[0] = (hsize_t)((j * iter_jump) + (mynod * opt_block));
-        stride[0] = block[0] = opt_block;
+        stride[0] = block[0] = (hsize_t)opt_block;
         count[0]= 1;
         ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
         VRFY((ret >= 0), "H5Sset_hyperslab succeeded", H5FATAL);
@@ -326,7 +322,7 @@ int main(int argc, char **argv)
 
         /* if the user wanted to check correctness, compare the write
          * buffer to the read buffer */
-        if (opt_correct && memcmp(buf, buf2, opt_block)) {
+        if (opt_correct && memcmp(buf, buf2, (size_t)opt_block)) {
                 HDfprintf(stderr, "node %d, correctness test failed\n", mynod);
                 my_correct = 0;
                 MPI_Allreduce(&my_correct, &correct, 1, MPI_INT, MPI_MIN,
@@ -367,8 +363,8 @@ int main(int argc, char **argv)
 
     /* print out the results on one node */
     if (mynod == 0) {
-       read_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_read_tim*1000000.0);
-       write_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_write_tim*1000000.0);
+       read_bw = (double)((int64_t)(opt_block*nprocs*opt_iter))/(max_read_tim*1000000.0);
+       write_bw = (double)((int64_t)(opt_block*nprocs*opt_iter))/(max_write_tim*1000000.0);
 
                     printf("nr_procs = %d, nr_iter = %d, blk_sz = %ld\n", nprocs,
             opt_iter, (long)opt_block);
@@ -439,9 +435,9 @@ parse_args(int argc, char **argv)
                 {
                     char *p;
 
-                    opt_alignment = HDatoi(optarg);
+                    opt_alignment = (hsize_t)HDatoi(optarg);
                     if(NULL != (p = (char*)HDstrchr(optarg, '/')))
-                        opt_threshold = HDatoi(p + 1);
+                        opt_threshold = (hsize_t)HDatoi(p + 1);
                 }
                 HDfprintf(stdout,
                     "alignment/threshold=%Hu/%Hu\n",

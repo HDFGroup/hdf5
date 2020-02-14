@@ -292,7 +292,7 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
     H5CX_set_dxpl(dxpl_id);
 
     /* Read the raw chunk */
-    if(H5VL_dataset_optional(vol_obj, dxpl_id, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_CHUNK_READ, offset, filters, buf) < 0)
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_CHUNK_READ, dxpl_id, H5_REQUEST_NULL, offset, filters, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data")
 
 done:
@@ -473,7 +473,7 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     H5CX_set_dxpl(dxpl_id);
 
     /* Write chunk */
-    if(H5VL_dataset_optional(vol_obj, dxpl_id, H5_REQUEST_NULL, H5VL_NATIVE_DATASET_CHUNK_WRITE, filters, offset, data_size_32, buf) < 0)
+    if(H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_CHUNK_WRITE, dxpl_id, H5_REQUEST_NULL, filters, offset, data_size_32, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data")
 
 done:
@@ -515,9 +515,8 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                                         /* Note that if this variable is used, the        */
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
-    H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-    hssize_t	snelmts;                /*total number of elmts	(signed) */
-    hsize_t	nelmts;                 /*total number of elmts	*/
+    H5D_storage_t store;                /* union of EFL and chunk pointer in file space */
+    hsize_t	nelmts;                     /* total number of elmts	*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
@@ -531,9 +530,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         file_space = dataset->shared->space;
     if(!mem_space)
         mem_space = file_space;
-    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dst dataspace has invalid selection")
-    H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
+    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
 
     /* Set up datatype info for operation */
     if(H5D__typeinfo_init(dataset, mem_type_id, FALSE, &type_info) < 0)
@@ -556,7 +553,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Make certain that the number of elements in each selection is the same */
-    if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
+    if(nelmts != H5S_GET_SELECT_NPOINTS(file_space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest dataspaces have different number of elements selected")
 
     /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
@@ -729,9 +726,8 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                                         /* Note that if this variable is used, the        */
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
-    H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-    hssize_t	snelmts;                /*total number of elmts	(signed) */
-    hsize_t	nelmts;                 /*total number of elmts	*/
+    H5D_storage_t store;                /* union of EFL and chunk pointer in file space */
+    hsize_t	nelmts;                     /* total number of elmts	*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
@@ -786,12 +782,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(!mem_space)
         mem_space = file_space;
 
-    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
-    H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
+    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
 
     /* Make certain that the number of elements in each selection is the same */
-    if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
+    if(nelmts != H5S_GET_SELECT_NPOINTS(file_space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest dataspaces have different number of elements selected")
 
     /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
@@ -1023,7 +1017,7 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
     HDassert(dset);
 
     /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
-    if(H5T_patch_vlen_file(dset->shared->type, dset->oloc.file) < 0 )
+    if(H5T_patch_vlen_file(dset->shared->type, H5F_VOL_OBJ(dset->oloc.file)) < 0 )
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
 
     /* Initialize type info safely */
@@ -1243,7 +1237,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                 uint32_t                        global_no_collective_cause;
                 hbool_t                         local_error_message_previously_written = FALSE;
                 hbool_t                         global_error_message_previously_written = FALSE;
-                size_t                          index;
+                size_t                          idx;
                 size_t                          cause_strings_len;
                 char                            local_no_collective_cause_string[512] = "";
                 char                            global_no_collective_cause_string[512] = "";
@@ -1265,8 +1259,11 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
 
                 /* Append each of the "reason for breaking collective I/O" error messages to the
                  * local and global no collective cause strings */
-                for (cause = 1, index = 0; (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (index < cause_strings_len); cause <<= 1, index++) {
-                    size_t cause_strlen = HDstrlen(cause_strings[index]);
+                for (cause = 1, idx = 0;
+                     (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) &&
+                     (idx < cause_strings_len);
+                     cause <<= 1, idx++) {
+                    size_t cause_strlen = HDstrlen(cause_strings[idx]);
 
                     if (cause & local_no_collective_cause) {
                         /* Check if there were any previous error messages included. If so, prepend a semicolon
@@ -1275,7 +1272,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                         if(local_error_message_previously_written)
                             HDstrncat(local_no_collective_cause_string, "; ", 2);
 
-                        HDstrncat(local_no_collective_cause_string, cause_strings[index], cause_strlen);
+                        HDstrncat(local_no_collective_cause_string,
+				  cause_strings[idx], cause_strlen);
 
                         local_error_message_previously_written = TRUE;
                     } /* end if */
@@ -1287,7 +1285,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
                         if(global_error_message_previously_written)
                             HDstrncat(global_no_collective_cause_string, "; ", 2);
 
-                        HDstrncat(global_no_collective_cause_string, cause_strings[index], cause_strlen);
+                        HDstrncat(global_no_collective_cause_string,
+				  cause_strings[idx], cause_strlen);
 
                         global_error_message_previously_written = TRUE;
                     } /* end if */

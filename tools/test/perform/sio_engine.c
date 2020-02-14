@@ -114,11 +114,11 @@ static const char *multi_letters = "msbrglo"; /* string for multi driver */
 /* HDF5 global variables */
 static hsize_t     h5count[MAX_DIMS];      /*selection count               */
 static hssize_t    h5offset[MAX_DIMS];     /* Selection offset within dataspace */
-static hid_t       h5dset_space_id = -1;   /*dataset space ID              */
-static hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
-static hid_t       h5ds_id = -1;           /*dataset handle                */
-static hid_t       h5dcpl = -1;            /* Dataset creation property list */
-static hid_t       h5dxpl = -1;            /* Dataset transfer property list */
+static hid_t       h5dset_space_id = H5I_INVALID_HID;   /*dataset space ID              */
+static hid_t       h5mem_space_id = H5I_INVALID_HID;    /*memory dataspace ID           */
+static hid_t       h5ds_id = H5I_INVALID_HID;           /*dataset handle                */
+static hid_t       h5dcpl = H5I_INVALID_HID;            /* Dataset creation property list */
+static hid_t       h5dxpl = H5I_INVALID_HID;            /* Dataset transfer property list */
 
 /*
  * Function:        do_sio
@@ -575,7 +575,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
             GOTOERROR(FAIL);
         }
 
-        h5ds_id = -1;
+        h5ds_id = H5I_INVALID_HID;
     } /* end if */
 
 done:
@@ -587,7 +587,7 @@ done:
             HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
             ret_code = FAIL;
         } else {
-            h5dset_space_id = -1;
+            h5dset_space_id = H5I_INVALID_HID;
         }
     }
 
@@ -597,7 +597,7 @@ done:
             HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
             ret_code = FAIL;
         } else {
-            h5mem_space_id = -1;
+            h5mem_space_id = H5I_INVALID_HID;
         }
     }
 
@@ -607,7 +607,7 @@ done:
             HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
             ret_code = FAIL;
         } else {
-            h5dxpl = -1;
+            h5dxpl = H5I_INVALID_HID;
         }
     }
 
@@ -894,7 +894,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
         GOTOERROR(FAIL);
         }
 
-        h5ds_id = -1;
+        h5ds_id = H5I_INVALID_HID;
     } /* end if */
 
 done:
@@ -906,7 +906,7 @@ done:
         HDfprintf(stderr, "HDF5 Dataset Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dset_space_id = -1;
+        h5dset_space_id = H5I_INVALID_HID;
     }
     }
 
@@ -916,7 +916,7 @@ done:
         HDfprintf(stderr, "HDF5 Memory Space Close failed\n");
         ret_code = FAIL;
     } else {
-        h5mem_space_id = -1;
+        h5mem_space_id = H5I_INVALID_HID;
     }
     }
 
@@ -926,7 +926,7 @@ done:
         HDfprintf(stderr, "HDF5 Dataset Transfer Property List Close failed\n");
         ret_code = FAIL;
     } else {
-        h5dxpl = -1;
+        h5dxpl = H5I_INVALID_HID;
     }
     }
 
@@ -1137,7 +1137,7 @@ done:
 hid_t
 set_vfd(parameters *param)
 {
-    hid_t my_fapl = -1;
+    hid_t my_fapl = H5I_INVALID_HID;
     vfdtype  vfd;
 
     vfd = param->vfd;
@@ -1174,7 +1174,7 @@ set_vfd(parameters *param)
         HDmemset(memb_addr, 0, sizeof memb_addr);
 
         HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-        for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+        for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
             HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
@@ -1268,8 +1268,7 @@ done:
  *      'temp' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 static void
 do_cleanupfile(iotype iot, char *filename)
 {
@@ -1312,7 +1311,7 @@ do_cleanupfile(iotype iot, char *filename)
                 H5FD_mem_t mt;
                 assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
 
-                for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+                for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                     HDsnprintf(temp, sizeof temp, "%s-%c.h5",
                                filename, multi_letters[mt]);
                     HDremove(temp); /*don't care if it fails*/
@@ -1331,5 +1330,5 @@ do_cleanupfile(iotype iot, char *filename)
         }
     }
 }
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 

@@ -42,6 +42,8 @@
 #include "H5Lprivate.h"		/* Links                                */
 #include "H5MMprivate.h"	/* Memory wrappers			*/
 
+#include "H5VLnative_private.h" /* Native VOL connector                     */
+
 
 /****************/
 /* Local Macros */
@@ -1195,16 +1197,16 @@ done:
  * Purpose:     Callback for retrieving object's name by address
  *
  * Return:      Positive if path is for object desired
- * 		0 if not correct object
- * 		negative on failure.
+ * 	            0 if not correct object
+ * 	            negative on failure.
  *
  * Programmer:	Quincey Koziol
- *		November 4 2007
+ *              November 4 2007
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info_t *linfo,
+H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo,
     void *_udata)
 {
     H5G_gnba_iter_t *udata = (H5G_gnba_iter_t *)_udata; /* User data for iteration */
@@ -1212,7 +1214,7 @@ H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info_t *linfo,
     H5G_name_t  obj_path;            	/* Object's group hier. path */
     H5O_loc_t   obj_oloc;            	/* Object's object location */
     hbool_t     obj_found = FALSE;      /* Object at 'path' found */
-    herr_t ret_value = H5_ITER_CONT;    /* Return value */
+    herr_t      ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1223,31 +1225,39 @@ H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info_t *linfo,
     HDassert(udata->path == NULL);
 
     /* Check for hard link with correct address */
-    if(linfo->type == H5L_TYPE_HARD && udata->loc->addr == linfo->u.address) {
-        H5G_loc_t	grp_loc;                /* Location of group */
+    if(linfo->type == H5L_TYPE_HARD) {
+        haddr_t link_addr;
 
-        /* Get group's location */
-        if(H5G_loc(gid, &grp_loc) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "bad group location")
+        /* Retrieve hard link address from VOL token */
+        if(H5VL_native_token_to_addr(udata->loc->file, H5I_FILE, linfo->u.token, &link_addr) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address")
 
-        /* Set up opened object location to fill in */
-        obj_loc.oloc = &obj_oloc;
-        obj_loc.path = &obj_path;
-        H5G_loc_reset(&obj_loc);
+        if(udata->loc->addr == link_addr) {
+            H5G_loc_t   grp_loc;                /* Location of group */
 
-        /* Find the object */
-        if(H5G_loc_find(&grp_loc, path, &obj_loc/*out*/) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "object not found")
-        obj_found = TRUE;
+            /* Get group's location */
+            if(H5G_loc(gid, &grp_loc) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "bad group location")
 
-        /* Check for object in same file (handles mounted files) */
-        /* (re-verify address, in case we traversed a file mount) */
-        if(udata->loc->addr == obj_loc.oloc->addr && udata->loc->file == obj_loc.oloc->file) {
-            if(NULL == (udata->path = H5MM_strdup(path)))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, H5_ITER_ERROR, "can't duplicate path string")
+            /* Set up opened object location to fill in */
+            obj_loc.oloc = &obj_oloc;
+            obj_loc.path = &obj_path;
+            H5G_loc_reset(&obj_loc);
 
-            /* We found a match so we return immediately */
-            HGOTO_DONE(H5_ITER_STOP)
+            /* Find the object */
+            if(H5G_loc_find(&grp_loc, path, &obj_loc/*out*/) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "object not found")
+            obj_found = TRUE;
+
+            /* Check for object in same file (handles mounted files) */
+            /* (re-verify address, in case we traversed a file mount) */
+            if(udata->loc->addr == obj_loc.oloc->addr && udata->loc->file == obj_loc.oloc->file) {
+                if(NULL == (udata->path = H5MM_strdup(path)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, H5_ITER_ERROR, "can't duplicate path string")
+
+                /* We found a match so we return immediately */
+                HGOTO_DONE(H5_ITER_STOP)
+            } /* end if */
         } /* end if */
     } /* end if */
 

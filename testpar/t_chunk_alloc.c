@@ -95,7 +95,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
     /* Only MAINPROCESS should create the file.  Others just wait. */
     if (MAINPROCESS){
         nchunks=chunk_factor*mpi_size;
-        dims[0]=nchunks*CHUNK_SIZE;
+        dims[0]=(hsize_t)(nchunks*CHUNK_SIZE);
         /* Create the data space with unlimited dimensions. */
         dataspace = H5Screate_simple (1, dims, maxdims);
         VRFY((dataspace >= 0), "");
@@ -127,7 +127,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
             count[0] = 1;
             stride[0] = 1;
             block[0] = chunk_dims[0];
-            offset[0] = (nchunks-2)*chunk_dims[0];
+            offset[0] = (hsize_t)(nchunks-2)*chunk_dims[0];
 
             hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
                 VRFY((hrc >= 0), "");
@@ -157,7 +157,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
 
         /* verify file size */
         filesize = get_filesize(filename);
-        est_filesize = nchunks * CHUNK_SIZE * sizeof(unsigned char);
+        est_filesize = (MPI_Offset)nchunks * (MPI_Offset)CHUNK_SIZE * (MPI_Offset)sizeof(unsigned char);
         VRFY((filesize >= est_filesize), "file size check");
 
     }
@@ -233,7 +233,7 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
     dataspace = H5Dget_space(*dataset);
     VRFY((dataspace >= 0), "");
 
-    size[0] = nchunks*CHUNK_SIZE;
+    size[0] = (hsize_t)nchunks*CHUNK_SIZE;
 
     switch (action) {
 
@@ -245,7 +245,7 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
             stride[0] = 1;
             block[0] = chunk_dims[0];
             for (i=0; i<nchunks/mpi_size; i++) {
-                offset[0] = (i*mpi_size+mpi_rank)*chunk_dims[0];
+                offset[0] = (hsize_t)(i*mpi_size+mpi_rank)*chunk_dims[0];
 
                 hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
                 VRFY((hrc >= 0), "");
@@ -294,7 +294,7 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
 
     /* verify file size */
     filesize = get_filesize(filename);
-    est_filesize = nchunks*CHUNK_SIZE*sizeof(unsigned char);
+    est_filesize = (MPI_Offset)nchunks*(MPI_Offset)CHUNK_SIZE*(MPI_Offset)sizeof(unsigned char);
     VRFY((filesize >= est_filesize), "file size check");
 
     /* Can close some plists */
@@ -374,7 +374,7 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
         /* reset buffer values */
         HDmemset(buffer, -1, CHUNK_SIZE);
 
-        offset[0] = i*chunk_dims[0];
+        offset[0] = (hsize_t)i*chunk_dims[0];
 
         hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
         VRFY((hrc >= 0), "");
@@ -385,17 +385,17 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
 
         /* set expected value according the write pattern */
         switch (write_pattern) {
-        case all:
-            value = i%mpi_size + 1;
-            break;
-        case none:
-            value = 0;
-            break;
-        case sec_last:
-            if (i==nchunks-2)
-                value = 100;
-            else
+            case all:
+                value = i%mpi_size + 1;
+                break;
+            case none:
                 value = 0;
+                break;
+            case sec_last:
+                if (i==nchunks-2)
+                    value = 100;
+                else
+                    value = 0;
                 break;
             default:
                 HDassert(0);

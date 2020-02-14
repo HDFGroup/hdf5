@@ -37,6 +37,7 @@
 #include "H5Epkg.h"             /* Error handling                           */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
+#include "H5TSprivate.h"        /* Thread stuff                             */
 
 
 /****************/
@@ -259,10 +260,8 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
             else
                 HDfprintf(stream, "thread 0");
         } /* end block */
-#elif defined(H5_HAVE_THREADSAFE)
-        HDfprintf(stream, "thread %lu", (unsigned long)HDpthread_self_ulong());
 #else
-        HDfprintf(stream, "thread 0");
+        HDfprintf(stream, "thread %" PRIu64, H5TS_thread_id());
 #endif
         HDfprintf(stream, ":\n");
     } /* end if */
@@ -391,10 +390,8 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
             else
                 HDfprintf(stream, "thread 0");
         } /* end block */
-#elif defined(H5_HAVE_THREADSAFE)
-        HDfprintf(stream, "thread %lu", (unsigned long)HDpthread_self_ulong());
 #else
-        HDfprintf(stream, "thread 0");
+        HDfprintf(stream, "thread %" PRIu64, H5TS_thread_id());
 #endif
         HDfprintf(stream, ":\n");
     } /* end if */
@@ -883,12 +880,12 @@ H5E__clear_entries(H5E_t *estack, size_t nentries)
 
         /* Release strings */
         if(error->func_name)
-            error->func_name = (const char *) H5MM_xfree((void *)error->func_name);        /* Casting away const OK - QAK */
+            error->func_name = (const char *) H5MM_xfree_const(error->func_name);
         if(error->file_name)
-            error->file_name = (const char *) H5MM_xfree((void *)error->file_name);        /* Casting away const OK - QAK */
+            error->file_name = (const char *) H5MM_xfree_const(error->file_name);
         if(error->desc)
-            error->desc = (const char *) H5MM_xfree((void *)error->desc);     /* Casting away const OK - QAK */
-    } /* end for */
+            error->desc = (const char *) H5MM_xfree_const(error->desc);
+    }
 
     /* Decrement number of errors on stack */
     estack->nused -= u;

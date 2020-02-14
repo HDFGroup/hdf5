@@ -471,19 +471,19 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     grp_id = H5Gcreate2(file_id, "GROUP", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((grp_id >= 0), "");
 
-    dims[0] = ROW_FACTOR*mpi_size;
-    dims[1] = COL_FACTOR*mpi_size;
+    dims[0] = (hsize_t)(ROW_FACTOR*mpi_size);
+    dims[1] = (hsize_t)(COL_FACTOR*mpi_size);
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
     /* Each process takes a slabs of rows. */
-    block[0] = dims[0]/mpi_size;
+    block[0] = dims[0]/(hsize_t)mpi_size;
     block[1] = dims[1];
     stride[0] = block[0];
     stride[1] = block[1];
     count[0] = 1;
     count[1] = 1;
-    start[0] = mpi_rank*block[0];
+    start[0] = (hsize_t)mpi_rank*block[0];
     start[1] = 0;
 
     num_elements = block[0] * block[1];
@@ -632,17 +632,17 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy,
     grp_id = H5Gopen2(file_id, "GROUP", H5P_DEFAULT);
     VRFY((grp_id >= 0), "");
 
-    dims[0] = ROW_FACTOR*mpi_size;
-    dims[1] = COL_FACTOR*mpi_size;
+    dims[0] = (hsize_t)(ROW_FACTOR*mpi_size);
+    dims[1] = (hsize_t)(COL_FACTOR*mpi_size);
 
     /* Each process takes a slabs of rows. */
-    block[0] = dims[0]/mpi_size;
+    block[0] = dims[0]/(hsize_t)mpi_size;
     block[1] = dims[1];
     stride[0] = block[0];
     stride[1] = block[1];
     count[0] = 1;
     count[1] = 1;
-    start[0] = mpi_rank*block[0];
+    start[0] = (hsize_t)mpi_rank*block[0];
     start[1] = 0;
 
     num_elements = block[0] * block[1];

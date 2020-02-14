@@ -28,13 +28,13 @@ extern "C" {
 
 /* ``parallel_print'' information */
 #define PRINT_DATA_MAX_SIZE     512
-#define OUTBUFF_SIZE        (PRINT_DATA_MAX_SIZE*4)
+#define OUTBUFF_SIZE           (PRINT_DATA_MAX_SIZE*4)
 
-H5TOOLS_DLLVAR int  g_nTasks;
+H5TOOLS_DLLVAR int g_nTasks;
 H5TOOLS_DLLVAR unsigned char g_Parallel;
-H5TOOLS_DLLVAR char    outBuff[];
+H5TOOLS_DLLVAR char outBuff[];
 H5TOOLS_DLLVAR unsigned outBuffOffset;
-H5TOOLS_DLLVAR FILE *   overflow_file;
+H5TOOLS_DLLVAR FILE *overflow_file;
 
 /* Maximum size used in a call to malloc for a dataset */
 H5TOOLS_DLLVAR hsize_t H5TOOLS_MALLOCSIZE;
@@ -88,22 +88,22 @@ typedef struct long_options {
                                  * this gets returned from get_option   */
 } long_options;
 
-H5TOOLS_DLL int    get_option(int argc, const char **argv, const char *opt,
-                         const struct long_options *l_opt);
+H5TOOLS_DLL int get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
 /*
  * end get_option section
  */
 
 /*struct taken from the dumper. needed in table struct*/
 typedef struct obj_t {
-    haddr_t objno;
-    char *objname;
-    hbool_t displayed;          /* Flag to indicate that the object has been displayed */
-    hbool_t recorded;           /* Flag for named datatypes to indicate they were found in the group hierarchy */
+    H5O_token_t  obj_token;
+    char      *objname;
+    hbool_t    displayed;          /* Flag to indicate that the object has been displayed */
+    hbool_t    recorded;           /* Flag for named datatypes to indicate they were found in the group hierarchy */
 } obj_t;
 
 /*struct for the tables that the find_objs function uses*/
 typedef struct table_t {
+    hid_t fid;
     size_t size;
     size_t nobjs;
     obj_t *objs;
@@ -111,7 +111,7 @@ typedef struct table_t {
 
 /*this struct stores the information that is passed to the find_objs function*/
 typedef struct find_objs_t {
-    hid_t fid;
+    hid_t    fid;
     table_t *group_table;
     table_t *type_table;
     table_t *dset_table;
@@ -120,26 +120,21 @@ typedef struct find_objs_t {
 H5TOOLS_DLLVAR unsigned h5tools_nCols;               /*max number of columns for outputting  */
 
 /* Definitions of useful routines */
-H5TOOLS_DLL void     indentation(unsigned);
-H5TOOLS_DLL void     print_version(const char *progname);
-H5TOOLS_DLL void     parallel_print(const char* format, ... );
-H5TOOLS_DLL herr_t   parse_tuple(const char   *start,
-                                 int           sep,
-                                 char        **cpy_out,
-                                 unsigned     *nelems,
-                                 char       ***ptrs_out);
-H5TOOLS_DLL void     error_msg(const char *fmt, ...);
-H5TOOLS_DLL void     warn_msg(const char *fmt, ...);
-H5TOOLS_DLL void     help_ref_msg(FILE *output);
-H5TOOLS_DLL void     free_table(table_t *table);
+H5TOOLS_DLL void indentation(unsigned);
+H5TOOLS_DLL void print_version(const char *progname);
+H5TOOLS_DLL void parallel_print(const char* format, ... );
+H5TOOLS_DLL herr_t parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char ***ptrs_out);
+H5TOOLS_DLL void error_msg(const char *fmt, ...);
+H5TOOLS_DLL void warn_msg(const char *fmt, ...);
+H5TOOLS_DLL void help_ref_msg(FILE *output);
+H5TOOLS_DLL void free_table(table_t *table);
 #ifdef H5DUMP_DEBUG
-H5TOOLS_DLL void     dump_tables(find_objs_t *info)
+H5TOOLS_DLL void dump_tables(find_objs_t *info);
 #endif  /* H5DUMP_DEBUG */
-H5TOOLS_DLL herr_t init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
-    table_t **dset_table, table_t **type_table);
-H5TOOLS_DLL obj_t   *search_obj(table_t *temp, haddr_t objno);
+H5TOOLS_DLL herr_t init_objs(hid_t fid, find_objs_t *info, table_t **group_table, table_t **dset_table, table_t **type_table);
+H5TOOLS_DLL obj_t *search_obj(table_t *temp, const H5O_token_t *obj_token);
 #ifndef H5_HAVE_TMPFILE
-H5TOOLS_DLL FILE *  tmpfile(void);
+H5TOOLS_DLL FILE *tmpfile(void);
 #endif
 
 /*************************************************************
@@ -161,30 +156,26 @@ typedef struct {
 
 /* obtain link info from H5tools_get_symlink_info() */
 typedef struct {
-    H5O_type_t  trg_type;  /* OUT: target type */
-    char *trg_path;        /* OUT: target obj path. This must be freed
-                            *      when used with H5tools_get_symlink_info() */
-    haddr_t     objno;     /* OUT: target object address */
-    unsigned long  fileno; /* OUT: File number that target object is located in */
-    H5L_info_t linfo;      /* OUT: link info */
-    h5tool_opt_t opt;      /* IN: options */
+    H5O_type_t    trg_type;  /* OUT: target type */
+    char         *trg_path;  /* OUT: target obj path. This must be freed
+                              *      when used with H5tools_get_symlink_info() */
+    H5O_token_t     obj_token; /* OUT: target object token */
+    unsigned long fileno;    /* OUT: File number that target object is located in */
+    H5L_info2_t   linfo;     /* OUT: link info */
+    h5tool_opt_t  opt;       /* IN: options */
 } h5tool_link_info_t;
 
 
 /* Definitions of routines */
-H5TOOLS_DLL int H5tools_get_symlink_info(hid_t file_id, const char * linkpath,
-    h5tool_link_info_t *link_info, hbool_t get_obj_type);
+H5TOOLS_DLL int H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info, hbool_t get_obj_type);
 H5TOOLS_DLL const char *h5tools_getprogname(void);
-H5TOOLS_DLL void     h5tools_setprogname(const char*progname);
-H5TOOLS_DLL int      h5tools_getstatus(void);
-H5TOOLS_DLL void     h5tools_setstatus(int d_status);
+H5TOOLS_DLL void h5tools_setprogname(const char*progname);
+H5TOOLS_DLL int h5tools_getstatus(void);
+H5TOOLS_DLL void h5tools_setstatus(int d_status);
 H5TOOLS_DLL int h5tools_getenv_update_hyperslab_bufsize(void);
-H5TOOLS_DLL int h5tools_set_configured_fapl(hid_t       fapl_id,
-                                            const char  vfd_name[],
-                                            void       *fapl_t_ptr);
+H5TOOLS_DLL int h5tools_set_configured_fapl(hid_t fapl_id, const char vfd_name[], void *fapl_t_ptr);
 #ifdef H5_HAVE_ROS3_VFD
-H5TOOLS_DLL int h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t  *fa, 
-                                           const char       **values);
+H5TOOLS_DLL int h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values);
 #endif /* H5_HAVE_ROS3_VFD */
 
 #ifdef __cplusplus

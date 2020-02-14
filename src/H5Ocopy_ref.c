@@ -24,7 +24,6 @@
 /****************/
 
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
-#define H5F_FRIEND              /* Suppress error about including H5Fpkg   */
 #define H5R_FRIEND              /* Suppress error about including H5Rpkg   */
 
 
@@ -32,12 +31,14 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5Fpkg.h"             /* File                                     */
+#include "H5Fprivate.h"         /* File                                     */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5Lprivate.h"         /* Links                                    */
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5Rpkg.h"             /* References                               */
+
+#include "H5VLnative_private.h" /* Native VOL connector                     */
 
 
 /****************/
@@ -166,7 +167,7 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
     size_t buf_size = H5R_OBJ_REF_BUF_SIZE;
     size_t i; /* Local index variable */
     size_t token_size = H5F_SIZEOF_ADDR(src_oloc->file);
-    herr_t  ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -174,8 +175,7 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
     for(i = 0; i < ref_count; i++) {
         const unsigned char *src_buf = (const unsigned char *)&src_ref[i];
         unsigned char *dst_buf = (unsigned char *)&dst_ref[i];
-        H5VL_token_t tmp_token = { 0 };
-        uint8_t *p;
+        H5O_token_t tmp_token = { 0 };
 
         /* If data is not initialized, copy zeros and skip */
         if(0 == HDmemcmp(src_buf, zeros, buf_size)) {
@@ -186,8 +186,9 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
         /* Set up for the object copy for the reference */
         if(H5R__decode_token_obj_compat(src_buf, &buf_size, &tmp_token, token_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode src object address")
-        p = tmp_token;
-        H5F_addr_decode(src_oloc->file, (const uint8_t **)&p, &src_oloc->addr);
+        if(H5VL_native_token_to_addr(src_oloc->file, H5I_FILE, tmp_token, &src_oloc->addr) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address")
+
         if(!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
         dst_oloc->addr = HADDR_UNDEF;
@@ -197,9 +198,9 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
         /* Set the object reference info for the destination file */
-        p = tmp_token;
-        H5F_addr_encode(dst_oloc->file, &p, dst_oloc->addr);
-        if(H5R__encode_token_obj_compat((const H5VL_token_t *)&tmp_token, token_size, dst_buf, &buf_size) < 0)
+        if(H5VL_native_addr_to_token(dst_oloc->file, H5I_FILE, dst_oloc->addr, &tmp_token) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "can't serialize address into object token")
+        if(H5R__encode_token_obj_compat((const H5O_token_t *)&tmp_token, token_size, dst_buf, &buf_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to encode dst object address")
     } /* end for */
 
@@ -333,7 +334,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, H5T_t *dt_src,
     /* create reference datatype at the destinaton file */
     if(NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy")
-    if(H5T_set_loc(dt_dst, dst_oloc->file, H5T_LOC_DISK) < 0) {
+    if(H5T_set_loc(dt_dst, H5F_VOL_OBJ(dst_oloc->file), H5T_LOC_DISK) < 0) {
         (void)H5T_close_real(dt_dst);
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
     } /* end if */
@@ -359,32 +360,32 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, H5T_t *dt_src,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
 
     /* Retrieve loc ID */
-    if((dst_loc_id = H5F__get_file_id(dst_oloc->file, FALSE)) < 0)
+    if((dst_loc_id = H5F_get_id(dst_oloc->file)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Making equivalent references in the destination file */
     for(i = 0; i < ref_count; i++) {
         H5R_ref_t *ref_ptr  = (H5R_ref_t *)conv_buf;
         H5R_ref_priv_t *ref = (H5R_ref_priv_t *)&ref_ptr[i];
-        H5VL_token_t tmp_token = { 0 };
-        uint8_t *p;
+        H5O_token_t tmp_token = { 0 };
 
         /* Get src object address */
         if(H5R__get_obj_token(ref, &tmp_token, &token_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object token")
-        p = tmp_token;
-        H5F_addr_decode(src_oloc->file, (const uint8_t **)&p, &src_oloc->addr);
+        if(H5VL_native_token_to_addr(src_oloc->file, H5I_FILE, tmp_token, &src_oloc->addr) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address")
 
         /* Attempt to copy object from source to destination file */
         if(H5O__copy_obj_by_ref(src_oloc, dst_oloc, dst_root_loc, cpy_info) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
         /* Set dst object address */
-        p = tmp_token;
-        H5F_addr_encode(dst_oloc->file, &p, dst_oloc->addr);
-        if(H5R__set_obj_token(ref, (const H5VL_token_t *)&tmp_token, token_size) < 0)
+        if(H5VL_native_addr_to_token(dst_oloc->file, H5I_FILE, dst_oloc->addr, &tmp_token) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "can't serialize address into object token")
+        if(H5R__set_obj_token(ref, (const H5O_token_t *)&tmp_token, token_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set object token")
-        if(H5R__set_loc_id(ref, dst_loc_id, TRUE) < 0)
+        /* Do not set app_ref since references are released once the copy is done */
+        if(H5R__set_loc_id(ref, dst_loc_id, TRUE, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set destination loc id")
     } /* end for */
 

@@ -174,7 +174,7 @@ typedef struct {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         H5G_iterate_t op_old;           /* "Old" application callback for each link */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-        H5L_iterate_t op_new;           /* "New" application callback for each link */
+        H5L_iterate2_t op_new;          /* "New" application callback for each link */
     } op_func;
 } H5G_link_iterate_t;
 
@@ -186,6 +186,7 @@ typedef struct H5G_entry_t H5G_entry_t;
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
+H5_DLL herr_t H5G_init(void);
 H5_DLL struct H5O_loc_t *H5G_oloc(H5G_t *grp);
 H5_DLL H5G_name_t * H5G_nameof(const H5G_t *grp);
 H5_DLL H5F_t *H5G_fileof(H5G_t *grp);
@@ -213,12 +214,12 @@ H5_DLL herr_t H5G_iterate(H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     const H5G_link_iterate_t *lnk_op, void *op_data);
 H5_DLL herr_t H5G_visit(H5G_loc_t *loc, const char *group_name,
-    H5_index_t idx_type, H5_iter_order_t order, H5L_iterate_t op, void *op_data);
+    H5_index_t idx_type, H5_iter_order_t order, H5L_iterate2_t op, void *op_data);
 
 /* 
  * Functions that understand links in groups
  */
-H5_DLL herr_t H5G_link_to_info(const struct H5O_link_t *lnk, H5L_info_t *linfo);
+H5_DLL herr_t H5G_link_to_info(const struct H5O_loc_t *link_loc, const struct H5O_link_t *lnk, H5L_info2_t *linfo);
 
 /*
  * Functions that understand group objects
@@ -278,7 +279,9 @@ H5_DLL herr_t H5G_loc_find_by_idx(const H5G_loc_t *loc, const char *group_name,
     H5G_loc_t *obj_loc/*out*/);
 H5_DLL htri_t H5G_loc_exists(const H5G_loc_t *loc, const char *name);
 H5_DLL herr_t H5G_loc_info(const H5G_loc_t *loc, const char *name,
-    H5O_info_t *oinfo/*out*/, unsigned fields);
+    H5O_info2_t *oinfo/*out*/, unsigned fields);
+H5_DLL herr_t H5G_loc_native_info(const H5G_loc_t *loc, const char *name,
+    H5O_native_info_t *oinfo/*out*/, unsigned fields);
 H5_DLL herr_t H5G_loc_set_comment(const H5G_loc_t *loc, const char *name,
     const char *comment);
 H5_DLL ssize_t H5G_loc_get_comment(const H5G_loc_t *loc, const char *name,

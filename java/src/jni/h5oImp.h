@@ -78,6 +78,33 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oget_native_info
+ * Signature: (JI)Lhdf/hdf5lib/structs/H5O_native_info_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Oget_1native_1info
+(JNIEnv*, jclass, jlong, jint fields);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oget_native_info_by_name
+ * Signature: (JLjava/lang/String;IJ)Lhdf/hdf5lib/structs/H5O_native_info_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1name
+(JNIEnv*, jclass, jlong, jstring, jint fields, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oget_native_info_by_idx
+ * Signature: (JLjava/lang/String;IIJIJ)Lhdf/hdf5lib/structs/H5O_native_info_t;
+ */
+JNIEXPORT jobject JNICALL
+Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1idx
+(JNIEnv*, jclass, jlong, jstring, jint, jint, jlong, jint fields, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Olink
  * Signature: (JJLjava/lang/String;JJ)V
  */
@@ -168,12 +195,12 @@ Java_hdf_hdf5lib_H5_H5Oincr_1refcount
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    _H5Oopen_by_addr
- * Signature: (JJ)J;
+ * Method:    _H5Oopen_by_token
+ * Signature: (JLhdf/hdf5lib/structs/H5O_token_t;)J;
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Oopen_1by_1addr
-  (JNIEnv*, jclass, jlong, jlong);
+Java_hdf_hdf5lib_H5__1H5Oopen_1by_1token
+  (JNIEnv*, jclass, jlong, jobject);
 
 /*
  * Class:     hdf_hdf5lib_H5
