@@ -140,8 +140,6 @@ libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
 
-dtypes_SOURCES=dtypes.c nop.c
-
 # List the source files for tests that have more than one
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c
