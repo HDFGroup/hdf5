@@ -51,7 +51,45 @@
 # endif
 #endif
 #ifdef H5_HAVE_INTTYPES_H
-#   include <inttypes.h>        /* For uint64_t on some platforms            */
+#   include <inttypes.h>        /* C99/POSIX.1 header for uint64_t, PRIu64 */
+#else /* H5_HAVE_INTTYPES_H */
+/* The following definitions should be suitable for 64-bit Windows, which is
+ * LLP64, and for 32-bit Windows, which is ILP32.  Those are the only
+ * platforms where <inttypes.h> is likely to be missing.  VS2015 and later
+ * *may* provide these definitions.
+ */
+#ifdef _WIN64
+#       define PRIdPTR "lld"
+#       define PRIoPTR "llo"
+#       define PRIuPTR "llu"
+#       define PRIxPTR "llx"
+#else /* _WIN64 */
+#       define PRIdPTR "ld"
+#       define PRIoPTR "lo"
+#       define PRIuPTR "lu"
+#       define PRIxPTR "lx"
+#endif /* _WIN64 */
+
+#   define PRId8 "d"
+#   define PRIo8 "o"
+#   define PRIu8 "u"
+#   define PRIx8 "x"
+#   define PRId16 "d"
+#   define PRIo16 "o"
+#   define PRIu16 "u"
+#   define PRIx16 "x"
+#   define PRId32 "d"
+#   define PRIo32 "o"
+#   define PRIu32 "u"
+#   define PRIx32 "x"
+#   define PRId64 "lld"
+#   define PRIo64 "llo"
+#   define PRIu64 "llu"
+#   define PRIx64 "llx"
+#   define PRIdMAX "lld"
+#   define PRIoMAX "llo"
+#   define PRIuMAX "llu"
+#   define PRIxMAX "llx"
 #endif
 #ifdef H5_HAVE_STDDEF_H
 #   include <stddef.h>
