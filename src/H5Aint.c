@@ -224,7 +224,7 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set version of dataspace")
 
     /* Copy the object header information */
-    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
+    if(H5O_loc_copy_deep(&(attr->oloc), loc->oloc) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
 
     /* Deep copy of the group hierarchy path */
@@ -390,7 +390,7 @@ H5A__open_common(const H5G_loc_t *loc, H5A_t *attr)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release group hier. path")
 
     /* Deep copy of the symbol table entry */
-    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
+    if(H5O_loc_copy_deep(&(attr->oloc), loc->oloc) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
 
     /* Deep copy of the group hier. path */
@@ -909,7 +909,7 @@ H5A__get_type(H5A_t *attr)
      * reopen the type before returning it to the user. Make the type
      * read-only.
      */
-    if (NULL == (dt = H5T_copy(attr->shared->dt, H5T_COPY_REOPEN)))
+    if (NULL == (dt = H5T_copy_reopen(attr->shared->dt)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy datatype")
 
     /* Mark any datatypes as being in memory now */
