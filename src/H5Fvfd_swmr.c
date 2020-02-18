@@ -917,10 +917,10 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
      *    Note that this operation will restore the index to 
      *    sorted order.
      */
-    if ( (uint32_t)(f->shared->mdf_idx_entries_used + idx_entries_added) > 0 ) {
+    if (f->shared->mdf_idx_entries_used + idx_entries_added > 0) {
 
         if ( H5F_update_vfd_swmr_metadata_file(f, 
-                (uint32_t)(f->shared->mdf_idx_entries_used + idx_entries_added),
+                f->shared->mdf_idx_entries_used + idx_entries_added,
                 f->shared->mdf_idx) < 0 )
 
             HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't update MD file")
