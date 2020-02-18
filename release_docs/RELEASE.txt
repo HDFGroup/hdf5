@@ -315,6 +315,13 @@ Bug Fixes since HDF5-1.12.0-alpha1 release
 
       (CJH - 2019/12/09, HDFFV-10934)
 
+    FORTRAN library:
+    ----------------
+
+    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
+    
+      (MSB - 2020/2/18, HDFFV-11029)
+
     Java Library:
     ----------------
     - Added ability to test java library with VOLs.
