@@ -1723,12 +1723,6 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
             shared->mdf_idx_entries_used, target_page);
 
         if ( ie_ptr == NULL ) { /* alloc new entry in the metadata file index*/
-
-            /* for now the metadata file index is of fixed size -- if we 
-             * exceed the maximum size, just abort.
-             *
-             * Obviously, this must be fixed for the production version.
-             */
             uint32_t new_index_entry_index;
 
             new_index_entry_index = shared->mdf_idx_entries_used + 
