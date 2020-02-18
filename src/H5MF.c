@@ -158,8 +158,11 @@ process_deferred_frees(H5F_t *f)
     herr_t err = SUCCEED;
     H5F_shared_t *shared = f->shared;
     const uint64_t tick_num = shared->tick_num;
+    lower_defree_queue_t defrees = SIMPLEQ_HEAD_INITIALIZER(defrees);
 
-    while ((df = SIMPLEQ_FIRST(&shared->lower_defrees)) != NULL) {
+    SIMPLEQ_CONCAT(&defrees, &shared->lower_defrees);
+
+    while ((df = SIMPLEQ_FIRST(&defrees)) != NULL) {
         if (tick_num <= df->free_after_tick)
             break;
         /* Have to remove the item before processing it because we
@@ -167,7 +170,7 @@ process_deferred_frees(H5F_t *f)
          * the item was still on the queue, it would be processed
          * a second time, and that's not good.
          */ 
-        SIMPLEQ_REMOVE_HEAD(&shared->lower_defrees, link);
+        SIMPLEQ_REMOVE_HEAD(&defrees, link);
         if (H5MF__xfree_impl(f, df->alloc_type, df->addr, df->size) < 0)
             err = FAIL;
         free(df);
