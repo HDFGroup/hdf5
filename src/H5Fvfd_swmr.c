@@ -92,6 +92,7 @@ HLOG_OUTLET_SHORT_DEFN(eot, swmr);
 HLOG_OUTLET_SHORT_DEFN(shadow_defrees, swmr);
 HLOG_OUTLET_MEDIUM_DEFN(noisy_shadow_defrees, shadow_defrees,
     HLOG_OUTLET_S_OFF);
+HLOG_OUTLET_SHORT_DEFN(shadow_index_enlargement, swmr);
 
 /*
  *  The head of the end of tick queue (EOT queue) for files opened in either
@@ -1871,6 +1872,8 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
 
     FUNC_ENTER_NOAPI(NULL)
 
+    hlog_fast(shadow_index_enlargement, "Enlarging shadow index.");
+
     old_mdf_idx = shared->mdf_idx;
     old_mdf_idx_len = shared->mdf_idx_len;
 
@@ -1903,7 +1906,9 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
      */ 
     memcpy(new_mdf_idx, old_mdf_idx, sizeof(new_mdf_idx[0]) * old_mdf_idx_len);
 
-    fprintf(stderr, "ding ding\n");
+    shared->writer_index_offset = idx_addr;
+    ret_value = shared->mdf_idx = new_mdf_idx;
+    shared->mdf_idx_len = new_mdf_idx_len;
 
     /* Postpone reclamation of the old index until max_lag ticks from now.
      * It's only necessary to wait until after the new index is in place,
@@ -1916,10 +1921,6 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
             "could not schedule index reclamation");
     }
-
-    shared->writer_index_offset = idx_addr;
-    ret_value = shared->mdf_idx = new_mdf_idx;
-    shared->mdf_idx_len = new_mdf_idx_len;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
