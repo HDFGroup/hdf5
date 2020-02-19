@@ -61,7 +61,7 @@ tts_cancel(void)
     pthread_attr_t attribute;
     hid_t dataset;
     int buffer;
-    int ret;
+    int H5_ATTR_NDEBUG_UNUSED ret;
 
     /* make thread scheduling global */
     ret=pthread_attr_init(&attribute);

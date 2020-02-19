@@ -153,7 +153,7 @@ H5O__assert(const H5O_t *oh)
 
     /* Loop over all messages in object header */
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
-        uint8_t *curr_hdr;      /* Start of current message header */
+        uint8_t H5_ATTR_NDEBUG_UNUSED *curr_hdr;      /* Start of current message header */
         size_t  curr_tot_size;  /* Total size of current message (including header) */
 
         curr_hdr = curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh);
@@ -164,7 +164,7 @@ H5O__assert(const H5O_t *oh)
             free_space += curr_tot_size;
         else if(H5O_CONT_ID == curr_msg->type->id) {
             H5O_cont_t *cont = (H5O_cont_t *)curr_msg->native;
-            hbool_t found_chunk = FALSE;        /* Found a chunk that matches */
+            hbool_t H5_ATTR_NDEBUG_UNUSED found_chunk = FALSE;        /* Found a chunk that matches */
 
             HDassert(cont);
 

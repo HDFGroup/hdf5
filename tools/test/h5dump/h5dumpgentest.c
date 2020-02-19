@@ -3093,7 +3093,7 @@ static void gent_array1(void)
     hsize_t  sdims1[] = {SPACE1_DIM1};
     hsize_t  tdims1[] = {ARRAY1_DIM1};
     int        i,j;        /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    herr_t  ret H5_ATTR_NDEBUG_UNUSED;  /* Generic return value  */
 
     /* Allocate and initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
