@@ -967,7 +967,7 @@ CONTAINS
          INTEGER(HID_T) , INTENT(IN) :: file_id
          TYPE(C_PTR)    , VALUE      :: buf_ptr
          INTEGER(SIZE_T), INTENT(IN) :: buf_len
-         INTEGER(SIZE_T), INTENT(IN) :: buf_size
+         INTEGER(SIZE_T), INTENT(OUT) :: buf_size
        END FUNCTION h5fget_file_image_c
     END INTERFACE
 
