@@ -1715,9 +1715,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
 
         HDassert(entry->magic == H5PB__H5PB_ENTRY_T_MAGIC);
 
-        /* do a binary search on the metadata file index to see if 
-         * it already contains an entry for *entry.
-         */
+        /* see if the shadow index already contains an entry for *entry. */
 
         ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx,
             shared->mdf_idx_entries_used, target_page);
@@ -3112,7 +3110,7 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
     H5PB_entry_t *entry_ptr;                /* Pointer to page buffer entry */
     H5FD_t *file;                           /* File driver pointer */
     uint64_t page;		            /* page offset of addr */
-    haddr_t page_addr;                      /* page containg addr */
+    haddr_t page_addr;                      /* page containing addr */
     static haddr_t prev_addr = HADDR_UNDEF; /* addr of last call */
     size_t offset;                          /* offset of read in page */
     size_t clipped_size;                    /* possibley clipped size */
@@ -3231,8 +3229,8 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
                      * page address, test to see if the last read was for the 
                      * same address.
                      *
-                     * If was, evict the page, and satisfy the read from file.
-                     * Flag an error if the page was dirty.
+                     * If it was, evict the page, and satisfy the read from
+                     * file.  Flag an error if the page was dirty.
                      *
                      * If the last read was for a different page, clip the read 
                      * to one page, and satisfy the read from the existing 
