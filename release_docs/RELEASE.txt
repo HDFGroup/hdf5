@@ -406,7 +406,9 @@ Bug Fixes since HDF5-1.10.5 release
 
     Fortran
     --------
-    -
+    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.  
+    
+      (MSB - 2020/2/18, HDFFV-11029) 
 
     Tools
     -----
