@@ -246,6 +246,21 @@ Support for new platforms, languages and compilers.
 
 Bug Fixes since HDF5-1.12.0-alpha1 release
 ==================================
+    Library
+    -------
+    - Fixed an assertion failure in the parallel library when collectively
+      filling chunks. As it is required that chunks be written in
+      monotonically non-decreasing order of offset in the file, this assertion
+      was being triggered when the list of chunk file space allocations being
+      passed to the collective chunk filling routine was not sorted according
+      to this particular requirement.
+
+      The addition of a sort of the out of order chunks trades a bit of
+      performance for the elimination of this assertion and of any complaints
+      from MPI implementations about the file offsets used being out of order.
+
+      (JTH - 2019/10/07, HDFFV-10792)
+
     Tools:
     ------
     - h5repack was fixed to repack the reference attributes properly.
