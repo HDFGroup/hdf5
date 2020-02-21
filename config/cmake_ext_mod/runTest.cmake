@@ -163,7 +163,7 @@ endif ()
 # if the output file needs Modified text removed
 if (TEST_MASK_MOD)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-   string (REGEX REPLACE "Modified:[^\n]+\n" "Modified:  XXXX-XX-XX XX:XX:XX XXX\n" TEST_STREAM "${TEST_STREAM}")
+  string (REGEX REPLACE "Modified:[^\n]+\n" "Modified:  XXXX-XX-XX XX:XX:XX XXX\n" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
 endif ()
 
