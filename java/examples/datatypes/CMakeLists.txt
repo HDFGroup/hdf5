@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDFJAVA_EXAMPLES_DATATYPES Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)

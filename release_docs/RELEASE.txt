@@ -48,6 +48,13 @@ New Features
 
     Configuration:
     -------------
+    - Update CMake minimum version to 3.12
+
+      Updated CMake minimum version to 3.12 and added version checks
+      for Windows features.
+
+      (ADB - 2020/02/05, TRILABS-142)
+
     - Fixed CMake include properties for Fortran libraries
 
       Corrected the library properties for Fortran to use the
