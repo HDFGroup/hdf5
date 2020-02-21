@@ -54,6 +54,7 @@ MODULE H5GLOBAL
   ! If you change the value of these parameters, do not forget to change corresponding
   ! values in the H5f90.h file.
   INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3
+  INTEGER, PARAMETER :: H5O_TOKEN_BUF_LEN = 16 ! Matches C defined value in H5public.h
 
   ! Parameters used in the function 'h5kind_to_type' located in H5_ff.F90.
   ! The flag is used to tell the function whether the kind input variable
@@ -70,13 +71,17 @@ MODULE H5GLOBAL
      INTEGER, DIMENSION(1:REF_REG_BUF_LEN) :: ref
   END TYPE hdset_reg_ref_t_f
 
+  TYPE, BIND(C) :: h5o_token_t_f
+     INTEGER(C_INT8_T), DIMENSION(1:H5O_TOKEN_BUF_LEN) :: token
+  END TYPE h5o_token_t_f
+
   ! Do not forget to change these values when new predefined
   ! datatypes are added
   INTEGER, PARAMETER :: PREDEF_TYPES_LEN = 19
   INTEGER, PARAMETER :: FLOATING_TYPES_LEN = 4
   INTEGER, PARAMETER :: INTEGER_TYPES_LEN = 27
 
-  ! These arrays need to be global because they are used in 
+  ! These arrays need to be global because they are used in
   ! both h5open_f and in h5close_f; initialize to fix linking issues
   ! on OSX and Intel compilers.
   INTEGER(HID_T), DIMENSION(1:PREDEF_TYPES_LEN)   :: predef_types = -1
@@ -232,6 +237,12 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_EARLIEST_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_LATEST_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_UNLIMITED_F
+  !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_ERROR_F
+  !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_NBOUNDS_F
+  !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V18_F
+  !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V110_F
+  !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V112_F
+  !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V114_F
   !DEC$endif
   
   INTEGER :: H5F_ACC_RDWR_F
@@ -253,6 +264,12 @@ MODULE H5GLOBAL
   INTEGER :: H5F_LIBVER_EARLIEST_F
   INTEGER :: H5F_LIBVER_LATEST_F
   INTEGER :: H5F_UNLIMITED_F
+  INTEGER :: H5F_LIBVER_ERROR_F
+  INTEGER :: H5F_LIBVER_NBOUNDS_F
+  INTEGER :: H5F_LIBVER_V18_F
+  INTEGER :: H5F_LIBVER_V110_F
+  INTEGER :: H5F_LIBVER_V112_F
+  INTEGER :: H5F_LIBVER_V114_F
   !
   ! H5G flags declaration
   !

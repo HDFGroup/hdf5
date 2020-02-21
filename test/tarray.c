@@ -1268,15 +1268,15 @@ test_array_vlen_atomic(void)
     } /* end for */
 
     /* Reclaim the read VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);
@@ -1523,15 +1523,15 @@ test_array_vlen_array(void)
     } /* end for */
 
     /* Reclaim the read VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret=H5Treclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close dataset transfer property list */
     ret = H5Pclose(xfer_pid);

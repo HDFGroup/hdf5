@@ -43,7 +43,7 @@ test_registration_by_value(void)
     TESTING("VOL registration by value");
 
     /* The null VOL connector should not be registered at the start of the test */
-    if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((is_registered = H5VLis_connector_registered_by_value(NULL_VOL_CONNECTOR_VALUE)) < 0)
         TEST_ERROR;
     if(TRUE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector is inappropriately registered");
@@ -53,7 +53,7 @@ test_registration_by_value(void)
         TEST_ERROR;
 
     /* The connector should be registered now */
-    if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((is_registered = H5VLis_connector_registered_by_value(NULL_VOL_CONNECTOR_VALUE)) < 0)
         TEST_ERROR;
     if(FALSE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector was not registered");
@@ -63,7 +63,7 @@ test_registration_by_value(void)
         TEST_ERROR;
 
     /* The connector should not be registered now */
-    if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((is_registered = H5VLis_connector_registered_by_value(NULL_VOL_CONNECTOR_VALUE)) < 0)
         TEST_ERROR;
     if(TRUE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector is inappropriately registered");
@@ -99,7 +99,7 @@ test_registration_by_name(void)
     TESTING("VOL registration by name");
 
     /* The null VOL connector should not be registered at the start of the test */
-    if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((is_registered = H5VLis_connector_registered_by_name(NULL_VOL_CONNECTOR_NAME)) < 0)
         TEST_ERROR;
     if(TRUE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector is inappropriately registered");
@@ -109,7 +109,7 @@ test_registration_by_name(void)
         TEST_ERROR;
 
     /* The connector should be registered now */
-    if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((is_registered = H5VLis_connector_registered_by_name(NULL_VOL_CONNECTOR_NAME)) < 0)
         TEST_ERROR;
     if(FALSE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector was not registered");
@@ -119,7 +119,7 @@ test_registration_by_name(void)
         TEST_ERROR;
 
     /* The connector should not be registered now */
-    if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((is_registered = H5VLis_connector_registered_by_name(NULL_VOL_CONNECTOR_NAME)) < 0)
         TEST_ERROR;
     if(TRUE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector is inappropriately registered");
@@ -156,7 +156,7 @@ test_multiple_registration(void)
     TESTING("registering a VOL connector multiple times");
 
     /* The null VOL connector should not be registered at the start of the test */
-    if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((is_registered = H5VLis_connector_registered_by_name(NULL_VOL_CONNECTOR_NAME)) < 0)
         TEST_ERROR;
     if(TRUE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector is inappropriately registered");
@@ -168,7 +168,7 @@ test_multiple_registration(void)
     }
 
     /* The connector should be registered now */
-    if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((is_registered = H5VLis_connector_registered_by_name(NULL_VOL_CONNECTOR_NAME)) < 0)
         TEST_ERROR;
     if(FALSE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector was not registered");
@@ -186,7 +186,43 @@ test_multiple_registration(void)
     }
 
     /* The connector should not be registered now */
-    if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((is_registered = H5VLis_connector_registered_by_name(NULL_VOL_CONNECTOR_NAME)) < 0)
+        TEST_ERROR;
+    if(TRUE == is_registered)
+        FAIL_PUTS_ERROR("NULL VOL connector is inappropriately registered");
+
+    /* Repeat testing with the _by_value routines */
+    if((is_registered = H5VLis_connector_registered_by_value(NULL_VOL_CONNECTOR_VALUE)) < 0)
+        TEST_ERROR;
+    if(TRUE == is_registered)
+        FAIL_PUTS_ERROR("NULL VOL connector is inappropriately registered");
+
+    /* Register the connector multiple times */
+    for(i = 0; i < N_REGISTRATIONS; i++) {
+        if((vol_ids[i] = H5VLregister_connector_by_value(NULL_VOL_CONNECTOR_VALUE, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+    }
+
+    /* The connector should be registered now */
+    if((is_registered = H5VLis_connector_registered_by_value(NULL_VOL_CONNECTOR_VALUE)) < 0)
+        TEST_ERROR;
+    if(FALSE == is_registered)
+        FAIL_PUTS_ERROR("NULL VOL connector was not registered");
+
+    /* Unregister the connector */
+    for(i = 0; i < N_REGISTRATIONS; i++) {
+        if(H5VLunregister_connector(vol_ids[i]) < 0)
+            TEST_ERROR;
+        /* Also test close on some of the IDs. This call currently works
+         * identically to unregister.
+         */
+        i++;
+        if(H5VLclose(vol_ids[i]) < 0)
+            TEST_ERROR;
+    }
+
+    /* The connector should not be registered now */
+    if((is_registered = H5VLis_connector_registered_by_value(NULL_VOL_CONNECTOR_VALUE)) < 0)
         TEST_ERROR;
     if(TRUE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector is inappropriately registered");
@@ -223,7 +259,7 @@ test_getters(void)
     TESTING("VOL getters");
 
     /* The null VOL connector should not be registered at the start of the test */
-    if((is_registered = H5VLis_connector_registered(NULL_VOL_CONNECTOR_NAME)) < 0)
+    if((is_registered = H5VLis_connector_registered_by_name(NULL_VOL_CONNECTOR_NAME)) < 0)
         TEST_ERROR;
     if(TRUE == is_registered)
         FAIL_PUTS_ERROR("NULL VOL connector is inappropriately registered");
@@ -232,11 +268,35 @@ test_getters(void)
     if((vol_id = H5VLregister_connector_by_name(NULL_VOL_CONNECTOR_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* Get the connector's ID */
-    if((vol_id_out = H5VLget_connector_id(NULL_VOL_CONNECTOR_NAME)) < 0)
+    /* Get the connector's ID by name */
+    if((vol_id_out = H5VLget_connector_id_by_name(NULL_VOL_CONNECTOR_NAME)) < 0)
         TEST_ERROR;
     if(vol_id != vol_id_out)
         FAIL_PUTS_ERROR("VOL connector IDs don't match");
+    if(H5VLclose(vol_id_out) < 0)
+        TEST_ERROR;
+
+    /* Unregister the connector */
+    if(H5VLunregister_connector(vol_id) < 0)
+        TEST_ERROR;
+
+    /* Repeat testing with the _by_value routines */
+    if((is_registered = H5VLis_connector_registered_by_value(NULL_VOL_CONNECTOR_VALUE)) < 0)
+        TEST_ERROR;
+    if(TRUE == is_registered)
+        FAIL_PUTS_ERROR("NULL VOL connector is inappropriately registered");
+
+    /* Register the connector by value */
+    if((vol_id = H5VLregister_connector_by_value(NULL_VOL_CONNECTOR_VALUE, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Get the connector's ID by value */
+    if((vol_id_out = H5VLget_connector_id_by_value(NULL_VOL_CONNECTOR_VALUE)) < 0)
+        TEST_ERROR;
+    if(vol_id != vol_id_out)
+        FAIL_PUTS_ERROR("VOL connector IDs don't match");
+    if(H5VLclose(vol_id_out) < 0)
+        TEST_ERROR;
 
     /* Unregister the connector */
     if(H5VLunregister_connector(vol_id) < 0)
@@ -247,6 +307,7 @@ test_getters(void)
 
 error:
     H5E_BEGIN_TRY {
+        H5VLclose(vol_id_out);
         H5VLunregister_connector(vol_id);
     } H5E_END_TRY;
     return FAIL;

@@ -40,6 +40,7 @@
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 /* Other public headers needed by this file */
 #include "H5Spublic.h"		/* Dataspace functions			*/
@@ -95,9 +96,14 @@
 /* This version also encodes array types more efficiently */
 #define H5O_DTYPE_VERSION_3	3
 
+/* This is the version that adds support for new reference types and prevents
+ * older versions of the library to attempt reading unknown types.
+ */
+#define H5O_DTYPE_VERSION_4 4
+
 /* The latest version of the format.  Look through the 'encode helper' routine
  *      and 'size' callback for places to change when updating this. */
-#define H5O_DTYPE_VERSION_LATEST H5O_DTYPE_VERSION_3
+#define H5O_DTYPE_VERSION_LATEST H5O_DTYPE_VERSION_4
 
 
 /* Flags for visiting datatype */
@@ -175,37 +181,56 @@ struct H5T_path_t {
     H5T_cdata_t	cdata;			/*data for this function	     */
 };
 
+/* Reference function pointers */
+typedef herr_t (*H5T_ref_isnullfunc_t)(const H5VL_object_t *file, const void *src_buf, hbool_t *isnull);
+typedef herr_t (*H5T_ref_setnullfunc_t)(H5VL_object_t *file, void *dst_buf, void *bg_buf);
+typedef size_t (*H5T_ref_getsizefunc_t)(H5VL_object_t *src_file, const void *src_buf, size_t src_size, H5VL_object_t *dst_file, hbool_t *dst_copy);
+typedef herr_t (*H5T_ref_readfunc_t)(H5VL_object_t *src_file, const void *src_buf, size_t src_size, H5VL_object_t *dst_file, void *dst_buf, size_t dst_size);
+typedef herr_t (*H5T_ref_writefunc_t)(H5VL_object_t *src_file, const void *src_buf, size_t src_size, H5R_type_t src_type, H5VL_object_t *dst_file, void *dst_buf, size_t dst_size, void *bg_buf);
+
+typedef struct H5T_ref_class_t {
+    H5T_ref_isnullfunc_t    isnull;     /* check if reference value is NIL */
+    H5T_ref_setnullfunc_t   setnull;    /* set a reference value to NIL */
+    H5T_ref_getsizefunc_t   getsize;    /* get reference size (bytes)   */
+    H5T_ref_readfunc_t      read;       /* read reference into buffer   */
+    H5T_ref_writefunc_t     write;      /* write reference from buffer  */
+} H5T_ref_class_t;
+
 typedef struct H5T_atomic_t {
-    H5T_order_t		order;	/*byte order				     */
-    size_t		prec;	/*precision in bits			     */
-    size_t		offset; /*bit position of lsb of value		     */
-    H5T_pad_t	        lsb_pad;/*type of lsb padding			     */
-    H5T_pad_t		msb_pad;/*type of msb padding			     */
+    H5T_order_t order;              /* byte order                           */
+    size_t      prec;               /* precision in bits                    */
+    size_t      offset;             /* bit position of lsb of value         */
+    H5T_pad_t   lsb_pad;            /* type of lsb padding                  */
+    H5T_pad_t   msb_pad;            /* type of msb padding                  */
     union {
-	struct {
-	    H5T_sign_t	sign;	/*type of integer sign			     */
-	} i;			/*integer; integer types		     */
+        struct {
+            H5T_sign_t  sign;       /* type of integer sign                 */
+        } i;    /* integer; integer types */
 
-	struct {
-	    size_t	sign;	/*bit position of sign bit		     */
-	    size_t	epos;	/*position of lsb of exponent		     */
-	    size_t	esize;	/*size of exponent in bits		     */
-	    uint64_t	ebias;	/*exponent bias				     */
-	    size_t	mpos;	/*position of lsb of mantissa		     */
-	    size_t	msize;	/*size of mantissa			     */
-	    H5T_norm_t	norm;	/*normalization				     */
-	    H5T_pad_t	pad;	/*type of padding for internal bits	     */
-	} f;			/*floating-point types			     */
+        struct {
+            size_t      sign;       /* bit position of sign bit             */
+            size_t      epos;       /* position of lsb of exponent          */
+            size_t      esize;      /* size of exponent in bits             */
+            uint64_t    ebias;      /* exponent bias                        */
+            size_t      mpos;       /* position of lsb of mantissa          */
+            size_t      msize;      /* size of mantissa                     */
+            H5T_norm_t  norm;       /* normalization                        */
+            H5T_pad_t   pad;        /* type of padding for internal bits    */
+        } f;    /* floating-point types */
 
-	struct {
-	    H5T_cset_t	cset;	/*character set				     */
-	    H5T_str_t	pad;	/*space or null padding of extra bytes	     */
-	} s;			/*string types				     */
+        struct {
+            H5T_cset_t  cset;       /* character set                        */
+            H5T_str_t   pad;        /* space or null padding of extra bytes */
+        } s;    /* string types */
 
-	struct {
-	    H5R_type_t	rtype;	/*type of reference stored		     */
-            H5T_loc_t   loc;    /* Location of data in buffer		     */
-	} r;			/*reference types			     */
+        struct {
+            H5R_type_t  rtype;      /* type of reference stored             */
+            unsigned    version;    /* version of encoded reference         */
+            hbool_t     opaque;     /* opaque reference type                */
+            H5T_loc_t   loc;        /* location of data in buffer           */
+            H5VL_object_t *file;    /* file VOL pointer (if data is on disk) */
+            const H5T_ref_class_t *cls; /* Pointer to ref class callbacks */
+        } r;    /* reference types */
     } u;
 } H5T_atomic_t;
 
@@ -243,14 +268,6 @@ typedef struct H5T_enum_t {
     char	**name;		/*array of symbol names		     */
 } H5T_enum_t;
 
-/* VL function pointers */
-typedef ssize_t (*H5T_vlen_getlenfunc_t)(const void *vl_addr);
-typedef void * (*H5T_vlen_getptrfunc_t)(void *vl_addr);
-typedef htri_t (*H5T_vlen_isnullfunc_t)(const H5F_t *f, void *vl_addr);
-typedef herr_t (*H5T_vlen_readfunc_t)(H5F_t *f, void *_vl, void *buf, size_t len);
-typedef herr_t (*H5T_vlen_writefunc_t)(H5F_t *f, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size);
-typedef herr_t (*H5T_vlen_setnullfunc_t)(H5F_t *f, void *_vl, void *_bg);
-
 /* VL types */
 typedef enum {
     H5T_VLEN_BADTYPE =  -1, /* invalid VL Type */
@@ -259,20 +276,35 @@ typedef enum {
     H5T_VLEN_MAXTYPE        /* highest type (Invalid as true type) */
 } H5T_vlen_type_t;
 
+/* VL function pointers */
+typedef herr_t (*H5T_vlen_getlen_func_t)(H5VL_object_t *file, const void *vl_addr, size_t *len);
+typedef void * (*H5T_vlen_getptr_func_t)(void *vl_addr);
+typedef herr_t (*H5T_vlen_isnull_func_t)(const H5VL_object_t *file, void *vl_addr, hbool_t *isnull);
+typedef herr_t (*H5T_vlen_setnull_func_t)(H5VL_object_t *file, void *_vl, void *_bg);
+typedef herr_t (*H5T_vlen_read_func_t)(H5VL_object_t *file, void *_vl, void *buf, size_t len);
+typedef herr_t (*H5T_vlen_write_func_t)(H5VL_object_t *file, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size);
+typedef herr_t (*H5T_vlen_delete_func_t)(H5VL_object_t *file, const void *_vl);
+
+/* VL datatype callbacks */
+typedef struct H5T_vlen_class_t {
+    H5T_vlen_getlen_func_t getlen;  /* Function to get VL sequence size (in element units, not bytes) */
+    H5T_vlen_getptr_func_t getptr;  /* Function to get VL sequence pointer */
+    H5T_vlen_isnull_func_t isnull;  /* Function to check if VL value is NIL */
+    H5T_vlen_setnull_func_t setnull;/* Function to set a VL value to NIL */
+    H5T_vlen_read_func_t read;      /* Function to read VL sequence into buffer */
+    H5T_vlen_write_func_t write;    /* Function to write VL sequence from buffer */
+    H5T_vlen_delete_func_t del;     /* Function to delete VL sequence */
+} H5T_vlen_class_t;
+
 /* A VL datatype */
 typedef struct H5T_vlen_t {
     H5T_vlen_type_t     type;   /* Type of VL data in buffer */
     H5T_loc_t		loc;    /* Location of VL data in buffer */
-    H5T_cset_t          cset;   /* For VL string. character set */
-    H5T_str_t           pad;    /* For VL string.  space or null padding of
+    H5T_cset_t          cset;   /* For VL string: character set */
+    H5T_str_t           pad;    /* For VL string: space or null padding of
                                  * extra bytes */
-    H5F_t *f;                   /* File ID (if VL data is on disk) */
-    H5T_vlen_getptrfunc_t getptr;   /* Function to get VL sequence pointer */
-    H5T_vlen_getlenfunc_t getlen;   /* Function to get VL sequence size (in element units, not bytes) */
-    H5T_vlen_isnullfunc_t isnull;   /* Function to check if VL value is NIL */
-    H5T_vlen_readfunc_t read;   /* Function to read VL sequence into buffer */
-    H5T_vlen_writefunc_t write; /* Function to write VL sequence from buffer */
-    H5T_vlen_setnullfunc_t setnull; /* Function to set a VL value to NIL */
+    H5VL_object_t *file;            /* File object (if VL data is on disk) */
+    const H5T_vlen_class_t *cls;    /* Pointer to VL class callbacks */
 } H5T_vlen_t;
 
 /* An opaque datatype */
@@ -304,6 +336,7 @@ typedef struct H5T_shared_t {
     unsigned            version;        /* Version of object header message to encode this object with */
     hbool_t		force_conv;/* Set if this type always needs to be converted and H5T__conv_noop cannot be called */
     struct H5T_t	*parent;/*parent type for derived datatypes	     */
+    H5VL_object_t       *owned_vol_obj; /* Vol object owned by this type (free on close) */
     union {
         H5T_atomic_t	atomic; /* an atomic datatype              */
         H5T_compnd_t	compnd; /* a compound datatype (struct)    */
@@ -371,6 +404,7 @@ H5_DLLVAR size_t H5T_POINTER_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_HVL_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_HOBJREF_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_HDSETREGREF_COMP_ALIGN_g;
+H5_DLLVAR size_t H5T_REF_COMP_ALIGN_g;
 
 /*
  * Alignment information for native types. A value of N indicates that the
@@ -482,6 +516,9 @@ H5_DLL herr_t H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                             size_t bkg_stride, void *buf, void *bkg);
 H5_DLL herr_t H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    size_t nelmts, size_t buf_stride,
+                            size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+                            size_t nelmts, size_t buf_stride,
                             size_t bkg_stride, void *buf, void *bkg);
 H5_DLL herr_t H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                             size_t nelmts, size_t buf_stride,
@@ -1142,12 +1179,15 @@ H5_DLL void H5T__bit_neg(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
 H5_DLL H5T_t * H5T__vlen_create(const H5T_t *base);
-H5_DLL htri_t H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc);
+H5_DLL htri_t H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Array functions */
 H5_DLL H5T_t *H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */]);
 H5_DLL int    H5T__get_array_ndims(const H5T_t *dt);
 H5_DLL int    H5T__get_array_dims(const H5T_t *dt, hsize_t dims[]);
+
+/* Reference functions */
+H5_DLL htri_t H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Compound functions */
 H5_DLL herr_t H5T__insert(H5T_t *parent, const char *name, size_t offset,

@@ -96,6 +96,7 @@ typedef struct {
     hsize_t skip;           /* Number of elements to skip in projected space */
     hsize_t nelem;          /* Number of elements to add to projected space (after skip) */
     uint64_t op_gen;        /* Operation generation for counting elements */
+    hbool_t share_selection; /* Whether span trees in dst_space can be shared with proj_space */
 } H5S_hyper_project_intersect_ud_t;
 
 /* Assert that H5S_MAX_RANK is <= 32 so our trick with using a 32 bit bitmap
@@ -112,6 +113,9 @@ typedef struct {
 static H5S_hyper_span_t *H5S__hyper_new_span(hsize_t low, hsize_t high,
     H5S_hyper_span_info_t *down, H5S_hyper_span_t *next);
 static H5S_hyper_span_info_t *H5S__hyper_new_span_info(unsigned rank);
+static H5S_hyper_span_info_t *H5S__hyper_copy_span_helper(
+    H5S_hyper_span_info_t *spans, unsigned rank, unsigned op_info_i,
+    uint64_t op_gen);
 static H5S_hyper_span_info_t *H5S__hyper_copy_span(H5S_hyper_span_info_t *spans,
     unsigned rank);
 static hbool_t H5S__hyper_cmp_spans(const H5S_hyper_span_info_t *span_info1,
@@ -132,7 +136,7 @@ static herr_t H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans,
     H5S_hyper_span_info_t **a_and_b, H5S_hyper_span_info_t **b_not_a);
 static herr_t H5S__hyper_merge_spans(H5S_t *space, H5S_hyper_span_info_t *new_spans);
 static hsize_t H5S__hyper_spans_nelem_helper(H5S_hyper_span_info_t *spans,
-    uint64_t op_gen);
+    unsigned op_info_i, uint64_t op_gen);
 static hsize_t H5S__hyper_spans_nelem(H5S_hyper_span_info_t *spans);
 static herr_t H5S__hyper_add_disjoint_spans(H5S_t *space, H5S_hyper_span_info_t *new_spans);
 static H5S_hyper_span_info_t *H5S__hyper_make_spans(unsigned rank,
@@ -190,6 +194,7 @@ static htri_t H5S__hyper_shape_same(const H5S_t *space1, const H5S_t *space2);
 static htri_t H5S__hyper_intersect_block(const H5S_t *space, const hsize_t *start,
     const hsize_t *end);
 static herr_t H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset);
+static herr_t H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset);
 static herr_t H5S__hyper_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t H5S__hyper_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
 static herr_t H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
@@ -236,6 +241,7 @@ const H5S_select_class_t H5S_sel_hyper[1] = {{
     H5S__hyper_shape_same,
     H5S__hyper_intersect_block,
     H5S__hyper_adjust_u,
+    H5S__hyper_adjust_s,
     H5S__hyper_project_scalar,
     H5S__hyper_project_simple,
     H5S__hyper_iter_init,
@@ -2852,9 +2858,10 @@ done:
  PURPOSE
     Helper routine to copy a hyperslab span tree
  USAGE
-    H5S_hyper_span_info_t * H5S__hyper_copy_span_helper(spans, rank)
+    H5S_hyper_span_info_t * H5S__hyper_copy_span_helper(spans, rank, op_info_i, op_gen)
         H5S_hyper_span_info_t *spans;   IN: Span tree to copy
         unsigned rank;                  IN: Rank of span tree
+        unsigned op_info_i;             IN: Index of op info to use
         uint64_t op_gen;                IN: Operation generation
  RETURNS
     Pointer to the copied span tree on success, NULL on failure
@@ -2867,7 +2874,7 @@ done:
 --------------------------------------------------------------------------*/
 static H5S_hyper_span_info_t *
 H5S__hyper_copy_span_helper(H5S_hyper_span_info_t *spans, unsigned rank,
-    uint64_t op_gen)
+    unsigned op_info_i, uint64_t op_gen)
 {
     H5S_hyper_span_t *span;         /* Hyperslab span */
     H5S_hyper_span_t *new_span;     /* Temporary hyperslab span */
@@ -2881,9 +2888,9 @@ H5S__hyper_copy_span_helper(H5S_hyper_span_info_t *spans, unsigned rank,
     HDassert(spans);
 
     /* Check if the span tree was already copied */
-    if(spans->op_gen == op_gen) {
+    if(spans->op_info[op_info_i].op_gen == op_gen) {
         /* Just return the value of the already copied span tree */
-        ret_value = spans->u.copied;
+        ret_value = spans->op_info[op_info_i].u.copied;
 
         /* Increment the reference count of the span tree */
         ret_value->count++;
@@ -2899,10 +2906,10 @@ H5S__hyper_copy_span_helper(H5S_hyper_span_info_t *spans, unsigned rank,
         ret_value->count = 1;
 
         /* Set the operation generation for the span info, to avoid future copies */
-        spans->op_gen = op_gen;
+        spans->op_info[op_info_i].op_gen = op_gen;
 
         /* Set the 'copied' pointer in the node being copied to the newly allocated node */
-        spans->u.copied = ret_value;
+        spans->op_info[op_info_i].u.copied = ret_value;
 
         /* Copy over the nodes in the span list */
         span = spans->head;
@@ -2920,7 +2927,7 @@ H5S__hyper_copy_span_helper(H5S_hyper_span_info_t *spans, unsigned rank,
 
             /* Recurse to copy the 'down' spans, if there are any */
             if(span->down != NULL) {
-                if(NULL == (new_down = H5S__hyper_copy_span_helper(span->down, rank - 1, op_gen)))
+                if(NULL == (new_down = H5S__hyper_copy_span_helper(span->down, rank - 1, op_info_i, op_gen)))
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy hyperslab spans")
                 new_span->down = new_down;
             } /* end if */
@@ -2976,7 +2983,9 @@ H5S__hyper_copy_span(H5S_hyper_span_info_t *spans, unsigned rank)
     op_gen = H5S__hyper_get_op_gen();
 
     /* Copy the hyperslab span tree */
-    if(NULL == (ret_value = H5S__hyper_copy_span_helper(spans, rank, op_gen)))
+    /* Always use op_info[0] since we own this op_info, so there can be no
+     * simultaneous operations */
+    if(NULL == (ret_value = H5S__hyper_copy_span_helper(spans, rank, 0, op_gen)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy hyperslab span tree")
 
 done:
@@ -3315,8 +3324,9 @@ done:
  PURPOSE
     Helper routine to count the number of blocks in a span tree
  USAGE
-    hsize_t H5S__hyper_span_nblocks_helper(spans)
+    hsize_t H5S__hyper_span_nblocks_helper(spans, op_info_i, op_gen)
         H5S_hyper_span_info_t *spans; IN: Hyperslab span tree to count blocks of
+        unsigned op_info_i; IN: Index of op info to use
         uint64_t op_gen;   IN: Operation generation
  RETURNS
     Number of blocks in span tree on success; negative on failure
@@ -3328,7 +3338,8 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hsize_t
-H5S__hyper_span_nblocks_helper(H5S_hyper_span_info_t *spans, uint64_t op_gen)
+H5S__hyper_span_nblocks_helper(H5S_hyper_span_info_t *spans, unsigned op_info_i,
+    uint64_t op_gen)
 {
     hsize_t ret_value = 0;      /* Return value */
 
@@ -3338,9 +3349,9 @@ H5S__hyper_span_nblocks_helper(H5S_hyper_span_info_t *spans, uint64_t op_gen)
     HDassert(spans);
 
     /* Check if the span tree was already counted */
-    if(spans->op_gen == op_gen)
+    if(spans->op_info[op_info_i].op_gen == op_gen)
         /* Just return the # of blocks in the already counted span tree */
-        ret_value = spans->u.nblocks;
+        ret_value = spans->op_info[op_info_i].u.nblocks;
     else {      /* Count the number of elements in the span tree */
         H5S_hyper_span_t *span;     /* Hyperslab span */
 
@@ -3348,7 +3359,7 @@ H5S__hyper_span_nblocks_helper(H5S_hyper_span_info_t *spans, uint64_t op_gen)
         if(span->down) {
             while(span) {
                 /* If there are down spans, add the total down span blocks */
-                ret_value += H5S__hyper_span_nblocks_helper(span->down, op_gen);
+                ret_value += H5S__hyper_span_nblocks_helper(span->down, op_info_i, op_gen);
 
                 /* Advance to next span */
                 span = span->next;
@@ -3365,10 +3376,10 @@ H5S__hyper_span_nblocks_helper(H5S_hyper_span_info_t *spans, uint64_t op_gen)
         } /* end else */
 
         /* Set the operation generation for this span tree, to avoid re-computing */
-        spans->op_gen = op_gen;
+        spans->op_info[op_info_i].op_gen = op_gen;
 
         /* Hold a copy of the # of blocks */
-        spans->u.nblocks = ret_value;
+        spans->op_info[op_info_i].u.nblocks = ret_value;
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3406,7 +3417,10 @@ H5S__hyper_span_nblocks(H5S_hyper_span_info_t *spans)
         /* Acquire an operation generation value for this operation */
         op_gen = H5S__hyper_get_op_gen();
 
-        ret_value = H5S__hyper_span_nblocks_helper(spans, op_gen);
+        /* Count the blocks */
+        /* Always use op_info[0] since we own this op_info, so there can be no
+         * simultaneous operations */
+        ret_value = H5S__hyper_span_nblocks_helper(spans, 0, op_gen);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3674,7 +3688,7 @@ H5S__hyper_get_version_enc_size(const H5S_t *space, hsize_t block_count, uint32_
                 /* Determine the encoding size */
                 enc2 = H5S__hyper_get_enc_size_real(max2);
 
-                *enc_size = MAX(enc1, enc2);
+                *enc_size = (uint8_t)MAX(enc1, enc2);
             } /* end if */
             else {
                 hsize_t max_size = block_count;
@@ -4250,6 +4264,9 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
 
     /* Decode version */
     UINT32DECODE(pp, version);
+
+    if(version < H5S_HYPER_VERSION_1 || version > H5S_HYPER_VERSION_LATEST)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for hyperslab selection")
 
     if(version >= (uint32_t)H5S_HYPER_VERSION_2) {
         /* Decode flags */
@@ -5946,7 +5963,7 @@ H5S__hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree,
                     /* Check if we've compared the 'stop' span's "down tree" to
                      *      this span's "down tree" already.
                      */
-                    if(tmp_span->down->op_gen != op_gen) {
+                    if(tmp_span->down->op_info[0].op_gen != op_gen) {
                         if(H5S__hyper_cmp_spans(tmp_span->down, stop_span->down))
                             attempt_merge_spans = TRUE;
 
@@ -5954,7 +5971,7 @@ H5S__hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree,
                         /* (Because it wasn't the same as the 'stop' span's down tree
                          *      and we don't need to compare it again)
                          */
-                        tmp_span->down->op_gen = op_gen;
+                        tmp_span->down->op_info[0].op_gen = op_gen;
                     } /* end if */
                 } /* end else */
 
@@ -6159,11 +6176,12 @@ done:
  PURPOSE
     Helper routine to detect intersections in span trees
  USAGE
-    hbool_t H5S__hyper_intersect_block_helper(spans, start, end)
+    hbool_t H5S__hyper_intersect_block_helper(spans, rank, start, end, op_info_i, op_gen)
         H5S_hyper_span_info_t *spans;     IN: First span tree to operate with
         unsigned rank;     IN: Number of dimensions for span tree
         hsize_t *start;    IN: Starting coordinate for block
         hsize_t *end;      IN: Ending coordinate for block
+        unsigned op_info_i;             IN: Index of op info to use
         uint64_t op_gen;   IN: Operation generation
  RETURN
     Non-negative (TRUE/FALSE) on success, can't fail
@@ -6176,7 +6194,8 @@ done:
 --------------------------------------------------------------------------*/
 static hbool_t
 H5S__hyper_intersect_block_helper(H5S_hyper_span_info_t *spans,
-    unsigned rank, const hsize_t *start, const hsize_t *end, uint64_t op_gen)
+    unsigned rank, const hsize_t *start, const hsize_t *end, unsigned op_info_i,
+    uint64_t op_gen)
 {
     hbool_t ret_value = FALSE;      /* Return value */
 
@@ -6188,7 +6207,7 @@ H5S__hyper_intersect_block_helper(H5S_hyper_span_info_t *spans,
     HDassert(end);
 
     /* Check if we've already visited this span tree */
-    if(spans->op_gen != op_gen) {
+    if(spans->op_info[op_info_i].op_gen != op_gen) {
         H5S_hyper_span_t *curr;         /* Pointer to current span in 1st span tree */
         unsigned u;                     /* Local index variable */
 
@@ -6221,7 +6240,7 @@ H5S__hyper_intersect_block_helper(H5S_hyper_span_info_t *spans,
                     /* If there is an intersection in the "down" dimensions,
                      * the span trees overlap.
                      */
-                    if(H5S__hyper_intersect_block_helper(curr->down, rank - 1, start + 1, end + 1, op_gen))
+                    if(H5S__hyper_intersect_block_helper(curr->down, rank - 1, start + 1, end + 1, op_info_i, op_gen))
                         HGOTO_DONE(TRUE)
 
                     /* No intersection in down dimensions, advance to next span */
@@ -6231,7 +6250,7 @@ H5S__hyper_intersect_block_helper(H5S_hyper_span_info_t *spans,
         } /* end while */
 
         /* Set the tree's operation generation */
-        spans->op_gen = op_gen;
+        spans->op_info[op_info_i].op_gen = op_gen;
     } /* end if */
 
     /* Fall through with 'FALSE' return value */
@@ -6267,7 +6286,7 @@ H5S__hyper_intersect_block(const H5S_t *space, const hsize_t *start, const hsize
 {
     htri_t ret_value = FAIL;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(space);
@@ -6363,7 +6382,9 @@ H5S__hyper_intersect_block(const H5S_t *space, const hsize_t *start, const hsize
         op_gen = H5S__hyper_get_op_gen();
 
         /* Perform the span-by-span intersection check */
-        ret_value = H5S__hyper_intersect_block_helper(space->select.sel_info.hslab->span_lst, space->extent.rank, start, end, op_gen);
+        /* Always use op_info[0] since we own this op_info, so there can be no
+         * simultaneous operations */
+        ret_value = H5S__hyper_intersect_block_helper(space->select.sel_info.hslab->span_lst, space->extent.rank, start, end, 0, op_gen);
     } /* end else */
 
 done:
@@ -6377,10 +6398,11 @@ done:
  PURPOSE
     Helper routine to adjust offsets in span trees
  USAGE
-    void H5S__hyper_adjust_u_helper(spans, offset)
+    void H5S__hyper_adjust_u_helper(spans, rank, offset, op_info_i, op_gen)
         H5S_hyper_span_info_t *spans;   IN: Span tree to operate with
         unsigned rank;                  IN: Number of dimensions for span tree
         const hsize_t *offset;          IN: Offset to subtract
+        unsigned op_info_i;             IN: Index of op info to use
         uint64_t op_gen;                IN: Operation generation
  RETURNS
     None
@@ -6393,7 +6415,7 @@ done:
 --------------------------------------------------------------------------*/
 static void
 H5S__hyper_adjust_u_helper(H5S_hyper_span_info_t *spans, unsigned rank,
-    const hsize_t *offset, uint64_t op_gen)
+    const hsize_t *offset, unsigned op_info_i, uint64_t op_gen)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -6402,7 +6424,7 @@ H5S__hyper_adjust_u_helper(H5S_hyper_span_info_t *spans, unsigned rank,
     HDassert(offset);
 
     /* Check if we've already set this span tree */
-    if(spans->op_gen != op_gen) {
+    if(spans->op_info[op_info_i].op_gen != op_gen) {
         H5S_hyper_span_t *span;     /* Pointer to current span in span tree */
         unsigned u;                 /* Local index variable */
 
@@ -6423,14 +6445,14 @@ H5S__hyper_adjust_u_helper(H5S_hyper_span_info_t *spans, unsigned rank,
 
             /* Recursively adjust spans in next dimension down */
             if(span->down != NULL)
-                H5S__hyper_adjust_u_helper(span->down, rank - 1, offset + 1, op_gen);
+                H5S__hyper_adjust_u_helper(span->down, rank - 1, offset + 1, op_info_i, op_gen);
 
             /* Advance to next span in this dimension */
             span = span->next;
         } /* end while */
 
         /* Set the tree's operation generation */
-        spans->op_gen = op_gen;
+        spans->op_info[op_info_i].op_gen = op_gen;
     } /* end if */
 
     FUNC_LEAVE_NOAPI_VOID
@@ -6458,36 +6480,50 @@ H5S__hyper_adjust_u_helper(H5S_hyper_span_info_t *spans, unsigned rank,
 static herr_t
 H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset)
 {
+    hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
+    unsigned u;                         /* Local index variable */
+
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(space);
     HDassert(offset);
 
-    /* Subtract the offset from the "regular" coordinates, if they exist */
-    /* (No need to rebuild the dimension info yet -QAK) */
-    if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES) {
-        unsigned u;                         /* Local index variable */
+    /* Check for an all-zero offset vector */
+    for(u = 0; u < space->extent.rank; u++)
+        if(0 != offset[u]) {
+            non_zero_offset = TRUE;
+            break;
+        } /* end if */
 
-        for(u = 0; u < space->extent.rank; u++) {
-            HDassert(space->select.sel_info.hslab->diminfo.opt[u].start >= offset[u]);
-            space->select.sel_info.hslab->diminfo.opt[u].start -= offset[u];
+    /* Only perform operation if the offset is non-zero */
+    if(non_zero_offset) {
+        /* Subtract the offset from the "regular" coordinates, if they exist */
+        /* (No need to rebuild the dimension info yet -QAK) */
+        if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES) {
+            for(u = 0; u < space->extent.rank; u++) {
+                HDassert(space->select.sel_info.hslab->diminfo.opt[u].start >= offset[u]);
+                space->select.sel_info.hslab->diminfo.opt[u].start -= offset[u];
 
-            /* Adjust the low & high bounds */
-            HDassert(space->select.sel_info.hslab->diminfo.low_bounds[u] >= offset[u]);
-            space->select.sel_info.hslab->diminfo.low_bounds[u] -= offset[u];
-            space->select.sel_info.hslab->diminfo.high_bounds[u] -= offset[u];
-        } /* end for */
-    } /* end if */
+                /* Adjust the low & high bounds */
+                HDassert(space->select.sel_info.hslab->diminfo.low_bounds[u] >= offset[u]);
+                space->select.sel_info.hslab->diminfo.low_bounds[u] -= offset[u];
+                space->select.sel_info.hslab->diminfo.high_bounds[u] -= offset[u];
+            } /* end for */
+        } /* end if */
 
-    /* Subtract the offset from the span tree coordinates, if they exist */
-    if(space->select.sel_info.hslab->span_lst) {
-        uint64_t op_gen;            /* Operation generation value */
+        /* Subtract the offset from the span tree coordinates, if they exist */
+        if(space->select.sel_info.hslab->span_lst) {
+            uint64_t op_gen;            /* Operation generation value */
 
-        /* Acquire an operation generation value for this operation */
-        op_gen = H5S__hyper_get_op_gen();
+            /* Acquire an operation generation value for this operation */
+            op_gen = H5S__hyper_get_op_gen();
 
-        H5S__hyper_adjust_u_helper(space->select.sel_info.hslab->span_lst, space->extent.rank, offset, op_gen);
+            /* Perform adjustment */
+            /* Always use op_info[0] since we own this op_info, so there can be no
+             * simultaneous operations */
+            H5S__hyper_adjust_u_helper(space->select.sel_info.hslab->span_lst, space->extent.rank, offset, 0, op_gen);
+        } /* end if */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -6897,10 +6933,11 @@ done:
  PURPOSE
     Helper routine to adjust offsets in span trees
  USAGE
-    void H5S__hyper_adjust_s_helper(spans, offset)
+    void H5S__hyper_adjust_s_helper(spans, rank, offset, op_info_i, op_gen)
         H5S_hyper_span_info_t *spans;   IN: Span tree to operate with
         unsigned rank;                  IN: Number of dimensions for span tree
         const hssize_t *offset;         IN: Offset to subtract
+        unsigned op_info_i;             IN: Index of op info to use
         uint64_t op_gen;                IN: Operation generation
  RETURNS
     None
@@ -6913,7 +6950,7 @@ done:
 --------------------------------------------------------------------------*/
 static void
 H5S__hyper_adjust_s_helper(H5S_hyper_span_info_t *spans, unsigned rank,
-    const hssize_t *offset, uint64_t op_gen)
+    const hssize_t *offset, unsigned op_info_i, uint64_t op_gen)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -6922,7 +6959,7 @@ H5S__hyper_adjust_s_helper(H5S_hyper_span_info_t *spans, unsigned rank,
     HDassert(offset);
 
     /* Check if we've already set this span tree */
-    if(spans->op_gen != op_gen) {
+    if(spans->op_info[op_info_i].op_gen != op_gen) {
         H5S_hyper_span_t *span;     /* Pointer to current span in span tree */
         unsigned u;                 /* Local index variable */
 
@@ -6943,14 +6980,14 @@ H5S__hyper_adjust_s_helper(H5S_hyper_span_info_t *spans, unsigned rank,
 
             /* Recursively adjust spans in next dimension down */
             if(span->down != NULL)
-                H5S__hyper_adjust_s_helper(span->down, rank - 1, offset + 1, op_gen);
+                H5S__hyper_adjust_s_helper(span->down, rank - 1, offset + 1, op_info_i, op_gen);
 
             /* Advance to next span in this dimension */
             span = span->next;
         } /* end while */
 
         /* Set the tree's operation generation */
-        spans->op_gen = op_gen;
+        spans->op_info[op_info_i].op_gen = op_gen;
     } /* end if */
 
     FUNC_LEAVE_NOAPI_VOID
@@ -6959,11 +6996,11 @@ H5S__hyper_adjust_s_helper(H5S_hyper_span_info_t *spans, unsigned rank,
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_hyper_adjust_s
+    H5S__hyper_adjust_s
  PURPOSE
     Adjust a hyperslab selection by subtracting an offset
  USAGE
-    herr_t H5S_hyper_adjust_s(space,offset)
+    herr_t H5S__hyper_adjust_s(space,offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
         const hssize_t *offset; IN: Offset to subtract
  RETURNS
@@ -6975,8 +7012,8 @@ H5S__hyper_adjust_s_helper(H5S_hyper_span_info_t *spans, unsigned rank,
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
-H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset)
+static herr_t
+H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset)
 {
     hbool_t non_zero_offset = FALSE;    /* Whether any offset is non-zero */
     unsigned u;                         /* Local index variable */
@@ -7018,54 +7055,16 @@ H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset)
             /* Acquire an operation generation value for this operation */
             op_gen = H5S__hyper_get_op_gen();
 
-            H5S__hyper_adjust_s_helper(space->select.sel_info.hslab->span_lst, space->extent.rank, offset, op_gen);
+            /* Perform the adjustment */
+            /* Always use op_info[0] since we own this op_info, so there can be no
+             * simultaneous operations */
+            H5S__hyper_adjust_s_helper(space->select.sel_info.hslab->span_lst, space->extent.rank, offset, 0, op_gen);
         } /* end if */
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_hyper_adjust_s() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Shyper_adjust_s
- PURPOSE
-    Adjust a hyperslab selection by subtracting an offset
- USAGE
-    herr_t H5Shyper_adjust_s(space_id,offset)
-        hid_t space_id;         IN: ID of the dataspace to adjust
-        const hssize_t *offset; IN: Offset to subtract
- RETURNS
-    Non-negative on success, negative on failure
- DESCRIPTION
-    Moves a hyperslab selection by subtracting an offset from it.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-herr_t
-H5Shyper_adjust_s(hid_t space_id, const hssize_t *offset)
-{
-    H5S_t *space;
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Hs", space_id, offset);
-
-    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace")
-    if(H5S_GET_SELECT_TYPE(space) != H5S_SEL_HYPERSLABS)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection")
-    if(NULL == offset)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "NULL offset pointer")
-
-    if(H5S_hyper_adjust_s(space, offset) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Shyper_adjust_s() */
+} /* end H5S__hyper_adjust_s() */
 
 
 /*--------------------------------------------------------------------------
@@ -7111,7 +7110,7 @@ H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset)
         } /* end for */
 
         /* Call the 'adjust' routine */
-        if(H5S_hyper_adjust_s(space, space->select.offset) < 0)
+        if(H5S__hyper_adjust_s(space, space->select.offset) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
 
         /* Zero out the selection offset */
@@ -7159,7 +7158,7 @@ H5S_hyper_denormalize_offset(H5S_t *space, const hssize_t *old_offset)
     HDassert(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS);
 
     /* Call the 'adjust' routine */
-    if(H5S_hyper_adjust_s(space, old_offset) < 0)
+    if(H5S__hyper_adjust_s(space, old_offset) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
 
     /* Copy the selection offset over */
@@ -8281,8 +8280,9 @@ done:
  PURPOSE
     Count the number of elements in a span tree
  USAGE
-    hsize_t H5S__hyper_spans_nelem_helper(spans, op_gen)
+    hsize_t H5S__hyper_spans_nelem_helper(spans, op_info_i, op_gen)
         const H5S_hyper_span_info_t *spans; IN: Hyperslan span tree to count elements of
+        unsigned op_info_i;             IN: Index of op info to use
         uint64_t op_gen;                IN: Operation generation
  RETURNS
     Number of elements in span tree on success; negative on failure
@@ -8294,7 +8294,8 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hsize_t
-H5S__hyper_spans_nelem_helper(H5S_hyper_span_info_t *spans, uint64_t op_gen)
+H5S__hyper_spans_nelem_helper(H5S_hyper_span_info_t *spans, unsigned op_info_i,
+    uint64_t op_gen)
 {
     hsize_t ret_value = 0;          /* Return value */
 
@@ -8304,9 +8305,9 @@ H5S__hyper_spans_nelem_helper(H5S_hyper_span_info_t *spans, uint64_t op_gen)
     HDassert(spans);
 
     /* Check if the span tree was already counted */
-    if(spans->op_gen == op_gen)
+    if(spans->op_info[op_info_i].op_gen == op_gen)
         /* Just return the # of elements in the already counted span tree */
-        ret_value = spans->u.nelmts;
+        ret_value = spans->op_info[op_info_i].u.nelmts;
     else {      /* Count the number of elements in the span tree */
         const H5S_hyper_span_t *span;     /* Hyperslab span */
 
@@ -8328,7 +8329,7 @@ H5S__hyper_spans_nelem_helper(H5S_hyper_span_info_t *spans, uint64_t op_gen)
                 nelmts = (span->high - span->low) + 1;
 
                 /* Multiply the size of this span by the total down span elements */
-                ret_value += nelmts * H5S__hyper_spans_nelem_helper(span->down, op_gen);
+                ret_value += nelmts * H5S__hyper_spans_nelem_helper(span->down, op_info_i, op_gen);
 
                 /* Advance to next span */
                 span = span->next;
@@ -8336,10 +8337,10 @@ H5S__hyper_spans_nelem_helper(H5S_hyper_span_info_t *spans, uint64_t op_gen)
         } /* end else */
 
         /* Set the operation generation for this span tree, to avoid re-computing */
-        spans->op_gen = op_gen;
+        spans->op_info[op_info_i].op_gen = op_gen;
 
         /* Hold a copy of the # of elements */
-        spans->u.nelmts = ret_value;
+        spans->op_info[op_info_i].u.nelmts = ret_value;
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8378,7 +8379,9 @@ H5S__hyper_spans_nelem(H5S_hyper_span_info_t *spans)
     op_gen = H5S__hyper_get_op_gen();
 
     /* Count the number of elements in the span tree */
-    ret_value = H5S__hyper_spans_nelem_helper(spans, op_gen);
+    /* Always use op_info[0] since we own this op_info, so there can be no
+     * simultaneous operations */
+    ret_value = H5S__hyper_spans_nelem_helper(spans, 0, op_gen);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_spans_nelem() */
@@ -8808,10 +8811,8 @@ H5S__hyper_update_diminfo(H5S_t *space, H5S_seloper_t op,
     (It can be recovered with regular selection)
  USAGE
     herr_t H5S__hyper_rebuild_helper(space)
-        const H5S_hyper_span_t *span;   IN: Portion of span tree to check
-        H5S_hyper_dim_t span_slab[];    OUT: Rebuilt section of hyperslab description
-        unsigned rank;                  IN: Current dimension to work on
-        uint64_t op_gen;                IN: Operation generation
+        const H5S_hyper_span_t *spans;  IN: Portion of span tree to check
+        H5S_hyper_dim_t span_slab_info[]; OUT: Rebuilt section of hyperslab description
  RETURNS
     TRUE/FALSE for hyperslab selection rebuilt
  DESCRIPTION
@@ -10833,6 +10834,7 @@ done:
 --------------------------------------------------------------------------*/
 static herr_t
 H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata) {
+    H5S_hyper_span_info_t *copied_span_info = NULL; /* Temporary span info pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -10852,15 +10854,15 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata) {
                     /* If we will run out of elements to skip in this span,
                      * advance to the first not fully skipped span and break
                      * out of this loop (start moving downwards) */
-                    if(udata->skip < H5S__hyper_spans_nelem_helper(udata->ds_span[udata->depth]->down, udata->op_gen)
+                    if(udata->skip < H5S__hyper_spans_nelem_helper(udata->ds_span[udata->depth]->down, 0, udata->op_gen)
                             * (udata->ds_span[udata->depth]->high - udata->ds_low[udata->depth] + 1)) {
-                        udata->ds_low[udata->depth] += udata->skip / udata->ds_span[udata->depth]->down->u.nelmts;
-                        udata->skip %= udata->ds_span[udata->depth]->down->u.nelmts;
+                        udata->ds_low[udata->depth] += udata->skip / udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
+                        udata->skip %= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
                         break;
                     } /* end if */
 
                     /* Skip over this entire span */
-                    udata->skip -= udata->ds_span[udata->depth]->down->u.nelmts
+                    udata->skip -= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts
                             * (udata->ds_span[udata->depth]->high - udata->ds_low[udata->depth] + 1);
                 } /* end if */
             } /* end if */
@@ -10919,15 +10921,15 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata) {
                     /* If we will run out of elements to skip in this span,
                      * advance to the first not fully skipped span and
                      * continue down */
-                    if(udata->skip < H5S__hyper_spans_nelem_helper(udata->ds_span[udata->depth]->down, udata->op_gen)
+                    if(udata->skip < H5S__hyper_spans_nelem_helper(udata->ds_span[udata->depth]->down, 0, udata->op_gen)
                             * (udata->ds_span[udata->depth]->high - udata->ds_low[udata->depth] + 1)) {
-                        udata->ds_low[udata->depth] += udata->skip / udata->ds_span[udata->depth]->down->u.nelmts;
-                        udata->skip %= udata->ds_span[udata->depth]->down->u.nelmts;
+                        udata->ds_low[udata->depth] += udata->skip / udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
+                        udata->skip %= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
                         break;
                     } /* end if */
 
                     /* Skip over this entire span */
-                    udata->skip -= udata->ds_span[udata->depth]->down->u.nelmts
+                    udata->skip -= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts
                             * (udata->ds_span[udata->depth]->high - udata->ds_low[udata->depth] + 1);
 
                     /* Advance to next span */
@@ -10972,27 +10974,59 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata) {
                  * any complete spans, advance to the first not fully added
                  * span, and break out of this loop (start moving downwards)
                  */
-                if(udata->nelem < H5S__hyper_spans_nelem_helper(udata->ds_span[udata->depth]->down, udata->op_gen)
+                if(udata->nelem < H5S__hyper_spans_nelem_helper(udata->ds_span[udata->depth]->down, 0, udata->op_gen)
                         * (udata->ds_span[udata->depth]->high - udata->ds_low[udata->depth] + 1)) {
-                    if(udata->nelem >= udata->ds_span[udata->depth]->down->u.nelmts) {
-                        if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
-                                udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
-                                udata->ds_low[udata->depth] + (udata->nelem / udata->ds_span[udata->depth]->down->u.nelmts) - 1,
-                                udata->ds_span[udata->depth]->down) < 0)
-                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-                        udata->ds_low[udata->depth] += udata->nelem / udata->ds_span[udata->depth]->down->u.nelmts;
-                        udata->nelem %= udata->ds_span[udata->depth]->down->u.nelmts;
+                    if(udata->nelem >= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts) {
+                        if(udata->share_selection) {
+                            if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
+                                    udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
+                                    udata->ds_low[udata->depth] + (udata->nelem / udata->ds_span[udata->depth]->down->op_info[0].u.nelmts) - 1,
+                                    udata->ds_span[udata->depth]->down) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
+                        } /* end if */
+                        else {
+                            /* If we're not sharing the destination space's
+                             * spans, we must copy it first (then release it
+                             * afterwards) */
+                            if(NULL == (copied_span_info = H5S__hyper_copy_span_helper(udata->ds_span[udata->depth]->down, udata->ds_rank - udata->depth, 1, udata->op_gen)))
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination spans")
+                            if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
+                                    udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
+                                    udata->ds_low[udata->depth] + (udata->nelem / udata->ds_span[udata->depth]->down->op_info[0].u.nelmts) - 1,
+                                    copied_span_info) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
+                            H5S__hyper_free_span_info(copied_span_info);
+                            copied_span_info = NULL;
+                        } /* end else */
+                        udata->ds_low[udata->depth] += udata->nelem / udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
+                        udata->nelem %= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
                     } /* end if */
                     break;
                 } /* end if */
 
                 /* Append span tree for entire span */
-                if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
+                if(udata->share_selection) {
+                    if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
                             udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
                             udata->ds_span[udata->depth]->high,
                             udata->ds_span[udata->depth]->down) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-                udata->nelem -= udata->ds_span[udata->depth]->down->u.nelmts
+                } /* end if */
+                else {
+                    /* If we're not sharing the destination space's
+                     * spans, we must copy it first (then release it
+                     * afterwards) */
+                    if(NULL == (copied_span_info = H5S__hyper_copy_span_helper(udata->ds_span[udata->depth]->down, udata->ds_rank - udata->depth, 1, udata->op_gen)))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination spans")
+                    if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
+                            udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
+                            udata->ds_span[udata->depth]->high,
+                            copied_span_info) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
+                    H5S__hyper_free_span_info(copied_span_info);
+                    copied_span_info = NULL;
+                } /* end else */
+                udata->nelem -= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts
                         * (udata->ds_span[udata->depth]->high - udata->ds_low[udata->depth] + 1);
             } /* end if */
         } /* end if */
@@ -11063,27 +11097,59 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata) {
                  * span and continue down
                  */
                 HDassert(udata->ds_low[udata->depth] <= udata->ds_span[udata->depth]->high);
-                if(udata->nelem < H5S__hyper_spans_nelem_helper(udata->ds_span[udata->depth]->down, udata->op_gen)
+                if(udata->nelem < H5S__hyper_spans_nelem_helper(udata->ds_span[udata->depth]->down, 0, udata->op_gen)
                         * (udata->ds_span[udata->depth]->high - udata->ds_low[udata->depth] + 1)) {
-                    if(udata->nelem >= udata->ds_span[udata->depth]->down->u.nelmts) {
-                        if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
-                                udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
-                                udata->ds_low[udata->depth] + (udata->nelem / udata->ds_span[udata->depth]->down->u.nelmts) - 1,
-                                udata->ds_span[udata->depth]->down) < 0)
-                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-                        udata->ds_low[udata->depth] += udata->nelem / udata->ds_span[udata->depth]->down->u.nelmts;
-                        udata->nelem %= udata->ds_span[udata->depth]->down->u.nelmts;
+                    if(udata->nelem >= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts) {
+                        if(udata->share_selection) {
+                            if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
+                                    udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
+                                    udata->ds_low[udata->depth] + (udata->nelem / udata->ds_span[udata->depth]->down->op_info[0].u.nelmts) - 1,
+                                    udata->ds_span[udata->depth]->down) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
+                        } /* end if */
+                        else {
+                            /* If we're not sharing the destination space's
+                             * spans, we must copy it first (then release it
+                             * afterwards) */
+                            if(NULL == (copied_span_info = H5S__hyper_copy_span_helper(udata->ds_span[udata->depth]->down, udata->ds_rank - udata->depth, 1, udata->op_gen)))
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination spans")
+                            if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
+                                    udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
+                                    udata->ds_low[udata->depth] + (udata->nelem / udata->ds_span[udata->depth]->down->op_info[0].u.nelmts) - 1,
+                                    copied_span_info) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
+                            H5S__hyper_free_span_info(copied_span_info);
+                            copied_span_info = NULL;
+                        } /* end else */
+                        udata->ds_low[udata->depth] += udata->nelem / udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
+                        udata->nelem %= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
                     } /* end if */
                     break;
                 } /* end if */
 
                 /* Append span tree for entire span */
-                if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
+                if(udata->share_selection) {
+                    if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
                             udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
                             udata->ds_span[udata->depth]->high,
                             udata->ds_span[udata->depth]->down) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-                udata->nelem -= udata->ds_span[udata->depth]->down->u.nelmts
+                } /* end if */
+                else {
+                    /* If we're not sharing the destination space's
+                     * spans, we must copy it first (then release it
+                     * afterwards) */
+                    if(NULL == (copied_span_info = H5S__hyper_copy_span_helper(udata->ds_span[udata->depth]->down, udata->ds_rank - udata->depth, 1, udata->op_gen)))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination spans")
+                    if(H5S__hyper_append_span(&udata->ps_span_info[udata->depth],
+                            udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
+                            udata->ds_span[udata->depth]->high,
+                            copied_span_info) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
+                    H5S__hyper_free_span_info(copied_span_info);
+                    copied_span_info = NULL;
+                } /* end else */
+                udata->nelem -= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts
                         * (udata->ds_span[udata->depth]->high - udata->ds_low[udata->depth] + 1);
 
                 /* Advance to next span */
@@ -11128,6 +11194,13 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata) {
     udata->ps_clean_bitmap = 0;
 
 done:
+    /* Cleanup on failure */
+    if(copied_span_info) {
+        HDassert(ret_value < 0);
+        H5S__hyper_free_span_info(copied_span_info);
+        copied_span_info = NULL;
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_proj_int_build_proj() */
 
@@ -11217,7 +11290,7 @@ H5S__hyper_proj_int_iterate(const H5S_hyper_span_info_t *ss_span_info,
                         /* Add skipped elements if there's a pre-gap */
                         if(ss_low < sis_low) {
                             low = sis_low;
-                            H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, udata->op_gen) * (sis_low - ss_low), FAIL);
+                            H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, 0, udata->op_gen) * (sis_low - ss_low), FAIL);
                         } /* end if */
                         else
                             low = ss_low;
@@ -11273,7 +11346,7 @@ H5S__hyper_proj_int_iterate(const H5S_hyper_span_info_t *ss_span_info,
                     if(ss_span->high < sis_low) {
                         /* Add skipped elements */
                         if(ss_span->down)
-                            H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, udata->op_gen) * (ss_span->high - ss_low + 1), FAIL);
+                            H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, 0, udata->op_gen) * (ss_span->high - ss_low + 1), FAIL);
                         else
                             H5S_HYPER_PROJ_INT_ADD_SKIP(udata, ss_span->high - ss_low + 1, FAIL);
 
@@ -11295,10 +11368,10 @@ H5S__hyper_proj_int_iterate(const H5S_hyper_span_info_t *ss_span_info,
             if(ss_span && !((depth == 0) && (u == count - 1))) {
                 /* Count remaining elements in ss_span_info */
                 if(ss_span->down) {
-                    H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, udata->op_gen) * (ss_span->high - ss_low + 1), FAIL);
+                    H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, 0, udata->op_gen) * (ss_span->high - ss_low + 1), FAIL);
                     ss_span = ss_span->next;
                     while(ss_span) {
-                        H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, udata->op_gen) * (ss_span->high - ss_span->low + 1), FAIL);
+                        H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper(ss_span->down, 0, udata->op_gen) * (ss_span->high - ss_span->low + 1), FAIL);
                         ss_span = ss_span->next;
                     } /* end while */
                 } /* end if */
@@ -11356,7 +11429,7 @@ H5S__hyper_proj_int_iterate(const H5S_hyper_span_info_t *ss_span_info,
     } /* end if */
     else if(depth > 0)
         /* Just count skipped elements */
-        H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper((H5S_hyper_span_info_t *)ss_span_info, udata->op_gen) * count, FAIL); /* Casting away const OK -NAF */
+        H5S_HYPER_PROJ_INT_ADD_SKIP(udata, H5S__hyper_spans_nelem_helper((H5S_hyper_span_info_t *)ss_span_info, 0, udata->op_gen) * count, FAIL); /* Casting away const OK -NAF */
 
     /* Clean up if we are done */
     if(depth == 0) {
@@ -11391,11 +11464,12 @@ done:
     src_intersect_space within the selection of src_space as a selection
     within the selection of dst_space
  USAGE
-    herr_t H5S__hyper_project_intersection(src_space,dst_space,src_intersect_space,proj_space)
+    herr_t H5S__hyper_project_intersection(src_space,dst_space,src_intersect_space,proj_space,share_selection)
         H5S_t *src_space;       IN: Selection that is mapped to dst_space, and intersected with src_intersect_space
         H5S_t *dst_space;       IN: Selection that is mapped to src_space, and which contains the result
         H5S_t *src_intersect_space; IN: Selection whose intersection with src_space is projected to dst_space to obtain the result
         H5S_t *proj_space;      OUT: Will contain the result (intersection of src_intersect_space and src_space projected from src_space to dst_space) after the operation
+        hbool_t share_selection; IN: Whether we are allowed to share structures inside dst_space with proj_space
  RETURNS
     Non-negative on success/Negative on failure.
  DESCRIPTION
@@ -11414,7 +11488,8 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
-    const H5S_t *src_intersect_space, H5S_t *proj_space)
+    const H5S_t *src_intersect_space, H5S_t *proj_space,
+    hbool_t share_selection)
 {
     H5S_hyper_project_intersect_ud_t  udata; /* User data for subroutines */
     const H5S_hyper_span_info_t *ss_span_info;
@@ -11431,7 +11506,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     HDassert(src_intersect_space);
     HDassert(proj_space);
 
-    /* Assert that src_space and src_intersect_space have same extent and there
+    /* Assert that src_space and src_intersect_space have same rank and there
      * are no point selections */
     HDassert(H5S_GET_EXTENT_NDIMS(src_space) == H5S_GET_EXTENT_NDIMS(src_intersect_space));
     HDassert(H5S_GET_SELECT_NPOINTS(src_space) == H5S_GET_SELECT_NPOINTS(dst_space));
@@ -11485,12 +11560,14 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "can't construct span tree for source intersect hyperslab selection")
 
     /* Initialize udata */
+    /* We will use op_info[0] for nelem and op_info[1] for copied spans */
     HDmemset(&udata, 0, sizeof(udata));
     udata.ds_span[0] = ds_span_info->head;
     udata.ds_low[0] = udata.ds_span[0]->low;
     udata.ss_rank = H5S_GET_EXTENT_NDIMS(src_space);
     udata.ds_rank = H5S_GET_EXTENT_NDIMS(dst_space);
     udata.op_gen = H5S__hyper_get_op_gen();
+    udata.share_selection = share_selection;
 
     /* Iterate over selections and build projected span tree */
     if(H5S__hyper_proj_int_iterate(ss_span_info, src_intersect_space->select.sel_info.hslab->span_lst, 1, 0, &udata) < 0)

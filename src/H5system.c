@@ -86,7 +86,11 @@ static hbool_t H5_ntzset = FALSE;
  *    prints an `hsize_t' value as a hex number right justified and
  *    zero filled in an 18-character field.
  *
- *    The conversion `a' refers to an `haddr_t' type.
+ *    The conversion 'a' refers to an haddr_t type.
+ *
+ *    The conversion 't' refers to an htri_t type.
+ *
+ *    The conversion 'k' refers to an H5O_token_t type.
  *
  * Return:  Success:  Number of characters printed
  *
@@ -103,8 +107,7 @@ static hbool_t H5_ntzset = FALSE;
  *      format_templ in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 int
 HDfprintf(FILE *stream, const char *fmt, ...)
 {
@@ -414,6 +417,32 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                     }
                     break;
 
+                case 'k':
+                    {
+                        H5O_token_t token = HDva_arg(ap, H5O_token_t);
+
+                        /* Print the raw token. */
+                        n = fprintf(stream, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X", 
+                                (unsigned char)token.__data[15],
+                                (unsigned char)token.__data[14],
+                                (unsigned char)token.__data[13],
+                                (unsigned char)token.__data[12],
+                                (unsigned char)token.__data[11],
+                                (unsigned char)token.__data[10],
+                                (unsigned char)token.__data[9],
+                                (unsigned char)token.__data[8],
+                                (unsigned char)token.__data[7],
+                                (unsigned char)token.__data[6],
+                                (unsigned char)token.__data[5],
+                                (unsigned char)token.__data[4],
+                                (unsigned char)token.__data[3],
+                                (unsigned char)token.__data[2],
+                                (unsigned char)token.__data[1],
+                                (unsigned char)token.__data[0]
+                                );
+                    }
+                    break;
+
                 default:
                     HDfputs(format_templ, stream);
                     n = (int)HDstrlen(format_templ);
@@ -430,7 +459,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     HDva_end(ap);
     return nout;
 } /* end HDfprintf() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------

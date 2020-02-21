@@ -132,13 +132,21 @@
 ./config/intel-flags
 ./config/linux-gnu
 ./config/linux-gnuaout
+./config/linux-gnueabihf
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/lt_vers.am
 ./config/Makefile.am.blank
+./config/netbsd
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
+
+#warnings files for both autotools and CMake
+./config/gnu-warnings-general
+./config/gnu-warnings-developer-general
+./config/gnu-warnings-no-developer-general
+./config/intel-warnings-general
 
 ./config/site-specific/BlankForm
 
@@ -167,8 +175,10 @@
 ./examples/h5_select.c
 ./examples/h5_attribute.c
 ./examples/h5_mount.c
-./examples/h5_reference.c
-./examples/h5_ref2reg.c
+./examples/h5_ref_compat.c
+./examples/h5_ref_extern.c
+./examples/h5_reference_deprec.c
+./examples/h5_ref2reg_deprec.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
 ./examples/h5_vds.c
@@ -745,6 +755,7 @@
 ./src/H5Ipublic.h
 ./src/H5Itest.c
 ./src/H5L.c
+./src/H5Ldeprec.c
 ./src/H5Lexternal.c
 ./src/H5Lmodule.h
 ./src/H5Lpkg.h
@@ -782,6 +793,7 @@
 ./src/H5Ochunk.c
 ./src/H5Ocont.c
 ./src/H5Ocopy.c
+./src/H5Ocopy_ref.c
 ./src/H5Odbg.c
 ./src/H5Odeprec.c
 ./src/H5Odrvinfo.c
@@ -911,6 +923,7 @@
 ./src/H5Tprecis.c
 ./src/H5Tprivate.h
 ./src/H5Tpublic.h
+./src/H5Tref.c
 ./src/H5Tstrpad.c
 ./src/H5Tvisit.c
 ./src/H5Tvlen.c
@@ -925,12 +938,15 @@
 ./src/H5VLnative.c
 ./src/H5VLnative.h
 ./src/H5VLnative_attr.c
+./src/H5VLnative_blob.c
 ./src/H5VLnative_dataset.c
 ./src/H5VLnative_datatype.c
 ./src/H5VLnative_file.c
 ./src/H5VLnative_group.c
 ./src/H5VLnative_link.c
+./src/H5VLnative_introspect.c
 ./src/H5VLnative_object.c
+./src/H5VLnative_token.c
 ./src/H5VLnative_private.h
 ./src/H5VLpassthru.c
 ./src/H5VLpassthru.h
@@ -1106,6 +1122,7 @@
 ./test/null_vol_connector.h
 ./test/ohdr.c
 ./test/objcopy.c
+./test/objcopy_ref.c
 ./test/page_buffer.c
 ./test/paged_nopersist.h5
 ./test/paged_persist.h5
@@ -1166,6 +1183,7 @@
 ./test/th5s.c
 ./test/th5s.h5
 ./test/theap.c
+./test/thread_id.c
 ./test/tid.c
 ./test/titerate.c
 ./test/tlayouto.h5
@@ -1175,6 +1193,8 @@
 ./test/tmtimeo.h5
 ./test/ttime.c
 ./test/trefer.c
+./test/trefer_deprec.c
+./test/trefer_shutdown.c
 ./test/trefstr.c
 ./test/tselect.c
 ./test/tsizeslheap.h5
@@ -1336,6 +1356,7 @@
 ./testpar/t_prestart.c
 ./testpar/t_span_tree.c
 ./testpar/t_init_term.c
+./testpar/t_2Gio.c
 ./testpar/testpar.h
 ./testpar/testpflush.sh.in
 ./testpar/testphdf5.c
@@ -2164,6 +2185,28 @@
 ./tools/testfiles/zerodim.ddl
 ./tools/testfiles/zerodim.h5
 
+# h5dump new reference validation
+./tools/testfiles/trefer_attrR.ddl
+./tools/testfiles/trefer_compatR.ddl
+./tools/testfiles/trefer_extR.ddl
+./tools/testfiles/trefer_grpR.ddl
+./tools/testfiles/trefer_obj_delR.ddl
+./tools/testfiles/trefer_objR.ddl
+./tools/testfiles/trefer_paramR.ddl
+./tools/testfiles/trefer_reg_1dR.ddl
+./tools/testfiles/trefer_regR.ddl
+# h5dump and h5diff new reference files
+./tools/testfiles/trefer_attr.h5
+./tools/testfiles/trefer_compat.h5
+./tools/testfiles/trefer_ext1.h5
+./tools/testfiles/trefer_ext2.h5
+./tools/testfiles/trefer_grp.h5
+./tools/testfiles/trefer_obj_del.h5
+./tools/testfiles/trefer_obj.h5
+./tools/testfiles/trefer_param.h5
+./tools/testfiles/trefer_reg_1d.h5
+./tools/testfiles/trefer_reg.h5
+
 # Expected output from h5ls tests
 ./tools/testfiles/nosuchfile.ls
 ./tools/testfiles/help-1.ls
@@ -2344,6 +2387,7 @@
 ./tools/test/h5diff/testfiles/h5diff_56.txt
 ./tools/test/h5diff/testfiles/h5diff_57.txt
 ./tools/test/h5diff/testfiles/h5diff_58.txt
+./tools/test/h5diff/testfiles/h5diff_58_ref.txt
 ./tools/test/h5diff/testfiles/h5diff_59.txt
 ./tools/test/h5diff/testfiles/h5diff_60.txt
 ./tools/test/h5diff/testfiles/h5diff_61.txt
@@ -2562,6 +2606,8 @@
 ./tools/test/h5diff/testfiles/h5diff_v1.txt
 ./tools/test/h5diff/testfiles/h5diff_v2.txt
 ./tools/test/h5diff/testfiles/h5diff_v3.txt
+#reg_ref
+./tools/test/h5diff/testfiles/h5diff_reg.txt
 
 #test files for h5repack
 ./tools/test/h5repack/testfiles/README
@@ -2642,6 +2688,8 @@
 ./tools/test/h5repack/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl
 ./tools/test/h5repack/testfiles/4_vds.h5-vds_conti-v.ddl
 ./tools/test/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
+./tools/test/h5repack/testfiles/attrregion.tattrreg.h5.ddl
+./tools/test/h5repack/testfiles/dataregion.tdatareg.h5.ddl
 
 # jam utility and tests
 ./tools/src/h5jam/Makefile.am
@@ -3006,10 +3054,10 @@
 ./java/src/hdf/hdf5lib/callbacks/H5D_append_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5E_walk_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5E_walk_t.java
-./java/src/hdf/hdf5lib/callbacks/H5L_iterate_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5L_iterate_t.java
-./java/src/hdf/hdf5lib/callbacks/H5O_iterate_cb.java
+./java/src/hdf/hdf5lib/callbacks/H5L_iterate_opdata_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5O_iterate_t.java
+./java/src/hdf/hdf5lib/callbacks/H5O_iterate_opdata_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_cls_close_func_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_cls_close_func_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_cls_copy_func_cb.java
@@ -3062,6 +3110,8 @@
 ./java/src/hdf/hdf5lib/structs/H5L_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_hdr_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_info_t.java
+./java/src/hdf/hdf5lib/structs/H5O_native_info_t.java
+./java/src/hdf/hdf5lib/structs/H5O_token_t.java
 
 ./java/src/hdf/hdf5lib/H5.java
 ./java/src/hdf/hdf5lib/HDF5Constants.java
@@ -3308,6 +3358,7 @@
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/jrunTest.cmake
+./config/cmake/jvolTest.cmake
 ./config/cmake/libh5cc.in
 ./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in
@@ -3460,6 +3511,13 @@
 ./config/cmake/scripts/CTestScript.cmake
 ./config/cmake/scripts/HDF5config.cmake
 ./config/cmake/scripts/HDF5options.cmake
+
+# CMake-specific Sanitizer Scripts
+./config/sanitizer/code-coverage.cmake
+./config/sanitizer/sanitizers.cmake
+./config/sanitizer/tools.cmake
+./config/sanitizer/LICENSE
+./config/sanitizer/README.md
 
 # CMake-specific HPC Scripts
 ./config/cmake/scripts/HPC/sbatch-HDF5options.cmake

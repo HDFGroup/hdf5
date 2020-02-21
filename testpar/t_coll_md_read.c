@@ -34,7 +34,6 @@
 
 #define MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS 2
 
-#define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_NO_SEL_PROCESS (mpi_rank == mpi_size - 1)
 #define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DATASET_NAME   "linked_chunk_io_sort_chunk_issue"
 #define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_Y_DIM_SCALE    20000
 #define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE     1
@@ -97,8 +96,8 @@ void test_partial_no_selection_coll_md_read(void)
     dataset_dims = HDmalloc(PARTIAL_NO_SELECTION_DATASET_NDIMS * sizeof(*dataset_dims));
     VRFY((dataset_dims != NULL), "malloc succeeded");
 
-    dataset_dims[0] = PARTIAL_NO_SELECTION_Y_DIM_SCALE * mpi_size;
-    dataset_dims[1] = PARTIAL_NO_SELECTION_X_DIM_SCALE * mpi_size;
+    dataset_dims[0] = (hsize_t)PARTIAL_NO_SELECTION_Y_DIM_SCALE * (hsize_t)mpi_size;
+    dataset_dims[1] = (hsize_t)PARTIAL_NO_SELECTION_X_DIM_SCALE * (hsize_t)mpi_size;
     max_dataset_dims[0] = H5S_UNLIMITED;
     max_dataset_dims[1] = H5S_UNLIMITED;
 
@@ -121,12 +120,12 @@ void test_partial_no_selection_coll_md_read(void)
      *
      * The ranks will write rows across the dataset.
      */
-    start[0] = PARTIAL_NO_SELECTION_Y_DIM_SCALE * mpi_rank;
+    start[0] = (hsize_t)PARTIAL_NO_SELECTION_Y_DIM_SCALE * (hsize_t)mpi_rank;
     start[1] = 0;
     stride[0] = PARTIAL_NO_SELECTION_Y_DIM_SCALE;
     stride[1] = PARTIAL_NO_SELECTION_X_DIM_SCALE;
     count[0] = 1;
-    count[1] = mpi_size;
+    count[1] = (hsize_t)mpi_size;
     block[0] = PARTIAL_NO_SELECTION_Y_DIM_SCALE;
     block[1] = PARTIAL_NO_SELECTION_X_DIM_SCALE;
 
@@ -406,7 +405,7 @@ void test_link_chunk_io_sort_chunk_issue(void)
     dataset_dims = HDmalloc(LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS * sizeof(*dataset_dims));
     VRFY((dataset_dims != NULL), "malloc succeeded");
 
-    dataset_dims[0] = LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE * mpi_size * LINK_CHUNK_IO_SORT_CHUNK_ISSUE_Y_DIM_SCALE;
+    dataset_dims[0] = (hsize_t)LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE * (hsize_t)mpi_size * (hsize_t)LINK_CHUNK_IO_SORT_CHUNK_ISSUE_Y_DIM_SCALE;
     max_dataset_dims[0] = H5S_UNLIMITED;
 
     fspace_id = H5Screate_simple(LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS, dataset_dims, max_dataset_dims);
@@ -429,8 +428,8 @@ void test_link_chunk_io_sort_chunk_issue(void)
      * The ranks will write rows across the dataset.
      */
     stride[0] = LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE;
-    count[0] = (dataset_dims[0] / LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE) / mpi_size;
-    start[0] = count[0] * mpi_rank;
+    count[0] = (dataset_dims[0] / LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE) / (hsize_t)mpi_size;
+    start[0] = count[0] * (hsize_t)mpi_rank;
     block[0] = LINK_CHUNK_IO_SORT_CHUNK_ISSUE_CHUNK_SIZE;
 
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) >= 0), "H5Sselect_hyperslab succeeded");

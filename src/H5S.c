@@ -1357,7 +1357,6 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
 
     /* Check args */
     HDassert(rank <= H5S_MAX_RANK);
-    HDassert(0 == rank || dims);
 
     /* shift out of the previous state to a "simple" dataspace.  */
     if(H5S__extent_release(&space->extent) < 0)
@@ -1378,7 +1377,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
         space->extent.size = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)rank);
 
         /* Copy the dimensions & compute the number of elements in the extent */
-        for(u = 0, nelem = 1; u < space->extent.rank; u++) {
+        for(u = 0, nelem = 1; dims && (u < space->extent.rank); u++) {
             space->extent.size[u] = dims[u];
             nelem *= dims[u];
         } /* end for */
@@ -1390,7 +1389,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
         if(max != NULL)
             H5MM_memcpy(space->extent.max, max, sizeof(hsize_t) * rank);
         else
-            for(u = 0; u < space->extent.rank; u++)
+            for(u = 0; dims && (u < space->extent.rank); u++)
                 space->extent.max[u] = dims[u];
     } /* end else */
 

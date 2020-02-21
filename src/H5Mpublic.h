@@ -40,7 +40,8 @@
 #define H5VL_MAP_PUT            5
 #define H5VL_MAP_GET            6
 #define H5VL_MAP_SPECIFIC       7
-#define H5VL_MAP_CLOSE          8
+#define H5VL_MAP_OPTIONAL       8
+#define H5VL_MAP_CLOSE          9
 
 
 /*******************/

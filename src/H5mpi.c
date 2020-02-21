@@ -22,6 +22,64 @@
 
 
 #ifdef H5_HAVE_PARALLEL
+
+/****************/
+/* Local Macros */
+/****************/
+#define TWO_GIG_LIMIT           (1 << 31)
+#ifndef H5_MAX_MPI_COUNT
+#define H5_MAX_MPI_COUNT        (1 << 30)
+#endif
+
+/*******************/
+/* Local Variables */
+/*******************/
+static hsize_t bigio_count = H5_MAX_MPI_COUNT;
+
+
+/*-------------------------------------------------------------------------
+ * Function:  H5_mpi_set_bigio_count
+ *
+ * Purpose:   Allow us to programatically change the switch point
+ *            when we utilize derived datatypes.  This is of
+ *            particular interest for allowing nightly testing
+ *
+ * Return:    The current/previous value of bigio_count.
+ *
+ * Programmer: Richard Warren,  March 10, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5_mpi_set_bigio_count(hsize_t new_count)
+{
+    hsize_t orig_count = bigio_count;
+
+    if((new_count > 0) && (new_count < (hsize_t)TWO_GIG_LIMIT)) {
+       bigio_count = new_count;
+    }
+    return orig_count;
+} /* end H5_mpi_set_bigio_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:  H5_mpi_get_bigio_count
+ *
+ * Purpose:   Allow other HDF5 library functions to access
+ *            the current value for bigio_count.
+ *
+ * Return:    The current/previous value of bigio_count.
+ *
+ * Programmer: Richard Warren,  October 7, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5_mpi_get_bigio_count(void)
+{
+    return bigio_count;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5_mpi_comm_dup
@@ -391,6 +449,115 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_mpi_info_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_mpio_create_large_type
+ *
+ * Purpose:     Create a large datatype of size larger than what a 32 bit integer
+ *              can hold.
+ *
+ * Return:      Non-negative on success, negative on failure.
+ *
+ *              *new_type    the new datatype created
+ *
+ * Programmer:  Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes,
+    MPI_Datatype old_type, MPI_Datatype *new_type)
+{
+    int           num_big_types;          /* num times the 2G datatype will be repeated */
+    int           remaining_bytes;        /* the number of bytes left that can be held in an int value */
+    hsize_t       leftover;
+    int           block_len[2];
+    int           mpi_code;               /* MPI return code */
+    MPI_Datatype  inner_type, outer_type, leftover_type, type[2];
+    MPI_Aint      disp[2], old_extent;
+    herr_t        ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Calculate how many Big MPI datatypes are needed to represent the buffer */
+    num_big_types = (int)(num_elements/bigio_count);
+    leftover = (hsize_t)num_elements - (hsize_t)num_big_types * bigio_count;
+    H5_CHECKED_ASSIGN(remaining_bytes, int, leftover, hsize_t);
+
+    /* Create a contiguous datatype of size equal to the largest
+     * number that a 32 bit integer can hold x size of old type.
+     * If the displacement is 0, then the type is contiguous, otherwise
+     * use type_hvector to create the type with the displacement provided
+     */
+    if (0 == stride_bytes) {
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)bigio_count, old_type, &inner_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+    } /* end if */
+    else
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)bigio_count, 1, stride_bytes, old_type, &inner_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+
+    /* Create a contiguous datatype of the buffer (minus the remaining < 2GB part)
+     * If a stride is present, use hvector type
+     */
+    if(0 == stride_bytes) {
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(num_big_types, inner_type, &outer_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+    } /* end if */
+    else
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector(num_big_types, 1, stride_bytes, inner_type, &outer_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+
+    MPI_Type_free(&inner_type);
+
+    /* If there is a remaining part create a contiguous/vector datatype and then
+     * use a struct datatype to encapsulate everything.
+     */
+    if(remaining_bytes) {
+        if(stride_bytes == 0) {
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(remaining_bytes, old_type, &leftover_type)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+        } /* end if */
+        else
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_hvector((int)(num_elements - (hsize_t)num_big_types * bigio_count), 1, stride_bytes, old_type, &leftover_type)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+
+        /* As of version 4.0, OpenMPI now turns off MPI-1 API calls by default,
+         * so we're using the MPI-2 version even though we don't need the lb
+         * value.
+         */
+        {
+            MPI_Aint unused_lb_arg;
+            MPI_Type_get_extent(old_type, &unused_lb_arg, &old_extent);
+        }
+
+        /* Set up the arguments for MPI_Type_struct constructor */
+        type[0] = outer_type;
+        type[1] = leftover_type;
+        block_len[0] = 1;
+        block_len[1] = 1;
+        disp[0] = 0;
+        disp[1] = (old_extent + stride_bytes) * num_big_types * (MPI_Aint)bigio_count;
+
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct(2, block_len, disp, type, new_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+
+        MPI_Type_free(&outer_type);
+        MPI_Type_free(&leftover_type);
+    } /* end if */
+    else
+        /* There are no remaining bytes so just set the new type to
+         * the outer type created */
+        *new_type = outer_type;
+
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_mpio_create_large_type() */
+
 
 #endif /* H5_HAVE_PARALLEL */
 

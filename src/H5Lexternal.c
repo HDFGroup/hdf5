@@ -341,7 +341,7 @@ herr_t
 H5Lcreate_external(const char *file_name, const char *obj_name,
     hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;   /* Object token of loc_id */
+    H5VL_object_t    *vol_obj = NULL;   /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     char       *norm_obj_name = NULL;   /* Pointer to normalized current name */
     void       *ext_link_buf = NULL;    /* Buffer to contain external link */
@@ -364,9 +364,16 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     if(!link_name || !*link_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no link name specified")
 
-    /* Check the group access property list */
+    /* Get the link creation property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Get normalized copy of the link target */
     if(NULL == (norm_obj_name = H5G_normalize(obj_name)))
@@ -385,10 +392,6 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     HDstrncpy((char *)p, file_name, buf_size - 1);      /* Name of file containing external link's object */
     p += file_name_len;
     HDstrncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1));       /* External link's object */
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = link_name;

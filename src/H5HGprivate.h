@@ -49,9 +49,13 @@ typedef struct H5HG_heap_t H5HG_heap_t;
 #define H5HG_FREE_SIZE(H)       (H5HG_get_free_size(H))
 #endif /* H5HG_MODULE */
 
+/* Size of encoded global heap ID */
+/* (size of file address + 32-bit integer) */
+#define H5HG_HEAP_ID_SIZE(F)    ((size_t)H5F_SIZEOF_ADDR(F) + H5_SIZEOF_UINT32_T)
+
 
 /* Main global heap routines */
-H5_DLL herr_t H5HG_insert(H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/);
+H5_DLL herr_t H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj/*out*/);
 H5_DLL void *H5HG_read(H5F_t *f, H5HG_t *hobj, void *object, size_t *buf_size/*out*/);
 H5_DLL int H5HG_link(H5F_t *f, const H5HG_t *hobj, int adjust);
 H5_DLL herr_t H5HG_get_obj_size(H5F_t *f, H5HG_t *hobj, size_t *obj_size);

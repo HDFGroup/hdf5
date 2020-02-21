@@ -34,7 +34,7 @@
 #include "H5Oprivate.h"         /* File objects                             */
 #include "H5Pprivate.h"         /* Property lists                           */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
-
+#include "H5VLnative_private.h" /* Native VOL                               */
 
 /****************/
 /* Local Macros */
@@ -49,7 +49,7 @@
 
 /* User data for path traversal routine for getting link info by name */
 typedef struct {
-    H5L_info_t      *linfo;             /* Buffer to return to user */
+    H5L_info2_t      *linfo;            /* Buffer to return to user */
 } H5L_trav_gi_t;
 
 /* User data for path traversal callback to creating a link */
@@ -92,6 +92,7 @@ typedef struct {
     size_t size;                        /* Size of user buffer */
     void *buf;                          /* User buffer */
 } H5L_trav_gv_t;
+
 
 /********************/
 /* Local Prototypes */
@@ -274,10 +275,11 @@ herr_t
 H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5VL_object_t      *vol_obj1            = NULL;         /* Object token of src_id */
+    H5VL_object_t      *vol_obj1            = NULL;         /* Object of src_id */
     H5VL_loc_params_t   loc_params1;
-    H5VL_object_t      *vol_obj2            = NULL;         /* Object token of dst_id */
+    H5VL_object_t      *vol_obj2            = NULL;         /* Object of dst_id */
     H5VL_loc_params_t   loc_params2;
+    H5VL_object_t       tmp_vol_obj;                    /* Temporary object */
     herr_t              ret_value       = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -297,6 +299,9 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* Check the link create property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, 
@@ -329,8 +334,12 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         if (vol_obj1->connector->cls->value != vol_obj2->connector->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL connectors and can't be linked")
 
+    /* Construct a temporary source VOL object */
+    tmp_vol_obj.data = (vol_obj1 ? vol_obj1->data : NULL);
+    tmp_vol_obj.connector = (vol_obj1 ? vol_obj1->connector : vol_obj2->connector);
+
     /* Move the link */
-    if(H5VL_link_move(vol_obj1, &loc_params1, vol_obj2, &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_link_move(&tmp_vol_obj, &loc_params1, vol_obj2, &loc_params2, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
 
 done:
@@ -356,11 +365,11 @@ herr_t
 H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5VL_object_t      *vol_obj1            = NULL;         /* Object token of src_id */
+    H5VL_object_t      *vol_obj1            = NULL;         /* Object of src_id */
     H5VL_loc_params_t   loc_params1;
-    H5VL_object_t      *vol_obj2            = NULL;         /* Object token of dst_id */
+    H5VL_object_t      *vol_obj2            = NULL;         /* Object of dst_id */
     H5VL_loc_params_t   loc_params2;
-    H5VL_object_t       tmp_vol_obj;                    /* Temporary object token of */
+    H5VL_object_t       tmp_vol_obj;                    /* Temporary object */
     herr_t              ret_value       = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -377,14 +386,17 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
+    /* Check the link create property list */
+    if(H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
+
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, 
             ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id), TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
-
-    /* Check the link create property list */
-    if(H5P_DEFAULT == lcpl_id)
-        lcpl_id = H5P_LINK_CREATE_DEFAULT;
 
     /* Set location paramter for source object */
     loc_params1.type                            = H5VL_OBJECT_BY_NAME;
@@ -447,7 +459,7 @@ herr_t
 H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name,
     hid_t lcpl_id, hid_t lapl_id)
 {
-    H5VL_object_t      *vol_obj         = NULL;         /* object token of loc_id */
+    H5VL_object_t      *vol_obj         = NULL;         /* object of loc_id */
     H5VL_loc_params_t   loc_params;
     herr_t              ret_value   = SUCCEED;      /* Return value */
 
@@ -468,9 +480,16 @@ H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
-    /* Check the group access property list */
+    /* Get the link creation property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
+
+    /* Verify access property list and set up collective metadata if appropriate */
+    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Set location fields */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -481,10 +500,6 @@ H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name
     /* get the location object */
     if(NULL == (vol_obj = (H5VL_object_t *)H5VL_vol_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
     /* Create the link */
     if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, vol_obj, &loc_params, lcpl_id, lapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, link_target) < 0)
@@ -515,9 +530,9 @@ herr_t
 H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5VL_object_t      *vol_obj1 = NULL;        /* Object token of cur_loc_id */
-    H5VL_object_t      *vol_obj2 = NULL;        /* Object token of new_loc_id */
-    H5VL_object_t       tmp_vol_obj;            /* Temporary object token of */
+    H5VL_object_t      *vol_obj1 = NULL;        /* Object of cur_loc_id */
+    H5VL_object_t      *vol_obj2 = NULL;        /* Object of new_loc_id */
+    H5VL_object_t       tmp_vol_obj;            /* Temporary object */
     H5VL_loc_params_t   loc_params1;
     H5VL_loc_params_t   loc_params2;
     herr_t              ret_value = SUCCEED;    /* Return value */
@@ -543,6 +558,9 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     /* Check the link create property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, cur_loc_id, TRUE) < 0)
@@ -614,7 +632,7 @@ herr_t
 H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     const void *udata, size_t udata_size, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;   /* Object token of loc_id */
+    H5VL_object_t    *vol_obj = NULL;   /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -630,9 +648,12 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     if(!udata && udata_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "udata cannot be NULL if udata_size is non-zero")
 
-    /* Check the group access property list */
+    /* Get the link creation property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
@@ -676,7 +697,7 @@ done:
 herr_t
 H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5VL_object_t  *vol_obj         = NULL;         /* Object token of loc_id */
+    H5VL_object_t  *vol_obj         = NULL;         /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -733,7 +754,7 @@ herr_t
 H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t    *vol_obj = NULL;        /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -796,7 +817,7 @@ herr_t
 H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t    *vol_obj = NULL;        /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -852,7 +873,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, void *buf/*out*/, size_t size,
     hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t    *vol_obj = NULL;        /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -908,7 +929,7 @@ done:
 htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5VL_object_t      *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t      *vol_obj = NULL;        /* object of loc_id */
     H5VL_loc_params_t   loc_params;
     htri_t      ret_value = FAIL;           /* Return value */
 
@@ -945,13 +966,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_info
+ * Function:	H5Lget_info2
  *
- * Purpose:	Gets metadata for a link.
+ * Purpose:	    Gets metadata for a link.
  *
- * Return:	Success:	Non-negative with information in LINFO
- *
- * 		Failure:	Negative
+ * Return:	    Success:    Non-negative with information in LINFO
+ *              Failure:    Negative
  *
  * Programmer:	James Laird
  *              Wednesday, June 21, 2006
@@ -959,12 +979,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
+H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo /*out*/,
     hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t       *vol_obj = NULL;        /* object of loc_id */
+    H5VL_loc_params_t   loc_params;
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
@@ -992,17 +1012,17 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Lget_info() */
+} /* end H5Lget_info2() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Lget_info_by_idx
+ * Function:	H5Lget_info_by_idx2
  *
- * Purpose:	Gets metadata for a link, according to the order within an
+ * Purpose:	    Gets metadata for a link, according to the order within an
  *              index.
  *
- * Return:	Success:	Non-negative with information in LINFO
- * 		Failure:	Negative
+ * Return:	    Success:    Non-negative with information in LINFO
+ * 	            Failure:    Negative
  *
  * Programmer:	Quincey Koziol
  *              Monday, November  6, 2006
@@ -1010,13 +1030,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
+H5Lget_info_by_idx2(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
-    H5L_info_t *linfo /*out*/, hid_t lapl_id)
+    H5L_info2_t *linfo /*out*/, hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5VL_object_t       *vol_obj = NULL;        /* object of loc_id */
+    H5VL_loc_params_t   loc_params;
+    herr_t              ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, linfo,
@@ -1052,7 +1072,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Lget_info_by_idx() */
+} /* end H5Lget_info_by_idx2() */
 
 
 /*-------------------------------------------------------------------------
@@ -1095,6 +1115,10 @@ H5Lregister(const H5L_class_t *cls)
      */
     if(cls->version > H5L_LINK_CLASS_T_VERS)
       HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5L_class_t version number")
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    if(cls->version < H5L_LINK_CLASS_T_VERS)
+      HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "deprecated H5L_class_t version number (%d) and library built without deprecated symbol support", cls->version)
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     if(cls->id < H5L_TYPE_UD_MIN || cls->id > H5L_TYPE_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid link identification number")
@@ -1209,7 +1233,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id)
 {
-    H5VL_object_t    *vol_obj = NULL;        /* object token of loc_id */
+    H5VL_object_t    *vol_obj = NULL;        /* object of loc_id */
     H5VL_loc_params_t loc_params;
     ssize_t ret_value = -1;          /* Return value */
 
@@ -1252,7 +1276,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Literate
+ * Function:    H5Literate2
  *
  * Purpose:     Iterates over links in a group, with user callback routine,
  *              according to the order within an index.
@@ -1270,10 +1294,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Literate(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
-    hsize_t *idx_p, H5L_iterate_t op, void *op_data)
+H5Literate2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
+    hsize_t *idx_p, H5L_iterate2_t op, void *op_data)
 {
-    H5VL_object_t       *vol_obj        = NULL;     /* Object token of loc_id */
+    H5VL_object_t       *vol_obj        = NULL;     /* Object of loc_id */
     H5VL_loc_params_t   loc_params;
     H5I_type_t          id_type;                /* Type of ID */
     herr_t              ret_value;              /* Return value */
@@ -1301,16 +1325,17 @@ H5Literate(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     loc_params.obj_type = H5I_get_type(group_id);
 
     /* Iterate over the links */
-    if((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (unsigned)FALSE, (int)idx_type, (int)order, idx_p, op, op_data)) < 0)
+    if((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (unsigned)FALSE, (int)idx_type, (int)order, idx_p, 
+            op, op_data)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Literate() */
+} /* end H5Literate2() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Literate_by_name
+ * Function:    H5Literate_by_name2
  *
  * Purpose:     Iterates over links in a group, with user callback routine,
  *              according to the order within an index.
@@ -1326,17 +1351,17 @@ done:
  *                          of the operators.
  *
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, November 16, 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Literate_by_name(hid_t loc_id, const char *group_name,
+H5Literate_by_name2(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p,
-    H5L_iterate_t op, void *op_data, hid_t lapl_id)
+    H5L_iterate2_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t      *vol_obj         = NULL;     /* Object token of loc_id */
+    H5VL_object_t      *vol_obj         = NULL;     /* Object of loc_id */
     H5VL_loc_params_t   loc_params;
     herr_t              ret_value;              /* Return value */
 
@@ -1371,7 +1396,8 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* Iterate over the links */
-    if((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, FALSE, idx_type, order, idx_p, op, op_data)) < 0)
+    if((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, FALSE, idx_type, order, idx_p,
+            op, op_data)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1380,7 +1406,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Lvisit
+ * Function:    H5Lvisit2
  *
  * Purpose:     Recursively visit all the links in a group and all
  *              the groups that are linked to from that group.  Links within
@@ -1403,15 +1429,15 @@ done:
  *                          of the operators.
  *
  * Programmer:	Quincey Koziol
- *		November 24 2007
+ *		        November 24 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lvisit(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
-    H5L_iterate_t op, void *op_data)
+H5Lvisit2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
+    H5L_iterate2_t op, void *op_data)
 {
-    H5VL_object_t      *vol_obj         = NULL;     /* Object token of loc_id */
+    H5VL_object_t      *vol_obj         = NULL;     /* Object of loc_id */
     H5VL_loc_params_t   loc_params;
     H5I_type_t          id_type;                /* Type of ID */
     herr_t              ret_value;              /* Return value */
@@ -1439,16 +1465,17 @@ H5Lvisit(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Iterate over the links */
-    if((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, TRUE, idx_type, order, NULL, op, op_data)) < 0)
+    if((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, TRUE, idx_type, order, NULL,
+            op, op_data)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Lvisit() */
+} /* end H5Lvisit2() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Lvisit_by_name
+ * Function:    H5Lvisit_by_name2
  *
  * Purpose:     Recursively visit all the links in a group and all
  *              the groups that are linked to from that group.  Links within
@@ -1470,16 +1497,16 @@ done:
  *                          library, or the negative value returned by one
  *                          of the operators.
  *
- * Programmer:	Quincey Koziol
- *		November 3 2007
+ * Programmer:  Quincey Koziol
+ *              November 3 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-    H5_iter_order_t order, H5L_iterate_t op, void *op_data, hid_t lapl_id)
+H5Lvisit_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+    H5_iter_order_t order, H5L_iterate2_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t      *vol_obj = NULL;         /* Object token of loc_id */
+    H5VL_object_t      *vol_obj = NULL;         /* Object of loc_id */
     H5VL_loc_params_t   loc_params;
     herr_t              ret_value;          /* Return value */
 
@@ -1514,12 +1541,13 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* Visit the links */
-    if((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, TRUE, idx_type, order, NULL, op, op_data)) < 0)
+    if((ret_value = H5VL_link_specific(vol_obj, &loc_params, H5VL_LINK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, TRUE, idx_type, order, NULL,
+            op, op_data)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Lvisit_by_name() */
+} /* end H5Lvisit_by_name2() */
 
 /*
  *-------------------------------------------------------------------------
@@ -1845,8 +1873,8 @@ H5L__link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t H5_ATT
     /* Check for non-default link creation properties */
     if(udata->lc_plist) {
         /* Get character encoding property */
-        if(H5P_get(udata->lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &udata->lnk->cset) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get property value for character encoding")
+        if(H5CX_get_encoding(&udata->lnk->cset) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get 'character set' property")
     } /* end if */
     else
         udata->lnk->cset = H5F_DEFAULT_CSET;   /* Default character encoding for link */
@@ -1882,7 +1910,7 @@ H5L__link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t H5_ATT
              * copy and wipe out grp_loc)
              */
             H5G_name_reset(&temp_path);
-            if(H5O_loc_copy(&temp_oloc, grp_loc->oloc, H5_COPY_DEEP) < 0)
+            if(H5O_loc_copy_deep(&temp_oloc, grp_loc->oloc) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object location")
 
             temp_loc.oloc = &temp_oloc;
@@ -1987,8 +2015,8 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Get intermediate group creation property */
-        if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &crt_intmd_group) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for creating missing groups")
+        if(H5CX_get_intermediate_group(&crt_intmd_group) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get 'create intermediate group' property")
 
         if(crt_intmd_group > 0)
             target_flags |= H5G_CRT_INTMD_GROUP;
@@ -2667,7 +2695,7 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
              * copy and wipe out grp_loc)
              */
             H5G_name_reset(&temp_path);
-            if(H5O_loc_copy(&temp_oloc, grp_loc->oloc, H5_COPY_DEEP) < 0)
+            if(H5O_loc_copy_deep(&temp_oloc, grp_loc->oloc) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object location")
 
             temp_loc.oloc = &temp_oloc;
@@ -2876,7 +2904,7 @@ H5L_move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_lo
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Get intermediate group creation property */
-        if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &crt_intmd_group) < 0)
+        if(H5CX_get_intermediate_group(&crt_intmd_group) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for creating missing groups")
 
         /* Set target flags for source and destination */
@@ -2884,7 +2912,7 @@ H5L_move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_lo
             dst_target_flags |= H5G_CRT_INTMD_GROUP;
 
         /* Get character encoding property */
-        if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &char_encoding) < 0)
+        if(H5CX_get_encoding(&char_encoding) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for character encoding")
     } /* end if */
 
@@ -3123,7 +3151,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L__get_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+H5L__get_info_cb(H5G_loc_t *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
     const H5O_link_t *lnk, H5G_loc_t H5_ATTR_UNUSED *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
@@ -3137,7 +3165,7 @@ H5L__get_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNU
         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
     /* Get information from the link */
-    if(H5G_link_to_info(lnk, udata->linfo) < 0)
+    if(H5G_link_to_info(grp_loc->oloc, lnk, udata->linfo) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info")
 
 done:
@@ -3152,9 +3180,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5L_get_info
  *
- * Purpose:	Returns metadata about a link.
+ * Purpose:	    Returns metadata about a link.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	James Laird
  *              Monday, April 17 2006
@@ -3162,7 +3190,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_get_info(const H5G_loc_t *loc, const char *name, H5L_info_t *linfo/*out*/)
+H5L_get_info(const H5G_loc_t *loc, const char *name, H5L_info2_t *linfo/*out*/)
 {
     H5L_trav_gi_t udata;               /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -3215,7 +3243,7 @@ H5L__get_info_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_A
     lnk_copied = TRUE;
 
     /* Get information from the link */
-    if(H5G_link_to_info(&fnd_lnk, udata->linfo) < 0)
+    if(H5G_link_to_info(obj_loc->oloc, &fnd_lnk, udata->linfo) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info")
 
 done:
@@ -3243,7 +3271,7 @@ done:
  */
 herr_t
 H5L_get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t n, H5L_info_t *linfo /*out*/)
+    H5_iter_order_t order, hsize_t n, H5L_info2_t *linfo /*out*/)
 {
     H5L_trav_gibi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -3496,7 +3524,7 @@ done:
  */
 herr_t
 H5L_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t *idx_p, H5L_iterate_t op, void *op_data)
+    H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op, void *op_data)
 {
     H5G_link_iterate_t  lnk_op;             /* Link operator                    */
     hsize_t             last_lnk;           /* Index of last object looked at   */

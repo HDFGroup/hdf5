@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -16,6 +16,20 @@
 # Intel icc compiler or a derivative.  It is careful not to do anything
 # if the compiler is not Intel; otherwise `cc_flags_set' is set to `yes'
 #
+
+#
+# Prepend `$srcdir/config/intel-` to the filename suffix(es) given as
+# subroutine argument(s), remove comments starting with # and ending
+# at EOL, replace spans of whitespace (including newlines) with spaces,
+# and re-emit the file(s) thus filtered on the standard output stream.
+#
+load_intel_arguments()
+{
+    set -- $(for arg; do
+        sed 's,#.*$,,' $srcdir/config/intel-${arg}
+    done)
+    IFS=' ' echo "$*"
+}
 
 # Get the compiler version in a way that works for icc
 # icc unless a compiler version is already known
@@ -66,7 +80,8 @@ if test "X-icc" = "X-$cc_vendor"; then
 
     # General
     # Default to C99 standard.
-    H5_CFLAGS="$H5_CFLAGS $arch -std=c99 -Wcheck -Wall"
+    H5_CFLAGS="$H5_CFLAGS $arch -std=c99"
+    H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments warnings-general)"
 
     # Production
     PROD_CFLAGS=

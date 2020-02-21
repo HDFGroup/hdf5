@@ -329,7 +329,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
 
     /* The character encoding for the attribute's name, in later versions */
     if(attr->shared->version >= H5O_ATTR_VERSION_3)
-        *p++ = attr->shared->encoding;
+        *p++ = (uint8_t)attr->shared->encoding;
 
     /* Write the name including null terminator */
     H5MM_memcpy(p, attr->shared->name, name_len);
@@ -674,7 +674,7 @@ H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t H5_ATTR_UNUSED *mesg_
     /* Mark datatype as being on disk now.  This step used to be done in a lower level
      * by H5O_dtype_decode.  But it has been moved up.  Not an ideal place, but no better
      * place than here. */
-    if(H5T_set_loc(((H5A_t *)native_src)->shared->dt, file_src, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(((H5A_t *)native_src)->shared->dt, H5F_VOL_OBJ(file_src), H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
 
     if(NULL == (ret_value = H5A__attr_copy_file((H5A_t *)native_src, file_dst, recompute_size, cpy_info)))

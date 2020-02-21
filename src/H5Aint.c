@@ -181,8 +181,9 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type,
     if(NULL == (attr->shared = H5FL_CALLOC(H5A_shared_t)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "can't allocate shared attr structure")
 
-    /* If the creation property list is H5P_DEFAULT, use the default character encoding */
-    if(acpl_id == H5P_DEFAULT)
+    /* If the creation property list is H5P_ATTRIBUTE_CREATE_DEFAULT, use the default character encoding */
+    HDassert(acpl_id != H5P_DEFAULT);
+    if(acpl_id == H5P_ATTRIBUTE_CREATE_DEFAULT)
         attr->shared->encoding = H5F_DEFAULT_CSET;
     else {
         H5P_genplist_t  *ac_plist;      /* ACPL Property list */
@@ -208,7 +209,7 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't get shared datatype info")
 
     /* Mark datatype as being on disk now */
-    if(H5T_set_loc(attr->shared->dt, loc->oloc->file, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(attr->shared->dt, H5F_VOL_OBJ(loc->oloc->file), H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
     /* Set the version for datatype */
@@ -223,7 +224,7 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set version of dataspace")
 
     /* Copy the object header information */
-    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
+    if(H5O_loc_copy_deep(&(attr->oloc), loc->oloc) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
 
     /* Deep copy of the group hierarchy path */
@@ -389,7 +390,7 @@ H5A__open_common(const H5G_loc_t *loc, H5A_t *attr)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release group hier. path")
 
     /* Deep copy of the symbol table entry */
-    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
+    if(H5O_loc_copy_deep(&(attr->oloc), loc->oloc) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
 
     /* Deep copy of the group hier. path */
@@ -908,7 +909,7 @@ H5A__get_type(H5A_t *attr)
      * reopen the type before returning it to the user. Make the type
      * read-only.
      */
-    if (NULL == (dt = H5T_copy(attr->shared->dt, H5T_COPY_REOPEN)))
+    if (NULL == (dt = H5T_copy_reopen(attr->shared->dt)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy datatype")
 
     /* Mark any datatypes as being in memory now */
@@ -2026,7 +2027,7 @@ H5A__set_version(const H5F_t *f, H5A_t *attr)
         version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
     /* Upgrade to the version indicated by the file's low bound if higher */
-    version = MAX(version, (uint8_t)H5O_attr_ver_bounds[H5F_LOW_BOUND(f)]);
+    version = (uint8_t)MAX(version, (uint8_t)H5O_attr_ver_bounds[H5F_LOW_BOUND(f)]);
 
     /* Version bounds check */
     if(version > H5O_attr_ver_bounds[H5F_HIGH_BOUND(f)])
@@ -2062,7 +2063,7 @@ done:
  */
 H5A_t *
 H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_size,
-    H5O_copy_t *cpy_info)
+    H5O_copy_t H5_ATTR_NDEBUG_UNUSED *cpy_info)
 {
     H5A_t      *attr_dst = NULL;        /* Destination attribute */
     hid_t       tid_src = -1;           /* Datatype ID for source datatype */
@@ -2115,7 +2116,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "cannot copy datatype")
 
     /* Set the location of the destination datatype */
-    if(H5T_set_loc(attr_dst->shared->dt, file_dst, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(attr_dst->shared->dt, H5F_VOL_OBJ(file_dst), H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "cannot mark datatype on disk")
 
     if(!H5T_is_named(attr_src->shared->dt)) {
@@ -2270,7 +2271,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
 
             H5MM_memcpy(attr_dst->shared->data, buf, attr_dst->shared->data_size);
 
-            if(H5D_vlen_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
+            if(H5T_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
         }  /* end if */
         else {
@@ -2401,17 +2402,9 @@ H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
 
         /* Check for expanding references */
         if(cpy_info->expand_ref) {
-            size_t ref_count;
-            size_t dst_dt_size;         /* Destination datatype size */
-
-            /* Determine size of the destination datatype */
-            if(0 == (dst_dt_size = H5T_get_size(attr_dst->shared->dt)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-            /* Determine # of reference elements to copy */
-            ref_count = attr_dst->shared->data_size / dst_dt_size;
-
             /* Copy objects referenced in source buffer to destination file and set destination elements */
-            if(H5O_copy_expand_ref(file_src, attr_dst->shared->data, file_dst, attr_dst->shared->data, ref_count, H5T_get_ref_type(attr_dst->shared->dt), cpy_info) < 0)
+            if(H5O_copy_expand_ref(file_src, H5I_INVALID_HID, attr_src->shared->dt,
+                attr_src->shared->data, attr_src->shared->data_size, file_dst, attr_dst->shared->data, cpy_info) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
         } /* end if */
         else

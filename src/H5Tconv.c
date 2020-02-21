@@ -30,7 +30,6 @@
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -1019,6 +1018,9 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
 /* Declare a free list to manage pieces of array data */
 H5FL_BLK_DEFINE_STATIC(array_seq);
 
+/* Declare a free list to manage pieces of reference data */
+H5FL_BLK_DEFINE_STATIC(ref_seq);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T__conv_noop
@@ -1846,7 +1848,7 @@ H5T_conv_struct_free(H5T_conv_struct_t *priv)
 
     for(i = 0; i < priv->src_nmembs; i++)
         if(src2dst[i] >= 0) {
-            int status;
+            int H5_ATTR_NDEBUG_UNUSED status;
 
             status = H5I_dec_ref(src_memb_id[i]);
             HDassert(status >= 0);
@@ -3020,17 +3022,16 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t     noop_conv = FALSE;      /* Flag to indicate a noop conversion */
     hbool_t     write_to_file = FALSE;  /* Flag to indicate writing to file */
     htri_t      parent_is_vlen;         /* Flag to indicate parent is vlen datatyp */
+    size_t	bg_seq_len = 0;         /* The number of elements in the background sequence */
     hid_t   	tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
     H5T_t	*src = NULL;		/*source datatype		     */
     H5T_t	*dst = NULL;		/*destination datatype		     */
-    H5HG_t	bg_hobjid, parent_hobjid;
     uint8_t	*s = NULL;		/*source buffer			*/
     uint8_t	*d = NULL;		/*destination buffer		*/
     uint8_t	*b = NULL;		/*background buffer		*/
     ssize_t	s_stride, d_stride;	/*src and dst strides		*/
     ssize_t	b_stride;	        /*bkg stride			*/
     size_t      safe;                   /*how many elements are safe to process in each pass */
-    size_t	bg_seq_len = 0;
     size_t	src_base_size, dst_base_size;/*source & destination base size*/
     void	*conv_buf = NULL;     	/*temporary conversion buffer 	     */
     size_t	conv_buf_size = 0;  	/*size of conversion buffer in bytes */
@@ -3055,13 +3056,13 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_VLEN != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_VLEN datatype")
-            if(H5T_VLEN != dst->shared->type) 
+            if(H5T_VLEN != dst->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_VLEN datatype")
             if(H5T_VLEN_STRING == src->shared->u.vlen.type && H5T_VLEN_STRING == dst->shared->u.vlen.type) {
                 if((H5T_CSET_ASCII == src->shared->u.vlen.cset && H5T_CSET_UTF8 == dst->shared->u.vlen.cset) 
-                    || (H5T_CSET_ASCII == dst->shared->u.vlen.cset && H5T_CSET_UTF8 == src->shared->u.vlen.cset))
+                        || (H5T_CSET_ASCII == dst->shared->u.vlen.cset && H5T_CSET_UTF8 == src->shared->u.vlen.cset))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "The library doesn't convert between strings of ASCII and UTF")
-            }
+            } /* end if */
 
             /* Variable-length types don't need a background buffer */
             cdata->need_bkg = H5T_BKG_NO;
@@ -3131,7 +3132,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
 
             /* Set flags to indicate we are writing to or reading from the file */
-            if(dst->shared->u.vlen.f != NULL)
+            if(dst->shared->u.vlen.file != NULL)
                 write_to_file = TRUE;
 
             /* Set the flag for nested VL case */
@@ -3179,25 +3180,27 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 } /* end else */
 
                 for(elmtno = 0; elmtno < safe; elmtno++) {
+                    hbool_t is_nil;      /* Whether sequence is "nil" */
+
                     /* Check for "nil" source sequence */
-                    if((*(src->shared->u.vlen.isnull))(src->shared->u.vlen.f, s)) {
+                    if((*(src->shared->u.vlen.cls->isnull))(src->shared->u.vlen.file, s, &is_nil) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check if VL data is 'nil'")
+                    else if(is_nil) {
                         /* Write "nil" sequence to destination location */
-                        if((*(dst->shared->u.vlen.setnull))(dst->shared->u.vlen.f, d, b) < 0)
+                        if((*(dst->shared->u.vlen.cls->setnull))(dst->shared->u.vlen.file, d, b) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't set VL data to 'nil'")
-                    } /* end if */
+                    } /* end else-if */
                     else {
-                        ssize_t sseq_len;   /* (signed) The number of elements in the current sequence*/
-                        size_t 	seq_len;    /* The number of elements in the current sequence*/
+                        size_t 	seq_len;    /* The number of elements in the current sequence */
 
                         /* Get length of element sequences */
-                        if((sseq_len = (*(src->shared->u.vlen.getlen))(s)) < 0)
-                            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect length")
-                        seq_len = (size_t)sseq_len;
+                        if((*(src->shared->u.vlen.cls->getlen))(src->shared->u.vlen.file, s, &seq_len) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "bad sequence length")
 
                         /* If we are reading from memory and there is no conversion, just get the pointer to sequence */
                         if(write_to_file && noop_conv) {
                             /* Get direct pointer to sequence */
-                            if(NULL == (conv_buf = (*(src->shared->u.vlen.getptr))(s)))
+                            if(NULL == (conv_buf = (*(src->shared->u.vlen.cls->getptr))(s)))
                                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid source pointer")
                         } /* end if */
                         else {
@@ -3213,17 +3216,17 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 conv_buf_size = ((1 / H5T_VLEN_MIN_CONF_BUF_SIZE) + 1) * H5T_VLEN_MIN_CONF_BUF_SIZE;
                                 if(NULL == (conv_buf = H5FL_BLK_CALLOC(vlen_seq, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
-			    }
+			    } /* end if */
                             else if(conv_buf_size < MAX(src_size, dst_size)) {
                                 /* Only allocate conversion buffer in H5T_VLEN_MIN_CONF_BUF_SIZE increments */
                                 conv_buf_size = ((MAX(src_size, dst_size) / H5T_VLEN_MIN_CONF_BUF_SIZE) + 1) * H5T_VLEN_MIN_CONF_BUF_SIZE;
                                 if(NULL == (conv_buf = H5FL_BLK_REALLOC(vlen_seq, conv_buf, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
                                 HDmemset(conv_buf, 0, conv_buf_size);
-                            } /* end if */
+                            } /* end else-if */
 
                             /* Read in VL sequence */
-                            if((*(src->shared->u.vlen.read))(src->shared->u.vlen.f, s, conv_buf, src_size) < 0)
+                            if((*(src->shared->u.vlen.cls->read))(src->shared->u.vlen.file, s, conv_buf, src_size) < 0)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL data")
                         } /* end else */
 
@@ -3241,9 +3244,14 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             /* If we are writing and there is a nested VL type, read
                              * the sequence into the background buffer */
                             if(nested) {
-                                const uint8_t *tmp = b;
+                                /* Sanity check */
+                                HDassert(write_to_file);
 
-                                UINT32DECODE(tmp, bg_seq_len);
+                                /* Get length of background element sequence */
+                                if((*(dst->shared->u.vlen.cls->getlen))(dst->shared->u.vlen.file, b, &bg_seq_len) < 0)
+                                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "bad sequence length")
+
+                                /* Read sequence if length > 0 */
                                 if(bg_seq_len > 0) {
                                     if(tmp_buf_size < (bg_seq_len * MAX(src_base_size, dst_base_size))) {
                                         tmp_buf_size = (bg_seq_len * MAX(src_base_size, dst_base_size));
@@ -3251,10 +3259,10 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
                                         HDmemset(tmp_buf, 0, tmp_buf_size);
                                     } /* end if */
-                                    H5F_addr_decode(dst->shared->u.vlen.f, &tmp, &(bg_hobjid.addr));
-                                    UINT32DECODE(tmp, bg_hobjid.idx);
-                                    if(NULL == H5HG_read(dst->shared->u.vlen.f, &bg_hobjid, tmp_buf, NULL))
-                                        HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL sequence into background buffer")
+
+                                    /* Read in background VL sequence */
+                                    if((*(dst->shared->u.vlen.cls->read))(dst->shared->u.vlen.file, b, tmp_buf, bg_seq_len * dst_base_size) < 0)
+                                        HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL data")
                                 } /* end if */
 
                                 /* If the sequence gets shorter, pad out the original sequence with zeros */
@@ -3268,26 +3276,23 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         } /* end if */
 
                         /* Write sequence to destination location */
-                        if((*(dst->shared->u.vlen.write))(dst->shared->u.vlen.f, &vl_alloc_info, d, conv_buf, b, seq_len, dst_base_size) < 0)
+                        if((*(dst->shared->u.vlen.cls->write))(dst->shared->u.vlen.file, &vl_alloc_info, d, conv_buf, b, seq_len, dst_base_size) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data")
 
                         if(!noop_conv) {
                             /* For nested VL case, free leftover heap objects from the deeper level if the length of new data elements is shorter than the old data elements.*/
                             if(nested && seq_len < bg_seq_len) {
-                                size_t parent_seq_len;
                                 const uint8_t *tmp;
                                 size_t u;
 
-                                /* TMP_P is reset each time in the loop because DST_BASE_SIZE may include some data in addition to VL info. - SLU */
-                                for(u = seq_len; u < bg_seq_len; u++) {
-                                    tmp = (uint8_t *)tmp_buf + u * dst_base_size;
-                                    UINT32DECODE(tmp, parent_seq_len);
-                                    if(parent_seq_len > 0) {
-                                        H5F_addr_decode(dst->shared->u.vlen.f, &tmp, &(parent_hobjid.addr));
-                                        UINT32DECODE(tmp, parent_hobjid.idx);
-                                        if(H5HG_remove(dst->shared->u.vlen.f, &parent_hobjid) < 0)
-                                            HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object")
-                                    } /* end if */
+                                /* Sanity check */
+                                HDassert(write_to_file);
+
+                                tmp = (uint8_t *)tmp_buf + seq_len * dst_base_size;
+                                for(u = seq_len; u < bg_seq_len; u++, tmp += dst_base_size) {
+                                    /* Delete sequence in destination location */
+                                    if((*(dst->shared->u.vlen.cls->del))(dst->shared->u.vlen.file, tmp) < 0)
+                                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove heap object")
                                 } /* end for */
                             } /* end if */
                         } /* end if */
@@ -3473,6 +3478,207 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__conv_array() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T__conv_ref
+ *
+ * Purpose: Converts between reference datatypes in memory and on disk.
+ *      This is a soft conversion function.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+    size_t buf_stride, size_t bkg_stride, void *buf, void *bkg)
+{
+    H5T_t   *src = NULL;        /* source datatype                      */
+    H5T_t   *dst = NULL;        /* destination datatype                 */
+    uint8_t *s = NULL;          /* source buffer                        */
+    uint8_t *d = NULL;          /* destination buffer                   */
+    uint8_t *b = NULL;          /* background buffer                    */
+    ssize_t s_stride, d_stride; /* src and dst strides                  */
+    ssize_t b_stride;           /* bkg stride                           */
+    size_t  safe;               /* how many elements are safe to process in each pass */
+    void    *conv_buf = NULL;   /* temporary conversion buffer          */
+    size_t  conv_buf_size = 0;  /* size of conversion buffer in bytes   */
+    size_t  elmtno;             /* element number counter               */
+    herr_t ret_value = SUCCEED; /* return value                         */
+
+    FUNC_ENTER_PACKAGE
+
+    switch(cdata->command) {
+        case H5T_CONV_INIT:
+            /*
+             * First, determine if this conversion function applies to the
+             * conversion path SRC_ID-->DST_ID.  If not, return failure;
+             * otherwise initialize the `priv' field of `cdata' with
+             * information that remains (almost) constant for this
+             * conversion path.
+             */
+            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
+            if(H5T_REFERENCE != src->shared->type)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_REFERENCE datatype")
+            if(H5T_REFERENCE != dst->shared->type)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_REFERENCE datatype")
+            /* Only allow for source reference that is not an opaque type, destination must be opaque */
+            if(!dst->shared->u.atomic.u.r.opaque)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not an H5T_STD_REF datatype")
+
+            /* Reference types don't need a background buffer */
+            cdata->need_bkg = H5T_BKG_NO;
+            break;
+
+        case H5T_CONV_FREE:
+            break;
+
+        case H5T_CONV_CONV:
+        {
+            /*
+             * Conversion.
+             */
+            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+            HDassert(src->shared->u.atomic.u.r.cls);
+
+            /* Initialize source & destination strides */
+            if(buf_stride) {
+                HDassert(buf_stride >= src->shared->size);
+                HDassert(buf_stride >= dst->shared->size);
+                H5_CHECK_OVERFLOW(buf_stride, size_t, ssize_t);
+                s_stride = d_stride = (ssize_t)buf_stride;
+            } /* end if */
+            else {
+                H5_CHECK_OVERFLOW(src->shared->size, size_t, ssize_t);
+                H5_CHECK_OVERFLOW(dst->shared->size, size_t, ssize_t);
+                s_stride = (ssize_t)src->shared->size;
+                d_stride = (ssize_t)dst->shared->size;
+            } /* end else */
+            if(bkg) {
+                if(bkg_stride)
+                    b_stride = (ssize_t)bkg_stride;
+                else
+                    b_stride = d_stride;
+            } /* end if */
+            else
+                b_stride = 0;
+
+            /* The outer loop of the type conversion macro, controlling which */
+            /* direction the buffer is walked */
+            while(nelmts > 0) {
+                /* Check if we need to go backwards through the buffer */
+                if(d_stride > s_stride) {
+                    /* Sanity check */
+                    HDassert(s_stride > 0);
+                    HDassert(d_stride > 0);
+                    HDassert(b_stride >= 0);
+
+                    /* Compute the number of "safe" destination elements at */
+                    /* the end of the buffer (Those which don't overlap with */
+                    /* any source elements at the beginning of the buffer) */
+                    safe = nelmts - (((nelmts * (size_t)s_stride) + ((size_t)d_stride - 1)) / (size_t)d_stride);
+
+                    /* If we're down to the last few elements, just wrap up */
+                    /* with a "real" reverse copy */
+                    if(safe < 2) {
+                        s = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
+                        d = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
+                        b = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
+                        s_stride = -s_stride;
+                        d_stride = -d_stride;
+                        b_stride = -b_stride;
+
+                        safe = nelmts;
+                    } /* end if */
+                    else {
+                        s = (uint8_t *)buf + (nelmts - safe) * (size_t)s_stride;
+                        d = (uint8_t *)buf + (nelmts - safe) * (size_t)d_stride;
+                        b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
+                    } /* end else */
+                } /* end if */
+                else {
+                    /* Single forward pass over all data */
+                    s = d = (uint8_t *)buf;
+                    b = (uint8_t *)bkg;
+                    safe = nelmts;
+                } /* end else */
+
+                for(elmtno = 0; elmtno < safe; elmtno++) {
+                    size_t buf_size;
+                    hbool_t dst_copy = FALSE;
+                    hbool_t is_nil;     /* Whether reference is "nil" */
+
+                    /* Check for "nil" source reference */
+                    if((*(src->shared->u.atomic.u.r.cls->isnull))(src->shared->u.atomic.u.r.file, s, &is_nil) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check if reference data is 'nil'")
+
+                    if(is_nil) {
+                        /* Write "nil" reference to destination location */
+                        if((*(dst->shared->u.atomic.u.r.cls->setnull))(dst->shared->u.atomic.u.r.file, d, b) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't set reference data to 'nil'")
+                    } /* end else-if */
+                    else {
+                        /* Get size of references */
+                        if(0 == (buf_size = src->shared->u.atomic.u.r.cls->getsize(
+                                src->shared->u.atomic.u.r.file, s, src->shared->size,
+                                dst->shared->u.atomic.u.r.file, &dst_copy)))
+                            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect size")
+
+                        /* Check if conversion buffer is large enough, resize if necessary. */
+                        if(conv_buf_size < buf_size) {
+                            conv_buf_size = buf_size;
+                            if(NULL == (conv_buf = H5FL_BLK_REALLOC(ref_seq, conv_buf, conv_buf_size)))
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                            HDmemset(conv_buf, 0, conv_buf_size);
+                        } /* end if */
+
+                        if(dst_copy && (src->shared->u.atomic.u.r.loc == H5T_LOC_DISK))
+                            H5MM_memcpy(conv_buf, s, buf_size);
+                        else {
+                            /* Read reference */
+                            if(src->shared->u.atomic.u.r.cls->read(
+                                    src->shared->u.atomic.u.r.file, s, src->shared->size,
+                                    dst->shared->u.atomic.u.r.file, conv_buf, buf_size) < 0)
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read reference data")
+                        } /* end else */
+
+                        if(dst_copy && (dst->shared->u.atomic.u.r.loc == H5T_LOC_DISK))
+                            H5MM_memcpy(d, conv_buf, buf_size);
+                        else {
+                            /* Write reference to destination location */
+                            if(dst->shared->u.atomic.u.r.cls->write(
+                                    src->shared->u.atomic.u.r.file, conv_buf, buf_size, src->shared->u.atomic.u.r.rtype,
+                                    dst->shared->u.atomic.u.r.file, d, dst->shared->size, b) < 0)
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write reference data")
+                        } /* end else */
+                    } /* end else */
+
+                    /* Advance pointers */
+                    s += s_stride;
+                    d += d_stride;
+                    b += b_stride;
+                } /* end for */
+
+                /* Decrement number of elements left to convert */
+                nelmts -= safe;
+            } /* end while */
+        } /* end case */
+            break;
+
+        default:    /* Some other command we don't know about yet.*/
+            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command")
+    }   /* end switch */
+
+done:
+    /* Release the conversion buffer (always allocated, except on errors) */
+    if(conv_buf)
+        conv_buf = H5FL_BLK_FREE(ref_seq, conv_buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T__conv_ref() */
 
 
 /*-------------------------------------------------------------------------
@@ -9305,3 +9511,84 @@ H5T_reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_reclaim
+ *
+ * Purpose: Frees the buffers allocated for storing variable-length data
+ *          in memory. Only frees the VL data in the selection defined in the
+ *          dataspace.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_reclaim(hid_t type_id, H5S_t *space, void *buf)
+{
+    H5T_t *type;                /* Datatype */
+    H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
+    H5T_vlen_alloc_info_t vl_alloc_info;   /* VL allocation info */
+    herr_t ret_value = FAIL;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
+    HDassert(space);
+    HDassert(buf);
+
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
+
+    /* Get the allocation info */
+    if(H5CX_get_vlen_alloc_info(&vl_alloc_info) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
+
+    /* Call H5S_select_iterate with args, etc. */
+    dset_op.op_type = H5S_SEL_ITER_OP_LIB;
+    dset_op.u.lib_op = H5T_reclaim_cb;
+
+    ret_value = H5S_select_iterate(buf, type, space, &dset_op, &vl_alloc_info);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5T_reclaim() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_reclaim_cb
+ *
+ * Purpose: Iteration callback to reclaim conversion allocated memory for a
+ *          buffer element.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned H5_ATTR_UNUSED ndim,
+    const hsize_t H5_ATTR_UNUSED *point, void *op_data)
+{
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(elem);
+    HDassert(dt);
+
+    if(dt->shared->type == H5T_REFERENCE) {
+        if(H5T_ref_reclaim(elem, dt) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim ref elements")
+    } else {
+        HDassert(op_data);
+
+        /* Allow vlen reclaim to recurse into that routine */
+        if(H5T_vlen_reclaim(elem, dt, (H5T_vlen_alloc_info_t *)op_data) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim vlen elements")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_reclaim_cb() */

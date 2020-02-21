@@ -208,11 +208,11 @@ test_vlstrings_basic(void)
     } /* end for */
 
     /* Reclaim the read VL data */
-    ret = H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid1,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used,0,"H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -314,8 +314,8 @@ test_vlstrings_special(void)
     } /* end for */
 
     /* Reclaim the read VL data */
-    ret = H5Dvlen_reclaim(tid1, sid1, H5P_DEFAULT, rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid1, sid1, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -537,8 +537,8 @@ test_compact_vlstring(void)
     } /* end for */
 
     /* Reclaim the read VL data */
-    ret = H5Dvlen_reclaim(tid1, sid1, H5P_DEFAULT, rdata);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(tid1, sid1, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Treclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -762,8 +762,8 @@ static void read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, ch
     if(HDstrcmp(data, data_read))
         TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
 
-    ret = H5Dvlen_reclaim(type, space, H5P_DEFAULT, &data_read);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+    ret = H5Treclaim(type, space, H5P_DEFAULT, &data_read);
+    CHECK(ret, FAIL, "H5Treclaim");
 }
 
 /****************************************************************
@@ -861,12 +861,11 @@ static void test_write_same_element(void)
     hid_t   file1, dataset1;
     hid_t   mspace, fspace, dtype;
     hsize_t fdim[] = {SPACE1_DIM1};
-    char *val[SPACE1_DIM1] = {"But", "reuniting", "is a", "great joy"};
+    const char *wdata[SPACE1_DIM1] = {"Parting", "is such a", "sweet", "sorrow."};
+    const char *val[SPACE1_DIM1] = {"But", "reuniting", "is a", "great joy"};
     hsize_t marray[] = {NUMP};
     hsize_t coord[SPACE1_RANK][NUMP];
     herr_t ret;
-
-    char *wdata[SPACE1_DIM1] = {"Parting", "is such a", "sweet", "sorrow."};
 
     file1 = H5Fcreate(DATAFILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file1, FAIL, "H5Fcreate");

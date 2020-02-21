@@ -1,5 +1,6 @@
 JUnit version 4.11
 .testH5Tget_member_type_invalid
+.testH5Treclaim_invalid
 .testH5Tenum_insert_null
 .testH5Tget_offset_invalid
 .testH5Tset_precision_invalid
@@ -68,9 +69,10 @@ JUnit version 4.11
 .testH5Tget_member_index_null
 .testH5Trefresh_invalid
 .testH5Tset_sign_invalid
+.testH5Treclaim_null
 .testH5Tenum_insert_name_null
 
 Time:  XXXX
 
-OK (70 tests)
+OK (72 tests)
 

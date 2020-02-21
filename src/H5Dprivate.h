@@ -170,9 +170,6 @@ H5_DLL herr_t H5D_flush_all(H5F_t *f);
 H5_DLL hid_t H5D_get_create_plist(const H5D_t *dset);
 H5_DLL hid_t H5D_get_access_plist(const H5D_t *dset);
 
-/* Functions that operate on vlen data */
-H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, void *buf);
-
 /* Functions that operate on chunked storage */
 H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
 

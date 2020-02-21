@@ -379,13 +379,13 @@ ceil_log10(unsigned long x)
  *-------------------------------------------------------------------------
  */
 static herr_t
-attribute_stats(iter_t *iter, const H5O_info_t *oi)
+attribute_stats(iter_t *iter, const H5O_info2_t *oi, const H5O_native_info_t *native_oi)
 {
     unsigned     bin;               /* "bin" the number of objects falls in */
 
     /* Update dataset & attribute metadata info */
-    iter->attrs_btree_storage_size += oi->meta_size.attr.index_size;
-    iter->attrs_heap_storage_size += oi->meta_size.attr.heap_size;
+    iter->attrs_btree_storage_size += native_oi->meta_size.attr.index_size;
+    iter->attrs_heap_storage_size += native_oi->meta_size.attr.heap_size;
 
     /* Update small # of attribute count & limits */
     if(oi->num_attrs <= (hsize_t)sattrs_threshold)
@@ -399,7 +399,7 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
         iter->attr_bins = (unsigned long *)HDrealloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
         HDassert(iter->attr_bins);
 
-  /* Initialize counts for intermediate bins */
+        /* Initialize counts for intermediate bins */
         while(iter->attr_nbins < bin)
             iter->attr_bins[iter->attr_nbins++] = 0;
         iter->attr_nbins++;
@@ -440,22 +440,22 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
  *-------------------------------------------------------------------------
  */
 static herr_t
-group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
+group_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_native_info_t *native_oi)
 {
     H5G_info_t ginfo;           /* Group information */
     unsigned bin;               /* "bin" the number of objects falls in */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;
 
     /* Gather statistics about this type of object */
     iter->uniq_groups++;
 
     /* Get object header information */
-    iter->group_ohdr_info.total_size += oi->hdr.space.total;
-    iter->group_ohdr_info.free_size += oi->hdr.space.free;
+    iter->group_ohdr_info.total_size += native_oi->hdr.space.total;
+    iter->group_ohdr_info.free_size += native_oi->hdr.space.free;
 
     /* Get group information */
     if((ret_value = H5Gget_info_by_name(iter->fid, name, &ginfo, H5P_DEFAULT)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Gget_info_by_name() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Gget_info_by_name() failed");
 
     /* Update link stats */
     /* Collect statistics for small groups */
@@ -470,7 +470,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     if((bin + 1) > iter->group_nbins) {
         /* Allocate more storage for info about dataset's datatype */
         if((iter->group_bins = (unsigned long *)HDrealloc(iter->group_bins, (bin + 1) * sizeof(unsigned long))) == NULL)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Drealloc() failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
         /* Initialize counts for intermediate bins */
         while(iter->group_nbins < bin)
@@ -484,12 +484,12 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
         (iter->group_bins[bin])++;
 
     /* Update group metadata info */
-    iter->groups_btree_storage_size += oi->meta_size.obj.index_size;
-    iter->groups_heap_storage_size += oi->meta_size.obj.heap_size;
+    iter->groups_btree_storage_size += native_oi->meta_size.obj.index_size;
+    iter->groups_heap_storage_size += native_oi->meta_size.obj.heap_size;
 
     /* Update attribute metadata info */
-    if((ret_value = attribute_stats(iter, oi)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "attribute_stats failed");
+    if((ret_value = attribute_stats(iter, oi, native_oi)) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "attribute_stats failed");
 
 done:
     return ret_value;
@@ -510,7 +510,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
+dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_native_info_t *native_oi)
 {
     unsigned bin;               /* "bin" the number of objects falls in */
     hid_t did;                  /* Dataset ID */
@@ -527,25 +527,25 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     int num_ext;                /* Number of external files for a dataset */
     int nfltr;                  /* Number of filters for a dataset */
     H5Z_filter_t fltr;          /* Filter identifier */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;
 
     /* Gather statistics about this type of object */
     iter->uniq_dsets++;
 
     /* Get object header information */
-    iter->dset_ohdr_info.total_size += oi->hdr.space.total;
-    iter->dset_ohdr_info.free_size += oi->hdr.space.free;
+    iter->dset_ohdr_info.total_size += native_oi->hdr.space.total;
+    iter->dset_ohdr_info.free_size += native_oi->hdr.space.free;
 
     if((did = H5Dopen2(iter->fid, name, H5P_DEFAULT)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dopen() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Dopen() failed");
 
     /* Update dataset metadata info */
-    iter->datasets_index_storage_size += oi->meta_size.obj.index_size;
-    iter->datasets_heap_storage_size += oi->meta_size.obj.heap_size;
+    iter->datasets_index_storage_size += native_oi->meta_size.obj.index_size;
+    iter->datasets_heap_storage_size += native_oi->meta_size.obj.heap_size;
 
     /* Update attribute metadata info */
-    if((ret_value = attribute_stats(iter, oi)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "attribute_stats() failed");
+    if((ret_value = attribute_stats(iter, oi, native_oi)) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "attribute_stats() failed");
 
     /* Get storage info */
     /* Failure 0 indistinguishable from no-data-stored 0 */
@@ -553,10 +553,10 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Gather layout statistics */
     if((dcpl = H5Dget_create_plist(did)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_create_plist() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Dget_create_plist() failed");
 
     if((lout = H5Pget_layout(dcpl)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_layout() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Pget_layout() failed");
 
     /* Object header's total size for H5D_COMPACT layout includes raw data size */
     /* "storage" also includes H5D_COMPACT raw data size */
@@ -568,7 +568,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Get the number of external files for the dataset */
     if((num_ext = H5Pget_external_count(dcpl)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pget_external_count() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Pget_external_count() failed");
 
     /* Accumulate raw data size accordingly */
     if(num_ext) {
@@ -580,10 +580,10 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Gather dataspace statistics */
     if((sid = H5Dget_space(did)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_space() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Sget_space() failed");
 
     if((ndims = H5Sget_simple_extent_dims(sid, dims, NULL)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Sget_simple_extent_dims() failed");
 
     /* Check for larger rank of dataset */
     if((unsigned)ndims > iter->max_dset_rank)
@@ -606,7 +606,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
         if((bin + 1) > iter->dset_dim_nbins) {
             /* Allocate more storage for info about dataset's datatype */
             if((iter->dset_dim_bins = (unsigned long *)HDrealloc(iter->dset_dim_bins, (bin + 1) * sizeof(unsigned long))) == NULL)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Drealloc() failed");
+                H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
             /* Initialize counts for intermediate bins */
             while(iter->dset_dim_nbins < bin)
@@ -621,11 +621,11 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     } /* end if */
 
     if(H5Sclose(sid) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Sclose() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Sclose() failed");
 
     /* Gather datatype statistics */
     if((tid = H5Dget_type(did)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dget_type() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Dget_type() failed");
 
     type_found = FALSE;
     for(u = 0; u < iter->dset_ntypes; u++)
@@ -644,11 +644,11 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
         /* Allocate more storage for info about dataset's datatype */
         if((iter->dset_type_info = (dtype_info_t *)HDrealloc(iter->dset_type_info, iter->dset_ntypes * sizeof(dtype_info_t))) == NULL)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Drealloc() failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
         /* Initialize information about datatype */
         if((iter->dset_type_info[curr_ntype].tid = H5Tcopy(tid)) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tcopy() failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Tcopy() failed");
         iter->dset_type_info[curr_ntype].count = 1;
         iter->dset_type_info[curr_ntype].named = 0;
 
@@ -661,7 +661,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
         (iter->dset_type_info[u].named)++;
 
     if(H5Tclose(tid) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tclose() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Tclose() failed");
 
     /* Track different filters */
     if((nfltr = H5Pget_nfilters(dcpl)) >= 0) {
@@ -679,10 +679,10 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     } /* endif nfltr */
 
      if(H5Pclose(dcpl) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Pclose() failed");
 
      if(H5Dclose(did) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Dclose() failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Dclose() failed");
 
 done:
      return ret_value;
@@ -702,7 +702,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-datatype_stats(iter_t *iter, const H5O_info_t *oi)
+datatype_stats(iter_t *iter, const H5O_info2_t *oi, const H5O_native_info_t *native_oi)
 {
     herr_t ret_value = SUCCEED;
 
@@ -710,12 +710,12 @@ datatype_stats(iter_t *iter, const H5O_info_t *oi)
     iter->uniq_dtypes++;
 
     /* Get object header information */
-    iter->dtype_ohdr_info.total_size += oi->hdr.space.total;
-    iter->dtype_ohdr_info.free_size += oi->hdr.space.free;
+    iter->dtype_ohdr_info.total_size += native_oi->hdr.space.total;
+    iter->dtype_ohdr_info.free_size += native_oi->hdr.space.free;
 
     /* Update attribute metadata info */
-    if((ret_value = attribute_stats(iter, oi)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "attribute_stats() failed");
+    if((ret_value = attribute_stats(iter, oi, native_oi)) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "attribute_stats() failed");
 done:
      return ret_value;
 }  /* end datatype_stats() */
@@ -735,32 +735,37 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-obj_stats(const char *path, const H5O_info_t *oi, const char *already_visited,
+obj_stats(const char *path, const H5O_info2_t *oi, const char *already_visited,
     void *_iter)
 {
+    H5O_native_info_t native_info;
     iter_t *iter = (iter_t *)_iter;
     herr_t ret_value = SUCCEED;
 
     /* If the object has already been seen then just return */
     if(NULL == already_visited) {
+        /* Retrieve the native info for the object */
+        if(H5Oget_native_info_by_name(iter->fid, path, &native_info, H5O_NATIVE_INFO_ALL, H5P_DEFAULT) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Oget_native_info_by_name failed");
+
         /* Gather some general statistics about the object */
         if(oi->rc > iter->max_links)
             iter->max_links = oi->rc;
 
         switch(oi->type) {
             case H5O_TYPE_GROUP:
-                if(group_stats(iter, path, oi) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "group_stats failed");
+                if(group_stats(iter, path, oi, &native_info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "group_stats failed");
                 break;
 
             case H5O_TYPE_DATASET:
-                if(dataset_stats(iter, path, oi) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "dataset_stats failed");
+                if(dataset_stats(iter, path, oi, &native_info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "dataset_stats failed");
                 break;
 
             case H5O_TYPE_NAMED_DATATYPE:
-                if(datatype_stats(iter, oi) < 0)
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "datatype_stats failed");
+                if(datatype_stats(iter, oi, &native_info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "datatype_stats failed");
                 break;
 
             case H5O_TYPE_MAP:
@@ -792,7 +797,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-lnk_stats(const char H5_ATTR_UNUSED *path, const H5L_info_t *li, void *_iter)
+lnk_stats(const char H5_ATTR_UNUSED *path, const H5L_info2_t *li, void *_iter)
 {
     iter_t *iter = (iter_t *)_iter;
 
@@ -1853,7 +1858,7 @@ main(int argc, const char *argv[])
 {
     iter_t              iter;
     const char         *fname = NULL;
-    hid_t               fid = -1;
+    hid_t               fid = H5I_INVALID_HID;
     H5E_auto2_t         func;
     H5E_auto2_t         tools_func;
     void               *edata;

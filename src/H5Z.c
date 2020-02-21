@@ -215,8 +215,10 @@ herr_t
 H5Zregister(const void *cls)
 {
     const H5Z_class2_t  *cls_real = (const H5Z_class2_t *) cls; /* "Real" class pointer */
-    H5Z_class2_t        cls_new;                  /* Translated class struct */
     herr_t              ret_value = SUCCEED;      /* Return value */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    H5Z_class2_t        cls_new;    /* Translated class struct */
+#endif
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "*x", cls);
@@ -583,7 +585,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
+H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id,
+    void *key H5_ATTR_PARALLEL_USED)
 {
     H5F_t          *f           = (H5F_t *)obj_ptr;     /* File object for operations */
 #ifdef H5_HAVE_PARALLEL

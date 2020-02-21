@@ -4694,7 +4694,7 @@ struct H5C_t {
     uint32_t                    num_last_entries;
 #if H5C_DO_SANITY_CHECKS
     int32_t			slist_len_increase;
-    ssize_t			slist_size_increase;
+    int64_t			slist_size_increase;
 #endif /* H5C_DO_SANITY_CHECKS */
 
     /* Fields for maintaining list of tagged entries */
@@ -4923,7 +4923,7 @@ H5_DLL herr_t H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry);
 
 /* Testing functions */
 #ifdef H5C_TESTING
-H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, haddr_t tag, hbool_t status);
+H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status);
 #endif /* H5C_TESTING */
 
 #endif /* _H5Cpkg_H */

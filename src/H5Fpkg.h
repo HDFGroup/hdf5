@@ -29,9 +29,6 @@
 /* Get package's private header */
 #include "H5Fprivate.h"
 
-/* Other public headers needed by this file */
-#include "H5VLpublic.h"         /* Virtual Object Layer                     */
-
 /* Other private headers needed by this file */
 #include "H5private.h"		    /* Generic Functions                        */
 #include "H5ACprivate.h"        /* Metadata cache                           */
@@ -313,6 +310,7 @@ struct H5F_shared_t {
 
     /* Cached VOL connector ID & info */
     hid_t       vol_id;         /* ID of VOL connector for the container */
+    const H5VL_class_t *vol_cls; /* Pointer to VOL connector class for the container */
     void       *vol_info;       /* Copy of VOL connector info for container */
 
     /* File space allocation information */
@@ -377,6 +375,7 @@ struct H5F_t {
     char	       *open_name;      /* Name used to open file                                       */
     char	       *actual_name;    /* Actual name of the file, after resolving symlinks, etc.      */
     H5F_shared_t       *shared;         /* The shared file info                                         */
+    H5VL_object_t      *vol_obj;        /* VOL object                                                   */
     unsigned	        nopen_objs;     /* Number of open object headers                                */
     H5FO_t             *obj_count;      /* # of time each object is opened through top file structure   */
     hbool_t             id_exists;      /* Whether an ID for this struct exists                         */
@@ -401,6 +400,7 @@ H5FL_EXTERN(H5F_shared_t);
 /******************************/
 
 /* General routines */
+H5_DLL herr_t H5F__post_open(H5F_t *f);
 H5_DLL H5F_t *H5F__reopen(H5F_t *f);
 H5_DLL herr_t H5F__dest(H5F_t *f, hbool_t flush);
 H5_DLL herr_t H5F__flush(H5F_t *f);
@@ -411,8 +411,7 @@ H5_DLL herr_t H5F__format_convert(H5F_t *f);
 H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
-H5_DLL H5F_t *H5F__get_file(void *obj, H5I_type_t type);
-H5_DLL hid_t H5F__get_file_id(H5F_t *file, hbool_t app_ref);
+H5_DLL herr_t H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);

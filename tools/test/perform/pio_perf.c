@@ -80,8 +80,13 @@
 #define PIO_MPI             0x2
 #define PIO_HDF5            0x4
 
+#ifdef STANDALONE 
+#define DBL_EPSILON 2.2204460492503131e-16
+#define H5_DBL_ABS_EQUAL(X,Y)       (fabs((X)-(Y)) < DBL_EPSILON)
+#endif
+
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
+#define MB_PER_SEC(bytes,t) (H5_DBL_ABS_EQUAL((t), 0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE    1
@@ -311,6 +316,7 @@ static void output_report(const char *fmt, ...);
 static void print_indent(register int indent);
 static void usage(const char *prog);
 static void report_parameters(struct options *opts);
+static off_t squareo(off_t);
 
 /*
  * Function:    main
@@ -393,6 +399,12 @@ finish:
     return exit_value;
 }
 
+off_t
+squareo(off_t x)
+{
+    return x * x;
+}
+
 /*
  * Function:    run_test_loop
  * Purpose:     Run the I/O tests. Write the results to OUTPUT.
@@ -428,8 +440,8 @@ run_test_loop(struct options *opts)
     parms.interleaved = opts->interleaved;
     parms.collective = opts->collective;
     parms.dim2d = opts->dim2d;
-    parms.h5_align = opts->h5_alignment;
-    parms.h5_thresh = opts->h5_threshold;
+    parms.h5_align = (hsize_t)opts->h5_alignment;
+    parms.h5_thresh = (hsize_t)opts->h5_threshold;
     parms.h5_use_chunks = opts->h5_use_chunks;
     parms.h5_write_only = opts->h5_write_only;
     parms.verify = opts->verify;
@@ -456,7 +468,7 @@ run_test_loop(struct options *opts)
                 parms.buf_size = buf_size;
 
         if (parms.dim2d){
-            parms.num_bytes = (off_t)pow((double)(opts->num_bpp*parms.num_procs),2);
+            parms.num_bytes = squareo(opts->num_bpp * parms.num_procs);
             if (parms.interleaved)
             output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MB\n",
                 buf_size, opts->blk_size,
@@ -557,6 +569,8 @@ run_test(iotype iot, parameters parms, struct options *opts)
             break;
         case PHDF5:
             output_report("PHDF5 (w/MPI-IO driver)\n");
+            break;
+        default:
             break;
     }
 
@@ -879,7 +893,7 @@ accumulate_minmax_stuff(minmax *mm, int count)
     int i;
     minmax total_mm;
 
-    total_mm.sum = 0.0;
+    total_mm.sum = 0.0f;
     total_mm.max = -DBL_MAX;
     total_mm.min = DBL_MAX;
     total_mm.num = count;
@@ -1155,10 +1169,10 @@ report_parameters(struct options *opts)
     recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs), "\n");
 
     HDfprintf(output, "rank %d: File size=", rank);
-    recover_size_and_print((long long)(pow(opts->num_bpp * opts->min_num_procs,2)
-            * opts->num_dsets), ":");
-    recover_size_and_print((long long)(pow(opts->num_bpp * opts->max_num_procs,2)
-            * opts->num_dsets), "\n");
+    recover_size_and_print((long long)(squareo(opts->num_bpp * opts->min_num_procs)
+                * opts->num_dsets), ":");
+    recover_size_and_print((long long)(squareo(opts->num_bpp * opts->max_num_procs)
+                * opts->num_dsets), "\n");
 
     HDfprintf(output, "rank %d: Transfer buffer size=", rank);
     if(opts->interleaved){
@@ -1322,7 +1336,7 @@ parse_command_line(int argc, char *argv[])
             break;
 #endif  /* 0 */
         case 'B':
-            cl_opts->blk_size = parse_size_directive(opt_arg);
+            cl_opts->blk_size = (size_t)parse_size_directive(opt_arg);
             break;
         case 'c':
             /* Turn on chunked HDF5 dataset creation */
@@ -1423,10 +1437,10 @@ parse_command_line(int argc, char *argv[])
             cl_opts->h5_write_only = TRUE;
             break;
         case 'x':
-            cl_opts->min_xfer_size = parse_size_directive(opt_arg);
+            cl_opts->min_xfer_size = (size_t)parse_size_directive(opt_arg);
             break;
         case 'X':
-            cl_opts->max_xfer_size = parse_size_directive(opt_arg);
+            cl_opts->max_xfer_size = (size_t)parse_size_directive(opt_arg);
             break;
         case 'h':
         case '?':
@@ -1446,13 +1460,13 @@ parse_command_line(int argc, char *argv[])
     }
 
     if (cl_opts->max_xfer_size == 0)
-        cl_opts->max_xfer_size = cl_opts->num_bpp;
+        cl_opts->max_xfer_size = (size_t)cl_opts->num_bpp;
 
     if (cl_opts->min_xfer_size == 0)
-        cl_opts->min_xfer_size = (cl_opts->num_bpp)/2;
+        cl_opts->min_xfer_size = (size_t)(cl_opts->num_bpp)/2;
 
     if (cl_opts->blk_size == 0)
-        cl_opts->blk_size = (cl_opts->num_bpp)/2;
+        cl_opts->blk_size = (size_t)(cl_opts->num_bpp)/2;
 
 
     /* set default if none specified yet */
@@ -1462,15 +1476,15 @@ parse_command_line(int argc, char *argv[])
     /* verify parameters sanity.  Adjust if needed. */
     /* cap xfer_size with bytes per process */
     if (!cl_opts->dim2d) {
-        if (cl_opts->min_xfer_size > cl_opts->num_bpp)
-        cl_opts->min_xfer_size = cl_opts->num_bpp;
-        if (cl_opts->max_xfer_size > cl_opts->num_bpp)
-        cl_opts->max_xfer_size = cl_opts->num_bpp;
+        if (cl_opts->min_xfer_size > (size_t)cl_opts->num_bpp)
+        cl_opts->min_xfer_size = (size_t)cl_opts->num_bpp;
+        if (cl_opts->max_xfer_size > (size_t)cl_opts->num_bpp)
+        cl_opts->max_xfer_size = (size_t)cl_opts->num_bpp;
     }
     if (cl_opts->min_xfer_size > cl_opts->max_xfer_size)
     cl_opts->min_xfer_size = cl_opts->max_xfer_size;
-    if (cl_opts->blk_size > cl_opts->num_bpp )
-        cl_opts->blk_size = cl_opts->num_bpp;
+    if (cl_opts->blk_size > (size_t)cl_opts->num_bpp )
+        cl_opts->blk_size = (size_t)cl_opts->num_bpp;
     /* check range of number of processes */
     if (cl_opts->min_num_procs <= 0)
     cl_opts->min_num_procs = 1;

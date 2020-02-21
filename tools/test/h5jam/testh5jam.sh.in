@@ -474,9 +474,9 @@ UNJAMTEST () {
 #
 
 TOOLTEST_OUTPUT() {
-    if [ "$1" == "JAM" ]; then
+    if [ "$1" = "JAM" ]; then
         TOOLCMD=$JAM_BIN/$JAM
-    elif [ "$1" == "UNJAM" ]; then
+    elif [ "$1" = "UNJAM" ]; then
         TOOLCMD=$JAM_BIN/$UNJAM
     fi
     shift

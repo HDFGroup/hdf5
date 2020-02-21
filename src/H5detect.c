@@ -49,7 +49,7 @@ static const char *FileHeader = "\n\
 /* Disable warning about cast increasing the alignment of the target type,
  * that's _exactly_ what this code is probing.  -QAK
  */
-#pragma GCC diagnostic ignored "-Wcast-align"
+H5_GCC_DIAG_OFF(cast-align)
 
 #if defined(__has_attribute)
 # if __has_attribute(no_sanitize_address)
@@ -107,8 +107,8 @@ typedef struct detected_t {
     unsigned int comp_align;            /* alignment for structure          */
 } detected_t;
 
-/* This structure holds structure alignment for pointers, hvl_t, hobj_ref_t,
- * hdset_reg_ref_t */
+/* This structure holds structure alignment for pointers, vlen and reference
+ * types. */
 typedef struct malign_t {
     const char          *name;
     unsigned int         comp_align;    /* alignment for structure          */
@@ -383,9 +383,8 @@ precision (detected_t *d)
 /*-------------------------------------------------------------------------
  * Function:    DETECT_M
  *
- * Purpose:     This macro takes only miscellaneous structures or pointer
- *              (pointer, hvl_t, hobj_ref_t, hdset_reg_ref_t).  It
- *              constructs the names and decides the alignment in structure.
+ * Purpose:     This macro takes only miscellaneous structures or pointer.
+ *              It constructs the names and decides the alignment in structure.
  *
  * Return:      void
  *-------------------------------------------------------------------------
@@ -761,8 +760,8 @@ H5T__init_native(void)\n\
     H5T_native_order_g = H5T_ORDER_%s;\n", "BE");
     }
 
-    /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */
-    fprintf(rawoutstream, "\n    /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */\n");
+    /* Structure alignment for pointers, vlen and reference types */
+    fprintf(rawoutstream, "\n    /* Structure alignment for pointers, vlen and reference types */\n");
     for(j=0; j<na; j++)
         fprintf(rawoutstream, "    H5T_%s_COMP_ALIGN_g = %lu;\n", misc_align[j].name, (unsigned long)(misc_align[j].comp_align));
 
@@ -1544,11 +1543,12 @@ detect_C99_floats(void)
 static void HDF_NO_UBSAN
 detect_alignments(void)
 {
-    /* Detect structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */
+    /* Detect structure alignment for pointers, vlen and reference types */
     DETECT_M(void *,              POINTER,      m_g[na_g]); na_g++;
     DETECT_M(hvl_t,               HVL,          m_g[na_g]); na_g++;
     DETECT_M(hobj_ref_t,          HOBJREF,      m_g[na_g]); na_g++;
     DETECT_M(hdset_reg_ref_t,     HDSETREGREF,  m_g[na_g]); na_g++;
+    DETECT_M(H5R_ref_t,           REF,          m_g[na_g]); na_g++;
 }
 
 
@@ -1707,3 +1707,4 @@ main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+H5_GCC_DIAG_ON(cast-align)

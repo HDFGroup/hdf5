@@ -1394,7 +1394,7 @@ H5F__super_init(H5F_t *f)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set version of fsinfo")
             f->shared->fs_version = fsinfo.version;
 
-            for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; H5_INC_ENUM(H5F_mem_page_t, ptype))
+            for(ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
                 fsinfo.fs_addr[ptype - 1] = HADDR_UNDEF;
 
             if(H5O_msg_create(&ext_loc, H5O_FSINFO_ID, H5O_MSG_FLAG_DONTSHARE | H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &fsinfo) < 0)

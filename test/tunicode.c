@@ -352,8 +352,8 @@ void test_vl_string(hid_t fid, const char *string)
   VERIFY(HDstrcmp(string, read_buf[0]), 0, "strcmp");
 
   /* Reclaim the read VL data */
-  ret = H5Dvlen_reclaim(type_id, space_id, H5P_DEFAULT, read_buf);
-  CHECK(ret, FAIL, "H5Dvlen_reclaim");
+  ret = H5Treclaim(type_id, space_id, H5P_DEFAULT, read_buf);
+  CHECK(ret, FAIL, "H5Treclaim");
 
   /* Close all */
   ret = H5Dclose(dset_id);

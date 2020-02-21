@@ -105,7 +105,7 @@
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
-#ifdef H5_HAVE_PARALLEL
+#if defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY)
 /* Macro for the duplicated code to test and set properties for a property list */
 #define H5CX_TEST_SET_PROP(PROP_NAME, PROP_FIELD)                             \
 {                                                                             \
@@ -127,7 +127,9 @@
         (*head)->ctx.H5_GLUE(PROP_FIELD,_set) = TRUE;                         \
     } /* end if */                                                            \
 }
+#endif /* defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY) */
 
+#ifdef H5_HAVE_PARALLEL
 /* Macro for the duplicated code to test and set properties for a property list */
 #define H5CX_SET_PROP(PROP_NAME, PROP_FIELD)                                  \
     if((*head)->ctx.H5_GLUE(PROP_FIELD,_set)) {                               \
@@ -180,6 +182,10 @@ typedef struct H5CX_t {
     /* DXPL */
     hid_t dxpl_id;              /* DXPL ID for API operation */
     H5P_genplist_t *dxpl;       /* Dataset Transfer Property List */
+
+    /* LCPL */
+    hid_t lcpl_id;              /* LCPL ID for API operation */
+    H5P_genplist_t *lcpl;       /* Link Creation Property List */
 
     /* LAPL */
     hid_t lapl_id;              /* LAPL ID for API operation */
@@ -278,6 +284,12 @@ typedef struct H5CX_t {
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
 
+    /* Cached LCPL properties */
+    H5T_cset_t encoding;     /* Link name character encoding */
+    hbool_t encoding_valid;  /* Whether link name character encoding is valid */
+    unsigned intermediate_group;       /* Whether to create intermediate groups */
+    hbool_t intermediate_group_valid;  /* Whether create intermediate group flag is valid */
+
     /* Cached LAPL properties */
     size_t nlinks;              /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
     hbool_t nlinks_valid;       /* Whether number of soft / UD links to traverse is valid */
@@ -285,6 +297,8 @@ typedef struct H5CX_t {
     /* Cached DCPL properties */
     hbool_t   do_min_dset_ohdr;   /* Whether to minimize dataset object header */
     hbool_t   do_min_dset_ohdr_valid;   /* Whether minimize dataset object header flag is valid */
+    uint8_t ohdr_flags;  /* Object header flags */
+    hbool_t ohdr_flags_valid;  /* Whether the object headers flags are valid */
 
     /* Cached DAPL properties */
     const char *extfile_prefix;         /* Prefix for external file                      */
@@ -346,6 +360,13 @@ typedef struct H5CX_dxpl_cache_t {
     H5T_conv_cb_t dt_conv_cb;       /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
 } H5CX_dxpl_cache_t;
 
+/* Typedef for cached default link creation property list information */
+/* (Same as the cached DXPL struct, above, except for the default LCPL) */
+typedef struct H5CX_lcpl_cache_t {
+    H5T_cset_t encoding;         /* Link name character encoding */
+    unsigned intermediate_group; /* Whether to create intermediate groups  */
+} H5CX_lcpl_cache_t;
+
 /* Typedef for cached default link access property list information */
 /* (Same as the cached DXPL struct, above, except for the default LAPL) */
 typedef struct H5CX_lapl_cache_t {
@@ -356,6 +377,7 @@ typedef struct H5CX_lapl_cache_t {
 /* (Same as the cached DXPL struct, above, except for the default DCPL) */
 typedef struct H5CX_dcpl_cache_t {
     hbool_t do_min_dset_ohdr;   /* Whether to minimize dataset object header */
+    uint8_t ohdr_flags;  /* Object header flags */
 } H5CX_dcpl_cache_t;
 
 /* Typedef for cached default dataset access property list information */
@@ -401,6 +423,9 @@ static H5CX_node_t *H5CX_head_g = NULL;         /* Pointer to head of context st
 /* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
 static H5CX_dxpl_cache_t H5CX_def_dxpl_cache;
 
+/* Define a "default" link creation property list cache structure to use for default LCPLs */
+static H5CX_lcpl_cache_t H5CX_def_lcpl_cache;
+
 /* Define a "default" link access property list cache structure to use for default LAPLs */
 static H5CX_lapl_cache_t H5CX_def_lapl_cache;
 
@@ -435,6 +460,7 @@ herr_t
 H5CX__init_package(void)
 {
     H5P_genplist_t *dx_plist;           /* Data transfer property list */
+    H5P_genplist_t *lc_plist;           /* Link creation property list */
     H5P_genplist_t *la_plist;           /* Link access property list */
     H5P_genplist_t *dc_plist;           /* Dataset creation property list */
     H5P_genplist_t *da_plist;           /* Dataset access property list */
@@ -525,6 +551,23 @@ H5CX__init_package(void)
     if(H5P_get(dx_plist, H5D_XFER_CONV_CB_NAME, &H5CX_def_dxpl_cache.dt_conv_cb) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve datatype conversion exception callback")
 
+    /* Reset the "default LCPL cache" information */
+    HDmemset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
+
+    /* Get the default LCPL cache information */
+
+    /* Get the default link creation property list */
+    if(NULL == (lc_plist = (H5P_genplist_t *)H5I_object(H5P_LINK_CREATE_DEFAULT)))
+        HGOTO_ERROR(H5E_CONTEXT, H5E_BADTYPE, FAIL, "not a link creation property list")
+
+    /* Get link name character encoding */
+    if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &H5CX_def_lcpl_cache.encoding) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve link name encoding")
+
+    /* Get flag whether to create intermediate groups */
+    if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &H5CX_def_lcpl_cache.intermediate_group) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve intermediate group creation flag")
+
     /* Reset the "default LAPL cache" information */
     HDmemset(&H5CX_def_lapl_cache, 0, sizeof(H5CX_lapl_cache_t));
 
@@ -551,6 +594,10 @@ H5CX__init_package(void)
     /* Get flag to indicate whether to minimize dataset object header */
     if(H5P_get(dc_plist, H5D_CRT_MIN_DSET_HDR_SIZE_NAME, &H5CX_def_dcpl_cache.do_min_dset_ohdr) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
+
+    /* Get object header flags */
+    if(H5P_get(dc_plist, H5O_CRT_OHDR_FLAGS_NAME, &H5CX_def_dcpl_cache.ohdr_flags) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve object header flags")
 
     /* Reset the "default DAPL cache" information */
     HDmemset(&H5CX_def_dapl_cache, 0, sizeof(H5CX_dapl_cache_t));
@@ -710,6 +757,7 @@ H5CX__push_common(H5CX_node_t *cnode)
     cnode->ctx.dxpl_id = H5P_DATASET_XFER_DEFAULT;
     cnode->ctx.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     cnode->ctx.dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    cnode->ctx.lcpl_id = H5P_LINK_CREATE_DEFAULT;
     cnode->ctx.lapl_id = H5P_LINK_ACCESS_DEFAULT;
     cnode->ctx.fapl_id = H5P_FILE_ACCESS_DEFAULT;
     cnode->ctx.tag = H5AC__INVALID_TAG;
@@ -820,6 +868,18 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
     if(NULL == (*api_state = H5FL_CALLOC(H5CX_state_t)))
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTALLOC, FAIL, "unable to allocate new API context state")
 
+    /* Check for non-default DCPL */
+    if(H5P_DATASET_CREATE_DEFAULT != (*head)->ctx.dcpl_id) {
+        /* Retrieve the DCPL property list */
+        H5CX_RETRIEVE_PLIST(dcpl, FAIL)
+
+        /* Copy the DCPL ID */
+        if(((*api_state)->dcpl_id = H5P_copy_plist((H5P_genplist_t *)(*head)->ctx.dcpl, FALSE)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "can't copy property list")
+    } /* end if */
+    else
+        (*api_state)->dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+
     /* Check for non-default DXPL */
     if(H5P_DATASET_XFER_DEFAULT != (*head)->ctx.dxpl_id) {
         /* Retrieve the DXPL property list */
@@ -843,6 +903,18 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
     } /* end if */
     else
         (*api_state)->lapl_id = H5P_LINK_ACCESS_DEFAULT;
+
+    /* Check for non-default LCPL */
+    if(H5P_LINK_CREATE_DEFAULT != (*head)->ctx.lcpl_id) {
+        /* Retrieve the LCPL property list */
+        H5CX_RETRIEVE_PLIST(lcpl, FAIL)
+
+        /* Copy the LCPL ID */
+        if(((*api_state)->lcpl_id = H5P_copy_plist((H5P_genplist_t *)(*head)->ctx.lcpl, FALSE)) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTCOPY, FAIL, "can't copy property list")
+    } /* end if */
+    else
+        (*api_state)->lcpl_id = H5P_LINK_CREATE_DEFAULT;
 
     /* Keep a reference to the current VOL wrapping context */
     (*api_state)->vol_wrap_ctx = (*head)->ctx.vol_wrap_ctx;
@@ -916,6 +988,10 @@ H5CX_restore_state(const H5CX_state_t *api_state)
     HDassert(head && *head);
     HDassert(api_state);
 
+    /* Restore the DCPL info */
+    (*head)->ctx.dcpl_id = api_state->dcpl_id;
+    (*head)->ctx.dcpl = NULL;
+
     /* Restore the DXPL info */
     (*head)->ctx.dxpl_id = api_state->dxpl_id;
     (*head)->ctx.dxpl = NULL;
@@ -923,6 +999,10 @@ H5CX_restore_state(const H5CX_state_t *api_state)
     /* Restore the LAPL info */
     (*head)->ctx.lapl_id = api_state->lapl_id;
     (*head)->ctx.lapl = NULL;
+
+    /* Restore the LCPL info */
+    (*head)->ctx.lcpl_id = api_state->lcpl_id;
+    (*head)->ctx.lcpl = NULL;
 
     /* Restore the VOL wrapper context */
     (*head)->ctx.vol_wrap_ctx = api_state->vol_wrap_ctx;
@@ -964,6 +1044,11 @@ H5CX_free_state(H5CX_state_t *api_state)
     /* Sanity check */
     HDassert(api_state);
 
+    /* Release the DCPL */
+    if(api_state->dcpl_id != H5P_DATASET_CREATE_DEFAULT)
+        if(H5I_dec_ref(api_state->dcpl_id) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on DCPL")
+
     /* Release the DXPL */
     if(api_state->dxpl_id != H5P_DATASET_XFER_DEFAULT)
         if(H5I_dec_ref(api_state->dxpl_id) < 0)
@@ -973,6 +1058,11 @@ H5CX_free_state(H5CX_state_t *api_state)
     if(api_state->lapl_id != H5P_LINK_ACCESS_DEFAULT)
         if(H5I_dec_ref(api_state->lapl_id) < 0)
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on LAPL")
+
+    /* Release the LCPL */
+    if(api_state->lcpl_id != H5P_LINK_CREATE_DEFAULT)
+        if(H5I_dec_ref(api_state->lcpl_id) < 0)
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTDEC, FAIL, "can't decrement refcount on LCPL")
 
     /* Release the VOL wrapper context */
     if(api_state->vol_wrap_ctx)
@@ -1116,6 +1206,35 @@ H5CX_set_libver_bounds(H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_libver_bounds() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_lcpl
+ *
+ * Purpose:     Sets the LCPL for the current API call context.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Chris Hogan
+ *              October 28, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_lcpl(hid_t lcpl_id)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(*head);
+
+    /* Set the API context's LCPL to a new value */
+    (*head)->ctx.lcpl_id = lcpl_id;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_lcpl() */
 
 
 /*-------------------------------------------------------------------------
@@ -2371,6 +2490,76 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_get_encoding
+ *
+ * Purpose:     Retrieves the character encoding for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Gerd Heber
+ *              October 21, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_encoding(H5T_cset_t* encoding)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(encoding);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.lcpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(lcpl, H5P_LINK_CREATE_DEFAULT, H5P_STRCRT_CHAR_ENCODING_NAME, encoding)
+
+    /* Get the value */
+    *encoding = (*head)->ctx.encoding;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_encoding() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_intermediate_group
+ *
+ * Purpose:     Retrieves the create intermediate group flag for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Gerd Heber
+ *              October 21, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_intermediate_group(unsigned* crt_intermed_group)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(crt_intermed_group);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.lcpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(lcpl, H5P_LINK_CREATE_DEFAULT, H5L_CRT_INTERMEDIATE_GROUP_NAME, intermediate_group)
+
+    /* Get the value */
+    *crt_intermed_group = (*head)->ctx.intermediate_group;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_create_intermediate_group() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_get_nlinks
  *
  * Purpose:     Retrieves the # of soft / UD links to traverse for the current API call context.
@@ -3281,6 +3470,41 @@ done:
 } /* end H5CX_test_set_mpio_coll_rank0_bcast() */
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_ohdr_flags
+ *
+ * Purpose:     Retrieves the object header flags for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Chris Hogan
+ *              November 15, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_ohdr_flags(uint8_t *ohdr_flags)
+{
+    H5CX_node_t **head = H5CX_get_my_context();  /* Get the pointer to the head of the API context, for this thread */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(ohdr_flags);
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dcpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(dcpl, H5P_DATASET_CREATE_DEFAULT, H5O_CRT_OHDR_FLAGS_NAME, ohdr_flags)
+
+    /* Get the value */
+    *ohdr_flags = (*head)->ctx.ohdr_flags;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* End H5CX_get_ohdr_flags() */
 
 
 /*-------------------------------------------------------------------------

@@ -28,6 +28,8 @@ extern "C" {
 #include "hdf5.h"
 #include "h5util.h"
 
+#define SKIP_UNUSED_DUMP_ROUTINES
+
 /* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
 hsize_t H5TOOLS_BUFSIZE = (32 * 1024 * 1024);  /* 32 MB */
 int     H5TOOLS_TEXT_BLOCK = 16;  /* Number of elements on a line in a text export file */
@@ -52,8 +54,10 @@ void        *edata;
 /* Local Prototypes */
 /********************/
 
+#ifndef SKIP_UNUSED_DUMP_ROUTINES
 static int     h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
 static int     h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
+#endif
 static int     h5str_is_zero(const void *_mem, size_t size);
 static hid_t   h5str_get_native_type(hid_t type);
 static hid_t   h5str_get_little_endian_type(hid_t type);
@@ -70,6 +74,12 @@ static int     render_bin_output_region_data_points(FILE *stream, hid_t region_s
             hid_t container, int ndims, hid_t type_id, hssize_t npoints, hsize_t *ptdata);
 static int     render_bin_output_region_points(FILE *stream, hid_t region_space,
             hid_t region_id, hid_t container);
+
+/* Strings for output */
+#define H5_TOOLS_GROUP           "GROUP"
+#define H5_TOOLS_DATASET         "DATASET"
+#define H5_TOOLS_DATATYPE        "DATATYPE"
+#define H5_TOOLS_ATTRIBUTE       "ATTRIBUTE"
 
 /** frees memory held by array of strings */
 void
@@ -217,7 +227,7 @@ h5str_convert
             switch (typeSize) {
                 case sizeof(float):
                 {
-                    float tmp_float = 0.0;
+                    float tmp_float = 0.0f;
 
                     sscanf(token, "%f", &tmp_float);
                     HDmemcpy(cptr, &tmp_float, sizeof(float));
@@ -509,7 +519,7 @@ h5str_convert
                 total_elmts *= dims[i];
 
             if (NULL == (cptr = (char *) HDcalloc((size_t)total_elmts, baseTypeSize)))
-                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_convert: failed to allocate array buffer");
+                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_convert: failed to allocate array buffer");
 
             for (i = 0; i < total_elmts; i++) {
                 if (!(h5str_convert(ENVONLY, &this_str, container, mtid, out_buf, i * baseTypeSize))) {
@@ -550,7 +560,7 @@ h5str_convert
                 H5_LIBRARY_ERROR(ENVONLY);
 
             if (NULL == (vl_buf->p = HDmalloc(baseTypeSize)))
-                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_convert: failed to allocate vlen buffer");
+                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_convert: failed to allocate vlen buffer");
             vl_buf->len = 1;
 
             /* Skip whitespace and vlen indicators */
@@ -564,7 +574,7 @@ h5str_convert
                     char *tmp_realloc;
 
                     if (NULL == (tmp_realloc = (char *) HDrealloc(vl_buf->p, vl_buf->len * 2 * baseTypeSize)))
-                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_convert: failed to reallocate vlen buffer");
+                        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_convert: failed to reallocate vlen buffer");
                     vl_buf->len *= 2;
                     vl_buf->p = tmp_realloc;
                 }
@@ -625,6 +635,69 @@ done:
     return retVal;
 } /* end h5str_convert */
 
+/*-------------------------------------------------------------------------
+ * Function:    h5str_sprint_reference
+ *
+ * Purpose: Object reference -- show the name of the referenced object.
+ *
+ * Return:  Nothing
+ *-------------------------------------------------------------------------
+ */
+void
+h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, hid_t container, void *ref_p)
+{
+    ssize_t      buf_size;
+    char *ref_name = NULL;
+    const H5R_ref_t *ref_vp = (H5R_ref_t *)ref_p;
+
+    UNUSED(container);
+
+    if (!h5str_append(out_str, " \""))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    buf_size = H5Rget_file_name(ref_vp, NULL, 0);
+    if (buf_size) {
+        ref_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
+        if (H5Rget_file_name(ref_vp, ref_name, buf_size + 1) >= 0) {
+            ref_name[buf_size] = '\0';
+            if (!h5str_append(out_str, ref_name))
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        }
+        HDfree(ref_name);
+        ref_name = NULL;
+    }
+
+    buf_size = H5Rget_obj_name(ref_vp, H5P_DEFAULT, NULL, 0);
+    if (buf_size) {
+        ref_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
+        if (H5Rget_obj_name(ref_vp, H5P_DEFAULT, ref_name, buf_size + 1) >= 0) {
+            ref_name[buf_size] = '\0';
+            if (!h5str_append(out_str, ref_name))
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        }
+        HDfree(ref_name);
+        ref_name = NULL;
+    }
+
+    if (H5Rget_type(ref_vp) == H5R_ATTR) {
+        buf_size = H5Rget_attr_name(ref_vp, NULL, 0);
+        if (buf_size) {
+            ref_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
+            if (H5Rget_attr_name(ref_vp, ref_name, buf_size + 1) >= 0) {
+                ref_name[buf_size] = '\0';
+                if (!h5str_append(out_str, ref_name))
+                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            }
+            HDfree(ref_name);
+            ref_name = NULL;
+        }
+    }
+    if (!h5str_append(out_str, "\""))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+done:
+    if (ref_name)
+        HDfree(ref_name);
+}
+
 /*
  * Prints the value of a data point into a string.
  *
@@ -640,7 +713,9 @@ h5str_sprintf
     static char    fmt_llong[8], fmt_ullong[8];
     H5T_class_t    tclass = H5T_NO_CLASS;
     size_t         typeSize = 0;
+    H5T_sign_t     nsign = H5T_SGN_ERROR;
     hid_t          mtid = H5I_INVALID_HID;
+    hid_t          obj = H5I_INVALID_HID;
     char          *cptr = (char *) in_buf;
     char          *this_str = NULL;
     int            n;
@@ -655,13 +730,15 @@ h5str_sprintf
         H5_LIBRARY_ERROR(ENVONLY);
     if (!(typeSize = H5Tget_size(tid)))
         H5_LIBRARY_ERROR(ENVONLY);
+    if (!(nsign = H5Tget_sign(tid)))
+        H5_LIBRARY_ERROR(ENVONLY);
 
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
-        if (HDsprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH) < 0)
-            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: sprintf failure");
-        if (HDsprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH) < 0)
-            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: sprintf failure");
+        if (HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH) < 0)
+            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+        if (HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%%su", H5_PRINTF_LL_WIDTH) < 0)
+            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
     } /* end if */
 
     switch (tclass) {
@@ -670,12 +747,12 @@ h5str_sprintf
             switch (typeSize) {
                 case sizeof(float):
                 {
-                    float tmp_float = 0.0;
+                    float tmp_float = 0.0f;
 
                     HDmemcpy(&tmp_float, cptr, sizeof(float));
 
                     if (NULL == (this_str = (char *) HDmalloc(25)))
-                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                     if (HDsprintf(this_str, "%g", tmp_float) < 0)
                         H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -690,7 +767,7 @@ h5str_sprintf
                     HDmemcpy(&tmp_double, cptr, sizeof(double));
 
                     if (NULL == (this_str = (char *) HDmalloc(25)))
-                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                     if (HDsprintf(this_str, "%g", tmp_double) < 0)
                         H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -705,7 +782,7 @@ h5str_sprintf
                     HDmemcpy(&tmp_ldouble, cptr, sizeof(long double));
 
                     if (NULL == (this_str = (char *) HDmalloc(27)))
-                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                     if (HDsprintf(this_str, "%Lf", tmp_ldouble) < 0)
                         H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -724,16 +801,17 @@ h5str_sprintf
 
         case H5T_STRING:
         {
-            htri_t  is_variable;
-            char   *tmp_str;
-
-            typeSize = 0;
+            htri_t       is_variable;
+            char        *tmp_str;
 
             if ((is_variable = H5Tis_variable_str(tid)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
 
             if (is_variable) {
-                if (NULL != (tmp_str = *(char **) in_buf))
+                /* cp_vp is the pointer into the struct where a `char*' is stored. So we have
+                 * to dereference the pointer to get the `char*' to pass to HDstrlen(). */
+                tmp_str = *(char **)in_buf;
+                if (NULL != tmp_str)
                     typeSize = HDstrlen(tmp_str);
             }
             else {
@@ -743,14 +821,13 @@ h5str_sprintf
             /* Check for NULL pointer for string */
             if (!tmp_str) {
                 if (NULL == (this_str = (char *) HDmalloc(5)))
-                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-
+                    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
                 HDstrncpy(this_str, "NULL", 5);
             }
             else {
                 if (typeSize > 0) {
                     if (NULL == (this_str = (char *) HDmalloc(typeSize + 1)))
-                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                     HDstrncpy(this_str, tmp_str, typeSize);
                     this_str[typeSize] = '\0';
@@ -762,7 +839,6 @@ h5str_sprintf
 
         case H5T_INTEGER:
         {
-            H5T_sign_t nsign = H5T_SGN_ERROR;
 
             if (H5T_SGN_ERROR == (nsign = H5Tget_sign(tid)))
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -777,16 +853,16 @@ h5str_sprintf
                         HDmemcpy(&tmp_uchar, cptr, sizeof(unsigned char));
 
                         if (NULL == (this_str = (char *) HDmalloc(7)))
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
-                        if (HDsprintf(this_str, "%u", tmp_uchar) < 0)
+                        if (HDsprintf(this_str, "%hhu", tmp_uchar) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
                     else {
                         HDmemcpy(&tmp_char, cptr, sizeof(char));
 
                         if (NULL == (this_str = (char *) HDmalloc(7)))
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%hhd", tmp_char) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -804,18 +880,18 @@ h5str_sprintf
                         HDmemcpy(&tmp_ushort, cptr, sizeof(unsigned short));
 
                         if (NULL == (this_str = (char *) HDmalloc(9)))
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
-                        if (HDsprintf(this_str, "%u", tmp_ushort) < 0)
+                        if (HDsprintf(this_str, "%hu", tmp_ushort) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
                     else {
                         HDmemcpy(&tmp_short, cptr, sizeof(short));
 
                         if (NULL == (this_str = (char *) HDmalloc(9)))
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
-                        if (HDsprintf(this_str, "%d", tmp_short) < 0)
+                        if (HDsprintf(this_str, "%hd", tmp_short) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                     }
 
@@ -831,7 +907,7 @@ h5str_sprintf
                         HDmemcpy(&tmp_uint, cptr, sizeof(unsigned int));
 
                         if (NULL == (this_str = (char *) HDmalloc(14)))
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%u", tmp_uint) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -840,7 +916,7 @@ h5str_sprintf
                         HDmemcpy(&tmp_int, cptr, sizeof(int));
 
                         if (NULL == (this_str = (char *) HDmalloc(14)))
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%d", tmp_int) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -858,7 +934,7 @@ h5str_sprintf
                         HDmemcpy(&tmp_ulong, cptr, sizeof(unsigned long));
 
                         if (NULL == (this_str = (char *) HDmalloc(23)))
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%lu", tmp_ulong) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -867,7 +943,7 @@ h5str_sprintf
                         HDmemcpy(&tmp_long, cptr, sizeof(long));
 
                         if (NULL == (this_str = (char *) HDmalloc(23)))
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, "%ld", tmp_long) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -886,7 +962,7 @@ h5str_sprintf
                         HDmemcpy(&tmp_ullong, cptr, sizeof(unsigned long long));
 
                         if (NULL == (this_str = (char *) HDmalloc(25)))
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, fmt_ullong, tmp_ullong) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -895,7 +971,7 @@ h5str_sprintf
                         HDmemcpy(&tmp_llong, cptr, sizeof(long long));
 
                         if (NULL == (this_str = (char *) HDmalloc(25)))
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                         if (HDsprintf(this_str, fmt_llong, tmp_llong) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
@@ -960,7 +1036,7 @@ h5str_sprintf
                 size_t i;
 
                 if (NULL == (this_str = (char *) HDmalloc(4 * (typeSize + 1))))
-                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                 if (1 == typeSize) {
                     if (HDsprintf(this_str, "%#02x", ucptr[0]) < 0)
@@ -984,96 +1060,131 @@ h5str_sprintf
                 break;
             }
 
-            if (H5R_DSET_REG_REF_BUF_SIZE == typeSize) {
-                H5S_sel_type region_type = H5S_SEL_ERROR;
-                hid_t        region_obj = H5I_INVALID_HID;
-                hid_t        region = H5I_INVALID_HID;
-                char         ref_name[1024];
+            if (H5Tequal(tid, H5T_STD_REF)) {
+                H5O_type_t obj_type = -1;   /* Object type */
+                H5R_type_t ref_type;   /* Reference type */
+                const H5R_ref_t *ref_vp = (H5R_ref_t *)cptr;
 
-                /*
-                 * Dataset region reference --
-                 * show the type and the referenced object
-                 */
+                ref_type = H5Rget_type(ref_vp);
+                H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type);
+                switch (ref_type) {
+                    case H5R_OBJECT1:
+                        {
+                        /* Object references -- show the type and OID of the referenced object. */
+                        H5O_info2_t oi;
 
-                /* Get name of the dataset the region reference points to using H5Rget_name */
-                if ((region_obj = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, cptr)) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
-
-                if ((region = H5Rget_region(container, H5R_DATASET_REGION, cptr)) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
-
-                if (expand_data) {
-                    if (H5S_SEL_ERROR == (region_type = H5Sget_select_type(region)))
-                        H5_LIBRARY_ERROR(ENVONLY);
-
-                    if (H5S_SEL_POINTS == region_type) {
-                        if (h5str_dump_region_points_data(ENVONLY, out_str, region, region_obj) < 0)
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                    }
-                    else {
-                        if (h5str_dump_region_blocks_data(ENVONLY, out_str, region, region_obj) < 0)
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                    }
-                }
-                else {
-                    if (H5Rget_name(region_obj, H5R_DATASET_REGION, cptr, (char *)ref_name, 1024) < 0)
-                        H5_LIBRARY_ERROR(ENVONLY);
-
-                    if (!h5str_append(out_str, ref_name))
-                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-
-                    if (H5S_SEL_ERROR == (region_type = H5Sget_select_type(region)))
-                        H5_LIBRARY_ERROR(ENVONLY);
-
-                    if (H5S_SEL_POINTS == region_type) {
-                        if (!h5str_append(out_str, " REGION_TYPE POINT"))
+                        if((obj = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                            H5Oget_info3(obj, &oi, H5O_INFO_BASIC);
+                            if(H5Oclose(obj) < 0)
+                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                        }
+                        else
                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-                        if (h5str_dump_region_points(ENVONLY, out_str, region, region_obj) < 0)
+                        if (NULL == (this_str = (char *) HDmalloc(14)))
+                            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                        if (HDsprintf(this_str, "%u-", (unsigned) oi.type) < 0)
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                        if (!h5str_append(out_str, this_str))
                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                    }
-                    else {
-                        if (!h5str_append(out_str, " REGION_TYPE BLOCK"))
+                        HDfree(this_str);
+                        this_str = NULL;
+
+                        switch (obj_type) {
+                            case H5O_TYPE_GROUP:
+                                if (!h5str_append(out_str, H5_TOOLS_GROUP))
+                                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
+
+                            case H5O_TYPE_DATASET:
+                                if (!h5str_append(out_str, H5_TOOLS_DATASET))
+                                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
+
+                            case H5O_TYPE_NAMED_DATATYPE:
+                                if (!h5str_append(out_str, H5_TOOLS_DATATYPE))
+                                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
+
+                            case H5O_TYPE_MAP:
+                            case H5O_TYPE_UNKNOWN:
+                            case H5O_TYPE_NTYPES:
+                            default:
+                                break;
+                        } /* end switch */
+                        H5Oclose(obj);
+                        h5str_sprint_reference(ENVONLY, out_str, container, ref_vp);
+
+                        /* Print OID */
+                        {
+                            char *token_str;
+
+                            H5Otoken_to_str(tid, &oi.token, &token_str);
+
+                            if (NULL == (this_str = (char *) HDmalloc(64 + strlen(token_str) + 1)))
+                                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                            if (HDsprintf(this_str, "%lu:%s", oi.fileno, token_str) < 0)
+                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+
+                            H5free_memory(token_str);
+                        }
+
+                        }
+
+                        break;
+                    case H5R_DATASET_REGION1:
+                        if (!h5str_append(out_str, H5_TOOLS_DATASET))
                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                        h5str_sprint_reference(ENVONLY, out_str, container, (void*)cptr);
+                        break;
+                    case H5R_OBJECT2:
+                        switch (obj_type) {
+                            case H5O_TYPE_GROUP:
+                                if (!h5str_append(out_str, H5_TOOLS_GROUP))
+                                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
 
-                        if (h5str_dump_region_blocks(ENVONLY, out_str, region, region_obj) < 0)
+                            case H5O_TYPE_DATASET:
+                                if (!h5str_append(out_str, H5_TOOLS_DATASET))
+                                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
+
+                            case H5O_TYPE_NAMED_DATATYPE:
+                                if (!h5str_append(out_str, H5_TOOLS_DATATYPE))
+                                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
+
+                            case H5O_TYPE_MAP:
+                            case H5O_TYPE_UNKNOWN:
+                            case H5O_TYPE_NTYPES:
+                            default:
+                                break;
+                        } /* end switch */
+                        h5str_sprint_reference(ENVONLY, out_str, container, (void*)cptr);
+                        break;
+                    case H5R_DATASET_REGION2:
+                        if (!h5str_append(out_str, H5_TOOLS_DATASET))
                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                    }
-                }
-
-                if (H5Sclose(region) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
-                region = H5I_INVALID_HID;
-
-                if (H5Dclose(region_obj) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
-                region_obj = H5I_INVALID_HID;
+                        h5str_sprint_reference(ENVONLY, out_str, container, (void*)cptr);
+                        break;
+                    case H5R_ATTR:
+                        if (!h5str_append(out_str, H5_TOOLS_ATTRIBUTE))
+                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                        h5str_sprint_reference(ENVONLY, out_str, container, (void*)cptr);
+                        break;
+                    case H5R_BADTYPE:
+                    case H5R_MAXTYPE:
+                    default:
+                        break;
+                } /* end switch */
             }
-            else if (H5R_OBJ_REF_BUF_SIZE == typeSize) {
-                H5O_info_t oi;
-                hid_t      obj = H5I_INVALID_HID;
-
-                /*
-                 * Object references -- show the type and OID of the referenced
-                 * object.
-                 */
-
-                if (NULL == (this_str = (char *) HDmalloc(64)))
-                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-
-                if ((obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, cptr)) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
-
-                if (H5Oget_info2(obj, &oi, H5O_INFO_ALL) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
-
-                /* Print object data and close object */
-                if (HDsprintf(this_str, "%u-%lu", (unsigned) oi.type, oi.addr) < 0)
-                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
-
-                if (H5Oclose(obj) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
-                obj = H5I_INVALID_HID;
+            else if (H5Tequal(tid, H5T_STD_REF_DSETREG)) {
+                /* (H5R_DSET_REG_REF_BUF_SIZE == typeSize) */
+                H5_LIBRARY_ERROR(ENVONLY);
+            }
+            else if (H5Tequal(tid, H5T_STD_REF_OBJ)) {
+                /* (H5R_OBJ_REF_BUF_SIZE == typeSize) */
+                H5_LIBRARY_ERROR(ENVONLY);
             }
 
             break;
@@ -1173,7 +1284,7 @@ h5str_sprintf
             /* All other types get printed as hexadecimal */
 
             if (NULL == (this_str = (char *) HDmalloc(4 * (typeSize + 1))))
-                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
+                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
             if (1 == typeSize) {
                 if (HDsprintf(this_str, "%#02x", ucptr[0]) < 0)
@@ -1246,7 +1357,7 @@ h5str_print_region_data_blocks
 
     /* Allocate space for the dimension array */
     if (NULL == (dims1 = (hsize_t *) HDmalloc(sizeof(hsize_t) * (size_t)ndims)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_print_region_data_blocks: failed to allocate dimension array buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_print_region_data_blocks: failed to allocate dimension array buffer");
 
     /* Find the dimensions of each data space from the block coordinates */
     for (jndx = 0, numelem = 1; jndx < (size_t) ndims; jndx++) {
@@ -1262,15 +1373,15 @@ h5str_print_region_data_blocks
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (region_buf = HDmalloc(type_size * (size_t)numelem)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_print_region_data_blocks: failed to allocate region buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_print_region_data_blocks: failed to allocate region buffer");
 
     /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
     /*         1   2        n      1   2        n                                        */
     if (NULL == (start = (hsize_t *) HDmalloc(sizeof(hsize_t) * (size_t)ndims)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_print_region_data_blocks: failed to allocate hyperslab start buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_print_region_data_blocks: failed to allocate hyperslab start buffer");
 
     if (NULL == (count = (hsize_t *) HDmalloc(sizeof(hsize_t) * (size_t)ndims)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_print_region_data_blocks: failed to allocate hyperslab count buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_print_region_data_blocks: failed to allocate hyperslab count buffer");
 
     for (blkndx = 0; blkndx < (hsize_t) nblocks; blkndx++) {
         for (indx = 0; indx < (unsigned) ndims; indx++) {
@@ -1345,7 +1456,7 @@ h5str_dump_region_blocks_data
     alloc_size = (hsize_t)nblocks * (hsize_t)ndims * 2 * (hsize_t)sizeof(ptdata[0]);
     if (alloc_size == (hsize_t)((size_t) alloc_size)) {
         if (NULL == (ptdata = (hsize_t *) HDmalloc((size_t) alloc_size)))
-            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_blocks_data: failed to allocate region block buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_region_blocks_data: failed to allocate region block buffer");
 
         if (H5Sget_select_hyper_blocklist(region, (hsize_t) 0, (hsize_t) nblocks, ptdata) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
@@ -1373,6 +1484,7 @@ done:
     return ret_value;
 } /* end h5str_dump_region_blocks_data */
 
+#ifndef SKIP_UNUSED_DUMP_ROUTINES
 static int
 h5str_dump_region_blocks
     (JNIEnv *env, h5str_t *str, hid_t region, hid_t region_id)
@@ -1405,7 +1517,7 @@ h5str_dump_region_blocks
         int i;
 
         if (NULL == (ptdata = (hsize_t *) HDmalloc((size_t) alloc_size)))
-            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_blocks: failed to allocate region block buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_region_blocks: failed to allocate region block buffer");
 
         if (H5Sget_select_hyper_blocklist(region, (hsize_t) 0, (hsize_t) nblocks, ptdata) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
@@ -1460,6 +1572,7 @@ done:
 
     return ret_value;
 } /* end h5str_dump_region_blocks */
+#endif
 
 /*-------------------------------------------------------------------------
  * Purpose: Print the data values from a dataset referenced by region points.
@@ -1490,7 +1603,7 @@ h5str_print_region_data_points
 
     /* Allocate space for the dimension array */
     if (NULL == (dims1 = (hsize_t *) HDmalloc(sizeof(hsize_t) * (size_t)ndims)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_print_region_data_points: failed to allocate dimension array buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_print_region_data_points: failed to allocate dimension array buffer");
 
     dims1[0] = (hsize_t)npoints;
 
@@ -1502,7 +1615,7 @@ h5str_print_region_data_points
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (region_buf = HDmalloc(type_size * (size_t)npoints)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_print_region_data_points: failed to allocate region buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_print_region_data_points: failed to allocate region buffer");
 
     if (H5Dread(region_id, type_id, mem_space, region_space, H5P_DEFAULT, region_buf) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1562,7 +1675,7 @@ h5str_dump_region_points_data
         alloc_size = (hsize_t)npoints * (hsize_t)ndims * (hsize_t)sizeof(ptdata[0]);
         if (alloc_size == (hsize_t)((size_t) alloc_size)) {
             if (NULL == (ptdata = (hsize_t *) HDmalloc((size_t) alloc_size)))
-                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_points_data: failed to allocate region point data buffer");
+                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_region_points_data: failed to allocate region point data buffer");
 
             if (H5Sget_select_elem_pointlist(region, (hsize_t) 0, (hsize_t) npoints, ptdata) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1592,6 +1705,7 @@ done:
     return ret_value;
 } /* end h5str_dump_region_points_data */
 
+#ifndef SKIP_UNUSED_DUMP_ROUTINES
 static int
 h5str_dump_region_points
     (JNIEnv *env, h5str_t *str, hid_t region, hid_t region_id)
@@ -1625,7 +1739,7 @@ h5str_dump_region_points
         alloc_size = (hsize_t)npoints * (hsize_t)ndims * (hsize_t)sizeof(ptdata[0]);
         if (alloc_size == (hsize_t)((size_t) alloc_size)) {
             if (NULL == (ptdata = (hsize_t *) HDmalloc((size_t) alloc_size)))
-                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_region_points: failed to allocate region point buffer");
+                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_region_points: failed to allocate region point buffer");
 
             if (H5Sget_select_elem_pointlist(region, (hsize_t) 0, (hsize_t) npoints, ptdata) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1667,6 +1781,7 @@ done:
 
     return ret_value;
 } /* end h5str_dump_region_points */
+#endif
 
 static int
 h5str_is_zero
@@ -2204,20 +2319,28 @@ h5str_render_bin_output
 
         case H5T_REFERENCE:
         {
-            if (H5Tequal(tid, H5T_STD_REF_DSETREG)) {
+            if (H5Tequal(tid, H5T_STD_REF)) {
+                hid_t   region_id = H5I_INVALID_HID;
+                hid_t   region_space = H5I_INVALID_HID;
                 H5S_sel_type region_type;
-                hid_t        region_id, region_space;
 
                 /* Region data */
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
                     mem = ((unsigned char*)_mem) + block_index * size;
-
-                    if ((region_id = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, mem)) < 0)
+                    if((region_id = H5Ropen_object((const H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                         continue;
-
-                    if ((region_space = H5Rget_region(container, H5R_DATASET_REGION, mem)) < 0) {
+                    else {
+                        if((region_space = H5Ropen_region((const H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                            if (!h5str_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
+                                region_type = H5Sget_select_type(region_space);
+                                if (region_type == H5S_SEL_POINTS)
+                                    ret_value = render_bin_output_region_points(stream, region_space, region_id, container);
+                                else
+                                    ret_value = render_bin_output_region_blocks(stream, region_space, region_id, container);
+                            }
+                            H5Sclose(region_space);
+                        } /* end if (region_space >= 0) */
                         H5Dclose(region_id);
-                        continue;
                     }
 
                     if ((region_type = H5Sget_select_type(region_space)) < 0) {
@@ -2225,18 +2348,12 @@ h5str_render_bin_output
                         H5Dclose(region_id);
                         continue;
                     }
-
-                    if (region_type == H5S_SEL_POINTS)
-                        ret_value = render_bin_output_region_points(stream, region_space, region_id, container);
-                    else
-                        ret_value = render_bin_output_region_blocks(stream, region_space, region_id, container);
-
-                    H5Sclose(region_space);
-                    H5Dclose(region_id);
-
                     if (ret_value < 0)
                         break;
                 }
+            }
+            else if (H5Tequal(tid, H5T_STD_REF_DSETREG)) {
+                ;
             }
             else if (H5Tequal(tid, H5T_STD_REF_OBJ)) {
                 ;
@@ -2731,7 +2848,7 @@ h5str_dump_simple_dset
 
             if (sm_nbytes > 0) {
                 if (NULL == (sm_buf = (unsigned char *) HDmalloc((size_t)sm_nbytes)))
-                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_dump_simple_dset: failed to allocate sm_buf");
+                    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_dset: failed to allocate sm_buf");
 
                 sm_nelmts = sm_nbytes / p_type_nbytes;
 
@@ -2781,7 +2898,7 @@ h5str_dump_simple_dset
 
                     /* Reclaim any VL memory, if necessary */
                     if (vl_data) {
-                        if (H5Dvlen_reclaim(p_type, sm_space, H5P_DEFAULT, sm_buf) < 0)
+                        if (H5Treclaim(p_type, sm_space, H5P_DEFAULT, sm_buf) < 0)
                             H5_LIBRARY_ERROR(ENVONLY);
                     }
 
@@ -2862,7 +2979,7 @@ h5tools_dump_simple_data
         h5str_new(&buffer, 32 * size);
 
         if (!buffer.s)
-            H5_JNI_FATAL_ERROR(ENVONLY, "h5tools_dump_simple_data: failed to allocate buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5tools_dump_simple_data: failed to allocate buffer");
 
         if (!(bytes_in = h5str_sprintf(ENVONLY, &buffer, container, type, memref, 0, 1)))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -2933,7 +3050,7 @@ Java_hdf_hdf5lib_H5_H5AreadComplex
     }
 
     if (NULL == (readBuf = (char *) HDmalloc((size_t)n * size)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5AreadComplex: failed to allocate read buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AreadComplex: failed to allocate read buffer");
 
     if ((status = H5Aread(attr_id, mem_type_id, readBuf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -2941,7 +3058,7 @@ Java_hdf_hdf5lib_H5_H5AreadComplex
     h5str_new(&h5str, 4 * size);
 
     if (!h5str.s)
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5AreadComplex: failed to allocate string buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AreadComplex: failed to allocate string buffer");
 
     for (i = 0; i < (size_t) n; i++) {
         h5str.s[0] = '\0';
@@ -3002,7 +3119,7 @@ Java_hdf_hdf5lib_H5_H5Acopy
     total_size = (hsize_t)npoints * (hsize_t)type_size;
 
     if (NULL == (buf = (jbyte *) HDmalloc((size_t)total_size * sizeof(jbyte))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Acopy: failed to allocate buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Acopy: failed to allocate buffer");
 
     if ((retVal = H5Aread((hid_t)src_id, tid, buf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -3049,7 +3166,7 @@ Java_hdf_hdf5lib_H5_H5Dcopy
     UNUSED(clss);
 
     if (!(total_allocated_size = H5Dget_storage_size((hid_t)src_id)))
-        return 0; // nothing to write
+        return 0; /* nothing to write */
 
     if ((sid = H5Dget_space((hid_t)src_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -3064,7 +3181,7 @@ Java_hdf_hdf5lib_H5_H5Dcopy
     total_size = (hsize_t)npoints * (hsize_t)type_size;
 
     if (NULL == (buf = (jbyte *) HDmalloc((size_t)total_size * sizeof(jbyte))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Dcopy: failed to allocate buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dcopy: failed to allocate buffer");
 
     if ((retVal = H5Dread((hid_t)src_id, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -3091,26 +3208,26 @@ done:
 } /* end Java_hdf_hdf5lib_H5_H5Dcopy */
 
 /*
-/////////////////////////////////////////////////////////////////////////////////
-//
-//
-// Add these methods so that we don't need to call H5Gget_objtype_by_idx
-// in a loop to get information for all the objects in a group, which takes
-// a lot of time to finish if the number of objects is more than 10,000
-//
-/////////////////////////////////////////////////////////////////////////////////
-*/
+ * /////////////////////////////////////////////////////////////////////////////////
+ * //
+ * //
+ * // Add these methods so that we don't need to call H5Gget_objtype_by_idx
+ * // in a loop to get information for all the objects in a group, which takes
+ * // a lot of time to finish if the number of objects is more than 10,000
+ * //
+ * /////////////////////////////////////////////////////////////////////////////////
+ */
 
 #ifdef __cplusplus
-    herr_t obj_info_all(hid_t g_id, const char *name, const H5L_info_t *linfo, void *op_data);
-    herr_t obj_info_max(hid_t g_id, const char *name, const H5L_info_t *linfo, void *op_data);
-    int H5Gget_obj_info_max(hid_t, char **, int *, int *, unsigned long *, long);
-    int H5Gget_obj_info_full( hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *fno, unsigned long *objno, int indexType, int indexOrder);
+    herr_t obj_info_all(hid_t g_id, const char *name, const H5L_info2_t *linfo, void *op_data);
+    herr_t obj_info_max(hid_t g_id, const char *name, const H5L_info2_t *linfo, void *op_data);
+    int H5Gget_obj_info_max(hid_t, char **, int *, int *, H5O_token_t *, long);
+    int H5Gget_obj_info_full( hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *fno, H5O_token_t *obj_token, int indexType, int indexOrder);
 #else
-    static herr_t obj_info_all(hid_t g_id, const char *name, const H5L_info_t *linfo, void *op_data);
-    static herr_t obj_info_max(hid_t g_id, const char *name, const H5L_info_t *linfo, void *op_data);
-    static int H5Gget_obj_info_max(hid_t, char **, int *, int *, unsigned long *, long);
-    static int H5Gget_obj_info_full( hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *fno, unsigned long *objno, int indexType, int indexOrder);
+    static herr_t obj_info_all(hid_t g_id, const char *name, const H5L_info2_t *linfo, void *op_data);
+    static herr_t obj_info_max(hid_t g_id, const char *name, const H5L_info2_t *linfo, void *op_data);
+    static int H5Gget_obj_info_max(hid_t, char **, int *, int *, H5O_token_t *, long);
+    static int H5Gget_obj_info_full( hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *fno, H5O_token_t *obj_token, int indexType, int indexOrder);
 #endif
 
 typedef struct info_all
@@ -3118,7 +3235,7 @@ typedef struct info_all
     char **objname;
     int *otype;
     int *ltype;
-    unsigned long *objno;
+    H5O_token_t *obj_token;
     unsigned long *fno;
     unsigned long idxnum;
     int count;
@@ -3139,17 +3256,17 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full
     (JNIEnv *env, jclass clss, jlong loc_id, jstring group_name,
         jobjectArray objName, jintArray oType, jintArray lType, jlongArray fNo,
-        jlongArray oRef, jint n, jint indx_type, jint indx_order)
+        jobjectArray oToken, jint n, jint indx_type, jint indx_order)
 {
-    unsigned long  *refs = NULL;
     unsigned long  *fnos = NULL;
+    H5O_token_t    *tokens = NULL;
     const char     *gName = NULL;
     char          **oName = NULL;
     jboolean        isCopy;
     jstring         str;
+    jobject         token;
     jint           *otarr = NULL;
     jint           *ltarr = NULL;
-    jlong          *refP = NULL;
     jlong          *fnoP = NULL;
     hid_t           gid = (hid_t)loc_id;
     int             i;
@@ -3163,24 +3280,23 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_obj_info_full: oType is NULL");
     if (NULL == lType)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_obj_info_full: lType is NULL");
-    if (NULL == oRef)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_obj_info_full: oRef is NULL");
+    if (NULL == oToken)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_obj_info_full: oToken is NULL");
     if (NULL == fNo)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_obj_info_full: fNo is NULL");
 
     PIN_INT_ARRAY(ENVONLY, oType, otarr, &isCopy, "H5Gget_obj_info_full: oType not pinned");
     PIN_INT_ARRAY(ENVONLY, lType, ltarr, &isCopy, "H5Gget_obj_info_full: lType not pinned");
-    PIN_LONG_ARRAY(ENVONLY, oRef, refP, &isCopy, "H5Gget_obj_info_full: oRef not pinned");
     PIN_LONG_ARRAY(ENVONLY, fNo, fnoP, &isCopy, "H5Gget_obj_info_full: fNo not pinned");
 
     if (NULL == (oName = (char **) HDcalloc((size_t)n, sizeof(*oName))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Gget_obj_info_full: failed to allocate buffer for object name");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Gget_obj_info_full: failed to allocate buffer for object name");
 
-    if (NULL == (refs = (unsigned long *) HDcalloc((size_t)n, sizeof(unsigned long))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Gget_obj_info_full: failed to allocate buffer for ref. info");
+    if (NULL == (tokens = (H5O_token_t *) HDcalloc((size_t)n, sizeof(H5O_token_t))))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Gget_obj_info_full: failed to allocate buffer for object tokens");
 
     if (NULL == (fnos = (unsigned long *) HDcalloc((size_t)n, sizeof(unsigned long))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Gget_obj_info_full: failed to allocate buffer for file number info");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Gget_obj_info_full: failed to allocate buffer for file number info");
 
     if (group_name) {
         PIN_JAVA_STRING(ENVONLY, group_name, gName, &isCopy, "H5Gget_obj_info_full: group_name not pinned");
@@ -3189,11 +3305,10 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full
             H5_LIBRARY_ERROR(ENVONLY);
     }
 
-    if ((ret_val = H5Gget_obj_info_full(gid, oName, (int *)otarr, (int *)ltarr, fnos, refs, indexType, indexOrder)) < 0)
+    if ((ret_val = H5Gget_obj_info_full(gid, oName, (int *)otarr, (int *)ltarr, fnos, tokens, indexType, indexOrder)) < 0)
         H5_JNI_FATAL_ERROR(ENVONLY, "H5Gget_obj_info_full: retrieval of object info failed");
 
     for (i = 0; i < n; i++) {
-        refP[i] = (jlong)refs[i];
         fnoP[i] = (jlong)fnos[i];
 
         if (oName[i]) {
@@ -3205,6 +3320,15 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full
 
             ENVPTR->DeleteLocalRef(ENVONLY, str);
         } /* end if */
+
+        /* Create an H5O_token_t object */
+        if (NULL == (token = create_H5O_token_t(ENVONLY, &tokens[i], TRUE)))
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        ENVPTR->SetObjectArrayElement(ENVONLY, oToken, i, token);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        ENVPTR->DeleteLocalRef(ENVONLY, token);
     }
 
 done:
@@ -3214,14 +3338,12 @@ done:
     }
     if (fnos)
         HDfree(fnos);
-    if (refs)
-        HDfree(refs);
+    if (tokens)
+        HDfree(tokens);
     if (oName)
         h5str_array_free(oName, (size_t)n);
     if (fnoP)
         UNPIN_LONG_ARRAY(ENVONLY, fNo, fnoP, (ret_val < 0) ? JNI_ABORT : 0);
-    if (refP)
-        UNPIN_LONG_ARRAY(ENVONLY, oRef, refP, (ret_val < 0) ? JNI_ABORT : 0);
     if (ltarr)
         UNPIN_INT_ARRAY(ENVONLY, lType, ltarr, (ret_val < 0) ? JNI_ABORT : 0);
     if (otarr)
@@ -3243,17 +3365,17 @@ done:
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max
     (JNIEnv *env, jclass clss, jlong loc_id, jobjectArray objName,
-          jintArray oType, jintArray lType, jlongArray oRef, jlong maxnum, jint n)
+          jintArray oType, jintArray lType, jobjectArray oToken, jlong maxnum, jint n)
 {
-    unsigned long  *refs = NULL;
-    jboolean        isCopy;
-    jstring         str;
-    jlong          *refP = NULL;
-    char          **oName = NULL;
-    jint           *otarr = NULL;
-    jint           *ltarr = NULL;
-    int             i;
-    herr_t          ret_val = FAIL;
+    H5O_token_t  *tokens = NULL;
+    jboolean      isCopy;
+    jstring       str;
+    jobject       token;
+    char        **oName = NULL;
+    jint         *otarr = NULL;
+    jint         *ltarr = NULL;
+    int           i;
+    herr_t        ret_val = FAIL;
 
     UNUSED(clss);
 
@@ -3261,25 +3383,22 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_obj_info_max: oType is NULL");
     if (NULL == lType)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_obj_info_max: lType is NULL");
-    if (NULL == oRef)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_obj_info_max: oRef is NULL");
+    if (NULL == oToken)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Gget_obj_info_max: oToken is NULL");
 
     PIN_INT_ARRAY(ENVONLY, oType, otarr, &isCopy, "H5Gget_obj_info_max: oType not pinned");
     PIN_INT_ARRAY(ENVONLY, lType, ltarr, &isCopy, "H5Gget_obj_info_max: lType not pinned");
-    PIN_LONG_ARRAY(ENVONLY, oRef, refP, &isCopy, "H5Gget_obj_info_max: oRef not pinned");
 
     if (NULL == (oName = (char **) HDcalloc((size_t)n, sizeof(*oName))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Gget_obj_info_max: failed to allocate buffer for object name");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Gget_obj_info_max: failed to allocate buffer for object name");
 
-    if (NULL == (refs = (unsigned long *) HDcalloc((size_t)n, sizeof(unsigned long))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Gget_obj_info_max: failed to allocate buffer for ref. info");
+    if (NULL == (tokens = (H5O_token_t *) HDcalloc((size_t)n, sizeof(H5O_token_t))))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Gget_obj_info_max: failed to allocate buffer for object tokens");
 
-    if ((ret_val = H5Gget_obj_info_max((hid_t)loc_id, oName, (int *)otarr, (int *)ltarr, refs, maxnum)) < 0)
+    if ((ret_val = H5Gget_obj_info_max((hid_t)loc_id, oName, (int *)otarr, (int *)ltarr, tokens, maxnum)) < 0)
         H5_JNI_FATAL_ERROR(ENVONLY, "H5Gget_obj_info_max: retrieval of object info failed");
 
     for (i = 0; i < n; i++) {
-        refP[i] = (jlong) refs[i];
-
         if (oName[i]) {
             if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, oName[i])))
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -3289,15 +3408,22 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max
 
             ENVPTR->DeleteLocalRef(ENVONLY, str);
         }
+
+        /* Create an H5O_token_t object */
+        if (NULL == (token = create_H5O_token_t(ENVONLY, &tokens[i], TRUE)))
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        ENVPTR->SetObjectArrayElement(ENVONLY, oToken, i, token);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        ENVPTR->DeleteLocalRef(ENVONLY, token);
     } /* end for */
 
 done:
-    if (refs)
-        HDfree(refs);
+    if (tokens)
+        HDfree(tokens);
     if (oName)
         h5str_array_free(oName, (size_t)n);
-    if (refP)
-        UNPIN_LONG_ARRAY(ENVONLY, oRef, refP, (ret_val < 0) ? JNI_ABORT : 0);
     if (ltarr)
         UNPIN_INT_ARRAY(ENVONLY, lType, ltarr, (ret_val < 0) ? JNI_ABORT : 0);
     if (otarr)
@@ -3308,7 +3434,7 @@ done:
 
 int
 H5Gget_obj_info_full
-    (hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *fno, unsigned long *objno, int indexType, int indexOrder)
+    (hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *fno, H5O_token_t *obj_token, int indexType, int indexOrder)
 {
     info_all_t info;
 
@@ -3317,10 +3443,10 @@ H5Gget_obj_info_full
     info.ltype = ltype;
     info.idxnum = 0;
     info.fno = fno;
-    info.objno = objno;
+    info.obj_token = obj_token;
     info.count = 0;
 
-    if (H5Literate(loc_id, (H5_index_t)indexType, (H5_iter_order_t)indexOrder, NULL, obj_info_all, (void *)&info) < 0) {
+    if (H5Literate2(loc_id, (H5_index_t)indexType, (H5_iter_order_t)indexOrder, NULL, obj_info_all, (void *)&info) < 0) {
         /*
          * Reset info stats; most importantly, reset the count.
          */
@@ -3329,11 +3455,11 @@ H5Gget_obj_info_full
         info.ltype = ltype;
         info.idxnum = 0;
         info.fno = fno;
-        info.objno = objno;
+        info.obj_token = obj_token;
         info.count = 0;
 
         /* Iteration failed, try normal alphabetical order */
-        if (H5Literate(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, obj_info_all, (void *)&info) < 0)
+        if (H5Literate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, obj_info_all, (void *)&info) < 0)
             return -1;
     }
 
@@ -3342,7 +3468,7 @@ H5Gget_obj_info_full
 
 int
 H5Gget_obj_info_max
-    (hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *objno, long maxnum)
+    (hid_t loc_id, char **objname, int *otype, int *ltype, H5O_token_t *obj_token, long maxnum)
 {
     info_all_t info;
 
@@ -3350,10 +3476,10 @@ H5Gget_obj_info_max
     info.otype = otype;
     info.ltype = ltype;
     info.idxnum = (unsigned long)maxnum;
-    info.objno = objno;
+    info.obj_token = obj_token;
     info.count = 0;
 
-    if (H5Lvisit(loc_id, H5_INDEX_NAME, H5_ITER_NATIVE, obj_info_max, (void *)&info) < 0)
+    if (H5Lvisit2(loc_id, H5_INDEX_NAME, H5_ITER_NATIVE, obj_info_max, (void *)&info) < 0)
         return -1;
 
     return info.count;
@@ -3361,16 +3487,16 @@ H5Gget_obj_info_max
 
 herr_t
 obj_info_all
-    (hid_t loc_id, const char *name, const H5L_info_t *info, void *op_data)
+    (hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
-    info_all_t *datainfo = (info_all_t *)op_data;
-    H5O_info_t  object_info;
-    htri_t      object_exists;
-    size_t      str_len;
+    info_all_t  *datainfo = (info_all_t *)op_data;
+    H5O_info2_t  object_info;
+    htri_t       object_exists;
+    size_t       str_len;
 
     datainfo->otype[datainfo->count] = -1;
     datainfo->ltype[datainfo->count] = -1;
-    datainfo->objno[datainfo->count] = (unsigned long)-1;
+    datainfo->obj_token[datainfo->count] = H5O_TOKEN_UNDEF;
 
     str_len = HDstrlen(name);
     if (NULL == (datainfo->objname[datainfo->count] = (char *) HDmalloc(str_len + 1)))
@@ -3383,21 +3509,15 @@ obj_info_all
         goto done;
 
     if (object_exists) {
-        if (H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT) < 0)
+        if (H5Oget_info_by_name3(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT) < 0)
             goto done;
 
         datainfo->otype[datainfo->count] = object_info.type;
         datainfo->ltype[datainfo->count] = info->type;
         datainfo->fno[datainfo->count] = object_info.fileno;
-        datainfo->objno[datainfo->count] = (unsigned long)object_info.addr;
-    }
 
-    /*
-    if (info->type == H5L_TYPE_HARD)
-        datainfo->objno[datainfo->count] = (unsigned long)info->u.address;
-    else
-        datainfo->objno[datainfo->count] = info->u.val_size;
-    */
+        HDmemcpy(&datainfo->obj_token[datainfo->count], &object_info.token, sizeof(object_info.token));
+    }
 
 done:
     datainfo->count++;
@@ -3407,16 +3527,16 @@ done:
 
 herr_t
 obj_info_max
-    (hid_t loc_id, const char *name, const H5L_info_t *info, void *op_data)
+    (hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
-    info_all_t *datainfo = (info_all_t *)op_data;
-    H5O_info_t  object_info;
-    size_t      str_len;
+    info_all_t  *datainfo = (info_all_t *)op_data;
+    H5O_info2_t  object_info;
+    size_t       str_len;
 
     datainfo->otype[datainfo->count] = -1;
     datainfo->ltype[datainfo->count] = -1;
     datainfo->objname[datainfo->count] = NULL;
-    datainfo->objno[datainfo->count] = (unsigned long)-1;
+    datainfo->obj_token[datainfo->count] = H5O_TOKEN_UNDEF;
 
     /* This will be freed by h5str_array_free(oName, n) */
     str_len = HDstrlen(name);
@@ -3426,16 +3546,13 @@ obj_info_max
     HDstrncpy(datainfo->objname[datainfo->count], name, str_len);
     (datainfo->objname[datainfo->count])[str_len] = '\0';
 
-    if (H5Oget_info2(loc_id, &object_info, H5O_INFO_ALL) < 0)
+    if (H5Oget_info3(loc_id, &object_info, H5O_INFO_ALL) < 0)
         goto done;
 
     datainfo->otype[datainfo->count] = object_info.type;
     datainfo->ltype[datainfo->count] = info->type;
 
-    if (info->type == H5L_TYPE_HARD)
-        datainfo->objno[datainfo->count] = (unsigned long)info->u.address;
-    else
-        datainfo->objno[datainfo->count] = info->u.val_size;
+    HDmemcpy(&datainfo->obj_token[datainfo->count], &object_info.token, sizeof(object_info.token));
 
 done:
     datainfo->count++;

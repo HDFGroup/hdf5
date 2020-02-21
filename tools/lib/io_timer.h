@@ -28,6 +28,7 @@
 #ifdef H5_HAVE_WINSOCK2_H
 #  include <winsock2.h>
 #endif /* H5_HAVE_WINSOCK2_H */
+
 /* The different types of timers we can have */
 typedef enum timer_type_ {
     HDF5_FILE_OPENCLOSE,
@@ -70,10 +71,19 @@ typedef struct io_time_t {
 #ifdef __cplusplus
 extern "C" {
 #endif  /* __cplusplus */
+
+#ifdef STANDALONE
+io_time_t   *io_time_new(clock_type t);
+void         io_time_destroy(io_time_t *pt);
+io_time_t   *io_time_set(io_time_t *pt, timer_type t, int start_stop);
+double       io_time_get(io_time_t *pt, timer_type t);
+#else
 H5TOOLS_DLL io_time_t   *io_time_new(clock_type t);
 H5TOOLS_DLL void         io_time_destroy(io_time_t *pt);
 H5TOOLS_DLL io_time_t   *io_time_set(io_time_t *pt, timer_type t, int start_stop);
 H5TOOLS_DLL double       io_time_get(io_time_t *pt, timer_type t);
+#endif
+
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */

@@ -2353,7 +2353,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
+H5Pget_virtual_vspace(hid_t dcpl_id, size_t idx)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5O_layout_t layout;        /* Layout information */
@@ -2361,7 +2361,7 @@ H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
     hid_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("i", "iz", dcpl_id, index);
+    H5TRACE2("i", "iz", dcpl_id, idx);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
@@ -2374,10 +2374,10 @@ H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
     /* Get the virtual space */
-    if(index >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
+    if(idx >= layout.storage.u.virt.list_nused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].source_dset.virtual_select, FALSE, TRUE)))
+    if(NULL == (space = H5S_copy(layout.storage.u.virt.list[idx].source_dset.virtual_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
 
     /* Register ID */
@@ -2411,7 +2411,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
+H5Pget_virtual_srcspace(hid_t dcpl_id, size_t idx)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5O_layout_t layout;        /* Layout information */
@@ -2419,7 +2419,7 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
     hid_t ret_value = FAIL;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("i", "iz", dcpl_id, index);
+    H5TRACE2("i", "iz", dcpl_id, idx);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
@@ -2431,28 +2431,28 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
     if(H5D_VIRTUAL != layout.type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
-    /* Check index */
-    if(index >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
+    /* Check idx */
+    if(idx >= layout.storage.u.virt.list_nused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
 
     /* Attempt to open source dataset and patch extent if extent status is not
      * H5O_VIRTUAL_STATUS_CORRECT?  -NAF */
     /* If source space status is H5O_VIRTUAL_STATUS_INVALID, patch with bounds
      * of selection */
-    if((H5O_VIRTUAL_STATUS_INVALID == layout.storage.u.virt.list[index].source_space_status)
-            && (layout.storage.u.virt.list[index].unlim_dim_source < 0)) {
+    if((H5O_VIRTUAL_STATUS_INVALID == layout.storage.u.virt.list[idx].source_space_status)
+            && (layout.storage.u.virt.list[idx].unlim_dim_source < 0)) {
         hsize_t bounds_start[H5S_MAX_RANK];
         hsize_t bounds_end[H5S_MAX_RANK];
         int rank;
         int i;
 
         /* Get rank of source space */
-        if((rank = H5S_GET_EXTENT_NDIMS(layout.storage.u.virt.list[index].source_select)) < 0)
+        if((rank = H5S_GET_EXTENT_NDIMS(layout.storage.u.virt.list[idx].source_select)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get source space rank")
 
         /* Get bounds of selection */
-        if(H5S_SELECT_BOUNDS(layout.storage.u.virt.list[index].source_select, bounds_start, bounds_end) < 0)
+        if(H5S_SELECT_BOUNDS(layout.storage.u.virt.list[idx].source_select, bounds_start, bounds_end) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get selection bounds")
 
         /* Adjust bounds to extent */
@@ -2460,15 +2460,15 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
             bounds_end[i]++;
 
         /* Set extent */
-        if(H5S_set_extent_simple(layout.storage.u.virt.list[index].source_select, (unsigned)rank, bounds_end, NULL) < 0)
+        if(H5S_set_extent_simple(layout.storage.u.virt.list[idx].source_select, (unsigned)rank, bounds_end, NULL) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set source space extent")
 
         /* Update source space status */
-        layout.storage.u.virt.list[index].source_space_status = H5O_VIRTUAL_STATUS_SEL_BOUNDS;
+        layout.storage.u.virt.list[idx].source_space_status = H5O_VIRTUAL_STATUS_SEL_BOUNDS;
     } /* end if */
 
     /* Get the source space */
-    if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].source_select, FALSE, TRUE)))
+    if(NULL == (space = H5S_copy(layout.storage.u.virt.list[idx].source_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")
 
     /* Register ID */
@@ -2515,7 +2515,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name/*out*/,
+H5Pget_virtual_filename(hid_t dcpl_id, size_t idx, char *name/*out*/,
     size_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -2523,7 +2523,7 @@ H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name/*out*/,
     ssize_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("Zs", "izxz", dcpl_id, index, name, size);
+    H5TRACE4("Zs", "izxz", dcpl_id, idx, name, size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
@@ -2536,13 +2536,13 @@ H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name/*out*/,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
     /* Get the virtual filename */
-    if(index >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
+    if(idx >= layout.storage.u.virt.list_nused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    HDassert(layout.storage.u.virt.list[index].source_file_name);
+    HDassert(layout.storage.u.virt.list[idx].source_file_name);
     if(name && (size > 0))
-        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_file_name, size);
-    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_file_name);
+        (void)HDstrncpy(name, layout.storage.u.virt.list[idx].source_file_name, size);
+    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[idx].source_file_name);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2578,7 +2578,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name/*out*/,
+H5Pget_virtual_dsetname(hid_t dcpl_id, size_t idx, char *name/*out*/,
     size_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -2586,7 +2586,7 @@ H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name/*out*/,
     ssize_t ret_value;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("Zs", "izxz", dcpl_id, index, name, size);
+    H5TRACE4("Zs", "izxz", dcpl_id, idx, name, size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
@@ -2599,13 +2599,13 @@ H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name/*out*/,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
     /* Get the virtual filename */
-    if(index >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
+    if(idx >= layout.storage.u.virt.list_nused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    HDassert(layout.storage.u.virt.list[index].source_dset_name);
+    HDassert(layout.storage.u.virt.list[idx].source_dset_name);
     if(name && (size > 0))
-        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_dset_name, size);
-    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_dset_name);
+        (void)HDstrncpy(name, layout.storage.u.virt.list[idx].source_dset_name, size);
+    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[idx].source_dset_name);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3324,19 +3324,19 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value/*out*/)
      */
     if(H5T_get_size(type) >= H5T_get_size(fill.type)) {
         buf = value;
-        if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_malloc(H5T_get_size(type))))
+        if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_calloc(H5T_get_size(type))))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for type conversion")
     } /* end if */
     else {
-        if(NULL == (buf = H5MM_malloc(H5T_get_size(fill.type))))
+        if(NULL == (buf = H5MM_calloc(H5T_get_size(fill.type))))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for type conversion")
-        if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_malloc(H5T_get_size(fill.type))))
+        if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_calloc(H5T_get_size(fill.type))))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for type conversion")
     } /* end else */
     H5MM_memcpy(buf, fill.buf, H5T_get_size(fill.type));
 
     /* Do the conversion */
-    if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(type, H5T_COPY_TRANSIENT), FALSE)) < 0)
+    if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(type, H5T_COPY_ALL), FALSE)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy/register datatype")
     if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "datatype conversion failed")

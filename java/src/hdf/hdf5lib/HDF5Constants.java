@@ -14,6 +14,8 @@
 
 package hdf.hdf5lib;
 
+import hdf.hdf5lib.structs.H5O_token_t;
+
 /**
  * /** This class contains C constants and enumerated types of HDF5 library. The
  * values of these constants are obtained from the library by calling J2C(int
@@ -344,9 +346,10 @@ public class HDF5Constants {
     public static final int H5O_INFO_BASIC = H5O_INFO_BASIC();
     public static final int H5O_INFO_TIME = H5O_INFO_TIME();
     public static final int H5O_INFO_NUM_ATTRS = H5O_INFO_NUM_ATTRS();
-    public static final int H5O_INFO_HDR = H5O_INFO_HDR();
-    public static final int H5O_INFO_META_SIZE = H5O_INFO_META_SIZE();
     public static final int H5O_INFO_ALL = H5O_INFO_ALL();
+    public static final int H5O_NATIVE_INFO_HDR = H5O_NATIVE_INFO_HDR();
+    public static final int H5O_NATIVE_INFO_META_SIZE = H5O_NATIVE_INFO_META_SIZE();
+    public static final int H5O_NATIVE_INFO_ALL = H5O_NATIVE_INFO_ALL();
     public static final int H5O_SHMESG_NONE_FLAG = H5O_SHMESG_NONE_FLAG();
     public static final int H5O_SHMESG_SDSPACE_FLAG = H5O_SHMESG_SDSPACE_FLAG();
     public static final int H5O_SHMESG_DTYPE_FLAG = H5O_SHMESG_DTYPE_FLAG();
@@ -359,6 +362,8 @@ public class HDF5Constants {
     public static final int H5O_TYPE_DATASET = H5O_TYPE_DATASET();
     public static final int H5O_TYPE_NAMED_DATATYPE = H5O_TYPE_NAMED_DATATYPE();
     public static final int H5O_TYPE_NTYPES = H5O_TYPE_NTYPES();
+    public static final int H5O_MAX_TOKEN_SIZE = H5O_MAX_TOKEN_SIZE();
+    public static final H5O_token_t H5O_TOKEN_UNDEF = H5O_TOKEN_UNDEF();
 
     public static final long H5P_ROOT = H5P_ROOT();
     public static final long H5P_OBJECT_CREATE = H5P_OBJECT_CREATE();
@@ -407,11 +412,18 @@ public class HDF5Constants {
     public static final int H5PL_VOL_PLUGIN = H5PL_VOL_PLUGIN();
     public static final int H5PL_ALL_PLUGIN = H5PL_ALL_PLUGIN();
 
+    public static final int H5R_ATTR = H5R_ATTR();
     public static final int H5R_BADTYPE = H5R_BADTYPE();
     public static final int H5R_DATASET_REGION = H5R_DATASET_REGION();
+    public static final int H5R_DATASET_REGION1 = H5R_DATASET_REGION1();
+    public static final int H5R_DATASET_REGION2 = H5R_DATASET_REGION2();
     public static final int H5R_MAXTYPE = H5R_MAXTYPE();
+    public static final int H5R_REF_BUF_SIZE = H5R_REF_BUF_SIZE();
     public static final int H5R_OBJ_REF_BUF_SIZE = H5R_OBJ_REF_BUF_SIZE();
     public static final int H5R_OBJECT = H5R_OBJECT();
+    public static final int H5R_OBJECT1 = H5R_OBJECT1();
+    public static final int H5R_OBJECT2 = H5R_OBJECT2();
+
     public static final int H5S_ALL = H5S_ALL();
     public static final int H5S_MAX_RANK = H5S_MAX_RANK();
     public static final int H5S_NO_CLASS = H5S_NO_CLASS();
@@ -606,6 +618,7 @@ public class HDF5Constants {
     public static final long H5T_STD_I8LE = H5T_STD_I8LE();
     public static final long H5T_STD_REF_DSETREG = H5T_STD_REF_DSETREG();
     public static final long H5T_STD_REF_OBJ = H5T_STD_REF_OBJ();
+    public static final long H5T_STD_REF = H5T_STD_REF();
     public static final long H5T_STD_U16BE = H5T_STD_U16BE();
     public static final long H5T_STD_U16LE = H5T_STD_U16LE();
     public static final long H5T_STD_U32BE = H5T_STD_U32BE();
@@ -1300,11 +1313,13 @@ public class HDF5Constants {
 
     private static native final int H5O_INFO_NUM_ATTRS();
 
-    private static native final int H5O_INFO_HDR();
-
-    private static native final int H5O_INFO_META_SIZE();
-
     private static native final int H5O_INFO_ALL();
+
+    private static native final int H5O_NATIVE_INFO_HDR();
+
+    private static native final int H5O_NATIVE_INFO_META_SIZE();
+
+    private static native final int H5O_NATIVE_INFO_ALL();
 
     private static native final int H5O_SHMESG_NONE_FLAG();
 
@@ -1329,6 +1344,10 @@ public class HDF5Constants {
     private static native final int H5O_TYPE_NAMED_DATATYPE();
 
     private static native final int H5O_TYPE_NTYPES();
+
+    private static native final int H5O_MAX_TOKEN_SIZE();
+
+    private static native final H5O_token_t H5O_TOKEN_UNDEF();
 
     private static native final long H5P_ROOT();
 
@@ -1420,15 +1439,27 @@ public class HDF5Constants {
 
     private static native final int H5PL_VOL_PLUGIN();
 
+    private static native final int H5R_ATTR();
+
     private static native final int H5R_BADTYPE();
 
     private static native final int H5R_DATASET_REGION();
 
+    private static native final int H5R_DATASET_REGION1();
+
+    private static native final int H5R_DATASET_REGION2();
+
     private static native final int H5R_MAXTYPE();
+
+    private static native final int H5R_REF_BUF_SIZE();
 
     private static native final int H5R_OBJ_REF_BUF_SIZE();
 
     private static native final int H5R_OBJECT();
+
+    private static native final int H5R_OBJECT1();
+
+    private static native final int H5R_OBJECT2();
 
     private static native final int H5S_ALL();
 
@@ -1817,6 +1848,8 @@ public class HDF5Constants {
     private static native final long H5T_STD_REF_DSETREG();
 
     private static native final long H5T_STD_REF_OBJ();
+
+    private static native final long H5T_STD_REF();
 
     private static native final long H5T_STD_U16BE();
 

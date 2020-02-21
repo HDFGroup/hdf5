@@ -106,7 +106,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     void *data = NULL;                  /* VOL-managed datatype data */
     H5VL_object_t *new_obj = NULL;      /* VOL object that holds the datatype object and the VOL info */
     H5T_t *dt = NULL;                   /* High level datatype object that wraps the VOL object */
-    H5VL_object_t *vol_obj = NULL;          /* object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -136,6 +136,9 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     else
         if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
+
+    /* Set the LCPL for the API context */
+    H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
     if(H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, TRUE) < 0)
@@ -229,7 +232,7 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects")
 
             /* Close the datatype object */
-	    if(H5O_close(&(dt->oloc), NULL) < 0)
+            if(H5O_close(&(dt->oloc), NULL) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
             /* Remove the datatype's object header from the file */
@@ -237,7 +240,7 @@ done:
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header")
 
             /* Mark datatype as being back in memory */
-            if(H5T_set_loc(dt, dt->sh_loc.file, H5T_LOC_MEMORY))
+            if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY))
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to return datatype to memory")
             dt->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;
             dt->shared->state = old_state;
@@ -270,7 +273,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     void *dt = NULL;                    /* datatype object created by VOL connector */
     H5VL_object_t *new_obj = NULL;      /* VOL object that holds the datatype object and the VOL info */
     H5T_t       *type = NULL;           /* Datatype created */
-    H5VL_object_t *vol_obj = NULL;          /* object token of loc_id */
+    H5VL_object_t *vol_obj = NULL;      /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -303,7 +306,8 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* Commit the datatype */
-    if(NULL == (dt = H5VL_datatype_commit(vol_obj, &loc_params, NULL, type_id, H5P_DEFAULT, tcpl_id, tapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (dt = H5VL_datatype_commit(vol_obj, &loc_params, NULL, type_id, H5P_LINK_CREATE_DEFAULT,
+            tcpl_id, tapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* Setup VOL object */
@@ -414,7 +418,7 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
     /* Mark datatype as being on disk now.  This step changes the size of
      *  datatype as stored on disk.
      */
-    if(H5T_set_loc(type, file, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(type, H5F_VOL_OBJ(file), H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
 
     /* Reset datatype location and path */
@@ -442,7 +446,7 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message")
 
     /* Copy the new object header's location into the datatype, taking ownership of it */
-    if(H5O_loc_copy(&(type->oloc), &temp_oloc, H5_COPY_SHALLOW) < 0)
+    if(H5O_loc_copy_shallow(&(type->oloc), &temp_oloc) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype location")
     if(H5G_name_copy(&(type->path), &temp_path, H5_COPY_SHALLOW) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype location")
@@ -564,8 +568,8 @@ done:
 hid_t
 H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 {
-    void *dt = NULL;           /* datatype token created by VOL connector */
-    H5VL_object_t *vol_obj = NULL;     /* object token of loc_id */
+    void *dt = NULL;           /* datatype object created by VOL connector */
+    H5VL_object_t *vol_obj = NULL;     /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t        ret_value = H5I_INVALID_HID;      /* Return value */
 
@@ -939,7 +943,7 @@ H5T_open(const H5G_loc_t *loc)
 #endif /* H5_USING_MEMCHECKER */
 
         /* Shallow copy (take ownership) of the object location object */
-        if(H5O_loc_copy(&dt->oloc, loc->oloc, H5_COPY_SHALLOW) < 0)
+        if(H5O_loc_copy_shallow(&dt->oloc, loc->oloc) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy object location")
 
         /* Shallow copy (take ownership) of the group hier. path */
@@ -1029,7 +1033,7 @@ H5T__open_oid(const H5G_loc_t *loc)
     dt->shared->state = H5T_STATE_OPEN;
 
     /* Shallow copy (take ownership) of the object location object */
-    if(H5O_loc_copy(&dt->oloc, loc->oloc, H5_COPY_SHALLOW) < 0)
+    if(H5O_loc_copy_shallow(&dt->oloc, loc->oloc) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy object location")
 
     /* Shallow copy (take ownership) of the group hier. path */
@@ -1092,7 +1096,7 @@ H5T_construct_datatype(H5VL_object_t *vol_obj)
 {
     ssize_t        nalloc;
     void          *buf = NULL;
-    H5T_t         *dt = NULL;       /* datatype token from VOL connector */
+    H5T_t         *dt = NULL;       /* datatype object from VOL connector */
     H5T_t         *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)

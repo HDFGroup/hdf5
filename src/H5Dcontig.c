@@ -1398,7 +1398,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
         /* create variable-length datatype at the destinaton file */
         if(NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy")
-        if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0) {
+        if(H5T_set_loc(dt_dst, H5F_VOL_OBJ(f_dst), H5T_LOC_DISK) < 0) {
             (void)H5T_close_real(dt_dst);
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
         } /* end if */
@@ -1543,19 +1543,14 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
             /* Reclaim space from variable length data */
-            if(H5D_vlen_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
+            if(H5T_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
         } /* end if */
         else if(fix_ref) {
             /* Check for expanding references */
             if(cpy_info->expand_ref) {
-                size_t ref_count;
-
-                /* Determine # of reference elements to copy */
-                ref_count = src_nbytes / H5T_get_size(dt_src);
-
                 /* Copy the reference elements */
-                if(H5O_copy_expand_ref(f_src, buf, f_dst, bkg, ref_count, H5T_get_ref_type(dt_src), cpy_info) < 0)
+                if(H5O_copy_expand_ref(f_src, tid_src, dt_src, buf, buf_size, f_dst, bkg, cpy_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
 
                 /* After fix ref, copy the new reference elements to the buffer to write out */

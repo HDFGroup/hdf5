@@ -25,14 +25,15 @@ typedef struct H5F_t H5F_t;
 #include "H5Fpublic.h"
 
 /* Public headers needed by this file */
-#include "H5FDpublic.h"        /* File drivers                */
+#include "H5FDpublic.h"         /* File drivers                */
 
 /* Private headers needed by this file */
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5MMprivate.h"	/* Memory management	       */
 #ifdef H5_HAVE_PARALLEL
-#include "H5Pprivate.h"        /* Property lists            */
+#include "H5Pprivate.h"         /* Property lists              */
 #endif /* H5_HAVE_PARALLEL */
-#include "H5VMprivate.h"        /* Vectors and arrays */
+#include "H5VMprivate.h"        /* Vectors and arrays          */
+#include "H5VLprivate.h"        /* Virtual Object Layer        */
 
 
 /**************************/
@@ -92,7 +93,7 @@ typedef struct H5F_t H5F_t;
    for (_i = 0; _i < sizeof(int64_t); _i++, _n >>= 8)                  \
       *_p++ = (uint8_t)(_n & 0xff);                          \
    for (/*void*/; _i < 8; _i++)                              \
-      *_p++ = (n) < 0 ? 0xff : 0;                          \
+      *_p++ = (uint8_t)((n) < 0 ? 0xff : 0);                          \
    (p) = (uint8_t*)(p)+8;                              \
 }
 
@@ -246,29 +247,29 @@ typedef struct H5F_t H5F_t;
 }
 
 /* Address-related macros */
-#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                  \
-                HADDR_UNDEF==(X)+(haddr_t)(Z) ||          \
+#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                      \
+                HADDR_UNDEF==(X)+(haddr_t)(Z) ||                            \
                 (X)+(haddr_t)(Z)<(X))
 #define H5F_addr_defined(X)    ((X)!=HADDR_UNDEF)
 /* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
  * certain that X is not HADDR_UNDEF and then checking that X equals Y
  */
-#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                  \
+#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                            \
                 (X)==(Y))
 #define H5F_addr_ne(X,Y)    (!H5F_addr_eq((X),(Y)))
-#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                           \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)<(Y))
-#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)<=(Y))
-#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)>(Y))
-#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                  \
-                (Y)!=HADDR_UNDEF &&                  \
+#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
                 (X)>=(Y))
-#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :              \
+#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :                   \
                 (H5F_addr_lt((X), (Y)) ? -1 : 1))
 #define H5F_addr_pow2(N)    ((haddr_t)1<<(N))
 #define H5F_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
@@ -335,6 +336,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_NULL_FSM_ADDR(F)    ((F)->shared->null_fsm_addr)
 #define H5F_GET_MIN_DSET_OHDR(F) ((F)->shared->crt_dset_min_ohdr_flag)
 #define H5F_SET_MIN_DSET_OHDR(F, V) ((F)->shared->crt_dset_min_ohdr_flag = (V))
+#define H5F_VOL_CLS(F)          ((F)->shared->vol_cls)
+#define H5F_VOL_OBJ(F)          ((F)->vol_obj)
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)        (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)       (H5F_get_high_bound(F))
@@ -395,6 +398,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_NULL_FSM_ADDR(F)    (H5F_get_null_fsm_addr(F))
 #define H5F_GET_MIN_DSET_OHDR(F) (H5F_get_min_dset_ohdr(F))
 #define H5F_SET_MIN_DSET_OHDR(F, V) (H5F_set_min_dset_ohdr((F), (V)))
+#define H5F_VOL_CLS(F)          (H5F_get_vol_cls(F))
+#define H5F_VOL_OBJ(F)          (H5F_get_vol_obj(F))
 #endif /* H5F_MODULE */
 
 
@@ -427,7 +432,7 @@ typedef struct H5F_t H5F_t;
     default: HDassert("bad sizeof size" && 0);                      \
 }
 
-#define H5F_DECODE_LENGTH(f,p,l) H5F_DECODE_LENGTH_LEN(p,l,H5F_SIZEOF_SIZE(f))
+#define H5F_DECODE_LENGTH(f,p,l) DECODE_VAR(p,l,H5F_SIZEOF_SIZE(f))
 
 /*
  * Macros that check for overflows.  These are somewhat dangerous to fiddle
@@ -725,9 +730,10 @@ typedef enum H5F_prefix_open_t {
 /***************************************/
 
 /* Private functions */
+H5_DLL herr_t H5F_init(void);
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
-H5_DLL hid_t H5F_get_file_id(hid_t obj_id, H5I_type_t id_type, hbool_t app_ref);
+H5_DLL hid_t H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref);
 
 /* Functions that retrieve values from the file struct */
 H5_DLL H5F_libver_t H5F_get_low_bound(const H5F_t *f);
@@ -755,6 +761,8 @@ H5_DLL hbool_t H5F_get_point_of_no_return(const H5F_t *f);
 H5_DLL hbool_t H5F_get_null_fsm_addr(const H5F_t *f);
 H5_DLL hbool_t H5F_get_min_dset_ohdr(const H5F_t *f);
 H5_DLL herr_t H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize);
+H5_DLL const H5VL_class_t *H5F_get_vol_cls(const H5F_t *f);
+H5_DLL H5VL_object_t *H5F_get_vol_obj(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);

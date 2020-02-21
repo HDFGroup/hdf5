@@ -556,10 +556,8 @@ H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 /* Package-local function prototypes */
 H5_DLL const H5O_obj_class_t *H5O__obj_class(const H5O_loc_t *loc);
 H5_DLL int H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted);
-H5_DLL herr_t H5O__get_info_by_idx(const H5G_loc_t *loc, const char *group_name,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, unsigned fields);
 H5_DLL herr_t H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
-    H5_iter_order_t order, H5O_iterate_t op, void *op_data, unsigned fields);
+    H5_iter_order_t order, H5O_iterate2_t op, void *op_data, unsigned fields);
 H5_DLL herr_t H5O__inc_rc(H5O_t *oh);
 H5_DLL herr_t H5O__dec_rc(H5O_t *oh);
 H5_DLL herr_t H5O__free(H5O_t *oh);

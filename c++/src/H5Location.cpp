@@ -1404,6 +1404,121 @@ void H5Location::unlink(const H5std_string& name, const LinkAccPropList& lapl) c
 }
 
 //--------------------------------------------------------------------------
+// Function:    H5Location::getNativeObjinfo
+///\brief       Retrieves native information about an HDF5 object.
+///\param       objinfo - OUT: Struct containing the native object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///\par Description
+///             Valid values of \a fields are as follows:
+///             \li \c H5O_INFO_HDR (default)
+///             \li \c H5O_INFO_META_SIZE
+///             \li \c H5O_INFO_ALL
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Location::getNativeObjinfo(H5O_native_info_t& objinfo, unsigned fields) const
+{
+
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_native_info(getId(), &objinfo, fields);
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+        throwException(inMemFunc("getNativeObjinfo"), "H5Oget_native_info failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getNativeObjinfo
+///\brief       Retrieves native information about an HDF5 object given its name.
+///\param       name    - IN: Name of the object to be queried - \c char *
+///\param       objinfo - OUT: Struct containing the native object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///                           - default to H5O_INFO_HDR
+///\param       lapl - IN: Link access property list
+///\par Description
+///             Valid values of \a fields are as follows:
+///             \li \c H5O_INFO_HDR (default)
+///             \li \c H5O_INFO_META_SIZE
+///             \li \c H5O_INFO_ALL
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Location::getNativeObjinfo(const char* name, H5O_native_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
+{
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_native_info_by_name(getId(), name, &objinfo, fields, lapl.getId());
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+        throwException(inMemFunc("getNativeObjinfo"), "H5Oget_native_info_by_name failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getNativeObjinfo
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+///\param       name    - IN: Name of the object to be queried - \c H5std_string
+///\param       objinfo - OUT: Struct containing the native object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///                           - default to H5O_INFO_HDR
+///\param       lapl - IN: Link access property list
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Location::getNativeObjinfo(const H5std_string& name, H5O_native_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
+{
+    getNativeObjinfo(name.c_str(), objinfo, fields, lapl);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getNativeObjinfo
+///\brief       Retrieves native information about an HDF5 object given its index.
+///\param       grp_name - IN: Group name where the object belongs - \c char *
+///\param       idx_type - IN: Type of index
+///\param       order   - IN: Order to traverse
+///\param       idx     - IN: Object position
+///\param       objinfo - OUT: Struct containing the native object info
+///\param       fields  - IN: Indicates the group of information to be retrieved
+///                           - default to H5O_INFO_HDR
+///\param       lapl    - IN: Link access property list
+///\par Description
+///             Valid values of \a fields are as follows:
+///             \li \c H5O_INFO_HDR (default)
+///             \li \c H5O_INFO_META_SIZE
+///             \li \c H5O_INFO_ALL
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Location::getNativeObjinfo(const char* grp_name, H5_index_t idx_type,
+     H5_iter_order_t order, hsize_t idx, H5O_native_info_t& objinfo, unsigned fields,
+     const LinkAccPropList& lapl) const
+{
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_native_info_by_idx(getId(), grp_name, idx_type, order,
+                       idx, &objinfo, fields, lapl.getId());
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+        throwException(inMemFunc("getNativeObjinfo"), "H5Oget_native_info_by_idx failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Location::getObjinfo
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+///\param       name    - IN: Name of the object to be queried - \c H5std_string
+///\param       objinfo - OUT: Struct containing the native object info
+///\param       fields  - IN: Indicates a group of information to be retrieved
+///                           - default to H5O_INFO_HDR
+///\param       lapl - IN: Link access property list
+// July, 2018
+//--------------------------------------------------------------------------
+void H5Location::getNativeObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
+     H5_iter_order_t order, hsize_t idx, H5O_native_info_t& objinfo, unsigned fields,
+     const LinkAccPropList& lapl) const
+{
+    getNativeObjinfo(grp_name.c_str(), idx_type, order, idx, objinfo, fields, lapl);
+}
+
+//--------------------------------------------------------------------------
 // Function:    H5Location::getObjinfo
 ///\brief       Retrieves information about an HDF5 object.
 ///\param       objinfo - OUT: Struct containing the object info
@@ -1418,15 +1533,15 @@ void H5Location::unlink(const H5std_string& name, const LinkAccPropList& lapl) c
 ///             \li \c H5O_INFO_ALL
 // July, 2018
 //--------------------------------------------------------------------------
-void H5Location::getObjinfo(H5O_info_t& objinfo, unsigned fields) const
+void H5Location::getObjinfo(H5O_info2_t& objinfo, unsigned fields) const
 {
 
     // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info2(getId(), &objinfo, fields);
+    herr_t ret_value = H5Oget_info3(getId(), &objinfo, fields);
 
     // Throw exception if C API returns failure
     if (ret_value < 0)
-        throwException(inMemFunc("getObjinfo"), "H5Oget_info2 failed");
+        throwException(inMemFunc("getObjinfo"), "H5Oget_info3 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -1447,10 +1562,10 @@ void H5Location::getObjinfo(H5O_info_t& objinfo, unsigned fields) const
 ///             \li \c H5O_INFO_ALL
 // July, 2018
 //--------------------------------------------------------------------------
-void H5Location::getObjinfo(const char* name, H5O_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
+void H5Location::getObjinfo(const char* name, H5O_info2_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
 {
     // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info_by_name2(getId(), name, &objinfo, fields, lapl.getId());
+    herr_t ret_value = H5Oget_info_by_name3(getId(), name, &objinfo, fields, lapl.getId());
 
     // Throw exception if C API returns failure
     if (ret_value < 0)
@@ -1469,7 +1584,7 @@ void H5Location::getObjinfo(const char* name, H5O_info_t& objinfo, unsigned fiel
 ///\param       lapl - IN: Link access property list
 // July, 2018
 //--------------------------------------------------------------------------
-void H5Location::getObjinfo(const H5std_string& name, H5O_info_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
+void H5Location::getObjinfo(const H5std_string& name, H5O_info2_t& objinfo, unsigned fields, const LinkAccPropList& lapl) const
 {
     getObjinfo(name.c_str(), objinfo, fields, lapl);
 }
@@ -1496,11 +1611,11 @@ void H5Location::getObjinfo(const H5std_string& name, H5O_info_t& objinfo, unsig
 // July, 2018
 //--------------------------------------------------------------------------
 void H5Location::getObjinfo(const char* grp_name, H5_index_t idx_type,
-     H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo, unsigned fields,
+     H5_iter_order_t order, hsize_t idx, H5O_info2_t& objinfo, unsigned fields,
      const LinkAccPropList& lapl) const
 {
     // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info_by_idx2(getId(), grp_name, idx_type, order,
+    herr_t ret_value = H5Oget_info_by_idx3(getId(), grp_name, idx_type, order,
                        idx, &objinfo, fields, lapl.getId());
 
     // Throw exception if C API returns failure
@@ -1521,7 +1636,7 @@ void H5Location::getObjinfo(const char* grp_name, H5_index_t idx_type,
 // July, 2018
 //--------------------------------------------------------------------------
 void H5Location::getObjinfo(const H5std_string& grp_name, H5_index_t idx_type,
-     H5_iter_order_t order, hsize_t idx, H5O_info_t& objinfo, unsigned fields,
+     H5_iter_order_t order, hsize_t idx, H5O_info2_t& objinfo, unsigned fields,
      const LinkAccPropList& lapl) const
 {
     getObjinfo(grp_name.c_str(), idx_type, order, idx, objinfo, fields, lapl);
@@ -1596,11 +1711,11 @@ void H5Location::getObjinfo(const H5std_string& name, H5G_stat_t& statbuf) const
 ///\exception   H5::FileIException/H5::GroupIException/H5::LocationException
 // 2000
 //--------------------------------------------------------------------------
-H5L_info_t H5Location::getLinkInfo(const char* link_name, const LinkAccPropList& lapl) const
+H5L_info2_t H5Location::getLinkInfo(const char* link_name, const LinkAccPropList& lapl) const
 {
-    H5L_info_t linkinfo; // link info structure
+    H5L_info2_t linkinfo; // link info structure
 
-    herr_t ret_value = H5Lget_info(getId(), link_name, &linkinfo, lapl.getId());
+    herr_t ret_value = H5Lget_info2(getId(), link_name, &linkinfo, lapl.getId());
     if (ret_value < 0)
         throwException("getLinkInfo", "H5Lget_info to find buffer size failed");
 
@@ -1613,7 +1728,7 @@ H5L_info_t H5Location::getLinkInfo(const char* link_name, const LinkAccPropList&
 ///             It differs from the above function in that it takes an
 ///             \c H5std_string for \a link_name.
 //--------------------------------------------------------------------------
-H5L_info_t H5Location::getLinkInfo(const H5std_string& link_name, const LinkAccPropList& lapl) const
+H5L_info2_t H5Location::getLinkInfo(const H5std_string& link_name, const LinkAccPropList& lapl) const
 {
     return(getLinkInfo(link_name.c_str(), lapl));
 }
@@ -1629,7 +1744,7 @@ H5L_info_t H5Location::getLinkInfo(const H5std_string& link_name, const LinkAccP
 //--------------------------------------------------------------------------
 H5std_string H5Location::getLinkval(const char* name, size_t size) const
 {
-    H5L_info_t linkinfo;
+    H5L_info2_t linkinfo;
     char *value_C;        // value in C string
     size_t val_size = size;
     H5std_string value = "";
@@ -1638,7 +1753,7 @@ H5std_string H5Location::getLinkval(const char* name, size_t size) const
     // if user doesn't provide buffer size, determine it
     if (size == 0)
     {
-        ret_value = H5Lget_info(getId(), name, &linkinfo, H5P_DEFAULT);
+        ret_value = H5Lget_info2(getId(), name, &linkinfo, H5P_DEFAULT);
         if (ret_value < 0)
             throwException("getLinkval", "H5Lget_info to find buffer size failed");
 
@@ -1941,11 +2056,11 @@ ssize_t H5Location::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size
 //--------------------------------------------------------------------------
 H5O_type_t H5Location::childObjType(const char* objname) const
 {
-    H5O_info_t objinfo;
+    H5O_info2_t objinfo;
     H5O_type_t objtype = H5O_TYPE_UNKNOWN;
 
     // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info_by_name2(getId(), objname, &objinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+    herr_t ret_value = H5Oget_info_by_name3(getId(), objname, &objinfo, H5O_INFO_BASIC, H5P_DEFAULT);
 
     // Throw exception if C API returns failure
     if (ret_value < 0)
@@ -2016,11 +2131,11 @@ H5O_type_t H5Location::childObjType(const H5std_string& objname) const
 H5O_type_t H5Location::childObjType(hsize_t index, H5_index_t index_type, H5_iter_order_t order, const char* objname) const
 {
     herr_t ret_value;
-    H5O_info_t objinfo;
+    H5O_info2_t objinfo;
     H5O_type_t objtype = H5O_TYPE_UNKNOWN;
 
     // Use C API to get information of the object
-    ret_value = H5Oget_info_by_idx2(getId(), objname, index_type, order, index, &objinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+    ret_value = H5Oget_info_by_idx3(getId(), objname, index_type, order, index, &objinfo, H5O_INFO_BASIC, H5P_DEFAULT);
 
     // Throw exception if C API returns failure
     if (ret_value < 0)
@@ -2058,11 +2173,11 @@ H5O_type_t H5Location::childObjType(hsize_t index, H5_index_t index_type, H5_ite
 //--------------------------------------------------------------------------
 unsigned H5Location::childObjVersion(const char* objname) const
 {
-    H5O_info_t objinfo;
+    H5O_native_info_t objinfo;
     unsigned version = 0;
 
     // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info_by_name2(getId(), objname, &objinfo, H5O_INFO_HDR, H5P_DEFAULT);
+    herr_t ret_value = H5Oget_native_info_by_name(getId(), objname, &objinfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT);
 
     // Throw exception if C API returns failure
     if (ret_value < 0)

@@ -113,17 +113,6 @@ public class TestH5Dparams {
         H5.H5Dvlen_get_buf_size(-1, -1, -1);
     }
 
-    @Test(expected = HDF5LibraryException.class)
-    public void testH5Dvlen_reclaim_invalid() throws Throwable {
-        byte[] buf = new byte[2];
-        H5.H5Dvlen_reclaim(-1, -1, -1, buf);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testH5Dvlen_reclaim_null() throws Throwable {
-        H5.H5Dvlen_reclaim(-1, -1, -1, null);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testH5Dget_storage_size_invalid() throws Throwable {
         H5.H5Dget_storage_size(-1);

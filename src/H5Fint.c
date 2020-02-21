@@ -139,18 +139,14 @@ H5F__set_vol_conn(H5F_t *file)
     /* Sanity check */
     HDassert(0 != connector_prop.connector_id);
 
-    /* Copy connector info, if it exists */
-    if(connector_prop.connector_info) {
-        H5VL_class_t *connector;           /* Pointer to connector */
+    /* Retrieve the connector for the ID */
+    if(NULL == (file->shared->vol_cls = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-        /* Retrieve the connector for the ID */
-        if(NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
-            HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
-        /* Allocate and copy connector info */
-        if(H5VL_copy_connector_info(connector, &new_connector_info, connector_prop.connector_info) < 0)
+    /* Allocate and copy connector info, if it exists */
+    if(connector_prop.connector_info)
+        if(H5VL_copy_connector_info(file->shared->vol_cls, &new_connector_info, connector_prop.connector_info) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "connector info copy failed")
-    } /* end if */
 
     /* Cache the connector ID & info for the container */
     file->shared->vol_id = connector_prop.connector_id;
@@ -277,7 +273,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 
 done:
     /* Release the copy of the driver info, if it was set up */
-    if(driver_prop_copied && H5FD_fapl_close(driver_prop.driver_id, driver_prop.driver_info) < 0)
+    if(driver_prop_copied && H5FD_free_driver_info(driver_prop.driver_id, driver_prop.driver_info) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, H5I_INVALID_HID, "can't close copy of driver info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1142,9 +1138,15 @@ done:
                     HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list")
 
             f->shared = H5FL_FREE(H5F_shared_t, f->shared);
-        }
+        } /* end if */
+
+        /* Free VOL object */
+        if(f->vol_obj)
+            if(H5VL_free_object(f->vol_obj) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "unable to free VOL object")
+
         f = H5FL_FREE(H5F_t, f);
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__new() */
@@ -1377,6 +1379,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
             if(H5I_dec_ref(f->shared->vol_id) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close VOL connector ID")
+        f->shared->vol_cls = NULL;
 
         /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)
@@ -1410,6 +1413,9 @@ H5F__dest(H5F_t *f, hbool_t flush)
     /* Free the non-shared part of the file */
     f->open_name = (char *)H5MM_xfree(f->open_name);
     f->actual_name = (char *)H5MM_xfree(f->actual_name);
+    if(f->vol_obj && H5VL_free_object(f->vol_obj) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
+    f->vol_obj = NULL;
     if(H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     f->shared = NULL;
@@ -1503,8 +1509,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
     size_t              page_buf_size;
-    unsigned            page_buf_min_meta_perc;
-    unsigned            page_buf_min_raw_perc;
+    unsigned            page_buf_min_meta_perc = 0;
+    unsigned            page_buf_min_raw_perc = 0;
     hbool_t             set_flag = FALSE;   /*set the status_flags in the superblock */
     hbool_t             clear = FALSE;      /*clear the status_flags         */
     hbool_t             evict_on_close;     /* evict on close value from plist  */
@@ -1820,6 +1826,35 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__post_open
+ *
+ * Purpose:     Finishes file open after wrapper context for file has been
+ *              set.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__post_open(H5F_t *f)
+{
+    herr_t   ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check arguments */
+    HDassert(f);
+
+    /* Store a vol object in the file struct */
+    if(NULL == (f->vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, f, f->shared->vol_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create VOL object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__flush() */
 
 
 /*-------------------------------------------------------------------------
@@ -3546,121 +3581,6 @@ done:
 } /* H5F__format_convert() */
 
 
-/*---------------------------------------------------------------------------
- * Function:    H5F__get_file
- *
- * Purpose:     Utility routine to get file struct for an object
- *
- * Returns:     SUCCESS:    A pointer to the H5F_t struct for the file
- *                          associated with the object.
- *              FAILURE:    NULL
- *
- *---------------------------------------------------------------------------
- */
-H5F_t *
-H5F__get_file(void *obj, H5I_type_t type)
-{
-    H5F_t      *ret_value  = NULL;         /* File pointer             */
-    H5O_loc_t  *oloc       = NULL;         /* Object location for ID   */
-
-    FUNC_ENTER_PACKAGE
-
-    switch(type) {
-        case H5I_FILE:
-            ret_value = (H5F_t *)obj;
-            break;
-
-        case H5I_GROUP:
-            oloc = H5G_oloc((H5G_t *)obj);
-            break;
-
-        case H5I_DATATYPE:
-            oloc = H5T_oloc((H5T_t *)obj);
-            break;
-
-        case H5I_DATASET:
-            oloc = H5D_oloc((H5D_t *)obj);
-            break;
-
-        case H5I_ATTR:
-            oloc = H5A_oloc((H5A_t *)obj);
-            break;
-
-        case H5I_MAP:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "maps not supported in native VOL connector")
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_DATASPACE:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_SPACE_SEL_ITER:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
-    } /* end switch */
-
-    /* Set return value for objects (not files) */
-    if(oloc)
-        ret_value = oloc->file;
-
-    /* Couldn't find a file struct */
-    if(!ret_value)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "object is not associated with a file")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__get_file */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__get_file_id
- *
- * Purpose:     The package version of H5Iget_file_id(), obtains the file
- *              ID given an object ID.
- *
- * Return:      Success:    The file ID associated with the object
- *              Failure:    H5I_INVALID_HID
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5F__get_file_id(H5F_t *file, hbool_t app_ref)
-{
-    hid_t file_id = H5I_INVALID_HID;    /* File ID */
-    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Check if the file's ID already exists */
-    if(H5I_find_id(file, H5I_FILE, &file_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
-
-    /* If the ID does not exist, register it with the VOL connector */
-    if(H5I_INVALID_HID == file_id) {
-        if((file_id = H5VL_wrap_register(H5I_FILE, file, app_ref)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
-        file->id_exists = TRUE;
-    } /* end if */
-    else {
-        /* Increment ref count on existing ID */
-        if(H5I_inc_ref(file_id, app_ref) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
-    } /* end else */
-
-    /* Set return value */
-    ret_value = file_id;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__get_file_id() */
-
-
 /*-------------------------------------------------------------------------
  * Function:    H5F_get_file_id
  *
@@ -3673,28 +3593,52 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5F_get_file_id(hid_t obj_id, H5I_type_t type, hbool_t app_ref)
+H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
 {
-    H5VL_object_t  *vol_obj;                    /* File info */
-    hid_t           file_id = H5I_INVALID_HID;  /* File ID for object */
-    hid_t           ret_value = H5I_INVALID_HID; /* Return value */
+    void *vol_obj_file = NULL;                  /* File object pointer */
+    H5VL_loc_params_t loc_params;               /* Location parameters */
+    hid_t       file_id = H5I_INVALID_HID;      /* File ID for object */
+    hbool_t     vol_wrapper_set = FALSE;        /* Whether the VOL object wrapping context was set up */
+    hid_t       ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    /* Get the object pointer */
-    if(NULL == (vol_obj = H5VL_vol_object(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid identifier")
+    /* Set location parameters */
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = obj_type;
 
-    /* Get the file through the VOL */
-    if(H5VL_file_optional(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5VL_NATIVE_FILE_GET_FILE_ID, (int)type, (int)app_ref, &file_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get file ID")
-    if(H5I_INVALID_HID == file_id)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to get the file ID through the VOL")
+    /* Retrieve VOL file from object */
+    if(H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_FILE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &vol_obj_file) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file from object")
+
+    /* Check if the file's ID already exists */
+    if(H5I_find_id(vol_obj_file, H5I_FILE, &file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "getting file ID failed")
+
+    /* If the ID does not exist, register it with the VOL connector */
+    if(H5I_INVALID_HID == file_id) {
+        /* Set wrapper info in API context */
+        if(H5VL_set_vol_wrapper(vol_obj) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL wrapper info")
+        vol_wrapper_set = TRUE;
+
+        if((file_id = H5VL_wrap_register(H5I_FILE, vol_obj_file, app_ref)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+    } /* end if */
+    else {
+        /* Increment ref count on existing ID */
+        if(H5I_inc_ref(file_id, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "incrementing file ID failed")
+    } /* end else */
 
     /* Set return value */
     ret_value = file_id;
 
 done:
+    /* Reset object wrapping info in API context */
+    if(vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTRESET, H5I_INVALID_HID, "can't reset VOL wrapper info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_file_id() */
 

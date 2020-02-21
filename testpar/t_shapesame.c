@@ -397,14 +397,9 @@ hs_dr_pio_test__setup(const int test_num,
          *
          *                                         JRM -- 9/16/10
          */
-        if ( express_test == 0 ) {
 
-            tv_ptr->chunk_dims[0] = 1;
+        tv_ptr->chunk_dims[0] = 1;
 
-        } else {
-
-            tv_ptr->chunk_dims[0] = 1;
-        }
         tv_ptr->chunk_dims[1] = tv_ptr->chunk_dims[2] =
                                 tv_ptr->chunk_dims[3] =
                                 tv_ptr->chunk_dims[4] = (hsize_t)(tv_ptr->chunk_edge_size);
@@ -1981,7 +1976,6 @@ contig_hs_dr_pio_test__run_test(const int test_num,
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG
     const char *fcnName = "contig_hs_dr_pio_test__run_test()";
 #endif /* CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
-    int        mpi_rank;
     struct hs_dr_pio_test_vars_t test_vars =
     {
         /* int           mpi_size                        = */ -1,
@@ -2048,9 +2042,6 @@ contig_hs_dr_pio_test__run_test(const int test_num,
     hs_dr_pio_test__setup(test_num, edge_size, -1, chunk_edge_size,
                           small_rank, large_rank, use_collective_io,
                           dset_type, express_test, tv_ptr);
-
-    /* initialize the local copy of mpi_rank */
-    mpi_rank = tv_ptr->mpi_rank;
 
     /* initialize skips & max_skips */
     tv_ptr->skips = *skips_ptr;
@@ -3520,7 +3511,6 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
     const char *fcnName = "ckrbrd_hs_dr_pio_test__m2d_l2s()";
 #endif /* CHECKER_BOARD_HS_DR_PIO_TEST__M2D_L2S__DEBUG */
     hbool_t    data_ok = FALSE;
-    hbool_t    mis_match = FALSE;
     int        i, j, k, l;
     size_t      u;
     size_t      start_index;
@@ -3768,8 +3758,6 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
 
                     /* verify that expected data is retrieved */
 
-                    mis_match = FALSE;
-
                     expected_value = (uint32_t)(
                 (i * tv_ptr->edge_size * tv_ptr->edge_size *
                                  tv_ptr->edge_size * tv_ptr->edge_size) +
@@ -3878,7 +3866,6 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
     const char *fcnName = "ckrbrd_hs_dr_pio_test__m2d_s2l()";
 #endif /* CONTIG_HS_DR_PIO_TEST__M2D_S2L__DEBUG */
     hbool_t    data_ok = FALSE;
-    hbool_t    mis_match = FALSE;
     int        i, j, k, l;
     size_t      u;
     size_t      start_index;
@@ -4138,8 +4125,6 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
                     HDassert( stop_index < tv_ptr->large_ds_size );
 
 
-                    mis_match = FALSE;
-
                     data_ok = TRUE;
 
                     ptr_1 = tv_ptr->large_ds_buf_1;
@@ -4235,7 +4220,6 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
 #if CKRBRD_HS_DR_PIO_TEST__RUN_TEST__DEBUG
     const char *fcnName = "ckrbrd_hs_dr_pio_test__run_test()";
 #endif /* CKRBRD_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
-    int        mpi_rank; /* needed by VRFY */
     struct hs_dr_pio_test_vars_t test_vars =
     {
         /* int           mpi_size                        = */ -1,
@@ -4303,10 +4287,6 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
                           chunk_edge_size, small_rank, large_rank,
                           use_collective_io, dset_type, express_test,
                           tv_ptr);
-
-
-    /* initialize the local copy of mpi_rank */
-    mpi_rank = tv_ptr->mpi_rank;
 
 
     /* initialize skips & max_skips */

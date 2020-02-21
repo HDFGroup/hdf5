@@ -1279,3 +1279,86 @@ H5F_get_null_fsm_addr(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->null_fsm_addr)
 } /* end H5F_get_null_fsm_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_get_vol_cls
+ *
+ * Purpose:  Get the VOL class for the file
+ *
+ * Return:   VOL class pointer for file, can't fail
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, August 17, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5VL_class_t *
+H5F_get_vol_cls(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->vol_cls)
+} /* end H5F_get_vol_cls */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_get_vol_obj
+ *
+ * Purpose:  Get the VOL object for the file
+ *
+ * Return:   VOL object pointer for file, can't fail
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_object_t *
+H5F_get_vol_obj(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->vol_obj)
+} /* end H5F_get_vol_obj */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_cont_info
+ *
+ * Purpose:     Get the VOL container info for the file
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, August 17, 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Verify structure version */
+    if(info->version != H5VL_CONTAINER_INFO_VERSION)
+        HGOTO_ERROR(H5E_FILE, H5E_VERSION, FAIL, "wrong container info version #")
+
+    /* Set the container info fields */
+    info->feature_flags = 0;            /* None currently defined */
+    info->token_size = H5F_SIZEOF_ADDR(f);
+    info->blob_id_size = H5HG_HEAP_ID_SIZE(f);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_cont_info */
+

@@ -254,7 +254,7 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDmulti.h
     ${HDF5_SRC_DIR}/H5FDpublic.h
     ${HDF5_SRC_DIR}/H5FDros3.h
-    ${HDF5_SRC_DIR}/H5FDs3comms.c
+    ${HDF5_SRC_DIR}/H5FDs3comms.h
     ${HDF5_SRC_DIR}/H5FDsec2.h
     ${HDF5_SRC_DIR}/H5FDstdio.h
     ${HDF5_SRC_DIR}/H5FDwindows.h
@@ -386,6 +386,7 @@ IDE_GENERATED_PROPERTIES ("H5I" "${H5I_HDRS}" "${H5I_SOURCES}" )
 
 set (H5L_SOURCES
     ${HDF5_SRC_DIR}/H5L.c
+    ${HDF5_SRC_DIR}/H5Ldeprec.c
     ${HDF5_SRC_DIR}/H5Lexternal.c
 )
 set (H5L_HDRS
@@ -446,6 +447,7 @@ set (H5O_SOURCES
     ${HDF5_SRC_DIR}/H5Ochunk.c
     ${HDF5_SRC_DIR}/H5Ocont.c
     ${HDF5_SRC_DIR}/H5Ocopy.c
+    ${HDF5_SRC_DIR}/H5Ocopy_ref.c
     ${HDF5_SRC_DIR}/H5Odbg.c
     ${HDF5_SRC_DIR}/H5Odeprec.c
     ${HDF5_SRC_DIR}/H5Odrvinfo.c
@@ -616,6 +618,7 @@ set (H5T_SOURCES
     ${HDF5_SRC_DIR}/H5Torder.c
     ${HDF5_SRC_DIR}/H5Tpad.c
     ${HDF5_SRC_DIR}/H5Tprecis.c
+    ${HDF5_SRC_DIR}/H5Tref.c
     ${HDF5_SRC_DIR}/H5Tstrpad.c
     ${HDF5_SRC_DIR}/H5Tvisit.c
     ${HDF5_SRC_DIR}/H5Tvlen.c
@@ -649,12 +652,15 @@ set (H5VL_SOURCES
     ${HDF5_SRC_DIR}/H5VLint.c
     ${HDF5_SRC_DIR}/H5VLnative.c
     ${HDF5_SRC_DIR}/H5VLnative_attr.c
+    ${HDF5_SRC_DIR}/H5VLnative_blob.c
     ${HDF5_SRC_DIR}/H5VLnative_dataset.c
     ${HDF5_SRC_DIR}/H5VLnative_datatype.c
     ${HDF5_SRC_DIR}/H5VLnative_file.c
     ${HDF5_SRC_DIR}/H5VLnative_group.c
     ${HDF5_SRC_DIR}/H5VLnative_link.c
+    ${HDF5_SRC_DIR}/H5VLnative_introspect.c
     ${HDF5_SRC_DIR}/H5VLnative_object.c
+    ${HDF5_SRC_DIR}/H5VLnative_token.c
     ${HDF5_SRC_DIR}/H5VLpassthru.c
 )
 set (H5VL_HDRS

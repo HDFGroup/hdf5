@@ -26,7 +26,7 @@
 hid_t
 h5tools_get_little_endian_type(hid_t tid)
 {
-    hid_t       p_type=-1;
+    hid_t       p_type=H5I_INVALID_HID;
     H5T_class_t type_class;
     size_t      size;
     H5T_sign_t  sign;
@@ -106,7 +106,7 @@ h5tools_get_little_endian_type(hid_t tid)
 hid_t
 h5tools_get_big_endian_type(hid_t tid)
 {
-    hid_t       p_type = -1;
+    hid_t       p_type = H5I_INVALID_HID;
     H5T_class_t type_class;
     size_t      size;
     H5T_sign_t  sign;

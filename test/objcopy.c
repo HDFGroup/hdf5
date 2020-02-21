@@ -157,6 +157,7 @@ const char *FILENAME[] = {
 #define NUM_SUB_GROUPS  20
 #define NUM_WIDE_LOOP_GROUPS  10
 #define NUM_DATASETS  10
+#define ATTR_CMPD_STRING    "ThisIsAString"
 
 char src_obj_full_name[215];  /* the full path + name of the object to be copied */
 
@@ -167,7 +168,7 @@ unsigned num_attributes_g;         /* Number of attributes created */
 static struct {
     size_t  nalloc;             /* number of slots allocated */
     size_t  nobjs;              /* number of objects */
-    haddr_t *obj;               /* Addresses of objects seen */
+    H5O_token_t *obj;           /* Tokens of objects seen */
 } idtab_g;
 
 /* Local function prototypes */
@@ -190,19 +191,19 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2);
 
 
 /*-------------------------------------------------------------------------
- * Function: addr_insert
+ * Function:    token_insert
  *
- * Purpose: Add an address to the table.
+ * Purpose:     Add a token to the table.
  *
- * Return: void
+ * Return:      void
  *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
  */
 static void
-addr_insert(H5O_info_t *oi)
+token_insert(H5O_info2_t *oi)
 {
     size_t  n;
 
@@ -214,64 +215,67 @@ addr_insert(H5O_info_t *oi)
     /* Extend the table */
     if(idtab_g.nobjs >= idtab_g.nalloc) {
         idtab_g.nalloc = MAX(256, 2*idtab_g.nalloc);
-        idtab_g.obj = (haddr_t *)HDrealloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
+        idtab_g.obj = (H5O_token_t *)HDrealloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
     } /* end if */
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
-    idtab_g.obj[n] = oi->addr;
-} /* end addr_insert() */
+    idtab_g.obj[n] = oi->token;
+} /* end token_insert() */
 
 
 /*-------------------------------------------------------------------------
- * Function: addr_lookup
+ * Function:    token_lookup
  *
- * Purpose: Check if address has already been encountered
+ * Purpose:     Check if a token has already been encountered
  *
- * Return: Success: TRUE/FALSE
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    (can't fail)
  *
- * Failure: (can't fail)
- *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hbool_t
-addr_lookup(H5O_info_t *oi)
+token_lookup(hid_t loc_id, H5O_info2_t *oi)
 {
-    size_t  n;
+    size_t n;
+    int token_cmp;
 
     if(oi->rc < 2) return FALSE; /*only one link possible*/
 
-    for(n = 0; n < idtab_g.nobjs; n++)
-        if(H5F_addr_eq(idtab_g.obj[n], oi->addr))
+    for(n = 0; n < idtab_g.nobjs; n++) {
+        if(H5Otoken_cmp(loc_id, &idtab_g.obj[n], &oi->token, &token_cmp) < 0)
+            return FALSE;
+        if(!token_cmp)
             return TRUE;
+    }
 
     return FALSE;
-} /* end addr_lookup() */
+} /* end token_lookup() */
 
 
 /*-------------------------------------------------------------------------
- * Function: addr_reset
+ * Function:    token_reset
  *
- * Purpose: Reset the address tracking data structures
+ * Purpose:     Reset the token tracking data structures
  *
- * Return: void
+ * Return:      void
  *
- * Programmer: Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
  */
 static void
-addr_reset(void)
+token_reset(void)
 {
     if(idtab_g.obj)
         HDfree(idtab_g.obj);
     idtab_g.obj = NULL;
     idtab_g.nalloc = idtab_g.nobjs = 0;
-} /* end addr_reset() */
+} /* end token_reset() */
 
 
 /*-------------------------------------------------------------------------
@@ -547,7 +551,7 @@ done:
     if(tid >0 && sid > 0) {
         hid_t dxpl_id = H5Pcreate(H5P_DATASET_XFER);
         H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL);
-        H5Dvlen_reclaim(tid, sid, dxpl_id, buf);
+        H5Treclaim(tid, sid, dxpl_id, buf);
         H5Pclose(dxpl_id);
     }
     if(sid > 0)
@@ -794,9 +798,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
 
     /* Reclaim vlen data, if necessary */
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE)
-        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE)
-        if(H5Dvlen_reclaim(tid2, sid2, H5P_DEFAULT, rbuf2) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid2, H5P_DEFAULT, rbuf2) < 0) TEST_ERROR
 
     /* Release raw data buffers */
     HDfree(rbuf);
@@ -852,7 +856,7 @@ static int
 compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
 {
     hid_t aid = -1, aid2 = -1;                  /* Attribute IDs */
-    H5O_info_t oinfo1, oinfo2;                  /* Object info */
+    H5O_info2_t oinfo1, oinfo2;                  /* Object info */
     unsigned cpy_flags;                         /* Object copy flags */
 
     /* Retrieve the object copy flags from the property list, if it's non-DEFAULT */
@@ -863,10 +867,10 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
         cpy_flags = 0;
 
     /* Check the number of attributes on source dataset */
-    if(H5Oget_info2(oid, &oinfo1, H5O_INFO_NUM_ATTRS) < 0) TEST_ERROR
+    if(H5Oget_info3(oid, &oinfo1, H5O_INFO_NUM_ATTRS) < 0) TEST_ERROR
 
     /* Check the number of attributes on destination dataset */
-    if(H5Oget_info2(oid2, &oinfo2, H5O_INFO_NUM_ATTRS) < 0) TEST_ERROR
+    if(H5Oget_info3(oid2, &oinfo2, H5O_INFO_NUM_ATTRS) < 0) TEST_ERROR
 
     if(cpy_flags & H5O_COPY_WITHOUT_ATTR_FLAG) {
         /* Check that the destination has no attributes */
@@ -1055,11 +1059,13 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
 
                 /* break the infinite loop when the ref_object points to itself */
                 if(obj_owner > 0) {
-                    H5O_info_t oinfo1, oinfo2;
+                    H5O_info2_t oinfo1, oinfo2;
+                    int token_cmp;
 
-                    if(H5Oget_info2(obj_owner, &oinfo1, H5O_INFO_BASIC) < 0) TEST_ERROR
-                    if(H5Oget_info2(obj1_id, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
-                    if(H5F_addr_eq(oinfo1.addr, oinfo2.addr)) {
+                    if(H5Oget_info3(obj_owner, &oinfo1, H5O_INFO_BASIC) < 0) TEST_ERROR
+                    if(H5Oget_info3(obj1_id, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
+                    if(H5Otoken_cmp(obj1_id, &oinfo1.token, &oinfo2.token, &token_cmp) < 0) TEST_ERROR
+                    if(!token_cmp) {
                         if(H5Oclose(obj1_id) < 0) TEST_ERROR
                         if(H5Oclose(obj2_id) < 0) TEST_ERROR
                         return TRUE;
@@ -1116,11 +1122,13 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
 
                 /* break the infinite loop when the ref_object points to itself */
                 if(obj_owner > 0) {
-                    H5O_info_t oinfo1, oinfo2;
+                    H5O_info2_t oinfo1, oinfo2;
+                    int token_cmp;
 
-                    if(H5Oget_info2(obj_owner, &oinfo1, H5O_INFO_BASIC) < 0) TEST_ERROR
-                    if(H5Oget_info2(obj1_id, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
-                    if(H5F_addr_eq(oinfo1.addr, oinfo2.addr)) {
+                    if(H5Oget_info3(obj_owner, &oinfo1, H5O_INFO_BASIC) < 0) TEST_ERROR
+                    if(H5Oget_info3(obj1_id, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
+                    if(H5Otoken_cmp(obj1_id, &oinfo1.token, &oinfo2.token, &token_cmp) < 0) TEST_ERROR
+                    if(!token_cmp) {
                         if(H5Oclose(obj1_id) < 0) TEST_ERROR
                         if(H5Oclose(obj2_id) < 0) TEST_ERROR
                         return TRUE;
@@ -1273,7 +1281,7 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 
     /* Check that the space used is the same */
     /* (Don't check if the dataset is filtered (i.e. compressed, etc.) and
-     *  the datatype is VLEN, since the addresses for the vlen
+     *  the datatype is VLEN, since the tokens for the vlen
      *  data in each dataset will (probably) be different and the storage
      *  size will thus vary)
      */
@@ -1306,9 +1314,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 
     /* Reclaim vlen data, if necessary */
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE)
-        if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, H5P_DEFAULT, rbuf) < 0) TEST_ERROR
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE)
-        if(H5Dvlen_reclaim(tid2, sid2, H5P_DEFAULT, rbuf2) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid2, H5P_DEFAULT, rbuf2) < 0) TEST_ERROR
 
     /* Release raw data buffers */
     HDfree(rbuf);
@@ -1394,8 +1402,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
     if(ginfo2.nlinks > 0) {
         char objname[NAME_BUF_SIZE];            /* Name of object in group */
         char objname2[NAME_BUF_SIZE];           /* Name of object in group */
-        H5L_info_t linfo;                       /* Link information */
-        H5L_info_t linfo2;                      /* Link information */
+        H5L_info2_t linfo;                      /* Link information */
+        H5L_info2_t linfo2;                     /* Link information */
 
         /* Loop over contents of groups */
         for(idx = 0; idx < ginfo.nlinks; idx++) {
@@ -1405,18 +1413,24 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
             if(HDstrcmp(objname, objname2)) TEST_ERROR
 
             /* Get link info */
-            if(H5Lget_info(gid, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-            if(H5Lget_info(gid2, objname2, &linfo2, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_info2(gid, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_info2(gid2, objname2, &linfo2, H5P_DEFAULT) < 0) TEST_ERROR
             if(linfo.type != linfo2.type) TEST_ERROR
 
             /* Extra checks for "real" objects */
             if(linfo.type == H5L_TYPE_HARD) {
-                hid_t oid, oid2;                /* IDs of objects within group */
-                H5O_info_t oinfo, oinfo2;       /* Object info */
+                hid_t oid, oid2;                    /* IDs of objects within group */
+                H5O_info2_t oinfo, oinfo2;          /* Data model object info */
+                H5O_native_info_t ninfo, ninfo2;    /* Native file format object info */
 
                 /* Compare some pieces of the object info */
-                if(H5Oget_info_by_name2(gid, objname, &oinfo, H5O_INFO_BASIC|H5O_INFO_HDR, H5P_DEFAULT) < 0) TEST_ERROR
-                if(H5Oget_info_by_name2(gid2, objname2, &oinfo2, H5O_INFO_BASIC|H5O_INFO_HDR, H5P_DEFAULT) < 0) TEST_ERROR
+                /* Get data model object info */
+                if(H5Oget_info_by_name3(gid, objname, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Oget_info_by_name3(gid2, objname2, &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0) TEST_ERROR
+
+                /* Get native object info */
+                if(H5Oget_native_info_by_name(gid, objname, &ninfo, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Oget_native_info_by_name(gid2, objname2, &ninfo2, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0) TEST_ERROR
 
                 if(oinfo.type != oinfo2.type) TEST_ERROR
                 if(oinfo.rc != oinfo2.rc) TEST_ERROR
@@ -1427,17 +1441,17 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                  * of messages hasn't increased.
                  */
                  if(H5O_COPY_PRESERVE_NULL_FLAG & copy_flags) {
-                    if(oinfo.hdr.nmesgs != oinfo2.hdr.nmesgs)
+                    if(ninfo.hdr.nmesgs != ninfo2.hdr.nmesgs)
                         ;
                     else
-                        if(oinfo.hdr.nmesgs < oinfo2.hdr.nmesgs) TEST_ERROR
+                        if(ninfo.hdr.nmesgs < ninfo2.hdr.nmesgs) TEST_ERROR
                  }
 
                 /* Check for object already having been compared */
-                if(addr_lookup(&oinfo))
+                if(token_lookup(gid, &oinfo))
                     continue;
                 else
-                    addr_insert(&oinfo);
+                    token_insert(&oinfo);
 
                 /* Open objects */
                 if((oid = H5Oopen(gid, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -1580,8 +1594,8 @@ test_copy_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -1605,7 +1619,7 @@ test_copy_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the datatype from SRC to DST */
@@ -1673,8 +1687,8 @@ test_copy_named_datatype_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -1698,7 +1712,7 @@ test_copy_named_datatype_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the datatype from SRC to DST */
@@ -1766,8 +1780,8 @@ test_copy_named_datatype_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -1797,7 +1811,7 @@ test_copy_named_datatype_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the datatype from SRC to DST */
@@ -1861,10 +1875,11 @@ test_copy_named_datatype_attr_self(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     hid_t aid = -1;                     /* Attribute ID */
     hid_t sid = -1;                     /* Dataspace ID */
     hsize_t dims[2] = {3, 4};           /* Dataspace dimensions */
-    H5O_info_t oinfo, oinfo2;           /* Object info */
+    H5O_info2_t oinfo, oinfo2;          /* Object info */
     H5G_info_t ginfo;                   /* Group info */
-    char                src_filename[NAME_BUF_SIZE];
-    char                dst_filename[NAME_BUF_SIZE];
+    hbool_t    same_type;
+    char       src_filename[NAME_BUF_SIZE];
+    char       dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): named datatype with self-referential attribute");
 
@@ -1872,8 +1887,8 @@ test_copy_named_datatype_attr_self(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -1912,7 +1927,7 @@ test_copy_named_datatype_attr_self(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the datatype from SRC to DST */
@@ -1939,10 +1954,20 @@ test_copy_named_datatype_attr_self(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* verify that the attribute's datatype is committed */
     if(H5Tcommitted(tid) != TRUE) TEST_ERROR
 
-    /* verify that the addresses of the datatypes are the same */
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(H5Oget_info2(tid2, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.fileno != oinfo2.fileno || oinfo.addr != oinfo2.addr)
+    /* verify that the tokens of the datatypes are the same */
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Oget_info3(tid2, &oinfo2, H5O_INFO_BASIC) < 0) TEST_ERROR
+
+    same_type = TRUE;
+    if(oinfo.fileno == oinfo2.fileno) {
+        int token_cmp;
+        if(H5Otoken_cmp(tid2, &oinfo.token, &oinfo2.token, &token_cmp) < 0) TEST_ERROR
+        if(token_cmp) same_type = FALSE;
+    }
+    else
+        same_type = FALSE;
+
+    if(!same_type)
         FAIL_PUTS_ERROR("destination attribute does not use the same committed datatype")
 
     /* Verify that there are only 2 links int he destination root group */
@@ -2015,8 +2040,8 @@ test_copy_dataset_simple(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -2053,7 +2078,7 @@ test_copy_dataset_simple(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -2144,8 +2169,8 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     h5_fixname(FILENAME[4], fapl_src, src_fname, sizeof src_fname);
     h5_fixname(FILENAME[5], fapl_dst, dst_fname, sizeof dst_fname);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* Create source file */
     fid_src = H5Fcreate(src_fname, H5F_ACC_TRUNC, fcpl_src, fapl_src);
@@ -2187,8 +2212,8 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     /* Loop through all the combinations of low/high library format bounds,
        skipping invalid combinations.  Create a destination file and copy the
        source dataset to it, then verify */
-    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, low)) {
-        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; H5_INC_ENUM(H5F_libver_t, high)) {
+    for(low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+        for(high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
             /* Set version bounds */
             H5E_BEGIN_TRY {
@@ -2202,7 +2227,7 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
             fid_dst = H5Fcreate(dst_fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_dst);
             if (fid_dst < 0) TEST_ERROR
 
-            /* Create an uncopied object in destination file so that addresses
+            /* Create an uncopied object in destination file so that tokens
                in source and destination files aren't the same */
             if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
@@ -2306,8 +2331,8 @@ test_copy_dataset_simple_samefile(hid_t fcpl, hid_t fapl)
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) TEST_ERROR
@@ -2413,8 +2438,8 @@ test_copy_dataset_simple_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -2451,7 +2476,7 @@ test_copy_dataset_simple_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -2537,8 +2562,8 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -2582,7 +2607,7 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -2669,8 +2694,8 @@ test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -2867,7 +2892,7 @@ test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the datasets from SRC to DST */
@@ -3072,8 +3097,8 @@ test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -3265,7 +3290,7 @@ test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the datasets from SRC to DST */
@@ -3482,8 +3507,8 @@ test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -3640,7 +3665,7 @@ test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the datasets from SRC to DST */
@@ -3795,8 +3820,8 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -3942,7 +3967,7 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -4129,8 +4154,8 @@ test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -4180,7 +4205,7 @@ test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -4276,8 +4301,8 @@ test_copy_dataset_compact(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -4323,7 +4348,7 @@ test_copy_dataset_compact(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -4408,8 +4433,8 @@ test_copy_dataset_external(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -4450,7 +4475,7 @@ test_copy_dataset_external(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -4530,8 +4555,8 @@ test_copy_dataset_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hi
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -4571,7 +4596,7 @@ test_copy_dataset_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hi
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -4652,8 +4677,8 @@ test_copy_dataset_named_dtype_hier(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -4708,7 +4733,7 @@ test_copy_dataset_named_dtype_hier(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -4791,8 +4816,8 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fcpl_src, hid_t fcpl_dst, hid_t
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -4847,7 +4872,7 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fcpl_src, hid_t fcpl_dst, hid_t
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -4936,8 +4961,8 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fa
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -4991,7 +5016,7 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fa
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -5078,8 +5103,8 @@ test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -5137,7 +5162,7 @@ test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -5224,8 +5249,8 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -5258,7 +5283,7 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -5290,7 +5315,7 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -5307,7 +5332,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Sclose(sid);
@@ -5362,8 +5387,8 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -5417,7 +5442,7 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -5473,7 +5498,7 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -5490,7 +5515,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Pclose(pid);
         H5Tclose(tid);
@@ -5545,8 +5570,8 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -5586,7 +5611,7 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -5618,7 +5643,7 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -5635,7 +5660,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Sclose(sid);
@@ -5677,8 +5702,8 @@ test_copy_attribute_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -5712,7 +5737,7 @@ test_copy_attribute_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -5784,7 +5809,8 @@ attach_attribute_compound_vlstr(hid_t loc_id)
         int i;
         char *v;
     } s1;
-    s1 buf;                     /* Buffer */
+    size_t len;
+    s1 buf = {0, NULL};         /* Buffer */
     int ret_value = -1;        /* Return value */
 
     /* Create dataspace */
@@ -5814,8 +5840,11 @@ attach_attribute_compound_vlstr(hid_t loc_id)
         goto done;
 
     /* Write to the attribute */
+    len = HDstrlen(ATTR_CMPD_STRING) + 1;
     buf.i = 9;
-    buf.v = "ThisIsAString";
+    if(NULL == (buf.v = (char *)HDcalloc(len, sizeof(char))))
+        goto done;
+    HDstrncpy(buf.v, ATTR_CMPD_STRING, len);
     if(H5Awrite(aid, cmpd_tid, &buf) < 0)
         goto done;
 
@@ -5832,6 +5861,9 @@ done:
         H5Tclose(cmpd_tid);
     if(aid > 0)
         H5Aclose(aid);
+
+    HDfree(buf.v);
+
     return ret_value;
 } /* attach_attribute_compound_vlstr */
 
@@ -5896,8 +5928,8 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
     /* Reclaim vlen buffer */
     if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
     if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-    if(H5Dvlen_reclaim(tid, sid, dxpl_id, &rbuf) < 0) TEST_ERROR
-    if(H5Dvlen_reclaim(tid, sid, dxpl_id, &rbuf2) < 0) TEST_ERROR
+    if(H5Treclaim(tid, sid, dxpl_id, &rbuf) < 0) TEST_ERROR
+    if(H5Treclaim(tid, sid, dxpl_id, &rbuf2) < 0) TEST_ERROR
     if(H5Pclose(dxpl_id) < 0) TEST_ERROR
 
     /* Close the dataspaces */
@@ -5917,8 +5949,8 @@ error:
     H5E_BEGIN_TRY {
         H5Aclose(aid);
         H5Aclose(aid2);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, &rbuf2);
+        H5Treclaim(tid, sid, H5P_DEFAULT, &rbuf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, &rbuf2);
         H5Sclose(sid);
         H5Sclose(sid2);
         H5Tclose(tid);
@@ -5963,8 +5995,8 @@ test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0)
@@ -6019,7 +6051,7 @@ test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0)
     FAIL_STACK_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     FAIL_STACK_ERROR
 
@@ -6145,8 +6177,8 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -6188,7 +6220,7 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -6219,7 +6251,7 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -6239,7 +6271,7 @@ error:
         H5Dclose(did2);
         H5Dclose(did);
         H5Pclose(pid);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Sclose(sid);
@@ -6278,8 +6310,8 @@ test_copy_group_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -6303,7 +6335,7 @@ test_copy_group_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
@@ -6382,8 +6414,8 @@ test_copy_root_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -6431,7 +6463,7 @@ test_copy_root_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
@@ -6513,8 +6545,8 @@ test_copy_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -6563,7 +6595,7 @@ test_copy_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
@@ -6646,8 +6678,8 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -6705,7 +6737,7 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
@@ -6777,8 +6809,8 @@ test_copy_group_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -6816,7 +6848,7 @@ test_copy_group_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
@@ -6894,8 +6926,8 @@ test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -6945,7 +6977,7 @@ test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the group from SRC to DST */
@@ -7011,7 +7043,7 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_
     hid_t plid = -1;                            /* Object copy plist ID */
     hsize_t dim2d[2];
     hsize_t dim1d[1];
-    H5L_info_t linfo;
+    H5L_info2_t linfo;
     int buf[DIM_SIZE_1][DIM_SIZE_2];
     int i, j;
     unsigned expand_soft;
@@ -7033,8 +7065,8 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_
     h5_fixname(FILENAME[1], src_fapl, dst_filename, sizeof dst_filename);
     h5_fixname(FILENAME[2], dst_fapl, ext_filename, sizeof ext_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -7128,7 +7160,7 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_
             /* create destination file */
             if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-            /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+            /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
             if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
             /* copy the group from SRC to DST */
@@ -7145,7 +7177,7 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_
              * re-add it as a soft link so compare_groups() works */
             if(expand_soft) {
                 /* Check link type */
-                if(H5Lget_info(fid_dst, NAME_LINK_SOFT, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Lget_info2(fid_dst, NAME_LINK_SOFT, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
                 if(linfo.type != H5L_TYPE_HARD)
                     FAIL_PUTS_ERROR("Soft link was not expanded to a hard link")
 
@@ -7168,7 +7200,7 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_
              * and re-add it as an external link so compare_groups() works */
             if(expand_ext) {
                 /* Check link type */
-                if(H5Lget_info(fid_dst, NAME_LINK_EXTERN, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Lget_info2(fid_dst, NAME_LINK_EXTERN, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
                 if(linfo.type != H5L_TYPE_HARD)
                     FAIL_PUTS_ERROR("External link was not expanded to a hard link")
 
@@ -7288,8 +7320,8 @@ test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fa
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -7334,7 +7366,7 @@ test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fa
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -7418,8 +7450,8 @@ test_copy_ext_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
     h5_fixname(FILENAME[1], src_fapl, dst_filename, sizeof dst_filename);
     h5_fixname(FILENAME[2], dst_fapl, ext_filename, sizeof ext_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -7467,7 +7499,7 @@ test_copy_ext_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -7551,8 +7583,8 @@ test_copy_exist(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -7589,7 +7621,7 @@ test_copy_exist(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -7660,8 +7692,8 @@ test_copy_path(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -7698,7 +7730,7 @@ test_copy_path(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST (should fail - intermediate groups not there) */
@@ -7782,8 +7814,8 @@ test_copy_same_file_named_datatype(hid_t fcpl_src, hid_t fapl)
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
@@ -7861,8 +7893,8 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl, hbool_t test_open)
     /* Initialize the destination filename */
     h5_fixname(FILENAME[1], fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* Setup */
     if((src_fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0) TEST_ERROR
@@ -7876,7 +7908,7 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl, hbool_t test_open)
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     if(test_open) {
@@ -7968,8 +8000,8 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -8018,7 +8050,7 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -8050,7 +8082,7 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8068,7 +8100,7 @@ error:
         H5Pclose(pid);
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid_copy, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid_copy);
@@ -8122,8 +8154,8 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -8165,7 +8197,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -8197,7 +8229,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8214,7 +8246,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid_copy, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid_copy);
@@ -8277,8 +8309,8 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -8330,7 +8362,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -8364,7 +8396,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8382,7 +8414,7 @@ error:
         H5Pclose(pid);
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid_copy, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid_copy);
@@ -8438,8 +8470,8 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -8489,7 +8521,7 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -8521,7 +8553,7 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
     if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8539,7 +8571,7 @@ error:
         H5Pclose(pid);
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid_copy, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid_copy);
@@ -8608,8 +8640,8 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -8652,7 +8684,7 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -8683,7 +8715,7 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8701,7 +8733,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid2, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Pclose(pid);
         H5Tclose(tid);
@@ -8778,8 +8810,8 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -8823,7 +8855,7 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -8856,7 +8888,7 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -8874,7 +8906,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid2, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Pclose(pid);
         H5Tclose(tid);
@@ -8944,8 +8976,8 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -9057,7 +9089,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -9076,7 +9108,7 @@ error:
         H5Pclose(pid);
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid2, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid2);
@@ -9152,8 +9184,8 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -9233,7 +9265,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -9252,7 +9284,7 @@ error:
         H5Pclose(pid);
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid2, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid);
         H5Tclose(tid2);
@@ -9319,8 +9351,8 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -9357,7 +9389,7 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -9389,7 +9421,7 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -9407,7 +9439,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Tclose(tid2);
         H5Tclose(tid);
@@ -9465,8 +9497,8 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -9510,7 +9542,7 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -9542,7 +9574,7 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -9560,7 +9592,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Pclose(pid);
         H5Tclose(tid2);
@@ -9618,8 +9650,8 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -9663,7 +9695,7 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
@@ -9695,7 +9727,7 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
         if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Treclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
         if(H5Pclose(dxpl_id) < 0) TEST_ERROR
     } /* end if */
 
@@ -9713,7 +9745,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose(did2);
         H5Dclose(did);
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Treclaim(tid, sid, H5P_DEFAULT, buf);
         H5Pclose(dxpl_id);
         H5Pclose(pid);
         H5Tclose(tid2);
@@ -9769,8 +9801,8 @@ test_copy_null_ref(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
     h5_fixname(FILENAME[1], src_fapl, mid_filename, sizeof mid_filename);
     h5_fixname(FILENAME[2], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* Create source file */
     if((fid1 = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0)
@@ -9938,8 +9970,8 @@ test_copy_null_ref_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     h5_fixname(FILENAME[1], src_fapl, mid_filename, sizeof mid_filename);
     h5_fixname(FILENAME[2], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* Create source file */
     if((fid1 = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0)
@@ -10100,8 +10132,8 @@ test_copy_attr_crt_order(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], src_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* Create source file */
     if((fid1 = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0)
@@ -10218,11 +10250,12 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     unsigned int i;                             /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     int buf[DIM_SIZE_1];                        /* Buffer for writing data */
-    H5O_info_t oinfo;                           /* Object info */
-    haddr_t exp_addr;                           /* Expected object address */
+    H5O_info2_t oinfo;                          /* Object info */
+    H5O_token_t exp_token;                      /* Expected object token */
     char src1_filename[NAME_BUF_SIZE];
     char src2_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
+    int token_cmp;
 
     if(reopen) {
         TESTING("H5Ocopy(): merging committed datatypes with reopen")
@@ -10239,8 +10272,8 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     h5_fixname(FILENAME[3], src_fapl, src2_filename, sizeof src2_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source files */
     if((fid_src1 = H5Fcreate(src1_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -10316,7 +10349,7 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy SRC1 to DST */
@@ -10331,31 +10364,34 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open SRC1 committed dtype, get address */
+    /* Open SRC1 committed dtype, get token */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open SRC1 dset dtype, check address */
+    /* Open SRC1 dset dtype, check token */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open SRC2 committed dtype, check address */
+    /* Open SRC2 committed dtype, check token */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open SRC2 dset dtype, check address */
+    /* Open SRC2 dset dtype, check token */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -10369,7 +10405,7 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* recreate destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy SRC1 to DST */
@@ -10384,19 +10420,20 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open SRC1 dset dtype, get address */
+    /* Open SRC1 dset dtype, get token */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open SRC2 dset dtype, check address */
+    /* Open SRC2 dset dtype, check token */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -10456,9 +10493,10 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     unsigned int i;                             /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     int buf[DIM_SIZE_1];                        /* Buffer for writing data */
-    H5O_info_t oinfo;                           /* Object info */
-    haddr_t exp_addr;                           /* Expected object address */
+    H5O_info2_t oinfo;                          /* Object info */
+    H5O_token_t exp_token;                      /* Expected object token */
     char filename[NAME_BUF_SIZE];
+    int token_cmp;
 
     if(reopen)
         TESTING("H5Ocopy(): merging committed datatypes to the source file with reopen")
@@ -10472,8 +10510,8 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /* Initialize the filename */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) TEST_ERROR
@@ -10546,7 +10584,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
     /*
      * First copy each group to the destination group 3 (each with their own
      * group), and verify the committed datatypes are merged as expected.  All
-     * datatypes copied should reference (share an address with) the
+     * datatypes copied should reference (share a token with) the
      * corresponding source datatype.
      */
     /* Create destination group */
@@ -10565,61 +10603,68 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
         if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open group 1 source committed dtype, get address */
+    /* Open group 1 source committed dtype, get token */
     if((tid = H5Topen2(fid, NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open group 1 source dset dtype, check address */
+    /* Open group 1 source dset dtype, check token */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open group 1 committed dtype, check address */
+    /* Open group 1 committed dtype, check token */
     if((tid = H5Topen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open group 1 dset dtype, check address */
+    /* Open group 1 dset dtype, check token */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open group 2 source committed dtype, get address and make sure it is
+    /* Open group 2 source committed dtype, get token and make sure it is
      * different from group 1 source committed dtype */
     if((tid = H5Topen2(fid, NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr == exp_addr) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(!token_cmp) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open group 2 source dset dtype, check address */
+    /* Open group 2 source dset dtype, check token */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open group 2 committed dtype, check address */
+    /* Open group 2 committed dtype, check token */
     if((tid = H5Topen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP2 "/" NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open group 2 dset dtype, check address */
+    /* Open group 2 dset dtype, check token */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP3 "/" NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -10643,37 +10688,40 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
         if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open group 1 source dset dtype, get address */
+    /* Open group 1 source dset dtype, get token */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open group 1 dset dtype, check address */
+    /* Open group 1 dset dtype, check token */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP4 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open group 2 source dset dtype, get address and make sure it is
+    /* Open group 2 source dset dtype, get token and make sure it is
      * different from group 1 source dset dtype */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP2 "/" NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr == exp_addr) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(!token_cmp) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open group 2 dset dtype, check address */
+    /* Open group 2 dset dtype, check token */
     if((did = H5Dopen2(fid, NAME_GROUP_TOP4 "/" NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -10729,10 +10777,11 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     unsigned int i;                             /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     int buf[DIM_SIZE_1];                        /* Buffer for writing data */
-    H5O_info_t oinfo;                           /* Object info */
-    haddr_t exp_addr;                           /* Expected object address */
+    H5O_info2_t oinfo;                          /* Object info */
+    H5O_token_t exp_token;                      /* Expected object token */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
+    int token_cmp;
 
     if(reopen)
         TESTING("H5Ocopy(): merging committed datatypes with suggestions and reopen")
@@ -10747,8 +10796,8 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -10837,17 +10886,18 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open committed dtype "b", get address */
+    /* Open committed dtype "b", get token */
     if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open dset dtype, check address */
+    /* Open dset dtype, check token */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -10875,31 +10925,33 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open committed dtype "a", get address */
+    /* Open committed dtype "a", get token */
     if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open dset 2 dtype, check address */
+    /* Open dset 2 dtype, check token */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open committed dtype "b", get address */
+    /* Open committed dtype "b", get token */
     if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open dset dtype, check address */
+    /* Open dset dtype, check token */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -10960,10 +11012,11 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     unsigned int i;                             /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     int buf[DIM_SIZE_1];                        /* Buffer for writing data */
-    H5O_info_t oinfo;                           /* Object info */
-    haddr_t exp_addr;                           /* Expected object address */
+    H5O_info2_t oinfo;                          /* Object info */
+    H5O_token_t exp_token;                      /* Expected object token */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
+    int token_cmp;
 
     if(reopen)
         TESTING("H5Ocopy(): merging committed datatypes with attributes and reopen")
@@ -10978,8 +11031,8 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -11071,19 +11124,20 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open attribute dtype, get address */
+    /* Open attribute dtype, get token */
     if((aid = H5Aopen_by_name(fid_dst, NAME_GROUP_TOP, "attr", H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
 
-    /* Open dset dtype, check address */
+    /* Open dset dtype, check token */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -11191,10 +11245,11 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     int i;                    /* Local index variable */
     hsize_t dim1d[1];                /* dimension sizes */
     int buf[DIM_SIZE_1];            /* Buffer for data */
-    haddr_t exp_addr_int, exp_addr_short;         /* Expected object addresses */
-    H5O_info_t oinfo;                           /* Object info */
+    H5O_token_t exp_token_int, exp_token_short;         /* Expected object tokenes */
+    H5O_info2_t oinfo;                       /* Object info */
     char src_filename[NAME_BUF_SIZE];        /* Source file name */
     char dst_filename[NAME_BUF_SIZE];        /* Destination file name */
+    int token_cmp;
 
     if(reopen)
         TESTING("H5Ocopy(): hier. of committed datatypes and merging with reopen")
@@ -11209,8 +11264,8 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /*
      * Populate source file
@@ -11331,16 +11386,16 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
      */
     if(H5Ocopy(fid_src, "/", fid_dst, SRC_ROOT_GROUP, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* get address of committed datatype at root group */
+    /* get token of committed datatype at root group */
     if((tid = H5Topen2(fid_dst, SRC_ROOT_GROUP "/" ROOT_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr_int = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token_int, &oinfo.token, sizeof(exp_token_int));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* get address of committed datatype at /g0 */
+    /* get token of committed datatype at /g0 */
     if((tid = H5Topen2(fid_dst, SRC_ROOT_GROUP NAME_GROUP_TOP "/" GROUP_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr_short = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token_short, &oinfo.token, sizeof(exp_token_short));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* verify the datatype of first dataset is not committed */
@@ -11350,19 +11405,21 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* check address of datatype for second dataset */
+    /* check token of datatype for second dataset */
     if((did = H5Dopen2(fid_dst, SRC_ROOT_GROUP NAME_GROUP_TOP "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr_short) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token_short, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* check address of datatype for third dataset */
+    /* check token of datatype for third dataset */
     if((did = H5Dopen2(fid_dst, SRC_ROOT_GROUP NAME_GROUP_TOP "/" SRC_NDT_DSET3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr_int) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token_int, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -11371,10 +11428,11 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
      */
     if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* get address of committed datatype at /g0 */
+    /* get token of committed datatype at /g0 */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_TOP "/" GROUP_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr_short) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token_short, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* verify the datatype of first dataset is not committed */
@@ -11384,19 +11442,21 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* check address of datatype for second dataset */
+    /* check token of datatype for second dataset */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr_short) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token_short, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* check address of datatype for third dataset */
+    /* check token of datatype for third dataset */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_TOP "/" SRC_NDT_DSET3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr_int) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token_int, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -11407,19 +11467,21 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     if(H5Ocopy(fid_src, NAME_GROUP_TOP "/" SRC_NDT_DSET2, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET2, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Ocopy(fid_src, NAME_GROUP_TOP "/" SRC_NDT_DSET3, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET3, ocpypl_id, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Open attribute with anon ndt (short), get address */
+    /* Open attribute with anon ndt (short), get token */
     if((aid = H5Aopen_by_name(fid_dst, NAME_GROUP_UNCOPIED, DST_ATTR_ANON_SHORT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr_short) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token_short, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
 
-    /* Open attribute with anon ndt (int), get address */
+    /* Open attribute with anon ndt (int), get token */
     if((aid = H5Aopen_by_name(fid_dst, NAME_GROUP_UNCOPIED, DST_ATTR_ANON_INT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr_int) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token_int, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
 
@@ -11430,19 +11492,21 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* check address of datatype for second dataset */
+    /* check token of datatype for second dataset */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr_short) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token_short, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* check address of datatype for third dataset */
+    /* check token of datatype for third dataset */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr_int) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token_int, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -11464,8 +11528,8 @@ error:
         H5Tclose(f_tid);
         H5Tclose(g_tid);
         H5Tclose(anon_tid);
-    H5Pclose(ocpypl_id);
-    H5Aclose(aid);
+        H5Pclose(ocpypl_id);
+        H5Aclose(aid);
         H5Dclose(did);
         H5Sclose(sid);
         H5Gclose(gid);
@@ -11515,10 +11579,11 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     hid_t aid = -1;                /* Attribute ID */
     hid_t ocpypl_id = -1;                       /* Object copy plist ID */
     hsize_t dim1d[1];                /* dimension sizes */
-    H5O_info_t oinfo;                           /* Object info */
-    haddr_t exp_addr;                  /* Expected object addresses */
+    H5O_info2_t oinfo;                          /* Object info */
+    H5O_token_t exp_token;                      /* Expected object token */
     char src_filename[NAME_BUF_SIZE];        /* Source file name */
     char dst_filename[NAME_BUF_SIZE];        /* Destination file name */
+    int token_cmp;
 
     if(reopen)
         TESTING("H5Ocopy(): merging various committed datatypes with reopen")
@@ -11529,8 +11594,8 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /*
      * Populate source file
@@ -11642,53 +11707,57 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     /*
      * Verification
      */
-    /* get address of committed datatype: /src_root/src_ndt_double */
+    /* get token of committed datatype: /src_root/src_ndt_double */
     if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_DOUBLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* get address of committed datatype: /dst_ndt_double */
+    /* get token of committed datatype: /dst_ndt_double */
     if((tid = H5Topen2(fid_dst, "/" DST_NDT_DOUBLE, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* get address of committed datatype: /src_root/src_ndt_float */
+    /* get token of committed datatype: /src_root/src_ndt_float */
     if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_FLOAT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* get address of committed datatype: /dst_ndt_float */
+    /* get token of committed datatype: /dst_ndt_float */
     if((tid = H5Topen2(fid_dst, "/" DST_NDT_FLOAT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* get address of committed datatype: /src_root/src_ndt_int */
+    /* get token of committed datatype: /src_root/src_ndt_int */
     if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* get address of committed datatype: /dst_ndt_int */
+    /* get token of committed datatype: /dst_ndt_int */
     if((tid = H5Topen2(fid_dst, "/" DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* get address of committed datatype: /src_root/src_ndt_short */
+    /* get token of committed datatype: /src_root/src_ndt_short */
     if((tid = H5Topen2(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* open attribute; get its dtype; get dtype's address: /src_root/src_ndt_double/dst_attr */
+    /* open attribute; get its dtype; get dtype's token: /src_root/src_ndt_double/dst_attr */
     if((aid = H5Aopen_by_name(fid_dst, "/" SRC_ROOT_GROUP "/" SRC_NDT_DOUBLE, DST_ATTR, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Aget_type(aid)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
 
@@ -11704,14 +11773,14 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
 
 error:
     H5E_BEGIN_TRY {
-    H5Pclose(ocpypl_id);
-    H5Tclose(tid);
-    H5Tclose(tid1);
-    H5Tclose(tid2);
-    H5Tclose(tid3);
-    H5Tclose(tid4);
-    H5Tclose(tid5);
-    H5Aclose(aid);
+        H5Pclose(ocpypl_id);
+        H5Tclose(tid);
+        H5Tclose(tid1);
+        H5Tclose(tid2);
+        H5Tclose(tid3);
+        H5Tclose(tid4);
+        H5Tclose(tid5);
+        H5Aclose(aid);
         H5Sclose(sid);
         H5Fclose(fid_dst);
         H5Fclose(fid_src);
@@ -11741,10 +11810,11 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1;                             /* Datatype ID */
     hid_t ocpypl_id = -1;                       /* Object copy plist ID */
-    H5O_info_t oinfo;                           /* Object info */
-    haddr_t exp_addr;                           /* Expected object address */
+    H5O_info2_t oinfo;                          /* Object info */
+    H5O_token_t exp_token;                      /* Expected object token */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
+    int token_cmp;
 
     if(reopen)
         TESTING("H5Ocopy(): merging committed datatypes with suggestions and reopen")
@@ -11755,8 +11825,8 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /*
      * Populate source file
@@ -11816,16 +11886,17 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* open committed dtype "/dst_ndt_int", get its address */
+    /* open committed dtype "/dst_ndt_int", get its token */
     if((tid = H5Topen2(fid_dst, DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* check address of "/uncopied/src_ndt_int" */
+    /* check token of "/uncopied/src_ndt_int" */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the DST file */
@@ -11849,16 +11920,17 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* open committed dtype "/uncopied/src_ndt_int", get its address */
+    /* open committed dtype "/uncopied/src_ndt_int", get its token */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* check address of "/src_ndt_int" */
+    /* check token of "/src_ndt_int" */
     if((tid = H5Topen2(fid_dst, SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the DST file */
@@ -11887,16 +11959,17 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open committed dtype "/uncopied/src_ndt_int", get its address */
+    /* Open committed dtype "/uncopied/src_ndt_int", get its token */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* check address of "/src_ndt_int2" */
+    /* check token of "/src_ndt_int2" */
     if((tid = H5Topen2(fid_dst, SRC_NDT_INT2, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the DST file */
@@ -11921,16 +11994,17 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open committed dtype "/dst_dt_int", get its address */
+    /* Open committed dtype "/dst_dt_int", get its token */
     if((tid = H5Topen2(fid_dst, DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* check address of "/uncopied/src_ndt_int2" */
+    /* check token of "/uncopied/src_ndt_int2" */
     if((tid = H5Topen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_INT2, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     /* close the DST file */
@@ -11981,10 +12055,11 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     unsigned int i;                             /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     int buf[DIM_SIZE_1];                        /* Buffer for writing data */
-    H5O_info_t oinfo;                           /* Object info */
-    haddr_t exp_addr;                           /* Expected object address */
+    H5O_info2_t oinfo;                          /* Object info */
+    H5O_token_t exp_token;                      /* Expected object token */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
+    int token_cmp;
 
     if(reopen)
         TESTING("H5Ocopy(): merging committed datatypes of datasets with suggestions and reopen")
@@ -11999,8 +12074,8 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /*
      * Populate source file
@@ -12077,17 +12152,18 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open committed dtype "/dst_ndt_int", get its address */
+    /* Open committed dtype "/dst_ndt_int", get its token */
     if((tid = H5Topen2(fid_dst, DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* check address of datatype for the copied dataset: "/uncopied/src_ndt_dset"  */
+    /* check token of datatype for the copied dataset: "/uncopied/src_ndt_dset"  */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -12112,19 +12188,20 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open committed dtype dataset "/uncopied/src_ndt_dset", get its datatype address */
+    /* Open committed dtype dataset "/uncopied/src_ndt_dset", get its datatype token */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* check address of datatype for the copied dataset: "/src_ndt_dset" */
+    /* check token of datatype for the copied dataset: "/src_ndt_dset" */
     if((did = H5Dopen2(fid_dst, SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -12154,19 +12231,20 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* open the copied dataset: /uncopied/src_ndt_dset", get its address  */
+    /* open the copied dataset: /uncopied/src_ndt_dset", get its token  */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* check address of datatype for the copied dataset: "/src_ndt_dset2" */
+    /* check token of datatype for the copied dataset: "/src_ndt_dset2" */
     if((did = H5Dopen2(fid_dst, SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -12192,19 +12270,20 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* open the copied dataset: "/src_ndt_dset", get its datatype address */
+    /* open the copied dataset: "/src_ndt_dset", get its datatype token */
     if((did = H5Dopen2(fid_dst, SRC_NDT_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* check address of datatype for the copied dataset: /uncopied/src_ndt_dset2 */
+    /* check token of datatype for the copied dataset: /uncopied/src_ndt_dset2 */
     if((did = H5Dopen2(fid_dst, NAME_GROUP_UNCOPIED "/" SRC_NDT_DSET2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -12272,8 +12351,8 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /*
      * Populate source file
@@ -12537,7 +12616,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* open committed dtype "/dst_grp/dst_dt_int", get its address */
+    /* open committed dtype "/dst_grp/dst_dt_int", get its token */
     if((exp_tid = H5Topen2(fid_dst, "/" DST_GRP "/" DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open datatype of dataset */
@@ -12630,7 +12709,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     if((aid = H5Aopen_by_name(fid_dst, DST_NDT_DOUBLE, DST_ATTR, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((exp_tid = H5Aget_type(aid)) < 0) TEST_ERROR
 
-    /* Open datatype of dataset, check address */
+    /* Open datatype of dataset, check token */
     if((did = H5Dopen2(fid_dst, "A_src_dset", H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
 
@@ -12667,7 +12746,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* open committed dtype "/dst_ndt_short" */
     if((exp_tid = H5Topen2(fid_dst, "/" DST_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    /* open datatype of dataset, check address */
+    /* open datatype of dataset, check token */
     if((did = H5Dopen2(fid_dst, "B_src_dset", H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
 
@@ -12749,11 +12828,12 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     unsigned int i;                             /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     int buf[DIM_SIZE_1];                        /* Buffer for writing data */
-    H5O_info_t oinfo;                           /* Object info */
-    haddr_t exp_addr;                           /* Expected object address */
+    H5O_info2_t oinfo;                          /* Object info */
+    H5O_token_t exp_token;                      /* Expected object token */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
     mcdt_search_cb_ud cb_udata;                 /* User data for callback */
+    int token_cmp;
 
     if(reopen)
         TESTING("H5Ocopy(): H5Pset_mcdt_search_cb and reopen")
@@ -12768,8 +12848,8 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -12861,17 +12941,18 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open committed dtype "b", get address */
+    /* Open committed dtype "b", get token */
     if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open dset dtype, check address */
+    /* Open dset dtype, check token */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -12909,17 +12990,18 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open committed dtype "a", get address */
+    /* Open committed dtype "a", get token */
     if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open copied dataset and its dtype, check address */
+    /* Open copied dataset and its dtype, check token */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE2, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr != exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -12948,31 +13030,33 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open committed dtype "a", get address */
+    /* Open committed dtype "a", get token */
     if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open the copied dataset and get its dtype, addresses should not be equal */
+    /* Open the copied dataset and get its dtype, tokens should not be equal */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr == exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(!token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open committed dtype "b", get address */
+    /* Open committed dtype "b", get token */
     if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open the copied dataset and get its dtype, addresses should not be equal */
+    /* Open the copied dataset and get its dtype, tokens should not be equal */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr == exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(!token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -13008,31 +13092,33 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         if((fid_dst = H5Fopen(dst_filename, H5F_ACC_RDONLY, dst_fapl)) < 0) TEST_ERROR
     } /* end if */
 
-    /* Open committed dtype "a", get address */
+    /* Open committed dtype "a", get token */
     if((tid = H5Topen2(fid_dst, "/a", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open the copied dataset and get its dtype, addresses should not be equal */
+    /* Open the copied dataset and get its dtype, tokens should not be equal */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr == exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(!token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Open committed dtype "b", get address */
+    /* Open committed dtype "b", get token */
     if((tid = H5Topen2(fid_dst, "/b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    exp_addr = oinfo.addr;
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if(H5Tclose(tid) < 0) TEST_ERROR
 
-    /* Open the copied dataset and get its dtype, addresses should not be equal */
+    /* Open the copied dataset and get its dtype, tokens should not be equal */
     if((did = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE3, H5P_DEFAULT)) < 0) TEST_ERROR
     if((tid = H5Dget_type(did)) < 0) TEST_ERROR
-    if(H5Oget_info2(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
-    if(oinfo.addr == exp_addr) TEST_ERROR
+    if(H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0) TEST_ERROR
+    if(H5Otoken_cmp(tid, &oinfo.token, &exp_token, &token_cmp) < 0) TEST_ERROR
+    if(!token_cmp) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -13127,8 +13213,8 @@ test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -13375,7 +13461,7 @@ error:
  */
 static herr_t
 test_copy_iterate_cb(hid_t loc_id, const char *name,
-    const H5L_info_t H5_ATTR_UNUSED *link_info, void *op_data)
+    const H5L_info2_t H5_ATTR_UNUSED *link_info, void *op_data)
 {
     hid_t dst_loc_id = *((hid_t *)op_data);
 
@@ -13404,8 +13490,8 @@ test_copy_iterate(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], src_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* Create source file */
     if((fid1 = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0)
@@ -13435,8 +13521,7 @@ test_copy_iterate(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl
 
     /* Iterate over links in the root group, copying each object */
     if((gid = H5Gopen2(fid1, "/", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Literate(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_copy_iterate_cb,
-            &fid2) < 0)
+    if(H5Literate2(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_copy_iterate_cb, &fid2) < 0)
         TEST_ERROR
 
     /* Close */
@@ -13499,8 +13584,8 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -13634,7 +13719,7 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination
+    /* Create an uncopied object in destination file so that tokens in source and destination
        files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
@@ -13820,8 +13905,8 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
     h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0) TEST_ERROR
@@ -13829,7 +13914,7 @@ test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0) TEST_ERROR
 
-    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    /* Create an uncopied object in destination file so that tokens in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Set dataspace dimensions */
@@ -14366,8 +14451,8 @@ main(void)
 */
     } /* end for */
 
-    /* Reset file address checking info */
-    addr_reset();
+    /* Reset file token checking info */
+    token_reset();
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);

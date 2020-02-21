@@ -129,7 +129,7 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **pp, H5T_t *dt)
+H5O_dtype_decode_helper(unsigned *ioflags/*in,out*/, const uint8_t **pp, H5T_t *dt)
 {
     unsigned	flags, version;
     unsigned	i;
@@ -145,7 +145,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
     /* Version, class & flags */
     UINT32DECODE(*pp, flags);
     version = (flags>>4) & 0x0f;
-    if(version < H5O_DTYPE_VERSION_1 || version > H5O_DTYPE_VERSION_3)
+    if(version < H5O_DTYPE_VERSION_1 || version > H5O_DTYPE_VERSION_LATEST)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "bad version number for datatype message")
     dt->shared->version = version;
     dt->shared->type = (H5T_class_t)(flags & 0x0f);
@@ -331,7 +331,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                     /* Decode the field's datatype information */
-                    if((can_upgrade = H5O_dtype_decode_helper(f, ioflags, pp, temp_type)) < 0) {
+                    if((can_upgrade = H5O_dtype_decode_helper(ioflags, pp, temp_type)) < 0) {
                         for(j = 0; j <= i; j++)
                             H5MM_xfree(dt->shared->u.compnd.memb[j].name);
                         H5MM_xfree(dt->shared->u.compnd.memb);
@@ -438,16 +438,28 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
 
             /* Set reference type */
             dt->shared->u.atomic.u.r.rtype = (H5R_type_t)(flags & 0x0f);
+            if(dt->shared->u.atomic.u.r.rtype <= H5R_BADTYPE
+                || dt->shared->u.atomic.u.r.rtype >= H5R_MAXTYPE)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "invalid reference type");
 
-            /* Set extra information for object references, so the hobj_ref_t gets swizzled correctly */
-            if(dt->shared->u.atomic.u.r.rtype == H5R_OBJECT) {
-                /* Mark location this type as undefined for now.  The caller function should
-                 * decide the location. */
-                dt->shared->u.atomic.u.r.loc = H5T_LOC_BADLOC;
+            /* Set generic flag */
+            if(dt->shared->u.atomic.u.r.rtype == H5R_OBJECT2
+                || dt->shared->u.atomic.u.r.rtype == H5R_DATASET_REGION2
+                || dt->shared->u.atomic.u.r.rtype == H5R_ATTR) {
+                dt->shared->u.atomic.u.r.opaque = TRUE;
+                dt->shared->u.atomic.u.r.version = (unsigned)((flags >> 4) & 0x0f);
+                if(dt->shared->u.atomic.u.r.version != H5R_ENCODE_VERSION)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "reference version does not match");
+            } else
+                dt->shared->u.atomic.u.r.opaque = FALSE;
 
-                /* This type needs conversion */
-                dt->shared->force_conv = TRUE;
-            } /* end if */
+            /* This type needs conversion */
+            dt->shared->force_conv = TRUE;
+
+            /* Mark location of this type as undefined for now.  The caller
+             * function should decide the location. */
+            if(H5T_set_loc(dt, NULL, H5T_LOC_BADLOC) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
             break;
 
         case H5T_ENUM:
@@ -457,7 +469,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
             dt->shared->u.enumer.nmembs = dt->shared->u.enumer.nalloc = flags & 0xffff;
             if(NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            if(H5O_dtype_decode_helper(f, ioflags, pp, dt->shared->parent) < 0)
+            if(H5O_dtype_decode_helper(ioflags, pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode parent datatype")
 
             /* Check if the parent of this enum has a version greater than the
@@ -499,7 +511,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
             /* Decode base type of VL information */
             if(NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            if(H5O_dtype_decode_helper(f, ioflags, pp, dt->shared->parent) < 0)
+            if(H5O_dtype_decode_helper(ioflags, pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type")
 
             /* Check if the parent of this vlen has a version greater than the
@@ -511,7 +523,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
 
             /* Mark location this type as undefined for now.  The caller function should
              * decide the location. */
-            if(H5T_set_loc(dt, f, H5T_LOC_BADLOC) < 0)
+            if(H5T_set_loc(dt, NULL, H5T_LOC_BADLOC) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
             break;
 
@@ -540,7 +552,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
             /* Decode base type of array */
             if(NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            if(H5O_dtype_decode_helper(f, ioflags, pp, dt->shared->parent) < 0)
+            if(H5O_dtype_decode_helper(ioflags, pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode array parent type")
 
             /* Check if the parent of this array has a version greater than the
@@ -596,7 +608,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
+H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 {
     unsigned	flags = 0;
     uint8_t	*hdr = (uint8_t *)*pp;
@@ -956,7 +968,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                     } /* end if */
 
                     /* Subtype */
-                    if(H5O_dtype_encode_helper(f, pp, dt->shared->u.compnd.memb[i].type) < 0)
+                    if(H5O_dtype_encode_helper(pp, dt->shared->u.compnd.memb[i].type) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode member type")
                 } /* end for */
             }
@@ -964,6 +976,8 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
 
         case H5T_REFERENCE:
             flags |= (dt->shared->u.atomic.u.r.rtype & 0x0f);
+            if(dt->shared->u.atomic.u.r.opaque)
+                flags = (unsigned)(flags | (((unsigned)dt->shared->u.atomic.u.r.version & 0x0f) << 4));
             break;
 
         case H5T_ENUM:
@@ -976,7 +990,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             flags = dt->shared->u.enumer.nmembs & 0xffff;
 
             /* Parent type */
-            if(H5O_dtype_encode_helper(f, pp, dt->shared->parent) < 0)
+            if(H5O_dtype_encode_helper(pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode parent datatype")
 
             /* Names, each a multiple of eight bytes */
@@ -1012,7 +1026,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             } /* end if */
 
             /* Encode base type of VL information */
-            if(H5O_dtype_encode_helper(f, pp, dt->shared->parent) < 0)
+            if(H5O_dtype_encode_helper(pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode VL parent type")
             break;
 
@@ -1050,7 +1064,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             } /* end if */
 
             /* Encode base type of array's information */
-            if(H5O_dtype_encode_helper(f, pp, dt->shared->parent) < 0)
+            if(H5O_dtype_encode_helper(pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode VL parent type")
             break;
 
@@ -1091,7 +1105,7 @@ done:
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
+H5O_dtype_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
     unsigned *ioflags/*in,out*/, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5T_t	*dt = NULL;
@@ -1107,7 +1121,7 @@ H5O_dtype_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Perform actual decode of message */
-    if(H5O_dtype_decode_helper(f, ioflags, &p, dt) < 0)
+    if(H5O_dtype_decode_helper(ioflags, &p, dt) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode type")
 
     /* Set return value */
@@ -1136,7 +1150,7 @@ done:
     message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_dtype_encode(H5F_t *f, uint8_t *p, const void *mesg)
+H5O_dtype_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *mesg)
 {
     const H5T_t	   *dt = (const H5T_t *) mesg;
     herr_t      ret_value = SUCCEED;       /* Return value */
@@ -1149,7 +1163,7 @@ H5O_dtype_encode(H5F_t *f, uint8_t *p, const void *mesg)
     HDassert(dt);
 
     /* encode */
-    if(H5O_dtype_encode_helper(f, &p, dt) < 0)
+    if(H5O_dtype_encode_helper(&p, dt) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode type")
 
 done:
@@ -1545,7 +1559,7 @@ H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
 
         /* Set the location of the source datatype to describe the disk form of the data */
-        if(H5T_set_loc(udata->src_dtype, file_src, H5T_LOC_DISK) < 0)
+        if(H5T_set_loc(udata->src_dtype, H5F_VOL_OBJ(file_src), H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
     } /* end if */
 
@@ -1582,7 +1596,7 @@ H5O__dtype_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const H5O_msg_class_t *mesg
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy")
 
     /* The datatype will be in the new file; set its location. */
-    if(H5T_set_loc(dst_mesg, file_dst, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(dst_mesg, H5F_VOL_OBJ(file_dst), H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to set location")
 
     ret_value = dst_mesg;

@@ -38,23 +38,25 @@
 
 
 #define FILENAME_LEN            1024
+
+/* test routines */
+#ifdef H5_HAVE_PARALLEL
+static unsigned verify_page_buffering_disabled(hid_t orig_fapl, 
+    const char *env_h5_drvr);
+#else
 #define NUM_DSETS               5
 #define NX                      100
 #define NY                      50
 
-/* helper routines */
-static unsigned create_file(char *filename, hid_t fcpl, hid_t fapl);
-static unsigned open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size);
-
-/* test routines */
 static unsigned test_args(hid_t fapl, const char *env_h5_drvr);
 static unsigned test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr);
 static unsigned test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr);
 static unsigned test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr);
 static unsigned test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr);
-#ifdef H5_HAVE_PARALLEL
-static unsigned verify_page_buffering_disabled(hid_t orig_fapl, 
-    const char *env_h5_drvr);
+
+/* helper routines */
+static unsigned create_file(char *filename, hid_t fcpl, hid_t fapl);
+static unsigned open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size);
 #endif /* H5_HAVE_PARALLEL */
 
 const char *FILENAME[] = {
@@ -62,6 +64,7 @@ const char *FILENAME[] = {
     NULL
 };
 
+#ifndef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:    create_file()
@@ -296,6 +299,7 @@ error:
     } H5E_END_TRY;
     return 1;
 }
+#endif /* H5_HAVE_PARALLEL */
 
 /*
  *
@@ -336,7 +340,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
             memb_addr[H5FD_MEM_DRAW] = ((memb_addr[H5FD_MEM_DRAW] + pagesize - 1) / pagesize) * pagesize;
         } else {
             /* Set memb_addr aligned */
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
                 memb_addr[mt] = ((memb_addr[mt] + pagesize - 1) / pagesize) * pagesize;
         } /* end else */
 
@@ -345,7 +349,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
             TEST_ERROR
 
         /* Free memb_name */
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
             free(memb_name[mt]);
 
     } /* end if */
@@ -357,6 +361,7 @@ error:
 
 } /* set_multi_split() */
 
+#ifndef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:    test_args()
@@ -379,6 +384,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+
 static unsigned
 test_args(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -2002,6 +2008,7 @@ error:
 
     return 1;
 } /* test_stats_collection */
+#endif /* #ifndef H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------

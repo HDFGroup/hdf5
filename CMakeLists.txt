@@ -1,9 +1,9 @@
 cmake_minimum_required (VERSION 3.10)
 project (HDF5 C)
 
-if(POLICY CMP0074)
-  cmake_policy(SET CMP0074 NEW)
-endif()
+if (POLICY CMP0074)
+  cmake_policy (SET CMP0074 NEW)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
@@ -15,7 +15,7 @@ endif()
 # Make install can be used to install all components for system-wide use.
 #
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
-    MESSAGE(FATAL_ERROR "\nERROR! ${PROJECT_NAME} DOES NOT SUPPORT IN SOURCE BUILDS!\n"
+    message (FATAL_ERROR "\nERROR! ${PROJECT_NAME} DOES NOT SUPPORT IN SOURCE BUILDS!\n"
       "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
       " == CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}\n"
       "NEXT STEPS:\n"
@@ -100,7 +100,7 @@ mark_as_advanced (HDF5_EXTERNAL_LIB_PREFIX)
 #   # Add the sub project
 #   add_subdirectory (Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
-string(TIMESTAMP CONFIG_DATE "%Y-%m-%d")
+string (TIMESTAMP CONFIG_DATE "%Y-%m-%d")
 
 #-----------------------------------------------------------------------------
 # Allow Visual Studio solution directories
@@ -432,18 +432,37 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to Build Shared and Static libs, default is both
 #-----------------------------------------------------------------------------
+option (BUILD_STATIC_LIBS "Build Static Libraries" ON)
+set (H5_ENABLE_STATIC_LIB NO)
+option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
+set (H5_ENABLE_SHARED_LIB NO)
 option (ONLY_SHARED_LIBS "Only Build Shared Libraries" OFF)
-set (H5_ENABLE_STATIC_LIB YES)
+mark_as_advanced (ONLY_SHARED_LIBS)
+
+if (BUILD_STATIC_LIBS)
+  set (H5_ENABLE_STATIC_LIB YES)
+endif ()
+if (BUILD_SHARED_LIBS)
+  set (H5_ENABLE_SHARED_LIB YES)
+endif ()
+
+# Force only shared libraries if all OFF
+if (NOT BUILD_STATIC_LIBS AND NOT BUILD_SHARED_LIBS)
+  set (ONLY_SHARED_LIBS ON CACHE BOOL "Only Build Shared Libraries" FORCE)
+endif ()
+
 if (ONLY_SHARED_LIBS)
   set (H5_ENABLE_STATIC_LIB NO)
   set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
 endif ()
-option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-set (H5_ENABLE_SHARED_LIB NO)
-if (BUILD_SHARED_LIBS)
-  set (H5_ENABLE_SHARED_LIB YES)
-endif ()
+
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if (NOT BUILD_SHARED_LIBS)
+  set (tgt_file_ext "")
+else ()
+  set (tgt_file_ext "-shared")
+endif ()
 
 #-----------------------------------------------------------------------------
 # Option to Build Static executables
@@ -456,18 +475,30 @@ if (BUILD_STATIC_EXECS)
   endif ()
 endif ()
 
+if (HDF5_ENABLE_ANALYZER_TOOLS)
+  include (${HDF5_SOURCE_DIR}/config/sanitizer/tools.cmake)
+endif ()
+if (HDF5_ENABLE_SANITIZERS)
+  include (${HDF5_SOURCE_DIR}/config/sanitizer/sanitizers.cmake)
+endif ()
+
 #-----------------------------------------------------------------------------
 # Option to use code coverage
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
 if (HDF5_ENABLE_COVERAGE)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --coverage -O0 -fprofile-arcs -ftest-coverage")
-  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
-    link_libraries (gcov)
+  include (${HDF5_SOURCE_DIR}/config/sanitizer/code-coverage.cmake)
+  if(CODE_COVERAGE AND CODE_COVERAGE_ADDED)
+    add_code_coverage () # Adds instrumentation to all targets
   else ()
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --coverage -O0 -fprofile-arcs -ftest-coverage")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+      set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+      link_libraries (gcov)
+    else ()
+      set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+    endif ()
   endif ()
 endif ()
 
@@ -768,8 +799,8 @@ if (HDF5_ENABLE_THREADSAFE)
       message (FATAL_ERROR " **** thread-safe option requires Win32 threads or Pthreads **** ")
     endif ()
   endif ()
-  set(THREADS_PREFER_PTHREAD_FLAG ON)
-  find_package(Threads REQUIRED)
+  set (THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package (Threads REQUIRED)
   if (Threads_FOUND)
     set (H5_HAVE_THREADSAFE 1)
   endif ()
@@ -844,6 +875,30 @@ if (BUILD_TESTING)
 
   include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
   configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
+
+  option (HDF5_TEST_SERIAL "Execute non-parallel tests" ON)
+  mark_as_advanced (HDF5_TEST_SERIAL)
+
+  option (HDF5_TEST_TOOLS "Execute tools tests" ON)
+  mark_as_advanced (HDF5_TEST_TOOLS)
+
+  option (HDF5_TEST_EXAMPLES "Execute tests on examples" ON)
+  mark_as_advanced (HDF5_TEST_EXAMPLES)
+
+  option (HDF5_TEST_SWMR "Execute SWMR tests" ON)
+  mark_as_advanced (HDF5_TEST_SWMR)
+
+  option (HDF5_TEST_PARALLEL "Execute parallel tests" ON)
+  mark_as_advanced (HDF5_TEST_PARALLEL)
+
+  option (HDF5_TEST_FORTRAN "Execute fortran tests" ON)
+  mark_as_advanced (HDF5_TEST_FORTRAN)
+
+  option (HDF5_TEST_CPP "Execute cpp tests" ON)
+  mark_as_advanced (HDF5_TEST_CPP)
+
+  option (HDF5_TEST_JAVA "Execute java tests" ON)
+  mark_as_advanced (HDF5_TEST_JAVA)
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")

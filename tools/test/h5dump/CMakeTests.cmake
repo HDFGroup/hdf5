@@ -198,6 +198,16 @@
       ${HDF5_TOOLS_DIR}/testfiles/h5dump-help.txt
       ${HDF5_TOOLS_DIR}/testfiles/out3.h5import
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.ddl
+      #STD_REF_OBJ files
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_attrR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_compatR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_extR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_grpR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj_delR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_objR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_paramR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg_1dR.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_regR.ddl
   )
   set (HDF5_N_REFERENCE_FILES
       tall-3
@@ -322,6 +332,18 @@
       ${HDF5_TOOLS_DIR}/testfiles/tvms.h5
       ${HDF5_TOOLS_DIR}/testfiles/t128bit_float.h5
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.h5
+      #STD_REF_OBJ files
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_attr.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_compat.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_ext1.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_ext2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_grp.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj_del.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_obj.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_param.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg_1d.h5
+      ${HDF5_TOOLS_DIR}/testfiles/trefer_reg.h5
+
   )
   set (HDF5_ERROR_REFERENCE_TEST_FILES
       ${PROJECT_SOURCE_DIR}/errfiles/filter_fail.err
@@ -398,16 +420,10 @@
 ##############################################################################
 ##############################################################################
 
-  if (NOT BUILD_SHARED_LIBS)
-    set (tgt_ext "")
-  else ()
-    set (tgt_ext "-shared")
-  endif ()
-
   macro (ADD_HELP_TEST testname resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN})
+      add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
       set_tests_properties (H5DUMP-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (last_test)
         set_tests_properties (H5DUMP-${testname} PROPERTIES DEPENDS ${last_test})
@@ -418,7 +434,7 @@
           NAME H5DUMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=h5dump-${testname}.out"
@@ -449,7 +465,7 @@
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN})
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -467,7 +483,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -482,7 +498,7 @@
   macro (ADD_H5_TEST_N resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-N-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN})
+      add_test (NAME H5DUMP-N-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
       set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (${resultcode})
         set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -500,7 +516,7 @@
           NAME H5DUMP-N-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}-N.out"
@@ -515,7 +531,7 @@
   macro (ADD_H5_TEST_EXPORT resultfile targetfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN} ${resultfile}.txt ${targetfile})
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN} ${resultfile}.txt ${targetfile})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -533,7 +549,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN};${resultfile}.txt;${targetfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -556,7 +572,7 @@
   macro (ADD_H5_TEST_EXPORT_DDL resultfile targetfile resultcode ddlfile)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> --ddl=${ddlfile}.txt ${ARGN} ${resultfile}.txt ${targetfile})
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> --ddl=${ddlfile}.txt ${ARGN} ${resultfile}.txt ${targetfile})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -576,7 +592,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=--ddl=${ddlfile}.txt;${ARGN};${resultfile}.txt;${targetfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -611,7 +627,7 @@
       set_tests_properties (H5DUMP-output-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       add_test (
           NAME H5DUMP-output-${resultfile}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_ext}> ${ARGN} ${resultfile}.txt ${targetfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN} ${resultfile}.txt ${targetfile}
       )
       set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile}-clear-objects)
@@ -632,7 +648,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -650,7 +666,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -667,7 +683,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -685,7 +701,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -713,7 +729,7 @@
           NAME H5DUMP-IMPORT-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN};-o;${resultfile}.bin;${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${conffile}.out"
@@ -722,10 +738,10 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES DEPENDS "H5DUMP-IMPORT-${resultfile}-clear-objects")
-      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
+      add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import${tgt_file_ext}> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-${resultfile})
-      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
+      add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> ${testfile} ${resultfile}.h5 /integer /integer)
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-h5import-${resultfile})
     endif ()
@@ -737,7 +753,7 @@
           NAME H5DUMP_UD-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -892,7 +908,7 @@
   # test for files with array data
   ADD_H5_TEST (tarray1 0 --enable-error-stack tarray1.h5)
   # # added for bug# 2092 - tarray1_big.h5
-  ADD_H5ERR_MASK_TEST (tarray1_big 0 "Undefined reference pointer" --enable-error-stack -R tarray1_big.h5)
+  ADD_H5ERR_MASK_TEST (tarray1_big 0 "NULL token size" --enable-error-stack -R tarray1_big.h5)
   ADD_H5_TEST (tarray2 0 --enable-error-stack tarray2.h5)
   ADD_H5_TEST (tarray3 0 --enable-error-stack tarray3.h5)
   ADD_H5_TEST (tarray4 0 --enable-error-stack tarray4.h5)
@@ -1103,10 +1119,21 @@
 
   # test for dataset region references
   ADD_H5_TEST (tdatareg 0 --enable-error-stack tdatareg.h5)
-  ADD_H5ERR_MASK_TEST (tdataregR 0 "Undefined reference pointer" --enable-error-stack -R tdatareg.h5)
+  ADD_H5ERR_MASK_TEST (tdataregR 0 "NULL token size" --enable-error-stack -R tdatareg.h5)
   ADD_H5_TEST (tattrreg 0 --enable-error-stack tattrreg.h5)
-  ADD_H5ERR_MASK_TEST (tattrregR 0 "Undefined reference pointer" -R --enable-error-stack tattrreg.h5)
+  ADD_H5ERR_MASK_TEST (tattrregR 0 "NULL token size" -R --enable-error-stack tattrreg.h5)
   ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 --enable-error-stack -d /Dataset1 -s 0 -R -y -o)
+
+  # test for 1.12 region references
+  ADD_H5_TEST (trefer_attrR 0 --enable-error-stack -R trefer_attr.h5)
+  ADD_H5_TEST (trefer_compatR 0 --enable-error-stack -R trefer_compat.h5)
+  ADD_H5_TEST (trefer_extR 0 --enable-error-stack -R trefer_ext2.h5)
+  ADD_H5_TEST (trefer_grpR 0 --enable-error-stack -R trefer_grp.h5)
+  ADD_H5_TEST (trefer_obj_delR 0 --enable-error-stack -R trefer_obj_del.h5)
+  ADD_H5_TEST (trefer_objR 0 --enable-error-stack -R trefer_obj.h5)
+  ADD_H5_TEST (trefer_paramR 0 --enable-error-stack -R trefer_param.h5)
+  ADD_H5_TEST (trefer_regR 0 --enable-error-stack -R trefer_reg.h5)
+  ADD_H5_TEST (trefer_reg_1dR 0 --enable-error-stack -R trefer_reg_1d.h5)
 
   # tests for group creation order
   # "1" tracked, "2" name, root tracked

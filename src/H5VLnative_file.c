@@ -129,6 +129,18 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
     FUNC_ENTER_PACKAGE
 
     switch(get_type) {
+        /* "get container info" */
+        case H5VL_FILE_GET_CONT_INFO:
+            {
+                H5VL_file_cont_info_t *info = HDva_arg(arguments, H5VL_file_cont_info_t *);
+
+                /* Retrieve the file's container info */
+                if(H5F__get_cont_info((H5F_t *)obj, info) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file container info")
+
+                break;
+            }
+
         /* H5Fget_access_plist */
         case H5VL_FILE_GET_FAPL:
             {
@@ -139,7 +151,7 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
 
                 /* Retrieve the file's access property list */
                 if((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file access property list")
 
                 if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(*plist_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
@@ -160,6 +172,73 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                 if((*plist_id = H5P_copy_plist(plist, TRUE)) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
 
+                break;
+            }
+
+        /* H5Fget_intent */
+        case H5VL_FILE_GET_INTENT:
+            {
+                unsigned *intent_flags = HDva_arg(arguments, unsigned *);
+
+                f = (H5F_t *)obj;
+
+                /* HDF5 uses some flags internally that users don't know about.
+                 * Simplify things for them so that they only get either H5F_ACC_RDWR
+                 * or H5F_ACC_RDONLY and any SWMR flags.
+                 */
+                if(H5F_INTENT(f) & H5F_ACC_RDWR) {
+                    *intent_flags = H5F_ACC_RDWR;
+
+                    /* Check for SWMR write access on the file */
+                    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+                        *intent_flags |= H5F_ACC_SWMR_WRITE;
+                } /* end if */
+                else {
+                    *intent_flags = H5F_ACC_RDONLY;
+
+                    /* Check for SWMR read access on the file */
+                    if(H5F_INTENT(f) & H5F_ACC_SWMR_READ)
+                        *intent_flags |= H5F_ACC_SWMR_READ;
+                } /* end else */
+
+                break;
+            }
+
+        /* H5Fget_fileno */
+        case H5VL_FILE_GET_FILENO:
+            {
+                unsigned long *fno = HDva_arg(arguments, unsigned long *);
+                unsigned long my_fileno = 0;
+
+                f = (H5F_t *)obj;
+                H5F_GET_FILENO(f, my_fileno);
+                *fno = my_fileno;    /* sigh */
+
+                break;
+            }
+
+        /* H5Fget_name */
+        case H5VL_FILE_GET_NAME:
+            {
+                H5I_type_t  type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
+                size_t      size = HDva_arg(arguments, size_t);
+                char       *name = HDva_arg(arguments, char *);
+                ssize_t    *ret  = HDva_arg(arguments, ssize_t *);
+                size_t      len;
+
+                if(H5VL_native_get_file_struct(obj, type, &f) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+                len = HDstrlen(H5F_OPEN_NAME(f));
+
+                if(name) {
+                    HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
+                    if(len >= size)
+                        name[size-1]='\0';
+                } /* end if */
+
+                /* Set the return value for the API call */
+                *ret = (ssize_t)len;
                 break;
             }
 
@@ -199,73 +278,6 @@ H5VL__native_file_get(void *obj, H5VL_file_get_t get_type,
                 break;
             }
 
-        /* H5Fget_intent */
-        case H5VL_FILE_GET_INTENT:
-            {
-                unsigned *intent_flags = HDva_arg(arguments, unsigned *);
-
-                f = (H5F_t *)obj;
-
-                /* HDF5 uses some flags internally that users don't know about.
-                 * Simplify things for them so that they only get either H5F_ACC_RDWR
-                 * or H5F_ACC_RDONLY and any SWMR flags.
-                 */
-                if(H5F_INTENT(f) & H5F_ACC_RDWR) {
-                    *intent_flags = H5F_ACC_RDWR;
-
-                    /* Check for SWMR write access on the file */
-                    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-                        *intent_flags |= H5F_ACC_SWMR_WRITE;
-                } /* end if */
-                else {
-                    *intent_flags = H5F_ACC_RDONLY;
-
-                    /* Check for SWMR read access on the file */
-                    if(H5F_INTENT(f) & H5F_ACC_SWMR_READ)
-                        *intent_flags |= H5F_ACC_SWMR_READ;
-                } /* end else */
-
-                break;
-            }
-
-        /* H5Fget_fileno */
-        case H5VL_FILE_GET_FILENO:
-            {
-                unsigned long *fileno = HDva_arg(arguments, unsigned long *);
-                unsigned long my_fileno = 0;
-
-                f = (H5F_t *)obj;
-                H5F_GET_FILENO(f, my_fileno);
-                *fileno = my_fileno;    /* sigh */
-
-                break;
-            }
-
-        /* H5Fget_name */
-        case H5VL_FILE_GET_NAME:
-            {
-                H5I_type_t  type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
-                size_t      size = HDva_arg(arguments, size_t);
-                char       *name = HDva_arg(arguments, char *);
-                ssize_t    *ret  = HDva_arg(arguments, ssize_t *);
-                size_t      len;
-
-                if(NULL == (f = H5F__get_file(obj, type)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-                len = HDstrlen(H5F_OPEN_NAME(f));
-
-                if(name) {
-                    HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
-                    if(len >= size)
-                        name[size-1]='\0';
-                } /* end if */
-
-                /* Set the return value for the API call */
-                *ret = (ssize_t)len;
-                break;
-            }
-
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information")
     } /* end switch */
@@ -301,7 +313,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 H5F_t           *f = NULL;              /* File to flush */
 
                 /* Get the file for the object */
-                if(NULL == (f = H5F__get_file(obj, type)))
+                if(H5VL_native_get_file_struct(obj, type, &f) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Nothing to do if the file is read only. This determination is
@@ -347,14 +359,14 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 H5I_type_t  type       = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
                 const char *name       = HDva_arg(arguments, const char *);
                 H5F_t      *child      = HDva_arg(arguments, H5F_t *);
-                hid_t       plist_id   = HDva_arg(arguments, hid_t);
+                hid_t       fmpl_id    = HDva_arg(arguments, hid_t);
                 H5G_loc_t   loc;
 
                 if(H5G_loc_real(obj, type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* Do the mount */
-                if(H5F__mount(&loc, name, child, plist_id) < 0)
+                if(H5F__mount(&loc, name, child, fmpl_id) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
                 break;
@@ -382,10 +394,10 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
             {
                 hid_t       fapl_id = HDva_arg(arguments, hid_t);
                 const char *name    = HDva_arg(arguments, const char *);
-                htri_t     *ret     = HDva_arg(arguments, htri_t *);
+                htri_t     *result  = HDva_arg(arguments, htri_t *);
 
                 /* Call private routine */
-                if((*ret = H5F__is_hdf5(name, fapl_id)) < 0)
+                if((*result = H5F__is_hdf5(name, fapl_id)) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "error in HDF5 file check")
                 break;
             }
@@ -397,6 +409,18 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type,
                 break;
             }
 
+        /* Check if two files are the same */
+        case H5VL_FILE_IS_EQUAL:
+            {
+                H5F_t *file2 = (H5F_t *)HDva_arg(arguments, void *);
+                hbool_t *is_equal = HDva_arg(arguments, hbool_t *);
+
+                if(!obj || !file2)
+                    *is_equal = FALSE;
+                else
+                    *is_equal = (((H5F_t *)obj)->shared == file2->shared);
+                break;
+            }
 
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
@@ -417,10 +441,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type,
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5F_t *f = NULL;           /* File */
-    H5VL_native_file_optional_t optional_type = HDva_arg(arguments, H5VL_native_file_optional_t);
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -495,7 +519,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 /* Get the file struct. This call is careful to not return the file pointer
                  * for the top file in a mount hierarchy.
                  */
-                if(NULL == (f = H5F__get_file(obj, type)))
+                if(H5VL_native_get_file_struct(obj, type, &f) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not get a file struct")
 
                 /* Get the file info */
@@ -532,8 +556,8 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
             {
                 size_t *max_size_ptr        = HDva_arg(arguments, size_t *);
                 size_t *min_clean_size_ptr  = HDva_arg(arguments, size_t *);
-                size_t *cur_size_ptr        = HDva_arg(arguments, size_t *); 
-                int    *cur_num_entries_ptr = HDva_arg(arguments, int *); 
+                size_t *cur_size_ptr        = HDva_arg(arguments, size_t *);
+                int    *cur_num_entries_ptr = HDva_arg(arguments, int *);
                 uint32_t cur_num_entries;
 
                 /* Go get the size data */
@@ -555,20 +579,6 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 /* Retrieve the VFD handle for the file */
                 if(H5F_get_vfd_handle(f, fapl_id, file_handle) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
-                break;
-            }
-
-        /* H5Iget_file_id */
-        case H5VL_NATIVE_FILE_GET_FILE_ID:
-            {
-                H5I_type_t  type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
-                hbool_t     app_ref = (hbool_t)HDva_arg(arguments, int);
-                hid_t      *file_id = HDva_arg(arguments, hid_t *);
-
-                if(NULL == (f = H5F__get_file(obj, type)))
-                    HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file or file object")
-                if((*file_id = H5F__get_file_id(f, app_ref)) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file ID")
                 break;
             }
 
@@ -687,7 +697,7 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 unsigned *misses        = HDva_arg(arguments, unsigned *);
                 unsigned *evictions     = HDva_arg(arguments, unsigned *);
                 unsigned *bypasses      = HDva_arg(arguments, unsigned *);
-                
+
                 /* Sanity check */
                 if(NULL == f->shared->page_buf)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
@@ -808,6 +818,15 @@ H5VL__native_file_optional(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR
                 break;
             }
 #endif /* H5_HAVE_PARALLEL */
+
+        /* Finalize H5Fopen */
+        case H5VL_NATIVE_FILE_POST_OPEN:
+            {
+                /* Call package routine */
+                if(H5F__post_open((H5F_t *)obj) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't finish opening file")
+                break;
+            }
 
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")

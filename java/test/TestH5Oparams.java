@@ -95,6 +95,31 @@ public class TestH5Oparams {
     }
 
     @Test(expected = HDF5LibraryException.class)
+    public void testH5Oget_native_info_invalid() throws Throwable {
+        H5.H5Oget_native_info(-1, 0);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testH5Oget_native_info_by_name_null() throws Throwable {
+        H5.H5Oget_native_info_by_name(-1, null, 0, HDF5Constants.H5P_DEFAULT);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oget_native_info_by_name_invalid() throws Throwable {
+        H5.H5Oget_native_info_by_name(-1, "/testH5Gcreate", 0, HDF5Constants.H5P_DEFAULT);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oget_native_info_by_idx_invalid() throws Throwable {
+        H5.H5Oget_native_info_by_idx(-1, "Bogus", -1, -1, -1L, 0, -1);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testH5Oget_native_info_by_idx_null() throws Throwable {
+        H5.H5Oget_native_info_by_idx(-1, null, 0, 0, 0L, 0, 0);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
     public void testH5Olink_invalid() throws Throwable {
         H5.H5Olink(-1, -1, "Bogus", -1, -1);
     }

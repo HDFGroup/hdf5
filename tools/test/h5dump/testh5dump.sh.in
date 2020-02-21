@@ -906,12 +906,14 @@ TOOLTEST_HELP() {
 }
 
 # Call the h5dump tool and grep for a value
-#
+# txttype ERRTXT greps test error output, otherwise greps test output
 GREPTEST()
 {
-    expectdata=$1
-    actual=$TESTDIR/$2
-    actual_err="$TESTDIR/`basename $2 .ddl`.oerr"
+    txttype=$1
+    expectdata=$2
+    actual=$TESTDIR/$3
+    actual_err="$TESTDIR/`basename $3 .ddl`.oerr"
+    shift
     shift
     shift
 
@@ -921,7 +923,47 @@ GREPTEST()
       cd $TESTDIR
       $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
     ) >$actual 2>$actual_err
-    $GREP $expectdata $actual > /dev/null
+    if [ "$txttype" = "ERRTXT" ]; then
+        $GREP "$expectdata" $actual_err > /dev/null
+    else
+        $GREP "$expectdata" $actual > /dev/null
+    fi
+    if [ $? -eq 0 ]; then
+        echo " PASSED"
+    else
+        echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+}
+
+# Call the h5dump tool and grep for a value but disables plugin filter loading
+# txttype ERRTXT greps test error output, otherwise greps test output
+GREPTEST2()
+{
+    txttype=$1
+    expectdata=$2
+    actual=$TESTDIR/$3
+    actual_err="$TESTDIR/`basename $3 .ddl`.oerr"
+    shift
+    shift
+    shift
+
+    # Run test.
+    TESTING $DUMPER -p $@
+    (
+      cd $TESTDIR
+      $ENVCMD $RUNSERIAL $DUMPER_BIN -p "$@"
+    ) >$actual 2>$actual_err
+    if [ "$txttype" = "ERRTXT" ]; then
+        $GREP "$expectdata" $actual_err > /dev/null
+    else
+        $GREP "$expectdata" $actual > /dev/null
+    fi
     if [ $? -eq 0 ]; then
         echo " PASSED"
     else
@@ -1137,7 +1179,7 @@ TOOLTEST tvlenstr_array.ddl --enable-error-stack tvlenstr_array.h5
 # test for files with array data
 TOOLTEST tarray1.ddl --enable-error-stack tarray1.h5
 # # added for bug# 2092 - tarray1_big.h
-TOOLTEST4 tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
+GREPTEST ERRTXT "NULL token size" tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
 TOOLTEST tarray2.ddl --enable-error-stack tarray2.h5
 TOOLTEST tarray3.ddl --enable-error-stack tarray3.h5
 TOOLTEST tarray4.ddl --enable-error-stack tarray4.h5
@@ -1345,9 +1387,9 @@ fi
 
 # test for dataset region references
 TOOLTEST  tdatareg.ddl --enable-error-stack tdatareg.h5
-TOOLTEST4 tdataregR.ddl --enable-error-stack -R tdatareg.h5
+GREPTEST ERRTXT "NULL token size" tdataregR.ddl --enable-error-stack -R tdatareg.h5
 TOOLTEST  tattrreg.ddl --enable-error-stack tattrreg.h5
-TOOLTEST4 tattrregR.ddl --enable-error-stack -R tattrreg.h5
+GREPTEST ERRTXT "NULL token size" tattrregR.ddl --enable-error-stack -R tattrreg.h5
 TOOLTEST2 tbinregR.exp --enable-error-stack -d /Dataset1 -s 0 -R -y -o tbinregR.txt    tdatareg.h5
 
 # Clean up text output files
@@ -1384,7 +1426,7 @@ TOOLTEST4 textlinkfar.ddl --enable-error-stack textlinkfar.h5
 TOOLTEST4 textlink.ddl --enable-error-stack textlink.h5
 
 # test for error stack display (BZ2048)
-TOOLTEST5 filter_fail.ddl --enable-error-stack filter_fail.h5
+GREPTEST2 ERRTXT "filter plugins disabled" filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
 TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1 tall.h5
@@ -1396,7 +1438,7 @@ TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
 TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5
 
 # test to verify HDFFV-9407: long double full precision
-GREPTEST "1.123456789012345" t128bit_float.ddl -m %.35Lf t128bit_float.h5
+GREPTEST OUTTXT "1.123456789012345" t128bit_float.ddl -m %.35Lf t128bit_float.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

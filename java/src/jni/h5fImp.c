@@ -131,7 +131,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1name
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (namePtr = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Fget_name: malloc failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Fget_name: malloc failed");
 
     if ((H5Fget_name((hid_t)file_id, namePtr, (size_t)buf_size + 1)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -156,15 +156,17 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Fis_1hdf5
     (JNIEnv *env, jclass clss, jstring name)
 {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     const char *fileName = NULL;
+#endif
     htri_t      bval = JNI_FALSE;
 
     UNUSED(clss);
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
+    UNUSED(name);
     H5_UNIMPLEMENTED(ENVONLY, "H5Fis_hdf5: not implemented");
-#endif
-
+#else
     if (NULL == name)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Fis_hdf5: file name is NULL");
 
@@ -174,10 +176,13 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
         H5_LIBRARY_ERROR(ENVONLY);
 
     bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
+#endif
 
 done:
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     if (fileName)
         UNPIN_JAVA_STRING(ENVONLY, name, fileName);
+#endif
 
     return (jboolean)bval;
 } /* end Java_hdf_hdf5lib_H5_H5Fis_1hdf5 */
@@ -441,7 +446,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1obj_1ids
     }
 
     if (NULL == (id_list = (hid_t *) HDmalloc((size_t)rank * sizeof(hid_t))))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Fget_obj_ids: malloc failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Fget_obj_ids: malloc failed");
 
     if ((ret_val = H5Fget_obj_ids((hid_t)file_id, (unsigned int)types, (size_t)maxObjs, id_list)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);

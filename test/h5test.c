@@ -23,6 +23,7 @@
 
 #include "h5test.h"
 #include "H5srcdir.h"
+#include "H5srcdir_str.h"
 
 /* Necessary for h5_verify_cached_stabs() */
 #define H5G_FRIEND        /*suppress error about including H5Gpkg      */
@@ -99,6 +100,12 @@ static const char *multi_letters = "msbrglo";
 
 /* The # of seconds to wait for the message file--used by h5_wait_message() */
 #define MESSAGE_TIMEOUT         300             /* Timeout in seconds */
+
+/* Buffer to construct path in and return pointer to */
+static char srcdir_path[1024] = "";
+
+/* Buffer to construct file in and return pointer to */
+static char srcdir_testpath[1024] = "";
 
 /*  The strings that correspond to library version bounds H5F_libver_t in H5Fpublic.h */
 /*  This is used by h5_get_version_string() */
@@ -196,8 +203,7 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  *      sub_filename in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 void
 h5_delete_test_file(const char *base_name, hid_t fapl)
 {
@@ -237,7 +243,7 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
 
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             HDsnprintf(sub_filename, sizeof(sub_filename), "%s-%c.h5", filename, multi_letters[mt]);
             HDremove(sub_filename);
         }
@@ -247,7 +253,7 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
 
     return;
 } /* end h5_delete_test_file() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------
@@ -990,7 +996,7 @@ h5_get_vfd_fapl(hid_t fapl)
         HDmemset(memb_addr, 0, sizeof(memb_addr));
 
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
             sv[mt] = (char *)HDmalloc(H5TEST_MULTI_FILENAME_LEN);
             HDassert(sv[mt]);
@@ -1002,7 +1008,7 @@ h5_get_vfd_fapl(hid_t fapl)
         if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
             goto error;
 
-        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
             HDfree(sv[mt]);
     } else if(!HDstrcmp(tok, "family")) {
         /* Family of files, each 1MB and using the default driver */
@@ -1166,10 +1172,8 @@ h5_show_hostname(void)
         else
             HDprintf("thread 0.");
     }
-#elif defined(H5_HAVE_THREADSAFE)
-    HDprintf("thread %lu.", HDpthread_self_ulong());
 #else
-    HDprintf("thread 0.");
+    HDprintf("thread %" PRIu64 ".", H5TS_thread_id());
 #endif
 #ifdef H5_HAVE_WIN32_API
 
@@ -1321,8 +1325,7 @@ h5_dump_info_object(MPI_Info info)
     int    flag;
     int    i, nkeys;
 
-    HDprintf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", (int)info,
-  MPI_MAX_INFO_VAL);
+    HDprintf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
     if (info==MPI_INFO_NULL){
   HDprintf("object is MPI_INFO_NULL\n");
     }
@@ -1359,8 +1362,7 @@ h5_dump_info_object(MPI_Info info)
  *      temp in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 h5_stat_size_t
 h5_get_file_size(const char *filename, hid_t fapl)
 {
@@ -1398,7 +1400,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
             h5_stat_size_t tot_size = 0;
 
             HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
-            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                 /* Create the filename to query */
                 HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
 
@@ -1462,7 +1464,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
 
     return(-1);
 } /* end get_file_size() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 /*
  * This routine is designed to provide equivalent functionality to 'printf'
@@ -1698,7 +1700,7 @@ error:
  */
 static herr_t
 h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name,
-    const H5O_info_t *oinfo, void H5_ATTR_UNUSED *udata)
+    const H5O_info2_t *oinfo, void H5_ATTR_UNUSED *udata)
 {
     if(oinfo->type == H5O_TYPE_GROUP)
         return H5G__verify_cached_stabs_test(oid);
@@ -1746,7 +1748,7 @@ h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
             continue;
         } /* end if */
 
-        if(H5Ovisit2(file, H5_INDEX_NAME, H5_ITER_NATIVE,
+        if(H5Ovisit3(file, H5_INDEX_NAME, H5_ITER_NATIVE,
                 h5_verify_cached_stabs_cb, NULL, H5O_INFO_BASIC) < 0)
             goto error;
 
@@ -2039,3 +2041,56 @@ h5_get_version_string(H5F_libver_t libver)
 {
     return(LIBVER_NAMES[libver]);
 } /* end of h5_get_version_string */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_get_srcdir_filename
+ *
+ * Purpose:     Append the test file name to the srcdir path and return the whole string
+ *
+ * Return:      The string
+ *
+ *-------------------------------------------------------------------------
+ */
+const char *H5_get_srcdir_filename(const char *filename)
+{
+    const char *srcdir = H5_get_srcdir();
+
+    /* Check for error */
+    if(NULL == srcdir)
+        return(NULL);
+    else {
+        /* Build path to test file */
+        if((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(srcdir_testpath)) {
+            HDsnprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s%s", srcdir, filename);
+            return(srcdir_testpath);
+        } /* end if */
+        else
+            return(NULL);
+    } /* end else */
+} /* end H5_get_srcdir_filename() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_get_srcdir
+ *
+ * Purpose:     Just return the srcdir path 
+ *
+ * Return:      The string
+ *
+ *-------------------------------------------------------------------------
+ */
+const char *H5_get_srcdir(void)
+{
+    const char *srcdir = HDgetenv("srcdir");
+
+    /* Check for using the srcdir from configure time */
+    if(NULL == srcdir)
+        srcdir = config_srcdir;
+
+    /* Build path to all test files */
+    if((HDstrlen(srcdir) + 2) < sizeof(srcdir_path)) {
+        HDsnprintf(srcdir_path, sizeof(srcdir_path), "%s/", srcdir);
+        return(srcdir_path);
+    } /* end if */
+    else
+        return(NULL);
+} /* end H5_get_srcdir() */

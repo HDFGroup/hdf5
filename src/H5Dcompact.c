@@ -476,7 +476,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
         /* create variable-length datatype at the destinaton file */
         if(NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
-        if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0) {
+        if(H5T_set_loc(dt_dst, H5F_VOL_OBJ(f_dst), H5T_LOC_DISK) < 0) {
             (void)H5T_close_real(dt_dst);
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
         } /* end if */
@@ -551,26 +551,16 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
 
         H5MM_memcpy(storage_dst->buf, buf, storage_dst->size);
 
-        if(H5D_vlen_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
+        if(H5T_reclaim(tid_mem, buf_space, reclaim_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
     } /* end if */
     else if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
         if(f_src != f_dst) {
             /* Check for expanding references */
             if(cpy_info->expand_ref) {
-                size_t ref_count;
-                size_t src_dt_size;         /* Source datatype size */
-
-                /* Determine largest datatype size */
-                if(0 == (src_dt_size = H5T_get_size(dt_src)))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-
-                /* Determine # of reference elements to copy */
-                ref_count = storage_src->size / src_dt_size;
-
                 /* Copy objects referenced in source buffer to destination file and set destination elements */
-                if(H5O_copy_expand_ref(f_src, storage_src->buf, f_dst,
-                        storage_dst->buf, ref_count, H5T_get_ref_type(dt_src), cpy_info) < 0)
+                if (H5O_copy_expand_ref(f_src, tid_src, dt_src, storage_src->buf,
+                    storage_src->size, f_dst, storage_dst->buf, cpy_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
             } /* end if */
             else

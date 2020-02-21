@@ -369,10 +369,10 @@ void DataSet::vlenReclaim(const DataType& type, const DataSpace& space, const DS
     hid_t space_id = space.getId();
     hid_t xfer_plist_id = xfer_plist.getId();
 
-    herr_t ret_value = H5Dvlen_reclaim(type_id, space_id, xfer_plist_id, buf);
+    herr_t ret_value = H5Treclaim(type_id, space_id, xfer_plist_id, buf);
     if (ret_value < 0)
     {
-        throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
+        throw DataSetIException("DataSet::vlenReclaim", "H5Treclaim failed");
     }
 }
 
@@ -397,10 +397,10 @@ void DataSet::vlenReclaim(void* buf, const DataType& type, const DataSpace& spac
     hid_t space_id = space.getId();
     hid_t xfer_plist_id = xfer_plist.getId();
 
-    herr_t ret_value = H5Dvlen_reclaim(type_id, space_id, xfer_plist_id, buf);
+    herr_t ret_value = H5Treclaim(type_id, space_id, xfer_plist_id, buf);
     if (ret_value < 0)
     {
-        throw DataSetIException("DataSet::vlenReclaim", "H5Dvlen_reclaim failed");
+        throw DataSetIException("DataSet::vlenReclaim", "H5Treclaim failed");
     }
 }
 

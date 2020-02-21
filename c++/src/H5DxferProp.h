@@ -66,7 +66,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         void getTypeConvCB(H5T_conv_except_func_t *op, void **user_data) const;
 
         // Sets the memory manager for variable-length datatype
-        // allocation in H5Dread and H5Dvlen_reclaim.
+        // allocation in H5Dread and H5Treclaim.
         void setVlenMemManager(H5MM_allocate_t alloc, void* alloc_info,
                                H5MM_free_t free, void* free_info) const;
 
@@ -75,7 +75,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
         void setVlenMemManager() const;
 
         // Gets the memory manager for variable-length datatype
-        // allocation in H5Dread and H5Tvlen_reclaim.
+        // allocation in H5Dread and H5Treclaim.
         void getVlenMemManager(H5MM_allocate_t& alloc, void** alloc_info,
                                H5MM_free_t& free, void** free_info) const;
 

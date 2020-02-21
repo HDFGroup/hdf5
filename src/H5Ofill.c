@@ -408,10 +408,10 @@ H5O_fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 
     if(fill->version < H5O_FILL_VERSION_3) {
         /* Space allocation time */
-        *p++ = fill->alloc_time;
+        *p++ = (uint8_t)fill->alloc_time;
 
         /* Fill value writing time */
-        *p++ = fill->fill_time;
+        *p++ = (uint8_t)fill->fill_time;
 
         /* Whether fill value is defined */
         *p++ = (uint8_t)fill->fill_defined;
@@ -742,7 +742,7 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create scalar dataspace")
 
             /* Reclaim any variable length components of the fill value */
-            if(H5D_vlen_reclaim(fill_type_id, fill_space, fill->buf) < 0) {
+            if(H5T_reclaim(fill_type_id, fill_space, fill->buf) < 0) {
                 H5S_close(fill_space);
                 HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to reclaim variable-length fill value data")
             } /* end if */
