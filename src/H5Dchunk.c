@@ -323,6 +323,7 @@ static herr_t H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfil
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D__chunk_collective_fill(const H5D_t *dset, 
     H5D_chunk_coll_info_t *chunk_info, size_t chunk_size, const void *fill_buf);
+static int H5D__chunk_cmp_addr(const void *addr1, const void *addr2);
 #endif /* H5_HAVE_PARALLEL */
 
 static int
@@ -4958,6 +4959,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     MPI_Datatype mem_type, file_type;
     H5FD_mpio_xfer_t prev_xfer_mode;    /* Previous data xfer mode */
     hbool_t     have_xfer_mode = FALSE; /* Whether the previous xffer mode has been retrieved */
+    hbool_t     need_addr_sort = FALSE;
     int         i;                  /* Local index variable */
     herr_t ret_value = SUCCEED;     /* Return value */
 
@@ -5006,18 +5008,27 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
 
         /* make sure that the addresses in the datatype are
            monotonically non decreasing */
-        if(i)
-            HDassert(chunk_disp_array[i] > chunk_disp_array[i - 1]);
-    } /* end if */
+        if(i && (chunk_disp_array[i] < chunk_disp_array[i - 1]))
+            need_addr_sort = TRUE;
+    } /* end for */
 
     /* calculate if there are any leftover blocks after evenly
        distributing. If there are, then round robin the distribution
        to processes 0 -> leftover. */
     if(leftover && leftover > mpi_rank) {
-        chunk_disp_array[blocks] = (MPI_Aint)chunk_info->addr[blocks*mpi_size + mpi_rank];        
+        chunk_disp_array[blocks] = (MPI_Aint)chunk_info->addr[blocks*mpi_size + mpi_rank];
+        if(blocks && (chunk_disp_array[blocks] < chunk_disp_array[blocks - 1]))
+            need_addr_sort = TRUE;
         block_lens[blocks] = block_len;
         blocks++;
     }
+
+    /*
+     * Ensure that the blocks are sorted in monotonically non-decreasing
+     * order of offset in the file.
+     */
+    if(need_addr_sort)
+        HDqsort(chunk_disp_array, blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
 
     /* MSC - should use this if MPI_type_create_hindexed block is working:
      * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE, &file_type);
@@ -5073,6 +5084,36 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_collective_fill() */
+
+
+static int
+H5D__chunk_cmp_addr(const void *addr1, const void *addr2)
+{
+    MPI_Aint _addr1 = (MPI_Aint)0, _addr2 = (MPI_Aint)0;
+    int ret_value = 0;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    _addr1 = *((const MPI_Aint *) addr1);
+    _addr2 = *((const MPI_Aint *) addr2);
+
+#if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
+    {
+        MPI_Aint diff = MPI_Aint_diff(_addr1, _addr2);
+
+        if(diff < (MPI_Aint)0)
+            ret_value = -1;
+        else if(diff > (MPI_Aint)0)
+            ret_value = 1;
+        else
+            ret_value = 0;
+    }
+#else
+    ret_value = (_addr1 > _addr2) - (_addr1 < _addr2);
+#endif
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_cmp_addr() */
 #endif /* H5_HAVE_PARALLEL */
 
 
