@@ -638,12 +638,16 @@
   macro (ADD_H5_TEST_META testname testfile)
       # Remove any output file left over from previous test run
       add_test (
-          NAME H5REPACK_META-${testname}_N-clear-objects
+          NAME H5REPACK_META-${testname}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
               testfiles/out-${testname}_N.${testname}.h5
+              testfiles/out-${testname}_N.${testname}.out
+              testfiles/out-${testname}_N.${testname}.out.err
               testfiles/out-${testname}_M.${testname}.h5
+              testfiles/out-${testname}_M.${testname}.out
+              testfiles/out-${testname}_M.${testname}.out.err
       )
-      set_tests_properties (H5REPACK_META-${testname}_N-clear-objects PROPERTIES
+      set_tests_properties (H5REPACK_META-${testname}-clear-objects PROPERTIES
           FIXTURES_REQUIRED clear_h5repack
       )
       add_test (
@@ -651,21 +655,52 @@
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5
       )
       set_tests_properties (H5REPACK_META-${testname}_N PROPERTIES
-          DEPENDS H5REPACK_META-${testname}_N-clear-objects
+          DEPENDS H5REPACK_META-${testname}-clear-objects
+      )
+      add_test (
+          NAME H5REPACK_META-${testname}_N_DFF
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
+              -D "TEST_ARGS:STRING=${testfile};out-${testname}_N.${testname}.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=out-${testname}_N.${testname}.out"
+              -D "TEST_EXPECT=0"
+              -D "TEST_REFERENCE=out-${testname}_N.${testname}.txt"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5REPACK_META-${testname}_N_DFF PROPERTIES
+          DEPENDS H5REPACK_META-${testname}_N
       )
       add_test (
           NAME H5REPACK_META-${testname}_M
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5
       )
       set_tests_properties (H5REPACK_META-${testname}_M PROPERTIES
-          DEPENDS H5REPACK_META-${testname}_N
+          DEPENDS H5REPACK_META-${testname}_N_DFF
       )
-
-      add_test (NAME H5REPACK_META-${testname} COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5 ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5)
-      set_tests_properties (H5REPACK_META-${testname} PROPERTIES
-          WILL_FAIL "true"
+      add_test (
+          NAME H5REPACK_META-${testname}_M_DFF
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
+              -D "TEST_ARGS:STRING=${testfile};out-${testname}_M.${testname}.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=out-${testname}_M.${testname}.out"
+              -D "TEST_EXPECT=0"
+              -D "TEST_REFERENCE=out-${testname}_M.${testname}.txt"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5REPACK_META-${testname}_M_DFF PROPERTIES
           DEPENDS H5REPACK_META-${testname}_M
       )
+
+# this will not work correctly
+#      add_test (NAME H5REPACK_META-${testname} COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5 ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5)
+#      set_tests_properties (H5REPACK_META-${testname} PROPERTIES
+#          WILL_FAIL "true"
+#          DEPENDS H5REPACK_META-${testname}_M_DFF
+#      )
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
@@ -1430,8 +1465,8 @@
   ADD_H5_TEST (HDFFV-7840 "TEST" h5diff_attr1.h5)
 
 # tests for metadata block size option ('-M')
-  ADD_H5_TEST_META (meta_short h5repack_layout.h5 -M 8192)
-  ADD_H5_TEST_META (meta_long h5repack_layout.h5 --metadata_block_size=8192)
+#  ADD_H5_TEST_META (meta_short h5repack_layout.h5 -M 8192)
+#  ADD_H5_TEST_META (meta_long h5repack_layout.h5 --metadata_block_size=8192)
 
 # VDS tests
 
