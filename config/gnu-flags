@@ -47,7 +47,7 @@ if test "X-" = "X-$cc_flags_set"; then
     # containing 'icc version'.  The cc_version for icc is correctly determined
     # and flags added in the intel-flags script.
     cc_version="`$CC $CFLAGS $H5_CFLAGS -v 2>&1 | grep -v 'PathScale' |\
-        grep -v 'icc version' |\
+        grep -v 'icc.*version' |\
         grep 'gcc version' | sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
     cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
     cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
