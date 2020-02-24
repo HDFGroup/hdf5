@@ -13,6 +13,7 @@
 #define	_HLOG_H
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <syslog.h>
 #include <sys/cdefs.h>
 
