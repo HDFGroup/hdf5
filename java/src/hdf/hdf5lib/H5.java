@@ -3590,7 +3590,7 @@ public class H5 implements java.io.Serializable {
      *                - name is null.
      */
     public synchronized static int H5Gget_obj_info_all(long loc_id, String name, String[] objNames, int[] objTypes,
-    		H5O_token_t[] tokens) throws HDF5LibraryException, NullPointerException {
+            H5O_token_t[] tokens) throws HDF5LibraryException, NullPointerException {
         if (objNames == null) {
             throw new NullPointerException("H5Gget_obj_info_all(): name array is null");
         }
@@ -3605,7 +3605,7 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static int H5Gget_obj_info_all(long loc_id, String name, String[] oname, int[] otype,
             int[] ltype, long[] fno, H5O_token_t[] tokens, int indx_type) throws HDF5LibraryException, NullPointerException {
-        return H5Gget_obj_info_full(loc_id, name, oname, otype, ltype, fno, tokens, oname.length, indx_type, -1);
+        return H5Gget_obj_info_full(loc_id, name, oname, otype, ltype, fno, tokens, indx_type, -1);
     }
 
     public synchronized static int H5Gget_obj_info_full(long loc_id, String name, String[] oname, int[] otype,
