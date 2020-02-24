@@ -23,6 +23,7 @@
  */
 
 #include "bsdqueue.h"
+#include "hlog.h"
 
 /****************/
 /* Module Setup */
@@ -127,10 +128,13 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Library Private Variables */
 /*****************************/
 
-
 /*******************/
 /* Local Variables */
 /*******************/
+
+HLOG_OUTLET_DECL(h5mf);
+HLOG_OUTLET_SHORT_DEFN(h5mf, all);
+HLOG_OUTLET_SHORT_DEFN(h5mf_defer, h5mf);
 
 static herr_t
 defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr,
@@ -146,6 +150,11 @@ defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr,
     df->size = size;
     df->free_after_tick = shared->tick_num + shared->vfd_swmr_config.max_lag;
 
+    hlog_fast(h5mf_defer,
+        "%s.%d: deferred free at %" PRIuHADDR ", %" PRIuHSIZE
+        " bytes until tick %" PRIu64, __FILE__, __LINE__, addr, size,
+        df->free_after_tick);
+
     SIMPLEQ_INSERT_TAIL(&shared->lower_defrees, df, link);
 
     return SUCCEED;
@@ -160,21 +169,34 @@ process_deferred_frees(H5F_t *f)
     const uint64_t tick_num = shared->tick_num;
     lower_defree_queue_t defrees = SIMPLEQ_HEAD_INITIALIZER(defrees);
 
+    /* Have to empty the queue before processing it because we
+     * could re-enter this routine through H5MF__xfree_impl.  If
+     * items were still on the queue, we would enter process_deferred_frees()
+     * recursively until the queue was empty.
+     */
     SIMPLEQ_CONCAT(&defrees, &shared->lower_defrees);
 
     while ((df = SIMPLEQ_FIRST(&defrees)) != NULL) {
         if (tick_num <= df->free_after_tick)
             break;
-        /* Have to remove the item before processing it because we
-         * could re-enter this routine through H5MF__xfree_impl.  If
-         * the item was still on the queue, it would be processed
-         * a second time, and that's not good.
-         */ 
+        hlog_fast(h5mf_defer,
+            "%s.%d: processing free at %" PRIuHADDR ", %" PRIuHSIZE " bytes",
+            __FILE__, __LINE__, df->addr, df->size);
         SIMPLEQ_REMOVE_HEAD(&defrees, link);
-        if (H5MF__xfree_impl(f, df->alloc_type, df->addr, df->size) < 0)
+        if (H5MF__xfree_impl(f, df->alloc_type, df->addr, df->size) < 0) {
             err = FAIL;
+        }
         free(df);
     }
+
+    if (err != SUCCEED) {
+        hlog_fast(h5mf_defer, "%s.%d: error: dropped entries on the floor",
+            __FILE__, __LINE__);
+    }
+
+    /* Save remaining entries for processing, later. */
+    SIMPLEQ_CONCAT(&shared->lower_defrees, &defrees);
+
     return err;
 }
 
