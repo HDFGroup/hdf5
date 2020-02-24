@@ -530,7 +530,7 @@ static int copy_refs_attr(hid_t loc_in,
                     ref_comp_size = NULL;
                 }
             }
-             /* This line below needs to be moved in this loop instead of inserting outside. Otherwise,
+            /* This line below needs to be moved in this loop instead of inserting outside. Otherwise,
                ref_comp_field_n may be >0 for the next attribute, which may not be
                the reference type and will be accidently treated as the reference type.
                It will then cause the H5Acreate2 failed since that attribute is already created.

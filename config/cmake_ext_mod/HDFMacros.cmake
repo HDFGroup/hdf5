@@ -82,10 +82,8 @@ macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
       set (targetfilename $<TARGET_FILE_DIR:${libtarget}>/${target_name}.pdb)
     endif ()
     install (
-      FILES
-          ${targetfilename}
-      DESTINATION
-          ${targetdestination}
+      FILES ${targetfilename}
+      DESTINATION ${targetdestination}
       CONFIGURATIONS Debug RelWithDebInfo
       COMPONENT ${targetcomponent}
       OPTIONAL
@@ -97,10 +95,8 @@ endmacro ()
 macro (INSTALL_PROGRAM_PDB progtarget targetdestination targetcomponent)
   if (WIN32 AND MSVC)
     install (
-      FILES
-          $<TARGET_PDB_FILE:${progtarget}>
-      DESTINATION
-          ${targetdestination}
+      FILES $<TARGET_PDB_FILE:${progtarget}>
+      DESTINATION ${targetdestination}
       CONFIGURATIONS Debug RelWithDebInfo
       COMPONENT ${targetcomponent}
       OPTIONAL
@@ -123,18 +119,12 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
     endif ()
   endif ()
 
-  set_target_properties (${libtarget}
-      PROPERTIES
-         OUTPUT_NAME
-               ${LIB_RELEASE_NAME}
-#         OUTPUT_NAME_DEBUG
-#               ${LIB_DEBUG_NAME}
-         OUTPUT_NAME_RELEASE
-               ${LIB_RELEASE_NAME}
-         OUTPUT_NAME_MINSIZEREL
-               ${LIB_RELEASE_NAME}
-         OUTPUT_NAME_RELWITHDEBINFO
-               ${LIB_RELEASE_NAME}
+  set_target_properties (${libtarget} PROPERTIES
+      OUTPUT_NAME                ${LIB_RELEASE_NAME}
+#      OUTPUT_NAME_DEBUG          ${LIB_DEBUG_NAME}
+      OUTPUT_NAME_RELEASE        ${LIB_RELEASE_NAME}
+      OUTPUT_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
+      OUTPUT_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
   )
   #get_property (target_name TARGET ${libtarget} PROPERTY OUTPUT_NAME)
   #get_property (target_name_debug TARGET ${libtarget} PROPERTY OUTPUT_NAME_DEBUG)
@@ -143,8 +133,7 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
 
   if (${libtype} MATCHES "STATIC")
     if (WIN32)
-      set_target_properties (${libtarget}
-          PROPERTIES
+      set_target_properties (${libtarget} PROPERTIES
           COMPILE_PDB_NAME_DEBUG          ${LIB_DEBUG_NAME}
           COMPILE_PDB_NAME_RELEASE        ${LIB_RELEASE_NAME}
           COMPILE_PDB_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
@@ -156,8 +145,7 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
 
   #----- Use MSVC Naming conventions for Shared Libraries
   if (MINGW AND ${libtype} MATCHES "SHARED")
-    set_target_properties (${libtarget}
-        PROPERTIES
+    set_target_properties (${libtarget} PROPERTIES
         IMPORT_SUFFIX ".lib"
         IMPORT_PREFIX ""
         PREFIX ""
