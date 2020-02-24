@@ -18,20 +18,20 @@
 
 #include "bsdqueue.h"
 
-#ifndef __unused
-#define __unused __attribute__((unused))
+#ifndef _unused
+#define _unused __attribute__((unused))
 #endif
 
-#ifndef __constructor
-#define __constructor __attribute__((constructor))
+#ifndef _constructor
+#define _constructor __attribute__((constructor))
 #endif
 
-#ifndef __noreturn
-#define __noreturn __attribute__((__noreturn__))
+#ifndef _noreturn
+#define _noreturn __attribute__((__noreturn__))
 #endif
 
-#ifndef __printflike
-#define __printflike(_fmt, _args) \
+#ifndef _printflike
+#define _printflike(_fmt, _args) \
     __attribute__((__format__(__printf__,_fmt,_args)))
 #endif
 
@@ -56,13 +56,13 @@ struct hlog_outlet {
 typedef struct hlog_outlet hlog_outlet_t;
 
 #define	HLOG_CONSTRUCTOR(__sym)					        \
-void hlog_constructor_##__sym(void) __constructor;	                \
+void hlog_constructor_##__sym(void) _constructor;	                \
 void									\
 hlog_constructor_##__sym(void)					        \
 {									\
 	hlog_outlet_register(&__sym);					\
 }									\
-void hlog_undefined_##__sym(void) __constructor
+void hlog_undefined_##__sym(void) _constructor
 
 #define	HLOG_OUTLET_FOREACH(__le, __le0)				\
 	for ((__le) = (__le0); (__le) != NULL; (__le) = (__le)->ls_parent)
@@ -111,23 +111,23 @@ void hlog_outlet_register(struct hlog_outlet *);
 struct hlog_outlet *hlog_outlet_lookup(const char *);
 int hlog_set_state(const char *, hlog_outlet_state_t, bool);
 
-void vhlog(const char *, va_list) __printflike(1,0);
+void vhlog(const char *, va_list) _printflike(1,0);
 
-void vhlog_warn(const char *, va_list) __printflike(1,0);
-void vhlog_warnx(const char *, va_list) __printflike(1,0);
-void vhlog_err(int, const char *, va_list) __printflike(2,0) __noreturn;
-void vhlog_errx(int, const char *, va_list) __printflike(2,0) __noreturn;
+void vhlog_warn(const char *, va_list) _printflike(1,0);
+void vhlog_warnx(const char *, va_list) _printflike(1,0);
+void vhlog_err(int, const char *, va_list) _printflike(2,0) _noreturn;
+void vhlog_errx(int, const char *, va_list) _printflike(2,0) _noreturn;
 
-void hlog_warnx(const char *, ...) __printflike(1,2);
-void hlog_warn(const char *, ...) __printflike(1,2);
+void hlog_warnx(const char *, ...) _printflike(1,2);
+void hlog_warn(const char *, ...) _printflike(1,2);
 
-void hlog_err(int, const char *, ...) __printflike(2,3) __noreturn;
-void hlog_errx(int, const char *, ...) __printflike(2,3) __noreturn;
+void hlog_err(int, const char *, ...) _printflike(2,3) _noreturn;
+void hlog_errx(int, const char *, ...) _printflike(2,3) _noreturn;
 
 void hlog_always(struct hlog_outlet *, const char *, ...)
-    __printflike(2,3);
+    _printflike(2,3);
 
 void hlog_impl(struct hlog_outlet *, const char *, ...)
-    __printflike(2,3);
+    _printflike(2,3);
 
 #endif	/* _HLOG_H */
