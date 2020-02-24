@@ -694,13 +694,22 @@
       set_tests_properties (H5REPACK_META-${testname}_M_DFF PROPERTIES
           DEPENDS H5REPACK_META-${testname}_M
       )
-
-# this will not work correctly
-#      add_test (NAME H5REPACK_META-${testname} COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5 ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5)
-#      set_tests_properties (H5REPACK_META-${testname} PROPERTIES
-#          WILL_FAIL "true"
-#          DEPENDS H5REPACK_META-${testname}_M_DFF
-#      )
+      add_test (NAME H5REPACK_META-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_ONEFILE=out-${testname}_N.${testname}.out"
+              -D "TEST_TWOFILE=out-${testname}_M.${testname}.h5"
+              -D "TEST_FUNCTION=LTEQ"
+              -P "${HDF_RESOURCES_DIR}/fileCompareTest.cmake"
+      )
+      if (CMAKE_VERSION VERSION_LESS "3.14.0")
+        set_tests_properties (H5REPACK_META-${testname} PROPERTIES
+            DISABLED "true"
+        )
+      endif ()
+      set_tests_properties (H5REPACK_META-${testname} PROPERTIES
+          DEPENDS H5REPACK_META-${testname}_M_DFF
+      )
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
@@ -1465,8 +1474,8 @@
   ADD_H5_TEST (HDFFV-7840 "TEST" h5diff_attr1.h5)
 
 # tests for metadata block size option ('-M')
-#  ADD_H5_TEST_META (meta_short h5repack_layout.h5 -M 8192)
-#  ADD_H5_TEST_META (meta_long h5repack_layout.h5 --metadata_block_size=8192)
+  ADD_H5_TEST_META (meta_short h5repack_layout.h5 -M 8192)
+  ADD_H5_TEST_META (meta_long h5repack_layout.h5 --metadata_block_size=8192)
 
 # VDS tests
 
