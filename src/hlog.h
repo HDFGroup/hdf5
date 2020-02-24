@@ -46,10 +46,10 @@ typedef enum hlog_outlet_state hlog_outlet_state_t;
 
 struct hlog_outlet {
         hlog_outlet_state_t             ls_resolved;
-	const char			*ls_name;
-	char				*ls_name0;
 	struct hlog_outlet		*ls_parent;
 	hlog_outlet_state_t		ls_state;
+	const char			*ls_name;
+	char				*ls_name0;
 	bool				ls_rendezvous;
 	TAILQ_ENTRY(hlog_outlet)	ls_next;
 };
