@@ -1222,12 +1222,8 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-
     Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
-
-    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 10 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
