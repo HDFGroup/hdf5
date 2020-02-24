@@ -150,6 +150,8 @@
 
 ./config/site-specific/BlankForm
 
+./doc/code-conventions.md
+
 ./examples/Attributes.txt
 ./examples/Makefile.am
 ./examples/h5_chunk_read.c
