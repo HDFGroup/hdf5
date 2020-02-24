@@ -345,11 +345,11 @@ hlog_outlet_register(struct hlog_outlet *ls_arg)
 		TAILQ_INSERT_TAIL(&hlog_outlets, ls_arg, ls_next);
 		if (ls == NULL)
 			return;
-		warnx("%s: rendezvous with log-sink '%s'", __func__,
+		warnx("%s: rendezvous with log-outlet '%s'", __func__,
 		    ls->ls_name);
 		ls_arg->ls_state = ls->ls_state;
 		TAILQ_REMOVE(&hlog_outlets, ls, ls_next);
 		hlog_outlet_destroy(ls);
 	} else
-		warnx("%s: duplicate log-sink, '%s'", __func__, ls->ls_name);
+		warnx("%s: duplicate log-outlet, '%s'", __func__, ls->ls_name);
 }
