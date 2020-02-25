@@ -18,6 +18,24 @@
 #
 
 #
+# For now, do not promote any warnings to errors.
+#
+PROMOTE_ERRORS_DFLT=no
+
+#
+# This filter rewrites -Werror= as -W, in that way demoting warnings
+# promoted to errors back to warnings, if PROMOTE_ERRORS is no.
+#
+demote_errors()
+{
+	if [ ${PROMOTE_ERRORS:-${PROMOTE_ERRORS_DFLT}} = no ]; then
+		sed 's,-Werror=,-W,g'
+	else
+		cat
+	fi
+}
+
+#
 # Prepend `$srcdir/config/gnu-` to the filename suffix(es) given as
 # subroutine argument(s), remove comments starting with # and ending
 # at EOL, replace spans of whitespace (including newlines) with spaces,
@@ -26,7 +44,7 @@
 load_gcc_arguments()
 {
     set -- $(for arg; do
-        sed 's,#.*$,,' $srcdir/config/gnu-${arg}
+        sed 's,#.*$,,' $srcdir/config/gnu-${arg} | demote_errors
     done)
     IFS=' ' echo "$*"
 }
