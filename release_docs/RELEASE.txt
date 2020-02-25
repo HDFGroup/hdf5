@@ -575,8 +575,10 @@ Known Problems
     if one or more processes do not participate.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
-    in the HDF5 source. Please report any new problems found to
-    help@hdfgroup.org.
+    in the HDF5 source, and in the HDF5 Jira database, available at 
+    https://jira.hdfgroup.org/.  Please register at https://www.hdfgroup.org to
+    create a free account for accessing the Jira database.  Please report any 
+    new problems found to help@hdfgroup.org.
 
 
 CMake vs. Autotools installations
