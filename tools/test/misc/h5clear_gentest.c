@@ -170,7 +170,7 @@ gen_enhance_files(hbool_t user)
     hid_t did = H5I_INVALID_HID;         /* Dataset ID */
     hsize_t dim[1];         /* Dimension sizes */
     int data[NUM_ELMTS];    /* Buffer for data */
-    int fd = -1;            /* The file descriptor ID */
+    int fd = H5I_INVALID_HID;            /* The file descriptor ID */
     int64_t eoa;            /* The EOA value */
     uint32_t chksum;        /* The chksum value */
     int i = 0 , j = 0, u = 0;   /* Local index variable */
