@@ -25,7 +25,8 @@
 #define FAMILY_SIZE     1024
 #define FILENAME        "family_file%05d.h5"
 
-static int buf[FAMILY_NUMBER][FAMILY_SIZE];
+int     **buf       = NULL;
+int     *buf_data   = NULL;
 
 int main(void)
 {
@@ -33,6 +34,18 @@ int main(void)
     char        dname[]="dataset";
     int         i, j;
     hsize_t     dims[2]={FAMILY_NUMBER, FAMILY_SIZE};
+
+    /* Set up data array */
+    if(NULL == (buf_data = (int *)HDcalloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int)))) {
+        HDperror("HDcalloc");
+        HDexit(EXIT_FAILURE);
+    }
+    if(NULL == (buf = (int **)HDcalloc(FAMILY_NUMBER, sizeof(buf_data)))) {
+        HDperror("HDcalloc");
+        HDexit(EXIT_FAILURE);
+    }
+    for (i = 0; i < FAMILY_NUMBER; i++)
+        buf[i] = buf_data + (i * FAMILY_SIZE);
 
     /* Set property list and file name for FAMILY driver */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
@@ -92,6 +105,9 @@ int main(void)
         HDperror("H5Fclose");
         HDexit(EXIT_FAILURE);
     }
+
+    HDfree(buf);
+    HDfree(buf_data);
 
     HDputs(" PASSED");
     HDfflush(stdout);
