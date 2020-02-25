@@ -46,6 +46,20 @@ New Features
 
     Configuration:
     -------------
+    - Added test script for file size compare
+
+      if CMake minimum version is at least 3.14, the fileCompareTest.cmake
+      script will compare file sizes.
+
+      (ADB - 2020/02/24, HDFFV-11036)
+
+    - Update CMake minimum version to 3.12
+
+      Updated CMake minimum version to 3.12 and added version checks
+      for Windows features.
+
+      (ADB - 2020/02/05, TRILABS-142)
+
     - Fixed CMake include properties for Fortran libraries
 
       Corrected the library properties for Fortran to use the
@@ -432,12 +446,8 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-
     Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
-
-    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 10 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)

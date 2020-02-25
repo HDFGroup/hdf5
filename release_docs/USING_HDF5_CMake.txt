@@ -180,7 +180,7 @@ Given the preconditions in section I, create a CMakeLists.txt file at the
 source root. Include the following text in the file:
 
 ##########################################################
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5MyApp C CXX)
 
 set (LIB_TYPE STATIC) # or SHARED
