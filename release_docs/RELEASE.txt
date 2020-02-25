@@ -477,8 +477,8 @@ Tested Configuration Features Summary
 
 Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
-Solaris2.11 32-bit                      n        y/y    n        y    y     y
-Solaris2.11 64-bit                      n        y/n    n        y    y     y
+SunOS 5.11 32-bit                       n        y/y    n        y    y     y
+SunOS 5.11 64-bit                       n        y/n    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
 Windows 7 x64                           y        y/y    y        y    y     y
 Windows 7 Cygwin                        n        y/n    n        y    y     y
@@ -497,8 +497,8 @@ Linux 2.6.32-573.18.1.el6.ppc64         n        y/n    n        y    y     y
 
 Platform                                 Shared  Shared    Shared    Thread-
                                          C libs  F90 libs  C++ libs  safe
-Solaris2.11 32-bit                         y       y         y         y
-Solaris2.11 64-bit                         y       y         y         y
+SunOS 5.11 32-bit                          y       y         y         y
+SunOS 5.11 64-bit                          y       y         y         y
 Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
 Windows 7 Cygwin                           n       n         n         y
