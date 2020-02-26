@@ -662,7 +662,7 @@ H5F_vfd_swmr_writer__delay_write(H5F_shared_t *shared, uint64_t page,
         ie_ptr = NULL;
     } else {
         ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx,
-            shared->mdf_idx_entries_used, page);
+            shared->mdf_idx_entries_used, page, false);
     }
 
     if (ie_ptr == NULL)

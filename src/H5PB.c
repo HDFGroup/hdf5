@@ -74,7 +74,7 @@ static herr_t H5PB__create_new_page(H5PB_t *pb_ptr, haddr_t addr, size_t size,
 
 static void H5PB__deallocate_page(H5PB_entry_t *entry_ptr);
 
-static herr_t H5PB__evict_entry(H5F_shared_t *, H5PB_entry_t *, hbool_t);
+static herr_t H5PB__evict_entry(H5F_shared_t *, H5PB_entry_t *, bool, bool);
 
 static herr_t H5PB__flush_entry(H5F_shared_t *, H5PB_t *, H5PB_entry_t *);
 
@@ -710,7 +710,7 @@ H5PB_dest(H5F_shared_t *shared)
                                     "Can't flush entry")
                 }
 
-                if ( H5PB__evict_entry(shared, evict_ptr, TRUE) < 0 )
+                if ( H5PB__evict_entry(shared, evict_ptr, TRUE, true) < 0 )
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                 "forced eviction failed")
@@ -1121,14 +1121,25 @@ done:
 
 } /* end H5PB_read() */
 
+/* Remove the entry corresponding to lower-file page number `page`.
+ * Return 0 if there was no such entry or if the entry was removed
+ * successfully.  Return -1 on error.
+ *
+ * If `only_mark` is true, then the entry corresponding shadow-index
+ * entry is not removed.  Instead, it is marked as garbage.  This is
+ * a stop-gap fix for a performance problem in H5PB_dest(): deleting
+ * all of the index entries took time quadratic in their number because
+ * this routine performs an O(n) copy of index entries.
+ */
 static int
-vfd_swmr_mdf_idx_entry_remove(H5F_shared_t *shared, uint64_t page)
+vfd_swmr_mdf_idx_entry_remove(H5F_shared_t *shared, uint64_t page,
+    bool only_mark)
 {
     ptrdiff_t i;
     H5FD_vfd_swmr_idx_entry_t *entry;
 
     entry = vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx,
-        shared->mdf_idx_entries_used, page);
+        shared->mdf_idx_entries_used, page, false);
 
     if (entry == NULL)
         return 0;
@@ -1136,6 +1147,11 @@ vfd_swmr_mdf_idx_entry_remove(H5F_shared_t *shared, uint64_t page)
     if (shared->vfd_swmr_writer && entry->md_file_page_offset != 0 &&
         shadow_image_defer_free(shared, entry) != 0)
         return -1;
+
+    if (only_mark) {
+        entry->garbage = true;
+        return 0;
+    }
 
     i = entry - shared->mdf_idx;
 
@@ -1252,11 +1268,11 @@ H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                         "mark entry clean failed")
 
-        if ( H5PB__evict_entry(shared, entry_ptr, TRUE) < 0 )
+        if ( H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0 )
 
             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
 
-        assert(vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page) == NULL);
+        assert(vfd_swmr_pageno_to_mdf_idx_entry(shared->mdf_idx, shared->mdf_idx_entries_used, page, false) == NULL);
     }
 
 done:
@@ -1422,7 +1438,7 @@ H5PB_vfd_swmr__release_delayed_writes(H5F_shared_t *shared)
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "flush of mpmde failed")
 
-            if ( H5PB__evict_entry(shared, entry_ptr, TRUE) < 0 )
+            if ( H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                             "eviction of mpmde failed")
@@ -1501,7 +1517,7 @@ H5PB_vfd_swmr__release_tick_list(H5F_shared_t *shared)
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                                 "flush of mpmde failed")
 
-                if ( H5PB__evict_entry(shared, entry_ptr, TRUE) < 0 )
+                if ( H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0 )
 
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                 "eviction of mpmde failed")
@@ -1718,7 +1734,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         /* see if the shadow index already contains an entry for *entry. */
 
         ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx,
-            shared->mdf_idx_entries_used, target_page);
+            shared->mdf_idx_entries_used, target_page, true);
 
         if ( ie_ptr == NULL ) { /* alloc new entry in the metadata file index*/
             uint32_t new_index_entry_index;
@@ -1747,7 +1763,8 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
             /* ie_ptr->clean                initialized below */
             /* ie_ptr->tick_of_last_flush   initialized below */
             ie_ptr->delayed_flush        = entry->delay_write_until;
-            ie_ptr->moved_to_hdf5_file   = FALSE;
+            ie_ptr->moved_to_lower_file  = false;
+            ie_ptr->garbage              = false;
 
         } else {
 
@@ -2281,7 +2298,13 @@ H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
  *              must be respected.  Attempts to evict an entry that 
  *              that do not respect these constraints will generate 
  *              and error unless the force parameter is TRUE, in which
- *              case, these constraints are igmored.
+ *              case, these constraints are ignored.
+ *
+ *              If `only_mark` is true, then the page-table entry's
+ *              corresponding shadow-index entry is not removed.  Instead,
+ *              it is marked as garbage.  This is a stop-gap fix for a
+ *              performance problem in H5PB_dest(): deleting all of the
+ *              index entries took time quadratic in their number.
  *
  *              In the context of VFD SWMR, there is also the requirement
  *              that entries to be evicted not be on the tick list, and
@@ -2299,7 +2322,8 @@ H5PB__deallocate_page(H5PB_entry_t *entry_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force)
+H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, bool force,
+    bool only_mark)
 {
     H5PB_t *pb_ptr = shared->pb_ptr;
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -2383,7 +2407,8 @@ H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, hbool_t force)
      * the image will be bigger.  So the shadow file will never see the
      * entire image written, just the first page of the image.
      */
-    if (vfd_swmr_mdf_idx_entry_remove(shared, entry_ptr->page) == -1) {
+    if (vfd_swmr_mdf_idx_entry_remove(shared, entry_ptr->page,
+            only_mark) == -1) {
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,
             "failed to remove shadow index entry")
     }
@@ -2425,7 +2450,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *pb_ptr, H5PB_entry_t *entry_ptr)
+H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *pb_ptr, H5PB_entry_t *const entry_ptr)
 {
     haddr_t eoa;                   /* Current EOA for the file */
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -2797,7 +2822,7 @@ H5PB__make_space(H5F_shared_t *shared, H5PB_t *pb_ptr, H5FD_mem_t inserted_type)
 
             evict_ptr = search_ptr;
             search_ptr = search_ptr->prev;
-            if ( H5PB__evict_entry(shared, evict_ptr, FALSE) < 0 )
+            if ( H5PB__evict_entry(shared, evict_ptr, FALSE, false) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "Can't evict entry")
@@ -3247,7 +3272,7 @@ H5PB__read_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
 
                         HDassert( ! ( entry_ptr->is_dirty ) );
 
-                        if ( H5PB__evict_entry(shared, entry_ptr, TRUE) < 0 )
+                        if (H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0)
 
                             HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                         "forced eviction failed (1)")
@@ -4046,7 +4071,7 @@ H5PB__write_raw(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "mark entry clean failed")
 
-                    if ( H5PB__evict_entry(shared, entry_ptr, TRUE) < 0 )
+                    if (H5PB__evict_entry(shared, entry_ptr, TRUE, false) < 0)
 
                         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
                                     "forced eviction failed (1)")

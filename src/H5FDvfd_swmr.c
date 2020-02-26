@@ -690,7 +690,8 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
     HDfprintf(stderr, "vfd swmr read index num_entries = %d\n", num_entries);
 #endif /* JRM */
 
-    entry = vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page);
+    entry = vfd_swmr_pageno_to_mdf_idx_entry(index, num_entries, target_page,
+        false);
 
 #if 0 /* JRM */
     if (entry != NULL) {

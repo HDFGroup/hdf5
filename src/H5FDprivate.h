@@ -169,7 +169,8 @@ typedef struct H5FD_vfd_swmr_idx_entry_t {
     hbool_t clean;
     uint64_t tick_of_last_flush; 
     uint64_t delayed_flush; 
-    hbool_t moved_to_hdf5_file; 
+    bool moved_to_lower_file;
+    bool garbage;
 } H5FD_vfd_swmr_idx_entry_t;
 
 /*
@@ -204,7 +205,7 @@ typedef struct H5FD_vfd_swmr_md_header {
 
 static inline H5FD_vfd_swmr_idx_entry_t *
 vfd_swmr_pageno_to_mdf_idx_entry(H5FD_vfd_swmr_idx_entry_t *idx,
-    uint32_t nindices, uint64_t target_page)
+    uint32_t nindices, uint64_t target_page, bool reuse_garbage)
 {
     uint32_t top;
     uint32_t bottom;
@@ -223,8 +224,8 @@ vfd_swmr_pageno_to_mdf_idx_entry(H5FD_vfd_swmr_idx_entry_t *idx,
             bottom = probe + 1;
         else if (idx[probe].hdf5_page_offset > target_page)
             top = probe;
-        else
-            return &idx[probe]; /* found it */
+        else /* found it */
+            return (reuse_garbage || !idx[probe].garbage) ? &idx[probe] : NULL;
     } while (bottom < top);
     /* Previous interval was [top - 1, top] or [bottom, bottom + 1].
      * The new interval is [top, top] or [bottom, bottom], respectively.
