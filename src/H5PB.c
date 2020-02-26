@@ -2513,8 +2513,8 @@ H5PB__flush_entry(H5F_shared_t *shared, H5PB_t *pb_ptr, H5PB_entry_t *const entr
 
 
     /* if the entry is on the LRU, update the replacement policy */
-    if ( ( ! (entry_ptr->is_mpmde) ) && 
-         ( entry_ptr->delay_write_until == 0 ) ) {
+    if (!entry_ptr->is_mpmde) {
+        HDassert(entry_ptr->delay_write_until == 0);
 
         H5PB__UPDATE_RP_FOR_FLUSH(pb_ptr, entry_ptr, FAIL)        
     }
