@@ -132,7 +132,7 @@ H5G__traverse_slink_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc, const char H5_ATTR_UNU
     } /* end if */
     else {
         /* Copy new location information for resolved object */
-        H5O_loc_copy(udata->obj_loc->oloc, obj_loc->oloc, H5_COPY_DEEP);
+        H5O_loc_copy_deep(udata->obj_loc->oloc, obj_loc->oloc);
 
         /* Indicate that the object exists */
         udata->exists = TRUE;
