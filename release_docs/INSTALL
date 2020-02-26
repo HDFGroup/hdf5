@@ -414,13 +414,15 @@ CONTENTS
 
 
 4.3.11. Backward compatibility
-        The 1.10 version of the HDF5 library can be configured to operate
-        identically to the v1.8 library with the
+        The 1.12 version of the HDF5 library can be configured to operate
+        identically to the v1.10 library with the
+            --with-default-api-version=v110
+        configure flag, or identically to the v1.8 library with the
             --with-default-api-version=v18
         configure flag, or identically to the v1.6 library with the
             --with-default-api-version=v16
         configure flag. This allows existing code to be compiled with the
-        v1.10 library without requiring immediate changes to the application
+        v1.12 library without requiring immediate changes to the application
         source code.  For additional configuration options and other details,
         see "API Compatibility Macros":
 
