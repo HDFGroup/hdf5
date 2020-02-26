@@ -1389,7 +1389,7 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_t *_file,
     /* Read index entries */
     if(md_index->num_entries) {
         /* Allocate memory for index entries */
-        md_index->entries = H5FL_SEQ_MALLOC(H5FD_vfd_swmr_idx_entry_t, 
+        md_index->entries = H5FL_SEQ_CALLOC(H5FD_vfd_swmr_idx_entry_t,
                                     md_index->num_entries);
         if (NULL == md_index->entries) {
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
