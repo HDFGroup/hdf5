@@ -141,7 +141,7 @@
  *              Set to FALSE whenever it is marked dirty in the page buffer.
  *
  * tick_of_last_flush: Number of the tick in which this entry was last 
- *              written to the HDF5 file or zero if it has never been flusehd.
+ *              written to the lower file or zero if it has never been flushed.
  *
  *              Used by the VFD SWMR writer only.
  *
@@ -153,8 +153,8 @@
  *
  *              Used by the VFD SWMR writer only.
  *
- * is_moved_to_hdf5_file: Set to TRUE iff the entry referenced is in the 
- *              HDF5 file and is therefore about to be removed from the 
+ * moved_to_lower_file: Set to TRUE iff the entry referenced is in the
+ *              lower file and is therefore about to be removed from the
  *              metadata file
  *
  *----------------------------------------------------------------------------
