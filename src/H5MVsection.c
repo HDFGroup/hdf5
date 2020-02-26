@@ -346,7 +346,7 @@ H5MV__sect_shrink(H5FS_section_info_t **_sect, void *_udata)
     HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
 
     /* Release section's space at EOA */
-    if(H5MV__free_md(f, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
+    if(H5MV__free_md(f->shared, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "free request for VFD SWMR metadata file failed")
 
     /* Free the section */
