@@ -98,7 +98,7 @@ barrier_lock(pthread_barrier_t *barrier)
     int rc;
 
     if ((rc = pthread_mutex_lock(&barrier->mtx)) != 0) {
-        my_errx(exit_failure, "%s: pthread_mutex_lock: %s", __func__,
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_lock: %s", __func__,
             strerror(rc));
     }
 }
@@ -109,7 +109,7 @@ barrier_unlock(pthread_barrier_t *barrier)
     int rc;
 
     if ((rc = pthread_mutex_unlock(&barrier->mtx)) != 0) {
-        my_errx(exit_failure, "%s: pthread_mutex_unlock: %s", __func__,
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_unlock: %s", __func__,
             strerror(rc));
     }
 }
