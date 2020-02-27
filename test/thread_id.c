@@ -143,6 +143,7 @@ int
 pthread_barrier_wait(pthread_barrier_t *barrier)
 {
     int rc;
+    uint64_t threshold;
 
     if (barrier == NULL)
         return EINVAL;
@@ -152,8 +153,14 @@ pthread_barrier_wait(pthread_barrier_t *barrier)
         rc = EINVAL;
         goto out;
     }
+    /* Compute the release `threshold`.  All threads entering with count = 5
+     * and `nentered` in [0, 4] should be released once `nentered` reaches 5:
+     * call 5 the release `threshold`.  All threads entering with count = 5
+     * and `nentered` in [5, 9] should be released once `nentered` reaches 10.
+     */
+    threshold = (barrier->nentered / barrier->count + 1) * barrier->count;
     barrier->nentered++;
-    while (barrier->nentered % barrier->count != 0) {
+    while (barrier->nentered < threshold) {
         if ((rc = pthread_cond_wait(&barrier->cv, &barrier->mtx)) != 0)
             goto out;
     }
