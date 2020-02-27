@@ -738,7 +738,7 @@ H5G__obj_info(const H5O_loc_t *oloc, H5G_info_t *grp_info)
     H5G_loc_reset(&grp_loc);
 
     /* Deep copy (duplicate) of the group location object */
-    if(H5O_loc_copy(&grp_oloc, (H5O_loc_t *)oloc, H5_COPY_DEEP) < 0)    /* (Casting away const OK - QAK) */
+    if(H5O_loc_copy_deep(&grp_oloc, oloc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "can't copy object location")
 
     /* Open the group */
