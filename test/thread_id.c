@@ -226,7 +226,15 @@ atomic_printf(const char *fmt, ...)
 /* Each thread runs this routine.  The routine fetches the current
  * thread's ID, makes sure that it is in the expected range, makes
  * sure that in this round of testing, no two threads shared the
- * same ID, 
+ * same ID, and checks that each thread's ID is constant over its lifetime.
+ *
+ * main() checks that every ID in [1, NTHREADS] is used in each round
+ * of testing.  All NTHREADS threads synchronize on a barrier after each
+ * has fetched its ID.  The barrier guarantees that all threads' lifetimes
+ * overlap at least momentarily, so the IDs will be unique, and there
+ * will be NTHREADS of them.  Further, since thread IDs are assigned
+ * starting with 1, and the number of threads with IDs alive never exceeds
+ * NTHREADS, the least ID has to be 1 and the greatest, NTHREADS.
  */
 static void *
 thread_main(void H5_ATTR_UNUSED *arg)
