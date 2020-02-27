@@ -122,7 +122,7 @@ pthread_barrier_destroy(pthread_barrier_t *barrier)
     barrier_lock(barrier);
     if (barrier->magic != barrier_magic)
         rc = EINVAL;
-    else if (barrier->count != 0)
+    else if (barrier->nentered % barrier->count != 0)
         rc = EBUSY;
     else {
         rc = 0;
