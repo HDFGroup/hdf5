@@ -1035,91 +1035,47 @@ H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
           void *buf/*out*/)
 {
     H5PB_t *pb_ptr;                    /* Page buffer for this file */
-    hbool_t bypass_pb = FALSE;          /* Whether to bypass page buffering */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity checks */
-    HDassert(shared);
     HDassert(type != H5FD_MEM_GHEAP);
 
     pb_ptr = shared->pb_ptr;
 
-    if ( pb_ptr == NULL ) {
+    HDassert(pb_ptr == NULL || pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
-        bypass_pb = TRUE; /* case 1) -- page buffer is disabled */
-
-    } else {
-
-        HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
-
-        if ( H5FD_MEM_DRAW == type ) { /* raw data read */
-
-            if ( pb_ptr->min_md_pages == pb_ptr->max_pages ) {
-
-                /* case 2) -- page buffer configured for metadata only */
-                bypass_pb = TRUE;
-
-            }
-        } else { /* metadata read */
-
-            if ( pb_ptr->min_rd_pages == pb_ptr->max_pages ) {
-
-                /* case 5) -- page buffer configured for raw data only */
-                bypass_pb = TRUE;
-            }
-        }
-    }
-
-#ifdef H5_HAVE_PARALLEL
-    /* at present, the page buffer must be disabled in the parallel case.
-     * However, just in case ...
+    /* Bypass the page buffer in case
+     * 1) page buffer is disabled
+     * _) MPI I/O is enabled
+     * 2) page buffer configured for metadata only, and it's a raw-data access
+     * 5) page buffer configured for raw data only, and it's a metadata access
      */
-    if(H5F_SHARED_HAS_FEATURE(shared, H5FD_FEAT_HAS_MPI)) {
+    if (pb_ptr == NULL || H5F_SHARED_HAS_FEATURE(shared, H5FD_FEAT_HAS_MPI) ||
+        (H5FD_MEM_DRAW == type && pb_ptr->min_md_pages == pb_ptr->max_pages) ||
+        (H5FD_MEM_DRAW != type && pb_ptr->min_rd_pages == pb_ptr->max_pages)) {
 
-        bypass_pb = TRUE;
+        if (H5FD_read(shared->lf, type, addr, size, buf) < 0) {
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL,
+                        "read through lower VFD failed");
+        }
 
-    } /* end if */
-#endif /* H5_HAVE_PARALLEL */
-
-    if ( bypass_pb ) { /* cases 1, 2. and 5 */
-
-        if ( H5FD_read(shared->lf, type, addr, size, buf) < 0 ) 
-
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
-                        "read through metadata accumulator failed")
-
-        /* Update statistics */
-        if ( pb_ptr ) {
-
+        if (pb_ptr != NULL)
             H5PB__UPDATE_STATS_FOR_BYPASS(pb_ptr, type, size);
-        }
-    } else {
-
-        if ( H5FD_MEM_DRAW == type ) { /* cases 3 and 4 */
-
-            if ( H5PB__read_raw(shared, type, addr, size, buf) < 0 )
-
-                HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
-                            "H5PB_read_raw() failed")
-
-        } else { /* cases 6, 7, 8, 9, and 10 */
-
-            if ( H5PB__read_meta(shared, type, addr, size, buf) < 0 )
-
-                HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
-                            "H5PB_read_meta() failed")
-        }
-
-        H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
+        HGOTO_DONE(SUCCEED);
     }
+
+    if (H5FD_MEM_DRAW == type) { /* cases 3 and 4 */
+        if (H5PB__read_raw(shared, type, addr, size, buf) < 0)
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "raw read failed");
+    } else if (H5PB__read_meta(shared, type, addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "meta read failed");
+
+    H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5PB_read() */
+}
 
 /* Remove the entry corresponding to lower-file page number `page`.
  * Return 0 if there was no such entry or if the entry was removed
