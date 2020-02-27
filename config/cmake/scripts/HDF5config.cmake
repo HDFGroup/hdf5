@@ -42,9 +42,9 @@ set (CTEST_SOURCE_VERSEXT "-snap0")
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
-#INSTALLDIR - HDF5-1.10.0 root folder
+#INSTALLDIR - HDF5-1.12.x root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
+#CTEST_SOURCE_NAME - name of source folder; HDF5-1.12.x
 #MODEL - CDash group name
 #HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
 #MPI - enable MPI
@@ -186,15 +186,6 @@ else ()
   set (CTEST_SITE "${SITE_OS_NAME}")
   set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
 endif ()
-###################################################################
-
-###################################################################
-#########       Following is for submission to CDash   ############
-###################################################################
-if (NOT DEFINED MODEL)
-  set (MODEL "Experimental")
-endif ()
-
 ###################################################################
 
 ###################################################################
