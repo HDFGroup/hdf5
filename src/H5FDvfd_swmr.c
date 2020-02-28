@@ -87,6 +87,8 @@ static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_t *_file,
     H5FD_vfd_swmr_md_index *md_index, const H5FD_vfd_swmr_md_header *md_header);
 static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open);
 
+HLOG_OUTLET_SHORT_DEFN(index_motion, swmr);
+
 static const H5FD_class_t H5FD_vfd_swmr_g = {
     "vfd_swmr",                 /* name                 */
     MAXADDR,                    /* maxaddr              */
@@ -1082,7 +1084,7 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_t *_file, hbool_t open)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not read header");
 
         if (md_header.index_offset != last_index_offset) {
-            fprintf(stderr, "index offset %" PRIu64 "\n",
+            hlog_fast(index_motion, "index offset changed %" PRIu64 "\n",
                 md_header.index_offset);
             last_index_offset = md_header.index_offset;
         }
