@@ -2013,8 +2013,7 @@ static int test_external(hid_t fapl) {
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR
 
-    PASSED()
-    ;
+    PASSED();
 
     return 0;
 

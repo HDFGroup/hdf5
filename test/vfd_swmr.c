@@ -168,7 +168,7 @@ test_fapl(void)
     if(my_config)
         HDfree(my_config);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -503,7 +503,7 @@ test_file_fapl(void)
     if(file_config)
         HDfree(file_config);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -644,7 +644,7 @@ test_file_end_tick(void)
     if(my_config)
         HDfree(my_config);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -769,7 +769,7 @@ test_writer_create_open_flush(void)
     if(my_config)
         HDfree(my_config);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -1020,7 +1020,7 @@ test_writer_md(void)
     if(index)
         HDfree(index);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -1715,7 +1715,7 @@ test_reader_md_concur(void)
     if(index)
         HDfree(index);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -1913,7 +1913,7 @@ test_multiple_file_opens(void)
     if(config2)
         HDfree(config2);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -2262,7 +2262,7 @@ test_multiple_concur_file_opens(void)
     if(config2)
         HDfree(config2);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -2614,7 +2614,7 @@ test_same_file_opens(void)
     if(config2)
         HDfree(config2);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:

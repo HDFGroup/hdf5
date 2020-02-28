@@ -103,7 +103,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
  */
 #define TESTING(...) h5_testing(__VA_ARGS__);
 #define TESTING_2(WHAT)  {HDprintf("  Testing %-60s",WHAT); HDfflush(stdout);}
-#define PASSED()  {HDputs(" PASSED");HDfflush(stdout);}
+#define PASSED()  do {HDputs(" PASSED");HDfflush(stdout);} while (0)
 #define H5_FAILED()  {HDputs("*FAILED*");HDfflush(stdout);}
 #define H5_WARNING()  {HDputs("*WARNING*");HDfflush(stdout);}
 #define SKIPPED()  {HDputs(" -SKIP-");HDfflush(stdout);}

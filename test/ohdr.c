@@ -1134,7 +1134,7 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
         if(H5Dclose(dset_F_N_id) < 0) TEST_ERROR
         if(H5Dclose(dset_F_Y_id) < 0) TEST_ERROR
 
-        PASSED()
+        PASSED();
 
     } /* compact and non-compact */
 
@@ -1266,7 +1266,7 @@ test_minimized_dset_ohdr_with_filter(hid_t fapl_id)
     if(H5Dclose(dset_mZ_id) < 0) TEST_ERROR
     if(H5Fclose(file_id) < 0) TEST_ERROR
 
-    PASSED()
+    PASSED();
     return SUCCEED;
 
 error:
@@ -1440,7 +1440,7 @@ test_minimized_dset_ohdr_modification_times(hid_t _fapl_id)
     if(H5Pclose(dcpl_mT_id) < 0) TEST_ERROR
     if(H5Pclose(dcpl_mN_id) < 0) TEST_ERROR
 
-    PASSED()
+    PASSED();
     return SUCCEED;
 
 error:
@@ -1555,7 +1555,7 @@ test_minimized_dset_ohdr_fillvalue_backwards_compatability(hid_t _fapl_id)
     if(H5Dclose(dset_1_id) < 0) TEST_ERROR
     if(H5Fclose(file_id) < 0) TEST_ERROR;
 
-    PASSED()
+    PASSED();
     return SUCCEED;
 
 error:

@@ -13885,7 +13885,7 @@ check_move_entry(unsigned paged)
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else
         H5_FAILED()
 
@@ -17017,7 +17017,7 @@ check_move_entry_errs(unsigned paged)
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else {
         H5_FAILED()
 
@@ -30672,7 +30672,7 @@ done:
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else {
         H5_FAILED();
         HDfprintf(stdout, "%s.\n", failure_mssg);
@@ -30895,7 +30895,7 @@ done:
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else {
         H5_FAILED();
         HDfprintf(stdout, "%s.\n", failure_mssg);
@@ -33467,7 +33467,7 @@ done:
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else {
         H5_FAILED();
         HDfprintf(stdout, "%s.\n", failure_mssg);
@@ -33670,7 +33670,7 @@ done:
     takedown_cache(file_ptr, FALSE, FALSE);
 
     if(pass)
-        PASSED()
+        PASSED();
     else {
         H5_FAILED();
         HDfprintf(stdout, "%s.\n", failure_mssg);
