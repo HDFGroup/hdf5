@@ -253,6 +253,14 @@ endforeach ()
 message (STATUS "Dashboard script configuration:\n${vars}\n")
 
 #-----------------------------------------------------------------------------
+
+###################################################################
+#########       Following is for submission to CDash   ############
+###################################################################
+if (NOT DEFINED MODEL)
+  set (MODEL "Experimental")
+endif ()
+
 #-----------------------------------------------------------------------------
   ## NORMAL process
   ## -- LOCAL_UPDATE updates the source folder from svn
