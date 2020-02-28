@@ -78,6 +78,12 @@ Bug Fixes since HDF5-1.12.0 release
     Fortran API
     -----------
 
+    - Fixed configure issue when building HDF5 with NAG Fortran 7.0.
+
+    HDF5 now accounts for the addition of half-precision floating-point 
+    in NAG 7.0 with a KIND=16.
+
+    (MSB - 2020/02/28, HDFFV-11033)
 
 
 
