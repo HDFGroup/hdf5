@@ -2632,6 +2632,89 @@ error:
     return 1;
 } /* test_same_file_opens() */
 
+#ifndef _arraycount
+#define _arraycount(_a) (sizeof(_a)/sizeof(_a[0]))
+#endif
+
+static unsigned
+test_shadow_index_lookup(void)
+{
+    unsigned nerrors = 0;
+    H5FD_vfd_swmr_idx_entry_t *idx;
+    uint32_t size[] = {0, 1, 2, 3, 4, 0};
+    char vector[8];
+    char *tmp;
+    unsigned seed = 1;
+    unsigned i, j;
+    char *ostate;
+    const char *seedvar = "H5_SHADOW_INDEX_SEED";
+
+    TESTING("Shadow-index lookups");
+
+    /* TBD get seed from environment or else from time(3) */
+    if ((tmp = getenv(seedvar)) == NULL)
+        seed = (unsigned int)time(NULL);
+    else {
+        char *end;
+        unsigned long ul;
+        errno = 0;
+        ul = strtoul(tmp, &end, 0);
+        if ((ul == ULONG_MAX && errno != 0) || end == tmp || *end != '\0') {
+            fprintf(stderr, "could not parse %s: %s\n", seedvar,
+                strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        if (ul > UINT_MAX) {
+            fprintf(stderr, "%s (%lu) out of range\n", seedvar, ul);
+            exit(EXIT_FAILURE);
+        }
+        seed = (unsigned int)ul;
+    }
+
+    ostate = initstate(seed, vector, _arraycount(vector));
+
+    size[5] = (uint32_t)(1024 + random() % (16 * 1024 * 1024 - 1024));
+
+    for (i = 0; i < _arraycount(size); i++) {
+        uint32_t cursize = size[i];
+        const uint64_t modulus = UINT64_MAX / MAX(1, cursize);
+        uint64_t pageno;
+
+        idx = calloc(cursize,  sizeof(*idx));
+        if (idx == NULL) {
+            fprintf(stderr, "couldn't allocate %" PRIu32 " indices\n",
+                cursize);
+            exit(EXIT_FAILURE);
+        }
+        for (pageno = (uint64_t)random() % modulus, j = 0;
+             j < cursize;
+             j++, pageno += (uint64_t)random() % modulus) {
+            idx[j].hdf5_page_offset = pageno;
+        }
+        for (j = 0; j < cursize; j++) {
+            H5FD_vfd_swmr_idx_entry_t *found;
+
+            found = vfd_swmr_pageno_to_mdf_idx_entry(idx, cursize,
+                idx[j].hdf5_page_offset, false);
+            if (found != &idx[j])
+                break;
+        }
+        if (j < cursize) {
+            printf("\nshadow-index entry %d lookup, pageno %" PRIu64
+                   ", index size %" PRIu32 ", seed %u", j,
+                   idx[j].hdf5_page_offset, cursize, seed);
+            nerrors++;
+        }
+        free(idx);
+    }
+    (void)setstate(ostate);
+    if (nerrors == 0)
+        PASSED();
+    else
+        printf(" FAILED\n");
+    return nerrors;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    main()
@@ -2691,6 +2774,7 @@ main(void)
     nerrors += test_fapl();
 
     if(use_file_locking) {
+        nerrors += test_shadow_index_lookup();
         nerrors += test_file_fapl();
         nerrors += test_file_end_tick();
         nerrors += test_writer_create_open_flush();
