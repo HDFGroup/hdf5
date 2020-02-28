@@ -46,251 +46,39 @@ New Features
 
     Configuration:
     -------------
-    - Update CMake minimum version to 3.12
-
-      Updated CMake minimum version to 3.12 and added version checks
-      for Windows features.
-
-      (ADB - 2020/02/05, TRILABS-142)
-
-    - Fixed CMake include properties for Fortran libraries
-
-      Corrected the library properties for Fortran to use the
-      correct path for the Fortran module files.
-
-      (ADB - 2020/02/04, HDFFV-11012)
-
-    - Added common warnings files for gnu and intel
-
-      Added warnings files to use one common set of flags
-      during configure for both autotools and CMake build
-      systems. The initial implementation only affects a
-      general set of flags for gnu and intel compilers.
-
-      (ADB - 2020/01/17)
-
-    - Added new options to CMake for control of testing
-
-      Added CMake options (default ON);
-          HDF5_TEST_SERIAL AND/OR HDF5_TEST_PARALLEL
-          combined with:
-            HDF5_TEST_TOOLS
-            HDF5_TEST_EXAMPLES
-            HDF5_TEST_SWMR
-            HDF5_TEST_FORTRAN
-            HDF5_TEST_CPP
-            HDF5_TEST_JAVA
-
-      (ADB - 2020/01/15, HDFFV-11001)
-
-    - Added Clang sanitizers to CMake for analyzer support if compiler is clang.
-
-      Added CMake code and files to execute the Clang sanitizers if
-      HDF5_ENABLE_SANITIZERS is enabled and the USE_SANITIZER option
-      is set to one of the following:
-          Address
-          Memory
-          MemoryWithOrigins
-          Undefined
-          Thread
-          Leak
-          'Address;Undefined'
-
-      (ADB - 2019/12/12, TRILAB-135)
-
-    - Update CMake for VS2019 support
-
-      CMake added support for VS2019 in version 3.15. Changes to the CMake
-      generator setting required changes to scripts. Also updated version
-      references in CMake files as necessary.
-
-      (ADB - 2019/11/18, HDFFV-10962)
 
 
     Library:
     --------
-    - Virtual Object Layer (VOL)
-
-      In this major HDF5 release we introduce HDF5 Virtual Object Layer (VOL).
-      VOL is an abstraction layer within the HDF5 library that enables different
-      methods for accessing data and objects that conform to the HDF5 data model.
-      The VOL layer intercepts all HDF5 API calls that potentially modify data
-      on disk and forwards those calls to a plugin "object driver". The data on
-      disk can be a different format than the HDF5 format. For more information
-      about VOL we refer the reader to the following documents (under review):
-
-          VOL HDF5 APIs
-          https://portal.hdfgroup.org/display/HDF5/Virtual+Object++Layer
-
-          VOL Documentation
-          https://bitbucket.hdfgroup.org/projects/HDFFV/repos/hdf5doc/browse/RFCs/HDF5/VOL
-
-          Repository with VOL plugins
-          https://bitbucket.hdfgroup.org/projects/HDF5VOL
-
-    - Enhancements to HDF5 References
-
-      HDF5 references were extended to support attributes, and object and dataset
-      selections that reside in another HDF5 file. For more information including
-      a list of new APIs, see
-
-          https://portal.hdfgroup.org/display/HDF5/Update+to+References
-
-      Current known limitations for references in this release:
-      • h5dump will fail to display references on big-endian machines.
-
-    - Add new public function H5Sselect_adjust.
-
-      This function shifts a dataspace selection by a specified logical offset
-      within the dataspace extent.  This can be useful for VOL developers to
-      implement chunked datasets.
-
-      (NAF - 2019/11/18)
-
-    - Add new public function H5Sselect_project_intersection.
-
-      This function computes the intersection between two dataspace selections
-      and projects that intersection into a third selection.  This can be useful
-      for VOL developers to implement chunked or virtual datasets.
-
-      (NAF - 2019/11/13, ID-148)
-
-    - Add new public function H5VLget_file_type.
-
-      This function returns a datatype equivalent to the supplied datatype but
-      with the location set to be in the file.  This datatype can then be used
-      with H5Tconvert to convert data between file and in-memory representation.
-      This funcition is intended for use only by VOL connector developers.
-
-      (NAF - 2019/11/08, ID-127)
-
-    - New S3 and HDFS Virtual File Drivers (VFDs)
-
-      This release has two new VFDs. The S3 VFD allows accessing HDF5 files on
-      AWS S3 buckets. HDFS VFD allows accessing HDF5 files stored on Apache HDFS.
-      See https://portal.hdfgroup.org/display/HDF5/Virtual+File+Drivers+-+S3+and+HDFS
-      for information on enabling those drivers and using those APIs.
-
-      Below are specific instructions for enabling S3 VFD on Windows:
-
-      Fix windows requirements and java tests. Windows requires CMake 3.13.
-          - Install openssl library (with dev files);
-                from "Shining Light Productions". msi package preferred.
-          - PATH should have been updated with the installation dir.
-          - set ENV variable OPENSSL_ROOT_DIR to the installation dir.
-          - set ENV variable OPENSSL_CONF to the cfg file, likely %OPENSSL_ROOT_DIR%\bin\openssl.cfg
-          - Install libcurl library (with dev files);
-          - download the latest released version using git: https://github.com/curl/curl.git
-          - Open a Visual Studio Command prompt
-          - change to the libcurl root folder
-          - run the "buildconf.bat" batch file
-          - change to the winbuild directory
-          - nmake /f Makefile.vc mode=dll MACHINE=x64
-          - copy libcurl-vc-x64-release-dll-ipv6-sspi-winssl dir to C:\curl (installation dir)
-          - set ENV variable CURL_ROOT to C:\curl (installation dir)
-          - update PATH ENV variable to %CURL_ROOT%\bin (installation bin dir).
-          - the aws credentials file should be in %USERPROFILE%\.aws folder
-          - set the ENV variable HDF5_ROS3_TEST_BUCKET_URL to the s3 url for the
-                s3 bucket containing the HDF5 files to be accessed.
 
 
     Java Library:
     ----------------
-    - Added ability to test java library with VOLs.
-
-      Created new CMake script that combines the java and vol test scripts.
-
-      (ADB - 2020/02/03, HDFFV-10996)
-
-    - Tests fail for non-English locale.
-
-      In the JUnit tests with a non-English locale, only the part before
-      the decimal comma is replaced by XXXX and this leads to a comparison
-      error. Changed the regex for the Time substitution.
-
-      (ADB - 2020/01/09, HDFFV-10995)
 
 
     Tools:
     ------
-    - h5diff was updated to use the new reference APIs.
 
-      h5diff uses the new reference APIs to compare references.
-      Attribute references can also be compared.
-
-      (ADB - 2019/12/19, HDFFV-10980)
-
-    - h5dump and h5ls were updated to use the new reference APIs.
-
-      The tools library now use the new reference APIs to inspect a
-      file. Also the DDL spec was updated to reflect the format
-      changes produced with the new APIs. The export API and support
-      functions in the JNI were updated to match.
-
-
-    Other improvements and changes:
-
-    - Hyperslab selection code was reworked to improve performance, getting more
-      than 10x speedup in some cases.
-
-    - The HDF5 Library was enhanced to open files with Unicode names on Windows.
-
-    - Deprecated H5Dvlen_reclaim() and replaced it with H5Treclaim().
-      This routine is meant to be used when resources are internally allocated
-      when reading data, i.e. when using either vlen or new reference types.
-      This is applicable to both attribute and dataset reads.
-
-    - h5repack was fixed to repack datasets with external storage
-      to other types of storage.
 
 
 Support for new platforms, languages and compilers.
 =======================================
-    - Added spectrum-mpi with clang, gcc and xl compilers on Linux 3.10.0
-    - Added OpenMPI 3.1 and 4.0 with clang, gcc and Intel compilers on Linux 3.10.0
-    - Added cray-mpich/PrgEnv with gcc and Intel compilers on Linux 4.14.180
-    - Added spectrum mpi with clang, gcc and xl compilers on Linux 4.14.0
 
-Bug Fixes since HDF5-1.12.0-alpha1 release
+
+Bug Fixes since HDF5-1.12.0 release
 ==================================
     Library
     -------
-    - Fixed an assertion failure in the parallel library when collectively
-      filling chunks. As it is required that chunks be written in
-      monotonically non-decreasing order of offset in the file, this assertion
-      was being triggered when the list of chunk file space allocations being
-      passed to the collective chunk filling routine was not sorted according
-      to this particular requirement.
-
-      The addition of a sort of the out of order chunks trades a bit of
-      performance for the elimination of this assertion and of any complaints
-      from MPI implementations about the file offsets used being out of order.
-
-      (JTH - 2019/10/07, HDFFV-10792)
+ 
 
     Tools:
     ------
-    - h5repack was fixed to repack the reference attributes properly.
-      The code line that checks if the update of reference inside a compound
-      datatype is misplaced outside the code block loop that carries out the
-      check. In consequence, the next attribute that is not the reference
-      type was repacked again as the reference type and caused the failure of
-      repacking. The fix is to move the corresponding code line to the correct
-      code block.
 
-      (KY -2020/02/10, HDFFV-11014)
 
     Fortran API
     -----------
-    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
-    
-      (MSB - 2020/2/18, HDFFV-11029) 
 
 
-Major Bug Fixes since HDF5-1.10.0 release
-==================================
-
-    - For major bug fixes please see HISTORY-1_10_0-1_12_0.txt file
 
 
 Supported Platforms
