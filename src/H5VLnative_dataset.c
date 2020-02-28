@@ -297,18 +297,6 @@ H5VL__native_dataset_get(void *obj, H5VL_dataset_get_t get_type,
                 break;
             }
 
-        /* H5Dget_offset */
-        case H5VL_DATASET_GET_OFFSET:
-            {
-                haddr_t *ret = HDva_arg(arguments, haddr_t *);
-
-                /* Set return value */
-                *ret = H5D__get_offset(dset);
-                if(!H5F_addr_defined(*ret))
-                    *ret = HADDR_UNDEF;
-                break;
-            }
-
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
     } /* end switch */
@@ -391,16 +379,17 @@ herr_t
 H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
-    H5D_t *dset = NULL;             /* Dataset */
-    herr_t ret_value = SUCCEED;    /* Return value */
+    H5D_t *dset = (H5D_t *)obj;         /* Dataset */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDassert(dset);
 
     switch(optional_type) {
         case H5VL_NATIVE_DATASET_FORMAT_CONVERT:
             {   /* H5Dformat_convert */
-                dset = (H5D_t *)obj;
-
                 switch(dset->shared->layout.type) {
                     case H5D_CHUNKED:
                         /* Convert the chunk indexing type to version 1 B-tree if not */
@@ -436,8 +425,6 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
             {   /* H5Dget_chunk_index_type */
                 H5D_chunk_index_t *idx_type = HDva_arg(arguments, H5D_chunk_index_t *);
 
-                dset = (H5D_t *)obj;
-
                 /* Make sure the dataset is chunked */
                 if(H5D_CHUNKED != dset->shared->layout.type)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
@@ -452,8 +439,6 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
             {   /* H5Dget_chunk_storage_size */
                 hsize_t *offset = HDva_arg(arguments, hsize_t *);
                 hsize_t *chunk_nbytes = HDva_arg(arguments, hsize_t *);
-
-                dset = (H5D_t *)obj;
 
                 /* Make sure the dataset is chunked */
                 if(H5D_CHUNKED != dset->shared->layout.type)
@@ -472,8 +457,6 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
                 hid_t        space_id = HDva_arg(arguments, hid_t);
                 hsize_t     *nchunks  = HDva_arg(arguments, hsize_t *);
 
-                dset = (H5D_t *)obj;
-                HDassert(dset);
                 HDassert(dset->shared);
                 HDassert(dset->shared->space);
 
@@ -505,8 +488,6 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
                 haddr_t     *addr        = HDva_arg(arguments, haddr_t *);
                 hsize_t     *size        = HDva_arg(arguments, hsize_t *);
 
-                dset = (H5D_t *)obj;
-                HDassert(dset);
                 HDassert(dset->shared);
                 HDassert(dset->shared->space);
 
@@ -534,8 +515,6 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
                 haddr_t  *addr        = HDva_arg(arguments, haddr_t *);
                 hsize_t  *size        = HDva_arg(arguments, hsize_t *);
 
-                dset = (H5D_t *)obj;
-                HDassert(dset);
                 HDassert(dset->shared);
 
                 /* Make sure the dataset is chunked */
@@ -555,8 +534,6 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
                 uint32_t   *filters             = HDva_arg(arguments, uint32_t *);
                 void       *buf                 = HDva_arg(arguments, void *);
                 hsize_t     offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
-
-                dset = (H5D_t *)obj;
 
                 /* Check arguments */
                 if(NULL == dset->oloc.file)
@@ -585,8 +562,6 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
                 const void     *buf                 = HDva_arg(arguments, const void *);
                 hsize_t         offset_copy[H5O_LAYOUT_NDIMS];  /* Internal copy of chunk offset */
 
-                dset = (H5D_t *)obj;
-
                 /* Check arguments */
                 if(NULL == dset->oloc.file)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
@@ -612,13 +587,22 @@ H5VL__native_dataset_optional(void *obj, H5VL_dataset_optional_t optional_type,
                 hid_t space_id = HDva_arg(arguments, hid_t);
                 hsize_t *size = HDva_arg(arguments, hsize_t *);
 
-                dset = (H5D_t *)obj;
-
                 if(H5D__vlen_get_buf_size(dset, type_id, space_id, size) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of vlen buf needed")
                 break;
             }
 
+        /* H5Dget_offset */
+        case H5VL_NATIVE_DATASET_GET_OFFSET:
+            {
+                haddr_t *ret = HDva_arg(arguments, haddr_t *);
+
+                /* Set return value */
+                *ret = H5D__get_offset(dset);
+                if(!H5F_addr_defined(*ret))
+                    *ret = HADDR_UNDEF;
+                break;
+            }
 
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
