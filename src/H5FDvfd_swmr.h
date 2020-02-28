@@ -12,10 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Monday, August  2, 1999
- *
- * Purpose:	The public header file for the VFD SWMR driver.
+ * The public header file for the VFD SWMR driver.
  */
 #ifndef H5FDswmr_H
 #define H5FDswmr_H
