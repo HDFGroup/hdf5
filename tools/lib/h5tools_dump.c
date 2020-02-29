@@ -3978,16 +3978,16 @@ h5tools_dump_subsetting_header(FILE *stream, const h5tool_format_t *info, h5tool
 void
 h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t obj_id, int obj_data)
 {
-    H5S_class_t space_type;
-    int         ndims;
-    size_t      i;
-    hid_t       space = H5I_INVALID_HID;
-    hid_t       f_type = H5I_INVALID_HID;
-    hid_t       new_obj_id = H5I_INVALID_HID;
-    hid_t       new_obj_sid = H5I_INVALID_HID;
-    hsize_t     total_size[H5S_MAX_RANK];
-    hsize_t     elmt_counter = 0;  /*counts the # elements printed. */
-    int         status = -1;
+    H5S_class_t        space_type;
+    int                ndims;
+    size_t             i;
+    hid_t              space = H5I_INVALID_HID;
+    hid_t              f_type = H5I_INVALID_HID;
+    hid_t              new_obj_id = H5I_INVALID_HID;
+    hid_t              new_obj_sid = H5I_INVALID_HID;
+    hsize_t            total_size[H5S_MAX_RANK];
+    hsize_t            elmt_counter = 0;  /*counts the # elements printed. */
+    int                status = -1;
     h5tools_context_t  datactx;            /* print context  */
     h5tools_str_t      buffer;          /* string into which to render   */
     hsize_t            curr_pos = 0;    /* total data element position   */
@@ -4061,21 +4061,21 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         datactx.need_prefix = TRUE;
 
         if (NULL != (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
-            if(obj_data) {
-                if(H5Dread(obj_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf) < 0) {
+            if (obj_data) {
+                if (H5Dread(obj_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf) < 0) {
                     HDfree(ref_buf);
                     H5TOOLS_INFO("H5Dread reference failed");
                     H5TOOLS_GOTO_DONE_NO_RET();
                 }
             }
             else {
-                if(H5Aread(obj_id, H5T_STD_REF, ref_buf) < 0) {
+                if (H5Aread(obj_id, H5T_STD_REF, ref_buf) < 0) {
                     HDfree(ref_buf);
                     H5TOOLS_INFO("H5Aread reference failed");
                     H5TOOLS_GOTO_DONE_NO_RET();
                 }
             }
-            for(i = 0; i < (size_t)ndims; i++, datactx.cur_elmt++, elmt_counter++) {
+            for (i = 0; i < (size_t)ndims; i++, datactx.cur_elmt++, elmt_counter++) {
                 H5O_type_t obj_type = -1;   /* Object type */
                 H5R_type_t ref_type;   /* Reference type */
 
