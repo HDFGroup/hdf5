@@ -98,11 +98,7 @@ static const char  *progname = "h5perf_serial";
  * It seems that only the options that accept additional information
  * such as dataset size (-e) require the colon next to it.
  */
-#if 1
 static const char *s_opts = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
-#else
-static const char *s_opts = "a:A:bB:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:wx:X:";
-#endif  /* 1 */
 static struct long_options l_opts[] = {
     { "align", require_arg, 'a' },
     { "alig", require_arg, 'a' },
@@ -277,7 +273,7 @@ struct options {
     long num_files;             /* number of files                      */
     off_t num_bpp;              /* number of bytes per proc per dset    */
     int num_iters;              /* number of iterations                 */
-    off_t dset_size[MAX_DIMS];  /* Dataset size                           */
+    hsize_t dset_size[MAX_DIMS];  /* Dataset size                           */
     size_t buf_size[MAX_DIMS];  /* Buffer size                           */
     size_t chk_size[MAX_DIMS];  /* Chunk size                           */
     int order[MAX_DIMS];        /* Dimension access order                           */
@@ -287,14 +283,15 @@ struct options {
     int chk_rank;               /* Rank                   */
     int print_times;           /* print times as well as throughputs   */
     int print_raw;             /* print raw data throughput info       */
-    off_t h5_alignment;         /* alignment in HDF5 file               */
-    off_t h5_threshold;         /* threshold for alignment in HDF5 file */
+    hsize_t h5_alignment;       /* alignment in HDF5 file               */
+    hsize_t h5_threshold;       /* threshold for alignment in HDF5 file */
     int h5_use_chunks;         /* Make HDF5 dataset chunked            */
     int h5_write_only;            /* Perform the write tests only         */
     int h5_extendable;            /* Perform the write tests only         */
     int verify;                /* Verify data correctness              */
     vfdtype     vfd;            /* File driver */
-
+    size_t page_buffer_size;
+    size_t page_size;
 };
 
 typedef struct _minmax {
@@ -305,13 +302,13 @@ typedef struct _minmax {
 } minmax;
 
 /* local functions */
-static off_t parse_size_directive(const char *size);
+static hsize_t parse_size_directive(const char *size);
 static struct options *parse_command_line(int argc, char *argv[]);
 static void run_test_loop(struct options *options);
 static int run_test(iotype iot, parameters parms, struct options *opts);
 static void output_all_info(minmax *mm, int count, int indent_level);
 static void get_minmax(minmax *mm, double val);
-static minmax accumulate_minmax_stuff(minmax *mm, int count);
+static void accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm);
 static void output_results(const struct options *options, const char *name,
                            minmax *table, int table_size, off_t data_size);
 static void output_report(const char *fmt, ...);
@@ -403,6 +400,8 @@ run_test_loop(struct options *opts)
     parms.h5_write_only = opts->h5_write_only;
     parms.verify = opts->verify;
     parms.vfd = opts->vfd;
+    parms.page_buffer_size = opts->page_buffer_size;
+    parms.page_size = opts->page_size;
 
     /* load multidimensional options */
     parms.num_bytes = 1;
@@ -480,23 +479,23 @@ run_test(iotype iot, parameters parms, struct options *opts)
 
     /* allocate space for tables minmax and that it is sufficient */
     /* to initialize all elements to zeros by calloc.             */
-    write_sys_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-    write_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-    write_gross_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-    write_raw_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_sys_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_gross_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_raw_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
 
     if (!parms.h5_write_only) {
-        read_sys_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-        read_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-        read_gross_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-        read_raw_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_sys_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_gross_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_raw_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
     }
 
     /* Do IO iteration times, collecting statistics each time */
     for (i = 0; i < parms.num_iters; ++i) {
         double t;
 
-        res = do_sio(parms);
+        do_sio(parms, &res);
 
         /* gather all of the "sys write" times */
         t = io_time_get(res.timers, HDF5_MPI_WRITE);
@@ -711,30 +710,27 @@ get_minmax(minmax *mm, double val)
  * Modifications:
  *              Changed to use seconds instead of MB/s - QAK, 5/9/02
  */
-static minmax
-accumulate_minmax_stuff(minmax *mm, int count)
+static void
+accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm)
 {
     int i;
-    minmax total_mm;
 
-    total_mm.sum = 0.0F;
-    total_mm.max = -DBL_MAX;
-    total_mm.min = DBL_MAX;
-    total_mm.num = count;
+    total_mm->sum = 0.0F;
+    total_mm->max = -DBL_MAX;
+    total_mm->min = DBL_MAX;
+    total_mm->num = count;
 
     for (i = 0; i < count; ++i) {
         double m = mm[i].max;
 
-        total_mm.sum += m;
+        total_mm->sum += m;
 
-        if (m < total_mm.min)
-            total_mm.min = m;
+        if (m < total_mm->min)
+            total_mm->min = m;
 
-        if (m > total_mm.max)
-            total_mm.max = m;
+        if (m > total_mm->max)
+            total_mm->max = m;
     }
-
-    return total_mm;
 }
 
 
@@ -752,7 +748,7 @@ output_results(const struct options *opts, const char *name, minmax *table,
 {
     minmax          total_mm;
 
-    total_mm = accumulate_minmax_stuff(table, table_size);
+    accumulate_minmax_stuff(table, table_size, &total_mm);
 
     print_indent(3);
     output_report("%s (%d iteration(s)):\n", name,table_size);
@@ -870,6 +866,16 @@ report_parameters(struct options *opts)
         recover_size_and_print((long long)opts->buf_size[i], " ");
     HDfprintf(output, "\n");
 
+    if(opts->page_size) {
+        HDfprintf(output, "Page Aggregation Enabled. Page size = %ld\n", opts->page_size);
+        if(opts->page_buffer_size)
+            HDfprintf(output, "Page Buffering Enabled. Page Buffer size = %ld\n", opts->page_buffer_size);
+        else
+            HDfprintf(output, "Page Buffering Disabled\n");
+    }
+    else
+        HDfprintf(output, "Page Aggregation Disabled\n");
+
     HDfprintf(output, "Dimension access order=");
     for (i=0; i<rank; i++)
         recover_size_and_print((long long)opts->order[i], " ");
@@ -940,11 +946,14 @@ report_parameters(struct options *opts)
 static struct options *
 parse_command_line(int argc, char *argv[])
 {
-    register int opt;
+    int opt;
     struct options *cl_opts;
     int i, default_rank, actual_rank, ranks[4];
 
     cl_opts = (struct options *)HDmalloc(sizeof(struct options));
+
+    cl_opts->page_buffer_size = 0;
+    cl_opts->page_size = 0;
 
     cl_opts->output_file = NULL;
     cl_opts->io_types =  0;    /* will set default after parsing options */
@@ -979,6 +988,12 @@ parse_command_line(int argc, char *argv[])
         switch ((char)opt) {
         case 'a':
             cl_opts->h5_alignment = parse_size_directive(opt_arg);
+            break;
+        case 'G':
+            cl_opts->page_size = parse_size_directive(opt_arg);
+            break;
+        case 'b':
+            cl_opts->page_buffer_size = parse_size_directive(opt_arg);
             break;
         case 'A':
             {
@@ -1295,10 +1310,10 @@ parse_command_line(int argc, char *argv[])
  * Modifications:
  */
 
-static off_t
+static hsize_t
 parse_size_directive(const char *size)
 {
-    off_t s;
+    hsize_t s;
     char *endptr;
 
     s = HDstrtoull(size, &endptr, 10);
@@ -1409,52 +1424,5 @@ usage(const char *prog)
         HDprintf("      HDF5_PREFIX      Data file prefix\n");
         HDprintf("\n");
         HDfflush(stdout);
-}
-
-void debug_start_stop_time(io_time_t *pt, timer_type t, int start_stop)
-{
-        if (sio_debug_level >= 4) {
-            const char *msg;
-
-            switch (t) {
-            case HDF5_FILE_OPENCLOSE:
-                msg = "File Open/Close";
-                break;
-            case HDF5_DATASET_CREATE:
-                msg = "Dataset Create";
-                break;
-            case HDF5_MPI_WRITE:
-                msg = "MPI Write";
-                break;
-            case HDF5_MPI_READ:
-                msg = "MPI Read";
-                break;
-            case HDF5_FINE_WRITE_FIXED_DIMS:
-                msg = "Fine Write";
-                break;
-            case HDF5_FINE_READ_FIXED_DIMS:
-                msg = "Fine Read";
-                break;
-            case HDF5_GROSS_WRITE_FIXED_DIMS:
-                msg = "Gross Write";
-                break;
-            case HDF5_GROSS_READ_FIXED_DIMS:
-                msg = "Gross Read";
-                break;
-            case HDF5_RAW_WRITE_FIXED_DIMS:
-                msg = "Raw Write";
-                break;
-            case HDF5_RAW_READ_FIXED_DIMS:
-                msg = "Raw Read";
-                break;
-            default:
-                msg = "Unknown Timer";
-                break;
-            }
-
-            HDfprintf(output, "    %s %s: %.2f\n", msg,
-                    (start_stop == TSTART ? "Start" : "Stop"),
-                    pt->total_time[t]);
-        }
-} /* debug_start_stop_time */
+} /* end usage() */
 

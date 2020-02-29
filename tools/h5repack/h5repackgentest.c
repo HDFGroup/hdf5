@@ -147,7 +147,7 @@ __make_file(const char *basename, struct external_def *ext,
             H5REPACKGENTEST_OOPS;
     }
 
-    space_id = H5Screate_simple(rank, dims, NULL);
+    space_id = H5Screate_simple((int)rank, dims, NULL);
     if (space_id == H5I_INVALID_HID)
         H5REPACKGENTEST_OOPS;
 
@@ -231,9 +231,9 @@ generate_int32le_3d(hbool_t external) {
 
     /* generate values, alternating positive and negative
     */
-    for (i = 0, n = 0; i < dims[0]; i++) {
-        for (j = 0; j < dims[1]; j++) {
-            for (k = 0; k < dims[2]; k++, n++) {
+    for (i = 0, n = 0; (hsize_t)i < dims[0]; i++) {
+        for (j = 0; (hsize_t)j < dims[1]; j++) {
+            for (k = 0; (hsize_t)k < dims[2]; k++, n++) {
                 wdata[n] = (k + j * 512 + i * 4096) * ((n & 1) ? (-1) : (1));
             }
         }
@@ -263,9 +263,9 @@ generate_uint8be(hbool_t external) {
 
     /* Generate values, ping-pong from ends of range
     */
-    for (i = 0, n = 0; i < dims[0]; i++) {
-        for (j = 0; j < dims[1]; j++) {
-            for (k = 0; k < dims[2]; k++, n++) {
+    for (i = 0, n = 0; (hsize_t)i < dims[0]; i++) {
+        for (j = 0; (hsize_t)j < dims[1]; j++) {
+            for (k = 0; (hsize_t)k < dims[2]; k++, n++) {
                 wdata[n] = (uint8_t)((n & 1) ? -n : n);
             }
         }
@@ -294,9 +294,9 @@ generate_f32le(hbool_t external) {
     int   ret_value = 0;
 
     /* Generate values */
-    for (i = 0, k = 0, n = 0; i < dims[0]; i++) {
-        for (j = 0; j < dims[1]; j++, k++, n++) {
-            wdata[k] = (float)(n * 801.1 * ((k % 5 == 1) ? (-1) : (1)));
+    for (i = 0, k = 0, n = 0; (hsize_t)i < dims[0]; i++) {
+        for (j = 0; (hsize_t)j < dims[1]; j++, k++, n++) {
+            wdata[k] = n * 801.1f * ((k % 5 == 1) ? (-1) : (1));
         }
     }
 
@@ -314,7 +314,6 @@ generate_f32le(hbool_t external) {
 int
 main(void) {
     int i = 0;
-    int ret_value = 0;
 
     for (i = 0; i < 2; i++) {
         hbool_t external = (i & 1) ? TRUE : FALSE;

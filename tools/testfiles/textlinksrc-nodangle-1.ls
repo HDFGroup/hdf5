@@ -20,7 +20,7 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
    --no-dangling-links
                    Must be used with --follow-symlinks option;
                    otherwise, h5ls shows error message and returns an exit
-                   code of 1. 
+                   code of 1.
                    Check for any symbolic links (soft links or external links)
                    that do not resolve to an existing object (dataset, group,
                    or named datatype).

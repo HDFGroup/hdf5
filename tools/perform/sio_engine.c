@@ -127,8 +127,8 @@ static hid_t       h5dxpl = H5I_INVALID_HID;            /* Dataset transfer prop
  * Programmer:      Christian Chilan, April, 2008
  * Modifications:
  */
-    results
-do_sio(parameters param)
+void
+do_sio(parameters param, results *res)
 {
     char       *buffer = NULL; /*data buffer pointer           */
     size_t      buf_size[MAX_DIMS];     /* general buffer size in bytes     */
@@ -137,7 +137,6 @@ do_sio(parameters param)
     char base_name[256];                /* test file base name */
     /* return codes */
     herr_t      ret_code = 0;   /*return code                           */
-    results     res;
 
     char        fname[FILENAME_MAX];    /* test file name */
     int     i;
@@ -152,11 +151,11 @@ do_sio(parameters param)
     switch (iot) {
     case POSIXIO:
         fd.posixfd = -1;
-        res.timers = io_time_new(SYS_CLOCK);
+        res->timers = io_time_new(SYS_CLOCK);
         break;
     case HDF5:
         fd.h5fd = -1;
-        res.timers = io_time_new(SYS_CLOCK);
+        res->timers = io_time_new(SYS_CLOCK);
         break;
     default:
         /* unknown request */
@@ -213,18 +212,18 @@ do_sio(parameters param)
         HDfprintf(output, "data filename=%s\n",
              fname);
 
-    io_time_set(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
+    io_time_set(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
     hrc = do_fopen(&param, fname, &fd, SIO_CREATE | SIO_WRITE);
     VRFY((hrc == SUCCESS), "do_fopen failed");
 
-    io_time_set(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
-    hrc = do_write(&res, &fd, &param, buffer);
-    io_time_set(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
+    hrc = do_write(res, &fd, &param, buffer);
+    io_time_set(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_write failed");
 
     /* Close file for write */
     hrc = do_fclose(iot, &fd);
-    io_time_set(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
+    io_time_set(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_fclose failed");
 
     if (!param.h5_write_only) {
@@ -233,19 +232,19 @@ do_sio(parameters param)
          */
 
         /* Open file for read */
-        io_time_set(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
+        io_time_set(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
         hrc = do_fopen(&param, fname, &fd, SIO_READ);
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-        io_time_set(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
-        hrc = do_read(&res, &fd, &param, buffer);
-        io_time_set(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
+        io_time_set(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
+        hrc = do_read(res, &fd, &param, buffer);
+        io_time_set(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
         hrc = do_fclose(iot, &fd);
 
-        io_time_set(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
+        io_time_set(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_fclose failed");
     }
 
@@ -276,8 +275,7 @@ done:
     if (buffer)
         free(buffer);
 
-    res.ret_code = ret_code;
-    return res;
+    res->ret_code = ret_code;
 }
 
 /*
@@ -1167,7 +1165,7 @@ set_vfd(parameters *param)
         HDmemset(memb_addr, 0, sizeof memb_addr);
 
         HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-        for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+        for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
             HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
@@ -1305,7 +1303,7 @@ do_cleanupfile(iotype iot, char *filename)
                 H5FD_mem_t mt;
                 assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
 
-                for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+                for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                     HDsnprintf(temp, sizeof temp, "%s-%c.h5",
                                filename, multi_letters[mt]);
                     HDremove(temp); /*don't care if it fails*/

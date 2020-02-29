@@ -52,10 +52,10 @@ typedef struct parameters_ {
     vfdtype     vfd;
     long        num_files;  /* Number of files to create            */
     long        num_dsets;  /* Number of datasets to create         */
-    off_t       num_bytes;  /* Number of bytes in each dset         */
+    hsize_t     num_bytes;  /* Number of bytes in each dset         */
     int         num_iters;  /* Number of times to loop doing the IO */
     int         rank;       /* Rank of dataset */
-    off_t       dset_size[MAX_DIMS]; /* Dataset size             */
+    hsize_t     dset_size[MAX_DIMS]; /* Dataset size             */
     size_t      buf_size[MAX_DIMS]; /* Buffer size               */
     size_t      chk_size[MAX_DIMS]; /* Chunk size               */
     int         order[MAX_DIMS]; /* Buffer size               */
@@ -65,6 +65,8 @@ typedef struct parameters_ {
     int         h5_extendable; /* Make HDF5 dataset chunked            */
     int         h5_write_only; /* Perform the write tests only         */
     int         verify;       /* Verify data correctness              */
+    size_t      page_size;
+    size_t      page_buffer_size;
 } parameters;
 
 typedef struct results_ {
@@ -93,7 +95,7 @@ extern int      sio_debug_level;    /* The debug level:
 extern "C" {
 #endif  /* __cplusplus */
 
-extern results do_sio(parameters param);
+extern void do_sio(parameters param, results *res);
 
 #ifdef __cplusplus
 }
