@@ -1320,12 +1320,15 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
 
         datactx.need_prefix = TRUE;
         h5tools_str_reset(&buffer);
+        H5TOOLS_DEBUG("reference loop - h5tools_str_sprint");
         h5tools_str_sprint(&buffer, info, container, f_type, memref, &datactx);
         h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)i, (hsize_t)ndims);
 
-        datactx.indent_level++;
-        h5tools_dump_dset(stream, info, &datactx, container);
-        datactx.indent_level--;
+        if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
+            datactx.indent_level++;
+            h5tools_dump_dset(stream, info, &datactx, container);
+            datactx.indent_level--;
+        }
 
         H5TOOLS_DEBUG("finished reference loop:%d",i);
     } /* end for(i = 0; i < ndims; i++, ctx->cur_elmt++, elmt_counter++) */
@@ -1354,6 +1357,7 @@ dump_dataset_values(hid_t dset)
     hsize_t             total_size[H5S_MAX_RANK];
     int                 ndims;
     size_t              i;
+    size_t              nsize;
     char                string_prefix[64];
     static char         fmt_double[16];
     static char         fmt_float[16];
@@ -1362,11 +1366,13 @@ dump_dataset_values(hid_t dset)
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t     outputformat;
     h5tool_format_t    *info = &ls_dataformat;
+    unsigned char      *region_buf = NULL;
 
     H5TOOLS_START_DEBUG("");
 
     f_type = H5Dget_type(dset);
     space = H5Dget_space(dset);
+    nsize = H5Tget_size(f_type);
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1457,10 +1463,42 @@ dump_dataset_values(hid_t dset)
 
     ctx.need_prefix = TRUE;
     ctx.cur_column = (size_t)curr_pos;
-    if (h5tools_dump_dset(rawoutstream, info, &ctx, dset) < 0) {
-        h5tools_str_reset(&buffer);
-        h5tools_str_append(&buffer, "        Unable to print data.");
-        h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+    if (H5Tget_class(f_type) == H5T_REFERENCE) {
+        H5TOOLS_DEBUG("reference class type");
+        if (!H5Tequal(f_type, H5T_STD_REF_DSETREG) && !H5Tequal(f_type, H5T_STD_REF_OBJ)) {
+            H5TOOLS_GOTO_DONE_NO_RET();
+        }
+
+        ndims = (int)H5Sget_simple_extent_npoints(space);
+        H5TOOLS_DEBUG("ndims=%d - ctx.ndims=%d", ndims, ctx.ndims);
+
+        /* Assume entire data space to be printed */
+        if (ctx.ndims > 0)
+            for (i = 0; i < (size_t)ctx.ndims; i++)
+                ctx.p_min_idx[i] = 0;
+
+        H5Sget_simple_extent_dims(space, total_size, NULL);
+        if (ctx.ndims > 0)
+            init_acc_pos(&ctx, total_size);
+        ctx.need_prefix = TRUE;
+
+        if (NULL != (region_buf = (void *)HDcalloc(nsize, (size_t)ndims))) {
+            H5TOOLS_DEBUG("H5Dread reference read");
+            if (H5Dread(dset, f_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, region_buf) < 0) {
+                HDfree(region_buf);
+                H5TOOLS_INFO("H5Dread reference failed");
+                H5TOOLS_GOTO_DONE_NO_RET();
+            }
+            dump_reference(rawoutstream, info, &ctx, dset, region_buf, ndims);
+            HDfree(region_buf);
+        }
+    }
+    else {
+        if (h5tools_dump_dset(rawoutstream, info, &ctx, dset) < 0) {
+            h5tools_str_reset(&buffer);
+            h5tools_str_append(&buffer, "        Unable to print data.");
+            h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+        }
     }
 done:
     H5Sclose(space);
@@ -1490,6 +1528,7 @@ dump_attribute_values(hid_t attr)
     hsize_t             total_size[H5S_MAX_RANK];
     int                 ndims;
     size_t              i;
+    size_t              nsize;
     char                string_prefix[64];
     static char         fmt_double[16];
     static char         fmt_float[16];
@@ -1498,11 +1537,13 @@ dump_attribute_values(hid_t attr)
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t     outputformat;
     h5tool_format_t    *info = &ls_dataformat;
+    unsigned char      *region_buf = NULL;
 
     H5TOOLS_START_DEBUG("");
 
     f_type = H5Aget_type(attr);
     space = H5Aget_space(attr);
+    nsize = H5Tget_size(f_type);
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1594,15 +1635,49 @@ dump_attribute_values(hid_t attr)
 
     ctx.need_prefix = TRUE;
     ctx.cur_column = (size_t)curr_pos;
-    H5TOOLS_DEBUG("Attribute data read");
-    ctx.indent_level++;
-    if (h5tools_dump_mem(rawoutstream, info, &ctx, attr) < 0) {
-        h5tools_str_reset(&buffer);
-        h5tools_str_append(&buffer, "        Unable to print data.");
-        h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+    if (H5Tget_class(f_type) == H5T_REFERENCE) {
+        H5TOOLS_DEBUG("reference class type");
+        if (!H5Tequal(f_type, H5T_STD_REF_DSETREG) && !H5Tequal(f_type, H5T_STD_REF_OBJ)) {
+            H5TOOLS_GOTO_DONE_NO_RET();
+        }
+
+        ndims = (int)H5Sget_simple_extent_npoints(space);
+        H5TOOLS_DEBUG("ndims=%d - ctx.ndims=%d", ndims, ctx.ndims);
+
+        /* Assume entire data space to be printed */
+        if (ctx.ndims > 0)
+            for (i = 0; i < (size_t)ctx.ndims; i++)
+                ctx.p_min_idx[i] = 0;
+
+        H5Sget_simple_extent_dims(space, total_size, NULL);
+        if (ctx.ndims > 0)
+            init_acc_pos(&ctx, total_size);
+        ctx.need_prefix = TRUE;
+
+        if (NULL != (region_buf = (void *)HDcalloc(nsize, (size_t)ndims))) {
+            H5TOOLS_DEBUG("H5Aread reference read");
+            if (H5Aread(attr, f_type, region_buf) < 0) {
+                HDfree(region_buf);
+                H5TOOLS_INFO("H5Aread reference failed");
+                H5TOOLS_GOTO_DONE_NO_RET();
+            }
+            ctx.indent_level++;
+            dump_reference(rawoutstream, info, &ctx, attr, region_buf, ndims);
+            ctx.indent_level--;
+            HDfree(region_buf);
+        }
     }
-    ctx.indent_level--;
-    H5TOOLS_DEBUG("Attribute data read complete");
+    else {
+        H5TOOLS_DEBUG("Attribute data read");
+        ctx.indent_level++;
+        if (h5tools_dump_mem(rawoutstream, info, &ctx, attr) < 0) {
+            h5tools_str_reset(&buffer);
+            h5tools_str_append(&buffer, "        Unable to print data.");
+            h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+        }
+        ctx.indent_level--;
+        H5TOOLS_DEBUG("Attribute data read complete");
+    }
 done:
     H5Sclose(space);
     H5Tclose(f_type);

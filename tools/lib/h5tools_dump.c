@@ -3930,6 +3930,8 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             for (i = 0; i < ndims; i++, ctx->cur_elmt++, elmt_counter++) {
                 void* memref = region_buf + i * nsize;
 
+                H5TOOLS_DEBUG("reference loop:%d with curr_pos=%ld", i, curr_pos);
+
                 datactx.need_prefix = TRUE;
                 h5tools_str_reset(&buffer);
                 H5TOOLS_DEBUG("reference loop - h5tools_str_sprint with H5T_STD_REF_DSETREG:%d", i);
@@ -3999,6 +4001,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference failed");
                     }
                 } /* end else to if (h5tools_is_zero(... */
+                H5TOOLS_DEBUG("finished reference loop:%d",i);
             } /* end for (i = 0; i < nelmts... */
             HDfree(region_buf);
         }
