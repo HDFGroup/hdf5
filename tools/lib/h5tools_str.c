@@ -708,6 +708,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     if(info->raw) {
         size_t i;
 
+        H5TOOLS_DEBUG("info->raw");
         if(1 == nsize)
             h5tools_str_append(str, OPT(info->fmt_raw, "0x%02x"), ucp_vp[0]);
         else
@@ -718,8 +719,11 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             }
     }
     else {
-        if((type_class = H5Tget_class(type)) < 0)
+        H5TOOLS_DEBUG("H5Tget_class(type)");
+        if((type_class = H5Tget_class(type)) < 0) {
+            H5TOOLS_ENDDEBUG(" with %s", "NULL");
             return NULL;
+        }
         switch (type_class) {
             case H5T_FLOAT:
                 H5TOOLS_DEBUG("H5T_FLOAT");
@@ -1272,6 +1276,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 break;
         } /* end switch */
     }
+    H5TOOLS_DEBUG("switch done");
 
     ret_value = h5tools_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
 
