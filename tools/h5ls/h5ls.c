@@ -1288,9 +1288,10 @@ print_type(h5tools_str_t *buffer, hid_t type, int ind)
  *
  */
 static void
-dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t container, void *ref_buf, int ndims)
+dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx, hid_t container, hid_t f_type, void *ref_buf, int ndims)
 {
-    hid_t               f_type = H5I_INVALID_HID;
+    hid_t               region_id = H5I_INVALID_HID;
+    hid_t               region_space = H5I_INVALID_HID;
     size_t              nsize;
     hsize_t             elmt_counter = 0;  /*counts the # elements printed. */
     size_t              ncols = 80;        /* available output width        */
@@ -1302,7 +1303,6 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
 
     H5TOOLS_START_DEBUG("");
 
-    f_type = H5Dget_type(container);
     nsize = H5Tget_size(f_type);
     datactx = *ctx;  /* print context  */
     /* Assume entire data space to be printed */
@@ -1323,17 +1323,45 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
         h5tools_str_sprint(&buffer, info, container, f_type, memref, &datactx);
         h5tools_render_element(stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)i, (hsize_t)ndims);
 
-        if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
-            datactx.indent_level++;
-            h5tools_dump_dset(stream, info, &datactx, container);
-            datactx.indent_level--;
+        /* region data */
+        if ((region_id = H5Rdereference(container, H5R_DATASET_REGION, memref)) >= 0) {
+            if ((region_space = H5Rget_region(container, H5R_DATASET_REGION, memref)) >= 0) {
+                    H5S_sel_type region_type;
+
+                    region_type = H5Sget_select_type(region_space);
+                    if(region_type == H5S_SEL_POINTS) {
+                        /* Print point information */
+                        H5TOOLS_DEBUG("H5S_SEL_POINTS H5R_DATASET_REGION");
+                        h5tools_dump_region_data_points(
+                                               region_space, region_id, stream, info, &datactx,
+                                               &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
+                    }
+                    else if(region_type == H5S_SEL_HYPERSLABS) {
+                        /* Print block information */
+                        H5TOOLS_DEBUG("H5S_SEL_HYPERSLABS H5R_DATASET_REGION");
+                        h5tools_dump_region_data_blocks(
+                                               region_space, region_id, stream, info, &datactx,
+                                               &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
+                    }
+                    else
+                        H5TOOLS_INFO("invalid region type");
+                if(H5Sclose(region_space) < 0)
+                    H5TOOLS_INFO("H5Sclose H5R_DATASET_REGION failed");
+            } /* end if (region_space >= 0) */
+            else
+                H5TOOLS_INFO("H5Rget_region H5R_DATASET_REGION failed");
+            if(H5Dclose(region_id) < 0)
+                H5TOOLS_INFO("H5Dclose H5R_DATASET_REGION failed");
+        } /* if (region_id >= 0) */
+        else {
+            /* if (region_id < 0) - could mean that no reference was written do not throw failure */
+            H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference failed");
         }
 
         H5TOOLS_DEBUG("finished reference loop:%d",i);
     } /* end for(i = 0; i < ndims; i++, ctx->cur_elmt++, elmt_counter++) */
 
     h5tools_str_close(&buffer);
-    H5Tclose(f_type);
 
     PRINTVALSTREAM(stream, "\n");
 
@@ -1488,7 +1516,7 @@ dump_dataset_values(hid_t dset)
                 H5TOOLS_INFO("H5Dread reference failed");
                 H5TOOLS_GOTO_DONE_NO_RET();
             }
-            dump_reference(rawoutstream, info, &ctx, dset, region_buf, ndims);
+            dump_reference(rawoutstream, info, &ctx, dset, f_type, region_buf, ndims);
             HDfree(region_buf);
         }
     }
@@ -1661,7 +1689,7 @@ dump_attribute_values(hid_t attr)
                 H5TOOLS_GOTO_DONE_NO_RET();
             }
             ctx.indent_level++;
-            dump_reference(rawoutstream, info, &ctx, attr, region_buf, ndims);
+            dump_reference(rawoutstream, info, &ctx, attr, f_type, region_buf, ndims);
             ctx.indent_level--;
             HDfree(region_buf);
         }
