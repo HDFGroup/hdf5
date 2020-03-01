@@ -358,7 +358,7 @@ H5O__chunk_update_idx(H5F_t *f, H5O_t *oh, unsigned idx)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header chunk")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__chunk_update_idx() */
 
 
