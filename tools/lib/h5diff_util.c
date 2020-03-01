@@ -185,7 +185,7 @@ void print_type(hid_t type)
  * Purpose:  Returns a pointer to the last component absolute name
  *-------------------------------------------------------------------------
  */
- const char*
+const char*
 diff_basename(const char *name)
 {
     size_t i;
@@ -242,7 +242,7 @@ get_type(h5trav_type_t type)
  * Purpose:  Returns the sign as a string
  *-------------------------------------------------------------------------
  */
- const char*
+const char*
 get_sign(H5T_sign_t sign)
 {
     switch(sign) {
@@ -270,7 +270,7 @@ get_sign(H5T_sign_t sign)
  * Purpose:  Returns the class as a string
  *-------------------------------------------------------------------------
  */
- const char*
+const char*
 get_class(H5T_class_t tclass)
 {
     switch(tclass) {

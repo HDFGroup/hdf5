@@ -3738,8 +3738,8 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     H5TOOLS_GOTO_DONE_NO_RET();
                 }
             }
-            for (i = 0; i < ndims; i++, ctx->cur_elmt++, elmt_counter++) {
-                void* memref = region_buf + i * nsize;
+            for (i = 0; i < ndims; i++, datactx.cur_elmt++, elmt_counter++) {
+                void *memref = region_buf + i * nsize;
 
                 H5TOOLS_DEBUG("reference loop:%d with curr_pos=%ld", i, curr_pos);
 
@@ -3749,51 +3749,70 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 h5tools_str_sprint(&buffer, &outputformat, obj_id, f_type, memref, &datactx);
                 h5tools_render_element(stream, &outputformat, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
-                if (h5tools_is_zero(memref, nsize)) {
-                    H5TOOLS_DEBUG("NULL H5R_DATASET_REGION");
+                if ((region_id = H5Rdereference(obj_id, H5R_OBJECT, memref)) >= 0) {
+                    datactx.indent_level++;
+                    h5tools_dump_data(stream, &outputformat, &datactx, region_id, TRUE);
+                    datactx.indent_level--;
                 }
                 else {
-                    /* region data */
-                    region_id = H5Rdereference(obj_id, H5R_DATASET_REGION, memref);
-                    if (region_id >= 0) {
-                        region_space = H5Rget_region(obj_id, H5R_DATASET_REGION, memref);
-                        if (region_space >= 0) {
-                            H5S_sel_type       region_type;
+                    if ((region_id = H5Rdereference(obj_id, H5R_DATASET_REGION, memref)) >= 0) {
+                        if ((region_space = H5Rget_region(obj_id, H5R_DATASET_REGION, memref)) >= 0) {
+                            if (h5tools_is_zero(memref, H5Tget_size(f_type))) {
+                                H5TOOLS_DEBUG("NULL H5R_DATASET_REGION");
 
-                            region_type = H5Sget_select_type(region_space);
-                            if(region_type == H5S_SEL_POINTS) {
-                                /* Print point information */
-                                H5TOOLS_DEBUG("H5S_SEL_POINTS H5R_DATASET_REGION");
-                                h5tools_dump_region_data_points(
-                                                    region_space, region_id, stream, &outputformat, &datactx,
-                                                    &buffer, &curr_pos, ncols, i, elmt_counter);
-                            }
-                            else if(region_type == H5S_SEL_HYPERSLABS) {
-                                /* Print block information */
-                                H5TOOLS_DEBUG("H5S_SEL_HYPERSLABS H5R_DATASET_REGION");
-                                h5tools_dump_region_data_blocks(
-                                                    region_space, region_id, stream, &outputformat, &datactx,
-                                                    &buffer, &curr_pos, ncols, i, elmt_counter);
+                                h5tools_str_reset(&buffer);
+                                h5tools_str_append(&buffer, " {");
+                                h5tools_render_element(stream, &outputformat, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+
+                                datactx.need_prefix = TRUE;
+                                datactx.indent_level++;
+                                h5tools_str_reset(&buffer);
+                                h5tools_str_append(&buffer, "NULL");
+                                h5tools_render_element(stream, &outputformat, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+                                datactx.indent_level--;
+                                datactx.need_prefix = TRUE;
+
+                                h5tools_str_reset(&buffer);
+                                h5tools_str_append(&buffer, "}");
+                                h5tools_render_element(stream, &outputformat, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
                             }
                             else {
-                                H5TOOLS_INFO("invalid region type");
-                            }
+                                H5S_sel_type region_type;
+
+                                region_type = H5Sget_select_type(region_space);
+                                if(region_type == H5S_SEL_POINTS) {
+                                    /* Print point information */
+                                    H5TOOLS_DEBUG("H5S_SEL_POINTS H5R_DATASET_REGION");
+                                    h5tools_dump_region_data_points(
+                                                           region_space, region_id, stream, &outputformat, &datactx,
+                                                           &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
+                                }
+                                else if(region_type == H5S_SEL_HYPERSLABS) {
+                                    /* Print block information */
+                                    H5TOOLS_DEBUG("H5S_SEL_HYPERSLABS H5R_DATASET_REGION");
+                                    h5tools_dump_region_data_blocks(
+                                                           region_space, region_id, stream, &outputformat, &datactx,
+                                                           &buffer, &curr_pos, ncols, (hsize_t)i, elmt_counter);
+                                }
+                                else
+                                    H5TOOLS_INFO("invalid region type");
+                            } /* end else to if (h5tools_is_zero(... */
                             if(H5Sclose(region_space) < 0)
-                                H5TOOLS_INFO("H5Sclose failed");
+                                H5TOOLS_INFO("H5Sclose H5R_DATASET_REGION failed");
                         } /* end if (region_space >= 0) */
                         else
-                            H5TOOLS_INFO("H5Rget_region failed");
+                            H5TOOLS_INFO("H5Rget_region H5R_DATASET_REGION failed");
                         if(H5Dclose(region_id) < 0)
-                            H5TOOLS_INFO("H5Dclose failed");
-
+                            H5TOOLS_INFO("H5Dclose H5R_DATASET_REGION failed");
                     } /* if (region_id >= 0) */
                     else {
                         /* if (region_id < 0) - could mean that no reference was written do not throw failure */
                         H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference failed");
                     }
-                } /* end else to if (h5tools_is_zero(... */
+                }
+
                 H5TOOLS_DEBUG("finished reference loop:%d",i);
-            } /* end for (i = 0; i < nelmts... */
+            } /* end for(i = 0; i < ndims; i++, datactx->cur_elmt++, elmt_counter++) */
             HDfree(region_buf);
         }
         ctx->indent_level--;

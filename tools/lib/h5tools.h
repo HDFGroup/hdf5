@@ -91,6 +91,7 @@
 #define PACKED_BITS     "PACKED_BITS"
 #define PACKED_OFFSET   "OFFSET"
 #define PACKED_LENGTH   "LENGTH"
+#define REGION          "REGION"
 
 #define BEGIN           "{"
 #define END             "}"

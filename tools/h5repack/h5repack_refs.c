@@ -531,8 +531,8 @@ static int copy_refs_attr(hid_t loc_in,
                     ref_comp_size = NULL;
                 }
             }
-            /* This line below needs to be moved in this loop instead of inserting outside. Otherwise, 
-               ref_comp_field_n may be >0 for the next attribute, which may not be 
+            /* This line below needs to be moved in this loop instead of inserting outside. Otherwise,
+               ref_comp_field_n may be >0 for the next attribute, which may not be
                the reference type and will be accidently treated as the reference type.
                It will then cause the H5Acreate2 failed since that attribute is already created.
                KY 2020-02-05
@@ -836,7 +836,7 @@ static herr_t update_ref_value(hid_t obj_id, H5R_type_t ref_type, void *ref_in,
 
     ref_obj_id = H5Rdereference(obj_id, ref_type, ref_in);
     if (ref_obj_id < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, "H5Rdereference2 failed");
+        H5TOOLS_GOTO_ERROR(FAIL, "H5Rdereference failed");
 
     ref_obj_name = MapIdToName(ref_obj_id, travt);
     if (ref_obj_name == NULL)

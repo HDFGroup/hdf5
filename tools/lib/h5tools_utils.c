@@ -680,7 +680,7 @@ dump_tables(find_objs_t *info)
  *              Failure:    FAIL   if object is not found
  *-------------------------------------------------------------------------
  */
- obj_t *
+obj_t *
 search_obj(table_t *table, haddr_t objno)
 {
     unsigned u;
