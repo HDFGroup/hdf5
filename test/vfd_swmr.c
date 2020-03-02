@@ -2636,6 +2636,35 @@ error:
 #define _arraycount(_a) (sizeof(_a)/sizeof(_a[0]))
 #endif
 
+/* Fetch a variable from the environment and parse it for unsigned long
+ * content.  Return 0 if the variable is not present, -1 if it is present
+ * but it does not parse and compare less than `limit`, 1 if it's present,
+ * parses, and is in-bounds.
+ */
+static int
+fetch_env_ulong(const char *varname, unsigned long limit, unsigned long *valp)
+{
+    char *end;
+    unsigned long ul;
+    char *tmp;
+
+    if ((tmp = getenv(varname)) == NULL)
+        return 0;
+
+    errno = 0;
+    ul = strtoul(tmp, &end, 0);
+    if ((ul == ULONG_MAX && errno != 0) || end == tmp || *end != '\0') {
+        fprintf(stderr, "could not parse %s: %s\n", varname, strerror(errno));
+        return -1;
+    }
+    if (ul > limit) {
+        fprintf(stderr, "%s (%lu) out of range\n", varname, ul);
+        return -1;
+    }
+    *valp = ul;
+    return 1;
+}
+
 static unsigned
 test_shadow_index_lookup(void)
 {
@@ -2643,32 +2672,40 @@ test_shadow_index_lookup(void)
     H5FD_vfd_swmr_idx_entry_t *idx;
     uint32_t size[] = {0, 1, 2, 3, 4, 0};
     char vector[8];
-    char *tmp;
     unsigned seed = 1;
-    unsigned i, j;
+    unsigned i, j, failj;
+    bool have_failj = false;
+    unsigned long tmpl;
     char *ostate;
     const char *seedvar = "H5_SHADOW_INDEX_SEED";
+    const char *failvar = "H5_SHADOW_INDEX_FAIL";
 
     TESTING("Shadow-index lookups");
 
-    /* TBD get seed from environment or else from time(3) */
-    if ((tmp = getenv(seedvar)) == NULL)
+    /* get seed from environment or else from time(3) */
+    switch (fetch_env_ulong(seedvar, UINT_MAX, &tmpl)) {
+    case -1:
+        nerrors = 1;
+        goto out;
+    case 0:
         seed = (unsigned int)time(NULL);
-    else {
-        char *end;
-        unsigned long ul;
-        errno = 0;
-        ul = strtoul(tmp, &end, 0);
-        if ((ul == ULONG_MAX && errno != 0) || end == tmp || *end != '\0') {
-            fprintf(stderr, "could not parse %s: %s\n", seedvar,
-                strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-        if (ul > UINT_MAX) {
-            fprintf(stderr, "%s (%lu) out of range\n", seedvar, ul);
-            exit(EXIT_FAILURE);
-        }
-        seed = (unsigned int)ul;
+        break;
+    default:
+        seed = (unsigned int)tmpl;
+        break;
+    }
+
+    /* get forced-fail index from environment or else from time(3) */
+    switch (fetch_env_ulong(failvar, UINT_MAX, &tmpl)) {
+    case -1:
+        nerrors = 1;
+        goto out;
+    case 0:
+        break;
+    default:
+        failj = (unsigned int)tmpl;
+        have_failj = true;
+        break;
     }
 
     ostate = initstate(seed, vector, _arraycount(vector));
@@ -2696,7 +2733,7 @@ test_shadow_index_lookup(void)
 
             found = vfd_swmr_pageno_to_mdf_idx_entry(idx, cursize,
                 idx[j].hdf5_page_offset, false);
-            if (found != &idx[j])
+            if ((have_failj && failj == j) || found != &idx[j])
                 break;
         }
         if (j < cursize) {
@@ -2708,6 +2745,7 @@ test_shadow_index_lookup(void)
         free(idx);
     }
     (void)setstate(ostate);
+out:
     if (nerrors == 0)
         PASSED();
     else
