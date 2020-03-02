@@ -142,8 +142,8 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK-bug1814-clear-objects
     H5REPACK-HDFFV-5932-clear-objects
     H5REPACK-HDFFV-7840-clear-objects
-    H5REPACK_META-meta_long_N-clear-objects
-    H5REPACK_META-meta_short_N-clear-objects
+    H5REPACK_META-meta_long-clear-objects
+    H5REPACK_META-meta_short-clear-objects
     H5REPACK_STAT-GS_AGGR-clear-objects
     H5REPACK_STAT-S_AGGR-clear-objects
     H5REPACK_STAT-SP_NONE-clear-objects
