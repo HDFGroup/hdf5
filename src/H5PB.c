@@ -51,11 +51,25 @@
 /* Local Macros */
 /****************/
 
+/* Round _x down to nearest _size. */
+#ifndef rounddown
+#define rounddown(_x, _size) (((_x) / (_size)) * (_size))
+#endif
+
+/* Round _x up to nearest _size. */
+#ifndef roundup
+#define roundup(_x, _size) ((((_x) + (_size) - 1) / (_size)) * (_size))
+#endif
 
 /******************/
 /* Local Typedefs */
 /******************/
 
+typedef struct _metadata_section {
+    haddr_t addr;
+    size_t len;
+    const char *buf;
+} metadata_section_t;
 
 /********************/
 /* Package Typedefs */
@@ -97,6 +111,12 @@ static herr_t H5PB__write_meta(H5F_shared_t *, H5FD_mem_t, haddr_t,
     size_t, const void *);
 
 static herr_t H5PB__write_raw(H5F_shared_t *, H5FD_mem_t, haddr_t, 
+    size_t, const void *);
+
+static herr_t metadata_multipart_read(H5F_shared_t *, H5FD_mem_t, haddr_t,
+    size_t, void *);
+
+static herr_t metadata_multipart_write(H5F_shared_t *, H5FD_mem_t, haddr_t,
     size_t, const void *);
 
 /*********************/
@@ -1068,7 +1088,7 @@ H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
     if (H5FD_MEM_DRAW == type) { /* cases 3 and 4 */
         if (H5PB__read_raw(shared, type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "raw read failed");
-    } else if (H5PB__read_meta(shared, type, addr, size, buf) < 0)
+    } else if (metadata_multipart_read(shared, type, addr, size, buf) < 0)
         HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, "meta read failed");
 
     H5PB__UPDATE_STATS_FOR_ACCESS(pb_ptr, type, size);
@@ -1953,7 +1973,7 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
         } else { /* cases 7, and 8 */
 
-            if ( H5PB__write_meta(shared, type, addr, size, buf) < 0 )
+            if ( metadata_multipart_write(shared, type, addr, size, buf) < 0 )
 
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, \
                             "H5PB_read_meta() failed")
@@ -2953,6 +2973,118 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5PB__mark_entry_dirty() */
+
+static void
+metadata_section_split(size_t pgsz, haddr_t addr, size_t len, const void *_buf,
+    metadata_section_t *section)
+{
+    int i;
+    size_t totlen = 0;
+    uint64_t whole_pgaddr, tail_pgaddr;
+    const char *buf = _buf;
+    metadata_section_t *head = &section[0], *middle = &section[1],
+        *tail = &section[2];
+
+    /* Try to find the address of the first whole page, and the address of
+     * the page after the last whole page.
+     */
+    whole_pgaddr = roundup(addr, pgsz);
+    tail_pgaddr = rounddown(addr + len, pgsz);
+
+    /* In the degenerate case where the first whole page is "after" the last,
+     * actually the entire access lands between page boundaries.
+     */
+    if (whole_pgaddr > tail_pgaddr) {
+        assert(len < pgsz);
+        head->addr = addr;
+        head->len = len;
+        head->buf = buf;
+        return;
+    }
+
+    /* `head` spans any range beginning before the first page boundary. */
+    if (addr < whole_pgaddr) {
+        head->buf = buf;
+        head->len = pgsz - addr % pgsz;
+        head->addr = addr;
+    }
+
+    /* `middle` spans one or more whole pages in between the end of
+     * `head` and before the beginning of `tail`.
+     */
+    if (whole_pgaddr < tail_pgaddr) {
+        middle->buf = &buf[whole_pgaddr - addr];
+        middle->len = tail_pgaddr - whole_pgaddr;
+        middle->addr = whole_pgaddr;
+    }
+
+    /* `tail` spans residual bytes that follow the last page boundary. */
+    if (tail_pgaddr < addr + len) {
+        tail->len = (addr + len) - tail_pgaddr;
+        tail->buf = &buf[tail_pgaddr - addr];
+        tail->addr = tail_pgaddr;
+    }
+
+    for (i = 0; i < 3; i++) {
+        metadata_section_t *iter = &section[i];
+        if (iter->buf == NULL)
+            continue;
+        assert(iter->addr == addr + totlen);
+        assert(iter->buf == &buf[totlen]);
+//      assert(i == 0 || iter[-1].buf + iter[-1].len == iter->buf);
+        totlen += iter->len;
+    }
+
+    assert(totlen == len);
+}
+
+static herr_t
+metadata_multipart_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
+    size_t len, void *_buf/*out*/)
+{
+    herr_t rc;
+    int i;
+    const size_t pgsz = shared->pb_ptr->page_size;
+    metadata_section_t section[3] = {{0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}};
+
+    metadata_section_split(pgsz, addr, len, _buf, section);
+
+    for (i = 0; i < 3; i++) {
+        metadata_section_t *iter = &section[i];
+        if (iter->buf == NULL)
+            continue;
+        rc = H5PB__read_meta(shared, type, iter->addr, iter->len,
+            (void *)(uintptr_t)iter->buf);
+        if (rc < 0)
+            return rc;
+    }
+
+    return SUCCEED;
+}
+
+static herr_t
+metadata_multipart_write(H5F_shared_t *shared, H5FD_mem_t type,
+    haddr_t addr, size_t len, const void *_buf/*out*/)
+{
+    herr_t rc;
+    int i;
+    const size_t pgsz = shared->pb_ptr->page_size;
+    metadata_section_t section[3] = {{0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}};
+
+    metadata_section_split(pgsz, addr, len, _buf, section);
+
+    for (i = 0; i < 3; i++) {
+        metadata_section_t *iter = &section[i];
+
+        if (iter->buf == NULL)
+            continue;
+        rc = H5PB__write_meta(shared, type, iter->addr, iter->len, iter->buf);
+        if (rc < 0)
+            return rc;
+    }
+
+    return SUCCEED;
+}
 
 
 /*-------------------------------------------------------------------------
