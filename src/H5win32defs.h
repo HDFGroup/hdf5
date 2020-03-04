@@ -40,6 +40,12 @@ typedef __int64             h5_stat_size_t;
 #define HDfileno(F)         _fileno(F)
 #define HDfstat(F,B)        _fstati64(F,B)
 #define HDisatty(F)         _isatty(F)
+
+/* The isnan function needs underscore in VS2012 and earlier */
+#if (_MSC_VER <= 1700)
+  #define HDisnan(X)      _isnan(X)
+#endif /* MSC_VER < 1700 */
+
 #define HDgetcwd(S,Z)       _getcwd(S,Z)
 #define HDgetdcwd(D,S,Z)    _getdcwd(D,S,Z)
 #define HDgetdrive()        _getdrive()

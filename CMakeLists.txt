@@ -1,8 +1,12 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5 C)
 
 if (POLICY CMP0074)
   cmake_policy (SET CMP0074 NEW)
+endif ()
+
+if (POLICY CMP0083)
+  cmake_policy (SET CMP0083 NEW)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -30,6 +34,17 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
       "        $ cd MY_BUILD\n"
       "        $ cmake [OPTIONS] ..\n"
       )
+endif ()
+
+# CMake version 3.14 added option --ignore-eol to compare files
+#     cmake -E compare_files --ignore-eol file1 file2
+set (CMAKE_IGNORE_EOL "--ignore-eol")
+if (CMAKE_VERSION VERSION_LESS "3.14.0")
+  set (CMAKE_IGNORE_EOL "")
+  if (WIN32)
+    message (FATAL_ERROR "Windows builds requires a minimum of CMake 3.14")
+  endif()
+else ()
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -306,9 +321,6 @@ HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
 include (${HDF_RESOURCES_EXT_DIR}/HDFLibMacros.cmake)
 include (${HDF_RESOURCES_DIR}/HDF5Macros.cmake)
-if (HDF5_ENABLE_SANITIZERS)
-  include (${HDF5_SOURCE_DIR}/config/sanitizer/sanitizers.cmake)
-endif ()
 
 #-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
@@ -453,9 +465,7 @@ endif ()
 set (EXE_EXT "")
 if (WIN32 OR MINGW)
   set (EXE_EXT ".exe")
-  add_definitions (-D_BIND_TO_CURRENT_VCLIBS_VERSION=1)
-  add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-  add_definitions (-D_CONSOLE)
+  add_compile_definitions (_BIND_TO_CURRENT_VCLIBS_VERSION=1 _CRT_SECURE_NO_WARNINGS _CONSOLE)
 endif ()
 
 if (MSVC)
@@ -540,8 +550,8 @@ if (HDF5_ENABLE_PARALLEL)
     set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}")
     set (CMAKE_REQUIRED_INCLUDES "${MPI_C_INCLUDE_DIRS}")
     # Used by Fortran + MPI
-    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
-    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
+    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
   else ()
     message (FATAL_ERROR "Parallel libraries not found")
   endif ()

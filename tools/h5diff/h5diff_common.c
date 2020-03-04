@@ -62,9 +62,9 @@ static void check_options(diff_opt_t* opts)
      * These options are mutually exclusive.
      */
     if ((opts->d + opts->p + opts->use_system_epsilon) > 1) {
-        printf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
-        printf("use no more than one.\n");
-        printf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 Reference Manual'.\n", PROGRAMNAME);
+        HDprintf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
+        HDprintf("use no more than one.\n");
+        HDprintf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 Reference Manual'.\n", PROGRAMNAME);
         h5diff_exit(EXIT_FAILURE);
     }
 }
@@ -186,7 +186,7 @@ void parse_command_line(int argc,
 
             /* create linked list of excluding objects */
             if( (exclude_node = (struct exclude_path_list*) HDmalloc(sizeof(struct exclude_path_list))) == NULL) {
-                printf("Error: lack of memory!\n");
+                HDprintf("Error: lack of memory!\n");
                 h5diff_exit(EXIT_FAILURE);
             }
 
@@ -212,7 +212,7 @@ void parse_command_line(int argc,
             opts->d=1;
 
             if (check_d_input(opt_arg) == - 1) {
-                printf("<-d %s> is not a valid option\n", opt_arg);
+                HDprintf("<-d %s> is not a valid option\n", opt_arg);
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
@@ -226,7 +226,7 @@ void parse_command_line(int argc,
         case 'p':
             opts->p=1;
             if (check_p_input(opt_arg) == -1) {
-                printf("<-p %s> is not a valid option\n", opt_arg);
+                HDprintf("<-p %s> is not a valid option\n", opt_arg);
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
@@ -240,7 +240,7 @@ void parse_command_line(int argc,
         case 'n':
             opts->n=1;
             if ( check_n_input(opt_arg) == -1) {
-                printf("<-n %s> is not a valid option\n", opt_arg);
+                HDprintf("<-n %s> is not a valid option\n", opt_arg);
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
@@ -302,30 +302,29 @@ void parse_command_line(int argc,
  *
  *-------------------------------------------------------------------------
  */
+void print_info(diff_opt_t* opts)
+{
+    if (opts->m_quiet || opts->err_stat)
+        return;
 
- void  print_info(diff_opt_t* opts)
- {
-     if (opts->m_quiet || opts->err_stat)
-         return;
+    if (opts->cmn_objs == 0) {
+        HDprintf("No common objects found. Files are not comparable.\n");
+        if (!opts->m_verbose)
+            HDprintf("Use -v for a list of objects.\n");
+    }
 
-     if (opts->cmn_objs == 0) {
-         printf("No common objects found. Files are not comparable.\n");
-         if (!opts->m_verbose)
-             printf("Use -v for a list of objects.\n");
-     }
-
-     if (opts->not_cmp == 1) {
-         if (opts->m_list_not_cmp == 0) {
-             printf("--------------------------------\n");
-             printf("Some objects are not comparable\n");
-             printf("--------------------------------\n");
-             if (opts->m_verbose)
-                 printf("Use -c for a list of objects without details of differences.\n");
-             else
-                 printf("Use -c for a list of objects.\n");
-         }
-     }
- }
+    if (opts->not_cmp == 1) {
+        if (opts->m_list_not_cmp == 0) {
+            HDprintf("--------------------------------\n");
+            HDprintf("Some objects are not comparable\n");
+            HDprintf("--------------------------------\n");
+            if (opts->m_verbose)
+                HDprintf("Use -c for a list of objects without details of differences.\n");
+            else
+                HDprintf("Use -c for a list of objects.\n");
+        }
+    }
+}
 
 /*-------------------------------------------------------------------------
  * Function: check_n_input

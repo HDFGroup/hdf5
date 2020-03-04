@@ -87,7 +87,7 @@ if (TEST_ERRREF)
   # if the .err file exists grep the error output with the error reference before comparing stdout
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
     file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_ERR_STREAM)
-    list(LENGTH TEST_ERR_STREAM test_len)
+    list (LENGTH TEST_ERR_STREAM test_len)
     if (test_len GREATER 0)
       # TEST_ERRREF should always be matched
       string (REGEX MATCH "${TEST_ERRREF}" TEST_MATCH ${TEST_ERR_STREAM})
@@ -103,7 +103,7 @@ if (TEST_ERRREF)
   if (NOT TEST_SKIP_COMPARE)
     if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
       file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-      list(LENGTH TEST_STREAM test_len)
+      list (LENGTH TEST_STREAM test_len)
       if (test_len GREATER 0)
         if (WIN32 OR MINGW)
           configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
@@ -116,7 +116,7 @@ if (TEST_ERRREF)
         if (NOT TEST_SORT_COMPARE)
           # now compare the output with the reference
           execute_process (
-              COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+              COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
               RESULT_VARIABLE TEST_COMPARE_RESULT
           )
         else ()

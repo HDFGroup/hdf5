@@ -47,13 +47,6 @@
 #define MAX3(a,b,c)             MAX(a,MAX(b,c))
 #define MAX4(a,b,c,d)           MAX(MAX(a,b),MAX(c,d))
 
-/*
- * A macro to portably increment enumerated types.
- */
-#ifndef H5_INC_ENUM
-#  define H5_INC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)+1))
-#endif
-
 #define H5_FLT_ABS_EQUAL(X,Y)       (HDfabsf((X)-(Y)) < FLT_EPSILON)
 #define H5_DBL_ABS_EQUAL(X,Y)       (HDfabs ((X)-(Y)) < DBL_EPSILON)
 #define H5_LDBL_ABS_EQUAL(X,Y)      (HDfabsl((X)-(Y)) < LDBL_EPSILON)
@@ -210,15 +203,6 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
     typedef off_t               h5_stat_size_t;
     #define HDoff_t             off_t
 #endif
-
-#ifndef H5_HAVE_WIN32_API
-/* These definitions differ in Windows and are defined in
- * H5win32defs for that platform.
- */
-typedef struct stat         h5_stat_t;
-typedef off_t               h5_stat_size_t;
-#define HDoff_t             off_t
-#endif /* H5_HAVE_WIN32_API */
 
 #define HDftell(F)              ftell(F)
 #define HDftruncate(F,L)        ftruncate(F,L)
@@ -501,10 +485,10 @@ extern char *strdup(const char *s);
  * HDF Boolean type.
  */
 #ifndef FALSE
-#   define FALSE 0
+#   define FALSE false
 #endif
 #ifndef TRUE
-#   define TRUE 1
+#   define TRUE true
 #endif
 
 /** From h5test.h **/

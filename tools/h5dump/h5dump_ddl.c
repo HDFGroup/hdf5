@@ -41,11 +41,6 @@ static int      dump_extlink(hid_t group, const char *linkname, const char *objn
  *              atomic datatype or committed/transient datatype.
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -70,11 +65,6 @@ dump_datatype(hid_t type)
  *              array, or others.
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -97,14 +87,7 @@ dump_dataspace(hid_t space)
  * Purpose:     attribute function callback called by H5Aiterate2, displays the attribute
  *
  * Return:      Success:        SUCCEED
- *
  *              Failure:        FAIL
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications: Pedro Vicente, October 4, 2007
- *  Added H5A_info_t parameter to conform with H5Aiterate2
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -120,6 +103,8 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
+    ctx.display_index = display_ai;
+    ctx.display_char = display_char;
 
     attr_id = H5Aopen(oid, attr_name, H5P_DEFAULT);
     oid_output = display_oid;
@@ -144,7 +129,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
     outputformat = &string_dataformat;
 
     h5dump_type_table = type_table;
-    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id, display_ai, display_char);
+    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id);
     h5dump_type_table = NULL;
 
     if(attr_id < 0) {
@@ -163,18 +148,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
  *                displays everything in the specified object
  *
  * Return:      Success:        SUCCEED
- *
  *              Failure:        FAIL
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *  RMcG, November 2000
- *   Added XML support. Also, optionally checks the op_data argument
- *
- * PVN, May 2008
- *   Dump external links
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -183,12 +157,12 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
     hid_t       obj;
     hid_t       dapl_id = H5P_DEFAULT;  /* dataset access property list ID */
     herr_t      ret = SUCCEED;
-    char       *obj_path = NULL;    /* Full path of object */
-    h5tools_str_t buffer;          /* string into which to render   */
-    h5tools_context_t ctx;            /* print context  */
+    char       *obj_path = NULL;        /* Full path of object */
+    h5tools_str_t     buffer;           /* string into which to render   */
+    h5tools_context_t ctx;              /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
-    hsize_t     curr_pos = 0;        /* total data element position   */
+    hsize_t           curr_pos = 0;     /* total data element position   */
 
     /* setup */
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -570,7 +544,6 @@ done:
  * Purpose:     Iterate and display attributes within the specified group
  *
  * Return:      void
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -600,7 +573,6 @@ attr_iteration(hid_t gid, unsigned attr_crt_order_flags)
  * Purpose:     Iterate and display links within the specified group
  *
  * Return:      void
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -621,15 +593,6 @@ link_iteration(hid_t gid, unsigned crt_order_flags)
  * Purpose:     Dump named datatype
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *  Pedro Vicente, March 27, 2006
- *   added display of attributes
- *  Pedro Vicente, October 4, 2007, added parameters to H5Aiterate2() to allow for
- *   other iteration orders
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -637,10 +600,10 @@ dump_named_datatype(hid_t tid, const char *name)
 {
     H5O_info_t        oinfo;
     unsigned          attr_crt_order_flags;
-    hid_t             tcpl_id = -1;  /* datatype creation property list ID */
-    hsize_t           curr_pos = 0;        /* total data element position   */
+    hid_t             tcpl_id = H5I_INVALID_HID;    /* datatype creation property list ID */
+    hsize_t           curr_pos = 0;    /* total data element position   */
     h5tools_str_t     buffer;          /* string into which to render   */
-    h5tools_context_t ctx;            /* print context  */
+    h5tools_context_t ctx;             /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
 
@@ -757,16 +720,6 @@ done:
  * Purpose:     Dump everything within the specified group
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *
- * Call to dump_all_cb -- add parameter to select everything.
- *
- * Pedro Vicente, October 1, 2007
- *  handle several iteration orders for attributes and groups
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -779,11 +732,11 @@ dump_group(hid_t gid, const char *name)
     unsigned    crt_order_flags;
     unsigned    attr_crt_order_flags;
     char        type_name[1024];
-    h5tools_str_t buffer;          /* string into which to render   */
-    h5tools_context_t ctx;            /* print context  */
+    h5tools_str_t     buffer;          /* string into which to render   */
+    h5tools_context_t ctx;             /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
-    hsize_t     curr_pos = 0;        /* total data element position   */
+    hsize_t           curr_pos = 0;    /* total data element position   */
 
     if ((gcpl_id = H5Gget_create_plist(gid)) < 0) {
         error_msg("error in getting group creation property list ID\n");
@@ -921,14 +874,6 @@ dump_group(hid_t gid, const char *name)
  * Purpose:     Dump the specified data set
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- *  Pedro Vicente, 2004, added dataset creation property list display
- *  Pedro Vicente, October 4, 2007, added parameters to H5Aiterate2() to allow for
- *   other  iteration orders
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -937,11 +882,11 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     h5tools_context_t ctx;            /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
-    hid_t       type, space;
-    unsigned    attr_crt_order_flags;
-    hid_t       dcpl_id;  /* dataset creation property list ID */
-    h5tools_str_t buffer;          /* string into which to render   */
-    hsize_t       curr_pos = 0;        /* total data element position   */
+    hid_t         type, space;
+    unsigned      attr_crt_order_flags;
+    hid_t         dcpl_id;           /* dataset creation property list ID */
+    h5tools_str_t buffer;            /* string into which to render   */
+    hsize_t       curr_pos = 0;      /* total data element position   */
 
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
@@ -1013,6 +958,9 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     }
     H5Pclose(dcpl_id);
 
+    ctx.sset = sset;
+    ctx.display_index = display_ai;
+    ctx.display_char = display_char;
     if(display_data) {
         unsigned  data_loop = 1;
         unsigned  u;
@@ -1056,7 +1004,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
             case H5T_VLEN:
             case H5T_ARRAY:
                 {
-                    h5tools_dump_data(rawoutstream, outputformat, &ctx, did, TRUE, sset, display_ai, display_char);
+                    h5tools_dump_data(rawoutstream, outputformat, &ctx, did, TRUE);
                 }
                 break;
 
@@ -1099,13 +1047,6 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
  * Purpose:     Dump attribute or dataset data
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications: pvn, print the matrix indices
- *  Albert Cheng, 2004/11/18
- *  Add --string printing for attributes too.
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1136,10 +1077,13 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
+    ctx.sset = sset;
+    ctx.display_index = display_index;
+    ctx.display_char = display_char;
 
     if(obj_data == DATASET_DATA)
         print_dataset = TRUE;
-    h5tools_dump_data(rawoutstream, outputformat, &ctx, obj_id, print_dataset, sset, display_index, display_char);
+    h5tools_dump_data(rawoutstream, outputformat, &ctx, obj_id, print_dataset);
 }
 
 
@@ -1149,11 +1093,6 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
  * Purpose:     prints file creation property list information
  *
  * Return:      void
- *
- * Programmer:  pvn
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1261,11 +1200,6 @@ dump_fcpl(hid_t fid)
  * Purpose:     prints all objects
  *
  * Return:      void
- *
- * Programmer:  pvn
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1436,13 +1370,12 @@ lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
  * Purpose:     Handle objects from the command.
  *
  * Return:      void
- *
  *-------------------------------------------------------------------------
  */
 void
 handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name)
 {
-    hid_t  gid = -1;
+    hid_t  gid = H5I_INVALID_HID;
 
     if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
         error_msg("unable to open root group\n");
@@ -1491,30 +1424,21 @@ handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H
  * Purpose:     Handle the attributes from the command.
  *
  * Return:      void
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 9. January 2001
- *
- * Modifications:
- *
- * PVN, May 2008
- *   add an extra parameter PE, to allow printing/not printing of error messages
- *
  *-------------------------------------------------------------------------
  */
 void
-handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name)
+handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name)
 {
-    hid_t  oid          = -1;
-    hid_t  attr_id      = -1;
+    hid_t  oid          = H5I_INVALID_HID;
+    hid_t  attr_id      = H5I_INVALID_HID;
     char *obj_name      = NULL;
     char *attr_name     = NULL;
     int j;
-    h5tools_str_t buffer;          /* string into which to render   */
-    h5tools_context_t ctx;            /* print context  */
+    h5tools_str_t     buffer;          /* string into which to render   */
+    h5tools_context_t ctx;             /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
-    hsize_t     curr_pos = 0;        /* total data element position   */
+    hsize_t           curr_pos = 0;    /* total data element position   */
 
     j = (int)HDstrlen(attr) - 1;
     obj_name = (char *)HDmalloc((size_t)j + 2);
@@ -1540,6 +1464,8 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
+    ctx.display_index = display_ai;
+    ctx.display_char = display_char;
 
     string_dataformat = *outputformat;
 
@@ -1599,7 +1525,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H
     attr_data_output = display_attr_data;
 
     h5dump_type_table = type_table;
-    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id, display_ai, display_char);
+    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id);
     h5dump_type_table = NULL;
 
     if(attr_id < 0) {
@@ -1637,19 +1563,6 @@ error:
  * Purpose:     Handle the datasets from the command.
  *
  * Return:      void
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 9. January 2001
- *
- * Modifications:
- *  Pedro Vicente, Tuesday, January 15, 2008
- *  check for block overlap\
- *
- *  Pedro Vicente, May 8, 2008
- *   added a flag PE that prints/not prints error messages
- *   added for cases of external links not found, to avoid printing of
- *    objects not found, since external links are dumped on a trial error basis
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1797,18 +1710,6 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
  * Purpose:     Handle the groups from the command.
  *
  * Return:      void
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 9. January 2001
- *
- * Modifications: Pedro Vicente, September 26, 2007
- *  handle creation order
- *
- * Pedro Vicente, May 8, 2008
- *   added a flag PE that prints/not prints error messages
- *   added for cases of external links not found, to avoid printing of
- *    objects not found, since external links are dumped on a trial error basis
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1853,12 +1754,6 @@ handle_groups(hid_t fid, const char *group, void H5_ATTR_UNUSED *data, int pe, c
  * Purpose:     Handle soft or UD links from the command.
  *
  * Return:      void
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 9. January 2001
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1939,17 +1834,6 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
  * Purpose:     Handle the datatypes from the command.
  *
  * Return:      void
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 9. January 2001
- *
- * Modifications:
- *
- *  Pedro Vicente, May 8, 2008
- *   added a flag PE that prints/not prints error messages
- *   added for cases of external links not found, to avoid printing of
- *    objects not found, since external links are dumped on a trial error basis
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -2014,19 +1898,10 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED * data, int pe
 /*-------------------------------------------------------------------------
  * Function:    dump_extlink
  *
- * made by: PVN
- *
  * Purpose:     Dump an external link
- *  Since external links are soft links, they are dumped on a trial error
- *   basis, attempting to dump as a dataset, as a group and as a named datatype
- *   Error messages are supressed
- *
- * Modifications:
- *      Neil Fortner
- *      13 October 2008
- *      Function basically rewritten.  No longer directly opens the target file,
- *      now initializes a new set of tables for the external file.  No longer
- *      dumps on a trial and error basis, but errors are still suppressed.
+ *      Function does not directly open the target file,
+ *      it initializes a new set of tables for the external file.
+ *      Errors are suppressed.
  *
  *-------------------------------------------------------------------------
  */
