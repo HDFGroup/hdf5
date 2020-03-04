@@ -467,17 +467,7 @@ H5O_iterate_cb
     args[11].l = ihinfobuf2;
 
     /* Get a reference to the H5O_info_t class */
-    if (NULL == (cls = CBENVPTR->FindClass(CBENVONLY, "hdf/hdf5lib/structs/H5O_info_t")))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    /* Get a reference to the constructor; the name is <init> */
-    if (NULL == (constructor = CBENVPTR->GetMethodID(CBENVONLY, cls, "<init>", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V")))
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-
-    if (NULL == (cb_info_t = CBENVPTR->NewObjectA(CBENVONLY, cls, constructor, args))) {
-        HDprintf("H5O_iterate_cb ERROR: hdf/hdf5lib/structs/H5O_info_t: Creation failed\n");
-        CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
-    }
+    CALL_CONSTRUCTOR(CBENVONLY, "hdf/hdf5lib/structs/H5O_info_t", "(JJIIJJJJJLhdf/hdf5lib/structs/H5O_hdr_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;Lhdf/hdf5lib/structs/H5_ih_info_t;)V", args, cb_info_t) ;
 
     status = CBENVPTR->CallIntMethod(CBENVONLY, visit_callback, mid, g_id, str, cb_info_t, op_data);
     CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
@@ -639,7 +629,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment
 
     if (buf_size) {
         if (NULL == (oComment = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Oget_comment: failed to allocate object comment buffer");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Oget_comment: failed to allocate object comment buffer");
 
         if ((status = H5Oget_comment((hid_t)loc_id, oComment, (size_t)buf_size + 1)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
@@ -684,7 +674,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name
 
     if (buf_size) {
         if (NULL == (objComment = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
-            H5_JNI_FATAL_ERROR(ENVONLY, "H5Oget_comment_by_name: failed to allocate buffer for object comment");
+            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Oget_comment_by_name: failed to allocate buffer for object comment");
 
         if ((status = H5Oget_comment_by_name((hid_t)loc_id, objName, objComment, (size_t)buf_size + 1, (hid_t)access_id)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);

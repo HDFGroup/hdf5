@@ -1777,22 +1777,15 @@ xml_dump_dataspace(hid_t space)
  *              the h5tools library.
  *
  * Return:      void
- *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 void
-xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset, int H5_ATTR_UNUSED pindex)
+xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED *sset, int H5_ATTR_UNUSED pindex)
 {
-    hid_t               space = -1;
-    hid_t               type = -1;
-    hid_t               p_type = -1;
-    hsize_t             size[64];
-    hsize_t             nelmts = 1;
-    int                 ndims;
-    int                 i;
+    hid_t               space = H5I_INVALID_HID;
+    hid_t               type = H5I_INVALID_HID;
+    hid_t               p_type = H5I_INVALID_HID;
     int                 status = -1;
-    void               *buf = NULL;
     hsize_t             curr_pos = 0;        /* total data element position   */
     h5tools_str_t       buffer;              /* string into which to render   */
     h5tools_context_t   ctx;                 /* print context  */
@@ -1861,7 +1854,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
             datactx.need_prefix = TRUE;
             datactx.indent_level = ctx.indent_level;
             datactx.cur_column = ctx.cur_column;
-            status = h5tools_dump_dset(rawoutstream, outputformat, &datactx, obj_id, NULL);
+            status = h5tools_dump_dset(rawoutstream, outputformat, &datactx, obj_id);
         }
     }
     else {
@@ -1881,47 +1874,17 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
             status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
         }
         else {  /* all other data */
-            /* VL data special information */
-            unsigned int vl_data = 0; /* contains VL datatypes */
-
-            p_type = H5Tget_native_type(type, H5T_DIR_DEFAULT);
-
-            /* Check if we have VL data in the dataset's datatype */
-            if (h5tools_detect_vlen(p_type) == TRUE)
-                vl_data = TRUE;
-
-            H5Tclose(type);
-
             space = H5Aget_space(obj_id);
             if(space == H5S_NULL || space == H5S_NO_CLASS) {
                 status = SUCCEED;
             }
             else {
-                ndims = H5Sget_simple_extent_dims(space, size, NULL);
-
-                for (i = 0; i < ndims; i++)
-                    nelmts *= size[i];
-
-                if((buf = HDmalloc((size_t)(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type))))) == NULL)  {
-                    error_msg("unable to allocate buffer\n");
-                    h5tools_setstatus(EXIT_FAILURE);
-                    status = FAIL;
-                }
-                else {
-                    if (H5Aread(obj_id, p_type, buf) >= 0) {
-                        h5tools_context_t datactx;
-                        HDmemset(&datactx, 0, sizeof(datactx));
-                        datactx.need_prefix = TRUE;
-                        datactx.indent_level = ctx.indent_level;
-                        datactx.cur_column = ctx.cur_column;
-                        status = h5tools_dump_mem(rawoutstream, outputformat, &datactx, obj_id, p_type, space, buf);
-                    }
-                    /* Reclaim any VL memory, if necessary */
-                    if (vl_data)
-                        H5Dvlen_reclaim(p_type, space, H5P_DEFAULT, buf);
-
-                    HDfree(buf);
-                }
+                h5tools_context_t datactx;
+                HDmemset(&datactx, 0, sizeof(datactx));
+                datactx.need_prefix = TRUE;
+                datactx.indent_level = ctx.indent_level;
+                datactx.cur_column = ctx.cur_column;
+                status = h5tools_dump_mem(rawoutstream, outputformat, &datactx, obj_id);
             }
             H5Tclose(p_type);
             H5Sclose(space);
@@ -1981,9 +1944,9 @@ herr_t
 xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *info,
     void H5_ATTR_UNUSED * op_data)
 {
-    hid_t             attr_id = -1;
-    hid_t             type = -1;
-    hid_t             space = -1;
+    hid_t             attr_id = H5I_INVALID_HID;
+    hid_t             type = H5I_INVALID_HID;
+    hid_t             space = H5I_INVALID_HID;
     H5S_class_t       space_type;
     hsize_t           curr_pos = 0;        /* total data element position   */
     h5tools_str_t     buffer;              /* string into which to render   */
@@ -2818,8 +2781,8 @@ static int
 xml_print_refs(hid_t did, int source)
 {
     herr_t            e;
-    hid_t             type    = -1;
-    hid_t             space   = -1;
+    hid_t             type    = H5I_INVALID_HID;
+    hid_t             space   = H5I_INVALID_HID;
     hssize_t          ssiz    = -1;
     hsize_t           i;
     size_t            tsiz;
@@ -2967,8 +2930,8 @@ static int
 xml_print_strs(hid_t did, int source)
 {
     herr_t            e;
-    hid_t             type    = -1;
-    hid_t             space   = -1;
+    hid_t             type    = H5I_INVALID_HID;
+    hid_t             space   = H5I_INVALID_HID;
     hssize_t          ssiz    = -1;
     htri_t            is_vlstr = FALSE;
     size_t            tsiz    = 0;
@@ -3578,12 +3541,10 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
  * Purpose:     Dump a description of an HDF5 dataset in XML.
  *
  * Return:      void
- *
- * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
 void
-xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * sset)
+xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *sset)
 {
     hid_t               type;
     hid_t               space;
@@ -4154,7 +4115,7 @@ xml_print_enum(hid_t type)
     unsigned char      *value = NULL;   /*value array                    */
     unsigned            nmembs;         /*number of members              */
     hid_t               super;          /*enum base integer type         */
-    hid_t               native = -1;    /*native integer datatype        */
+    hid_t               native = H5I_INVALID_HID;    /*native integer datatype        */
     size_t              dst_size;       /*destination value type size    */
     unsigned            i;              /*miscellaneous counters         */
     size_t              j;

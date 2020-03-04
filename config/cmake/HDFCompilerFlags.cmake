@@ -30,8 +30,10 @@ macro (ADD_H5_FLAGS h5_flag_var infile)
   #message (STATUS "h5_flag_var=${${h5_flag_var}}")
 endmacro ()
 
-message (STATUS "Warnings Configuration:")
 set (CMAKE_C_FLAGS "${CMAKE_C99_STANDARD_COMPILE_OPTION} ${CMAKE_C_FLAGS}")
+set (CMAKE_C_FLAGS "${CMAKE_C_SANITIZER_FLAGS} ${CMAKE_C_FLAGS}")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_SANITIZER_FLAGS} ${CMAKE_CXX_FLAGS}")
+message (STATUS "Warnings Configuration: default: ${CMAKE_C_FLAGS} : ${CMAKE_CXX_FLAGS}")
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
@@ -176,7 +178,12 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
 
     # Append more extra warning flags that only gcc 4.5+ know about
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
-      set (H5_CFLAGS1 "${H5_CFLAGS1} -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants")
+      set (H5_CFLAGS1 "${H5_CFLAGS1} -Wstrict-overflow=5 -Wjump-misses-init")
+        if (HDF5_ENABLE_DEV_WARNINGS)
+          set (H5_CFLAGS0 "${H5_CFLAGS0} -Wunsuffixed-float-constants")
+        else ()
+          set (H5_CFLAGS0 "${H5_CFLAGS0} -Wno-unsuffixed-float-constants")
+        endif ()
     endif ()
 
     # Append more extra warning flags that only gcc 4.6+ know about

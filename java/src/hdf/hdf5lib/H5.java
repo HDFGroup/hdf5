@@ -1107,7 +1107,9 @@ public class H5 implements java.io.Serializable {
             log.trace("H5Aread_dname_D");
             status = H5Aread_double(attr_id, mem_type_id, (double[]) obj, isCriticalPinning);
         }
-        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) && (is1D && (dataClass.getComponentType() == String.class))) || H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
+        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
+                (is1D && (dataClass.getComponentType() == String.class))) ||
+                H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
             log.trace("H5Aread_reg_ref");
             status = H5Aread_reg_ref(attr_id, mem_type_id, (String[]) obj);
         }
@@ -2005,7 +2007,9 @@ public class H5 implements java.io.Serializable {
             status = H5Dread_double(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                     (double[]) obj, isCriticalPinning);
         }
-        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) && (is1D && (dataClass.getComponentType() == String.class))) || H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
+        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
+                (is1D && (dataClass.getComponentType() == String.class))) ||
+                H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
             log.trace("H5Dread_reg_ref");
             status = H5Dread_reg_ref(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                     (String[]) obj);
@@ -3563,7 +3567,7 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static int H5Gget_obj_info_all(long loc_id, String name, String[] oname, int[] otype,
             int[] ltype, long[] fno, long[] ref, int indx_type) throws HDF5LibraryException, NullPointerException {
-        return H5Gget_obj_info_full(loc_id, name, oname, otype, ltype, fno, ref, oname.length, indx_type, -1);
+        return H5Gget_obj_info_full(loc_id, name, oname, otype, ltype, fno, ref, indx_type, -1);
     }
 
     public synchronized static int H5Gget_obj_info_full(long loc_id, String name, String[] oname, int[] otype,

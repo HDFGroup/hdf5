@@ -15,7 +15,7 @@
 ### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 ############################################################################
 # Usage:
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log
@@ -42,9 +42,9 @@ set (CTEST_SOURCE_VERSEXT "-snap0")
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
-#INSTALLDIR - HDF5-1.10.0 root folder
+#INSTALLDIR - HDF5-1.10.x root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
+#CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.x
 #MODEL - CDash group name
 #HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
 #MPI - enable MPI
@@ -189,15 +189,6 @@ endif ()
 ###################################################################
 
 ###################################################################
-#########       Following is for submission to CDash   ############
-###################################################################
-if (NOT DEFINED MODEL)
-  set (MODEL "Experimental")
-endif ()
-
-###################################################################
-
-###################################################################
 #####       Following controls CDash submission               #####
 #set (LOCAL_SUBMIT "TRUE")
 #####       Following controls test process                   #####
@@ -209,7 +200,7 @@ endif ()
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
 set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
-set (REPOSITORY_BRANCH "hdf5_1_10_6")
+set (REPOSITORY_BRANCH "hdf5_1_10")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")

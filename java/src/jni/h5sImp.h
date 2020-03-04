@@ -49,9 +49,10 @@ Java_hdf_hdf5lib_H5__1H5Scopy
 (JNIEnv *, jclass, jlong);
 
 #ifdef notdef
-// 10/28/99 -- added code to copy the array -- this is not used,
-// but serves as a reminder in case we try to implement this in
-// the future....
+/* 10/28/99 -- added code to copy the array -- this is not used,
+ * but serves as a reminder in case we try to implement this in
+ * the future....
+ */ 
 /*
  *  Note:  the argument coord is actually long coord[][], which has been
  *         flattened by the caller.

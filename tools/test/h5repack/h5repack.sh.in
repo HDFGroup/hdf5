@@ -303,7 +303,7 @@ TOOLTEST()
     TESTING $H5REPACK $@
     (
         cd $TESTDIR
-        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -821,7 +821,7 @@ TOOLTESTM() {
     TESTING $H5REPACK $@
     (
         cd $TESTDIR
-        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.

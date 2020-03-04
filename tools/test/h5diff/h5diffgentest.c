@@ -303,8 +303,8 @@ int main(void)
 static
 int test_basic(const char *fname1, const char *fname2, const char *fname3)
 {
-    hid_t fid1 = -1, fid2 = H5I_INVALID_HID;
-    hid_t gid1 = -1, gid2 = -1, gid3 = H5I_INVALID_HID;
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;
+    hid_t gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID, gid3 = H5I_INVALID_HID;
     hsize_t dims1[1] = { 6 };
     hsize_t dims2[2] = { 3, 2 };
 
@@ -1039,14 +1039,14 @@ int test_attributes(const char *file, int make_diffs /* flag to modify data buff
 static int test_attributes_verbose_level(const char *fname1, const char *fname2)
 {
     herr_t status = SUCCEED;
-    hid_t fid1 = -1, fid2 = H5I_INVALID_HID;
-    hid_t f1_gid = -1, f2_gid = H5I_INVALID_HID;
-    hid_t f1_gid2 = -1, f2_gid2 = H5I_INVALID_HID;
-    hid_t f1_gid3 = -1, f2_gid3 = H5I_INVALID_HID;
-    hid_t f1_gid4 = -1, f2_gid4 = H5I_INVALID_HID;
-    hid_t f1_did = -1, f2_did = H5I_INVALID_HID;
-    hid_t f1_sid = -1, f2_sid = H5I_INVALID_HID;
-    hid_t f1_tid = -1, f2_tid = H5I_INVALID_HID;
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;
+    hid_t f1_gid = H5I_INVALID_HID, f2_gid = H5I_INVALID_HID;
+    hid_t f1_gid2 = H5I_INVALID_HID, f2_gid2 = H5I_INVALID_HID;
+    hid_t f1_gid3 = H5I_INVALID_HID, f2_gid3 = H5I_INVALID_HID;
+    hid_t f1_gid4 = H5I_INVALID_HID, f2_gid4 = H5I_INVALID_HID;
+    hid_t f1_did = H5I_INVALID_HID, f2_did = H5I_INVALID_HID;
+    hid_t f1_sid = H5I_INVALID_HID, f2_sid = H5I_INVALID_HID;
+    hid_t f1_tid = H5I_INVALID_HID, f2_tid = H5I_INVALID_HID;
     /* dset */
     hsize_t dset_dims[1] = { 3 };
     int dset_data[3] = { 0, 1, 2 };
