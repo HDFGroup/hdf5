@@ -25,10 +25,10 @@ EXIT_FAILURE=1
 DUMPER=h5dump                     # The tool name
 DUMPER_BIN=`pwd`/$DUMPER          # The path of the tool binary
 
-H5DIFF=../h5diff/h5diff           # The h5diff tool name 
+H5DIFF=../h5diff/h5diff           # The h5diff tool name
 H5DIFF_BIN=`pwd`/$H5DIFF          # The path of the h5diff  tool binary
 
-H5IMPORT=../h5import/h5import     # The h5import tool name 
+H5IMPORT=../h5import/h5import     # The h5import tool name
 H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 
 RM='rm -rf'
@@ -1418,7 +1418,7 @@ TOOLTEST4 textlinkfar.ddl --enable-error-stack textlinkfar.h5
 TOOLTEST4 textlink.ddl --enable-error-stack textlink.h5
 
 # test for error stack display (BZ2048)
-GREPTEST2 ERRTXT "filter plugins disabled" filter_fail.ddl --enable-error-stack filter_fail.h5
+GREPTEST2 ERRTXT "is not registered" filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
 TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1 tall.h5
