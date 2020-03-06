@@ -1059,8 +1059,6 @@ H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(type != H5FD_MEM_GHEAP);
-
     pb_ptr = shared->pb_ptr;
 
     HDassert(pb_ptr == NULL || pb_ptr->magic == H5PB__H5PB_T_MAGIC);
@@ -1901,7 +1899,6 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
     /* Sanity checks */
     HDassert(shared);
-    HDassert(type != H5FD_MEM_GHEAP);
 
     pb_ptr = shared->pb_ptr;
 
