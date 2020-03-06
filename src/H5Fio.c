@@ -84,11 +84,6 @@
  *		address for the file.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -128,40 +123,12 @@ done:
  *		address for the file.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf/*out*/)
 {
-    H5FD_mem_t  map_type;               /* Mapped memory type */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(buf);
-    HDassert(H5F_addr_defined(addr));
-
-    /* Check for attempting I/O on 'temporary' file address */
-    if(H5F_addr_le(f->shared->tmp_addr, (addr + size)))
-        HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
-
-    /* Treat global heap as raw data */
-    map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
-
-    /* Pass through page buffer layer */
-    if(H5PB_read(f->shared, map_type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through page buffer failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return H5F_shared_block_read(f->shared, type, addr, size, buf);
 } /* end H5F_block_read() */
 
 
@@ -173,11 +140,6 @@ done:
  *		address.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -218,41 +180,12 @@ done:
  *		address.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf)
 {
-    H5FD_mem_t  map_type;               /* Mapped memory type */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
-    HDassert(buf);
-    HDassert(H5F_addr_defined(addr));
-
-    /* Check for attempting I/O on 'temporary' file address */
-    if(H5F_addr_le(f->shared->tmp_addr, (addr + size)))
-        HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
-
-    /* Treat global heap as raw data */
-    map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
-
-    /* Pass through page buffer layer */
-    if(H5PB_write(f->shared, map_type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through page buffer failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    return H5F_shared_block_write(f->shared, type, addr, size, buf);
 } /* end H5F_block_write() */
 
 
