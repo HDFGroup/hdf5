@@ -1970,11 +1970,8 @@
 ./tools/test/h5dump/errfiles/tall-2A.err
 ./tools/test/h5dump/errfiles/tall-2A0.err
 ./tools/test/h5dump/errfiles/tall-2B.err
-./tools/test/h5dump/errfiles/tarray1_big.err
 ./tools/test/h5dump/errfiles/tattr-3.err
-./tools/test/h5dump/errfiles/tattrregR.err
 ./tools/test/h5dump/errfiles/tcomp-3.err
-./tools/test/h5dump/errfiles/tdataregR.err
 ./tools/test/h5dump/errfiles/tdset-2.err
 ./tools/test/h5dump/errfiles/texceedsubblock.err
 ./tools/test/h5dump/errfiles/texceedsubcount.err

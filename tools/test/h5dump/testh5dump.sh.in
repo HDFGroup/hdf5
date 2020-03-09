@@ -1175,7 +1175,7 @@ TOOLTEST tvlenstr_array.ddl --enable-error-stack tvlenstr_array.h5
 # test for files with array data
 TOOLTEST tarray1.ddl --enable-error-stack tarray1.h5
 # # added for bug# 2092 - tarray1_big.h
-GREPTEST ERRTXT "Undefined reference pointer" tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
+TOOLTEST tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
 TOOLTEST tarray2.ddl --enable-error-stack tarray2.h5
 TOOLTEST tarray3.ddl --enable-error-stack tarray3.h5
 TOOLTEST tarray4.ddl --enable-error-stack tarray4.h5
@@ -1383,9 +1383,9 @@ fi
 
 # test for dataset region references
 TOOLTEST  tdatareg.ddl --enable-error-stack tdatareg.h5
-GREPTEST ERRTXT "Undefined reference pointer" tdataregR.ddl --enable-error-stack -R tdatareg.h5
+TOOLTEST  tdataregR.ddl --enable-error-stack -R tdatareg.h5
 TOOLTEST  tattrreg.ddl --enable-error-stack tattrreg.h5
-GREPTEST ERRTXT "Undefined reference pointer" tattrregR.ddl --enable-error-stack -R tattrreg.h5
+TOOLTEST  tattrregR.ddl --enable-error-stack -R tattrreg.h5
 TOOLTEST2 tbinregR.exp --enable-error-stack -d /Dataset1 -s 0 -R -y -o tbinregR.txt    tdatareg.h5
 
 # Clean up text output files
