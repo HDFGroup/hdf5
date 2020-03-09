@@ -66,12 +66,19 @@ await_signal(hid_t fid)
         const int rc = sigtimedwait(&sleepset, NULL, &tick);
 
         if (rc == SIGUSR1) {
-            printf("Cancelled by SIGUSR1.\n");
+            printf("Received SIGUSR1, wrapping things up.\n");
             break;
         } else if (rc == -1 && errno == EAGAIN) {
             H5E_auto_t efunc;
             void *edata;
 
+            /* Avoid deadlock with peer: periodically enter the API so that
+             * tick processing occurs and data is flushed so that the peer
+             * can see it.
+             *
+             * The call we make will fail, but that's ok,
+             * so squelch errors.
+             */
             (void)H5Eget_auto(H5E_DEFAULT, &efunc, &edata);
             (void)H5Eset_auto(H5E_DEFAULT, NULL, NULL);
             (void)H5Aexists_by_name(fid, "nonexistent", "nonexistent",
