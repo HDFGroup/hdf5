@@ -328,11 +328,8 @@
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2A.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2A0.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2B.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tarray1_big.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tattrregR.err
       ${PROJECT_SOURCE_DIR}/errfiles/tattr-3.err
       ${PROJECT_SOURCE_DIR}/errfiles/tcomp-3.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tdataregR.err
       ${PROJECT_SOURCE_DIR}/errfiles/tdset-2.err
       ${PROJECT_SOURCE_DIR}/errfiles/texceedsubblock.err
       ${PROJECT_SOURCE_DIR}/errfiles/texceedsubcount.err
