@@ -556,6 +556,99 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5get_free_list_sizes
+ *
+ * Purpose:	Gets the current size of the different kinds of free lists that
+ *	the library uses to manage memory.  The free list sizes can be set with
+ *	H5set_free_list_limits and garbage collected with H5garbage_collect.
+ *      These lists are global for the entire library.
+ *
+ * Parameters:
+ *  size_t *reg_size;    OUT: The current size of all "regular" free list memory used
+ *  size_t *arr_size;    OUT: The current size of all "array" free list memory used
+ *  size_t *blk_size;    OUT: The current size of all "block" free list memory used
+ *  size_t *fac_size;    OUT: The current size of all "factory" free list memory used
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, March 6, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size,
+    size_t *fac_size)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "*z*z*z*z", reg_size, arr_size, blk_size, fac_size);
+
+    /* Call the free list function to actually get the sizes */
+    if(H5FL_get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get garbage collection sizes")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* end H5get_free_list_sizes() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5get_alloc_stats
+ *
+ * Purpose:	Gets the memory allocation statistics for the library, if the
+ *	--enable-memory-alloc-sanity-check option was given when building the
+ *      library.  Applications can check whether this option was enabled by
+ *	detecting if the 'H5_MEMORY_ALLOC_SANITY_CHECK' macro is defined.  This
+ *	option is enabled by default for debug builds of the library and
+ *	disabled by default for non-debug builds.  If the option is not enabled,
+ *	all the values returned with be 0.  These statistics are global for the
+ *	entire library, but don't include allocations from chunked dataset I/O
+ *	filters or non-native VOL connectors.
+ *
+ * Parameters:
+ *  unsigned long long *total_alloc_bytes; OUT: Running count of total # of bytes allocated
+ *  size_t *curr_alloc_bytes;           OUT: Current # of bytes allocated
+ *  size_t *peak_alloc_bytes;           OUT: Peak # of bytes allocated
+ *  size_t *max_block_size;             OUT: Largest block allocated
+ *  size_t *total_alloc_blocks_count;   OUT: Running count of total # of blocks allocated
+ *  size_t *curr_alloc_blocks_count;    OUT: Current # of blocks allocated
+ *  size_t *peak_alloc_blocks_count;    OUT: Peak # of blocks allocated
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, March 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5get_alloc_stats(unsigned long long *total_alloc_bytes, size_t *curr_alloc_bytes,
+    size_t *peak_alloc_bytes, size_t *max_block_size, size_t *total_alloc_blocks_count,
+    size_t *curr_alloc_blocks_count, size_t *peak_alloc_blocks_count)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*UL*z*z*z*z*z*z", total_alloc_bytes, curr_alloc_bytes,
+             peak_alloc_bytes, max_block_size, total_alloc_blocks_count,
+             curr_alloc_blocks_count, peak_alloc_blocks_count);
+
+    /* Call the internal allocation stat routine to get the values */
+    if(H5MM_get_alloc_stats(total_alloc_bytes, curr_alloc_bytes, peak_alloc_bytes,
+            max_block_size, total_alloc_blocks_count, curr_alloc_blocks_count,
+            peak_alloc_blocks_count) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get allocation stats")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* end H5get_alloc_stats() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5_debug_mask
  *
  * Purpose:     Set runtime debugging flags according to the string S.  The

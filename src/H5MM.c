@@ -108,8 +108,8 @@ static H5MM_block_t H5MM_block_head_s;
 
 /* Statistics about block allocations */
 static unsigned long long H5MM_total_alloc_bytes_s = 0;
-static unsigned long long H5MM_curr_alloc_bytes_s = 0;
-static unsigned long long H5MM_peak_alloc_bytes_s = 0;
+static size_t H5MM_curr_alloc_bytes_s = 0;
+static size_t H5MM_peak_alloc_bytes_s = 0;
 static size_t H5MM_max_block_size_s = 0;
 static size_t H5MM_total_alloc_blocks_count_s = 0;
 static size_t H5MM_curr_alloc_blocks_count_s = 0;
@@ -235,7 +235,7 @@ H5MM_final_sanity_check(void)
     HDassert(H5MM_block_head_s.prev == &H5MM_block_head_s);
 #ifdef H5MM_PRINT_MEMORY_STATS
     HDfprintf(stderr, "%s: H5MM_total_alloc_bytes_s = %llu\n", __func__, H5MM_total_alloc_bytes_s);
-    HDfprintf(stderr, "%s: H5MM_peak_alloc_bytes_s = %llu\n", __func__, H5MM_peak_alloc_bytes_s);
+    HDfprintf(stderr, "%s: H5MM_peak_alloc_bytes_s = %zu\n", __func__, H5MM_peak_alloc_bytes_s);
     HDfprintf(stderr, "%s: H5MM_max_block_size_s = %zu\n", __func__, H5MM_max_block_size_s);
     HDfprintf(stderr, "%s: H5MM_total_alloc_blocks_count_s = %zu\n", __func__, H5MM_total_alloc_blocks_count_s);
     HDfprintf(stderr, "%s: H5MM_peak_alloc_blocks_count_s = %zu\n", __func__, H5MM_peak_alloc_blocks_count_s);
@@ -599,4 +599,72 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
     FUNC_LEAVE_NOAPI(ret)
 
 } /* end H5MM_memcpy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MM_get_alloc_stats
+ *
+ * Purpose:	Gets the memory allocation statistics for the library, if the
+ *	H5_MEMORY_ALLOC_SANITY_CHECK macro is defined.  If the macro is not
+ *	defined, zeros are returned.  These statistics are global for the
+ *	entire library.
+ *
+ * Parameters:
+ *  unsigned long long *total_alloc_bytes; OUT: Running count of total # of bytes allocated
+ *  size_t *curr_alloc_bytes;           OUT: Current # of bytes allocated
+ *  size_t *peak_alloc_bytes;           OUT: Peak # of bytes allocated
+ *  size_t *max_block_size;             OUT: Largest block allocated
+ *  size_t *total_alloc_blocks_count;   OUT: Running count of total # of blocks allocated
+ *  size_t *curr_alloc_blocks_count;    OUT: Current # of blocks allocated
+ *  size_t *peak_alloc_blocks_count;    OUT: Peak # of blocks allocated
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, March 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MM_get_alloc_stats(unsigned long long *total_alloc_bytes, size_t *curr_alloc_bytes,
+    size_t *peak_alloc_bytes, size_t *max_block_size, size_t *total_alloc_blocks_count,
+    size_t *curr_alloc_blocks_count, size_t *peak_alloc_blocks_count)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
+    if(total_alloc_bytes)
+        *total_alloc_bytes = H5MM_total_alloc_bytes_s;
+    if(curr_alloc_bytes)
+        *curr_alloc_bytes = H5MM_curr_alloc_bytes_s;
+    if(peak_alloc_bytes)
+        *peak_alloc_bytes = H5MM_peak_alloc_bytes_s;
+    if(max_block_size)
+        *max_block_size = H5MM_max_block_size_s;
+    if(total_alloc_blocks_count)
+        *total_alloc_blocks_count = H5MM_total_alloc_blocks_count_s;
+    if(curr_alloc_blocks_count)
+        *curr_alloc_blocks_count = H5MM_curr_alloc_blocks_count_s;
+    if(peak_alloc_blocks_count)
+        *peak_alloc_blocks_count = H5MM_peak_alloc_blocks_count_s;
+#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
+    if(total_alloc_bytes)
+        *total_alloc_bytes = 0;
+    if(curr_alloc_bytes)
+        *curr_alloc_bytes = 0;
+    if(peak_alloc_bytes)
+        *peak_alloc_bytes = 0;
+    if(max_block_size)
+        *max_block_size = 0;
+    if(total_alloc_blocks_count)
+        *total_alloc_blocks_count = 0;
+    if(curr_alloc_blocks_count)
+        *curr_alloc_blocks_count = 0;
+    if(peak_alloc_blocks_count)
+        *peak_alloc_blocks_count = 0;
+#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}   /* end H5get_alloc_stats() */
 
