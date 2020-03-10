@@ -171,9 +171,10 @@ int do_copy_refobjs(hid_t fidin,
                             } /* end if */
                             for(u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY {
-                                    if((refobj_id = H5Rdereference(dset_in, H5R_OBJECT, &buf[u])) < 0)
-                                        continue;
+                                    refobj_id = H5Rdereference(dset_in, H5R_OBJECT, &buf[u]);
                                 } H5E_END_TRY;
+                                if(refobj_id < 0)
+                                    continue;
 
                                 /* get the name. a valid name could only occur
                                  * in the second traversal of the file
@@ -252,9 +253,10 @@ int do_copy_refobjs(hid_t fidin,
 
                             for(u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY {
-                                    if((refobj_id = H5Rdereference(dset_in, H5R_DATASET_REGION, &buf[u])) < 0)
-                                        continue;
+                                    refobj_id = H5Rdereference(dset_in, H5R_DATASET_REGION, &buf[u]);
                                 } H5E_END_TRY;
+                                if(refobj_id < 0)
+                                    continue;
 
                                 /* get the name. a valid name could only occur
                                  * in the second traversal of the file
