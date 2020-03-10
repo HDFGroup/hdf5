@@ -407,6 +407,11 @@ H5_DLL herr_t H5garbage_collect(void);
 H5_DLL herr_t H5set_free_list_limits (int reg_global_lim, int reg_list_lim,
                 int arr_global_lim, int arr_list_lim, int blk_global_lim,
                 int blk_list_lim);
+H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size,
+    size_t *blk_size, size_t *fac_size);
+H5_DLL herr_t H5get_alloc_stats(unsigned long long *total_alloc_bytes, size_t *curr_alloc_bytes,
+    size_t *peak_alloc_bytes, size_t *max_block_size, size_t *total_alloc_blocks_count,
+    size_t *curr_alloc_blocks_count, size_t *peak_alloc_blocks_count);
 H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
 				unsigned *relnum);
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,

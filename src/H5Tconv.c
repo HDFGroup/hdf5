@@ -3213,7 +3213,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                              * necessary.  If the SEQ_LEN is 0, allocate a minimal size buffer.
                              */
 			    if(!seq_len && !conv_buf) {
-                                conv_buf_size = ((1 / H5T_VLEN_MIN_CONF_BUF_SIZE) + 1) * H5T_VLEN_MIN_CONF_BUF_SIZE;
+                                conv_buf_size = H5T_VLEN_MIN_CONF_BUF_SIZE;
                                 if(NULL == (conv_buf = H5FL_BLK_CALLOC(vlen_seq, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
 			    } /* end if */
