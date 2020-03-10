@@ -46,7 +46,8 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     vfd_swmr_generator$(EXEEXT) vfd_swmr_reader$(EXEEXT) vfd_swmr_writer$(EXEEXT)  \
     vfd_swmr_remove_reader$(EXEEXT) vfd_swmr_remove_writer$(EXEEXT)  \
     vfd_swmr_addrem_writer$(EXEEXT) vfd_swmr_sparse_reader$(EXEEXT) \
-    vfd_swmr_sparse_writer$(EXEEXT) \
+    vfd_swmr_sparse_writer$(EXEEXT) vfd_swmr_vlstr$(EXEEXT) \
+    vfd_swmr_vlstr_reader$(EXEEXT) \
     vds_env$(EXEEXT) \
     vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
@@ -96,6 +97,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     vfd_swmr_generator vfd_swmr_reader vfd_swmr_writer \
     vfd_swmr_remove_reader vfd_swmr_remove_writer vfd_swmr_addrem_writer \
     vfd_swmr_sparse_reader vfd_swmr_sparse_writer \
+    vfd_swmr_vlstr vfd_swmr_vlstr_reader \
     swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin vol_plugin
