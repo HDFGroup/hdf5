@@ -47,6 +47,9 @@ H5_DLL char *H5MM_strdup(const char *s);
 H5_DLL void *H5MM_xfree(void *mem);
 H5_DLL void *H5MM_xfree_const(const void *mem);
 H5_DLL void *H5MM_memcpy(void *dest, const void *src, size_t n);
+H5_DLL herr_t H5MM_get_alloc_stats(unsigned long long *total_alloc_bytes, size_t *curr_alloc_bytes,
+    size_t *peak_alloc_bytes, size_t *max_block_size, size_t *total_alloc_blocks_count,
+    size_t *curr_alloc_blocks_count, size_t *peak_alloc_blocks_count);
 #if defined H5_MEMORY_ALLOC_SANITY_CHECK
 H5_DLL void H5MM_sanity_check_all(void);
 H5_DLL void H5MM_final_sanity_check(void);
