@@ -150,6 +150,8 @@
 
 ./config/site-specific/BlankForm
 
+./doc/code-conventions.md
+
 ./examples/Attributes.txt
 ./examples/Makefile.am
 ./examples/h5_chunk_read.c
@@ -3348,6 +3350,7 @@
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
+./config/cmake/fileCompareTest.cmake
 ./config/cmake/FindHDFS.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in

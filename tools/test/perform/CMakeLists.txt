@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_TOOLS_TEST_PERFORM C)
 
 # --------------------------------------------------------------------
@@ -179,10 +179,10 @@ if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
     target_include_directories (h5perf_alone PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_TOOLS_DIR}/lib;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     if (NOT BUILD_SHARED_LIBS)
       TARGET_C_PROPERTIES (h5perf_alone STATIC)
-      target_link_libraries (h5perf_alone PRIVATE ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
+      target_link_libraries (h5perf_alone PRIVATE ${HDF5_LIB_TARGET} ${LINK_LIBS} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
     else ()
       TARGET_C_PROPERTIES (h5perf_alone SHARED)
-      target_link_libraries (h5perf_alone PRIVATE ${HDF5_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
+      target_link_libraries (h5perf_alone PRIVATE ${HDF5_LIBSH_TARGET} ${LINK_LIBS} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
     endif ()
     set_target_properties (h5perf_alone PROPERTIES FOLDER perform)
     set_property (TARGET h5perf_alone

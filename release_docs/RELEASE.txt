@@ -20,7 +20,7 @@ The official HDF5 releases can be obtained from:
 
      https://www.hdfgroup.org/downloads/hdf5/
 
-Changes from Release to Release and New Features in the HDF5-1.10.x release series
+Changes from Release to Release and New Features in the HDF5-1.13.x release series
 can be found at:
 
      https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
@@ -48,6 +48,20 @@ New Features
 
     Configuration:
     -------------
+    - Added test script for file size compare
+
+      if CMake minimum version is at least 3.14, the fileCompareTest.cmake
+      script will compare file sizes.
+
+      (ADB - 2020/02/24, HDFFV-11036)
+
+    - Update CMake minimum version to 3.12
+
+      Updated CMake minimum version to 3.12 and added version checks
+      for Windows features.
+
+      (ADB - 2020/02/05, TRILABS-142)
+
     - Fixed CMake include properties for Fortran libraries
 
       Corrected the library properties for Fortran to use the
@@ -566,6 +580,19 @@ Bug Fixes since HDF5-1.10.3 release
 
       (CJH - 2019/12/9, HDFFV-10934)
 
+    - Fixed an assertion failure in the parallel library when collectively
+      filling chunks. As it is required that chunks be written in
+      monotonically non-decreasing order of offset in the file, this assertion
+      was being triggered when the list of chunk file space allocations being
+      passed to the collective chunk filling routine was not sorted according
+      to this particular requirement.
+
+      The addition of a sort of the out of order chunks trades a bit of
+      performance for the elimination of this assertion and of any complaints
+      from MPI implementations about the file offsets used being out of order.
+
+      (JTH - 2019/10/07, HDFFV-10792)
+
     - Fixed the iteration error in test_versionbounds() in test/dtypes.c
 
       The test was supposed to loop through all valid combinations of
@@ -874,7 +901,7 @@ Bug Fixes since HDF5-1.10.3 release
       (MSB, 2018/1/8, HDFFV-10443)
 
     - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
-    
+
       (MSB - 2020/2/18, HDFFV-11029)
 
     Tools
@@ -1195,12 +1222,8 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-
     Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
-
-    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 10 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)
