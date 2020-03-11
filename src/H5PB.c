@@ -1106,8 +1106,7 @@ done:
  * this routine performs an O(n) copy of index entries.
  */
 static int
-vfd_swmr_mdf_idx_entry_remove(H5F_shared_t *shared, uint64_t page,
-    bool only_mark)
+shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, bool only_mark)
 {
     ptrdiff_t i;
     H5FD_vfd_swmr_idx_entry_t *entry;
@@ -1556,7 +1555,7 @@ H5PB_vfd_swmr__set_tick(H5F_shared_t *shared)
     if ( shared->tick_num != pb_ptr->cur_tick + 1 )
 
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
-                    "shared->tick_num != pb_ptr->cur_tick + 1 ?!?!")
+                    "shared->tick_num (%" PRIu64 ") != (%" PRIu64 ") pb_ptr->cur_tick + 1 ?!?!", shared->tick_num, pb_ptr->cur_tick)
 
     pb_ptr->cur_tick = shared->tick_num;
 
@@ -2380,8 +2379,7 @@ H5PB__evict_entry(H5F_shared_t *shared, H5PB_entry_t *entry_ptr, bool force,
      * the image will be bigger.  So the shadow file will never see the
      * entire image written, just the first page of the image.
      */
-    if (vfd_swmr_mdf_idx_entry_remove(shared, entry_ptr->page,
-            only_mark) == -1) {
+    if (shadow_idx_entry_remove(shared, entry_ptr->page, only_mark) == -1) {
         HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,
             "failed to remove shadow index entry")
     }
