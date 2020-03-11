@@ -744,9 +744,9 @@ static void Test_Obj_Copy(void)
         /* Set the FAPL for the type of format */
         /* Create source file */
         if(new_format)
-        fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_new);
-    else
-        fid = H5Fcreate(HDF_FILE1_NEW, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+            fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_new);
+        else
+            fid = H5Fcreate(HDF_FILE1_NEW, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         if(fid < 0) {
             HDfprintf(stderr, "Error: H5Fcreate failed.\n");
             goto out;
@@ -756,7 +756,7 @@ static void Test_Obj_Copy(void)
         gent_empty_group(fid);
         gent_nested_datasets(fid);
         gent_nested_group(fid);
-    gent_att_compound_vlstr(fid);
+        gent_att_compound_vlstr(fid);
 
         H5Fclose(fid);
         fid = (-1);

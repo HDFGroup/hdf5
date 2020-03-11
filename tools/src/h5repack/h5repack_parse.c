@@ -228,7 +228,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                                 l = 0;
                             }
                             else if (f == -1) {
-                                filt->filt_flag = HDstrtoul(stype, NULL, 0);
+                                filt->filt_flag = (unsigned)HDstrtoul(stype, NULL, 0);
                                 f = 0;
                             }
                             else if (p == -1) {

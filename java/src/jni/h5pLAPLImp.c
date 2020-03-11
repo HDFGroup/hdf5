@@ -134,7 +134,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (pre = (char *) HDmalloc(sizeof(char) * (size_t) prefix_size + 1)))
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_elink_prefix: memory allocation failed");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_elink_prefix: memory allocation failed");
 
     if (H5Pget_elink_prefix((hid_t)lapl_id, (char *)pre, (size_t) prefix_size + 1) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -142,7 +142,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, pre))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_JNI_FATAL_ERROR(ENVONLY, "H5Pget_elink_prefix: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_elink_prefix: out of memory - unable to construct string from UTF characters");
     }
 
     ENVPTR->SetObjectArrayElement(ENVONLY, prefix, 0, str);

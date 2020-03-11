@@ -51,7 +51,7 @@
 
 #include "gif.h"
 
-typedef BYTE  byte;
+typedef GIFBYTE  byte;
 typedef long int count_int;
 
 #ifdef __STDC__

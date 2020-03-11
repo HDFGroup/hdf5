@@ -47,6 +47,20 @@ New Features
 
     Configuration:
     -------------
+    - Update CMake minimum version to 3.12
+
+      Updated CMake minimum version to 3.12 and added version checks
+      for Windows features.
+
+      (ADB - 2020/02/05, TRILABS-142)
+
+    - Fixed CMake include properties for Fortran libraries
+
+      Corrected the library properties for Fortran to use the
+      correct path for the Fortran module files.
+
+      (ADB - 2020/02/04, HDFFV-11012)
+
     - Added common warnings files for gnu and intel
 
       Added warnings files to use one common set of flags
@@ -410,6 +424,13 @@ Bug Fixes since HDF5-1.10.5 release
     
       (MSB - 2020/2/18, HDFFV-11029) 
 
+    - Fixed configure issue when building HDF5 with NAG Fortran 7.0.
+
+      HDF5 now accounts for the addition of half-precision floating-point 
+      in NAG 7.0 with a KIND=16.
+
+      (MSB - 2020/02/28, HDFFV-11033)
+
     Tools
     -----
     - h5repack was fixed to repack the reference attributes properly.
@@ -478,12 +499,8 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-
     Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
-
-    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 10 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)

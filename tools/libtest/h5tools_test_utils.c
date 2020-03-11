@@ -1000,7 +1000,7 @@ test_set_configured_fapl(void)
      * TEST-LOCAL VARIABLES *
      ************************/
 
-    hid_t            fapl_id = -1;
+    hid_t            fapl_id = H5I_INVALID_HID;
     other_fa_t       wrong_fa = {0x432, 0xf82, 0x9093};
     H5FD_ros3_fapl_t ros3_anon_fa = {1, FALSE, "", "", ""};
     H5FD_ros3_fapl_t ros3_auth_fa = {
@@ -1150,7 +1150,7 @@ test_set_configured_fapl(void)
         int      result;
         testcase C = cases[i];
 
-        fapl_id = -1;
+        fapl_id = H5I_INVALID_HID;
 
 #if UTIL_TEST_DEBUG
         HDfprintf(stderr, "setup test %d\t%s\n", i, C.message); fflush(stderr);
@@ -1183,7 +1183,7 @@ test_set_configured_fapl(void)
         if (fapl_id > 0) {
             FAIL_IF( FAIL == H5Pclose(fapl_id) )
         }
-        fapl_id = -1;
+        fapl_id = H5I_INVALID_HID;
 
 #if UTIL_TEST_DEBUG
         HDfprintf(stderr, "after cleanup\n"); fflush(stderr);
