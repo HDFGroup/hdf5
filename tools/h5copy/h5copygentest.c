@@ -337,102 +337,67 @@ static void gent_att_compound_vlstr(hid_t loc_id)
         const char *v;
     } s1;
     hsize_t dim[1] = {1};    /* Dimension size */
-    hid_t sid = -1;         /* Dataspace ID */
-    hid_t tid = -1;         /* Datatype ID */
-    hid_t aid = -1;         /* Attribute ID */
-    hid_t did = -1;         /* Dataset ID */
-    hid_t gid = -1;         /* Group ID */
-    hid_t vl_str_tid = -1;    /* Variable length datatype ID */
-    hid_t cmpd_tid = -1;    /* Compound datatype ID */
-    hid_t null_sid = -1;    /* Null dataspace ID */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t tid = H5I_INVALID_HID;         /* Datatype ID */
+    hid_t aid = H5I_INVALID_HID;         /* Attribute ID */
+    hid_t did = H5I_INVALID_HID;         /* Dataset ID */
+    hid_t gid = H5I_INVALID_HID;         /* Group ID */
+    hid_t vl_str_tid = H5I_INVALID_HID;    /* Variable length datatype ID */
+    hid_t cmpd_tid = H5I_INVALID_HID;    /* Compound datatype ID */
+    hid_t null_sid = H5I_INVALID_HID;    /* Null dataspace ID */
     s1 buf;                 /* Buffer */
 
     buf.i = 9;
     buf.v = "ThisIsAString";
 
     /* Create an integer datatype */
-    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
-        goto error;
+    tid = H5Tcopy(H5T_NATIVE_INT);
 
     /* Create a variable length string */
-    if((vl_str_tid = H5Tcopy(H5T_C_S1)) < 0)
-        goto error;
-    if(H5Tset_size(vl_str_tid, H5T_VARIABLE) < 0)
-        goto error;
+    vl_str_tid = H5Tcopy(H5T_C_S1);
+    H5Tset_size(vl_str_tid, H5T_VARIABLE);
 
     /* Create a compound datatype with a variable length string and an integer */
-    if((cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0)
-        goto error;
-    if(H5Tinsert(cmpd_tid, "i", HOFFSET(s1, i), tid) < 0)
-        goto error;
-    if(H5Tinsert(cmpd_tid, "v", HOFFSET(s1, v), vl_str_tid) < 0)
-        goto error;
+    cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1));
+    H5Tinsert(cmpd_tid, "i", HOFFSET(s1, i), tid);
+    H5Tinsert(cmpd_tid, "v", HOFFSET(s1, v), vl_str_tid);
 
     /* Create a dataset */
-    if((null_sid = H5Screate(H5S_NULL)) < 0)
-        goto error;
-    if((did = H5Dcreate2(loc_id, DATASET_ATTR, H5T_NATIVE_INT, null_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto error;
+    null_sid = H5Screate(H5S_NULL);
+    did = H5Dcreate2(loc_id, DATASET_ATTR, H5T_NATIVE_INT, null_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Attach an attribute with the compound datatype to the dataset */
-    if((sid = H5Screate_simple(1, dim, dim)) < 0)
-        goto error;
-    if((aid = H5Acreate2(did, ATTR, cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto error;
+    sid = H5Screate_simple(1, dim, dim);
+    aid = H5Acreate2(did, ATTR, cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write the attribute */
     buf.i = 9;
     buf.v = "ThisIsAString";
-    if(H5Awrite(aid, cmpd_tid, &buf) < 0)
-        goto error;
+    H5Awrite(aid, cmpd_tid, &buf);
 
     /* Close the dataset and its attribute */
-    if(H5Dclose(did) < 0)
-        goto error;
-    if(H5Aclose(aid) < 0)
-        goto error;
+    H5Dclose(did);
+    H5Aclose(aid);
 
     /* Create a group */
-    if((gid = H5Gcreate2(loc_id, GROUP_ATTR, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto error;
+    gid = H5Gcreate2(loc_id, GROUP_ATTR, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Attach an attribute with the compound datatype to the group */
-    if((aid = H5Acreate2(gid, ATTR, cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto error;
-    if(H5Awrite(aid, cmpd_tid, &buf) < 0)
-        goto error;
+    aid = H5Acreate2(gid, ATTR, cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(aid, cmpd_tid, &buf);
 
     /* Close the group and its attribute */
-    if(H5Aclose(aid) < 0)
-        goto error;
-    if(H5Gclose(gid) < 0)
-        goto error;
+    H5Aclose(aid);
+    H5Gclose(gid);
 
     /* Close dataspaces */
-    if(H5Sclose(sid) < 0)
-        goto error;
-    if(H5Sclose(null_sid) < 0)
-        goto error;
+    H5Sclose(sid);
+    H5Sclose(null_sid);
 
     /* Close datatypes */
-    if(H5Tclose(tid) < 0)
-        goto error;
-    if(H5Tclose(vl_str_tid) < 0)
-        goto error;
-    if(H5Tclose(cmpd_tid) < 0)
-        goto error;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Tclose(tid);
-        H5Tclose(vl_str_tid);
-        H5Tclose(cmpd_tid);
-        H5Sclose(null_sid);
-        H5Sclose(sid);
-        H5Dclose(did);
-        H5Aclose(aid);
-        H5Gclose(gid);
-    } H5E_END_TRY;
+    H5Tclose(tid);
+    H5Tclose(vl_str_tid);
+    H5Tclose(cmpd_tid);
 
 } /* gen_att_compound_vlstr() */
 
@@ -759,7 +724,7 @@ out:
  *------------------------------------------------------------------------*/
 static void Test_Obj_Copy(void)
 {
-    hid_t fid=0;
+    hid_t fid = H5I_INVALID_HID;                /* File id */
 
     /* Create source file */
     fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

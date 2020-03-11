@@ -323,11 +323,8 @@
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2A.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2A0.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2B.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tarray1_big.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tattrregR.err
       ${PROJECT_SOURCE_DIR}/errfiles/tattr-3.err
       ${PROJECT_SOURCE_DIR}/errfiles/tcomp-3.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tdataregR.err
       ${PROJECT_SOURCE_DIR}/errfiles/tdset-2.err
       ${PROJECT_SOURCE_DIR}/errfiles/texceedsubblock.err
       ${PROJECT_SOURCE_DIR}/errfiles/texceedsubcount.err
@@ -529,14 +526,12 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-      if(NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-        add_test (
-            NAME H5DUMP-${resultfile}-output-cmp
-            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
-        )
-        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
-      endif ()
+      add_test (
+          NAME H5DUMP-${resultfile}-output-cmp
+          COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${resultfile}.txt ${resultfile}.exp
+      )
+      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
     endif ()
   endmacro ()
 
@@ -572,20 +567,18 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-      if(NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-        add_test (
-            NAME H5DUMP-${resultfile}-output-cmp
-            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
-        )
-        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
-        add_test (
-            NAME H5DUMP-${resultfile}-output-cmp-ddl
-            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${ddlfile}.txt ${ddlfile}.exp
-        )
-        set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-        set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES DEPENDS H5DUMP-${resultfile}-output-cmp)
-      endif ()
+      add_test (
+          NAME H5DUMP-${resultfile}-output-cmp
+          COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${resultfile}.txt ${resultfile}.exp
+      )
+      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+      set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
+      add_test (
+          NAME H5DUMP-${resultfile}-output-cmp-ddl
+          COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${ddlfile}.txt ${ddlfile}.exp
+      )
+      set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+      set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES DEPENDS H5DUMP-${resultfile}-output-cmp)
     endif ()
   endmacro ()
 
@@ -602,14 +595,12 @@
       )
       set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile}-clear-objects)
-      if(NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-        add_test (
-            NAME H5DUMP-output-cmp-${resultfile}
-            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
-        )
-        set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-        set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile})
-      endif ()
+      add_test (
+          NAME H5DUMP-output-cmp-${resultfile}
+          COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${resultfile}.txt ${resultfile}.exp
+      )
+      set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+      set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile})
     endif ()
   endmacro ()
 
@@ -876,7 +867,7 @@
   # test for files with array data
   ADD_H5_TEST (tarray1 0 --enable-error-stack tarray1.h5)
   # # added for bug# 2092 - tarray1_big.h5
-  ADD_H5ERR_MASK_TEST (tarray1_big 0 "Undefined reference pointer" --enable-error-stack -R tarray1_big.h5)
+  ADD_H5_TEST (tarray1_big 0 --enable-error-stack -R tarray1_big.h5)
   ADD_H5_TEST (tarray2 0 --enable-error-stack tarray2.h5)
   ADD_H5_TEST (tarray3 0 --enable-error-stack tarray3.h5)
   ADD_H5_TEST (tarray4 0 --enable-error-stack tarray4.h5)
@@ -1086,9 +1077,9 @@
 
   # test for dataset region references
   ADD_H5_TEST (tdatareg 0 --enable-error-stack tdatareg.h5)
-  ADD_H5ERR_MASK_TEST (tdataregR 0 "Undefined reference pointer" --enable-error-stack -R tdatareg.h5)
+  ADD_H5_TEST (tdataregR 0 --enable-error-stack -R tdatareg.h5)
   ADD_H5_TEST (tattrreg 0 --enable-error-stack tattrreg.h5)
-  ADD_H5ERR_MASK_TEST (tattrregR 0 "Undefined reference pointer" -R --enable-error-stack tattrreg.h5)
+  ADD_H5_TEST (tattrregR 0 -R --enable-error-stack tattrreg.h5)
   ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 --enable-error-stack -d /Dataset1 -s 0 -R -y -o)
 
   # tests for group creation order

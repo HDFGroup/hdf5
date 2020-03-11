@@ -552,6 +552,7 @@ set_sort_by(const char *form)
  *              parameter to a H5_iter_order_t return value
  *              current order values are [ascending | descending ]
  *
+ * Return:      H5_iter_order_t form of order or H5_ITER_UNKNOWN if none found
  *-------------------------------------------------------------------------
  */
 static H5_iter_order_t
@@ -629,8 +630,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
 /*-------------------------------------------------------------------------
  * Function:    parse_subset_params
  *
- * Purpose:     Parse the so-called "terse" syntax for specifying subsetting
- *              parameters.
+ * Purpose:     Parse the so-called "terse" syntax for specifying subsetting parameters.
  *
  * Return:      Success:    struct subset_t object
  *              Failure:    NULL
@@ -1379,8 +1379,8 @@ error:
 int
 main(int argc, const char *argv[])
 {
-    hid_t               fid = -1;
-    hid_t               gid = -1;
+    hid_t               fid = H5I_INVALID_HID;
+    hid_t               gid = H5I_INVALID_HID;
     hid_t               fapl_id = H5P_DEFAULT;
     H5E_auto2_t         func;
     H5E_auto2_t         tools_func;
@@ -1688,6 +1688,8 @@ main(int argc, const char *argv[])
         free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
+
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     leave(h5tools_getstatus());
 

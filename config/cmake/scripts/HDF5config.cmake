@@ -15,7 +15,7 @@
 ### ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf518.log     ###
 #############################################################################################
 
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 ############################################################################
 # Usage:
 #     ctest -S HDF518config.cmake,OPTION=VALUE -C Release -VV -O test.log
@@ -189,15 +189,6 @@ endif ()
 ###################################################################
 
 ###################################################################
-#########       Following is for submission to CDash   ############
-###################################################################
-if (NOT DEFINED MODEL)
-  set (MODEL "Experimental")
-endif ()
-
-###################################################################
-
-###################################################################
 #####       Following controls CDash submission               #####
 #set (LOCAL_SUBMIT "TRUE")
 #####       Following controls test process                   #####
@@ -209,7 +200,7 @@ endif ()
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
 set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
-set (REPOSITORY_BRANCH "hdf5_1_10_6")
+set (REPOSITORY_BRANCH "hdf5_1_8")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")

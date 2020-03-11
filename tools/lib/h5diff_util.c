@@ -185,7 +185,7 @@ void print_type(hid_t type)
  * Purpose:  Returns a pointer to the last component absolute name
  *-------------------------------------------------------------------------
  */
- const char*
+const char*
 diff_basename(const char *name)
 {
     size_t i;
@@ -242,7 +242,7 @@ get_type(h5trav_type_t type)
  * Purpose:  Returns the sign as a string
  *-------------------------------------------------------------------------
  */
- const char*
+const char*
 get_sign(H5T_sign_t sign)
 {
     switch(sign) {
@@ -270,7 +270,7 @@ get_sign(H5T_sign_t sign)
  * Purpose:  Returns the class as a string
  *-------------------------------------------------------------------------
  */
- const char*
+const char*
 get_class(H5T_class_t tclass)
 {
     switch(tclass) {
@@ -341,12 +341,13 @@ herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
 {
     herr_t ret_value = SUCCEED;
 
+    H5TOOLS_START_DEBUG("");
     if((*m_size1) != (*m_size2)) {
         if((*m_size1) < (*m_size2)) {
             H5Tclose(*m_tid1);
 
             if(((*m_tid1) = H5Tget_native_type(f_tid2_id, H5T_DIR_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type failed");
+                H5TOOLS_GOTO_ERROR(FAIL, "H5Tget_native_type failed");
 
             *m_size1 = H5Tget_size(*m_tid1);
         } /* end if */
@@ -354,15 +355,16 @@ herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
             H5Tclose(*m_tid2);
 
             if(((*m_tid2) = H5Tget_native_type(f_tid1_id, H5T_DIR_DEFAULT)) < 0)
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_native_type failed");
+                H5TOOLS_GOTO_ERROR(FAIL, "H5Tget_native_type failed");
 
             *m_size2 = H5Tget_size(*m_tid2);
         } /* end else */
     } /* end if */
     if((*m_size1) != (*m_size2))
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "native type sizes do not compare");
+        H5TOOLS_GOTO_ERROR(FAIL, "native type sizes do not compare");
 
 done:
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 }
 

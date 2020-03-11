@@ -25,6 +25,18 @@
 
 /* Assignment checks for unsigned */
 
+/* src: unsigned, dst: int8_t */
+#if H5_SIZEOF_UNSIGNED < H5_SIZEOF_INT8_T
+    #define ASSIGN_unsigned_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_UNSIGNED > H5_SIZEOF_INT8_T
+    #define ASSIGN_unsigned_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_UNSIGNED == H5_SIZEOF_INT8_T */
+    #define ASSIGN_unsigned_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: unsigned dst: int8_t */
+
 /* src: unsigned, dst: int */
 #if H5_SIZEOF_UNSIGNED < H5_SIZEOF_INT
     #define ASSIGN_unsigned_TO_int(dst, dsttype, src, srctype) \
@@ -170,6 +182,165 @@
 #endif /* src: unsigned dst: h5_stat_size_t */
 
 
+/* Assignment checks for int8_t */
+
+/* src: int8_t, dst: unsigned */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_UNSIGNED
+    #define ASSIGN_int8_t_TO_unsigned(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_UNSIGNED
+    #define ASSIGN_int8_t_TO_unsigned(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_UNSIGNED */
+    #define ASSIGN_int8_t_TO_unsigned(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: unsigned */
+
+/* src: int8_t, dst: int */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_INT
+    #define ASSIGN_int8_t_TO_int(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_INT
+    #define ASSIGN_int8_t_TO_int(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_INT */
+    #define ASSIGN_int8_t_TO_int(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: int */
+
+/* src: int8_t, dst: uint8_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_UINT8_T
+    #define ASSIGN_int8_t_TO_uint8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_UINT8_T
+    #define ASSIGN_int8_t_TO_uint8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_UINT8_T */
+    #define ASSIGN_int8_t_TO_uint8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: uint8_t */
+
+/* src: int8_t, dst: uint16_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_UINT16_T
+    #define ASSIGN_int8_t_TO_uint16_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_UINT16_T
+    #define ASSIGN_int8_t_TO_uint16_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_UINT16_T */
+    #define ASSIGN_int8_t_TO_uint16_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: uint16_t */
+
+/* src: int8_t, dst: uint32_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_UINT32_T
+    #define ASSIGN_int8_t_TO_uint32_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_UINT32_T
+    #define ASSIGN_int8_t_TO_uint32_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_UINT32_T */
+    #define ASSIGN_int8_t_TO_uint32_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: uint32_t */
+
+/* src: int8_t, dst: uint64_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_UINT64_T
+    #define ASSIGN_int8_t_TO_uint64_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_UINT64_T
+    #define ASSIGN_int8_t_TO_uint64_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_UINT64_T */
+    #define ASSIGN_int8_t_TO_uint64_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: uint64_t */
+
+/* src: int8_t, dst: ptrdiff_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_PTRDIFF_T
+    #define ASSIGN_int8_t_TO_ptrdiff_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_PTRDIFF_T
+    #define ASSIGN_int8_t_TO_ptrdiff_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_PTRDIFF_T */
+    #define ASSIGN_int8_t_TO_ptrdiff_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: ptrdiff_t */
+
+/* src: int8_t, dst: size_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_SIZE_T
+    #define ASSIGN_int8_t_TO_size_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_SIZE_T
+    #define ASSIGN_int8_t_TO_size_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_SIZE_T */
+    #define ASSIGN_int8_t_TO_size_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: size_t */
+
+/* src: int8_t, dst: ssize_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_SSIZE_T
+    #define ASSIGN_int8_t_TO_ssize_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_SSIZE_T
+    #define ASSIGN_int8_t_TO_ssize_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_SSIZE_T */
+    #define ASSIGN_int8_t_TO_ssize_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: ssize_t */
+
+/* src: int8_t, dst: haddr_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_HADDR_T
+    #define ASSIGN_int8_t_TO_haddr_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_HADDR_T
+    #define ASSIGN_int8_t_TO_haddr_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_HADDR_T */
+    #define ASSIGN_int8_t_TO_haddr_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: haddr_t */
+
+/* src: int8_t, dst: hsize_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_HSIZE_T
+    #define ASSIGN_int8_t_TO_hsize_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_HSIZE_T
+    #define ASSIGN_int8_t_TO_hsize_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_HSIZE_T */
+    #define ASSIGN_int8_t_TO_hsize_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: hsize_t */
+
+/* src: int8_t, dst: hssize_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_HSSIZE_T
+    #define ASSIGN_int8_t_TO_hssize_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_HSSIZE_T
+    #define ASSIGN_int8_t_TO_hssize_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_HSSIZE_T */
+    #define ASSIGN_int8_t_TO_hssize_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: hssize_t */
+
+/* src: int8_t, dst: h5_stat_size_t */
+#if H5_SIZEOF_INT8_T < H5_SIZEOF_H5_STAT_SIZE_T
+    #define ASSIGN_int8_t_TO_h5_stat_size_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT8_T > H5_SIZEOF_H5_STAT_SIZE_T
+    #define ASSIGN_int8_t_TO_h5_stat_size_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT8_T == H5_SIZEOF_H5_STAT_SIZE_T */
+    #define ASSIGN_int8_t_TO_h5_stat_size_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
+#endif /* src: int8_t dst: h5_stat_size_t */
+
+
 /* Assignment checks for int */
 
 /* src: int, dst: unsigned */
@@ -183,6 +354,18 @@
     #define ASSIGN_int_TO_unsigned(dst, dsttype, src, srctype) \
         ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
 #endif /* src: int dst: unsigned */
+
+/* src: int, dst: int8_t */
+#if H5_SIZEOF_INT < H5_SIZEOF_INT8_T
+    #define ASSIGN_int_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_INT > H5_SIZEOF_INT8_T
+    #define ASSIGN_int_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_INT == H5_SIZEOF_INT8_T */
+    #define ASSIGN_int_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: int dst: int8_t */
 
 /* src: int, dst: uint8_t */
 #if H5_SIZEOF_INT < H5_SIZEOF_UINT8_T
@@ -331,6 +514,18 @@
         ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
 #endif /* src: uint8_t dst: unsigned */
 
+/* src: uint8_t, dst: int8_t */
+#if H5_SIZEOF_UINT8_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_uint8_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_UINT8_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_uint8_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_UINT8_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_uint8_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: uint8_t dst: int8_t */
+
 /* src: uint8_t, dst: int */
 #if H5_SIZEOF_UINT8_T < H5_SIZEOF_INT
     #define ASSIGN_uint8_t_TO_int(dst, dsttype, src, srctype) \
@@ -477,6 +672,18 @@
     #define ASSIGN_uint16_t_TO_unsigned(dst, dsttype, src, srctype) \
         ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
 #endif /* src: uint16_t dst: unsigned */
+
+/* src: uint16_t, dst: int8_t */
+#if H5_SIZEOF_UINT16_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_uint16_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_UINT16_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_uint16_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_UINT16_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_uint16_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: uint16_t dst: int8_t */
 
 /* src: uint16_t, dst: int */
 #if H5_SIZEOF_UINT16_T < H5_SIZEOF_INT
@@ -625,6 +832,18 @@
         ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
 #endif /* src: uint32_t dst: unsigned */
 
+/* src: uint32_t, dst: int8_t */
+#if H5_SIZEOF_UINT32_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_uint32_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_UINT32_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_uint32_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_UINT32_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_uint32_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: uint32_t dst: int8_t */
+
 /* src: uint32_t, dst: int */
 #if H5_SIZEOF_UINT32_T < H5_SIZEOF_INT
     #define ASSIGN_uint32_t_TO_int(dst, dsttype, src, srctype) \
@@ -771,6 +990,18 @@
     #define ASSIGN_uint64_t_TO_unsigned(dst, dsttype, src, srctype) \
         ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
 #endif /* src: uint64_t dst: unsigned */
+
+/* src: uint64_t, dst: int8_t */
+#if H5_SIZEOF_UINT64_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_uint64_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_UINT64_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_uint64_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_UINT64_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_uint64_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: uint64_t dst: int8_t */
 
 /* src: uint64_t, dst: int */
 #if H5_SIZEOF_UINT64_T < H5_SIZEOF_INT
@@ -919,6 +1150,18 @@
         ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
 #endif /* src: ptrdiff_t dst: unsigned */
 
+/* src: ptrdiff_t, dst: int8_t */
+#if H5_SIZEOF_PTRDIFF_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_ptrdiff_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_PTRDIFF_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_ptrdiff_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_PTRDIFF_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_ptrdiff_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: ptrdiff_t dst: int8_t */
+
 /* src: ptrdiff_t, dst: int */
 #if H5_SIZEOF_PTRDIFF_T < H5_SIZEOF_INT
     #define ASSIGN_ptrdiff_t_TO_int(dst, dsttype, src, srctype) \
@@ -1065,6 +1308,18 @@
     #define ASSIGN_size_t_TO_unsigned(dst, dsttype, src, srctype) \
         ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
 #endif /* src: size_t dst: unsigned */
+
+/* src: size_t, dst: int8_t */
+#if H5_SIZEOF_SIZE_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_size_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_SIZE_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_size_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_SIZE_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_size_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: size_t dst: int8_t */
 
 /* src: size_t, dst: int */
 #if H5_SIZEOF_SIZE_T < H5_SIZEOF_INT
@@ -1213,6 +1468,18 @@
         ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
 #endif /* src: ssize_t dst: unsigned */
 
+/* src: ssize_t, dst: int8_t */
+#if H5_SIZEOF_SSIZE_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_ssize_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_SSIZE_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_ssize_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_SSIZE_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_ssize_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: ssize_t dst: int8_t */
+
 /* src: ssize_t, dst: int */
 #if H5_SIZEOF_SSIZE_T < H5_SIZEOF_INT
     #define ASSIGN_ssize_t_TO_int(dst, dsttype, src, srctype) \
@@ -1359,6 +1626,18 @@
     #define ASSIGN_haddr_t_TO_unsigned(dst, dsttype, src, srctype) \
         ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
 #endif /* src: haddr_t dst: unsigned */
+
+/* src: haddr_t, dst: int8_t */
+#if H5_SIZEOF_HADDR_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_haddr_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_HADDR_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_haddr_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_HADDR_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_haddr_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: haddr_t dst: int8_t */
 
 /* src: haddr_t, dst: int */
 #if H5_SIZEOF_HADDR_T < H5_SIZEOF_INT
@@ -1507,6 +1786,18 @@
         ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
 #endif /* src: hsize_t dst: unsigned */
 
+/* src: hsize_t, dst: int8_t */
+#if H5_SIZEOF_HSIZE_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_hsize_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_HSIZE_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_hsize_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_HSIZE_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_hsize_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: hsize_t dst: int8_t */
+
 /* src: hsize_t, dst: int */
 #if H5_SIZEOF_HSIZE_T < H5_SIZEOF_INT
     #define ASSIGN_hsize_t_TO_int(dst, dsttype, src, srctype) \
@@ -1654,6 +1945,18 @@
         ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)
 #endif /* src: hssize_t dst: unsigned */
 
+/* src: hssize_t, dst: int8_t */
+#if H5_SIZEOF_HSSIZE_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_hssize_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_HSSIZE_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_hssize_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_HSSIZE_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_hssize_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: hssize_t dst: int8_t */
+
 /* src: hssize_t, dst: int */
 #if H5_SIZEOF_HSSIZE_T < H5_SIZEOF_INT
     #define ASSIGN_hssize_t_TO_int(dst, dsttype, src, srctype) \
@@ -1800,6 +2103,18 @@
     #define ASSIGN_h5_stat_size_t_TO_unsigned(dst, dsttype, src, srctype) \
         ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)
 #endif /* src: h5_stat_size_t dst: unsigned */
+
+/* src: h5_stat_size_t, dst: int8_t */
+#if H5_SIZEOF_H5_STAT_SIZE_T < H5_SIZEOF_INT8_T
+    #define ASSIGN_h5_stat_size_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_LARGER_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#elif H5_SIZEOF_H5_STAT_SIZE_T > H5_SIZEOF_INT8_T
+    #define ASSIGN_h5_stat_size_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)
+#else /* H5_SIZEOF_H5_STAT_SIZE_T == H5_SIZEOF_INT8_T */
+    #define ASSIGN_h5_stat_size_t_TO_int8_t(dst, dsttype, src, srctype) \
+        ASSIGN_TO_SAME_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)
+#endif /* src: h5_stat_size_t dst: int8_t */
 
 /* src: h5_stat_size_t, dst: int */
 #if H5_SIZEOF_H5_STAT_SIZE_T < H5_SIZEOF_INT

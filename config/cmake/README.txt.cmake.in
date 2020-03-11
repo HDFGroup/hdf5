@@ -27,7 +27,8 @@ After Installation
 The examples folder, HDF5Examples, located in the
 HDF5 install folder, can be built and tested with CMake and the supplied
 HDF518_Examples.cmake file. The HDF518_Examples.cmake expects HDF5 to have
-been installed in the default location with above compilers. Also, the CMake 
+been installed in the default location with above compilers (see the
+libhdf5.settings file in the lib install folder). Also, the CMake
 utility should be installed.
 
 To test the installation with the examples;

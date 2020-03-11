@@ -216,7 +216,7 @@ int read_info(const char *filename, pack_opt_t *options)
     char comp_info[1024];
     FILE *fp = NULL;
     char c;
-    int i, rc = 1;
+    int i;
     int ret_value = EXIT_SUCCESS;
 
     if (NULL == (fp = HDfopen(filename, "r"))) {
