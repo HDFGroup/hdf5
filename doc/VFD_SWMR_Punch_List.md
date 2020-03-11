@@ -175,3 +175,8 @@ primarily on Jelly.
     object that the reader has open (possesses an hid_t), and max_lag
     ticks later the reader tries to access the object by hid_t, the
     reader get an error result, or crash, or access the wrong object.
+
+36. Make variable-length data work.  It cannot work in a simple and
+    reliable fashion with VFD SWMR while structural metadata is mixed
+    with user data and stored in raw data pages.  For a simple example,
+    see the variable-length string test, `vfd_swmr_vlstr`.
