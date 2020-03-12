@@ -43,6 +43,11 @@
 /* Typedefs */
 /************/
 
+typedef struct _estack_state {
+    H5E_auto_t efunc;
+    void *edata;
+} estack_state_t;
+
 /* Information about a symbol/dataset */
 typedef struct {
     char *name;         /* Dataset name for symbol */
@@ -69,6 +74,9 @@ H5TEST_DLLVAR unsigned symbol_count[NLEVELS];
 extern "C" {
 #endif
 
+H5TEST_DLL estack_state_t disable_estack(void);
+H5TEST_DLL void restore_estack(estack_state_t);
+
 H5TEST_DLL symbol_info_t * choose_dataset(unsigned *, unsigned *);
 H5TEST_DLL hid_t create_symbol_datatype(void);
 H5TEST_DLL int generate_name(char *name_buf, unsigned level, unsigned count);
@@ -76,12 +84,12 @@ H5TEST_DLL int generate_symbols(void);
 H5TEST_DLL int shutdown_symbols(void);
 H5TEST_DLL int print_metadata_retries_info(hid_t fid);
 
-#ifdef __cplusplus
-}
-#endif
-
 H5TEST_DLL void block_signals(sigset_t *);
 H5TEST_DLL void restore_signals(sigset_t *);
 H5TEST_DLL void await_signal(hid_t);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _SWMR_COMMON_H */

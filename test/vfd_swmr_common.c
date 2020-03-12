@@ -29,6 +29,23 @@
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
+estack_state_t
+disable_estack(void)
+{
+    estack_state_t es;
+
+    (void)H5Eget_auto(H5E_DEFAULT, &es.efunc, &es.edata);
+    (void)H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+
+    return es;
+}
+
+void
+restore_estack(estack_state_t es)
+{
+    (void)H5Eset_auto(H5E_DEFAULT, es.efunc, es.edata);
+}
+
 void
 block_signals(sigset_t *oldset)
 {
@@ -57,6 +74,7 @@ await_signal(hid_t fid)
     struct timespec tick = {.tv_sec = 0, .tv_nsec = 1000000000 / 100};
 
     if (sigemptyset(&sleepset) == -1 ||
+        sigaddset(&sleepset, SIGINT) == -1 ||
         sigaddset(&sleepset, SIGUSR1) == -1) {
         err(EXIT_FAILURE, "%s.%d: could not initialize signal masks",
             __func__, __LINE__);
@@ -69,8 +87,7 @@ await_signal(hid_t fid)
             printf("Received SIGUSR1, wrapping things up.\n");
             break;
         } else if (rc == -1 && errno == EAGAIN) {
-            H5E_auto_t efunc;
-            void *edata;
+            estack_state_t es;
 
             /* Avoid deadlock with peer: periodically enter the API so that
              * tick processing occurs and data is flushed so that the peer
@@ -79,11 +96,10 @@ await_signal(hid_t fid)
              * The call we make will fail, but that's ok,
              * so squelch errors.
              */
-            (void)H5Eget_auto(H5E_DEFAULT, &efunc, &edata);
-            (void)H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+            es = disable_estack();
             (void)H5Aexists_by_name(fid, "nonexistent", "nonexistent",
                 H5P_DEFAULT);
-            (void)H5Eset_auto(H5E_DEFAULT, efunc, edata);
+            restore_estack(es);
         } else if (rc == -1)
             err(EXIT_FAILURE, "%s: sigtimedwait", __func__);
     }
