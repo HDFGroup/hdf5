@@ -580,6 +580,9 @@ H5S__all_deserialize(H5S_t **space, const uint8_t **p)
     /* Decode version */
     UINT32DECODE(*p, version);
 
+    if(version < H5S_ALL_VERSION_1 || version > H5S_ALL_VERSION_LATEST)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for all selection")
+
     /* Skip over the remainder of the header */
     *p += 8;
 
