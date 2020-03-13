@@ -365,6 +365,22 @@
 #endif /* __cplusplus */
 
 /*
+ * Networking headers used by the mirror VFD and related tests and utilities.
+ */
+#ifdef H5_HAVE_ARPA_INET_H
+#   include <arpa/inet.h>
+#endif
+#ifdef H5_HAVE_NETDB_H
+#   include <netdb.h>
+#endif
+#ifdef H5_HAVE_NETINET_IN_H
+#   include <netinet/in.h>
+#endif
+#ifdef H5_HAVE_SYS_SOCKET_H
+#   include <sys/socket.h>
+#endif
+
+/*
  * Status return values for the `herr_t' type.
  * Since some unix/c routines use 0 and -1 (or more precisely, non-negative
  * vs. negative) as their return code, and some assumption had been made in
@@ -646,6 +662,9 @@ typedef struct {
 #ifndef HDabs
     #define HDabs(X)    abs(X)
 #endif /* HDabs */
+#ifndef HDaccept
+    #define HDaccept(A,B,C)    accept((A),(B),(C)) /* mirror VFD */
+#endif /* HDaccept */
 #ifndef HDaccess
     #define HDaccess(F,M)    access(F, M)
 #endif /* HDaccess */
@@ -692,9 +711,15 @@ typedef struct {
 #ifndef HDatoll
     #define HDatoll(S)   atoll(S)
 #endif /* HDatol */
+#ifndef HDbind
+    #define HDbind(A,B,C)   bind((A),(B),(C)) /* mirror VFD */
+#endif /* HDbind */
 #ifndef HDbsearch
     #define HDbsearch(K,B,N,Z,F)  bsearch(K,B,N,Z,F)
 #endif /* HDbsearch */
+#ifndef HDbzero
+    #define HDbzero(A,B)   bzero((A),(B)) /* mirror VFD */
+#endif /* HDbzero */
 #ifndef HDcalloc
     #define HDcalloc(N,Z)    calloc(N,Z)
 #endif /* HDcalloc */
@@ -734,6 +759,9 @@ typedef struct {
 #ifndef HDclosedir
     #define HDclosedir(D)    closedir(D)
 #endif /* HDclosedir */
+#ifndef HDconnect
+    #define HDconnect(A,B,C)    connect((A),(B),(C)) /* mirror VFD */
+#endif /* HDconnect */
 #ifndef HDcos
     #define HDcos(X)    cos(X)
 #endif /* HDcos */
@@ -978,9 +1006,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgetgroups
     #define HDgetgroups(Z,G)  getgroups(Z,G)
 #endif /* HDgetgroups */
+#ifndef HDgethostbyaddr
+    #define HDgethostbyaddr(A,B,C)  gethostbyaddr((A),(B),(C)) /* mirror VFD */
+#endif /* HDgethostbyaddr */
 #ifndef HDgethostname
     #define HDgethostname(N,L)    gethostname(N,L)
-#endif /* HDgetlogin */
+#endif /* HDgethostname */
 #ifndef HDgetlogin
     #define HDgetlogin()    getlogin()
 #endif /* HDgetlogin */
@@ -1017,6 +1048,18 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDgmtime
     #define HDgmtime(T)    gmtime(T)
 #endif /* HDgmtime */
+#ifndef HDhtonl
+    #define HDhtonl(X)    htonl((X)) /* mirror VFD */
+#endif /* HDhtonl */
+#ifndef HDhtons
+    #define HDhtons(X)    htons((X)) /* mirror VFD */
+#endif /* HDhtons */
+#ifndef HDinet_addr
+    #define HDinet_addr(C)    inet_addr((C)) /* mirror VFD */
+#endif /* HDinet_addr */
+#ifndef HDinet_ntoa
+    #define HDinet_ntoa(C)    inet_ntoa((C)) /* mirror VFD */
+#endif /* HDinet_ntoa */
 #ifndef HDisalnum
     #define HDisalnum(C)    isalnum((int)(C)) /*cast for solaris warning*/
 #endif /* HDisalnum */
@@ -1071,6 +1114,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDlink
     #define HDlink(OLD,NEW)    link(OLD,NEW)
 #endif /* HDlink */
+#ifndef HDlisten
+    #define HDlisten(A,B)    listen((A),(B)) /* mirror VFD */
+#endif /* HDlisten */
 #ifndef HDllround
     #define HDllround(V)     llround(V)
 #endif /* HDround */
@@ -1152,6 +1198,12 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDnanosleep
     #define HDnanosleep(N, O)    nanosleep(N, O)
 #endif /* HDnanosleep */
+#ifndef HDntohl
+    #define HDntohl(A)    ntohl((A)) /* mirror VFD */
+#endif /* HDntohl */
+#ifndef HDntohs
+    #define HDntohs(A)    ntohs((A)) /* mirror VFD */
+#endif /* HDntohs */
 #ifndef HDopen
     #define HDopen(F,...)    open(F,__VA_ARGS__)
 #endif /* HDopen */
@@ -1299,12 +1351,21 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsetsid
     #define HDsetsid()    setsid()
 #endif /* HDsetsid */
+#ifndef HDsetsockopt
+    #define HDsetsockopt(A,B,C,D,E)    setsockopt((A),(B),(C),(D),(E)) /* mirror VFD */
+#endif /* HDsetsockopt */
 #ifndef HDsetuid
     #define HDsetuid(U)    setuid(U)
 #endif /* HDsetuid */
 #ifndef HDsetvbuf
     #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,Z)
 #endif /* HDsetvbuf */
+#ifndef HDshutdown
+    #define HDshutdown(A, B)    shutdown((A),(B)) /* mirror VFD */
+#endif /* HDshutdown */
+#ifndef HDsigaction
+    #define HDsigaction(S,A,O)  sigaction((S),(A),(O))
+#endif /* HDsigaction */
 #ifndef HDsigaddset
     #define HDsigaddset(S,N)  sigaddset(S,N)
 #endif /* HDsigaddset */
@@ -1350,6 +1411,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsnprintf
     #define HDsnprintf    snprintf /*varargs*/
 #endif /* HDsnprintf */
+#ifndef HDsocket
+    #define HDsocket(A,B,C)    socket((A),(B),(C)) /* mirror VFD */
+#endif /* HDsocket */
 #ifndef HDsprintf
     #define HDsprintf    sprintf /*varargs*/
 #endif /* HDsprintf */

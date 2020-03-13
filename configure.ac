@@ -1090,6 +1090,7 @@ AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 AC_CHECK_HEADERS([stdbool.h])
+AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
 ## Darwin
 AC_CHECK_HEADERS([mach/mach_time.h])
@@ -2867,6 +2868,36 @@ AC_DEFINE_UNQUOTED([EXAMPLESDIR], ["$examplesdir"],
             [Define the examples directory])
 
 ## ----------------------------------------------------------------------
+## Check whether the Mirror VFD can be built.
+## Auto-enabled if the required libraries are present.
+##
+AC_SUBST([MIRROR_VFD])
+
+## Default is no Mirror VFD
+MIRROR_VFD=yes
+
+AC_CHECK_HEADERS([arpa/inet.h],, [unset MIRROR_VFD])
+AC_CHECK_HEADERS([netinet/in.h],, [unset MIRROR_VFD])
+AC_CHECK_HEADERS([netdb.h],, [unset MIRROR_VFD])
+AC_CHECK_HEADERS([sys/socket.h],, [unset MIRROR_VFD])
+
+AC_MSG_CHECKING([if the Mirror virtual file driver (VFD) can be built])
+if test "X$MIRROR_VFD" = "Xyes"; then
+    AC_DEFINE([HAVE_MIRROR_VFD], [1],
+            [Define whether the Mirror virtual file driver (VFD) will be compiled])
+    AC_MSG_RESULT([yes])
+else
+    AC_MSG_RESULT([no])
+    MIRROR_VFD=no
+    AC_MSG_ERROR([The Mirror VFD was cannot be built.
+                  Missing any of: arpa/inet.h, netinet/in.h, netdb.h,
+                  sys/socket.h.])
+fi
+
+## Mirror VFD files built only if able.
+AM_CONDITIONAL([MIRROR_VFD_CONDITIONAL], [test "X$MIRROR_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
 ## Check if Read-Only S3 virtual file driver is enabled by --enable-ros3-vfd
 ##
 AC_SUBST([ROS3_VFD])
@@ -3746,10 +3777,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testvds_env.sh
                  test/testvdsswmr.sh
                  test/test_filter_plugin.sh
+                 test/test_mirror.sh
                  test/test_usecases.sh
                  test/test_vol_plugin.sh
                  testpar/Makefile
                  testpar/testpflush.sh
+                 utils/Makefile
+                 utils/mirror_vfd/Makefile
                  tools/Makefile
                  tools/lib/Makefile
                  tools/libtest/Makefile

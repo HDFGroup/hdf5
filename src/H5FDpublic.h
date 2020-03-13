@@ -255,6 +255,8 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * that creates a file which is compatible with the default VFD.
      * Generally, this means that the VFD creates a single file that follows
      * the canonical HDF5 file format.
+     * Regarding the Splitter VFD specifically, only drivers with this flag
+     * enabled may be used as the Write-Only (W/O) channel driver.
      */
 #define H5FD_FEAT_DEFAULT_VFD_COMPATIBLE        0x00008000
 
