@@ -3887,10 +3887,10 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
          *
          * 2) Overwrite the image of the entry with the write buffer.
          *
-         * 3) If the entry is not alread on the tick list, add it to 
+         * 3) If the entry is not already on the tick list, add it to 
          *    the tick list.
          * 
-         * 4) If the entry is not alread on the delayed write list,
+         * 4) If the entry is not already on the delayed write list,
          *    test to see if it should be, and move it from the 
          *    LRU to the delayed write list and set the delay_write_until
          *    field appropriately.
