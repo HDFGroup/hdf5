@@ -211,6 +211,11 @@ set (cache_image_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/genall5.c
 )
 
+set(mirror_vfd_SOURCES
+    ${HDF5_TEST_SOURCE_DIR}/mirror_vfd.c
+    ${HDF5_TEST_SOURCE_DIR}/genall5.c
+)
+
 set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
@@ -273,6 +278,7 @@ set (H5_TESTS
     ros3
     s3comms
     hdfs
+    mirror_vfd
     ntypes
     dangle
     dtransform
@@ -310,6 +316,7 @@ set (H5_TESTS_MULTIPLE
     testhdf5
     cache_image
     ttsafe
+    mirror_vfd
 )
 # Only build single source tests here
 foreach (h5_test ${H5_TESTS})
@@ -388,6 +395,18 @@ else ()
   target_link_libraries (ttsafe PRIVATE ${HDF5_TEST_LIBSH_TARGET} $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>)
 endif ()
 set_target_properties (ttsafe PROPERTIES FOLDER test)
+
+#-- Adding test for mirror_vfd
+add_executable (mirror_vfd ${mirror_vfd_SOURCES})
+target_include_directories (mirror_vfd PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+if (NOT BUILD_SHARED_LIBS)
+  TARGET_C_PROPERTIES (mirror_vfd STATIC)
+  target_link_libraries (mirror_vfd PRIVATE ${HDF5_TEST_LIB_TARGET})
+else ()
+  TARGET_C_PROPERTIES (mirror_vfd SHARED)
+  target_link_libraries (mirror_vfd PRIVATE ${HDF5_TEST_LIBSH_TARGET})
+endif ()
+set_target_properties (mirror_vfd PROPERTIES FOLDER test)
 
 ##############################################################################
 ###           A D D I T I O N A L   T E S T S                              ###

@@ -171,6 +171,17 @@ option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
     endif ()
 endif ()
 
+# ----------------------------------------------------------------------
+# Check whether we can build the Mirror VFD 
+# Header-check flags set in config/cmake_ext_mod/ConfigureChecks.cmake
+# ----------------------------------------------------------------------
+if ( ${HDF_PREFIX}_HAVE_NETINET_IN_H AND
+     ${HDF_PREFIX}_HAVE_NETDB_H      AND
+     ${HDF_PREFIX}_HAVE_ARPA_INET_H  AND
+     ${HDF_PREFIX}_HAVE_SYS_SOCKET_H)
+    set (${HDF_PREFIX}_HAVE_MIRROR_VFD 1)
+endif()
+
 #-----------------------------------------------------------------------------
 # Check if C has __float128 extension
 #-----------------------------------------------------------------------------

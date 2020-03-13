@@ -10,6 +10,36 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* HACKED VERSION
+ * Demonstrate SWMR with a mirrored file.
+ *
+ * Must be built with SERVER_IP as the IP address of the target system
+ * with a running mirror server, and SERVER_PORT as the primary server port.
+ *
+ * In addition to the local file, 'shinano.h5' will be created on the remote
+ * system, mirroring the local file. The file location will be local to
+ * Server's/Writer's invocation directory.
+ *
+ * Template for demonstration purposes:
+ *
+ * # Launch mirror server on remote machine (in foreground to easily stop)
+ * REMOTE(1)$ ./mirror_server /path/to/mirror_worker
+ *
+ * # Launch chunk writer with plenty of chunks.
+ * LOCAL(1)$ ./use_append_chunk_mirror -l w -n 10000
+ *
+ * # Wait one second for files to be created.
+ *
+ * # Launch chunk readers on both files.
+ * LOCAL(2)$ ./use_append_chunk_mirror -l r -n 10000
+ * REMOTE(2)$ ./use_append_chunk_mirror -l r -n 10000 -f shinano.h5
+ *
+ * # Hard-stop the server.
+ * REMOTE(1)$ ^C
+ * # alt, softer shutdown using echo and nc
+ * echo "SHUTDOWN" | nc localhost 3000
+ */
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Use Case 1.7 Appending a single chunk
  * Description:
@@ -56,9 +86,9 @@
  *         o The Reader will see all new data written by Writer.
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Created: Albert Cheng, 2013/5/28 */
+/* Created: Jacob Smith, 2019 */
 
-#include "h5test.h"
+#include "use.h"
 
 /* This test uses many POSIX things that are not available on
  * Windows. We're using a check for fork(2) here as a proxy for
@@ -67,9 +97,19 @@
  */
 #ifdef H5_HAVE_FORK
 
-#include "use.h"
+#ifdef H5_HAVE_MIRROR_VFD
 
-#define USE_APPEND_CHUNK_PROGNAME "use_append_chunk"
+#define THIS_PROGNAME "use_append_chunk_mirror"
+
+#define CONNECT_WITH_JELLY 0
+
+#if CONNECT_WITH_JELLY
+#define SERVER_IP "10.10.10.248" /* hard-coded IP address */
+#else
+#define SERVER_IP "127.0.0.1"    /* localhost */
+#endif /* CONNECT_WITH_JELLY */
+#define SERVER_PORT 3000         /* hard-coded port number */
+#define MIRROR_FILE_NAME "shinano.h5" /* hard-coded duplicate/mirror filename */
 
 static options_t UC_opts; /* Use Case Options */
 
@@ -82,10 +122,10 @@ setup_parameters(int argc, char * const argv[], options_t * opts)
     /* use case defaults */
     HDmemset(opts, 0, sizeof(options_t));
     opts->chunksize = Chunksize_DFT;
-    opts->use_swmr = TRUE; /* use swmr open */
+    opts->use_swmr = TRUE;
     opts->iterations = 1;
     opts->chunkplanes = 1;
-    opts->progname = USE_APPEND_CHUNK_PROGNAME;
+    opts->progname = THIS_PROGNAME;
 
     if (parse_option(argc, argv, opts) < 0)
         return(-1);
@@ -122,12 +162,28 @@ main(int argc, char *argv[])
     int ret_value = 0;
     int child_ret_value;
     hbool_t send_wait = FALSE;
-    hid_t fapl = -1;    /* File access property list */
     hid_t fid = -1;     /* File ID */
+    H5FD_mirror_fapl_t mirr_fa;
+    H5FD_splitter_vfd_config_t split_fa;
+    hid_t mirr_fapl_id = H5I_INVALID_HID;
 
     if (setup_parameters(argc, argv, &UC_opts) < 0) {
         Hgoto_error(1);
     }
+
+    mirr_fa.magic          = H5FD_MIRROR_FAPL_MAGIC;
+    mirr_fa.version        = H5FD_MIRROR_CURR_FAPL_T_VERSION;
+    mirr_fa.handshake_port = SERVER_PORT;
+    HDstrncpy(mirr_fa.remote_ip, SERVER_IP, H5FD_MIRROR_MAX_IP_LEN);
+
+
+    split_fa.wo_fapl_id       = H5I_INVALID_HID;
+    split_fa.rw_fapl_id       = H5I_INVALID_HID;
+    split_fa.magic            = H5FD_SPLITTER_MAGIC;
+    split_fa.version          = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
+    split_fa.log_file_path[0] = '\0'; /* none */
+    split_fa.ignore_wo_errs   = FALSE;
+    HDstrncpy(split_fa.wo_path, MIRROR_FILE_NAME, H5FD_SPLITTER_PATH_MAX);
 
     /* Determine the need to send/wait message file*/
     if (UC_opts.launch == UC_READWRITE) {
@@ -145,26 +201,57 @@ main(int argc, char *argv[])
     /* =========== */
     if (UC_opts.launch != UC_READER) {
         HDprintf("Creating skeleton data file for test...\n");
-        if ((UC_opts.fapl_id = h5_fileaccess()) < 0) {
+
+        /* Prepare mirror child driver */
+        mirr_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        if (mirr_fapl_id == H5I_INVALID_HID) {
+            HDfprintf(stderr, "can't create creation mirror FAPL\n");
+            Hgoto_error(1);
+        }
+        if (H5Pset_fapl_mirror(mirr_fapl_id, &mirr_fa) < 0) {
+            HDfprintf(stderr, "can't set creation mirror FAPL\n");
+            H5Eprint2(H5E_DEFAULT, stdout);
+            Hgoto_error(1);
+        }
+
+        /* Prepare parent "splitter" driver in UC_opts */
+        split_fa.wo_fapl_id       = mirr_fapl_id;
+        split_fa.rw_fapl_id       = H5P_DEFAULT;
+        UC_opts.fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+        if (UC_opts.fapl_id == H5I_INVALID_HID) {
             HDfprintf(stderr, "can't create creation FAPL\n");
             Hgoto_error(1);
-        }   
+        }
+        if (H5Pset_fapl_splitter(UC_opts.fapl_id, &split_fa) < 0) {
+            HDfprintf(stderr, "can't set creation FAPL\n");
+            H5Eprint2(H5E_DEFAULT, stdout);
+            Hgoto_error(1);
+        }
+
         if (H5Pset_libver_bounds(UC_opts.fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
             HDfprintf(stderr, "can't set creation FAPL libver bounds\n");
             Hgoto_error(1);
         }
+
+        /* Create file */
         if (create_uc_file(&UC_opts) < 0) {
             HDfprintf(stderr, "***encounter error\n");
             Hgoto_error(1);
         } else {
             HDprintf("File created.\n");
         }
-        /* Close FAPL to prevent issues with forking later */ 
+
+        /* Close FAPLs to prevent issues with forking later */
         if (H5Pclose(UC_opts.fapl_id) < 0) {
             HDfprintf(stderr, "can't close creation FAPL\n");
             Hgoto_error(1);
         }
         UC_opts.fapl_id = H5I_INVALID_HID;
+        if (H5Pclose(mirr_fapl_id) < 0) {
+            HDfprintf(stderr, "can't close creation mirror FAPL\n");
+            Hgoto_error(1);
+        }
+        mirr_fapl_id = H5I_INVALID_HID;
     }
 
     /* ============ */
@@ -182,22 +269,18 @@ main(int argc, char *argv[])
     /* launch reader */
     /* ============= */
     if (UC_opts.launch != UC_WRITER) {
-        /* child process launch the reader */
+        /* child process -- launch the reader */
+        /* reader only opens the one file -- separate reader needed for mirrored file 'shinano.h5' */
         if (0 == childpid) {
             HDprintf("%d: launch reader process\n", mypid);
-            if ((UC_opts.fapl_id = h5_fileaccess()) < 0) {
-                HDfprintf(stderr, "can't create read FAPL\n");
-                HDexit(EXIT_FAILURE);
-            }
+
+            UC_opts.fapl_id = H5P_DEFAULT;
             if (read_uc_file(send_wait, &UC_opts) < 0) {
-                HDfprintf(stderr, "read_uc_file encountered error\n");
-                HDexit(EXIT_FAILURE);
+                HDfprintf(stderr, "read_uc_file encountered error (%d)\n", mypid);
+                HDexit(1);
             }
-            if (H5Pclose(UC_opts.fapl_id) < 0) {
-                HDfprintf(stderr, "can't close read FAPL\n");
-                HDexit(EXIT_FAILURE);
-            }
-            HDexit(EXIT_SUCCESS);
+
+            HDexit(0);
         }
     }
 
@@ -207,19 +290,40 @@ main(int argc, char *argv[])
     /* this process continues to launch the writer */
     HDprintf("%d: continue as the writer process\n", mypid);
 
-    if ((fapl = h5_fileaccess()) < 0) {
-        HDfprintf(stderr, "can't create write FAPL\n");
+    /* Prepare mirror child driver */
+    mirr_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (mirr_fapl_id == H5I_INVALID_HID) {
+        HDfprintf(stderr, "can't create creation mirror FAPL\n");
+        Hgoto_error(1);
+    }
+    if (H5Pset_fapl_mirror(mirr_fapl_id, &mirr_fa) < 0) {
+        HDfprintf(stderr, "can't set creation mirror FAPL\n");
+        H5Eprint2(H5E_DEFAULT, stdout);
+        Hgoto_error(1);
+    }
+
+    /* Prepare parent "splitter" driver in UC_opts */
+    split_fa.wo_fapl_id       = mirr_fapl_id;
+    split_fa.rw_fapl_id       = H5P_DEFAULT;
+    UC_opts.fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (UC_opts.fapl_id == H5I_INVALID_HID) {
+        HDfprintf(stderr, "can't create creation FAPL\n");
+        Hgoto_error(1);
+    }
+    if (H5Pset_fapl_splitter(UC_opts.fapl_id, &split_fa) < 0) {
+        HDfprintf(stderr, "can't set creation FAPL\n");
+        H5Eprint2(H5E_DEFAULT, stdout);
         Hgoto_error(1);
     }
 
     if (UC_opts.use_swmr) {
-        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+        if (H5Pset_libver_bounds(UC_opts.fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
             HDfprintf(stderr, "can't set write FAPL libver bounds\n");
             Hgoto_error(1);
         }
     }
 
-    if ((fid = H5Fopen(UC_opts.filename, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), fapl)) < 0) {
+    if ((fid = H5Fopen(UC_opts.filename, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), UC_opts.fapl_id)) < 0) {
         HDfprintf(stderr, "H5Fopen failed\n");
         Hgoto_error(1);
     }
@@ -234,8 +338,13 @@ main(int argc, char *argv[])
         Hgoto_error(1);
     }
 
-    if (H5Pclose(fapl) < 0) {
+    if (H5Pclose(UC_opts.fapl_id) < 0) {
         HDfprintf(stderr, "can't close write FAPL\n");
+        Hgoto_error(1);
+    }
+
+    if (H5Pclose(mirr_fapl_id) < 0) {
+        HDfprintf(stderr, "can't close write mirror FAPL\n");
         Hgoto_error(1);
     }
 
@@ -269,6 +378,17 @@ done:
 
     return(ret_value);
 }
+
+#else /* H5_HAVE_MIRROR_VFD */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Mirror VFD is not built. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_MIRROR_VFD */
 
 #else /* H5_HAVE_FORK */
 

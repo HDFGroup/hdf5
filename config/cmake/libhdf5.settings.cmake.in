@@ -76,6 +76,7 @@ Parallel Filtered Dataset Writes: @PARALLEL_FILTERED_WRITES@
           I/O filters (external): @EXTERNAL_FILTERS@
                              MPE: @H5_HAVE_LIBLMPE@
                       Direct VFD: @H5_HAVE_DIRECT@
+                      Mirror VFD: @H5_HAVE_MIRROR_VFD@
               (Read-Only) S3 VFD: @H5_HAVE_ROS3_VFD@
             (Read-Only) HDFS VFD: @H5_HAVE_LIBHDFS@
                          dmalloc: @H5_HAVE_LIBDMALLOC@
