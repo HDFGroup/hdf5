@@ -1120,7 +1120,10 @@ typedef off_t               h5_stat_size_t;
     #define HDmemcmp(X,Y,Z)    memcmp(X,Y,Z)
 #endif /* HDmemcmp */
 #ifndef HDmemcpy
-    #define HDmemcpy(X,Y,Z)    memcpy(X,Y,Z)
+    /* Casts to char pointers are necessary for some compilers (e.g. clang)
+     * and platforms, possibly due to alignment issues.
+     */
+    #define HDmemcpy(X,Y,Z)    memcpy((char*)(X),(const char*)(Y),Z)
 #endif /* HDmemcpy */
 #ifndef HDmemmove
     #define HDmemmove(X,Y,Z)  memmove((char*)(X),(const char*)(Y),Z)
