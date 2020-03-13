@@ -29,6 +29,23 @@
 #include "h5test.h"
 #include "vfd_swmr_common.h"
 
+static const hid_t badhid = H5I_INVALID_HID;
+
+int verbosity = 2;
+
+void
+dbgf(int level, const char *fmt, ...)
+{
+    va_list ap;
+
+    if (verbosity < level)
+        return;
+
+    va_start(ap, fmt);
+    (void)vprintf(fmt, ap);
+    va_end(ap);
+}
+
 estack_state_t
 disable_estack(void)
 {
@@ -83,8 +100,8 @@ await_signal(hid_t fid)
     for (;;) {
         const int rc = sigtimedwait(&sleepset, NULL, &tick);
 
-        if (rc == SIGUSR1) {
-            printf("Received SIGUSR1, wrapping things up.\n");
+        if (rc == SIGUSR1 || rc == SIGINT) {
+            printf("Received %s, wrapping things up.\n", (rc == SIGUSR1) ? "SIGUSR1" : "SIGINT");
             break;
         } else if (rc == -1 && errno == EAGAIN) {
             estack_state_t es;
@@ -103,4 +120,49 @@ await_signal(hid_t fid)
         } else if (rc == -1)
             err(EXIT_FAILURE, "%s: sigtimedwait", __func__);
     }
+}
+
+hid_t
+vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr)
+{
+    H5F_vfd_swmr_config_t config;
+    hid_t fapl;
+
+    /* Create file access property list */
+    if((fapl = h5_fileaccess()) < 0) {
+        warnx("h5_fileaccess");
+        return badhid;
+    }
+
+    /* FOR NOW: set to use latest format, the "old" parameter is not used */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+        warnx("H5Pset_libver_bounds");
+        return badhid;
+    }
+
+    /*
+     * Set up to open the file with VFD SWMR configured.
+     */
+
+    /* Enable page buffering */
+    if(H5Pset_page_buffer_size(fapl, 4096, only_meta_pages ? 100 : 0, 0) < 0) {
+        warnx("H5Pset_page_buffer_size");
+        return badhid;
+    }
+
+    memset(&config, 0, sizeof(config));
+
+    config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config.tick_len = 1;
+    config.max_lag = 5;
+    config.writer = writer;
+    config.md_pages_reserved = 128;
+    HDstrcpy(config.md_file_path, "./my_md_file");
+
+    /* Enable VFD SWMR configuration */
+    if(use_vfd_swmr && H5Pset_vfd_swmr_config(fapl, &config) < 0) {
+        warnx("H5Pset_vfd_swmr_config");
+        return badhid;
+    }
+    return fapl;
 }

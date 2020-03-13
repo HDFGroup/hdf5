@@ -116,7 +116,7 @@ if [ $rc -ne 0 ] ; then
     exit 0
 fi
 
-all_tests="generator expand shrink expand_shrink sparse"
+all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob"
 tests=${all_tests}
 
 if [ $# -gt 0 ]; then
@@ -444,7 +444,7 @@ do
 
 	if [ ${do_sparse:-no} = yes ]; then
 		echo
-		echo "## Sparse writer test - test writing to random locations in the dataset"
+		echo "## Sparse writer test - write random dataset locations"
 
 		# Launch the Generator
 		# NOTE: Random seed is shared between readers and writers and is
@@ -525,6 +525,61 @@ do
 		rm -f vfd_swmr_reader.*.{out,rc}
 	fi
     done
+done
+
+for ty in null oob; do
+
+	if [ ${ty} = null ]; then
+		[ ${do_vlstr_null:-no} = no ] && continue
+		echo
+		echo "## VL string 1 - expect to read NULL"
+	else
+		[ ${do_vlstr_oob:-no} = no ] && continue
+		echo
+		echo "## VL string 2 - expect out-of-bounds access"
+	fi
+
+	echo launch vfd_swmr_vlstr_writer
+	catch_out_err_and_rc vfd_swmr_vlstr_writer \
+	    ../vfd_swmr_vlstr_writer -q -t ${ty} &
+	pid_writer=$!
+
+	# pause?
+
+	catch_out_err_and_rc vfd_swmr_vlstr_reader \
+	    ../vfd_swmr_vlstr_reader -q -t ${ty} &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	kill -USR1 $(cat vfd_swmr_vlstr_writer.pid)
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_vlstr_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_vlstr_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Check for error and exit if one occured
+	if test $nerrors -ne 0 ; then
+	    echo "VFD SWMR tests failed with $nerrors errors."
+	    echo "(Writer and reader output preserved)"
+	    exit 1
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_vlstr_writer.{out,rc}
+	rm -f vfd_swmr_vlstr_reader.*.{out,rc}
 done
 
 ###############################################################################

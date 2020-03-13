@@ -61,6 +61,12 @@ typedef struct {
     uint8_t info[DTYPE_SIZE];   /* "Other" information for this record */
 } symbol_t;
 
+typedef enum _testsel {
+  TEST_NONE = 0
+, TEST_NULL
+, TEST_OOB
+} testsel_t;
+
 /********************/
 /* Global Variables */
 /********************/
@@ -87,9 +93,14 @@ H5TEST_DLL int print_metadata_retries_info(hid_t fid);
 H5TEST_DLL void block_signals(sigset_t *);
 H5TEST_DLL void restore_signals(sigset_t *);
 H5TEST_DLL void await_signal(hid_t);
+H5TEST_DLL hid_t vfd_swmr_create_fapl(bool, bool, bool);
+
+H5TEST_DLL void dbgf(int, const char *, ...) H5_ATTR_FORMAT(printf, 2, 3);
 
 #ifdef __cplusplus
 }
 #endif
+
+extern int verbosity;
 
 #endif /* _SWMR_COMMON_H */

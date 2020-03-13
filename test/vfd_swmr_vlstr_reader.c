@@ -29,7 +29,7 @@
 #include "testhdf5.h"
 #include "vfd_swmr_common.h"
 
-enum _step {
+typedef enum _step {
   CREATE = 0
 , LENGTHEN
 , SHORTEN
@@ -39,33 +39,33 @@ enum _step {
 
 static const hid_t badhid = H5I_INVALID_HID; // abbreviate
 static bool caught_out_of_bounds = false;
+static bool read_null = false;
 
-static void
-read_vl_dset(hid_t dset, hid_t type, hid_t space, char *data)
+static bool
+read_vl_dset(hid_t dset, hid_t type, char **data)
 {
-    if (H5Dread(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
-        errx(EXIT_FAILURE, "%s: H5Dwrite", __func__);
-}
+    bool success;
+    estack_state_t es;
 
-static hid_t
-open_vl_dset(hid_t file, hid_t type, const char *name)
-{
-    hid_t dset;
+    es = disable_estack();
+    success = H5Dread(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0;
+    if (*data == NULL) {
+        read_null = true;
+        return false;
+    }
+    restore_estack(es);
 
-    dset = H5Dopen(file, name, H5P_DEFAULT);
-
-    if (dset == badhid)
-        errx(EXIT_FAILURE, "H5Dopen");
-
-    return dset;
+    return success;
 }
 
 static void
 usage(const char *progname)
 {
-    fprintf(stderr, "usage: %s [-W] [-V]\n", progname);
-    fprintf(stderr, "\n  -W: do not wait for SIGUSR1\n");
+    fprintf(stderr, "usage: %s [-W] [-V] [-t (oob|null)] \n", progname);
+    fprintf(stderr, "\n  -S: do not use VFD SWMR\n");
     fprintf(stderr,   "  -n: number of test steps to perform\n");
+    fprintf(stderr,   "  -q: be quiet: few/no progress messages\n");
+    fprintf(stderr,   "  -t (oob|null): select out-of-bounds or NULL test\n");
     exit(EXIT_FAILURE);
 }
 
@@ -74,9 +74,9 @@ H5HG_trap(const char *reason)
 {
     if (strcmp(reason, "out of bounds") == 0) {
         caught_out_of_bounds = true;
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 int
@@ -84,25 +84,23 @@ main(int argc, char **argv)
 {
     hid_t fapl, fid, space, type;
     hid_t dset[2];
-    char content[2][96];
+    char *content[2];
     char name[2][96];
-    H5F_vfd_swmr_config_t config;
-    sigset_t oldsigs;
-    herr_t ret;
-    bool wait_for_signal = true;
-    const hsize_t dims = 1;
     int ch, i, ntimes = 100;
     unsigned long tmp;
+    bool use_vfd_swmr = true;
     char *end;
+    const long millisec_in_nanosecs = 1000 * 1000;
     const struct timespec delay =
-        {.tv_sec = 0, .tv_nsec = 1000 * 1000 * 1000 / 10};
+        {.tv_sec = 0, .tv_nsec = millisec_in_nanosecs * 11 / 10};
+    testsel_t sel = TEST_NONE;
 
     assert(H5T_C_S1 != badhid);
 
-    while ((ch = getopt(argc, argv, "Wn:")) != -1) {
+    while ((ch = getopt(argc, argv, "Sn:qt:")) != -1) {
         switch(ch) {
-        case 'W':
-            wait_for_signal = false;
+        case 'S':
+            use_vfd_swmr = false;
             break;
         case 'n':
             errno = 0;
@@ -114,6 +112,17 @@ main(int argc, char **argv)
             else if (tmp > INT_MAX)
                 errx(EXIT_FAILURE, "`-n` argument `%lu` too large", tmp);
             ntimes = (int)tmp;
+            break;
+        case 'q':
+            verbosity = 1;
+            break;
+        case 't':
+            if (strcmp(optarg, "oob") == 0)
+                sel = TEST_OOB;
+            else if (strcmp(optarg, "null") == 0)
+                sel = TEST_NULL;
+            else
+                usage(argv[0]);
             break;
         default:
             usage(argv[0]);
@@ -127,33 +136,8 @@ main(int argc, char **argv)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
     /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0)
-        errx(EXIT_FAILURE, "h5_fileaccess");
-
-    /* FOR NOW: set to use latest format, the "old" parameter is not used */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        errx(EXIT_FAILURE, "H5Pset_libver_bounds");
-
-    /*
-     * Set up to open the file with VFD SWMR configured.
-     */
-
-    /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl, 4096, 100, 0) < 0)
-        errx(EXIT_FAILURE, "H5Pset_page_buffer_size");
-
-    memset(&config, 0, sizeof(config));
-
-    config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config.tick_len = 1;
-    config.max_lag = 5;
-    config.writer = true;
-    config.md_pages_reserved = 128;
-    HDstrcpy(config.md_file_path, "./my_md_file");
-
-    /* Enable VFD SWMR configuration */
-    if(H5Pset_vfd_swmr_config(fapl, &config) < 0)
-        errx(EXIT_FAILURE, "H5Pset_vfd_swmr_config");
+    if ((fapl = vfd_swmr_create_fapl(false, sel == TEST_OOB, use_vfd_swmr)) < 0)
+        errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
 
     fid = H5Fopen("vfd_swmr_vlstr.h5", H5F_ACC_RDONLY, fapl);
 
@@ -177,35 +161,54 @@ main(int argc, char **argv)
     if (fid == badhid)
         errx(EXIT_FAILURE, "H5Fcreate");
 
-    block_signals(&oldsigs);
-
     /* content 1 seq 1 short
      * content 1 seq 1 long long long long long long long long
      * content 1 seq 1 medium medium medium
      */
-    for (i = 0; i < ntimes; i++) {
+    for (i = 0;
+         !caught_out_of_bounds && i < ntimes;
+         (i % 2 == 0) ? nanosleep(&delay, NULL) : 0, i++) {
+        estack_state_t es;
         const int ndsets = 2;
         const int which = i % ndsets;
-        fprintf(stderr, "iteration %d which %d\n", i, which);
+        int nconverted;
+        struct {
+            int which;
+            int seq;
+            char tail[96];
+        } scanned_content;
+
+        dbgf(2, "iteration %d which %d", i, which);
         (void)snprintf(name[which], sizeof(name[which]),
             "dset-%d", which);
-        dset[which] = open_vl_dset(fid, type, name[which]);
-        read_vl_dset(dset[which], type, space, content[which]);
-#if 0
-        (void)snprintf(content[which], sizeof(content[which]),
-            "content %d seq %d %s", which, seq, tail);
-#endif
-        if (caught_out_of_bounds) {
-            fprintf(stderr, "caught out of bounds\n");
-            break;
+        es = disable_estack();
+        dset[which] = H5Dopen(fid, name[which], H5P_DEFAULT);
+        restore_estack(es);
+        if (caught_out_of_bounds || dset[which] == badhid) {
+            dbgf(2, ": couldn't open\n");
+            continue;
         }
-        nanosleep(&delay, NULL);
+        if (!read_vl_dset(dset[which], type, &content[which])) {
+            H5Dclose(dset[which]);
+            dbgf(2, ": couldn't read\n");
+            continue;
+        }
+        nconverted = sscanf(content[which], "content %d seq %d %96s",
+            &scanned_content.which, &scanned_content.seq, scanned_content.tail);
+        if (nconverted != 3) {
+            dbgf(2, ": couldn't scan\n");
+            continue;
+        }
+        dbgf(2, ": read which %d seq %d tail %s\n",
+            scanned_content.which, scanned_content.seq, scanned_content.tail);
+        H5Dclose(dset[which]);
     }
 
-    if (wait_for_signal)
-        await_signal(fid);
+    if (caught_out_of_bounds)
+        fprintf(stderr, "caught out of bounds\n");
 
-    restore_signals(&oldsigs);
+    if (read_null)
+        fprintf(stderr, "read NULL\n");
 
     if (H5Pclose(fapl) < 0)
         errx(EXIT_FAILURE, "H5Pclose(fapl)");
@@ -218,6 +221,11 @@ main(int argc, char **argv)
 
     if (H5Fclose(fid) < 0)
         errx(EXIT_FAILURE, "H5Fclose");
+
+    if (sel == TEST_OOB)
+        return caught_out_of_bounds ? EXIT_SUCCESS : EXIT_FAILURE;
+    else if (sel == TEST_NULL)
+        return read_null ? EXIT_SUCCESS : EXIT_FAILURE;
 
     return EXIT_SUCCESS;
 }

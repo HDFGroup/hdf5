@@ -101,20 +101,23 @@ print_cache_hits(H5C_t *cache)
     int i;
 
     for (i = 0; i < H5AC_NTYPES; i++) {
-        printf("type-%d cache hits %" PRId64 "%s\n",
+        dbgf(3, "type-%d cache hits %" PRId64 "%s\n",
             i, cache->hits[i], (i == H5AC_GHEAP_ID) ? " *" : "");
     }
-    printf("\n");
+    dbgf(3, "\n");
 }
 
 static void
 usage(const char *progname)
 {
     fprintf(stderr, "usage: %s [-W] [-V]\n", progname);
-    fprintf(stderr, "\n  -W: do not wait for SIGUSR1\n");
+    fprintf(stderr, "\n  -W: do not wait for SIGINT or SIGUSR1\n");
+    fprintf(stderr, "\n  -S: do not use VFD SWMR\n");
     fprintf(stderr,   "  -f: use fixed-length string\n");
     fprintf(stderr,   "      (default: variable-length string)\n");
     fprintf(stderr,   "  -n: number of test steps to perform\n");
+    fprintf(stderr,   "  -q: be quiet: few/no progress messages\n");
+    fprintf(stderr,   "  -t (oob|null): select out-of-bounds or NULL test\n");
     exit(EXIT_FAILURE);
 }
 
@@ -137,7 +140,6 @@ main(int argc, char **argv)
     char name[2][96];
     H5F_t *f;
     H5C_t *cache;
-    H5F_vfd_swmr_config_t config;
     sigset_t oldsigs;
     herr_t ret;
     bool variable = true, wait_for_signal = true;
@@ -145,13 +147,18 @@ main(int argc, char **argv)
     int ch, i, ntimes = 100;
     unsigned long tmp;
     char *end;
+    bool use_vfd_swmr = true;
     const struct timespec delay =
         {.tv_sec = 0, .tv_nsec = 1000 * 1000 * 1000 / 10};
+    testsel_t sel = TEST_NONE;
 
     assert(H5T_C_S1 != badhid);
 
-    while ((ch = getopt(argc, argv, "Wfn:")) != -1) {
+    while ((ch = getopt(argc, argv, "SWfn:qt:")) != -1) {
         switch(ch) {
+        case 'S':
+            use_vfd_swmr = false;
+            break;
         case 'W':
             wait_for_signal = false;
             break;
@@ -169,6 +176,17 @@ main(int argc, char **argv)
                 errx(EXIT_FAILURE, "`-n` argument `%lu` too large", tmp);
             ntimes = (int)tmp;
             break;
+        case 'q':
+            verbosity = 1;
+            break;
+        case 't':
+            if (strcmp(optarg, "oob") == 0)
+                sel = TEST_OOB;
+            else if (strcmp(optarg, "null") == 0)
+                sel = TEST_NULL;
+            else
+                usage(argv[0]);
+            break;
         default:
             usage(argv[0]);
             break;
@@ -180,34 +198,8 @@ main(int argc, char **argv)
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
-    /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0)
-        errx(EXIT_FAILURE, "h5_fileaccess");
-
-    /* FOR NOW: set to use latest format, the "old" parameter is not used */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        errx(EXIT_FAILURE, "H5Pset_libver_bounds");
-
-    /*
-     * Set up to open the file with VFD SWMR configured.
-     */
-
-    /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl, 4096, 100, 0) < 0)
-        errx(EXIT_FAILURE, "H5Pset_page_buffer_size");
-
-    memset(&config, 0, sizeof(config));
-
-    config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config.tick_len = 1;
-    config.max_lag = 5;
-    config.writer = true;
-    config.md_pages_reserved = 128;
-    HDstrcpy(config.md_file_path, "./my_md_file");
-
-    /* Enable VFD SWMR configuration */
-    if(H5Pset_vfd_swmr_config(fapl, &config) < 0)
-        errx(EXIT_FAILURE, "H5Pset_vfd_swmr_config");
+    if ((fapl = vfd_swmr_create_fapl(true, sel == TEST_OOB, use_vfd_swmr)) < 0)
+        errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         errx(EXIT_FAILURE, "H5Pcreate");
@@ -262,7 +254,7 @@ main(int argc, char **argv)
         const int step = i % NSTEPS;
         const int which = (i / NSTEPS) % ndsets;
         const int seq = i / (ndsets * NSTEPS);
-        fprintf(stderr, "iteration %d which %d step %d seq %d\n",
+        dbgf(2, "iteration %d which %d step %d seq %d\n",
             i, which, step, seq);
         switch (step) {
         case CREATE:
@@ -304,7 +296,7 @@ main(int argc, char **argv)
         nanosleep(&delay, NULL);
     }
 
-    if (wait_for_signal)
+    if (use_vfd_swmr && wait_for_signal)
         await_signal(fid);
 
     restore_signals(&oldsigs);
