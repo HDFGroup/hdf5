@@ -539,7 +539,8 @@ H5R__get_region(H5F_t *file, const void *_ref)
     const uint8_t *p;           /* Pointer to OID to store */
     H5HG_t hobjid;              /* Heap object ID */
     uint8_t *buf = NULL;        /* Buffer to store serialized selection in */
-    H5S_t *ret_value;		/* Return value */
+    H5S_t *ds = NULL;           /* Temporary pointer to dataspace */
+    H5S_t *ret_value = NULL;	/* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -564,17 +565,24 @@ H5R__get_region(H5F_t *file, const void *_ref)
     H5F_addr_decode(oloc.file, &p, &(oloc.addr));
 
     /* Open and copy the dataset's dataspace */
-    if(NULL == (ret_value = H5S_read(&oloc)))
+    if(NULL == (ds = H5S_read(&oloc)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, NULL, "not found")
 
     /* Unserialize the selection */
-    if(H5S_SELECT_DESERIALIZE(&ret_value, &p) < 0)
+    if(H5S_SELECT_DESERIALIZE(&ds, &p) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, NULL, "can't deserialize selection")
+
+    ret_value = ds;
 
 done:
     /* Free the buffer allocated in H5HG_read() */
     if(buf)
         H5MM_xfree(buf);
+
+    if(ret_value == NULL) {
+        if(ds && H5S_close(ds) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 }  /* end H5R__get_region() */

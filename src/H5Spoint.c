@@ -1017,6 +1017,9 @@ H5S_point_deserialize(H5S_t **space, const uint8_t **p)
     /* Decode version */
     UINT32DECODE(pp, version);
 
+    if(version < H5S_POINT_VERSION_1 || version > H5S_POINT_VERSION_LATEST)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for point selection")
+
     /* Skip over the remainder of the header */
     pp += 8;
 
