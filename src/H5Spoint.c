@@ -846,7 +846,7 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
 
     /* Store the preamble information */
     UINT32ENCODE(buf, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(buf, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(buf, (uint32_t)H5S_POINT_VERSION_1);  /* Store the version number */
     UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
     lenp=buf;           /* keep the pointer to the length location for later */
     buf+=4;             /* skip over space for length */
@@ -907,6 +907,8 @@ H5S_point_deserialize (H5S_t *space, const uint8_t *buf)
     size_t num_elem=0;      /* Number of elements in selection */
     hsize_t *coord=NULL, *tcoord;   /* Pointer to array of elements */
     unsigned i, j;              /* local counting variables */
+    uint32_t version;       /* Decoded version */
+    uint8_t *p;             /* Temporary pointer to buf */
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -914,6 +916,13 @@ H5S_point_deserialize (H5S_t *space, const uint8_t *buf)
     /* Check args */
     HDassert(space);
     HDassert(buf);
+
+    p = buf + 4;
+    UINT32DECODE(p, version);
+
+    if(version < H5S_POINT_VERSION_1 || version > H5S_POINT_VERSION_LATEST)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for point selection")
+
 
     /* Deserialize points to select */
     buf += 16;    /* Skip over selection header */

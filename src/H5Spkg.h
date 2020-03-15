@@ -32,6 +32,21 @@
 #define H5S_VALID_MAX	0x01
 #define H5S_VALID_PERM	0x02
 
+/* Version for hyperslab selection info */
+#define H5S_HYPER_VERSION_1         1
+#define H5S_HYPER_VERSION_LATEST    H5S_HYPER_VERSION_1
+
+/* Version for point selection info */
+#define H5S_POINT_VERSION_1         1
+#define H5S_POINT_VERSION_LATEST    H5S_HYPER_VERSION_1
+
+/* Versions for H5S_SEL_NONE selection info */
+#define H5S_NONE_VERSION_1          1
+#define H5S_NONE_VERSION_LATEST     H5S_NONE_VERSION_1
+
+/* Versions for H5S_SEL_ALL selection info */
+#define H5S_ALL_VERSION_1           1
+#define H5S_ALL_VERSION_LATEST      H5S_ALL_VERSION_1
 
 /* Initial version of the dataspace information */
 #define H5O_SDSPACE_VERSION_1	1

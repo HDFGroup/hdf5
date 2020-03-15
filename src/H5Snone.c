@@ -484,7 +484,7 @@ H5S_none_serialize(const H5S_t *space, uint8_t *buf)
 
     /* Store the preamble information */
     UINT32ENCODE(buf, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(buf, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(buf, (uint32_t)H5S_NONE_VERSION_1);  /* Store the version number */
     UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
     UINT32ENCODE(buf, (uint32_t)0);  /* Store the additional information length */
 
@@ -512,13 +512,23 @@ H5S_none_serialize(const H5S_t *space, uint8_t *buf)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_none_deserialize(H5S_t *space, const uint8_t H5_ATTR_UNUSED *buf)
+H5S_none_deserialize(H5S_t *space, const uint8_t *buf)
 {
+    uint8_t *p;                 /* Temporary pointer to buf */
+    uint32_t version;           /* Version number */
     herr_t ret_value = SUCCEED;  /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(space);
+    HDassert(buf);
+
+    p = buf + 4;
+    /* Decode version */
+    UINT32DECODE(p, version);
+
+    if(version < H5S_NONE_VERSION_1 || version > H5S_NONE_VERSION_LATEST)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for none selection")
 
     /* Change to "none" selection */
     if(H5S_select_none(space) < 0)

@@ -2120,7 +2120,7 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
 
     /* Store the preamble information */
     UINT32ENCODE(buf, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(buf, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(buf, (uint32_t)H5S_HYPER_VERSION_1);  /* Store the version number */
     UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
     lenp = buf;           /* keep the pointer to the length location for later */
     buf += 4;             /* skip over space for length */
@@ -2265,14 +2265,23 @@ H5S_hyper_deserialize (H5S_t *space, const uint8_t *buf)
     hsize_t *tstride=NULL;	/* temporary hyperslab pointers */
     hsize_t *tcount=NULL;	/* temporary hyperslab pointers */
     hsize_t *tblock=NULL;	/* temporary hyperslab pointers */
-    unsigned i,j;              	/* local counting variables */
-    herr_t ret_value=FAIL;  	/* return value */
+    unsigned i,j;           /* local counting variables */
+    uint32_t version;       /* decoded version */
+    uint8_t *p;             /* temporary pointer to buf */
+    herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(space);
     HDassert(buf);
+
+    p = buf + 4;
+    UINT32DECODE(p, version);
+
+    if(version < H5S_HYPER_VERSION_1 || version > H5S_HYPER_VERSION_LATEST)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for hyperslab selection")
+
 
     /* Deserialize slabs to select */
     buf+=16;    /* Skip over selection header */
