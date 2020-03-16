@@ -48,7 +48,7 @@ read_vl_dset(hid_t dset, hid_t type, char **data)
     estack_state_t es;
 
     es = disable_estack();
-    success = H5Dread(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0;
+    success = H5Dread(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) >= 0;
     if (*data == NULL) {
         read_null = true;
         return false;
