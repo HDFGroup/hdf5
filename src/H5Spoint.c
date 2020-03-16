@@ -1413,6 +1413,9 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p)
     /* Decode version */
     UINT32DECODE(pp, version);
 
+    if(version < H5S_POINT_VERSION_1 || version > H5S_POINT_VERSION_LATEST)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for point selection")
+
     if(version >= (uint32_t)H5S_POINT_VERSION_2)
         /* Decode size of point info */
         enc_size = *(pp)++;
