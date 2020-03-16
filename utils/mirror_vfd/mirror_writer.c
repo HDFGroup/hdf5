@@ -1033,7 +1033,23 @@ done:
 } /* end process_instructions() */
 
 
-/* ------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+ * Function:    run_writer
+ *
+ * Purpose:     Initiate Writer operations.
+ *
+ *              Receives as parameters a socket which has accepted the
+ *              connection to the Driver and the OPEN xmit (which must be
+ *              decoded into the structure and verified prior to being passed
+ *              to this function).
+ *
+ *              Is not responsible for closing or cleaning up any of the
+ *              received parameters.
+ *
+ * Return:      Success: SUCCEED
+ *              Failure: FAIL
+ * ---------------------------------------------------------------------------
+ */
 herr_t
 run_writer(int socketfd, H5FD_mirror_xmit_open_t *xmit_open)
 {
