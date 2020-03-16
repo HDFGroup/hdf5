@@ -1768,6 +1768,7 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf,
     H5O_token_t token = { 0 };
     size_t data_size;
     const uint8_t *p;
+    H5S_t *space = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -1788,7 +1789,6 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf,
 
     if(space_ptr) {
         H5O_loc_t oloc; /* Object location */
-        H5S_t *space = NULL;
 
         /* Initialize the object location */
         H5O_loc_reset(&oloc);
@@ -1812,6 +1812,12 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf,
 
 done:
     H5MM_free(data);
+
+    if(ret_value < 0) {
+        if(space && H5S_close(space) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__decode_token_region_compat() */
 
