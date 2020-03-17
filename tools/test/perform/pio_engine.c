@@ -129,6 +129,7 @@ static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
     int flags);
 static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
+static off_t sqrto(off_t);
 
 /*
  * Function:        do_pio
@@ -199,7 +200,7 @@ do_pio(parameters param)
         bsize = buf_size;   /* Actual buffer size       */
     }
     else {
-        snbytes = (off_t)sqrt((double)nbytes);  /* General dataset size     */
+        snbytes = sqrto(nbytes);  /* General dataset size     */
         bsize = buf_size * blk_size;    /* Actual buffer size       */
     }
 
@@ -362,15 +363,17 @@ done:
     switch (iot) {
         case POSIXIO:
             if (fd.posixfd != -1)
-            hrc = do_fclose(iot, &fd);
+                hrc = do_fclose(iot, &fd);
             break;
         case MPIO:
             if (fd.mpifd != MPI_FILE_NULL)
-            hrc = do_fclose(iot, &fd);
+                hrc = do_fclose(iot, &fd);
             break;
         case PHDF5:
             if (fd.h5fd != -1)
-            hrc = do_fclose(iot, &fd);
+                hrc = do_fclose(iot, &fd);
+            break;
+        default:
             break;
     }
 
@@ -412,6 +415,8 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
             break;
         case PHDF5:
             suffix = ".h5";
+            break;
+        default:
             break;
     }
 
@@ -592,7 +597,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* nbytes is always the number of bytes per dataset (1D or 2D). If the
            dataspace is 2D, snbytes is the size of a side of the dataset square.
          */
-        snbytes = (off_t)sqrt((double)nbytes);
+        snbytes = sqrto(nbytes);
 
         /* Contiguous Pattern: */
         if (!parms->interleaved) {
@@ -857,6 +862,9 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             } /* end if */
         } /* end if */
         break;
+
+    default:
+        break;
     } /* end switch */
 
     for (ndset = 1; ndset <= ndsets; ++ndset) {
@@ -919,6 +927,9 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 HDfprintf(stderr, "HDF5 Property List Close failed\n");
                 GOTOERROR(FAIL);
             }
+            break;
+
+        default:
             break;
     }
 
@@ -1376,6 +1387,9 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             } /* end else */
 
             break;
+
+        default:
+            break;
         } /* switch (parms->io_type) */
     } /* end while */
 
@@ -1476,6 +1490,13 @@ done:
     return ret_code;
 }
 
+static off_t
+sqrto(off_t x)
+{
+    double root_x = sqrt((double)x);
+    return (off_t)root_x;
+}
+
 /*
  * Function:        do_read
  * Purpose:         read the required amount of data from the file.
@@ -1568,7 +1589,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* nbytes is always the number of bytes per dataset (1D or 2D). If the
            dataspace is 2D, snbytes is the size of a side of the 'dataset square'.
          */
-        snbytes = (off_t)sqrt((double)nbytes);
+        snbytes = sqrto(nbytes);
 
         bsize = buf_size * blk_size;
 
@@ -1815,18 +1836,21 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         /* Create the dataset transfer property list */
         h5dxpl = H5Pcreate(H5P_DATASET_XFER);
         if (h5dxpl < 0) {
-        HDfprintf(stderr, "HDF5 Property List Create failed\n");
-        GOTOERROR(FAIL);
+            HDfprintf(stderr, "HDF5 Property List Create failed\n");
+            GOTOERROR(FAIL);
         }
 
         /* Change to collective I/O, if asked */
         if(parms->collective) {
-        hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
-        if (hrc < 0) {
-            HDfprintf(stderr, "HDF5 Property List Set failed\n");
-            GOTOERROR(FAIL);
+            hrc = H5Pset_dxpl_mpio(h5dxpl, H5FD_MPIO_COLLECTIVE);
+            if (hrc < 0) {
+                HDfprintf(stderr, "HDF5 Property List Set failed\n");
+                GOTOERROR(FAIL);
+            } /* end if */
         } /* end if */
-        } /* end if */
+        break;
+
+    default:
         break;
     } /* end switch */
 
@@ -1838,19 +1862,21 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     switch (parms->io_type) {
         case POSIXIO:
         case MPIO:
-        /* both posix and mpi io just need dataset offset in file*/
-        dset_offset = (ndset - 1) * nbytes;
-        break;
+            /* both posix and mpi io just need dataset offset in file*/
+            dset_offset = (ndset - 1) * nbytes;
+            break;
 
         case PHDF5:
             HDsprintf(dname, "Dataset_%ld", ndset);
-        h5ds_id = H5DOPEN(fd->h5fd, dname);
-        if (h5ds_id < 0) {
-            HDfprintf(stderr, "HDF5 Dataset open failed\n");
-            GOTOERROR(FAIL);
-        }
+            h5ds_id = H5DOPEN(fd->h5fd, dname);
+            if (h5ds_id < 0) {
+                HDfprintf(stderr, "HDF5 Dataset open failed\n");
+                GOTOERROR(FAIL);
+            }
+            break;
 
-        break;
+        default:
+            break;
     }
 
     /* The task is to transfer bytes_count bytes, starting at
@@ -2303,6 +2329,9 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 
             } /* end else */
             break;
+
+        default:
+            break;
         } /* switch (parms->io_type) */
 
         /* Verify raw data, if asked */
@@ -2532,6 +2561,9 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             }
 
             break;
+
+        default:
+            break;
     }
 
 done:
@@ -2552,38 +2584,41 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
     int mrc = 0, rc = 0;
 
     switch (iot) {
-    case POSIXIO:
-        rc = POSIXCLOSE(fd->posixfd);
+        case POSIXIO:
+            rc = POSIXCLOSE(fd->posixfd);
 
-        if (rc != 0){
-        HDfprintf(stderr, "POSIX File Close failed\n");
-        GOTOERROR(FAIL);
-        }
+            if (rc != 0){
+                HDfprintf(stderr, "POSIX File Close failed\n");
+                GOTOERROR(FAIL);
+            }
 
-        fd->posixfd = -1;
-        break;
+            fd->posixfd = -1;
+            break;
 
-    case MPIO:
-        mrc = MPI_File_close(&fd->mpifd);
+        case MPIO:
+            mrc = MPI_File_close(&fd->mpifd);
 
-        if (mrc != MPI_SUCCESS){
-        HDfprintf(stderr, "MPI File close failed\n");
-        GOTOERROR(FAIL);
-        }
+            if (mrc != MPI_SUCCESS){
+                HDfprintf(stderr, "MPI File close failed\n");
+                GOTOERROR(FAIL);
+            }
 
-        fd->mpifd = MPI_FILE_NULL;
-        break;
+            fd->mpifd = MPI_FILE_NULL;
+            break;
 
-    case PHDF5:
-        hrc = H5Fclose(fd->h5fd);
+        case PHDF5:
+            hrc = H5Fclose(fd->h5fd);
 
-        if (hrc < 0) {
-        HDfprintf(stderr, "HDF5 File Close failed\n");
-        GOTOERROR(FAIL);
-        }
+            if (hrc < 0) {
+                HDfprintf(stderr, "HDF5 File Close failed\n");
+                GOTOERROR(FAIL);
+            }
 
-        fd->h5fd = -1;
-        break;
+            fd->h5fd = -1;
+            break;
+
+        default:
+            break;
     }
 
 done:
@@ -2610,15 +2645,17 @@ do_cleanupfile(iotype iot, char *fname)
     clean_file_g = (getenv("HDF5_NOCLEANUP")==NULL) ? 1 : 0;
 
     if (clean_file_g){
-    switch (iot){
-        case POSIXIO:
-            HDremove(fname);
-        break;
-        case MPIO:
-        case PHDF5:
-        MPI_File_delete(fname, h5_io_info_g);
-        break;
-    }
+        switch (iot){
+            case POSIXIO:
+                HDremove(fname);
+                break;
+            case MPIO:
+            case PHDF5:
+                MPI_File_delete(fname, h5_io_info_g);
+                break;
+            default:
+                break;
+        }
     }
 }
 

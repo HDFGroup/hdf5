@@ -152,7 +152,6 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
     unsigned       i;
     herr_t         ret_value = SUCCEED;
 
-
     H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
 
     if(H5Oget_info3(loc1_id, &oinfo1, H5O_INFO_NUM_ATTRS) < 0) {

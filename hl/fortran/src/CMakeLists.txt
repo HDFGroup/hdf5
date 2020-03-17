@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_HL_F90_SRC C Fortran)
 
 #-----------------------------------------------------------------------------
@@ -164,7 +164,7 @@ if (NOT ONLY_SHARED_LIBS)
       PRIVATE
           "${HDF5_F90_BINARY_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
       INTERFACE
-          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/static>"
   )
   target_compile_definitions(${HDF5_HL_F90_LIB_TARGET}
       PUBLIC
@@ -201,7 +201,7 @@ if (BUILD_SHARED_LIBS)
       PRIVATE
           "${HDF5_F90_BINARY_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
       INTERFACE
-          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/shared>"
   )
   target_compile_definitions(${HDF5_HL_F90_LIBSH_TARGET}
       PUBLIC

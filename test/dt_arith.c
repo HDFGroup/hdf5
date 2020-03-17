@@ -770,7 +770,7 @@ static int test_particular_fp_integer(void)
 
     /* Print errors */
     if(dst_c != SCHAR_MAX) {
-        double x;
+        double x = 0.;
         signed char   y;
 
         if(0 == fails_this_test++)
@@ -814,7 +814,7 @@ static int test_particular_fp_integer(void)
 
     /* Print errors */
     if(dst_i != fill_value) {
-        float x;
+        float x = 0.;
         int   y;
 
         if(0 == fails_this_test++)
@@ -2723,16 +2723,16 @@ my_isnan(dtype_t type, void *val)
     char s[256];
 
     if (FLT_FLOAT==type) {
-    float x;
+    float x = 0.;
     HDmemcpy(&x, val, sizeof(float));
     retval = (x!=x);
     } else if (FLT_DOUBLE==type) {
-    double x;
+    double x = 0.;
     HDmemcpy(&x, val, sizeof(double));
     retval = (x!=x);
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     } else if (FLT_LDOUBLE==type) {
-    long double x;
+    long double x = 0.;
     HDmemcpy(&x, val, sizeof(long double));
     retval = (x!=x);
 #endif
@@ -2746,18 +2746,18 @@ my_isnan(dtype_t type, void *val)
      */
     if (!retval) {
     if (FLT_FLOAT==type) {
-        float x;
+        float x = 0.;
 
         HDmemcpy(&x, val, sizeof(float));
         HDsnprintf(s, sizeof(s), "%g", (double)x);
     } else if (FLT_DOUBLE==type) {
-        double x;
+        double x = 0.;
 
         HDmemcpy(&x, val, sizeof(double));
         HDsnprintf(s, sizeof(s), "%g", x);
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     } else if (FLT_LDOUBLE==type) {
-        long double x;
+        long double x = 0.;
 
         HDmemcpy(&x, val, sizeof(long double));
         HDsnprintf(s, sizeof(s), "%Lg", x);
@@ -3197,7 +3197,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             int        check_expo[2];
 
             if (FLT_FLOAT==dst_type) {
-                float x;
+                float x = 0.;
                 HDmemcpy(&x, &buf[j*dst_size], sizeof(float));
                 if (underflow &&
                         HDfabsf(x) <= FLT_MIN && HDfabsf(hw_f) <= FLT_MIN)
@@ -3208,7 +3208,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 check_mant[0] = HDfrexpf(x, check_expo+0);
                 check_mant[1] = HDfrexpf(hw_f, check_expo+1);
             } else if (FLT_DOUBLE==dst_type) {
-                double x;
+                double x = 0.;
                 HDmemcpy(&x, &buf[j*dst_size], sizeof(double));
                 if (underflow &&
                         HDfabs(x) <= DBL_MIN && HDfabs(hw_d) <= DBL_MIN)
@@ -3220,7 +3220,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 check_mant[1] = HDfrexp(hw_d, check_expo+1);
 #if H5_SIZEOF_LONG_DOUBLE !=0 && (H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE)
             } else {
-                long double x;
+                long double x = 0.;
                 HDmemcpy(&x, &buf[j*dst_size], sizeof(long double));
                 /* dst is largest float, no need to check underflow. */
                 check_mant[0] = (double)HDfrexpl(x, check_expo+0);
@@ -3265,16 +3265,16 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             HDprintf(" %02x", saved[j*src_size+ENDIAN(src_size,k,sendian)]);
         HDprintf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)), "");
         if (FLT_FLOAT==src_type) {
-            float x;
+            float x = 0.;
             HDmemcpy(&x, &saved[j*src_size], sizeof(float));
             HDprintf(" %29.20e\n", (double)x);
         } else if (FLT_DOUBLE==src_type) {
-            double x;
+            double x = 0.;
             HDmemcpy(&x, &saved[j*src_size], sizeof(double));
             HDprintf(" %29.20e\n", x);
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
         } else {
-            long double x;
+            long double x = 0.;
             HDmemcpy(&x, &saved[j*src_size], sizeof(long double));
             HDfprintf(stdout," %29.20Le\n", x);
 #endif
@@ -3285,16 +3285,16 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             HDprintf(" %02x", buf[j*dst_size+ENDIAN(dst_size,k,dendian)]);
         HDprintf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
         if (FLT_FLOAT==dst_type) {
-            float x;
+            float x = 0.;
             HDmemcpy(&x, &buf[j*dst_size], sizeof(float));
             HDprintf(" %29.20e\n", (double)x);
         } else if (FLT_DOUBLE==dst_type) {
-            double x;
+            double x = 0.;
             HDmemcpy(&x, &buf[j*dst_size], sizeof(double));
             HDprintf(" %29.20e\n", x);
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
         } else {
-            long double x;
+            long double x = 0.;
             HDmemcpy(&x, &buf[j*dst_size], sizeof(long double));
             HDfprintf(stdout," %29.20Le\n", x);
 #endif

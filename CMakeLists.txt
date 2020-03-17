@@ -1,9 +1,13 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5 C)
 
-if(POLICY CMP0074)
-  cmake_policy(SET CMP0074 NEW)
-endif()
+if (POLICY CMP0074)
+  cmake_policy (SET CMP0074 NEW)
+endif ()
+
+if (POLICY CMP0083)
+  cmake_policy (SET CMP0083 NEW)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
@@ -15,7 +19,7 @@ endif()
 # Make install can be used to install all components for system-wide use.
 #
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
-    MESSAGE(FATAL_ERROR "\nERROR! ${PROJECT_NAME} DOES NOT SUPPORT IN SOURCE BUILDS!\n"
+    message (FATAL_ERROR "\nERROR! ${PROJECT_NAME} DOES NOT SUPPORT IN SOURCE BUILDS!\n"
       "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
       " == CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}\n"
       "NEXT STEPS:\n"
@@ -34,9 +38,14 @@ endif ()
 
 # CMake version 3.14 added option --ignore-eol to compare files
 #     cmake -E compare_files --ignore-eol file1 file2
-#if(CMAKE_VERSION VERSION_LESS "3.14.0" AND WIN32)
-#    MESSAGE(FATAL_ERROR "Windows builds requires a minimum of CMake 3.14")
-#endif()
+set (CMAKE_IGNORE_EOL "--ignore-eol")
+if (CMAKE_VERSION VERSION_LESS "3.14.0")
+  set (CMAKE_IGNORE_EOL "")
+  if (WIN32)
+    message (FATAL_ERROR "Windows builds requires a minimum of CMake 3.14")
+  endif()
+else ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
@@ -100,7 +109,7 @@ mark_as_advanced (HDF5_EXTERNAL_LIB_PREFIX)
 #   # Add the sub project
 #   add_subdirectory (Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
-string(TIMESTAMP CONFIG_DATE "%Y-%m-%d")
+string (TIMESTAMP CONFIG_DATE "%Y-%m-%d")
 
 #-----------------------------------------------------------------------------
 # Allow Visual Studio solution directories
@@ -394,9 +403,6 @@ HDF_DIR_PATHS(${HDF5_PACKAGE_NAME})
 
 include (${HDF_RESOURCES_EXT_DIR}/HDFLibMacros.cmake)
 include (${HDF_RESOURCES_DIR}/HDF5Macros.cmake)
-if (HDF5_ENABLE_SANITIZERS)
-  include (${HDF5_SOURCE_DIR}/config/sanitizer/sanitizers.cmake)
-endif ()
 
 #-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
@@ -440,6 +446,7 @@ set (H5_ENABLE_STATIC_LIB NO)
 option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
 option (ONLY_SHARED_LIBS "Only Build Shared Libraries" OFF)
+mark_as_advanced (ONLY_SHARED_LIBS)
 
 if (BUILD_STATIC_LIBS)
   set (H5_ENABLE_STATIC_LIB YES)
@@ -459,6 +466,12 @@ if (ONLY_SHARED_LIBS)
 endif ()
 
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if (NOT BUILD_SHARED_LIBS)
+  set (tgt_file_ext "")
+else ()
+  set (tgt_file_ext "-shared")
+endif ()
 
 #-----------------------------------------------------------------------------
 # Option to Build Static executables
@@ -485,7 +498,7 @@ option (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" O
 if (HDF5_ENABLE_COVERAGE)
   include (${HDF5_SOURCE_DIR}/config/sanitizer/code-coverage.cmake)
   if(CODE_COVERAGE AND CODE_COVERAGE_ADDED)
-    add_code_coverage() # Adds instrumentation to all targets
+    add_code_coverage () # Adds instrumentation to all targets
   else ()
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --coverage -O0 -fprofile-arcs -ftest-coverage")
@@ -551,9 +564,7 @@ endif ()
 set (EXE_EXT "")
 if (WIN32 OR MINGW)
   set (EXE_EXT ".exe")
-  add_definitions (-D_BIND_TO_CURRENT_VCLIBS_VERSION=1)
-  add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-  add_definitions (-D_CONSOLE)
+  add_compile_definitions (_BIND_TO_CURRENT_VCLIBS_VERSION=1 _CRT_SECURE_NO_WARNINGS _CONSOLE)
 endif ()
 
 if (MSVC)
@@ -795,8 +806,8 @@ if (HDF5_ENABLE_THREADSAFE)
       message (FATAL_ERROR " **** thread-safe option requires Win32 threads or Pthreads **** ")
     endif ()
   endif ()
-  set(THREADS_PREFER_PTHREAD_FLAG ON)
-  find_package(Threads REQUIRED)
+  set (THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package (Threads REQUIRED)
   if (Threads_FOUND)
     set (H5_HAVE_THREADSAFE 1)
   endif ()
@@ -953,12 +964,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
 
     message (STATUS "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
-    # Building with PGI requires CMake 3.3 or greater  because previous versions
-    # of CMake add the wrong compiler flag for the PGI Fortran compiler.
-    if (CMAKE_Fortran_COMPILER_ID MATCHES "PGI" AND CMAKE_VERSION VERSION_LESS "3.3")
-      message (FATAL_ERROR " **** PGI FORTRAN REQUIRES CMAKE VERSION 3.3 OR GREATER **** ")
-    endif ()
-
     include (${HDF_RESOURCES_DIR}/HDF5UseFortran.cmake)
     set (LINK_Fortran_LIBS ${LINK_LIBS})
 

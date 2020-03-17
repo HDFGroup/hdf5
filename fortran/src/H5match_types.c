@@ -153,7 +153,9 @@ int main(void)
   
   int FORTRAN_NUM_INTEGER_KINDS=H5_FORTRAN_NUM_INTEGER_KINDS;
   int H5_FORTRAN_NUM_REAL_KINDS;
+#if H5_FORTRAN_HAVE_C_LONG_DOUBLE!=0
   int found_long_double = 0;
+#endif
 
   /* Open target files */
   c_header = fopen(CFILE, "w");

@@ -34,8 +34,8 @@ main (int argc, char **argv)
     hid_t       file_id, dset_id, grp_id;
     hid_t       fapl, sid, mem_dataspace;
     herr_t      ret;
-    char	filename[1024];
-    int         mpi_size, mpi_rank, ndims, i, j;
+    char	    filename[1024];
+    int         mpi_size, mpi_rank, ndims;
     MPI_Comm    comm  = MPI_COMM_WORLD;
     MPI_Info    info  = MPI_INFO_NULL;
     hsize_t     dims[RANK];
@@ -43,6 +43,7 @@ main (int argc, char **argv)
     hsize_t     count[RANK];
     hsize_t     stride[RANK];
     hsize_t     block[RANK];
+    hsize_t     i, j;
     DATATYPE   *data_array = NULL, *dataptr;	/* data buffer */
 
     MPI_Init(&argc, &argv);
@@ -73,8 +74,8 @@ main (int argc, char **argv)
 
     ndims = H5Sget_simple_extent_dims(sid, dims, NULL);
     VRFY((ndims == 2), "H5Sget_simple_extent_dims succeeded");
-    VRFY(dims[0] == ROW_FACTOR*mpi_size, "Wrong dataset dimensions");
-    VRFY(dims[1] == COL_FACTOR*mpi_size, "Wrong dataset dimensions");
+    VRFY(dims[0] == (hsize_t)(ROW_FACTOR*mpi_size), "Wrong dataset dimensions");
+    VRFY(dims[1] == (hsize_t)(COL_FACTOR*mpi_size), "Wrong dataset dimensions");
 
     /* allocate memory for data buffer */
     data_array = (DATATYPE *)HDmalloc(dims[0]*dims[1]*sizeof(DATATYPE));
@@ -127,7 +128,7 @@ main (int argc, char **argv)
 
     if(MAINPROCESS) {
         if(0 == nerrors)
-            PASSED()
+            PASSED();
         else
 	    H5_FAILED()
     }

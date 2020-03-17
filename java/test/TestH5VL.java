@@ -55,15 +55,18 @@ public class TestH5VL {
         try {
             boolean is_registered;
 
-            is_registered = H5.H5VLis_connector_registered(HDF5Constants.H5VL_NATIVE_NAME);
-            assertTrue("H5.H5VLis_connector_registered H5VL_NATIVE_NAME", is_registered);
+            is_registered = H5.H5VLis_connector_registered_by_name(HDF5Constants.H5VL_NATIVE_NAME);
+            assertTrue("H5.H5VLis_connector_registered_by_name H5VL_NATIVE_NAME", is_registered);
 
-            is_registered = H5.H5VLis_connector_registered("FAKE_VOL_NAME");
-            assertFalse("H5.H5VLis_connector_registered FAKE_VOL_NAME", is_registered);
+            is_registered = H5.H5VLis_connector_registered_by_name("FAKE_VOL_NAME");
+            assertFalse("H5.H5VLis_connector_registered_by_name FAKE_VOL_NAME", is_registered);
+
+            is_registered = H5.H5VLis_connector_registered_by_value(HDF5Constants.H5VL_NATIVE_VALUE);
+            assertTrue("H5.H5VLis_connector_registered_by_value H5VL_NATIVE_VALUE", is_registered);
         }
         catch (Throwable err) {
             err.printStackTrace();
-            fail("H5.H5VLis_connector_registered " + err);
+            fail("testH5VLnative_init(): " + err);
         }
     }
 
@@ -109,6 +112,19 @@ public class TestH5VL {
         catch (Throwable err) {
             err.printStackTrace();
             fail("H5.H5VLget_connector_id_by_name " + err);
+        }
+    }
+
+    @Test
+    public void testH5VLget_connector_id_by_value() {
+        try {
+            long native_id = H5.H5VLget_connector_id_by_value(HDF5Constants.H5VL_NATIVE_VALUE);
+            assertTrue("H5.H5VLget_connector_id_by_value H5VL_NATIVE_VALUE", native_id >= 0);
+            assertEquals(HDF5Constants.H5VL_NATIVE, native_id);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.H5VLget_connector_id_by_value " + err);
         }
     }
 

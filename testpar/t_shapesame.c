@@ -397,14 +397,9 @@ hs_dr_pio_test__setup(const int test_num,
          *
          *                                         JRM -- 9/16/10
          */
-        if ( express_test == 0 ) {
 
-            tv_ptr->chunk_dims[0] = 1;
+        tv_ptr->chunk_dims[0] = 1;
 
-        } else {
-
-            tv_ptr->chunk_dims[0] = 1;
-        }
         tv_ptr->chunk_dims[1] = tv_ptr->chunk_dims[2] =
                                 tv_ptr->chunk_dims[3] =
                                 tv_ptr->chunk_dims[4] = (hsize_t)(tv_ptr->chunk_edge_size);

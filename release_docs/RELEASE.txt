@@ -20,7 +20,7 @@ The official HDF5 releases can be obtained from:
 
      https://www.hdfgroup.org/downloads/hdf5/
 
-Changes from Release to Release and New Features in the HDF5-1.10.x release series
+Changes from Release to Release and New Features in the HDF5-1.13.x release series
 can be found at:
 
      https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
@@ -48,6 +48,36 @@ New Features
 
     Configuration:
     -------------
+    - Added test script for file size compare
+
+      if CMake minimum version is at least 3.14, the fileCompareTest.cmake
+      script will compare file sizes.
+
+      (ADB - 2020/02/24, HDFFV-11036)
+
+    - Update CMake minimum version to 3.12
+
+      Updated CMake minimum version to 3.12 and added version checks
+      for Windows features.
+
+      (ADB - 2020/02/05, TRILABS-142)
+
+    - Fixed CMake include properties for Fortran libraries
+
+      Corrected the library properties for Fortran to use the
+      correct path for the Fortran module files.
+
+      (ADB - 2020/02/04, HDFFV-11012)
+
+    - Added common warnings files for gnu and intel
+
+      Added warnings files to use one common set of flags
+      during configure for both autotools and CMake build
+      systems. The initial implementation only affects a
+      general set of flags for gnu and intel compilers.
+
+      (ADB - 2020/01/17)
+
     - Added new options to CMake for control of testing
 
       Added CMake options (default ON);
@@ -62,9 +92,18 @@ New Features
 
       (ADB - 2020/01/15, HDFFV-11001)
 
-    - Added Clang sanitizers to CMake for analyzer support
+    - Added Clang sanitizers to CMake for analyzer support if compiler is clang.
 
-      Added CMake code and files to execute the Clang sanitizers.
+      Added CMake code and files to execute the Clang sanitizers if
+      HDF5_ENABLE_SANITIZERS is enabled and the USE_SANITIZER option
+      is set to one of the following:
+          Address
+          Memory
+          MemoryWithOrigins
+          Undefined
+          Thread
+          Leak
+          'Address;Undefined'
 
       (ADB - 2019/12/12, TRILAB-135)
 
@@ -231,6 +270,50 @@ New Features
 
     Library:
     --------
+    - Refactored public exposure of haddr_t type in favor of "object tokens"
+
+      To better accommodate HDF5 VOL connectors where "object addresses in a file"
+      may not make much sense, the following changes were made to the library:
+
+      * Introduced new H5O_token_t "object token" type, which represents a
+        unique and permanent identifier for referencing an HDF5 object within
+        a container; these "object tokens" are meant to replace object addresses.
+        Along with the new type, a new H5Oopen_by_token API call was introduced
+        to open an object by a token, similar to how object addresses were
+        previously used with H5Oopen_by_addr.
+
+      * Introduced new H5Lget_info2, H5Lget_info_by_idx2, H5Literate2, H5Literate_by_name2,
+        H5Lvisit2 and H5Lvisit_by_name2 API calls, along with their associated H5L_info2_t
+        struct and H5L_iterate2_t callback function, which work with the newly-introduced
+        object tokens, instead of object addresses. The original functions have been
+        renamed to version 1 functions and are deprecated in favor of the new version 2
+        functions. The H5L_info_t and H5L_iterate_t types have been renamed to version 1
+        types and are now deprecated in favor of their version 2 counterparts. For each of
+        the functions and types, compatibility macros take place of the original symbols.
+
+      * Introduced new H5Oget_info3, H5Oget_info_by_name3, H5Oget_info_by_idx3,
+        H5Ovisit3 and H5Ovisit_by_name3 API calls, along with their associated H5O_info2_t
+        struct and H5O_iterate2_t callback function, which work with the newly-introduced
+        object tokens, instead of object addresses. The version 2 functions are now
+        deprecated in favor of the version 3 functions. The H5O_info_t and H5O_iterate_t
+        types have been renamed to version 1 types and are now deprecated in favor of their
+        version 2 counterparts. For each, compatibility macros take place of the original
+        symbols.
+
+      * Introduced new H5Oget_native_info, H5Oget_native_info_by_name and
+        H5Oget_native_info_by_idx API calls, along with their associated H5O_native_info_t
+        struct, which are used to retrieve the native HDF5 file format-specific information
+        about an object. This information (such as object header info and B-tree/heap info)
+        has been removed from the new H5O_info2_t struct so that the more generic
+        H5Oget_info(_by_name/_by_idx)3 routines will not try to retrieve it for non-native
+        VOL connectors.
+
+      * Added new H5Otoken_cmp, H5Otoken_to_str and H5Otoken_from_str routines to compare
+        two object tokens, convert an object token into a nicely-readable string format and
+        to convert an object token string back into a real object token, respectively.
+
+      (DER, QAK, JTH - 2020/01/16)
+
     - Add new public function H5Sselect_adjust.
 
       This function shifts a dataspace selection by a specified logical offset
@@ -382,6 +465,12 @@ New Features
 
     Java Library:
     ----------------
+    - Added ability to test java library with VOLs.
+
+      Created new CMake script that combines the java and vol test scripts.
+
+      (ADB - 2020/02/03, HDFFV-10996)
+
     - Tests fail for non-English locale.
 
       In the JUnit tests with a non-English locale, only the part before
@@ -413,6 +502,16 @@ New Features
 
     Tools:
     ------
+    - h5repack was fixed to repack the reference attributes properly.
+      The code line that checks if the update of reference inside a compound
+      datatype is misplaced outside the code block loop that carries out the
+      check. In consequence, the next attribute that is not the reference
+      type was repacked again as the reference type and caused the failure of
+      repacking. The fix is to move the corresponding code line to the correct
+      code block.
+
+      (KY -2020/02/07, HDFFV-11014)
+
     - h5diff was updated to use the new reference APIs.
 
       h5diff uses the new reference APIs to compare references.
@@ -480,6 +579,19 @@ Bug Fixes since HDF5-1.10.3 release
       reproducer and a patch.
 
       (CJH - 2019/12/9, HDFFV-10934)
+
+    - Fixed an assertion failure in the parallel library when collectively
+      filling chunks. As it is required that chunks be written in
+      monotonically non-decreasing order of offset in the file, this assertion
+      was being triggered when the list of chunk file space allocations being
+      passed to the collective chunk filling routine was not sorted according
+      to this particular requirement.
+
+      The addition of a sort of the out of order chunks trades a bit of
+      performance for the elimination of this assertion and of any complaints
+      from MPI implementations about the file offsets used being out of order.
+
+      (JTH - 2019/10/07, HDFFV-10792)
 
     - Fixed the iteration error in test_versionbounds() in test/dtypes.c
 
@@ -788,6 +900,9 @@ Bug Fixes since HDF5-1.10.3 release
 
       (MSB, 2018/1/8, HDFFV-10443)
 
+    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
+
+      (MSB - 2020/2/18, HDFFV-11029)
 
     Tools
     -----
@@ -1107,12 +1222,8 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-
     Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
-
-    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 10 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)

@@ -107,8 +107,7 @@ static hbool_t H5_ntzset = FALSE;
  *      format_templ in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+H5_GCC_DIAG_OFF(format-nonliteral)
 int
 HDfprintf(FILE *stream, const char *fmt, ...)
 {
@@ -460,7 +459,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     HDva_end(ap);
     return nout;
 } /* end HDfprintf() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(format-nonliteral)
 
 
 /*-------------------------------------------------------------------------

@@ -525,7 +525,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_free_connector_info(hid_t connector_id, void *info)
+H5VL_free_connector_info(hid_t connector_id, const void *info)
 {
     H5VL_class_t *cls;                  /* VOL connector's class struct */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -543,12 +543,13 @@ H5VL_free_connector_info(hid_t connector_id, void *info)
     if(info) {
         /* Allow the connector to free info or do it ourselves */
         if(cls->info_cls.free) {
-            if((cls->info_cls.free)(info) < 0)
+            /* Cast through uintptr_t to de-const memory */
+            if((cls->info_cls.free)((void *)(uintptr_t)info) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "connector info free request failed")
-        } /* end if */
+        }
         else
-            H5MM_xfree(info);
-    } /* end if */
+            H5MM_xfree_const(info);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -526,7 +526,7 @@ static int test_mpio_1wMr(char *filename, int special_request) {
     * ==================================================*/
     irank = 0;
     for (i = 0; i < DIMSIZE; i++)
-         H5_CHECKED_ASSIGN(writedata[i], uint8_t, irank * DIMSIZE + i, int)
+         writedata[i] = (uint8_t)(irank * DIMSIZE + i);
     mpi_off = irank * DIMSIZE;
 
     /* Only one process writes */
@@ -597,7 +597,7 @@ static int test_mpio_1wMr(char *filename, int special_request) {
         return 1;
     };
     for (i = 0; i < DIMSIZE; i++) {
-        H5_CHECKED_ASSIGN(expect_val, uint8_t, irank * DIMSIZE + i, int);
+        expect_val = (uint8_t)(irank * DIMSIZE + i);
         if (readdata[i] != expect_val) {
             PRINTID;
             HDprintf("read data[%d:%d] got %02x, expect %02x\n", irank, i,

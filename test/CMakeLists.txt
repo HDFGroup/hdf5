@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_TEST C)
 
 #-----------------------------------------------------------------------------
@@ -287,6 +287,7 @@ set (H5_TESTS
     cache_logging
     cork
     swmr
+    thread_id
     vol
 )
 

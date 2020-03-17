@@ -91,7 +91,6 @@ typedef int H5VL_attr_optional_t;
 typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_DAPL,                  /* access property list                */
     H5VL_DATASET_GET_DCPL,                  /* creation property list              */
-    H5VL_DATASET_GET_OFFSET,                /* offset                              */
     H5VL_DATASET_GET_SPACE,                 /* dataspace                           */
     H5VL_DATASET_GET_SPACE_STATUS,          /* space status                        */
     H5VL_DATASET_GET_STORAGE_SIZE,          /* storage size                        */
@@ -512,7 +511,8 @@ H5_DLL hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);
 H5_DLL void *H5VLobject(hid_t obj_id);
 H5_DLL hid_t H5VLget_file_type(void *file_obj, hid_t connector_id,
     hid_t dtype_id);
-H5_DLL hid_t H5VLpeek_connector_id(const char *name);
+H5_DLL hid_t H5VLpeek_connector_id_by_name(const char *name);
+H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 
 #ifdef __cplusplus
 }

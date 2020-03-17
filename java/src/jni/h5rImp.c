@@ -50,7 +50,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1object
 
     PIN_JAVA_STRING(ENVONLY, name, refName, NULL, "H5Rcreate_object: reference name not pinned");
 
-    if (NULL == (refBuf = (unsigned char *) HDcalloc((size_t) 1, H5R_REF_BUF_SIZE)))
+    if (NULL == (refBuf = HDcalloc(1, H5R_REF_BUF_SIZE)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rcreate_object: failed to allocate reference buffer");
 
     if ((status = H5Rcreate_object((hid_t)loc_id, refName, (hid_t)aid, (const H5R_ref_t *)refBuf)) < 0)
@@ -93,7 +93,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1region
 
     PIN_JAVA_STRING(ENVONLY, name, refName, NULL, "H5Rcreate_region: reference name not pinned");
 
-    if (NULL == (refBuf = (unsigned char *) HDcalloc((size_t) 1, H5R_REF_BUF_SIZE)))
+    if (NULL == (refBuf = HDcalloc(1, H5R_REF_BUF_SIZE)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rcreate_region: failed to allocate reference buffer");
 
     if ((status = H5Rcreate_region((hid_t)loc_id, refName, space_id, (hid_t)aid, (const H5R_ref_t *)refBuf)) < 0)
@@ -140,7 +140,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1attr
 
     PIN_JAVA_STRING(ENVONLY, name, refName, NULL, "H5Rcreate_attr: reference name not pinned");
 
-    if (NULL == (refBuf = (unsigned char *) HDcalloc((size_t) 1, H5R_REF_BUF_SIZE)))
+    if (NULL == (refBuf = HDcalloc(1, H5R_REF_BUF_SIZE)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rcreate_attr: failed to allocate reference buffer");
 
     if ((status = H5Rcreate_attr((hid_t)loc_id, refName, attrName, (hid_t)aid, (const H5R_ref_t *)refBuf)) < 0)
@@ -314,7 +314,7 @@ Java_hdf_hdf5lib_H5_H5Rcopy
 
     PIN_BYTE_ARRAY(ENVONLY, src_ref, src_refBuf, &isCopy, "H5Rcopy: src reference buffer not pinned");
 
-    if (NULL == (dst_refBuf = (unsigned char *) HDcalloc((size_t) 1, H5R_REF_BUF_SIZE)))
+    if (NULL == (dst_refBuf = HDcalloc(1, H5R_REF_BUF_SIZE)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rcreate_attr: failed to allocate dst reference buffer");
 
     if ((status = H5Rcopy((const H5R_ref_t *)src_refBuf, (const H5R_ref_t *)dst_refBuf)) < 0)
@@ -504,7 +504,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1file_1name
     if ((buf_size = H5Rget_file_name((const H5R_ref_t *)refBuf, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (namePtr = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_file_name: malloc failed");
 
     if ((check_size = H5Rget_file_name((const H5R_ref_t *)refBuf, namePtr, (size_t)buf_size + 1)) < 0)
@@ -550,7 +550,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1name
     if ((buf_size = H5Rget_obj_name((const H5R_ref_t *)refBuf, (hid_t)rapl_id, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (namePtr = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_obj_name: malloc failed");
 
     if ((check_size = H5Rget_obj_name((const H5R_ref_t *)refBuf, (hid_t)rapl_id, namePtr, (size_t)buf_size + 1)) < 0)
@@ -596,7 +596,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1attr_1name
     if ((buf_size = H5Rget_attr_name((const H5R_ref_t *)refBuf, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (namePtr = (char *) HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (namePtr = HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_attr_name: malloc failed");
 
     if ((check_size = H5Rget_attr_name((const H5R_ref_t *)refBuf, namePtr, (size_t)buf_size + 1)) < 0)
@@ -862,7 +862,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1name
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rget_name: reference buffer not pinned");
 
-    if (NULL == (aName = (char *) HDmalloc(sizeof(char) * (size_t)size + 1)))
+    if (NULL == (aName = HDmalloc(sizeof(char) * (size_t)size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_name: failed to allocate referenced object name buffer");
 
     if ((ret_val = (jlong)H5Rget_name((hid_t)loc_id, (H5R_type_t)ref_type, refBuf, aName, (size_t)size + 1)) < 0)

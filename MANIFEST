@@ -142,7 +142,15 @@
 ./config/pgi-flags
 ./config/solaris
 
+#warnings files for both autotools and CMake
+./config/gnu-warnings-general
+./config/gnu-warnings-developer-general
+./config/gnu-warnings-no-developer-general
+./config/intel-warnings-general
+
 ./config/site-specific/BlankForm
+
+./doc/code-conventions.md
 
 ./examples/Attributes.txt
 ./examples/Makefile.am
@@ -1177,6 +1185,7 @@
 ./test/th5s.c
 ./test/th5s.h5
 ./test/theap.c
+./test/thread_id.c
 ./test/tid.c
 ./test/titerate.c
 ./test/tlayouto.h5
@@ -3341,6 +3350,7 @@
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
+./config/cmake/fileCompareTest.cmake
 ./config/cmake/FindHDFS.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
@@ -3351,6 +3361,7 @@
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/jrunTest.cmake
+./config/cmake/jvolTest.cmake
 ./config/cmake/libh5cc.in
 ./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in

@@ -272,7 +272,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
 
                 /* Construct child compound type and retrieve a list of their IDs, offsets, total size, and alignment for compound type. */
                 for(u = 0; u < nmemb; u++) {
-                    if(NULL == (memb_type = H5T_get_member_type(dtype, u, H5T_COPY_TRANSIENT)))
+                    if(NULL == (memb_type = H5T_get_member_type(dtype, u)))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member type retrieval failed")
 
                     if(NULL == (comp_mname[u] = H5T__get_member_name(dtype, u)))
@@ -530,8 +530,7 @@ done:
  *       the code below, but early (4.4.7, at least) gcc only allows
  *       diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wduplicated-branches"
+H5_GCC_DIAG_OFF(duplicated-branches)
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_integer
@@ -672,7 +671,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_integer() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(duplicated-branches)
 
 /* Disable warning for intentional identical branches here -QAK */
 /*
@@ -680,8 +679,7 @@ done:
  *       the code below, but early (4.4.7, at least) gcc only allows
  *       diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wduplicated-branches"
+H5_GCC_DIAG_OFF(duplicated-branches)
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_float
@@ -806,7 +804,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_float() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(duplicated-branches)
 
 /* Disable warning for intentional identical branches here -QAK */
 /*
@@ -814,8 +812,7 @@ done:
  *       the code below, but early (4.4.7, at least) gcc only allows
  *       diagnostic pragmas to be toggled outside of functions.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wduplicated-branches"
+H5_GCC_DIAG_OFF(duplicated-branches)
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_bitfield
@@ -901,7 +898,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_bitfield() */
-#pragma GCC diagnostic pop
+H5_GCC_DIAG_ON(duplicated-branches)
 
 
 /*-------------------------------------------------------------------------

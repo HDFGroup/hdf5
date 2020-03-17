@@ -44,7 +44,7 @@ typedef struct H5VL_object_t {
 /* Internal structure to hold the connector ID & info for FAPLs */
 typedef struct H5VL_connector_prop_t {
     hid_t       connector_id;           /* VOL connector's ID                                   */
-    void        *connector_info;        /* VOL connector info, for open callbacks               */
+    const void  *connector_info;        /* VOL connector info, for open callbacks               */
 } H5VL_connector_prop_t;
 
 /* Which kind of VOL connector field to use for searching */
@@ -128,7 +128,7 @@ H5_DLL int H5VL_copy_connector_info(const H5VL_class_t *connector, void **dst_in
     const void *src_info);
 H5_DLL herr_t H5VL_cmp_connector_info(const H5VL_class_t *connector, int *cmp_value,
     const void *info1, const void *info2);
-H5_DLL herr_t H5VL_free_connector_info(hid_t connector_id, void *info);
+H5_DLL herr_t H5VL_free_connector_info(hid_t connector_id, const void *info);
 
 /* Attribute functions */
 H5_DLL void *H5VL_attr_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);

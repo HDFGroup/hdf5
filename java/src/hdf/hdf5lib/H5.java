@@ -3590,7 +3590,7 @@ public class H5 implements java.io.Serializable {
      *                - name is null.
      */
     public synchronized static int H5Gget_obj_info_all(long loc_id, String name, String[] objNames, int[] objTypes,
-    		H5O_token_t[] tokens) throws HDF5LibraryException, NullPointerException {
+            H5O_token_t[] tokens) throws HDF5LibraryException, NullPointerException {
         if (objNames == null) {
             throw new NullPointerException("H5Gget_obj_info_all(): name array is null");
         }
@@ -3605,7 +3605,7 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static int H5Gget_obj_info_all(long loc_id, String name, String[] oname, int[] otype,
             int[] ltype, long[] fno, H5O_token_t[] tokens, int indx_type) throws HDF5LibraryException, NullPointerException {
-        return H5Gget_obj_info_full(loc_id, name, oname, otype, ltype, fno, tokens, oname.length, indx_type, -1);
+        return H5Gget_obj_info_full(loc_id, name, oname, otype, ltype, fno, tokens, indx_type, -1);
     }
 
     public synchronized static int H5Gget_obj_info_full(long loc_id, String name, String[] oname, int[] otype,
@@ -10895,9 +10895,11 @@ public class H5 implements java.io.Serializable {
     /// VOL Connector Functionality
     public synchronized static native long H5VLregister_connector_by_name(String connector_name, long vipl_id);
     public synchronized static native long H5VLregister_connector_by_value(int connector_value, long vipl_id);
-    public synchronized static native boolean H5VLis_connector_registered(String name);
+    public synchronized static native boolean H5VLis_connector_registered_by_name(String name);
+    public synchronized static native boolean H5VLis_connector_registered_by_value(int connector_value);
     public synchronized static native long H5VLget_connector_id(long object_id);
     public synchronized static native long H5VLget_connector_id_by_name(String name);
+    public synchronized static native long H5VLget_connector_id_by_value(int connector_value);
     public synchronized static native String H5VLget_connector_name(long object_id);
     public synchronized static native void H5VLclose(long connector_id);
     public synchronized static native void H5VLunregister_connector(long connector_id);
