@@ -1705,7 +1705,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         /* see if the shadow index already contains an entry for *entry. */
 
         ie_ptr = vfd_swmr_pageno_to_mdf_idx_entry(idx,
-            shared->mdf_idx_entries_used, target_page, true);
+            shared->mdf_idx_entries_used, target_page, false);
 
         if ( ie_ptr == NULL ) { /* alloc new entry in the metadata file index*/
             uint32_t new_index_entry_index;
@@ -1727,7 +1727,6 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
             /* partial initialization of new entry -- rest done later */
             ie_ptr->hdf5_page_offset     = target_page;
             ie_ptr->md_file_page_offset  = 0; /* undefined at this point */
-            ie_ptr->length               = (uint32_t)entry->size;
             ie_ptr->chksum               = 0; /* undefined at this point */
             /* ie_ptr->entry_ptr            initialized below */
             /* ie_ptr->tick_of_last_change  initialized below */
@@ -1742,6 +1741,8 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
             idx_ent_modified++;
         }
 
+        /* entry->size could have changed */
+        ie_ptr->length               = (uint32_t)entry->size;
         ie_ptr->entry_ptr            = entry->image_ptr;
         ie_ptr->tick_of_last_change  = shared->tick_num;
         ie_ptr->clean                = !entry->is_dirty;
@@ -2973,7 +2974,7 @@ metadata_section_split(size_t pgsz, haddr_t addr, size_t len, const void *_buf,
 {
     int i;
     size_t totlen = 0;
-    uint64_t whole_pgaddr, tail_pgaddr;
+    haddr_t whole_pgaddr, tail_pgaddr;
     const char *buf = _buf;
     metadata_section_t *head = &section[0], *middle = &section[1],
         *tail = &section[2];
@@ -3871,9 +3872,12 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
     /* if size > pb_ptr->page_size, addr must be page aligned */
     HDassert((size <= pb_ptr->page_size) || (addr == page_addr));
 
+    H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
 
     /* case 7) metadata write of size greater than page size. */
     if ( size > pb_ptr->page_size ) {
+
+        offset = 0;
 
         /* The write must be for a multi-page metadata entry, and 
          * we must be running as a VFD SWMR writer.
@@ -3898,7 +3902,37 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
         HDassert(pb_ptr->vfd_swmr_writer);
         HDassert(addr == page_addr);
 
-        H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
+        /* If we're about to overwrite a single-page entry with multiple
+         * pages, lengthen the entry.
+         */
+        if (entry_ptr != NULL && entry_ptr->size < size) {
+            H5PB_entry_t *overlap;
+            void *new_image = H5MM_malloc(size);
+            uint64_t iter_page;
+            uint64_t last_page = page +
+                roundup(size, pb_ptr->page_size) / pb_ptr->page_size;
+
+            fprintf(stderr,
+                "lengthening page %" PRIu64 " from %zu bytes to %zu, "
+                "last page %" PRIu64 "\n", page, entry_ptr->size, size,
+                last_page);
+
+            for (iter_page = page + 1; iter_page < last_page; iter_page++) {
+                H5PB__SEARCH_INDEX(pb_ptr, iter_page, overlap, FAIL)
+                assert(overlap == NULL);
+            }
+            if (new_image == NULL) {
+                HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL,
+                            "couldn't extend entry");
+            }
+            H5PB__UPDATE_RP_FOR_REMOVE(pb_ptr, entry_ptr, FAIL)
+            H5PB__DELETE_FROM_INDEX(pb_ptr, entry_ptr, FAIL)
+            entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
+            entry_ptr->image_ptr = new_image;
+            entry_ptr->is_mpmde = true;
+            entry_ptr->size = size;
+            H5PB__INSERT_IN_INDEX(pb_ptr, entry_ptr, FAIL)
+        }
 
         /* update hit rate stats */
         H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
@@ -3927,28 +3961,9 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
         /* at this point, one way or the other, the multi-page metadata 
          * entry must be in the page buffer.
          */
-        HDassert(entry_ptr->is_metadata);
         HDassert(entry_ptr->is_mpmde);
         HDassert(size == entry_ptr->size);
         HDassert(type == entry_ptr->mem_type);
-
-        /* overwrite the entry image with the write buffer */
-        HDmemcpy((uint8_t *)(entry_ptr->image_ptr), buf, size);
-
-        /* mark the entry dirty */
-        if ( H5PB__mark_entry_dirty(shared, pb_ptr, entry_ptr) < 0 )
-
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
-                        "mark entry dirty failed (1)")
-
-        /* insert in tick list if not there already */
-        if ( ! ( entry_ptr->modified_this_tick ) ) {
-
-            entry_ptr->modified_this_tick = TRUE;
-
-            H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
-        }
-
 
     } else {
         /* case 8) metadata write of size no larger than page size */
@@ -3958,50 +3973,39 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
         /* write cannot cross page boundaries. */
         HDassert((offset + size) <= pb_ptr->page_size);
 
-        /* get the containing page */
-        H5PB__SEARCH_INDEX(pb_ptr, page, entry_ptr, FAIL)
-
         /* update hit rate stats */
         H5PB__UPDATE_PB_HIT_RATE_STATS(pb_ptr, (entry_ptr != NULL), \
                                       TRUE, FALSE)
 
-        if ( ( NULL == entry_ptr ) &&
-             ( H5PB__load_page(shared, pb_ptr, page_addr, type, &entry_ptr) < 0 ) )
-
+        if (NULL == entry_ptr &&
+            H5PB__load_page(shared, pb_ptr, page_addr, type, &entry_ptr) < 0) {
             HGOTO_ERROR(H5E_PAGEBUF, H5E_READERROR, FAIL, \
                         "page buffer page load request failed (1)")
+        }
 
-        HDassert(entry_ptr);
         HDassert(entry_ptr->magic == H5PB__H5PB_ENTRY_T_MAGIC);
         HDassert(entry_ptr->addr == page_addr);
-        HDassert(entry_ptr->is_metadata);
         HDassert(!(entry_ptr->is_mpmde));
         HDassert(entry_ptr->size == pb_ptr->page_size);
         HDassert(size <= entry_ptr->size);
+    }
 
-        /* copy data from the write buffer into the page image */
-        HDmemcpy(((uint8_t *)(entry_ptr->image_ptr) + offset), 
-                 (const uint8_t *)buf, size);
+    HDassert(entry_ptr->is_metadata);
 
-        if ( H5PB__mark_entry_dirty(shared, pb_ptr, entry_ptr) < 0 )
+    /* copy data from the write buffer into the page image */
+    HDmemcpy((uint8_t *)(entry_ptr->image_ptr) + offset, buf, size);
 
-            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, \
-                        "mark entry dirty failed (2)")
+    if (H5PB__mark_entry_dirty(shared, pb_ptr, entry_ptr) < 0)
+        HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "mark entry dirty failed")
 
-        if ( pb_ptr->vfd_swmr_writer ) {
-
-            /* test to see if the entry is on the tick list, and insert 
-             * it if it is not. This will force the page buffer to retain 
-             * the page until the end of the tick.
-             */
-            if ( ! ( entry_ptr->modified_this_tick ) ) {
-
-                entry_ptr->modified_this_tick = TRUE;
-
-                H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
-            }
-        }
-    } 
+    /* Force the page buffer to retain the page until the end of
+     * the tick: add the entry to the tick list if it is not
+     * already present.
+     */
+    if (pb_ptr->vfd_swmr_writer && !entry_ptr->modified_this_tick) {
+        entry_ptr->modified_this_tick = true;
+        H5PB__INSERT_IN_TL(pb_ptr, entry_ptr, FAIL)
+    }
 
 done:
 
