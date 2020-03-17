@@ -1697,9 +1697,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
      * as appropriate.
      */
 
-    for (entry = pb_ptr->tl_head_ptr;
-         entry != NULL;
-         entry = entry->tl_next) {
+    for (entry = pb_ptr->tl_head_ptr; entry != NULL; entry = entry->tl_next) {
         uint64_t target_page = entry->page;
 
         HDassert(entry->magic == H5PB__H5PB_ENTRY_T_MAGIC);
