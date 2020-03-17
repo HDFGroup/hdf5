@@ -35,8 +35,6 @@ add_subdirectory (perform)
 
 #-- Add the tests
 if (BUILD_TESTING)
-  add_subdirectory (libtest)
-
 # --------------------------------------------------------------------
 # If S3 or HDFS enabled, then we need to test the tools library
 # --------------------------------------------------------------------
