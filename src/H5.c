@@ -354,7 +354,9 @@ H5_term_library(void)
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(VL);
-            pending += DOWN(PL);
+            /* Don't shut down the plugin code until all "pluggable" interfaces (Z, FD, PL) are shut down */
+            if(pending == 0)
+                pending += DOWN(PL);
             /* Don't shut down the error code until other APIs which use it are shut down */
             if(pending == 0)
                 pending += DOWN(E);

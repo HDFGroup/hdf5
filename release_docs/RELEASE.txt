@@ -419,6 +419,18 @@ New Features
 
       (ADB - 2018/09/18, HDFFV-10332)
 
+    - Fix shutdown failure when using the HDF5_VOL_CONNECTOR environment variable
+
+      When using the HDF5_VOL_CONNECTOR environment variable to set an
+      alternative default VOL connector, if the VOL connector is a dynamically
+      loaded plugin, the library can experience segmentation faults at when
+      the library is closed. This is due to the library unloading the plugins
+      before the virtual object layer. When then the VOL shutdown occurs,
+      it will attempt to close the default VOL connector, however this will
+      fail since the plugins will already have been unloaded.
+
+      (DER - 2020/03/18, HDFFV-11057)
+
 
     Parallel Library:
     -----------------
