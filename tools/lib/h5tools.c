@@ -514,7 +514,7 @@ h5tools_get_fapl(hid_t fapl, const char *fname, const char *driver,
     if (!HDstrcmp(driver, drivernames[SWMR_IDX])) {
         /* SWMR driver */
         if (swmr_fapl_augment(new_fapl, fname) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "swmr_fapl_augment failed");
+            H5TOOLS_GOTO_ERROR(FAIL, "swmr_fapl_augment failed");
         if (drivernum)
             *drivernum = SWMR_IDX;
     } else if (!HDstrcmp(driver, drivernames[SEC2_IDX])) {
