@@ -25,7 +25,11 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 # is enabled.
 if BUILD_PARALLEL_CONDITIONAL
   H5PDIFF=ph5diff
+if BUILD_TESTS_CONDITIONAL
   TEST_SCRIPT_PARA=testph5diff.sh
+else
+  TEST_SCRIPT_PARA=
+endif
 endif
 
 # Our main target, h5diff

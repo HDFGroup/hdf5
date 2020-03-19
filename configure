@@ -27548,8 +27548,10 @@ esac
  ADD_PARALLEL_FILES="no"
 
 if test -n "$PARALLEL"; then
-  ## The 'testpar' directory should participate in the build
-  TESTPARALLEL=testpar
+  if test "X$HDF5_TESTS" = "Xyes"; then
+    ## The 'testpar' directory should participate in the build
+    TESTPARALLEL=testpar
+  fi
 
   ## We are building a parallel library
 
@@ -29429,7 +29431,7 @@ else
   BUILD_CXX_CONDITIONAL_FALSE=
 fi
 
- if test -n "$TESTPARALLEL"; then
+ if test -n "$PARALLEL"; then
   BUILD_PARALLEL_CONDITIONAL_TRUE=
   BUILD_PARALLEL_CONDITIONAL_FALSE='#'
 else
