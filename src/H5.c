@@ -609,13 +609,7 @@ done:
  *	filters or non-native VOL connectors.
  *
  * Parameters:
- *  unsigned long long *total_alloc_bytes; OUT: Running count of total # of bytes allocated
- *  size_t *curr_alloc_bytes;           OUT: Current # of bytes allocated
- *  size_t *peak_alloc_bytes;           OUT: Peak # of bytes allocated
- *  size_t *max_block_size;             OUT: Largest block allocated
- *  size_t *total_alloc_blocks_count;   OUT: Running count of total # of blocks allocated
- *  size_t *curr_alloc_blocks_count;    OUT: Current # of blocks allocated
- *  size_t *peak_alloc_blocks_count;    OUT: Peak # of blocks allocated
+ *  H5_alloc_stats_t *stats;            OUT: Memory allocation statistics
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
@@ -626,21 +620,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_alloc_stats(unsigned long long *total_alloc_bytes, size_t *curr_alloc_bytes,
-    size_t *peak_alloc_bytes, size_t *max_block_size, size_t *total_alloc_blocks_count,
-    size_t *curr_alloc_blocks_count, size_t *peak_alloc_blocks_count)
+H5get_alloc_stats(H5_alloc_stats_t *stats)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*UL*z*z*z*z*z*z", total_alloc_bytes, curr_alloc_bytes,
-             peak_alloc_bytes, max_block_size, total_alloc_blocks_count,
-             curr_alloc_blocks_count, peak_alloc_blocks_count);
+    H5TRACE1("e", "*x", stats);
 
     /* Call the internal allocation stat routine to get the values */
-    if(H5MM_get_alloc_stats(total_alloc_bytes, curr_alloc_bytes, peak_alloc_bytes,
-            max_block_size, total_alloc_blocks_count, curr_alloc_blocks_count,
-            peak_alloc_blocks_count) < 0)
+    if(H5MM_get_alloc_stats(stats) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get allocation stats")
 
 done:

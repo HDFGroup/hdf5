@@ -5709,13 +5709,7 @@ test_misc35(void)
     size_t arr_size_final;    /* Final amount of array memory allocated */
     size_t blk_size_final;    /* Final amount of block memory allocated */
     size_t fac_size_final;    /* Final amount of factory memory allocated */
-    unsigned long long total_alloc_bytes; /* Running count of total # of bytes allocated */
-    size_t curr_alloc_bytes;            /* Current # of bytes allocated */
-    size_t peak_alloc_bytes;            /* Peak # of bytes allocated */
-    size_t max_block_size;              /* Largest block allocated */
-    size_t total_alloc_blocks_count;    /* Running count of total # of blocks allocated */
-    size_t curr_alloc_blocks_count;     /* Current # of blocks allocated */
-    size_t peak_alloc_blocks_count;     /* Peak # of blocks allocated */
+    H5_alloc_stats_t alloc_stats;       /* Memory stats */
     herr_t ret;         /* Return value */
 
     /* Output message about test being performed */
@@ -5778,43 +5772,41 @@ test_misc35(void)
         ERROR("fac_size_final > fac_size_start");
 
     /* Retrieve memory allocation statistics */
-    ret = H5get_alloc_stats(&total_alloc_bytes, &curr_alloc_bytes,
-            &peak_alloc_bytes, &max_block_size, &total_alloc_blocks_count,
-            &curr_alloc_blocks_count, &peak_alloc_blocks_count);
+    ret = H5get_alloc_stats(&alloc_stats);
     CHECK(ret, FAIL, "H5get_alloc_stats");
 
 #if defined H5_MEMORY_ALLOC_SANITY_CHECK
     /* All the values should be >0 */
-    if(0 == total_alloc_bytes)
-        ERROR("total_alloc_bytes == 0");
-    if(0 == curr_alloc_bytes)
-        ERROR("curr_alloc_bytes == 0");
-    if(0 == peak_alloc_bytes)
-        ERROR("peak_alloc_bytes == 0");
-    if(0 == max_block_size)
-        ERROR("max_block_size == 0");
-    if(0 == total_alloc_blocks_count)
-        ERROR("total_alloc_blocks_count == 0");
-    if(0 == curr_alloc_blocks_count)
-        ERROR("curr_alloc_blocks_count == 0");
-    if(0 == peak_alloc_blocks_count)
-        ERROR("peak_alloc_blocks_count == 0");
+    if(0 == alloc_stats.total_alloc_bytes)
+        ERROR("alloc_stats.total_alloc_bytes == 0");
+    if(0 == alloc_stats.curr_alloc_bytes)
+        ERROR("alloc_stats.curr_alloc_bytes == 0");
+    if(0 == alloc_stats.peak_alloc_bytes)
+        ERROR("alloc_stats.peak_alloc_bytes == 0");
+    if(0 == alloc_stats.max_block_size)
+        ERROR("alloc_stats.max_block_size == 0");
+    if(0 == alloc_stats.total_alloc_blocks_count)
+        ERROR("alloc_stats.total_alloc_blocks_count == 0");
+    if(0 == alloc_stats.curr_alloc_blocks_count)
+        ERROR("alloc_stats.curr_alloc_blocks_count == 0");
+    if(0 == alloc_stats.peak_alloc_blocks_count)
+        ERROR("alloc_stats.peak_alloc_blocks_count == 0");
 #else /* H5_MEMORY_ALLOC_SANITY_CHECK */
     /* All the values should be == 0 */
-    if(0 != total_alloc_bytes)
-        ERROR("total_alloc_bytes != 0");
-    if(0 != curr_alloc_bytes)
-        ERROR("curr_alloc_bytes != 0");
-    if(0 != peak_alloc_bytes)
-        ERROR("peak_alloc_bytes != 0");
-    if(0 != max_block_size)
-        ERROR("max_block_size != 0");
-    if(0 != total_alloc_blocks_count)
-        ERROR("total_alloc_blocks_count != 0");
-    if(0 != curr_alloc_blocks_count)
-        ERROR("curr_alloc_blocks_count != 0");
-    if(0 != peak_alloc_blocks_count)
-        ERROR("peak_alloc_blocks_count != 0");
+    if(0 != alloc_stats.total_alloc_bytes)
+        ERROR("alloc_stats.total_alloc_bytes != 0");
+    if(0 != alloc_stats.curr_alloc_bytes)
+        ERROR("alloc_stats.curr_alloc_bytes != 0");
+    if(0 != alloc_stats.peak_alloc_bytes)
+        ERROR("alloc_stats.peak_alloc_bytes != 0");
+    if(0 != alloc_stats.max_block_size)
+        ERROR("alloc_stats.max_block_size != 0");
+    if(0 != alloc_stats.total_alloc_blocks_count)
+        ERROR("alloc_stats.total_alloc_blocks_count != 0");
+    if(0 != alloc_stats.curr_alloc_blocks_count)
+        ERROR("alloc_stats.curr_alloc_blocks_count != 0");
+    if(0 != alloc_stats.peak_alloc_blocks_count)
+        ERROR("alloc_stats.peak_alloc_blocks_count != 0");
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 } /* end test_misc35() */

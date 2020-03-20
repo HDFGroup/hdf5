@@ -340,6 +340,19 @@ typedef struct H5O_token_t {
     uint8_t __data[H5O_MAX_TOKEN_SIZE];
 } H5O_token_t;
 
+/*
+ * Allocation statistics info struct
+ */
+typedef struct H5_alloc_stats_t {
+    unsigned long long total_alloc_bytes; /* Running count of total # of bytes allocated */
+    size_t curr_alloc_bytes;           /* Current # of bytes allocated */
+    size_t peak_alloc_bytes;           /* Peak # of bytes allocated */
+    size_t max_block_size;             /* Largest block allocated */
+    size_t total_alloc_blocks_count;   /* Running count of total # of blocks allocated */
+    size_t curr_alloc_blocks_count;    /* Current # of blocks allocated */
+    size_t peak_alloc_blocks_count;    /* Peak # of blocks allocated */
+} H5_alloc_stats_t;
+
 /* Functions in H5.c */
 H5_DLL herr_t H5open(void);
 H5_DLL herr_t H5close(void);
@@ -350,9 +363,7 @@ H5_DLL herr_t H5set_free_list_limits (int reg_global_lim, int reg_list_lim,
                 int blk_list_lim);
 H5_DLL herr_t H5get_free_list_sizes(size_t *reg_size, size_t *arr_size,
     size_t *blk_size, size_t *fac_size);
-H5_DLL herr_t H5get_alloc_stats(unsigned long long *total_alloc_bytes, size_t *curr_alloc_bytes,
-    size_t *peak_alloc_bytes, size_t *max_block_size, size_t *total_alloc_blocks_count,
-    size_t *curr_alloc_blocks_count, size_t *peak_alloc_blocks_count);
+H5_DLL herr_t H5get_alloc_stats(H5_alloc_stats_t *stats);
 H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
 				unsigned *relnum);
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
