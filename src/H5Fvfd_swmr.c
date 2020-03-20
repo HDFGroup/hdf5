@@ -323,10 +323,9 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create header in md")
 
-    /* Increment tick_num */
-    ++f->shared->tick_num;
-
     if ( closing ) { /* For file close */
+
+        ++f->shared->tick_num;
 
         /* Close the md file */
         if(HDclose(f->shared->vfd_swmr_md_fd) < 0)
