@@ -3047,6 +3047,156 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data) {
     return;
 } /* vrfy_ds_ctg_v() */
 
+/* Create or, if `validate` is true, validate objects in file `fid` under
+ * group `full_path`.  `proc_num` tells the processor number the test runs
+ * on.  The set of objects to create/validate is chosen by `selector`.
+ *
+ * The valid selectors are consecutive and they start at 0.
+ *
+ * If the selected objects cannot be created/validated, `pass` may be set
+ * to `false`, indicating that the selected objects could not be
+ * created/validated, and `failure_mmsg` set to a description of the error
+ * that occurred.
+ *
+ * The program may also fail an assert()ion if the selected objects cannot
+ * be created/validated.
+ * 
+ * Return `true` if the selector was valid, `false` if it was not.
+ */
+static bool
+create_or_validate_selection(hid_t fid, const char *full_path, int proc_num,
+    int selector, bool skip_varlen, bool validate)
+{
+    const bool wr = !validate;
+
+    switch (selector) {
+    case 0: /* Add & verify an empty "new style" group */
+        wr ? ns_grp_0(fid, full_path) : vrfy_ns_grp_0(fid, full_path);
+        break;
+    case 1: /* Add & verify a compact "new style" group (3 link messages) */
+        wr ? ns_grp_c(fid, full_path, 3) : vrfy_ns_grp_c(fid, full_path, 3);
+        break;
+    case 2:
+        /* Add & verify a dense "new style" group (w/300 links,
+         * in v2 B-tree & fractal heap)
+         */
+        wr ? ns_grp_d(fid, full_path, 300) : vrfy_ns_grp_d(fid, full_path, 300);
+        break;
+    case 3: /* Add & verify an empty "old style" group to file */
+        wr ? os_grp_0(fid, full_path) : vrfy_os_grp_0(fid, full_path);
+        break;
+    case 4:
+        /* Add & verify an "old style" group (w/300 links, in
+         * v1 B-tree & local heap) to file
+         */
+        wr ? os_grp_n(fid, full_path, proc_num, 300)
+           : vrfy_os_grp_n(fid, full_path, proc_num, 300);
+        break;
+    case 5:
+        /* Add & verify a contiguous dataset w/integer datatype (but no data)
+         * to file
+         */
+        wr ? ds_ctg_i(fid, full_path, FALSE)
+           : vrfy_ds_ctg_i(fid, full_path, FALSE);
+        break;
+    case 6:
+        /* Add & verify a contiguous dataset w/integer datatype (with data)
+         * to file
+         */
+        wr ? ds_ctg_i(fid, full_path, TRUE)
+           : vrfy_ds_ctg_i(fid, full_path, TRUE);
+        break;
+    case 7:
+        /* Add & verify a chunked dataset w/integer datatype (but no data)
+         * to file
+         */
+        wr ? ds_chk_i(fid, full_path, FALSE)
+           : vrfy_ds_chk_i(fid, full_path, FALSE);
+        break;
+    case 8:
+        /* Add & verify a chunked dataset w/integer datatype (and data)
+         * to file
+         */
+        wr ? ds_chk_i(fid, full_path, TRUE)
+           : vrfy_ds_chk_i(fid, full_path, TRUE);
+        break;
+    case 9:
+        /* Add & verify a compact dataset w/integer datatype (but no data)
+         * to file
+         */
+        wr ? ds_cpt_i(fid, full_path, FALSE)
+           : vrfy_ds_cpt_i(fid, full_path, FALSE);
+        break;
+    case 10:
+        /* Add & verify a compact dataset w/integer datatype (and data)
+         * to file
+         */
+        wr ? ds_cpt_i(fid, full_path, TRUE)
+           : vrfy_ds_cpt_i(fid, full_path, TRUE);
+        break;
+    case 11:
+        if (skip_varlen)
+            return false;
+        /* Add & verify a contiguous dataset w/variable-length datatype
+         * (but no data) to file
+         */
+        wr ? ds_ctg_v(fid, full_path, FALSE)
+           : vrfy_ds_ctg_v(fid, full_path, FALSE);
+        break;
+    case 12:
+        if (skip_varlen)
+            return false;
+        /* Add & verify a contiguous dataset w/variable-length datatype
+         * (and data) to file
+         */
+        wr ? ds_ctg_v(fid, full_path, TRUE)
+           : vrfy_ds_ctg_v(fid, full_path, TRUE);
+        break;
+    default:
+        return false;
+    }
+    return true;
+}
+
+/* Create and validate objects or, if `only_validate` is true, only
+ * validate objects in file `fid` under group `base_path`. `proc_num`
+ * tells the processor number the test runs on.  If `skip_varlen` is
+ * true, do NOT perform tests that use variable-length data.
+ */
+static void
+tend_zoo(hid_t fid, const char *base_path, int proc_num, bool skip_varlen,
+    bool only_validate)
+{
+    const bool create = !only_validate;
+    char full_path[1024];
+    int i, nwritten;
+    char *leafp;
+
+    nwritten = snprintf(full_path, sizeof(full_path), "%s/*", base_path);
+    if (nwritten < 0 || (size_t)nwritten >= sizeof(full_path)) {
+        pass = false;
+        failure_mssg = "create_zoo: snprintf failed";
+        return;
+    }
+
+    if ((leafp = strrchr(full_path, '*')) == NULL) {
+        pass = false;
+        failure_mssg = "create_zoo: strrchr failed";
+        return;
+    }
+
+    for (i = 0; pass; i++) {
+        assert('A' + i <= 'Z');
+        *leafp = (char)('A' + i);
+        if (create &&
+            !create_or_validate_selection(fid, full_path, proc_num, i,
+                skip_varlen, false))
+            break;
+        if (!create_or_validate_selection(fid, full_path, proc_num, i,
+                skip_varlen, true))
+            break;
+    }
+}
 
 /*-------------------------------------------------------------------------
  * Function:    create_zoo
@@ -3068,214 +3218,14 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data) {
  *              the superblock.
  *
  *              Note the associated validate_zoo() function.
- *
- * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
- *
  *-------------------------------------------------------------------------
  */
 
 void
-create_zoo(hid_t fid, const char *base_path, int proc_num)
+create_zoo(hid_t fid, const char *base_path, int proc_num, bool skip_varlen)
 {
-    char full_path[1024];
-
-    HDassert(base_path);
-
-    /* Add & verify an empty "new style" group */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/A", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ns_grp_0(fid, full_path);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/A", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_0(fid, full_path);
-    }
-
-    /* Add & verify a compact "new style" group (3 link messages) */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/B", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ns_grp_c(fid, full_path, 3);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/B", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_c(fid, full_path, 3);
-    }
-
-    /* Add & verify a dense "new style" group (w/300 links, in v2 B-tree &
-     * fractal heap)
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/C", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ns_grp_d(fid, full_path, 300);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/C", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_d(fid, full_path, 300);
-    }
-
-    /* Add & verify an empty "old style" group to file */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/D", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        os_grp_0(fid, full_path);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/D", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_os_grp_0(fid, full_path);
-    }
-
-    /* Add & verify an "old style" group (w/300 links, in v1 B-tree &
-     * local heap) to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/E", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        os_grp_n(fid, full_path, proc_num, 300);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/E", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_os_grp_n(fid, full_path, proc_num, 300);
-    }
-
-    /* Add & verify a contiguous dataset w/integer datatype (but no data)
-     * to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/F", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_ctg_i(fid, full_path, FALSE);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/F", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_i(fid, full_path, FALSE);
-    }
-
-    /* Add & verify a contiguous dataset w/integer datatype (with data)
-     * to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/G", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_ctg_i(fid, full_path, TRUE);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/G", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_i(fid, full_path, TRUE);
-    }
-
-    /* Add & verify a chunked dataset w/integer datatype (but no data)
-     * to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/H", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_chk_i(fid, full_path, FALSE);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/H", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_chk_i(fid, full_path, FALSE);
-    }
-
-    /* Add & verify a chunked dataset w/integer datatype (and data)
-     * to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/I", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_chk_i(fid, full_path, TRUE);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/I", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_chk_i(fid, full_path, TRUE);
-    }
-
-    /* Add & verify a compact dataset w/integer datatype (but no data)
-     * to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/J", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_cpt_i(fid, full_path, FALSE);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/J", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_cpt_i(fid, full_path, FALSE);
-    }
-
-    /* Add & verify a compact dataset w/integer datatype (and data)
-     * to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/K", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_cpt_i(fid, full_path, TRUE);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/K", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_cpt_i(fid, full_path, TRUE);
-    }
-
-    /* Add & verify a contiguous dataset w/variable-length datatype
-     * (but no data) to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/L", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_ctg_v(fid, full_path, FALSE);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/L", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_v(fid, full_path, FALSE);
-    }
-
-    /* Add & verify a contiguous dataset w/variable-length datatype
-     * (and data) to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/M", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_ctg_v(fid, full_path, TRUE);
-    }
-
-    if ( pass ) {
-        HDsprintf(full_path, "%s/M", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_v(fid, full_path, TRUE);
-    }
-
-    return;
-} /* create_zoo() */
-
+    tend_zoo(fid, base_path, proc_num, skip_varlen, false);
+}
 
 /*-------------------------------------------------------------------------
  * Function:    validate_zoo
@@ -3294,134 +3244,13 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
  *              on disk structures that can occur with this version of
  *              the superblock.
  *
- *              Note the associated validate_zoo() function.
- *
- * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
- *
+ *              Note the associated create_zoo() function.
  *-------------------------------------------------------------------------
  */
 
 void
-validate_zoo(hid_t fid, const char *base_path, int proc_num)
+validate_zoo(hid_t fid, const char *base_path, int proc_num, bool skip_varlen)
 {
-    char full_path[1024];
-
-    HDassert(base_path);
-
-    /* validate an empty "new style" group */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/A", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_0(fid, full_path);
-    }
-
-    /* validate a compact "new style" group (3 link messages) */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/B", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_c(fid, full_path, 3);
-    }
-
-    /* validate a dense "new style" group (w/300 links, in v2 B-tree &
-     * fractal heap)
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/C", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_d(fid, full_path, 300);
-    }
-
-    /* validate an empty "old style" group in file */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/D", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_os_grp_0(fid, full_path);
-    }
-
-    /* validate an "old style" group (w/300 links, in v1 B-tree &
-     * local heap)
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/E", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_os_grp_n(fid, full_path, proc_num, 300);
-    }
-
-    /* validate a contiguous dataset w/integer datatype (but no data)
-     * in file.
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/F", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_i(fid, full_path, FALSE);
-    }
-
-    /* validate a contiguous dataset w/integer datatype (with data)
-     * in file.
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/G", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_i(fid, full_path, TRUE);
-    }
-
-    /* validate a chunked dataset w/integer datatype (but no data)
-     * in file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/H", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_chk_i(fid, full_path, FALSE);
-    }
-
-    /* validate a chunked dataset w/integer datatype (and data)
-     * in file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/I", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_chk_i(fid, full_path, TRUE);
-    }
-
-    /* Validate a compact dataset w/integer datatype (but no data)
-     * in file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/J", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_cpt_i(fid, full_path, FALSE);
-    }
-
-    /* validate a compact dataset w/integer datatype (and data)
-     * in file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/K", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_cpt_i(fid, full_path, TRUE);
-    }
-
-    /* validate a contiguous dataset w/variable-length datatype
-     * (but no data) to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/L", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_v(fid, full_path, FALSE);
-    }
-
-    /* validate a contiguous dataset w/variable-length datatype
-     * (and data) to file
-     */
-    if ( pass ) {
-        HDsprintf(full_path, "%s/M", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_v(fid, full_path, TRUE);
-    }
-
-    return;
-} /* validate_zoo() */
+    tend_zoo(fid, base_path, proc_num, skip_varlen, true);
+}
 

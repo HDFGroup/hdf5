@@ -18,8 +18,10 @@
  *		in genall5.c
  */
 
-void create_zoo(hid_t fid, const char *base_path, int proc_num);
-void validate_zoo(hid_t fid, const char *base_path, int proc_num);
+void create_zoo(hid_t fid, const char *base_path, int proc_num,
+    bool skip_varlen);
+void validate_zoo(hid_t fid, const char *base_path, int proc_num,
+    bool skip_varlen);
 
 void ns_grp_0(hid_t fid, const char *group_name);
 void vrfy_ns_grp_0(hid_t fid, const char *group_name);
