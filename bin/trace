@@ -132,6 +132,7 @@ $Source = "";
                "H5VL_blob_optional_t"       => "VA",
                "void"                       => "x",
                "FILE"                       => "x",
+               "H5_alloc_stats_t"           => "x",
                "H5A_operator_t"             => "x",
                "H5A_operator1_t"            => "x",
                "H5A_operator2_t"            => "x",
