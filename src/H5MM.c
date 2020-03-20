@@ -635,13 +635,7 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
  *	entire library.
  *
  * Parameters:
- *  unsigned long long *total_alloc_bytes; OUT: Running count of total # of bytes allocated
- *  size_t *curr_alloc_bytes;           OUT: Current # of bytes allocated
- *  size_t *peak_alloc_bytes;           OUT: Peak # of bytes allocated
- *  size_t *max_block_size;             OUT: Largest block allocated
- *  size_t *total_alloc_blocks_count;   OUT: Running count of total # of blocks allocated
- *  size_t *curr_alloc_blocks_count;    OUT: Current # of blocks allocated
- *  size_t *peak_alloc_blocks_count;    OUT: Peak # of blocks allocated
+ *  H5_alloc_stats_t *stats;            OUT: Memory allocation statistics
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
@@ -652,44 +646,25 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MM_get_alloc_stats(unsigned long long *total_alloc_bytes, size_t *curr_alloc_bytes,
-    size_t *peak_alloc_bytes, size_t *max_block_size, size_t *total_alloc_blocks_count,
-    size_t *curr_alloc_blocks_count, size_t *peak_alloc_blocks_count)
+H5MM_get_alloc_stats(H5_alloc_stats_t *stats)
 {
     FUNC_ENTER_NOAPI_NOERR
 
 #if defined H5_MEMORY_ALLOC_SANITY_CHECK
-    if(total_alloc_bytes)
-        *total_alloc_bytes = H5MM_total_alloc_bytes_s;
-    if(curr_alloc_bytes)
-        *curr_alloc_bytes = H5MM_curr_alloc_bytes_s;
-    if(peak_alloc_bytes)
-        *peak_alloc_bytes = H5MM_peak_alloc_bytes_s;
-    if(max_block_size)
-        *max_block_size = H5MM_max_block_size_s;
-    if(total_alloc_blocks_count)
-        *total_alloc_blocks_count = H5MM_total_alloc_blocks_count_s;
-    if(curr_alloc_blocks_count)
-        *curr_alloc_blocks_count = H5MM_curr_alloc_blocks_count_s;
-    if(peak_alloc_blocks_count)
-        *peak_alloc_blocks_count = H5MM_peak_alloc_blocks_count_s;
+    if(stats) {
+        stats->total_alloc_bytes = H5MM_total_alloc_bytes_s;
+        stats->curr_alloc_bytes = H5MM_curr_alloc_bytes_s;
+        stats->peak_alloc_bytes = H5MM_peak_alloc_bytes_s;
+        stats->max_block_size = H5MM_max_block_size_s;
+        stats->total_alloc_blocks_count = H5MM_total_alloc_blocks_count_s;
+        stats->curr_alloc_blocks_count = H5MM_curr_alloc_blocks_count_s;
+        stats->peak_alloc_blocks_count = H5MM_peak_alloc_blocks_count_s;
+    } /* end if */
 #else /* H5_MEMORY_ALLOC_SANITY_CHECK */
-    if(total_alloc_bytes)
-        *total_alloc_bytes = 0;
-    if(curr_alloc_bytes)
-        *curr_alloc_bytes = 0;
-    if(peak_alloc_bytes)
-        *peak_alloc_bytes = 0;
-    if(max_block_size)
-        *max_block_size = 0;
-    if(total_alloc_blocks_count)
-        *total_alloc_blocks_count = 0;
-    if(curr_alloc_blocks_count)
-        *curr_alloc_blocks_count = 0;
-    if(peak_alloc_blocks_count)
-        *peak_alloc_blocks_count = 0;
+    if(stats)
+        HDmemset(stats, 0, sizeof(H5_alloc_stats_t));
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* end H5get_alloc_stats() */
+}   /* end H5MM_get_alloc_stats() */
 
