@@ -3192,6 +3192,7 @@ tend_zoo(hid_t fid, const char *base_path, int proc_num, bool skip_varlen,
             !create_or_validate_selection(fid, full_path, proc_num, i,
                 skip_varlen, false))
             break;
+        zoo_create_hook(fid);
         if (!create_or_validate_selection(fid, full_path, proc_num, i,
                 skip_varlen, true))
             break;

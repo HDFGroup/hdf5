@@ -51,3 +51,9 @@ void vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data);
 void ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
 void vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
 
+/* Individual tests can override zoo_create_hook(), which is called
+ * after each step of create_zoo().  The `hid_t` argument identifies
+ * the file where the step was performed.  The test library provides a
+ * default implementation of zoo_create_hook() that does nothing.
+ */
+void zoo_create_hook(hid_t);

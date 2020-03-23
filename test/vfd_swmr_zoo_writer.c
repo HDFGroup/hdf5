@@ -53,6 +53,13 @@ print_cache_hits(H5C_t *cache)
     dbgf(3, "\n");
 }
 
+void
+zoo_create_hook(hid_t fid)
+{
+    dbgf(3, "%s: enter\n", __func__);
+    H5Fvfd_swmr_end_tick(fid);
+}
+
 static void
 usage(const char *progname)
 {
