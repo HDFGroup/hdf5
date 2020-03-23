@@ -159,7 +159,7 @@ main(int argc, char **argv)
     if (ret < 0)
         errx(EXIT_FAILURE, "H5Pset_file_space_strategy");
 
-    fid = H5Fcreate("vfd_swmr_vlstr.h5", H5F_ACC_TRUNC, fcpl, fapl);
+    fid = H5Fcreate("vfd_swmr_zoo.h5", H5F_ACC_TRUNC, fcpl, fapl);
 
     if ((f = H5VL_object_verify(fid, H5I_FILE)) == NULL)
         errx(EXIT_FAILURE, "H5VL_object_verify");
