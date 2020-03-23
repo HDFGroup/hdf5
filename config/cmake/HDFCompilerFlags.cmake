@@ -171,13 +171,13 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
       if (CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
         ADD_H5_FLAGS (CMAKE_C_FLAGS_4_LAST "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.last")
         set (H5_CFLAGS1 "${H5_CFLAGS1} ${CMAKE_C_FLAGS_4_LAST}")
-      endif
+      endif ()
 
       # Append more extra warning flags that only gcc 4.4+ know about
       if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.4)
         ADD_H5_FLAGS (CMAKE_C_FLAGS_4_4 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.4")
         set (H5_CFLAGS1 "${H5_CFLAGS1} ${CMAKE_C_FLAGS_4_4}")
-      endif
+      endif ()
     endif ()
 
     # Append more extra warning flags that only gcc 4.5+ know about
