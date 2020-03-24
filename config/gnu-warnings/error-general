@@ -12,12 +12,8 @@
 -Werror=redundant-decls
 -Werror=switch
 #-Werror=discarded-qualifiers
-#
-# NOTE: CMake FortranCInterface module fails to compile with
-#       -Werror=missing-declarations
-#       -Werror=missing-prototypes
--Wmissing-declarations
--Wmissing-prototypes
+-Werror=missing-declarations
+-Werror=missing-prototypes
 #
 # NOTE: File Driver files are not compatible with these warnings as errors
 #     H5FDdirect.c,H5FDmpio.c,H5FDros3.c,
@@ -31,44 +27,15 @@
 -Wunused-parameter
 #
 #
-# NOTE: Examples files are not compatible with these warnings as errors
-#     h5_vds-eiger.c,h5_vds-exclim.c,h5_vds.c,h5_vds-exc.c,h5_vds-percival-unlim-maxmin.c
-#     h5_vds-percival.c,h5_read.c,h5_rdwt.c,h5_mount.c,h5_extend.c,h5_extend_write.c
-#     h5_write.c,h5_vds-simpleIO.c,h5_ref2reg_deprec.c,h5_crtgrp.c,h5_select.c
-#     h5_vds-percival-unlim.c,h5_crtatt.c,h5_group.c,h5_attribute.c,h5_crtdat.c
-#     h5_reference_deprec.c
-#       -Werror=unused-but-set-variable
--Wunused-but-set-variable
-#     h5_vds-exclim.c,h5_vds.c,h5_vds-exc.c,
-#       -Werror=unused-variable
-#     h5_elink_unix2win.c,h5_extlink.c,h5_attribute.c
-#       -Werror=unused-parameter
-#     h5_rdwt.c,h5_crtgrp.c,h5_crtatt.c,h5_crtdat.c
-#       -Werror=strict-prototypes
--Wstrict-prototypes
-#     h5_rdwt.c,h5_crtgrp.c,h5_crtatt.c,h5_crtdat.c
-#       -Werror=old-style-definition
--Wold-style-definition
-#
-#
 # NOTE: Tools files are not compatible with these warnings as errors
 #     lib/h5tools.c
 #       -Werror=cast-align
 -Wcast-align
 #     lib/h5diff_array.c
 #       -Werror=unused-but-set-variable
+-Werror=unused-but-set-variable
 #     lib/h5tools_utils.c
 #       -Werror=unused-parameter
-#
-#
-# NOTE: Test files are not compatible with these warnings as errors
-#     thread_id.c,
-#       -Werror=unused-function
-#     dsets.c
-#       -Werror=unused-parameter
-#     external.c,perform/sio_engine.c
-#       -Werror=format(-trunaction)
--Wformat
 #
 #
 # NOTE: JNI files are not compatible with these warnings as errors
@@ -77,4 +44,30 @@
 #       -Werror=cast-align
 #     jni/h5util.c
 #       -Werror=format(-overflow)
+-Wformat
+#
+#
+# NOTE: Test files are not compatible with these warnings as errors
+#     thread_id.c,
+#       -Werror=unused-function
+#     dsets.c
+#       -Werror=unused-parameter
+#     external.c,perform/sio_engine.c
+#       -Werror=format(-truncation)
+#
+#
+# NOTE: Examples files are not compatible with these warnings as errors
+#     h5_vds-eiger.c,h5_vds-exclim.c,h5_vds.c,h5_vds-exc.c,h5_vds-percival-unlim-maxmin.c
+#     h5_vds-percival.c,h5_read.c,h5_rdwt.c,h5_mount.c,h5_extend.c,h5_extend_write.c
+#     h5_write.c,h5_vds-simpleIO.c,h5_ref2reg_deprec.c,h5_crtgrp.c,h5_select.c
+#     h5_vds-percival-unlim.c,h5_crtatt.c,h5_group.c,h5_attribute.c,h5_crtdat.c
+#     h5_reference_deprec.c
+#     h5_rdwt.c,h5_crtgrp.c,h5_crtatt.c,h5_crtdat.c
+-Werror=strict-prototypes
+#     h5_rdwt.c,h5_crtgrp.c,h5_crtatt.c,h5_crtdat.c
+-Werror=old-style-definition
+#     h5_vds-exclim.c,h5_vds.c,h5_vds-exc.c,
+#       -Werror=unused-variable
+#     h5_elink_unix2win.c,h5_extlink.c,h5_attribute.c
+#       -Werror=unused-parameter
 
