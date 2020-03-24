@@ -14,6 +14,7 @@
 #-Werror=discarded-qualifiers
 -Werror=missing-declarations
 -Werror=missing-prototypes
+-Werror=unused-but-set-variable
 #
 # NOTE: File Driver files are not compatible with these warnings as errors
 #     H5FDdirect.c,H5FDmpio.c,H5FDros3.c,
@@ -31,9 +32,6 @@
 #     lib/h5tools.c
 #       -Werror=cast-align
 -Wcast-align
-#     lib/h5diff_array.c
-#       -Werror=unused-but-set-variable
--Werror=unused-but-set-variable
 #     lib/h5tools_utils.c
 #       -Werror=unused-parameter
 #

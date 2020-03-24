@@ -548,6 +548,7 @@ H5O_iterate_cb
     jobject     token;
     jstring     str;
     JNIEnv     *cbenv = NULL;
+    jclass      cbcls;
     jvalue      args[12];
     void       *op_data = (void *)wrapper->op_data;
     jint        status = FAIL;
@@ -557,10 +558,10 @@ H5O_iterate_cb
         H5_JNI_FATAL_ERROR(CBENVONLY, "H5O_iterate_cb: failed to attach current thread to JVM");
     }
 
-    if (NULL == (cls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
+    if (NULL == (cbcls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
-    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cls, "callback", "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5O_info_t;Lhdf/hdf5lib/callbacks/H5O_iterate_opdata_t;)I")))
+    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cbcls, "callback", "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5O_info_t;Lhdf/hdf5lib/callbacks/H5O_iterate_opdata_t;)I")))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     if (NULL == (str = CBENVPTR->NewStringUTF(CBENVONLY, name)))
