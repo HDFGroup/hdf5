@@ -672,6 +672,7 @@ H5L_iterate_cb
     jobject     visit_callback = wrapper->visit_callback;
     jstring     str;
     JNIEnv     *cbenv = NULL;
+    jclass      cbcls;
     jvalue      args[5];
     void       *op_data = (void *)wrapper->op_data;
     jint        status = -1;
@@ -682,10 +683,10 @@ H5L_iterate_cb
     }
 
     /* Get the Method ID for the "callback" function of the H5L_iterate_t class */
-    if (NULL == (cls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
+    if (NULL == (cbcls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
-    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cls, "callback", "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5L_info_t;Lhdf/hdf5lib/callbacks/H5L_iterate_opdata_t;)I")))
+    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cbcls, "callback", "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5L_info_t;Lhdf/hdf5lib/callbacks/H5L_iterate_opdata_t;)I")))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     if (NULL == (str = CBENVPTR->NewStringUTF(CBENVONLY, name)))
