@@ -48,6 +48,13 @@ New Features
 
     Configuration:
     -------------
+    - CMake ConfigureChecks.cmake file now uses CHECK_STRUCT_HAS_MEMBER
+
+      Some handcrafted tests in HDFTests.c has been removed and the CMake
+      CHECK_STRUCT_HAS_MEMBER module has been used.
+
+      (ADB - 2020/03/24, TRILAB-24)
+
     - Both build systems use same set of warnings flags
 
       GNU C warnings flags were moved to files in a config sub-folder
