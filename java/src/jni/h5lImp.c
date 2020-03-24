@@ -672,7 +672,6 @@ H5L_iterate_cb
     jobject     visit_callback = wrapper->visit_callback;
     jstring     str;
     JNIEnv     *cbenv = NULL;
-    jclass      cls;
     jvalue      args[5];
     void       *op_data = (void *)wrapper->op_data;
     jint        status = -1;

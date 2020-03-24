@@ -548,7 +548,6 @@ H5O_iterate_cb
     jobject     token;
     jstring     str;
     JNIEnv     *cbenv = NULL;
-    jclass      cls;
     jvalue      args[12];
     void       *op_data = (void *)wrapper->op_data;
     jint        status = FAIL;
