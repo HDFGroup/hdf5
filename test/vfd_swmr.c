@@ -36,7 +36,6 @@
 #include "H5Iprivate.h"
 
 #define H5FD_FRIEND       /*suppress error about including H5FDpkg      */
-#define H5FD_TESTING
 #include "H5FDpkg.h"
 
 #define FS_PAGE_SIZE    512
