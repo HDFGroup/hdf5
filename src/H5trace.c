@@ -155,13 +155,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     } /* end if */
 
     /* Get time for event */
-<<<<<<< HEAD
     if(H5_DBL_ABS_EQUAL(first_time.etime, H5_DOUBLE(0.0)))
-||||||| parent of 04b8cc82a8... Add routines to query the library's free list sizes and allocation stats.
-    if(H5_DBL_ABS_EQUAL(first_time.etime, 0.0))
-=======
-    if(H5_DBL_ABS_EQUAL(first_time.etime, (double)0.0f))
->>>>>>> 04b8cc82a8... Add routines to query the library's free list sizes and allocation stats.
         H5_timer_begin(&first_time);
     if(H5_debug_g.ttimes)
         H5_timer_begin(&event_time);
