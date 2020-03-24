@@ -5744,6 +5744,7 @@ test_misc35(void)
     ret = H5get_free_list_sizes(&reg_size_start, &arr_size_start, &blk_size_start, &fac_size_start);
     CHECK(ret, FAIL, "H5get_free_list_sizes");
 
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
     /* All the free list values should be >0 */
     if(0 == reg_size_start)
         ERROR("reg_size_start == 0");
@@ -5753,6 +5754,17 @@ test_misc35(void)
         ERROR("blk_size_start == 0");
     if(0 == fac_size_start)
         ERROR("fac_size_start == 0");
+#else /* H5_MEMORY_ALLOC_SANITY_CHECK */
+    /* All the values should be == 0 */
+    if(0 != reg_size_start)
+        ERROR("reg_size_start != 0");
+    if(0 != arr_size_start)
+        ERROR("arr_size_start != 0");
+    if(0 != blk_size_start)
+        ERROR("blk_size_start != 0");
+    if(0 != fac_size_start)
+        ERROR("fac_size_start != 0");
+#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
     /* Garbage collect the free lists */
     ret = H5garbage_collect();
