@@ -523,7 +523,6 @@ H5E_walk_cb
     jobject     cb_info_t = NULL;
     jvalue      args[7];
     JNIEnv     *cbenv = NULL;
-    jclass      cls;
     void       *op_data = (void *)wrapper->op_data;
     jint        status = FAIL;
 
