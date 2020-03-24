@@ -1,0 +1,24 @@
+#
+# HDF5 code should not trigger the following warnings under any
+# circumstances, so ask the compiler to treat them as errors:
+#
+-Werror=bad-function-cast
+-Werror=cast-align
+-Werror=declaration-after-statement
+-Werror=format
+-Werror=implicit-function-declaration
+-Werror=missing-declarations
+-Werror=missing-prototypes
+-Werror=nested-externs
+-Werror=old-style-definition
+-Werror=packed
+-Werror=pointer-sign
+-Werror=pointer-to-int-cast
+-Werror=redundant-decls
+-Werror=strict-prototypes
+-Werror=switch
+-Werror=unused-but-set-variable
+-Werror=unused-function
+-Werror=unused-parameter
+-Werror=unused-variable
+#-Werror=discarded-qualifiers
