@@ -70,6 +70,7 @@ usage(const char *progname)
     fprintf(stderr,   "  -n: number of test steps to perform\n");
     fprintf(stderr,   "  -q: be quiet: few/no progress messages\n");
     fprintf(stderr,   "  -t (oob|null): select out-of-bounds or NULL test\n");
+    fprintf(stderr,   "  -v: be verbose: most progress messages\n");
     exit(EXIT_FAILURE);
 }
 
@@ -103,13 +104,16 @@ main(int argc, char **argv)
 #endif
     testsel_t sel = TEST_NONE;
 
-    while ((ch = getopt(argc, argv, "SWan:qt:")) != -1) {
+    while ((ch = getopt(argc, argv, "SWan:qt:v")) != -1) {
         switch(ch) {
         case 'S':
             use_vfd_swmr = false;
             break;
         case 'W':
             wait_for_signal = false;
+            break;
+        case 'a':
+            skip_varlen = false;
             break;
 #if 0
         case 'n':
@@ -135,8 +139,8 @@ main(int argc, char **argv)
             else
                 usage(argv[0]);
             break;
-        case 'a':
-            skip_varlen = false;
+        case 'v':
+            verbosity = 3;
             break;
         default:
             usage(argv[0]);
