@@ -90,6 +90,9 @@ if (NOT ONLY_SHARED_LIBS)
       PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
+  target_compile_options(${HDF5_CPP_LIB_TARGET}
+      PRIVATE "${HDF5_CMAKE_CXX_FLAGS}"
+  )
   target_compile_definitions(${HDF5_CPP_LIB_TARGET}
       PRIVATE $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPICH_SKIP_MPICXX;MPICH_IGNORE_CXX_SEEK># Parallel/MPI, prevent spurious cpp/cxx warnings
   )
@@ -106,6 +109,9 @@ if (BUILD_SHARED_LIBS)
   target_include_directories (${HDF5_CPP_LIBSH_TARGET}
       PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+  )
+  target_compile_options(${HDF5_CPP_LIBSH_TARGET}
+      PRIVATE "${HDF5_CMAKE_CXX_FLAGS}"
   )
   target_compile_definitions(${HDF5_CPP_LIBSH_TARGET}
       PUBLIC "H5_BUILT_AS_DYNAMIC_LIB"
