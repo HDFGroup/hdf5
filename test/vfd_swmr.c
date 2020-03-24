@@ -2717,6 +2717,8 @@ test_shadow_index_lookup(void)
         const uint64_t modulus = UINT64_MAX / MAX(1, cursize);
         uint64_t pageno;
 
+        assert(modulus > 1); // so that modulus - 1 > 0, below
+
         idx = calloc(cursize,  sizeof(*idx));
         if (idx == NULL) {
             fprintf(stderr, "couldn't allocate %" PRIu32 " indices\n",
@@ -2725,7 +2727,7 @@ test_shadow_index_lookup(void)
         }
         for (pageno = (uint64_t)random() % modulus, j = 0;
              j < cursize;
-             j++, pageno += (uint64_t)random() % modulus) {
+             j++, pageno += 1 + (uint64_t)random() % (modulus - 1)) {
             idx[j].hdf5_page_offset = pageno;
         }
         for (j = 0; j < cursize; j++) {
