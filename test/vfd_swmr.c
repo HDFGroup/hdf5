@@ -2695,7 +2695,7 @@ test_shadow_index_lookup(void)
         break;
     }
 
-    /* get forced-fail index from environment or else from time(3) */
+    /* get forced-fail index from environment */
     switch (fetch_env_ulong(failvar, UINT_MAX, &tmpl)) {
     case -1:
         nerrors = 1;
