@@ -33,7 +33,7 @@
 -Wcast-align
 #     lib/h5diff_array.c
 #       -Werror=unused-but-set-variable
--Werror=unused-but-set-variable
+-Wunused-but-set-variable
 #     lib/h5tools_utils.c
 #       -Werror=unused-parameter
 #
