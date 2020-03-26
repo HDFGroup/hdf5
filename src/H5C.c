@@ -7070,6 +7070,14 @@ done:
  *
  * Programmer:  John Mainzer, 5/18/04
  *
+ * Changes:     Please maintain the change list and do not delete entries
+ *              unless the have been folded into the header comment.
+ *
+ *              Reverted optimization that avoided re-reading the prefix
+ *              of a metadata entry when a speculative read proved too
+ *              small.  
+ *                                           JRM -- 3/25/20
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -7289,6 +7297,7 @@ H5C_load_entry(H5F_t *              f,
 #ifdef H5_HAVE_PARALLEL
                         if ( !coll_access || 0 == mpi_rank ) {
 #endif /* H5_HAVE_PARALLEL */
+#if 0 /* JRM */
                             /* If the thing's image needs to be bigger for 
                              * a speculatively loaded thing, go get the 
                              * on-disk image again (the extra portion).
@@ -7298,6 +7307,46 @@ H5C_load_entry(H5F_t *              f,
 
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
                                             "can't read image")
+#else /* JRM */
+
+                            /* the original version of this code re-read 
+                             * the entire buffer.  At some point, someone
+                             * reworked this code to avoid re-reading the 
+                             * initial portion of the buffer.  
+                             *
+                             * In addition to being of questionable utility,
+                             * this optimization changed the invarient that
+                             * that metadata is read and written atomically.
+                             * While this didn't cause immediate problems, 
+                             * the page buffer in VFD SWMR depends on this 
+                             * invarient in its management of multi-page 
+                             * metadata entries.
+                             *
+                             * To repair this issue, I have reverted to 
+                             * the original algorithm for managing the 
+                             * speculative load case.  Note that I have
+                             * done so crudely -- before merge, we should
+                             * remove the infrastructure that supports the
+                             * optimization.
+                             *
+                             * We should also verify my impression that the 
+                             * that the optimization is of no measurable
+                             * value.  If it is, we will put it back, but 
+                             * disable it in the VFD SWMR case.
+                             *
+                             * While this issue was detected in the global
+                             * heap case, note that the super bloc, the
+                             * local heap, and the fractal heap also use 
+                             * speculative loads.  
+                             * 
+                             *                          JRM -- 3/24/20
+                             */
+                            if ( H5F_block_read(f, type->mem_type, addr, 
+                                                actual_len, image) < 0)
+
+                                HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
+                                            "can't read image")
+#endif /* JRM */
 #ifdef H5_HAVE_PARALLEL
                         }
                         /* If the collective metadata read optimization is 
