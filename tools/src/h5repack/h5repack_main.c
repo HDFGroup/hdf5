@@ -438,8 +438,8 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     int bound, opt;
     int ret_value = 0;
 
-    memset(&get_in_vol_info, 0, sizeof(h5tools_get_fapl_info_t));
-    memset(&get_out_vol_info, 0, sizeof(h5tools_get_fapl_info_t));
+    HDmemset(&get_in_vol_info, 0, sizeof(h5tools_get_fapl_info_t));
+    HDmemset(&get_out_vol_info, 0, sizeof(h5tools_get_fapl_info_t));
 
     /* parse command line options */
     while (EOF != (opt = get_option(argc, argv, s_opts, l_opts))) {
