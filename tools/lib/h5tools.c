@@ -591,10 +591,10 @@ h5tools_set_vol_fapl(hid_t fapl, h5tools_get_fapl_info_t *get_info)
         }
         else {
             /* Check for VOL connectors that ship with the library */
-            if (!strcmp(get_info->u.name, H5VL_NATIVE_NAME)) {
+            if (!HDstrcmp(get_info->u.name, H5VL_NATIVE_NAME)) {
                 connector_id = H5VL_NATIVE;
             }
-            else if (!strcmp(get_info->u.name, H5VL_PASSTHRU_NAME)) {
+            else if (!HDstrcmp(get_info->u.name, H5VL_PASSTHRU_NAME)) {
                 connector_id = H5VL_PASSTHRU;
             }
             else {
