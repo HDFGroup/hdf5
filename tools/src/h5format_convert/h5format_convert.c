@@ -421,7 +421,7 @@ main(int argc, const char *argv[])
 	HDfprintf(stdout, "It is noop...\n");
 
     /* Open the HDF5 file */
-    if((fid = h5tools_fopen(fname_g, H5F_ACC_RDWR, H5P_DEFAULT, NULL, NULL, 0)) < 0) {
+    if((fid = h5tools_fopen(fname_g, H5F_ACC_RDWR, H5P_DEFAULT, FALSE, NULL, 0)) < 0) {
 	error_msg("unable to open file \"%s\"\n", fname_g);
 	h5tools_setstatus(EXIT_FAILURE);
 	goto done;

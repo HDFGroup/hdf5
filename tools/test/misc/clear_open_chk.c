@@ -53,7 +53,7 @@ main(int argc, char *argv[])
     fname = HDstrdup(argv[1]);
 
     /* Try opening the file */
-    if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
+    if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
         HDfprintf(stderr, "clear_open_chk: unable to open the file\n");
         HDfree(fname);
         HDexit(EXIT_FAILURE);
