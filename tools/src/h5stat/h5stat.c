@@ -123,7 +123,7 @@ static const char *drivername = NULL;
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
 static H5FD_ros3_fapl_t ros3_fa = {
-    1,     /* FAPL Version      */
+    1,     /* Structure Version */
     false, /* Authenticate?     */
     "",    /* AWS Region        */
     "",    /* Access Key ID     */
@@ -134,7 +134,7 @@ static H5FD_ros3_fapl_t ros3_fa = {
 #ifdef H5_HAVE_LIBHDFS
 /* "Default" HDFS configuration */
 static H5FD_hdfs_fapl_t hdfs_fa = {
-    1,           /* FAPL Version          */
+    1,           /* Structure Version     */
     "localhost", /* Namenode Name         */
     0,           /* Namenode Port         */
     "",          /* Kerberos ticket cache */
