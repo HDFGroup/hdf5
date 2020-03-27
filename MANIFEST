@@ -143,6 +143,10 @@
 ./config/solaris
 
 #warnings files for both autotools and CMake
+./config/clang-warnings/developer-general
+./config/clang-warnings/error-general
+./config/clang-warnings/general
+./config/clang-warnings/no-developer-general
 ./config/gnu-warnings/4.2-4.3
 ./config/gnu-warnings/4.2-4.4
 ./config/gnu-warnings/4.2-4.6
