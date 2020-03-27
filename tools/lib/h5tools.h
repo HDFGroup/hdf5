@@ -558,8 +558,8 @@ typedef struct h5tools_get_fapl_info_t {
     } u;
 } h5tools_get_fapl_info_t;
 
-extern const char *volnames[];
-extern const char *drivernames[];
+H5TOOLS_DLLVAR const char *volnames[];
+H5TOOLS_DLLVAR const char *drivernames[];
 
 /* This enum should match the entries in the above 'volnames'
  * since they are indices into the 'volnames' array. */
@@ -638,6 +638,7 @@ H5TOOLS_DLL int     h5tools_set_input_file(const char *fname, int is_bin);
 H5TOOLS_DLL int     h5tools_set_output_file(const char *fname, int is_bin);
 H5TOOLS_DLL int     h5tools_set_error_file(const char *fname, int is_bin);
 H5TOOLS_DLL hid_t   h5tools_get_fapl(hid_t fapl, h5tools_get_fapl_info_t *get_info);
+H5TOOLS_DLL herr_t  h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size);
 H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl,
                             hbool_t use_specific_driver, char *drivername, size_t drivername_size);
 H5TOOLS_DLL hid_t   h5tools_get_little_endian_type(hid_t type);
