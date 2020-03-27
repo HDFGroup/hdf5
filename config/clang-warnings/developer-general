@@ -1,0 +1,4 @@
+# NOTE: -Wformat-nonliteral added back in here (from being disabled in
+-Wformat-nonliteral
+-Wmissing-noreturn
+-Wswitch-enum
