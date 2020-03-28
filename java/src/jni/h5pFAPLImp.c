@@ -395,29 +395,23 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1hdfs
     if (H5Pget_fapl_hdfs((hid_t)fapl_id, &fa) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL != fa.namenode_name) {
-        if (NULL == (j_namenode_name = ENVPTR->NewStringUTF(ENVONLY, fa.namenode_name))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create namenode_name string");
-        }
+    if (NULL == (j_namenode_name = ENVPTR->NewStringUTF(ENVONLY, fa.namenode_name))) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create namenode_name string");
     }
     args[0].l = j_namenode_name;
 
     args[1].i = (jint)fa.namenode_port;
 
-    if (NULL != fa.user_name) {
-        if (NULL == (j_user_name = ENVPTR->NewStringUTF(ENVONLY, fa.user_name))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create user_name string");
-        }
+    if (NULL == (j_user_name = ENVPTR->NewStringUTF(ENVONLY, fa.user_name))) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create user_name string");
     }
     args[2].l = j_user_name;
 
-    if (NULL != fa.kerberos_ticket_cache) {
-        if (NULL == (j_kerb_cache_path = ENVPTR->NewStringUTF(ENVONLY, fa.kerberos_ticket_cache))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create kerberos_ticket_cache string");
-        }
+    if (NULL == (j_kerb_cache_path = ENVPTR->NewStringUTF(ENVONLY, fa.kerberos_ticket_cache))) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_hdfs: out of memory - can't create kerberos_ticket_cache string");
     }
     args[3].l = j_kerb_cache_path;
 
@@ -820,27 +814,21 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3
     if (H5Pget_fapl_ros3((hid_t)fapl_id, &fa) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL != fa.aws_region) {
-        if (NULL == (j_aws = ENVPTR->NewStringUTF(ENVONLY, fa.aws_region))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create aws_region string");
-        }
+    if (NULL == (j_aws = ENVPTR->NewStringUTF(ENVONLY, fa.aws_region))) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create aws_region string");
     }
     args[0].l = j_aws;
 
-    if (NULL != fa.secret_id) {
-        if (NULL == (j_id = ENVPTR->NewStringUTF(ENVONLY, fa.secret_id))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_id string");
-        }
+    if (NULL == (j_id = ENVPTR->NewStringUTF(ENVONLY, fa.secret_id))) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_id string");
     }
     args[1].l = j_id;
 
-    if (NULL != fa.secret_key) {
-        if (NULL == (j_key = ENVPTR->NewStringUTF(ENVONLY, fa.secret_key))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_key string");
-        }
+    if (NULL == (j_key = ENVPTR->NewStringUTF(ENVONLY, fa.secret_key))) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_key string");
     }
     args[2].l = j_key;
 
@@ -1685,11 +1673,9 @@ Java_hdf_hdf5lib_H5_H5Pget_1mdc_1config
     args[2].z = cacheinfo.open_trace_file;
     args[3].z = cacheinfo.close_trace_file;
 
-    if (NULL != cacheinfo.trace_file_name) {
-        if (NULL == (j_str = ENVPTR->NewStringUTF(ENVONLY, cacheinfo.trace_file_name))) {
-            CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_mdc_config: out of memory - unable to construct string from UTF characters");
-        }
+    if (NULL == (j_str = ENVPTR->NewStringUTF(ENVONLY, cacheinfo.trace_file_name))) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_mdc_config: out of memory - unable to construct string from UTF characters");
     }
 
     args[4].l = j_str;

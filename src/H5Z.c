@@ -585,7 +585,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
+H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id,
+    void *key H5_ATTR_PARALLEL_USED)
 {
     H5F_t          *f           = (H5F_t *)obj_ptr;     /* File object for operations */
 #ifdef H5_HAVE_PARALLEL

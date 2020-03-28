@@ -47,14 +47,17 @@
 #define H5S_HYPER_VERSION_LATEST    H5S_HYPER_VERSION_3
 
 /* Versions for H5S_SEL_POINTS selection info */
-#define H5S_POINT_VERSION_1     1
-#define H5S_POINT_VERSION_2     2
+#define H5S_POINT_VERSION_1         1
+#define H5S_POINT_VERSION_2         2
+#define H5S_POINT_VERSION_LATEST    H5S_POINT_VERSION_2
 
 /* Versions for H5S_SEL_NONE selection info */
-#define H5S_NONE_VERSION_1      1
+#define H5S_NONE_VERSION_1          1
+#define H5S_NONE_VERSION_LATEST     H5S_NONE_VERSION_1
 
 /* Versions for H5S_SEL_ALL selection info */
-#define H5S_ALL_VERSION_1       1
+#define H5S_ALL_VERSION_1           1
+#define H5S_ALL_VERSION_LATEST      H5S_ALL_VERSION_1
 
 /* Encoded size of selection info for H5S_SEL_POINTS/H5S_SEL_HYPER */
 #define H5S_SELECT_INFO_ENC_SIZE_2 0x02        /* 2 bytes: 16 bits */

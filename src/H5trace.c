@@ -155,7 +155,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     } /* end if */
 
     /* Get time for event */
-    if(H5_DBL_ABS_EQUAL(first_time.etime, 0.0))
+    if(H5_DBL_ABS_EQUAL(first_time.etime, (double)0.0f))
         H5_timer_begin(&first_time);
     if(H5_debug_g.ttimes)
         H5_timer_begin(&event_time);
@@ -2746,9 +2746,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_DATASET_GET_STORAGE_SIZE:
                                     HDfprintf(out, "H5VL_DATASET_GET_STORAGE_SIZE");
                                     break;
-                                case H5VL_DATASET_GET_OFFSET:
-                                    HDfprintf(out, "H5VL_DATASET_GET_OFFSET");
-                                    break;
                                 default:
                                     HDfprintf(out, "%ld", (long)get);
                                     break;
@@ -3275,6 +3272,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE:
                                     HDfprintf(out, "H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE");
+                                    break;
+                                case H5VL_NATIVE_DATASET_GET_OFFSET:
+                                    HDfprintf(out, "H5VL_NATIVE_DATASET_GET_OFFSET");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)optional);

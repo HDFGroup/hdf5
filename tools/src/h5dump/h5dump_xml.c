@@ -578,7 +578,7 @@ int
 xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen)
 {
     H5O_token_t obj_token;
-    char *obj_addr_str = NULL;
+    char *obj_tok_str = NULL;
     int lookup_ret;
 
     if (outlen < 22) return 1;
@@ -591,9 +591,9 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
                 if (gen) {
                     ref_path_table_gen_fake(str, &obj_token);
 
-                    H5Otoken_to_str(loc_id, &obj_token, &obj_addr_str);
-                    HDsprintf(outstr, "xid_%s", obj_addr_str);
-                    H5free_memory(obj_addr_str);
+                    H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
+                    HDsprintf(outstr, "xid_%s", obj_tok_str);
+                    H5free_memory(obj_tok_str);
 
                     return 0;
                 }
@@ -606,9 +606,9 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
             if (gen) {
                 ref_path_table_gen_fake(str, &obj_token);
 
-                H5Otoken_to_str(loc_id, &obj_token, &obj_addr_str);
-                HDsprintf(outstr, "xid_%s", obj_addr_str);
-                H5free_memory(obj_addr_str);
+                H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
+                HDsprintf(outstr, "xid_%s", obj_tok_str);
+                H5free_memory(obj_tok_str);
 
                 return 0;
             }
@@ -618,9 +618,9 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
         }
     }
 
-    H5Otoken_to_str(loc_id, &obj_token, &obj_addr_str);
-    HDsprintf(outstr, "xid_%s", obj_addr_str);
-    H5free_memory(obj_addr_str);
+    H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
+    HDsprintf(outstr, "xid_%s", obj_tok_str);
+    H5free_memory(obj_tok_str);
 
     return 0;
 }
@@ -2659,14 +2659,14 @@ xml_dump_group(hid_t gid, const char *name)
                     /* Very special case: dump unamed type in root group */
                     for(u = 0; u < type_table->nobjs; u++) {
                         if(!type_table->objs[u].recorded) {
-                            char *obj_addr_str = NULL;
+                            char *obj_tok_str = NULL;
 
                             dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                             type = H5Dget_type(dset);
 
-                            H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_addr_str);
-                            HDsprintf(type_name, "#%s", obj_addr_str);
-                            H5free_memory(obj_addr_str);
+                            H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
+                            HDsprintf(type_name, "#%s", obj_tok_str);
+                            H5free_memory(obj_tok_str);
 
                             dump_function_table->dump_named_datatype_function(type, type_name);
                             H5Tclose(type);
@@ -2747,14 +2747,14 @@ xml_dump_group(hid_t gid, const char *name)
             /* Very special case: dump unamed type in root group */
             for(u = 0; u < type_table->nobjs; u++) {
                 if(!type_table->objs[u].recorded) {
-                    char *obj_addr_str = NULL;
+                    char *obj_tok_str = NULL;
 
                     dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                     type = H5Dget_type(dset);
 
-                    H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_addr_str);
-                    HDsprintf(type_name, "#%s", obj_addr_str);
-                    H5free_memory(obj_addr_str);
+                    H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
+                    HDsprintf(type_name, "#%s", obj_tok_str);
+                    H5free_memory(obj_tok_str);
 
                     dump_function_table->dump_named_datatype_function(type, type_name);
                     H5Tclose(type);

@@ -20,7 +20,7 @@ The official HDF5 releases can be obtained from:
 
      https://www.hdfgroup.org/downloads/hdf5/
 
-Changes from Release to Release and New Features in the HDF5-1.10.x release series
+Changes from Release to Release and New Features in the HDF5-1.13.x release series
 can be found at:
 
      https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
@@ -48,6 +48,42 @@ New Features
 
     Configuration:
     -------------
+    - CMake ConfigureChecks.cmake file now uses CHECK_STRUCT_HAS_MEMBER
+
+      Some handcrafted tests in HDFTests.c has been removed and the CMake
+      CHECK_STRUCT_HAS_MEMBER module has been used.
+
+      (ADB - 2020/03/24, TRILAB-24)
+
+    - Both build systems use same set of warnings flags
+
+      GNU C warnings flags were moved to files in a config sub-folder
+      named gnu-warnings. Flags that only are available for a specific
+      version of the compiler are in files named with that version.
+
+      There are flags in named "error-xxx" files with warnings that may
+      be promoted to errors. Some source files may still need fixes.
+
+      There are also pairs of files named "developer-xxx" and "no-developer-xxx"
+      that are chosen by the CMake option:HDF5_ENABLE_DEV_WARNINGS or the
+      configure option:--enable-developer-warnings.
+
+      (ADB - 2020/03/24, TRILAB-192)
+
+    - Added test script for file size compare
+
+      if CMake minimum version is at least 3.14, the fileCompareTest.cmake
+      script will compare file sizes.
+
+      (ADB - 2020/02/24, HDFFV-11036)
+
+    - Update CMake minimum version to 3.12
+
+      Updated CMake minimum version to 3.12 and added version checks
+      for Windows features.
+
+      (ADB - 2020/02/05, TRILABS-142)
+
     - Fixed CMake include properties for Fortran libraries
 
       Corrected the library properties for Fortran to use the
@@ -78,9 +114,18 @@ New Features
 
       (ADB - 2020/01/15, HDFFV-11001)
 
-    - Added Clang sanitizers to CMake for analyzer support
+    - Added Clang sanitizers to CMake for analyzer support if compiler is clang.
 
-      Added CMake code and files to execute the Clang sanitizers.
+      Added CMake code and files to execute the Clang sanitizers if
+      HDF5_ENABLE_SANITIZERS is enabled and the USE_SANITIZER option
+      is set to one of the following:
+          Address
+          Memory
+          MemoryWithOrigins
+          Undefined
+          Thread
+          Leak
+          'Address;Undefined'
 
       (ADB - 2019/12/12, TRILAB-135)
 
@@ -396,6 +441,17 @@ New Features
 
       (ADB - 2018/09/18, HDFFV-10332)
 
+    - Fix shutdown failure when using H5VLregister_connector_by_name/value
+
+      When using H5VLregister_connector_by_name/value to dynamically load a
+      VOL connector plugin, the library can experience segmentation faults
+      when the library is closed. This is due to the library unloading
+      the plugin interface before the virtual object layer. Then, when the
+      VOL shutdown occurs, it will attempt to close the VOL connector,
+      however this will fail since the plugin will already have been unloaded.
+
+      (DER - 2020/03/18, HDFFV-11057)
+
 
     Parallel Library:
     -----------------
@@ -556,6 +612,19 @@ Bug Fixes since HDF5-1.10.3 release
       reproducer and a patch.
 
       (CJH - 2019/12/9, HDFFV-10934)
+
+    - Fixed an assertion failure in the parallel library when collectively
+      filling chunks. As it is required that chunks be written in
+      monotonically non-decreasing order of offset in the file, this assertion
+      was being triggered when the list of chunk file space allocations being
+      passed to the collective chunk filling routine was not sorted according
+      to this particular requirement.
+
+      The addition of a sort of the out of order chunks trades a bit of
+      performance for the elimination of this assertion and of any complaints
+      from MPI implementations about the file offsets used being out of order.
+
+      (JTH - 2019/10/07, HDFFV-10792)
 
     - Fixed the iteration error in test_versionbounds() in test/dtypes.c
 
@@ -864,6 +933,9 @@ Bug Fixes since HDF5-1.10.3 release
 
       (MSB, 2018/1/8, HDFFV-10443)
 
+    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
+
+      (MSB - 2020/2/18, HDFFV-11029)
 
     Tools
     -----
@@ -1183,12 +1255,8 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-
     Windows 7 x64                 Visual Studio 2015 w/ Intel C, Fortran 2018 (cmake)
-                                  Visual Studio 2015 w/ MSMPI 8 (cmake)
-
-    Windows 10                    Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                                  Visual Studio 2015 w/ MSMPI 10 (cmake)
 
     Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel Fortran 19 (cmake)

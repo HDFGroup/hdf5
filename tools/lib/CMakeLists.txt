@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 project (HDF5_TOOLS_LIB C)
 
 #-----------------------------------------------------------------------------
@@ -38,6 +38,9 @@ if (NOT ONLY_SHARED_LIBS)
       PRIVATE "${HDF5_TOOLS_LIB_SOURCE_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
+  target_compile_options(${HDF5_TOOLS_LIB_TARGET}
+      PRIVATE "${HDF5_CMAKE_C_FLAGS}"
+  )
   #target_compile_definitions(${HDF5_TOOLS_LIB_TARGET} PRIVATE H5_TOOLS_DEBUG)
   #target_compile_definitions(${HDF5_TOOLS_LIB_TARGET} PRIVATE H5DIFF_DEBUG)
   TARGET_C_PROPERTIES (${HDF5_TOOLS_LIB_TARGET} STATIC)
@@ -56,6 +59,9 @@ if (BUILD_SHARED_LIBS)
   target_include_directories (${HDF5_TOOLS_LIBSH_TARGET}
       PRIVATE "${HDF5_TOOLS_LIB_SOURCE_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+  )
+  target_compile_options(${HDF5_TOOLS_LIBSH_TARGET}
+      PRIVATE "${HDF5_CMAKE_C_FLAGS}"
   )
   target_compile_definitions(${HDF5_TOOLS_LIBSH_TARGET}
       PUBLIC "H5_BUILT_AS_DYNAMIC_LIB"

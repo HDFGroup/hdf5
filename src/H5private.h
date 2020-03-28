@@ -304,17 +304,38 @@
  * file). Be sure to update that file if the #ifdefs change here.
  */
 #ifdef __cplusplus
-#   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED         /*void*/
-#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
-#   define H5_ATTR_NORETURN       /*void*/
-#   define H5_ATTR_CONST          /*void*/
-#   define H5_ATTR_PURE           /*void*/
-#   define H5_ATTR_FALLTHROUGH    /*void*/
+#   define H5_ATTR_FORMAT(X,Y,Z)                /*void*/
+#   define H5_ATTR_UNUSED                       /*void*/
+#   define H5_ATTR_DEPRECATED_USED              /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED                /*void*/
+#   define H5_ATTR_DEBUG_API_USED               /*void*/
+#   define H5_ATTR_PARALLEL_UNUSED              /*void*/
+#   define H5_ATTR_PARALLEL_USED                /*void*/
+#   define H5_ATTR_NORETURN                     /*void*/
+#   define H5_ATTR_CONST                        /*void*/
+#   define H5_ATTR_PURE                         /*void*/
+#   define H5_ATTR_FALLTHROUGH                  /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
 #   define H5_ATTR_UNUSED       __attribute__((unused))
+#ifdef H5_HAVE_PARALLEL
+#   define H5_ATTR_PARALLEL_UNUSED       __attribute__((unused))
+#   define H5_ATTR_PARALLEL_USED         /*void*/
+#else
+#   define H5_ATTR_PARALLEL_UNUSED       /*void*/
+#   define H5_ATTR_PARALLEL_USED         __attribute__((unused))
+#endif
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+#define H5_ATTR_DEPRECATED_USED    H5_ATTR_UNUSED
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+#define H5_ATTR_DEPRECATED_USED    /*void*/
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+#ifdef H5_DEBUG_API
+#define H5_ATTR_DEBUG_API_USED    /*void*/
+#else /* H5_DEBUG_API */
+#define H5_ATTR_DEBUG_API_USED    H5_ATTR_UNUSED
+#endif /* H5_DEBUG_API */
 #ifndef NDEBUG
 #define H5_ATTR_NDEBUG_UNUSED     /*void*/
 #else /* NDEBUG */
@@ -329,13 +350,17 @@
 #   define H5_ATTR_FALLTHROUGH  /*void*/
 #endif
 #else
-#   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED         /*void*/
-#   define H5_ATTR_NDEBUG_UNUSED  /*void*/
-#   define H5_ATTR_NORETURN       /*void*/
-#   define H5_ATTR_CONST          /*void*/
-#   define H5_ATTR_PURE           /*void*/
-#   define H5_ATTR_FALLTHROUGH    /*void*/
+#   define H5_ATTR_FORMAT(X,Y,Z)    /*void*/
+#   define H5_ATTR_UNUSED           /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED    /*void*/
+#   define H5_ATTR_DEBUG_API_USED   /*void*/
+#   define H5_ATTR_DEPRECATED_USED  /*void*/
+#   define H5_ATTR_PARALLEL_UNUSED  /*void*/
+#   define H5_ATTR_PARALLEL_USED    /*void*/
+#   define H5_ATTR_NORETURN         /*void*/
+#   define H5_ATTR_CONST            /*void*/
+#   define H5_ATTR_PURE             /*void*/
+#   define H5_ATTR_FALLTHROUGH      /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -1596,10 +1621,6 @@ extern char *strdup(const char *s);
     #define HDstrdup(S)     strdup(S)
 #endif /* HDstrdup */
 
-#ifndef HDpthread_self
-    #define HDpthread_self()    pthread_self()
-#endif /* HDpthread_self */
-
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */
 #define H5_STRINGIZE(x) #x
@@ -1948,11 +1969,10 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
 /* global library version information string */
 extern char  H5_lib_vers_info_g[];
 
+#include "H5TSprivate.h"
+
 /* Lock headers */
 #ifdef H5_HAVE_THREADSAFE
-
-/* Include required thread-safety header */
-#include "H5TSprivate.h"
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {

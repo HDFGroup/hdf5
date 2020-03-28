@@ -432,7 +432,7 @@ typedef struct H5F_t H5F_t;
     default: HDassert("bad sizeof size" && 0);                      \
 }
 
-#define H5F_DECODE_LENGTH(f,p,l) H5F_DECODE_LENGTH_LEN(p,l,H5F_SIZEOF_SIZE(f))
+#define H5F_DECODE_LENGTH(f,p,l) DECODE_VAR(p,l,H5F_SIZEOF_SIZE(f))
 
 /*
  * Macros that check for overflows.  These are somewhat dangerous to fiddle

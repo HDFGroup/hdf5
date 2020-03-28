@@ -143,12 +143,45 @@
 ./config/solaris
 
 #warnings files for both autotools and CMake
-./config/gnu-warnings-general
-./config/gnu-warnings-developer-general
-./config/gnu-warnings-no-developer-general
+./config/gnu-warnings/4.2-4.3
+./config/gnu-warnings/4.2-4.4
+./config/gnu-warnings/4.2-4.6
+./config/gnu-warnings/4.2-4.last
+./config/gnu-warnings/4.3
+./config/gnu-warnings/4.4
+./config/gnu-warnings/4.5
+./config/gnu-warnings/4.5-4.6
+./config/gnu-warnings/4.6
+./config/gnu-warnings/4.7
+./config/gnu-warnings/4.8
+./config/gnu-warnings/4.9
+./config/gnu-warnings/5
+./config/gnu-warnings/6
+./config/gnu-warnings/7
+./config/gnu-warnings/8
+./config/gnu-warnings/9
+./config/gnu-warnings/developer-4.5
+./config/gnu-warnings/developer-4.6
+./config/gnu-warnings/developer-4.7
+./config/gnu-warnings/developer-4.8
+./config/gnu-warnings/developer-7
+./config/gnu-warnings/developer-8
+./config/gnu-warnings/developer-general
+./config/gnu-warnings/error-5
+./config/gnu-warnings/error-8
+./config/gnu-warnings/error-general
+./config/gnu-warnings/general
+./config/gnu-warnings/no-developer-4.5
+./config/gnu-warnings/no-developer-4.6
+./config/gnu-warnings/no-developer-4.7
+./config/gnu-warnings/no-developer-4.8
+./config/gnu-warnings/no-developer-8
+./config/gnu-warnings/no-developer-general
 ./config/intel-warnings-general
 
 ./config/site-specific/BlankForm
+
+./doc/code-conventions.md
 
 ./examples/Attributes.txt
 ./examples/Makefile.am
@@ -3349,6 +3382,7 @@
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
+./config/cmake/fileCompareTest.cmake
 ./config/cmake/FindHDFS.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in

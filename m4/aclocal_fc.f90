@@ -83,10 +83,11 @@ END PROGRAM PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
 !---- START ----- Determine the available KINDs for REALs and INTEGERs
 PROGRAM FC_AVAIL_KINDS
       IMPLICIT NONE
-      INTEGER :: ik, jk, k, max_decimal_prec
-      INTEGER :: num_rkinds = 1, num_ikinds = 1
+      INTEGER :: ik, jk, k, kk, max_decimal_prec
+      INTEGER :: prev_rkind, num_rkinds = 1, num_ikinds = 1
       INTEGER, DIMENSION(1:10) :: list_ikinds = -1
       INTEGER, DIMENSION(1:10) :: list_rkinds = -1
+      LOGICAL :: new_kind
   
       OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
 
@@ -113,14 +114,26 @@ PROGRAM FC_AVAIL_KINDS
       ! Find real KINDs
       list_rkinds(num_rkinds)=SELECTED_REAL_KIND(1)
       max_decimal_prec = 1
+      prev_rkind=list_rkinds(num_rkinds)
 
       prec: DO ik = 2, 36
-         exp: DO jk = 1, 17000
+         exp: DO jk = 1, 700
             k = SELECTED_REAL_KIND(ik,jk)
             IF(k.LT.0) EXIT exp
-            IF(k.GT.list_rkinds(num_rkinds))THEN
-               num_rkinds = num_rkinds + 1
-               list_rkinds(num_rkinds) = k
+            IF(k.NE.prev_rkind)THEN
+               ! Check if we aleady have that kind
+               new_kind = .TRUE.
+               DO kk = 1, num_rkinds
+                  IF(k.EQ.list_rkinds(kk))THEN
+                     new_kind=.FALSE.
+                     EXIT
+                  ENDIF
+               ENDDO
+               IF(new_kind)THEN
+                  num_rkinds = num_rkinds + 1
+                  list_rkinds(num_rkinds) = k
+                  prev_rkind=list_rkinds(num_rkinds)
+               ENDIF
             ENDIF
             max_decimal_prec = ik
          ENDDO exp

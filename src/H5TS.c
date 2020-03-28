@@ -426,8 +426,8 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
         HGOTO_DONE(ret_value);
 
     /* Check if this thread already owns the lock */
-    if(mutex->lock_count && HDpthread_equal(HDpthread_self(), mutex->owner_thread))
-        /* Already owned by self - increment count */
+    if(mutex->lock_count && pthread_equal(pthread_self(), mutex->owner_thread))
+        /* already owned by self - increment count */
         mutex->lock_count++;
     else {
         /* Wait until the lock is released by current owner thread */
@@ -435,7 +435,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
             HDpthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
 
         /* After we've received the signal, take ownership of the mutex */
-        mutex->owner_thread = HDpthread_self();
+        mutex->owner_thread = pthread_self();
         mutex->lock_count = 1;
     } /* end else */
 
@@ -896,13 +896,4 @@ H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_create_thread */
 
-#else  /* H5_HAVE_THREADSAFE */
-
-uint64_t
-H5TS_thread_id(void)
-{
-    return 0;
-}
-
 #endif  /* H5_HAVE_THREADSAFE */
-

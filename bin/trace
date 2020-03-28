@@ -132,6 +132,7 @@ $Source = "";
                "H5VL_blob_optional_t"       => "VA",
                "void"                       => "x",
                "FILE"                       => "x",
+               "H5_alloc_stats_t"           => "x",
                "H5A_operator_t"             => "x",
                "H5A_operator1_t"            => "x",
                "H5A_operator2_t"            => "x",
@@ -239,7 +240,11 @@ sub argstring ($$$) {
   # certain type qualifiers, and indirection.
   $atype =~ s/^\bconst\b//;
   $atype =~ s/\bH5_ATTR_UNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_DEPRECATED_USED\b//g;
   $atype =~ s/\bH5_ATTR_NDEBUG_UNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_DEBUG_API_USED\b//g;
+  $atype =~ s/\bH5_ATTR_PARALLEL_UNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_PARALLEL_USED\b//g;
   $atype =~ s/\s+/ /g;
   $ptr = length $1 if  $atype =~ s/(\*+)//;
   $atype =~ s/^\s+//;

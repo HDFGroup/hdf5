@@ -529,7 +529,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     if(H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -803,7 +803,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     HDfree(data);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -1056,7 +1056,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     HDfree(data);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -1688,7 +1688,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
 
     HDfree(data);
 
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1994,7 +1994,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     HDfree(data);
 
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -2108,7 +2108,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     if(H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-    PASSED()
+    PASSED();
 
     return 0;
 

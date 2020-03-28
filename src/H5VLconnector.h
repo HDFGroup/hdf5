@@ -91,7 +91,6 @@ typedef int H5VL_attr_optional_t;
 typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_DAPL,                  /* access property list                */
     H5VL_DATASET_GET_DCPL,                  /* creation property list              */
-    H5VL_DATASET_GET_OFFSET,                /* offset                              */
     H5VL_DATASET_GET_SPACE,                 /* dataspace                           */
     H5VL_DATASET_GET_SPACE_STATUS,          /* space status                        */
     H5VL_DATASET_GET_STORAGE_SIZE,          /* storage size                        */
@@ -197,7 +196,7 @@ typedef enum H5VL_object_get_t {
     H5VL_OBJECT_GET_FILE,              /* object file                       */
     H5VL_OBJECT_GET_NAME,              /* object name                       */
     H5VL_OBJECT_GET_TYPE,              /* object type                       */
-    H5VL_OBJECT_GET_INFO               /* H5Oget_info(_by_idx|name)3        */
+    H5VL_OBJECT_GET_INFO               /* H5Oget_info(_by_idx|name)         */
 } H5VL_object_get_t;
 
 /* types for object SPECIFIC callback */
