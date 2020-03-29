@@ -3023,6 +3023,8 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrncmp(argv[argno], "--s3-cred=", (size_t)10)) {
 #ifdef H5_HAVE_ROS3_VFD
+            char const *start = NULL;
+
             start = strchr(argv[argno], '=');
             if (start == NULL) {
                 HDfprintf(rawerrorstream, "Error: Unable to parse null credentials tuple\n"
