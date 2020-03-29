@@ -56,7 +56,10 @@ New Features
 
     Library:
     --------
+    - Added two new API routines for tracking library memory use:
+        H5get_alloc_stats() and H5get_free_list_sizes().
 
+      (QAK - 2020/03/25)
 
     Java Library:
     ----------------
