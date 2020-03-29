@@ -311,6 +311,8 @@ int read_info(const char *filename, pack_opt_t *options)
 
     /* cycle until end of file reached */
     while (1) {
+        if (EOF == fscanf(fp, "%9s", stype))
+            break;
 
         /* Info indicator must be for layout or filter */
         if (HDstrcmp(stype,"-l") && HDstrcmp(stype, "-f")) {
