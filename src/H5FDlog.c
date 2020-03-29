@@ -78,8 +78,10 @@ typedef struct H5FD_log_t {
     int             fd;     /* the unix file                    */
     haddr_t         eoa;    /* end of allocated region          */
     haddr_t         eof;    /* end of file; current file size   */
+#ifndef H5_HAVE_PREADWRITE
     haddr_t         pos;    /* current file I/O position        */
     H5FD_file_op_t  op;     /* last operation                   */
+#endif /* H5_HAVE_PREADWRITE */
     char            filename[H5FD_MAX_FILENAME_LEN];    /* Copy of file name from open operation */
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
@@ -108,7 +110,7 @@ typedef struct H5FD_log_t {
     DWORD           nFileIndexLow;
     DWORD           nFileIndexHigh;
     DWORD           dwVolumeSerialNumber;
-    
+
     HANDLE          hFile;      /* Native windows file handle */
 #endif  /* H5_HAVE_WIN32_API */
 
@@ -578,8 +580,10 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     file->fd = fd;
     H5_CHECKED_ASSIGN(file->eof, haddr_t, sb.st_size, h5_stat_size_t);
+#ifndef H5_HAVE_PREADWRITE
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
+#endif /* H5_HAVE_PREADWRITE */
 #ifdef H5_HAVE_WIN32_API
     file->hFile = (HANDLE)_get_osfhandle(fd);
     if(INVALID_HANDLE_VALUE == file->hFile)
@@ -1255,7 +1259,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
     while(size > 0) {
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
-        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */ 
+        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */
 
         /* Trying to read more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -1279,7 +1283,9 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
 
+#ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+#endif /* H5_HAVE_PREADWRITE */
 
             if(file->fa.flags & H5FD_LOG_LOC_READ)
                 HDfprintf(file->logfp, "Error! Reading: %10a-%10a (%10Zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
@@ -1295,7 +1301,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
 
         HDassert(bytes_read >= 0);
         HDassert((size_t)bytes_read <= size);
-        
+
         size -= (size_t)bytes_read;
         addr += (haddr_t)bytes_read;
         buf = (char *)buf + bytes_read;
@@ -1344,15 +1350,19 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
 #endif /* H5_HAVE_GETTIMEOFDAY */
     } /* end if */
 
+#ifndef H5_HAVE_PREADWRITE
     /* Update current position */
     file->pos = addr;
     file->op = OP_READ;
+#endif /* H5_HAVE_PREADWRITE */
 
 done:
     if(ret_value < 0) {
+#ifndef H5_HAVE_PREADWRITE
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
+#endif /* H5_HAVE_PREADWRITE */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1472,7 +1482,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     while(size > 0) {
 
         h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
-        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
+        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -1496,7 +1506,9 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             int myerrno = errno;
             time_t mytime = HDtime(NULL);
 
+#ifndef H5_HAVE_PREADWRITE
             offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+#endif /* H5_HAVE_PREADWRITE */
 
             if(file->fa.flags & H5FD_LOG_LOC_WRITE)
                 HDfprintf(file->logfp, "Error! Writing: %10a-%10a (%10Zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
@@ -1555,17 +1567,24 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 #endif /* H5_HAVE_GETTIMEOFDAY */
     } /* end if */
 
+#ifndef H5_HAVE_PREADWRITE
     /* Update current position and eof */
     file->pos = addr;
     file->op = OP_WRITE;
     if(file->pos > file->eof)
         file->eof = file->pos;
+#else /* H5_HAVE_PREADWRITE */
+    if(addr > file->eof)
+        file->eof = addr;
+#endif /* H5_HAVE_PREADWRITE */
 
 done:
     if(ret_value < 0) {
+#ifndef H5_HAVE_PREADWRITE
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
+#endif /* H5_HAVE_PREADWRITE */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1674,9 +1693,11 @@ H5FD_log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_U
         /* Update the eof value */
         file->eof = file->eoa;
 
+#ifndef H5_HAVE_PREADWRITE
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
+#endif /* H5_HAVE_PREADWRITE */
     } /* end if */
 
 done:
