@@ -183,9 +183,8 @@ process_deferred_frees(H5F_t *f)
             "%s.%d: processing free at %" PRIuHADDR ", %" PRIuHSIZE " bytes",
             __FILE__, __LINE__, df->addr, df->size);
         SIMPLEQ_REMOVE_HEAD(&defrees, link);
-        if (H5MF__xfree_impl(f, df->alloc_type, df->addr, df->size) < 0) {
+        if (H5MF__xfree_impl(f, df->alloc_type, df->addr, df->size) < 0)
             err = FAIL;
-        }
         free(df);
     }
 
@@ -1258,15 +1257,14 @@ HDfprintf(stderr, "%s: Trying to avoid starting up free space manager\n", FUNC);
             if((status = H5MF_try_shrink(f, alloc_type, addr, size)) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check for absorbing block")
             else if(status > 0)
-                /* Indicate success */
                 HGOTO_DONE(SUCCEED)
 	    else if(size < f->shared->fs_threshold) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 		HGOTO_DONE(SUCCEED)
-	    } /* end else-if */
-        } /* end if */
+	    }
+        }
 
         /* If we are deleting the free space manager, leave now, to avoid
          *  [re-]starting it.
@@ -1283,7 +1281,7 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
 HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
             HGOTO_DONE(SUCCEED)
-        } /* end if */
+        }
 
         /* There's either already a free space manager, or the freed
          *  space isn't at the end of the file, so start up (or create)
@@ -1291,7 +1289,7 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
          */
         if(H5MF__start_fstype(f, fs_type) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
-    } /* end if */
+    }
 
     /* Create the free-space section for the freed section */
     ctype = H5MF_SECT_CLASS_TYPE(f, size);
@@ -1331,7 +1329,7 @@ HDfprintf(stderr, "%s: After H5FS_sect_add()\n", FUNC);
 	else if(merged == TRUE) /* successfully merged */
 	    /* Indicate that the node was used */
             node = NULL;
-    } /* end else */
+    }
 
     /* Multi-page and VFD SWMR writer: remove from PB if exists there.
      *
@@ -1671,8 +1669,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     if(H5F_PAGED_AGGR(f)) {
         if((ret_value = H5MF__close_pagefs(f)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close free-space managers for 'page' file space")
-    } /* end if */
-    else {
+    } else {
         if((ret_value = H5MF__close_aggrfs(f)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close free-space managers for 'aggr' file space")
     } /* end else */
