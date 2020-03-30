@@ -1755,16 +1755,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         ie_ptr->tick_of_last_change  = shared->tick_num;
         ie_ptr->clean                = !entry->is_dirty;
 
-        if ( ie_ptr->clean ) {
-
-            ie_ptr->tick_of_last_flush = shared->tick_num;
-
-        } else {
-
-            ie_ptr->tick_of_last_flush = 0;
-        }
-
-        HDassert(ie_ptr);
+        ie_ptr->tick_of_last_flush = ie_ptr->clean ? shared->tick_num : 0;
     }
 
     /* scan the metadata file index for entries that don't appear in the 
