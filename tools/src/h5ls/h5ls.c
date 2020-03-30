@@ -2362,7 +2362,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
         if (verbose_g > 0) {
             size_t buf_size = 0;
             char* comment = NULL;
-            char* obj_addr_str = NULL;
+            char* obj_tok_str = NULL;
             ssize_t cmt_bufsize = -1;
 
             /* Display attributes */
@@ -2371,14 +2371,14 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                 H5Aiterate2(obj, H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL);
 
             /* Object location & reference count */
-            H5Otoken_to_str(obj, &oinfo->token, &obj_addr_str);
+            H5Otoken_to_str(obj, &oinfo->token, &obj_tok_str);
 
             h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "    %-10s %lu:%s\n", "Location:", oinfo->fileno, obj_addr_str);
+            h5tools_str_append(&buffer, "    %-10s %lu:%s\n", "Location:", oinfo->fileno, obj_tok_str);
             h5tools_str_append(&buffer, "    %-10s %u\n", "Links:", (unsigned)oinfo->rc);
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
 
-            H5free_memory(obj_addr_str);
+            H5free_memory(obj_tok_str);
 
             /* Modification time */
             if (oinfo->mtime > 0) {
