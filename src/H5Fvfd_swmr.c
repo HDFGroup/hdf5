@@ -470,7 +470,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
      *
      *  --Set entry_ptr to NULL
      */
-    for ( i = 0; i < num_entries; i++ ) {
+    for (i = 0; i < num_entries; i++) {
 
         if (index[i].entry_ptr == NULL)
             continue;
@@ -527,7 +527,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
         /* Set entry_ptr to NULL */
         index[i].entry_ptr = NULL;
 
-    } /* end for */
+    }
 
     /* Construct and write index to the metadata file */
     if ( H5F__vfd_swmr_construct_write_md_idx(f, num_entries, index) < 0 )
