@@ -553,34 +553,33 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
      *
      *      --remove the associated entries from the list
      */
-     
+
+    if (f->shared->tick_num <= f->shared->vfd_swmr_config.max_lag)
+        goto done; // It is too early for any reclamations to be due.
+
      TAILQ_FOREACH_REVERSE_SAFE(shadow_defree, &f->shared->shadow_defrees,
          shadow_defree_queue, link, prev) {
 
-        /* max_lag is at least 3 */
-        if ( ( f->shared->tick_num > f->shared->vfd_swmr_config.max_lag ) &&
-             ( shadow_defree->tick_num <=
-               f->shared->tick_num - f->shared->vfd_swmr_config.max_lag ) ) {
-
-            if (H5MV_free(f, shadow_defree->offset, shadow_defree->length) < 0)
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                            "unable to flush clean entry")
-
-            hlog_fast(noisy_shadow_defrees,
-                "released %" PRIu32 " bytes at %" PRIu64 "\n",
-                shadow_defree->length, shadow_defree->offset);
-
-            /* Remove the entry from the delayed list */
-            TAILQ_REMOVE(&f->shared->shadow_defrees, shadow_defree, link);
-
-            /* Free the delayed entry struct */
-            H5FL_FREE(shadow_defree_t, shadow_defree);
-
-        } else {
-
-            break;
+        if (shadow_defree->tick_num + f->shared->vfd_swmr_config.max_lag >
+            f->shared->tick_num) {
+            break;  // No more entries are due for reclamation.
         }
+
+        if (H5MV_free(f, shadow_defree->offset, shadow_defree->length) < 0) {
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
+                "unable to flush clean entry");
+        }
+
+        hlog_fast(noisy_shadow_defrees,
+            "released %" PRIu32 " bytes at %" PRIu64,
+            shadow_defree->length, shadow_defree->offset);
+
+        /* Remove the entry from the delayed list */
+        TAILQ_REMOVE(&f->shared->shadow_defrees, shadow_defree, link);
+
+        /* Free the delayed entry struct */
+        H5FL_FREE(shadow_defree_t, shadow_defree);
+
     }
 
     if (queue_was_nonempty && TAILQ_EMPTY(&f->shared->shadow_defrees))
