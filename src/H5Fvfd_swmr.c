@@ -912,19 +912,10 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
      *    Note that this operation will restore the index to 
      *    sorted order.
      */
-    if (f->shared->mdf_idx_entries_used + idx_entries_added > 0) {
-
-        if ( H5F_update_vfd_swmr_metadata_file(f, 
-                f->shared->mdf_idx_entries_used + idx_entries_added,
-                f->shared->mdf_idx) < 0 )
-
-            HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't update MD file")
-    } else {
-
-        if ( H5F_update_vfd_swmr_metadata_file(f, 0, NULL) < 0 )
-
-            HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't update MD file")
-    }
+    if (H5F_update_vfd_swmr_metadata_file(f,
+            f->shared->mdf_idx_entries_used + idx_entries_added,
+            f->shared->mdf_idx) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't update MD file")
 
     /* at this point the metadata file index should be sorted -- update
      * f->shared->mdf_idx_entries_used.
@@ -1681,8 +1672,7 @@ H5F__vfd_swmr_construct_write_md_idx(H5F_t *f, uint32_t num_entries,
 
     FUNC_ENTER_STATIC
 
-    HDassert((num_entries!= 0 && index != NULL) || 
-             (num_entries == 0 && index == NULL));
+    HDassert(num_entries == 0 || index != NULL);
 
     /* Allocate space for the buffer to hold the index */
     if ( (image = HDmalloc(idx_size)) == NULL )
