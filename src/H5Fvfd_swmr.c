@@ -828,10 +828,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
      *
      *    (Not for first cut.)
      */
-    if ( f->shared->vfd_swmr_config.flush_raw_data ) {
-
-        HDassert(FALSE);
-    }
+    HDassert(!f->shared->vfd_swmr_config.flush_raw_data);
 
 #if 1
     /* Test to see if b-tree corruption seen in VFD SWMR tests 
