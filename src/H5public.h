@@ -338,6 +338,17 @@ typedef struct H5_ih_info_t {
     hsize_t     heap_size;
 } H5_ih_info_t;
 
+static inline const char *
+htri_to_string(htri_t v)
+{
+    if (v == 0)
+        return "false";
+    else if (v < 0)
+        return "error";
+    else
+        return "true";
+}
+
 /* Functions in H5.c */
 H5_DLL herr_t H5open(void);
 H5_DLL herr_t H5close(void);
