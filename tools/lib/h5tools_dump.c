@@ -2099,11 +2099,11 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
 
         if(obj) {
             if(!obj->recorded) {
-                char *obj_addr_str = NULL;
+                char *obj_tok_str = NULL;
 
-                H5Otoken_to_str(type, &oinfo.token, &obj_addr_str);
-                h5tools_str_append(buffer,"\"/#%s\"", obj_addr_str);
-                H5free_memory(obj_addr_str);
+                H5Otoken_to_str(type, &oinfo.token, &obj_tok_str);
+                h5tools_str_append(buffer,"\"/#%s\"", obj_tok_str);
+                H5free_memory(obj_tok_str);
             }
             else
                 h5tools_str_append(buffer, "\"%s\"", obj->objname);
@@ -3241,16 +3241,15 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             break;
         case H5D_CONTIGUOUS:
             {
-                int next;
+                int n_external;
 
-                next = H5Pget_external_count(dcpl_id);
+                n_external = H5Pget_external_count(dcpl_id);
 
-                /*-------------------------------------------------------------------------
-                 * EXTERNAL_FILE
-                 *-------------------------------------------------------------------------
-                 */
                 ctx->indent_level++;
-                if (next) {
+                if (n_external) {
+
+                    /* EXTERNAL FILE */
+
                     ctx->need_prefix = TRUE;
 
                     h5tools_str_reset(&buffer);
@@ -3264,7 +3263,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
                     ctx->indent_level++;
-                    for (j = 0; j < (unsigned) next; j++) {
+                    for (j = 0; j < (unsigned) n_external; j++) {
                         H5Pget_external(dcpl_id, j, sizeof(name), name, &offset, &size);
 
                         ctx->need_prefix = TRUE;
@@ -3285,6 +3284,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 else {
                     haddr_t ioffset;
 
+                    /* NORMAL FILE */
+
                     ctx->need_prefix = TRUE;
 
                     h5tools_str_reset(&buffer);
@@ -3299,9 +3300,18 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
 
                     ctx->need_prefix = TRUE;
 
+                    /* NOTE: H5Dget_offset() is a native VOL connector optional
+                     *       API call and will not work with arbitrary VOL
+                     *       connectors. When unsupported, it will return
+                     *       HADDR_UNDEF and the numerical value of this will
+                     *       be printed.
+                     */
                     h5tools_str_reset(&buffer);
                     ioffset = H5Dget_offset(obj_id);
-                    h5tools_str_append(&buffer, "OFFSET %" PRIuHADDR, ioffset);
+                    if (HADDR_UNDEF == ioffset)
+                        h5tools_str_append(&buffer, "OFFSET Undefined (HADDR_UNDEF)");
+                    else
+                        h5tools_str_append(&buffer, "OFFSET %" PRIuHADDR, ioffset);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
                 }
                 ctx->indent_level--;
@@ -3311,23 +3321,23 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         case H5D_VIRTUAL:
             {
                 char dsetname[256];     /* virtual datset name       */
-                size_t vmaps;
+                size_t n_vmaps;
 
-                H5Pget_virtual_count(dcpl_id, &vmaps);
+                H5Pget_virtual_count(dcpl_id, &n_vmaps);
 
-                if (vmaps) {
-                    size_t next;
-                    ssize_t H5_ATTR_SANITY_CHECK ssize_out;
+                if (n_vmaps) {
+                    size_t curr_vmap;
+                    ssize_t H5_ATTR_NDEBUG_UNUSED ssize_out;
 
                     ctx->indent_level++;
-                    for (next = 0; next < (unsigned) vmaps; next++) {
-                        hid_t virtual_vspace = H5Pget_virtual_vspace(dcpl_id, next);
-                        hid_t virtual_srcspace = H5Pget_virtual_srcspace(dcpl_id, next);
+                    for (curr_vmap = 0; curr_vmap < n_vmaps; curr_vmap++) {
+                        hid_t virtual_vspace = H5Pget_virtual_vspace(dcpl_id, curr_vmap);
+                        hid_t virtual_srcspace = H5Pget_virtual_srcspace(dcpl_id, curr_vmap);
 
                         ctx->need_prefix = TRUE;
 
                         h5tools_str_reset(&buffer);
-                        h5tools_str_append(&buffer, "%s %ld %s ", VDS_MAPPING, next, BEGIN);
+                        h5tools_str_append(&buffer, "%s %ld %s ", VDS_MAPPING, curr_vmap, BEGIN);
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
                         ctx->indent_level++;
@@ -3358,14 +3368,14 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
 
                         ctx->indent_level++;
 
-                        ssize_out = H5Pget_virtual_filename(dcpl_id, next, NULL, 0);
+                        ssize_out = H5Pget_virtual_filename(dcpl_id, curr_vmap, NULL, 0);
                         HDassert(ssize_out > 0);
                         HDassert((size_t)ssize_out < sizeof(name));
-                        H5Pget_virtual_filename(dcpl_id, next, name, sizeof(name));
-                        ssize_out = H5Pget_virtual_dsetname(dcpl_id, next, NULL, 0);
+                        H5Pget_virtual_filename(dcpl_id, curr_vmap, name, sizeof(name));
+                        ssize_out = H5Pget_virtual_dsetname(dcpl_id, curr_vmap, NULL, 0);
                         HDassert(ssize_out > 0);
                         HDassert((size_t)ssize_out < sizeof(name));
-                        H5Pget_virtual_dsetname(dcpl_id, next, dsetname, sizeof(dsetname));
+                        H5Pget_virtual_dsetname(dcpl_id, curr_vmap, dsetname, sizeof(dsetname));
 
                         ctx->need_prefix = TRUE;
 

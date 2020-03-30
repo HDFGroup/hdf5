@@ -259,7 +259,7 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
                 dt->next = *named_dt_head_p;
                 *named_dt_head_p = dt;
 
-                /* Update the address and id */
+                /* Update the token/address and id */
                 HDmemcpy(&dt->obj_token, &travt->objs[i].obj_token, sizeof(H5O_token_t));
                 dt->id_out = H5I_INVALID_HID;
 
@@ -282,7 +282,7 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
         dt_ret->next = *named_dt_head_p;
         *named_dt_head_p = dt_ret;
 
-        /* Update the address and id */
+        /* Update the token/address and id */
         HDmemcpy(&dt_ret->obj_token, &oinfo.token, sizeof(H5O_token_t));
         dt_ret->id_out = H5I_INVALID_HID;
     } /* end if requested datatype not found */
