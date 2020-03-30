@@ -379,9 +379,6 @@ H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
          *  see if we can avoid creating one by checking if the freed
          *  space is at the end of the file
          */
-#ifdef H5MV_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: fs_addr = %a\n", FUNC, f->shared->fs_man_md);
-#endif
         htri_t status;          /* "can absorb" status for section into */
 
         hlog_fast(h5mv, "%s: Trying to avoid starting up free space manager",
