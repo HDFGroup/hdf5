@@ -391,7 +391,6 @@ HDfprintf(stderr, "%s: Trying to avoid starting up free space manager\n", FUNC);
          if((status = H5MV_try_shrink(f, addr, size)) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check for absorbing block")
          else if(status > 0)
-            /* Indicate success */
             HGOTO_DONE(SUCCEED)
 
         /* If we are deleting the free space manager, leave now, to avoid
@@ -402,7 +401,7 @@ HDfprintf(stderr, "%s: Trying to avoid starting up free space manager\n", FUNC);
 HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, addr, size);
 #endif
             HGOTO_DONE(SUCCEED)
-        } /* end if */
+        }
 
         /* There's either already a free space manager, or the freed
          *  space isn't at the end of the file, so start up (or create)
@@ -410,13 +409,13 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
          */
         if(H5MV__create(f) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space manager")
-    } /* end if */
+    }
 
     /* Create the free-space section for the freed section */
     if(NULL == (node = H5MV__sect_new(addr, size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section")
 
-	HDassert(f->shared->fs_man_md);
+    HDassert(f->shared->fs_man_md);
 
 #ifdef H5MV_VFD_SWMR_DEBUG
 HDfprintf(stderr, "%s: Before H5FS_sect_add(): addr=%a, size=%Hu\n", FUNC, addr, size);
