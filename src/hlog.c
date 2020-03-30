@@ -48,7 +48,7 @@ hlog_init(void)
         return;
     }
 
-    while ((item = strsep(&settings, ",")) != NULL) {
+    while ((item = strsep(&settings, " ,")) != NULL) {
         hlog_outlet_state_t state;
         char key[64 + 1], val[4 + 1];   // + 1 for the terminating NUL
         int nconverted;
