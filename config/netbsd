@@ -1,0 +1,56 @@
+#							-*- shell-script -*-
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+
+
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+#
+# See BlankForm in this directory for details.
+
+# The default compiler is `gcc'
+if test "X-" = "X-$CC"; then
+  CC=gcc
+  CC_BASENAME=gcc
+fi
+
+# Figure out C compiler flags
+. $srcdir/config/gnu-flags
+
+# Figure out Intel C compiler flags
+. $srcdir/config/intel-flags
+
+# The default Fortran 90 compiler
+if test "X-" = "X-$FC"; then
+    case $CC_BASENAME in
+        gcc*|pgcc*)
+            FC=gfortran
+            FC_BASENAME=gfortran
+            ;;
+        icc*)
+            FC=ifort
+            FC_BASENAME=ifort
+            ;;
+        mpicc*)
+            FC=mpif90
+            FC_BASENAME=mpif90
+            ;;
+    esac
+fi
+
+# Figure out FORTRAN compiler flags
+. $srcdir/config/gnu-fflags
+
+# Figure out Intel F90 compiler flags
+. $srcdir/config/intel-fflags
+

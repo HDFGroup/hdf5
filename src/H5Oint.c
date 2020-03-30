@@ -31,6 +31,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
+#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Fprivate.h"         /* File access                              */
 #include "H5FLprivate.h"        /* Free lists                               */
@@ -57,7 +58,7 @@
 /* User data for recursive traversal over objects from a group */
 typedef struct {
     hid_t       obj_id;         /* The ID for the starting group */
-    H5G_loc_t	*start_loc;     /* Location of starting group */
+    H5G_loc_t    *start_loc;     /* Location of starting group */
     H5SL_t     *visited;        /* Skip list for tracking visited nodes */
     H5O_iterate_t op;           /* Application callback */
     void       *op_data;        /* Application's op data */
@@ -97,36 +98,36 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  * message.
  */
 const H5O_msg_class_t *const H5O_msg_class_g[] = {
-    H5O_MSG_NULL,		/*0x0000 Null				*/
-    H5O_MSG_SDSPACE,		/*0x0001 Dataspace			*/
-    H5O_MSG_LINFO,		/*0x0002 Link information		*/
-    H5O_MSG_DTYPE,		/*0x0003 Datatype			*/
-    H5O_MSG_FILL,       	/*0x0004 Old data storage -- fill value */
-    H5O_MSG_FILL_NEW,		/*0x0005 New data storage -- fill value */
-    H5O_MSG_LINK,		/*0x0006 Link 				*/
-    H5O_MSG_EFL,		/*0x0007 Data storage -- external data files */
-    H5O_MSG_LAYOUT,		/*0x0008 Data Layout			*/
+    H5O_MSG_NULL,        /*0x0000 Null                */
+    H5O_MSG_SDSPACE,        /*0x0001 Dataspace            */
+    H5O_MSG_LINFO,        /*0x0002 Link information        */
+    H5O_MSG_DTYPE,        /*0x0003 Datatype            */
+    H5O_MSG_FILL,           /*0x0004 Old data storage -- fill value */
+    H5O_MSG_FILL_NEW,        /*0x0005 New data storage -- fill value */
+    H5O_MSG_LINK,        /*0x0006 Link                 */
+    H5O_MSG_EFL,        /*0x0007 Data storage -- external data files */
+    H5O_MSG_LAYOUT,        /*0x0008 Data Layout            */
 #ifdef H5O_ENABLE_BOGUS
-    H5O_MSG_BOGUS_VALID,	/*0x0009 "Bogus valid" (for testing)	*/
+    H5O_MSG_BOGUS_VALID,    /*0x0009 "Bogus valid" (for testing)    */
 #else /* H5O_ENABLE_BOGUS */
-    NULL,			/*0x0009 "Bogus valid" (for testing)	*/
+    NULL,            /*0x0009 "Bogus valid" (for testing)    */
 #endif /* H5O_ENABLE_BOGUS */
-    H5O_MSG_GINFO,		/*0x000A Group information		*/
-    H5O_MSG_PLINE,		/*0x000B Data storage -- filter pipeline */
-    H5O_MSG_ATTR,		/*0x000C Attribute			*/
-    H5O_MSG_NAME,		/*0x000D Object name			*/
-    H5O_MSG_MTIME,		/*0x000E Object modification date and time */
-    H5O_MSG_SHMESG,		/*0x000F File-wide shared message table */
-    H5O_MSG_CONT,		/*0x0010 Object header continuation	*/
-    H5O_MSG_STAB,		/*0x0011 Symbol table			*/
-    H5O_MSG_MTIME_NEW,		/*0x0012 New Object modification date and time */
-    H5O_MSG_BTREEK,		/*0x0013 Non-default v1 B-tree 'K' values */
-    H5O_MSG_DRVINFO,		/*0x0014 Driver info settings		*/
-    H5O_MSG_AINFO,		/*0x0015 Attribute information		*/
-    H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
-    H5O_MSG_FSINFO,		/*0x0017 Free-space manager info        */
+    H5O_MSG_GINFO,        /*0x000A Group information        */
+    H5O_MSG_PLINE,        /*0x000B Data storage -- filter pipeline */
+    H5O_MSG_ATTR,        /*0x000C Attribute            */
+    H5O_MSG_NAME,        /*0x000D Object name            */
+    H5O_MSG_MTIME,        /*0x000E Object modification date and time */
+    H5O_MSG_SHMESG,        /*0x000F File-wide shared message table */
+    H5O_MSG_CONT,        /*0x0010 Object header continuation    */
+    H5O_MSG_STAB,        /*0x0011 Symbol table            */
+    H5O_MSG_MTIME_NEW,        /*0x0012 New Object modification date and time */
+    H5O_MSG_BTREEK,        /*0x0013 Non-default v1 B-tree 'K' values */
+    H5O_MSG_DRVINFO,        /*0x0014 Driver info settings        */
+    H5O_MSG_AINFO,        /*0x0015 Attribute information        */
+    H5O_MSG_REFCOUNT,        /*0x0016 Object's ref. count        */
+    H5O_MSG_FSINFO,        /*0x0017 Free-space manager info        */
     H5O_MSG_MDCI,               /*0x0018 Metadata cache image           */
-    H5O_MSG_UNKNOWN		/*0x0019 Placeholder for unknown message */
+    H5O_MSG_UNKNOWN        /*0x0019 Placeholder for unknown message */
 };
 
 /* Format version bounds for object header */
@@ -174,20 +175,20 @@ H5FL_EXTERN(H5_obj_t);
  * datatype message is a datatype but only some of them are datasets.
  */
 static const H5O_obj_class_t *const H5O_obj_class_g[] = {
-    H5O_OBJ_DATATYPE,		/* Datatype object (H5O_TYPE_NAMED_DATATYPE - 2) */
-    H5O_OBJ_DATASET,		/* Dataset object (H5O_TYPE_DATASET - 1) */
-    H5O_OBJ_GROUP,		/* Group object (H5O_TYPE_GROUP - 0) */
+    H5O_OBJ_DATATYPE,        /* Datatype object (H5O_TYPE_NAMED_DATATYPE - 2) */
+    H5O_OBJ_DATASET,        /* Dataset object (H5O_TYPE_DATASET - 1) */
+    H5O_OBJ_GROUP,        /* Group object (H5O_TYPE_GROUP - 0) */
 };
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__init_package
+ * Function:    H5O__init_package
  *
- * Purpose:	Initialize information specific to H5O interface.
+ * Purpose:    Initialize information specific to H5O interface.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, January 18, 2007
  *
  *-------------------------------------------------------------------------
@@ -206,7 +207,7 @@ H5O__init_package(void)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__init_package() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_set_version
  *
@@ -253,24 +254,24 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_set_version() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_create
+ * Function:    H5O_create
  *
- * Purpose:	Creates a new object header. Allocates space for it and
+ * Purpose:    Creates a new object header. Allocates space for it and
  *              then calls an initialization function. The object header
  *              is opened for write access and should eventually be
  *              closed by calling H5O_close().
  *
- * Return:	Success:	Non-negative, the ENT argument contains
- *				information about the object header,
- *				including its address.
+ * Return:    Success:    Non-negative, the ENT argument contains
+ *                information about the object header,
+ *                including its address.
  *
- *		Failure:	Negative
+ *        Failure:    Negative
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  5 1997
+ * Programmer:    Robb Matzke
+ *        matzke@llnl.gov
+ *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -312,7 +313,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_create() */
 
-
+
 /*-----------------------------------------------------------------------------
  * Function:   H5O__create_ohdr
  *
@@ -377,7 +378,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__create_ohdr() */
 
-
+
 /*-----------------------------------------------------------------------------
  * Function:   H5O__apply_ohdr
  *
@@ -548,17 +549,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__apply_ohdr() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_open
+ * Function:    H5O_open
  *
- * Purpose:	Opens an object header which is described by the symbol table
- *		entry OBJ_ENT.
+ * Purpose:    Opens an object header which is described by the symbol table
+ *        entry OBJ_ENT.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Monday, January	 5, 1998
+ * Programmer:    Robb Matzke
+ *        Monday, January     5, 1998
  *
  * Modification:
  *              Raymond Lu
@@ -585,7 +586,7 @@ H5O_open(H5O_loc_t *loc)
 
     /* Turn off the variable for holding file or increment open-lock counters */
     if(loc->holding_file)
-     	loc->holding_file = FALSE;
+        loc->holding_file = FALSE;
     else
         H5F_INCR_NOPEN_OBJS(loc->file);
 
@@ -593,17 +594,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_open_name
+ * Function:    H5O_open_name
  *
- * Purpose:	Opens an object within an HDF5 file.
+ * Purpose:    Opens an object within an HDF5 file.
  *
- * Return:	Success:	An open object identifier
- *		Failure:	Negative
+ * Return:    Success:    An open object identifier
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		March  5 2007
+ * Programmer:    Quincey Koziol
+ *        March  5 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -611,8 +612,8 @@ hid_t
 H5O_open_name(const H5G_loc_t *loc, const char *name, hbool_t app_ref)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    H5G_name_t  obj_path;                /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;                /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     hid_t       ret_value = H5I_INVALID_HID;
 
@@ -644,17 +645,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open_name() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O__open_by_idx
  *
  * Purpose:     Internal routine to open an object by index within group
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		December 28, 2017
+ * Programmer:    Quincey Koziol
+ *        December 28, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -663,10 +664,10 @@ H5O__open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    H5G_name_t  obj_path;                /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;                /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
-    hid_t ret_value = H5I_INVALID_HID;	/* Return value */
+    hid_t ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -696,17 +697,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__open_by_idx() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O__open_by_addr
  *
  * Purpose:     Internal routine to open an object by its address
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		December 28, 2017
+ * Programmer:    Quincey Koziol
+ *        December 28, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -714,9 +715,9 @@ hid_t
 H5O__open_by_addr(const H5G_loc_t *loc, haddr_t addr)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
-    hid_t ret_value = H5I_INVALID_HID;	/* Return value */
+    H5G_name_t  obj_path;                /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;                /* Opened object object location */
+    hid_t ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -739,17 +740,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__open_by_addr() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__open_by_loc
+ * Function:    H5O__open_by_loc
  *
- * Purpose:	Opens an object and returns an ID given its group loction.
+ * Purpose:    Opens an object and returns an ID given its group loction.
  *
- * Return:	Success:	Open object identifier
- *		Failure:	Negative
+ * Return:    Success:    Open object identifier
+ *        Failure:    Negative
  *
- * Programmer:	James Laird
- *		July 25 2006
+ * Programmer:    James Laird
+ *        July 25 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -757,7 +758,7 @@ hid_t
 H5O__open_by_loc(const H5G_loc_t *obj_loc, hbool_t app_ref)
 {
     const H5O_obj_class_t *obj_class;   /* Class of object for location */
-    hid_t ret_value = H5I_INVALID_HID;	/* Return value */
+    hid_t ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -776,16 +777,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__open_by_loc() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_close
+ * Function:    H5O_close
  *
- * Purpose:	Closes an object header that was previously open.
+ * Purpose:    Closes an object header that was previously open.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Monday, January	 5, 1998
+ * Programmer:    Robb Matzke
+ *        Monday, January     5, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -818,8 +819,8 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
         if(H5F_FILE_ID(loc->file)< 0 && 1 == H5F_NREFS(loc->file))
             HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n",
                 loc->addr, (unsigned long)H5F_NOPEN_OBJS(loc->file));
-	else
-	    HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
+    else
+        HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
     }
 #endif
 
@@ -840,20 +841,20 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_close() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__link_oh
+ * Function:    H5O__link_oh
  *
- * Purpose:	Adjust the link count for an open object header by adding
- *		ADJUST to the link count.
+ * Purpose:    Adjust the link count for an open object header by adding
+ *        ADJUST to the link count.
  *
- * Return:	Success:	New link count
+ * Return:    Success:    New link count
  *
- *		Failure:	Negative
+ *        Failure:    Negative
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  5 1997
+ * Programmer:    Robb Matzke
+ *        matzke@llnl.gov
+ *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -861,7 +862,7 @@ int
 H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted)
 {
     haddr_t addr = H5O_OH_GET_ADDR(oh);     /* Object header address */
-    int	ret_value = -1;                     /* Return value */
+    int    ret_value = -1;                     /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -955,29 +956,29 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__link_oh() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_link
+ * Function:    H5O_link
  *
- * Purpose:	Adjust the link count for an object header by adding
- *		ADJUST to the link count.
+ * Purpose:    Adjust the link count for an object header by adding
+ *        ADJUST to the link count.
  *
- * Return:	Success:	New link count
+ * Return:    Success:    New link count
  *
- *		Failure:	Negative
+ *        Failure:    Negative
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  5 1997
+ * Programmer:    Robb Matzke
+ *        matzke@llnl.gov
+ *        Aug  5 1997
  *
  *-------------------------------------------------------------------------
  */
 int
 H5O_link(const H5O_loc_t *loc, int adjust)
 {
-    H5O_t	*oh = NULL;
+    H5O_t    *oh = NULL;
     hbool_t deleted = FALSE;            /* Whether the object was deleted */
-    int	ret_value = -1;                 /* Return value */
+    int    ret_value = -1;                 /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
@@ -1003,21 +1004,21 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_link() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_protect
+ * Function:    H5O_protect
  *
- * Purpose:	Wrapper around H5AC_protect for use during a H5O_protect->
+ * Purpose:    Wrapper around H5AC_protect for use during a H5O_protect->
  *              H5O_msg_append->...->H5O_msg_append->H5O_unprotect sequence of calls
  *              during an object's creation.
  *
- * Return:	Success:	Pointer to the object header structure for the
+ * Return:    Success:    Pointer to the object header structure for the
  *                              object.
- *		Failure:	NULL
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Dec 31 2002
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Dec 31 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1189,21 +1190,21 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_protect() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_pin
+ * Function:    H5O_pin
  *
- * Purpose:	Pin an object header down for use during a sequence of message
+ * Purpose:    Pin an object header down for use during a sequence of message
  *              operations, which prevents the object header from being
  *              evicted from the cache.
  *
- * Return:	Success:	Pointer to the object header structure for the
+ * Return:    Success:    Pointer to the object header structure for the
  *                              object.
- *		Failure:	NULL
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jul 13 2008
+ * Programmer:    Quincey Koziol
+ *        koziol@hdfgroup.org
+ *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1238,19 +1239,19 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_pin() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_unpin
+ * Function:    H5O_unpin
  *
- * Purpose:	Unpin an object header, allowing it to be evicted from the
+ * Purpose:    Unpin an object header, allowing it to be evicted from the
  *              metadata cache.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jul 13 2008
+ * Programmer:    Quincey Koziol
+ *        koziol@hdfgroup.org
+ *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1273,20 +1274,20 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_unpin() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_unprotect
+ * Function:    H5O_unprotect
  *
- * Purpose:	Wrapper around H5AC_unprotect for use during a H5O_protect->
+ * Purpose:    Wrapper around H5AC_unprotect for use during a H5O_protect->
  *              H5O_msg_append->...->H5O_msg_append->H5O_unprotect sequence of calls
  *              during an object's creation.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Dec 31 2002
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Dec 31 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1330,17 +1331,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_unprotect() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_touch_oh
+ * Function:    H5O_touch_oh
  *
- * Purpose:	If FORCE is non-zero then create a modification time message
- *		unless one already exists.  Then update any existing
- *		modification time message with the current time.
+ * Purpose:    If FORCE is non-zero then create a modification time message
+ *        unless one already exists.  Then update any existing
+ *        modification time message with the current time.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Monday, July 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1350,7 +1351,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
     hbool_t chk_dirtied = FALSE;        /* Flag for unprotecting chunk */
-    time_t	now;                    /* Current time */
+    time_t    now;                    /* Current time */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1365,7 +1366,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
 
         /* Check version, to determine how to store time information */
         if(oh->version == H5O_VERSION_1) {
-            size_t	idx;                    /* Index of modification time message to update */
+            size_t    idx;                    /* Index of modification time message to update */
 
             /* Look for existing message */
             for(idx = 0; idx < oh->nmesgs; idx++)
@@ -1424,18 +1425,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_touch_oh() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_touch
+ * Function:    H5O_touch
  *
- * Purpose:	Touch an object by setting the modification time to the
- *		current time and marking the object as dirty.  Unless FORCE
- *		is non-zero, nothing happens if there is no MTIME message in
- *		the object header.
+ * Purpose:    Touch an object by setting the modification time to the
+ *        current time and marking the object as dirty.  Unless FORCE
+ *        is non-zero, nothing happens if there is no MTIME message in
+ *        the object header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Monday, July 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1443,8 +1444,8 @@ done:
 herr_t
 H5O_touch(const H5O_loc_t *loc, hbool_t force)
 {
-    H5O_t	*oh = NULL;             /* Object header to modify */
-    unsigned 	oh_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
+    H5O_t    *oh = NULL;             /* Object header to modify */
+    unsigned     oh_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1471,15 +1472,15 @@ done:
 } /* end H5O_touch() */
 
 #ifdef H5O_ENABLE_BOGUS
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_bogus_oh
+ * Function:    H5O_bogus_oh
  *
- * Purpose:	Create a "bogus" message unless one already exists.
+ * Purpose:    Create a "bogus" message unless one already exists.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              <koziol@ncsa.uiuc.edu>
  *              Tuesday, January 21, 2003
  *
@@ -1488,8 +1489,8 @@ done:
 herr_t
 H5O_bogus_oh(H5F_t *f, H5O_t *oh, unsigned bogus_id, unsigned mesg_flags)
 {
-    size_t	idx;                /* Local index variable */
-    H5O_msg_class_t *type;	    /* Message class type */
+    size_t    idx;                /* Local index variable */
+    H5O_msg_class_t *type;        /* Message class type */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1507,25 +1508,25 @@ H5O_bogus_oh(H5F_t *f, H5O_t *oh, unsigned bogus_id, unsigned mesg_flags)
         H5O_bogus_t *bogus;             /* Pointer to the bogus information */
 
         /* Allocate the native message in memory */
-	if(NULL == (bogus = H5MM_malloc(sizeof(H5O_bogus_t))))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "memory allocation failed for 'bogus' message")
+    if(NULL == (bogus = H5MM_malloc(sizeof(H5O_bogus_t))))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "memory allocation failed for 'bogus' message")
 
         /* Update the native value */
         bogus->u = H5O_BOGUS_VALUE;
 
-	if(bogus_id == H5O_BOGUS_VALID_ID)
-	    type = H5O_MSG_BOGUS_VALID;
-	else if(bogus_id == H5O_BOGUS_INVALID_ID)
-	    type = H5O_MSG_BOGUS_INVALID;
-	else
-	    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID for 'bogus' message")
+    if(bogus_id == H5O_BOGUS_VALID_ID)
+        type = H5O_MSG_BOGUS_VALID;
+    else if(bogus_id == H5O_BOGUS_INVALID_ID)
+        type = H5O_MSG_BOGUS_INVALID;
+    else
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID for 'bogus' message")
 
         /* Allocate space in the object header for bogus message */
-	if(H5O__msg_alloc(f, oh, type, &mesg_flags, bogus, &idx) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message")
+    if(H5O__msg_alloc(f, oh, type, &mesg_flags, bogus, &idx) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message")
 
         /* Point to "bogus" information (take it over) */
-	oh->mesg[idx].native = bogus;
+    oh->mesg[idx].native = bogus;
 
         /* Set the appropriate flags for the message */
         oh->mesg[idx].flags = mesg_flags;
@@ -1540,20 +1541,20 @@ done:
 } /* end H5O_bogus_oh() */
 #endif /* H5O_ENABLE_BOGUS */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_delete
+ * Function:    H5O_delete
  *
- * Purpose:	Delete an object header from a file.  This frees the file
+ * Purpose:    Delete an object header from a file.  This frees the file
  *              space used for the object header (and it's continuation blocks)
  *              and also walks through each header message and asks it to
  *              remove all the pieces of the file referenced by the header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 19 2003
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Mar 19 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1602,21 +1603,21 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_delete() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__delete_oh
+ * Function:    H5O__delete_oh
  *
- * Purpose:	Internal function to:
+ * Purpose:    Internal function to:
  *              Delete an object header from a file.  This frees the file
  *              space used for the object header (and it's continuation blocks)
  *              and also walks through each header message and asks it to
  *              remove all the pieces of the file referenced by the header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 19 2003
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Mar 19 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1624,7 +1625,7 @@ static herr_t
 H5O__delete_oh(H5F_t *f, H5O_t *oh)
 {
     H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
-    unsigned	u;
+    unsigned    u;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1646,16 +1647,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__delete_oh() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_obj_type
+ * Function:    H5O_obj_type
  *
- * Purpose:	Retrieves the type of object pointed to by `loc'.
+ * Purpose:    Retrieves the type of object pointed to by `loc'.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, November  4, 1998
  *
  *-------------------------------------------------------------------------
@@ -1663,7 +1664,7 @@ done:
 herr_t
 H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type)
 {
-    H5O_t	*oh = NULL;             /* Object header for location */
+    H5O_t    *oh = NULL;             /* Object header for location */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
@@ -1678,21 +1679,21 @@ H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type)
 
 done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+    HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_obj_type() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__obj_type_real
+ * Function:    H5O__obj_type_real
  *
- * Purpose:	Returns the type of object pointed to by `oh'.
+ * Purpose:    Returns the type of object pointed to by `oh'.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, November 21, 2005
  *
  *-------------------------------------------------------------------------
@@ -1724,16 +1725,16 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__obj_type_real() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__obj_class
+ * Function:    H5O__obj_class
  *
- * Purpose:	Returns the class of object pointed to by `loc'.
+ * Purpose:    Returns the class of object pointed to by `loc'.
  *
- * Return:	Success:	An object class
- *		Failure:	NULL
+ * Return:    Success:    An object class
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, November  6, 2006
  *
  *-------------------------------------------------------------------------
@@ -1741,7 +1742,7 @@ H5O__obj_type_real(const H5O_t *oh, H5O_type_t *obj_type)
 const H5O_obj_class_t *
 H5O__obj_class(const H5O_loc_t *loc)
 {
-    H5O_t	*oh = NULL;                     /* Object header for location */
+    H5O_t    *oh = NULL;                     /* Object header for location */
     const H5O_obj_class_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_STATIC_TAG(loc->addr)
@@ -1756,21 +1757,21 @@ H5O__obj_class(const H5O_loc_t *loc)
 
 done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+    HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__obj_class() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__obj_class_real
+ * Function:    H5O__obj_class_real
  *
- * Purpose:	Returns the class of object pointed to by `oh'.
+ * Purpose:    Returns the class of object pointed to by `oh'.
  *
- * Return:	Success:	An object class
- *		Failure:	NULL
+ * Return:    Success:    An object class
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, November 21, 2005
  *
  *-------------------------------------------------------------------------
@@ -1778,7 +1779,7 @@ done:
 static const H5O_obj_class_t *
 H5O__obj_class_real(const H5O_t *oh)
 {
-    size_t	i;                      /* Local index variable */
+    size_t    i;                      /* Local index variable */
     const H5O_obj_class_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1789,7 +1790,7 @@ H5O__obj_class_real(const H5O_t *oh)
     /* Test whether entry qualifies as a particular type of object */
     /* (Note: loop is in reverse order, to test specific objects first) */
     for(i = NELMTS(H5O_obj_class_g); i > 0; --i) {
-        htri_t	isa;            /* Is entry a particular type? */
+        htri_t    isa;            /* Is entry a particular type? */
 
         if((isa = (H5O_obj_class_g[i - 1]->isa)(oh)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to determine object type")
@@ -1804,17 +1805,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__obj_class_real() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_get_loc
+ * Function:    H5O_get_loc
  *
- * Purpose:	Gets the object location for an object given its ID.
+ * Purpose:    Gets the object location for an object given its ID.
  *
- * Return:	Success:	Pointer to H5O_loc_t
- *		Failure:	NULL
+ * Return:    Success:    Pointer to H5O_loc_t
+ *        Failure:    NULL
  *
- * Programmer:	James Laird
- *		July 25 2006
+ * Programmer:    James Laird
+ *        July 25 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1862,16 +1863,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_loc() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_loc_reset
+ * Function:    H5O_loc_reset
  *
- * Purpose:	Reset a object location to an empty state
+ * Purpose:    Reset a object location to an empty state
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
@@ -1891,16 +1892,16 @@ H5O_loc_reset(H5O_loc_t *loc)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_reset() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_loc_copy
  *
  * Purpose:     Copy object location information
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              koziol@ncsa.uiuc.edu
  *              Monday, September 19, 2005
  *
@@ -1942,17 +1943,17 @@ H5O_loc_copy(H5O_loc_t *dst, H5O_loc_t *src, H5_copy_depth_t depth)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_copy() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_loc_hold_file
+ * Function:    H5O_loc_hold_file
  *
- * Purpose:	Have this object header hold a file open until it is
+ * Purpose:    Have this object header hold a file open until it is
  *              released.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	James Laird
+ * Programmer:    James Laird
  *              Wednesday, August 16, 2006
  *
  *-------------------------------------------------------------------------
@@ -1975,18 +1976,18 @@ H5O_loc_hold_file(H5O_loc_t *loc)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_hold_file() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_loc_free
+ * Function:    H5O_loc_free
  *
- * Purpose:	Release resources used by this object header location.
+ * Purpose:    Release resources used by this object header location.
  *              Not to be confused with H5O_close; this is used on
  *              locations that don't correspond to open objects.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	James Laird
+ * Programmer:    James Laird
  *              Wednesday, August 16, 2006
  *
  *-------------------------------------------------------------------------
@@ -2015,17 +2016,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_loc_free() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_get_hdr_info
+ * Function:    H5O_get_hdr_info
  *
- * Purpose:	Retrieve the object header information for an object
+ * Purpose:    Retrieve the object header information for an object
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		September 22 2009
+ * Programmer:    Quincey Koziol
+ *        September 22 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -2054,22 +2055,22 @@ H5O_get_hdr_info(const H5O_loc_t *loc, H5O_hdr_info_t *hdr)
 
 done:
     if(oh && H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+    HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_hdr_info() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__get_hdr_info_real
+ * Function:    H5O__get_hdr_info_real
  *
- * Purpose:	Internal routine to retrieve the object header information for an object
+ * Purpose:    Internal routine to retrieve the object header information for an object
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		September 22 2009
+ * Programmer:    Quincey Koziol
+ *        September 22 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -2077,7 +2078,7 @@ static herr_t
 H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
 {
     const H5O_mesg_t *curr_msg;         /* Pointer to current message being operated on */
-    const H5O_chunk_t *curr_chunk;	/* Pointer to current message being operated on */
+    const H5O_chunk_t *curr_chunk;    /* Pointer to current message being operated on */
     unsigned u;                         /* Local index variable */
 
     FUNC_ENTER_STATIC_NOERR
@@ -2140,16 +2141,16 @@ H5O__get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__get_hdr_info_real() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_get_info
  *
  * Purpose:     Retrieve the information for an object
  *
  * Note:        Add a parameter "fields" to indicate selection of object info.
- *  
- * Return:      Success:	Non-negative
- *              Failure:	Negative
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  * Programmer:  Quincey Koziol
  *              November 21 2006
@@ -2193,7 +2194,7 @@ H5O_get_info(const H5O_loc_t *loc, H5O_info_t *oinfo, unsigned fields)
 
         /* Set the object's reference count */
         oinfo->rc = oh->nlink;
-    } 
+    }
 
     /* Get time information, if requested */
     if(fields & H5O_INFO_TIME) {
@@ -2270,7 +2271,7 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_get_info() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O__get_info_by_idx
  *
@@ -2280,8 +2281,8 @@ done:
  *
  * Note:        Add a parameter "fields" to indicate selection of object info.
  *
- * Return:      Success:	Non-negative
- *              Failure:	Negative
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  * Programmer:  Quincey Koziol
  *              December 28, 2017
@@ -2293,10 +2294,10 @@ H5O__get_info_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
     H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, unsigned fields)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    H5G_name_t  obj_path;                /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;                /* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
-    herr_t ret_value = SUCCEED;		/* Return value */
+    herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2327,17 +2328,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__get_info_by_idx() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_get_create_plist
+ * Function:    H5O_get_create_plist
  *
- * Purpose:	Retrieve the object creation properties for an object
+ * Purpose:    Retrieve the object creation properties for an object
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		November 28 2006
+ * Programmer:    Quincey Koziol
+ *        November 28 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2382,17 +2383,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_create_plist() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_get_nlinks
+ * Function:    H5O_get_nlinks
  *
- * Purpose:	Retrieve the number of link messages read in from the file
+ * Purpose:    Retrieve the number of link messages read in from the file
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		March 11 2007
+ * Programmer:    Quincey Koziol
+ *        March 11 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2422,17 +2423,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_nlinks() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_obj_create
+ * Function:    H5O_obj_create
  *
- * Purpose:	Creates an object, in an abstract manner.
+ * Purpose:    Creates an object, in an abstract manner.
  *
- * Return:	Success:	Pointer to object opened
- *		Failure:	NULL
+ * Return:    Success:    Pointer to object opened
+ *        Failure:    NULL
  *
- * Programmer:	Quincey Koziol
- *		April 9 2007
+ * Programmer:    Quincey Koziol
+ *        April 9 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2453,7 +2454,7 @@ H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc
     /* Iterate through the object classes */
     for(u = 0; u < NELMTS(H5O_obj_class_g); u++) {
         /* Check for correct type of object to create */
-	if(H5O_obj_class_g[u]->type == obj_type) {
+    if(H5O_obj_class_g[u]->type == obj_type) {
             /* Call the object class's 'create' routine */
             HDassert(H5O_obj_class_g[u]->create);
             if(NULL == (ret_value = H5O_obj_class_g[u]->create(f, crt_info, obj_loc)))
@@ -2469,21 +2470,21 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_obj_create() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_get_oh_addr
+ * Function:    H5O_get_oh_addr
  *
- * Purpose:	Retrieve the address of the object header
+ * Purpose:    Retrieve the address of the object header
  *
- * Note:	This routine participates in the "Inlining C struct access"
- *		pattern, don't call it directly, use the appropriate macro
- *		defined in H5Oprivate.h.
+ * Note:    This routine participates in the "Inlining C struct access"
+ *        pattern, don't call it directly, use the appropriate macro
+ *        defined in H5Oprivate.h.
  *
- * Return:	Success:	Valid haddr_t
- *		Failure:	HADDR_UNDEF
+ * Return:    Success:    Valid haddr_t
+ *        Failure:    HADDR_UNDEF
  *
- * Programmer:	Quincey Koziol
- *		March 15 2007
+ * Programmer:    Quincey Koziol
+ *        March 15 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2499,7 +2500,7 @@ H5O_get_oh_addr(const H5O_t *oh)
     FUNC_LEAVE_NOAPI(oh->chunk[0].addr)
 } /* end H5O_get_oh_addr() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5O_get_oh_flags
  *
@@ -2516,7 +2517,7 @@ H5O_get_oh_flags(const H5O_t *oh)
     FUNC_LEAVE_NOAPI(oh->flags); /* flags can be 0 */
 } /* H5O_get_oh_flags() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5O_get_oh_mtime
  *
@@ -2538,7 +2539,7 @@ H5O_get_oh_mtime(const H5O_t *oh)
     FUNC_LEAVE_NOAPI(oh->mtime);
 } /* H5O_get_oh_mtime() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5O_get_oh_version
  *
@@ -2556,17 +2557,17 @@ H5O_get_oh_version(const H5O_t *oh)
     FUNC_LEAVE_NOAPI(oh->version);
 } /* H5O_get_oh_version() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_get_rc_and_type
+ * Function:    H5O_get_rc_and_type
  *
- * Purpose:	Retrieve an object's reference count and type
+ * Purpose:    Retrieve an object's reference count and type
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		November  4 2007
+ * Programmer:    Quincey Koziol
+ *        November  4 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2601,7 +2602,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_rc_and_type() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5O__free_visit_visited
  *
@@ -2610,7 +2611,7 @@ done:
  * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  Quincey Koziol
- *	        Nov 25, 2007
+ *            Nov 25, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2624,17 +2625,17 @@ H5O__free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSE
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__free_visit_visited() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__visit_cb
+ * Function:    H5O__visit_cb
  *
  * Purpose:     Callback function for recursively visiting objects from a group
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:    Success:        Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *	        Nov 25, 2007
+ * Programmer:    Quincey Koziol
+ *            Nov 25, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2644,8 +2645,8 @@ H5O__visit_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t *li
 {
     H5O_iter_visit_ud_t *udata = (H5O_iter_visit_ud_t *)_udata;     /* User data for callback */
     H5G_loc_t   obj_loc;                /* Location of object */
-    H5G_name_t  obj_path;            	/* Object's group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Object's object location */
+    H5G_name_t  obj_path;                /* Object's group hier. path */
+    H5O_loc_t   obj_oloc;                /* Object's object location */
     hbool_t     obj_found = FALSE;      /* Object at 'name' found */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
@@ -2716,9 +2717,9 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__visit_cb() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__visit
+ * Function:    H5O__visit
  *
  * Purpose:     Recursively visit an object and all the objects reachable
  *              from it.  If the starting object is a group, all the objects
@@ -2739,14 +2740,14 @@ done:
  * Note:        Add a parameter "fields" to indicate selection of object info.
  *
  * Return:      Success:    The return value of the first operator that
- *				returns non-zero, or zero if all members were
- *				processed with no operator returning non-zero.
+ *                returns non-zero, or zero if all members were
+ *                processed with no operator returning non-zero.
  *
  *              Failure:    Negative if something goes wrong within the
- *				library, or the negative value returned by one
- *				of the operators.
+ *                library, or the negative value returned by one
+ *                of the operators.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              November 24 2007
  *
  *-------------------------------------------------------------------------
@@ -2756,7 +2757,7 @@ H5O__visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, H5O_iterate_t op, void *op_data, unsigned fields)
 {
     H5O_iter_visit_ud_t udata;  /* User data for callback */
-    H5G_loc_t	loc;            /* Location of reference object */
+    H5G_loc_t    loc;            /* Location of reference object */
     H5G_loc_t   obj_loc;        /* Location used to open object */
     H5G_name_t  obj_path;       /* Opened object group hier. path */
     H5O_loc_t   obj_oloc;       /* Opened object object location */
@@ -2803,7 +2804,7 @@ H5O__visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 
     /* Check for object being a group */
     if(oinfo.type == H5O_TYPE_GROUP) {
-        H5G_loc_t	start_loc;          /* Location of starting group */
+        H5G_loc_t    start_loc;          /* Location of starting group */
 
         /* Get the location of the starting group */
         if(H5G_loc(obj_id, &start_loc) < 0)
@@ -2856,17 +2857,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__visit() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__inc_rc
+ * Function:    H5O__inc_rc
  *
- * Purpose:	Increments the reference count on an object header
+ * Purpose:    Increments the reference count on an object header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jul 13 2008
+ * Programmer:    Quincey Koziol
+ *        koziol@hdfgroup.org
+ *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -2892,17 +2893,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__inc_rc() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__dec_rc
+ * Function:    H5O__dec_rc
  *
- * Purpose:	Decrements the reference count on an object header
+ * Purpose:    Decrements the reference count on an object header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jul 13 2008
+ * Programmer:    Quincey Koziol
+ *        koziol@hdfgroup.org
+ *        Jul 13 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -2928,7 +2929,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dec_rc() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:   H5O_dec_rc_by_loc
  *
@@ -2971,16 +2972,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dec_rc_by_loc() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O_get_proxy
+ * Function:    H5O_get_proxy
  *
- * Purpose:	Retrieve the proxy for the object header.
+ * Purpose:    Retrieve the proxy for the object header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		July 24 2016
+ * Programmer:    Quincey Koziol
+ *        July 24 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -2995,24 +2996,24 @@ H5O_get_proxy(const H5O_t *oh)
     FUNC_LEAVE_NOAPI(oh->proxy)
 } /* end H5O_get_proxy() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	H5O__free
+ * Function:    H5O__free
  *
- * Purpose:	Destroys an object header.
+ * Purpose:    Destroys an object header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan 15 2003
+ * Programmer:    Quincey Koziol
+ *        koziol@ncsa.uiuc.edu
+ *        Jan 15 2003
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5O__free(H5O_t *oh)
 {
-    unsigned	u;                      /* Local index variable */
+    unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE

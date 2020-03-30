@@ -47,6 +47,23 @@ New Features
 
     Configuration:
     -------------
+    - Both build systems use same set of warnings flags
+
+      GNU C warnings flags were moved to files in a config sub-folder
+      named gnu-warnings. Flags that only are available for a specific
+      version of the compiler are in files named with that version.
+      Clang C warnings flags were moved to files in a config sub-folder
+      named clang-warnings.
+
+      There are flags in named "error-xxx" files with warnings that may
+      be promoted to errors. Some source files may still need fixes.
+
+      There are also pairs of files named "developer-xxx" and "no-developer-xxx"
+      that are chosen by the CMake option:HDF5_ENABLE_DEV_WARNINGS or the
+      configure option:--enable-developer-warnings.
+
+      (ADB - 2020/03/24, TRILAB-192)
+
     - Update CMake minimum version to 3.12
 
       Updated CMake minimum version to 3.12 and added version checks
