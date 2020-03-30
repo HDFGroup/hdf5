@@ -40,6 +40,7 @@
 #include "H5MVpkg.h"		/* File memory management		*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
+#include "hlog.h"
 
 /****************/
 /* Local Macros */
@@ -94,6 +95,8 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /*******************/
 /* Local Variables */
 /*******************/
+
+HLOG_OUTLET_SHORT_DEFN(h5mv, all);
 
 
 /*-------------------------------------------------------------------------
@@ -279,9 +282,7 @@ H5MV_alloc(H5F_t *f, hsize_t size)
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
-#ifdef H5MV_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: size = %Hu\n", FUNC, size);
-#endif
+    hlog_fast(h5mv, "%s: size = %" PRIuHSIZE, __func__, size);
 
     /* check arguments */
     HDassert(f);
@@ -336,9 +337,8 @@ HDfprintf(stderr, "%s: size = %Hu\n", FUNC, size);
     HDassert(H5F_addr_defined(ret_value));
 
 done:
-#ifdef H5MV_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: Leaving: ret_value = %a, size = %Hu\n", FUNC, ret_value, size);
-#endif
+    hlog_fast(h5mv, "%s: Leaving: ret_value = %" PRIuHADDR
+        ", size = %" PRIuHSIZE, __func__, ret_value, size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MV_alloc() */
@@ -362,9 +362,9 @@ H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-#ifdef H5MV_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: Entering - addr = %a, size = %Hu\n", FUNC, addr, size);
-#endif
+
+    hlog_fast(h5mv, "%s: Entering - addr = %" PRIuHADDR ", size = %" PRIuHSIZE,
+        __func__, addr, size);
 
     /* check arguments */
     HDassert(f);
@@ -384,9 +384,9 @@ HDfprintf(stderr, "%s: fs_addr = %a\n", FUNC, f->shared->fs_man_md);
 #endif
         htri_t status;          /* "can absorb" status for section into */
 
-#ifdef H5MV_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: Trying to avoid starting up free space manager\n", FUNC);
-#endif
+        hlog_fast(h5mv, "%s: Trying to avoid starting up free space manager",
+            __func__);
+
          /* Try to shrink the file */
          if((status = H5MV_try_shrink(f, addr, size)) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check for absorbing block")
@@ -397,9 +397,8 @@ HDfprintf(stderr, "%s: Trying to avoid starting up free space manager\n", FUNC);
          *  [re-]starting it: dropping free space section on the floor.
          */
         if(f->shared->fs_state_md == H5F_FS_STATE_DELETING) {
-#ifdef H5MV_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, addr, size);
-#endif
+            hlog_fast(h5mv, "%s: dropping addr = %" PRIuHADDR
+                ", size = %" PRIuHSIZE ", on the floor!", __func__, addr, size);
             HGOTO_DONE(SUCCEED)
         }
 
@@ -417,9 +416,8 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
 
     HDassert(f->shared->fs_man_md);
 
-#ifdef H5MV_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: Before H5FS_sect_add(): addr=%a, size=%Hu\n", FUNC, addr, size);
-#endif
+    hlog_fast(h5mv, "%s: Before H5FS_sect_add(): addr=%" PRIuHADDR
+        ", size=%" PRIuHSIZE, __func__, addr, size);
 
      /* Add the section */
     if(H5FS_sect_add(f, f->shared->fs_man_md, &node->sect_info, H5FS_ADD_RETURNED_SPACE, f) < 0)
@@ -427,9 +425,7 @@ HDfprintf(stderr, "%s: Before H5FS_sect_add(): addr=%a, size=%Hu\n", FUNC, addr,
 
     node = NULL;
 
-#ifdef H5MV_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: After H5FS_sect_add()\n", FUNC);
-#endif
+    hlog_fast(h5mv, "%s: After H5FS_sect_add()", __func__);
 
 done:
     /* Release section node, if allocated and not added to section list or merged */
@@ -437,9 +433,8 @@ done:
         if(H5MV__sect_free(&node->sect_info) < 0)
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
 
-#ifdef H5MV_VFD_SWMR_DEBUG
-HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
-#endif
+    hlog_fast(h5mv, "%s: Leaving, ret_value = %d", __func__, ret_value);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MV_free() */
 
