@@ -18,38 +18,38 @@
  *		in genall5.c
  */
 
-void create_zoo(hid_t fid, const char *base_path, int proc_num,
+bool create_zoo(hid_t fid, const char *base_path, int proc_num,
     bool skip_varlen);
-void validate_zoo(hid_t fid, const char *base_path, int proc_num,
+bool validate_zoo(hid_t fid, const char *base_path, int proc_num,
     bool skip_varlen);
 
-void ns_grp_0(hid_t fid, const char *group_name);
-void vrfy_ns_grp_0(hid_t fid, const char *group_name);
+bool ns_grp_0(hid_t fid, const char *group_name);
+bool vrfy_ns_grp_0(hid_t fid, const char *group_name);
 
-void ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks);
-void vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks);
+bool ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks);
+bool vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks);
 
-void ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks);
-void vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks);
+bool ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks);
+bool vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks);
 
-void os_grp_0(hid_t fid, const char *group_name);
-void vrfy_os_grp_0(hid_t fid, const char *group_name);
+bool os_grp_0(hid_t fid, const char *group_name);
+bool vrfy_os_grp_0(hid_t fid, const char *group_name);
 
-void os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks);
-void vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, 
+bool os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks);
+bool vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, 
     unsigned nlinks);
 
-void ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
-void vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
+bool ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
+bool vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
 
-void ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data);
-void vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data);
+bool ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data);
+bool vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data);
 
-void ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data);
-void vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data);
+bool ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data);
+bool vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data);
 
-void ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
-void vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
+bool ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
+bool vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
 
 /* Individual tests can override zoo_create_hook(), which is called
  * after each step of create_zoo().  The `hid_t` argument identifies
