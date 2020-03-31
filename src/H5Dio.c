@@ -90,7 +90,7 @@ static herr_t H5D__typeinfo_term(const H5D_type_info_t *type_info);
 H5FL_BLK_DEFINE(type_conv);
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Dread
  *
@@ -228,7 +228,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5Dwrite
  *
@@ -326,7 +326,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__pre_write
  *
@@ -408,7 +408,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__pre_write() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__read
  *
@@ -629,7 +629,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__read() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__write
  *
@@ -887,7 +887,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__write() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__ioinfo_init
  *
@@ -956,7 +956,7 @@ const
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__ioinfo_init() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__typeinfo_init
  *
@@ -1113,7 +1113,7 @@ done:
 } /* end H5D__typeinfo_init() */
 
 #ifdef H5_HAVE_PARALLEL
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__ioinfo_adjust
  *
@@ -1205,7 +1205,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_adjust() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__ioinfo_term
  *
@@ -1261,7 +1261,7 @@ done:
 
 #endif /* H5_HAVE_PARALLEL */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__typeinfo_term
  *
