@@ -67,6 +67,8 @@ H5_DLL ssize_t H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects,
 /* File 'temporary' space allocation routines */
 H5_DLL haddr_t H5MF_alloc_tmp(H5F_t *f, hsize_t size);
 
+herr_t H5MF_process_deferred_frees(H5F_t *, uint64_t);
+
 /* 'block aggregator' routines */
 H5_DLL herr_t H5MF_free_aggrs(H5F_t *f);
 H5_DLL htri_t H5MF_aggrs_try_shrink_eoa(H5F_t *f);

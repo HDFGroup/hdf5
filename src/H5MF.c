@@ -167,19 +167,18 @@ defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr,
     return SUCCEED;
 }
 
-static herr_t
-process_deferred_frees(H5F_t *f)
+herr_t
+H5MF_process_deferred_frees(H5F_t *f, const uint64_t tick_num)
 {
     lower_defree_t *df;
     herr_t err = SUCCEED;
     H5F_shared_t *shared = f->shared;
-    const uint64_t tick_num = shared->tick_num;
     lower_defree_queue_t defrees = SIMPLEQ_HEAD_INITIALIZER(defrees);
 
     /* Have to empty the queue before processing it because we
      * could re-enter this routine through H5MF__xfree_impl.  If
-     * items were still on the queue, we would enter process_deferred_frees()
-     * recursively until the queue was empty.
+     * items were still on the queue, we would enter
+     * H5MF_process_deferred_frees() recursively until the queue was empty.
      */
     SIMPLEQ_CONCAT(&defrees, &shared->lower_defrees);
 
@@ -883,7 +882,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 
     if (!f->shared->vfd_swmr_writer)
         ;   // not a VFD SWMR writer, do not process deferrals
-    else if (process_deferred_frees(f) < 0) {
+    else if (H5MF_process_deferred_frees(f, f->shared->tick_num) < 0) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, HADDR_UNDEF,
             "could not process deferrals")
     }
@@ -1192,7 +1191,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
         ret_value = H5MF__xfree_impl(f, alloc_type, addr, size);
     } else if (defer_free(f->shared, alloc_type, addr, size) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "could not defer")
-    else if (process_deferred_frees(f) < 0) {
+    else if (H5MF_process_deferred_frees(f, f->shared->tick_num) < 0) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL,
             "could not process deferrals")
     }
