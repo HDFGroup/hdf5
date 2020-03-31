@@ -13,8 +13,11 @@
 /* Define the default plugins path to compile */
 #undef DEFAULT_PLUGINDIR
 
-/* Define if `dev_t' is a scalar */
+/* Define if dev_t is a scalar */
 #undef DEV_T_IS_SCALAR
+
+/* Define the examples directory */
+#undef EXAMPLESDIR
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
@@ -188,10 +191,10 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #undef HAVE_MPE_H
 
-/* Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists */
+/* Define if MPI_Comm_c2f and MPI_Comm_f2c exist */
 #undef HAVE_MPI_MULTI_LANG_Comm
 
-/* Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists */
+/* Define if MPI_Info_c2f and MPI_Info_f2c exist */
 #undef HAVE_MPI_MULTI_LANG_Info
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
@@ -246,7 +249,7 @@
 /* Define to 1 if you have the `srandom' function. */
 #undef HAVE_SRANDOM
 
-/* Define if `struct stat' has the `st_blocks' field */
+/* Define if struct stat has the st_blocks field */
 #undef HAVE_STAT_ST_BLOCKS
 
 /* Define to 1 if you have the <stddef.h> header file. */
@@ -273,10 +276,10 @@
 /* Define to 1 if you have the `strtoull' function. */
 #undef HAVE_STRTOULL
 
-/* Define if `struct text_info' is defined */
+/* Define if struct text_info is defined */
 #undef HAVE_STRUCT_TEXT_INFO
 
-/* Define if `struct videoconfig' is defined */
+/* Define if struct videoconfig is defined */
 #undef HAVE_STRUCT_VIDEOCONFIG
 
 /* Define to 1 if you have the `symlink' function. */
@@ -312,7 +315,7 @@
 /* Define if we have thread safe support */
 #undef HAVE_THREADSAFE
 
-/* Define if `timezone' is a global variable */
+/* Define if timezone is a global variable */
 #undef HAVE_TIMEZONE
 
 /* Define if the ioctl TIOCGETD is defined */
@@ -324,7 +327,7 @@
 /* Define to 1 if you have the `tmpfile' function. */
 #undef HAVE_TMPFILE
 
-/* Define if `tm_gmtoff' is a member of `struct tm' */
+/* Define if tm_gmtoff is a member of struct tm */
 #undef HAVE_TM_GMTOFF
 
 /* Define to 1 if you have the <unistd.h> header file. */

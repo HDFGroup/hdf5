@@ -103,6 +103,7 @@
 ./config/conclude.am
 ./config/examples.am
 ./config/freebsd
+./config/gnu-cxxflags
 ./config/gnu-fflags
 ./config/gnu-flags
 ./config/cygwin

@@ -1,8 +1,0 @@
-# (suggestions from gcc, not code problems)
-# NOTE: -Wformat-nonliteral added back in here (from being disabled in
-# H5_CFLAGS)
--Waggregate-return
--Wformat-nonliteral
--Winline
--Wmissing-format-attribute
--Wmissing-noreturn
