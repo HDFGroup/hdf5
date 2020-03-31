@@ -1701,7 +1701,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
     HDassert(idx_ent_not_in_tl_ptr);
     HDassert(idx_ent_not_in_tl_flushed_ptr);
 
-    /* scan the tick list and insert or update metadata file index entries 
+    /* scan the tick list and insert or update metadata file index entries
      * as appropriate.
      */
 
