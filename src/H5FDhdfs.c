@@ -549,7 +549,7 @@ H5FD_hdfs_init_interface(void)
     FUNC_LEAVE_NOAPI(H5FD_hdfs_init())
 } /* H5FD_hdfs_init_interface() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_init
  *
@@ -767,7 +767,7 @@ done:
 } /* H5FD_hdfs_open() */
 #endif /* H5_HAVE_LIBHDFS */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_close
  *
@@ -945,7 +945,7 @@ H5FD_hdfs_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags) /* out
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5FD_hdfs_query() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_get_eoa()
  *
@@ -1282,7 +1282,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_hdfs_write() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_truncate
  *
