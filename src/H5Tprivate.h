@@ -24,9 +24,9 @@
 #include "H5MMpublic.h"         /* Memory management                    */
 
 /* Private headers needed by this file */
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Gprivate.h"		/* Groups 			  	*/
-#include "H5Rprivate.h"		/* References				*/
+#include "H5private.h"        /* Generic Functions            */
+#include "H5Gprivate.h"        /* Groups                   */
+#include "H5Rprivate.h"        /* References                */
 
 /* Macro for size of temporary buffers to contain a single element */
 #define H5T_ELEM_BUF_SIZE       256
@@ -138,6 +138,7 @@ H5_DLL uint32_t H5T_hash(H5F_t * file, const H5T_t *dt);
 H5_DLL herr_t H5T_set_latest_version(H5T_t *dt);
 H5_DLL herr_t H5T_patch_file(H5T_t *dt, H5F_t *f);
 H5_DLL htri_t H5T_is_variable_str(const H5T_t *dt);
+H5_DLL herr_t H5T_patch_vlen_file(H5T_t *dt, H5F_t *f);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);

@@ -25,8 +25,8 @@ endif
 
 # Example directory
 # Note: no '/' after DESTDIR.  Explanation in commence.am
-EXAMPLEDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples/hl/c
-EXAMPLETOPDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples/hl
+EXAMPLEDIR=$(examplesdir)/hl/c
+EXAMPLETOPDIR=$(examplesdir)/hl
 INSTALL_SCRIPT_FILES = run-hlc-ex.sh
 INSTALL_TOP_SCRIPT_FILES = run-hl-ex.sh
 
