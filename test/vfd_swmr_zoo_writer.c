@@ -12,6 +12,7 @@
  */
 
 #include <err.h>
+#include <libgen.h> /* basename(3) */
 #include <time.h> /* nanosleep(2) */
 #include <unistd.h> /* getopt(3) */
 
@@ -38,8 +39,9 @@ enum _step {
 , NSTEPS
 } step_t;
 
-static const hid_t badhid = H5I_INVALID_HID; // abbreviate
+static const hid_t badhid = H5I_INVALID_HID;
 static bool caught_out_of_bounds = false;
+static bool writer;
 
 static void
 print_cache_hits(H5C_t *cache)
@@ -57,7 +59,8 @@ void
 zoo_create_hook(hid_t fid)
 {
     dbgf(3, "%s: enter\n", __func__);
-    H5Fvfd_swmr_end_tick(fid);
+    if (writer)
+        H5Fvfd_swmr_end_tick(fid);
 }
 
 static void
@@ -69,7 +72,6 @@ usage(const char *progname)
     fprintf(stderr,   "  -a: run all tests, including variable-length data\n");
     fprintf(stderr,   "  -n: number of test steps to perform\n");
     fprintf(stderr,   "  -q: be quiet: few/no progress messages\n");
-    fprintf(stderr,   "  -t (oob|null): select out-of-bounds or NULL test\n");
     fprintf(stderr,   "  -v: be verbose: most progress messages\n");
     exit(EXIT_FAILURE);
 }
@@ -92,7 +94,7 @@ main(int argc, char **argv)
     H5C_t *cache;
     sigset_t oldsigs;
     herr_t ret;
-    bool skip_varlen = true, wait_for_signal = true;
+    bool skip_varlen = true, wait_for_signal;
     int ch;
     bool use_vfd_swmr = true;
 #if 0
@@ -102,9 +104,21 @@ main(int argc, char **argv)
     const struct timespec delay =
         {.tv_sec = 0, .tv_nsec = 1000 * 1000 * 1000 / 10};
 #endif
-    testsel_t sel = TEST_NONE;
+    const char *progname = basename(argv[0]);
+    estack_state_t es;
 
-    while ((ch = getopt(argc, argv, "SWan:qt:v")) != -1) {
+    dbgf(1, "0th arg %s, personality `%s`\n", argv[0], progname);
+
+    if (strcmp(progname, "vfd_swmr_zoo_writer") == 0)
+        writer = wait_for_signal = true;
+    else if (strcmp(progname, "vfd_swmr_zoo_reader") == 0)
+        writer = false;
+    else {
+        errx(EXIT_FAILURE,
+             "unknown personality, expected vfd_swmr_zoo_{reader,writer}");
+    }
+
+    while ((ch = getopt(argc, argv, "SWan:qv")) != -1) {
         switch(ch) {
         case 'S':
             use_vfd_swmr = false;
@@ -131,14 +145,6 @@ main(int argc, char **argv)
         case 'q':
             verbosity = 1;
             break;
-        case 't':
-            if (strcmp(optarg, "oob") == 0)
-                sel = TEST_OOB;
-            else if (strcmp(optarg, "null") == 0)
-                sel = TEST_NULL;
-            else
-                usage(argv[0]);
-            break;
         case 'v':
             verbosity = 3;
             break;
@@ -153,7 +159,9 @@ main(int argc, char **argv)
     if (argc > 0)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
-    if ((fapl = vfd_swmr_create_fapl(true, sel == TEST_OOB, use_vfd_swmr)) < 0)
+    fapl = vfd_swmr_create_fapl(writer, true, use_vfd_swmr);
+
+    if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -163,22 +171,35 @@ main(int argc, char **argv)
     if (ret < 0)
         errx(EXIT_FAILURE, "H5Pset_file_space_strategy");
 
-    fid = H5Fcreate("vfd_swmr_zoo.h5", H5F_ACC_TRUNC, fcpl, fapl);
+    if (writer)
+        fid = H5Fcreate("vfd_swmr_zoo.h5", H5F_ACC_TRUNC, fcpl, fapl);
+    else
+        fid = H5Fopen("vfd_swmr_zoo.h5", H5F_ACC_RDONLY, fapl);
+
+    if (fid == badhid)
+        errx(EXIT_FAILURE, writer ? "H5Fcreate" : "H5Fopen");
 
     if ((f = H5VL_object_verify(fid, H5I_FILE)) == NULL)
         errx(EXIT_FAILURE, "H5VL_object_verify");
 
     cache = f->shared->cache;
 
-    if (fid == badhid)
-        errx(EXIT_FAILURE, "H5Fcreate");
-
     if (wait_for_signal)
         block_signals(&oldsigs);
 
     print_cache_hits(cache);
 
-    create_zoo(fid, ".", 0, skip_varlen);
+    es = disable_estack();
+    if (writer) {
+        dbgf(1, "Writing zoo...\n");
+        if (!create_zoo(fid, ".", 0, skip_varlen))
+            errx(EXIT_FAILURE, "create_zoo didn't pass self-check");
+    } else {
+        dbgf(1, "Reading zoo...\n");
+        while (!validate_zoo(fid, ".", 0, skip_varlen))
+            ;
+    }
+    restore_estack(es);
 
     if (use_vfd_swmr && wait_for_signal)
         await_signal(fid);
