@@ -678,10 +678,10 @@ error:
  ***********************************************************************/
 static herr_t gen_sel_files(const char *filename, H5F_libver_t low_bound,  H5F_libver_t high_bound)
 {
-    hid_t fid = -1;         /* File ID */
-    hid_t fapl = -1;        /* File access property list */
-    hid_t sid = -1;         /* Dataspace ID */
-    hid_t did = -1;         /* Dataset ID */
+    hid_t fid = H5I_INVALID_HID;         /* File ID */
+    hid_t fapl = H5I_INVALID_HID;        /* File access property list */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t did = H5I_INVALID_HID;         /* Dataset ID */
     hsize_t numparticles = 8388608;
     hsize_t total_particles = numparticles * 513;
     hsize_t vdsdims[1] = {total_particles};     /* Dataset dimension size */
@@ -690,12 +690,10 @@ static herr_t gen_sel_files(const char *filename, H5F_libver_t low_bound,  H5F_l
     hsize_t ref_stride;     /* Stride of hyperslab */
     hsize_t ref_count;      /* Element count of hyperslab */
     hsize_t ref_block;      /* Block size of hyperslab */
-    hid_t ref_sid = -1;     /* Dataspace ID for the reference dataset */
-    hid_t ref_did = -1;     /* Dataset ID for the reference dataset */
+    hid_t ref_sid = H5I_INVALID_HID;     /* Dataspace ID for the reference dataset */
+    hid_t ref_did = H5I_INVALID_HID;     /* Dataset ID for the reference dataset */
     hsize_t ref_dims[1] = {1};      /* Dimension for reference dataset */
     hdset_reg_ref_t ref_wbuf[1];    /* Buffer for dataset region reference */
-    int ret;                        /* Return value */
-
 
     /*
      * Create test file, attribute, group and dataset 
@@ -709,8 +707,7 @@ static herr_t gen_sel_files(const char *filename, H5F_libver_t low_bound,  H5F_l
     if((sid = H5Screate_simple(1, vdsdims, NULL)) < 0)
         TEST_ERROR;
 
-    did = H5Dcreate2(fid, DATASET, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if(did < 0)
+    if((did = H5Dcreate2(fid, DATASET, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if(H5Sclose(sid) < 0)
@@ -753,22 +750,18 @@ static herr_t gen_sel_files(const char *filename, H5F_libver_t low_bound,  H5F_l
     ref_block = 4;
     ref_stride = POWER32;
 
-    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, &ref_start, &ref_stride, &ref_count, &ref_block);
-    if(ret < 0)
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, &ref_start, &ref_stride, &ref_count, &ref_block) < 0)
         TEST_ERROR;
 
-    /* Create the first reference */
-    H5E_BEGIN_TRY {
-        ret = H5Rcreate(&ref_wbuf[0], fid, DATASET, H5R_DATASET_REGION, sid);
-    } H5E_END_TRY;
-
     /* Should succeed for v110 and above */
-    if(ret >= 0) {
-        HDassert(high_bound >= H5F_LIBVER_V110);
+    if(high_bound >= H5F_LIBVER_V110) {
+
+        /* Create the first reference */
+        if(H5Rcreate(&ref_wbuf[0], fid, DATASET, H5R_DATASET_REGION, sid) < 0)
+            TEST_ERROR;
 
         /* Create the reference datset */
-        ref_did  = H5Dcreate2(fid, SEL_EX_REG_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        if(ref_did < 0)
+        if((ref_did  = H5Dcreate2(fid, SEL_EX_REG_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         /* Write to the reference datset */
@@ -784,22 +777,18 @@ static herr_t gen_sel_files(const char *filename, H5F_libver_t low_bound,  H5F_l
     ref_count = 5;
     ref_block = 2;
     ref_stride = POWER32;
-    ret = H5Sselect_hyperslab(sid, H5S_SELECT_OR, &ref_start, &ref_stride, &ref_count, &ref_block);
-    if(ret < 0)
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_OR, &ref_start, &ref_stride, &ref_count, &ref_block) < 0)
         TEST_ERROR;
 
-    /* Create the second reference */
-    H5E_BEGIN_TRY {
-        ret = H5Rcreate(&ref_wbuf[0], fid, DATASET, H5R_DATASET_REGION, sid);
-    } H5E_END_TRY;
-
     /* Should succeed for v112 and above */
-    if(ret >= 0) {
-        HDassert(high_bound >= H5F_LIBVER_V112);
+    if(high_bound >= H5F_LIBVER_V112) {
+
+        /* Create the second reference */
+        if(H5Rcreate(&ref_wbuf[0], fid, DATASET, H5R_DATASET_REGION, sid) < 0)
+            TEST_ERROR;
 
         /* Create the reference datset */
-        ref_did  = H5Dcreate2(fid, SEL_EX_IRR_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        if(ref_did < 0)
+        if((ref_did  = H5Dcreate2(fid, SEL_EX_IRR_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         /* Write to the reference datset */
@@ -819,18 +808,15 @@ static herr_t gen_sel_files(const char *filename, H5F_libver_t low_bound,  H5F_l
     if(H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)4, coord) < 0)
         TEST_ERROR;
 
-    /* Create the third reference */
-    H5E_BEGIN_TRY {
-        ret = H5Rcreate(&ref_wbuf[0], fid, DATASET,  H5R_DATASET_REGION, sid);
-    } H5E_END_TRY;
-
     /* Should succeed for v112 and above */
-    if(ret >= 0) {
-        HDassert(high_bound >= H5F_LIBVER_V112);
+    if(high_bound >= H5F_LIBVER_V112) {
+
+        /* Create the third reference */
+        if(H5Rcreate(&ref_wbuf[0], fid, DATASET,  H5R_DATASET_REGION, sid) < 0)
+            TEST_ERROR;
 
         /* Create the reference datset */
-        ref_did  = H5Dcreate2(fid, SEL_EX_PT_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        if(ref_did < 0)
+        if((ref_did  = H5Dcreate2(fid, SEL_EX_PT_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         /* Write to the reference datset */
@@ -903,20 +889,20 @@ error:
  ***********************************************************************/
 static herr_t gen_ref_files(const char *filename, H5F_libver_t low_bound,  H5F_libver_t high_bound)
 {
-    hid_t fid = -1;         /* File ID */
-    hid_t gid = -1;         /* Group ID */
-    hid_t fapl = -1;        /* File access property list */
-    hid_t aid = -1;         /* Attribute ID */
-    hid_t asid = -1;        /* Dataspace ID for attribute */
-    hid_t sid = -1;         /* Dataspace ID */
-    hid_t did = -1;         /* Dataset ID */
+    hid_t fid = H5I_INVALID_HID;         /* File ID */
+    hid_t gid = H5I_INVALID_HID;         /* Group ID */
+    hid_t fapl = H5I_INVALID_HID;        /* File access property list */
+    hid_t aid = H5I_INVALID_HID;         /* Attribute ID */
+    hid_t asid = H5I_INVALID_HID;        /* Dataspace ID for attribute */
+    hid_t sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t did = H5I_INVALID_HID;         /* Dataset ID */
     hsize_t dims[1] = {100};    /* Dimension size */
     unsigned *dwbuf = NULL;     /* Buffer for writing data */
-    hid_t ref_sid;              /* Dataspace ID for the reference dataset */
-    hid_t ref_did = -1;         /* Dataset ID for the reference dataset */
-    hsize_t rev_ref_dims[1] = {3};  /* Dimension size for the reference dataset */
-    H5R_ref_t rev_ref_wbuf[3];      /* Buffer for storing the revised references */
-    hobj_ref_t old_ref_obj_wbuf[1];         /* Buffer for storing the old reference object */
+    hid_t ref_sid = H5I_INVALID_HID;    /* Dataspace ID for the reference dataset */
+    hid_t ref_did = H5I_INVALID_HID;    /* Dataset ID for the reference dataset */
+    hsize_t rev_ref_dims[1] = {3};      /* Dimension size for the reference dataset */
+    H5R_ref_t rev_ref_wbuf[3];          /* Buffer for storing the revised references */
+    hobj_ref_t old_ref_obj_wbuf[1];     /* Buffer for storing the old reference object */
     hdset_reg_ref_t old_ref_reg_wbuf[1];    /* Buffer for storing the old dataset region reference */
     hsize_t old_ref_dims[] = {1};           /* Dimension size for the reference dataset */
     hsize_t start[1];       /* Starting location of hyperslab */
@@ -953,8 +939,7 @@ static herr_t gen_ref_files(const char *filename, H5F_libver_t low_bound,  H5F_l
         TEST_ERROR;
 
     /* Create a dataset in the group */
-    did = H5Dcreate2(gid, DATASET, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if(did < 0)
+    if((did = H5Dcreate2(gid, DATASET, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Initialize data to write */
@@ -1013,18 +998,15 @@ static herr_t gen_ref_files(const char *filename, H5F_libver_t low_bound,  H5F_l
     if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block) < 0)
         TEST_ERROR;
 
-    /* Create dataspace for the reference dataset */
-    if((ref_sid = H5Screate_simple(1, rev_ref_dims, NULL)) < 0)
-        TEST_ERROR;
 
-    /* Try to create a dataset with the revised reference type */
-    H5E_BEGIN_TRY {
+    if(high_bound >= H5F_LIBVER_V112) {
+
+        /* Create dataspace for the reference dataset */
+        if((ref_sid = H5Screate_simple(1, rev_ref_dims, NULL)) < 0)
+            TEST_ERROR;
+
+        /* Create a dataset with the revised reference type */
         ref_did = H5Dcreate2(fid, REVISED_REFS_DSET, H5T_STD_REF, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    } H5E_END_TRY;
-
-    if(ref_did >= 0) {
-
-        HDassert(high_bound >= H5F_LIBVER_V112);
 
         /* Store the reference to "Attr" */
         if(H5Rcreate_attr(fid, "/", "Attr", H5P_DEFAULT, &rev_ref_wbuf[0]) < 0)
@@ -1050,18 +1032,17 @@ static herr_t gen_ref_files(const char *filename, H5F_libver_t low_bound,  H5F_l
         /* Closing */
         if(H5Dclose(ref_did) < 0)
             TEST_ERROR;
-    }
 
-    if(H5Sclose(ref_sid) < 0)
-        TEST_ERROR;
+        if(H5Sclose(ref_sid) < 0)
+            TEST_ERROR;
+    }
 
     /* Create dataspace for the reference dataset */
     if((ref_sid = H5Screate_simple(1, old_ref_dims, NULL)) < 0)
         TEST_ERROR;
 
     /* Create a dataset with the old object reference type */
-    ref_did = H5Dcreate2(fid, OLD_REF_OBJ_DSET, H5T_STD_REF_OBJ, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if(ref_did < 0)
+    if((ref_did = H5Dcreate2(fid, OLD_REF_OBJ_DSET, H5T_STD_REF_OBJ, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Create reference to /Group */
@@ -1078,8 +1059,7 @@ static herr_t gen_ref_files(const char *filename, H5F_libver_t low_bound,  H5F_l
 
 
     /* Create a dataset with the old dataset region reference type */
-    ref_did = H5Dcreate2(fid, OLD_REF_REG_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if(ref_did < 0)
+    if((ref_did = H5Dcreate2(fid, OLD_REF_REG_DSET, H5T_STD_REF_DSETREG, ref_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Create dataset region reference */
