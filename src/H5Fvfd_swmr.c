@@ -435,12 +435,8 @@ herr_t
 H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries, 
     H5FD_vfd_swmr_idx_entry_t *index)
 {
-    shadow_defree_t *prev;          /* Points to the previous entry 
-                                 * in the delayed list 
-                                 */
-    shadow_defree_t *shadow_defree;      /* Points to an entry in the 
-                                  * delayed list 
-                                  */
+    shadow_defree_t *prev;
+    shadow_defree_t *shadow_defree;
     haddr_t md_addr;                        /* Address in the metadata file */
     unsigned i;                             /* Local index variable */
     herr_t ret_value = SUCCEED;             /* Return value */
@@ -451,9 +447,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
     /* Sort index entries by increasing offset in the HDF5 file */
     if (num_entries > 0) {
         HDqsort(index, num_entries, sizeof(*index), H5F__idx_entry_cmp);
-        /* Assert that there are not any HDF5 page offsets duplicated in
-         * here.
-         */
+        /* Assert that no HDF5 page offsets are duplicated. */
         for (i = 1; i < num_entries; i++)
             assert(index[i - 1].hdf5_page_offset < index[i].hdf5_page_offset);
     }
@@ -524,7 +518,6 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
              "error in writing the page/multi-page entry to metadata file")
 
-        /* Set entry_ptr to NULL */
         index[i].entry_ptr = NULL;
 
     }
@@ -574,10 +567,8 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
             "released %" PRIu32 " bytes at %" PRIu64,
             shadow_defree->length, shadow_defree->offset);
 
-        /* Remove the entry from the delayed list */
         TAILQ_REMOVE(&f->shared->shadow_defrees, shadow_defree, link);
 
-        /* Free the delayed entry struct */
         H5FL_FREE(shadow_defree_t, shadow_defree);
 
     }
@@ -618,9 +609,9 @@ done:
  *           index.
  *
  *           If the entry doesn't exist, the function sets 
- *           *delay_write_until_ptr to the current tick plus max_lag.
+ *           *untilp to the current tick plus max_lag.
  *
- *           If the entry exists, the function sets *delay_write_until_ptr
+ *           If the entry exists, the function sets *untilp
  *           equal to the entries delayed flush field if it is greater than
  *           or equal to the current tick, or zero otherwise.
  *
