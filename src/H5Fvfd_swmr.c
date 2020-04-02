@@ -626,9 +626,9 @@ H5F_vfd_swmr_writer__delay_write(H5F_shared_t *shared, uint64_t page,
     uint64_t *untilp)
 {
     uint64_t until;
-    H5FD_vfd_swmr_idx_entry_t * ie_ptr = NULL;
-    H5FD_vfd_swmr_idx_entry_t * idx = NULL;
-    herr_t ret_value = SUCCEED;              /* Return value */
+    H5FD_vfd_swmr_idx_entry_t *ie_ptr;
+    H5FD_vfd_swmr_idx_entry_t *idx;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
