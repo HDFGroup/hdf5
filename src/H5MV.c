@@ -282,7 +282,7 @@ H5MV_alloc(H5F_t *f, hsize_t size)
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
-    hlog_fast(h5mv, "%s: size = %" PRIuHSIZE, __func__, size);
+    hlog_fast(h5mv, "%s: enter size %" PRIuHSIZE, __func__, size);
 
     /* check arguments */
     HDassert(f);
@@ -337,8 +337,8 @@ H5MV_alloc(H5F_t *f, hsize_t size)
     HDassert(H5F_addr_defined(ret_value));
 
 done:
-    hlog_fast(h5mv, "%s: Leaving: ret_value = %" PRIuHADDR
-        ", size = %" PRIuHSIZE, __func__, ret_value, size);
+    hlog_fast(h5mv, "%s: leave addr %" PRIuHADDR " size %" PRIuHSIZE,
+        __func__, ret_value, size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MV_alloc() */
@@ -363,7 +363,7 @@ H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    hlog_fast(h5mv, "%s: Entering - addr = %" PRIuHADDR ", size = %" PRIuHSIZE,
+    hlog_fast(h5mv, "%s: enter addr %" PRIuHADDR " size %" PRIuHSIZE,
         __func__, addr, size);
 
     /* check arguments */
@@ -381,7 +381,7 @@ H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
          */
         htri_t status;          /* "can absorb" status for section into */
 
-        hlog_fast(h5mv, "%s: Trying to avoid starting up free space manager",
+        hlog_fast(h5mv, "%s: trying to avoid starting up free space manager",
             __func__);
 
          /* Try to shrink the file */
@@ -394,8 +394,8 @@ H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
          *  [re-]starting it: dropping free space section on the floor.
          */
         if(f->shared->fs_state_md == H5F_FS_STATE_DELETING) {
-            hlog_fast(h5mv, "%s: dropping addr = %" PRIuHADDR
-                ", size = %" PRIuHSIZE ", on the floor!", __func__, addr, size);
+            hlog_fast(h5mv, "%s: dropping addr %" PRIuHADDR
+                " size %" PRIuHSIZE " on the floor!", __func__, addr, size);
             HGOTO_DONE(SUCCEED)
         }
 
@@ -413,8 +413,8 @@ H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
 
     HDassert(f->shared->fs_man_md);
 
-    hlog_fast(h5mv, "%s: Before H5FS_sect_add(): addr=%" PRIuHADDR
-        ", size=%" PRIuHSIZE, __func__, addr, size);
+    hlog_fast(h5mv, "%s: before H5FS_sect_add, addr %" PRIuHADDR
+        " size %" PRIuHSIZE, __func__, addr, size);
 
      /* Add the section */
     if(H5FS_sect_add(f, f->shared->fs_man_md, &node->sect_info, H5FS_ADD_RETURNED_SPACE, f) < 0)
@@ -422,7 +422,7 @@ H5MV_free(H5F_t *f, haddr_t addr, hsize_t size)
 
     node = NULL;
 
-    hlog_fast(h5mv, "%s: After H5FS_sect_add()", __func__);
+    hlog_fast(h5mv, "%s: after H5FS_sect_add", __func__);
 
 done:
     /* Release section node, if allocated and not added to section list or merged */
@@ -430,7 +430,7 @@ done:
         if(H5MV__sect_free(&node->sect_info) < 0)
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
 
-    hlog_fast(h5mv, "%s: Leaving, ret_value = %d", __func__, ret_value);
+    hlog_fast(h5mv, "%s: leave %d", __func__, ret_value);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MV_free() */
