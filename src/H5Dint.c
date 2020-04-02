@@ -207,6 +207,9 @@ H5D__init_package(void)
 
     /* Reset the "default dataset" information */
     HDmemset(&H5D_def_dset, 0, sizeof(H5D_shared_t));
+    H5D_def_dset.type_id = H5I_INVALID_HID;
+    H5D_def_dset.dapl_id = H5I_INVALID_HID;
+    H5D_def_dset.dcpl_id = H5I_INVALID_HID;
 
     /* Get the default dataset creation property list values and initialize the
      * default dataset with them.
@@ -1418,8 +1421,18 @@ done:
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset external file list info")
             if(new_dset->shared->space && H5S_close(new_dset->shared->space) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
-            if(new_dset->shared->type && H5I_dec_ref(new_dset->shared->type_id) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
+
+            if(new_dset->shared->type) {
+                if(new_dset->shared->type_id > 0) {
+                    if(H5I_dec_ref(new_dset->shared->type_id) < 0)
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                } /* end if */
+                else {
+                    if(H5T_close_real(new_dset->shared->type) < 0)
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                } /* end else */
+            } /* end if */
+
             if(H5F_addr_defined(new_dset->oloc.addr)) {
                 if(H5O_dec_rc_by_loc(&(new_dset->oloc)) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement refcount on newly created object")
