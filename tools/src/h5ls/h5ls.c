@@ -2338,13 +2338,13 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
         h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
     } /* end if */
     else {
-        hid_t obj = H5I_INVALID_HID;               /* ID of object opened */
+        hid_t obj_id = H5I_INVALID_HID;               /* ID of object opened */
 
         /* Open the object.  Not all objects can be opened.  If this is the case
          * then return right away.
          */
         H5TOOLS_DEBUG("Open object name=%s", name);
-        if (obj_type >= 0 && (obj = H5Oopen(iter->fid, name, H5P_DEFAULT)) < 0) {
+        if (obj_type >= 0 && (obj_id = H5Oopen(iter->fid, name, H5P_DEFAULT)) < 0) {
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, " *ERROR*\n");
             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -2354,7 +2354,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
         /* List the first line of information for the object. */
         H5TOOLS_DEBUG("Object type:%d", obj_type);
         if (obj_type >= 0 && dispatch_g[obj_type].list1)
-            (dispatch_g[obj_type].list1)(obj);
+            (dispatch_g[obj_type].list1)(obj_id);
         if (!iter->symlink_target || (verbose_g > 0)) {
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "\n");
@@ -2368,14 +2368,17 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
             char* comment = NULL;
             char* obj_tok_str = NULL;
             ssize_t cmt_bufsize = -1;
+            void *obj = NULL;
+            hid_t connector_id = H5I_INVALID_HID;
+            hbool_t supported = FALSE;
 
             /* Display attributes */
             H5TOOLS_DEBUG("Display attributes");
             if (obj_type >= 0)
-                H5Aiterate2(obj, H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL);
+                H5Aiterate2(obj_id, H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL);
 
             /* Object location & reference count */
-            H5Otoken_to_str(obj, &oinfo->token, &obj_tok_str);
+            H5Otoken_to_str(obj_id, &oinfo->token, &obj_tok_str);
 
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "    %-10s %lu:%s\n", "Location:", oinfo->fileno, obj_tok_str);
@@ -2401,36 +2404,45 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                 } /* end if */
             } /* end if */
 
-            /* Object comment */
-            cmt_bufsize = H5Oget_comment(obj, comment, buf_size);
+            /* Only emit comments if the VOL connector supports that */
+            obj = H5VLobject(obj_id);
+            connector_id = H5VLget_connector_id(obj_id);
+            H5VLintrospect_opt_query(obj, connector_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
+            H5VLclose(connector_id);
 
-            /* if the actual length of the comment is longer than cmt_bufsize, then call
-             * H5Oget_comment again with the correct value.
-             * If the call to H5Oget_comment returned an error, skip this block */
-            if (cmt_bufsize > 0) {
-                comment = (char *)HDmalloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
-                if (comment) {
-                    cmt_bufsize = H5Oget_comment(obj, comment, (size_t)cmt_bufsize);
-                    if (cmt_bufsize > 0) {
-                        comment[cmt_bufsize] = 0;
-                        h5tools_str_reset(&buffer);
-                        h5tools_str_append(&buffer, "    %-10s \"", "Comment:");
-                        print_string(&buffer, comment, FALSE);
-                        h5tools_str_append(&buffer, "\"\n");
-                        h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
-                    } /* end if */
-                    HDfree(comment);
+            if (supported) {
+
+                /* Object comment */
+                cmt_bufsize = H5Oget_comment(obj_id, comment, buf_size);
+
+                /* if the actual length of the comment is longer than cmt_bufsize, then call
+                 * H5Oget_comment again with the correct value.
+                 */
+                if (cmt_bufsize > 0) {
+                    comment = (char *)HDmalloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
+                    if (comment) {
+                        cmt_bufsize = H5Oget_comment(obj_id, comment, (size_t)cmt_bufsize);
+                        if (cmt_bufsize > 0) {
+                            comment[cmt_bufsize] = 0;
+                            h5tools_str_reset(&buffer);
+                            h5tools_str_append(&buffer, "    %-10s \"", "Comment:");
+                            print_string(&buffer, comment, FALSE);
+                            h5tools_str_append(&buffer, "\"\n");
+                            h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
+                        } /* end if */
+                        HDfree(comment);
+                    }
                 }
             }
         } /* end if */
 
         /* Detailed list for object */
         if (obj_type >= 0 && dispatch_g[obj_type].list2)
-            (dispatch_g[obj_type].list2)(obj, name);
+            (dispatch_g[obj_type].list2)(obj_id, name);
 
         /* Close the object. */
         if (obj_type >= 0)
-            H5Oclose(obj);
+            H5Oclose(obj_id);
     } /* end else */
 
 done:
