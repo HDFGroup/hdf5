@@ -3110,7 +3110,7 @@ h5tools_print_fill_value(h5tools_str_t *buffer/*in,out*/, const h5tool_format_t 
  */
 void
 h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
-        h5tools_context_t *ctx, hid_t dcpl_id, hid_t type_id, hid_t obj_id)
+        h5tools_context_t *ctx, hid_t dcpl_id, hid_t type_id, hid_t dset_id)
 {
     int              nfilters;       /* number of filters */
     int              rank;           /* rank */
@@ -3141,7 +3141,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     if (info->line_ncols > 0)
         ncols = info->line_ncols;
 
-    storage_size = H5Dget_storage_size(obj_id);
+    storage_size = H5Dget_storage_size(dset_id);
     nfilters = H5Pget_nfilters(dcpl_id);
     HDstrcpy(f_name,"\0");
 
@@ -3182,8 +3182,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 double ratio = 0;
                 int ok = 0;
 
-                hid_t tid = H5Dget_type(obj_id);
-                hid_t sid = H5Dget_space(obj_id);
+                hid_t tid = H5Dget_type(dset_id);
+                hid_t sid = H5Dget_space(dset_id);
                 size_t datum_size = H5Tget_size(tid);
                 int ndims = H5Sget_simple_extent_dims(sid, dims, NULL);
 
@@ -3283,6 +3283,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 }
                 else {
                     haddr_t ioffset;
+                    void *obj = NULL;
+                    hid_t connector_id = H5I_INVALID_HID;
+                    hbool_t supported = FALSE;
 
                     /* NORMAL FILE */
 
@@ -3298,21 +3301,26 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     h5tools_str_append(&buffer,"SIZE " HSIZE_T_FORMAT, storage_size);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
-                    ctx->need_prefix = TRUE;
-
-                    /* NOTE: H5Dget_offset() is a native VOL connector optional
-                     *       API call and will not work with arbitrary VOL
-                     *       connectors. When unsupported, it will return
-                     *       HADDR_UNDEF and the numerical value of this will
-                     *       be printed.
+                    /* Only dump the offset if the VOL connector implements
+                     * the functionality.
                      */
-                    h5tools_str_reset(&buffer);
-                    ioffset = H5Dget_offset(obj_id);
-                    if (HADDR_UNDEF == ioffset)
-                        h5tools_str_append(&buffer, "OFFSET Undefined (HADDR_UNDEF)");
-                    else
-                        h5tools_str_append(&buffer, "OFFSET "H5_PRINTF_HADDR_FMT, ioffset);
-                    h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
+                    obj = H5VLobject(dset_id);
+                    connector_id = H5VLget_connector_id(dset_id);
+                    H5VLintrospect_opt_query(obj, connector_id, H5VL_SUBCLS_DATASET, H5VL_NATIVE_DATASET_GET_OFFSET, &supported);
+                    H5VLclose(connector_id);
+
+                    if (supported) {
+
+                        ctx->need_prefix = TRUE;
+
+                        h5tools_str_reset(&buffer);
+                        ioffset = H5Dget_offset(dset_id);
+                        if (HADDR_UNDEF == ioffset)
+                            h5tools_str_append(&buffer, "OFFSET Undefined (HADDR_UNDEF)");
+                        else
+                            h5tools_str_append(&buffer, "OFFSET "H5_PRINTF_HADDR_FMT, ioffset);
+                        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
+                    }
                 }
                 ctx->indent_level--;
             }
@@ -3639,7 +3647,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             break;
         case H5D_FILL_VALUE_USER_DEFINED:
             ctx->indent_level--;
-            h5tools_print_fill_value(&buffer, info, ctx, dcpl_id, type_id, obj_id);
+            h5tools_print_fill_value(&buffer, info, ctx, dcpl_id, type_id, dset_id);
             ctx->indent_level++;
             break;
         case H5D_FILL_VALUE_ERROR:
@@ -3724,6 +3732,17 @@ h5tools_dump_comment(FILE *stream, const h5tool_format_t *info, h5tools_context_
                                              * instead of the current stripmine position i; this is necessary
                                              * to print the array indices
                                              */
+    void *obj = NULL;
+    hid_t connector_id = H5I_INVALID_HID;
+    hbool_t supported = FALSE;
+
+    /* Check if comments are supported and return if not */
+    obj = H5VLobject(obj_id);
+    connector_id = H5VLget_connector_id(obj_id);
+    H5VLintrospect_opt_query(obj, connector_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
+    H5VLclose(connector_id);
+    if (!supported)
+        return;
 
     /* setup */
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -3733,8 +3752,7 @@ h5tools_dump_comment(FILE *stream, const h5tool_format_t *info, h5tools_context_
 
     cmt_bufsize = H5Oget_comment(obj_id, comment, buf_size);
 
-    /* call H5Oget_comment again with the correct value.
-     * If the call to H5Oget_comment returned an error, skip this block */
+    /* call H5Oget_comment again with the correct value */
     if (cmt_bufsize > 0) {
         comment = (char *)HDmalloc((size_t)(cmt_bufsize+1)); /* new_size including null terminator */
         if(comment) {
@@ -3749,7 +3767,7 @@ h5tools_dump_comment(FILE *stream, const h5tool_format_t *info, h5tools_context_
                 h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
                 h5tools_str_close(&buffer);
-            } /* end if */
+            }
             HDfree(comment);
         }
     }
