@@ -167,6 +167,18 @@ defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr,
     return SUCCEED;
 }
 
+static uint64_t
+H5MF_total_deferred_frees(H5F_shared_t *shared)
+{
+    lower_defree_t *df;
+    uint64_t total = 0;
+
+    SIMPLEQ_FOREACH(df, &shared->lower_defrees, link)
+        total += df->size;
+
+    return total;
+}
+
 herr_t
 H5MF_process_deferred_frees(H5F_t *f, const uint64_t tick_num)
 {
@@ -870,8 +882,9 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, HADDR_UNDEF)
 
-    hlog_fast(h5mf_alloc, "%s: alloc_type = %u, size = %" PRIuHSIZE
-        ", tick = %" PRIu64, __func__, (unsigned)alloc_type, size,
+    hlog_fast(h5mf_alloc,
+        "%s: enter %p type %u size %" PRIuHSIZE " tick %" PRIu64,
+        __func__, (void *)f->shared, (unsigned)alloc_type, size,
         f->shared->vfd_swmr_writer ? f->shared->tick_num : 0);
 
     /* check arguments */
@@ -944,8 +957,9 @@ done:
     if(orig_ring != H5AC_RING_INV)
         H5AC_set_ring(orig_ring, NULL);
 
-    hlog_fast(h5mf_alloc, "%s: Leaving: ret_value = %" PRIuHADDR
-        ", size = %" PRIuHSIZE, __func__, ret_value, size);
+    hlog_fast(h5mf_alloc,
+        "%s: leave %p type %u addr %" PRIuHADDR " size = %" PRIuHSIZE,
+        __func__, (void *)f->shared, (unsigned)alloc_type, ret_value, size);
 #ifdef H5MF_ALLOC_DEBUG_DUMP
 H5MF__sects_dump(f, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
@@ -1210,8 +1224,9 @@ H5MF__xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     H5AC_ring_t fsm_ring;               /* Ring of FSM */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    hlog_fast(h5mf_free, "%s: type %u addr %" PRIuHADDR " size %" PRIuHSIZE,
-        __func__, (unsigned)alloc_type, addr, size);
+    hlog_fast(h5mf_free,
+        "%s: enter %p type %u addr %" PRIuHADDR " size %" PRIuHSIZE,
+        __func__, (void *)f->shared, (unsigned)alloc_type, addr, size);
 
     FUNC_ENTER_STATIC_TAG(H5AC__FREESPACE_TAG)
 
@@ -1360,7 +1375,8 @@ done:
         if(H5MF__sect_free((H5FS_section_info_t *)node) < 0)
             HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
 
-    hlog_fast(h5mf_free, "%s: Leaving, ret_value = %d", __func__, ret_value);
+    hlog_fast(h5mf_free,
+        "%s: %p leave %d", __func__, (void *)f->shared, ret_value);
 
 #ifdef H5MF_ALLOC_DEBUG_DUMP
 H5MF__sects_dump(f, stderr);
@@ -1662,6 +1678,9 @@ H5MF_close(H5F_t *f)
     /* check args */
     HDassert(f);
     HDassert(f->shared);
+
+    hlog_fast(h5mf, "%s: total deferred frees %" PRIu64, __func__,
+        H5MF_total_deferred_frees(f->shared));
 
     if(H5F_PAGED_AGGR(f)) {
         if((ret_value = H5MF__close_pagefs(f)) < 0)
