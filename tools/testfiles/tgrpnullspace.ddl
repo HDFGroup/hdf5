@@ -13,7 +13,7 @@ GROUP "/" {
          STORAGE_LAYOUT {
             CONTIGUOUS
             SIZE 0
-            OFFSET Undefined (HADDR_UNDEF)
+            OFFSET HADDR_UNDEF
          }
          FILTERS {
             NONE

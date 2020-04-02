@@ -3316,7 +3316,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         h5tools_str_reset(&buffer);
                         ioffset = H5Dget_offset(dset_id);
                         if (HADDR_UNDEF == ioffset)
-                            h5tools_str_append(&buffer, "OFFSET Undefined (HADDR_UNDEF)");
+                            h5tools_str_append(&buffer, "OFFSET HADDR_UNDEF");
                         else
                             h5tools_str_append(&buffer, "OFFSET "H5_PRINTF_HADDR_FMT, ioffset);
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
