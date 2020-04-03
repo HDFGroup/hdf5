@@ -702,11 +702,14 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 
                 break;
 
-                /*-------------------------------------------------------------------------
-                 * H5TRAV_TYPE_DATASET
-                 *-------------------------------------------------------------------------
-                 */
+            /*-------------------------------------------------------------------------
+             * H5TRAV_TYPE_DATASET
+             *-------------------------------------------------------------------------
+             */
             case H5TRAV_TYPE_DATASET:
+            {
+                hbool_t use_h5ocopy;
+
                 has_filter = 0;
                 req_filter = 0;
 
@@ -764,9 +767,10 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                  * otherwise we do a copy using H5Ocopy
                  *-------------------------------------------------------------------------
                  */
-                if (options->op_tbl->nelems || options->all_filter == 1
-                        || options->all_layout == 1 || is_ref || is_named) {
+                use_h5ocopy = !(options->op_tbl->nelems || options->all_filter == 1
+                        || options->all_layout == 1 || is_ref || is_named);
 
+                if (!use_h5ocopy) {
                     int j;
 
                     if ((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
@@ -1135,7 +1139,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                         HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
 
                 } /* end whether we have request for filter/chunking */
+
                 break;
+            } /* H5TRAV_TYPE_DATASET */
 
             /*-------------------------------------------------------------------------
              * H5TRAV_TYPE_NAMED_DATATYPE
