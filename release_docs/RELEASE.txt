@@ -70,6 +70,8 @@ New Features
       that are chosen by the CMake option:HDF5_ENABLE_DEV_WARNINGS or the
       configure option:--enable-developer-warnings.
 
+      In addition, CMake no longer applies these warnings for tests and examples.
+
       (ADB - 2020/03/24, TRILAB-192)
 
     - Added test script for file size compare
