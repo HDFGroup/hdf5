@@ -1543,6 +1543,88 @@ test_reference_group(void)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_reference_group() */
 
+/****************************************************************
+**
+**  test_reference_sel_none(): 
+**      Verify the jira issue HDFFV-11067 is fixed:
+**      -- It was reported that an incorrect number of selected elements
+**         was returned when dereferenced a region reference which has 
+**         H5Sselect_none() set on the dataspace.
+**
+****************************************************************/
+static void
+test_reference_sel_none(void)
+{
+    hid_t fid = H5I_INVALID_HID;        /* File ID */
+    hid_t sid = H5I_INVALID_HID;        /* Dataspace ID */
+    hid_t ref_sid = H5I_INVALID_HID;    /* Dataspace ID for referenced */
+    hid_t did = H5I_INVALID_HID;    /* Dataset ID */
+    hsize_t dims[1]= {SPACE1_DIM1}; /* Dimension siez ofr dataset */
+    int buf[SPACE1_DIM1];           /* Buffer for data */
+    hdset_reg_ref_t ref[1];         /* Buffer for reference */
+    hssize_t npoints;               /* Number of points in selection */
+    herr_t status;                  /* Return status */
+    int i;                          /* Local index variable */
+
+    /* Iniitialize buffer */
+    for (i = 0; i < SPACE1_DIM1; i++)
+       buf[i] = i; 
+
+    /* Create the test file */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    /* Create dataspace */
+    sid = H5Screate_simple (1, dims, NULL);
+    CHECK(sid, H5I_INVALID_HID, "H5Screate_simple");
+
+    /* Create the dataset */
+    did = H5Dcreate2(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(did, H5I_INVALID_HID, "H5Dcreate2");
+
+    /* Write data to the dataset */
+    status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT, buf);
+    CHECK(status, FAIL, "H5Dwrite");
+
+    /* Get the number of points in the dataspace selection */
+    npoints = H5Sget_select_npoints(sid);
+    VERIFY(npoints, SPACE1_DIM1, "H5Sget_select_npoints");
+
+    /* Set selection to include no elements */
+    status = H5Sselect_none(sid);
+    CHECK(status, FAIL, "H5Sselect_none");
+
+    /* Get the number of points in the dataspace selection */
+    npoints = H5Sget_select_npoints(sid);
+    VERIFY(npoints, 0, "H5Sget_select_npoints");
+
+    /* Create region reference */
+    status = H5Rcreate(&ref[0], fid, DSETNAME, H5R_DATASET_REGION, sid);
+    CHECK(status, FAIL, "H5Rcreate");
+
+    /* Dereference the region reference */
+    ref_sid = H5Rget_region(did, H5R_DATASET_REGION, ref);
+    CHECK(status, FAIL, "H5Rget_region");
+
+    /* Get the # of points in the dataspace */
+    npoints = H5Sget_select_npoints(ref_sid);
+    VERIFY(npoints, 0, "H5Sget_select_npoints");
+
+    /* Closing */
+    status = H5Sclose(sid);
+    CHECK(status, FAIL, "H5Sclose");
+    status = H5Sclose(ref_sid);
+    CHECK(status, FAIL, "H5Sclose");
+    status = H5Dclose(did);
+    CHECK(status, FAIL, "H5Dclose");
+    status = H5Fclose(fid);
+    CHECK(status, FAIL, "H5Fclose");
+
+    return 0;
+
+}   /* test_reference_sel_none() */
+
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 /****************************************************************
 **
@@ -1868,6 +1950,7 @@ test_reference(void)
 
     test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
     test_reference_group();     /* Test operations on dereferenced groups */
+    test_reference_sel_none();  /* Test selected elements on region reference */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_reference_compat();    /* Test operations with old API routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
