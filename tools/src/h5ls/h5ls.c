@@ -1333,10 +1333,10 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
         switch (ref_type) {
             case H5R_OBJECT1:
                 H5TOOLS_DEBUG("ref_type is H5R_OBJECT1");
-                if (H5Rget_obj_type3((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
+                if (H5Rget_obj_type3(&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
                     switch (obj_type) {
                         case H5O_TYPE_DATASET:
-                            if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                            if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                 datactx.indent_level++;
                                 h5tools_dump_dset(stream, info, &datactx, new_obj_id);
                                 datactx.indent_level--;
@@ -1363,7 +1363,7 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
                 break;
             case H5R_DATASET_REGION1:
                 H5TOOLS_DEBUG("ref_type is H5R_DATASET_REGION1");
-                if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     datactx.indent_level++;
                     h5tools_dump_dset(stream, info, &datactx, new_obj_id);
                     datactx.indent_level--;
@@ -1377,13 +1377,13 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
                 break;
             case H5R_OBJECT2:
                 H5TOOLS_DEBUG("ref_type is H5R_OBJECT2");
-                if (H5Rget_obj_type3((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
+                if (H5Rget_obj_type3(&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
                     switch (obj_type) {
                         case H5O_TYPE_GROUP:
                             break;
 
                         case H5O_TYPE_DATASET:
-                            if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                            if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                 datactx.indent_level++;
                                 h5tools_dump_dset(stream, info, &datactx, new_obj_id);
                                 datactx.indent_level--;
@@ -1416,10 +1416,10 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
                     ncols = info->line_ncols;
 
                 /* if (new_obj_id < 0) - could mean that no reference was written do not throw failure */
-                if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) < 0)
                     H5TOOLS_INFO("H5Ropen_object H5R_DATASET_REGION2 failed");
                 else {
-                    if((new_obj_sid = H5Ropen_region((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    if((new_obj_sid = H5Ropen_region(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                         if (h5tools_is_zero(&ref_buf[i], H5Tget_size(H5T_STD_REF))) {
                             H5TOOLS_DEBUG("NULL H5R_DATASET_REGION2");
 
@@ -1471,7 +1471,7 @@ dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_context_t *ctx
                 break;
             case H5R_ATTR:
                 H5TOOLS_DEBUG("ref_type is H5R_ATTR");
-                if((new_obj_id = H5Ropen_attr((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                if((new_obj_id = H5Ropen_attr(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                     h5tools_dump_region_attribute(new_obj_id, stream, info, &datactx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
                     if(H5Aclose(new_obj_id) < 0)
                         H5TOOLS_INFO("H5Aclose H5R_ATTR failed");
@@ -3006,6 +3006,8 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrncmp(argv[argno], "--s3-cred=", (size_t)10)) {
 #ifdef H5_HAVE_ROS3_VFD
+            char const *start = NULL;
+
             start = strchr(argv[argno], '=');
             if (start == NULL) {
                 HDfprintf(rawerrorstream, "Error: Unable to parse null credentials tuple\n"
@@ -3139,16 +3141,16 @@ main(int argc, const char *argv[])
     }
 
     if (preferred_driver) {
-        h5tools_get_fapl_info_t get_fapl_info;
+        h5tools_fapl_info_t fapl_info;
 
         /* Currently, only retrieval of VFDs is supported. */
-        get_fapl_info.get_type = GET_VFD_BY_NAME;
-        get_fapl_info.info = NULL;
-        get_fapl_info.u.name = preferred_driver;
+        fapl_info.type = VFD_BY_NAME;
+        fapl_info.info = NULL;
+        fapl_info.u.name = preferred_driver;
 
         if (!HDstrcmp(preferred_driver, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
-            get_fapl_info.info = (void *)&ros3_fa;
+            fapl_info.info = (void *)&ros3_fa;
 #else
             HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
             leave(EXIT_FAILURE);
@@ -3156,14 +3158,14 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrcmp(preferred_driver, drivernames[HDFS_VFD_IDX])) {
 #ifdef H5_HAVE_LIBHDFS
-            get_fapl_info.info = (void *)&hdfs_fa;
+            fapl_info.info = (void *)&hdfs_fa;
 #else
             HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
             leave(EXIT_FAILURE);
 #endif
         }
 
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &get_fapl_info)) < 0) {
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &fapl_info)) < 0) {
             HDfprintf(rawerrorstream, "Error: Unable to create FAPL for file access\n\n");
             leave(EXIT_FAILURE);
         }
