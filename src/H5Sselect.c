@@ -484,7 +484,7 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p)
             break;
 
         case H5S_SEL_NONE:           /* Nothing selected */
-            ret_value = (*H5S_sel_all->deserialize)(space, p);
+            ret_value = (*H5S_sel_none->deserialize)(space, p);
             break;
 
         default:
