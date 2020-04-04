@@ -311,6 +311,8 @@ int read_info(const char *filename, pack_opt_t *options)
 
     /* cycle until end of file reached */
     while (1) {
+        if (EOF == fscanf(fp, "%9s", stype))
+            break;
 
         /* Info indicator must be for layout or filter */
         if (HDstrcmp(stype,"-l") && HDstrcmp(stype, "-f")) {
@@ -430,16 +432,16 @@ set_sort_order(const char *form)
 static
 int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 {
-    h5tools_get_fapl_info_t get_in_vol_info;
-    h5tools_get_fapl_info_t get_out_vol_info;
+    h5tools_fapl_info_t in_vol_info;
+    h5tools_fapl_info_t out_vol_info;
     hbool_t custom_in_fapl = FALSE;
     hbool_t custom_out_fapl = FALSE;
     hid_t tmp_fapl = H5I_INVALID_HID;
     int bound, opt;
     int ret_value = 0;
 
-    HDmemset(&get_in_vol_info, 0, sizeof(h5tools_get_fapl_info_t));
-    HDmemset(&get_out_vol_info, 0, sizeof(h5tools_get_fapl_info_t));
+    HDmemset(&in_vol_info, 0, sizeof(h5tools_fapl_info_t));
+    HDmemset(&out_vol_info, 0, sizeof(h5tools_fapl_info_t));
 
     /* parse command line options */
     while (EOF != (opt = get_option(argc, argv, s_opts, l_opts))) {
@@ -680,35 +682,35 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case '1':
-                get_in_vol_info.get_type = GET_VOL_BY_ID;
-                get_in_vol_info.u.id = HDatol(opt_arg);
+                in_vol_info.type = VOL_BY_ID;
+                in_vol_info.u.id = HDatol(opt_arg);
                 custom_in_fapl = TRUE;
                 break;
 
             case '2':
-                get_in_vol_info.get_type = GET_VOL_BY_NAME;
-                get_in_vol_info.u.name = opt_arg;
+                in_vol_info.type = VOL_BY_NAME;
+                in_vol_info.u.name = opt_arg;
                 custom_in_fapl = TRUE;
                 break;
 
             case '3':
-                get_in_vol_info.info = opt_arg;
+                in_vol_info.info = opt_arg;
                 break;
 
             case '4':
-                get_out_vol_info.get_type = GET_VOL_BY_ID;
-                get_out_vol_info.u.id = HDatol(opt_arg);
+                out_vol_info.type = VOL_BY_ID;
+                out_vol_info.u.id = HDatol(opt_arg);
                 custom_out_fapl = TRUE;
                 break;
 
             case '5':
-                get_out_vol_info.get_type = GET_VOL_BY_NAME;
-                get_out_vol_info.u.name = opt_arg;
+                out_vol_info.type = VOL_BY_NAME;
+                out_vol_info.u.name = opt_arg;
                 custom_out_fapl = TRUE;
                 break;
 
             case '6':
-                get_out_vol_info.info = opt_arg;
+                out_vol_info.info = opt_arg;
                 break;
 
             default:
@@ -745,7 +747,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
     /* Setup FAPL for input and output file accesses */
     if (custom_in_fapl) {
-        if ((tmp_fapl = h5tools_get_fapl(options->fin_fapl, &get_in_vol_info)) < 0) {
+        if ((tmp_fapl = h5tools_get_fapl(options->fin_fapl, &in_vol_info)) < 0) {
             error_msg("failed to setup FAPL for input file\n");
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = -1;
@@ -765,7 +767,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     }
 
     if (custom_out_fapl) {
-        if ((tmp_fapl = h5tools_get_fapl(options->fout_fapl, &get_out_vol_info)) < 0) {
+        if ((tmp_fapl = h5tools_get_fapl(options->fout_fapl, &out_vol_info)) < 0) {
             error_msg("failed to setup FAPL for output file\n");
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = -1;
