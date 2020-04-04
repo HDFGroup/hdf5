@@ -1620,8 +1620,6 @@ test_reference_sel_none(void)
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
 
-    return 0;
-
 }   /* test_reference_sel_none() */
 
 
