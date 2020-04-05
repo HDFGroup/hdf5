@@ -22,12 +22,10 @@ add_executable (parallel_test
     mdset.f90
 )
 target_include_directories (parallel_test
-    PRIVATE
-        ${TESTPAR_INCLUDES}
+    PRIVATE ${TESTPAR_INCLUDES}
 )
 target_compile_options(parallel_test
-    PRIVATE
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+    PRIVATE $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
 )
 if (NOT BUILD_SHARED_LIBS)
   target_link_libraries (parallel_test
