@@ -7,13 +7,13 @@
 # warnings that are emitted. If you need it, add it from the
 # environment variable at configure time.
 -Wabi
--Wctor-dtor-privacy 
--Weffc++ 
-##-Wendif-labels"
--Wnon-virtual-dtor 
--Wold-style-cast 
--Woverloaded-virtual 
--Wreorder 
--Wsign-promo 
-##-Wunreachable-code"
-##-Wvariadic-macros -
+-Wctor-dtor-privacy
+-Weffc++
+##-Wendif-labels
+-Wnon-virtual-dtor
+-Wold-style-cast
+-Woverloaded-virtual
+-Wreorder
+-Wsign-promo
+##-Wunreachable-code
+##-Wvariadic-macros
