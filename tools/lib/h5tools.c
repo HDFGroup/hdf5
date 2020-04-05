@@ -738,7 +738,7 @@ h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size)
 
     /* TODO: For now, we have no way of determining if an arbitrary
      * VOL connector is native-terminal. */
-    if (fapl_vol_id == H5VL_NATIVE) {
+    if (fapl_vol_id == H5VL_NATIVE || fapl_vol_id == H5VL_PASSTHRU) {
         const char *driver_name;
         hid_t       driver_id;
 
