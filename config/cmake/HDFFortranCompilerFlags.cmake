@@ -136,7 +136,7 @@ if (NOT MSVC)
 else ()
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
     #ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/win-ifort-general")
-    list (APPEND HDF5_CMAKE_Fortran_FLAGS "/warn:all" "/stand:f90" "/free")
+    list (APPEND HDF5_CMAKE_Fortran_FLAGS "/warn:all" "/stand:f03" "/free")
   endif ()
 endif ()
 
