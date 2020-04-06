@@ -57,8 +57,8 @@ New Features
 
     - Both build systems use same set of warnings flags
 
-      GNU C warnings flags were moved to files in a config sub-folder
-      named gnu-warnings. Flags that only are available for a specific
+      GNU C, C++ and gfortran warnings flags were moved to files in a confi
+      sub-folder named gnu-warnings. Flags that only are available for a specific
       version of the compiler are in files named with that version.
       Clang C warnings flags were moved to files in a config sub-folder
       named clang-warnings.
@@ -70,7 +70,7 @@ New Features
       that are chosen by the CMake option:HDF5_ENABLE_DEV_WARNINGS or the
       configure option:--enable-developer-warnings.
 
-      In addition, CMake no longer applies these warnings for tests and examples.
+      In addition, CMake no longer applies these warnings for examples.
 
       (ADB - 2020/03/24, TRILAB-192)
 
