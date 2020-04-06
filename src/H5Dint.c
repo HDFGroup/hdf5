@@ -2563,7 +2563,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_offset
  *
- * Purpose:     Private function for H5D__get_offset.  Returns the address
+ * Purpose:     Private function for H5Dget_offset().  Returns the address
  *              of dataset in file.
  *
  * Return:      Success:    The address of dataset
