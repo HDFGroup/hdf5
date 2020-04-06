@@ -190,8 +190,8 @@
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
-./config/intel-ifort-general
-./config/intel-warnings-general
+./config/intel-warnings/ifort-general
+./config/intel-warnings/general
 
 ./config/site-specific/BlankForm
 
