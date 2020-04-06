@@ -228,6 +228,8 @@ int read_info(const char *filename, pack_opt_t *options)
 
     /* cycle until end of file reached */
     while (1) {
+        if (EOF == fscanf(fp, "%9s", stype))
+            break;
 
         /* Info indicator must be for layout or filter */
         if (HDstrcmp(stype,"-l") && HDstrcmp(stype, "-f")) {
@@ -269,7 +271,7 @@ int read_info(const char *filename, pack_opt_t *options)
 
         if (!HDstrcmp(stype, "-l")) {
             if (h5repack_addlayout(comp_info, options) == -1) {
-                error_msg("could not add chunck option\n");
+                error_msg("could not add chunk option\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = EXIT_FAILURE;
                 goto done;
@@ -369,13 +371,13 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
             case 'h':
                 usage(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
-                ret_value = -1;
+                ret_value = 1;
                 goto done;
 
             case 'V':
                 print_version(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
-                ret_value = -1;
+                ret_value = 1;
                 goto done;
 
             case 'v':
@@ -413,9 +415,12 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'e':
-                ret_value = read_info(opt_arg, options);
-                if (ret_value < 0)
+                if ((ret_value = read_info(opt_arg, options)) < 0) {
+                    error_msg("failed to read from repack options file <%s>\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
                     goto done;
+                }
                 break;
 
             case 'n':
@@ -496,7 +501,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'q':
-                if (H5_INDEX_UNKNOWN == set_sort_by(opt_arg)) {
+                if (H5_INDEX_UNKNOWN == (sort_by = set_sort_by(opt_arg))) {
                     error_msg(" failed to set sort by form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
@@ -505,7 +510,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'z':
-                if (set_sort_order(opt_arg) == H5_ITER_UNKNOWN) {
+                if (H5_ITER_UNKNOWN == (sort_order = set_sort_order(opt_arg))) {
                     error_msg(" failed to set sort order form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
@@ -565,11 +570,12 @@ done:
  */
 int main(int argc, const char **argv)
 {
-    pack_opt_t options; /*the global options */
+    pack_opt_t          options; /*the global options */
     H5E_auto2_t         func;
     H5E_auto2_t         tools_func;
     void               *edata;
     void               *tools_edata;
+    int                 parse_ret;
 
     HDmemset(&options, 0, sizeof(pack_opt_t));
 
@@ -589,20 +595,32 @@ int main(int argc, const char **argv)
 
     /* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
     if (h5tools_getenv_update_hyperslab_bufsize() < 0) {
+        HDprintf("Error occurred while retrieving H5TOOLS_BUFSIZE value\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
     /* initialize options  */
     if (h5repack_init(&options, 0, FALSE) < 0) {
+        HDprintf("Error occurred while initializing repack options\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
+
     /* Initialize default indexing options */
     sort_by = H5_INDEX_CRT_ORDER;
 
-    if (parse_command_line(argc, argv, &options) < 0)
+    parse_ret = parse_command_line(argc, argv, &options);
+    if (parse_ret < 0) {
+        HDprintf("Error occurred while parsing command-line options\n");
+        h5tools_setstatus(EXIT_FAILURE);
         goto done;
+    }
+    else if (parse_ret > 0) {
+        /* Short-circuit success */
+        h5tools_setstatus(EXIT_SUCCESS);
+        goto done;
+    }
 
     if (enable_error_stack > 0) {
         H5Eset_auto2(H5E_DEFAULT, func, edata);
@@ -610,7 +628,13 @@ int main(int argc, const char **argv)
     }
 
     /* pack it */
-    h5tools_setstatus(h5repack(infile, outfile, &options));
+    if (h5repack(infile, outfile, &options) < 0) {
+        HDprintf("Error occurred while repacking\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
+
+    h5tools_setstatus(EXIT_SUCCESS);
 
 done:
     /* free tables */
