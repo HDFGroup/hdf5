@@ -2718,8 +2718,8 @@ test_shadow_index_lookup(void)
 
         assert(modulus > 1); // so that modulus - 1 > 0, below
 
-        idx = calloc(cursize,  sizeof(*idx));
-        if (idx == NULL) {
+        idx = (cursize == 0) ? NULL : calloc(cursize,  sizeof(*idx));
+        if (idx == NULL && cursize != 0) {
             fprintf(stderr, "couldn't allocate %" PRIu32 " indices\n",
                 cursize);
             exit(EXIT_FAILURE);
