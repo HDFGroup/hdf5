@@ -207,6 +207,9 @@ H5D__init_package(void)
 
     /* Reset the "default dataset" information */
     HDmemset(&H5D_def_dset, 0, sizeof(H5D_shared_t));
+    H5D_def_dset.type_id = H5I_INVALID_HID;
+    H5D_def_dset.dapl_id = H5I_INVALID_HID;
+    H5D_def_dset.dcpl_id = H5I_INVALID_HID;
 
     /* Get the default dataset creation property list values and initialize the
      * default dataset with them.
@@ -2560,7 +2563,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_offset
  *
- * Purpose:     Private function for H5D__get_offset.  Returns the address
+ * Purpose:     Private function for H5Dget_offset().  Returns the address
  *              of dataset in file.
  *
  * Return:      Success:    The address of dataset

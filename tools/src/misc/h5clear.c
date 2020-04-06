@@ -267,6 +267,8 @@ main (int argc, const char *argv[])
     /* initialize h5tools lib */
     h5tools_init();
 
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
+
     /* Parse command line options */
     if(parse_command_line(argc, argv) < 0)
         goto done;
@@ -339,7 +341,7 @@ main (int argc, const char *argv[])
     }
 
     /* Open the file */
-    if((fid = h5tools_fopen(fname, flags, fapl, NULL, NULL, (size_t)0)) < 0) {
+    if((fid = h5tools_fopen(fname, flags, fapl, FALSE, NULL, (size_t)0)) < 0) {
         error_msg("h5tools_fopen\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;

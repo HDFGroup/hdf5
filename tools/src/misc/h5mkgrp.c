@@ -255,7 +255,7 @@ main(int argc, const char *argv[])
     } /* end if */
 
     /* Attempt to open an existing HDF5 file first */
-    fid = h5tools_fopen(params.fname, H5F_ACC_RDWR, fapl_id, NULL, NULL, 0);
+    fid = h5tools_fopen(params.fname, H5F_ACC_RDWR, fapl_id, FALSE, NULL, 0);
 
     /* If we couldn't open an existing file, try creating file */
     /* (use "EXCL" instead of "TRUNC", so we don't blow away existing non-HDF5 file) */

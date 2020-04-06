@@ -819,7 +819,7 @@ CONTAINS
 
   SUBROUTINE H5_Fortran_string_c2f(c_string, f_string)
 
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_CHAR, C_NULL_CHAR
     IMPLICIT NONE
     CHARACTER(KIND=C_CHAR, LEN=*), INTENT(IN) :: c_string
     CHARACTER(LEN=*), INTENT(OUT) :: f_string
@@ -845,7 +845,7 @@ CONTAINS
 
   SUBROUTINE H5_Fortran_string_f2c(f_string, c_string)
 
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_CHAR, C_NULL_CHAR
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: f_string
     CHARACTER(KIND=C_CHAR, LEN=*), INTENT(OUT) :: c_string

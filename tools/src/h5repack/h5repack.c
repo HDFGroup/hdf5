@@ -79,6 +79,8 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
     options->layout_g = H5D_LAYOUT_ERROR;
     options->low_bound = H5F_LIBVER_EARLIEST;
     options->high_bound = H5F_LIBVER_LATEST;
+    options->fin_fapl = H5P_DEFAULT;
+    options->fout_fapl = H5P_DEFAULT;
 
     for (n = 0; n < H5_REPACK_MAX_NFILTERS; n++) {
         options->filter_g[n].filtn = -1;
@@ -257,7 +259,7 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
                 dt->next = *named_dt_head_p;
                 *named_dt_head_p = dt;
 
-                /* Update the address and id */
+                /* Update the token/address and id */
                 HDmemcpy(&dt->obj_token, &travt->objs[i].obj_token, sizeof(H5O_token_t));
                 dt->id_out = H5I_INVALID_HID;
 
@@ -280,7 +282,7 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
         dt_ret->next = *named_dt_head_p;
         *named_dt_head_p = dt_ret;
 
-        /* Update the address and id */
+        /* Update the token/address and id */
         HDmemcpy(&dt_ret->obj_token, &oinfo.token, sizeof(H5O_token_t));
         dt_ret->id_out = H5I_INVALID_HID;
     } /* end if requested datatype not found */
@@ -751,7 +753,8 @@ check_objects(const char* fname, pack_opt_t *options)
      * open the file
      *-------------------------------------------------------------------------
      */
-    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0)) < 0)
+    if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, options->fin_fapl,
+            (options->fin_fapl == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname, H5FOPENERROR);
 
     /*-------------------------------------------------------------------------

@@ -1101,12 +1101,12 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                 {
                                 /* Object references -- show the type and OID of the referenced object. */
                                 H5O_info2_t oi;
-                                char *obj_addr_str = NULL;
+                                char *obj_tok_str = NULL;
 
                                 H5TOOLS_DEBUG("ref_type is H5R_OBJECT1");
                                 if((obj = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                     H5Oget_info3(obj, &oi, H5O_INFO_BASIC);
-                                    H5Otoken_to_str(obj, &oi.token, &obj_addr_str);
+                                    H5Otoken_to_str(obj, &oi.token, &obj_tok_str);
                                 }
                                 else
                                     H5TOOLS_ERROR(NULL, "H5Ropen_object H5R_OBJECT1 failed");
@@ -1137,13 +1137,13 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
                                 /* Print OID */
                                 if(info->obj_hidefileno)
-                                    h5tools_str_append(str, info->obj_format, obj_addr_str);
+                                    h5tools_str_append(str, info->obj_format, obj_tok_str);
                                 else
-                                    h5tools_str_append(str, info->obj_format, oi.fileno, obj_addr_str);
+                                    h5tools_str_append(str, info->obj_format, oi.fileno, obj_tok_str);
 
-                                if(obj_addr_str) {
-                                    H5free_memory(obj_addr_str);
-                                    obj_addr_str = NULL;
+                                if(obj_tok_str) {
+                                    H5free_memory(obj_tok_str);
+                                    obj_tok_str = NULL;
                                 }
 
                                 if(obj >= 0)

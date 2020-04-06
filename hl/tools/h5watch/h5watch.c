@@ -822,7 +822,9 @@ main(int argc, const char *argv[])
     char        *fname = NULL;      /* File name */
     char        *dname = NULL;      /* Dataset name */
     void        *edata;             /* Error reporting */
+    void        *tools_edata;       /* Error reporting */
     H5E_auto2_t func;               /* Error reporting */
+    H5E_auto2_t tools_func;         /* Error reporting */
     char        *x;                 /* Temporary string pointer */
     hid_t       fid = -1;           /* File ID */
     hid_t       fapl = -1;          /* File access property list */
@@ -837,6 +839,10 @@ main(int argc, const char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+
+    /* Disable tools error reporting */
+    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     /* To exit from h5watch for SIGTERM signal */
     if(HDsignal(SIGTERM, catch_signal) == SIG_ERR) {
@@ -890,7 +896,7 @@ main(int argc, const char *argv[])
 
     do {
         while(fname && *fname) {
-            fid = h5tools_fopen(fname, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl, NULL, drivername, sizeof drivername);
+            fid = h5tools_fopen(fname, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl, FALSE, drivername, sizeof drivername);
 
             if(fid >= 0) {
                 HDfprintf(stdout, "Opened \"%s\" with %s driver.\n", fname, drivername);
@@ -966,6 +972,8 @@ main(int argc, const char *argv[])
     }
 
     H5Eset_auto2(H5E_DEFAULT, func, edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+
     /* exit */
     leave(h5tools_getstatus());
 } /* main() */
