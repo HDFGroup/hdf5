@@ -1200,8 +1200,11 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
         HGOTO_DONE(SUCCEED)
     HDassert(addr != 0);        /* Can't deallocate the superblock :-) */
 
-    if (!f->shared->vfd_swmr_writer) {
-        // not a VFD SWMR writer, do not defer or process deferrals
+    if (!f->shared->vfd_swmr_writer || f->shared->closing ||
+        alloc_type != H5FD_MEM_DRAW) {
+        /* VFD SWMR writers defer raw-data allocations until the
+         * file starts to close.
+         */
         ret_value = H5MF__xfree_impl(f, alloc_type, addr, size);
     } else if (defer_free(f->shared, alloc_type, addr, size) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "could not defer")
