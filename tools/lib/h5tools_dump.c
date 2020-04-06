@@ -4119,10 +4119,10 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                 switch (ref_type) {
                     case H5R_OBJECT1:
                         H5TOOLS_DEBUG("ref_type is H5R_OBJECT1");
-                        if (H5Rget_obj_type3((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
+                        if (H5Rget_obj_type3(&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
                             switch (obj_type) {
                                 case H5O_TYPE_DATASET:
-                                    if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                    if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                         datactx.indent_level++;
                                         h5tools_dump_data(stream, &outputformat, &datactx, new_obj_id, TRUE);
                                         datactx.indent_level--;
@@ -4147,7 +4147,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         break;
                     case H5R_DATASET_REGION1:
                         H5TOOLS_DEBUG("ref_type is H5R_DATASET_REGION1");
-                        if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                        if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                             datactx.indent_level++;
                             h5tools_dump_data(stream, &outputformat, &datactx, new_obj_id, TRUE);
                             datactx.indent_level--;
@@ -4159,13 +4159,13 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         break;
                     case H5R_OBJECT2:
                         H5TOOLS_DEBUG("ref_type is H5R_OBJECT2");
-                        if (H5Rget_obj_type3((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
+                        if (H5Rget_obj_type3(&ref_buf[i], H5P_DEFAULT, &obj_type) >= 0) {
                             switch (obj_type) {
                                 case H5O_TYPE_GROUP:
                                     break;
 
                                 case H5O_TYPE_DATASET:
-                                    if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                    if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                         datactx.indent_level++;
                                         h5tools_dump_data(stream, &outputformat, &datactx, new_obj_id, TRUE);
                                         datactx.indent_level--;
@@ -4196,10 +4196,10 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                             ncols = outputformat.line_ncols;
 
                         /* if (new_obj_id < 0) - could mean that no reference was written do not throw failure */
-                        if((new_obj_id = H5Ropen_object((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                        if((new_obj_id = H5Ropen_object(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) < 0)
                             H5TOOLS_INFO("H5Ropen_object H5R_DATASET_REGION2 failed");
                         else {
-                            if((new_obj_sid = H5Ropen_region((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                            if((new_obj_sid = H5Ropen_region(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                 if (h5tools_is_zero(&ref_buf[i], H5Tget_size(H5T_STD_REF))) {
                                     H5TOOLS_DEBUG("NULL H5R_DATASET_REGION2");
 
@@ -4251,7 +4251,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         break;
                     case H5R_ATTR:
                         H5TOOLS_DEBUG("ref_type is H5R_ATTR");
-                        if((new_obj_id = H5Ropen_attr((const H5R_ref_t *)&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                        if((new_obj_id = H5Ropen_attr(&ref_buf[i], H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                             h5tools_dump_region_attribute(new_obj_id, stream, &outputformat, &datactx,
                                                 &buffer, &curr_pos, ncols, i, elmt_counter);
                             if(H5Aclose(new_obj_id) < 0)
