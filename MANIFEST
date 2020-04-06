@@ -642,6 +642,9 @@
 ./src/H5EAsblock.c
 ./src/H5EAstat.c
 ./src/H5EAtest.c
+./src/H5ES.c
+./src/H5ESmodule.h
+./src/H5ESprivate.h
 ./src/H5ESpublic.h
 ./src/H5F.c
 ./src/H5Faccum.c

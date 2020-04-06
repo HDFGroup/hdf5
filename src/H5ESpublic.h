@@ -10,6 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*
+ * This file contains public declarations for the H5ES (event set) module.
+ */
+
 #ifndef _H5ESpublic_H
 #define _H5ESpublic_H
 
@@ -19,6 +23,10 @@
 /*****************/
 /* Public Macros */
 /*****************/
+
+/* "Wait forever" timeout value */
+#define H5ES_WAIT_FOREVER       (UINT64_MAX)
+
 
 /*******************/
 /* Public Typedefs */
@@ -37,6 +45,7 @@ typedef enum H5ES_status_t {
 /* Public Variables */
 /********************/
 
+
 /*********************/
 /* Public Prototypes */
 /*********************/
@@ -44,6 +53,13 @@ typedef enum H5ES_status_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+hid_t H5EScreate(void);
+herr_t H5ESget_count(hid_t es_id, unsigned *count);
+herr_t H5EStest(hid_t es_id, H5ES_status_t *status);
+herr_t H5ESwait(hid_t es_id, H5ES_status_t *status, uint64_t timeout);
+herr_t H5EScancel(hid_t es_id, H5ES_status_t *status);
+herr_t H5ESclose(hid_t es_id);
 
 #ifdef __cplusplus
 }

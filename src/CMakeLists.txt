@@ -174,11 +174,13 @@ IDE_GENERATED_PROPERTIES ("H5EA" "${H5EA_HDRS}" "${H5EA_SOURCES}" )
 
 
 set (H5ES_SOURCES
+    ${HDF5_SRC_DIR}/H5ES.c
 )
 set (H5ES_HDRS
     ${HDF5_SRC_DIR}/H5ESpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5ES" "${H5ES_HDRS}" "${H5ES_SOURCES}" )
+
 
 
 set (H5F_SOURCES
@@ -722,6 +724,7 @@ set (common_SRCS
     ${H5D_SOURCES}
     ${H5E_SOURCES}
     ${H5EA_SOURCES}
+    ${H5ES_SOURCES}
     ${H5F_SOURCES}
     ${H5FA_SOURCES}
     ${H5FD_SOURCES}
@@ -829,6 +832,8 @@ set (H5_PRIVATE_HEADERS
 
     ${HDF5_SRC_DIR}/H5EApkg.h
     ${HDF5_SRC_DIR}/H5EAprivate.h
+
+    ${HDF5_SRC_DIR}/H5ESprivate.h
 
     ${HDF5_SRC_DIR}/H5Fpkg.h
     ${HDF5_SRC_DIR}/H5Fprivate.h

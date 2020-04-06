@@ -302,21 +302,31 @@ H5_term_library(void)
         /* Try to organize these so the "higher" level components get shut
          * down before "lower" level components that they might rely on. -QAK
          */
-        pending += DOWN(L);
 
-        /* Close the "top" of various interfaces (IDs, etc) but don't shut
-         *  down the whole interface yet, so that the object header messages
-         *  get serialized correctly for entries in the metadata cache and the
-         *  symbol table entry in the superblock gets serialized correctly, etc.
-         *  all of which is performed in the 'F' shutdown.
+        /* Close the event sets first, so that all asynchronous operations
+         *  complete before anything else attempts to shut down.
          */
-        pending += DOWN(A_top);
-        pending += DOWN(D_top);
-        pending += DOWN(G_top);
-        pending += DOWN(M_top);
-        pending += DOWN(R_top);
-        pending += DOWN(S_top);
-        pending += DOWN(T_top);
+        pending += DOWN(ES);
+
+        /* Close down the user-facing interfaces, after the event sets */
+        if(pending == 0) {
+            /* Close the interfaces dependent on others */
+            pending += DOWN(L);
+
+            /* Close the "top" of various interfaces (IDs, etc) but don't shut
+             *  down the whole interface yet, so that the object header messages
+             *  get serialized correctly for entries in the metadata cache and the
+             *  symbol table entry in the superblock gets serialized correctly, etc.
+             *  all of which is performed in the 'F' shutdown.
+             */
+            pending += DOWN(A_top);
+            pending += DOWN(D_top);
+            pending += DOWN(G_top);
+            pending += DOWN(M_top);
+            pending += DOWN(R_top);
+            pending += DOWN(S_top);
+            pending += DOWN(T_top);
+        } /* end if */
 
         /* Don't shut down the file code until objects in files are shut down */
         if(pending == 0)
@@ -352,6 +362,7 @@ H5_term_library(void)
          */
         if(pending == 0) {
             pending += DOWN(AC);
+            /* Shut down the "pluggable" interfaces, before the plugin framework */
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(VL);
