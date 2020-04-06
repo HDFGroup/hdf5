@@ -1343,7 +1343,7 @@ CONTAINS
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)    :: group_id
     INTEGER         , INTENT(IN)    :: index_type
@@ -1423,7 +1423,7 @@ CONTAINS
 ! Fortran2003 Interface:
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &
        idx, op, op_data, return_value, hdferr, lapl_id)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)           :: loc_id
     CHARACTER(LEN=*), INTENT(IN)           :: group_name 
