@@ -50,7 +50,7 @@ HL_ADD_EXE (test_h5do_compat)
 
 # test_packet has two source files
 add_executable (hl_test_packet test_packet.c test_packet_vlen.c)
-  target_compile_options(hl_test_packet PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+target_compile_options(hl_test_packet PRIVATE "${HDF5_CMAKE_C_FLAGS}")
 target_include_directories (hl_test_packet PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (hl_test_packet STATIC)
