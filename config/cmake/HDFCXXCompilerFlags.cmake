@@ -155,6 +155,8 @@ if (NOT MSVC)
     #    ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-4.5")
     #  endif ()
     #endif ()
+else ()
+    list (APPEND HDF5_CMAKE_CXX_FLAGS "/EHsc")
 endif ()
 
 #-----------------------------------------------------------------------------

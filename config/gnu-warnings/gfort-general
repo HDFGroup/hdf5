@@ -9,5 +9,4 @@
 -Wimplicit-interface
 -Wsurprising
 -Wunderflow
--Wuse-without-only
 -pedantic
