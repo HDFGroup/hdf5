@@ -97,7 +97,7 @@ if (NOT MSVC)
     # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
     # warnings that are emitted. If you need it, add it at configure time.
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-      ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings-general")
+      ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/intel-warnings/general")
       if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18.0)
         list (APPEND H5_CXXFLAGS0 "-Wextra-tokens -Wformat -Wformat-security -Wic-pointer -Wshadow")
         list (APPEND H5_CXXFLAGS0 "-Wsign-compare -Wtrigraphs -Wwrite-strings")

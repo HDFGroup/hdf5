@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -16,6 +16,20 @@
 # Intel ifort compiler or a derivative.  It is careful not to do anything
 # if the compiler is not Intel; otherwise `f9x_flags_set' is set to `yes'
 #
+
+#
+# Prepend `$srcdir/config/intel-warnings/` to the filename suffix(es) given as
+# subroutine argument(s), remove comments starting with # and ending
+# at EOL, replace spans of whitespace (including newlines) with spaces,
+# and re-emit the file(s) thus filtered on the standard output stream.
+#
+load_intel_arguments()
+{
+    set -- $(for arg; do
+        sed 's,#.*$,,' $srcdir/config/intel-warnings/${arg}
+    done)
+    IFS=' ' echo "$*"
+}
 
 # Get the compiler version in a way that works for ifort
 # ifort unless a compiler version is already known
@@ -44,8 +58,8 @@ fi
 
 # Common Intel flags for various situations
 if test "X-ifort" = "X-$f9x_vendor"; then
-    # Insert section about version specific problems from gnu-flags here, if
-    # necessary.
+    # Insert section about version specific problems from compiler flags here,
+    # if necessary.
 
     arch=
     # Architecture-specific flags
@@ -68,7 +82,7 @@ if test "X-ifort" = "X-$f9x_vendor"; then
     FC_BASENAME=ifort
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
-    H5_FCFLAGS="$H5_FCFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $(load_intel_arguments ifort-general)"
 
     # Production
     PROD_FCFLAGS=
@@ -89,7 +103,9 @@ if test "X-ifort" = "X-$f9x_vendor"; then
     DEBUG_OPT_FCFLAGS=
     NO_OPT_FCFLAGS=
 
-    # Flags are set
+    #################
+    # Flags are set #
+    #################
     f9x_flags_set=yes
 fi
 
