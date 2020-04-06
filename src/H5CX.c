@@ -1903,7 +1903,6 @@ H5CX_get_tconv_buf(void **tconv_buf)
     /* Sanity check */
     HDassert(tconv_buf);
     HDassert(head && *head);
-
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
     H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_TCONV_BUF_NAME, tconv_buf)
@@ -2361,7 +2360,6 @@ H5CX_get_data_transform(H5Z_data_xform_t **data_transform)
     /* Sanity check */
     HDassert(data_transform);
     HDassert(head && *head);
-
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
     /* Check if the value has been retrieved already */
