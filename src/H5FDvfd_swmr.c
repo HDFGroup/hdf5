@@ -336,7 +336,7 @@ H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set driver info")
 
     /* set pb_configured to FALSE.  This field should not exist, but 
-     * until we modify the file open proceedure to create the page buffer
+     * until we modify the file open procedure to create the page buffer
      * before there is any file I/O when opening a file VFD SWMR reader, 
      * we need to be able to turn off sanity checking in the read function
      * until the page buffer is enabled.  This field exists for this 
