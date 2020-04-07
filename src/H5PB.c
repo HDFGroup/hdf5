@@ -1669,6 +1669,8 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
                             uint32_t * idx_ent_not_in_tl_ptr,
                             uint32_t * idx_ent_not_in_tl_flushed_ptr)
 {
+    H5F_shared_t * const shared = f->shared;
+    const uint64_t tick_num = shared->tick_num;
     uint32_t i;
     uint32_t idx_ent_added = 0;
     uint32_t idx_ent_modified = 0;
@@ -1676,7 +1678,6 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
     uint32_t idx_ent_not_in_tl_flushed = 0;
     H5PB_t * pb_ptr = NULL;
     H5PB_entry_t *entry;
-    H5F_shared_t *shared = f->shared;
     H5FD_vfd_swmr_idx_entry_t * ie_ptr = NULL;
     H5FD_vfd_swmr_idx_entry_t * idx = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1726,7 +1727,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
                 HDfprintf(stderr,
                     "\n\nmax mdf index len (%" PRIu32 ") exceeded.\n\n",
                     shared->mdf_idx_len);
-                HDfprintf(stderr, "tick = %" PRIu64 ".\n", shared->tick_num);
+                HDfprintf(stderr, "tick = %" PRIu64 ".\n", tick_num);
                 exit(EXIT_FAILURE);
             }
 
@@ -1752,10 +1753,10 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
         /* entry->size could have changed */
         ie_ptr->length               = (uint32_t)entry->size;
         ie_ptr->entry_ptr            = entry->image_ptr;
-        ie_ptr->tick_of_last_change  = shared->tick_num;
-        ie_ptr->clean                = !entry->is_dirty;
-
-        ie_ptr->tick_of_last_flush = ie_ptr->clean ? shared->tick_num : 0;
+        ie_ptr->tick_of_last_change  = tick_num;
+        assert(entry->is_dirty);
+        ie_ptr->clean                = false;
+        ie_ptr->tick_of_last_flush = 0;
     }
 
     /* scan the metadata file index for entries that don't appear in the 
@@ -1765,27 +1766,28 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
      */
     for ( i = 0; i < shared->mdf_idx_entries_used; i++ ) {
 
-        HDassert( ( i == 0 ) || 
-                  ( idx[i - 1].hdf5_page_offset < idx[i].hdf5_page_offset ) );
+        HDassert(i == 0 ||
+                 idx[i - 1].hdf5_page_offset < idx[i].hdf5_page_offset);
 
-        if ( idx[i].tick_of_last_change < shared->tick_num ) {
+        ie_ptr = idx + i;
 
-            idx_ent_not_in_tl++;
+        if (ie_ptr->tick_of_last_change == tick_num)
+            continue;
 
-            ie_ptr = idx + i;
+        idx_ent_not_in_tl++;
 
-            if (!ie_ptr->clean) {
+        if (ie_ptr->clean)
+            continue;
 
-                H5PB__SEARCH_INDEX(pb_ptr, ie_ptr->hdf5_page_offset, \
-                                   entry, FAIL);
+        H5PB__SEARCH_INDEX(pb_ptr, ie_ptr->hdf5_page_offset, entry, FAIL);
 
-                if (entry == NULL || !entry->is_dirty) {
-
-                    idx_ent_not_in_tl_flushed++;
-                    ie_ptr->clean = TRUE;
-                    ie_ptr->tick_of_last_flush = shared->tick_num;
-                }
-            }
+        if (entry == NULL || !entry->is_dirty) {
+            hlog_fast(shadow_index_reclaim,
+                "Marking shadow index slot %" PRIu32 " clean at tick %" PRIu64,
+                i, tick_num);
+            idx_ent_not_in_tl_flushed++;
+            ie_ptr->clean = TRUE;
+            ie_ptr->tick_of_last_flush = tick_num;
         }
     }
 
