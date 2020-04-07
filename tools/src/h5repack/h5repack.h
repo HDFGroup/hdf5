@@ -114,6 +114,8 @@ typedef struct {
     hbool_t         latest;         /*pack file with the latest file format */
     H5F_libver_t    low_bound;      /* The file's low bound as in H5Fset_libver_bounds() */
     H5F_libver_t    high_bound;     /* The file's high bound as in H5Fset_libver_bounds() */
+    hid_t           fin_fapl;       /* FAPL to use for opening the input file */
+    hid_t           fout_fapl;      /* FAPL to use for opening/creating the output file */
     int             grp_compact;    /* Set the maximum number of links to store as header messages in the group */
     int             grp_indexed;    /* Set the minimum number of links to store in the indexed format */
     int             msg_size[8];    /* Minimum size of shared messages: dataspace,
@@ -151,7 +153,7 @@ int h5repack_addlayout(const char* str, pack_opt_t *options);
 int h5repack_init(pack_opt_t *options, int verbose, hbool_t latest);
 int h5repack_end(pack_opt_t *options);
 int h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options);
-int h5repack_cmp_pl(const char *fname1, const char *fname2);
+int h5repack_cmp_pl(const char *fname1, hid_t fname1_fapl, const char *fname2, hid_t fname2_fapl);
 
 /* Note: The below copy_named_datatype(), named_datatype_free(), copy_attr()
  * and struct named_dt_t were located in h5repack_copy.c as static prior to

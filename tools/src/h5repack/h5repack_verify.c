@@ -353,16 +353,16 @@ int verify_layout(hid_t pid, pack_info_t *obj)
  *-------------------------------------------------------------------------
  */
 
-int h5repack_cmp_pl(const char *fname1, const char *fname2)
+int h5repack_cmp_pl(const char *fname1, hid_t fname1_fapl, const char *fname2, hid_t fname2_fapl)
 {
-    hid_t         fid1 =H5I_INVALID_HID;         /* file ID */
-    hid_t         fid2 =H5I_INVALID_HID;         /* file ID */
-    hid_t         dset1 =H5I_INVALID_HID;        /* dataset ID */
-    hid_t         dset2 =H5I_INVALID_HID;        /* dataset ID */
-    hid_t         gid =H5I_INVALID_HID;          /* group ID */
-    hid_t         dcpl1 =H5I_INVALID_HID;        /* dataset creation property list ID */
-    hid_t         dcpl2 =H5I_INVALID_HID;        /* dataset creation property list ID */
-    hid_t         gcplid =H5I_INVALID_HID;       /* group creation property list */
+    hid_t         fid1 = H5I_INVALID_HID;         /* file ID */
+    hid_t         fid2 = H5I_INVALID_HID;         /* file ID */
+    hid_t         dset1 = H5I_INVALID_HID;        /* dataset ID */
+    hid_t         dset2 = H5I_INVALID_HID;        /* dataset ID */
+    hid_t         gid = H5I_INVALID_HID;          /* group ID */
+    hid_t         dcpl1 = H5I_INVALID_HID;        /* dataset creation property list ID */
+    hid_t         dcpl2 = H5I_INVALID_HID;        /* dataset creation property list ID */
+    hid_t         gcplid = H5I_INVALID_HID;       /* group creation property list */
     unsigned      crt_order_flag1;  /* group creation order flag */
     unsigned      crt_order_flag2;  /* group creation order flag */
     trav_table_t *trav = NULL;
@@ -374,9 +374,9 @@ int h5repack_cmp_pl(const char *fname1, const char *fname2)
     *-------------------------------------------------------------------------
     */
     /* Open the files */
-    if ((fid1 = H5Fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+    if ((fid1 = h5tools_fopen(fname1, H5F_ACC_RDONLY, fname1_fapl, TRUE, NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname1, H5FOPENERROR);
-    if ((fid2 = H5Fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+    if ((fid2 = h5tools_fopen(fname2, H5F_ACC_RDONLY, fname2_fapl, TRUE, NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname2, H5FOPENERROR);
 
    /*-------------------------------------------------------------------------

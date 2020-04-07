@@ -523,7 +523,7 @@ H5E_walk_cb
     jobject     cb_info_t = NULL;
     jvalue      args[7];
     JNIEnv     *cbenv = NULL;
-    jclass      cls;
+    jclass      cbcls;
     void       *op_data = (void *)wrapper->op_data;
     jint        status = FAIL;
 
@@ -532,10 +532,10 @@ H5E_walk_cb
         H5_JNI_FATAL_ERROR(CBENVONLY, "H5E_walk_cb: failed to attach current thread to JVM");
     }
 
-    if (NULL == (cls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
+    if (NULL == (cbcls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
-    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cls, "callback", "(ILhdf/hdf5lib/structs/H5E_error2_t;Lhdf/hdf5lib/callbacks/H5E_walk_t;)I")))
+    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cbcls, "callback", "(ILhdf/hdf5lib/structs/H5E_error2_t;Lhdf/hdf5lib/callbacks/H5E_walk_t;)I")))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     args[0].j = info->cls_id;

@@ -816,14 +816,14 @@ dump_group(hid_t gid, const char *name)
         /* dump unamed type in root group */
         for(u = 0; u < type_table->nobjs; u++)
             if(!type_table->objs[u].recorded) {
-                char *obj_addr_str = NULL;
+                char *obj_tok_str = NULL;
 
                 dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                 type = H5Dget_type(dset);
 
-                H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_addr_str);
-                HDsprintf(type_name, "#%s", obj_addr_str);
-                H5free_memory(obj_addr_str);
+                H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
+                HDsprintf(type_name, "#%s", obj_tok_str);
+                H5free_memory(obj_tok_str);
 
                 dump_function_table->dump_named_datatype_function(type, type_name);
                 H5Tclose(type);
@@ -1136,6 +1136,22 @@ dump_fcpl(hid_t fid)
     unsigned sym_ik;    /* symbol table B-tree internal 'K' value */
     unsigned istore_ik; /* indexed storage B-tree internal 'K' value */
 
+    void *obj = NULL;
+    hid_t connector_id = H5I_INVALID_HID;
+    hbool_t supported = FALSE;
+
+    /* Dumping the information here only makes sense for the native
+     * VOL connector. The only VOL call here is H5Fget_info(), so we'll
+     * use that as a proxy for "native-ness". If that isn't supported, we'll
+     * just return.
+     */
+    obj = H5VLobject(fid);
+    connector_id = H5VLget_connector_id(fid);
+    H5VLintrospect_opt_query(obj, connector_id, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_GET_INFO, &supported);
+    H5VLclose(connector_id);
+    if (!supported)
+        return;
+
     fcpl=H5Fget_create_plist(fid);
     H5Fget_info2(fid, &finfo);
     H5Pget_userblock(fcpl,&userblock);
@@ -1258,11 +1274,11 @@ dump_fcontents(hid_t fid)
 
         for (u = 0; u < type_table->nobjs; u++) {
             if (!type_table->objs[u].recorded) {
-                char *obj_addr_str = NULL;
+                char *obj_tok_str = NULL;
 
-                H5Otoken_to_str(fid, &type_table->objs[u].obj_token, &obj_addr_str);
-                PRINTSTREAM(rawoutstream, " %-10s /#%s\n", "datatype", obj_addr_str);
-                H5free_memory(obj_addr_str);
+                H5Otoken_to_str(fid, &type_table->objs[u].obj_token, &obj_tok_str);
+                PRINTSTREAM(rawoutstream, " %-10s /#%s\n", "datatype", obj_tok_str);
+                H5free_memory(obj_tok_str);
             }
         }
     }
@@ -1914,12 +1930,12 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED * data, int pe
             char name[128];
 
             if(!type_table->objs[idx].recorded) {
-                char *obj_addr_string = NULL;
+                char *obj_tok_str = NULL;
 
                 /* unamed datatype */
-                H5Otoken_to_str(fid, &type_table->objs[idx].obj_token, &obj_addr_string);
-                HDsprintf(name, "/#%s", obj_addr_string);
-                H5free_memory(obj_addr_string);
+                H5Otoken_to_str(fid, &type_table->objs[idx].obj_token, &obj_tok_str);
+                HDsprintf(name, "/#%s", obj_tok_str);
+                H5free_memory(obj_tok_str);
 
                 if(!HDstrcmp(name, real_name))
                     break;

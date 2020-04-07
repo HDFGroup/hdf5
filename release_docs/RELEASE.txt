@@ -48,6 +48,34 @@ New Features
 
     Configuration:
     -------------
+    - CMake ConfigureChecks.cmake file now uses CHECK_STRUCT_HAS_MEMBER
+
+      Some handcrafted tests in HDFTests.c has been removed and the CMake
+      CHECK_STRUCT_HAS_MEMBER module has been used.
+
+      (ADB - 2020/03/24, TRILAB-24)
+
+    - Both build systems use same set of warnings flags
+
+      GNU C, C++ and gfortran warnings flags were moved to files in a config
+      sub-folder named gnu-warnings. Flags that only are available for a specific
+      version of the compiler are in files named with that version.
+      Clang C warnings flags were moved to files in a config sub-folder
+      named clang-warnings.
+      Intel C, Fortran warnings flags were moved to files in a config sub-folder
+      named intel-warnings.
+
+      There are flags in named "error-xxx" files with warnings that may
+      be promoted to errors. Some source files may still need fixes.
+
+      There are also pairs of files named "developer-xxx" and "no-developer-xxx"
+      that are chosen by the CMake option:HDF5_ENABLE_DEV_WARNINGS or the
+      configure option:--enable-developer-warnings.
+
+      In addition, CMake no longer applies these warnings for examples.
+
+      (ADB - 2020/03/24, TRILAB-192)
+
     - Added test script for file size compare
 
       if CMake minimum version is at least 3.14, the fileCompareTest.cmake
@@ -432,6 +460,17 @@ New Features
       H5make_libsettings.c, supply a location for those files.
 
       (ADB - 2018/09/18, HDFFV-10332)
+
+    - Fix shutdown failure when using H5VLregister_connector_by_name/value
+
+      When using H5VLregister_connector_by_name/value to dynamically load a
+      VOL connector plugin, the library can experience segmentation faults
+      when the library is closed. This is due to the library unloading
+      the plugin interface before the virtual object layer. Then, when the
+      VOL shutdown occurs, it will attempt to close the VOL connector,
+      however this will fail since the plugin will already have been unloaded.
+
+      (DER - 2020/03/18, HDFFV-11057)
 
 
     Parallel Library:
