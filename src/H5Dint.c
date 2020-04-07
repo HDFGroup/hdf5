@@ -1426,11 +1426,11 @@ done:
             if(new_dset->shared->type) {
                 if(new_dset->shared->type_id > 0) {
                     if(H5I_dec_ref(new_dset->shared->type_id) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
                 } /* end if */
                 else {
                     if(H5T_close_real(new_dset->shared->type) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
                 } /* end else */
             } /* end if */
 
