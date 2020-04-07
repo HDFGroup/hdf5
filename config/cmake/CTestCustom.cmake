@@ -18,23 +18,18 @@ set (CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE 50000)
 
 set (CTEST_CUSTOM_WARNING_EXCEPTION
     ${CTEST_CUSTOM_WARNING_EXCEPTION}
-#    "H5detect.c.[0-9]+.[ \t]*:[ \t]*warning C4090:"
-#    "H5detect.c.[0-9]+.[ \t]*:[ \t]*warning:[ \t]*passing argument"
-#    "H5detect.c[0-9 \t:]*warning:[ \t]*passing argument"
     "note.*expected.*void.*but argument is of type.*volatile"
-#    "H5Tconv.c[0-9 \t:]*warning:[ \t]*comparison is always false due to limited range of data type"
-#    "H5Ztrans.c.[0-9]+.[ \t]*:[ \t]*warning C4244"
     "src.ZLIB.*:[ \t]*warning"
     "warning LNK4197:.*ZLIB-prefix"
     "src.SZIP.*:[ \t]*warning"
 #    "POSIX name for this item is deprecated"
     "disabling jobserver mode"
     "config.cmake.xlatefile.c"
-#    "warning.*implicit declaration of function"
     "warning.*unknown pragma"
     "warning.*unrecognized .pragma"
-#    "note: expanded from macro"
-#    "fpp:[ \t]*warning:[ \t]*cannot remove H5_DEBUG_API - not a predefined macro"
+    "note: expanded from macro"
+    # HDDFFV-11074
+    "This directive is not standard"
 )
 
 set (CTEST_CUSTOM_MEMCHECK_IGNORE

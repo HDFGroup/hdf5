@@ -22,11 +22,11 @@ add_executable (parallel_test
     mdset.f90
 )
 target_include_directories (parallel_test
-    PRIVATE
-        ${TESTPAR_INCLUDES}
+    PRIVATE ${TESTPAR_INCLUDES}
 )
 target_compile_options(parallel_test
     PRIVATE
+        "${HDF5_CMAKE_Fortran_FLAGS}"
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
 )
 if (NOT BUILD_SHARED_LIBS)
@@ -53,12 +53,8 @@ else ()
   )
 endif ()
 
-#set_property(TARGET parallel_test APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#)
-#set_property(TARGET parallel_test APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#)
+#set_property(TARGET parallel_test APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#set_property(TARGET parallel_test APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
 if(MSVC)
   set_property(TARGET parallel_test PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
 endif()
