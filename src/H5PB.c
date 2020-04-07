@@ -1683,8 +1683,6 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Sanity checks */
-    HDassert(shared);
     HDassert(shared->vfd_swmr);
     HDassert(shared->vfd_swmr_writer);
 
