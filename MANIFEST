@@ -2849,7 +2849,7 @@
 ./utils/mirror_vfd/mirror_remote.c
 ./utils/mirror_vfd/mirror_remote.h
 ./utils/mirror_vfd/mirror_server.c
-./utils/mirror_vfd/mirror_server_halten_sie.c
+./utils/mirror_vfd/mirror_server_stop.c
 ./utils/mirror_vfd/mirror_writer.c
 
 # high level libraries

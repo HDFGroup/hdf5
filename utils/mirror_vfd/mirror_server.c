@@ -137,6 +137,27 @@ struct server_run {
 
 
 /* ---------------------------------------------------------------------------
+ * Function:   mybzero
+ *
+ * Purpose:    Introduce bzero without neededing it on the system.
+ *
+ * Programmer: Jacob Smith
+ *             2020-03-30
+ * ---------------------------------------------------------------------------
+ */
+static void mybzero(void *dest, size_t size)
+{
+    size_t i = 0;
+    char  *s = NULL;
+    HDassert(dest);
+    s = (char *)dest;
+    for (i = 0; i < size; i++) {
+        *(s+i) = 0;
+    }
+} /* end mybzero() */
+
+
+/* ---------------------------------------------------------------------------
  * Function:    usage
  *
  * Purpose:     Print the usage message to stdout.
@@ -187,8 +208,8 @@ parse_args(int argc, char **argv, struct op_args *args_out)
     args_out->log_prepend_type = 1;
     args_out->verbosity = MIRROR_LOG_DEFAULT_VERBOSITY;
     /* preset empty strings */
-    HDbzero(args_out->log_path,        PATH_MAX+1);
-    HDbzero(args_out->writer_log_path, PATH_MAX+1);
+    mybzero(args_out->log_path,        PATH_MAX+1);
+    mybzero(args_out->writer_log_path, PATH_MAX+1);
 
     if (argv == NULL || *argv == NULL) {
         mirror_log(NULL, V_ERR, "invalid argv pointer");

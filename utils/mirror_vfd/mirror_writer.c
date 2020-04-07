@@ -157,8 +157,31 @@ struct mirror_writer_opts {
     char       *logpath;
 };
 
+static void mybzero(void *dest, size_t size);
+
 static int do_open(struct mirror_session *session,
         const H5FD_mirror_xmit_open_t *xmit_open);
+
+
+/* ---------------------------------------------------------------------------
+ * Function:   mybzero
+ *
+ * Purpose:    Introduce bzero without neededing it on the system.
+ *
+ * Programmer: Jacob Smith
+ *             2020-03-30
+ * ---------------------------------------------------------------------------
+ */
+static void mybzero(void *dest, size_t size)
+{
+    size_t i = 0;
+    char *s = NULL;
+    HDassert(dest);
+    s = (char *)dest;
+    for (i = 0; i < size; i++) {
+        *(s+i) = 0;
+    }
+} /* end mybzero() */
 
 
 /* ---------------------------------------------------------------------------
@@ -199,7 +222,7 @@ session_init(struct mirror_writer_opts *opts)
     session->reply.pub.version       = H5FD_MIRROR_XMIT_CURR_VERSION;
     session->reply.pub.op            = H5FD_MIRROR_OP_REPLY;
     session->reply.pub.session_token = 0;
-    HDbzero(session->reply.message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
+    mybzero(session->reply.message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
 
     /* Options-derived population
      */
@@ -381,7 +404,7 @@ reply_ok(struct mirror_session *session)
     mirror_log(session->loginfo, V_ALL, "reply_ok()");
 
     reply->status = H5FD_MIRROR_STATUS_OK;
-    HDbzero(reply->message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
+    mybzero(reply->message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
     return _xmit_reply(session);
 } /* end reply_ok() */
 
@@ -876,7 +899,7 @@ receive_communique(
 
     mirror_log(session->loginfo, V_INFO, "receive_communique()");
 
-    HDbzero(comm->raw, comm->raw_size);
+    mybzero(comm->raw, comm->raw_size);
     comm->recd_die = 0;
 
     mirror_log(session->loginfo, V_INFO, "ready to receive"); /* TODO */

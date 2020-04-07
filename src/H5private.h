@@ -717,9 +717,6 @@ typedef struct {
 #ifndef HDbsearch
     #define HDbsearch(K,B,N,Z,F)  bsearch(K,B,N,Z,F)
 #endif /* HDbsearch */
-#ifndef HDbzero
-    #define HDbzero(A,B)   bzero((A),(B)) /* mirror VFD */
-#endif /* HDbzero */
 #ifndef HDcalloc
     #define HDcalloc(N,Z)    calloc(N,Z)
 #endif /* HDcalloc */
