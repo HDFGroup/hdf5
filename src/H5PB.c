@@ -1803,9 +1803,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
     *idx_ent_not_in_tl_flushed_ptr = idx_ent_not_in_tl_flushed;
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 }
 
 
