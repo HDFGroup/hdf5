@@ -1125,9 +1125,11 @@ shadow_idx_entry_remove(H5F_shared_t *shared, uint64_t page, bool only_mark)
     if (entry == NULL)
         return 0;
 
-    if (shared->vfd_swmr_writer && entry->md_file_page_offset != 0 &&
-        shadow_image_defer_free(shared, entry) != 0)
-        return -1;
+    if (shared->vfd_swmr_writer && entry->md_file_page_offset != 0) {
+        if (shadow_image_defer_free(shared, entry) != 0)
+            return -1;
+        entry->md_file_page_offset = 0;
+    }
 
     if (only_mark) {
         entry->garbage = true;
