@@ -67,6 +67,7 @@ typedef TAILQ_HEAD(eot_queue, eot_queue_entry) eot_queue_t;
 extern eot_queue_t eot_queue_g;
 
 HLOG_OUTLET_DECL(swmr);
+HLOG_OUTLET_DECL(shadow_index_reclaim);
 
 /***************************************/
 /* Library-private Function Prototypes */
