@@ -31,8 +31,9 @@
 ./m4/ltversion.m4                       _DO_NOT_DISTRIBUTE_
 ./m4/lt~obsolete.m4                     _DO_NOT_DISTRIBUTE_
 ./m4/ltoptions.m4                       _DO_NOT_DISTRIBUTE_
-./m4/aclocal_cxx.m4
-./m4/aclocal_fc.m4
+./m4/aclocal_cxx.m4                     _DO_NOT_DISTRIBUTE_
+./m4/aclocal_fc.m4                      _DO_NOT_DISTRIBUTE_
+./m4/aclocal_fc.f90
 ./README.txt
 ./aclocal.m4
 ./acsite.m4
