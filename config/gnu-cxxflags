@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -17,33 +17,65 @@
 # if the compiler is not GNU; otherwise `cxx_flags_set' is set to `yes'
 #
 
+#
+# For now, do not promote any warnings to errors.
+#
+PROMOTE_ERRORS_DFLT=no
+
+#
+# This filter rewrites -Werror= as -W, in that way demoting warnings
+# promoted to errors back to warnings, if PROMOTE_ERRORS is no.
+#
+demote_errors()
+{
+    if [ ${PROMOTE_ERRORS:-${PROMOTE_ERRORS_DFLT}} = no ]; then
+        sed 's,-Werror=,-W,g'
+    else
+        cat
+    fi
+}
+
+#
+# Prepend `$srcdir/config/gnu-warnings/` to the filename suffix(es) given as
+# subroutine argument(s), remove comments starting with # and ending
+# at EOL, replace spans of whitespace (including newlines) with spaces,
+# and re-emit the file(s) thus filtered on the standard output stream.
+#
+load_gnu_arguments()
+{
+    set -- $(for arg; do
+        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg} | demote_errors
+    done)
+    IFS=' ' echo "$*"
+}
+
 # Get the compiler version in a way that works for g++
 # unless a compiler version is already known
 #
 #   cxx_vendor:    The compiler name: g++
 #   cxx_version:   Version number: 2.91.60, 2.7.2.1
 #
-if test X = "X$cxx_flags_set"; then
+if test "X-" = "X-$cxx_flags_set"; then
     # PathScale compiler spits out gcc version string too. Need to
     # filter it out.
     # icc beginning with version 12 includes a "gcc version compatiblilty"
-    # string, causing the gcc H5_CFLAGS to be erroneously added.  The line
+    # string, causing the gcc H5_CXXFLAGS to be erroneously added.  The line
     # "grep -v 'icc version'" causes the discarding of any output
-    # containing 'icc version'.  The cc_version for icc is correctly determined
+    # containing 'icc version'.  The cxx_version for icc is correctly determined
     # and flags added in the intel-flags script.
     cxx_version="`$CXX $CXXFLAGS $H5_CXXFLAGS -v 2>&1 | grep -v 'PathScale' |\
-        grep -v 'icc version' |\
+        grep -v '^icc.*version' |\
         grep 'gcc version' | sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
     cxx_vendor=`echo $cxx_version |sed 's/\([a-z]*\).*/\1/'`
     cxx_version=`echo $cxx_version |sed 's/[-a-z]//g'`
     if test X = "X$cxx_vendor" -a X != "X$cxx_version"; then
-	cxx_vendor=g++
+        cxx_vendor=g++
     fi
     if test "-" != "$cxx_vendor-$cxx_version"; then
-	echo "compiler '$CXX' is GNU $cxx_vendor-$cxx_version"
+        echo "compiler '$CXX' is GNU $cxx_vendor-$cxx_version"
     fi
 
-    # Some version numbers
+    # Get the compiler version numbers
     cxx_vers_major=`echo $cxx_version | cut -f1 -d.`
     cxx_vers_minor=`echo $cxx_version | cut -f2 -d.`
     cxx_vers_patch=`echo $cxx_version | cut -f3 -d.`
@@ -53,10 +85,12 @@ if test X = "X$cxx_flags_set"; then
     cxx_vers_all=`expr $cxx_vers_major '*' 1000000 + $cxx_vers_minor '*' 1000 + $cxx_vers_patch`
 fi
 
-# Common g++ flags for various situations
-case "$cxx_vendor-$cxx_version" in
-  g++*)
-    # Architecture-specific flags
+if test "X-g++" = "X-$cxx_vendor"; then
+
+    ###############################
+    # Architecture-specific flags #
+    ###############################
+
     arch=
     case "$host_os-$host_cpu" in
         # FreeBSD sets the information from "uname -m" to the general machine
@@ -84,742 +118,197 @@ case "$cxx_vendor-$cxx_version" in
             ;;
     esac
 
-    # Host-specific flags
-    case "`hostname`" in
-        sleipnir.ncsa.uiuc.edu)
-            arch="$arch -pipe"
-            ;;
-    esac
-
-    # General (copied from H5_CFLAGS)
-    H5_CXXFLAGS="$H5_CXXFLAGS $arch -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wredundant-decls -Winline"
-
     # C++-specific
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsign-promo -Woverloaded-virtual -Wold-style-cast -Weffc++ -Wreorder -Wnon-virtual-dtor -Wctor-dtor-privacy -Wabi"
+    H5_CXXFLAGS="$H5_CXXFLAGS $arch
 
-    # Production
+    ##############
+    # Production #
+    ##############
+
     # NDEBUG is handled explicitly by the configure script
-    case "$cxx_vendor-$cxx_version" in
-      g++-[34].*)
+    if test $cxx_vers_major -le 4; then
         PROD_CXXFLAGS=
-        ;;
-      g++-[56].*)
+    else
         PROD_CXXFLAGS="-fstdarg-opt"
-        ;;
-      *)
-        PROD_CXXFLAGS="-finline-functions"
-        ;;
-    esac
+    fi
 
-    # Debug
+    #########
+    # Debug #
+    #########
+
     # NDEBUG is handled explicitly by the configure script
-    # -g is hanled by the symbols flags
-    case "$cxx_vendor-$cxx_version" in
-      g++-[56].*)
-        DEBUG_CXXFLAGS="-ftrapv -fno-common"
-        ;;
-      *)
+    # -g is handled by the symbols flags
+    if test $cxx_vers_major -le 4; then
         DEBUG_CXXFLAGS=
-        ;;
-    esac
+    else
+        DEBUG_CXXFLAGS="-ftrapv -fno-common"
+    fi
 
-    # Symbols
+    ###########
+    # Symbols #
+    ###########
+
     NO_SYMBOLS_CXXFLAGS="-s"
     SYMBOLS_CXXFLAGS="-g"
 
-    # Profile
+    #############
+    # Profiling #
+    #############
+
     PROFILE_CXXFLAGS="-pg"
 
-    # Optimization
-    case "$cxx_vendor-$cxx_version" in
-      g++-[34].*)
+    ################
+    # Optimization #
+    ################
+
+    if test $cxx_vers_major -le 4; then
         HIGH_OPT_CXXFLAGS="-O3"
         DEBUG_OPT_CXXFLAGS=
-        ;;
-      g++-[56].*)
+    else
         HIGH_OPT_CXXFLAGS="-O3"
         DEBUG_OPT_CXXFLAGS="-Og"
-        ;;
-      *)
-        HIGH_OPT_CXXFLAGS="-O"
-        DEBUG_OPT_CXXFLAGS=
-        ;;
-    esac
+    fi
     NO_OPT_CXXFLAGS="-O0"
 
-    # Flags are set
+    ############
+    # Warnings #
+    ############
+
+# First load the C warnings then add CXX warnings (if needed)
+
+    ###########
+    # General #
+    ###########
+
+    H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments general)"
+    H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-general)"
+    H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-general)"
+    #H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-cxx-general)"
+
+    ######################
+    # Developer warnings #
+    ######################
+
+    NO_DEVELOPER_WARNING_CXXFLAGS=$(load_gnu_arguments no-developer-general)
+    DEVELOPER_WARNING_CXXFLAGS=$(load_gnu_arguments developer-general)
+
+    #######################
+    # gcc 4 special cases #
+    #######################
+
+    # GCC 4.2 through 4.6
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 6; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.2-4.6)"
+    fi
+
+    # GCC 4.2 through 4.3
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 3; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.2-4.3)"
+    fi
+
+    # GCC 4.5 through 4.6
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 6; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.5-4.6)"
+    fi
+
+    # GCC 4.2 through 4.4
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -a $cc_vers_major -eq 4 -a $cc_vers_minor -le 4; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.2-4.4)"
+    fi
+
+    # GCC 4.2 through the end of GCC 4 series
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.2-4.last)"
+    fi
+
+    #############################
+    # Version-specific warnings #
+    #############################
+
+    # gcc >= 4.3
+    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 3; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.3)"
+    fi
+
+    # gcc >= 4.4
+    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 4; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.4)"
+    fi
+
+    # gcc >= 4.5
+    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.5)"
+    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments developer-4.5)"
+    NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments no-developer-4.5)"
+    fi
+
+    # gcc >= 4.6
+    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 6; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.6)"
+    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments developer-4.6)"
+    NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments no-developer-4.6)"
+    fi
+
+    # gcc >= 4.7
+    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 7; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.7)"
+    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments developer-4.7)"
+    NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments no-developer-4.7)"
+    fi
+
+    # gcc >= 4.8
+    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.8)"
+    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments developer-4.8)"
+    NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments no-developer-4.8)"
+    fi
+
+    # gcc >= 4.9
+    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 9; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.9)"
+    fi
+
+    # gcc >= 5
+    if test $cc_vers_major -ge 5; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 5)"
+        H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-5)"
+    fi
+
+    # gcc >= 6
+    if test $cc_vers_major -ge 6; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 6)"
+    fi
+
+    # gcc >= 7
+    if test $cc_vers_major -ge 7; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 7)"
+    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments developer-7)"
+    fi
+
+    # gcc 8
+    if test $cc_vers_major -ge 8; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 8)"
+        H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-8)"
+    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments developer-8)"
+    NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gcc_arguments no-developer-8)"
+    fi
+
+    # gcc 9
+    if test $cc_vers_major -ge 9; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 9)"
+    fi
+
+    #################
+    # Flags are set #
+    #################
     cxx_flags_set=yes
-    ;;
-esac
+fi
 
 # Version-specific g++ flags
-#
-# Please follow the pattern below by adding new versions at the top, copying
-# the information from the previous version and adding modifications to that.
-case "$cxx_vendor-$cxx_version" in
 
-# Closer to the g++ 5.2 release, we should check for additional flags to
-# include and break it out into it's own section, like the other versions
-# below. -QAK
-  g++-[56]*)
-
-    # Append warning flags from gcc-3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunsafe-loop-optimizations"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow"
-
-    # Append more extra warning flags that only gcc 4.3+ know about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append more extra warning flags that only gcc 4.4+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow=5"
-
-    # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
-
-    # Append more extra warning flags that only gcc 4.7+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-
-    # Append more extra warning flags that only gcc 4.8+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsuggest-attribute=format"
 
     # Append more extra warning flags that only gcc 4.9+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wdate-time -Wopenmp-simd"
-
-    # (There was no release of gcc 5.0)
-
-    # Append more extra warning flags that only gcc 5.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Warray-bounds=2"
-    ;;
-
-  g++-4.9*)
-    # Append warning flags
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc 3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc 3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunsafe-loop-optimizations"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow"
-
-    # Append more extra warning flags that only gcc 4.3+ know about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append more extra warning flags that only gcc 4.4+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow=5"
-
-    # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
-
-    # Append more extra warning flags that only gcc 4.7+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-
-    # Append more extra warning flags that only gcc 4.8+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsuggest-attribute=format"
-
-    # Append more extra warning flags that only gcc 4.9+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wdate-time -Wopenmp-simd"
-    ;;
-
-  g++-4.8*)
-    # Append warning flags
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunsafe-loop-optimizations"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow"
-
-    # Append more extra warning flags that only gcc 4.3+ know about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append more extra warning flags that only gcc 4.4+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow=5"
-
-    # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
-
-    # Append more extra warning flags that only gcc 4.7+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-
-    # Append more extra warning flags that only gcc 4.8+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsuggest-attribute=format"
-    ;;
-
-  g++-4.7*)
-    # Append warning flags
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunsafe-loop-optimizations"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow"
-
-    # Append more extra warning flags that only gcc 4.3+ know about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append more extra warning flags that only gcc 4.4+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow=5"
-
-    # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
-
-    # Append more extra warning flags that only gcc 4.7+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-    ;;
-
-  g++-4.6*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ knows about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunsafe-loop-optimizations"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow"
-
-    # Append more extra warning flags that only gcc 4.3+ know about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append more extra warning flags that only gcc 4.4+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-aliasing -Wstrict-overflow=5"
-
-    # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
-    ;;
-
-  g++-4.5*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc4.0+ knows about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunsafe-loop-optimizations"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow"
-
-    # Append more extra warning flags that only gcc 4.3+ know about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append more extra warning flags that only gcc 4.4+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-
-    # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-aliasing -Wstrict-overflow=5"
-    ;;
-
-  g++-4.4*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunsafe-loop-optimizations"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow"
-
-    # Append more extra warning flags that only gcc 4.3+ know about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
-
-    # Append more extra warning flags that only gcc 4.4+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-    ;;
-
-  g++-4.3*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunsafe-loop-optimizations -Wvolatile-register-var"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow"
-
-    # Append more extra warning flags that only gcc 4.3+ know about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wlogical-op -Wvla"
-    ;;
-
-  g++-4.2*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunsafe-loop-optimizations -Wvolatile-register-var"
-
-    # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wstrict-overflow"
-    ;;
-
-  g++-4.1.*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunsafe-loop-optimizations -Wvolatile-register-var"
-    ;;
-
-  g++-4.0*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CXXFLAGS="$CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-    ;;
-
-  g++-3.4*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CXXFLAGS="$CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-
-    # Append more extra warning flags that only gcc3.4+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CXXFLAGS="`echo $H5_CXXFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-    ;;
-
-  g++-3.3*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CXXFLAGS="$CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-
-    # Append more extra warning flags that only gcc3.3+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
-    ;;
-
-  g++-3.2*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append more extra warning flags that only gcc3.2+ know about
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CXXFLAGS="$CXXFLAGS -Wformat=2"
-
-    # The "unreachable code" flag generates many spurious C++ warnings.
-    # We'll disable it for now.
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
-    ;;
-
-  g++-3*)
-    # Disable warnings about using 'long long' type
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wno-long-long"
-
-    # Append some extra warning flags that only gcc3+ know about
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wfloat-equal -Wmissing-format-attribute"
-    ;;
-esac
+    -Wopenmp-simd"
 
 # Clear cxx info if no flags set
 if test "X$cxx_flags_set" = "X"; then

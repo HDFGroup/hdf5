@@ -667,6 +667,9 @@ void verify_unprotected(void);
 
 /*** H5AC level utility functions ***/
 
+hbool_t resize_configs_are_equal(const H5C_auto_size_ctl_t *a,
+    const H5C_auto_size_ctl_t *b, hbool_t compare_init);
+
 void check_and_validate_cache_hit_rate(hid_t file_id,
                                        double * hit_rate_ptr,
                                        hbool_t dump_data,

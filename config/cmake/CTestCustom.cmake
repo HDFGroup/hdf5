@@ -30,11 +30,11 @@ set (CTEST_CUSTOM_WARNING_EXCEPTION
     "POSIX name for this item is deprecated"
     "disabling jobserver mode"
     "config.cmake.xlatefile.c"
-    "warning.*implicit declaration of function"
     "warning.*unknown pragma"
     "warning.*unrecognized .pragma"
     "note: expanded from macro"
-#    "fpp:[ \t]*warning:[ \t]*cannot remove H5_DEBUG_API - not a predefined macro"
+    # HDDFFV-11074
+    "This directive is not standard"
 )
 
 set (CTEST_CUSTOM_MEMCHECK_IGNORE

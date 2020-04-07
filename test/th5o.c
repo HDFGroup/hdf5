@@ -13,7 +13,7 @@
 
 /***********************************************************
 *
-* Test program:	 th5o
+* Test program:     th5o
 *
 * Test public H5O functions for accessing
 *
@@ -30,7 +30,7 @@
 #define TEST6_DIM1 100
 #define TEST6_DIM2 100
 
-
+
 /****************************************************************
 **
 **  test_h5o_open(): Test H5Oopen function.
@@ -140,7 +140,7 @@ test_h5o_open(void)
 } /* test_h5o_open() */
 
 
-
+
 /****************************************************************
 **
 **  test_h5o_close(): Test H5Oclose function.
@@ -151,6 +151,7 @@ test_h5o_close(void)
 {
     hid_t       fid;                        /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
+    H5I_type_t  id_type;                    /* Type of IDs returned from H5Oopen */
     hsize_t     dims[RANK];
     herr_t      ret;                        /* Value returned from API calls */
 
@@ -162,7 +163,8 @@ test_h5o_close(void)
     /* Create the group and close it with H5Oclose */
     grp = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(grp, FAIL, "H5Gcreate2");
-    VERIFY(H5Iget_type(grp), H5I_GROUP, "H5Iget_type");
+    id_type = H5Iget_type(grp);
+    VERIFY(id_type, H5I_GROUP, "H5Iget_type");
     ret = H5Oclose(grp);
     CHECK(ret, FAIL, "H5Oclose");
 
@@ -230,7 +232,7 @@ test_h5o_close(void)
     CHECK(ret, FAIL, "H5Fclose");
 }
 
-
+
 /****************************************************************
 **
 **  test_h5o_open_by_addr(): Test H5Oopen_by_addr function.
@@ -367,7 +369,7 @@ test_h5o_open_by_addr(void)
     VERIFY(dtype, FAIL, "H5Oopen_by_addr");
 } /* test_h5o_open_by_addr() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_refcount(): Test H5O refcounting functions.
@@ -378,7 +380,7 @@ test_h5o_refcount(void)
 {
     hid_t       fid;                        /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
-    H5O_info_t	oinfo;                      /* Object info struct */
+    H5O_info_t    oinfo;                      /* Object info struct */
     hsize_t     dims[RANK];
     herr_t      ret;                        /* Value returned from API calls */
 
@@ -562,7 +564,7 @@ test_h5o_refcount(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* test_h5o_refcount() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_plist(): Test object creation properties
@@ -756,7 +758,7 @@ test_h5o_plist(void)
     CHECK(ret, FAIL, "H5Pclose");
 } /* test_h5o_plist() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_link(): Test creating link to object
@@ -897,7 +899,7 @@ test_h5o_link(void)
     CHECK(ret, FAIL, "H5Pclose");
 } /* end test_h5o_link() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_comment(): Test H5Oset(get)_comment functions.
@@ -1069,7 +1071,7 @@ test_h5o_comment(void)
 
 } /* test_h5o_comment() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_comment_by_name(): Test H5Oset(get)_comment_by_name functions.
@@ -1227,7 +1229,7 @@ test_h5o_comment_by_name(void)
 
 } /* test_h5o_comment_by_name() */
 
-
+
 /****************************************************************
 **
 **  test_h5o_getinfo_same_file():  Test that querying the object info for
@@ -1239,7 +1241,7 @@ test_h5o_getinfo_same_file(void)
 {
     hid_t       fid1, fid2;             /* HDF5 File ID */
     hid_t       gid1, gid2;             /* Group IDs */
-    H5O_info_t	oinfo1, oinfo2;         /* Object info structs */
+    H5O_info_t    oinfo1, oinfo2;         /* Object info structs */
     herr_t      ret;                    /* Value returned from API calls */
 
     /* Create a new HDF5 file */
@@ -1333,7 +1335,7 @@ test_h5o_getinfo_same_file(void)
 
 } /* test_h5o_getinfo_same_file() */
 
-
+
 /****************************************************************
 **
 **  test_h5o(): Main H5O (generic object) testing routine.
@@ -1345,9 +1347,9 @@ test_h5o(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Objects\n"));
 
-    test_h5o_open();		/* Test generic open function */
-    test_h5o_open_by_addr();	/* Test opening objects by address */
-    test_h5o_close();		/* Test generic close function */
+    test_h5o_open();        /* Test generic open function */
+    test_h5o_open_by_addr();    /* Test opening objects by address */
+    test_h5o_close();        /* Test generic close function */
     test_h5o_refcount();        /* Test incrementing and decrementing reference count */
     test_h5o_plist();           /* Test object creation properties */
     test_h5o_link();            /* Test object link routine */
@@ -1356,15 +1358,15 @@ test_h5o(void)
     test_h5o_getinfo_same_file(); /* Test info for objects in the same file */
 } /* test_h5o() */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:	cleanup_h5o
+ * Function:    cleanup_h5o
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:    Cleanup temporary test files
  *
- * Return:	none
+ * Return:    none
  *
- * Programmer:	James Laird
+ * Programmer:    James Laird
  *              June 3, 2006
  *
  *-------------------------------------------------------------------------

@@ -28,27 +28,26 @@ PROMOTE_ERRORS_DFLT=no
 #
 demote_errors()
 {
-    if [ ${PROMOTE_ERRORS:-${PROMOTE_ERRORS_DFLT}} = no ]; then
-        sed 's,-Werror=,-W,g'
-    else
-        cat
-    fi
+	if [ ${PROMOTE_ERRORS:-${PROMOTE_ERRORS_DFLT}} = no ]; then
+		sed 's,-Werror=,-W,g'
+	else
+		cat
+	fi
 }
 
 #
-# Prepend `$srcdir/config/gnu-` to the filename suffix(es) given as
+# Prepend `$srcdir/config/gnu-warnings/` to the filename suffix(es) given as
 # subroutine argument(s), remove comments starting with # and ending
 # at EOL, replace spans of whitespace (including newlines) with spaces,
 # and re-emit the file(s) thus filtered on the standard output stream.
 #
-load_gcc_arguments()
+load_gnu_arguments()
 {
     set -- $(for arg; do
         sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg} | demote_errors
     done)
     IFS=' ' echo "$*"
 }
-
 
 # Get the compiler version in a way that works for gcc
 # unless a compiler version is already known
@@ -65,7 +64,7 @@ if test "X-" = "X-$cc_flags_set"; then
     # containing 'icc version'.  The cc_version for icc is correctly determined
     # and flags added in the intel-flags script.
     cc_version="`$CC $CFLAGS $H5_CFLAGS -v 2>&1 | grep -v 'PathScale' |\
-        grep -v 'icc version' |\
+        grep -v '^icc.*version' |\
         grep 'gcc version' | sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
     cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
     cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
@@ -83,12 +82,9 @@ if test "X-" = "X-$cc_flags_set"; then
     test -n "$cc_vers_major" || cc_vers_major=0
     test -n "$cc_vers_minor" || cc_vers_minor=0
     test -n "$cc_vers_patch" || cc_vers_patch=0
-    cc_vers_all=`expr $cc_vers_major '*' 1000000 + $cc_vers_minor '*' 1000 + $cc_vers_patch`
 fi
 
-# Common GCC flags for various situations
-case "$cc_vendor-$cc_version" in
-  gcc*)
+if test "X-gcc" = "X-$cc_vendor"; then
 
     ###############################
     # Architecture-specific flags #
@@ -133,7 +129,6 @@ case "$cc_vendor-$cc_version" in
             ;;
     esac
 
-    # General
     H5_CFLAGS="$H5_CFLAGS $arch"
 
     ##############
@@ -146,7 +141,6 @@ case "$cc_vendor-$cc_version" in
     else
         PROD_CFLAGS="-fstdarg-opt"
     fi
-    PROD_CPPFLAGS=
 
     #########
     # Debug #
@@ -159,201 +153,50 @@ case "$cc_vendor-$cc_version" in
     else
         DEBUG_CFLAGS="-ftrapv -fno-common"
     fi
-    DEBUG_CPPFLAGS=
+
+    ###########
+    # Symbols #
+    ###########
+
+    NO_SYMBOLS_CFLAGS="-s"
+    SYMBOLS_CFLAGS="-g -fno-omit-frame-pointer"
 
     #############
     # Profiling #
     #############
 
     PROFILE_CFLAGS="-pg"
-    PROFILE_CPPFLAGS=
-    ;;
-esac
+
+    ################
+    # Optimization #
+    ################
+
+    if test $cc_vers_major -le 4; then
+        HIGH_OPT_CFLAGS="-O3"
+        DEBUG_OPT_CFLAGS=
+    else
+        HIGH_OPT_CFLAGS="-O3"
+        DEBUG_OPT_CFLAGS="-Og"
+    fi
+    NO_OPT_CFLAGS="-O0"
 
     ############
     # Warnings #
     ############
 
-# Version specific GCC flags
-#
-case "$cc_vendor-$cc_version" in
-  # older compiler versions
-  gcc-4.1.*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
-    ;;
-
-  gcc-4.0*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append warning flags from gcc-3.4* case
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-
-    # Append more extra warning flags that only gcc 4.0+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
-    ;;
-
-  gcc-3.4*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
-
-    # Append warning flags from gcc-3.3* case
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-
-    # Append more extra warning flags that only gcc3.4+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Replace old -W flag with new -Wextra flag
-    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
-    ;;
-
-  gcc-3.3*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append warning flags from gcc-3.2* case
-    H5_CFLAGS="$H5_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
-
-    # Append more extra warning flags that only gcc3.3+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
-    ;;
-
-  gcc-3.2*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-
-    # Append more extra warning flags that only gcc3.2+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
-
-    # The "format=2" warning generates too many warnings about valid
-    # usage in the library.
-    #CFLAGS="$CFLAGS -Wformat=2"
-
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CFLAGS="$CFLAGS -Wunreachable-code"
-    ;;
-
-  gcc-3*)
-    # Disable warnings about using 'long long' type
-    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-
-    # Append some extra warning flags that only gcc3+ know about
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
-    ;;
-
-  gcc-*)
-
     ###########
     # General #
     ###########
 
-    H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments general)"
-    H5_ECFLAGS="$H5_ECFLAGS $(load_gcc_arguments error-general)"
+    H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments general)"
+    H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-general)"
 
     ######################
     # Developer warnings #
     ######################
 
-    NO_DEVELOPER_WARNING_CFLAGS=$(load_gcc_arguments no-developer-general)
-    DEVELOPER_WARNING_CFLAGS=$(load_gcc_arguments developer-general)
+    NO_DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments no-developer-general)
+    DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments developer-general)
 
     #######################
     # gcc 4 special cases #
@@ -361,27 +204,27 @@ case "$cc_vendor-$cc_version" in
 
     # GCC 4.2 through 4.6
     if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 6; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.2-4.6)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.2-4.6)"
     fi
 
     # GCC 4.2 through 4.3
     if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 3; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.2-4.3)"
-    fi
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.2-4.3)"
+    fi 
 
     # GCC 4.5 through 4.6
     if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 6; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.5-4.6)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.5-4.6)"
     fi
 
     # GCC 4.2 through 4.4
     if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -a $cc_vers_major -eq 4 -a $cc_vers_minor -le 4; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.2-4.4)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.2-4.4)"
     fi
 
     # GCC 4.2 through the end of GCC 4 series
     if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.2-4.last)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.2-4.last)"
     fi
 
     #############################
@@ -390,86 +233,86 @@ case "$cc_vendor-$cc_version" in
 
     # gcc >= 4.3
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 3; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.3)"
-    fi
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.3)"
+    fi 
 
     # gcc >= 4.4
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 4; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.4)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.4)"
     fi
 
     # gcc >= 4.5
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.5)"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-4.5)"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments no-developer-4.5)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.5)"
+	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-4.5)"
+	NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments no-developer-4.5)"
     fi
 
     # gcc >= 4.6
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 6; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.6)"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-4.6)"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments no-developer-4.6)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.6)"
+	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-4.6)"
+	NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments no-developer-4.6)"
     fi
 
     # gcc >= 4.7
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 7; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.7)"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-4.7)"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments no-developer-4.7)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.7)"
+	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-4.7)"
+	NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments no-developer-4.7)"
     fi
 
     # gcc >= 4.8
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.8)"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-4.8)"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments no-developer-4.8)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.8)"
+	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-4.8)"
+	NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments no-developer-4.8)"
     fi
 
     # gcc >= 4.9
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 9; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 4.9)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.9)"
     fi
 
     # gcc >= 5
     if test $cc_vers_major -ge 5; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 5)"
-        H5_ECFLAGS="$H5_ECFLAGS $(load_gcc_arguments error-5)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 5)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-5)"
     fi
 
     # gcc >= 6
     if test $cc_vers_major -ge 6; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 6)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 6)"
     fi
 
     # gcc >= 7
     if test $cc_vers_major -ge 7; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 7)"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-7)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 7)"
+	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-7)"
     fi
 
     # gcc 8
     if test $cc_vers_major -ge 8; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 8)"
-        H5_ECFLAGS="$H5_ECFLAGS $(load_gcc_arguments error-8)"
-    DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-8)"
-    NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments no-developer-8)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 8)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-8)"
+	DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments developer-8)"
+	NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gcc_arguments no-developer-8)"
     fi
 
     # gcc 9
     if test $cc_vers_major -ge 9; then
-        H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments 9)"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 9)"
     fi
-    ;;
-esac
 
     #################
     # Flags are set #
     #################
     cc_flags_set=yes
+fi
 
 # Clear cc info if no flags set
 if test "X$cc_flags_set" = "X"; then
     cc_vendor=
     cc_version=
 fi
+
