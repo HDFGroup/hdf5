@@ -438,7 +438,7 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
     shadow_defree_t *prev;
     shadow_defree_t *shadow_defree;
     haddr_t md_addr;                        /* Address in the metadata file */
-    unsigned i;                             /* Local index variable */
+    uint32_t i;                             /* Local index variable */
     herr_t ret_value = SUCCEED;             /* Return value */
     bool queue_was_nonempty;
 
