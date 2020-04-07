@@ -23,22 +23,22 @@ set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};mirror_server
 set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} mirror_server)
 
 #-----------------------------------------------------------------------------
-# Add the mirror_server_halten_sie executable
+# Add the mirror_server_stop executable
 #-----------------------------------------------------------------------------
 
-set (mirror_server_halt_SOURCES ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_server_halten_sie.c)
-add_executable (mirror_server_halt ${mirror_server_halt_SOURCES})
-target_include_directories (mirror_server_halt PRIVATE "${HDF5_UITLS_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+set (mirror_server_stop_SOURCES ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_server_stop.c)
+add_executable (mirror_server_stop ${mirror_server_stop_SOURCES})
+target_include_directories (mirror_server_stop PRIVATE "${HDF5_UITLS_DIR};${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
-  TARGET_C_PROPERTIES (mirror_server_halt STATIC)
-  target_link_libraries (mirror_server_halt PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+  TARGET_C_PROPERTIES (mirror_server_stop STATIC)
+  target_link_libraries (mirror_server_stop PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 else ()
-  TARGET_C_PROPERTIES (mirror_server_halt SHARED)
-  target_link_libraries (mirror_server_halt PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  TARGET_C_PROPERTIES (mirror_server_stop SHARED)
+  target_link_libraries (mirror_server_stop PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
-set_target_properties (mirror_server_halt PROPERTIES FOLDER utils)
-set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};mirror_server_halt")
-set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} mirror_server_halt)
+set_target_properties (mirror_server_stop PROPERTIES FOLDER utils)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};mirror_server_stop")
+set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} mirror_server_stop)
 
 ##############################################################################
 ##############################################################################

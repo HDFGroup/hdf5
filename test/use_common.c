@@ -21,10 +21,6 @@
 
 #include "use.h"
 
-#define H5D_FRIEND        /*suppress error about including H5Dpkg      */
-#define H5D_TESTING
-#include "H5Dpkg.h" /* TODO : used to verify chunk index type (yes?) -- is there a way to do this sanity-check using the public API instead? */
-
 /* ----------------------------------------------------------------------------
  * Print a common/shared usage message.
  * Receives program name to show default test file name (<program_name>.h5).
@@ -231,7 +227,7 @@ create_uc_file(options_t * opts)
     /* Check that the chunk index type is not version 1 B-tree.
      * Version 1 B-trees are not supported under SWMR.
      */
-    if (H5D__layout_idx_type_test(dsid, &idx_type) < 0)
+    if (H5Dget_chunk_index_type(dsid, &idx_type) < 0)
         return -1;
     if (idx_type == H5D_CHUNK_IDX_BTREE) {
         HDfprintf(stderr, "ERROR: Chunk index is version 1 B-tree: aborting.\n");

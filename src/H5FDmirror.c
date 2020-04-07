@@ -62,7 +62,8 @@ typedef struct H5FD_mirror_t {
 #define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
 #define ADDR_OVERFLOW(A)    (HADDR_UNDEF==(A) || ((A) & ~(haddr_t)MAXADDR))
 
-#define _BSWAP_64(X)                                \
+#ifndef BSWAP_64
+#define BSWAP_64(X)                                \
     (uint64_t)(  (((X) & 0x00000000000000FF) << 56) \
                | (((X) & 0x000000000000FF00) << 40) \
                | (((X) & 0x0000000000FF0000) << 24) \
@@ -71,6 +72,7 @@ typedef struct H5FD_mirror_t {
                | (((X) & 0x0000FF0000000000) >> 24) \
                | (((X) & 0x00FF000000000000) >> 40) \
                | (((X) & 0xFF00000000000000) >> 56))
+#endif /* BSWAP_64 */
 
 /* Debugging flabs for verbose tracing -- nonzero to enable */
 #define MIRROR_DEBUG_OP_CALLS 0
@@ -387,7 +389,7 @@ H5FD__mirror_xmit_decode_uint64(uint64_t *out, const unsigned char *_buf)
     HDassert(_buf && out);
     HDmemcpy(&n, _buf, sizeof(n));
     if (TRUE == is_host_little_endian()) {
-        *out = _BSWAP_64(n);
+        *out = BSWAP_64(n);
     }
     else {
         *out = n;
@@ -484,7 +486,7 @@ H5FD__mirror_xmit_encode_uint64(unsigned char *_dest, uint64_t v)
     LOG_OP_CALL("H5FD__mirror_xmit_decode_uint64");
     HDassert(_dest);
     if (TRUE == is_host_little_endian()) {
-        n = _BSWAP_64(v);
+        n = BSWAP_64(v);
     }
     HDmemcpy(_dest, &n, sizeof(n));
     return 8;
@@ -813,7 +815,11 @@ H5FD_mirror_xmit_encode_open(unsigned char                 *dest,
     size_t n_writ = 0;
     LOG_OP_CALL("H5FD_mirror_xmit_encode_open");
     HDassert(dest && x);
-    HDbzero(dest, H5FD_MIRROR_XMIT_OPEN_SIZE);
+    /* clear entire structure, but especially its filepath string area */
+    for (n_writ = 0; n_writ < H5FD_MIRROR_XMIT_OPEN_SIZE; n_writ++) {
+        *(dest+n_writ) = 0;
+    }
+    n_writ = 0;
     n_writ += H5FD_mirror_xmit_encode_header(dest,
             (const H5FD_mirror_xmit_t *)&(x->pub));
     n_writ += H5FD__mirror_xmit_encode_uint32(&dest[n_writ], x->flags);
@@ -849,7 +855,11 @@ H5FD_mirror_xmit_encode_reply(unsigned char                  *dest,
     size_t n_writ = 0;
     LOG_OP_CALL("H5FD_mirror_xmit_encode_reply");
     HDassert(dest && x);
-    HDbzero(dest, H5FD_MIRROR_XMIT_REPLY_SIZE);
+    /* clear entire structure, but especially its message string area */
+    for (n_writ = 0; n_writ < H5FD_MIRROR_XMIT_REPLY_SIZE; n_writ++) {
+        *(dest+n_writ) = 0;
+    }
+    n_writ = 0;
     n_writ += H5FD_mirror_xmit_encode_header(dest,
             (const H5FD_mirror_xmit_t *)&(x->pub));
     n_writ += H5FD__mirror_xmit_encode_uint32(&dest[n_writ], x->status);

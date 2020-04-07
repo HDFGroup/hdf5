@@ -81,7 +81,7 @@ SERVER_ARGS="$SERVER_PORT $SERVER_VERBOSITY"
 nerrors=$?
 
 echo "Stopping Mirror Server"
-./mirror_server_halten_sie $SERVER_PORT
+./mirror_server_stop $SERVER_PORT
 
 ###############################################################################
 ## Report and exit

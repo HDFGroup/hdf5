@@ -101,6 +101,31 @@ static herr_t _populate_filepath(const char *dirname, const char *_basename,
 static hid_t create_mirroring_split_fapl(const char *_basename,
         struct mirrortest_filenames *names);
 
+static void mybzero(void *dest, size_t size);
+
+
+/* ----------------------------------------------------------------------------
+ * Function:   mybzero
+ *
+ * Purpose:    Have bzero simplicity and abstraction in (possible) absence of 
+ *             it being available.
+ *
+ * Programmer: Jacob Smith
+ *             2020-03-30
+ * ----------------------------------------------------------------------------
+ */
+static void
+mybzero(void *dest, size_t size)
+{
+    size_t i = 0;
+    char *s = NULL;
+    HDassert(dest != NULL);
+    s = (char *)dest;
+    for (i = 0; i < size; i++) {
+        *(s+i) = 0;
+    }
+} /* end mybzero() */
+
 
 /* ----------------------------------------------------------------------------
  * Function:   _populate_filepath
@@ -349,8 +374,8 @@ test_xmit_encode_decode(void)
 
         /* Start of buffer uint8_t
          */
-        HDbzero(buf, 8);
-        HDbzero(expected, 8);
+        mybzero(buf, 8);
+        mybzero(expected, 8);
         expected[0] = 200;
         out = 0;
         if (H5FD__mirror_xmit_encode_uint8(buf, v) != 1) {
@@ -369,8 +394,8 @@ test_xmit_encode_decode(void)
 
         /* Middle of buffer uint8_t
          */
-        HDbzero(buf, 8);
-        HDbzero(expected, 8);
+        mybzero(buf, 8);
+        mybzero(expected, 8);
         expected[3] = v;
         out = 0;
         if (H5FD__mirror_xmit_encode_uint8((buf+3), v) != 1) {
@@ -389,8 +414,8 @@ test_xmit_encode_decode(void)
 
         /* End of buffer uint8_t
          */
-        HDbzero(buf, 8);
-        HDbzero(expected, 8);
+        mybzero(buf, 8);
+        mybzero(expected, 8);
         expected[7] = v;
         out = 0;
         if (H5FD__mirror_xmit_encode_uint8((buf+7), v) != 1) {
@@ -419,8 +444,8 @@ test_xmit_encode_decode(void)
 
         /* Start of buffer uint16_t
          */
-        HDbzero(buf, 8);
-        HDbzero(expected, 8);
+        mybzero(buf, 8);
+        mybzero(expected, 8);
         expected[0] = 0x8F;
         expected[1] = 0x02;
         out = 0;
@@ -440,8 +465,8 @@ test_xmit_encode_decode(void)
 
         /* Middle of buffer uint16_t
          */
-        HDbzero(buf, 8);
-        HDbzero(expected, 8);
+        mybzero(buf, 8);
+        mybzero(expected, 8);
         expected[3] = 0x8F;
         expected[4] = 0x02;
         out = 0;
@@ -468,8 +493,8 @@ test_xmit_encode_decode(void)
 
         /* End of buffer uint16_t
          */
-        HDbzero(buf, 8);
-        HDbzero(expected, 8);
+        mybzero(buf, 8);
+        mybzero(expected, 8);
         expected[6] = 0x8F;
         expected[7] = 0x02;
         out = 0;
@@ -499,8 +524,8 @@ test_xmit_encode_decode(void)
 
         /* Start of buffer uint32_t
          */
-        HDbzero(buf, 8);
-        HDbzero(expected, 8);
+        mybzero(buf, 8);
+        mybzero(expected, 8);
         expected[0] = 0x8F;
         expected[1] = 0x02;
         expected[2] = 0x00;
@@ -522,8 +547,8 @@ test_xmit_encode_decode(void)
 
         /* Middle of buffer uint32_t
          */
-        HDbzero(buf, 8);
-        HDbzero(expected, 8);
+        mybzero(buf, 8);
+        mybzero(expected, 8);
         expected[3] = 0x8F;
         expected[4] = 0x02;
         expected[5] = 0x00;
@@ -552,8 +577,8 @@ test_xmit_encode_decode(void)
 
         /* End of buffer uint32_t
          */
-        HDbzero(buf, 8);
-        HDbzero(expected, 8);
+        mybzero(buf, 8);
+        mybzero(expected, 8);
         expected[4] = 0x8F;
         expected[5] = 0x02;
         expected[6] = 0x00;
@@ -585,8 +610,8 @@ test_xmit_encode_decode(void)
 
         /* Start of buffer uint64_t
          */
-        HDbzero(buf, 16);
-        HDbzero(expected, 16);
+        mybzero(buf, 16);
+        mybzero(expected, 16);
         expected[0] = 0x90;
         expected[1] = 0xDC;
         expected[2] = 0xBE;
@@ -612,8 +637,8 @@ test_xmit_encode_decode(void)
 
         /* Middle of buffer uint64_t
          */
-        HDbzero(buf, 16);
-        HDbzero(expected, 16);
+        mybzero(buf, 16);
+        mybzero(expected, 16);
         expected[3]  = 0x90;
         expected[4]  = 0xDC;
         expected[5]  = 0xBE;
@@ -646,8 +671,8 @@ test_xmit_encode_decode(void)
 
         /* End of buffer uint64_t
          */
-        HDbzero(buf, 16);
-        HDbzero(expected, 16);
+        mybzero(buf, 16);
+        mybzero(expected, 16);
         expected[8]  = 0x90;
         expected[9]  = 0xDC;
         expected[10] = 0xBE;

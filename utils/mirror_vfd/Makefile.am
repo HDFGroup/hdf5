@@ -19,7 +19,7 @@ include $(top_srcdir)/config/commence.am
 
 AM_CPPFLAGS+=-I$(top_srcdir)/src
 
-bin_PROGRAMS = mirror_server mirror_server_halten_sie
+bin_PROGRAMS = mirror_server mirror_server_stop
 
 mirror_server_SOURCES = mirror_server.c mirror_writer.c mirror_remote.c
 #mirror_writer_SOURCES = mirror_writer.c mirror_remote.c
