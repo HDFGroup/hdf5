@@ -1402,7 +1402,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     ret_value = new_dset;
 
 done:
-    if(!ret_value && new_dset && new_dset->shared) {
+    if(!ret_value && new_dset) {
         if(new_dset->shared) {
             if(layout_init)
                 if(new_dset->shared->layout.ops->dest && (new_dset->shared->layout.ops->dest)(new_dset) < 0)
