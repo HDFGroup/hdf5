@@ -150,6 +150,7 @@ HLOG_OUTLET_SHORT_DEFN(pbflush_entry, pbflush);
 HLOG_OUTLET_SHORT_DEFN(pbio, pagebuffer);
 HLOG_OUTLET_SHORT_DEFN(pbrd, pbio);
 HLOG_OUTLET_SHORT_DEFN(pbwr, pbio);
+HLOG_OUTLET_SHORT_DEFN(lengthen_pbentry, pagebuffer);
 
 
 /*-------------------------------------------------------------------------
@@ -3913,7 +3914,7 @@ H5PB__write_meta(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr,
             uint64_t last_page = page +
                 roundup(size, pb_ptr->page_size) / pb_ptr->page_size;
 
-            fprintf(stderr,
+            hlog_fast(lengthen_pbentry,
                 "lengthening page %" PRIu64 " from %zu bytes to %zu, "
                 "last page %" PRIu64 "\n", page, entry_ptr->size, size,
                 last_page);
