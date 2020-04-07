@@ -406,22 +406,6 @@ endif ()
 
 set (${HDF_PREFIX}_FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
 
-# remove the invalid kind from the list
-if (NOT(${${HDF_PREFIX}_SIZEOF___FLOAT128} EQUAL 0))
-   if (NOT(${${HDF_PREFIX}_SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof})
-       AND NOT(${${HDF_PREFIX}_FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof})
-       # account for the fact that the C compiler can have 16-byte __float128 and the fortran compiler only has 8-byte doubles,
-       # so we don't want to remove the 8-byte fortran doubles.
-       AND NOT(${PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF} EQUAL ${max_real_fortran_sizeof}))
-     message (WARNING "
-          Fortran REAL(KIND=${max_real_fortran_kind}) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
-                                           !!! Fortran interfaces will not be generated for REAL(KIND=${max_real_fortran_kind}) !!!")
-     string (REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS ${PAC_FC_ALL_REAL_KINDS})
-     string (REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS_SIZEOF ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
-     math (EXPR NUM_RKIND "${NUM_RKIND} - 1")
-   endif ()
-endif ()
-
 set (${HDF_PREFIX}_H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
 
 string (REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS})
@@ -435,7 +419,7 @@ set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: 
 ENABLE_LANGUAGE (C)
 
 if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-include (CheckCSourceRuns)
+  include (CheckCSourceRuns)
 else ()
 #-----------------------------------------------------------------------------
 # The provided CMake C macros don't provide a general compile/run function
@@ -487,59 +471,6 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
         message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
     endif ()
 endmacro ()
-endif ()
-
-set (PROG_SRC
-    "
-#include <float.h>
-#include <stdio.h>
-#define CHECK_FLOAT128 ${${HDF_PREFIX}_SIZEOF___FLOAT128}
-#if CHECK_FLOAT128!=0
-# if ${${HDF_PREFIX}_HAVE_QUADMATH_H}!=0
-#include <quadmath.h>
-# endif
-# ifdef FLT128_DIG
-#define C_FLT128_DIG FLT128_DIG
-# else
-#define C_FLT128_DIG 0
-# endif
-#else
-#define C_FLT128_DIG 0
-#endif
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define C_LDBL_DIG DECIMAL_DIG
-#else
-#define C_LDBL_DIG LDBL_DIG
-#endif
-   int main() {
-       printf(\"%d\\\\n%d\\\\n\", C_LDBL_DIG, C_FLT128_DIG)\\\;
-       return 1\\\;
-   }
-     "
-)
-
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_c_source_runs (${PROG_SRC} PROG_OUTPUT)
-else ()
-  C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT)
-endif ()
-
-# dnl The output from the above program will be:
-# dnl    -- LINE 1 --  long double decimal precision
-# dnl    -- LINE 2 --  __float128 decimal precision
-
-# Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
-
-list (GET PROG_OUTPUT 0 LDBL_DIG)
-list (GET PROG_OUTPUT 1 FLT128_DIG)
-
-if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
-  set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-  set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${LDBL_DIG})
-else ()
-  set(${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${FLT128_DIG})
 endif ()
 
 
