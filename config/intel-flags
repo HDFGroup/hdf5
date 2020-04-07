@@ -18,7 +18,7 @@
 #
 
 #
-# Prepend `$srcdir/config/intel-` to the filename suffix(es) given as
+# Prepend `$srcdir/config/intel-warnings/` to the filename suffix(es) given as
 # subroutine argument(s), remove comments starting with # and ending
 # at EOL, replace spans of whitespace (including newlines) with spaces,
 # and re-emit the file(s) thus filtered on the standard output stream.
@@ -26,7 +26,7 @@
 load_intel_arguments()
 {
     set -- $(for arg; do
-        sed 's,#.*$,,' $srcdir/config/intel-${arg}
+        sed 's,#.*$,,' $srcdir/config/intel-warnings/${arg}
     done)
     IFS=' ' echo "$*"
 }
@@ -81,7 +81,6 @@ if test "X-icc" = "X-$cc_vendor"; then
     # General
     # Default to C99 standard.
     H5_CFLAGS="$H5_CFLAGS $arch -std=c99"
-    H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments warnings-general)"
 
     # Production
     PROD_CFLAGS=
@@ -103,16 +102,20 @@ if test "X-icc" = "X-$cc_vendor"; then
     DEBUG_OPT_CFLAGS="-O0"
     NO_OPT_CFLAGS="-O0"
 
-    # Flags are set
-    cc_flags_set=yes
+    ############
+    # Warnings #
+    ############
 
-fi
+    ###########
+    # General #
+    ###########
 
-# Version specific ICC flags
-#
-# Please follow the pattern below by adding new versions at the top, copying
-# the information from the previous version and adding modifications to that.
-# The default at the bottom will apply if no earlier version matches.
+    H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments general)"
+
+    #############################
+    # Version-specific warnings #
+    #############################
+
 case "$cc_vendor-$cc_version" in
     icc-1[5-6]*)
         H5_CFLAGS="$H5_CFLAGS -Wcomment -Wdeprecated -Wextra-tokens -Wformat -Wformat-security -Wmain -Wmissing-declarations -Wmissing-prototypes -Wp64 -Wpointer-arith -Wreturn-type -Wshadow -Wstrict-prototypes -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function -Wunused-variable -Wwrite-strings"
@@ -127,6 +130,13 @@ case "$cc_vendor-$cc_version" in
     icc-*)
         ;;
 esac
+
+    #################
+    # Flags are set #
+    #################
+    cc_flags_set=yes
+
+fi
 
 # Clear cc info if no flags set
 if test "X-$cc_flags_set" = "X-"; then
