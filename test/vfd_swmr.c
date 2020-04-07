@@ -2743,7 +2743,8 @@ test_shadow_index_lookup(void)
                    idx[j].hdf5_page_offset, cursize, seed);
             nerrors++;
         }
-        free(idx);
+        if (idx != NULL)
+            free(idx);
     }
     (void)setstate(ostate);
 out:
