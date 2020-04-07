@@ -91,7 +91,8 @@ HLOG_OUTLET_SHORT_DEFN(eot, swmr);
 HLOG_OUTLET_SHORT_DEFN(shadow_defrees, swmr);
 HLOG_OUTLET_MEDIUM_DEFN(noisy_shadow_defrees, shadow_defrees,
     HLOG_OUTLET_S_OFF);
-HLOG_OUTLET_SHORT_DEFN(shadow_index_enlargement, swmr);
+HLOG_OUTLET_SHORT_DEFN(shadow_index_enlarge, swmr);
+HLOG_OUTLET_SHORT_DEFN(shadow_index_reclaim, swmr);
 
 /*
  *  The head of the end of tick queue (EOT queue) for files opened in either
@@ -481,6 +482,10 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
         if((md_addr = H5MV_alloc(f, index[i].length)) == HADDR_UNDEF)
             HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, \
                         "error in allocating space from the metadata file")
+
+        hlog_fast(noisy_shadow_defrees,
+            "shadow index %" PRIu32 " page offset %" PRIu64 " -> %" PRIuHADDR, i,
+            index[i].md_file_page_offset * f->shared->fs_page_size, md_addr);
 
         HDassert(md_addr % f->shared->fs_page_size == 0);
 
@@ -1845,7 +1850,7 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
 
     FUNC_ENTER_NOAPI(NULL)
 
-    hlog_fast(shadow_index_enlargement, "Enlarging shadow index.");
+    hlog_fast(shadow_index_enlarge, "Enlarging shadow index.");
 
     old_mdf_idx = shared->mdf_idx;
     old_mdf_idx_len = shared->mdf_idx_len;
