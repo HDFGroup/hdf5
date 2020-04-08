@@ -1400,6 +1400,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 HDfprintf(out, "%ld (dataspace selection iterator)", (long)obj);
                                 break;
 
+                            case H5I_EVENTSET:
+                                HDfprintf(out, "%ld (event set)", (long)obj);
+                                break;
+
                             case H5I_NTYPES:
                                 HDfprintf (out, "%ld (ntypes - error)", (long)obj);
                                 break;
@@ -1587,6 +1591,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                 case H5I_SPACE_SEL_ITER:
                                     HDfprintf(out, "H5I_SPACE_SEL_ITER");
+                                    break;
+
+                                case H5I_EVENTSET:
+                                    HDfprintf(out, "H5I_EVENTSET");
                                     break;
 
                                 case H5I_NTYPES:
@@ -2773,6 +2781,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5VL_DATASET_REFRESH:
                                     HDfprintf(out, "H5VL_DATASET_REFRESH");
                                     break;
+                                case H5VL_DATASET_WAIT:
+                                    HDfprintf(out, "H5VL_DATASET_WAIT");
+                                    break;
                                 default:
                                     HDfprintf(out, "%ld", (long)specific);
                                     break;
@@ -2901,6 +2912,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5VL_FILE_IS_EQUAL:
                                     HDfprintf(out, "H5VL_FILE_IS_EQUAL");
+                                    break;
+                                case H5VL_FILE_WAIT:
+                                    HDfprintf(out, "H5VL_FILE_WAIT");
                                     break;
                                 default:
                                     HDfprintf(out, "%ld", (long)specific);

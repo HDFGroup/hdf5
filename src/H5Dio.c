@@ -25,6 +25,7 @@
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dpkg.h"             /* Dataset functions                        */
 #include "H5Eprivate.h"         /* Error handling                           */
+#include "H5ESprivate.h"        /* Event Sets                               */
 #include "H5FLprivate.h"        /* Free Lists                               */
 #include "H5Iprivate.h"         /* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
@@ -211,14 +212,14 @@ done:
  */
 herr_t
 H5Dread_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t dxpl_id, void *buf/*out*/, void **token)
+    hid_t file_space_id, hid_t dxpl_id, void *buf/*out*/, hid_t es_id)
 {
-    H5VL_object_t  *vol_obj     = NULL;
-    herr_t          ret_value   = SUCCEED;      /* Return value */
+    H5VL_object_t *vol_obj = NULL;      /* Dataset VOL object */
+    H5ES_t *es = NULL;                  /* Event set for the operation */
+    void *token = NULL, **token_ptr;    /* Request token for async operation */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "iiiiix**x", dset_id, mem_type_id, mem_space_id, file_space_id,
-             dxpl_id, buf, token);
 
     /* Check arguments */
     if (mem_space_id < 0)
@@ -237,12 +238,31 @@ H5Dread_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
+    /* Get the event set and set up request token pointer for operation */
+    if(H5ES_NONE != es_id) {
+        /* Get event set */
+        if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+    else
+        /* Synchronous operation */
+        token_ptr = H5_REQUEST_NULL;
+
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
     /* Read the data */
-    if ((ret_value = H5VL_dataset_read(vol_obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token)) < 0)
+    if((ret_value = H5VL_dataset_read(vol_obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token_ptr)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if(H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if(H5ES_insert(es, token) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTAPPEND, FAIL, "can't append token to event set")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -386,38 +406,57 @@ done:
  */
 herr_t
 H5Dwrite_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-	 hid_t file_space_id, hid_t dxpl_id, const void *buf, void **token)
+    hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t es_id)
 {
-    H5VL_object_t          *vol_obj = NULL;
-    herr_t                  ret_value = SUCCEED;    /* Return value */
+    H5VL_object_t *vol_obj = NULL;      /* Dataset VOL object */
+    H5ES_t *es = NULL;                  /* Event set for the operation */
+    void *token = NULL, **token_ptr;    /* Request token for async operation */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "iiiii*x**x", dset_id, mem_type_id, mem_space_id, file_space_id,
-             dxpl_id, buf, token);
 
     /* Check arguments */
-    if (mem_space_id < 0)
+    if(mem_space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid memory dataspace ID")
-    if (file_space_id < 0)
+    if(file_space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file dataspace ID")
 
     /* Get dataset pointer */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
-    if (H5P_DEFAULT == dxpl_id)
+    if(H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Get the event set and set up request token pointer for operation */
+    if(H5ES_NONE != es_id) {
+        /* Get event set */
+        if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+    else
+        /* Synchronous operation */
+        token_ptr = H5_REQUEST_NULL;
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
     /* Write the data */
-    if ((ret_value = H5VL_dataset_write(vol_obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token)) < 0)
+    if((ret_value = H5VL_dataset_write(vol_obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token_ptr)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if(H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if(H5ES_insert(es, token) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTAPPEND, FAIL, "can't append token to event set")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -427,7 +466,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Dwrite_chunk
  *
- * Purpose:     Writes an entire chunk to the file directly.	
+ * Purpose:     Writes an entire chunk to the file directly.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -443,7 +482,7 @@ H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *of
     H5VL_object_t  *vol_obj = NULL;
     uint32_t        data_size_32;                   /* Chunk data size (limited to 32-bits currently) */
     herr_t          ret_value = SUCCEED;            /* Return value */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, filters, offset, data_size, buf);
 

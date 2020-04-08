@@ -313,7 +313,7 @@ static herr_t H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t
 static herr_t H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_t func);
 static htri_t H5T__compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T__set_size(H5T_t *dt, size_t size);
-static herr_t H5T__close_cb(H5T_t *dt);
+static herr_t H5T__close_cb(H5T_t *dt, void **request);
 static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_conv_func_t *conv);
 static hbool_t H5T__detect_vlen_ref(const H5T_t *dt);
 static H5T_t *H5T__initiate_copy(const H5T_t *old_dt);
@@ -1646,7 +1646,7 @@ H5T_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__close_cb(H5T_t *dt)
+H5T__close_cb(H5T_t *dt, void **request)
 {
     herr_t  ret_value = SUCCEED;                /* Return value */
 
@@ -1661,7 +1661,7 @@ H5T__close_cb(H5T_t *dt)
      */
     if(NULL != dt->vol_obj) {
         /* Close the connector-managed datatype data */
-        if(H5VL_datatype_close(dt->vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if(H5VL_datatype_close(dt->vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype")
 
         /* Free the VOL object */
@@ -1795,6 +1795,7 @@ H5Tcopy(hid_t obj_id)
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a datatype or dataset")

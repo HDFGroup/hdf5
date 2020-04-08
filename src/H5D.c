@@ -814,7 +814,7 @@ H5Dflush(hid_t dset_id)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
-    
+
     /* Check args */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id parameter is not a valid dataset identifier")
@@ -853,7 +853,7 @@ H5Dwait(hid_t dset_id)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
-    
+
     /* Check args */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id parameter is not a valid dataset identifier")

@@ -328,7 +328,7 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
         /* H5Dspecific_space */
         case H5VL_DATASET_SET_EXTENT:
             { /* H5Dset_extent (H5Dextend - deprecated) */
-                const hsize_t *size = HDva_arg(arguments, const hsize_t *); 
+                const hsize_t *size = HDva_arg(arguments, const hsize_t *);
 
                 if(H5D__set_extent(dset, size) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
@@ -354,6 +354,14 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
                 if((H5D__refresh(dset_id, dset)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to refresh dataset")
 
+                break;
+            }
+
+        case H5VL_DATASET_WAIT:
+            { /* H5Dwait */
+                /* The native VOL connector doesn't support asynchronous
+                 *      operations, so this is a no-op.
+                 */
                 break;
             }
 

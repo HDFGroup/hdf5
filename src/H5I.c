@@ -1432,10 +1432,10 @@ H5I_dec_ref_async(hid_t id, void **token)
      * reference count without calling the free method.
      *
      * Beware: the free method may call other H5I functions.
-     * 
-     * If an object is closing, we can remove the ID even though the free 
+     *
+     * If an object is closing, we can remove the ID even though the free
      * method might fail.  This can happen when a mandatory filter fails to
-     * write when a dataset is closed and the chunk cache is flushed to the 
+     * write when a dataset is closed and the chunk cache is flushed to the
      * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
      */
     if(1 == id_ptr->count) {
@@ -2566,6 +2566,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
             break;   /* Other types of IDs are not stored in files */

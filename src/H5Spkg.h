@@ -395,6 +395,9 @@ H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
     const H5S_t *dst_space, const H5S_t *src_intersect_space, H5S_t *proj_space,
     hbool_t share_space);
 
+/* Operations on selection iterators */
+H5_DLL herr_t H5S__sel_iter_close_cb(H5S_sel_iter_t *_sel_iter, void **request);
+
 /* Testing functions */
 #ifdef H5S_TESTING
 H5_DLL herr_t H5S__get_rebuild_status_test(hid_t space_id,

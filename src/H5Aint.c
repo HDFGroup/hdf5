@@ -88,6 +88,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
+static herr_t H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request);
 static herr_t H5A__compact_build_table_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/);
 static herr_t H5A__dense_build_table_cb(const H5A_t *attr, void *_udata);
@@ -104,6 +105,9 @@ static herr_t H5A__iterate_common(hid_t loc_id, H5_index_t idx_type,
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 /* Format version bounds for attribute */
 const unsigned H5O_attr_ver_bounds[] = {
     H5O_ATTR_VERSION_1,         /* H5F_LIBVER_EARLIEST */
@@ -112,6 +116,7 @@ const unsigned H5O_attr_ver_bounds[] = {
     H5O_ATTR_VERSION_3,         /* H5F_LIBVER_V112 */
     H5O_ATTR_VERSION_LATEST     /* H5F_LIBVER_LATEST */
 };
+
 
 /*****************************/
 /* Library Private Variables */
@@ -122,10 +127,169 @@ const unsigned H5O_attr_ver_bounds[] = {
 /* Local Variables */
 /*******************/
 
+/* Declare the free lists of H5A_t */
+H5FL_DEFINE(H5A_t);
+
+/* Declare the free lists for H5A_shared_t's */
+H5FL_DEFINE(H5A_shared_t);
+
+/* Declare a free list to manage blocks of type conversion data */
+H5FL_BLK_DEFINE(attr_buf);
+
 typedef H5A_t*    H5A_t_ptr;
-H5FL_SEQ_DEFINE(H5A_t_ptr);
+H5FL_SEQ_DEFINE_STATIC(H5A_t_ptr);
+
+/* Attribute ID class */
+static const H5I_class_t H5I_ATTR_CLS[1] = {{
+    H5I_ATTR,                   /* ID class value */
+    0,                          /* Class flags */
+    0,                          /* # of reserved IDs for class */
+    (H5I_free_t)H5A__close_cb   /* Callback routine for closing objects of this class */
+}};
+
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5A_top_package_initialize_s = FALSE;
 
 
+
+/*-------------------------------------------------------------------------
+ * Function: H5A_init
+ *
+ * Purpose:  Initialize the interface from some other layer.
+ *
+ * Return:   Success:    non-negative
+ *
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5A_init(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_init() */
+
+
+/*--------------------------------------------------------------------------
+NAME
+   H5A__init_package -- Initialize interface-specific information
+USAGE
+    herr_t H5A__init_package()
+
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+
+--------------------------------------------------------------------------*/
+herr_t
+H5A__init_package(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /*
+     * Create attribute ID type.
+     */
+    if(H5I_register_type(H5I_ATTR_CLS) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    /* Mark "top" of interface as initialized, too */
+    H5A_top_package_initialize_s = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A__init_package() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5A_top_term_package
+ PURPOSE
+    Terminate various H5A objects
+ USAGE
+    void H5A_top_term_package()
+ RETURNS
+ DESCRIPTION
+    Release IDs for the atom group, deferring full interface shutdown
+    until later (in H5A_term_package).
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int
+H5A_top_term_package(void)
+{
+    int	n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5A_top_package_initialize_s) {
+	if(H5I_nmembers(H5I_ATTR) > 0) {
+	    (void)H5I_clear_type(H5I_ATTR, FALSE, FALSE);
+            n++; /*H5I*/
+	} /* end if */
+
+        /* Mark closed */
+        if(0 == n)
+            H5A_top_package_initialize_s = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* H5A_top_term_package() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5A_term_package
+ PURPOSE
+    Terminate various H5A objects
+ USAGE
+    void H5A_term_package()
+ RETURNS
+ DESCRIPTION
+    Release any other resources allocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+
+     Finishes shutting down the interface, after H5A_top_term_package()
+     is called
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int
+H5A_term_package(void)
+{
+    int	n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_ATTR));
+        HDassert(FALSE == H5A_top_package_initialize_s);
+
+        /* Destroy the attribute object id group */
+        n += (H5I_dec_type_ref(H5I_ATTR) > 0);
+
+        /* Mark closed */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* H5A_term_package() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5A__create
  *
@@ -1154,18 +1318,18 @@ H5A__shared_free(H5A_t *attr)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5A__close_cb(H5VL_object_t *attr_vol_obj)
+static herr_t
+H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request)
 {
     herr_t          ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(attr_vol_obj);
 
     /* Close the attribute */
-    if((ret_value = H5VL_attr_close(attr_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_attr_close(attr_vol_obj, H5P_DATASET_XFER_DEFAULT, request)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "problem closing attribute")
 
     /* Free the VOL object */

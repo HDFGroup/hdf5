@@ -24,6 +24,10 @@
 /* Public Macros */
 /*****************/
 
+/* Default value for "no event set" / synchronous execution */
+#define H5ES_NONE               (hid_t)0
+
+
 /* "Wait forever" timeout value */
 #define H5ES_WAIT_FOREVER       (UINT64_MAX)
 

@@ -10,51 +10,47 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
+/*
+ * Programmer:	Quincey Koziol <koziol@lbl.gov>
+ *		Wednesday, April 8, 2020
  *
- * Created:		H5ESprivate.h
- *			Apr  6 2020
- *			Quincey Koziol <koziol@lbl.gov>
- *
- * Purpose:		Private header for library accessible event set routines.
- *
- *-------------------------------------------------------------------------
+ * Purpose:	This file contains declarations which are visible only within
+ *		the H5ES package.  Source files outside the H5ES package should
+ *		include H5ESprivate.h instead.
  */
+#if !(defined H5ES_FRIEND || defined H5ES_MODULE)
+#error "Do not include this file outside the H5ES package!"
+#endif
 
-#ifndef _H5ESprivate_H
-#define _H5ESprivate_H
+#ifndef _H5ESpkg_H
+#define _H5ESpkg_H
 
-/* Include package's public header */
-#include "H5ESpublic.h"         /* Event Sets                  */
+/* Get package's private header */
+#include "H5ESprivate.h"
 
-/* Private headers needed by this file */
+/* Other private headers needed by this file */
 
 
 /**************************/
-/* Library Private Macros */
+/* Package Private Macros */
 /**************************/
 
 
 /****************************/
-/* Library Private Typedefs */
+/* Package Private Typedefs */
 /****************************/
 
-/* Typedef for event set objects */
-typedef struct H5ES_t {
-    int x;
-} H5ES_t;
-
 
 /*****************************/
-/* Library-private Variables */
+/* Package Private Variables */
 /*****************************/
 
 
-/***************************************/
-/* Library-private Function Prototypes */
-/***************************************/
-herr_t H5ES_insert(H5ES_t *es, void *request);
+/******************************/
+/* Package Private Prototypes */
+/******************************/
+H5_DLL H5ES_t *H5ES__create(void);
+H5_DLL herr_t H5ES__close(H5ES_t *es);
 
-
-#endif /* _H5ESprivate_H */
+#endif /* _H5ESpkg_H */
 

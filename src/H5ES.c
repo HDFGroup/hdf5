@@ -37,7 +37,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5ESprivate.h"        /* Event Sets                           */
+#include "H5ESpkg.h"            /* Event Sets                           */
 #include "H5FLprivate.h"        /* Free Lists                           */
 #include "H5Iprivate.h"         /* IDs                                  */
 
@@ -51,11 +51,6 @@
 /* Local Typedefs */
 /******************/
 
-/* Typedef for event set objects */
-typedef struct H5ES_t {
-    int x;
-} H5ES_t;
-
 
 /********************/
 /* Package Typedefs */
@@ -65,16 +60,11 @@ typedef struct H5ES_t {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5ES__close_cb(void *es, void **request_token);
-static herr_t H5ES__close(H5ES_t *es);
 
 
 /*********************/
 /* Package Variables */
 /*********************/
-
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
 
 
 /*****************************/
@@ -86,139 +76,75 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Local Variables */
 /*******************/
 
-/* Event Set ID class */
-static const H5I_class_t H5I_EVENTSET_CLS[1] = {{
-    H5I_EVENTSET,               /* ID class value */
-    0,                          /* Class flags */
-    0,                          /* # of reserved IDs for class */
-    (H5I_free_t)H5ES__close_cb  /* Callback routine for closing objects of this class */
-}};
-
-/* Declare a static free list to manage H5ES_t structs */
-H5FL_DEFINE_STATIC(H5ES_t);
-
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5ES__init_package
+ * Function:    H5EScreate
  *
- * Purpose:     Initializes any interface-specific data or routines.
+ * Purpose:     Creates an event set.
  *
- * Return:      Non-negative on success / Negative on failure
+ * Return:      Success:    An ID for the event set
+ *              Failure:    H5I_INVALID_HID
  *
  * Programmer:	Quincey Koziol
- *	        Monday, April 6, 2020
+ *              Wednesday, April 8, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5EScreate(void)
+{
+    H5ES_t *es;                         /* Pointer to event set object */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE0("i","");
+
+    /* Create the new event set object */
+    if(NULL == (es = H5ES__create()))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, H5I_INVALID_HID, "can't create event set")
+
+    /* Register the new event set to get an ID for it */
+    if((ret_value = H5I_register(H5I_EVENTSET, es, TRUE)) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5EScreate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ESclose
+ *
+ * Purpose:     Closes an event set.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__init_package(void)
+H5ESclose(hid_t es_id)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t       ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", es_id);
 
-    /* Initialize the ID group for the event set IDs */
-    if(H5I_register_type(H5I_EVENTSET_CLS) < 0)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINIT, FAIL, "unable to initialize interface")
+    /* Check arguments */
+    if(H5I_EVENTSET != H5I_get_type(es_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+    /*
+     * Decrement the counter on the object.  It will be freed if the count
+     * reaches zero.
+     */
+    if(H5I_dec_app_ref(es_id) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "unable to decrement ref count on event set")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ES__init_package() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5ES_term_package
- *
- * Purpose:     Terminate this interface.
- *
- * Return:      Success:    Positive if anything is done that might
- *                          affect other interfaces; zero otherwise.
- *              Failure:    Negative
- *
- * Programmer:	Quincey Koziol
- *	        Monday, April 6, 2020
- *
- *-------------------------------------------------------------------------
- */
-int
-H5ES_term_package(void)
-{
-    int    n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if(H5_PKG_INIT_VAR) {
-        /* Destroy the event set ID group */
-        n += (H5I_dec_type_ref(H5I_EVENTSET) > 0);
-
-        /* Mark closed */
-        if(0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(n)
-} /* end H5ES_term_package() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5ES__close_cb
- *
- * Purpose:     Called when the ref count reaches zero on an event set's ID
- *
- * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Monday, April 6, 2020
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5ES__close_cb(void *_es, void H5_ATTR_UNUSED **rt)
-{
-    H5ES_t *es = (H5ES_t *)_es;         /* The event set to close */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity check */
-    HDassert(es);
-
-    /* Close the event set object */
-    if(H5ES__close(es) < 0)
-        HGOTO_ERROR(H5E_EVENTSET, H5E_CLOSEERROR, FAIL, "unable to close event set");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ES__close_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5ES__close
- *
- * Purpose:     Destroy an event set object
- *
- * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Monday, April 6, 2020
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5ES__close(H5ES_t *es)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity check */
-    HDassert(es);
-
-    /* Release the event set */
-    es = H5FL_FREE(H5ES_t, es);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ES__close() */
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESclose() */
 

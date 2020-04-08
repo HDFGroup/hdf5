@@ -92,7 +92,7 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5VL__free_cls(H5VL_class_t *cls);
+static herr_t H5VL__free_cls(H5VL_class_t *cls, void **request);
 static int H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data);
 static herr_t H5VL__set_def_conn(void);
 static void *H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
@@ -304,7 +304,7 @@ H5VL_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__free_cls(H5VL_class_t *cls)
+H5VL__free_cls(H5VL_class_t *cls, void H5_ATTR_UNUSED **request)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1812,6 +1812,7 @@ H5VL__object(hid_t id, H5I_type_t obj_type)
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unknown data object type")

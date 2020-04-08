@@ -43,8 +43,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-
-static herr_t H5M__close_cb(H5VL_object_t *map_vol_obj);
+static herr_t H5M__close_cb(H5VL_object_t *map_vol_obj, void **request);
 
 
 /*********************/
@@ -210,7 +209,7 @@ H5M_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5M__close_cb(H5VL_object_t *map_vol_obj)
+H5M__close_cb(H5VL_object_t *map_vol_obj, void **request)
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -220,7 +219,7 @@ H5M__close_cb(H5VL_object_t *map_vol_obj)
     HDassert(map_vol_obj);
 
     /* Close the map */
-    if(H5VL_optional(map_vol_obj, H5VL_MAP_CLOSE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_optional(map_vol_obj, H5VL_MAP_CLOSE, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CLOSEERROR, FAIL, "unable to close map");
 
     /* Free the VOL object */

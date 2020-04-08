@@ -249,6 +249,9 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
         case H5I_SPACE_SEL_ITER:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a dataspace selection iterator")
 
+        case H5I_EVENTSET:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a event set")
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_NTYPES:

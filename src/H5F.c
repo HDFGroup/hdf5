@@ -22,20 +22,14 @@
 /* Headers */
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
-#include "H5Aprivate.h"         /* Attributes                               */
 #include "H5ACprivate.h"        /* Metadata cache                           */
 #include "H5CXprivate.h"        /* API Contexts                             */
-#include "H5Dprivate.h"         /* Datasets                                 */
 #include "H5Eprivate.h"         /* Error handling                           */
+#include "H5ESprivate.h"        /* Event Sets                               */
 #include "H5Fpkg.h"             /* File access                              */
-#include "H5FDprivate.h"        /* File drivers                             */
 #include "H5FLprivate.h"        /* Free lists                               */
-#include "H5Gprivate.h"         /* Groups                                   */
 #include "H5Iprivate.h"         /* IDs                                      */
-#include "H5MFprivate.h"        /* File memory management                   */
-#include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Pprivate.h"         /* Property lists                           */
-#include "H5Tprivate.h"         /* Datatypes                                */
 #include "H5VLprivate.h"        /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
@@ -818,25 +812,25 @@ done:
  * Function:    H5Fopen_async
  *
  * Purpose:     Asynchronous version of H5Fopen
- * 
+ *
  * See Also:    H5Fpublic.h for a list of possible values for FLAGS.
  *
  * Return:      Success:    A file ID
- *
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, void **token)
+H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
 {
     H5F_t              *new_file = NULL;        /* File struct for new file                 */
     H5P_genplist_t     *plist;                  /* Property list pointer                    */
     H5VL_connector_prop_t  connector_prop;      /* Property for VOL connector ID & info        */
+    H5ES_t *es = NULL;                          /* Event set for the operation */
+    void *token = NULL, **token_ptr;            /* Request token for async operation */
     hid_t               ret_value;              /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE4("i", "*sIui**x", filename, flags, fapl_id, token);
 
     /* Check arguments */
     if(!filename || !*filename)
@@ -869,13 +863,32 @@ H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, void **token)
     if(H5CX_set_vol_connector_prop(&connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context")
 
+    /* Get the event set and set up request token pointer for operation */
+    if(H5ES_NONE != es_id) {
+        /* Get event set */
+        if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+    else
+        /* Synchronous operation */
+        token_ptr = H5_REQUEST_NULL;
+
     /* Open the file through the VOL layer */
-    if(NULL == (new_file = (H5F_t *)H5VL_file_open(&connector_prop, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, token)))
+    if(NULL == (new_file = (H5F_t *)H5VL_file_open(&connector_prop, filename, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* Get an ID for the file */
     if((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if(H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if(H5ES_insert(es, token) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -956,7 +969,8 @@ H5Fclose(hid_t file_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Fclose() */ 
+} /* end H5Fclose() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Fclose_async
@@ -968,22 +982,42 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fclose_async(hid_t file_id, void **token)
+H5Fclose_async(hid_t file_id, hid_t es_id)
 {
-    herr_t      ret_value = SUCCEED;
+    H5ES_t *es = NULL;                  /* Event set for the operation */
+    void *token = NULL, **token_ptr;    /* Request token for async operation */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i**x", file_id, token);
 
     /* Check arguments */
     if(H5I_FILE != H5I_get_type(file_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
 
+    /* Get the event set and set up request token pointer for operation */
+    if(H5ES_NONE != es_id) {
+        /* Get event set */
+        if(NULL == (es = (H5ES_t *)H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event set")
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+    else
+        /* Synchronous operation */
+        token_ptr = H5_REQUEST_NULL;
+
     /* Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
-    if(H5I_dec_app_ref_async(file_id, token) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+    if(H5I_dec_app_ref_async(file_id, token_ptr) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+
+    /* If there's an event set and a token was created, add the token to it */
+    if(H5ES_NONE != es_id && NULL != token)
+        /* Add token to event set */
+        if(H5ES_insert(es, token) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTAPPEND, FAIL, "can't append token to event set")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2197,7 +2231,7 @@ H5Fwait(hid_t file_id)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
-    
+
     /* Get the type of object we're flushing + sanity check */
     obj_type = H5I_get_type(file_id);
     if(H5I_FILE != obj_type && H5I_GROUP != obj_type && H5I_DATATYPE != obj_type &&
@@ -2212,4 +2246,5 @@ H5Fwait(hid_t file_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Fwait*/
+} /* H5Fwait() */
+

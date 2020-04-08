@@ -88,7 +88,7 @@ static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
         hsize_t old_dim[]);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
-static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj);
+static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj, void **request);
 static herr_t H5D__use_minimized_dset_headers(H5F_t *file, hbool_t *minimize);
 static herr_t H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc);
 static size_t H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr);
@@ -342,7 +342,7 @@ H5D_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__close_cb(H5VL_object_t *dset_vol_obj)
+H5D__close_cb(H5VL_object_t *dset_vol_obj, void **request)
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -352,15 +352,10 @@ H5D__close_cb(H5VL_object_t *dset_vol_obj)
     HDassert(dset_vol_obj);
 
     /* Close the dataset */
-    if(H5VL_dataset_close(dset_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if(H5VL_dataset_close(dset_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset");
 
 done:
-    /* XXX: (MSC) Weird thing for datasets and filters:
-     * Always decrement the ref count on the VOL for datasets, since
-     * the ID is removed even if the close fails.
-     */
-
     /* Free the VOL object */
     if(H5VL_free_object(dset_vol_obj) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object");
@@ -1425,11 +1420,11 @@ done:
             if(new_dset->shared->type) {
                 if(new_dset->shared->type_id > 0) {
                     if(H5I_dec_ref(new_dset->shared->type_id) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
                 } /* end if */
                 else {
                     if(H5T_close_real(new_dset->shared->type) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
                 } /* end else */
             } /* end if */
 

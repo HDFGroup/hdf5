@@ -81,14 +81,14 @@
 /* Static function declarations */
 static herr_t H5E__set_default_auto(H5E_t *stk);
 static H5E_cls_t *H5E__register_class(const char *cls_name, const char *lib_name, const char *version);
-static herr_t  H5E__unregister_class(H5E_cls_t *cls);
+static herr_t  H5E__unregister_class(H5E_cls_t *cls, void **request);
 static ssize_t H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size);
 static int H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata);
-static herr_t  H5E__close_msg(H5E_msg_t *err);
+static herr_t  H5E__close_msg(H5E_msg_t *err, void **request);
 static H5E_msg_t *H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg);
 static H5E_t  *H5E__get_current_stack(void);
 static herr_t  H5E__set_current_stack(H5E_t *estack);
-static herr_t  H5E__close_stack(H5E_t *err_stack);
+static herr_t  H5E__close_stack(H5E_t *err_stack, void **request);
 static ssize_t H5E__get_num(const H5E_t *err_stack);
 
 
@@ -558,7 +558,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E__unregister_class(H5E_cls_t *cls)
+H5E__unregister_class(H5E_cls_t *cls, void H5_ATTR_UNUSED **request)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -681,7 +681,7 @@ H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata)
 
     /* Close the message if it is in the class being closed */
     if(err_msg->cls == cls) {
-        if(H5E__close_msg(err_msg) < 0)
+        if(H5E__close_msg(err_msg, NULL) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "unable to close error message")
         if(NULL == H5I_remove(obj_id))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTREMOVE, H5_ITER_ERROR, "unable to remove error message")
@@ -738,7 +738,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E__close_msg(H5E_msg_t *err)
+H5E__close_msg(H5E_msg_t *err, void H5_ATTR_UNUSED **request)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -840,7 +840,7 @@ H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
 
 done:
     if(!ret_value)
-        if(msg && H5E__close_msg(msg) < 0)
+        if(msg && H5E__close_msg(msg, NULL) < 0)
             HDONE_ERROR(H5E_ERROR, H5E_CANTCLOSEOBJ, NULL, "unable to close error message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1193,7 +1193,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E__close_stack(H5E_t *estack)
+H5E__close_stack(H5E_t *estack, void H5_ATTR_UNUSED **request)
 {
     FUNC_ENTER_STATIC_NOERR
 
