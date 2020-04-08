@@ -56,6 +56,12 @@
 /* Package Typedefs */
 /********************/
 
+/* Typedef for event nodes */
+struct H5ES_event_t {
+    void *request;                      /* Request token for event */
+    struct H5ES_event_t *prev, *next;   /* Previous and next event nodes */
+};
+
 
 /********************/
 /* Local Prototypes */
@@ -90,6 +96,9 @@ static const H5I_class_t H5I_EVENTSET_CLS[1] = {{
 
 /* Declare a static free list to manage H5ES_t structs */
 H5FL_DEFINE_STATIC(H5ES_t);
+
+/* Declare a static free list to manage H5ES_event_t structs */
+H5FL_DEFINE_STATIC(H5ES_event_t);
 
 
 
@@ -239,12 +248,33 @@ done:
 herr_t
 H5ES_insert(H5ES_t *es, void *request)
 {
+    H5ES_event_t *ev;                   /* Event for request */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(es);
+    HDassert(request);
+
+    /* Allocate space for new event */
+    if(NULL == (ev = H5FL_CALLOC(H5ES_event_t)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTALLOC, FAIL, "can't allocate event object")
+
+    /* Set request for event */
+    ev->request = request;
+
+    /* Stitch into the event set's list */
+    if(NULL == es->head)
+        es->head = es->tail = ev;
+    else {
+        ev->next = es->head;
+        es->head->prev = ev;
+        es->head = ev;
+    } /* end else */
+
+    /* Increment the # of events in set */
+    es->count++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -266,12 +296,34 @@ done:
 herr_t
 H5ES__close(H5ES_t *es)
 {
+    H5ES_event_t *ev;                   /* Event to operate on */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(es);
+
+    /* Iterate over the events in the set, waiting for them to complete */
+    ev = es->head;
+    while(ev) {
+        H5ES_event_t *tmp;              /* Temporary event */
+        H5ES_status_t status;           /* Status from event's operation */
+
+        /* Get pointer to next node, so we can free this one */
+        tmp = ev->next;
+
+        /* Wait on the event */
+        /* (Releases the request) */
+        if(H5VL_request_wait(ev->request, H5ES_WAIT_FOREVER, &status) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTWAIT, FAIL, "unable to wait for operation")
+
+        /* Free the event node */
+        H5FL_FREE(H5ES_event_t, ev);
+
+        /* Advance to next node */
+        ev = tmp;
+    } /* end while */
 
     /* Release the event set */
     es = H5FL_FREE(H5ES_t, es);

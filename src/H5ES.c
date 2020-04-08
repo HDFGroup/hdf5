@@ -114,6 +114,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5ESget_count
+ *
+ * Purpose:     Retrieve the # of events in an event set
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, April 8, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESget_count(hid_t es_id, size_t *count)
+{
+    H5ES_t *es;                         /* Event set */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*z", es_id, count);
+
+    /* Check arguments */
+    if(NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+
+    /* Retrieve the count, if non-NULL */
+    if(count)
+        *count = es->count;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESget_count() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5ESclose
  *
  * Purpose:     Closes an event set.
@@ -128,7 +162,7 @@ done:
 herr_t
 H5ESclose(hid_t es_id)
 {
-    herr_t       ret_value = SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", es_id);

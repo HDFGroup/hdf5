@@ -103,6 +103,7 @@ SECTION, FSPACE, Free space errors
 SECTION, PIPELINE, I/O pipeline errors
 SECTION, SYSTEM, System level errors
 SECTION, PLUGIN, Plugin errors
+SECTION, ASYNC, Plugin errors
 SECTION, NONE, No error
 
 # Minor errors
@@ -278,6 +279,9 @@ MINOR, SYSTEM, H5E_SYSERRSTR, System error message
 
 # Plugin errors
 MINOR, PLUGIN, H5E_OPENERROR, Can't open directory or file
+
+# Asynchronous operation errors
+MINOR, ASYNC, H5E_CANTWAIT, Can't wait on operation
 
 # No error, for backward compatibility */
 MINOR, NONE, H5E_NONE_MINOR, No error

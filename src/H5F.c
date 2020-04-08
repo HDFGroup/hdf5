@@ -831,6 +831,7 @@ H5Fopen_async(const char *filename, unsigned flags, hid_t fapl_id, hid_t es_id)
     hid_t               ret_value;              /* return value                             */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE4("i", "*sIuii", filename, flags, fapl_id, es_id);
 
     /* Check arguments */
     if(!filename || !*filename)
@@ -989,6 +990,7 @@ H5Fclose_async(hid_t file_id, hid_t es_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", file_id, es_id);
 
     /* Check arguments */
     if(H5I_FILE != H5I_get_type(file_id))

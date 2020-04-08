@@ -40,9 +40,7 @@
 /****************************/
 
 /* Typedef for event set objects */
-typedef struct H5ES_t {
-    int x;
-} H5ES_t;
+typedef struct H5ES_t H5ES_t;
 
 
 /*****************************/

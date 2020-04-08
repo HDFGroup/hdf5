@@ -59,9 +59,9 @@ extern "C" {
 #endif
 
 hid_t H5EScreate(void);
-herr_t H5ESget_count(hid_t es_id, unsigned *count);
+herr_t H5ESget_count(hid_t es_id, size_t *count);
 herr_t H5EStest(hid_t es_id, H5ES_status_t *status);
-herr_t H5ESwait(hid_t es_id, H5ES_status_t *status, uint64_t timeout);
+herr_t H5ESwait(hid_t es_id, uint64_t timeout, H5ES_status_t *status);
 herr_t H5EScancel(hid_t es_id, H5ES_status_t *status);
 herr_t H5ESclose(hid_t es_id);
 

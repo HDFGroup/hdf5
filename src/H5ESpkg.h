@@ -40,6 +40,15 @@
 /* Package Private Typedefs */
 /****************************/
 
+/* Event nodes */
+typedef struct H5ES_event_t H5ES_event_t;
+
+/* Typedef for event set objects */
+struct H5ES_t {
+    size_t count;                       /* # of events in set */
+    H5ES_event_t *head, *tail;          /* Head & tail of events for event set */
+};
+
 
 /*****************************/
 /* Package Private Variables */
