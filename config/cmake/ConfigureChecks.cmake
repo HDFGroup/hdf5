@@ -175,11 +175,17 @@ endif ()
 # Check whether we can build the Mirror VFD 
 # Header-check flags set in config/cmake_ext_mod/ConfigureChecks.cmake
 # ----------------------------------------------------------------------
-if ( ${HDF_PREFIX}_HAVE_NETINET_IN_H AND
-     ${HDF_PREFIX}_HAVE_NETDB_H      AND
-     ${HDF_PREFIX}_HAVE_ARPA_INET_H  AND
-     ${HDF_PREFIX}_HAVE_SYS_SOCKET_H)
-    set (${HDF_PREFIX}_HAVE_MIRROR_VFD 1)
+option (HDF5_ENABLE_MIRROR_VFD "Build the Mirror Virtual File Driver" OFF)
+if (H5FD_ENABLE_MIRROR_VFD)
+  if ( ${HDF_PREFIX}_HAVE_NETINET_IN_H AND
+       ${HDF_PREFIX}_HAVE_NETDB_H      AND
+       ${HDF_PREFIX}_HAVE_ARPA_INET_H  AND
+       ${HDF_PREFIX}_HAVE_SYS_SOCKET_H AND
+       ${HDF_PREFIX}_HAVE_FORK)
+      set (${HDF_PREFIX}_HAVE_MIRROR_VFD 1)
+  else()
+    message(STATUS "The socket-based Mirror VFD was requested but cannot be built. System prerequisites are not met.")
+  endif()
 endif()
 
 #-----------------------------------------------------------------------------

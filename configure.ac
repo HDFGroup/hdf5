@@ -2849,24 +2849,38 @@ AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
 AC_SUBST([MIRROR_VFD])
 
 ## Default is no Mirror VFD
-MIRROR_VFD=yes
+MIRROR_VFD=no
 
-AC_CHECK_HEADERS([arpa/inet.h],, [unset MIRROR_VFD])
-AC_CHECK_HEADERS([netinet/in.h],, [unset MIRROR_VFD])
-AC_CHECK_HEADERS([netdb.h],, [unset MIRROR_VFD])
-AC_CHECK_HEADERS([sys/socket.h],, [unset MIRROR_VFD])
+AC_ARG_ENABLE([mirror-vfd],
+              [AS_HELP_STRING([--enable-mirror-vfd],
+                              [Build the socket-based Mirror virtual file driver (VFD).
+                               [default=no]])],
+              [MIRROR_VFD=$enableval], [MIRROR_VFD=no])
 
-AC_MSG_CHECKING([if the Mirror virtual file driver (VFD) can be built])
 if test "X$MIRROR_VFD" = "Xyes"; then
-    AC_DEFINE([HAVE_MIRROR_VFD], [1],
-            [Define whether the Mirror virtual file driver (VFD) will be compiled])
-    AC_MSG_RESULT([yes])
+
+    AC_CHECK_HEADERS([arpa/inet.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([netinet/in.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([netdb.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([sys/socket.h],, [unset MIRROR_VFD])
+    AC_CHECK_FUNC([fork], [], [unset MIRROR_VFD])
+
+    AC_MSG_CHECKING([if the Mirror virtual file driver (VFD) can be built])
+    if test "X$MIRROR_VFD" = "Xyes"; then
+        AC_DEFINE([HAVE_MIRROR_VFD], [1],
+                [Define whether the Mirror virtual file driver (VFD) will be compiled])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+        MIRROR_VFD=no
+        AC_MSG_ERROR([The Mirror VFD cannot be built.
+                      Missing one or more of: arpa/inet.h, netinet/in.h,
+                      netdb.h, sys/socket.h, fork().])
+    fi
 else
+    AC_MSG_CHECKING([if the Mirror virtual file driver (VFD) is enabled])
     AC_MSG_RESULT([no])
     MIRROR_VFD=no
-    AC_MSG_ERROR([The Mirror VFD cannot be built.
-                  Missing any of: arpa/inet.h, netinet/in.h, netdb.h,
-                  sys/socket.h.])
 fi
 
 ## Mirror VFD files built only if able.
