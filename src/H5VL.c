@@ -663,7 +663,7 @@ done:
 /*---------------------------------------------------------------------------
  * Function:    H5VLobject
  *
- * Purpose:     Retrieve the object pointer associated with an hid_t for a.
+ * Purpose:     Retrieve the object pointer associated with an hid_t for a
  *              VOL object.
  *
  * Note:        This routine is mainly targeted toward unwrapping objects for
