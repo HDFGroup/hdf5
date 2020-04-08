@@ -3283,8 +3283,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 }
                 else {
                     haddr_t ioffset;
-                    void *obj = NULL;
-                    hid_t connector_id = H5I_INVALID_HID;
                     hbool_t supported = FALSE;
 
                     /* NORMAL FILE */
@@ -3304,10 +3302,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     /* Only dump the offset if the VOL connector implements
                      * the functionality.
                      */
-                    obj = H5VLobject(dset_id);
-                    connector_id = H5VLget_connector_id(dset_id);
-                    H5VLintrospect_opt_query(obj, connector_id, H5VL_SUBCLS_DATASET, H5VL_NATIVE_DATASET_GET_OFFSET, &supported);
-                    H5VLclose(connector_id);
+                    H5VLquery_optional(dset_id, H5VL_SUBCLS_DATASET, H5VL_NATIVE_DATASET_GET_OFFSET, &supported);
 
                     if (supported) {
 
@@ -3732,15 +3727,11 @@ h5tools_dump_comment(FILE *stream, const h5tool_format_t *info, h5tools_context_
                                              * instead of the current stripmine position i; this is necessary
                                              * to print the array indices
                                              */
-    void *obj = NULL;
-    hid_t connector_id = H5I_INVALID_HID;
     hbool_t supported = FALSE;
 
     /* Check if comments are supported and return if not */
-    obj = H5VLobject(obj_id);
-    connector_id = H5VLget_connector_id(obj_id);
-    H5VLintrospect_opt_query(obj, connector_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
-    H5VLclose(connector_id);
+    H5VLquery_optional(obj_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
+
     if (!supported)
         return;
 
