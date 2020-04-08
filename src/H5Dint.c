@@ -1402,7 +1402,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     ret_value = new_dset;
 
 done:
-    if(!ret_value && new_dset && new_dset->shared) {
+    if(!ret_value && new_dset) {
         if(new_dset->shared) {
             if(layout_init)
                 if(new_dset->shared->layout.ops->dest && (new_dset->shared->layout.ops->dest)(new_dset) < 0)
@@ -1425,11 +1425,11 @@ done:
             if(new_dset->shared->type) {
                 if(new_dset->shared->type_id > 0) {
                     if(H5I_dec_ref(new_dset->shared->type_id) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
                 } /* end if */
                 else {
                     if(H5T_close_real(new_dset->shared->type) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
                 } /* end else */
             } /* end if */
 
