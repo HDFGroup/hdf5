@@ -306,9 +306,10 @@ fi
 
 # Version-specific g++ flags
 
-
-    # Append more extra warning flags that only gcc 4.9+ know about
-    -Wopenmp-simd"
+# This flag was left behind when moving warnings flags to common files for 
+# both autotools and CMake.
+#    # Append more extra warning flags that only gcc 4.9+ know about
+#    -Wopenmp-simd"
 
 # Clear cxx info if no flags set
 if test "X$cxx_flags_set" = "X"; then
