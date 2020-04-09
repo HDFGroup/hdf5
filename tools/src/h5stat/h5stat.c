@@ -1816,9 +1816,9 @@ main(int argc, const char *argv[])
         h5tools_fapl_info_t fapl_info;
 
         /* Currently, only retrieval of VFDs is supported. */
-        fapl_info.type = VFD_BY_NAME;
-        fapl_info.info = NULL;
-        fapl_info.u.name = drivername;
+        fapl_info.type          = VFD_BY_NAME;
+        fapl_info.info_string   = NULL;
+        fapl_info.u.name        = drivername;
 
         if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD

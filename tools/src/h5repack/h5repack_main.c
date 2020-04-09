@@ -694,7 +694,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case '3':
-                in_vol_info.info = opt_arg;
+                in_vol_info.info_string = opt_arg;
                 break;
 
             case '4':
@@ -710,7 +710,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case '6':
-                out_vol_info.info = opt_arg;
+                out_vol_info.info_string = opt_arg;
                 break;
 
             default:
