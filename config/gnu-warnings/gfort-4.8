@@ -1,0 +1,5 @@
+-Wrealloc-lhs
+-Wrealloc-lhs-all
+# Turn off warnings for passing non-ANSI types to BIND().
+# We pass a lot of hid_t, etc. types so this generates a LOT of spurious warnings.
+-Wno-c-binding-type

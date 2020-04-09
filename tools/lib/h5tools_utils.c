@@ -648,17 +648,17 @@ static void
 dump_table(hid_t fid, char* tablename, table_t *table)
 {
     unsigned u;
-    char *obj_addr_str = NULL;
+    char *obj_tok_str = NULL;
 
     PRINTSTREAM(rawoutstream,"%s: # of entries = %d\n", tablename,table->nobjs);
     for (u = 0; u < table->nobjs; u++) {
-        H5VLconnector_token_to_str(fid, table->objs[u].obj_token, &obj_addr_str);
+        H5VLconnector_token_to_str(fid, table->objs[u].obj_token, &obj_tok_str);
 
-        PRINTSTREAM(rawoutstream,"%s %s %d %d\n", obj_addr_str,
+        PRINTSTREAM(rawoutstream,"%s %s %d %d\n", obj_tok_str,
            table->objs[u].objname,
            table->objs[u].displayed, table->objs[u].recorded);
 
-        H5VLfree_token_str(fid, obj_addr_str);
+        H5VLfree_token_str(fid, obj_tok_str);
     }
 }
 

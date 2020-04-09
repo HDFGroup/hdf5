@@ -213,7 +213,7 @@ my (@curver) = getvers $contents;
 # Determine the new version number.
 my @newver; #new version
 if ($set) {
-  if ($set =~ /(\d+)\.(\d+)\.(\d+)(-([a-zA-Z]\w*))?/) {
+  if ($set =~ /(\d+)\.(\d+)\.(\d+)(-([\da-zA-Z]\w*))?/) {
     @newver = ($1, $2, $3, $5);
   } elsif ($set =~ /(\d+)\D+(\d+)\D+(\d+)(\s*\(([a-zA-Z]\w*)\))?\D*$/) {
     @newver = ($1, $2, $3, $5);

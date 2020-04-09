@@ -46,7 +46,7 @@ Languages:
                         Fortran: @HDF5_BUILD_FORTRAN@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               Fortran Compiler: @CMAKE_Fortran_COMPILER@ @CMAKE_Fortran_COMPILER_VERSION@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@                  Fortran Flags: @CMAKE_Fortran_FLAGS@
-@BUILD_FORTRAN_CONDITIONAL_TRUE@               H5 Fortran Flags: @H5_FCFLAGS@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@               H5 Fortran Flags: @HDF5_CMAKE_Fortran_FLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               AM Fortran Flags: @AM_FCFLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Shared Fortran Library: @H5_ENABLE_SHARED_LIB@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Static Fortran Library: @H5_ENABLE_STATIC_LIB@
