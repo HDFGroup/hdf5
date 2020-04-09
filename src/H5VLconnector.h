@@ -48,24 +48,6 @@
 /* Public Typedefs */
 /*******************/
 
-/* Enum type for each VOL subclass */
-/* (Used for various queries, etc) */
-typedef enum H5VL_subclass_t {
-    H5VL_SUBCLS_NONE,                   /* Operations outside of a subclass */
-    H5VL_SUBCLS_INFO,                   /* 'Info' subclass */
-    H5VL_SUBCLS_WRAP,                   /* 'Wrap' subclass */
-    H5VL_SUBCLS_ATTR,                   /* 'Attribute' subclass */
-    H5VL_SUBCLS_DATASET,                /* 'Dataset' subclass */
-    H5VL_SUBCLS_DATATYPE,               /* 'Named datatype' subclass */
-    H5VL_SUBCLS_FILE,                   /* 'File' subclass */
-    H5VL_SUBCLS_GROUP,                  /* 'Group' subclass */
-    H5VL_SUBCLS_LINK,                   /* 'Link' subclass */
-    H5VL_SUBCLS_OBJECT,                 /* 'Object' subclass */
-    H5VL_SUBCLS_REQUEST,                /* 'Request' subclass */
-    H5VL_SUBCLS_BLOB,                   /* 'Blob' subclass */
-    H5VL_SUBCLS_TOKEN                   /* 'Token' subclass */
-} H5VL_subclass_t;
-
 /* types for attribute GET callback */
 typedef enum H5VL_attr_get_t {
     H5VL_ATTR_GET_ACPL,                     /* creation property list              */
