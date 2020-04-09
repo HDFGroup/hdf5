@@ -2364,8 +2364,6 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
             char* comment = NULL;
             char* obj_tok_str = NULL;
             ssize_t cmt_bufsize = -1;
-            void *obj = NULL;
-            hid_t connector_id = H5I_INVALID_HID;
             hbool_t supported = FALSE;
 
             /* Display attributes */
@@ -2401,10 +2399,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
             } /* end if */
 
             /* Only emit comments if the VOL connector supports that */
-            obj = H5VLobject(obj_id);
-            connector_id = H5VLget_connector_id(obj_id);
-            H5VLintrospect_opt_query(obj, connector_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
-            H5VLclose(connector_id);
+            H5VLquery_optional(obj_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
 
             if (supported) {
 
@@ -3156,9 +3151,9 @@ main(int argc, const char *argv[])
         h5tools_fapl_info_t fapl_info;
 
         /* Currently, only retrieval of VFDs is supported. */
-        fapl_info.type = VFD_BY_NAME;
-        fapl_info.info = NULL;
-        fapl_info.u.name = preferred_driver;
+        fapl_info.type          = VFD_BY_NAME;
+        fapl_info.info_string   = NULL;
+        fapl_info.u.name        = preferred_driver;
 
         if (!HDstrcmp(preferred_driver, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
