@@ -1136,8 +1136,6 @@ dump_fcpl(hid_t fid)
     unsigned sym_ik;    /* symbol table B-tree internal 'K' value */
     unsigned istore_ik; /* indexed storage B-tree internal 'K' value */
 
-    void *obj = NULL;
-    hid_t connector_id = H5I_INVALID_HID;
     hbool_t supported = FALSE;
 
     /* Dumping the information here only makes sense for the native
@@ -1145,10 +1143,8 @@ dump_fcpl(hid_t fid)
      * use that as a proxy for "native-ness". If that isn't supported, we'll
      * just return.
      */
-    obj = H5VLobject(fid);
-    connector_id = H5VLget_connector_id(fid);
-    H5VLintrospect_opt_query(obj, connector_id, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_GET_INFO, &supported);
-    H5VLclose(connector_id);
+    H5VLquery_optional(fid, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_GET_INFO, &supported);
+
     if (!supported)
         return;
 
