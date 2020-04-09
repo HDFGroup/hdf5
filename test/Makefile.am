@@ -59,11 +59,12 @@ TEST_PROG= testhdf5 \
            stab gheap evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
            dtypes dsets chunk_info cmpd_dset filter_fail extend direct_chunk \
-           external efc objcopy objcopy_ref links unlink twriteorder big mtime fillval mount \
+           external efc objcopy objcopy_ref links unlink twriteorder big mtime \
+           fillval mount \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
            dangle dtransform reserved cross_read freespace mf vds file_image \
-           unregister cache_logging cork swmr thread_id vol
+           unregister cache_logging cork swmr thread_id vol event_set
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -213,7 +214,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
-    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5
+    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5 \
+    eventset_[0-9].h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

@@ -447,6 +447,7 @@ set (test_CLEANFILES
     tmp_vds_env/vds_src_2.h5
     direct_chunk.h5
     native_vol_test.h5
+    event_set_*.h5
 )
 
 # Remove any output file left over from previous test run

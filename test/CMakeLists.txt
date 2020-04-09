@@ -289,6 +289,7 @@ set (H5_TESTS
     swmr
     thread_id # special link
     vol
+    event_set
 )
 
 macro (ADD_H5_EXE file)
