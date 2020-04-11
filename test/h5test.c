@@ -2043,6 +2043,80 @@ h5_get_version_string(H5F_libver_t libver)
 } /* end of h5_get_version_string */
 
 /*-------------------------------------------------------------------------
+ * Function:    h5_compare_file_bytes()
+ *
+ * Purpose:     Helper function to compare two files byte-for-byte.
+ *
+ * Return:      Success:  0, if files are identical
+ *              Failure: -1, if files differ
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              October, 2018
+ *-------------------------------------------------------------------------
+ */
+int
+h5_compare_file_bytes(char *f1name, char *f2name)
+{
+    FILE    *f1ptr = NULL;  /* two file pointers */
+    FILE    *f2ptr = NULL;
+    hsize_t  f1size = 0; /* size of the files */
+    hsize_t  f2size = 0;
+    char     f1char = 0; /* one char from each file */
+    char     f2char = 0;
+    hsize_t  ii = 0;
+    int      ret_value = 0; /* for error handling */
+
+    /* Open files for reading */
+    f1ptr = fopen(f1name, "r");
+    if (f1ptr == NULL) {
+        HDfprintf(stderr, "Unable to fopen() %s\n", f1name);
+        ret_value = -1;
+        goto done;
+    }
+    f2ptr = fopen(f2name, "r");
+    if (f2ptr == NULL) {
+        HDfprintf(stderr, "Unable to fopen() %s\n", f2name);
+        ret_value = -1;
+        goto done;
+    }
+
+    /* Get the file sizes and verify that they equal */
+    fseek(f1ptr , 0 , SEEK_END);
+    f1size = ftell(f1ptr);
+
+    fseek(f2ptr , 0 , SEEK_END);
+    f2size = ftell(f2ptr);
+
+    if (f1size != f2size) {
+        HDfprintf(stderr, "Files differ in size, %llu vs. %llu\n", f1size, f2size);
+        ret_value = -1;
+        goto done;
+    }
+
+    /* Compare each byte and fail if a difference is found */
+    rewind(f1ptr);
+    rewind(f2ptr);
+    for (ii = 0; ii < f1size; ii++) {
+        fread(&f1char, 1, 1, f1ptr);
+        fread(&f2char, 1, 1, f2ptr);
+        if (f1char != f2char) {
+            HDfprintf(stderr, "Mismatch @ 0x%llX: 0x%X != 0x%X\n", ii, f1char, f2char);
+            ret_value = -1;
+            goto done;
+        }
+    }
+
+done:
+    if (f1ptr) {
+        fclose(f1ptr);
+    }
+    if (f2ptr) {
+        fclose(f2ptr);
+    }
+    return(ret_value);
+} /* end h5_compare_file_bytes() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5_get_srcdir_filename
  *
  * Purpose:     Append the test file name to the srcdir path and return the whole string
@@ -2094,3 +2168,4 @@ const char *H5_get_srcdir(void)
     else
         return(NULL);
 } /* end H5_get_srcdir() */
+

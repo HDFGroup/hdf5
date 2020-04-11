@@ -521,6 +521,12 @@ H5FD_sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set the VFL feature flags that this driver supports */
+    /* Notice: the Mirror VFD Writer currently uses only the Sec2 driver as
+     * the underying driver -- as such, the Mirror VFD implementation copies
+     * these feature flags as its own. Any modifications made here must be
+     * reflected in H5FDmirror.c
+     * -- JOS 2020-01-13
+     */
     if(flags) {
         *flags = 0;
         *flags |= H5FD_FEAT_AGGREGATE_METADATA;     /* OK to aggregate metadata allocations                             */

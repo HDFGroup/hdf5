@@ -699,6 +699,8 @@
 ./src/H5FDint.c
 ./src/H5FDlog.c
 ./src/H5FDlog.h
+./src/H5FDmirror.c
+./src/H5FDmirror.h
 ./src/H5FDmodule.h
 ./src/H5FDmpi.c
 ./src/H5FDmpi.h
@@ -716,6 +718,8 @@
 ./src/H5FDsec2.c
 ./src/H5FDsec2.h
 ./src/H5FDspace.c
+./src/H5FDsplitter.c
+./src/H5FDsplitter.h
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
 ./src/H5FDtest.c
@@ -1158,6 +1162,7 @@
 ./test/memleak_H5O_dtype_decode_helper_H5Odtype.h5
 ./test/mergemsg.h5
 ./test/mf.c
+./test/mirror_vfd.c
 ./test/mount.c
 ./test/mtime.c
 ./test/multi_file_v16-r.h5
@@ -1218,6 +1223,7 @@
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
+./test/test_mirror.sh.in
 ./test/test_usecases.sh.in
 ./test/test_vol_plugin.sh.in
 ./test/testmeta.c
@@ -1261,6 +1267,7 @@
 ./test/unlink.c
 ./test/unregister.c
 ./test/use_append_chunk.c
+./test/use_append_chunk_mirror.c
 ./test/use_append_mchunks.c
 ./test/use_common.c
 ./test/use_disable_mdc_flushes.c
@@ -2817,6 +2824,18 @@
 ./tools/test/perform/sio_standalone.h
 ./tools/test/perform/zip_perf.c
 
+# Utils directory
+./utils/COPYING
+./utils/Makefile.am
+
+# Mirror VFD utilities
+./utils/mirror_vfd/Makefile.am
+./utils/mirror_vfd/mirror_remote.c
+./utils/mirror_vfd/mirror_remote.h
+./utils/mirror_vfd/mirror_server.c
+./utils/mirror_vfd/mirror_server_stop.c
+./utils/mirror_vfd/mirror_writer.c
+
 # high level libraries
 ./hl/COPYING
 ./hl/Makefile.am
@@ -3554,6 +3573,8 @@
 ./tools/test/misc/vds/CMakeLists.txt
 ./tools/test/perform/CMakeLists.txt
 ./tools/test/perform/CMakeTests.cmake
+./utils/CMakeLists.txt
+./utils/mirror_vfd/CMakeLists.txt
 
 # CMake-specific User Scripts
 ./config/cmake/CTestScript.cmake
