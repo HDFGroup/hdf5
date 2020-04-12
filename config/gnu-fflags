@@ -139,7 +139,7 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     # General #
     ###########
 
-    H5_FCFLAGS="$H5_CFLAGS $(load_gnu_arguments gfort-general)"
+    H5_FCFLAGS="$H5_FCFLAGS $(load_gnu_arguments gfort-general)"
 
     #############################
     # Version-specific warnings #
