@@ -70,7 +70,9 @@ void hlog_undefined_##__sym(void) _constructor
 
 #define	HLOG_OUTLET_DECL1(__sym)	extern struct hlog_outlet __sym
 
-#define	HLOG_OUTLET_DECL(__name)	HLOG_OUTLET_DECL1(log_##__name)
+#define HLOG_PREFIX hlog_gbl_
+
+#define	HLOG_OUTLET_DECL(__name)	HLOG_OUTLET_DECL1(HLOG_PREFIX##__name)
 
 #define	HLOG_OUTLET_DEFN(__sym, __name, __parent, __state)	        \
 	struct hlog_outlet __sym = {					\
@@ -81,23 +83,23 @@ void hlog_undefined_##__sym(void) _constructor
 	HLOG_CONSTRUCTOR(__sym)
 
 #define	HLOG_OUTLET_MEDIUM_DEFN(__name, __parent, __state)	        \
-    HLOG_OUTLET_DEFN(log_##__name, #__name, &log_##__parent,		\
+    HLOG_OUTLET_DEFN(HLOG_PREFIX##__name, #__name, &HLOG_PREFIX##__parent,		\
         __state)
 
 #define	HLOG_OUTLET_SHORT_DEFN(__name, __parent)			\
     HLOG_OUTLET_MEDIUM_DEFN(__name, __parent, HLOG_OUTLET_S_PASS)
 
 #define	HLOG_OUTLET_TOP_DEFN(__name)					\
-    HLOG_OUTLET_DEFN(log_##__name, #__name, NULL, HLOG_OUTLET_S_OFF)
+    HLOG_OUTLET_DEFN(HLOG_PREFIX##__name, #__name, NULL, HLOG_OUTLET_S_PASS)
 
 HLOG_OUTLET_DECL(all);
 
 #define hlog(_name, _fmt, ...)    \
-    hlog_impl(&log_##_name, _fmt, __VA_ARGS__)
+    hlog_impl(&HLOG_PREFIX##_name, _fmt, __VA_ARGS__)
 
 #define	hlog_fast(_name, ...)						    \
     do {								    \
-            hlog_outlet_t *_ls0 = &log_##_name;		                    \
+            hlog_outlet_t *_ls0 = &HLOG_PREFIX##_name;		            \
                                                                             \
             if (_ls0->ls_resolved == HLOG_OUTLET_S_OFF)                     \
                 break;                                                      \
