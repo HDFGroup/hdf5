@@ -266,6 +266,7 @@ if test "X-g++" = "X-$cxx_vendor"; then
     # gcc >= 4.9
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 9; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.9)"
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-4.9)"
     fi
 
     # gcc >= 5
@@ -303,13 +304,6 @@ if test "X-g++" = "X-$cxx_vendor"; then
     #################
     cxx_flags_set=yes
 fi
-
-# Version-specific g++ flags
-
-# This flag was left behind when moving warnings flags to common files for 
-# both autotools and CMake.
-#    # Append more extra warning flags that only gcc 4.9+ know about
-#    -Wopenmp-simd"
 
 # Clear cxx info if no flags set
 if test "X$cxx_flags_set" = "X"; then
