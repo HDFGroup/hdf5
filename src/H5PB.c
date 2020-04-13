@@ -1745,14 +1745,27 @@ H5PB_vfd_swmr__update_index(H5F_t *f,
             ie_ptr->delayed_flush        = entry->delay_write_until;
             ie_ptr->moved_to_lower_file  = false;
             ie_ptr->garbage              = false;
+            ie_ptr->length               = (uint32_t)entry->size;
 
         } else {
+            /* If entry->size changed, discard the too-small (too-big?)
+             * shadow region and set the shadow-file page number to 0
+             * so that H5F_update_vfd_swmr_metadata_file() will
+             * allocate a new one.
+             */
+            if (ie_ptr->length != (uint32_t)entry->size) {
+                int ret;
+
+                ret = shadow_image_defer_free(shared, ie_ptr);
+                HDassert(ret == 0);
+
+                ie_ptr->md_file_page_offset = 0;
+                ie_ptr->length = (uint32_t)entry->size;
+            }
 
             idx_ent_modified++;
         }
 
-        /* entry->size could have changed */
-        ie_ptr->length               = (uint32_t)entry->size;
         ie_ptr->entry_ptr            = entry->image_ptr;
         ie_ptr->tick_of_last_change  = tick_num;
         assert(entry->is_dirty);
