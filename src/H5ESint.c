@@ -264,13 +264,13 @@ H5ES_insert(H5ES_t *es, void *request)
     /* Set request for event */
     ev->request = request;
 
-    /* Stitch into the event set's list */
-    if(NULL == es->head)
+    /* Append event onto the event set's list */
+    if(NULL == es->tail)
         es->head = es->tail = ev;
     else {
-        ev->next = es->head;
-        es->head->prev = ev;
-        es->head = ev;
+        ev->prev = es->tail;
+        es->tail->next = ev;
+        es->tail = ev;
     } /* end else */
 
     /* Increment the # of events in set */

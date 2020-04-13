@@ -1169,6 +1169,8 @@
 ./test/mtime.c
 ./test/multi_file_v16-r.h5
 ./test/multi_file_v16-s.h5
+./test/nb_vol_conn.c
+./test/nb_vol_conn.h
 ./test/noencoder.h5
 ./test/none.h5
 ./test/ntypes.c

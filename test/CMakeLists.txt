@@ -219,6 +219,11 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
 )
 
+set (event_set_SOURCES
+    ${HDF5_TEST_SOURCE_DIR}/event_set.c
+    ${HDF5_TEST_SOURCE_DIR}/nb_vol_conn.c
+)
+
 set (H5_TESTS
     testhdf5 # multiple source
     cache
@@ -289,7 +294,7 @@ set (H5_TESTS
     swmr
     thread_id # special link
     vol
-    event_set
+    event_set # multiple source
 )
 
 macro (ADD_H5_EXE file)
@@ -313,6 +318,7 @@ set (H5_TESTS_MULTIPLE
     cache_image
     ttsafe
     thread_id # special link
+    event_set
 )
 # Only build single source tests here
 foreach (h5_test ${H5_TESTS})
@@ -415,6 +421,19 @@ else ()
   target_link_libraries (thread_id PRIVATE ${HDF5_TEST_LIBSH_TARGET} $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>)
 endif ()
 set_target_properties (thread_id PROPERTIES FOLDER test)
+
+#-- Adding test for event_set
+add_executable (event_set ${event_set_SOURCES})
+target_compile_options(event_set PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+target_include_directories (event_set PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+if (NOT BUILD_SHARED_LIBS)
+  TARGET_C_PROPERTIES (event_set STATIC)
+  target_link_libraries (event_set PRIVATE ${HDF5_TEST_LIB_TARGET})
+else ()
+  TARGET_C_PROPERTIES (event_set SHARED)
+  target_link_libraries (event_set PRIVATE ${HDF5_TEST_LIBSH_TARGET})
+endif ()
+set_target_properties (event_set PROPERTIES FOLDER test)
 
 ##############################################################################
 ###           A D D I T I O N A L   T E S T S                              ###
