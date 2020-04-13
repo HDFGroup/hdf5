@@ -127,7 +127,7 @@ H5FL_DEFINE(eot_queue_entry_t);
  *              For VFD SWMR writer:
  *
  *                  --set vfd_swmr_writer_g to TRUE
- *                  --set tick_num_g to 1
+ *                  --set f->shared->tick_num to 1
  *                  --create the metadata file
  *                  --when opening an existing HDF5 file, write header and 
  *                    empty index in the metadata file
@@ -135,7 +135,7 @@ H5FL_DEFINE(eot_queue_entry_t);
  *              For VFD SWMR reader:
  *
  *                  --set vfd_swmr_writer_g to FALSE
- *                  --set tick_num_g to the current tick read from the 
+ *                  --set f->shared->tick_num to the current tick read from the 
  *                    metadata file
  *
  * Return:      Success:        SUCCEED
@@ -243,7 +243,7 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
                        "unable to allocate metadata file index")
 
 
-        /* Set tick_num_g to the current tick read from the metadata file */
+        /* Set tick_num to the current tick read from the metadata file */
         f->shared->mdf_idx_entries_used = f->shared->mdf_idx_len;
         if ( H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, FALSE, 
                                             &f->shared->tick_num, 
@@ -1339,7 +1339,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
                         "unable to update end of tick")
 
-    } /* if ( tmp_tick_num != tick_num_g ) */
+    }
 
     /* Remove the entry from the EOT queue */
     if(H5F_vfd_swmr_remove_entry_eot(f) < 0)
@@ -1520,7 +1520,7 @@ H5F_dump_eot_queue(void)
  * Function:    H5F__vfd_swmr_update_end_of_tick_and_tick_num
  *
  * Purpose:     Update end_of_tick (end_of_tick_g, f->shared->end_of_tick)
- *              Update tick_num (tick_num_g, f->shared->tick_num)
+ *              Update tick_num (f->shared->tick_num)
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -1559,7 +1559,7 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
     tlen_nsecs = f->shared->vfd_swmr_config.tick_len * nanosecs_per_tenth_sec;
 
     /* 
-     *  Update tick_num_g, f->shared->tick_num 
+     *  Update f->shared->tick_num 
      */
     if ( incr_tick_num ) {
 
