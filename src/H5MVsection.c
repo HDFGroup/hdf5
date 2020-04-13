@@ -62,6 +62,8 @@ static herr_t H5MV__sect_merge(H5FS_section_info_t **sect1,
     H5FS_section_info_t *sect2, void *udata);
 static herr_t H5MV__sect_valid(const H5FS_section_class_t *cls,
     const H5FS_section_info_t *sect);
+static H5FS_section_info_t *H5MV__sect_split(H5FS_section_info_t *sect,
+    hsize_t frag_size);
 
 
 
@@ -91,7 +93,7 @@ H5FS_section_class_t H5MV_FSPACE_SECT_CLS_SIMPLE[1] = {{
     H5MV__sect_shrink,		        /* Shrink container w/section   */
     H5MV__sect_free,			    /* Free section                 */
     H5MV__sect_valid,			    /* Check validity of section    */
-    NULL,			                /* Split section node for alignment */
+    H5MV__sect_split,			    /* Split section node for alignment */
     NULL,				            /* Dump debugging for section   */
 }};
 
@@ -179,29 +181,6 @@ H5MV__sect_free(H5FS_section_info_t *_sect)
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5MV__sect_free() */
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5MV__sect_valid
- *
- * Purpose:	    Check the validity of a section
- *
- * Return:	    Success:	non-negative
- *              Failure:	negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5MV__sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5FS_section_info_t *_sect)
-{
-    const H5MV_free_section_t *sect = (const H5MV_free_section_t *)_sect;   /* File free section */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Check arguments. */
-    HDassert(sect);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-}   /* H5MV__sect_valid() */
 
 
 /*-------------------------------------------------------------------------
@@ -359,3 +338,57 @@ H5MV__sect_shrink(H5FS_section_info_t **_sect, void *_udata)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MV__sect_shrink() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MV__sect_valid
+ *
+ * Purpose:	    Check the validity of a section
+ *
+ * Return:	    Success:	non-negative
+ *              Failure:	negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5MV__sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5FS_section_info_t *_sect)
+{
+    const H5MV_free_section_t *sect = (const H5MV_free_section_t *)_sect;   /* File free section */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments. */
+    HDassert(sect);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}   /* H5MV__sect_valid() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MV__sect_split
+ *
+ * Purpose: Split SECT into 2 sections: fragment for alignment & the aligned section
+ *          SECT's addr and size are updated to point to the aligned section
+ *
+ * Return:  Success:    the fragment for aligning sect
+ *          Failure:    null
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5FS_section_info_t *
+H5MV__sect_split(H5FS_section_info_t *sect, hsize_t frag_size)
+{
+    H5MV_free_section_t *ret_value = NULL;      /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Allocate space for new section */
+    if(NULL == (ret_value = H5MV__sect_new(sect->addr, frag_size)))
+       HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't initialize free space section")
+
+    /* Set new section's info */
+    sect->addr += frag_size;
+    sect->size -= frag_size;
+
+done:
+    FUNC_LEAVE_NOAPI((H5FS_section_info_t *)ret_value)
+} /* end H5MV__sect_split() */
