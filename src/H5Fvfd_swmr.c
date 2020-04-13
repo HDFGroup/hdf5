@@ -738,6 +738,49 @@ done:
 
 } /* H5F_vfd_swmr_writer__prep_for_flush_or_close() */
 
+#if 0
+static int
+clean_shadow_index(H5F_t *f, uint32_t nentries,
+    H5FD_vfd_swmr_idx_entry_t *idx, uint32_t *ndeletedp)
+{
+    H5F_shared_t *shared = f->shared;
+    uint32_t i, j, ndeleted, max_lag = shared->vfd_swmr_config.max_lag;
+    uint64_t tick_num = shared->tick_num;
+    H5FD_vfd_swmr_idx_entry_t *ie;
+
+    for (i = j = ndeleted = 0; i < nentries; i++) {
+        ie = &idx[i];
+
+        if (ie->clean) {
+            hlog_fast(shadow_index_reclaim,
+                "Clean shadow index slot %" PRIu32 " last flush %" PRIu64 " ticks ago", i, tick_num - ie->tick_of_last_flush);
+        }
+
+        if (ie->clean && ie->tick_of_last_flush + max_lag < tick_num) {
+
+            assert(!ie->garbage);
+            assert(ie->entry_ptr == NULL);
+
+            hlog_fast(shadow_index_reclaim,
+                "Reclaiming shadow index slot %" PRIu32, i);
+
+            if (ie->md_file_page_offset != 0) {
+                if (shadow_image_defer_free(shared, ie) == -1)
+                    return -1;
+                ie->md_file_page_offset = 0;
+            }
+            ndeleted++;
+            continue;
+        }
+        if (j != i)
+            idx[j] = *ie;
+        j++;
+    }
+    *ndeletedp = ndeleted;
+    return 0;
+}
+#endif
+
 
 /*-------------------------------------------------------------------------
  *
@@ -802,6 +845,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
 {
     uint32_t idx_entries_added = 0;
     uint32_t idx_entries_modified = 0;
+    uint32_t idx_entries_removed = 0;
     uint32_t idx_ent_not_in_tl = 0;
     uint32_t idx_ent_not_in_tl_flushed = 0;
     herr_t ret_value = SUCCEED;              /* Return value */
@@ -894,10 +938,11 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
      *    removed -- specifically entries that have been written 
      *    to the HDF5 file more than max_lag ticks ago, and haven't
      *    been modified since. 
-     *
-     *    (This is an optimization -- address it later)
      */
-
+#if 0
+    clean_shadow_index(f, f->shared->mdf_idx_entries_used + idx_entries_added,
+        f->shared->mdf_idx, &idx_entries_removed);
+#endif
 
     /* 6) Update the metadata file.  Must do this before we 
      *    release the tick list, as otherwise the page buffer 
@@ -907,7 +952,8 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
      *    sorted order.
      */
     if (H5F_update_vfd_swmr_metadata_file(f,
-            f->shared->mdf_idx_entries_used + idx_entries_added,
+            f->shared->mdf_idx_entries_used + idx_entries_added -
+                idx_entries_removed,
             f->shared->mdf_idx) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't update MD file")
 
@@ -915,6 +961,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
      * f->shared->mdf_idx_entries_used.
      */
     f->shared->mdf_idx_entries_used += idx_entries_added;
+    f->shared->mdf_idx_entries_used -= idx_entries_removed;
 
     HDassert(f->shared->mdf_idx_entries_used <= f->shared->mdf_idx_len);
 
