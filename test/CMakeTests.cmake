@@ -446,6 +446,10 @@ set (test_CLEANFILES
     vds_swmr_src_*.h5
     tmp_vds_env/vds_src_2.h5
     direct_chunk.h5
+    splitter*.h5
+    splitter.log
+    mirror_rw/*
+    mirror_wo/*
     native_vol_test.h5
     event_set_*.h5
 )
