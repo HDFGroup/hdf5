@@ -93,6 +93,7 @@ HLOG_OUTLET_MEDIUM_DEFN(noisy_shadow_defrees, shadow_defrees,
     HLOG_OUTLET_S_OFF);
 HLOG_OUTLET_SHORT_DEFN(shadow_index_enlarge, swmr);
 HLOG_OUTLET_SHORT_DEFN(shadow_index_reclaim, swmr);
+HLOG_OUTLET_SHORT_DEFN(tick, swmr);
 
 /*
  *  The head of the end of tick queue (EOT queue) for files opened in either
@@ -252,6 +253,10 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
 
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL, \
                         "unable to load/decode metadata file")
+
+
+        hlog_fast(tick, "%s first tick %" PRIu64,
+            __func__, f->shared->tick_num);
 
 #if 0 /* JRM */
         HDfprintf(stderr, 
@@ -1148,11 +1153,12 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, \
                     "error in retrieving tick_num from driver")
 
-#if 0 /* JRM */
-    HDfprintf(stderr,
-        "--- reader EOT curr/new tick = %" PRIu64 "/%" PRIu64 " ---\n",
-        tick_num_g, tmp_tick_num);
-#endif /* JRM */
+    hlog_fast(tick,
+        "%s last tick %" PRIu64 " new tick %" PRIu64,
+        __func__, f->shared->tick_num, tmp_tick_num);
+
+    assert(tmp_tick_num <
+           f->shared->tick_num + f->shared->vfd_swmr_config.max_lag);
 
     if ( tmp_tick_num != f->shared->tick_num ) {
 
@@ -1564,6 +1570,9 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
     if ( incr_tick_num ) {
 
         f->shared->tick_num++;
+
+        hlog_fast(tick, "%s tick %" PRIu64 " -> %" PRIu64,
+            __func__, f->shared->tick_num - 1, f->shared->tick_num);
 
         if ( H5PB_vfd_swmr__set_tick(f->shared) < 0 )
 
