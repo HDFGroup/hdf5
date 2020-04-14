@@ -15,19 +15,20 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#define H5D_PACKAGE        /* suppress error about including H5Dpkg      */
 
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dpkg.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Sprivate.h"		/* Dataspace			  	*/
+#include "H5private.h"      /* Generic Functions        */
+#include "H5Dpkg.h"         /* Dataset functions        */
+#include "H5Eprivate.h"     /* Error handling           */
+#include "H5FLprivate.h"    /* Free Lists               */
+#include "H5Iprivate.h"     /* IDs                      */
+#include "H5MMprivate.h"    /* Memory management        */
+#include "H5Sprivate.h"     /* Dataspace                */
+#include "H5Tprivate.h"     /* Datatype                 */
 
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
@@ -91,43 +92,43 @@ H5FL_BLK_DEFINE(type_conv);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dread
+ * Function:    H5Dread
  *
- * Purpose:	Reads (part of) a DSET from the file into application
- *		memory BUF. The part of the dataset to read is defined with
- *		MEM_SPACE_ID and FILE_SPACE_ID.	 The data points are
- *		converted from their file type to the MEM_TYPE_ID specified.
- *		Additional miscellaneous data transfer properties can be
- *		passed to this function with the PLIST_ID argument.
+ * Purpose:    Reads (part of) a DSET from the file into application
+ *        memory BUF. The part of the dataset to read is defined with
+ *        MEM_SPACE_ID and FILE_SPACE_ID.     The data points are
+ *        converted from their file type to the MEM_TYPE_ID specified.
+ *        Additional miscellaneous data transfer properties can be
+ *        passed to this function with the PLIST_ID argument.
  *
- *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *		that the entire file data space is to be referenced.
+ *        The FILE_SPACE_ID can be the constant H5S_ALL which indicates
+ *        that the entire file data space is to be referenced.
  *
- *		The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *		the memory data space is the same as the file data space
- *		defined when the dataset was created.
+ *        The MEM_SPACE_ID can be the constant H5S_ALL in which case
+ *        the memory data space is the same as the file data space
+ *        defined when the dataset was created.
  *
- *		The number of elements in the memory data space must match
- *		the number of elements in the file data space.
+ *        The number of elements in the memory data space must match
+ *        the number of elements in the file data space.
  *
- *		The PLIST_ID can be the constant H5P_DEFAULT in which
- *		case the default data transfer properties are used.
+ *        The PLIST_ID can be the constant H5P_DEFAULT in which
+ *        case the default data transfer properties are used.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:    Robb Matzke
+ *        Thursday, December  4, 1997
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
+    hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
-    H5D_t		   *dset = NULL;
-    H5P_genplist_t 	   *plist;      /* Property list pointer */
-    const H5S_t		   *mem_space = NULL;
-    const H5S_t		   *file_space = NULL;
+    H5D_t           *dset = NULL;
+    H5P_genplist_t        *plist;      /* Property list pointer */
+    const H5S_t           *mem_space = NULL;
+    const H5S_t           *file_space = NULL;
     herr_t                  ret_value = SUCCEED;  /* Return value */
     hsize_t         *direct_offset = NULL;
     hbool_t         direct_read = FALSE;
@@ -229,42 +230,42 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dwrite
+ * Function:    H5Dwrite
  *
- * Purpose:	Writes (part of) a DSET from application memory BUF to the
- *		file.  The part of the dataset to write is defined with the
- *		MEM_SPACE_ID and FILE_SPACE_ID arguments. The data points
- *		are converted from their current type (MEM_TYPE_ID) to their
- *		file datatype.	 Additional miscellaneous data transfer
- *		properties can be passed to this function with the
- *		PLIST_ID argument.
+ * Purpose:    Writes (part of) a DSET from application memory BUF to the
+ *        file.  The part of the dataset to write is defined with the
+ *        MEM_SPACE_ID and FILE_SPACE_ID arguments. The data points
+ *        are converted from their current type (MEM_TYPE_ID) to their
+ *        file datatype.     Additional miscellaneous data transfer
+ *        properties can be passed to this function with the
+ *        PLIST_ID argument.
  *
- *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *		that the entire file data space is to be referenced.
+ *        The FILE_SPACE_ID can be the constant H5S_ALL which indicates
+ *        that the entire file data space is to be referenced.
  *
- *		The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *		the memory data space is the same as the file data space
- *		defined when the dataset was created.
+ *        The MEM_SPACE_ID can be the constant H5S_ALL in which case
+ *        the memory data space is the same as the file data space
+ *        defined when the dataset was created.
  *
- *		The number of elements in the memory data space must match
- *		the number of elements in the file data space.
+ *        The number of elements in the memory data space must match
+ *        the number of elements in the file data space.
  *
- *		The PLIST_ID can be the constant H5P_DEFAULT in which
- *		case the default data transfer properties are used.
+ *        The PLIST_ID can be the constant H5P_DEFAULT in which
+ *        case the default data transfer properties are used.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:    Robb Matzke
+ *        Thursday, December  4, 1997
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
+    hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
-    H5D_t		   *dset = NULL;
-    H5P_genplist_t 	   *plist;      /* Property list pointer */
+    H5D_t           *dset = NULL;
+    H5P_genplist_t        *plist;      /* Property list pointer */
     const H5S_t            *mem_space = NULL;
     const H5S_t            *file_space = NULL;
     hbool_t                 direct_write = FALSE;
@@ -298,7 +299,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* Check dataspace selections if this is not a direct write */
     if(!direct_write) {
         if(mem_space_id < 0 || file_space_id < 0)
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
         if(H5S_ALL != mem_space_id) {
             if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
@@ -327,14 +328,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__pre_write
+ * Function:    H5D__pre_write
  *
- * Purpose:	Preparation for writing data.
+ * Purpose:    Preparation for writing data.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		2 November 2012
+ * Programmer:    Raymond Lu
+ *        2 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -409,21 +410,21 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__read
+ * Function:    H5D__read
  *
- * Purpose:	Reads (part of) a DATASET into application memory BUF. See
- *		H5Dread() for complete details.
+ * Purpose:    Reads (part of) a DATASET into application memory BUF. See
+ *        H5Dread() for complete details.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:    Robb Matzke
+ *        Thursday, December  4, 1997
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
-	 const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
+    const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
 {
     H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
     H5D_io_info_t io_info;              /* Dataset I/O info     */
@@ -443,8 +444,8 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-    hssize_t	snelmts;                /*total number of elmts	(signed) */
-    hsize_t	nelmts;                 /*total number of elmts	*/
+    hssize_t    snelmts;                /*total number of elmts    (signed) */
+    hsize_t    nelmts;                 /*total number of elmts    */
 #ifdef H5_HAVE_PARALLEL
     hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
 #endif /*H5_HAVE_PARALLEL*/
@@ -452,7 +453,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
-    herr_t	ret_value = SUCCEED;	/* Return value	*/
+    herr_t    ret_value = SUCCEED;    /* Return value    */
 
     FUNC_ENTER_PACKAGE
 
@@ -464,7 +465,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(!mem_space)
         mem_space = file_space;
     if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dst dataspace has invalid selection")
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dst dataspace has invalid selection")
     H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
 
     /* Fill the DXPL cache values for later use */
@@ -496,10 +497,10 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         if(nelmts > 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
-	/* If the buffer is nil, and 0 element is selected, make a fake buffer.
-	 * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-	 * doesn't support this feature.
-	 */
+    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+    * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+    * doesn't support this feature.
+    */
         buf = &fake_char;
     } /* end if */
 
@@ -630,21 +631,21 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__write
+ * Function:    H5D__write
  *
- * Purpose:	Writes (part of) a DATASET to a file from application memory
- *		BUF. See H5Dwrite() for complete details.
+ * Purpose:    Writes (part of) a DATASET to a file from application memory
+ *        BUF. See H5Dwrite() for complete details.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:    Robb Matzke
+ *        Thursday, December  4, 1997
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
-	  const H5S_t *file_space, hid_t dxpl_id, const void *buf)
+    const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {
     H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
     H5D_io_info_t io_info;              /* Dataset I/O info     */
@@ -664,8 +665,8 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                                         /* projected mem space must be discarded at the   */
                                         /* end of the function to avoid a memory leak.    */
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-    hssize_t	snelmts;                /*total number of elmts	(signed) */
-    hsize_t	nelmts;                 /*total number of elmts	*/
+    hssize_t    snelmts;                /*total number of elmts    (signed) */
+    hsize_t    nelmts;                 /*total number of elmts    */
 #ifdef H5_HAVE_PARALLEL
     hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
 #endif /*H5_HAVE_PARALLEL*/
@@ -673,7 +674,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
-    herr_t	ret_value = SUCCEED;	/* Return value	*/
+    herr_t    ret_value = SUCCEED;    /* Return value    */
 
     FUNC_ENTER_STATIC
 
@@ -690,7 +691,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Check if we are allowed to write to this file */
     if(0 == (H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
+    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Fill the DXPL cache values for later use */
     if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
@@ -742,12 +743,12 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         mem_space = file_space;
 
     if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
     H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
 
     /* Make certain that the number of elements in each selection is the same */
     if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
 
     /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
     if(NULL == buf) {
@@ -755,10 +756,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         if(nelmts > 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
-	/* If the buffer is nil, and 0 element is selected, make a fake buffer.
-	 * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-	 * doesn't support this feature.
-	 */
+    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+    * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+    * doesn't support this feature.
+    */
         buf = &fake_char;
     } /* end if */
 
@@ -817,7 +818,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         else
             full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
 
- 	/* Allocate storage */
+    /* Allocate storage */
         if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
     } /* end if */
@@ -888,15 +889,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__ioinfo_init
+ * Function:    H5D__ioinfo_init
  *
- * Purpose:	Routine for determining correct I/O operations for
+ * Purpose:    Routine for determining correct I/O operations for
  *              each I/O action.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, September 30, 2004
+ * Programmer:    Quincey Koziol
+ *        Thursday, September 30, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -957,15 +958,15 @@ const
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__typeinfo_init
+ * Function:    H5D__typeinfo_init
  *
- * Purpose:	Routine for determining correct datatype information for
+ * Purpose:    Routine for determining correct datatype information for
  *              each I/O action.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, March  4, 2008
+ * Programmer:    Quincey Koziol
+ *        Tuesday, March  4, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -974,9 +975,9 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id, hid_t mem_type_id, hbool_t do_write,
     H5D_type_info_t *type_info)
 {
-    const H5T_t	*src_type;              /* Source datatype */
-    const H5T_t	*dst_type;              /* Destination datatype */
-    herr_t ret_value = SUCCEED;	        /* Return value	*/
+    const H5T_t    *src_type;              /* Source datatype */
+    const H5T_t    *dst_type;              /* Destination datatype */
+    herr_t ret_value = SUCCEED;            /* Return value    */
 
     FUNC_ENTER_STATIC
 
@@ -989,7 +990,7 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
 
     /* Get the memory & dataset datatypes */
     if(NULL == (type_info->mem_type = (const H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     type_info->dset_type = dset->shared->type;
 
     if(do_write) {
@@ -1014,7 +1015,7 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
      * turns off background preservation.
      */
     if(NULL == (type_info->tpath = H5T_path_find(src_type, dst_type, NULL, NULL, dxpl_id, FALSE)))
-	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
+    HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
 
     /* Precompute some useful information */
     type_info->src_type_size = H5T_get_size(src_type);
@@ -1027,7 +1028,7 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
         type_info->need_bkg = H5T_BKG_NO;
     } /* end if */
     else {
-        size_t	target_size;		/* Desired buffer size	*/
+        size_t    target_size;        /* Desired buffer size    */
 
         /* Check if the datatypes are compound subsets of one another */
         type_info->cmpd_subset = H5T_path_compound_subset(type_info->tpath);
@@ -1091,7 +1092,7 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
             type_info->tconv_buf_allocated = TRUE;
         } /* end if */
         if(type_info->need_bkg && NULL == (type_info->bkg_buf = (uint8_t *)dxpl_cache->bkgr_buf)) {
-            size_t	bkg_size;		/* Desired background buffer size	*/
+            size_t    bkg_size;        /* Desired background buffer size    */
 
             /* Compute the background buffer size */
             /* (don't try to use buffers smaller than the default size) */
@@ -1114,14 +1115,14 @@ done:
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__ioinfo_adjust
+ * Function:    H5D__ioinfo_adjust
  *
- * Purpose:	Adjust operation's I/O info for any parallel I/O
+ * Purpose:    Adjust operation's I/O info for any parallel I/O
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March 27, 2008
+ * Programmer:    Quincey Koziol
+ *        Thursday, March 27, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1133,7 +1134,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
     H5P_genplist_t *dx_plist;       /* Data transer property list */
     H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode; /* performed chunk optimization */
     H5D_mpio_actual_io_mode_t actual_io_mode; /* performed io mode */
-    herr_t	ret_value = SUCCEED;	/* Return value	*/
+    herr_t    ret_value = SUCCEED;    /* Return value    */
 
     FUNC_ENTER_STATIC
 
@@ -1206,22 +1207,22 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__ioinfo_term
+ * Function:    H5D__ioinfo_term
  *
- * Purpose:	Common logic for terminating an I/O info object
+ * Purpose:    Common logic for terminating an I/O info object
  *              (Only used for restoring MPI transfer mode currently)
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Friday, February  6, 2004
+ * Programmer:    Quincey Koziol
+ *        Friday, February  6, 2004
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__ioinfo_term(H5D_io_info_t *io_info)
 {
-    herr_t	ret_value = SUCCEED;	/*return value		*/
+    herr_t    ret_value = SUCCEED;    /*return value        */
 
     FUNC_ENTER_STATIC
 
@@ -1262,14 +1263,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__typeinfo_term
+ * Function:    H5D__typeinfo_term
  *
- * Purpose:	Common logic for terminating a type info object
+ * Purpose:    Common logic for terminating a type info object
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March  6, 2008
+ * Programmer:    Quincey Koziol
+ *        Thursday, March  6, 2008
  *
  *-------------------------------------------------------------------------
  */

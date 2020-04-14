@@ -2131,7 +2131,6 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
 
     /* Check for a "regular" hyperslab selection */
     if(space->select.sel_info.hslab->diminfo_valid) {
-        unsigned u;     /* Local counting variable */
 
         /* Encode number of hyperslabs */
         H5_CHECK_OVERFLOW(block_count, hsize_t, uint32_t);

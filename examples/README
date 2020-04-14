@@ -2,7 +2,7 @@
 
 This directory contains example programs for the installed APIs and scripts to 
 compile and run them.  Examples in the c and hl/c subdirectories are always 
-installed, and those in fortan, hl/fortran, c++ and hl/c++ will be installed 
+installed, and those in fortran, hl/fortran, c++ and hl/c++ will be installed 
 when fortran or c++ are enabled.
 
 Running the run-all-ex.sh script in this directory will run the scripts and in 

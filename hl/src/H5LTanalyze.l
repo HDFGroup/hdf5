@@ -11,11 +11,23 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* NOTE!
+ *
+ * If you make any changes to H5LTanalyze.l, please run bin/genparser to
+ * recreate the output files.
+ */
+
 %{
 #include <stdlib.h>
 #include <string.h>
 #include <hdf5.h>
 #include "H5LTparse.h"
+
+/* Turn off suggest const & malloc attribute warnings in gcc */
+#if defined __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=malloc"
+#endif 
 
 int my_yyinput(char *, int);
 #undef YY_INPUT

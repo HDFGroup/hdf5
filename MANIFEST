@@ -31,8 +31,9 @@
 ./m4/ltversion.m4                       _DO_NOT_DISTRIBUTE_
 ./m4/lt~obsolete.m4                     _DO_NOT_DISTRIBUTE_
 ./m4/ltoptions.m4                       _DO_NOT_DISTRIBUTE_
-./m4/aclocal_cxx.m4
-./m4/aclocal_fc.m4
+./m4/aclocal_cxx.m4                     _DO_NOT_DISTRIBUTE_
+./m4/aclocal_fc.m4                      _DO_NOT_DISTRIBUTE_
+./m4/aclocal_fc.f90
 ./README.txt
 ./aclocal.m4
 ./acsite.m4
@@ -101,30 +102,79 @@
 ./config/cce-flags
 ./config/commence.am
 ./config/conclude.am
-./config/cygwin
 ./config/examples.am
 ./config/freebsd
+./config/gnu-cxxflags
 ./config/gnu-fflags
 ./config/gnu-flags
+./config/cygwin
 ./config/ibm-aix
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
 ./config/linux-gnu
 ./config/linux-gnuaout
+./config/linux-gnueabihf
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/lt_vers.am
 ./config/Makefile.am.blank
+./config/netbsd
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
 
 #warnings files for both autotools and CMake
-./config/gnu-warnings-general
-./config/gnu-warnings-developer-general
-./config/gnu-warnings-no-developer-general
-./config/intel-warnings-general
+./config/clang-warnings/developer-general
+./config/clang-warnings/error-general
+./config/clang-warnings/general
+./config/clang-warnings/no-developer-general
+./config/gnu-warnings/4.2-4.3
+./config/gnu-warnings/4.2-4.4
+./config/gnu-warnings/4.2-4.6
+./config/gnu-warnings/4.2-4.last
+./config/gnu-warnings/4.3
+./config/gnu-warnings/4.4
+./config/gnu-warnings/4.5
+./config/gnu-warnings/4.5-4.6
+./config/gnu-warnings/4.6
+./config/gnu-warnings/4.7
+./config/gnu-warnings/4.8
+./config/gnu-warnings/4.9
+./config/gnu-warnings/5
+./config/gnu-warnings/6
+./config/gnu-warnings/7
+./config/gnu-warnings/8
+./config/gnu-warnings/9
+./config/gnu-warnings/cxx-general
+./config/gnu-warnings/cxx-4.9
+./config/gnu-warnings/developer-4.5
+./config/gnu-warnings/developer-4.6
+./config/gnu-warnings/developer-4.7
+./config/gnu-warnings/developer-4.8
+./config/gnu-warnings/developer-7
+./config/gnu-warnings/developer-8
+./config/gnu-warnings/developer-general
+./config/gnu-warnings/error-5
+./config/gnu-warnings/error-8
+./config/gnu-warnings/error-general
+./config/gnu-warnings/general
+./config/gnu-warnings/gfort-general
+./config/gnu-warnings/gfort-4.4
+./config/gnu-warnings/gfort-4.5
+./config/gnu-warnings/gfort-4.7
+./config/gnu-warnings/gfort-4.8
+./config/gnu-warnings/gfort-5
+./config/gnu-warnings/gfort-6
+./config/gnu-warnings/gfort-8
+./config/gnu-warnings/no-developer-4.5
+./config/gnu-warnings/no-developer-4.6
+./config/gnu-warnings/no-developer-4.7
+./config/gnu-warnings/no-developer-4.8
+./config/gnu-warnings/no-developer-8
+./config/gnu-warnings/no-developer-general
+./config/intel-warnings/ifort-general
+./config/intel-warnings/general
 
 ./config/site-specific/BlankForm
 
@@ -2388,6 +2438,8 @@
 ./config/cmake/hdf5-config.cmake.in
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDFCompilerFlags.cmake
+./config/cmake/HDFCXXCompilerFlags.cmake
+./config/cmake/HDFFortranCompilerFlags.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/libh5cc.in
