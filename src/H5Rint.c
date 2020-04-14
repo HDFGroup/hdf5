@@ -23,6 +23,7 @@
 /***********/
 #include "H5private.h"          /* Generic Functions                        */
 #include "H5ACprivate.h"        /* Metadata cache                           */
+#include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dprivate.h"         /* Datasets                                 */
 #include "H5Eprivate.h"         /* Error handling                           */
 #include "H5Gprivate.h"         /* Groups                                   */
@@ -77,7 +78,7 @@ static const H5I_class_t H5I_REFERENCE_CLS[1] = {{
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5R_top_package_initialize_s = FALSE;
 
-
+
 /*--------------------------------------------------------------------------
 NAME
    H5R__init_package -- Initialize interface-specific information
@@ -108,7 +109,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__init_package() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5R_top_term_package
@@ -130,7 +131,7 @@ done:
 int
 H5R_top_term_package(void)
 {
-    int	n = 0;
+    int    n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -138,7 +139,7 @@ H5R_top_term_package(void)
         if (H5I_nmembers(H5I_REFERENCE) > 0) {
             (void)H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
             n++;
-	    }
+        }
 
         /* Mark closed */
         if (0 == n)
@@ -148,7 +149,7 @@ H5R_top_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5R_top_term_package() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5R_term_package
@@ -172,7 +173,7 @@ H5R_top_term_package(void)
 int
 H5R_term_package(void)
 {
-    int	n = 0;
+    int    n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -192,7 +193,7 @@ H5R_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5R_term_package() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5R__create
@@ -224,9 +225,9 @@ herr_t
 H5R__create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type,
     H5S_t *space)
 {
-    H5G_loc_t	obj_loc;		/* Group hier. location of object */
-    H5G_name_t  path;            	/* Object group hier. path */
-    H5O_loc_t   oloc;            	/* Object object location */
+    H5G_loc_t    obj_loc;        /* Group hier. location of object */
+    H5G_name_t  path;                /* Object group hier. path */
+    H5O_loc_t   oloc;                /* Object object location */
     hbool_t     obj_found = FALSE;      /* Object location found */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -341,7 +342,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5R__create() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5R__dereference
@@ -380,7 +381,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type,
     H5O_loc_t oloc;             /* Object location */
     H5G_name_t path;            /* Path of object */
     H5G_loc_t loc;              /* Group location */
-    unsigned rc;		/* Reference count of object */
+    unsigned rc;        /* Reference count of object */
     H5O_type_t obj_type;        /* Type of object */
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
@@ -510,7 +511,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5R__dereference() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5R__get_region
@@ -540,7 +541,7 @@ H5R__get_region(H5F_t *file, const void *_ref)
     H5HG_t hobjid;              /* Heap object ID */
     uint8_t *buf = NULL;        /* Buffer to store serialized selection in */
     H5S_t *ds = NULL;           /* Temporary pointer to dataspace */
-    H5S_t *ret_value = NULL;	/* Return value */
+    H5S_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -587,7 +588,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }  /* end H5R__get_region() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5R__get_obj_type
@@ -598,7 +599,7 @@ done:
         H5F_t *file;        IN: File the object being dereferenced is within
         H5R_type_t ref_type;    IN: Type of reference to query
         void *ref;          IN: Reference to query.
-        H5O_type_t *obj_type;	OUT: The type of the object, set on success
+        H5O_type_t *obj_type;    OUT: The type of the object, set on success
 
  RETURNS
     Non-negative on success/Negative on failure
@@ -615,7 +616,7 @@ H5R__get_obj_type(H5F_t *file, H5R_type_t ref_type, const void *_ref,
     H5O_type_t *obj_type)
 {
     H5O_loc_t oloc;             /* Object location */
-    unsigned rc;		/* Reference count of object    */
+    unsigned rc;        /* Reference count of object    */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -676,7 +677,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5R__get_obj_type() */
 
-
+
 /*--------------------------------------------------------------------------
  NAME
     H5R__get_name
