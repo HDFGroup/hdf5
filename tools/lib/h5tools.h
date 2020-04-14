@@ -542,7 +542,7 @@ typedef struct h5tools_context_t {
 typedef enum {
     VFD_BY_NAME,
     VOL_BY_NAME,
-    VOL_BY_ID
+    VOL_BY_VALUE
 } h5tools_fapl_info_type_t;
 
 typedef struct h5tools_fapl_info_t {
@@ -553,8 +553,8 @@ typedef struct h5tools_fapl_info_t {
 
     /* Field specifying either the driver's/connector's name or ID */
     union {
-        const char *name;
-        long        id;
+        const char          *name;      /* VOL and VFD */
+        H5VL_class_value_t  value;      /* VOL only */
     } u;
 } h5tools_fapl_info_t;
 
