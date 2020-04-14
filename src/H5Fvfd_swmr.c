@@ -1316,15 +1316,17 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
             haddr_t page_addr =
                 (haddr_t)(removed_page[i] *
                                   f->shared->pb_ptr->page_size);
-            if ( H5PB_remove_entry(f->shared, page_addr) < 0 )
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
-                            "remove page buffer entry failed")
+            if (H5PB_remove_entry(f->shared, page_addr) < 0) {
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL,
+                            "remove page buffer entry failed");
+            }
         }
         for (i = 0; i < entries_removed + entries_changed; i++) {
-           if ( H5C_evict_or_refresh_all_entries_in_page(f,
-                               removed_page[i], tmp_tick_num) < 0 )
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, \
-                    "evict or refresh stale MDC entries failed")
+            if (H5C_evict_or_refresh_all_entries_in_page(f,
+                    removed_page[i], tmp_tick_num) < 0) {
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL,
+                    "evict or refresh stale MDC entries failed");
+            }
         }
 
 #if 0 /* JRM */
