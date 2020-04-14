@@ -489,8 +489,8 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries,
                         "error in allocating space from the metadata file")
 
         hlog_fast(noisy_shadow_defrees,
-            "shadow index %" PRIu32 " page offset %" PRIu64 " -> %" PRIuHADDR, i,
-            index[i].md_file_page_offset * f->shared->fs_page_size, md_addr);
+            "shadow index %" PRIu32 " page offset %" PRIu64 " -> %" PRIuHADDR,
+            i, index[i].md_file_page_offset * f->shared->fs_page_size, md_addr);
 
         HDassert(md_addr % f->shared->fs_page_size == 0);
 
