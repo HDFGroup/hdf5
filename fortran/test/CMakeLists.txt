@@ -283,7 +283,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   )
   add_dependencies (fflush1 ${HDF5_F90_TEST_LIBSH_TARGET})
 else ()
-  target_include_directories (fflush1 PRIVATE${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  target_include_directories (fflush1 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
   target_link_libraries (fflush1 PRIVATE ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (fflush1 PROPERTIES
       LINKER_LANGUAGE Fortran

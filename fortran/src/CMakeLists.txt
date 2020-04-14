@@ -43,22 +43,15 @@ set_target_properties (H5test_FortranHavekind PROPERTIES
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
-#set_property(TARGET H5test_FortranHavekind APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#)
-#target_compile_definitions(H5test_FortranHavekind
-#    PRIVATE $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
-#)
+#set_property(TARGET H5test_FortranHavekind APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#target_compile_definitions(H5test_FortranHavekind PRIVATE $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>)
 if (MSVC)
   set_target_properties (H5test_FortranHavekind PROPERTIES
       LINK_FLAGS "/SUBSYSTEM:CONSOLE"
       COMPILE_FLAGS "/MT"
   )
 endif ()
-target_include_directories(H5test_FortranHavekind
-    PRIVATE
-        "${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR}"
-)
+target_include_directories(H5test_FortranHavekind PRIVATE "${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR}")
 
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5fortran_detect.f90
