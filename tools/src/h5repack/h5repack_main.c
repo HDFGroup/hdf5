@@ -62,10 +62,10 @@ static struct long_options l_opts[] = {
     { "sort_by",             require_arg, 'q' },
     { "sort_order",          require_arg, 'z' },
     { "enable-error-stack",  no_arg,      'E' },
-    { "src-vol-id",          require_arg, '1' },
+    { "src-vol-value",       require_arg, '1' },
     { "src-vol-name",        require_arg, '2' },
     { "src-vol-info",        require_arg, '3' },
-    { "dst-vol-id",          require_arg, '4' },
+    { "dst-vol-value",       require_arg, '4' },
     { "dst-vol-name",        require_arg, '5' },
     { "dst-vol-info",        require_arg, '6' },
     { NULL, 0, '\0' }
