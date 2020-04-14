@@ -76,7 +76,7 @@ static void test_get_objname()
         // Attempted to create a same group to generate a failure, which should
         // be caught with sub-class exception clause, if available.
         try {
-            Group grp1_2 = grp1.createGroup(GROUP1_2, 0);
+            grp1_2 = grp1.createGroup(GROUP1_2, 0);
         }
         catch (GroupIException& E)
         {} // do nothing, exception expected
@@ -301,7 +301,7 @@ static void test_get_objtype()
         issue_fail_msg("test_get_objtype", __LINE__, __FILE__);
     }
 }   // test_get_objtype
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_open_object_header
  *
@@ -435,7 +435,7 @@ static void test_open_object_header()
         issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } /* test_open_object_header() */
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_is_valid
  *
