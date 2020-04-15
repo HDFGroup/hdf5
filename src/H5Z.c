@@ -880,46 +880,59 @@ done:
  *
  * Purpose:  If one filter optional, this filter can be ignored.
  *
+ * Description:
+ *      When filter is optional (H5Z_FLAG_OPTIONAL is provided,) if any of
+ *      the following conditions is met, the filter will be ignored:
+ *          - dataspace is either H5S_NULL or H5S_SCALAR
+ *          - datatype is variable-length (string or non-string)
+ *
  * Return:   Non-negative(TRUE/FALSE) on success
- *           0 
  *           Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Z_has_optional_filter(hid_t dcpl_id)
-
-/*H5Z_can_ignore(hid_t dcpl_id, hid_t type_id) */
-/*H5Z_can_ignore(hid_t dcpl_id, hid_t type_id,const H5S_t *space) */
+H5Z_has_optional_filter(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
 {
-    htri_t ret_value = FALSE;   /* Return value */
-    H5P_genplist_t     *dc_plist;           /* Dataset creation property list object */
-    H5O_pline_t     dcpl_pline;     /* Object's I/O pipeline information */
+    H5S_class_t     space_class;        /* To check class of space */
+    H5T_class_t     type_class;         /* To check if type is VL */
+    htri_t          ret_value = FALSE;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    space_class = H5S_GET_EXTENT_TYPE(space);
+    type_class = H5T_get_class(type, FALSE);
 
-    if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list")
+    /* Only consider optional filter with these conditions */
+    if(H5S_NULL == space_class || H5S_SCALAR == space_class
+       || H5T_VLEN == type_class
+       || (H5T_STRING == type_class && TRUE == H5T_is_variable_str(type))) {
 
-    /* Get I/O pipeline information */
-    if (H5P_peek(dc_plist, H5O_CRT_PIPELINE_NAME, &dcpl_pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter")
+        H5P_genplist_t *dc_plist;   /* Dataset creation property list object */
+        H5O_pline_t     dcpl_pline; /* Object's I/O pipeline information */
 
-    if (dcpl_pline.nused > 0) {
-        size_t u;
-        for ( u = 0; u<dcpl_pline.nused;u++) {
-            if(dcpl_pline.filter[u].flags & H5Z_FLAG_OPTIONAL) {
-                ret_value = TRUE;
-                break;
-            }         
+        if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list")
+
+        /* Get I/O pipeline information */
+        if(H5P_peek(dc_plist, H5O_CRT_PIPELINE_NAME, &dcpl_pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter")
+
+        /* If there are any filters, check if there is an optional filter */
+        if(dcpl_pline.nused > 0) {
+            size_t u;
+            for (u = 0; (u < dcpl_pline.nused) && (ret_value == FALSE); u++) {
+                if(dcpl_pline.filter[u].flags & H5Z_FLAG_OPTIONAL) {
+                    ret_value = TRUE;
+                    break;
+                }
+            }
         }
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z_can_apply() */
-
+} /* end H5Z_has_optional_filter() */
 
 
 /*-------------------------------------------------------------------------
