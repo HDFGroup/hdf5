@@ -47,12 +47,12 @@ guide to the syntax.
 10. Update the new page buffer to support the pb\_expansion\_threshold,
     and trigger an early end of tick if the threshold is exceeded.
 
-11. **David, in progress** Modify metadata file write call to allow the location of the index
-    to float and thus be of arbitrary size.
+11. **David, complete** Modify metadata file write call to allow the
+    location of the index to float and thus be of arbitrary size.
 
-12. Add code to remove entries from the index after they have been
-    written to the HDF5 file, and have not been modified for at least
-    max\_lag ticks.
+12. **David, complete** Add code to remove entries from the index after
+    they have been written to the HDF5 file, and have not been modified
+    for at least max\_lag ticks.
 
 13. Tidy short cuts in the initial implementation. These include:
 
@@ -174,7 +174,8 @@ primarily on Jelly.
 35. In the documentation, we should note that if a writer deletes an
     object that the reader has open (possesses an hid_t), and max_lag
     ticks later the reader tries to access the object by hid_t, the
-    reader get an error result, or crash, or access the wrong object.
+    reader gets an error result, or crashes, or accesses the wrong
+    object.
 
 36. Make variable-length data work.  It cannot work in a simple and
     reliable fashion with VFD SWMR while structural metadata is mixed
