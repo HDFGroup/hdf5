@@ -42,7 +42,7 @@ dbgf(int level, const char *fmt, ...)
         return;
 
     va_start(ap, fmt);
-    (void)vprintf(fmt, ap);
+    (void)vfprintf(stderr, fmt, ap);
     va_end(ap);
 }
 
