@@ -1272,11 +1272,9 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                  */
                 entries_added++;
                 j++;
-           
             }
 
-            /* sanity checks to verify that the old and new indicies
-             * are sorted as expected.
+            /* Verify that the old and new indices are sorted as expected.
              */
             HDassert( ( i == 0 ) ||
                       ( i >= old_mdf_idx_entries_used ) ||
@@ -1335,20 +1333,23 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
         f->shared->tick_num = tmp_tick_num;
 
         /* Update end_of_tick */
-        if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, FALSE) < 0 )
-
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
-                        "unable to update end of tick")
-
+        if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, FALSE) < 0) {
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL,
+                        "unable to update end of tick");
+        }
     }
 
     /* Remove the entry from the EOT queue */
-    if(H5F_vfd_swmr_remove_entry_eot(f) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to remove entry from EOT queue")
+    if(H5F_vfd_swmr_remove_entry_eot(f) < 0) {
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
+            "unable to remove entry from EOT queue")
+    }
 
      /* Re-insert the entry that corresponds to f onto the EOT queue */
-    if(H5F_vfd_swmr_insert_entry_eot(f) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
+    if(H5F_vfd_swmr_insert_entry_eot(f) < 0) {
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL,
+            "unable to insert entry into the EOT queue")
+    }
 
 #if 0 /* JRM */
     HDfprintf(stderr, "--- reader EOT final index "
