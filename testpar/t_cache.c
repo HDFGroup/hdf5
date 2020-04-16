@@ -24,6 +24,7 @@
 
 #include "H5ACpkg.h"
 #include "H5Cpkg.h"
+#include "H5CXprivate.h"
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
@@ -1619,7 +1620,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
             reply.base_addr = data[target_index].base_addr;
             reply.len       = data[target_index].len;
             reply.ver       = data[target_index].ver;
-        reply.count     = 0;
+            reply.count     = 0;
             reply.magic     = MSSG_MAGIC;
 
         /* and update the counters */
@@ -1760,7 +1761,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
     hbool_t report_mssg = FALSE;
     hbool_t success = TRUE;
     int target_index;
-    int new_ver_num;
+    int new_ver_num = 0;
     haddr_t target_addr;
 #if DO_WRITE_REQ_ACK
     struct mssg_t reply;
@@ -1925,7 +1926,7 @@ serve_total_writes_request(struct mssg_t * mssg_ptr)
         reply.base_addr = 0;
         reply.len       = 0;
         reply.ver       = 0;
-        reply.count     = total_writes;
+        reply.count     = (unsigned)total_writes;
         reply.magic     = MSSG_MAGIC;
     }
 
@@ -2004,7 +2005,7 @@ serve_total_reads_request(struct mssg_t * mssg_ptr)
         reply.base_addr = 0;
         reply.len       = 0;
         reply.ver       = 0;
-        reply.count     = total_reads;
+        reply.count     = (unsigned)total_reads;
         reply.magic     = MSSG_MAGIC;
     }
 
@@ -2098,7 +2099,7 @@ serve_entry_writes_request(struct mssg_t * mssg_ptr)
             reply.base_addr = target_addr;
             reply.len       = 0;
             reply.ver       = 0;
-        reply.count     = data[target_index].writes;
+            reply.count     = (unsigned)data[target_index].writes;
             reply.magic     = MSSG_MAGIC;
         }
     }
@@ -2195,7 +2196,7 @@ serve_entry_reads_request(struct mssg_t * mssg_ptr)
             reply.base_addr = target_addr;
             reply.len       = 0;
             reply.ver       = 0;
-        reply.count     = (long)(data[target_index].reads);
+            reply.count     = (unsigned)(data[target_index].reads);
             reply.magic     = MSSG_MAGIC;
         }
     }
@@ -4611,7 +4612,7 @@ verify_entry_reads(haddr_t addr,
                    int expected_entry_reads)
 {
     hbool_t success = TRUE;
-    int reported_entry_reads;
+    int reported_entry_reads = 0;
     struct mssg_t mssg;
 
     if ( success ) {
@@ -4718,7 +4719,7 @@ verify_entry_writes(haddr_t addr,
                     int expected_entry_writes)
 {
     hbool_t success = TRUE;
-    int reported_entry_writes;
+    int reported_entry_writes = 0;
     struct mssg_t mssg;
 
     if ( success ) {
@@ -7288,7 +7289,7 @@ smoke_check_6(int metadata_write_strategy)
             }
 
             /* Make sure coll entries do not cross the 80% threshold */
-            HDassert(cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
+            HDassert((double)cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
         }
 
         /* flush the file */
@@ -7318,7 +7319,7 @@ smoke_check_6(int metadata_write_strategy)
             }
 
             /* Make sure coll entries do not cross the 80% threshold */
-            HDassert(cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
+            HDassert((double)cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
         }
 
         /* protect the other half independently */
@@ -7339,7 +7340,7 @@ smoke_check_6(int metadata_write_strategy)
             }
 
             /* Make sure coll entries do not cross the 80% threshold */
-            HDassert(cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
+            HDassert((double)cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
         }
 
         for ( i = 0; i < (virt_num_data_entries); i++ )
