@@ -860,10 +860,6 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* When called from FUNC ENTER/EXIT, get the first entry on the EOT queue */
-    if(f == NULL)
-        f = TAILQ_FIRST(&eot_queue_g)->vfd_swmr_file;
-
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->pb_ptr);
@@ -1113,7 +1109,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
+H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
 {
     uint64_t tmp_tick_num = 0;
     H5FD_vfd_swmr_idx_entry_t * tmp_mdf_idx;
@@ -1128,10 +1124,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
     uint32_t i, j;
 
     FUNC_ENTER_NOAPI(FAIL)
-
-    /* When called from FUNC ENTER/EXIT, get the first entry on the EOT queue */
-    if(f == NULL)
-        f = TAILQ_FIRST(&eot_queue_g)->vfd_swmr_file;
 
     HDassert(f);
     HDassert(f->shared);
@@ -1159,7 +1151,10 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
         "%s last tick %" PRIu64 " new tick %" PRIu64,
         __func__, f->shared->tick_num, tmp_tick_num);
 
-    assert(tmp_tick_num <
+    /* This is ok if we're entering the API, but it should
+     * not happen if we're exiting the API.
+     */
+    assert(entering_api || tmp_tick_num <
            f->shared->tick_num + f->shared->vfd_swmr_config.max_lag);
 
     if ( tmp_tick_num != f->shared->tick_num ) {
@@ -2026,3 +2021,37 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5F__vfd_swmr_writer__wait_a_tick() */
+
+herr_t
+H5F_vfd_swmr_process_eot_queue(bool entering_api)
+{
+    struct timespec now;
+    eot_queue_entry_t *first_head, *head;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    first_head = head = TAILQ_FIRST(&eot_queue_g);
+
+    do {
+        H5F_t *f = head->vfd_swmr_file;
+
+        if(HDclock_gettime(CLOCK_MONOTONIC, &now) < 0) {
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, FAIL,
+                        "can't get time via clock_gettime");
+        }
+        if(timespeccmp(&now, &head->end_of_tick, <))
+            break;
+        if (f->shared->vfd_swmr_writer) {
+            if (H5F_vfd_swmr_writer_end_of_tick(f) < 0)
+                HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL,
+                            "end of tick error for VFD SWMR writer");
+        } else if (H5F_vfd_swmr_reader_end_of_tick(f, entering_api) < 0) {
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL,
+                        "end of tick error for VFD SWMR reader");
+        }
+    } while ((head = TAILQ_FIRST(&eot_queue_g)) != NULL && head != first_head);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}

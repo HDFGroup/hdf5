@@ -2106,45 +2106,28 @@ H5_DLL herr_t H5CX_pop(void);
 #include "H5FDvfd_swmr_private.h"
 #include "H5time_private.h" /* for timespeccmp */
 
-#define VFD_SWMR_TEST_FOR_END_OF_TICK(entering, _swmr_reader_exit, err)       \
-    /* Initialize the library */                                              \
-    /* TBD assert that the API lock is held.  The API lock */                 \
-    /* synchronizes access to `vfd_swmr_api_entries_g`     */                 \
-    if (!entering && --vfd_swmr_api_entries_g > 0) {                          \
-        ;   /* Do nothing: we are still in an API call. */                    \
-    } else if (entering && vfd_swmr_api_entries_g++ > 0) {                    \
-        ;   /* Do nothing: we are *re-*entering the API. */                   \
-    } else if(err_occurred) {                                                 \
-        ;   /* Do nothing: an error occurred. */                              \
-    } else if(TAILQ_FIRST(&eot_queue_g) != NULL) {                            \
-        const bool swmr_reader_exit = _swmr_reader_exit;                      \
-        struct timespec curr_time;                                            \
-        eot_queue_entry_t *init_eot_queue_head = TAILQ_FIRST(&eot_queue_g);   \
-        do {                                                                  \
-            if(HDclock_gettime(CLOCK_MONOTONIC, &curr_time) < 0) {            \
-                HGOTO_ERROR(H5E_FUNC, H5E_CANTGET, err,                       \
-                            "can't get time via clock_gettime")               \
-            } else if(timespeccmp(&curr_time, &end_of_tick_g, <)) {           \
-                break;                                                        \
-            } else if (vfd_swmr_writer_g) {                                   \
-                if(H5F_vfd_swmr_writer_end_of_tick(NULL) < 0)                 \
-                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                   \
-                                "end of tick error for VFD SWMR writer")      \
-            } else if(!swmr_reader_exit) {                                    \
-                if(H5F_vfd_swmr_reader_end_of_tick(NULL) < 0)                 \
-                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                   \
-                                "end of tick error for VFD SWMR reader")      \
-            } else                                                            \
-                break;                                                        \
-        } while (TAILQ_FIRST(&eot_queue_g) != NULL &&                         \
-                 TAILQ_FIRST(&eot_queue_g) != init_eot_queue_head);           \
-    }                                                                         \
+#define VFD_SWMR_TEST_FOR_END_OF_TICK(entering, err)                          \
+    do {                                                                      \
+        /* TBD assert that the API lock is held.  The API lock */             \
+        /* synchronizes access to `vfd_swmr_api_entries_g`     */             \
+        if (!entering && --vfd_swmr_api_entries_g > 0) {                      \
+            ;   /* Do nothing: we are still in an API call. */                \
+        } else if (entering && vfd_swmr_api_entries_g++ > 0) {                \
+            ;   /* Do nothing: we are *re-*entering the API. */               \
+        } else if(err_occurred) {                                             \
+            ;   /* Do nothing: an error occurred. */                          \
+        } else if(TAILQ_FIRST(&eot_queue_g) != NULL) {                        \
+            if (H5F_vfd_swmr_process_eot_queue(entering) < 0)                 \
+                HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err,                       \
+                            "error processing EOT queue")                     \
+        }                                                                     \
+    } while (0)
 
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(err) {{                                                \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
-    VFD_SWMR_TEST_FOR_END_OF_TICK(true, false, err);                          \
+    VFD_SWMR_TEST_FOR_END_OF_TICK(true, err);                                 \
     /* Clear thread error stack entering public functions */                  \
     H5E_clear_stack(NULL);                                                    \
     {
@@ -2156,7 +2139,7 @@ H5_DLL herr_t H5CX_pop(void);
 #define FUNC_ENTER_API_NOCLEAR(err) {{                                        \
     FUNC_ENTER_API_COMMON                                                     \
     FUNC_ENTER_API_INIT(err);                                                 \
-    VFD_SWMR_TEST_FOR_END_OF_TICK(true, false, err);                          \
+    VFD_SWMR_TEST_FOR_END_OF_TICK(true, err);                                 \
     {
 
 /*
@@ -2349,7 +2332,7 @@ H5_DLL herr_t H5CX_pop(void);
     H5TRACE_RETURN(ret_value);
 
 #define FUNC_LEAVE_API(ret_value)                                             \
-    VFD_SWMR_TEST_FOR_END_OF_TICK(false, !vfd_swmr_writer_g, ret_value);      \
+    VFD_SWMR_TEST_FOR_END_OF_TICK(false, ret_value);                          \
     FUNC_LEAVE_API_COMMON(ret_value);                                         \
     (void)H5CX_pop();                                                         \
     H5_POP_FUNC                                                               \
