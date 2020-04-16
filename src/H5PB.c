@@ -1194,15 +1194,11 @@ herr_t
 H5PB_remove_entry(H5F_shared_t *shared, haddr_t addr)
 {
     uint64_t page;
-    H5PB_t *pb_ptr = NULL;
+    H5PB_t *pb_ptr;
     H5PB_entry_t *entry_ptr = NULL;
-    herr_t ret_value = SUCCEED;             /* Return value */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(shared);
-    HDassert(shared->pb_ptr);
 
     pb_ptr = shared->pb_ptr;
 
