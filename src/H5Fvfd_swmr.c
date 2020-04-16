@@ -743,7 +743,6 @@ done:
 
 } /* H5F_vfd_swmr_writer__prep_for_flush_or_close() */
 
-#if 0
 static int
 clean_shadow_index(H5F_t *f, uint32_t nentries,
     H5FD_vfd_swmr_idx_entry_t *idx, uint32_t *ndeletedp)
@@ -787,7 +786,6 @@ clean_shadow_index(H5F_t *f, uint32_t nentries,
     *ndeletedp = ndeleted;
     return 0;
 }
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -943,10 +941,10 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
      *    to the HDF5 file more than max_lag ticks ago, and haven't
      *    been modified since. 
      */
-#if 0
-    clean_shadow_index(f, f->shared->mdf_idx_entries_used + idx_entries_added,
-        f->shared->mdf_idx, &idx_entries_removed);
-#endif
+    if (clean_shadow_index(f,
+            f->shared->mdf_idx_entries_used + idx_entries_added,
+            f->shared->mdf_idx, &idx_entries_removed) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't clean shadow file index")
 
     /* 6) Update the metadata file.  Must do this before we 
      *    release the tick list, as otherwise the page buffer 
