@@ -49,10 +49,19 @@ dbgf(int level, const char *fmt, ...)
 estack_state_t
 disable_estack(void)
 {
+    estack_state_t es = estack_get_state();
+
+    (void)H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+
+    return es;
+}
+
+estack_state_t
+estack_get_state(void)
+{
     estack_state_t es;
 
     (void)H5Eget_auto(H5E_DEFAULT, &es.efunc, &es.edata);
-    (void)H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
     return es;
 }

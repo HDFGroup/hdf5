@@ -80,6 +80,7 @@ H5TEST_DLLVAR unsigned symbol_count[NLEVELS];
 extern "C" {
 #endif
 
+H5TEST_DLL estack_state_t estack_get_state(void);
 H5TEST_DLL estack_state_t disable_estack(void);
 H5TEST_DLL void restore_estack(estack_state_t);
 
