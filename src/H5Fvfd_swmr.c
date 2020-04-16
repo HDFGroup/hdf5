@@ -986,14 +986,12 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
  
 
     /* 9) Increment the tick, and update the end of tick. */
-    if( f) {
 
-        /* Update end_of_tick */
-        if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, TRUE) < 0 )
+    /* Update end_of_tick */
+    if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, TRUE) < 0 )
 
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
-                        "unable to update end of tick")
-    }
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
+                    "unable to update end of tick")
 
     /* Remove the entry from the EOT queue */
     if(H5F_vfd_swmr_remove_entry_eot(f) < 0)
