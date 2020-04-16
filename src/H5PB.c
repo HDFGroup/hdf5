@@ -1063,10 +1063,8 @@ H5PB_read(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (type == H5FD_MEM_GHEAP) {
-        hlog_fast(pbrd, "%s(%p, type %d, %" PRIuHADDR " size %zu)",
-            __func__, (void *)shared, type, addr, size);
-    }
+    hlog_fast(pbrd, "%s %p type %d %" PRIuHADDR " size %zu",
+        __func__, (void *)shared, type, addr, size);
 
     pb_ptr = shared->pb_ptr;
 
@@ -1908,10 +1906,8 @@ H5PB_write(H5F_shared_t *shared, H5FD_mem_t type, haddr_t addr, size_t size,
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (type == H5FD_MEM_GHEAP) {
-        hlog_fast(pbwr, "%s(%p, type %d, %" PRIuHADDR " size %zu)",
-            __func__, (void *)shared, type, addr, size);
-    }
+    hlog_fast(pbwr, "%s %p type %d %" PRIuHADDR " size %zu",
+        __func__, (void *)shared, type, addr, size);
 
     pb_ptr = shared->pb_ptr;
 
