@@ -758,7 +758,9 @@ clean_shadow_index(H5F_t *f, uint32_t nentries,
 
         if (ie->clean) {
             hlog_fast(shadow_index_reclaim,
-                "Clean shadow index slot %" PRIu32 " last flush %" PRIu64 " ticks ago", i, tick_num - ie->tick_of_last_flush);
+                "Visiting clean shadow index slot %" PRIu32
+                " lower page %" PRIu64 " last flush %" PRIu64 " ticks ago",
+                i, ie->hdf5_page_offset, tick_num - ie->tick_of_last_flush);
         }
 
         if (ie->clean && ie->tick_of_last_flush + max_lag < tick_num) {
@@ -767,7 +769,8 @@ clean_shadow_index(H5F_t *f, uint32_t nentries,
             assert(ie->entry_ptr == NULL);
 
             hlog_fast(shadow_index_reclaim,
-                "Reclaiming shadow index slot %" PRIu32, i);
+                "Reclaiming shadow index slot %" PRIu32
+                " lower page %" PRIu64, i, ie->hdf5_page_offset);
 
             if (ie->md_file_page_offset != 0) {
                 if (shadow_image_defer_free(shared, ie) == -1)
@@ -1137,9 +1140,8 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f)
     HDassert(!f->shared->vfd_swmr_writer);
     HDassert(f->shared->lf);
 
-    hlog_fast(eot, "--- reader EOT entering ---");
-    hlog_fast(eot, "--- reader EOT init index used / len = %d / %d ---",
-              f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
+    hlog_fast(eot, "%s enter index len %" PRIu32 " used %" PRIu32,
+        __func__, f->shared->mdf_idx_len, f->shared->mdf_idx_entries_used);
 
     /* 1) Direct the VFD SWMR reader VFD to load the current header
      *    from the metadata file, and report the current tick.
