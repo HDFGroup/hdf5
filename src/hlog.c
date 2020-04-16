@@ -273,10 +273,20 @@ hlog_impl(struct hlog_outlet *ls0, const char *fmt, ...)
 	va_end(ap);
 }
 
+static void
+hlog_outlet_reset_all(void)
+{
+	struct hlog_outlet *ls;
+
+	TAILQ_FOREACH(ls, &hlog_outlets, ls_next)
+		ls->ls_resolved = HLOG_OUTLET_S_PASS;
+}
+
 struct hlog_outlet *
 hlog_outlet_lookup(const char *name)
 {
 	struct hlog_outlet *ls;
+
 	TAILQ_FOREACH(ls, &hlog_outlets, ls_next) {
 		if (strcmp(ls->ls_name, name) == 0)
 			return ls;
@@ -333,6 +343,7 @@ hlog_set_state(const char *name, hlog_outlet_state_t state, bool rendezvous)
 		TAILQ_INSERT_TAIL(&hlog_outlets, ls, ls_next);
 	}
 	ls->ls_state = state;
+        hlog_outlet_reset_all();
 	return 0;
 }
 
