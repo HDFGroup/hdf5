@@ -980,7 +980,7 @@ done:
  */
 herr_t
 H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page, 
-    uint64_t tick)
+    uint32_t length, uint64_t tick)
 {
     int i;
     size_t image_len;
@@ -994,6 +994,7 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
     H5C_cache_entry_t * entry_ptr;
     H5C_cache_entry_t * follow_ptr = NULL;
     herr_t ret_value = SUCCEED;      /* Return value */
+    bool found = false;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1031,6 +1032,11 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
             HDassert(entry_ptr->addr >= (haddr_t)(page * cache_ptr->page_size));
             HDassert(entry_ptr->addr < 
                      (haddr_t)((page+1) * cache_ptr->page_size));
+            HDassert(length == cache_ptr->page_size ||
+                     page * cache_ptr->page_size + length >=
+                     entry_ptr->addr + entry_ptr->size);
+
+            found = true;
 
             /* since end of tick occurs only on API call entry in 
              * the VFD SWMR reader case, the entry must not be protected.
@@ -1297,6 +1303,11 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
                  (entry_ptr->refreshed_in_tick == tick));;
 
         entry_ptr = entry_ptr->pi_next;
+    }
+
+    if (!found) {
+        hlog_fast(mdc_invalidation, "no MDC match for page %" PRIu64
+            " length %" PRIu32 " tick %" PRIu64, page, length, tick);
     }
 
 done:

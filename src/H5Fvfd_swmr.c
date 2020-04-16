@@ -93,7 +93,9 @@ HLOG_OUTLET_MEDIUM_DEFN(noisy_shadow_defrees, shadow_defrees,
     HLOG_OUTLET_S_OFF);
 HLOG_OUTLET_SHORT_DEFN(shadow_index_enlarge, swmr);
 HLOG_OUTLET_SHORT_DEFN(shadow_index_reclaim, swmr);
+HLOG_OUTLET_SHORT_DEFN(shadow_index_update, swmr);
 HLOG_OUTLET_SHORT_DEFN(tick, swmr);
+HLOG_OUTLET_SHORT_DEFN(mdc_invalidation, swmr);
 
 /*
  *  The head of the end of tick queue (EOT queue) for files opened in either
@@ -1111,13 +1113,16 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
     H5FD_vfd_swmr_idx_entry_t * tmp_mdf_idx;
     uint32_t entries_added = 0;
     uint32_t entries_removed = 0;
-    uint32_t entries_changed = 0;
+    uint32_t entries_moved = 0;
     uint32_t tmp_mdf_idx_len;
     uint32_t tmp_mdf_idx_entries_used;
     uint32_t mdf_idx_entries_used;
-    uint64_t *removed_page = NULL;
+    struct {
+        uint64_t pgno;
+        uint32_t length;
+    } *change = NULL;
     herr_t ret_value = SUCCEED;
-    uint32_t i, j;
+    uint32_t i, j, nchanges;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1208,10 +1213,10 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
         const uint32_t new_mdf_idx_entries_used = f->shared->mdf_idx_entries_used;
         const uint32_t old_mdf_idx_entries_used = f->shared->old_mdf_idx_entries_used;
 
-        removed_page = malloc(sizeof(removed_page[0]) *
-            MAX(old_mdf_idx_entries_used, new_mdf_idx_entries_used));
+        change = malloc(sizeof(change[0]) *
+            (old_mdf_idx_entries_used + new_mdf_idx_entries_used));
 
-        if (removed_page == NULL) {
+        if (change == NULL) {
            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL,
                        "unable to allocate removed pages list");
         }
@@ -1226,7 +1231,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
          * in which case it may access an entry in the page buffer. 
          */
 
-        for (i = j = 0;
+        for (i = j = nchanges = 0;
              i < old_mdf_idx_entries_used &&
              j < new_mdf_idx_entries_used; ) {
 
@@ -1236,13 +1241,25 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                 if ( old_mdf_idx[i].md_file_page_offset !=
                      new_mdf_idx[j].md_file_page_offset ) {
 
+                    /* It's ok if the length changes, I think, but I need
+                     * to think about how to perform MDC invalidation in the
+                     * case where the new entry is *longer*, because the
+                     * extension could overlap with a second entry.
+                     */
+                    assert(old_mdf_idx[i].length == new_mdf_idx[i].length);
+
+                    hlog_fast(shadow_index_update,
+                        "writer moved shadow at slot %" PRIu32
+                        " for page %" PRIu64, i,
+                        old_mdf_idx[i].hdf5_page_offset);
+
                     /* the page has been altered -- evict it and 
                      * any contained metadata cache entries.
                      */
-                    removed_page[entries_removed + entries_changed] =
-                        new_mdf_idx[j].hdf5_page_offset;
-                    entries_changed++;
-
+                    change[nchanges].pgno = new_mdf_idx[j].hdf5_page_offset;
+                    change[nchanges].length = old_mdf_idx[i].length;
+                    nchanges++;
+                    entries_moved++;
                 }
                 i++;
                 j++;
@@ -1258,8 +1275,13 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                 * for several ticks, we can probably omit this.  However,
                 * lets not worry about this for the first cut.
                 */
-                removed_page[entries_removed + entries_changed] =
-                    old_mdf_idx[i].hdf5_page_offset;
+                hlog_fast(shadow_index_update,
+                    "writer removed shadow index slot %" PRIu32
+                    " for page %" PRIu64, i, old_mdf_idx[i].hdf5_page_offset);
+
+                change[nchanges].pgno = old_mdf_idx[i].hdf5_page_offset;
+                change[nchanges].length = old_mdf_idx[i].length;
+                nchanges++;
                 entries_removed++;
                 i++;
 
@@ -1267,9 +1289,14 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                       * new_mdf_idx[j].hdf5_page_offset
                       */
 
-                /* the page has been added to the index.  No action 
-                 * is required.
-                 */
+                hlog_fast(shadow_index_update,
+                    "writer added shadow index slot %" PRIu32
+                    " for page %" PRIu64, j, new_mdf_idx[j].hdf5_page_offset);
+
+                /* The page has been added to the index. */
+                change[nchanges].pgno = new_mdf_idx[j].hdf5_page_offset;
+                change[nchanges].length = new_mdf_idx[j].length;
+                nchanges++;
                 entries_added++;
                 j++;
             }
@@ -1298,23 +1325,32 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
              * contained metadata cache entries
              */
 
-            removed_page[entries_removed + entries_changed] =
-                old_mdf_idx[i].hdf5_page_offset;
+            hlog_fast(shadow_index_update,
+                "writer removed shadow index slot %" PRIu32
+                " for page %" PRIu64, i, old_mdf_idx[i].hdf5_page_offset);
+
+            change[nchanges].pgno = old_mdf_idx[i].hdf5_page_offset;
+            change[nchanges].length = old_mdf_idx[i].length;
+            nchanges++;
 
             entries_removed++;
         }
-        for (i = 0; i < entries_removed + entries_changed; i++) {
+        for (i = 0; i < nchanges; i++) {
             haddr_t page_addr =
-                (haddr_t)(removed_page[i] *
-                                  f->shared->pb_ptr->page_size);
+                (haddr_t)(change[i].pgno * f->shared->pb_ptr->page_size);
             if (H5PB_remove_entry(f->shared, page_addr) < 0) {
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL,
                             "remove page buffer entry failed");
             }
         }
-        for (i = 0; i < entries_removed + entries_changed; i++) {
+        for (i = 0; i < nchanges; i++) {
+            hlog_fast(mdc_invalidation,
+                "invalidating MDC entries at page %" PRIu64
+                " length %" PRIu32 " tick %" PRIu64,
+                change[i].pgno, change[i].length, tmp_tick_num);
             if (H5C_evict_or_refresh_all_entries_in_page(f,
-                    removed_page[i], tmp_tick_num) < 0) {
+                    change[i].pgno, change[i].length,
+                    tmp_tick_num) < 0) {
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL,
                     "evict or refresh stale MDC entries failed");
             }
@@ -1351,23 +1387,19 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
             "unable to insert entry into the EOT queue")
     }
 
-#if 0 /* JRM */
-    HDfprintf(stderr, "--- reader EOT final index "
-        "used / len = %" PRIu32 " / %" PRIu32 " ---\n",
-        f->shared->mdf_idx_entries_used, f->shared->mdf_idx_len);
-    HDfprintf(stderr, "--- reader EOT old index "
-        "used / len = %" PRIu32 " / %" PRIu32 " ---\n",
-        f->shared->old_mdf_idx_entries_used, f->shared->old_mdf_idx_len);
-    HDfprintf(stderr, "--- reader EOT %" PRIu64 " exiting "
-        "t/a/r/c = %" PRIu32 "/%" PRIu32 "/%" PRIu32 "/%" PRIu32 "---\n",
-        f->shared->tick_num, f->shared->mdf_idx_entries_used,
-        entries_added, entries_removed, entries_changed);
-#endif /* JRM */
+    hlog_fast(eot, "%s exit tick %" PRIu64
+        " len %" PRIu32 " -> %" PRIu32
+        " used %" PRIu32 " -> %" PRIu32
+        " added %" PRIu32 " removed %" PRIu32 " moved %" PRIu32,
+        __func__, f->shared->tick_num,
+        f->shared->old_mdf_idx_len, f->shared->mdf_idx_len,
+        f->shared->old_mdf_idx_entries_used, f->shared->mdf_idx_entries_used,
+        entries_added, entries_removed, entries_moved);
 
 done:
 
-    if (removed_page != NULL)
-        free(removed_page);
+    if (change != NULL)
+        free(change);
 
     FUNC_LEAVE_NOAPI(ret_value)
 

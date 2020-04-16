@@ -2389,7 +2389,7 @@ H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr, int32_t version,
 H5_DLL herr_t H5C_dest(H5F_t *f);
 H5_DLL herr_t H5C_evict(H5F_t *f);
 H5_DLL herr_t H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
-    uint64_t tick);
+    uint32_t length, uint64_t tick);
 H5_DLL herr_t H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr,
     unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, unsigned flags);
