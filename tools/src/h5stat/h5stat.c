@@ -1822,7 +1822,7 @@ main(int argc, const char *argv[])
 
         if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
-            fapl_info.info = (void *)&ros3_fa;
+            fapl_info.info_string = (void *)&ros3_fa;
 #else
             error_msg("Read-Only S3 VFD not enabled.\n");
             goto done;
@@ -1830,7 +1830,7 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX])) {
 #ifdef H5_HAVE_LIBHDFS
-            fapl_info.info = (void *)&hdfs_fa;
+            fapl_info.info_string = (void *)&hdfs_fa;
 #else
             error_msg("HDFS VFD not enabled.\n");
             goto done;
