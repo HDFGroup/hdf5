@@ -963,14 +963,13 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 
 #ifdef H5FDmpio_DEBUG
     /* Check for debug commands in the info parameter */
-    {
-        if(MPI_INFO_NULL != info_dup) {
-            char debug_str[128];
-            int flag;
+    if(MPI_INFO_NULL != info_dup) {
+        char debug_str[128];
+        int flag;
 
-            MPI_Info_get(fa->info, H5F_MPIO_DEBUG_KEY, sizeof(debug_str) - 1, debug_str, &flag);
-            if(flag) {
-                int i;
+        MPI_Info_get(fa->info, H5F_MPIO_DEBUG_KEY, sizeof(debug_str) - 1, debug_str, &flag);
+        if(flag) {
+            int i;
 
             HDfprintf(stdout, "H5FD_mpio debug flags = '%s'\n", debug_str);
             for(i = 0; debug_str[i]/*end of string*/ && i < 128/*just in case*/; ++i)
