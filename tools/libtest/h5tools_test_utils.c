@@ -1172,7 +1172,7 @@ test_set_configured_fapl(void)
 
         /* test */
         fapl_info.type = VFD_BY_NAME;
-        fapl_info.info = C.conf_fa;
+        fapl_info.info_string = C.conf_fa;
         fapl_info.u.name = C.vfdname;
         result = h5tools_get_fapl(H5P_DEFAULT, &fapl_info);
         if (C.expected == 0)
