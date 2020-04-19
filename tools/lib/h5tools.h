@@ -542,19 +542,19 @@ typedef struct h5tools_context_t {
 typedef enum {
     VFD_BY_NAME,
     VOL_BY_NAME,
-    VOL_BY_ID
+    VOL_BY_VALUE
 } h5tools_fapl_info_type_t;
 
 typedef struct h5tools_fapl_info_t {
     h5tools_fapl_info_type_t type;
 
     /* Pointer to information to be passed to the driver/connector for its setup */
-    const void *info;
+    const char *info_string;
 
     /* Field specifying either the driver's/connector's name or ID */
     union {
-        const char *name;
-        long        id;
+        const char          *name;      /* VOL and VFD */
+        H5VL_class_value_t  value;      /* VOL only */
     } u;
 } h5tools_fapl_info_t;
 
@@ -637,7 +637,7 @@ H5TOOLS_DLL int     h5tools_set_attr_output_file(const char *fname, int is_bin);
 H5TOOLS_DLL int     h5tools_set_input_file(const char *fname, int is_bin);
 H5TOOLS_DLL int     h5tools_set_output_file(const char *fname, int is_bin);
 H5TOOLS_DLL int     h5tools_set_error_file(const char *fname, int is_bin);
-H5TOOLS_DLL hid_t   h5tools_get_fapl(hid_t fapl, h5tools_fapl_info_t *fapl_info);
+H5TOOLS_DLL hid_t   h5tools_get_fapl(hid_t prev_fapl_id, h5tools_fapl_info_t *fapl_info);
 H5TOOLS_DLL herr_t  h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size);
 H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl,
                             hbool_t use_specific_driver, char *drivername, size_t drivername_size);

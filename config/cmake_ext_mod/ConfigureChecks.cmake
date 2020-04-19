@@ -166,6 +166,8 @@ CHECK_INCLUDE_FILE_CONCAT ("memory.h"        ${HDF_PREFIX}_HAVE_MEMORY_H)
 CHECK_INCLUDE_FILE_CONCAT ("dlfcn.h"         ${HDF_PREFIX}_HAVE_DLFCN_H)
 CHECK_INCLUDE_FILE_CONCAT ("inttypes.h"      ${HDF_PREFIX}_HAVE_INTTYPES_H)
 CHECK_INCLUDE_FILE_CONCAT ("netinet/in.h"    ${HDF_PREFIX}_HAVE_NETINET_IN_H)
+CHECK_INCLUDE_FILE_CONCAT ("netdb.h"         ${HDF_PREFIX}_HAVE_NETDB_H)
+CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
 # _Bool type support
 CHECK_INCLUDE_FILE_CONCAT (stdbool.h    ${HDF_PREFIX}_HAVE_STDBOOL_H)
 
@@ -681,3 +683,4 @@ endif ()
 # the cache value is set in it's config file)
 #
 set (${HDF_PREFIX}_CONVERT_DENORMAL_FLOAT 1)
+

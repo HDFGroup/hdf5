@@ -531,9 +531,9 @@ h5tools_set_vfd_fapl(hid_t fapl, h5tools_fapl_info_t *fapl_info)
             }
             else if (!HDstrcmp(fapl_info->u.name, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
-                if (!fapl_info->info)
+                if (!fapl_info->info_string)
                     H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD info is invalid");
-                if (H5Pset_fapl_ros3(fapl, (H5FD_ros3_fapl_t *)fapl_info->info) < 0)
+                if (H5Pset_fapl_ros3(fapl, (H5FD_ros3_fapl_t *)fapl_info->info_string) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3() failed");
 #else
                 H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD is not enabled");
@@ -541,9 +541,9 @@ h5tools_set_vfd_fapl(hid_t fapl, h5tools_fapl_info_t *fapl_info)
             }
             else if (!HDstrcmp(fapl_info->u.name, drivernames[HDFS_VFD_IDX])) {
 #ifdef H5_HAVE_LIBHDFS
-                if (!fapl_info->info)
+                if (!fapl_info->info_string)
                     H5TOOLS_GOTO_ERROR(FAIL, "HDFS VFD info is invalid");
-                if (H5Pset_fapl_hdfs(fapl, (H5FD_hdfs_fapl_t *)fapl_info->info) < 0)
+                if (H5Pset_fapl_hdfs(fapl, (H5FD_hdfs_fapl_t *)fapl_info->info_string) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_hdfs() failed");
 #else
                 H5TOOLS_GOTO_ERROR(FAIL, "The HDFS VFD is not enabled");
@@ -555,7 +555,7 @@ h5tools_set_vfd_fapl(hid_t fapl, h5tools_fapl_info_t *fapl_info)
             break;
 
         case VOL_BY_NAME:
-        case VOL_BY_ID:
+        case VOL_BY_VALUE:
         default:
             H5TOOLS_GOTO_ERROR(FAIL, "invalid VFD retrieval type");
     }
@@ -575,10 +575,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-h5tools_set_vol_fapl(hid_t fapl, h5tools_fapl_info_t *fapl_info)
+h5tools_set_vol_fapl(hid_t fapl_id, h5tools_fapl_info_t *fapl_info)
 {
     htri_t connector_is_registered;
     hid_t  connector_id = H5I_INVALID_HID;
+    void *vol_info = NULL;
     herr_t ret_value = SUCCEED;
 
     switch (fapl_info->type) {
@@ -604,29 +605,39 @@ h5tools_set_vol_fapl(hid_t fapl, h5tools_fapl_info_t *fapl_info)
                 }
             }
 
+            /* Convert the info string */
+            if (fapl_info->info_string)
+                if (H5VLconnector_str_to_info(fapl_info->info_string, connector_id, &vol_info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "can't get VOL info from string");
+
             break;
 
-        case VOL_BY_ID:
+        case VOL_BY_VALUE:
             /* Retrieve VOL connector by ID */
-            if ((connector_is_registered = H5VLis_connector_registered_by_value((H5VL_class_value_t) fapl_info->u.id)) < 0)
+            if ((connector_is_registered = H5VLis_connector_registered_by_value(fapl_info->u.value)) < 0)
                 H5TOOLS_GOTO_ERROR(FAIL, "can't check if VOL connector is registered");
             if (connector_is_registered) {
-                if ((connector_id = H5VLget_connector_id_by_value((H5VL_class_value_t) fapl_info->u.id)) < 0)
+                if ((connector_id = H5VLget_connector_id_by_value(fapl_info->u.value)) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "can't get VOL connector ID");
             }
             else {
                 /* Check for VOL connectors that ship with the library */
-                if (fapl_info->u.id == H5VL_NATIVE_VALUE) {
+                if (fapl_info->u.value == H5VL_NATIVE_VALUE) {
                     connector_id = H5VL_NATIVE;
                 }
-                else if (fapl_info->u.id == H5VL_PASSTHRU_VALUE) {
+                else if (fapl_info->u.value == H5VL_PASSTHRU_VALUE) {
                     connector_id = H5VL_PASSTHRU;
                 }
                 else {
-                    if ((connector_id = H5VLregister_connector_by_value((H5VL_class_value_t) fapl_info->u.id, H5P_DEFAULT)) < 0)
+                    if ((connector_id = H5VLregister_connector_by_value(fapl_info->u.value, H5P_DEFAULT)) < 0)
                         H5TOOLS_GOTO_ERROR(FAIL, "can't register VOL connector");
                 }
             }
+
+            /* Convert the info string */
+            if (fapl_info->info_string)
+                if (H5VLconnector_str_to_info(fapl_info->info_string, connector_id, &vol_info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "can't get VOL info from string");
 
             break;
 
@@ -635,10 +646,14 @@ h5tools_set_vol_fapl(hid_t fapl, h5tools_fapl_info_t *fapl_info)
             H5TOOLS_GOTO_ERROR(FAIL, "invalid VOL retrieval type");
     }
 
-    if (H5Pset_vol(fapl, connector_id, fapl_info->info) < 0)
+    if (H5Pset_vol(fapl_id, connector_id, vol_info) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "can't set VOL connector on FAPL");
 
 done:
+    if (vol_info)
+        if (H5VLfree_connector_info(connector_id, vol_info))
+            H5TOOLS_ERROR(FAIL, "failed to free VOL connector-specific info");
+
     if (ret_value < 0) {
         if (connector_id >= 0 && H5Idec_ref(connector_id) < 0)
             H5TOOLS_ERROR(FAIL, "failed to decrement refcount on VOL connector ID");
@@ -658,44 +673,44 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-h5tools_get_fapl(hid_t fapl, h5tools_fapl_info_t *fapl_info)
+h5tools_get_fapl(hid_t prev_fapl_id, h5tools_fapl_info_t *fapl_info)
 {
-    hid_t new_fapl = H5I_INVALID_HID;
+    hid_t new_fapl_id = H5I_INVALID_HID;
     hid_t ret_value = H5I_INVALID_HID;
 
-    if (fapl < 0)
+    if (prev_fapl_id < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "invalid FAPL");
     if (!fapl_info)
         H5TOOLS_GOTO_ERROR(FAIL, "invalid FAPL retrieval info");
 
     /* Make a copy of the FAPL if necessary, or create a FAPL if
      * H5P_DEFAULT is specified. */
-    if (H5P_DEFAULT == fapl) {
-        if ((new_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if (H5P_DEFAULT == prev_fapl_id) {
+        if ((new_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
             H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5Pcreate failed");
     } /* end if */
     else {
-        if ((new_fapl = H5Pcopy(fapl)) < 0)
+        if ((new_fapl_id = H5Pcopy(prev_fapl_id)) < 0)
             H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5Pcopy failed");
     }
 
     if (VFD_BY_NAME == fapl_info->type) {
-        if (h5tools_set_vfd_fapl(new_fapl, fapl_info) < 0)
+        if (h5tools_set_vfd_fapl(new_fapl_id, fapl_info) < 0)
             H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to set VFD on FAPL");
     }
-    else if (VOL_BY_NAME == fapl_info->type || VOL_BY_ID == fapl_info->type) {
-        if (h5tools_set_vol_fapl(new_fapl, fapl_info) < 0)
+    else if (VOL_BY_NAME == fapl_info->type || VOL_BY_VALUE == fapl_info->type) {
+        if (h5tools_set_vol_fapl(new_fapl_id, fapl_info) < 0)
             H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to set VOL on FAPL");
     }
     else
         H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "invalid FAPL retrieval type");
 
-    ret_value = new_fapl;
+    ret_value = new_fapl_id;
 
 done:
-    if ((new_fapl >= 0) && (ret_value < 0)) {
-        H5Pclose(new_fapl);
-        new_fapl = H5I_INVALID_HID;
+    if ((new_fapl_id >= 0) && (ret_value < 0)) {
+        H5Pclose(new_fapl_id);
+        new_fapl_id = H5I_INVALID_HID;
     }
 
     return ret_value;
@@ -887,9 +902,9 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, hbool_t use_specifi
     for (volnum = 0; volnum < NUM_VOLS; volnum++) {
         h5tools_fapl_info_t vol_info;
 
-        vol_info.type = VOL_BY_NAME;
-        vol_info.info = NULL;
-        vol_info.u.name = volnames[volnum];
+        vol_info.type           = VOL_BY_NAME;
+        vol_info.info_string    = NULL;
+        vol_info.u.name         = volnames[volnum];
 
         /* Get a FAPL for the current VOL connector */
         if ((tmp_vol_fapl = h5tools_get_fapl(fapl, &vol_info)) < 0)
@@ -912,9 +927,9 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, hbool_t use_specifi
                 if (drivernum == LOG_VFD_IDX)
                     continue;
 
-                vfd_info.type = VFD_BY_NAME;
-                vfd_info.info = NULL;
-                vfd_info.u.name = drivernames[drivernum];
+                vfd_info.type           = VFD_BY_NAME;
+                vfd_info.info_string    = NULL;
+                vfd_info.u.name         = drivernames[drivernum];
 
                 /* Using the current VOL FAPL as a base, get the correct FAPL for the given VFL driver */
                 if ((tmp_vfd_fapl = h5tools_get_fapl(tmp_vol_fapl, &vfd_info)) < 0)

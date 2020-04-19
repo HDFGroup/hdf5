@@ -62,10 +62,10 @@ static struct long_options l_opts[] = {
     { "sort_by",             require_arg, 'q' },
     { "sort_order",          require_arg, 'z' },
     { "enable-error-stack",  no_arg,      'E' },
-    { "src-vol-id",          require_arg, '1' },
+    { "src-vol-value",       require_arg, '1' },
     { "src-vol-name",        require_arg, '2' },
     { "src-vol-info",        require_arg, '3' },
-    { "dst-vol-id",          require_arg, '4' },
+    { "dst-vol-value",       require_arg, '4' },
     { "dst-vol-name",        require_arg, '5' },
     { "dst-vol-info",        require_arg, '6' },
     { NULL, 0, '\0' }
@@ -92,14 +92,14 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
     PRINTVALSTREAM(rawoutstream, "   --enable-error-stack    Prints messages from the HDF5 error stack as they\n");
     PRINTVALSTREAM(rawoutstream, "                           occur\n");
-    PRINTVALSTREAM(rawoutstream, "   --src-vol-id            ID of the VOL connector to use for opening the input\n");
-    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --src-vol-value         Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           input HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --src-vol-name          Name of the VOL connector to use for opening the input\n");
     PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --src-vol-info          VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the input HDF5 file specified\n");
-    PRINTVALSTREAM(rawoutstream, "   --dst-vol-id            ID of the VOL connector to use for opening the output\n");
-    PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --dst-vol-value         Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                           output HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --dst-vol-name          Name of the VOL connector to use for opening the output\n");
     PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --dst-vol-info          VOL-specific info to pass to the VOL connector used for\n");
@@ -682,8 +682,8 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case '1':
-                in_vol_info.type = VOL_BY_ID;
-                in_vol_info.u.id = HDatol(opt_arg);
+                in_vol_info.type = VOL_BY_VALUE;
+                in_vol_info.u.value = (H5VL_class_value_t)HDatoi(opt_arg);
                 custom_in_fapl = TRUE;
                 break;
 
@@ -694,12 +694,12 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case '3':
-                in_vol_info.info = opt_arg;
+                in_vol_info.info_string = opt_arg;
                 break;
 
             case '4':
-                out_vol_info.type = VOL_BY_ID;
-                out_vol_info.u.id = HDatol(opt_arg);
+                out_vol_info.type = VOL_BY_VALUE;
+                out_vol_info.u.value = (H5VL_class_value_t)HDatoi(opt_arg);
                 custom_out_fapl = TRUE;
                 break;
 
@@ -710,7 +710,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case '6':
-                out_vol_info.info = opt_arg;
+                out_vol_info.info_string = opt_arg;
                 break;
 
             default:
