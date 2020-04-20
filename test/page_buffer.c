@@ -56,7 +56,7 @@ static unsigned open_file(char *filename, hid_t fapl, hsize_t page_size, size_t 
 
 /* test routines */
 #ifdef H5_HAVE_PARALLEL
-static unsigned verify_page_buffering_disabled(hid_t orig_fapl, 
+static unsigned verify_page_buffering_disabled(hid_t orig_fapl,
     const char *env_h5_drvr);
 #else
 static unsigned test_args(hid_t fapl, const char *env_h5_drvr);
@@ -201,9 +201,9 @@ error:
  * Purpose:     The purpose of this function appears to be a smoke check
  *              intended to exercise the page buffer.
  *
- *              Specifically, the function creates a file, and then goes 
- *              through a loop in which it creates four data sets, write 
- *              data to one of them, verifies the data written, and then 
+ *              Specifically, the function creates a file, and then goes
+ *              through a loop in which it creates four data sets, write
+ *              data to one of them, verifies the data written, and then
  *              deletes the three that it didn't write to.
  *
  *              Any data mis-matches or failures reported by the HDF5
@@ -287,7 +287,7 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
 
         HDmemset(data, 0, (size_t)num_elements * sizeof(int));
         if((dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;        
+            FAIL_STACK_ERROR;
         if(H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
             FAIL_STACK_ERROR;
         if(H5Dclose(dset_id) < 0)
@@ -342,7 +342,7 @@ error:
  * Purpose:     The purpose of this function appears to be a smoke check
  *              intended to exercise the page buffer.
  *
- *              Specifically, the function opens a file (created by 
+ *              Specifically, the function opens a file (created by
  *              create_file()?), and verify the contents of its datasets.
  *
  *              Any data mis-matches or failures reported by the HDF5
@@ -357,7 +357,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-open_file(char *filename, hid_t fapl, hsize_t page_size, 
+open_file(char *filename, hid_t fapl, hsize_t page_size,
     size_t page_buffer_size)
 {
     hid_t       file_id = -1;
@@ -499,7 +499,7 @@ error:
  *
  *              1) verifying that API errors are caught.
  *
- *              2) verifying that the page buffer behaves more or less 
+ *              2) verifying that the page buffer behaves more or less
  *                 as advertized.
  *
  *              Any data mis-matches or unexpected failures or successes
@@ -537,8 +537,8 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
 
 
-    /* Test setting a page buffer without Paged Aggregation enabled - 
-     * should fail 
+    /* Test setting a page buffer without Paged Aggregation enabled -
+     * should fail
      */
     if(H5Pset_page_buffer_size(fapl, 512, 0, 0) < 0)
         TEST_ERROR;
@@ -551,8 +551,8 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
 
 
-    /* Test setting a page buffer with a size smaller than a single 
-     * page size - should fail 
+    /* Test setting a page buffer with a size smaller than a single
+     * page size - should fail
      */
     if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         TEST_ERROR;
@@ -571,8 +571,8 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
 
 
-    /* Test setting a page buffer with sum of min meta and raw 
-     * data percentage > 100 - should fail 
+    /* Test setting a page buffer with sum of min meta and raw
+     * data percentage > 100 - should fail
      */
     H5E_BEGIN_TRY {
         ret = H5Pset_page_buffer_size(fapl, 512, 50, 51);
@@ -601,8 +601,8 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
 
 
-    /* Test setting a page buffer with a size slightly larger than a 
-     * single page size 
+    /* Test setting a page buffer with a size slightly larger than a
+     * single page size
      */
     if(H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
         TEST_ERROR;
@@ -1168,9 +1168,9 @@ error:
  *              the test to adjust to the number of page buffer pages
  *              accessed during file open / create.
  *
- *              The test for the value of base_page_cnt just after file 
+ *              The test for the value of base_page_cnt just after file
  *              open exists detect changes in library behavior.  Assuming
- *              any such change is not indicative of other issues, these 
+ *              any such change is not indicative of other issues, these
  *              tests can be modified to reflect the change.
  *
  *                                                    JRM -- 2/23/17
@@ -1227,7 +1227,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
-     * Get the number of pages inserted, and verify that it is the 
+     * Get the number of pages inserted, and verify that it is the
      * expected value.
      */
     base_page_cnt = f->shared->pb_ptr->curr_pages;
@@ -1310,8 +1310,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
     if (f->shared->pb_ptr->curr_pages != page_count + base_page_cnt)
         FAIL_STACK_ERROR;
 
-    /* read elements 1200 - 1201, this should read -1 and bring in an 
-     * entire page of addr 1200 
+    /* read elements 1200 - 1201, this should read -1 and bring in an
+     * entire page of addr 1200
      */
     if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 1200), sizeof(int) * 1, data) < 0)
         FAIL_STACK_ERROR;
@@ -1368,7 +1368,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
     }
 
     /* read elements 0 - 800 using the PB.. this should result in all
-     * what we have written so far and should get the updates from the PB 
+     * what we have written so far and should get the updates from the PB
      */
     if (H5F_block_read(f, H5FD_MEM_DRAW, addr, sizeof(int) * 800, data) < 0)
         FAIL_STACK_ERROR;
@@ -1385,7 +1385,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr,
 
     /* update elements 400 - 1400 to value 0, this will go to disk but
      * also evict existing pages from the PB (page 400 & 1200 that are
-     * existing). 
+     * existing).
      */
     for(i=0 ; i<1000 ; i++)
         data[i] = 0;
@@ -1715,7 +1715,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_min_threshold()
  *
- * Purpose:     Tests verifying observation of minimum and maximum 
+ * Purpose:     Tests verifying observation of minimum and maximum
  *              raw and metadata page counts in the page buffer.
  *
  *              Any data mis-matches or failures reported by the HDF5
@@ -1726,16 +1726,16 @@ error:
  *
  * Programmer:  unknown
  *              ?? / ?? / ??
- *              
+ *
  * Changes:     Added the base_raw_cnt and base_meta_cnt fields and
- *              supporting code.  This allows the test to adjust to the 
- *              number of page buffer pages accessed during file open / 
+ *              supporting code.  This allows the test to adjust to the
+ *              number of page buffer pages accessed during file open /
  *              create.
  *
  *              The tests for the values of base_raw_cnt and base_meta_cnt
- *              just after file open exist detect changes in library 
- *              behavior.  Assuming any such change is not indicative of 
- *              other issues, these tests can be modified to reflect the 
+ *              just after file open exist detect changes in library
+ *              behavior.  Assuming any such change is not indicative of
+ *              other issues, these tests can be modified to reflect the
  *              change.
  *
  *                                                    JRM -- 2/23/17
@@ -1836,8 +1836,8 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
                                             sizeof(int)*(size_t)num_elements)))
         FAIL_STACK_ERROR;
 
-    /* write all raw data.  Since min_md_pages == max_pages, none of it 
-     * should end up in the page buffer. 
+    /* write all raw data.  Since min_md_pages == max_pages, none of it
+     * should end up in the page buffer.
      */
     for(i=0 ; i<100 ; i++)
         data[i] = i;
@@ -1898,7 +1898,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
 
     /* write and read more raw data and make sure that they don't end up in
-     * page buffer 
+     * page buffer
      */
     if(H5F_block_write(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*200), 
                        sizeof(int)*100, data) < 0)
@@ -2039,7 +2039,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
 
     /* write and read more meta data and make sure that they don't end up in
-     * page buffer 
+     * page buffer
      */
     if(H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*100), 
                        sizeof(int)*50, data) < 0)
@@ -2093,8 +2093,8 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
 
     /* opening the file inserts one or more pages into the page buffer.
      *
-     * However, with the current 1 metadata page inserted into the 
-     * the page buffer, it is not necessary to track the base raw and 
+     * However, with the current 1 metadata page inserted into the
+     * the page buffer, it is not necessary to track the base raw and
      * metadata entry counts.
      */
 
@@ -2185,8 +2185,8 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if(f->shared->pb_ptr->curr_rd_pages != 2)
         TEST_ERROR;
 
-    /* adding more meta entires should replace meta entries since raw data 
-     * is at its minimum 
+    /* adding more meta entires should replace meta entries since raw data
+     * is at its minimum
      */
     if(H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*600), 
                        sizeof(int)*100, data) < 0)
@@ -2207,8 +2207,8 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
                       sizeof(int)*100, data) < 0)
         FAIL_STACK_ERROR;
 
-    /* adding 2 raw entries (even with 1 call) should only evict 1 meta 
-     * entry and another raw entry 
+    /* adding 2 raw entries (even with 1 call) should only evict 1 meta
+     * entry and another raw entry
      */
     if(H5F_block_read(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*350), 
                       sizeof(int)*100, data) < 0)
@@ -2383,8 +2383,8 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if(f->shared->pb_ptr->curr_rd_pages != 4)
         TEST_ERROR;
 
-    /* write one more raw entry which should replace another raw entry 
-     * keeping min threshold of meta entries 
+    /* write one more raw entry which should replace another raw entry
+     * keeping min threshold of meta entries
      */
     if(H5F_block_write(f, H5FD_MEM_DRAW, raw_addr+(sizeof(int)*300), 
                        sizeof(int)*100, data) < 0)
@@ -2399,8 +2399,8 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if(f->shared->pb_ptr->curr_rd_pages != 4)
         TEST_ERROR;
 
-    /* write a metadata entry that should replace the metadata entry 
-     * at the bottom of the LRU 
+    /* write a metadata entry that should replace the metadata entry
+     * at the bottom of the LRU
      */
     if(H5F_block_write(f, H5FD_MEM_SUPER, meta_addr+(sizeof(int)*500), 
                        sizeof(int)*100, data) < 0)
@@ -2460,16 +2460,16 @@ error:
  *
  * Programmer:  unknown
  *              ?? / ?? / ??
- *              
+ *
  * Changes:     Added the base_raw_cnt and base_meta_cnt fields and
- *              supporting code.  This allows the test to adjust to the 
- *              number of page buffer pages accessed during file open / 
+ *              supporting code.  This allows the test to adjust to the
+ *              number of page buffer pages accessed during file open /
  *              create.
  *
  *              The tests for the values of base_raw_cnt and base_meta_cnt
- *              just after file open exist detect changes in library 
- *              behavior.  Assuming any such change is not indicative of 
- *              other issues, these tests can be modified to reflect the 
+ *              just after file open exist detect changes in library
+ *              behavior.  Assuming any such change is not indicative of
+ *              other issues, these tests can be modified to reflect the
  *              change.
  *
  *                                                    JRM -- 2/23/17
@@ -2530,7 +2530,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* opening the file inserts one or more pages into the page buffer.
-     * Get the raw and meta counts now, so we can adjust the expected 
+     * Get the raw and meta counts now, so we can adjust the expected
      * statistics accordingly.
      */
     HDassert(f);
@@ -2844,7 +2844,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    verify_page_buffering_disabled()
  *
- * Purpose:     This function should only be called in parallel 
+ * Purpose:     This function should only be called in parallel
  *              builds.
  *
  *              At present, page buffering should be disabled in parallel
@@ -2855,7 +2855,7 @@ error:
  *
  * Programmer:  John Mainzer
  *              03/21/17
- *              
+ *
  * Changes:     None.
  *
  *-------------------------------------------------------------------------
@@ -2902,7 +2902,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     if(file_id >= 0)
         TEST_ERROR;
 
-    /* now, create a file, close it, and then try to open it with page 
+    /* now, create a file, close it, and then try to open it with page
      * buffering enabled.
      */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -2922,7 +2922,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     if(H5Fclose(file_id) < 0)
         FAIL_STACK_ERROR;
 
-    /* try to open the file using the fapl prepared above which enables 
+    /* try to open the file using the fapl prepared above which enables
      * page buffering.  Should fail.
      */
     H5E_BEGIN_TRY {
@@ -2991,7 +2991,7 @@ main(void)
      * Page buffering depends on paged aggregation which is
      * currently disabled for multi/split drivers.
      */
-    if((0 == HDstrcmp(env_h5_drvr, "multi")) || 
+    if((0 == HDstrcmp(env_h5_drvr, "multi")) ||
        (0 == HDstrcmp(env_h5_drvr, "split"))) {
 
         SKIPPED()
@@ -3009,7 +3009,7 @@ main(void)
     if(H5CX_push() < 0) FAIL_STACK_ERROR
     api_ctx_pushed = TRUE;
 
-#ifdef H5_HAVE_PARALLEL 
+#ifdef H5_HAVE_PARALLEL
 
     HDputs("Page Buffering is disabled for parallel.");
     nerrors += verify_page_buffering_disabled(fapl, env_h5_drvr);

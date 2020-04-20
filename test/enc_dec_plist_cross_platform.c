@@ -192,7 +192,7 @@ error:
 }
 
 static int
-test_plists(const char *filename_prefix) 
+test_plists(const char *filename_prefix)
 {
     int i;
     unsigned config[2];

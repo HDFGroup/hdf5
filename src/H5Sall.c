@@ -675,7 +675,7 @@ H5S__all_deserialize(H5S_t **space, const uint8_t **p)
     HDassert(*p);
 
     /* As part of the efforts to push all selection-type specific coding
-       to the callbacks, the coding for the allocation of a null dataspace 
+       to the callbacks, the coding for the allocation of a null dataspace
        is moved from H5S_select_deserialize() in H5Sselect.c.
        This is needed for decoding virtual layout in H5O__layout_decode() */
 

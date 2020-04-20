@@ -751,7 +751,7 @@ H5Z_set_parms_compound(const H5T_t *type, unsigned *cd_values_index,
                     H5_CHECK_OVERFLOW(dtype_member_offset, size_t, unsigned);
                     H5_CHECK_OVERFLOW(dtype_next_member_offset, size_t, unsigned);
                     cd_values[(*cd_values_index)++] = (unsigned)dtype_next_member_offset - (unsigned)dtype_member_offset;
-                } 
+                }
                 break;
 
             case H5T_TIME:

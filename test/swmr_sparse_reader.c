@@ -163,7 +163,7 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
  *              The amount of time to sleep (s).
  *
  *              unsigned reopen_count
- *              
+ *
  *
  * Return:      Success:    0
  *              Failure:    -1
@@ -186,7 +186,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
 
     HDassert(filename);
     HDassert(poll_time != 0);
-    
+
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0)
         return -1;

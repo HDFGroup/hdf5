@@ -64,10 +64,10 @@ static herr_t H5HG__cache_heap_get_initial_load_size(void *udata, size_t *image_
 static herr_t H5HG__cache_heap_get_final_load_size(const void *_image,
     size_t image_len, void *udata, size_t *actual_len);
 static void *H5HG__cache_heap_deserialize(const void *image, size_t len,
-    void *udata, hbool_t *dirty); 
+    void *udata, hbool_t *dirty);
 static herr_t H5HG__cache_heap_image_len(const void *thing, size_t *image_len);
 static herr_t H5HG__cache_heap_serialize(const H5F_t *f, void *image,
-    size_t len, void *thing); 
+    size_t len, void *thing);
 static herr_t H5HG__cache_heap_free_icr(void *thing);
 
 /* Prefix deserialization */
@@ -159,10 +159,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5HG__cache_heap_get_initial_load_size()
  *
- * Purpose:	Return the initial speculative read size to the metadata 
- *		cache.  This size will be used in the initial attempt to read 
- *		the global heap.  If this read is too small, the cache will 
- *		try again with the correct value obtained from 
+ * Purpose:	Return the initial speculative read size to the metadata
+ *		cache.  This size will be used in the initial attempt to read
+ *		the global heap.  If this read is too small, the cache will
+ *		try again with the correct value obtained from
  *		H5HG__cache_get_final_load_size().
  *
  * Return:      Success:        SUCCEED
@@ -233,7 +233,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5HG__cache_heap_deserialize
  *
- * Purpose:	Given a buffer containing the on disk image of the global 
+ * Purpose:	Given a buffer containing the on disk image of the global
  *		heap, deserialize it, load its contents into a newly allocated
  *		instance of H5HG_heap_t, and return a pointer to the new instance.
  *
@@ -335,11 +335,11 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata,
             heap->obj[idx].begin = begin;
 
             /*
-             * The total storage size includes the size of the object 
-             * header and is zero padded so the next object header is 
-             * properly aligned. The entire obj array was calloc'ed, 
-             * so no need to zero the space here. The last bit of space 
-             * is the free space object whose size is never padded and 
+             * The total storage size includes the size of the object
+             * header and is zero padded so the next object header is
+             * properly aligned. The entire obj array was calloc'ed,
+             * so no need to zero the space here. The last bit of space
+             * is the free space object whose size is never padded and
              * already includes the object header.
              */
             if(idx > 0) {
@@ -385,7 +385,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5HG__cache_heap_image_len
  *
- * Purpose:	Return the on disk image size of the global heap to the 
+ * Purpose:	Return the on disk image size of the global heap to the
  *		metadata cache via the image_len.
  *
  * Return:      Success:        SUCCEED
@@ -419,7 +419,7 @@ H5HG__cache_heap_image_len(const void *_thing, size_t *image_len)
 /*-------------------------------------------------------------------------
  * Function:    H5HG__cache_heap_serialize
  *
- * Purpose:	Given an appropriately sized buffer and an instance of 
+ * Purpose:	Given an appropriately sized buffer and an instance of
  *		H5HG_heap_t, serialize the global heap for writing to file,
  *		and copy the serialized version into the buffer.
  *

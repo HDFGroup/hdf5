@@ -794,7 +794,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
                     else
                         if (H5Pget_vol_id(options->fout_fapl, &out_vol_id) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Pget_vol_id failed");
- 
+
                     if (in_vol_id != out_vol_id)
                         use_h5ocopy = FALSE;
 

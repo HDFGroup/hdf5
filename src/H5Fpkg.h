@@ -84,17 +84,17 @@
         + 1) /* superblock version */
 
 /* The H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE is the minimal amount of super block
- * variable length data guarnateed to load the sizeof offsets and the sizeof 
+ * variable length data guarnateed to load the sizeof offsets and the sizeof
  * lengths fields in all versions of the superblock.
  *
- * This is necessary in the V3 cache, as on the initial load, we need to 
+ * This is necessary in the V3 cache, as on the initial load, we need to
  * get enough of the superblock to determine its version and size so that
- * the metadata cache can load the correct amount of data from file to 
+ * the metadata cache can load the correct amount of data from file to
  * allow the second deserialization attempt to succeed.
  *
- * The value selected will have to be revisited for each new version 
+ * The value selected will have to be revisited for each new version
  * of the super block.  Note that the current value is one byte larger
- * than it needs to be. 
+ * than it needs to be.
  */
 #define H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE	7
 
@@ -170,8 +170,8 @@ typedef struct H5F_superblock_cache_ud_t {
     unsigned btree_k[H5B_NUM_BTREE_ID]; /* B-tree key values for each type */
     haddr_t stored_eof;     /* End-of-file in file */
     hbool_t drvrinfo_removed; /* Indicate if the driver info was removed */
-    unsigned    super_vers;   /* Superblock version obtained in get_load_size callback. 
-			       * It will be used later in verify_chksum callback 
+    unsigned    super_vers;   /* Superblock version obtained in get_load_size callback.
+			       * It will be used later in verify_chksum callback
 			       */
 } H5F_superblock_cache_ud_t;
 
@@ -279,16 +279,16 @@ typedef TAILQ_HEAD(shadow_defree_queue, shadow_defree) shadow_defree_queue_t;
 struct H5F_shared_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     H5F_super_t *sblock;        /* Pointer to (pinned) superblock for file */
-    H5O_drvinfo_t *drvinfo;	/* Pointer to the (pinned) driver info 
+    H5O_drvinfo_t *drvinfo;	/* Pointer to the (pinned) driver info
                                  * cache entry.  This field is only defined
                                  * for older versions of the super block,
                                  * and then only when a driver information
                                  * block is present.  At all other times
                                  * it should be NULL.
                                  */
-    hbool_t drvinfo_sb_msg_exists;  /* Convenience field used to track 
-                                     * whether the driver info superblock 
-                                     * extension message has been created 
+    hbool_t drvinfo_sb_msg_exists;  /* Convenience field used to track
+                                     * whether the driver info superblock
+                                     * extension message has been created
                                      * yet. This field should be TRUE iff the
                                      * superblock extension exists and contains
                                      * a driver info message.  Under all other
@@ -317,7 +317,7 @@ struct H5F_shared_t {
                                 /* metadata cache.  This structure is   */
                                 /* fixed at creation time and should    */
                                 /* not change thereafter.               */
-    H5AC_cache_image_config_t 
+    H5AC_cache_image_config_t
 		mdc_initCacheImageCfg;  /* initial configuration for the */
                                         /* generate metadata cache image on     */
                                         /* close option.  This structure is     */
@@ -357,7 +357,7 @@ struct H5F_shared_t {
     hsize_t     fs_threshold;	/* Free space section threshold 	*/
     hbool_t     fs_persist;     /* Free-space persist or not */
     unsigned    fs_version;     /* Free-space version: */
-                                /* It is used to update fsinfo message in the superblock 
+                                /* It is used to update fsinfo message in the superblock
                                    extension when closing down the free-space managers */
     hbool_t     use_tmp_space;  /* Whether temp. file space allocation is allowed */
     haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */

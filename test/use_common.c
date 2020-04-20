@@ -157,9 +157,9 @@ void
 show_parameters(options_t * opts)
 {
     HDprintf("===Parameters used:===\n");
-    HDprintf("chunk dims=(%llu, %llu, %llu)\n", (unsigned long long)opts->chunkdims[0], 
+    HDprintf("chunk dims=(%llu, %llu, %llu)\n", (unsigned long long)opts->chunkdims[0],
         (unsigned long long)opts->chunkdims[1], (unsigned long long)opts->chunkdims[2]);
-    HDprintf("dataset max dims=(%llu, %llu, %llu)\n", (unsigned long long)opts->max_dims[0], 
+    HDprintf("dataset max dims=(%llu, %llu, %llu)\n", (unsigned long long)opts->max_dims[0],
         (unsigned long long)opts->max_dims[1], (unsigned long long)opts->max_dims[2]);
     HDprintf("number of planes to write=%llu\n", (unsigned long long)opts->nplanes);
     HDprintf("using SWMR mode=%s\n", opts->use_swmr ? "yes(1)" : "no(0)");
@@ -301,7 +301,7 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t * opts)
     /* verify chunk_dims against set paramenters */
     if (chunk_dims[0]!=opts->chunkdims[0] || chunk_dims[1] != cz || chunk_dims[2] != cz) {
         HDfprintf(stderr, "chunk size is not as expected. Got dims=(%llu,%llu,%llu)\n",
-            (unsigned long long)chunk_dims[0], (unsigned long long)chunk_dims[1], 
+            (unsigned long long)chunk_dims[0], (unsigned long long)chunk_dims[1],
             (unsigned long long)chunk_dims[2]);
         return -1;
     }
@@ -329,12 +329,12 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t * opts)
         return -1;
     }
     HDprintf("dataset rank %d, dimensions %llu x %llu x %llu\n",
-           rank, (unsigned long long)(dims[0]), (unsigned long long)(dims[1]), 
+           rank, (unsigned long long)(dims[0]), (unsigned long long)(dims[1]),
            (unsigned long long)(dims[2]));
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[0] != 0 || dims[1] != memdims[1] || dims[2] != memdims[2]) {
         HDfprintf(stderr, "dataset is not empty. Got dims=(%llu,%llu,%llu)\n",
-            (unsigned long long)dims[0], (unsigned long long)dims[1], 
+            (unsigned long long)dims[0], (unsigned long long)dims[1],
             (unsigned long long)dims[2]);
         return -1;
     }
@@ -529,7 +529,7 @@ read_uc_file(hbool_t towait, options_t * opts)
                 HDprintf("\n");
                 loops_waiting_for_plane=0;
             }
-            HDprintf("reading planes %llu to %llu\n", (unsigned long long)nplanes_seen, 
+            HDprintf("reading planes %llu to %llu\n", (unsigned long long)nplanes_seen,
                 (unsigned long long)dims[0]);
         }
         else {
@@ -579,7 +579,7 @@ read_uc_file(hbool_t towait, options_t * opts)
                         if (++nerrs < ErrorReportMax) {
                             HDfprintf(stderr,
                                 "found error %llu plane(%llu,%llu), expected %llu, got %d\n",
-                                (unsigned long long)nplane, (unsigned long long)j, 
+                                (unsigned long long)nplane, (unsigned long long)j,
                                 (unsigned long long)k, (unsigned long long)nplane, (int)*(bufptr-1));
                         } /* end if should print error */
                     } /* end if value mismatch */
@@ -587,7 +587,7 @@ read_uc_file(hbool_t towait, options_t * opts)
             } /* end for plane first dimension */
             if (nerrs) {
                 nreadererr++;
-                HDfprintf(stderr, "found %d unexpected values in plane %llu\n", nerrs, 
+                HDfprintf(stderr, "found %d unexpected values in plane %llu\n", nerrs,
                     (unsigned long long)nplane);
             }
         } /* end for each plane added since last read */

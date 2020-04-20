@@ -1805,7 +1805,7 @@ H5HF__man_iblock_parent_info(const H5HF_hdr_t *hdr, hsize_t block_off,
     /* Sanity check - first lookup must be an indirect block */
     HDassert(row >= hdr->man_dtable.max_direct_rows);
 
-    /* Traverse down, until a direct block at the offset is found, then 
+    /* Traverse down, until a direct block at the offset is found, then
      *	use previous (i.e. parent's) offset, row, and column.
      */
     prev_par_block_off = par_block_off = 0;

@@ -171,7 +171,7 @@ HLOG_OUTLET_SHORT_DEFN(pbrm, pagebuffer);
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5PB_reset_stats(H5PB_t *pb_ptr)
 {
     int i;
@@ -258,7 +258,7 @@ H5PB_reset_stats(H5PB_t *pb_ptr)
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5PB_get_stats(const H5PB_t *pb_ptr, unsigned accesses[2], unsigned hits[2],
     unsigned misses[2], unsigned evictions[2], unsigned bypasses[2])
 {

@@ -57,7 +57,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5B2__update_child_flush_depends(H5B2_hdr_t *hdr, 
+static herr_t H5B2__update_child_flush_depends(H5B2_hdr_t *hdr,
     unsigned depth, const H5B2_node_ptr_t *node_ptrs, unsigned start_idx,
     unsigned end_idx, void *old_parent, void *new_parent);
 
@@ -1757,7 +1757,7 @@ H5B2__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-    
+
     /* Sanity check */
     HDassert(parent_entry);
     HDassert(child_entry);
@@ -1794,7 +1794,7 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
-    
+
     /* Sanity checks */
     HDassert(hdr);
     HDassert(depth > 0);
@@ -1884,14 +1884,14 @@ done:
  */
 static herr_t
 H5B2__update_child_flush_depends(H5B2_hdr_t *hdr, unsigned depth,
-    const H5B2_node_ptr_t *node_ptrs, unsigned start_idx, unsigned end_idx, 
+    const H5B2_node_ptr_t *node_ptrs, unsigned start_idx, unsigned end_idx,
     void *old_parent, void *new_parent)
 {
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
-    
+
     /* Sanity checks */
     HDassert(hdr);
     HDassert(depth > 1);
@@ -1929,7 +1929,7 @@ H5B2__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-    
+
     /* Sanity check */
     HDassert(parent_entry);
     HDassert(child_entry);

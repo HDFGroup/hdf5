@@ -213,7 +213,7 @@ error:
  * Purpose:     Handle each dataset from the data file.
  *
  * Return:      Success:        0
- *              Failure:        Number of failures 
+ *              Failure:        Number of failures
  *
  * Programmer:  Raymond Lu
  *              21 January 2011
@@ -242,46 +242,46 @@ check_file(char *filename)
 
     TESTING("dataset of LE FLOAT with scale-offset filter");
     nerrors += check_data_f(DATASETNAME2, fid);
- 
+
     TESTING("dataset of BE FLOAT with scale-offset filter");
     nerrors += check_data_f(DATASETNAME3, fid);
 
     TESTING("dataset of LE DOUBLE with scale-offset filter");
     nerrors += check_data_f(DATASETNAME4, fid);
- 
+
     TESTING("dataset of BE DOUBLE with scale-offset filter");
     nerrors += check_data_f(DATASETNAME5, fid);
- 
+
     TESTING("dataset of LE CHAR with scale-offset filter");
     nerrors += check_data_i(DATASETNAME6, fid);
- 
+
     TESTING("dataset of BE CHAR with scale-offset filter");
     nerrors += check_data_i(DATASETNAME7, fid);
- 
+
     TESTING("dataset of LE SHORT with scale-offset filter");
     nerrors += check_data_i(DATASETNAME8, fid);
- 
+
     TESTING("dataset of BE SHORT with scale-offset filter");
     nerrors += check_data_i(DATASETNAME9, fid);
 
     TESTING("dataset of LE INT with scale-offset filter");
     nerrors += check_data_i(DATASETNAME10, fid);
- 
+
     TESTING("dataset of BE INT with scale-offset filter");
     nerrors += check_data_i(DATASETNAME11, fid);
 
     TESTING("dataset of LE LONG LONG with scale-offset filter");
     nerrors += check_data_i(DATASETNAME12, fid);
- 
+
     TESTING("dataset of BE LONG LONG with scale-offset filter");
     nerrors += check_data_i(DATASETNAME13, fid);
 
     TESTING("dataset of LE FLOAT with Fletcher32 filter");
     nerrors += check_data_f(DATASETNAME14, fid);
- 
+
     TESTING("dataset of BE FLOAT with Fletcher32 filter");
     nerrors += check_data_f(DATASETNAME15, fid);
- 
+
     TESTING("dataset of LE FLOAT with Deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += check_data_f(DATASETNAME16, fid);

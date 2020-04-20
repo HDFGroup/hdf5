@@ -15,23 +15,23 @@
 #include "H5HLprivate2.h"
 
 /*
- *  WATCH.h5: file with various types of datasets for testing--                                   
+ *  WATCH.h5: file with various types of datasets for testing--
  *
- *  The following datasets are chunked, H5D_ALLOC_TIME_INCR, max. dimensional setting:       
- *      DSET_ONE: one-dimensional dataset                                                   
- *      DSET_TWO: two-dimensional dataset                                                  
- *      DSET_CMPD: one-dimensional dataset with compound type                             
+ *  The following datasets are chunked, H5D_ALLOC_TIME_INCR, max. dimensional setting:
+ *      DSET_ONE: one-dimensional dataset
+ *      DSET_TWO: two-dimensional dataset
+ *      DSET_CMPD: one-dimensional dataset with compound type
  *      DSET_CMPD_ESC: one-dimensional dataset with compound type and member names with
- *		       escape/separator characters 
- *      DSET_CMPD_TWO: two-dimensional dataset with compound type                             
- *                                                                                           
- *  The following datasets are one-dimensional, chunked, max. dimension setting:              
- *      DSET_ALLOC_EARLY: dataset with H5D_ALLOC_TIME_EARLY                                  
- *      DSET_ALLOC_LATE: dataset H5D_ALLOC_TIME_LATE                                        
- *                                                                                       
- *  The following datasets are one-dimensional:                                           
- *      DSET_NONE: fixed dimension setting, contiguous, H5D_ALLOC_TIME_LATE              
- *      DSET_NOMAX: fixed dimension setting, chunked, H5D_ALLOC_TIME_INCR      
+ *		       escape/separator characters
+ *      DSET_CMPD_TWO: two-dimensional dataset with compound type
+ *
+ *  The following datasets are one-dimensional, chunked, max. dimension setting:
+ *      DSET_ALLOC_EARLY: dataset with H5D_ALLOC_TIME_EARLY
+ *      DSET_ALLOC_LATE: dataset H5D_ALLOC_TIME_LATE
+ *
+ *  The following datasets are one-dimensional:
+ *      DSET_NONE: fixed dimension setting, contiguous, H5D_ALLOC_TIME_LATE
+ *      DSET_NOMAX: fixed dimension setting, chunked, H5D_ALLOC_TIME_INCR
  */
 #define ONE_DIMS0	10
 #define MAX_ONE_DIMS0	100

@@ -115,7 +115,7 @@ H5FL_SEQ_EXTERN(H5G_entry_t);
 /*-------------------------------------------------------------------------
  * Function:    H5G__cache_node_get_initial_load_size()
  *
- * Purpose:	Determine the size of the on-disk image of the node, and 
+ * Purpose:	Determine the size of the on-disk image of the node, and
  *		return this value in *image_len.
  *
  * Return:      Success:        SUCCEED
@@ -151,10 +151,10 @@ H5G__cache_node_get_initial_load_size(void *_udata, size_t *image_len)
  *		node, allocate an instance of H5G_node_t, load the contence of the
  *		image into it, and return a pointer to the instance.
  *
- *		Note that deserializing the image requires access to the file 
- *		pointer, which is not included in the parameter list for this 
- *		callback.  Finesse this issue by passing in the file pointer 
- *		twice to the H5AC_protect() call -- once as the file pointer 
+ *		Note that deserializing the image requires access to the file
+ *		pointer, which is not included in the parameter list for this
+ *		callback.  Finesse this issue by passing in the file pointer
+ *		twice to the H5AC_protect() call -- once as the file pointer
  *		proper, and again as the user data
  *
  * Return:      Success:        Pointer to in core representation

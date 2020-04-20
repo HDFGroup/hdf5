@@ -26,7 +26,7 @@
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
-#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER) 
+#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER)
 # define H5_ZLIB_HEADER "zlib.h"
 #endif
 #if defined(H5_ZLIB_HEADER)

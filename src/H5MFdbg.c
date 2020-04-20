@@ -115,8 +115,8 @@ H5MF__sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     /* Print generic section information */
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
 	      "Section type:",
-          (sect->sect_info.type == H5MF_FSPACE_SECT_SIMPLE ? "simple" : 
-          (sect->sect_info.type == H5MF_FSPACE_SECT_SMALL ? "small" : 
+          (sect->sect_info.type == H5MF_FSPACE_SECT_SIMPLE ? "simple" :
+          (sect->sect_info.type == H5MF_FSPACE_SECT_SMALL ? "small" :
           (sect->sect_info.type == H5MF_FSPACE_SECT_LARGE ? "large" : "unknown"))));
     HDfprintf(udata->stream, "%*s%-*s %a\n", udata->indent, "", udata->fwidth,
 	      "Section address:",

@@ -354,7 +354,7 @@ main(void)
 
     /* TEST 6 */
     /* Check the case where the file was flushed, but more data was
-     * added afterward and then flushed (w/SWMR) 
+     * added afterward and then flushed (w/SWMR)
      */
     TESTING("H5Fflush (part2 with flush and later addition and another flush + SWMR)");
     if(vfd_supports_swmr) {

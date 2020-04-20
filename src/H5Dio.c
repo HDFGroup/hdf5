@@ -321,7 +321,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Dwrite_chunk
  *
- * Purpose:     Writes an entire chunk to the file directly.	
+ * Purpose:     Writes an entire chunk to the file directly.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -331,13 +331,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, 
+H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset,
          size_t data_size, const void *buf)
 {
     H5VL_object_t  *vol_obj = NULL;
     uint32_t        data_size_32;                   /* Chunk data size (limited to 32-bits currently) */
     herr_t          ret_value = SUCCEED;            /* Return value */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiIu*hz*x", dset_id, dxpl_id, filters, offset, data_size, buf);
 

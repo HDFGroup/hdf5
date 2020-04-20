@@ -2157,7 +2157,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_COMPOUND != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_COMPOUND datatype")
-            if(H5T_COMPOUND != dst->shared->type) 
+            if(H5T_COMPOUND != dst->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_COMPOUND datatype")
 
             if(H5T_conv_struct_init(src, dst, cdata) < 0)
@@ -2385,7 +2385,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_COMPOUND != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_COMPOUND datatype")
-            if(H5T_COMPOUND != dst->shared->type) 
+            if(H5T_COMPOUND != dst->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_COMPOUND datatype")
 
             /* Initialize data which is relatively constant */
@@ -2648,14 +2648,14 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
      * that array are the index numbers in the destination type or negative
      * if the entry is unused.
      *
-     * (This optimized algorithm doesn't work when the byte orders are different.  
+     * (This optimized algorithm doesn't work when the byte orders are different.
      * The code such as "n = *((int*)(src->shared->u.enumer.value+i*src->shared->size));"
      * can change the value significantly. i.g. if the source value is big-endian 0x0000000f,
      * executing the casting on little-endian machine will get a big number 0x0f000000.
-     * Then it can't meet the condition 
+     * Then it can't meet the condition
      * "if(src->shared->u.enumer.nmembs<2 || (double)length/src->shared->u.enumer.nmembs<1.2)"
-     * Because this is the optimized code, we won't fix it. It should still work in some 
-     * situations. SLU - 2011/5/24) 
+     * Because this is the optimized code, we won't fix it. It should still work in some
+     * situations. SLU - 2011/5/24)
      */
     if(1 == src->shared->size || sizeof(short) == src->shared->size || sizeof(int) == src->shared->size) {
 	for(i = 0; i < src->shared->u.enumer.nmembs; i++) {
@@ -2763,7 +2763,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_ENUM != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_ENUM datatype")
-            if(H5T_ENUM != dst->shared->type) 
+            if(H5T_ENUM != dst->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_ENUM datatype")
 
             if(H5T_conv_enum_init(src, dst, cdata) < 0)
@@ -2790,7 +2790,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
             if(H5T_ENUM != src->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_ENUM datatype")
-            if(H5T_ENUM != dst->shared->type) 
+            if(H5T_ENUM != dst->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_ENUM datatype")
 
             /* priv->src2dst map was computed for certain sort keys. Make sure those same
@@ -2830,10 +2830,10 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     /* Use O(1) lookup */
                     /* (The casting won't work when the byte orders are different. i.g. if the source value
                      * is big-endian 0x0000000f, the direct casting "n = *((int*)s);" will make it a big
-                     * number 0x0f000000 on little-endian machine. But we won't fix it because it's an 
+                     * number 0x0f000000 on little-endian machine. But we won't fix it because it's an
                      * optimization code. Please also see the comment in the H5T_conv_enum_init() function.
                      * SLU - 2011/5/24)
-                     */ 
+                     */
                     if(1 == src->shared->size)
                         n = *((signed char*)s);
                     else if(sizeof(short) == src->shared->size)
@@ -2912,9 +2912,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T__conv_enum_numeric
  *
- * Purpose:	Converts enumerated data to a numeric type (integer or 
- *              floating-point number). This function is registered into 
- *              the conversion table twice in H5T_init_interface in H5T.c.  
+ * Purpose:	Converts enumerated data to a numeric type (integer or
+ *              floating-point number). This function is registered into
+ *              the conversion table twice in H5T_init_interface in H5T.c.
  *              Once for enum-integer conversion. Once for enum-float conversion.
  *
  * Return:	Success:	Non-negative
@@ -2966,7 +2966,7 @@ H5T__conv_enum_numeric(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
             if(NULL == (tpath = H5T_path_find(src_parent, dst))) {
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
             } else if(!H5T_path_noop(tpath)) {
-                if((src_parent_id = H5I_register(H5I_DATATYPE, H5T_copy(src_parent, H5T_COPY_ALL), FALSE)) < 0) 
+                if((src_parent_id = H5I_register(H5I_DATATYPE, H5T_copy(src_parent, H5T_COPY_ALL), FALSE)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
 
                 /* Convert the data */
@@ -3059,7 +3059,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if(H5T_VLEN != dst->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_VLEN datatype")
             if(H5T_VLEN_STRING == src->shared->u.vlen.type && H5T_VLEN_STRING == dst->shared->u.vlen.type) {
-                if((H5T_CSET_ASCII == src->shared->u.vlen.cset && H5T_CSET_UTF8 == dst->shared->u.vlen.cset) 
+                if((H5T_CSET_ASCII == src->shared->u.vlen.cset && H5T_CSET_UTF8 == dst->shared->u.vlen.cset)
                         || (H5T_CSET_ASCII == dst->shared->u.vlen.cset && H5T_CSET_UTF8 == src->shared->u.vlen.cset))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "The library doesn't convert between strings of ASCII and UTF")
             } /* end if */
@@ -4701,7 +4701,7 @@ H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad source character set")
             if(H5T_CSET_ASCII != dst->shared->u.atomic.u.s.cset && H5T_CSET_UTF8 != dst->shared->u.atomic.u.s.cset)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad destination character set")
-            if((H5T_CSET_ASCII == src->shared->u.atomic.u.s.cset && H5T_CSET_UTF8 == dst->shared->u.atomic.u.s.cset) 
+            if((H5T_CSET_ASCII == src->shared->u.atomic.u.s.cset && H5T_CSET_UTF8 == dst->shared->u.atomic.u.s.cset)
                     || (H5T_CSET_ASCII == dst->shared->u.atomic.u.s.cset && H5T_CSET_UTF8 == src->shared->u.atomic.u.s.cset))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "The library doesn't convert between strings of ASCII and UTF")
             if(src->shared->u.atomic.u.s.pad < 0 || src->shared->u.atomic.u.s.pad >= H5T_NSTR ||

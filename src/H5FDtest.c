@@ -114,7 +114,7 @@ H5FD__supports_swmr_test(const char *vfd_name)
         ret_value = !HDstrcmp(vfd_name, "log") || !HDstrcmp(vfd_name, "sec2");
 
     FUNC_LEAVE_NOAPI(ret_value)
-    
+
 } /* end H5FD__supports_swmr_test() */
 
 /*

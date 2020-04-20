@@ -143,7 +143,7 @@ init_cparam(H5FA_create_t *cparam, farray_test_param_t *tparam)
  * Purpose:     Create file and retrieve pointer to internal file object
  *
  * Return:      SUCCEED/FAIL
- *   
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -262,7 +262,7 @@ set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
  *-------------------------------------------------------------------------
  */
 static int
-reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id, 
+reopen_file(hid_t *fid, H5F_t **f, hid_t fapl_id,
     H5FA_t **fa, haddr_t fa_addr, const farray_test_param_t *tparam)
 {
     /* Check for closing & re-opening the array */

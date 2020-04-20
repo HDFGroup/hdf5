@@ -6008,7 +6008,7 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
 
     /* Set return value */
     ret_value = cmp_value;
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_vol_cmp() */

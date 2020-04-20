@@ -164,7 +164,7 @@ h5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
     size_t c_namelen = (size_t)*namelen;
     int_f ret_value = 0;
 
-    if(c_namelen > 0) 
+    if(c_namelen > 0)
         c_name = (char *)HDmalloc(c_namelen + 1);
 
     if(!c_name)
@@ -212,7 +212,7 @@ h5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
     size_t c_namelen = (size_t)*namelen;
     int_f ret_value = 0;
 
-    if(c_namelen > 0) 
+    if(c_namelen > 0)
         c_name = (char *)HDmalloc(c_namelen + 1);
 
     if(!c_name)
@@ -242,7 +242,7 @@ done:
  *  estack_id   - Error stack identifier.
  *  func 	- Function to be called upon an error condition.
  *  client_data - Data passed to the error function.
- *   
+ *
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR

@@ -186,7 +186,7 @@ H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1] = {{
 /* Declare a free list to manage the H5MF_free_section_t struct */
 H5FL_DEFINE(H5MF_free_section_t);
 
-/* 
+/*
  * "simple/small/large" section callbacks
  */
 
@@ -371,7 +371,7 @@ done:
     FUNC_LEAVE_NOAPI((H5FS_section_info_t *)ret_value)
 } /* end H5MF__sect_split() */
 
-/* 
+/*
  * "simple" section callbacks
  */
 
@@ -615,7 +615,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF__sect_simple_shrink() */
 
-/* 
+/*
  * "small" section callbacks
  */
 
@@ -625,7 +625,7 @@ done:
  *
  * Purpose:     Perform actions on a small "meta" action before adding it to the free space manager:
  *              1) Drop the section if it is at page end and its size <= page end threshold
- *              2) Adjust section size to include page end threshold if 
+ *              2) Adjust section size to include page end threshold if
  *                 (section size + threshold) is at page end
  *
  * Return:      Success:        non-negative
@@ -795,7 +795,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF__sect_small_merge() */
 
-/* 
+/*
  * "Large" section callbacks
  */
 

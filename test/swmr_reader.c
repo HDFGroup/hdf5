@@ -329,7 +329,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
         /* Emit informational message */
         if(verbose)
             HDfprintf(verbose_file, "Closing file\n");
-            
+
         /* Close the file */
         if(H5Fclose(fid) < 0)
             return -1;

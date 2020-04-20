@@ -1,41 +1,41 @@
-#if defined __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__    
-#pragma GCC diagnostic ignored "-Wconversion"                     
-#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"  
-#pragma GCC diagnostic ignored "-Wlarger-than="                   
-#pragma GCC diagnostic ignored "-Wmissing-prototypes"             
-#pragma GCC diagnostic ignored "-Wnested-externs"                 
-#pragma GCC diagnostic ignored "-Wold-style-definition"           
-#pragma GCC diagnostic ignored "-Wredundant-decls"                
-#pragma GCC diagnostic ignored "-Wsign-compare"                   
-#pragma GCC diagnostic ignored "-Wsign-conversion"                
-#pragma GCC diagnostic ignored "-Wstrict-overflow"                
-#pragma GCC diagnostic ignored "-Wstrict-prototypes"              
-#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"         
-#pragma GCC diagnostic ignored "-Wswitch-default"                 
-#pragma GCC diagnostic ignored "-Wunused-function"                
-#pragma GCC diagnostic ignored "-Wunused-macros"                  
-#pragma GCC diagnostic ignored "-Wunused-parameter"               
-#elif defined __SUNPRO_CC                                         
-#pragma disable_warn                                              
-#elif defined _MSC_VER                                            
-#pragma warning(push, 1)                                          
-#endif                                                            
+#if defined __GNUC__ && 402 <= __GNUC__ * 100 + __GNUC_MINOR__
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
+#pragma GCC diagnostic ignored "-Wlarger-than="
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#pragma GCC diagnostic ignored "-Wnested-externs"
+#pragma GCC diagnostic ignored "-Wold-style-definition"
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
+#pragma GCC diagnostic ignored "-Wswitch-default"
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-macros"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#elif defined __SUNPRO_CC
+#pragma disable_warn
+#elif defined _MSC_VER
+#pragma warning(push, 1)
+#endif
 /* A Bison parser, made by GNU Bison 2.7.  */
 
 /* Bison implementation for Yacc-like parsers in C
-   
+
       Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
-   
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -48,7 +48,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -127,7 +127,7 @@ struct arr_info {
 };
 /*stack for nested array type*/
 struct arr_info arr_stack[STACK_SIZE];
-int asindex = -1;               /*pointer to the top of array stack*/ 
+int asindex = -1;               /*pointer to the top of array stack*/
 
 hbool_t     is_str_size = 0;        /*flag to lexer for string size*/
 hbool_t     is_str_pad = 0;         /*flag to lexer for string padding*/
@@ -135,7 +135,7 @@ H5T_str_t   str_pad;                /*variable for string padding*/
 H5T_cset_t  str_cset;               /*variable for string character set*/
 hbool_t     is_variable = 0;        /*variable for variable-length string*/
 size_t      str_size;               /*variable for string size*/
-   
+
 hid_t       enum_id;                /*type ID*/
 hbool_t     is_enum = 0;            /*flag to lexer for enum type*/
 hbool_t     is_enum_memb = 0;       /*flag to lexer for enum member*/
@@ -1868,9 +1868,9 @@ yyreduce:
   case 48:
 /* Line 1792 of yacc.c  */
 #line 161 "hl/src/H5LTparse.y"
-    { (yyval.hid) = cmpd_stack[csindex].id; 
+    { (yyval.hid) = cmpd_stack[csindex].id;
                               cmpd_stack[csindex].id = 0;
-                              cmpd_stack[csindex].first_memb = 1; 
+                              cmpd_stack[csindex].first_memb = 1;
                               csindex--;
                             }
     break;
@@ -1884,7 +1884,7 @@ yyreduce:
   case 52:
 /* Line 1792 of yacc.c  */
 #line 172 "hl/src/H5LTparse.y"
-    {   
+    {
                             size_t origin_size, new_size;
                             hid_t dtype_id = cmpd_stack[csindex].id;
 
@@ -1898,7 +1898,7 @@ yyreduce:
                                 cmpd_stack[csindex].first_memb = 0;
                             } else {
                                 origin_size = H5Tget_size(dtype_id);
-                                
+
                                 if((yyvsp[(6) - (7)].ival) == 0) {
                                     new_size = origin_size + H5Tget_size((yyvsp[(1) - (7)].hid));
                                     H5Tset_size(dtype_id, new_size);
@@ -1915,7 +1915,7 @@ yyreduce:
                             }
                             cmpd_stack[csindex].is_field = 0;
                             H5Tclose((yyvsp[(1) - (7)].hid));
-                             
+
                             new_size = H5Tget_size(dtype_id);
                         }
     break;
@@ -1951,7 +1951,7 @@ yyreduce:
   case 58:
 /* Line 1792 of yacc.c  */
 #line 223 "hl/src/H5LTparse.y"
-    { 
+    {
                           (yyval.hid) = H5Tarray_create2((yyvsp[(5) - (6)].hid), arr_stack[asindex].ndims, arr_stack[asindex].dims);
                           arr_stack[asindex].ndims = 0;
                           asindex--;
@@ -1969,9 +1969,9 @@ yyreduce:
 /* Line 1792 of yacc.c  */
 #line 234 "hl/src/H5LTparse.y"
     { unsigned ndims = arr_stack[asindex].ndims;
-                                  arr_stack[asindex].dims[ndims] = (hsize_t)yylval.ival; 
+                                  arr_stack[asindex].dims[ndims] = (hsize_t)yylval.ival;
                                   arr_stack[asindex].ndims++;
-                                  arr_stack[asindex].is_dim = 0; 
+                                  arr_stack[asindex].is_dim = 0;
                                 }
     break;
 
@@ -1990,10 +1990,10 @@ yyreduce:
   case 67:
 /* Line 1792 of yacc.c  */
 #line 251 "hl/src/H5LTparse.y"
-    {   
+    {
                                 size_t size = (size_t)yylval.ival;
                                 (yyval.hid) = H5Tcreate(H5T_OPAQUE, size);
-                                is_opq_size = 0;    
+                                is_opq_size = 0;
                             }
     break;
 
@@ -2006,7 +2006,7 @@ yyreduce:
   case 69:
 /* Line 1792 of yacc.c  */
 #line 257 "hl/src/H5LTparse.y"
-    {  
+    {
                                 H5Tset_tag((yyvsp[(7) - (13)].hid), yylval.sval);
                                 free(yylval.sval);
                                 yylval.sval = NULL;
@@ -2029,12 +2029,12 @@ yyreduce:
   case 74:
 /* Line 1792 of yacc.c  */
 #line 272 "hl/src/H5LTparse.y"
-    {  
+    {
                                 if((yyvsp[(5) - (6)].ival) == H5T_VARIABLE_TOKEN)
                                     is_variable = 1;
-                                else 
+                                else
                                     str_size = yylval.ival;
-                                is_str_size = 0; 
+                                is_str_size = 0;
                             }
     break;
 
@@ -2054,7 +2054,7 @@ yyreduce:
   case 76:
 /* Line 1792 of yacc.c  */
 #line 289 "hl/src/H5LTparse.y"
-    {  
+    {
                                 if((yyvsp[(13) - (14)].ival) == H5T_CSET_ASCII_TOKEN)
                                     str_cset = H5T_CSET_ASCII;
                                 else if((yyvsp[(13) - (14)].ival) == H5T_CSET_UTF8_TOKEN)
@@ -2076,7 +2076,7 @@ yyreduce:
   case 78:
 /* Line 1792 of yacc.c  */
 #line 303 "hl/src/H5LTparse.y"
-    {   
+    {
                                 hid_t str_id = (yyvsp[(19) - (20)].hid);
 
                                 /*set string size*/
@@ -2085,12 +2085,12 @@ yyreduce:
                                     is_variable = 0;
                                 } else
                                     H5Tset_size(str_id, str_size);
-                                
+
                                 /*set string padding and character set*/
                                 H5Tset_strpad(str_id, str_pad);
                                 H5Tset_cset(str_id, str_cset);
 
-                                (yyval.hid) = str_id; 
+                                (yyval.hid) = str_id;
                             }
     break;
 
@@ -2160,9 +2160,9 @@ yyreduce:
     {
                                                 is_enum_memb = 1; /*indicate member of enum*/
 #ifdef H5_HAVE_WIN32_API
-                                                enum_memb_symbol = _strdup(yylval.sval); 
+                                                enum_memb_symbol = _strdup(yylval.sval);
 #else /* H5_HAVE_WIN32_API */
-                                                enum_memb_symbol = strdup(yylval.sval); 
+                                                enum_memb_symbol = strdup(yylval.sval);
 #endif  /* H5_HAVE_WIN32_API */
                                                 free(yylval.sval);
                                                 yylval.sval = NULL;
@@ -2182,32 +2182,32 @@ yyreduce:
                                 hid_t native = H5Tget_native_type(super, H5T_DIR_ASCEND);
                                 H5T_order_t super_order = H5Tget_order(super);
                                 H5T_order_t native_order = H5Tget_order(native);
- 
+
                                 if(is_enum && is_enum_memb) { /*if it's an enum member*/
                                     /*To handle machines of different endianness*/
                                     if(H5Tequal(native, H5T_NATIVE_SCHAR) || H5Tequal(native, H5T_NATIVE_UCHAR)) {
                                         if(super_order != native_order)
-                                            H5Tconvert(native, super, 1, &char_val, NULL, H5P_DEFAULT); 
+                                            H5Tconvert(native, super, 1, &char_val, NULL, H5P_DEFAULT);
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &char_val);
                                     } else if(H5Tequal(native, H5T_NATIVE_SHORT) || H5Tequal(native, H5T_NATIVE_USHORT)) {
                                         if(super_order != native_order)
-                                            H5Tconvert(native, super, 1, &short_val, NULL, H5P_DEFAULT); 
+                                            H5Tconvert(native, super, 1, &short_val, NULL, H5P_DEFAULT);
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &short_val);
                                     } else if(H5Tequal(native, H5T_NATIVE_INT) || H5Tequal(native, H5T_NATIVE_UINT)) {
                                         if(super_order != native_order)
-                                            H5Tconvert(native, super, 1, &int_val, NULL, H5P_DEFAULT); 
+                                            H5Tconvert(native, super, 1, &int_val, NULL, H5P_DEFAULT);
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &int_val);
                                     } else if(H5Tequal(native, H5T_NATIVE_LONG) || H5Tequal(native, H5T_NATIVE_ULONG)) {
                                         if(super_order != native_order)
-                                            H5Tconvert(native, super, 1, &long_val, NULL, H5P_DEFAULT); 
+                                            H5Tconvert(native, super, 1, &long_val, NULL, H5P_DEFAULT);
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &long_val);
                                     } else if(H5Tequal(native, H5T_NATIVE_LLONG) || H5Tequal(native, H5T_NATIVE_ULLONG)) {
                                         if(super_order != native_order)
-                                            H5Tconvert(native, super, 1, &llong_val, NULL, H5P_DEFAULT); 
+                                            H5Tconvert(native, super, 1, &llong_val, NULL, H5P_DEFAULT);
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &llong_val);
                                     }
 
-                                    is_enum_memb = 0; 
+                                    is_enum_memb = 0;
                                     if(enum_memb_symbol) free(enum_memb_symbol);
                                 }
 

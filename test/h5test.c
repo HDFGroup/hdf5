@@ -2157,7 +2157,7 @@ const char *H5_get_srcdir_filename(const char *filename)
 /*-------------------------------------------------------------------------
  * Function:    H5_get_srcdir
  *
- * Purpose:     Just return the srcdir path 
+ * Purpose:     Just return the srcdir path
  *
  * Return:      The string
  *
