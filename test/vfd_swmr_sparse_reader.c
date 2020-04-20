@@ -186,15 +186,15 @@ static int
 read_records(const char *filename, unsigned verbose, unsigned long nrecords,
     unsigned poll_time, unsigned reopen_count)
 {
-    hid_t fid;                  /* File ID */
-    hid_t aid;                  /* Attribute ID */
+    hid_t fid = H5I_INVALID_HID;
+    hid_t aid = H5I_INVALID_HID;
     time_t start_time;          /* Starting time */
-    hid_t mem_sid;              /* Memory dataspace ID */
+    hid_t mem_sid = H5I_INVALID_HID;
     symbol_t record;            /* The record to add to the dataset */
     unsigned seed;              /* Seed for random number generator */
     unsigned iter_to_reopen = reopen_count; /* # of iterations until reopen */
     unsigned long u;            /* Local index variable */
-    hid_t fapl;
+    hid_t fapl = H5I_INVALID_HID;
     H5F_vfd_swmr_config_t *config = NULL;   /* Configuration for VFD SWMR */
 
     HDassert(filename);
