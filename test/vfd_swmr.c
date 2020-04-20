@@ -1832,7 +1832,7 @@ test_multiple_file_opens(void)
         FAIL_STACK_ERROR
 
     /* Verify the global vfd_swmr_writer_g is not set */
-    if(vfd_swmr_writer_g)
+    if((curr = TAILQ_FIRST(&eot_queue_g)) != NULL && curr->vfd_swmr_writer)
         TEST_ERROR;
     /* The EOT queue should be empty */
     if(!TAILQ_EMPTY(&eot_queue_g))
@@ -1846,8 +1846,8 @@ test_multiple_file_opens(void)
     if(NULL == (f1 = (H5F_t *)H5VL_object(fid1)))
         FAIL_STACK_ERROR
 
-    /* The global vfd_swmr_writer_g should be set */
-    if(!vfd_swmr_writer_g)
+    /* Head of EOT queue should be a writer */
+    if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || !curr->vfd_swmr_writer)
         TEST_ERROR;
     /* The EOT queue should be initialized with the first entry equals to f1 */
     if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || curr->vfd_swmr_file != f1)
@@ -1861,8 +1861,8 @@ test_multiple_file_opens(void)
     if(NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
         FAIL_STACK_ERROR
 
-    /* The global vfd_swmr_writer_g should still be set */
-    if(!vfd_swmr_writer_g)
+    /* Head of EOT queue should be a writer */
+    if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || !curr->vfd_swmr_writer)
         TEST_ERROR;
     /* The EOT queue's first entry should be f1 */
     if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || curr->vfd_swmr_file != f1)
@@ -1878,8 +1878,8 @@ test_multiple_file_opens(void)
     if(H5Fclose(fid1) < 0)
         FAIL_STACK_ERROR;
 
-    /* The global vfd_swmr_writer_g should still be set */
-    if(!vfd_swmr_writer_g)
+    /* Head of EOT queue should be a writer */
+    if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || !curr->vfd_swmr_writer)
         TEST_ERROR;
     /* The EOT queue's first entry should be f2 */
     if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || curr->vfd_swmr_file != f2)
@@ -2146,8 +2146,8 @@ test_multiple_concur_file_opens(void)
     if(NULL == (f1 = (H5F_t *)H5VL_object(fid1)))
         FAIL_STACK_ERROR
 
-    /* The global vfd_swmr_writer_g should be set */
-    if(!vfd_swmr_writer_g)
+    /* Head of EOT queue should be a writer */
+    if((curr = TAILQ_FIRST(&eot_queue_g)) == NULL || !curr->vfd_swmr_writer)
         TEST_ERROR;
 
     /* The EOT queue's first entry should be f1 */
@@ -2202,8 +2202,8 @@ test_multiple_concur_file_opens(void)
     if(NULL == (f2 = (H5F_t *)H5VL_object(fid2)))
         FAIL_STACK_ERROR
 
-    /* The global vfd_swmr_writer_g should not be set */
-    if(vfd_swmr_writer_g)
+    /* Head of EOT queue should NOT be a writer */
+    if((curr = TAILQ_FIRST(&eot_queue_g)) != NULL && curr->vfd_swmr_writer)
         TEST_ERROR;
 
     /* The EOT queue's first entry should be f2 */

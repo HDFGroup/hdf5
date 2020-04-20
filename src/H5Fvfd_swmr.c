@@ -76,9 +76,6 @@ static herr_t H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f);
  * Globals for VFD SWMR 
  */
 
-hbool_t vfd_swmr_writer_g = FALSE;      /* Is this the VFD SWMR writer */
-struct timespec end_of_tick_g;          /* The current end_of_tick */
-
 unsigned int vfd_swmr_api_entries_g = 0;/* Times the library was entered
                                          * and re-entered minus the times
                                          * it was exited.  We only perform
@@ -129,7 +126,6 @@ H5FL_DEFINE(eot_queue_entry_t);
  *
  *              For VFD SWMR writer:
  *
- *                  --set vfd_swmr_writer_g to TRUE
  *                  --set f->shared->tick_num to 1
  *                  --create the metadata file
  *                  --when opening an existing HDF5 file, write header and 
@@ -137,7 +133,6 @@ H5FL_DEFINE(eot_queue_entry_t);
  *
  *              For VFD SWMR reader:
  *
- *                  --set vfd_swmr_writer_g to FALSE
  *                  --set f->shared->tick_num to the current tick read from the 
  *                    metadata file
  *
@@ -1438,12 +1433,6 @@ H5F_vfd_swmr_remove_entry_eot(H5F_t *f)
         curr = H5FL_FREE(eot_queue_entry_t, curr);
     }
 
-    if(!TAILQ_EMPTY(&eot_queue_g)) {
-        vfd_swmr_writer_g = TAILQ_FIRST(&eot_queue_g)->vfd_swmr_writer;
-        end_of_tick_g = TAILQ_FIRST(&eot_queue_g)->end_of_tick;
-    } else
-        vfd_swmr_writer_g = FALSE;
-
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_vfd_swmr_remove_entry_eot() */
 
@@ -1491,13 +1480,6 @@ H5F_vfd_swmr_insert_entry_eot(H5F_t *f)
         TAILQ_INSERT_AFTER(&eot_queue_g, prec_ptr, entry_ptr, link);
     else
         TAILQ_INSERT_HEAD(&eot_queue_g, entry_ptr, link);
-
-    /* Set up globals accordingly */
-    if(!TAILQ_EMPTY(&eot_queue_g)) {
-        vfd_swmr_writer_g = TAILQ_FIRST(&eot_queue_g)->vfd_swmr_writer;
-        end_of_tick_g = TAILQ_FIRST(&eot_queue_g)->end_of_tick;
-    } else
-        vfd_swmr_writer_g = FALSE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1553,7 +1535,7 @@ H5F_dump_eot_queue(void)
  *
  * Function:    H5F__vfd_swmr_update_end_of_tick_and_tick_num
  *
- * Purpose:     Update end_of_tick (end_of_tick_g, f->shared->end_of_tick)
+ * Purpose:     Update end_of_tick (f->shared->end_of_tick)
  *              Update tick_num (f->shared->tick_num)
  *
  * Return:      Success:        SUCCEED
@@ -1609,7 +1591,7 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
     }
 
     /* 
-     * Update end_of_tick_g, f->shared->end_of_tick
+     * Update f->shared->end_of_tick
      */
     /* Calculate new end_of_tick */
 
@@ -1623,8 +1605,6 @@ H5F__vfd_swmr_update_end_of_tick_and_tick_num(H5F_t *f, hbool_t incr_tick_num)
     new_end_of_tick.tv_nsec = (long)(new_end_nsecs % nanosecs_per_second);
     new_end_of_tick.tv_sec = new_end_nsecs / nanosecs_per_second;
 
-    /* Update end_of_tick */
-    end_of_tick_g = new_end_of_tick;
     f->shared->end_of_tick = new_end_of_tick;
 
 done:

@@ -58,8 +58,6 @@ typedef struct eot_queue_entry {
 } eot_queue_entry_t;
 
 extern unsigned int vfd_swmr_api_entries_g;
-extern hbool_t vfd_swmr_writer_g;
-extern struct timespec end_of_tick_g;
 
 /* The head of the EOT queue */
 typedef TAILQ_HEAD(eot_queue, eot_queue_entry) eot_queue_t;
