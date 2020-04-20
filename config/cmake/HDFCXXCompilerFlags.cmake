@@ -103,8 +103,10 @@ if (NOT MSVC)
         list (APPEND H5_CXXFLAGS0 "-Wsign-compare -Wtrigraphs -Wwrite-strings")
       endif()
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
-        # autotools always add the C flags with the CXX flags
+      if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED 
+          AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.2)
+        # autotools always add the C flags with the CXX flags, except for 
+        # with older versions that are no longer supported
         ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/general")
         ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-general")
       endif ()
@@ -141,16 +143,17 @@ if (NOT MSVC)
   endif ()
 
   if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # Append warning flags that only gcc 4.3+ knows about
-    # autotools always add the C flags with the CXX flags
-    ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.3")
-    #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... Only needed for gcc 4.X
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0 AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2)
       # autotools always add the C flags with the CXX flags
       ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.last")
     endif ()
+    # Append warning flags that only gcc 4.3+ knows about
+    # autotools always add the C flags with the CXX flags
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3 AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2)
+      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.3")
+    endif()
 
     # Append more extra warning flags that only gcc 4.4+ know about
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.4)
@@ -172,7 +175,7 @@ if (NOT MSVC)
     endif ()
 
     # Append more extra warning flags that only gcc 4.6 and less know about
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7 AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2)
       # autotools always add the C flags with the CXX flags
       ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.6")
     endif ()
