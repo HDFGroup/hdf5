@@ -1889,8 +1889,8 @@ test_multiple_file_opens(void)
     if(H5Fclose(fid2) < 0)
         FAIL_STACK_ERROR;
 
-    /* The global vfd_swmr_writer_g should not be set */
-    if(vfd_swmr_writer_g)
+    /* Head of EOT queue should not be a writer */
+    if((curr = TAILQ_FIRST(&eot_queue_g)) != NULL && curr->vfd_swmr_writer)
         TEST_ERROR;
     /* The EOT queue should be empty */
     if(!TAILQ_EMPTY(&eot_queue_g))
