@@ -117,7 +117,7 @@ static herr_t H5EA__cache_dblk_page_get_initial_load_size(void *udata, size_t *i
 static htri_t H5EA__cache_dblk_page_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5EA__cache_dblk_page_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5EA__cache_dblk_page_image_len(const void *thing, 
+static herr_t H5EA__cache_dblk_page_image_len(const void *thing,
     size_t *image_len);
 static herr_t H5EA__cache_dblk_page_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
@@ -1467,12 +1467,12 @@ H5EA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len))
     HDmemset(&dblock, 0, sizeof(dblock));
 
     /* need to set:
-     * 
+     *
      *    dblock.hdr
      *    dblock.npages
      *    dblock.nelmts
      *
-     * before we invoke either H5EA_DBLOCK_PREFIX_SIZE() or 
+     * before we invoke either H5EA_DBLOCK_PREFIX_SIZE() or
      * H5EA_DBLOCK_SIZE().
      */
     dblock.hdr = udata->hdr;
@@ -1564,7 +1564,7 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     if(NULL == (dblock = H5EA__dblock_alloc(udata->hdr, udata->parent, udata->nelmts)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block")
 
-    HDassert(((!dblock->npages) && (len == H5EA_DBLOCK_SIZE(dblock))) || 
+    HDassert(((!dblock->npages) && (len == H5EA_DBLOCK_SIZE(dblock))) ||
              (len == H5EA_DBLOCK_PREFIX_SIZE(dblock)));
 
     /* Set the extensible array data block's information */

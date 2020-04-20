@@ -328,7 +328,7 @@ int main(int argc, const char *argv[])
                         verbose = FALSE;
                         u++;
                         break;
-                    
+
                     /* Random # seed */
                     case 'r':
                         use_seed = TRUE;

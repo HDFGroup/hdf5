@@ -228,10 +228,10 @@ H5AC_term_package(void)
  *
  * Function:    H5AC_cache_image_pending()
  *
- * Purpose:     Debugging function that tests to see if the load of a 
+ * Purpose:     Debugging function that tests to see if the load of a
  *              metadata cache image load is pending (i.e. will be executed
  *              on the next protect or insert)
- *              
+ *
  *              Returns TRUE if a cache image load is pending, and FALSE
  *              if not.  Throws an assertion failure on error.
  *
@@ -421,8 +421,8 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "auto resize configuration failed")
 
     /* Don't need to get the current H5C image config here since the
-     * cache has just been created, and thus f->shared->cache->image_ctl 
-     * must still set to its initial value (H5C__DEFAULT_CACHE_IMAGE_CTL).  
+     * cache has just been created, and thus f->shared->cache->image_ctl
+     * must still set to its initial value (H5C__DEFAULT_CACHE_IMAGE_CTL).
      * Note that this not true as soon as control returns to the application
      * program, as some test code modifies f->shared->cache->image_ctl.
      */
@@ -517,10 +517,10 @@ H5AC_dest(H5F_t *f)
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
-    /* If the file was opened R/W, attempt to flush all entries 
+    /* If the file was opened R/W, attempt to flush all entries
      * from rank 0 & Bcast clean list to other ranks.
      *
-     * Must not flush in the R/O case, as this will trigger the 
+     * Must not flush in the R/O case, as this will trigger the
      * free space manager settle routines.
      */
     if(H5F_ACC_RDWR & H5F_INTENT(f))
@@ -1963,10 +1963,10 @@ done:
  *              and flag an error and return FAIL otherwise.
  *
  *		At present, this function operates by packing the data
- *		from the instance of H5AC_cache_image_config_t into an 
+ *		from the instance of H5AC_cache_image_config_t into an
  *		instance of H5C_cache_image_ctl_t, and then calling
- *		H5C_validate_cache_image_config().  If and when 
- *              H5AC_cache_image_config_t and H5C_cache_image_ctl_t 
+ *		H5C_validate_cache_image_config().  If and when
+ *              H5AC_cache_image_config_t and H5C_cache_image_ctl_t
  *		diverge, we may have to change this.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1992,7 +1992,7 @@ H5AC_validate_cache_image_config(H5AC_cache_image_config_t *config_ptr)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Unknown image config version")
 
     /* don't need to get the current H5C image config here since the
-     * default values of fields not in the H5AC config will always be 
+     * default values of fields not in the H5AC config will always be
      * valid.
      */
     internal_config.version            = config_ptr->version;
@@ -2132,11 +2132,11 @@ done:
 /*------------------------------------------------------------------------------
  * Function:    H5AC_ignore_tags()
  *
- * Purpose:     Override all assertion frameworks and force application of 
+ * Purpose:     Override all assertion frameworks and force application of
  *              global tag everywhere. This should really only be used in the
- *              tests that need to access functions without going through 
+ *              tests that need to access functions without going through
  *              API paths.
- * 
+ *
  * Return:      SUCCEED on success, FAIL otherwise.
  *
  * Programmer:  Mike McGreevy
@@ -2159,7 +2159,7 @@ H5AC_ignore_tags(const H5F_t *f)
     /* Set up a new metadata tag */
     if(H5C_ignore_tags(f->shared->cache) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "H5C_ignore_tags() failed")
-            
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_ignore_tags() */
@@ -2169,7 +2169,7 @@ done:
  * Function:    H5AC_tag()
  *
  * Purpose:     Sets the metadata tag property in the provided property list.
- * 
+ *
  * Return:      void
  *
  * Programmer:  Mike McGreevy
@@ -2197,9 +2197,9 @@ H5AC_tag(haddr_t metadata_tag, haddr_t *prev_tag)
  * Function:    H5AC_retag_copied_metadata()
  *
  * Purpose:     Searches through cache index for all entries with the
- *              H5AC__COPIED_TAG, indicating that it was created as a 
+ *              H5AC__COPIED_TAG, indicating that it was created as a
  *              result of an object copy, and applies the provided tag.
- * 
+ *
  * Return:      SUCCEED on success, FAIL otherwise.
  *
  * Programmer:  Mike McGreevy
@@ -2208,7 +2208,7 @@ H5AC_tag(haddr_t metadata_tag, haddr_t *prev_tag)
  *------------------------------------------------------------------------------
  */
 herr_t
-H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag) 
+H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2217,7 +2217,7 @@ H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag)
     /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
-     
+
     /* Call cache-level function to re-tag entries with the COPIED tag */
     if(H5C_retag_entries(f->shared->cache, H5AC__COPIED_TAG, metadata_tag) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "Can't retag metadata")
@@ -2231,8 +2231,8 @@ done:
  * Function:    H5AC_flush_tagged_metadata()
  *
  * Purpose:     Wrapper for cache level function which flushes all metadata
- *              that contains the specific tag. 
- * 
+ *              that contains the specific tag.
+ *
  * Return:      SUCCEED on success, FAIL otherwise.
  *
  * Programmer:  Mike McGreevy
@@ -2245,8 +2245,8 @@ H5AC_flush_tagged_metadata(H5F_t *f, haddr_t metadata_tag)
 {
     /* Variable Declarations */
     herr_t ret_value = SUCCEED;
- 
-    /* Function Enter Macro */   
+
+    /* Function Enter Macro */
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
@@ -2266,8 +2266,8 @@ done:
  * Function:    H5AC_evict_tagged_metadata()
  *
  * Purpose:     Wrapper for cache level function which flushes all metadata
- *              that contains the specific tag. 
- * 
+ *              that contains the specific tag.
+ *
  * Return:      SUCCEED on success, FAIL otherwise.
  *
  * Programmer:  Mike McGreevy
@@ -2280,8 +2280,8 @@ H5AC_evict_tagged_metadata(H5F_t *f, haddr_t metadata_tag, hbool_t match_global)
 {
     /* Variable Declarations */
     herr_t ret_value = SUCCEED;
- 
-    /* Function Enter Macro */   
+
+    /* Function Enter Macro */
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
@@ -2302,7 +2302,7 @@ done:
  *
  * Purpose:     Wrapper for cache level function which expunge entries with
  *              a specific tag and type id.
- * 
+ *
  * Return:      SUCCEED on success, FAIL otherwise.
  *
  * Programmer:  Vailin Choi; May 2016
@@ -2314,8 +2314,8 @@ H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flag
 {
     /* Variable Declarations */
     herr_t ret_value = SUCCEED;
- 
-    /* Function Enter Macro */   
+
+    /* Function Enter Macro */
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
@@ -2335,7 +2335,7 @@ done:
  * Function:    H5AC_get_tag()
  *
  * Purpose:     Get the tag for a metadata cache entry.
- * 
+ *
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Dana Robinson
@@ -2348,8 +2348,8 @@ H5AC_get_tag(const void *thing, haddr_t *tag)
 {
     /* Variable Declarations */
     herr_t ret_value = SUCCEED;
- 
-    /* Function Enter Macro */   
+
+    /* Function Enter Macro */
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */

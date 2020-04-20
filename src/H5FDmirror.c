@@ -1091,7 +1091,7 @@ H5FD_mirror_xmit_is_xmit(const H5FD_mirror_xmit_t *xmit)
 {
     LOG_OP_CALL("H5FD_mirror_xmit_is_xmit");
     HDassert(xmit);
-    if ( (H5FD_MIRROR_XMIT_MAGIC != xmit->magic) || 
+    if ( (H5FD_MIRROR_XMIT_MAGIC != xmit->magic) ||
          (H5FD_MIRROR_XMIT_CURR_VERSION != xmit->version) )
     {
         return FALSE;

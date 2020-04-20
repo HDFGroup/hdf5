@@ -14,7 +14,7 @@
 ## Run automake to generate a Makefile.in from this file.
 #
 # Top-level HDF5-C++ Makefile(.in)
-# 
+#
 
 include $(top_srcdir)/config/commence.am
 

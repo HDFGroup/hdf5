@@ -110,7 +110,7 @@ typedef struct H5FD_stdio_t {
     DWORD           nFileIndexLow;
     DWORD           nFileIndexHigh;
     DWORD           dwVolumeSerialNumber;
-    
+
     HANDLE          hFile;      /* Native windows file handle */
 #endif  /* H5_HAVE_WIN32_API */
 } H5FD_stdio_t;
@@ -824,13 +824,13 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_READERROR, "fread failed", -1)
         } /* end if */
-        
+
         if(0 == bytes_read && feof(file->fp)) {
             /* end of file but not end of format address space */
             memset((unsigned char *)buf, 0, size);
             break;
         } /* end if */
-        
+
         size -= bytes_read;
         addr += (haddr_t)bytes_read;
         buf = (char *)buf + bytes_read;
@@ -914,7 +914,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fwrite failed", -1)
         } /* end if */
-        
+
         assert(bytes_wrote > 0);
         assert((size_t)bytes_wrote <= size);
 
@@ -1040,7 +1040,7 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id,
                 if(dwError != NO_ERROR )
                     H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_FILEOPEN, "unable to set file pointer", -1)
             }
-            
+
             bError = SetEndOfFile(file->hFile);
             if(0 == bError)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "unable to truncate/extend file properly", -1)

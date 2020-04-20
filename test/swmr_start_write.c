@@ -53,11 +53,11 @@ static void usage(void);
  * Purpose:     Creates the HDF5 file (without SWMR access) which
  *              which will be used for testing H5Fstart_swmr_write().
  *
- * Parameters:  
+ * Parameters:
  *              filename: The SWMR test file's name.
  *              verbose: whether verbose console output is desired.
  *              verbose_file: file pointer for verbose output
- *              random_seed: The random seed to store in the file.  
+ *              random_seed: The random seed to store in the file.
  *              The sparse tests use this value.
  *
  * Return:      Success:    the file ID
@@ -134,10 +134,10 @@ create_file(const char *filename, hbool_t verbose, FILE *verbose_file,
 /*-------------------------------------------------------------------------
  * Function:    create_datasets
  *
- * Purpose:     Create datasets (and keep them opened) which will be used for testing 
+ * Purpose:     Create datasets (and keep them opened) which will be used for testing
  *              H5Fstart_swmr_write().
  *
- * Parameters:  
+ * Parameters:
  *              fid: file ID for the SWMR test file
  *              comp_level: the compresssion level
  *              index_type: The chunk index type (b1 | b2 | ea | fa)
@@ -212,7 +212,7 @@ create_datasets(hid_t fid, int comp_level, hbool_t verbose, FILE *verbose_file,
  * Purpose:     Writes a specified number of records to random datasets in
  *              the SWMR test file.
  *
- * Parameters:  
+ * Parameters:
  *              fid: The file ID of the SWMR HDF5 file
  *              verbose: Whether or not to emit verbose console messages
  *              verbose_file: file pointer for verbose output
@@ -419,7 +419,7 @@ int main(int argc, const char *argv[])
                         verbose = FALSE;
                         u++;
                         break;
-                    
+
                     /* Random # seed */
                     case 'r':
                         use_seed = TRUE;

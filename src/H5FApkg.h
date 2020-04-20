@@ -157,10 +157,10 @@ typedef struct H5FA_hdr_t {
                                          * of the fixed array header.
  					 *
  					 * The field is used to avoid duplicate
-					 * setups of the flush dependency 
-					 * relationship, and to allow the 
+					 * setups of the flush dependency
+					 * relationship, and to allow the
 					 * fixed array header to destroy
-					 * the flush dependency on receipt of 
+					 * the flush dependency on receipt of
 					 * an eviction notification from the
 					 * metadata cache.
 					 */

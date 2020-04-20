@@ -372,7 +372,7 @@ H5_DLL ssize_t H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t 
     hsize_t n, char* name, size_t size);
 H5_DLL herr_t H5G__stab_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r,
     const char *name);
-H5_DLL herr_t H5G__stab_remove_by_idx(const H5O_loc_t *oloc, 
+H5_DLL herr_t H5G__stab_remove_by_idx(const H5O_loc_t *oloc,
     H5RS_str_t *grp_full_path_r, H5_iter_order_t order, hsize_t n);
 H5_DLL herr_t H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *lnk);
@@ -434,7 +434,7 @@ H5_DLL ssize_t H5G__compact_get_name_by_idx(const H5O_loc_t *oloc,
     hsize_t idx, char *name, size_t size);
 H5_DLL herr_t H5G__compact_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r,
     const char *name);
-H5_DLL herr_t H5G__compact_remove_by_idx(const H5O_loc_t *oloc, 
+H5_DLL herr_t H5G__compact_remove_by_idx(const H5O_loc_t *oloc,
     const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_r, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n);
 H5_DLL herr_t H5G__compact_iterate(const H5O_loc_t *oloc,

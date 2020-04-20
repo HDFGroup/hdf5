@@ -12,7 +12,7 @@
 ! fortran/src/H5config_f.inc. Generated from fortran/src/H5config_f.inc.in by configure
 
 ! The script to replace the defines in H5config_f.inc.in is
-! located in configure.ac in the Fortran section. 
+! located in configure.ac in the Fortran section.
 
 ! Define if we have parallel support
 #undef HAVE_PARALLEL
@@ -47,7 +47,7 @@
 ! If C has quad precision
 #undef HAVE_FLOAT128
 
-! Define if INTEGER*16 is available 
+! Define if INTEGER*16 is available
 #undef HAVE_Fortran_INTEGER_SIZEOF_16
 
 ! Maximum decimal precision for C

@@ -50,8 +50,8 @@ const H5Z_class2_t H5Z_FAIL_TEST[1] = {{
 /*-------------------------------------------------------------------------
  * Function:    filter_fail
  *
- * Purpose:     For testing library's behavior when a mandatory filter 
- *              fails to write a chunk. 
+ * Purpose:     For testing library's behavior when a mandatory filter
+ *              fails to write a chunk.
  *
  * Return:	Success:	Data chunk size
  *		Failure:	0
@@ -74,7 +74,7 @@ filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
         ret_value = nbytes;
     }  /* end if */
     else { /* Write data */
-        /* If it's the last chunk, pretend to fail. Otherwise, do nothing. */ 
+        /* If it's the last chunk, pretend to fail. Otherwise, do nothing. */
         if(*dst == 8 || *dst == 9) {
             ret_value = 0;
         } else {
@@ -90,14 +90,14 @@ filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 /*-------------------------------------------------------------------------
  * Function:    test_filter_write_failure
  *
- * Purpose:     Tests the library's behavior when a mandate filter returns 
+ * Purpose:     Tests the library's behavior when a mandate filter returns
  *              failure.  There're only 5 chunks with each of them having
- *              2 integers.  The filter will fail in the last chunk.  The 
- *              dataset should release all resources even though the last 
+ *              2 integers.  The filter will fail in the last chunk.  The
+ *              dataset should release all resources even though the last
  *              chunk can't be flushed to file.  The file should close
  *              successfully.
  *
- * Return:  
+ * Return:
  *              Success:         0
  *              Failure:         -1
  *
@@ -107,7 +107,7 @@ filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
  * Modifications:
  *              Raymond Lu
  *              5 Oct 2010
- *              Test when the chunk cache is enable and disabled to make 
+ *              Test when the chunk cache is enable and disabled to make
  *              sure the library behaves properly.
  *-------------------------------------------------------------------------
  */
@@ -151,7 +151,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
         TEST_ERROR
 
     /* create a dataset */
-    if((dataset = H5Dcreate2(file, DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR 
+    if((dataset = H5Dcreate2(file, DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Initialize the write buffer */
     for(i = 0; i < DIM; i++)
@@ -160,7 +160,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
     /* Write data.  If the chunk cache is enabled, H5Dwrite should succeed.  If it is
      * diabled, H5Dwrite should fail. */
     if(cache_enabled) {
-        if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, points) < 0) 
+        if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, points) < 0)
             TEST_ERROR
     } else {
         /* Data writing should fail */
@@ -194,7 +194,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
             TEST_ERROR
     }
 
-    /* Even though H5Dclose or H5Dwrite fails, it should release all resources.  
+    /* Even though H5Dclose or H5Dwrite fails, it should release all resources.
      * So the file should close successfully. */
     if(H5Fclose (file) < 0) TEST_ERROR
 
@@ -215,11 +215,11 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_filter_read
  *
- * Purpose:     Tests the library's behavior when a mandate filter returns 
- *              failure.  The first 4 chunks should be in the file.  The 
+ * Purpose:     Tests the library's behavior when a mandate filter returns
+ *              failure.  The first 4 chunks should be in the file.  The
  *              last chunk should not.
  *
- * Return:  
+ * Return:
  *              Success:         0
  *              Failure:         -1
  *
@@ -305,7 +305,7 @@ test_filter_read(char *file_name, hid_t my_fapl)
     if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, rbuf) < 0)
         TEST_ERROR
 
-    /* Check that the values read are the same as the values written. 
+    /* Check that the values read are the same as the values written.
      * The last chunk should not be in the file. */
     for(i = 0; i < DIM; i+=2) {
         if(i < DIM-2 && rbuf[i] != i) {
@@ -344,11 +344,11 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:     Tests the library's behavior when a mandate filter returns 
+ * Purpose:     Tests the library's behavior when a mandate filter returns
  *              failure.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- * 
+ *
  * Programmer:  Raymond Lu
  *              25 August 2010
  *

@@ -1084,7 +1084,7 @@ H5T_update_shared(H5T_t *dt)
 /*-------------------------------------------------------------------------
  * Function:    H5T_construct_datatype
  *
- * Purpose:     Create a Library datatype with a connector specific datatype object 
+ * Purpose:     Create a Library datatype with a connector specific datatype object
  *
  * Return:      Success:    A type structure
  *              Failure:    NULL
@@ -1156,7 +1156,7 @@ H5T_get_named_type(const H5T_t *dt)
  * Function:    H5T_get_actual_type
  *
  * Purpose:     Returns underlying native datatype created by native connector
- *              if datatype is committed, otherwise return the datatype 
+ *              if datatype is committed, otherwise return the datatype
  *              object associate with the ID.
  *
  * Return:      Success:    Pointer to the VOL-managed data for this datatype

@@ -281,7 +281,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
 
     /* create a chunked dataset */
     chunk[0] = COUNT/8;
-    
+
     if ( pass ) {
       if ( (dcpl_id = H5Pcreate (H5P_DATASET_CREATE)) < 0 ) {
         pass = false;
@@ -295,9 +295,9 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         failure_mssg = "H5Pset_chunk() failed.\n";
       }
     }
-    
+
     if ( pass ) {
-      
+
       if ( (dset_id_ch = H5Dcreate2(file_id, "dataset0_chunked", H5T_NATIVE_FLOAT,
                                     filespace, H5P_DEFAULT, dcpl_id,
                                     H5P_DEFAULT)) < 0 ) {
@@ -319,7 +319,7 @@ generate_test_file( MPI_Comm comm, int mpi_rank, int group_id )
         failure_mssg = "H5Pclose(dcpl_id) failed.\n";
       }
     }
-    
+
     if ( pass || (dset_id_ch != -1)) {
       if ( H5Dclose(dset_id_ch) < 0 ) {
         pass = false;
@@ -698,8 +698,8 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         data_slice = NULL;
     }
 
-    /* 
-     * Test reading proc0-read-and-bcast with sub-communicators 
+    /*
+     * Test reading proc0-read-and-bcast with sub-communicators
      */
 
     /* Don't test with more than LIMIT_NPROC processes to avoid memory issues */
@@ -798,7 +798,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
           nextValue = 0;
         else                                /* test 2 group 1 */
           nextValue = (float)((hsize_t)( mpi_size / 2 )*count);
-        
+
         i = 0;
         while ( ( pass ) && ( i < (hsize_t)dset_size ) ) {
           /* what we really want is data_slice[i] != nextValue --
@@ -863,7 +863,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
           nextValue = 0;
         else                                /* test 2 group 1 */
           nextValue = (float)((hsize_t)( mpi_size / 2 )*count);
-        
+
         i = 0;
         while ( ( pass ) && ( i < (hsize_t)dset_size ) ) {
           /* what we really want is data_slice[i] != nextValue --
@@ -893,8 +893,8 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         data_slice = NULL;
       }
 
-      /* 
-       * Read an H5S_ALL filespace into a hyperslab defined memory space 
+      /*
+       * Read an H5S_ALL filespace into a hyperslab defined memory space
        */
 
       if ( (data_slice = (float *)HDmalloc((size_t)(dset_size*2)*filetype_size)) == NULL ) {
@@ -979,14 +979,14 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
           i++;
         }
       }
-      
+
       if ( pass || (memspace != -1) ) {
         if ( H5Sclose(memspace) < 0 ) {
           pass = false;
           failure_mssg = "H5Sclose(memspace) failed.\n";
         }
       }
-      
+
       /* free data_slice if it has been allocated */
       if ( data_slice != NULL ) {
         HDfree(data_slice);

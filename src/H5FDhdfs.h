@@ -43,7 +43,7 @@ extern "C" {
  *
  * `version` (int32_t)
  *
- *     Version number of the `H5FD_hdfs_fapl_t` structure.  Any instance passed 
+ *     Version number of the `H5FD_hdfs_fapl_t` structure.  Any instance passed
  *     to the above calls must have a recognized version number, or an error
  *     will be flagged.
  *

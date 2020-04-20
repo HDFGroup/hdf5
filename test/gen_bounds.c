@@ -27,8 +27,8 @@
  *              that they can or cannot read particular file format.
  */
 
-/* 
- * Add two routines gen_ref_files() and gen_sel_files() to generate the 
+/*
+ * Add two routines gen_ref_files() and gen_sel_files() to generate the
  * following test files:
  *
  *  (1) gen_ref_files():
@@ -42,7 +42,7 @@
  *      bounds_sel_v112_v112.h5
  *      bounds_sel_v110_v110.h5
  *
- * These test files will be copied to 1.12, 1.10 and 1.8 libraries for 
+ * These test files will be copied to 1.12, 1.10 and 1.8 libraries for
  * compatibility testing.
  */
 #include "h5test.h"
@@ -649,25 +649,25 @@ error:
 
 /***********************************************************************
  * gen_sel_files() is used to create the following test files:
- *      bounds_sel_earliest_latest.h5 
- *      bounds_sel_latest_latest.h5 
- *      bounds_sel_v112_v112.h5 
- *      bounds_sel_v110_v110.h5 
+ *      bounds_sel_earliest_latest.h5
+ *      bounds_sel_latest_latest.h5
+ *      bounds_sel_v112_v112.h5
+ *      bounds_sel_v110_v110.h5
  *
  * File contents for:
  * --bounds_sel_earliest_latest.h5
  * --bounds_sel_latest_latest.h5
  * --bounds_sel_v112_v112.h5
- *      --each file contains 3 datasets with old region reference type 
- *          (1) Sel_ex32_reg_dset: 
+ *      --each file contains 3 datasets with old region reference type
+ *          (1) Sel_ex32_reg_dset:
  *          --regular hyperslab selection exceeding 32 bits integer limit
  *          (2) Sel_ex32_irr_dset:
  *          --irregular hyperslab selection exceeding 32 bits integer limit
- *          (3) Sel_ex32_pt_dset: 
+ *          (3) Sel_ex32_pt_dset:
  *          --point selection exceeding 32 bits integer limit
  *
  * File contents for:
- * --bounds_ref_v110_v110.h5 
+ * --bounds_ref_v110_v110.h5
  *      (1) Sel_ex32_reg_dset: a dataset with old region reference type
  *          --regular hyperslab selection exceeding 32 bits integer limit
  *      (2) Sel_ex32_irr_dset: does not exist, cannot be created
@@ -696,7 +696,7 @@ static herr_t gen_sel_files(const char *filename, H5F_libver_t low_bound,  H5F_l
     hdset_reg_ref_t ref_wbuf[1];    /* Buffer for dataset region reference */
 
     /*
-     * Create test file, attribute, group and dataset 
+     * Create test file, attribute, group and dataset
      */
 
    /* Create the test file */
@@ -720,7 +720,7 @@ static herr_t gen_sel_files(const char *filename, H5F_libver_t low_bound,  H5F_l
         TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) 
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
     /* Set to use the low/high bounds in fapl */
@@ -770,7 +770,7 @@ static herr_t gen_sel_files(const char *filename, H5F_libver_t low_bound,  H5F_l
 
         if(H5Dclose(ref_did) < 0)
             TEST_ERROR;
-    } 
+    }
 
     /* Generate irregular hyperslab exceeding 32 */
     ref_start = 8;
@@ -825,7 +825,7 @@ static herr_t gen_sel_files(const char *filename, H5F_libver_t low_bound,  H5F_l
 
         if(H5Dclose(ref_did) < 0)
             TEST_ERROR;
-    } 
+    }
 
     /* Closing */
     if(H5Sclose(ref_sid) < 0)
@@ -858,30 +858,30 @@ error:
 
 /***********************************************************************
  * gen_ref_files() is used to create the following test files:
- *      bounds_ref_earliest_latest.h5 
- *      bounds_ref_latest_latest.h5 
- *      bounds_ref_v110_v110.h5 
- *      bounds_ref_v18_v18.h5 
+ *      bounds_ref_earliest_latest.h5
+ *      bounds_ref_latest_latest.h5
+ *      bounds_ref_v110_v110.h5
+ *      bounds_ref_v18_v18.h5
  *
  * File contents for:
  * --bounds_ref_earliest_latest.h5
  * --bounds_ref_latest_latest.h5
  * --bounds_ref_v112_v112.h5
  *      (1) Revised_refs_dset: a dataset created with the revised reference type
- *          --attribute reference 
+ *          --attribute reference
  *          --object reference
  *          --dataset region reference
- *      (2) Old_ref_object_dset: 
+ *      (2) Old_ref_object_dset:
  *          --a dataset created with the old object reference type
- *      (3) Old_ref_region_dset: 
+ *      (3) Old_ref_region_dset:
  *          --a dataset created with the old dataset region reference type
  *
  * File contents for:
- * --bounds_ref_v110_v110.h5 
- * --bounds_ref_v18_v18.h5 
- *      (1) Old_ref_object_dset: 
+ * --bounds_ref_v110_v110.h5
+ * --bounds_ref_v18_v18.h5
+ *      (1) Old_ref_object_dset:
  *          --a dataset created with the old object reference type
- *      (2) Old_ref_region_dset: 
+ *      (2) Old_ref_region_dset:
  *          --a dataset created with the old dataset region reference type
  *
  * Return: SUCCEED/FAIL
@@ -912,7 +912,7 @@ static herr_t gen_ref_files(const char *filename, H5F_libver_t low_bound,  H5F_l
     unsigned i;             /* Local index variable */
 
     /*
-     * Create test file, attribute, group and dataset 
+     * Create test file, attribute, group and dataset
      */
 
     if((dwbuf = HDcalloc(sizeof(unsigned), 100)) == NULL)
@@ -968,7 +968,7 @@ static herr_t gen_ref_files(const char *filename, H5F_libver_t low_bound,  H5F_l
         HDfree(dwbuf);
         dwbuf = NULL;
     }
-    
+
     /* Create file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) TEST_ERROR;
 
@@ -980,7 +980,7 @@ static herr_t gen_ref_files(const char *filename, H5F_libver_t low_bound,  H5F_l
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) <0)
         TEST_ERROR;
 
-    /* 
+    /*
      * Create the revised and old references in the file
      */
 
@@ -1080,7 +1080,7 @@ static herr_t gen_ref_files(const char *filename, H5F_libver_t low_bound,  H5F_l
         TEST_ERROR;
     if(H5Sclose(sid) < 0)
         TEST_ERROR;
-    if(H5Pclose(fapl) < 0) 
+    if(H5Pclose(fapl) < 0)
         TEST_ERROR;
     if(H5Fclose(fid) < 0)
         TEST_ERROR;
@@ -1120,7 +1120,7 @@ int main(void)
     if (gen_v18_v18() < 0) TEST_ERROR;
 
 
-    /* 
+    /*
      * Files generated via gen_ref_files()
      */
 
@@ -1144,7 +1144,7 @@ int main(void)
     if(gen_ref_files(FILENAME_REF_V18_V18, H5F_LIBVER_V18, H5F_LIBVER_V18) < 0)
         TEST_ERROR;
 
-    /* 
+    /*
      * Files generated via gen_sel_files()
      */
 

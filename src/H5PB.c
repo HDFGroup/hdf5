@@ -166,7 +166,7 @@ H5FL_DEFINE_STATIC(H5PB_entry_t);
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5PB_reset_stats(H5PB_t *page_buf)
 {
     FUNC_ENTER_NOAPI_NOERR
@@ -208,7 +208,7 @@ H5PB_reset_stats(H5PB_t *page_buf)
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5PB_get_stats(const H5PB_t *page_buf, unsigned accesses[2], unsigned hits[2],
     unsigned misses[2], unsigned evictions[2], unsigned bypasses[2])
 {
@@ -517,9 +517,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5PB_add_new_page
  *
- * Purpose:	Add a new page to the new page skip list. This is called 
- *              from the MF layer when a new page is allocated to 
- *              indicate to the page buffer layer that a read of the page 
+ * Purpose:	Add a new page to the new page skip list. This is called
+ *              from the MF layer when a new page is allocated to
+ *              indicate to the page buffer layer that a read of the page
  *              from the file is not necessary since it's an empty page.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -577,9 +577,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5PB_update_entry
  *
- * Purpose:	In PHDF5, entries that are written by other processes and just 
- *              marked clean by this process have to have their corresponding 
- *              pages updated if they exist in the page buffer. 
+ * Purpose:	In PHDF5, entries that are written by other processes and just
+ *              marked clean by this process have to have their corresponding
+ *              pages updated if they exist in the page buffer.
  *              This routine checks and update the pages.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -588,7 +588,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5PB_update_entry(H5PB_t *page_buf, haddr_t addr, size_t size, const void *buf)
 {
     H5PB_entry_t *page_entry;   /* Pointer to the corresponding page entry */
@@ -743,7 +743,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                 page_buf->bypasses[0] ++;
         } /* end if */
 
-        /* If page buffering is disabled, or if this is a large metadata access, 
+        /* If page buffering is disabled, or if this is a large metadata access,
          * or if this is parallel raw data access, we are done here
          */
         if(NULL == page_buf || (size >= page_buf->page_size && H5FD_MEM_DRAW != type) ||
@@ -769,7 +769,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
         last_page_addr = ((addr + size - 1) / page_buf->page_size) * page_buf->page_size;
 
         /* How many pages does this write span */
-        num_touched_pages = (last_page_addr / page_buf->page_size + 1) - 
+        num_touched_pages = (last_page_addr / page_buf->page_size + 1) -
                 (first_page_addr / page_buf->page_size);
         if(first_page_addr == last_page_addr) {
             HDassert(1 == num_touched_pages);
@@ -822,7 +822,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                         offset = addr - first_page_addr;
                         HDassert(page_buf->page_size > offset);
 
-                        H5MM_memcpy(buf, (uint8_t *)page_entry->page_buf_ptr + offset, 
+                        H5MM_memcpy(buf, (uint8_t *)page_entry->page_buf_ptr + offset,
                                  page_buf->page_size - (size_t)offset);
 
                         /* move to top of LRU list */
@@ -830,7 +830,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                     } /* end if */
                     /* special handling for the last page if it is not a full page access */
                     else if(num_touched_pages > 1 && i == num_touched_pages-1 && search_addr < addr+size) {
-                        offset = (num_touched_pages-2)*page_buf->page_size + 
+                        offset = (num_touched_pages-2)*page_buf->page_size +
                             (page_buf->page_size - (addr - first_page_addr));
 
                         H5MM_memcpy((uint8_t *)buf + offset, page_entry->page_buf_ptr,
@@ -843,7 +843,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                     else {
                         offset = i*page_buf->page_size;
 
-                        H5MM_memcpy((uint8_t *)buf+(i*page_buf->page_size) , page_entry->page_buf_ptr, 
+                        H5MM_memcpy((uint8_t *)buf+(i*page_buf->page_size) , page_entry->page_buf_ptr,
                              page_buf->page_size);
                     } /* end else */
                 } /* end if */
@@ -1039,7 +1039,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr,
                 page_buf->bypasses[0]++;
         } /* end if */
 
-        /* If page buffering is disabled, or if this is a large metadata access, 
+        /* If page buffering is disabled, or if this is a large metadata access,
          * or if this is a parallel raw data access, we are done here
          */
         if(NULL == page_buf || (size >= page_buf->page_size && H5FD_MEM_DRAW != type) ||
@@ -1073,7 +1073,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr,
         last_page_addr = (addr + size - 1) / page_buf->page_size * page_buf->page_size;
 
         /* how many pages does this write span */
-        num_touched_pages = (last_page_addr/page_buf->page_size + 1) - 
+        num_touched_pages = (last_page_addr/page_buf->page_size + 1) -
             (first_page_addr / page_buf->page_size);
         if(first_page_addr == last_page_addr) {
             HDassert(1 == num_touched_pages);
@@ -1114,18 +1114,18 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr,
                 } /* end if */
             } /* end if */
             /* Special handling for the last page if it is not a full page update */
-            else if(num_touched_pages > 1 && i == (num_touched_pages - 1) && 
+            else if(num_touched_pages > 1 && i == (num_touched_pages - 1) &&
                     (search_addr + page_buf->page_size) != (addr + size)) {
                 HDassert(search_addr+page_buf->page_size > addr+size);
 
                 /* Lookup the page in the skip list */
                 page_entry = (H5PB_entry_t *)H5SL_search(page_buf->slist_ptr, (void *)(&search_addr));
                 if(page_entry) {
-                    offset = (num_touched_pages - 2) * page_buf->page_size + 
+                    offset = (num_touched_pages - 2) * page_buf->page_size +
                         (page_buf->page_size - (addr - first_page_addr));
 
                     /* Update page's data */
-                    H5MM_memcpy(page_entry->page_buf_ptr, (const uint8_t *)buf + offset, 
+                    H5MM_memcpy(page_entry->page_buf_ptr, (const uint8_t *)buf + offset,
                              (size_t)((addr + size) - last_page_addr));
 
                     /* Mark page dirty and push to top of LRU */
@@ -1313,7 +1313,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5PB__insert_entry()
  *
- * Purpose: ??? 
+ * Purpose: ???
  *
  *          This function was created without documentation.
  *          What follows is my best understanding of Mohamad's intent.
@@ -1334,7 +1334,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
+static herr_t
 H5PB__insert_entry(H5PB_t *page_buf, H5PB_entry_t *page_entry)
 {
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -1399,7 +1399,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
 
         /* check the metadata threshold before evicting metadata items */
         while(1) {
-            if(page_entry->prev && H5F_MEM_PAGE_META == page_entry->type && 
+            if(page_entry->prev && H5F_MEM_PAGE_META == page_entry->type &&
                     page_buf->min_meta_count >= page_buf->meta_count)
                 page_entry = page_entry->prev;
             else
@@ -1416,7 +1416,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
 
         /* check the raw data threshold before evicting raw data items */
         while(1) {
-            if(page_entry->prev && (H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type) && 
+            if(page_entry->prev && (H5F_MEM_PAGE_DRAW == page_entry->type || H5F_MEM_PAGE_GHEAP == page_entry->type) &&
                     page_buf->min_raw_count >= page_buf->raw_count)
                 page_entry = page_entry->prev;
             else
@@ -1461,7 +1461,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5PB__write_entry()
  *
- * Purpose: ??? 
+ * Purpose: ???
  *
  *          This function was created without documentation.
  *          What follows is my best understanding of Mohamad's intent.
