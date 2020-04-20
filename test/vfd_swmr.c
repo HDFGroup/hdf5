@@ -1948,7 +1948,7 @@ error:
 static unsigned
 test_multiple_concur_file_opens(void)
 {
-    hid_t fcpl = -1;            /* File creation property list */
+    hid_t fcpl = H5I_INVALID_HID;
     pid_t tmppid;               /* Child process ID returned by waitpid */
     pid_t childpid = 0;         /* Child process ID */
     int child_status;           /* Status passed to waitpid */
@@ -1957,8 +1957,8 @@ test_multiple_concur_file_opens(void)
     int parent_pfd[2];          /* Pipe for parent process as writer */
     int child_pfd[2];           /* Pipe for child process as reader */
     int notify = 0;             /* Notification between parent and child */
-    hid_t fid1, fid2;           /* File IDs */
-    hid_t fapl1, fapl2;         /* File access property list */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;
+    hid_t fapl1 = H5I_INVALID_HID, fapl2 = H5I_INVALID_HID;
     H5F_vfd_swmr_config_t *config1 = NULL;    /* VFD SWMR configuration */
     H5F_vfd_swmr_config_t *config2 = NULL;    /* VFD SWMR configuration */
     H5F_t *f1, *f2;             /* File pointer */
