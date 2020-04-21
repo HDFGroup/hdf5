@@ -93,6 +93,23 @@ restore_signals(sigset_t *oldset)
         err(EXIT_FAILURE, "%s.%d: sigprocmask", __func__, __LINE__);
 }
 
+#if 0
+static const char *
+strsignal(int signum)
+{
+    switch (signum) {
+    case SIGUSR1:
+        return "SIGUSR1";
+    case SIGINT:
+        return "SIGINT";
+    case SIGPIPE:
+        return "SIGPIPE";
+    default:
+        return "<unknown>";
+    }
+}
+#endif
+
 void
 await_signal(hid_t fid)
 {
@@ -100,8 +117,7 @@ await_signal(hid_t fid)
     struct timespec tick = {.tv_sec = 0, .tv_nsec = 1000000000 / 100};
 
     if (sigemptyset(&sleepset) == -1 ||
-        sigaddset(&sleepset, SIGINT) == -1 ||
-        sigaddset(&sleepset, SIGUSR1) == -1) {
+        sigfillset(&sleepset) == -1) {
         err(EXIT_FAILURE, "%s.%d: could not initialize signal masks",
             __func__, __LINE__);
     }
@@ -109,8 +125,8 @@ await_signal(hid_t fid)
     for (;;) {
         const int rc = sigtimedwait(&sleepset, NULL, &tick);
 
-        if (rc == SIGUSR1 || rc == SIGINT) {
-            printf("Received %s, wrapping things up.\n", (rc == SIGUSR1) ? "SIGUSR1" : "SIGINT");
+        if (rc != -1) {
+            fprintf(stderr, "Received %s, wrapping things up.\n", strsignal(rc));
             break;
         } else if (rc == -1 && errno == EAGAIN) {
             estack_state_t es;
