@@ -29,9 +29,9 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
  * Function:	create_file_with_bogus_filter
  *
  * Purpose:	Create a dataset with the fletcher filter.
- *	        This function is used to create the test file `test_filters.h5' 
- *              which has a dataset with the "fletcher" I/O filter.  This dataset 
- *              will be used to verify the correct behavior of the library in 
+ *	        This function is used to create the test file `test_filters.h5'
+ *              which has a dataset with the "fletcher" I/O filter.  This dataset
+ *              will be used to verify the correct behavior of the library in
  *              the test "dsets"
  *
  * Return:	Success:	0
@@ -168,7 +168,7 @@ create_file_with_bogus_filter(void)
     /* create dcpl  */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
 
-    /* create chunking */ 
+    /* create chunking */
     if(H5Pset_chunk(dcpl, rank, chunk_dims) < 0) goto error;
 
     /* register bogus filter */

@@ -112,7 +112,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL__native_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, 
+H5VL__native_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
     hid_t H5_ATTR_UNUSED tapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5T_t       *type = NULL;           /* Datatype opened in file */
@@ -147,7 +147,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_datatype_get(void *obj, H5VL_datatype_get_t get_type, 
+H5VL__native_datatype_get(void *obj, H5VL_datatype_get_t get_type,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5T_t       *dt = (H5T_t *)obj;
@@ -199,7 +199,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_datatype_specific(void *obj, H5VL_datatype_specific_t specific_type, 
+H5VL__native_datatype_specific(void *obj, H5VL_datatype_specific_t specific_type,
                              hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
 {
     H5T_t       *dt = (H5T_t *)obj;

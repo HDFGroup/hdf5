@@ -241,7 +241,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
     if(HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
     if((addr + file->base_addr + size) > eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu", 
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu",
                     (unsigned long long)(addr+ file->base_addr), (unsigned long long)size, (unsigned long long)eoa)
 
     /* Dispatch to driver */
@@ -389,7 +389,7 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
     /* Check for the driver to query and then query it */
     if(driver->query)
         ret_value = (driver->query)(NULL, flags);
-    else 
+    else
         *flags = 0;
 
     FUNC_LEAVE_NOAPI(ret_value)

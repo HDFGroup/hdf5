@@ -843,7 +843,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
                  * the end of the data element, and don't read more than
                  * the buffer size.
                  */
-                min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size); 
+                min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size);
                 H5_CHECKED_ASSIGN(dset_contig->sieve_size, size_t, min, hsize_t);
 
                 /* Read the new sieve buffer */
@@ -1038,7 +1038,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
             max_data = store_contig->dset_size - dst_off;
 
             /* Compute the size of the sieve buffer */
-            min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size); 
+            min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size);
             H5_CHECKED_ASSIGN(dset_contig->sieve_size, size_t, min, hsize_t);
 
             /* Check if there is any point in reading the data from the file */
@@ -1154,7 +1154,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
                      * the end of the data element, and don't read more than
                      * the buffer size.
                      */
-                    min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size); 
+                    min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size);
                     H5_CHECKED_ASSIGN(dset_contig->sieve_size, size_t, min, hsize_t);
 
                     /* Check if there is any point in reading the data from the file */

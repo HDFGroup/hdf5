@@ -10,7 +10,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.

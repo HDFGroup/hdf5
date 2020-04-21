@@ -44,7 +44,7 @@
  *-------------------------------------------------------------------------
  */
 void *
-H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
+H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5F_t *new_file = NULL;
@@ -60,7 +60,7 @@ H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t 
         flags |= H5F_ACC_EXCL;              /* default */
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
-    /* Create the file */ 
+    /* Create the file */
     if(NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
     new_file->id_exists = TRUE;
@@ -68,7 +68,7 @@ H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t 
     ret_value = (void *)new_file;
 
 done:
-    if(NULL == ret_value && new_file) 
+    if(NULL == ret_value && new_file)
         if(H5F__close(new_file) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
 
@@ -95,7 +95,7 @@ H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id,
 
     FUNC_ENTER_PACKAGE
 
-    /* Open the file */ 
+    /* Open the file */
     if(NULL == (new_file = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
     new_file->id_exists = TRUE;
@@ -561,7 +561,7 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type,
                 uint32_t cur_num_entries;
 
                 /* Go get the size data */
-                if(H5AC_get_cache_size(f->shared->cache, max_size_ptr, min_clean_size_ptr, 
+                if(H5AC_get_cache_size(f->shared->cache, max_size_ptr, min_clean_size_ptr,
                                        cur_size_ptr, &cur_num_entries) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_size() failed.")
 

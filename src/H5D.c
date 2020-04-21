@@ -332,7 +332,7 @@ H5Dclose(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID")
 
     /* Decrement the counter on the dataset.  It will be freed if the count
-     * reaches zero.  
+     * reaches zero.
      */
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
@@ -814,7 +814,7 @@ H5Dflush(hid_t dset_id)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
-    
+
     /* Check args */
     if(NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id parameter is not a valid dataset identifier")
@@ -873,7 +873,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Dformat_convert (Internal)
  *
- * Purpose:     For chunked: 
+ * Purpose:     For chunked:
  *                  Convert the chunk indexing type to version 1 B-tree if not
  *              For compact/contiguous:
  *                  Downgrade layout version to 3 if greater than 3
@@ -892,7 +892,7 @@ H5Dformat_convert(hid_t dset_id)
 {
     H5VL_object_t  *vol_obj;                   /* Dataset for this operation   */
     herr_t          ret_value = SUCCEED;    /* Return value                 */
-    
+
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 

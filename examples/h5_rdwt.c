@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
+/*
  *  This example illustrates how to write and read data in an existing
  *  dataset.  It is used in the HDF5 Tutorial.
  */
@@ -37,10 +37,10 @@ int main() {
    dataset_id = H5Dopen2(file_id, "/dset", H5P_DEFAULT);
 
    /* Write the dataset. */
-   status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+   status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                      dset_data);
 
-   status = H5Dread(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+   status = H5Dread(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                     dset_data);
 
    /* Close the dataset. */

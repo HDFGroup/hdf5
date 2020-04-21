@@ -16,15 +16,15 @@
   This example illustrates the concept of virtual dataset.
   The program  creates three 1-dim source datasets and writes
   data to them. Then it creates a 2-dim virtual dataset and
-  maps the first three rows of the virtual dataset to the data 
-  in the source datasets. Elements of a row are mapped to all 
+  maps the first three rows of the virtual dataset to the data
+  in the source datasets. Elements of a row are mapped to all
   elements of the corresponding source dataset.
-  The fourth row is not mapped and will be filled with the fill 
-  values when virtual dataset is read back. 
-   
+  The fourth row is not mapped and will be filled with the fill
+  values when virtual dataset is read back.
+
   The program closes all datasets, and then reopens the virtual
   dataset, and finds and prints its creation properties.
-  Then it reads the values. 
+  Then it reads the values.
 
   This file is intended for use with HDF5 Library version 1.10
 
@@ -37,9 +37,9 @@
 
 #define FILE         "vds.h5"
 #define DATASET      "VDS"
-#define VDSDIM1         6 
-#define VDSDIM0         4 
-#define DIM0            6 
+#define VDSDIM1         6
+#define VDSDIM0         4
+#define DIM0            6
 #define RANK1           1
 #define RANK2           2
 
@@ -58,7 +58,7 @@ const char *SRC_DATASET[] = {
 int
 main (void)
 {
-    hid_t        file, space, src_space, vspace, dset; /* Handles */ 
+    hid_t        file, space, src_space, vspace, dset; /* Handles */
     hid_t        dcpl;
     herr_t       status;
     hsize_t      vdsdims[2] = {VDSDIM0, VDSDIM1},      /* Virtual datasets dimension */
@@ -73,12 +73,12 @@ main (void)
                  block_out[2];
     int          wdata[DIM0],                /* Write buffer for source dataset */
                  rdata[VDSDIM0][VDSDIM1],    /* Read buffer for virtual dataset */
-                 i, j, k, l;  
+                 i, j, k, l;
     int          fill_value = -1;            /* Fill value for VDS */
     H5D_layout_t layout;                     /* Storage layout */
     size_t       num_map;                    /* Number of mappings */
     ssize_t      len;                        /* Length of the string; also a return value */
-    char         *filename;                  
+    char         *filename;
     char         *dsetname;
     hsize_t      nblocks;
     hsize_t      *buf;                       /* Buffer to hold hyperslab coordinates */
@@ -91,9 +91,9 @@ main (void)
          * Initialize data for i-th source dataset.
          */
         for (j = 0; j < DIM0; j++) wdata[j] = i+1;
-        
+
         /*
-         * Create the source files and  datasets. Write data to each dataset and 
+         * Create the source files and  datasets. Write data to each dataset and
          * close all resources.
          */
 
@@ -117,7 +117,7 @@ main (void)
     /* Set VDS creation property. */
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
     status = H5Pset_fill_value (dcpl, H5T_NATIVE_INT, &fill_value);
-     
+
     /* Initialize hyperslab values. */
     start[0] = 0;
     start[1] = 0;
@@ -126,11 +126,11 @@ main (void)
     block[0] = 1;
     block[1] = VDSDIM1;
 
-    /* 
+    /*
      * Build the mappings.
      * Selections in the source datasets are H5S_ALL.
-     * In the virtual dataset we select the first, the second and the third rows 
-     * and map each row to the data in the corresponding source dataset. 
+     * In the virtual dataset we select the first, the second and the third rows
+     * and map each row to the data in the corresponding source dataset.
      */
     src_space = H5Screate_simple (RANK1, dims, NULL);
     for (i = 0; i < 3; i++) {
@@ -146,8 +146,8 @@ main (void)
     status = H5Sclose (space);
     status = H5Sclose (src_space);
     status = H5Dclose (dset);
-    status = H5Fclose (file);    
-     
+    status = H5Fclose (file);
+
     /*
      * Now we begin the read section of this example.
      */
@@ -167,7 +167,7 @@ main (void)
      * Get storage layout.
      */
     layout = H5Pget_layout (dcpl);
-    if (H5D_VIRTUAL == layout) 
+    if (H5D_VIRTUAL == layout)
         printf(" Dataset has a virtual layout \n");
     else
         printf(" Wrong layout found \n");
@@ -178,26 +178,26 @@ main (void)
      status = H5Pget_virtual_count (dcpl, &num_map);
      printf(" Number of mappings is %lu\n", (unsigned long)num_map);
 
-     /* 
+     /*
       * Get mapping parameters for each mapping.
       */
-    for (i = 0; i < (int)num_map; i++) {   
+    for (i = 0; i < (int)num_map; i++) {
         printf(" Mapping %d \n", i);
         printf("         Selection in the virtual dataset ");
         /* Get selection in the virttual  dataset */
         vspace = H5Pget_virtual_vspace (dcpl, (size_t)i);
 
         /* Make sure that this is a hyperslab selection and then print information. */
-        if (H5Sget_select_type(vspace) == H5S_SEL_HYPERSLABS) { 
+        if (H5Sget_select_type(vspace) == H5S_SEL_HYPERSLABS) {
             nblocks = H5Sget_select_hyper_nblocks (vspace);
             buf = (hsize_t *)malloc(sizeof(hsize_t)*2*RANK2*nblocks);
             status = H5Sget_select_hyper_blocklist (vspace, (hsize_t)0, nblocks, buf);
             for (l=0; l<nblocks; l++) {
                 printf("(");
-                for (k=0; k<RANK2-1; k++) 
+                for (k=0; k<RANK2-1; k++)
                     printf("%d,", (int)buf[k]);
                 printf("%d ) - (", (int)buf[k]);
-                for (k=0; k<RANK2-1; k++) 
+                for (k=0; k<RANK2-1; k++)
                     printf("%d,", (int)buf[RANK2+k]);
                 printf("%d)\n", (int)buf[RANK2+k]);
             }

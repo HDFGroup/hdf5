@@ -14,7 +14,7 @@
 /* Programmer: 	Vailin Choi <vchoi@hdfgroup.org>
  *	       	September 2010
  *
- * Purpose:	Implicit (Non Index) chunked I/O functions.  
+ * Purpose:	Implicit (Non Index) chunked I/O functions.
  *		This is used when the dataset is:
  *			extendible but with fixed max. dims
  *			with early allocation
@@ -114,8 +114,8 @@ const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
  * Function:	H5D__none_idx_create
  *
  * Purpose:	Allocate memory for the maximum # of chunks in the dataset.
- *		
- * Return:	Non-negative on success 
+ *
+ * Return:	Non-negative on success
  *		Negative on failure.
  *
  * Programmer:	Vailin Choi; September 2010
@@ -472,7 +472,7 @@ H5D__none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 /*-------------------------------------------------------------------------
  * Function:	H5D__none_idx_dump
  *
- * Purpose:	Dump 
+ * Purpose:	Dump
  *
  * Return:	Non-negative on success/Negative on failure
  *

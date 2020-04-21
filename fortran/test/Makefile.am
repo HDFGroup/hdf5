@@ -91,7 +91,7 @@ tf_gen.F90: H5_test_buildiface$(EXEEXT)
 
 H5_test_buildiface_SOURCES = H5_test_buildiface.F90
 
-# The build of the H5_test_buildiface does not depend on any libraries, so set it 
+# The build of the H5_test_buildiface does not depend on any libraries, so set it
 # to nothing.
 
 H5_test_buildiface_LDADD =

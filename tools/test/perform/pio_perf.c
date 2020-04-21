@@ -80,7 +80,7 @@
 #define PIO_MPI             0x2
 #define PIO_HDF5            0x4
 
-#ifdef STANDALONE 
+#ifdef STANDALONE
 #define DBL_EPSILON 2.2204460492503131e-16
 #define H5_DBL_ABS_EQUAL(X,Y)       (fabs((X)-(Y)) < DBL_EPSILON)
 #endif

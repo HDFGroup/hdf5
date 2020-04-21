@@ -15325,7 +15325,7 @@ test_select_intersect_block(void)
 
 /****************************************************************
 **
-**  test_hyper_io_1d(): 
+**  test_hyper_io_1d():
 **  Test to verify all the selected 10th element in the 1-d file
 **  dataspace is read correctly into the 1-d contiguous memory space.
 **  This is modeled after the test scenario described in HDFFV-10585

@@ -391,15 +391,15 @@ typedef struct H5O_chunk_proxy_t {
     H5O_t       *oh;                    /* Object header for this chunk */
     unsigned    chunkno;                /* Chunk number for this chunk */
 
-    /* Flush depencency parent information (not stored) 
+    /* Flush depencency parent information (not stored)
      *
-     * The following field is used to store a pointer 
+     * The following field is used to store a pointer
      * to the in-core representation of a new chunk proxy's flush dependency
      * parent -- if it exists.  If it does not exist, this field will
      * contain NULL.
      *
-     * If the file is opened in SWMR write mode, the flush dependency 
-     * parent of the chunk proxy will be either its object header 
+     * If the file is opened in SWMR write mode, the flush dependency
+     * parent of the chunk proxy will be either its object header
      * or the chunk with the continuation message that references this chunk.
      */
     void *fd_parent;                    /* Pointer to flush dependency parent */

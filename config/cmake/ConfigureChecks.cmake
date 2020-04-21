@@ -172,7 +172,7 @@ option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
 endif ()
 
 # ----------------------------------------------------------------------
-# Check whether we can build the Mirror VFD 
+# Check whether we can build the Mirror VFD
 # Header-check flags set in config/cmake_ext_mod/ConfigureChecks.cmake
 # ----------------------------------------------------------------------
 option (HDF5_ENABLE_MIRROR_VFD "Build the Mirror Virtual File Driver" OFF)

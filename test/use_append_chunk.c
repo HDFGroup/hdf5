@@ -148,7 +148,7 @@ main(int argc, char *argv[])
         if ((UC_opts.fapl_id = h5_fileaccess()) < 0) {
             HDfprintf(stderr, "can't create creation FAPL\n");
             Hgoto_error(1);
-        }   
+        }
         if (H5Pset_libver_bounds(UC_opts.fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
             HDfprintf(stderr, "can't set creation FAPL libver bounds\n");
             Hgoto_error(1);
@@ -159,7 +159,7 @@ main(int argc, char *argv[])
         } else {
             HDprintf("File created.\n");
         }
-        /* Close FAPL to prevent issues with forking later */ 
+        /* Close FAPL to prevent issues with forking later */
         if (H5Pclose(UC_opts.fapl_id) < 0) {
             HDfprintf(stderr, "can't close creation FAPL\n");
             Hgoto_error(1);

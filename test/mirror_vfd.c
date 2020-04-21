@@ -107,7 +107,7 @@ static void mybzero(void *dest, size_t size);
 /* ----------------------------------------------------------------------------
  * Function:   mybzero
  *
- * Purpose:    Have bzero simplicity and abstraction in (possible) absence of 
+ * Purpose:    Have bzero simplicity and abstraction in (possible) absence of
  *             it being available.
  *
  * Programmer: Jacob Smith
