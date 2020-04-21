@@ -308,7 +308,7 @@ herr_t
 H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 {
     shadow_defree_t *curr;
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -316,15 +316,12 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
     HDassert(f->shared->vfd_swmr_md_fd >= 0);
 
     /* Write empty index to the md file */
-    if ( H5F__vfd_swmr_construct_write_md_idx(f, 0, NULL) < 0 )
-
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create index in md")
-
+    if (H5F__vfd_swmr_construct_write_md_idx(f, 0, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create index in md");
 
     /* Write header to the md file */
     if ( H5F__vfd_swmr_construct_write_md_hdr(f, 0) < 0 )
-
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create header in md")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to create header in md");
 
     if ( closing ) { /* For file close */
 
@@ -332,22 +329,19 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 
         /* Close the md file */
         if(HDclose(f->shared->vfd_swmr_md_fd) < 0)
-
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, \
-                        "unable to close the metadata file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
+                        "unable to close the metadata file");
         f->shared->vfd_swmr_md_fd = -1;
 
         /* Unlink the md file */
         if ( HDunlink(f->shared->vfd_swmr_config.md_file_path) < 0 )
-
-            HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL, \
-                        "unable to unlink the metadata file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTREMOVE, FAIL,
+                        "unable to unlink the metadata file");
 
         /* Close the free-space manager for the metadata file */
         if ( H5MV_close(f) < 0 )
-
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, \
-                "unable to close the free-space manager for the metadata file")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL,
+                "unable to close the free-space manager for the metadata file");
 
         /* Free the delayed list */ 
         while ((curr = TAILQ_FIRST(&f->shared->shadow_defrees)) != NULL) {
@@ -358,19 +352,14 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 
         assert(TAILQ_EMPTY(&f->shared->shadow_defrees));
     } else { /* For file flush */
-
         /* Update end_of_tick */
-        if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, TRUE) < 0 )
-
-            HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
-                        "unable to update end of tick")
+        if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, TRUE) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL,
+                        "unable to update end of tick");
     }
-
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5F_vfd_swmr_close_or_flush() */
+}
 
 static int
 shadow_range_defer_free(H5F_shared_t *shared, uint64_t offset, uint32_t length)
