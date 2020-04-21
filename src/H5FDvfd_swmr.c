@@ -775,9 +775,6 @@ H5FD_vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type,
              (init_size == entry->length));
 #endif /* JRM */
 
-    HDassert( ( ! file->pb_configured ) ||
-              ( init_size == entry->length ) );
-
     do {
         char *p = buf;
 
