@@ -15,6 +15,7 @@
 #define H5DIFF_H__
 
 #include "hdf5.h"
+#include "h5tools.h"
 #include "h5trav.h"
 
 /*
@@ -86,6 +87,10 @@ typedef struct {
     int        m_list_not_cmp;        /* list not comparable messages */
     int        exclude_path;          /* exclude path to an object */
     struct     exclude_path_list * exclude; /* keep exclude path list */
+    h5tools_vol_info_t  in_vol_info;  /* VOL information for input file */
+    h5tools_vol_info_t  out_vol_info; /* VOL information for output file */
+    hbool_t    custom_in_vol;         /* Using a custom input VOL? */
+    hbool_t    custom_out_vol;        /* Using a custom output VOL? */
 } diff_opt_t;
 
 

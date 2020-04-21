@@ -42,6 +42,12 @@ static struct long_options l_opts[] = {
     { "no-dangling-links", no_arg, 'x' },
     { "exclude-path", require_arg, 'E' },
     { "enable-error-stack", no_arg, 'S' },
+    { "src-vol-value",       require_arg, '1' },
+    { "src-vol-name",        require_arg, '2' },
+    { "src-vol-info",        require_arg, '3' },
+    { "dst-vol-value",       require_arg, '4' },
+    { "dst-vol-name",        require_arg, '5' },
+    { "dst-vol-info",        require_arg, '6' },
     { NULL, 0, '\0' }
 };
 
@@ -91,7 +97,7 @@ void parse_command_line(int argc,
     struct exclude_path_list *exclude_head, *exclude_prev, *exclude_node;
 
     /* process the command-line */
-    memset(opts, 0, sizeof (diff_opt_t));
+    HDmemset(opts, 0, sizeof (diff_opt_t));
 
     /* assume equal contents initially */
     opts->contents = 1;
@@ -257,6 +263,38 @@ void parse_command_line(int argc,
 
         case 'e':
             opts->use_system_epsilon = 1;
+            break;
+
+        case '1':
+            opts->in_vol_info.type = VOL_BY_VALUE;
+            opts->in_vol_info.u.value = (H5VL_class_value_t)HDatoi(opt_arg);
+            opts->custom_in_vol = TRUE;
+            break;
+
+        case '2':
+            opts->in_vol_info.type = VOL_BY_NAME;
+            opts->in_vol_info.u.name = opt_arg;
+            opts->custom_in_vol = TRUE;
+            break;
+
+        case '3':
+            opts->in_vol_info.info_string = opt_arg;
+            break;
+
+        case '4':
+            opts->out_vol_info.type = VOL_BY_VALUE;
+            opts->out_vol_info.u.value = (H5VL_class_value_t)HDatoi(opt_arg);
+            opts->custom_out_vol = TRUE;
+            break;
+
+        case '5':
+            opts->out_vol_info.type = VOL_BY_NAME;
+            opts->out_vol_info.u.name = opt_arg;
+            opts->custom_out_vol = TRUE;
+            break;
+
+        case '6':
+            opts->out_vol_info.info_string = opt_arg;
             break;
         }
     }
@@ -469,6 +507,18 @@ void usage(void)
  PRINTVALSTREAM(rawoutstream, "         Quiet mode. Do not produce output.\n");
  PRINTVALSTREAM(rawoutstream, "   --enable-error-stack\n");
  PRINTVALSTREAM(rawoutstream, "                   Prints messages from the HDF5 error stack as they occur.\n");
+ PRINTVALSTREAM(rawoutstream, "   --src-vol-value         Value (ID) of the VOL connector to use for opening the\n");
+ PRINTVALSTREAM(rawoutstream, "                           input HDF5 file specified\n");
+ PRINTVALSTREAM(rawoutstream, "   --src-vol-name          Name of the VOL connector to use for opening the input\n");
+ PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+ PRINTVALSTREAM(rawoutstream, "   --src-vol-info          VOL-specific info to pass to the VOL connector used for\n");
+ PRINTVALSTREAM(rawoutstream, "                           opening the input HDF5 file specified\n");
+ PRINTVALSTREAM(rawoutstream, "   --dst-vol-value         Value (ID) of the VOL connector to use for opening the\n");
+ PRINTVALSTREAM(rawoutstream, "                           output HDF5 file specified\n");
+ PRINTVALSTREAM(rawoutstream, "   --dst-vol-name          Name of the VOL connector to use for opening the output\n");
+ PRINTVALSTREAM(rawoutstream, "                           HDF5 file specified\n");
+ PRINTVALSTREAM(rawoutstream, "   --dst-vol-info          VOL-specific info to pass to the VOL connector used for\n");
+ PRINTVALSTREAM(rawoutstream, "                           opening the output HDF5 file specified\n");
  PRINTVALSTREAM(rawoutstream, "   --follow-symlinks\n");
  PRINTVALSTREAM(rawoutstream, "         Follow symbolic links (soft links and external links and compare the)\n");
  PRINTVALSTREAM(rawoutstream, "         links' target objects.\n");

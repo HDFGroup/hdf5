@@ -519,6 +519,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
 {
     hid_t         file1_id = H5I_INVALID_HID;
     hid_t         file2_id = H5I_INVALID_HID;
+    hid_t         fapl1_id = H5P_DEFAULT;
+    hid_t         fapl2_id = H5P_DEFAULT;
     char          filenames[2][MAX_FILENAME];
     hsize_t       nfound = 0;
     int           l_ret1 = -1;
@@ -570,17 +572,32 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     *-------------------------------------------------------------------------
     */
     /* open file 1 */
-    if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
+    if (opts->custom_in_vol) {
+        if((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->in_vol_info), NULL)) < 0 ) {
+            parallel_print("h5diff: unable to create fapl for input file\n");
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
+        }
+    }
+
+    if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, fapl1_id, FALSE, NULL, (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname1);
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "<%s>: unable to open file\n", fname1);
-    } /* end if */
+    }
     H5TOOLS_DEBUG("file1_id = %s", fname1);
 
     /* open file 2 */
-    if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
+
+    if (opts->custom_out_vol) {
+        if((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->out_vol_info), NULL)) < 0 ) {
+            parallel_print("h5diff: unable to create fapl for output file\n");
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create output fapl\n");
+        }
+    }
+
+    if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, fapl2_id, FALSE, NULL, (size_t)0)) < 0) {
         parallel_print("h5diff: <%s>: unable to open file\n", fname2);
         H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "<%s>: unable to open file\n", fname2);
-    } /* end if */
+    }
     H5TOOLS_DEBUG("file2_id = %s", fname2);
 
     /*-------------------------------------------------------------------------
@@ -967,6 +984,10 @@ done:
     {
         H5Fclose(file1_id);
         H5Fclose(file2_id);
+        if (fapl1_id != H5P_DEFAULT)
+            H5Pclose(fapl1_id);
+        if (fapl2_id != H5P_DEFAULT)
+            H5Pclose(fapl2_id);
     } H5E_END_TRY;
 
     H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
