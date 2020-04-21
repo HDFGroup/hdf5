@@ -1234,7 +1234,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
                      * case where the new entry is *longer*, because the
                      * extension could overlap with a second entry.
                      */
-                    assert(old_mdf_idx[i].length == new_mdf_idx[i].length);
+                    assert(old_mdf_idx[i].length == new_mdf_idx[j].length);
 
                     hlog_fast(shadow_index_update,
                         "writer moved shadow at slot %" PRIu32
