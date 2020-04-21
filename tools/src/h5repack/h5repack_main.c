@@ -432,16 +432,16 @@ set_sort_order(const char *form)
 static
 int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 {
-    h5tools_fapl_info_t in_vol_info;
-    h5tools_fapl_info_t out_vol_info;
+    h5tools_vol_info_t in_vol_info;
+    h5tools_vol_info_t out_vol_info;
     hbool_t custom_in_fapl = FALSE;
     hbool_t custom_out_fapl = FALSE;
     hid_t tmp_fapl = H5I_INVALID_HID;
     int bound, opt;
     int ret_value = 0;
 
-    HDmemset(&in_vol_info, 0, sizeof(h5tools_fapl_info_t));
-    HDmemset(&out_vol_info, 0, sizeof(h5tools_fapl_info_t));
+    HDmemset(&in_vol_info, 0, sizeof(h5tools_vol_info_t));
+    HDmemset(&out_vol_info, 0, sizeof(h5tools_vol_info_t));
 
     /* parse command line options */
     while (EOF != (opt = get_option(argc, argv, s_opts, l_opts))) {
@@ -747,7 +747,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
     /* Setup FAPL for input and output file accesses */
     if (custom_in_fapl) {
-        if ((tmp_fapl = h5tools_get_fapl(options->fin_fapl, &in_vol_info)) < 0) {
+        if ((tmp_fapl = h5tools_get_fapl(options->fin_fapl, &in_vol_info, NULL)) < 0) {
             error_msg("failed to setup FAPL for input file\n");
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = -1;
@@ -767,7 +767,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     }
 
     if (custom_out_fapl) {
-        if ((tmp_fapl = h5tools_get_fapl(options->fout_fapl, &out_vol_info)) < 0) {
+        if ((tmp_fapl = h5tools_get_fapl(options->fout_fapl, &out_vol_info, NULL)) < 0) {
             error_msg("failed to setup FAPL for output file\n");
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = -1;

@@ -1813,16 +1813,14 @@ main(int argc, const char *argv[])
         goto done;
 
     if (drivername) {
-        h5tools_fapl_info_t fapl_info;
+        h5tools_vfd_info_t vfd_info;
 
-        /* Currently, only retrieval of VFDs is supported. */
-        fapl_info.type          = VFD_BY_NAME;
-        fapl_info.info_string   = NULL;
-        fapl_info.u.name        = drivername;
+        vfd_info.info       = NULL;
+        vfd_info.name       = drivername;
 
         if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
-            fapl_info.info_string = (void *)&ros3_fa;
+            vfd_info.info = (void *)&ros3_fa;
 #else
             error_msg("Read-Only S3 VFD not enabled.\n");
             goto done;
@@ -1830,14 +1828,14 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX])) {
 #ifdef H5_HAVE_LIBHDFS
-            fapl_info.info_string = (void *)&hdfs_fa;
+            vfd_info.info = (void *)&hdfs_fa;
 #else
             error_msg("HDFS VFD not enabled.\n");
             goto done;
 #endif
         }
 
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &fapl_info)) < 0) {
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
             error_msg("Unable to create FAPL for file access\n");
             goto done;
         }
