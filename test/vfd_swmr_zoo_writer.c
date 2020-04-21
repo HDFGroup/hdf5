@@ -16,11 +16,13 @@
 #include <time.h> /* nanosleep(2) */
 #include <unistd.h> /* getopt(3) */
 
-#define H5C_FRIEND              /*suppress error about including H5Cpkg   */
-#define H5F_FRIEND              /*suppress error about including H5Fpkg   */
+#define H5C_FRIEND              /* suppress error about including H5Cpkg */
+#define H5F_FRIEND              /* suppress error about including H5Fpkg */
 
 #include "hdf5.h"
 
+#include "H5private.h"
+#include "H5retry_private.h"
 #include "H5Cpkg.h"
 #include "H5Fpkg.h"
 // #include "H5Iprivate.h"
@@ -31,14 +33,25 @@
 #include "genall5.h"
 #include "vfd_swmr_common.h"
 
-enum _step {
-  CREATE = 0
-, LENGTHEN
-, SHORTEN
-, DELETE
-, NSTEPS
-} step_t;
+typedef struct _shared_ticks {
+    uint64_t reader_tick;
+} shared_ticks_t;
 
+typedef struct _tick_stats {
+    uint64_t writer_tried_increase;
+    uint64_t writer_aborted_increase;
+    uint64_t writer_read_shared_file;
+    uint64_t reader_tick_was_zero;      // writer read reader tick equal to 0
+    uint64_t reader_tick_lead_writer;   // writer read reader tick greater than
+                                        // proposed writer tick
+    uint64_t writer_lead_reader_by[1];  // proposed writer tick lead reader
+                                        // tick by `lead` ticks
+                                        // `writer_lead_reader_by[lead]`
+                                        // times, for `0 <= lead <= max_lag - 1`
+} tick_stats_t;
+
+static H5F_vfd_swmr_config_t swmr_config;
+static tick_stats_t *tick_stats = NULL;
 static const hid_t badhid = H5I_INVALID_HID;
 static bool caught_out_of_bounds = false;
 static bool writer;
@@ -66,10 +79,13 @@ zoo_create_hook(hid_t fid)
 static void
 usage(const char *progname)
 {
-    fprintf(stderr, "usage: %s [-W] [-V]\n", progname);
-    fprintf(stderr, "\n  -W: do not wait for SIGINT or SIGUSR1\n");
-    fprintf(stderr, "\n  -S: do not use VFD SWMR\n");
+    fprintf(stderr, "usage: %s [-C] [-S] [-W] [-a] [-e] [-n] [-q] [-v]\n",
+        progname);
+    fprintf(stderr, "\n  -C: skip compact dataset tests\n");
+    fprintf(stderr,   "  -S: do not use VFD SWMR\n");
+    fprintf(stderr,   "  -W: do not wait for SIGINT or SIGUSR1\n");
     fprintf(stderr,   "  -a: run all tests, including variable-length data\n");
+    fprintf(stderr,   "  -e: print error stacks\n");
     fprintf(stderr,   "  -n: number of test steps to perform\n");
     fprintf(stderr,   "  -q: be quiet: few/no progress messages\n");
     fprintf(stderr,   "  -v: be verbose: most progress messages\n");
@@ -86,6 +102,108 @@ H5HG_trap(const char *reason)
     return true;
 }
 
+bool
+vfd_swmr_writer_may_increase_tick_to(uint64_t new_tick, bool wait_for_reader)
+{
+    static int fd = -1;
+    shared_ticks_t shared;
+    ssize_t nread;
+    h5_retry_t retry;
+    bool do_try;
+
+    fprintf(stderr, "%s: enter\n", __func__);
+
+    if (fd == -1) {
+        fd = open("./shared_tick_num", O_RDONLY);
+        if (fd == -1) {
+            warn("%s: open", __func__); // TBD ratelimit/silence this warning
+            return true;
+        }
+        assert(tick_stats == NULL);
+        tick_stats = calloc(1, sizeof(*tick_stats) +
+            (swmr_config.max_lag - 1) *
+            sizeof(tick_stats->writer_lead_reader_by[0]));
+        if (tick_stats == NULL)
+            err(EXIT_FAILURE, "%s: calloc", __func__);
+    }
+
+    tick_stats->writer_tried_increase++;
+
+    for (do_try = h5_retry_init(&retry, 14, 10 * 1000 * 1000,
+                                100 * 1000 * 1000);
+         do_try;
+         do_try = wait_for_reader && h5_retry_next(&retry)) {
+
+        tick_stats->writer_read_shared_file++;
+
+        if ((nread = pread(fd, &shared, sizeof(shared), 0)) == -1)
+            err(EXIT_FAILURE, "%s: pread", __func__);
+
+        if (nread != sizeof(shared))
+            errx(EXIT_FAILURE, "%s: pread", __func__);
+
+        // TBD convert endianness
+
+        if (shared.reader_tick == 0) {
+            tick_stats->reader_tick_was_zero++;
+            return true;
+        }
+
+        if (new_tick < shared.reader_tick) {
+            tick_stats->reader_tick_lead_writer++;
+            return true;
+        }
+        if (new_tick <= shared.reader_tick + swmr_config.max_lag - 1) {
+            uint64_t lead = new_tick - shared.reader_tick;
+            assert(lead <= swmr_config.max_lag - 1);
+            tick_stats->writer_lead_reader_by[lead]++;
+            return true;
+        }
+    }
+    if (wait_for_reader && !do_try)
+        errx(EXIT_FAILURE, "%s: timed out waiting for reader", __func__);
+
+    tick_stats->writer_aborted_increase++;
+
+    return false;
+}
+
+void
+vfd_swmr_reader_did_increase_tick_to(uint64_t new_tick)
+{
+    static int fd = -1;
+    shared_ticks_t shared;
+    ssize_t nwritten;
+
+    fprintf(stderr, "%s: enter\n", __func__);
+
+    if (fd == -1) {
+        // TBD create a temporary file, here, and move it to its final path
+        // after writing it.
+        fd = open("./shared_tick_num", O_RDWR|O_CREAT, 0600);
+        if (fd == -1)
+            err(EXIT_FAILURE, "%s: open", __func__);
+    }
+
+    shared.reader_tick = new_tick;
+
+    // TBD convert endianness
+
+    if ((nwritten = pwrite(fd, &shared, sizeof(shared), 0)) == -1)
+        errx(EXIT_FAILURE, "%s: pwrite", __func__);
+
+    if (nwritten != sizeof(shared))
+        errx(EXIT_FAILURE, "%s: pwrite", __func__);
+
+    if (new_tick == 0) {
+        if (unlink("./shared_tick_num") == -1)
+            warn("%s: unlink", __func__);
+        if (close(fd) == -1)
+            err(EXIT_FAILURE, "%s: close", __func__);
+        fd = -1;
+    }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -94,18 +212,26 @@ main(int argc, char **argv)
     H5C_t *cache;
     sigset_t oldsigs;
     herr_t ret;
-    bool skip_varlen = true, wait_for_signal;
+    zoo_config_t config = {
+          .proc_num = 0
+        , .skip_compact = false
+        , .skip_varlen = true};
+    bool wait_for_signal;
     int ch;
     bool use_vfd_swmr = true;
+    bool print_estack = false;
 #if 0
     unsigned long tmp;
     char *end;
-    int i, ntimes = 100;
+    int i;
     const struct timespec delay =
         {.tv_sec = 0, .tv_nsec = 1000 * 1000 * 1000 / 10};
 #endif
     const char *progname = basename(argv[0]);
     estack_state_t es;
+#if 0
+    char step[2] = "ab";
+#endif
 
     dbgf(1, "0th arg %s, personality `%s`\n", argv[0], progname);
 
@@ -118,8 +244,11 @@ main(int argc, char **argv)
              "unknown personality, expected vfd_swmr_zoo_{reader,writer}");
     }
 
-    while ((ch = getopt(argc, argv, "SWan:qv")) != -1) {
+    while ((ch = getopt(argc, argv, "CSWaen:qv")) != -1) {
         switch(ch) {
+        case 'C':
+            config.skip_compact = true;
+            break;
         case 'S':
             use_vfd_swmr = false;
             break;
@@ -127,21 +256,11 @@ main(int argc, char **argv)
             wait_for_signal = false;
             break;
         case 'a':
-            skip_varlen = false;
+            config.skip_varlen = false;
             break;
-#if 0
-        case 'n':
-            errno = 0;
-            tmp = strtoul(optarg, &end, 0);
-            if (end == optarg || *end != '\0')
-                errx(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", optarg);
-            else if (errno != 0)
-                err(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", optarg);
-            else if (tmp > INT_MAX)
-                errx(EXIT_FAILURE, "`-n` argument `%lu` too large", tmp);
-            ntimes = (int)tmp;
+        case 'e':
+            print_estack = true;
             break;
-#endif
         case 'q':
             verbosity = 1;
             break;
@@ -161,8 +280,15 @@ main(int argc, char **argv)
 
     fapl = vfd_swmr_create_fapl(writer, true, use_vfd_swmr);
 
+    if (use_vfd_swmr && H5Pget_vfd_swmr_config(fapl, &swmr_config) < 0)
+        errx(EXIT_FAILURE, "H5Pget_vfd_swmr_config");
+
     if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
+
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0){
+        errx(EXIT_FAILURE, "%s.%d: H5Pset_libver_bounds", __func__, __LINE__);
+    }
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         errx(EXIT_FAILURE, "H5Pcreate");
@@ -189,23 +315,77 @@ main(int argc, char **argv)
 
     print_cache_hits(cache);
 
-    es = disable_estack();
+    es = print_estack ? estack_get_state() : disable_estack();
     if (writer) {
+
+#if 0
+        H5Fvfd_swmr_end_tick(fid);
+
+        if (read(STDIN_FILENO, &step[0], sizeof(step[0])) == -1)
+            err(EXIT_FAILURE, "read");
+
+        if (step[0] != 'a')
+            errx(EXIT_FAILURE, "expected 'a' read '%c'", step[0]);
+#endif
+
         dbgf(1, "Writing zoo...\n");
-        if (!create_zoo(fid, ".", 0, skip_varlen))
+
+        if (!create_zoo(fid, ".", config))
             errx(EXIT_FAILURE, "create_zoo didn't pass self-check");
+
+#if 1
+        H5Fvfd_swmr_end_tick(fid);
+#endif
+
+#if 0
+        if (read(STDIN_FILENO, &step[1], sizeof(step[1])) == -1)
+            err(EXIT_FAILURE, "read");
+
+        if (step[1] != 'b')
+            errx(EXIT_FAILURE, "expected 'b' read '%c'", step[1]);
+
+        if (!delete_zoo(fid, ".", config))
+            errx(EXIT_FAILURE, "delete_zoo failed");
+#endif
     } else {
         dbgf(1, "Reading zoo...\n");
-        while (!validate_zoo(fid, ".", 0, skip_varlen))
+#if 0
+        if (write(STDOUT_FILENO, &step[0], sizeof(step[0])) == -1)
+            err(EXIT_FAILURE, "write");
+#endif
+        while (!validate_zoo(fid, ".", config))
             ;
+#if 0
+        if (write(STDOUT_FILENO, &step[1], sizeof(step[1])) == -1)
+            err(EXIT_FAILURE, "write");
+        while (!validate_deleted_zoo(fid, ".", config))
+            ;
+#endif
     }
     restore_estack(es);
 
     if (use_vfd_swmr && wait_for_signal)
         await_signal(fid);
 
-    if (wait_for_signal)
-        restore_signals(&oldsigs);
+    if (writer && tick_stats != NULL) {
+        uint64_t lead;
+
+        dbgf(1, "writer tried tick increase %" PRIu64 "\n",
+            tick_stats->writer_tried_increase);
+        dbgf(1, "writer aborted tick increase %" PRIu64 "\n",
+            tick_stats->writer_aborted_increase);
+        dbgf(1, "writer read shared file %" PRIu64 "\n",
+            tick_stats->writer_read_shared_file);
+        dbgf(1, "writer read reader tick equal to 0 %" PRIu64 "\n",
+            tick_stats->reader_tick_was_zero);
+        dbgf(1, "writer read reader tick leading writer %" PRIu64 "\n",
+            tick_stats->reader_tick_lead_writer);
+
+        for (lead = 0; lead < swmr_config.max_lag; lead++) {
+            dbgf(1, "writer tick lead writer by %" PRIu64 " %" PRIu64 "\n",
+                lead, tick_stats->writer_lead_reader_by[lead]);
+        }
+    }
 
     if (H5Pclose(fapl) < 0)
         errx(EXIT_FAILURE, "H5Pclose(fapl)");
@@ -215,6 +395,9 @@ main(int argc, char **argv)
 
     if (H5Fclose(fid) < 0)
         errx(EXIT_FAILURE, "H5Fclose");
+
+    if (wait_for_signal)
+        restore_signals(&oldsigs);
 
     return EXIT_SUCCESS;
 }

@@ -4819,7 +4819,9 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 
     /* 3) Construct a "zoo" in the above group, and validate it. */
     if ( pass )
-        pass = create_zoo(file_id, process_group_name, min_group, false);
+        pass = create_zoo(file_id, process_group_name,
+            (zoo_config_t){.proc_num = min_group, .skip_varlen = false,
+                           .skip_compact = false});
 
 #if H5C_COLLECT_CACHE_STATS
     if ( pass ) {
@@ -4890,8 +4892,11 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 
 
         /* 6) Validate the "zoo" created in the previous file open. */
-        if ( pass )
-            pass = validate_zoo(file_id, process_group_name, max_group, false);
+        if ( pass ) {
+            pass = validate_zoo(file_id, process_group_name,
+                (zoo_config_t){.proc_num = max_group, .skip_varlen = false,
+                               .skip_compact = false});
+        }
 
 #if H5C_COLLECT_CACHE_STATS
         if ( pass ) {
@@ -4931,8 +4936,11 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 
 
     /* 8) Construct a "zoo" in the above group, and validate it. */
-        if ( pass )
-            pass = create_zoo(file_id, process_group_name, max_group, false);
+        if ( pass ) {
+            pass = create_zoo(file_id, process_group_name,
+                (zoo_config_t){.proc_num = max_group, .skip_varlen = false,
+                               .skip_compact = false});
+        }
 
         if ( show_progress )
             HDfprintf(stdout, "%s:L4 cp = %d, max_group = %d, pass = %d.\n",
@@ -4993,7 +5001,9 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     i = min_group;
     while(pass && i <= max_group) {
         HDsprintf(process_group_name, "/process_%d", i);
-        pass = validate_zoo(file_id, process_group_name, i++, false);
+        pass = validate_zoo(file_id, process_group_name,
+            (zoo_config_t){.proc_num = i++, .skip_varlen = false,
+                           .skip_compact = false});
     }
 
 #if H5C_COLLECT_CACHE_STATS
@@ -5046,7 +5056,9 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     while ( ( pass ) && ( i <= max_group ) ) {
 
         HDsprintf(process_group_name, "/process_%d", i);
-        pass = validate_zoo(file_id, process_group_name, i++, false);
+        pass = validate_zoo(file_id, process_group_name,
+            (zoo_config_t){.proc_num = i++, .skip_varlen = false,
+                           .skip_compact = false});
     }
 
 #if H5C_COLLECT_CACHE_STATS
@@ -5110,7 +5122,9 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     i = min_group;
     while ( ( pass ) && ( i <= max_group ) ) {
         HDsprintf(process_group_name, "/process_%d", i);
-        pass = validate_zoo(file_id, process_group_name, i++, false);
+        pass = validate_zoo(file_id, process_group_name,
+            (zoo_config_t){.proc_num = i++, .skip_varlen = false,
+                           .skip_compact = false});
     }
 
 #if H5C_COLLECT_CACHE_STATS

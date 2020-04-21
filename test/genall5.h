@@ -11,17 +11,21 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              9/4/15
- *
- *              This file contains declarations of all functions defined
- *		in genall5.c
+/* 
+ * This file contains declarations of all functions defined in genall5.c
  */
 
-bool create_zoo(hid_t fid, const char *base_path, int proc_num,
-    bool skip_varlen);
-bool validate_zoo(hid_t fid, const char *base_path, int proc_num,
-    bool skip_varlen);
+typedef struct _zoo_config {
+    int proc_num;
+    bool continue_on_failure;
+    bool skip_compact;
+    bool skip_varlen;
+} zoo_config_t;
+
+bool create_zoo(hid_t, const char *, zoo_config_t);
+bool validate_zoo(hid_t, const char *, zoo_config_t);
+bool delete_zoo(hid_t, const char *, zoo_config_t);
+bool validate_deleted_zoo(hid_t, const char *, zoo_config_t);
 
 bool ns_grp_0(hid_t fid, const char *group_name);
 bool vrfy_ns_grp_0(hid_t fid, const char *group_name);

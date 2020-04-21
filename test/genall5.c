@@ -19,6 +19,8 @@
  *        of the same name.
  */
 
+#include <err.h>
+
 #include "cache_common.h"
 #include "genall5.h"
 
@@ -27,6 +29,45 @@
 #define DSET_CHUNK_DIMS 1024
 #define DSET_COMPACT_DIMS 4096
 
+typedef enum phase {PHASE_CREATE, PHASE_VALIDATE, PHASE_DELETE,
+    PHASE_VALIDATE_DELETION} phase_t;
+
+static bool rm_ns_grp_0(hid_t, const char *);
+static bool rm_ns_grp_c(hid_t, const char *, unsigned);
+static bool rm_ns_grp_d(hid_t, const char *, unsigned);
+static bool rm_os_grp_0(hid_t, const char *);
+static bool rm_os_grp_n(hid_t, const char *, int, unsigned);
+static bool rm_ds_ctg_i(hid_t, const char *, hbool_t);
+static bool rm_ds_chk_i(hid_t, const char *, hbool_t);
+static bool rm_ds_cpt_i(hid_t, const char *, hbool_t);
+static bool rm_ds_ctg_v(hid_t, const char *, hbool_t);
+
+static bool missing_ns_grp_0(hid_t, const char *);
+static bool missing_ns_grp_c(hid_t, const char *, unsigned);
+static bool missing_ns_grp_d(hid_t, const char *, unsigned);
+static bool missing_os_grp_0(hid_t, const char *);
+static bool missing_os_grp_n(hid_t, const char *, int, unsigned);
+static bool missing_ds_ctg_i(hid_t, const char *, hbool_t);
+static bool missing_ds_chk_i(hid_t, const char *, hbool_t);
+static bool missing_ds_cpt_i(hid_t, const char *, hbool_t);
+static bool missing_ds_ctg_v(hid_t, const char *, hbool_t);
+
+#define FN_ITEM_DEFN(__name, ...)                           \
+    typedef bool (*__name##fn_t)(__VA_ARGS__);              \
+    static const __name##fn_t __name##_fntbl[] =            \
+        {__name, vrfy_##__name, rm_##__name, missing_##__name}
+
+FN_ITEM_DEFN(ns_grp_0, hid_t, const char *);
+FN_ITEM_DEFN(ns_grp_c, hid_t, const char *, unsigned);
+FN_ITEM_DEFN(ns_grp_d, hid_t, const char *, unsigned);
+FN_ITEM_DEFN(os_grp_0, hid_t, const char *);
+FN_ITEM_DEFN(os_grp_n, hid_t, const char *, int, unsigned);
+FN_ITEM_DEFN(ds_ctg_i, hid_t, const char *, bool);
+FN_ITEM_DEFN(ds_chk_i, hid_t, const char *, bool);
+FN_ITEM_DEFN(ds_cpt_i, hid_t, const char *, bool);
+FN_ITEM_DEFN(ds_ctg_v, hid_t, const char *, bool);
+
+#undef FN_ITEM_DEFN
 
 /*-------------------------------------------------------------------------
  * Function:    ns_grp_0
@@ -44,6 +85,18 @@
  *
  *-------------------------------------------------------------------------
  */
+
+static bool
+missing_ns_grp_0(hid_t fid, const char *group_name)
+{
+    return true;
+}
+
+static bool
+rm_ns_grp_0(hid_t fid, const char *group_name)
+{
+    return true;
+}
 
 bool
 ns_grp_0(hid_t fid, const char *group_name)
@@ -197,6 +250,18 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
  *
  *-------------------------------------------------------------------------
  */
+
+static bool
+missing_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
+{
+    return true;
+}
+
+static bool
+rm_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
+{
+    return true;
+}
 
 bool
 ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
@@ -530,6 +595,18 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
  *-------------------------------------------------------------------------
  */
 
+static bool
+missing_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
+{
+    return true;
+}
+
+static bool
+rm_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
+{
+    return true;
+}
+
 bool
 ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
 {
@@ -857,6 +934,18 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
  *-------------------------------------------------------------------------
  */
 
+static bool
+missing_os_grp_0(hid_t fid, const char *group_name)
+{
+    return true;
+}
+
+static bool
+rm_os_grp_0(hid_t fid, const char *group_name)
+{
+    return true;
+}
+
 bool
 os_grp_0(hid_t fid, const char *group_name)
 {
@@ -1018,6 +1107,19 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
  *
  *-------------------------------------------------------------------------
  */
+
+static bool
+missing_os_grp_n(hid_t fid, const char *group_name, int proc_num,
+    unsigned nlinks)
+{
+    return true;
+}
+
+static bool
+rm_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
+{
+    return true;
+}
 
 bool
 os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
@@ -1292,6 +1394,18 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
  *
  *-------------------------------------------------------------------------
  */
+static bool
+missing_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
+{
+    return true;
+}
+
+static bool
+rm_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
+{
+    return true;
+}
+
 bool
 ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
@@ -1541,6 +1655,18 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  *-------------------------------------------------------------------------
  */
+static bool
+missing_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
+{
+    return true;
+}
+
+static bool
+rm_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
+{
+    return true;
+}
+
 bool
 ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
@@ -1818,6 +1944,28 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  *-------------------------------------------------------------------------
  */
+static bool
+missing_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+{
+    if (H5Lexists(fid, dset_name, H5P_DEFAULT) >= 0) {
+        failure_mssg = "rm_ds_cpt_i: H5Lexists unexpectedly succeeded.";
+        return false;
+    }
+
+    return true;
+}
+
+static bool
+rm_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+{
+    if (H5Ldelete(fid, dset_name, H5P_DEFAULT) < 0) {
+        failure_mssg = "rm_ds_cpt_i: H5Ldelete failed.";
+        return false;
+    }
+
+    return true;
+}
+
 bool
 ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
@@ -2084,6 +2232,18 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  *-------------------------------------------------------------------------
  */
+static bool
+missing_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
+{
+    return true;
+}
+
+static bool
+rm_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
+{
+    return true;
+}
+
 bool
 ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
 {
@@ -2409,97 +2569,83 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
  * 
  * Return `true` if the selector was valid, `false` if it was not.
  */
+
 static bool
-create_or_validate_selection(hid_t fid, const char *full_path, int proc_num,
-    int selector, bool skip_varlen, bool validate, bool *okp)
+create_or_validate_selection(hid_t fid, const char *full_path,
+    int selector, zoo_config_t config, phase_t phase, bool *okp)
 {
-    const bool wr = !validate;
     bool ok;
 
     switch (selector) {
     case 0: /* Add & verify an empty "new style" group */
-        ok = wr ? ns_grp_0(fid, full_path) : vrfy_ns_grp_0(fid, full_path);
+        ok = ns_grp_0_fntbl[phase](fid, full_path);
         break;
     case 1: /* Add & verify a compact "new style" group (3 link messages) */
-        ok = wr ? ns_grp_c(fid, full_path, 3)
-                : vrfy_ns_grp_c(fid, full_path, 3);
+        ok = ns_grp_c_fntbl[phase](fid, full_path, 3);
         break;
     case 2:
         /* Add & verify a dense "new style" group (w/300 links,
          * in v2 B-tree & fractal heap)
          */
-        ok = wr ? ns_grp_d(fid, full_path, 300)
-                : vrfy_ns_grp_d(fid, full_path, 300);
+        ok = ns_grp_d_fntbl[phase](fid, full_path, 300);
         break;
     case 3: /* Add & verify an empty "old style" group to file */
-        ok = wr ? os_grp_0(fid, full_path) : vrfy_os_grp_0(fid, full_path);
+        ok = os_grp_0_fntbl[phase](fid, full_path);
         break;
     case 4:
         /* Add & verify an "old style" group (w/300 links, in
          * v1 B-tree & local heap) to file
          */
-        ok = wr ? os_grp_n(fid, full_path, proc_num, 300)
-                : vrfy_os_grp_n(fid, full_path, proc_num, 300);
+        ok = os_grp_n_fntbl[phase](fid, full_path, config.proc_num, 300);
         break;
     case 5:
         /* Add & verify a contiguous dataset w/integer datatype (but no data)
          * to file
          */
-        ok = wr ? ds_ctg_i(fid, full_path, FALSE)
-                : vrfy_ds_ctg_i(fid, full_path, FALSE);
+        ok = ds_ctg_i_fntbl[phase](fid, full_path, false);
         break;
     case 6:
         /* Add & verify a contiguous dataset w/integer datatype (with data)
          * to file
          */
-        ok = wr ? ds_ctg_i(fid, full_path, TRUE)
-                : vrfy_ds_ctg_i(fid, full_path, TRUE);
+        ok = ds_ctg_i_fntbl[phase](fid, full_path, true);
         break;
     case 7:
         /* Add & verify a chunked dataset w/integer datatype (but no data)
          * to file
          */
-        ok = wr ? ds_chk_i(fid, full_path, FALSE)
-                : vrfy_ds_chk_i(fid, full_path, FALSE);
+        ok = ds_chk_i_fntbl[phase](fid, full_path, false);
         break;
     case 8:
         /* Add & verify a chunked dataset w/integer datatype (and data)
          * to file
          */
-        ok = wr ? ds_chk_i(fid, full_path, TRUE)
-                : vrfy_ds_chk_i(fid, full_path, TRUE);
+        ok = ds_chk_i_fntbl[phase](fid, full_path, true);
         break;
     case 9:
         /* Add & verify a compact dataset w/integer datatype (but no data)
          * to file
          */
-        ok = wr ? ds_cpt_i(fid, full_path, FALSE)
-                : vrfy_ds_cpt_i(fid, full_path, FALSE);
+        ok = config.skip_compact ||
+             ds_cpt_i_fntbl[phase](fid, full_path, false);
         break;
     case 10:
         /* Add & verify a compact dataset w/integer datatype (and data)
          * to file
          */
-        ok = wr ? ds_cpt_i(fid, full_path, TRUE)
-                : vrfy_ds_cpt_i(fid, full_path, TRUE);
+        ok = config.skip_compact || ds_cpt_i_fntbl[phase](fid, full_path, true);
         break;
     case 11:
-        if (skip_varlen)
-            return false;
         /* Add & verify a contiguous dataset w/variable-length datatype
          * (but no data) to file
          */
-        ok = wr ? ds_ctg_v(fid, full_path, FALSE)
-                : vrfy_ds_ctg_v(fid, full_path, FALSE);
+        ok = config.skip_varlen || ds_ctg_v_fntbl[phase](fid, full_path, false);
         break;
     case 12:
-        if (skip_varlen)
-            return false;
         /* Add & verify a contiguous dataset w/variable-length datatype
          * (and data) to file
          */
-        ok = wr ? ds_ctg_v(fid, full_path, TRUE)
-                : vrfy_ds_ctg_v(fid, full_path, TRUE);
+        ok = config.skip_varlen || ds_ctg_v_fntbl[phase](fid, full_path, true);
         break;
     default:
         return false;
@@ -2509,47 +2655,50 @@ create_or_validate_selection(hid_t fid, const char *full_path, int proc_num,
 }
 
 /* Create and validate objects or, if `only_validate` is true, only
- * validate objects in file `fid` under group `base_path`. `proc_num`
- * tells the processor number the test runs on.  If `skip_varlen` is
+ * validate objects in file `fid` under group `base_path`. `config.proc_num`
+ * tells the processor number the test runs on.  If `config.skip_varlen` is
  * true, do NOT perform tests that use variable-length data.
  *
  * Return true if all tests pass, false if any test fails.
  */
+
 static bool
-tend_zoo(hid_t fid, const char *base_path, int proc_num, bool skip_varlen,
-    bool only_validate)
+tend_zoo(hid_t fid, const char *base_path, zoo_config_t config,
+    const phase_t *phase, size_t nphases)
 {
-    const bool create = !only_validate;
+    struct timespec delay = {.tv_sec = 0, .tv_nsec = 50 * 1000 * 1000};
     char full_path[1024];
     int i, nwritten;
+    size_t j;
     char *leafp;
     bool ok = true;
 
     nwritten = snprintf(full_path, sizeof(full_path), "%s/*", base_path);
     if (nwritten < 0 || (size_t)nwritten >= sizeof(full_path)) {
-        failure_mssg = "create_zoo: snprintf failed";
+        failure_mssg = "tend_zoo: snprintf failed";
         return false;
     }
 
     if ((leafp = strrchr(full_path, '*')) == NULL) {
-        failure_mssg = "create_zoo: strrchr failed";
+        failure_mssg = "tend_zoo: strrchr failed";
         return false;
     }
 
     for (i = 0; ok; i++) {
         assert('A' + i <= 'Z');
         *leafp = (char)('A' + i);
-        if (create &&
-            !create_or_validate_selection(fid, full_path, proc_num, i,
-                skip_varlen, false, &ok))
-            break;
-        zoo_create_hook(fid);
-        if (!create_or_validate_selection(fid, full_path, proc_num, i,
-                skip_varlen, true, &ok))
-            break;
+        for (j = 0; j < nphases; j++) {
+            if (!create_or_validate_selection(fid, full_path, i, config,
+                    phase[j], &ok))
+                goto out;
+            if (phase[j] == PHASE_CREATE || phase[j] == PHASE_DELETE)
+                zoo_create_hook(fid);
+        }
     }
+    nanosleep(&delay, NULL);
+out:
     if (!ok)
-        fprintf(stderr, "%s: %s\n", __func__, failure_mssg);
+        warnx("%s: %s", __func__, failure_mssg);
     return ok;
 }
 
@@ -2575,9 +2724,11 @@ tend_zoo(hid_t fid, const char *base_path, int proc_num, bool skip_varlen,
  */
 
 bool
-create_zoo(hid_t fid, const char *base_path, int proc_num, bool skip_varlen)
+create_zoo(hid_t fid, const char *base_path, zoo_config_t config)
 {
-    return tend_zoo(fid, base_path, proc_num, skip_varlen, false);
+    const phase_t phase[] = {PHASE_CREATE, PHASE_VALIDATE};
+
+    return tend_zoo(fid, base_path, config, phase, NELMTS(phase));
 }
 
 /*-------------------------------------------------------------------------
@@ -2600,8 +2751,26 @@ create_zoo(hid_t fid, const char *base_path, int proc_num, bool skip_varlen)
  */
 
 bool
-validate_zoo(hid_t fid, const char *base_path, int proc_num, bool skip_varlen)
+validate_zoo(hid_t fid, const char *base_path, zoo_config_t config)
 {
-    return tend_zoo(fid, base_path, proc_num, skip_varlen, true);
+    const phase_t phase[] = {PHASE_VALIDATE};
+
+    return tend_zoo(fid, base_path, config, phase, NELMTS(phase));
+}
+
+bool
+delete_zoo(hid_t fid, const char *base_path, zoo_config_t config)
+{
+    const phase_t phase[] = {PHASE_DELETE};
+
+    return tend_zoo(fid, base_path, config, phase, NELMTS(phase));
+}
+
+bool
+validate_deleted_zoo(hid_t fid, const char *base_path, zoo_config_t config)
+{
+    const phase_t phase[] = {PHASE_VALIDATE_DELETION};
+
+    return tend_zoo(fid, base_path, config, phase, NELMTS(phase));
 }
 
