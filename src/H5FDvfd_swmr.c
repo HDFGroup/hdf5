@@ -391,6 +391,8 @@ H5FD_vfd_swmr_close(H5FD_t *_file)
     /* Sanity check */
     HDassert(file);
 
+    vfd_swmr_reader_did_increase_tick_to(0);
+
     /* Close the underlying file */
     if(file->hdf5_file_lf && H5FD_close(file->hdf5_file_lf) < 0)
          /* Push error, but keep going */

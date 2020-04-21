@@ -711,7 +711,7 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
      * tick so as to avoid attempts to flush entries on the page buffer 
      * tick list that were modified during the current tick.
      */
-    if ( H5F_vfd_swmr_writer_end_of_tick(f) < 0 )
+    if ( H5F_vfd_swmr_writer_end_of_tick(f, true) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
                     "H5F_vfd_swmr_writer_end_of_tick() failed.")
@@ -833,7 +833,7 @@ clean_shadow_index(H5F_t *f, uint32_t nentries,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
+H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, bool wait_for_reader)
 {
     uint32_t idx_entries_added = 0;
     uint32_t idx_entries_modified = 0;
@@ -841,6 +841,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
     uint32_t idx_ent_not_in_tl = 0;
     uint32_t idx_ent_not_in_tl_flushed = 0;
     herr_t ret_value = SUCCEED;              /* Return value */
+    bool incr_tick = false;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -849,7 +850,12 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
     HDassert(f->shared->pb_ptr);
     HDassert(f->shared->vfd_swmr_writer);
 
-  
+    if (!vfd_swmr_writer_may_increase_tick_to(f->shared->tick_num + 1,
+            wait_for_reader))
+        goto update_eot;
+
+    incr_tick = true;
+
     /* 1) If requested, flush all raw data to the HDF5 file.
      *
      *    (Not for first cut.)
@@ -969,10 +975,12 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't release delayed writes")
  
 
+update_eot:
+
     /* 9) Increment the tick, and update the end of tick. */
 
     /* Update end_of_tick */
-    if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, TRUE) < 0 )
+    if ( H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, incr_tick) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, \
                     "unable to update end of tick")
@@ -985,16 +993,12 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f)
     if(H5F_vfd_swmr_insert_entry_eot(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
 
-#if 0 /* JRM */
-    HDfprintf(stderr,
-        "*** writer EOT %" PRIu64 " exiting. idx len = %" PRIu32 " ***\n",
-        f->shared->tick_num, f->shared->mdf_idx_entries_used);
-#endif /* JRM */
+    hlog_fast(eot, "%s leave tick %" PRIu64 " idx len %" PRIu32,
+        __func__, f->shared->tick_num, f->shared->mdf_idx_entries_used);
+
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5F_vfd_swmr_writer_end_of_tick() */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1351,6 +1355,8 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, bool entering_api)
          * Start the next tick.
          */
         f->shared->tick_num = tmp_tick_num;
+
+        vfd_swmr_reader_did_increase_tick_to(tmp_tick_num);
 
         /* Update end_of_tick */
         if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(f, FALSE) < 0) {
@@ -2009,7 +2015,7 @@ H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "HDnanosleep() failed.")
         
-    if ( H5F_vfd_swmr_writer_end_of_tick(f) < 0 )
+    if ( H5F_vfd_swmr_writer_end_of_tick(f, false) < 0 )
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, \
                     "H5F_vfd_swmr_writer_end_of_tick() failed.")
@@ -2041,7 +2047,7 @@ H5F_vfd_swmr_process_eot_queue(bool entering_api)
         if(timespeccmp(&now, &head->end_of_tick, <))
             break;
         if (f->shared->vfd_swmr_writer) {
-            if (H5F_vfd_swmr_writer_end_of_tick(f) < 0)
+            if (H5F_vfd_swmr_writer_end_of_tick(f, false) < 0)
                 HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FAIL,
                             "end of tick error for VFD SWMR writer");
         } else if (H5F_vfd_swmr_reader_end_of_tick(f, entering_api) < 0) {

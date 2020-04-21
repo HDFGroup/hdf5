@@ -17,6 +17,10 @@
 #ifndef H5FDswmr_H
 #define H5FDswmr_H
 
+#include "H5api_adpt.h" /* H5_DLL */
+#include "H5public.h"   /* uint64_t *ahem* */
+#include "H5Ipublic.h"  /* hid_t */
+
 #define H5FD_VFD_SWMR   (H5FD_vfd_swmr_init())
 
 #ifdef __cplusplus

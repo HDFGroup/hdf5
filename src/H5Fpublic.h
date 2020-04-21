@@ -373,6 +373,8 @@ H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 
 /* VFD SWMR */
 H5_DLL herr_t H5Fvfd_swmr_end_tick(hid_t file_id);
+H5_DLL bool vfd_swmr_writer_may_increase_tick_to(uint64_t, bool);
+H5_DLL void vfd_swmr_reader_did_increase_tick_to(uint64_t);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
