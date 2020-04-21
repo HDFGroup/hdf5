@@ -22,7 +22,6 @@
 
 /* global variable declarations: */
 
-
 const char *FILENAMES[] = {
         "cache_image_test",
         NULL
