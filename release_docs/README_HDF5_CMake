@@ -7,6 +7,7 @@ This tar file contains
     HDF5config.cmake    CMake scripts for building HDF5
     HDF5options.cmake
     hdf5-1.13.0         HDF5 1.13.0 source
+    LIBAEC.tar.gz       source for building SZIP replacement
     SZip.tar.gz         source for building SZIP
     ZLib.tar.gz         source for building ZLIB
 
