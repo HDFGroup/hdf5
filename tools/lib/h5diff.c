@@ -572,8 +572,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     *-------------------------------------------------------------------------
     */
     /* open file 1 */
-    if (opts->custom_in_vol) {
-        if((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->in_vol_info), NULL)) < 0 ) {
+    if (opts->custom_vol_1) {
+        if((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->vol_info_1), NULL)) < 0 ) {
             parallel_print("h5diff: unable to create fapl for input file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
         }
@@ -587,8 +587,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
 
     /* open file 2 */
 
-    if (opts->custom_out_vol) {
-        if((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->out_vol_info), NULL)) < 0 ) {
+    if (opts->custom_vol_2) {
+        if((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, &(opts->vol_info_2), NULL)) < 0 ) {
             parallel_print("h5diff: unable to create fapl for output file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create output fapl\n");
         }
