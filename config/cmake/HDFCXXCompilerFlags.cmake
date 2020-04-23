@@ -13,24 +13,6 @@ set(CMAKE_CXX_STANDARD 98)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-macro (ADD_H5_FLAGS h5_flag_var infile)
-  file (STRINGS ${infile} TEST_FLAG_STREAM)
-  #message (STATUS "TEST_FLAG_STREAM=${TEST_FLAG_STREAM}")
-  list (LENGTH TEST_FLAG_STREAM len_flag)
-  if (len_flag GREATER 0)
-    math (EXPR _FP_LEN "${len_flag} - 1")
-    foreach (line RANGE 0 ${_FP_LEN})
-      list (GET TEST_FLAG_STREAM ${line} str_flag)
-      string (REGEX REPLACE "^#.*" "" str_flag "${str_flag}")
-      #message (STATUS "str_flag=${str_flag}")
-      if (str_flag)
-        list (APPEND ${h5_flag_var} "${str_flag}")
-      endif ()
-    endforeach ()
-  endif ()
-  #message (STATUS "h5_flag_var=${${h5_flag_var}}")
-endmacro ()
-
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_SANITIZER_FLAGS} ${CMAKE_CXX_FLAGS}")
 message (STATUS "Warnings Configuration: CXX default:  ${CMAKE_CXX_FLAGS}")
 #-----------------------------------------------------------------------------
@@ -103,10 +85,13 @@ if (NOT MSVC)
         list (APPEND H5_CXXFLAGS0 "-Wsign-compare -Wtrigraphs -Wwrite-strings")
       endif()
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
-        # autotools always add the C flags with the CXX flags
+      if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED 
+          AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
+        # autotools adds the C flags with the CXX flags for g++ compiler 
+        # versions 4.2 and above.
         ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/general")
         ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-general")
+        ADD_H5_FLAGS (H5_CXXFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/error-general")
       endif ()
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
       ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/clang-warnings/general")
@@ -141,16 +126,30 @@ if (NOT MSVC)
   endif ()
 
   if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # Append warning flags that only gcc 4.3+ knows about
-    # autotools always add the C flags with the CXX flags
-    ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.3")
-    #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... Only needed for gcc 4.X
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
       # autotools always add the C flags with the CXX flags
       ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.last")
     endif ()
+
+    # Append warning flags for gcc 4.2-4.3
+    # autotools always add the C flags with the CXX flags
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
+      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.3")
+    endif ()
+
+    # Append warning flags for gcc 4.2-4.4
+    # autotools always add the C flags with the CXX flags
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL 4.4 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
+      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.4")
+    endif ()
+
+    # Append warning flags that only gcc 4.3+ knows about
+    # autotools always add the C flags with the CXX flags
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
+      ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.3")
+    endif()
 
     # Append more extra warning flags that only gcc 4.4+ know about
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.4)
@@ -172,7 +171,7 @@ if (NOT MSVC)
     endif ()
 
     # Append more extra warning flags that only gcc 4.6 and less know about
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
       # autotools always add the C flags with the CXX flags
       ADD_H5_FLAGS (H5_CXXFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.6")
     endif ()
@@ -255,6 +254,7 @@ if (NOT MSVC)
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
       # autotools always add the C flags with the CXX flags
       ADD_H5_FLAGS (H5_CXXFLAGS3 "${HDF5_SOURCE_DIR}/config/gnu-warnings/8")
+      ADD_H5_FLAGS (H5_CXXFLAGS3 "${HDF5_SOURCE_DIR}/config/gnu-warnings/error-8")
       if (HDF5_ENABLE_DEV_WARNINGS)
         # autotools always add the C flags with the CXX flags
         ADD_H5_FLAGS (H5_CXXFLAGS3 "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-8")
@@ -313,7 +313,7 @@ if (HDF5_ENABLE_GROUPZERO_WARNINGS)
   else ()
     if (CMAKE_COMPILER_IS_GNUCC)
       if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
-        list (APPEND HDF5_CMAKE_CXX_FLAGS ${H5_CFLAGS0})
+        list (APPEND HDF5_CMAKE_CXX_FLAGS ${H5_CXXFLAGS0})
       endif ()
     endif ()
   endif ()
@@ -332,7 +332,7 @@ if (HDF5_ENABLE_GROUPONE_WARNINGS)
   else ()
     if (CMAKE_COMPILER_IS_GNUCC)
       if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
-        list (APPEND HDF5_CMAKE_CXX_FLAGS ${H5_CFLAGS1})
+        list (APPEND HDF5_CMAKE_CXX_FLAGS ${H5_CXXFLAGS1})
       endif ()
     endif ()
   endif ()
@@ -351,7 +351,7 @@ if (HDF5_ENABLE_GROUPTWO_WARNINGS)
   else ()
     if (CMAKE_COMPILER_IS_GNUCC)
       if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
-        list (APPEND HDF5_CMAKE_CXX_FLAGS ${H5_CFLAGS2})
+        list (APPEND HDF5_CMAKE_CXX_FLAGS ${H5_CXXFLAGS2})
       endif ()
     endif ()
   endif ()
@@ -370,7 +370,7 @@ if (HDF5_ENABLE_GROUPTHREE_WARNINGS)
   else ()
     if (CMAKE_COMPILER_IS_GNUCC)
       if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
-        list (APPEND HDF5_CMAKE_CXX_FLAGS ${H5_CFLAGS3})
+        list (APPEND HDF5_CMAKE_CXX_FLAGS ${H5_CXXFLAGS3})
       endif ()
     endif ()
   endif ()
@@ -384,7 +384,7 @@ if (HDF5_ENABLE_GROUPFOUR_WARNINGS)
   if (NOT MSVC)
     if (CMAKE_COMPILER_IS_GNUCC)
       if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
-        list (APPEND HDF5_CMAKE_CXX_FLAGS ${H5_CFLAGS4})
+        list (APPEND HDF5_CMAKE_CXX_FLAGS ${H5_CXXFLAGS4})
       endif ()
     endif ()
   endif ()
