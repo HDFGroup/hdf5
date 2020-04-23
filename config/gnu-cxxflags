@@ -44,7 +44,7 @@ demote_errors()
 load_gnu_arguments()
 {
     set -- $(for arg; do
-        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg} | demote_errors
+        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg}
     done)
     IFS=' ' echo "$*"
 }
@@ -181,10 +181,8 @@ if test "X-g++" = "X-$cxx_vendor"; then
     ###########
 
     if test $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 2 -o $cxx_vers_major -gt 4; then
-        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments general)"
-        H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-general)"
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-general)"
-        #H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-cxx-general)"
+        H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments cxx-error-general)"
     fi
 
     ######################
@@ -240,29 +238,29 @@ if test "X-g++" = "X-$cxx_vendor"; then
     # gcc >= 4.5
     if test $cxx_vers_major -ge 5 -o $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 5; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.5)"
-    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.5)"
-    NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.5)"
+        #DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.5)"
+        #NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.5)"
     fi
 
     # gcc >= 4.6
     if test $cxx_vers_major -ge 5 -o $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 6; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.6)"
-    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.6)"
-    NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.6)"
+        DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.6)"
+        NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.6)"
     fi
 
     # gcc >= 4.7
     if test $cxx_vers_major -ge 5 -o $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 7; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.7)"
-    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.7)"
-    NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.7)"
+        DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.7)"
+        NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.7)"
     fi
 
     # gcc >= 4.8
     if test $cxx_vers_major -ge 5 -o $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 8; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.8)"
-    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.8)"
-    NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.8)"
+        DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.8)"
+        NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.8)"
     fi
 
     # gcc >= 4.9
@@ -273,8 +271,8 @@ if test "X-g++" = "X-$cxx_vendor"; then
 
     # gcc >= 5
     if test $cxx_vers_major -ge 5; then
-        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 5)"
-        H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-5)"
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-5)"
+        H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments cxx-error-5)"
     fi
 
     # gcc >= 6
@@ -285,15 +283,15 @@ if test "X-g++" = "X-$cxx_vendor"; then
     # gcc >= 7
     if test $cxx_vers_major -ge 7; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 7)"
-    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-7)"
+        DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-7)"
     fi
 
     # gcc 8
     if test $cxx_vers_major -ge 8; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 8)"
-        H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-8)"
-    DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-8)"
-    NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-8)"
+        #H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-8)"
+        DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-8)"
+        NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-8)"
     fi
 
     # gcc 9

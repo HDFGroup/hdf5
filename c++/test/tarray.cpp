@@ -370,7 +370,6 @@ static void test_array_info()
         float f[ARRAY1_DIM1];
     } s1_t;
     s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   // Information to write
-    s1_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   // Information read in
     hsize_t sdims1[] = {SPACE1_DIM1};
     hsize_t tdims1[] = {ARRAY1_DIM1};
     int     nmemb;      // Number of compound members

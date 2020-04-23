@@ -325,7 +325,6 @@ const H5std_string DSETNAME("dataset");
 static void test_open_object_header()
 {
     hsize_t     dims[2];
-    H5G_info_t  ginfo;                      /* Group info struct */
 
     // Output message about test being performed
     SUBTEST("H5Location::openObjId and H5Location::closeObjId");
@@ -383,6 +382,7 @@ static void test_open_object_header()
         dset.setId(obj_dset);
         dspace = dset.getSpace();
         bool is_simple = dspace.isSimple();
+        verify_val(is_simple, true, "isSimple", __LINE__, __FILE__);
         dspace.close();
 
         // Open datatype object from the group
@@ -439,7 +439,6 @@ static void test_open_object_header()
 /*-------------------------------------------------------------------------
  * Function:    test_is_valid
  *
- * Purpose:     Tests validating IDs.
  *
  * Return:      Success:        0
  *              Failure:        -1
