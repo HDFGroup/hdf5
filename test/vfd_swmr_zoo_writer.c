@@ -220,16 +220,9 @@ main(int argc, char **argv)
     int ch;
     bool use_vfd_swmr = true;
     bool print_estack = false;
-#if 0
-    unsigned long tmp;
-    char *end;
-    int i;
-    const struct timespec delay =
-        {.tv_sec = 0, .tv_nsec = 1000 * 1000 * 1000 / 10};
-#endif
     const char *progname = basename(argv[0]);
     estack_state_t es;
-#if 0
+#if 1
     char step[2] = "ab";
 #endif
 
@@ -318,26 +311,11 @@ main(int argc, char **argv)
     es = print_estack ? estack_get_state() : disable_estack();
     if (writer) {
 
-#if 0
-        H5Fvfd_swmr_end_tick(fid);
-
-        if (read(STDIN_FILENO, &step[0], sizeof(step[0])) == -1)
-            err(EXIT_FAILURE, "read");
-
-        if (step[0] != 'a')
-            errx(EXIT_FAILURE, "expected 'a' read '%c'", step[0]);
-#endif
-
         dbgf(1, "Writing zoo...\n");
 
         if (!create_zoo(fid, ".", config))
             errx(EXIT_FAILURE, "create_zoo didn't pass self-check");
 
-#if 1
-        H5Fvfd_swmr_end_tick(fid);
-#endif
-
-#if 0
         if (read(STDIN_FILENO, &step[1], sizeof(step[1])) == -1)
             err(EXIT_FAILURE, "read");
 
@@ -346,21 +324,16 @@ main(int argc, char **argv)
 
         if (!delete_zoo(fid, ".", config))
             errx(EXIT_FAILURE, "delete_zoo failed");
-#endif
     } else {
         dbgf(1, "Reading zoo...\n");
-#if 0
-        if (write(STDOUT_FILENO, &step[0], sizeof(step[0])) == -1)
-            err(EXIT_FAILURE, "write");
-#endif
+
         while (!validate_zoo(fid, ".", config))
             ;
-#if 0
+
         if (write(STDOUT_FILENO, &step[1], sizeof(step[1])) == -1)
             err(EXIT_FAILURE, "write");
         while (!validate_deleted_zoo(fid, ".", config))
             ;
-#endif
     }
     restore_estack(es);
 
