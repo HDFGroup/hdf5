@@ -1033,7 +1033,7 @@ H5C_evict_or_refresh_all_entries_in_page(H5F_t * f, uint64_t page,
             HDassert(entry_ptr->addr < 
                      (haddr_t)((page+1) * cache_ptr->page_size));
             HDassert(length == cache_ptr->page_size ||
-                     page * cache_ptr->page_size + length >=
+                     page * cache_ptr->page_size + length <=
                      entry_ptr->addr + entry_ptr->size);
 
             found = true;
