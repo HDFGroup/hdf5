@@ -251,6 +251,8 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
             HGOTO_ERROR(H5E_FILE, H5E_CANTLOAD, FAIL, \
                         "unable to load/decode metadata file")
 
+        assert(f->shared->tick_num != 0);
+        vfd_swmr_reader_did_increase_tick_to(f->shared->tick_num);
 
         hlog_fast(tick, "%s first tick %" PRIu64,
             __func__, f->shared->tick_num);
