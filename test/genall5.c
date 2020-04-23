@@ -69,6 +69,31 @@ FN_ITEM_DEFN(ds_ctg_v, hid_t, const char *, bool);
 
 #undef FN_ITEM_DEFN
 
+static bool
+file_has_no_path(hid_t fid, const char *path)
+{
+    switch (H5Lexists(fid, path, H5P_DEFAULT)) {
+    case FALSE:
+        return true;
+    case TRUE:
+        failure_mssg = "H5Lexists unexpectedly true.";
+        return false;
+    default:
+        failure_mssg = "H5Lexists unexpectedly failed.";
+        return false;
+    }
+}
+
+static bool
+remove_from_file_path(hid_t fid, const char *path)
+{
+    if (H5Ldelete(fid, path, H5P_DEFAULT) < 0) {
+        failure_mssg = "H5Ldelete failed.";
+        return false;
+    }
+    return true;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    ns_grp_0
  *
@@ -89,13 +114,13 @@ FN_ITEM_DEFN(ds_ctg_v, hid_t, const char *, bool);
 static bool
 missing_ns_grp_0(hid_t fid, const char *group_name)
 {
-    return true;
+    return file_has_no_path(fid, group_name);
 }
 
 static bool
 rm_ns_grp_0(hid_t fid, const char *group_name)
 {
-    return true;
+    return remove_from_file_path(fid, group_name);
 }
 
 bool
@@ -1947,23 +1972,13 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
 static bool
 missing_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
 {
-    if (H5Lexists(fid, dset_name, H5P_DEFAULT) >= 0) {
-        failure_mssg = "rm_ds_cpt_i: H5Lexists unexpectedly succeeded.";
-        return false;
-    }
-
-    return true;
+    return file_has_no_path(fid, dset_name);
 }
 
 static bool
 rm_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
 {
-    if (H5Ldelete(fid, dset_name, H5P_DEFAULT) < 0) {
-        failure_mssg = "rm_ds_cpt_i: H5Ldelete failed.";
-        return false;
-    }
-
-    return true;
+    return remove_from_file_path(fid, dset_name);
 }
 
 bool
