@@ -277,15 +277,16 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
  */
 
 static bool
-missing_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
+missing_ns_grp_c(hid_t fid, const char *group_name,
+    unsigned H5_ATTR_UNUSED nlinks)
 {
-    return true;
+    return file_has_no_path(fid, group_name);
 }
 
 static bool
-rm_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
+rm_ns_grp_c(hid_t fid, const char *group_name, unsigned H5_ATTR_UNUSED nlinks)
 {
-    return true;
+    return remove_from_file_path(fid, group_name);
 }
 
 bool
@@ -621,15 +622,16 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
  */
 
 static bool
-missing_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
+missing_ns_grp_d(hid_t fid, const char *group_name,
+    unsigned H5_ATTR_UNUSED nlinks)
 {
-    return true;
+    return file_has_no_path(fid, group_name);
 }
 
 static bool
-rm_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
+rm_ns_grp_d(hid_t fid, const char *group_name, unsigned H5_ATTR_UNUSED nlinks)
 {
-    return true;
+    return remove_from_file_path(fid, group_name);
 }
 
 bool
@@ -962,13 +964,13 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
 static bool
 missing_os_grp_0(hid_t fid, const char *group_name)
 {
-    return true;
+    return file_has_no_path(fid, group_name);
 }
 
 static bool
 rm_os_grp_0(hid_t fid, const char *group_name)
 {
-    return true;
+    return remove_from_file_path(fid, group_name);
 }
 
 bool
@@ -1134,16 +1136,17 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
  */
 
 static bool
-missing_os_grp_n(hid_t fid, const char *group_name, int proc_num,
-    unsigned nlinks)
+missing_os_grp_n(hid_t fid, const char *group_name, int H5_ATTR_UNUSED proc_num,
+    unsigned H5_ATTR_UNUSED nlinks)
 {
-    return true;
+    return file_has_no_path(fid, group_name);
 }
 
 static bool
-rm_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
+rm_os_grp_n(hid_t fid, const char *group_name, int H5_ATTR_UNUSED proc_num,
+    unsigned H5_ATTR_UNUSED nlinks)
 {
-    return true;
+    return remove_from_file_path(fid, group_name);
 }
 
 bool
@@ -1420,15 +1423,16 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
  *-------------------------------------------------------------------------
  */
 static bool
-missing_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
+missing_ds_ctg_i(hid_t fid, const char *dset_name,
+    hbool_t H5_ATTR_UNUSED write_data)
 {
-    return true;
+    return file_has_no_path(fid, dset_name);
 }
 
 static bool
-rm_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
+rm_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
 {
-    return true;
+    return remove_from_file_path(fid, dset_name);
 }
 
 bool
@@ -1681,15 +1685,16 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *-------------------------------------------------------------------------
  */
 static bool
-missing_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
+missing_ds_chk_i(hid_t fid, const char *dset_name,
+    hbool_t H5_ATTR_UNUSED write_data)
 {
-    return true;
+    return file_has_no_path(fid, dset_name);
 }
 
 static bool
-rm_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
+rm_ds_chk_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
 {
-    return true;
+    return remove_from_file_path(fid, dset_name);
 }
 
 bool
@@ -1970,7 +1975,8 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *-------------------------------------------------------------------------
  */
 static bool
-missing_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+missing_ds_cpt_i(hid_t fid, const char *dset_name,
+    hbool_t H5_ATTR_UNUSED write_data)
 {
     return file_has_no_path(fid, dset_name);
 }
@@ -2248,15 +2254,16 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *-------------------------------------------------------------------------
  */
 static bool
-missing_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
+missing_ds_ctg_v(hid_t fid, const char *dset_name,
+    hbool_t H5_ATTR_UNUSED write_data)
 {
-    return true;
+    return file_has_no_path(fid, dset_name);
 }
 
 static bool
-rm_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
+rm_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
 {
-    return true;
+    return remove_from_file_path(fid, dset_name);
 }
 
 bool
