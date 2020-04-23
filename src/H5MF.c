@@ -1364,7 +1364,7 @@ H5MF__xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
         HDassert(H5F_USE_VFD_SWMR(f));
         HDassert(H5F_SHARED_PAGED_AGGR(f->shared));
 
-        if(H5PB_remove_entry(f->shared, addr) < 0)
+        if (H5PB_remove_entries(f->shared, addr, size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't remove the page from page buffer")
     }
 

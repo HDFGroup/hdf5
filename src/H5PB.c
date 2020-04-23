@@ -113,6 +113,9 @@ static herr_t H5PB__write_meta(H5F_shared_t *, H5FD_mem_t, haddr_t,
 static herr_t H5PB__write_raw(H5F_shared_t *, H5FD_mem_t, haddr_t, 
     size_t, const void *);
 
+static void metadata_section_split(size_t, haddr_t, size_t, const void *,
+    metadata_section_t *);
+
 static herr_t metadata_multipart_read(H5F_shared_t *, H5FD_mem_t, haddr_t,
     size_t, void *);
 
@@ -151,6 +154,7 @@ HLOG_OUTLET_SHORT_DEFN(pbio, pagebuffer);
 HLOG_OUTLET_SHORT_DEFN(pbrd, pbio);
 HLOG_OUTLET_SHORT_DEFN(pbwr, pbio);
 HLOG_OUTLET_SHORT_DEFN(lengthen_pbentry, pagebuffer);
+HLOG_OUTLET_SHORT_DEFN(pbrm, pagebuffer);
 
 
 /*-------------------------------------------------------------------------
@@ -1258,6 +1262,51 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5PB_remove_entry */
+
+herr_t
+H5PB_remove_entries(H5F_shared_t *shared, haddr_t addr, hsize_t size)
+{
+    H5PB_t *pb_ptr;
+    H5PB_entry_t *entry_ptr;
+    herr_t ret_value = SUCCEED;
+    metadata_section_t section[3] = {{0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}};
+    int i;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    pb_ptr = shared->pb_ptr;
+
+    HDassert(addr % pb_ptr->page_size == 0);
+
+    if (size > pb_ptr->page_size) {
+        hlog_fast(pbrm,
+            "removing multipage region [%" PRIuHADDR ", %" PRIuHADDR ")",
+            addr, addr + size);
+    }
+
+    metadata_section_split(pb_ptr->page_size, addr, size, NULL, section);
+
+    for (i = 0; i < 3; i++) {
+        metadata_section_t *iter = &section[i];
+
+        if (iter->len == 0)
+            continue;
+
+        if (iter->len < size) {
+            hlog_fast(pbrm, "removing entry [%" PRIuHADDR ", %" PRIuHADDR ") "
+                "for split region [%" PRIuHADDR ", %" PRIuHADDR ")",
+                iter->addr, iter->addr + iter->len, addr, addr + size);
+        }
+
+        assert(iter->addr % pb_ptr->page_size == 0);
+
+        if (H5PB_remove_entry(shared, iter->addr) < 0)
+            HGOTO_ERROR(H5E_PAGEBUF, H5E_SYSTEM, FAIL, "forced eviction failed")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------
@@ -3014,7 +3063,7 @@ metadata_section_split(size_t pgsz, haddr_t addr, size_t len, const void *_buf,
      * `head` and before the beginning of `tail`.
      */
     if (whole_pgaddr < tail_pgaddr) {
-        middle->buf = &buf[whole_pgaddr - addr];
+        middle->buf = (buf == NULL) ? NULL : &buf[whole_pgaddr - addr];
         middle->len = tail_pgaddr - whole_pgaddr;
         middle->addr = whole_pgaddr;
     }
@@ -3022,16 +3071,16 @@ metadata_section_split(size_t pgsz, haddr_t addr, size_t len, const void *_buf,
     /* `tail` spans residual bytes that follow the last page boundary. */
     if (tail_pgaddr < addr + len) {
         tail->len = (addr + len) - tail_pgaddr;
-        tail->buf = &buf[tail_pgaddr - addr];
+        tail->buf = (buf == NULL) ? NULL : &buf[tail_pgaddr - addr];
         tail->addr = tail_pgaddr;
     }
 
     for (i = 0; i < 3; i++) {
         metadata_section_t *iter = &section[i];
-        if (iter->buf == NULL)
+        if (iter->len == 0)
             continue;
         assert(iter->addr == addr + totlen);
-        assert(iter->buf == &buf[totlen]);
+        assert(iter->buf == ((buf == NULL) ? NULL : &buf[totlen]));
 //      assert(i == 0 || iter[-1].buf + iter[-1].len == iter->buf);
         totlen += iter->len;
     }
