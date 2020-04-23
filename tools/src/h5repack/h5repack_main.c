@@ -440,6 +440,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
     int bound, opt;
     int ret_value = 0;
 
+    /* Initialize fapl info structs */
     HDmemset(&in_vol_info, 0, sizeof(h5tools_vol_info_t));
     HDmemset(&out_vol_info, 0, sizeof(h5tools_vol_info_t));
 
