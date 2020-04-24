@@ -96,6 +96,8 @@ if (NOT MSVC)
       # Add general CFlags for GCC versions 4.2 and above
       if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
         ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/general")
+      endif ()
+      if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
         ADD_H5_FLAGS (H5_CFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/error-general")
       endif ()
       # gcc automatically inlines based on the optimization level
@@ -140,12 +142,12 @@ if (NOT MSVC)
       ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.last")
     endif ()
 
-    # Append warning flags for gcc 4.2-4.3 
+    # Append warning flags for gcc 4.2-4.3
     if (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
       ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.3")
     endif ()
 
-    # Append warning flags for gcc 4.2-4.4 
+    # Append warning flags for gcc 4.2-4.4
     if (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL 4.4 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
       ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.4")
     endif ()
