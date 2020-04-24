@@ -824,7 +824,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             H5E_error2_t *error = HDva_arg(ap, H5E_error2_t *);
 
-                           HDfprintf(out, "0x%p", error);
+                           HDfprintf(out, "0x%p", (void *)error);
                         } /* end else */
                         break;
 
@@ -1156,7 +1156,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             H5G_stat_t *statbuf = HDva_arg(ap, H5G_stat_t*);
 
-                            HDfprintf(out, "0x%p", statbuf);
+                            HDfprintf(out, "0x%p", (void *)statbuf);
                         }
                         break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -3619,7 +3619,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             H5Z_class2_t *filter = HDva_arg(ap, H5Z_class2_t*);
 
-                            HDfprintf(out, "0x%p", filter);
+                            HDfprintf(out, "0x%p", (void *)filter);
                         } /* end else */
                         break;
 
