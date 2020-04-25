@@ -732,7 +732,7 @@ xml_escape_the_name(const char *str)
  * Programmer:  REMcG
  *-------------------------------------------------------------------------
  */
-static char                   *
+static char *
 xml_escape_the_string(const char *str, int slen)
 {
     size_t      extra;
@@ -794,18 +794,22 @@ xml_escape_the_string(const char *str, int slen)
         else if (*cp == '\'') {
             esc_len = HDstrlen(apos);
             HDstrncpy(ncp, apos, esc_len);
+            ncp[sizeof(ncp) - 1] = '\0';
         }
         else if (*cp == '<') {
             esc_len = HDstrlen(lt);
             HDstrncpy(ncp, lt, esc_len);
+            ncp[sizeof(ncp) - 1] = '\0';
         }
         else if (*cp == '>') {
             esc_len = HDstrlen(gt);
             HDstrncpy(ncp, gt, esc_len);
+            ncp[sizeof(ncp) - 1] = '\0';
         }
         else if (*cp == '&') {
             esc_len = HDstrlen(amp);
             HDstrncpy(ncp, amp, esc_len);
+            ncp[sizeof(ncp) - 1] = '\0';
         }
         else {
             *ncp = *cp;

@@ -197,7 +197,7 @@ void parse_command_line(int argc,
             }
 
             /* init */
-            exclude_node->obj_path = (char*)opt_arg;
+            exclude_node->obj_path = opt_arg;
             exclude_node->obj_type = H5TRAV_TYPE_UNKNOWN;
             exclude_prev = exclude_head;
 
@@ -207,7 +207,7 @@ void parse_command_line(int argc,
             }
             else {
                 while(NULL != exclude_prev->next)
-                    exclude_prev=exclude_prev->next;
+                    exclude_prev = exclude_prev->next;
 
                 exclude_node->next = NULL;
                 exclude_prev->next = exclude_node;
@@ -215,14 +215,14 @@ void parse_command_line(int argc,
             break;
 
         case 'd':
-            opts->d=1;
+            opts->d = 1;
 
             if (check_d_input(opt_arg) == - 1) {
                 HDprintf("<-d %s> is not a valid option\n", opt_arg);
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
-            opts->delta = atof(opt_arg);
+            opts->delta = HDatof(opt_arg);
 
             /* -d 0 is the same as default */
             if (H5_DBL_ABS_EQUAL(opts->delta, (double)0.0F))
@@ -230,13 +230,13 @@ void parse_command_line(int argc,
             break;
 
         case 'p':
-            opts->p=1;
+            opts->p = 1;
             if (check_p_input(opt_arg) == -1) {
                 HDprintf("<-p %s> is not a valid option\n", opt_arg);
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
-            opts->percent = atof(opt_arg);
+            opts->percent = HDatof(opt_arg);
 
             /* -p 0 is the same as default */
             if (H5_DBL_ABS_EQUAL(opts->percent, (double)0.0F))
@@ -244,7 +244,7 @@ void parse_command_line(int argc,
             break;
 
         case 'n':
-            opts->n=1;
+            opts->n = 1;
             if ( check_n_input(opt_arg) == -1) {
                 HDprintf("<-n %s> is not a valid option\n", opt_arg);
                 usage();
@@ -427,7 +427,7 @@ check_p_input( const char *str )
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = atof(str);
+    x = HDatof(str);
     if (x < 0)
         return -1;
 
@@ -461,7 +461,7 @@ check_d_input( const char *str )
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = atof(str);
+    x = HDatof(str);
     if (x < 0)
         return -1;
 
