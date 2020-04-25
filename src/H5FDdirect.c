@@ -1335,15 +1335,12 @@ static herr_t
 H5FD_direct_lock(H5FD_t *_file, hbool_t rw)
 {
     H5FD_direct_t  *file = (H5FD_direct_t*)_file;	/* VFD file struct */
-    int lock;						/* The type of lock */
+    const int lock = rw ? LOCK_EX : LOCK_SH;
     herr_t ret_value = SUCCEED;                 	/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
-
-    /* Determine the type of lock */
-    int lock = rw ? LOCK_EX : LOCK_SH;
 
     /* Place the lock with non-blocking */
     if(HDflock(file->fd, lock | LOCK_NB) < 0)
