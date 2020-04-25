@@ -201,16 +201,22 @@ typedef long long ssize_t;
  * defined in Posix.1g, otherwise it is defined here.
  */
 #if H5_SIZEOF_UINT64_T>=8
+#ifndef UINT64_MAX
+#define UINT64_MAX ((uint64_t)-1)
+#endif
 #elif H5_SIZEOF_INT>=8
     typedef unsigned uint64_t;
+#   define UINT64_MAX UINT_MAX
 #   undef H5_SIZEOF_UINT64_T
 #   define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
 #elif H5_SIZEOF_LONG>=8
     typedef unsigned long uint64_t;
+#   define UINT64_MAX ULONG_MAX
 #   undef H5_SIZEOF_UINT64_T
 #   define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
 #elif H5_SIZEOF_LONG_LONG>=8
     typedef unsigned long long uint64_t;
+#   define UINT64_MAX ULLONG_MAX
 #   undef H5_SIZEOF_UINT64_T
 #   define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG_LONG
 #else
