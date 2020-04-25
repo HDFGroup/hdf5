@@ -148,7 +148,7 @@ parse_command_line (int argc, const char *argv[])
   int opt = FALSE;
 
   /* parse command line options */
-  while ((opt = get_option (argc, argv, s_opts, l_opts)) != EOF)
+  while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF)
     {
       switch ((char) opt)
       {
