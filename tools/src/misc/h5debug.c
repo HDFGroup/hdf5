@@ -251,7 +251,7 @@ main(int argc, char *argv[])
     hid_t  fid, fapl;
     H5VL_object_t *vol_obj;
     H5F_t       *f;
-    haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
+    haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0, extra5 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
     H5E_auto2_t func;
@@ -327,6 +327,8 @@ main(int argc, char *argv[])
         extra3 = (haddr_t)HDstrtoll(argv[5], NULL, 0);
     if(argc > 6)
         extra4 = (haddr_t)HDstrtoll(argv[6], NULL, 0);
+    if(argc > 7)
+        extra5 = (haddr_t)HDstrtoll(argv[7], NULL, 0);
 
     /*
      * Read the signature at the specified file position.
@@ -410,10 +412,12 @@ main(int argc, char *argv[])
                 dim[1] = (uint32_t)extra3;
             if(ndims > 2)
                 dim[2] = (uint32_t)extra4;
+            if(ndims > 3)
+                dim[3] = (uint32_t)extra5;
 
             /* Check for dimension error */
-            if(ndims > 3) {
-                HDfprintf(stderr, "ERROR: Only 3 dimensions support currently (fix h5debug)\n");
+            if(ndims > 4) {
+                HDfprintf(stderr, "ERROR: Only 4 dimensions support currently (fix h5debug)\n");
                 HDfprintf(stderr, "B-tree chunked storage node usage:\n");
                 HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> <slowest chunk dim>...<fastest chunk dim>\n");
                 HDexit(4);
