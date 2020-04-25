@@ -2457,7 +2457,8 @@ test_vanishing_datasets(void)
         TEST_ERROR;
     }
     if (group_info.nlinks > 0) {
-        HDfprintf(stderr, "links in rw file: %d\n", group_info.nlinks);
+        HDfprintf(stderr, "links in rw file: %" PRIuHSIZE "\n",
+            group_info.nlinks);
         HDfflush(stderr);
         TEST_ERROR;
     }
@@ -2472,7 +2473,8 @@ test_vanishing_datasets(void)
         TEST_ERROR;
     }
     if (group_info.nlinks > 0) {
-        HDfprintf(stderr, "links in wo file: %d\n", group_info.nlinks);
+        HDfprintf(stderr, "links in wo file: %" PRIuHSIZE "\n",
+            group_info.nlinks);
         HDfflush(stderr);
         TEST_ERROR;
     }
