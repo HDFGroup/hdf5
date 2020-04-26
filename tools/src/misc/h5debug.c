@@ -335,7 +335,15 @@ main(int argc, char *argv[])
     /* Extra arguments for primary data structure */
     HDmemset(extra, 0, sizeof(extra));
     if(argc > 3) {
-        extra_count = argc - 3;         /* Number of extra arguments */
+        /* Number of extra arguments */
+        extra_count = argc - 3;
+
+        /* Range check against 'extra' array size */
+        if(extra_count > (int)(sizeof(extra) / sizeof(haddr_t))) {
+            HDfprintf(stderr, "\nWARNING: Only using first %d extra parameters\n\n", (int)(sizeof(extra) / sizeof(haddr_t)));
+            extra_count = (int)(sizeof(extra) / sizeof(haddr_t));
+        } /* end if */
+
         for(u = 0; u < (size_t)extra_count; u++)
             extra[u] = (haddr_t)HDstrtoll(argv[u + 3], NULL, 0);
     } /* end if */
