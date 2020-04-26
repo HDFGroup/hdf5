@@ -671,6 +671,7 @@ CONFIG_MODE
 CONFIG_USER
 CONFIG_DATE
 H5_VERSION
+examplesdir
 JNI_LDFLAGS
 HAVE_LIBHDFS
 ROS3_VFD_CONDITIONAL_FALSE
@@ -812,6 +813,7 @@ H5_LDFLAGS
 H5_CXXFLAGS
 H5_FCFLAGS
 H5_CPPFLAGS
+H5_ECFLAGS
 H5_CFLAGS
 CPPFLAGS
 host_os
@@ -932,6 +934,7 @@ with_mpe
 enable_direct_vfd
 enable_ros3_vfd
 with_libhdfs
+with_examplesdir
 with_default_plugindir
 enable_dconv_exception
 enable_dconv_accuracy
@@ -1625,8 +1628,8 @@ Optional Features:
                           Enable this option if a memory allocation and/or
                           bounds checking tool will be used on the HDF5
                           library. Enabling this causes the library to be more
-                          picky about it's memory operations and also disables
-                          the library's free space manager code. Default=no.
+                          picky about its memory operations and also disables
+                          the library's free space manager code. [default=no]
   --enable-parallel       Search for MPI-IO and MPI support files
   --enable-direct-vfd     Build the direct I/O virtual file driver (VFD). This
                           is based on the POSIX (sec2) VFD and requires the
@@ -1678,6 +1681,9 @@ Optional Packages:
   --with-mpe=DIR          Use MPE instrumentation [default=no]
   --with-libhdfs=DIR      Provide libhdfs library to enable HDFS virtual file
                           driver (VFD) [default=no]
+  --with-examplesdir=location
+                          Specify path for examples
+                          [default="DATAROOTDIR/hdf5_examples"]
   --with-default-plugindir=location
                           Specify default location for plugins
                           [default="/usr/local/hdf5/lib/plugin"]
@@ -3849,6 +3855,10 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
+##
+## H5_ECFLAGS is for warnings that should be treated as errors.
+##
+
 
 
 
@@ -3993,13 +4003,13 @@ fi
 ## turning on debug or profiling flags for the compiler.  The search order
 ## is:
 ##
-##	CPU-VENDOR-OS
-##	VENDOR-OS
-##	CPU-OS
-##	CPU-VENDOR
-##	OS
-##	VENDOR
-##	CPU
+##    CPU-VENDOR-OS
+##    VENDOR-OS
+##    CPU-OS
+##    CPU-VENDOR
+##    OS
+##    VENDOR
+##    CPU
 ##
 ## If the `OS' ends with a version number then remove it. For instance,
 ## `freebsd3.1' would become `freebsd'
@@ -4010,6 +4020,9 @@ case $host_os in
     ;;
   freebsd*)
     host_os_novers=freebsd
+    ;;
+  netbsd*)
+    host_os_novers=netbsd
     ;;
   solaris*)
     host_os_novers=solaris
@@ -6712,7 +6725,7 @@ fi
 ## We need to check for a C++ compiler unconditionally, since
 ## AC_PROG_CXX defines some macros that Automake 1.9.x uses and will
 ## miss even if c++ is not enabled.
-  ac_ext=cpp
+ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -7129,7 +7142,7 @@ else
 fi
 
 
-  ac_ext=cpp
+ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -7261,7 +7274,7 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-	## this is checked for when AC_HEADER_STDC is done
+    ## this is checked for when AC_HEADER_STDC is done
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if c++ interface enabled" >&5
 $as_echo_n "checking if c++ interface enabled... " >&6; }
@@ -7276,6 +7289,9 @@ if test "X$HDF_CXX" = "Xyes"; then
   echo "yes"
   HDF5_INTERFACES="$HDF5_INTERFACES c++"
 
+  ## Expose the compiler for *.in files
+
+
   ## Change to the C++ language
   ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7284,7 +7300,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-  # Checking if C++ needs old style header files in includes
+  ## Checking if C++ needs old style header files in includes
 
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX needs old style header files in includes" >&5
@@ -7310,7 +7326,7 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
 
-  # Checking if C++ can handle namespaces
+  ## Checking if C++ can handle namespaces
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle namespaces" >&5
 $as_echo_n "checking if $CXX can handle namespaces... " >&6; }
@@ -7341,7 +7357,38 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
 
-  # Checking if C++ has offsetof extension
+  ## if C++ can handle static cast
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle static cast" >&5
+$as_echo_n "checking if $CXX can handle static cast... " >&6; }
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int main(void) {
+   float test_float;
+   int test_int;
+   test_float = 37.0;
+   test_int = static_cast <int> (test_float);
+   return 0;
+}
+
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
+    AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+
+  ## Checking if C++ has offsetof extension,
+  ## note: this test has to be the last of the C++ tests because it sets a definition
+  ## which would be used in the other tests, causing them to fail.
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX has offsetof extension" >&5
 $as_echo_n "checking if $CXX has offsetof extension... " >&6; }
@@ -7387,35 +7434,6 @@ $as_echo "#define CXX_HAVE_OFFSETOF 1" >>confdefs.h
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-
-  # if C++ can handle static cast
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle static cast" >&5
-$as_echo_n "checking if $CXX can handle static cast... " >&6; }
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int main(void) {
-   float test_float;
-   int test_int;
-   test_float = 37.0;
-   test_int = static_cast <int> (test_float);
-   return 0;
-}
-
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-    CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
-    AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -7524,7 +7542,6 @@ fi
 ## Check which archiving tool to use. This needs to be done before
 ## the AM_PROG_LIBTOOL macro.
 ##
-
 if test -z "$AR"; then
   for ac_prog in ar xar
 do
@@ -7684,36 +7701,36 @@ fi
 ## The following variables are used to distinguish between building a
 ## serial and parallel library.
 ##
-##    HAVE_PARALLEL	-- defined in H5config.h if we are building
-##			   a parallel library even if configure wasn't
-##			   able to find some header file or library that
-##			   might be required. This is defined if the
-##			   user explicitly states
-##			   that a parallel library is being built by supplying
-##			   the `--enable-parallel' configure switch.
+##    HAVE_PARALLEL    -- defined in H5config.h if we are building
+##               a parallel library even if configure wasn't
+##               able to find some header file or library that
+##               might be required. This is defined if the
+##               user explicitly states
+##               that a parallel library is being built by supplying
+##               the `--enable-parallel' configure switch.
 ##
-##    PARALLEL		-- This variable is set to a non-null value if
-##			   we're building a parallel version of the library.
+##    PARALLEL        -- This variable is set to a non-null value if
+##               we're building a parallel version of the library.
 ##
-##    RUNSERIAL	        -- This is a command which will be prepended to
-##			   the executable name to run the executable using
-##			   a single process. For serial versions of the
-##			   library this will normally be empty. For parallel
-##			   versions it might be something like `mpiexec -n 1'.
-##			   The value of this variable is substituted in *.in
-##			   files.
+##    RUNSERIAL            -- This is a command which will be prepended to
+##               the executable name to run the executable using
+##               a single process. For serial versions of the
+##               library this will normally be empty. For parallel
+##               versions it might be something like `mpiexec -n 1'.
+##               The value of this variable is substituted in *.in
+##               files.
 ##
-##    RUNPARALLEL	-- This is a command which will be prepended to
-##			   the executable name to run the executable on
-##			   multiple processors. For the serial library the
-##			   value will normally be the empty string. For
-##			   parallel library it should be something like
-##			   "mpiexec -n \$\${NPROCS:=6}" where NPROCS will
-##			   eventually contain the number of processors on which
-##			   to run the executable (the double dollarsigns are to
-##			   protect the expansion until make executes the
-##			   command).  The value of this variable is
-##			   substituted in *.in files.
+##    RUNPARALLEL    -- This is a command which will be prepended to
+##               the executable name to run the executable on
+##               multiple processors. For the serial library the
+##               value will normally be the empty string. For
+##               parallel library it should be something like
+##               "mpiexec -n \$\${NPROCS:=6}" where NPROCS will
+##               eventually contain the number of processors on which
+##               to run the executable (the double dollarsigns are to
+##               protect the expansion until make executes the
+##               command).  The value of this variable is
+##               substituted in *.in files.
 ##
 
 
@@ -7820,6 +7837,7 @@ if test "X$HDF5_TOOLS" = "Xno"; then
   echo "Building HDF5 tools is disabled"
 fi
 
+## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
 ## or disabled, it should happen before these macros.
 
@@ -22360,8 +22378,8 @@ if test "X$STATIC_EXEC" = "Xyes"; then
   echo "yes"
   ## Issue a warning if -static flag is not supported.
   if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
-      echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
-      LT_STATIC_EXEC=""
+    echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+    LT_STATIC_EXEC=""
   else
     LT_STATIC_EXEC="-all-static"
   fi
@@ -25030,7 +25048,6 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
@@ -25047,11 +25064,17 @@ fi
 
 
 ## ----------------------------------------------------------------------
-## Is the dmalloc present? It has a header file `dmalloc.h' and a library
-## `-ldmalloc' and their locations might be specified with the `--with-dmalloc'
-## command-line switch. The value is an include path and/or a library path.
-## If the library path is specified then it must be preceded by a comma.
+## Is dmalloc (debug malloc library) requested? It has a header file
+## `dmalloc.h' and a library `-ldmalloc' and their locations might be
+## specified with the `--with-dmalloc' command-line switch. The value
+## is an include path and/or a library path. If the library path is
+## specified then it must be preceded by a comma.
 ##
+
+
+## Default is not present
+HAVE_DMALLOC=no
+
 
 # Check whether --with-dmalloc was given.
 if test "${with_dmalloc+set}" = set; then :
@@ -25061,8 +25084,8 @@ else
 fi
 
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_DMALLOC="yes"
     for ac_header in dmalloc.h
 do :
@@ -25139,7 +25162,7 @@ fi
       as_fn_error $? "couldn't find dmalloc library" "$LINENO" 5
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_DMALLOC="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dmalloc library" >&5
 $as_echo_n "checking for dmalloc library... " >&6; }
@@ -25271,8 +25294,8 @@ else
 fi
 
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_ZLIB="yes"
     for ac_header in zlib.h
 do :
@@ -25357,7 +25380,7 @@ fi
 
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_ZLIB="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for zlib" >&5
 $as_echo_n "checking for zlib... " >&6; }
@@ -25491,7 +25514,7 @@ $as_echo "#define HAVE_FILTER_DEFLATE 1" >>confdefs.h
   if test "X$EXTERNAL_FILTERS" != "X"; then
     EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
   fi
-  EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
 fi
 
 
@@ -25511,8 +25534,8 @@ else
 fi
 
 
-case $withval in
-  yes)
+case "X-$withval" in
+  X-yes)
     HAVE_SZLIB="yes"
     for ac_header in szlib.h
 do :
@@ -25589,7 +25612,7 @@ fi
       as_fn_error $? "couldn't find szlib library" "$LINENO" 5
     fi
     ;;
-  no)
+  X-|X-no|X-none)
     HAVE_SZLIB="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for szlib" >&5
 $as_echo_n "checking for szlib... " >&6; }
@@ -25716,7 +25739,7 @@ $as_echo_n "checking for szlib encoder... " >&6; }
   if test -z "$LD_LIBRARY_PATH"; then
     export LD_LIBRARY_PATH="$szlib_lib"
   else
-    export LD_LIBRARY_PATH="$szlib_lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$szlib_lib"
   fi
 
    LL_PATH="$LD_LIBRARY_PATH"
@@ -25733,16 +25756,29 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-        #include <szlib.h>
+                #include "szlib.h"
 
-        int main(void)
-        {
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+
                 /* SZ_encoder_enabled returns 1 if encoder is present */
-            if(SZ_encoder_enabled() == 1)
-                exit(0);
-            else
-                exit(1);
-        }
+                if(SZ_encoder_enabled() == 1)
+                    exit(0);
+                else
+                    exit(1);
+
+  ;
+  return 0;
+}
 
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
@@ -25753,6 +25789,7 @@ fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
+
 
 fi
 
@@ -25776,13 +25813,13 @@ $as_echo "no" >&6; }
     if test "X$EXTERNAL_FILTERS" != "X"; then
       EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
+      EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
   fi
   if test ${hdf5_cv_szlib_can_encode} = "no"; then
     if test "X$EXTERNAL_FILTERS" != "X"; then
       EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
+      EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
   fi
 fi
 
@@ -25886,6 +25923,11 @@ rm -f confcache
 ## Enable thread-safe version of library.  It requires Pthreads support
 ## on POSIX systems.
 ##
+
+
+## Default is no thread-safety
+THREADSAFE=no
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread safe support" >&5
 $as_echo_n "checking for thread safe support... " >&6; }
 # Check whether --enable-threadsafe was given.
@@ -25914,7 +25956,7 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## --enable-threadsafe is also incompatible with --enable-fortran, unless
+## --enable-threadsafe is also incompatible with --enable-fortran unless
 ## --enable-unsupported has been specified on the configure line.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
@@ -25945,7 +25987,7 @@ $as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
 
 
     ## ----------------------------------------------------------------------
-    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## Is the Pthreads library present?  It has a header file `pthread.h' and
     ## a library `-lpthread' and their locations might be specified with the
     ## `--with-pthread' command-line switch.  The value is an include path
     ## and/or a library path.  If the library path is specified then it must
@@ -26244,6 +26286,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 
   #include <sys/time.h>
   #include <time.h>
+
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26327,7 +26370,6 @@ $as_echo_n "checking for st_blocks in struct stat... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-  #include <sys/stat.h>
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26339,10 +26381,11 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 int
 main ()
 {
-struct stat sb; sb.st_blocks=0;
+
   ;
   return 0;
-}
+}[
+  #include <sys/stat.h>],[struct stat sb; sb.st_blocks=0;])
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
 
@@ -26472,7 +26515,9 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 $as_echo_n "checking for TIOCGWINSZ... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
+
 #include <sys/ioctl.h>
+
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26505,7 +26550,9 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 $as_echo_n "checking for TIOCGETD... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
+
 #include <sys/ioctl.h>
+
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26917,7 +26964,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 int
 main ()
 {
- const char *fname = __FUNCTION__;
+
   ;
   return 0;
 }
@@ -26993,17 +27040,30 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-     #include <stdio.h>
-     #include <stdlib.h>
-     #include <string.h>
+            #include <stdio.h>
+            #include <stdlib.h>
+            #include <string.h>
 
-     int main(void)
-     {
-	char *s = malloc(128);
-	long long x = (long long)1048576 * (long long)1048576;
-	sprintf(s,"%${hdf5_cv_printf_ll}d",x);
-	exit(strcmp(s,"1099511627776"));
-     }
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+
+            char *s = malloc(128);
+            long long x = (long long)1048576 * (long long)1048576;
+            sprintf(s,"%${hdf5_cv_printf_ll}d",x);
+            exit(strcmp(s,"1099511627776"));
+
+  ;
+  return 0;
+}
 
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
@@ -27300,7 +27360,6 @@ esac
 ##     more scrupulous with it's memory operations.  Enabling this also
 ##     disables the library's free space manager code.
 ##
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether a memory checking tool will be used" >&5
 $as_echo_n "checking whether a memory checking tool will be used... " >&6; }
 # Check whether --enable-using-memchecker was given.
@@ -27309,19 +27368,29 @@ if test "${enable_using_memchecker+set}" = set; then :
 fi
 
 
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
+## Set the default level.
+if test "X-$USINGMEMCHECKER" = X- ; then
+  USINGMEMCHECKER=no
+fi
+
 case "X-$USINGMEMCHECKER" in
   X-yes)
-      USINGMEMCHECKER=yes
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
 
 $as_echo "#define USING_MEMCHECKER 1" >>confdefs.h
 
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
     ;;
-  *)
-      USINGMEMCHECKER=no
+  X-no)
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
+    ;;
+  *)
+      as_fn_error $? "Unrecognized value: $USINGMEMCHECKER" "$LINENO" 5
     ;;
 esac
 
@@ -27473,7 +27542,7 @@ int
 main ()
 {
  MPI_Init(0, (void *)0);
-		      MPI_File_open(0, (void *)0, 0, 0, (void *)0);
+            MPI_File_open(0, (void *)0, 0, 0, (void *)0);
   ;
   return 0;
 }
@@ -27484,7 +27553,7 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-		    as_fn_error $? "unable to link a simple MPI-IO C program" "$LINENO" 5
+            as_fn_error $? "unable to link a simple MPI-IO C program" "$LINENO" 5
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -27544,6 +27613,8 @@ esac
 
 ## ----------------------------------------------------------------------
 ## Print some other parallel information and do some sanity checks.
+## Needs to be done outside of the PARALLEL block since the serial
+## build also needs to have values defined.
 ##
  ADD_PARALLEL_FILES="no"
 
@@ -27591,7 +27662,9 @@ $as_echo_n "checking for MPI_Comm_c2f and MPI_Comm_f2c functions... " >&6; }
 
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <mpi.h>
+
+    #include <mpi.h>
+
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -27612,7 +27685,7 @@ if ac_fn_c_try_link "$LINENO"; then :
 
 $as_echo "#define HAVE_MPI_MULTI_LANG_Comm 1" >>confdefs.h
 
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+                 { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -27647,7 +27720,7 @@ if ac_fn_c_try_link "$LINENO"; then :
 
 $as_echo "#define HAVE_MPI_MULTI_LANG_Info 1" >>confdefs.h
 
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -27934,8 +28007,9 @@ fi
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
-## Check these regardless. If the checks are moved inside the main
-## direct VFD block, the output is nested.
+
+## Default is no direct VFD
+DIRECT_VFD=no
 
 if ${hdf5_cv_direct_io+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -28515,6 +28589,37 @@ $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
   fi
 fi
 rm -f confcache
+
+## ----------------------------------------------------------------------
+## Use custom examples path.
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for custom examples path definition" >&5
+$as_echo_n "checking for custom examples path definition... " >&6; }
+
+# Check whether --with-examplesdir was given.
+if test "${with_examplesdir+set}" = set; then :
+  withval=$with_examplesdir;
+else
+  withval="${datarootdir}/hdf5_examples"
+fi
+
+
+if test "X$withval" = "X"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: default" >&5
+$as_echo "default" >&6; }
+    examplesdir="${datarootdir}/hdf5_examples"
+else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $withval" >&5
+$as_echo "$withval" >&6; }
+    examplesdir=$withval
+fi
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define EXAMPLESDIR "$examplesdir"
+_ACEOF
+
 
 ## ----------------------------------------------------------------------
 ## Enable custom plugin default path for library.  It requires SHARED support.
@@ -34369,14 +34474,14 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 
-  ### libtool does not pass the correct argument linking (-WL,-Wl,,) for the NAG Fortran compiler
+  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
   ### on Linux (other OSs have not been tested).
   ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
   ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
   case "`uname`" in
     Linux*)
       if test "X$FC_BASENAME" = "Xnagfor"; then
-        cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,-Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+         cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,-Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       fi
       ;;
   esac

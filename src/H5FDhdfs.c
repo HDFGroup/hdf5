@@ -478,7 +478,7 @@ static int     H5FD_hdfs_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t  H5FD_hdfs_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_hdfs_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD_hdfs_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-static haddr_t H5FD_hdfs_get_eof(const H5FD_t *_file, H5FD_mem_t type);
+static haddr_t H5FD_hdfs_get_eof(const H5FD_t *_file);
 static herr_t  H5FD_hdfs_get_handle(H5FD_t *_file, hid_t fapl,
                                     void** file_handle);
 static herr_t  H5FD_hdfs_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id,
@@ -1056,7 +1056,7 @@ H5FD_hdfs_set_eoa(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED  type,
 #ifdef H5_HAVE_LIBHDFS
 
 static haddr_t
-H5FD_hdfs_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
+H5FD_hdfs_get_eof(const H5FD_t *_file)
 {
     const H5FD_hdfs_t *file = (const H5FD_hdfs_t *)_file;
 
@@ -1075,7 +1075,7 @@ H5FD_hdfs_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 #else /* H5_HAVE_LIBHDFS not defined */
 
 static haddr_t
-H5FD_hdfs_get_eof(const H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type)
+H5FD_hdfs_get_eof(const H5FD_t H5_ATTR_UNUSED *_file)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

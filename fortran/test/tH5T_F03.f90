@@ -1541,7 +1541,7 @@ SUBROUTINE t_bit(total_error)
   INTEGER :: A, B, C, D
   INTEGER :: Aw, Bw, Cw, Dw
   INTEGER :: i, j
-  INTEGER, PARAMETER :: hex =  Z'00000003'
+  INTEGER, PARAMETER :: hex =  INT(Z'00000003')
   TYPE(C_PTR) :: f_ptr
   INTEGER :: error     ! Error flag
   !

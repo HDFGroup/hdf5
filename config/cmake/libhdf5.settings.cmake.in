@@ -1,12 +1,11 @@
-      SUMMARY OF THE HDF5 CONFIGURATION
-      =================================
+        SUMMARY OF THE HDF5 CONFIGURATION
+        =================================
 
 General Information:
 -------------------
                    HDF5 Version: @HDF5_PACKAGE_VERSION_STRING@
                   Configured on: @CONFIG_DATE@
                   Configured by: @CMAKE_GENERATOR@
-                 Configure mode: CMAKE @CMAKE_VERSION@
                     Host system: @CMAKE_HOST_SYSTEM@
               Uname information: @CMAKE_SYSTEM_NAME@
                        Byte sex: @BYTESEX@
@@ -39,7 +38,7 @@ Languages:
                     H5_CPPFLAGS: @H5_CPPFLAGS@
                     AM_CPPFLAGS: @AM_CPPFLAGS@
                          CFLAGS: @CMAKE_C_FLAGS@
-                      H5_CFLAGS: @H5_CFLAGS@
+                      H5_CFLAGS: @HDF5_CMAKE_C_FLAGS@
                       AM_CFLAGS: @AM_CFLAGS@
                Shared C Library: @H5_ENABLE_SHARED_LIB@
                Static C Library: @H5_ENABLE_STATIC_LIB@
@@ -48,7 +47,7 @@ Languages:
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               Fortran Compiler: @CMAKE_Fortran_COMPILER@ @CMAKE_Fortran_COMPILER_VERSION@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@          Fortran 2003 Compiler: @HDF5_ENABLE_F2003@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@                  Fortran Flags: @CMAKE_Fortran_FLAGS@
-@BUILD_FORTRAN_CONDITIONAL_TRUE@               H5 Fortran Flags: @H5_FCFLAGS@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@               H5 Fortran Flags: @HDF5_CMAKE_Fortran_FLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               AM Fortran Flags: @AM_FCFLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Shared Fortran Library: @H5_ENABLE_SHARED_LIB@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Static Fortran Library: @H5_ENABLE_STATIC_LIB@
@@ -56,7 +55,7 @@ Languages:
                             C++: @HDF5_BUILD_CPP_LIB@
 @BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CMAKE_CXX_COMPILER@ @CMAKE_CXX_COMPILER_VERSION@
 @BUILD_CXX_CONDITIONAL_TRUE@                      C++ Flags: @CMAKE_CXX_FLAGS@
-@BUILD_CXX_CONDITIONAL_TRUE@                   H5 C++ Flags: @H5_CXXFLAGS@
+@BUILD_CXX_CONDITIONAL_TRUE@                   H5 C++ Flags: @HDF5_CMAKE_CXX_FLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@                   AM C++ Flags: @AM_CXXFLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@             Shared C++ Library: @H5_ENABLE_SHARED_LIB@
 @BUILD_CXX_CONDITIONAL_TRUE@             Static C++ Library: @H5_ENABLE_STATIC_LIB@

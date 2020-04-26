@@ -46,16 +46,22 @@
 #endif
 
 /* Loop through all mapped files */
-#define UNIQUE_MEMBERS(MAP,LOOPVAR) {					      \
-    H5FD_mem_t _unmapped, LOOPVAR;					      \
-    hbool_t _seen[H5FD_MEM_NTYPES];					      \
+#define UNIQUE_MEMBERS_CORE(MAP, ITER, SEEN, LOOPVAR) {					      \
+    H5FD_mem_t ITER, LOOPVAR;					      \
+    unsigned SEEN[H5FD_MEM_NTYPES];					      \
 									      \
-    memset(_seen, 0, sizeof _seen);					      \
-    for (_unmapped=H5FD_MEM_SUPER; _unmapped<H5FD_MEM_NTYPES; _unmapped=(H5FD_mem_t)(_unmapped+1)) {  \
-	LOOPVAR = MAP[_unmapped];					      \
-	if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=_unmapped;		      \
+    memset(SEEN, 0, sizeof SEEN);	      				      \
+    for (ITER=H5FD_MEM_SUPER; ITER<H5FD_MEM_NTYPES; ITER=(H5FD_mem_t)(ITER+1)) {  \
+	LOOPVAR = MAP[ITER];					      \
+	if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=ITER;		      \
 	assert(LOOPVAR>0 && LOOPVAR<H5FD_MEM_NTYPES);			      \
-	if (_seen[LOOPVAR]++) continue;
+	if (SEEN[LOOPVAR]++) continue;					      \
+
+/* Need two front-ends, since they are nested sometimes */
+#define UNIQUE_MEMBERS(MAP, LOOPVAR)                                          \
+    UNIQUE_MEMBERS_CORE(MAP, _unmapped, _seen, LOOPVAR)
+#define UNIQUE_MEMBERS2(MAP, LOOPVAR)                                         \
+    UNIQUE_MEMBERS_CORE(MAP, _unmapped2, _seen2, LOOPVAR)
 
 #define ALL_MEMBERS(LOOPVAR) {						      \
     H5FD_mem_t LOOPVAR;							      \
@@ -71,11 +77,11 @@ static hid_t H5FD_MULTI_g = 0;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_multi_fapl_t {
-    H5FD_mem_t	memb_map[H5FD_MEM_NTYPES]; /*memory usage map		*/
-    hid_t	memb_fapl[H5FD_MEM_NTYPES];/*member access properties	*/
-    char	*memb_name[H5FD_MEM_NTYPES];/*name generators		*/
-    haddr_t	memb_addr[H5FD_MEM_NTYPES];/*starting addr per member	*/
-    hbool_t	relax;			/*less stringent error checking	*/
+    H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];      /*memory usage map              */
+    hid_t       memb_fapl[H5FD_MEM_NTYPES];     /*member access properties      */
+    char        *memb_name[H5FD_MEM_NTYPES];    /*name generators               */
+    haddr_t     memb_addr[H5FD_MEM_NTYPES];     /*starting addr per member      */
+    hbool_t     relax;                          /*less stringent error checking	*/
 } H5FD_multi_fapl_t;
 
 /*
@@ -85,17 +91,17 @@ typedef struct H5FD_multi_fapl_t {
  * copied into the parent file struct in H5F_open().
  */
 typedef struct H5FD_multi_t {
-    H5FD_t	pub;		/*public stuff, must be first		*/
-    H5FD_multi_fapl_t fa;	/*driver-specific file access properties*/
-    haddr_t	memb_next[H5FD_MEM_NTYPES];/*addr of next member	*/
-    H5FD_t	*memb[H5FD_MEM_NTYPES];	/*member pointers		*/
-    haddr_t     memb_eoa[H5FD_MEM_NTYPES]; /*EOA for individual files,
-    				 *end of allocated addresses.  v1.6 library 
-                                 *have the EOA for the entire file. But it's
-                                 *meaningless for MULTI file.  We replaced it
-                                 *with the EOAs for individual files    */
-    unsigned	flags;		/*file open flags saved for debugging	*/
-    char	*name;		/*name passed to H5Fopen or H5Fcreate	*/
+    H5FD_t              pub;                        /*public stuff, must be first               */
+    H5FD_multi_fapl_t   fa;                         /*driver-specific file access properties    */
+    haddr_t             memb_next[H5FD_MEM_NTYPES]; /*addr of next member                       */
+    H5FD_t             *memb[H5FD_MEM_NTYPES];      /*member pointers                           */
+    haddr_t             memb_eoa[H5FD_MEM_NTYPES];  /*EOA for individual files,
+                                                     *end of allocated addresses.  v1.6 library 
+                                                     *have the EOA for the entire file. But it's
+                                                     *meaningless for MULTI file.  We replaced it
+                                                     *with the EOAs for individual files        */
+    unsigned            flags;                      /*file open flags saved for debugging       */
+    char               *name;                       /*name passed to H5Fopen or H5Fcreate       */
 } H5FD_multi_t;
 
 /* Driver specific data transfer properties */
@@ -185,8 +191,6 @@ static const H5FD_class_t H5FD_multi_g = {
  * Programmer:	Robb Matzke
  *              Friday, August 13, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static char *
@@ -219,8 +223,6 @@ my_strdup(const char *s)
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -229,9 +231,9 @@ H5FD_multi_init(void)
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if (H5I_VFL!=H5Iget_type(H5FD_MULTI_g)) {
-	H5FD_MULTI_g = H5FDregister(&H5FD_multi_g);
-    }
+    if(H5I_VFL!=H5Iget_type(H5FD_MULTI_g))
+        H5FD_MULTI_g = H5FDregister(&H5FD_multi_g);
+
     return H5FD_MULTI_g;
 }
 
@@ -245,8 +247,6 @@ H5FD_multi_init(void)
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
- *
- * Modification:
  *
  *---------------------------------------------------------------------------
  */
@@ -273,14 +273,6 @@ H5FD_multi_term(void)
  * Programmer:	Robb Matzke
  *              Wednesday, August 11, 1999
  *
- * Modifications:
- *	Albert Cheng, Sep 17, 2001
- *	Added feature that if the raw or meta extension string contains
- *	a "%s", it will be substituted by the filename given for H5Fopen
- *	or H5Fcreate.  This is same as the multi-file syntax.  If no %s
- *	is found, one is inserted at the beginning.  This is the previous
- *	behavior.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -290,7 +282,8 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
     H5FD_mem_t		memb_map[H5FD_MEM_NTYPES];
     hid_t		memb_fapl[H5FD_MEM_NTYPES];
     const char		*memb_name[H5FD_MEM_NTYPES];
-    char		meta_name[H5FD_MULT_MAX_FILE_NAME_LEN], raw_name[H5FD_MULT_MAX_FILE_NAME_LEN];
+    char		meta_name[H5FD_MULT_MAX_FILE_NAME_LEN];
+    char		raw_name[H5FD_MULT_MAX_FILE_NAME_LEN];
     haddr_t		memb_addr[H5FD_MEM_NTYPES];
 
     /*NO TRACE*/
@@ -430,11 +423,6 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
- *		Raymond Lu, 2001-10-25
- *		Use new generic property list for argument checking.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -537,11 +525,6 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
- *              Raymond Lu, 2001-10-25
- *              Use new generic property list for argument checking.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -606,8 +589,6 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
  * Programmer:	Robb Matzke
  *              Monday, August 16, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -658,8 +639,6 @@ H5FD_multi_sb_size(H5FD_t *_file)
  *
  * Programmer:	Robb Matzke
  *              Monday, August 16, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -880,8 +859,6 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
  * Programmer:	Robb Matzke
  *              Friday, August 13, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -907,8 +884,6 @@ H5FD_multi_fapl_get(H5FD_t *_file)
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -964,8 +939,6 @@ H5FD_multi_fapl_copy(const void *_old_fa)
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1003,8 +976,6 @@ H5FD_multi_fapl_free(void *_fa)
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1104,8 +1075,6 @@ error:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1136,6 +1105,7 @@ H5FD_multi_close(H5FD_t *_file)
 	if (file->fa.memb_fapl[mt]>=0) (void)H5Pclose(file->fa.memb_fapl[mt]);
 	if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
     } END_MEMBERS;
+
     free(file->name);
     free(file);
     return 0;
@@ -1159,8 +1129,6 @@ H5FD_multi_close(H5FD_t *_file)
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1176,14 +1144,18 @@ H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     ALL_MEMBERS(mt) {
         out_mt = mt;
-	if (f1->memb[mt] && f2->memb[mt]) break;
-	if (!cmp) {
-	    if (f1->memb[mt]) cmp = -1;
-	    else if (f2->memb[mt]) cmp = 1;
+	if(f1->memb[mt] && f2->memb[mt])
+            break;
+	if(!cmp) {
+	    if(f1->memb[mt])
+                cmp = -1;
+	    else if(f2->memb[mt])
+                cmp = 1;
 	}
     } END_MEMBERS;
     assert(cmp || out_mt<H5FD_MEM_NTYPES);
-    if (out_mt>=H5FD_MEM_NTYPES) return cmp;
+    if(out_mt>=H5FD_MEM_NTYPES)
+        return cmp;
 
     return H5FDcmp(f1->memb[out_mt], f2->memb[out_mt]);
 }
@@ -1201,8 +1173,6 @@ H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, September 26, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1297,7 +1267,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
                     memb_eoa = H5FDget_eoa(file->memb[mt], mt);
 	        } H5E_END_TRY;
 
-	        if (HADDR_UNDEF==memb_eoa)
+	        if(HADDR_UNDEF == memb_eoa)
                     H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eoa", HADDR_UNDEF)
 	    } else if (file->fa.relax) {
 	        /*
@@ -1305,7 +1275,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
 	         * best guess about the end-of-file.
 	         */
 	        memb_eoa = file->memb_next[mt];
-	        assert(HADDR_UNDEF!=memb_eoa);
+	        assert(HADDR_UNDEF != memb_eoa);
 	    } else {
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "bad eoa", HADDR_UNDEF)
 	    }
@@ -1315,23 +1285,26 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
         } END_MEMBERS;
     } else {
         H5FD_mem_t mmt = file->fa.memb_map[type];
-        if (H5FD_MEM_DEFAULT==mmt) mmt = type;
 
-	if (file->memb[mmt]) {
+        if(H5FD_MEM_DEFAULT == mmt)
+            mmt = type;
+
+	if(file->memb[mmt]) {
             H5E_BEGIN_TRY {
 	        eoa = H5FDget_eoa(file->memb[mmt], mmt);
             } H5E_END_TRY;
 
-	    if (HADDR_UNDEF==eoa)
+	    if(HADDR_UNDEF == eoa)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eoa", HADDR_UNDEF)
-	    if (eoa>0) eoa += file->fa.memb_addr[mmt];
-	} else if (file->fa.relax) {
+	    if(eoa > 0)
+                eoa += file->fa.memb_addr[mmt];
+	} else if(file->fa.relax) {
 	    /*
 	     * The member is not open yet (maybe it doesn't exist). Make the
 	     * best guess about the end-of-file.
 	     */
 	    eoa = file->memb_next[mmt];
-	    assert(HADDR_UNDEF!=eoa);
+	    assert(HADDR_UNDEF != eoa);
 	 } else {
             H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "bad eoa", HADDR_UNDEF)
 	 }
@@ -1384,13 +1357,15 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     if(H5FD_MEM_DEFAULT == mmt)
         mmt = type;
 
-    /* Handle backward compatibility in a quick and simple way.  v1.6 library had EOA for the entire virtual 
-     * file.  But it wasn't meaningful.  So v1.8 library doesn't have it anymore.  It saves the EOA for the 
-     * metadata file, instead.  Here we try to figure out whether the EOA is from a v1.6 file by comparing its 
-     * value.  If it is a big value, we assume it's from v1.6 and simply discard it. This is the normal case 
-     * when the metadata file has the smallest starting address.  If the metadata file has the biggest address,
-     * the EOAs of v1.6 and v1.8 files are the same.  It won't cause any trouble.  (Please see Issue 2598 
-     * in Jira) SLU - 2011/6/21
+    /* Handle backward compatibility in a quick and simple way.  v1.6 library
+     * had EOA for the entire virtual file.  But it wasn't meaningful.  So v1.8
+     * library doesn't have it anymore.  It saves the EOA for the metadata file,
+     * instead.  Here we try to figure out whether the EOA is from a v1.6 file
+     * by comparing its value.  If it is a big value, we assume it's from v1.6
+     * and simply discard it. This is the normal case when the metadata file
+     * has the smallest starting address.  If the metadata file has the biggest
+     * address, the EOAs of v1.6 and v1.8 files are the same.  It won't cause
+     * any trouble.  (Please see Issue 2598 in Jira) SLU - 2011/6/21
      */
     if(H5FD_MEM_SUPER == type && file->memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > file->memb_eoa[H5FD_MEM_SUPER])
         return 0;
@@ -1401,7 +1376,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     H5E_BEGIN_TRY {
 	status = H5FDset_eoa(file->memb[mmt], mmt, (eoa - file->fa.memb_addr[mmt]));
     } H5E_END_TRY;
-    if (status<0)
+    if(status < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "member H5FDset_eoa failed", -1)
 
     return 0;
@@ -1422,12 +1397,6 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              5 January 2007
- *              Multi driver no longer has EOA for the whole file.  Calculate
- *              it in the same way as EOF instead.
  *
  *-------------------------------------------------------------------------
  */
@@ -1493,8 +1462,6 @@ H5FD_multi_get_eof(const H5FD_t *_file)
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1527,8 +1494,6 @@ H5FD_multi_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
  *
  * Programmer:	Robb Matzke
  *              Thursday, August 12, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1576,8 +1541,6 @@ H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
  *
  * Programmer:	Robb Matzke
  *              Thursday, August 12, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1827,8 +1790,6 @@ H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
  * Programmer:	Robb Matzke
  *              Monday, August 23, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1842,7 +1803,7 @@ compute_next(H5FD_multi_t *file)
     } END_MEMBERS;
 
     UNIQUE_MEMBERS(file->fa.memb_map, mt1) {
-	UNIQUE_MEMBERS(file->fa.memb_map, mt2) {
+	UNIQUE_MEMBERS2(file->fa.memb_map, mt2) {
 	    if (file->fa.memb_addr[mt1]<file->fa.memb_addr[mt2] &&
 		(HADDR_UNDEF==file->memb_next[mt1] ||
 		 file->memb_next[mt1]>file->fa.memb_addr[mt2])) {
@@ -1869,8 +1830,6 @@ compute_next(H5FD_multi_t *file)
  *
  * Programmer:	Robb Matzke
  *              Monday, August 23, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

@@ -716,9 +716,6 @@ if (BUILD_TESTING)
   option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")
   mark_as_advanced (HDF_TEST_EXPRESS)
 
-  option (TEST_SHARED_PROGRAMS "Enable testing of Shared programs" OFF)
-  mark_as_advanced (TEST_SHARED_PROGRAMS)
-
   enable_testing ()
   include (CTest)
 
@@ -813,6 +810,9 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
 
         include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
 
+        message (STATUS "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
+        include (${HDF_RESOURCES_DIR}/HDFFortranCompilerFlags.cmake)
+        include (${HDF_RESOURCES_DIR}/HDF5UseFortran.cmake)
         set (LINK_Fortran_LIBS ${LINK_LIBS})
 
         if (HDF5_ENABLE_F2003)
@@ -856,6 +856,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
     endif ()
 
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseCXX.cmake)
+    include (${HDF_RESOURCES_DIR}/HDFCXXCompilerFlags.cmake)
 
     if (CMAKE_NO_STD_NAMESPACE)
       set (H5_NO_STD 1)

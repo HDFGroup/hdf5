@@ -8912,7 +8912,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /* Allocate enough space for the buffer holding temporary
              * converted value
              */
-            buf_size = (size_t)HDpow((double)2.0f, (double)src.u.f.esize) / 8 + 1;
+            buf_size = (size_t) (HDpow((double)2.0f, (double)src.u.f.esize) / 8 + 1);
             int_buf = (uint8_t*)H5MM_calloc(buf_size);
 
             /* Get the plist structure. Do I need to close it? */
@@ -9709,7 +9709,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
 
                 /* Check if the exponent is too big */
-                expo_max = (hsize_t)HDpow((double)2.0f, (double)dst.u.f.esize) - 1;
+                expo_max = (hsize_t) (HDpow((double)2.0f, (double)dst.u.f.esize) - 1);
 
                 if(expo > expo_max) {  /*overflows*/
                     if(cb_struct.func) { /*user's exception handler.  Reverse back source order*/
