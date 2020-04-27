@@ -374,11 +374,13 @@ int main(int argc, const char *argv[])
         return -1;
 
     /* Emit informational message */
-    if(verbose)
-        HDfprintf(stderr, "WRITER: Opening skeleton file: %s\n", FILENAME);
+    if(verbose) {
+        HDfprintf(stderr, "WRITER: Opening skeleton file: %s\n",
+            COMMON_FILENAME);
+    }
 
     /* Open file skeleton */
-    if((fid = open_skeleton(FILENAME, verbose, old)) < 0) {
+    if((fid = open_skeleton(COMMON_FILENAME, verbose, old)) < 0) {
         HDfprintf(stderr, "WRITER: Error opening skeleton file!\n");
         HDexit(1);
     } /* end if */

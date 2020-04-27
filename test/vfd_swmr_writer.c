@@ -400,11 +400,13 @@ main(int argc, char * const *argv)
         return -1;
 
     /* Emit informational message */
-    if(verbose)
-        HDfprintf(verbose_file, "WRITER: Opening skeleton file: %s\n", FILENAME);
+    if(verbose) {
+        HDfprintf(verbose_file, "WRITER: Opening skeleton file: %s\n",
+            COMMON_FILENAME);
+    }
 
     /* Open file skeleton */
-    if((fid = open_skeleton(FILENAME, verbose, verbose_file, random_seed, old)) < 0) {
+    if((fid = open_skeleton(COMMON_FILENAME, verbose, verbose_file, random_seed, old)) < 0) {
         HDfprintf(stderr, "WRITER: Error opening skeleton file!\n");
         HDexit(1);
     } /* end if */

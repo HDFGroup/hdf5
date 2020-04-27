@@ -33,7 +33,7 @@
 
 #define NMAPPING        9   
 
-#define FILENAME        "vfd_swmr_data.h5"  /* SWMR test file name */
+#define COMMON_FILENAME        "vfd_swmr_data.h5"  /* SWMR test file name */
 #define DTYPE_SIZE      150             /* Data size in opaque type */
 
 /* The message sent by writer that the file open is done--releasing the file lock */

@@ -647,7 +647,7 @@ int main(int argc, const char *argv[])
     }
 
     /* Reading records from datasets */
-    if(read_records(FILENAME, verbose, verbose_file, random_seed, (unsigned long)nseconds, (unsigned)poll_time, (unsigned)ncommon, (unsigned)nrandom) < 0) {
+    if(read_records(COMMON_FILENAME, verbose, verbose_file, random_seed, (unsigned long)nseconds, (unsigned)poll_time, (unsigned)ncommon, (unsigned)nrandom) < 0) {
         HDfprintf(stderr, "READER: Error reading records from datasets (random_seed = %u)!\n", random_seed);
         HDexit(1);
     } /* end if */

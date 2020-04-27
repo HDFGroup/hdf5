@@ -385,10 +385,10 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        HDfprintf(stderr, "Generating skeleton file: %s\n", FILENAME);
+        HDfprintf(stderr, "Generating skeleton file: %s\n", COMMON_FILENAME);
 
     /* Generate file skeleton */
-    if(gen_skeleton(FILENAME, verbose, vfd_swmr_write, comp_level, index_type, random_seed) < 0) {
+    if(gen_skeleton(COMMON_FILENAME, verbose, vfd_swmr_write, comp_level, index_type, random_seed) < 0) {
         HDfprintf(stderr, "Error generating skeleton file!\n");
         HDexit(1);
     } /* end if */

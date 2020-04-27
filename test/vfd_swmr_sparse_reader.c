@@ -515,7 +515,7 @@ int main(int argc, const char *argv[])
     }
 
     /* Reading records from datasets */
-    if(read_records(FILENAME, verbose, (unsigned long) nrecords, (unsigned)poll_time, (unsigned)reopen_count) < 0) {
+    if(read_records(COMMON_FILENAME, verbose, (unsigned long) nrecords, (unsigned)poll_time, (unsigned)reopen_count) < 0) {
         HDfprintf(stderr, "READER: Error reading records from datasets!\n");
         HDexit(1);
     } /* end if */
