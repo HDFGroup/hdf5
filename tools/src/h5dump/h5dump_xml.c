@@ -783,32 +783,30 @@ xml_escape_the_string(const char *str, int slen)
 
         if (*cp == '\\') {
             *ncp++ = '\\';
+            ncp_len--;
             *ncp = *cp;
             esc_len = 1;
         }
         else if (*cp == '\"') {
             *ncp++ = '\\';
+            ncp_len--;
             *ncp = *cp;
             esc_len = 1;
         }
         else if (*cp == '\'') {
             HDstrncpy(ncp, apos, ncp_len);
-            ncp[ncp_len - 1] = '\0';
             esc_len = HDstrlen(apos);
         }
         else if (*cp == '<') {
             HDstrncpy(ncp, lt, ncp_len);
-            ncp[ncp_len - 1] = '\0';
             esc_len = HDstrlen(lt);
         }
         else if (*cp == '>') {
             HDstrncpy(ncp, gt, ncp_len);
-            ncp[ncp_len - 1] = '\0';
             esc_len = HDstrlen(gt);
         }
         else if (*cp == '&') {
             HDstrncpy(ncp, amp, ncp_len);
-            ncp[ncp_len - 1] = '\0';
             esc_len = HDstrlen(amp);
         }
         else {
