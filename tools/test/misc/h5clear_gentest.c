@@ -62,6 +62,7 @@ gen_cache_image_file(const char *fname)
     hid_t dcpl = H5I_INVALID_HID;                /* Dataset creation property list */
     hsize_t dims[2];                /* Dimension sizes */
     hsize_t chunks[2];              /* Chunked dimension sizes */
+    int i, j;                       /* Local index variables */
     int **buf = NULL;               /* Buffer for data to write */
     H5AC_cache_image_config_t cache_image_config =  /* Cache image input configuration */
                             { H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION,
@@ -72,7 +73,9 @@ gen_cache_image_file(const char *fname)
     H5TEST_ALLOCATE_2D_ARRAY(buf, int, 50, 100);
     if (NULL == buf)
         goto error;
-    H5TEST_FILL_2D_ARRAY(buf, int, 50, 100);
+    for(i = 0; i < 50; i++)
+        for(j = 0; j < 100; j++)
+            buf[i][j] = i * j;
 
     /* Create a copy of file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
