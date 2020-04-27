@@ -61,6 +61,7 @@ CMake build script:
     CTestScript.cmake
 
 External compression szip and zlib libraries:
+    LIBAEC.tar.gz
     SZip.tar.gz
     ZLib.tar.gz
 
@@ -475,6 +476,8 @@ These five steps are described in detail below.
                 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
                 set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
                 set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
+                set (SZAEC_TGZ_NAME "LIBAEC.tar.gz" CACHE STRING "Use SZip AEC from compressed file" FORCE)
+                set (USE_LIBAEC ON CACHE BOOL "Use libaec szip replacement" FORCE)
                 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
                 set (SZIP_PACKAGE_NAME "szip" CACHE STRING "Name of SZIP package" FORCE)
 
@@ -550,11 +553,16 @@ These five steps are described in detail below.
            file) are:
                ZLIB_TGZ_NAME:STRING="zlib_src.ext"
                SZIP_TGZ_NAME:STRING="szip_src.ext"
+               LIBAEC_TGZ_NAME:STRING="liaec_src.ext"
                TGZPATH:STRING="some_location"
             where "some_location/xxxx_src.ext" is the URL or full path to
             the compressed file and where ext is the type of the compression
             file such as .bz2, .tar, .tar.gz, .tgz, or .zip. Also define
             CMAKE_BUILD_TYPE to be the configuration type.
+
+           NOTE: the USE_LIBAEC option will use the file named by LIBAEC_TGZ_NAME
+            to build SZIP instead of the file named by SZIP_TGZ_NAME. This option
+            is also used to account for the different headers and library names.
 
    4. Test HDF5
 
@@ -675,6 +683,7 @@ ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"            
 SZIP_USE_EXTERNAL           "Use External Library Building for SZIP"              0
 if (HDF5_ENABLE_SZIP_SUPPORT)
     HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                                 OFF
+    USE_LIBAEC                "Use libaec szip replacement"                       OFF
 if (WINDOWS)
     H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 else ()
