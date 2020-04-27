@@ -148,6 +148,9 @@
 ./config/gnu-warnings/9
 ./config/gnu-warnings/cxx-general
 ./config/gnu-warnings/cxx-4.9
+./config/gnu-warnings/cxx-5
+./config/gnu-warnings/cxx-error-5
+./config/gnu-warnings/cxx-error-general
 ./config/gnu-warnings/developer-4.5
 ./config/gnu-warnings/developer-4.6
 ./config/gnu-warnings/developer-4.7

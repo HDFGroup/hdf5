@@ -735,8 +735,8 @@ static void test_encode_decode()
         FloatType decoded_flttyp(decoded_flt_ptr->getId());
         verify_val(flttyp == decoded_flttyp, true, "DataType::decode", __LINE__, __FILE__);
 
-        H5std_string norm_string;
-        H5T_norm_t mant_norm = decoded_flttyp.getNorm(norm_string);
+        //H5std_string norm_string;
+        //H5T_norm_t mant_norm = decoded_flttyp.getNorm(norm_string);
         //verify_val(decoded_flttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
 
         delete decoded_flt_ptr;

@@ -10,24 +10,6 @@
 # help@hdfgroup.org.
 #
 
-macro (ADD_H5_FFLAGS h5_fflag_var infile)
-  file (STRINGS ${infile} TEST_FLAG_STREAM)
-  #message (STATUS "TEST_FLAG_STREAM=${TEST_FLAG_STREAM}")
-  list (LENGTH TEST_FLAG_STREAM len_flag)
-  if (len_flag GREATER 0)
-    math (EXPR _FP_LEN "${len_flag} - 1")
-    foreach (line RANGE 0 ${_FP_LEN})
-      list (GET TEST_FLAG_STREAM ${line} str_flag)
-      string (REGEX REPLACE "^#.*" "" str_flag "${str_flag}")
-      #message (STATUS "str_flag=${str_flag}")
-      if (str_flag)
-        list (APPEND ${h5_fflag_var} "${str_flag}")
-      endif ()
-    endforeach ()
-  endif ()
-  #message (STATUS "h5_fflag_var=${${h5_fflag_var}}")
-endmacro ()
-
 message (STATUS "Warnings Configuration: default Fortran: ${CMAKE_Fortran_FLAGS}")
 
 #-----------------------------------------------------------------------------
