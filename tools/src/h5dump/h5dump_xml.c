@@ -738,9 +738,9 @@ xml_escape_the_string(const char *str, int slen)
     size_t      extra;
     size_t      len;
     size_t      i;
-    const char *cp;
-    char       *ncp;
-    char       *rcp;
+    const char *cp = NULL;
+    char       *ncp = NULL;
+    char       *rcp = NULL;
     size_t      ncp_len;
 
     if (!str)
@@ -793,18 +793,22 @@ xml_escape_the_string(const char *str, int slen)
         }
         else if (*cp == '\'') {
             HDstrncpy(ncp, apos, ncp_len);
+            ncp[ncp_len - 1] = '\0';
             esc_len = HDstrlen(apos);
         }
         else if (*cp == '<') {
             HDstrncpy(ncp, lt, ncp_len);
+            ncp[ncp_len - 1] = '\0';
             esc_len = HDstrlen(lt);
         }
         else if (*cp == '>') {
             HDstrncpy(ncp, gt, ncp_len);
+            ncp[ncp_len - 1] = '\0';
             esc_len = HDstrlen(gt);
         }
         else if (*cp == '&') {
             HDstrncpy(ncp, amp, ncp_len);
+            ncp[ncp_len - 1] = '\0';
             esc_len = HDstrlen(amp);
         }
         else {
