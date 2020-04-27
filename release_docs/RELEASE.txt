@@ -56,6 +56,16 @@ New Features
 
     Configuration
     -------------
+    - CMake option to use AEC (open source SZip) library instead of SZip
+
+      The open source AEC library is a replacement library for SZip. In
+      order to use it for hdf5 the libaec CMake source was changed to add
+      "-fPIC" and exclude test files. Autotools does not build the
+      compression libraries within hdf5 builds. New option USE_LIBAEC is
+      required to compensate for the different files produced by AEC build.
+
+      (ADB - 2020/04/22, OESS-65)
+
     - CMake ConfigureChecks.cmake file now uses CHECK_STRUCT_HAS_MEMBER
 
       Some handcrafted tests in HDFTests.c has been removed and the CMake
