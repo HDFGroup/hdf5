@@ -53,9 +53,9 @@ typedef struct {
  */
 /* linked list to keep exclude path list */
 struct exclude_path_list {
-    char  *obj_path;
-    h5trav_type_t obj_type;
-    struct exclude_path_list * next;
+    const char                 *obj_path;
+    h5trav_type_t               obj_type;
+    struct exclude_path_list   *next;
 };
 
 /* Enumeration value for keeping track of whether an error occurred or differences were found */
