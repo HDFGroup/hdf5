@@ -267,13 +267,13 @@ error:
 const char* COMPRESS_PT("/compressTest");
 int TestCompress()
 {
+#ifdef H5_HAVE_FILTER_DEFLATE
     unsigned int flags = 0;
     unsigned int config = 0;
     size_t cd_nelemts = 0;
 
     printf("Testing %-62s", "compression");
     HDfflush(stdout);
-#ifdef H5_HAVE_FILTER_DEFLATE
     try {
     /* Prepare property list to set compression, randomly use deflate */
     DSetCreatPropList dscreatplist;
