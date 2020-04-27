@@ -26,7 +26,7 @@
 load_gnu_arguments()
 {
     set -- $(for arg; do
-        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg} | demote_errors
+        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg}
     done)
     IFS=' ' echo "$*"
 }

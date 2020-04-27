@@ -12,24 +12,6 @@
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
-macro (ADD_H5_FLAGS h5_flag_var infile)
-  file (STRINGS ${infile} TEST_FLAG_STREAM)
-  #message (STATUS "TEST_FLAG_STREAM=${TEST_FLAG_STREAM}")
-  list (LENGTH TEST_FLAG_STREAM len_flag)
-  if (len_flag GREATER 0)
-    math (EXPR _FP_LEN "${len_flag} - 1")
-    foreach (line RANGE 0 ${_FP_LEN})
-      list (GET TEST_FLAG_STREAM ${line} str_flag)
-      string (REGEX REPLACE "^#.*" "" str_flag "${str_flag}")
-      #message (STATUS "str_flag=${str_flag}")
-      if (str_flag)
-        list (APPEND ${h5_flag_var} "${str_flag}")
-      endif ()
-    endforeach ()
-  endif ()
-  #message (STATUS "h5_flag_var=${${h5_flag_var}}")
-endmacro ()
-
 set (CMAKE_C_FLAGS "${CMAKE_C99_STANDARD_COMPILE_OPTION} ${CMAKE_C_FLAGS}")
 set (CMAKE_C_FLAGS "${CMAKE_C_SANITIZER_FLAGS} ${CMAKE_C_FLAGS}")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_SANITIZER_FLAGS} ${CMAKE_CXX_FLAGS}")
@@ -111,8 +93,13 @@ if (NOT MSVC)
         list (APPEND H5_CFLAGS0 "-Wsign-compare -Wtrigraphs -Wwrite-strings")
       endif()
     elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/general")
-      ADD_H5_FLAGS (H5_CFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/error-general")
+      # Add general CFlags except for older versions that are no longer supported
+      if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2)
+        ADD_H5_FLAGS (HDF5_CMAKE_C_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/general")
+      endif ()
+      if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
+        ADD_H5_FLAGS (H5_CFLAGS0 "${HDF5_SOURCE_DIR}/config/gnu-warnings/error-general")
+      endif ()
       # gcc automatically inlines based on the optimization level
       # this is just a failsafe
       list (APPEND H5_CFLAGS0 "-finline-functions")
@@ -149,14 +136,27 @@ if (NOT MSVC)
 
 
   if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    # Append warning flags that only gcc 4.3+ knows about
-    ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.3")
-    #
     # Technically, variable-length arrays are part of the C99 standard, but
     #   we should approach them a bit cautiously... Only needed for gcc 4.X
-    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2)
       ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.last")
     endif ()
+
+    # Append warning flags for gcc 4.2-4.3
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
+      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.3")
+    endif ()
+
+    # Append warning flags for gcc 4.2-4.4
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL 4.4 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2)
+      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.4")
+    endif ()
+
+    # Append warning flags that only gcc 4.3+ knows about
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3 AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2)
+      ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.3")
+    endif ()
+
 
     # Append more extra warning flags that only gcc 4.4+ know about
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.4)
@@ -174,7 +174,7 @@ if (NOT MSVC)
     endif ()
 
     # Append more extra warning flags that only gcc 4.6 and less know about
-    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7 AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2)
       ADD_H5_FLAGS (H5_CFLAGS1 "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.2-4.6")
     endif ()
 
