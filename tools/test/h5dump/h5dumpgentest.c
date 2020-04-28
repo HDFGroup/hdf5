@@ -2113,6 +2113,7 @@ static void gent_objref(void)
     uint32_t   *tu32;      /* Temporary pointer to uint32 data */
     int        i;          /* counting variables */
     const char *write_comment = "Foo!"; /* Comments for group */
+    hbool_t supports_comments = FALSE;
 
     /* Allocate write & read buffers */
     wbuf = (hobj_ref_t*) HDmalloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
@@ -2128,8 +2129,12 @@ static void gent_objref(void)
     /* Create a group */
     group = H5Gcreate2(fid1, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
+    /* Check if we support comments in the current VOL connector */
+    H5VLquery_optional(fid1, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_SET_COMMENT, &supports_comments);
+
     /* Set group's comment */
-    H5Oset_comment(group, write_comment);
+    if (supports_comments)
+        H5Oset_comment(group, write_comment);
 
     /* Create a dataset (inside Group1) */
     dataset = H5Dcreate2(group, "Dataset1", H5T_STD_U32BE, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -3629,62 +3634,81 @@ static void gent_empty(void)
 static void
 gent_group_comments(void)
 {
-    hid_t fid, group;
+    hid_t fid = H5I_INVALID_HID;
+    hid_t group = H5I_INVALID_HID;
+    hbool_t supports_comments = FALSE;
 
     fid = H5Fcreate(FILE33, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
+    /* Check if we support comments in the current VOL connector */
+    H5VLquery_optional(fid, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_SET_COMMENT, &supports_comments);
+
     /* / */
     group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g1", "Comment for group /g1", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g1", "Comment for group /g1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g2", "Comment for group /g2", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g2", "Comment for group /g2", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g3", "Comment for group /g3", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g3", "Comment for group /g3", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g1 */
     group = H5Gcreate2(fid, "/g1/g1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g1/g1.1", "Comment for group /g1/g1.1", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g1/g1.1", "Comment for group /g1/g1.1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g1/g1.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g1/g1.2", "Comment for group /g1/g1.2", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g1/g1.2", "Comment for group /g1/g1.2", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g2 */
     group = H5Gcreate2(fid, "/g2/g2.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g2/g2.1", "Comment for group /g2/g2.1", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g2/g2.1", "Comment for group /g2/g2.1", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g3 */
     group = H5Gcreate2(fid, "/g3/g3.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g3/g3.1", "Comment for group /g3/g3.1", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g3/g3.1", "Comment for group /g3/g3.1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3/g3.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g3/g3.2", "Comment for group /g3/g3.2", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g3/g3.2", "Comment for group /g3/g3.2", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3/g3.3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g3/g3.3", "Comment for group /g3/g3.3", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g3/g3.3", "Comment for group /g3/g3.3", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3/g3.4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g3/g3.4", "Comment for group /g3/g3.4", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g3/g3.4", "Comment for group /g3/g3.4", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g2/g2.1 */
     group = H5Gcreate2(fid, "/g2/g2.1/g2.1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g2/g2.1/g2.1.1", "Comment for group /g2/g2.1/g2.1.1", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g2/g2.1/g2.1.1", "Comment for group /g2/g2.1/g2.1.1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g2/g2.1/g2.1.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g2/g2.1/g2.1.2", "Comment for group /g2/g2.1/g2.1.2", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g2/g2.1/g2.1.2", "Comment for group /g2/g2.1/g2.1.2", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g2/g2.1/g2.1.3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/g2/g2.1/g2.1.3", "Comment for group /g2/g2.1/g2.1.3", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/g2/g2.1/g2.1.3", "Comment for group /g2/g2.1/g2.1.3", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /glongcomment */
     group = H5Gcreate2(fid, "/glongcomment", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Oset_comment_by_name(group, "/glongcomment", "Comment for group /glongcomment with a really, really, really long, long, long comment", H5P_DEFAULT);
+    if (supports_comments)
+        H5Oset_comment_by_name(group, "/glongcomment", "Comment for group /glongcomment with a really, really, really long, long, long comment", H5P_DEFAULT);
     H5Gclose(group);
 
     H5Fclose(fid);
@@ -5424,7 +5448,9 @@ static void gent_filters(void)
     hsize_t  dims1[RANK]      = {DIM1,DIM2};
     hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
     int      buf1[DIM1][DIM2];
-    int      i, j, n, H5_ATTR_SANITY_CHECK ret;
+    int      i, j, n;
+    int H5_ATTR_NDEBUG_UNUSED ret;
+    hbool_t supports_comments = FALSE;
 
     for(i=n=0; i<DIM1; i++){
         for(j=0; j<DIM2; j++){
@@ -5435,6 +5461,9 @@ static void gent_filters(void)
     /* create a file */
     fid  = H5Fcreate(FILE44, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     HDassert(fid>=0);
+
+    /* Check if we support comments in the current VOL connector */
+    H5VLquery_optional(fid, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_SET_COMMENT, &supports_comments);
 
     /* create a space */
     sid = H5Screate_simple(SPACE2_RANK, dims1, NULL);
@@ -5453,8 +5482,10 @@ static void gent_filters(void)
     ret=make_dset(fid,"compact",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);
 
-    ret = H5Oset_comment_by_name(fid, "compact", "This is a dataset with compact storage", H5P_DEFAULT);
-    HDassert(ret >= 0);
+    if (supports_comments) {
+        ret = H5Oset_comment_by_name(fid, "compact", "This is a dataset with compact storage", H5P_DEFAULT);
+        HDassert(ret >= 0);
+    }
 
     ret = H5Pset_layout(dcpl, H5D_CONTIGUOUS);
     HDassert(ret >= 0);
@@ -5462,8 +5493,10 @@ static void gent_filters(void)
     ret=make_dset(fid,"contiguous",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);
 
-    ret = H5Oset_comment_by_name(fid, "contiguous", "This is a dataset with contiguous storage", H5P_DEFAULT);
-    HDassert(ret >= 0);
+    if (supports_comments) {
+        ret = H5Oset_comment_by_name(fid, "contiguous", "This is a dataset with contiguous storage", H5P_DEFAULT);
+        HDassert(ret >= 0);
+    }
 
     ret = H5Pset_layout(dcpl, H5D_CHUNKED);
     HDassert(ret >= 0);
@@ -5474,8 +5507,10 @@ static void gent_filters(void)
     ret=make_dset(fid,"chunked",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);
 
-    ret = H5Oset_comment_by_name(fid, "chunked", "This is a dataset with chunked storage", H5P_DEFAULT);
-    HDassert(ret >= 0);
+    if (supports_comments) {
+        ret = H5Oset_comment_by_name(fid, "chunked", "This is a dataset with chunked storage", H5P_DEFAULT);
+        HDassert(ret >= 0);
+    }
 
     /*-------------------------------------------------------------------------
      * make several dataset with filters
@@ -5691,8 +5726,10 @@ static void gent_filters(void)
     ret = H5Tcommit2(fid, "mytype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     HDassert(ret >= 0);
 
-    ret = H5Oset_comment_by_name(fid, "mytype", "This is a commited datatype", H5P_DEFAULT);
-    HDassert(ret >= 0);
+    if (supports_comments) {
+        ret = H5Oset_comment_by_name(fid, "mytype", "This is a commited datatype", H5P_DEFAULT);
+        HDassert(ret >= 0);
+    }
 
     ret = H5Tclose(tid);
     HDassert(ret >= 0);
