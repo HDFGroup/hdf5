@@ -47,7 +47,7 @@ typedef enum int_t {
     INT_LONG, INT_ULONG, INT_LLONG, INT_ULLONG, INT_OTHER
 } int_t;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_compound_array
  *
@@ -211,7 +211,7 @@ static void test_array_compound_array()
         // Verify the compound datatype info
         CompType ctype_check(base_type.getId());
         base_type.close();
-        
+
         // Check the number of members
         nmemb = ctype_check.getNmembers();
         verify_val(nmemb, 2, "ctype_check.getNmembers", __LINE__, __FILE__);
@@ -277,7 +277,7 @@ static void test_array_compound_array()
 
 } // end test_array_compound_array()
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_assignment
  *
@@ -298,11 +298,11 @@ static void test_array_compound_array()
  */
 H5::DataType getArr()
 {
-    hsize_t *dims = new hsize_t; 
-    *dims = 5; 
-    H5::ArrayType ret; 
-    ret = H5::ArrayType(H5::PredType::NATIVE_INT, 1, dims); 
-    delete[] dims; 
+    hsize_t *dims = new hsize_t;
+    *dims = 5;
+    H5::ArrayType ret;
+    ret = H5::ArrayType(H5::PredType::NATIVE_INT, 1, dims);
+    delete[] dims;
     return ret; }
 
 static void test_array_assignment()
@@ -349,7 +349,7 @@ static void test_array_assignment()
     }
 } // end test_array_assignment()
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    test_array_info
  *
@@ -372,7 +372,6 @@ static void test_array_info()
     s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   // Information to write
     hsize_t sdims1[] = {SPACE1_DIM1};
     hsize_t tdims1[] = {ARRAY1_DIM1};
-    int     nmemb;      // Number of compound members
     int     ii;         // counting variables
     hsize_t idxi, idxj, idxk; // dimension indicing variables
     H5T_class_t mclass; // Datatype class for field
@@ -469,7 +468,7 @@ static void test_array_info()
 
 } // end test_array_info()
 
-
+
 /****************************************************************
 **
 **  test_array(): Main datatypes testing routine.
@@ -492,7 +491,7 @@ void test_array()
 
 }   // test_array()
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    cleanup_array
  *
