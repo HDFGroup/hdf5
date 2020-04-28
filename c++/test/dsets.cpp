@@ -35,7 +35,8 @@ using std::endl;
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
-#include "h5cpputil.h"  // C++ utilility header file
+#include "h5test.h"
+#include "h5cpputil.h"    // C++ utilility header file
 
 const H5std_string      FILE1("dataset.h5");
 const H5std_string      DSET_DEFAULT_NAME("default");

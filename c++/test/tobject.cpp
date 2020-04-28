@@ -29,6 +29,7 @@ using std::endl;
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
+#include "h5test.h"
 #include "h5cpputil.h"  // C++ utilility header file
 
 const H5std_string      FILE_OBJECTS("tobjects.h5");
@@ -336,6 +337,7 @@ static void test_open_object_header()
 
         // Create a group in the root group
         Group grp(file1.createGroup(GROUPNAME));
+        grp.close();
 
         // Commit the type inside the file
         IntType dtype(PredType::NATIVE_INT);
@@ -354,7 +356,6 @@ static void test_open_object_header()
         // Close dataset, dataspace, and group
         dset.close();
         dspace.close();
-        grp.close();
 
         // Now make sure that openObjId can open all three types of objects
         hid_t obj_grp = file1.openObjId(GROUPNAME);
