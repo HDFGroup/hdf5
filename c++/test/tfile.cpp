@@ -33,6 +33,7 @@ using std::endl;
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
+#include "h5test.h"
 #include "h5cpputil.h"  // C++ utilility header file
 
 const hsize_t   F1_USERBLOCK_SIZE = (hsize_t)0;
@@ -849,9 +850,6 @@ static void test_file_info()
 {
     // Output message about test being performed
     SUBTEST("File general information");
-
-    hsize_t out_threshold = 0;  // Free space section threshold to get
-    hbool_t out_persist = FALSE;// Persist free-space read
 
     try {
         // Create a file using default properties.

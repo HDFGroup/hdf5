@@ -30,6 +30,7 @@ using std::endl;
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
+#include "h5test.h"
 #include "h5cpputil.h"  // C++ utilility header file
 
 const H5std_string      FILE_BASIC("tattr_basic.h5");
@@ -1134,7 +1135,6 @@ static void test_attr_mult_read()
 static void test_attr_delete()
 {
     H5std_string  attr_name; // Buffer for attribute names
-    int ii;
 
     // Output message about test being performed
     SUBTEST("Removing Attribute Function");

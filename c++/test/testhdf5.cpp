@@ -51,6 +51,7 @@ using std::endl;
 #include "H5Cpp.h"      // C++ API header file
 using namespace H5;
 
+#include "h5test.h"
 #include "h5cpputil.h"  // C++ utilility header file
 
 int
@@ -120,6 +121,9 @@ Comment out tests that are not done yet */
     /* Clean up test files, if allowed */
     if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
         TestCleanup();
+
+    /* Release test infrastructure */
+    TestShutdown();
 
     return (GetTestNumErrs());
 }
