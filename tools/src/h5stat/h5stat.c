@@ -1654,7 +1654,7 @@ print_storage_summary(const iter_t *iter)
     HDfprintf(stdout, "  Raw data: %" PRIuHSIZE " bytes\n", iter->dset_storage_size);
 
     percent = ((double)iter->free_space / (double)iter->filesize) * (double)100.0f;
-    HDfprintf(stdout, "  Amount/Percent of tracked free space: %" PRIuHSIZE " bytes/%3.1f\n",
+    HDfprintf(stdout, "  Amount/Percent of tracked free space: %" PRIuHSIZE " bytes/%3.1f%%\n",
                 iter->free_space, percent);
 
     if(iter->filesize < (total_meta + iter->dset_storage_size + iter->free_space)) {
