@@ -118,7 +118,7 @@ if [ $rc -ne 0 ] ; then
     exit 0
 fi
 
-all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob"
+all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo"
 tests=${all_tests}
 
 if [ $# -gt 0 ]; then
@@ -529,6 +529,9 @@ do
     done
 done
 
+#
+# Test variable-length strings, expecting errors.
+#
 for ty in null oob; do
 
 	if [ ${ty} = null ]; then
@@ -583,6 +586,57 @@ for ty in null oob; do
 	rm -f vfd_swmr_vlstr_writer.{out,rc}
 	rm -f vfd_swmr_vlstr_reader.*.{out,rc}
 done
+
+#
+# Make sure that a "zoo"---the variety of HDF5 object types---can be
+# read and written by VFD SWMR.
+#
+if [ ${do_zoo:-no} = yes ]; then
+	[ -e ./fifo ] && rm -f ./fifo
+	mkfifo -m 0600 ./fifo
+	rm -f ./shared_tick_num
+	echo launch vfd_swmr_zoo_writer
+	STDIN_PATH="./fifo" catch_out_err_and_rc vfd_swmr_zoo_writer \
+	    ../vfd_swmr_zoo_writer -q &
+	pid_writer=$!
+
+	STDOUT_PATH="./fifo" catch_out_err_and_rc vfd_swmr_zoo_reader \
+	    ../vfd_swmr_zoo_reader -q -W &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	kill -USR1 $(cat vfd_swmr_zoo_writer.pid)
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_zoo_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nsofterrors=$((nsofterrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_zoo_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Check for error and exit if one occured
+	if test $nerrors -ne 0 ; then
+	    echo "VFD SWMR tests failed with $nerrors errors."
+	    echo "(Writer and reader output preserved)"
+	    exit 1
+	fi
+
+	# Clean up output files
+	rm -f ./fifo
+	rm -f vfd_swmr_zoo_writer.{out,rc}
+	rm -f vfd_swmr_zoo_reader.*.{out,rc}
+fi
+
 
 ###############################################################################
 ## Report and exit
