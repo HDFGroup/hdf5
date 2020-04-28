@@ -17,11 +17,11 @@ catch_out_err_and_rc()
 	outbase=$1
 	shift
 	{
-		"$@" 2>&1 &
+		"$@" < ${STDIN_PATH:-/dev/stdin} > ${STDOUT_PATH:-/dev/stdout} &
 		echo $! > ${outbase}.pid
 		wait $(cat ${outbase}.pid)
 		echo $? > ${outbase}.rc
-	} | tee ${outbase}.out
+	} 2>&1 | tee ${outbase}.out
 }
 
 #catch_out_err_and_rc xxlsxx ls smiles &
