@@ -111,7 +111,7 @@ vfd_swmr_writer_may_increase_tick_to(uint64_t new_tick, bool wait_for_reader)
     h5_retry_t retry;
     bool do_try;
 
-    fprintf(stderr, "%s: enter\n", __func__);
+    dbgf(3, "%s: enter\n", __func__);
 
     if (fd == -1) {
         fd = open("./shared_tick_num", O_RDONLY);
@@ -175,7 +175,7 @@ vfd_swmr_reader_did_increase_tick_to(uint64_t new_tick)
     shared_ticks_t shared;
     ssize_t nwritten;
 
-    fprintf(stderr, "%s: enter\n", __func__);
+    dbgf(3, "%s: enter\n", __func__);
 
     if (fd == -1) {
         // TBD create a temporary file, here, and move it to its final path
@@ -225,8 +225,6 @@ main(int argc, char **argv)
 #if 1
     char step[2] = "ab";
 #endif
-
-    dbgf(1, "0th arg %s, personality `%s`\n", argv[0], progname);
 
     if (strcmp(progname, "vfd_swmr_zoo_writer") == 0)
         writer = wait_for_signal = true;
@@ -311,7 +309,7 @@ main(int argc, char **argv)
     es = print_estack ? estack_get_state() : disable_estack();
     if (writer) {
 
-        dbgf(1, "Writing zoo...\n");
+        dbgf(2, "Writing zoo...\n");
 
         if (!create_zoo(fid, ".", config))
             errx(EXIT_FAILURE, "create_zoo didn't pass self-check");
@@ -325,7 +323,7 @@ main(int argc, char **argv)
         if (!delete_zoo(fid, ".", config))
             errx(EXIT_FAILURE, "delete_zoo failed");
     } else {
-        dbgf(1, "Reading zoo...\n");
+        dbgf(2, "Reading zoo...\n");
 
         while (!validate_zoo(fid, ".", config))
             ;
@@ -343,19 +341,19 @@ main(int argc, char **argv)
     if (writer && tick_stats != NULL) {
         uint64_t lead;
 
-        dbgf(1, "writer tried tick increase %" PRIu64 "\n",
+        dbgf(2, "writer tried tick increase %" PRIu64 "\n",
             tick_stats->writer_tried_increase);
-        dbgf(1, "writer aborted tick increase %" PRIu64 "\n",
+        dbgf(2, "writer aborted tick increase %" PRIu64 "\n",
             tick_stats->writer_aborted_increase);
-        dbgf(1, "writer read shared file %" PRIu64 "\n",
+        dbgf(2, "writer read shared file %" PRIu64 "\n",
             tick_stats->writer_read_shared_file);
-        dbgf(1, "writer read reader tick equal to 0 %" PRIu64 "\n",
+        dbgf(2, "writer read reader tick equal to 0 %" PRIu64 "\n",
             tick_stats->reader_tick_was_zero);
-        dbgf(1, "writer read reader tick leading writer %" PRIu64 "\n",
+        dbgf(2, "writer read reader tick leading writer %" PRIu64 "\n",
             tick_stats->reader_tick_lead_writer);
 
         for (lead = 0; lead < swmr_config.max_lag; lead++) {
-            dbgf(1, "writer tick lead writer by %" PRIu64 " %" PRIu64 "\n",
+            dbgf(2, "writer tick lead writer by %" PRIu64 " %" PRIu64 "\n",
                 lead, tick_stats->writer_lead_reader_by[lead]);
         }
     }
