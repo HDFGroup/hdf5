@@ -98,6 +98,8 @@ H5TEST_DLL hid_t vfd_swmr_create_fapl(bool, bool, bool);
 
 H5TEST_DLL void dbgf(int, const char *, ...) H5_ATTR_FORMAT(printf, 2, 3);
 
+H5TEST_DLL int fetch_env_ulong(const char *, unsigned long, unsigned long *);
+
 #ifdef __cplusplus
 }
 #endif
